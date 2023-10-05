@@ -1,1 +1,5 @@
-build
+# C++
+/build
+
+# Rust
+/target
