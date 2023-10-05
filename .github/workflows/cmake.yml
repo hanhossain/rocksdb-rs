@@ -12,7 +12,7 @@ env:
 
 jobs:
   basic-test:
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
@@ -29,43 +29,28 @@ jobs:
           cpus: 3
 
     steps:
-    - name: Check disk space (before cleaning)
-      if: runner.os == 'macOS'
-      run: df -h
-
-    - name: Free disk space
-      if: runner.os == 'macOS'
-      run: |
-        sudo docker rmi $(docker image ls -aq) || true
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-
-    - name: Check disk space (after cleaning)
-      if: runner.os == 'macOS'
-      run: df -h
-
     - uses: actions/checkout@v3
 
     - name: Install dependencies
-      run: ${{matrix.deps}}
+      run: ${{ matrix.deps }}
 
     - name: Create build directory
-      run: mkdir -p ${{github.workspace}}/build
+      run: mkdir -p ${{ github.workspace }}/build
 
     - name: Configure CMake
-      working-directory: ${{github.workspace}}/build
-      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
+      working-directory: ${{ github.workspace }}/build
+      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
 
     - name: Build
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{ github.workspace }}/build
       run: ninja
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}} -j ${{matrix.cpus}}
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C ${{ env.BUILD_TYPE }} -j ${{ matrix.cpus }}
 
   test:
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
@@ -82,37 +67,22 @@ jobs:
           cpus: 3
 
     steps:
-    - name: Check disk space (before cleaning)
-      if: runner.os == 'macOS'
-      run: df -h
-
-    - name: Free disk space
-      if: runner.os == 'macOS'
-      run: |
-        sudo docker rmi $(docker image ls -aq) || true
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-
-    - name: Check disk space (after cleaning)
-      if: runner.os == 'macOS'
-      run: df -h
-
     - uses: actions/checkout@v3
 
     - name: Install dependencies
-      run: ${{matrix.deps}}
+      run: ${{ matrix.deps }}
 
     - name: Create build directory
-      run: mkdir -p ${{github.workspace}}/build
+      run: mkdir -p ${{ github.workspace }}/build
 
     - name: Configure CMake
-      working-directory: ${{github.workspace}}/build
-      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DWITH_ALL_TESTS=ON ../rocksdb-cxx
+      working-directory: ${{ github.workspace }}/build
+      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DWITH_ALL_TESTS=ON ../rocksdb-cxx
 
     - name: Build
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{ github.workspace }}/build
       run: ninja
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}} -j ${{matrix.cpus}}
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C ${{ env.BUILD_TYPE }} -j ${{ matrix.cpus }}
