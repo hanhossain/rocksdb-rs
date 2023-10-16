@@ -22,6 +22,8 @@ jobs:
           deps: brew install ninja
     steps:
     - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: ${{ matrix.deps }}
     - name: Build
       run: cargo build
     - name: Run tests
