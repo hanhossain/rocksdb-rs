@@ -20,6 +20,7 @@
 
 #include <cstdarg>
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <string>
@@ -1901,5 +1902,17 @@ Status NewEnvLogger(const std::string& fname, Env* env,
 // Creates a new Env based on Env::Default() but modified to use the specified
 // FileSystem.
 std::unique_ptr<Env> NewCompositeEnv(const std::shared_ptr<FileSystem>& fs);
+
+// Simple hello world to help with rust integration.
+class Rusty {
+public:
+    Rusty() {
+        std::cout << "Creating Rusty from C++!" << std::endl;
+    }
+
+    std::string HelloWorld() const {
+        return "Hello World from C++!";
+    }
+};
 
 }  // namespace ROCKSDB_NAMESPACE

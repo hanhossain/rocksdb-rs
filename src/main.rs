@@ -1,3 +1,6 @@
+use rocksdb_rs::{hello_world, hello_world_cxx};
+
 fn main() {
-    println!("Hello, world!");
+    hello_world();
+    hello_world_cxx();
 }
