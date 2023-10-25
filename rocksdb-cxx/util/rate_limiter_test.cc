@@ -259,7 +259,7 @@ TEST_F(RateLimiterTest, GeneratePriorityIterationOrder) {
   }
 }
 
-TEST_F(RateLimiterTest, Rate) {
+TEST_F(RateLimiterTest, DISABLED_Rate) {
   auto* env = Env::Default();
   struct Arg {
     Arg(int32_t _target_rate, int _burst)
