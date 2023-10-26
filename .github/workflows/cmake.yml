@@ -39,7 +39,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{ github.workspace }}/build
-      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
+      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DWITH_ALL_TESTS=OFF ..
 
     - name: Build
       working-directory: ${{ github.workspace }}/build
@@ -77,7 +77,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{ github.workspace }}/build
-      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DWITH_ALL_TESTS=ON ../rocksdb-cxx
+      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DWITH_ALL_TESTS=ON ..
 
     - name: Build
       working-directory: ${{ github.workspace }}/build

@@ -25,6 +25,8 @@ jobs:
     - name: Install dependencies
       run: ${{ matrix.deps }}
     - name: Build
+      working-directory: ${{ github.workspace }}/rocksdb-rs
       run: cargo build
     - name: Run tests
+      working-directory: ${{ github.workspace }}/rocksdb-rs
       run: cargo test
