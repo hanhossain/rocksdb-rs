@@ -35,6 +35,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules/")
+include(FetchContent)
 include(ReadVersion)
 include(GoogleTest)
 get_rocksdb_version(rocksdb_VERSION)
@@ -43,6 +44,12 @@ project(rocksdb
   DESCRIPTION "An embeddable persistent key-value store for fast storage"
   HOMEPAGE_URL https://rocksdb.org/
   LANGUAGES CXX C ASM)
+
+FetchContent_Declare(
+  Corrosion
+  GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+)
+FetchContent_MakeAvailable(Corrosion)
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
@@ -1102,14 +1109,20 @@ string(REGEX REPLACE "[^0-9: /-]+" "" GIT_DATE "${GIT_DATE}")
 set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
+corrosion_import_crate(MANIFEST_PATH rocksdb-rs/Cargo.toml)
+corrosion_add_cxxbridge(rocksdb-rs-cxx CRATE rocksdb-rs FILES lib.rs)
+target_include_directories(rocksdb-rs-cxx PRIVATE "include")
+
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})
-target_link_libraries(${ROCKSDB_STATIC_LIB} PRIVATE
-  ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
+target_link_libraries(${ROCKSDB_STATIC_LIB}
+  INTERFACE rocksdb-rs-cxx
+  PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
 if(ROCKSDB_BUILD_SHARED)
   add_library(${ROCKSDB_SHARED_LIB} SHARED ${SOURCES} ${BUILD_VERSION_CC})
-  target_link_libraries(${ROCKSDB_SHARED_LIB} PRIVATE
-    ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
+  target_link_libraries(${ROCKSDB_SHARED_LIB}
+    INTERFACE rocksdb-rs-cxx
+    PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
   if(WIN32)
     set_target_properties(${ROCKSDB_SHARED_LIB} PROPERTIES

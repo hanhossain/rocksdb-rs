@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <string>
 
+#include "rocksdb-rs-cxx/lib.h"
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
 #include "rocksdb/slice.h"
@@ -25,6 +26,8 @@ std::string kDBPath = "/tmp/rocksdb_simple_example";
 #endif
 
 int main() {
+  hello_world("simple_example.cc");
+
   DB* db;
   Options options;
   // Optimize RocksDB. This is the easiest way to get RocksDB to perform well
