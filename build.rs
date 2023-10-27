@@ -335,7 +335,7 @@ const SOURCES: &[&str] = &[
 fn main() {
     let target = std::env::var("TARGET").unwrap();
 
-    let includes = ["rocksdb/include", "rocksdb"];
+    let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
 
     let mut config = autocxx_build::Builder::new("src/lib.rs", &includes)
         .extra_clang_args(&["-std=c++17"])
@@ -373,13 +373,13 @@ fn main() {
         sources.push("util/crc32c_arm64.cc");
     }
 
-    let sources = sources.iter().map(|s| format!("rocksdb/{}", s));
+    let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
     config.files(sources);
     config.file("build_version.cc");
     config.flag_if_supported("-std=c++17");
     config.compile("rocksdb-cxx");
 
-    println!("cargo:rerun-if-changed=rocksdb");
+    println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
     println!("cargo:rerun-if-changed=src/lib.rs");
 }
