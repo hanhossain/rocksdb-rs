@@ -361,7 +361,14 @@ fn main() {
     config.include("rocksdb/include");
     config.include("rocksdb");
 
-    let sources = SOURCES.iter().map(|s| format!("rocksdb/{}", s));
+    let mut sources = SOURCES.to_vec();
+
+    if target.contains("aarch64") || target.contains("arm64") {
+        config.flag_if_supported("-march=armv8-a+crc+crypto");
+        sources.push("util/crc32c_arm64.cc");
+    }
+
+    let sources = sources.iter().map(|s| format!("rocksdb/{}", s));
     config.files(sources);
     config.file("build_version.cc");
     config.flag_if_supported("-std=c++17");
