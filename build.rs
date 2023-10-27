@@ -335,7 +335,13 @@ const SOURCES: &[&str] = &[
 fn main() {
     let target = std::env::var("TARGET").unwrap();
 
-    let mut config = cxx_build::bridge("src/lib.rs");
+    let includes = ["rocksdb/include", "rocksdb"];
+
+    let mut config = autocxx_build::Builder::new("src/lib.rs", &includes)
+        .extra_clang_args(&["-std=c++17"])
+        .build()
+        .unwrap();
+
     config.flag("-pthread");
     config.flag("-Wsign-compare");
     config.flag("-Wshadow");
@@ -358,8 +364,7 @@ fn main() {
     config.define("ROCKSDB_PLATFORM_POSIX", None);
     config.define("ROCKSDB_LIB_IO_POSIX", None);
 
-    config.include("rocksdb/include");
-    config.include("rocksdb");
+    config.includes(&includes);
 
     let mut sources = SOURCES.to_vec();
 
