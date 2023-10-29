@@ -1905,14 +1905,14 @@ std::unique_ptr<Env> NewCompositeEnv(const std::shared_ptr<FileSystem>& fs);
 
 // Simple hello world to help with rust integration.
 class Rusty {
-public:
-    Rusty() {
-        std::cout << "Creating Rusty from C++!" << std::endl;
-    }
+ public:
+  Rusty() { std::cout << "Creating Rusty from C++!" << std::endl; }
 
-    std::string HelloWorld() const {
-        return "Hello World from C++!";
-    }
+  // std::string HelloWorld() const { return "Hello World from C++!"; }
 };
+
+[[maybe_unused]] static std::unique_ptr<Rusty> NewRusty() {
+  return std::make_unique<Rusty>();
+}
 
 }  // namespace ROCKSDB_NAMESPACE

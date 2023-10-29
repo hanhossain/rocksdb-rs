@@ -337,10 +337,7 @@ fn main() {
 
     let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
 
-    let mut config = autocxx_build::Builder::new("src/lib.rs", &includes)
-        .extra_clang_args(&["-std=c++17"])
-        .build()
-        .unwrap();
+    let mut config = cxx_build::bridge("src/lib.rs");
 
     config.flag("-pthread");
     config.flag("-Wsign-compare");
@@ -381,5 +378,4 @@ fn main() {
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
-    println!("cargo:rerun-if-changed=src/lib.rs");
 }
