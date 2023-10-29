@@ -1908,7 +1908,9 @@ class Rusty {
  public:
   Rusty() { std::cout << "Creating Rusty from C++!" << std::endl; }
 
-  // std::string HelloWorld() const { return "Hello World from C++!"; }
+  std::unique_ptr<std::string> HelloWorld() const {
+    return std::make_unique<std::string>("Hello World from C++!");
+  }
 };
 
 [[maybe_unused]] static std::unique_ptr<Rusty> NewRusty() {
