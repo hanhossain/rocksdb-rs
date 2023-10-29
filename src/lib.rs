@@ -5,7 +5,7 @@ pub mod ffi {
 
         type Rusty;
 
-        #[cxx_name = "NewRusty"]
+        #[cxx_name = "Rusty_new"]
         fn rusty_new() -> UniquePtr<Rusty>;
 
         #[cxx_name = "HelloWorld"]

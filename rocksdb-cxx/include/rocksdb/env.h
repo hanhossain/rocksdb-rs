@@ -1906,14 +1906,12 @@ std::unique_ptr<Env> NewCompositeEnv(const std::shared_ptr<FileSystem>& fs);
 // Simple hello world to help with rust integration.
 class Rusty {
  public:
-  Rusty() { std::cout << "Creating Rusty from C++!" << std::endl; }
-
   std::unique_ptr<std::string> HelloWorld() const {
     return std::make_unique<std::string>("Hello World from C++!");
   }
 };
 
-[[maybe_unused]] static std::unique_ptr<Rusty> NewRusty() {
+[[maybe_unused]] static std::unique_ptr<Rusty> Rusty_new() {
   return std::make_unique<Rusty>();
 }
 
