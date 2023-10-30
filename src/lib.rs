@@ -1,21 +1,16 @@
-use crate::ffi::rocksdb::Rusty;
-use autocxx::prelude::*;
+#[cxx::bridge(namespace = "rocksdb")]
+pub mod ffi {
+    unsafe extern "C++" {
+        include!("rocksdb/env.h");
 
-include_cpp! {
-    #include "rocksdb/env.h"
-    safety!(unsafe)
+        type Rusty;
 
-    generate!("rocksdb::Rusty")
-}
+        #[cxx_name = "Rusty_new"]
+        fn rusty_new() -> UniquePtr<Rusty>;
 
-pub fn hello_world() -> &'static str {
-    "hello, world!"
-}
-
-pub fn hello_world_cxx() -> String {
-    let user = Rusty::new().within_unique_ptr();
-    let value = user.as_ref().unwrap().HelloWorld();
-    value.to_string()
+        #[cxx_name = "HelloWorld"]
+        fn hello_world(&self) -> UniquePtr<CxxString>;
+    }
 }
 
 #[cfg(test)]
@@ -23,12 +18,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_hello_world() {
-        assert_eq!(hello_world(), "hello, world!");
+    fn create_rusty() {
+        let _rusty = ffi::rusty_new();
     }
 
     #[test]
-    fn test_hello_world_from_cpp() {
-        assert_eq!(hello_world_cxx(), "Hello World from C++!");
+    fn hello_rusty() {
+        let rusty = ffi::rusty_new();
+        let value = rusty.hello_world();
+        let value = value.to_string();
+        assert_eq!(value, "Hello World from C++!");
     }
 }

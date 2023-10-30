@@ -15,15 +15,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        include:
-        - os: ubuntu-latest
-          deps: sudo apt-get install -y ninja-build
-        - os: macos-latest
-          deps: brew install ninja
     steps:
     - uses: actions/checkout@v3
-    - name: Install dependencies
-      run: ${{ matrix.deps }}
     - name: Build
       run: cargo build
     - name: Run tests
