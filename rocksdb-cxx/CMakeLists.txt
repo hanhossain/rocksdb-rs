@@ -1418,7 +1418,6 @@ if(WITH_TESTS)
         OUTPUT_NAME ${exename}${ARTIFACT_SUFFIX}
       )
       target_link_libraries(${exename}${ARTIFACT_SUFFIX}
-        PUBLIC rocksdb-rs-cxx
         PRIVATE testutillib${ARTIFACT_SUFFIX} testharness gtest ${THIRDPARTY_LIBS} ${ROCKSDB_LIB})
       if(NOT "${exename}" MATCHES "db_sanity_test")
         gtest_discover_tests(${exename} DISCOVERY_TIMEOUT 120)
