@@ -333,10 +333,13 @@ const SOURCES: &[&str] = &[
 ];
 
 fn main() {
+    // This will be called when building rocksdb-rs from cmake.
+    if let Ok("1") = std::env::var("SKIP_BUILD_SCRIPT").as_deref() {
+        return;
+    }
+
     let target = std::env::var("TARGET").unwrap();
-
     let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
-
     let mut config = cxx_build::bridge("src/lib.rs");
 
     config.flag("-pthread");
