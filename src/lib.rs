@@ -1,3 +1,5 @@
+use crate::ffi::CommonRustData;
+
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
     unsafe extern "C++" {
@@ -11,6 +13,18 @@ pub mod ffi {
         #[cxx_name = "HelloWorld"]
         fn hello_world(&self) -> UniquePtr<CxxString>;
     }
+
+    extern "Rust" {
+        fn hello_common(data: &CommonRustData) -> String;
+    }
+
+    struct CommonRustData {
+        value: String,
+    }
+}
+
+pub fn hello_common(data: &CommonRustData) -> String {
+    format!("Hello {} from rust!", data.value)
 }
 
 #[cfg(test)]
