@@ -1,8 +1,10 @@
 # C++
 /build
+/cmake-build-*
 
 # Rust
 /target
 
 # IDE
 .idea
+.vscode
