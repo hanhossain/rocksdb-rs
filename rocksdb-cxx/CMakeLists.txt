@@ -14,7 +14,7 @@
 #        cd build
 # 3. Run cmake to generate project files for Windows, add more options to enable required third-party libraries.
 #    See thirdparty.inc for more information.
-#        sample command: cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release -DWITH_GFLAGS=1 -DWITH_SNAPPY=1 -DWITH_JEMALLOC=1 -DWITH_JNI=1 ..
+#        sample command: cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release -DWITH_GFLAGS=1 -DWITH_SNAPPY=1 -DWITH_JEMALLOC=1 ..
 # 4. Then build the project in debug mode (you may want to add /m[:<N>] flag to run msbuild in <N> parallel threads
 #                                          or simply /m to use all avail cores)
 #        msbuild rocksdb.sln
@@ -1149,7 +1149,6 @@ else()
   set(ROCKSDB_LIB ${ROCKSDB_STATIC_LIB})
 endif()
 
-option(WITH_JNI "build with JNI" OFF)
 # Tests are excluded from Release builds
 CMAKE_DEPENDENT_OPTION(WITH_TESTS "build with tests" ON
   "CMAKE_BUILD_TYPE STREQUAL Debug" OFF)
@@ -1157,14 +1156,9 @@ option(WITH_BENCHMARK_TOOLS "build with benchmarks" ON)
 option(WITH_CORE_TOOLS "build with ldb and sst_dump" ON)
 option(WITH_TOOLS "build with tools" ON)
 
-if(WITH_TESTS OR WITH_BENCHMARK_TOOLS OR WITH_TOOLS OR WITH_JNI OR JNI)
+# TODO: remove JNI
+if(WITH_TESTS OR WITH_BENCHMARK_TOOLS OR WITH_TOOLS)
   include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/third-party/gtest-1.8.1/fused-src)
-endif()
-if(WITH_JNI OR JNI)
-  message(STATUS "JNI library is enabled")
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/java)
-else()
-  message(STATUS "JNI library is disabled")
 endif()
 
 option(WITH_ALL_TESTS "Build all test, rather than a small subset" ON)
@@ -1424,25 +1418,6 @@ if(WITH_TESTS)
         add_dependencies(check ${exename}${ARTIFACT_SUFFIX})
       endif()
   endforeach(sourcefile ${TESTS})
-
-  if(WIN32)
-    # C executables must link to a shared object
-    if(ROCKSDB_BUILD_SHARED)
-      set(ROCKSDB_LIB_FOR_C ${ROCKSDB_SHARED_LIB})
-    else()
-      set(ROCKSDB_LIB_FOR_C OFF)
-    endif()
-  else()
-    set(ROCKSDB_LIB_FOR_C ${ROCKSDB_LIB})
-  endif()
-
-  if(ROCKSDB_LIB_FOR_C)
-    set(C_TESTS db/c_test.c)
-    add_executable(c_test db/c_test.c)
-    target_link_libraries(c_test ${ROCKSDB_LIB_FOR_C} testharness)
-    add_test(NAME c_test COMMAND c_test${ARTIFACT_SUFFIX})
-    add_dependencies(check c_test)
-  endif()
 endif()
 
 if(WITH_BENCHMARK_TOOLS)
