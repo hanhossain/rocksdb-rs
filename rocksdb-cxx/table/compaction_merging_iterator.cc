@@ -23,7 +23,7 @@ class CompactionMergingIterator : public InternalIterator {
     for (int i = 0; i < n; i++) {
       children_[i].level = i;
       children_[i].iter.Set(children[i]);
-      assert(children_[i].type == HeapItem::ITERATOR);
+      assert(children_[i].type == HeapItem::Type::ITERATOR);
     }
     assert(range_tombstones.size() == static_cast<size_t>(n));
     for (auto& p : range_tombstones) {
@@ -36,7 +36,7 @@ class CompactionMergingIterator : public InternalIterator {
         *range_tombstones[i].second = &range_tombstone_iters_[i];
       }
       pinned_heap_item_[i].level = i;
-      pinned_heap_item_[i].type = HeapItem::DELETE_RANGE_START;
+      pinned_heap_item_[i].type = HeapItem::Type::DELETE_RANGE_START;
     }
   }
 
@@ -75,7 +75,7 @@ class CompactionMergingIterator : public InternalIterator {
 
   Slice value() const override {
     assert(Valid());
-    if (LIKELY(current_->type == HeapItem::ITERATOR)) {
+    if (LIKELY(current_->type == HeapItem::Type::ITERATOR)) {
       return current_->iter.value();
     } else {
       return dummy_tombstone_val;
@@ -87,13 +87,13 @@ class CompactionMergingIterator : public InternalIterator {
   // report out of bound is not possible, we know current key is within bound.
   bool MayBeOutOfLowerBound() override {
     assert(Valid());
-    return current_->type == HeapItem::DELETE_RANGE_START ||
+    return current_->type == HeapItem::Type::DELETE_RANGE_START ||
            current_->iter.MayBeOutOfLowerBound();
   }
 
   IterBoundCheck UpperBoundCheckResult() override {
     assert(Valid());
-    return current_->type == HeapItem::DELETE_RANGE_START
+    return current_->type == HeapItem::Type::DELETE_RANGE_START
                ? IterBoundCheck::kUnknown
                : current_->iter.UpperBoundCheckResult();
   }
@@ -107,7 +107,7 @@ class CompactionMergingIterator : public InternalIterator {
 
   bool IsDeleteRangeSentinelKey() const override {
     assert(Valid());
-    return current_->type == HeapItem::DELETE_RANGE_START;
+    return current_->type == HeapItem::Type::DELETE_RANGE_START;
   }
 
   // Compaction uses the above subset of InternalIterator interface.
@@ -144,8 +144,8 @@ class CompactionMergingIterator : public InternalIterator {
     IteratorWrapper iter;
     size_t level = 0;
     std::string tombstone_str;
-    enum Type { ITERATOR, DELETE_RANGE_START };
-    Type type = ITERATOR;
+    enum class Type { ITERATOR, DELETE_RANGE_START };
+    Type type = Type::ITERATOR;
 
     explicit HeapItem(size_t _level, InternalIteratorBase<Slice>* _iter)
         : level(_level), type(Type::ITERATOR) {
@@ -158,7 +158,7 @@ class CompactionMergingIterator : public InternalIterator {
     }
 
     [[nodiscard]] Slice key() const {
-      return type == ITERATOR ? iter.key() : tombstone_str;
+      return type == Type::ITERATOR ? iter.key() : tombstone_str;
     }
   };
 
@@ -280,7 +280,7 @@ void CompactionMergingIterator::Next() {
   // current top of the heap.
   assert(current_ == CurrentForward());
   // as the current points to the current record. move the iterator forward.
-  if (current_->type == HeapItem::ITERATOR) {
+  if (current_->type == HeapItem::Type::ITERATOR) {
     current_->iter.Next();
     if (current_->iter.Valid()) {
       // current is still valid after the Next() call above.  Call
@@ -294,7 +294,7 @@ void CompactionMergingIterator::Next() {
       minHeap_.pop();
     }
   } else {
-    assert(current_->type == HeapItem::DELETE_RANGE_START);
+    assert(current_->type == HeapItem::Type::DELETE_RANGE_START);
     size_t level = current_->level;
     assert(range_tombstone_iters_[level]);
     range_tombstone_iters_[level]->Next();
@@ -314,7 +314,7 @@ void CompactionMergingIterator::FindNextVisibleKey() {
   while (!minHeap_.empty()) {
     HeapItem* current = minHeap_.top();
     // IsDeleteRangeSentinelKey() here means file boundary sentinel keys.
-    if (current->type != HeapItem::ITERATOR ||
+    if (current->type != HeapItem::Type::ITERATOR ||
         !current->iter.IsDeleteRangeSentinelKey()) {
       return;
     }

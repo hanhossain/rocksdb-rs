@@ -351,7 +351,7 @@ void CompactionServiceCompactionJob::CleanupCompaction() {
 }
 
 // Internal binary format for the input and result data
-enum BinaryFormatVersion : uint32_t {
+enum class BinaryFormatVersion : uint32_t {
   kOptionsString = 1,  // Use string format similar to Option string format
 };
 
@@ -750,7 +750,7 @@ Status CompactionServiceInput::Read(const std::string& data_str,
     return Status::InvalidArgument("Invalid CompactionServiceInput string");
   }
   auto format_version = DecodeFixed32(data_str.data());
-  if (format_version == kOptionsString) {
+  if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
     ConfigOptions cf;
     cf.invoke_prepare_options = false;
     cf.ignore_unknown_options = true;
@@ -766,7 +766,7 @@ Status CompactionServiceInput::Read(const std::string& data_str,
 
 Status CompactionServiceInput::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
-  EncodeFixed32(buf, kOptionsString);
+  EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));
   ConfigOptions cf;
   cf.invoke_prepare_options = false;
@@ -779,7 +779,7 @@ Status CompactionServiceResult::Read(const std::string& data_str,
     return Status::InvalidArgument("Invalid CompactionServiceResult string");
   }
   auto format_version = DecodeFixed32(data_str.data());
-  if (format_version == kOptionsString) {
+  if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
     ConfigOptions cf;
     cf.invoke_prepare_options = false;
     cf.ignore_unknown_options = true;
@@ -795,7 +795,7 @@ Status CompactionServiceResult::Read(const std::string& data_str,
 
 Status CompactionServiceResult::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
-  EncodeFixed32(buf, kOptionsString);
+  EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));
   ConfigOptions cf;
   cf.invoke_prepare_options = false;

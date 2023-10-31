@@ -32,7 +32,7 @@ namespace ROCKSDB_NAMESPACE {
 // doesn't understand format of actual blob index (the value).
 class DBBlobIndexTest : public DBTestBase {
  public:
-  enum Tier {
+  enum class Tier {
     kMemtable = 0,
     kImmutableMemtables = 1,
     kL0SstFile = 2,
@@ -204,7 +204,7 @@ TEST_F(DBBlobIndexTest, Get) {
     ASSERT_FALSE(is_blob_index);
 
     // Verify blob index
-    if (tier <= kImmutableMemtables) {
+    if (tier <= Tier::kImmutableMemtables) {
       ASSERT_TRUE(Get("blob_key", &value).IsNotSupported());
       ASSERT_EQ("NOT_SUPPORTED", GetImpl("blob_key"));
     } else {
@@ -249,7 +249,7 @@ TEST_F(DBBlobIndexTest, Updated) {
       ASSERT_EQ(blob_index, GetBlobIndex("key" + std::to_string(i), snapshot));
     }
     ASSERT_EQ("new_value", Get("key1"));
-    if (tier <= kImmutableMemtables) {
+    if (tier <= Tier::kImmutableMemtables) {
       ASSERT_EQ("NOT_SUPPORTED", GetImpl("key2"));
     } else {
       ASSERT_EQ("CORRUPTION", GetImpl("key2"));
@@ -445,7 +445,7 @@ TEST_F(DBBlobIndexTest, Iterate) {
            create_blob_iterator, check_is_blob(false));
     verify(9, Status::kOk, get_value(10, 0), get_value(8, 0),
            create_blob_iterator, check_is_blob(false));
-    if (tier <= kImmutableMemtables) {
+    if (tier <= Tier::kImmutableMemtables) {
       verify(11, Status::kNotSupported, "", "", create_blob_iterator);
     } else {
       verify(11, Status::kCorruption, "", "", create_blob_iterator);
@@ -470,7 +470,7 @@ TEST_F(DBBlobIndexTest, Iterate) {
            create_blob_iterator, check_is_blob(false));
     verify(9, Status::kOk, get_value(10, 0), get_value(8, 0),
            create_blob_iterator, check_is_blob(false));
-    if (tier <= kImmutableMemtables) {
+    if (tier <= Tier::kImmutableMemtables) {
       verify(11, Status::kNotSupported, "", "", create_blob_iterator);
     } else {
       verify(11, Status::kCorruption, "", "", create_blob_iterator);
