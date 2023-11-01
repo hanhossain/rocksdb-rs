@@ -62,8 +62,8 @@ class FaultInjectionTest
   bool sequential_order_;
 
  public:
-  enum ExpectedVerifResult { kValExpectFound, kValExpectNoError };
-  enum ResetMethod {
+  enum class ExpectedVerifResult { kValExpectFound, kValExpectNoError };
+  enum class ResetMethod {
     kResetDropUnsyncedData,
     kResetDropRandomUnsyncedData,
     kResetDeleteUnsyncedFiles,
@@ -222,7 +222,7 @@ class FaultInjectionTest
       if (s.ok()) {
         EXPECT_EQ(value_space, val);
       }
-      if (expected == kValExpectFound) {
+      if (expected == ExpectedVerifResult::kValExpectFound) {
         if (!s.ok()) {
           fprintf(stderr, "Error when read %dth record (expect found): %s\n", i,
                   s.ToString().c_str());
@@ -290,16 +290,16 @@ class FaultInjectionTest
   void ResetDBState(ResetMethod reset_method, Random* rnd = nullptr) {
     env_->AssertNoOpenFile();
     switch (reset_method) {
-      case kResetDropUnsyncedData:
+        case ResetMethod::kResetDropUnsyncedData:
         ASSERT_OK(env_->DropUnsyncedFileData());
         break;
-      case kResetDropRandomUnsyncedData:
+      case ResetMethod::kResetDropRandomUnsyncedData:
         ASSERT_OK(env_->DropRandomUnsyncedFileData(rnd));
         break;
-      case kResetDeleteUnsyncedFiles:
+      case ResetMethod::kResetDeleteUnsyncedFiles:
         ASSERT_OK(env_->DeleteFilesCreatedAfterLastDirSync());
         break;
-      case kResetDropAndDeleteUnsynced:
+      case ResetMethod::kResetDropAndDeleteUnsynced:
         ASSERT_OK(env_->DropUnsyncedFileData());
         ASSERT_OK(env_->DeleteFilesCreatedAfterLastDirSync());
         break;
@@ -329,13 +329,13 @@ class FaultInjectionTest
     CloseDB();
     ResetDBState(reset_method, rnd);
     ASSERT_OK(OpenDB());
-    ASSERT_OK(Verify(0, num_pre_sync, FaultInjectionTest::kValExpectFound));
+    ASSERT_OK(Verify(0, num_pre_sync, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
     ASSERT_OK(Verify(num_pre_sync, num_post_sync,
-                     FaultInjectionTest::kValExpectNoError));
+                     FaultInjectionTest::ExpectedVerifResult::kValExpectNoError));
     WaitCompactionFinish();
-    ASSERT_OK(Verify(0, num_pre_sync, FaultInjectionTest::kValExpectFound));
+    ASSERT_OK(Verify(0, num_pre_sync, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
     ASSERT_OK(Verify(num_pre_sync, num_post_sync,
-                     FaultInjectionTest::kValExpectNoError));
+                     FaultInjectionTest::ExpectedVerifResult::kValExpectNoError));
   }
 
   void NoWriteTestPreFault() {}
@@ -367,32 +367,32 @@ TEST_P(FaultInjectionTestSplitted, FaultTest) {
       int num_post_sync = rnd.Uniform(kMaxNumValues);
 
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
-      PartialCompactTestReopenWithFault(kResetDropUnsyncedData, num_pre_sync,
+      PartialCompactTestReopenWithFault(ResetMethod::kResetDropUnsyncedData, num_pre_sync,
                                         num_post_sync);
       NoWriteTestPreFault();
-      NoWriteTestReopenWithFault(kResetDropUnsyncedData);
+      NoWriteTestReopenWithFault(ResetMethod::kResetDropUnsyncedData);
 
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
-      PartialCompactTestReopenWithFault(kResetDropRandomUnsyncedData,
+      PartialCompactTestReopenWithFault(ResetMethod::kResetDropRandomUnsyncedData,
                                         num_pre_sync, num_post_sync, &rnd);
       NoWriteTestPreFault();
-      NoWriteTestReopenWithFault(kResetDropUnsyncedData);
+      NoWriteTestReopenWithFault(ResetMethod::kResetDropUnsyncedData);
 
       // Setting a separate data path won't pass the test as we don't sync
       // it after creating new files,
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
-      PartialCompactTestReopenWithFault(kResetDropAndDeleteUnsynced,
+      PartialCompactTestReopenWithFault(ResetMethod::kResetDropAndDeleteUnsynced,
                                         num_pre_sync, num_post_sync);
       NoWriteTestPreFault();
-      NoWriteTestReopenWithFault(kResetDropAndDeleteUnsynced);
+      NoWriteTestReopenWithFault(ResetMethod::kResetDropAndDeleteUnsynced);
 
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
       // No new files created so we expect all values since no files will be
       // dropped.
-      PartialCompactTestReopenWithFault(kResetDeleteUnsyncedFiles, num_pre_sync,
+      PartialCompactTestReopenWithFault(ResetMethod::kResetDeleteUnsyncedFiles, num_pre_sync,
                                         num_post_sync);
       NoWriteTestPreFault();
-      NoWriteTestReopenWithFault(kResetDeleteUnsyncedFiles);
+      NoWriteTestReopenWithFault(ResetMethod::kResetDeleteUnsyncedFiles);
     }
   } while (ChangeOptions());
 }
@@ -421,7 +421,7 @@ TEST_P(FaultInjectionTest, WriteOptionSyncTest) {
   ASSERT_OK(db_->FlushWAL(false));
 
   env_->SetFilesystemActive(false);
-  NoWriteTestReopenWithFault(kResetDropAndDeleteUnsynced);
+  NoWriteTestReopenWithFault(ResetMethod::kResetDropAndDeleteUnsynced);
   sleeping_task_low.WakeUp();
   sleeping_task_low.WaitUntilDone();
 
@@ -467,7 +467,7 @@ TEST_P(FaultInjectionTest, UninstalledCompaction) {
   TEST_SYNC_POINT("FaultInjectionTest::FaultTest:2");
   CloseDB();
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-  ResetDBState(kResetDropUnsyncedData);
+  ResetDBState(ResetMethod::kResetDropUnsyncedData);
 
   std::atomic<bool> opened(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
@@ -477,9 +477,9 @@ TEST_P(FaultInjectionTest, UninstalledCompaction) {
       [&](void* /*arg*/) { ASSERT_TRUE(opened.load()); });
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(OpenDB());
-  ASSERT_OK(Verify(0, kNumKeys, FaultInjectionTest::kValExpectFound));
+  ASSERT_OK(Verify(0, kNumKeys, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
   WaitCompactionFinish();
-  ASSERT_OK(Verify(0, kNumKeys, FaultInjectionTest::kValExpectFound));
+  ASSERT_OK(Verify(0, kNumKeys, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
 }
@@ -506,7 +506,7 @@ TEST_P(FaultInjectionTest, ManualLogSyncTest) {
   ASSERT_OK(db_->FlushWAL(true));
 
   env_->SetFilesystemActive(false);
-  NoWriteTestReopenWithFault(kResetDropAndDeleteUnsynced);
+  NoWriteTestReopenWithFault(ResetMethod::kResetDropAndDeleteUnsynced);
   sleeping_task_low.WakeUp();
   sleeping_task_low.WaitUntilDone();
 
@@ -536,7 +536,7 @@ TEST_P(FaultInjectionTest, WriteBatchWalTerminationTest) {
   ASSERT_OK(db_->Write(wo, &batch));
 
   env_->SetFilesystemActive(false);
-  NoWriteTestReopenWithFault(kResetDropAndDeleteUnsynced);
+  NoWriteTestReopenWithFault(ResetMethod::kResetDropAndDeleteUnsynced);
   ASSERT_OK(OpenDB());
 
   std::string val;
