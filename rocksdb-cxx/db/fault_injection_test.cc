@@ -38,7 +38,7 @@ static const int kValueSize = 1000;
 static const int kMaxNumValues = 2000;
 static const size_t kNumIterations = 3;
 
-enum FaultInjectionOptionConfig {
+enum class FaultInjectionOptionConfig {
   kDefault,
   kDifferentDataDir,
   kWalDir,
@@ -78,8 +78,8 @@ class FaultInjectionTest
   DB* db_;
 
   FaultInjectionTest()
-      : option_config_(std::get<1>(GetParam())),
-        non_inclusive_end_range_(std::get<2>(GetParam())),
+      : option_config_((int)std::get<1>(GetParam())),
+        non_inclusive_end_range_((int)std::get<2>(GetParam())),
         sync_use_wal_(false),
         sync_use_compact_(true),
         base_env_(nullptr),
@@ -100,7 +100,7 @@ class FaultInjectionTest
     if (option_config_ >= non_inclusive_end_range_) {
       return false;
     } else {
-      if (option_config_ == kMultiLevels) {
+      if (option_config_ == (int)FaultInjectionOptionConfig::kMultiLevels) {
         base_env_.reset(MockEnv::Create(system_env_));
       }
       return true;
@@ -112,24 +112,24 @@ class FaultInjectionTest
     sync_use_wal_ = false;
     sync_use_compact_ = true;
     Options options;
-    switch (option_config_) {
-      case kWalDir:
+    switch ((FaultInjectionOptionConfig)option_config_) {
+      case FaultInjectionOptionConfig::kWalDir:
         options.wal_dir = test::PerThreadDBPath(env_, "fault_test_wal");
         break;
-      case kDifferentDataDir:
+      case FaultInjectionOptionConfig::kDifferentDataDir:
         options.db_paths.emplace_back(
             test::PerThreadDBPath(env_, "fault_test_data"), 1000000U);
         break;
-      case kSyncWal:
+      case FaultInjectionOptionConfig::kSyncWal:
         sync_use_wal_ = true;
         sync_use_compact_ = false;
         break;
-      case kWalDirSyncWal:
+      case FaultInjectionOptionConfig::kWalDirSyncWal:
         options.wal_dir = test::PerThreadDBPath(env_, "/fault_test_wal");
         sync_use_wal_ = true;
         sync_use_compact_ = false;
         break;
-      case kMultiLevels:
+      case FaultInjectionOptionConfig::kMultiLevels:
         options.write_buffer_size = 64 * 1024;
         options.target_file_size_base = 64 * 1024;
         options.level0_file_num_compaction_trigger = 2;
@@ -617,15 +617,15 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
 
 INSTANTIATE_TEST_CASE_P(
     FaultTest, FaultInjectionTest,
-    ::testing::Values(std::make_tuple(false, kDefault, kEnd),
-                      std::make_tuple(true, kDefault, kEnd)));
+    ::testing::Values(std::make_tuple(false, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kEnd),
+                      std::make_tuple(true, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kEnd)));
 
 INSTANTIATE_TEST_CASE_P(
     FaultTest, FaultInjectionTestSplitted,
-    ::testing::Values(std::make_tuple(false, kDefault, kSyncWal),
-                      std::make_tuple(true, kDefault, kSyncWal),
-                      std::make_tuple(false, kSyncWal, kEnd),
-                      std::make_tuple(true, kSyncWal, kEnd)));
+    ::testing::Values(std::make_tuple(false, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kSyncWal),
+                      std::make_tuple(true, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kSyncWal),
+                      std::make_tuple(false, FaultInjectionOptionConfig::kSyncWal, FaultInjectionOptionConfig::kEnd),
+                      std::make_tuple(true, FaultInjectionOptionConfig::kSyncWal, FaultInjectionOptionConfig::kEnd)));
 
 }  // namespace ROCKSDB_NAMESPACE
 
