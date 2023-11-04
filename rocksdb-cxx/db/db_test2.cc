@@ -1233,7 +1233,7 @@ TEST_F(DBTest2, PresetCompressionDict) {
     compression_types.push_back(kZSTD);
   }
 
-  enum DictionaryTypes : int {
+  enum class DictionaryTypes : int {
     kWithoutDict,
     kWithDict,
     kWithZSTDfinalizeDict,
@@ -1247,7 +1247,7 @@ TEST_F(DBTest2, PresetCompressionDict) {
     size_t bytes_with_dict = 0;
     size_t bytes_with_zstd_finalize_dict = 0;
     size_t bytes_with_zstd_trained_dict = 0;
-    for (int i = kWithoutDict; i < kDictEnd; i++) {
+    for (int i = (int)DictionaryTypes::kWithoutDict; i < (int)DictionaryTypes::kDictEnd; i++) {
       // First iteration: compress without preset dictionary
       // Second iteration: compress with preset dictionary
       // Third iteration (zstd only): compress with zstd-trained dictionary
@@ -1256,16 +1256,16 @@ TEST_F(DBTest2, PresetCompressionDict) {
       // verify the compressed size is smaller in successive iterations. Also in
       // the non-first iterations, verify the data we get out is the same data
       // we put in.
-      switch (i) {
-        case kWithoutDict:
+      switch ((DictionaryTypes)i) {
+        case DictionaryTypes::kWithoutDict:
           options.compression_opts.max_dict_bytes = 0;
           options.compression_opts.zstd_max_train_bytes = 0;
           break;
-        case kWithDict:
+        case DictionaryTypes::kWithDict:
           options.compression_opts.max_dict_bytes = kBlockSizeBytes;
           options.compression_opts.zstd_max_train_bytes = 0;
           break;
-        case kWithZSTDfinalizeDict:
+        case DictionaryTypes::kWithZSTDfinalizeDict:
           if (compression_type != kZSTD ||
               !ZSTD_FinalizeDictionarySupported()) {
             continue;
@@ -1274,7 +1274,7 @@ TEST_F(DBTest2, PresetCompressionDict) {
           options.compression_opts.zstd_max_train_bytes = kL0FileBytes;
           options.compression_opts.use_zstd_dict_trainer = false;
           break;
-        case kWithZSTDTrainedDict:
+        case DictionaryTypes::kWithZSTDTrainedDict:
           if (compression_type != kZSTD || !ZSTD_TrainDictionarySupported()) {
             continue;
           }
@@ -1313,13 +1313,13 @@ TEST_F(DBTest2, PresetCompressionDict) {
 
       // Get the live sst files size
       size_t total_sst_bytes = TotalSize(1);
-      if (i == kWithoutDict) {
+      if (i == (int)DictionaryTypes::kWithoutDict) {
         bytes_without_dict = total_sst_bytes;
-      } else if (i == kWithDict) {
+      } else if (i == (int)DictionaryTypes::kWithDict) {
         bytes_with_dict = total_sst_bytes;
-      } else if (i == kWithZSTDfinalizeDict) {
+      } else if (i == (int)DictionaryTypes::kWithZSTDfinalizeDict) {
         bytes_with_zstd_finalize_dict = total_sst_bytes;
-      } else if (i == kWithZSTDTrainedDict) {
+      } else if (i == (int)DictionaryTypes::kWithZSTDTrainedDict) {
         bytes_with_zstd_trained_dict = total_sst_bytes;
       }
 
@@ -1327,16 +1327,16 @@ TEST_F(DBTest2, PresetCompressionDict) {
            j++) {
         ASSERT_EQ(seq_datas[(j / 10) % 10], Get(1, Key(static_cast<int>(j))));
       }
-      if (i == kWithDict) {
+      if (i == (int)DictionaryTypes::kWithDict) {
         ASSERT_GT(bytes_without_dict, bytes_with_dict);
-      } else if (i == kWithZSTDTrainedDict) {
+      } else if (i == (int)DictionaryTypes::kWithZSTDTrainedDict) {
         // In zstd compression, it is sometimes possible that using a finalized
         // dictionary does not get as good a compression ratio as raw content
         // dictionary. But using a dictionary should always get better
         // compression ratio than not using one.
         ASSERT_TRUE(bytes_with_dict > bytes_with_zstd_finalize_dict ||
                     bytes_without_dict > bytes_with_zstd_finalize_dict);
-      } else if (i == kWithZSTDTrainedDict) {
+      } else if (i == (int)DictionaryTypes::kWithZSTDTrainedDict) {
         // In zstd compression, it is sometimes possible that using a trained
         // dictionary does not get as good a compression ratio as without
         // training.
@@ -1671,7 +1671,7 @@ class CompactionCompressionListener : public EventListener {
   const Options* db_options_;
 };
 
-enum CompressionFailureType {
+enum class CompressionFailureType {
   kTestCompressionFail,
   kTestDecompressionFail,
   kTestDecompressionCorruption
@@ -1688,7 +1688,7 @@ class CompressionFailuresTest
         GetParam();
   }
 
-  CompressionFailureType compression_failure_type_ = kTestCompressionFail;
+  CompressionFailureType compression_failure_type_ = CompressionFailureType::kTestCompressionFail;
   CompressionType compression_type_ = kNoCompression;
   uint32_t compression_max_dict_bytes_ = 0;
   uint32_t compression_parallel_threads_ = 0;
@@ -1696,9 +1696,9 @@ class CompressionFailuresTest
 
 INSTANTIATE_TEST_CASE_P(
     DBTest2, CompressionFailuresTest,
-    ::testing::Combine(::testing::Values(kTestCompressionFail,
-                                         kTestDecompressionFail,
-                                         kTestDecompressionCorruption),
+    ::testing::Combine(::testing::Values(CompressionFailureType::kTestCompressionFail,
+                                         CompressionFailureType::kTestDecompressionFail,
+                                         CompressionFailureType::kTestDecompressionCorruption),
                        ::testing::ValuesIn(GetSupportedCompressions()),
                        ::testing::Values(0, 10), ::testing::Values(1, 4)));
 
@@ -1728,20 +1728,20 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
   options.bottommost_compression_opts.max_dict_bytes =
       compression_max_dict_bytes_;
 
-  if (compression_failure_type_ == kTestCompressionFail) {
+  if (compression_failure_type_ == CompressionFailureType::kTestCompressionFail) {
     ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
         "CompressData:TamperWithReturnValue", [](void* arg) {
           bool* ret = static_cast<bool*>(arg);
           *ret = false;
         });
-  } else if (compression_failure_type_ == kTestDecompressionFail) {
+  } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionFail) {
     ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
         "UncompressBlockData:TamperWithReturnValue", [](void* arg) {
           Status* ret = static_cast<Status*>(arg);
           ASSERT_OK(*ret);
           *ret = Status::Corruption("kTestDecompressionFail");
         });
-  } else if (compression_failure_type_ == kTestDecompressionCorruption) {
+  } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionCorruption) {
     ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
         "UncompressBlockData:"
         "TamperWithDecompressionOutput",
@@ -1775,17 +1775,17 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
         value += valueUnit;
       }
       s = Put(key, value);
-      if (compression_failure_type_ == kTestCompressionFail) {
+      if (compression_failure_type_ == CompressionFailureType::kTestCompressionFail) {
         key_value_written[key] = value;
         ASSERT_OK(s);
       }
     }
     s = Flush();
-    if (compression_failure_type_ == kTestCompressionFail) {
+    if (compression_failure_type_ == CompressionFailureType::kTestCompressionFail) {
       ASSERT_OK(s);
     }
     s = dbfull()->TEST_WaitForCompact();
-    if (compression_failure_type_ == kTestCompressionFail) {
+    if (compression_failure_type_ == CompressionFailureType::kTestCompressionFail) {
       ASSERT_OK(s);
     }
     if (i == 4) {
@@ -1795,7 +1795,7 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
   }
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
 
-  if (compression_failure_type_ == kTestCompressionFail) {
+  if (compression_failure_type_ == CompressionFailureType::kTestCompressionFail) {
     // Should be kNoCompression, check content consistency
     std::unique_ptr<Iterator> db_iter(db_->NewIterator(ReadOptions()));
     for (db_iter->SeekToFirst(); db_iter->Valid(); db_iter->Next()) {
@@ -1806,10 +1806,10 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
       key_value_written.erase(key);
     }
     ASSERT_EQ(0, key_value_written.size());
-  } else if (compression_failure_type_ == kTestDecompressionFail) {
+  } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionFail) {
     ASSERT_EQ(std::string(s.getState()),
               "Could not decompress: kTestDecompressionFail");
-  } else if (compression_failure_type_ == kTestDecompressionCorruption) {
+  } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionCorruption) {
     ASSERT_EQ(std::string(s.getState()),
               "Decompressed block did not match pre-compression block");
   }
