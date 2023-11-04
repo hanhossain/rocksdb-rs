@@ -621,7 +621,7 @@ class DBConstructor : public Constructor {
   DB* db_;
 };
 
-enum TestType {
+enum class TestType {
   BLOCK_BASED_TABLE_TEST,
   PLAIN_TABLE_SEMI_FIXED_PREFIX,
   PLAIN_TABLE_FULL_STR_PREFIX,
@@ -4174,7 +4174,6 @@ TEST_F(PlainTableTest, Crc32cFileChecksum) {
   ASSERT_OK(f.CalculateFileChecksum(checksum_crc32c_gen2.get(), &checksum));
   EXPECT_STREQ(f.GetFileChecksum().c_str(), checksum.c_str());
 }
-
 
 TEST_F(GeneralTableTest, ApproximateOffsetOfPlain) {
   TableConstructor c(BytewiseComparator(), true /* convert_to_internal_key_ */);

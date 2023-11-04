@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/transaction_test.h"
 #include "utilities/transactions/write_unprepared_txn.h"
 #include "utilities/transactions/write_unprepared_txn_db.h"
@@ -35,8 +34,8 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(std::make_tuple(false, false, WRITE_UNPREPARED),
                       std::make_tuple(false, true, WRITE_UNPREPARED)));
 
-enum SnapshotAction { NO_SNAPSHOT, RO_SNAPSHOT, REFRESH_SNAPSHOT };
-enum VerificationOperation { VERIFY_GET, VERIFY_NEXT, VERIFY_PREV };
+enum class SnapshotAction { NO_SNAPSHOT, RO_SNAPSHOT, REFRESH_SNAPSHOT };
+enum class VerificationOperation { VERIFY_GET, VERIFY_NEXT, VERIFY_PREV };
 class WriteUnpreparedSnapshotTest
     : public WriteUnpreparedTransactionTestBase,
       virtual public ::testing::WithParamInterface<
@@ -280,7 +279,7 @@ TEST_P(WriteUnpreparedTransactionTest, RecoveryTest) {
   WriteUnpreparedTxnDB* wup_db;
   options.disable_auto_compactions = true;
 
-  enum Action { UNPREPARED, ROLLBACK, COMMIT };
+  enum class Action { UNPREPARED, ROLLBACK, COMMIT };
 
   // batch_size of 1 causes writes to DB for every marker.
   for (size_t batch_size : {1, 1000000}) {
@@ -552,7 +551,7 @@ TEST_P(WriteUnpreparedTransactionTest, IterateAndWrite) {
   TransactionOptions txn_options;
   txn_options.write_batch_flush_threshold = 1;
 
-  enum Action { DO_DELETE, DO_UPDATE };
+  enum class Action { DO_DELETE, DO_UPDATE };
 
   for (Action a : {DO_DELETE, DO_UPDATE}) {
     for (int i = 0; i < 100; i++) {
@@ -613,7 +612,7 @@ TEST_P(WriteUnpreparedTransactionTest, IterateAfterClear) {
   TransactionOptions txn_options;
   txn_options.write_batch_flush_threshold = 1;
 
-  enum Action { kCommit, kRollback };
+  enum class Action { kCommit, kRollback };
 
   for (Action a : {kCommit, kRollback}) {
     for (int i = 0; i < 100; i++) {
@@ -729,4 +728,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

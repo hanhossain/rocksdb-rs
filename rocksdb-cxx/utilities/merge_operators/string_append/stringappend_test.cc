@@ -366,7 +366,7 @@ TEST_P(StringAppendOperatorTest, RandomMixGetAppend) {
   std::map<std::string, std::string> parallel_copy;
 
   // Generate a bunch of random queries (Append and Get)!
-  enum query_t { APPEND_OP, GET_OP, NUM_OPS };
+  enum class query_t { APPEND_OP, GET_OP, NUM_OPS };
   Random randomGen(1337);  // deterministic seed; always get same results!
 
   const int kNumQueries = 30;
@@ -415,7 +415,7 @@ TEST_P(StringAppendOperatorTest, BIGRandomMixGetAppend) {
   std::map<std::string, std::string> parallel_copy;
 
   // Generate a bunch of random queries (Append and Get)!
-  enum query_t { APPEND_OP, GET_OP, NUM_OPS };
+  enum class query_t { APPEND_OP, GET_OP, NUM_OPS };
   Random randomGen(9138204);  // deterministic seed
 
   const int kNumQueries = 1000;

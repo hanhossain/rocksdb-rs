@@ -3,7 +3,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include <map>
 #include <memory>
 
@@ -26,7 +25,7 @@ namespace {
 
 using KVMap = std::map<std::string, std::string>;
 
-enum BatchOperation { OP_PUT = 0, OP_DELETE = 1 };
+enum class BatchOperation { OP_PUT = 0, OP_DELETE = 1 };
 }  // namespace
 
 class SpecialTimeEnv : public EnvWrapper {
@@ -910,4 +909,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

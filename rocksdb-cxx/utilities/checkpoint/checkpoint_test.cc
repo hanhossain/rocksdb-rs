@@ -34,7 +34,7 @@ namespace ROCKSDB_NAMESPACE {
 class CheckpointTest : public testing::Test {
  protected:
   // Sequence of option configurations to try
-  enum OptionConfig {
+  enum class OptionConfig {
     kDefault = 0,
   };
   int option_config_;
