@@ -261,13 +261,13 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
 
   if (two_write_queues_ && disable_memtable) {
     AssignOrder assign_order =
-        seq_per_batch_ ? kDoAssignOrder : kDontAssignOrder;
+        seq_per_batch_ ? AssignOrder::kDoAssignOrder : AssignOrder::kDontAssignOrder;
     // Otherwise it is WAL-only Prepare batches in WriteCommitted policy and
     // they don't consume sequence.
     return WriteImplWALOnly(&nonmem_write_thread_, write_options, my_batch,
                             callback, log_used, log_ref, seq_used, batch_cnt,
                             pre_release_callback, assign_order,
-                            kDontPublishLastSeq, disable_memtable);
+                            PublishLastSeq::kDontPublishLastSeq, disable_memtable);
   }
 
   if (immutable_db_options_.unordered_write) {
@@ -280,8 +280,8 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
     // sequence in in increasing order, iii) call pre_release_callback serially
     Status status = WriteImplWALOnly(
         &write_thread_, write_options, my_batch, callback, log_used, log_ref,
-        &seq, sub_batch_cnt, pre_release_callback, kDoAssignOrder,
-        kDoPublishLastSeq, disable_memtable);
+        &seq, sub_batch_cnt, pre_release_callback, AssignOrder::kDoAssignOrder,
+        PublishLastSeq::kDoPublishLastSeq, disable_memtable);
     TEST_SYNC_POINT("DBImpl::WriteImpl:UnorderedWriteAfterWriteWAL");
     if (!status.ok()) {
       return status;
@@ -904,7 +904,7 @@ Status DBImpl::WriteImplWALOnly(
   // else we are the leader of the write batch group
   assert(w.state == WriteThread::STATE_GROUP_LEADER);
 
-  if (publish_last_seq == kDoPublishLastSeq) {
+  if (publish_last_seq == PublishLastSeq::kDoPublishLastSeq) {
     Status status;
 
     // Currently we only use kDoPublishLastSeq in unordered_write
@@ -994,7 +994,7 @@ Status DBImpl::WriteImplWALOnly(
   // LastAllocatedSequence is increased inside WriteToWAL under
   // wal_write_mutex_ to ensure ordered events in WAL
   size_t seq_inc = 0 /* total_count */;
-  if (assign_order == kDoAssignOrder) {
+  if (assign_order == AssignOrder::kDoAssignOrder) {
     size_t total_batch_cnt = 0;
     for (auto* writer : write_group) {
       assert(writer->batch_cnt || !seq_per_batch_);
@@ -1029,7 +1029,7 @@ Status DBImpl::WriteImplWALOnly(
       continue;
     }
     writer->sequence = curr_seq;
-    if (assign_order == kDoAssignOrder) {
+    if (assign_order == AssignOrder::kDoAssignOrder) {
       assert(writer->batch_cnt || !seq_per_batch_);
       curr_seq += writer->batch_cnt;
     }
@@ -1068,7 +1068,7 @@ Status DBImpl::WriteImplWALOnly(
       }
     }
   }
-  if (publish_last_seq == kDoPublishLastSeq) {
+  if (publish_last_seq == PublishLastSeq::kDoPublishLastSeq) {
     versions_->SetLastSequence(last_sequence + seq_inc);
     // Currently we only use kDoPublishLastSeq in unordered_write
     assert(immutable_db_options_.unordered_write);

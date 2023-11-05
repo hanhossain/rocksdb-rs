@@ -1208,7 +1208,7 @@ class DBImpl : public DB {
   // state_ is changed accordingly.
   class WBMStallInterface : public StallInterface {
    public:
-    enum State {
+    enum class State {
       BLOCKED = 0,
       RUNNING,
     };
@@ -1459,9 +1459,9 @@ class DBImpl : public DB {
                                 const size_t sub_batch_cnt);
 
   // Whether the batch requires to be assigned with an order
-  enum AssignOrder : bool { kDontAssignOrder, kDoAssignOrder };
+  enum class AssignOrder : bool { kDontAssignOrder, kDoAssignOrder };
   // Whether it requires publishing last sequence or not
-  enum PublishLastSeq : bool { kDontPublishLastSeq, kDoPublishLastSeq };
+  enum class PublishLastSeq : bool { kDontPublishLastSeq, kDoPublishLastSeq };
 
   // Join the write_thread to write the batch only to the WAL. It is the
   // responsibility of the caller to also write the write batch to the memtable
