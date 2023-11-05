@@ -562,11 +562,11 @@ enum FillDBFlushAction {
 };
 
 // Many tests in this file expect FillDB to write at least one sst file,
-// so the default behavior (if not kAutoFlushOnly) of FillDB is to force
+// so the default behavior (if not FillDBFlushAction::kAutoFlushOnly) of FillDB is to force
 // a flush. But to ensure coverage of the WAL file case, we also (by default)
-// do one Put after the Flush (kFlushMost).
+// do one Put after the Flush (FillDBFlushAction::kFlushMost).
 size_t FillDB(DB* db, int from, int to,
-              FillDBFlushAction flush_action = kFlushMost) {
+              FillDBFlushAction flush_action = FillDBFlushAction::kFlushMost) {
   size_t bytes_written = 0;
   for (int i = from; i < to; ++i) {
     std::string key = "testkey" + std::to_string(i);
@@ -575,11 +575,11 @@ size_t FillDB(DB* db, int from, int to,
 
     EXPECT_OK(db->Put(WriteOptions(), Slice(key), Slice(value)));
 
-    if (flush_action == kFlushMost && i == to - 2) {
+    if (flush_action == FillDBFlushAction::kFlushMost && i == to - 2) {
       EXPECT_OK(db->Flush(FlushOptions()));
     }
   }
-  if (flush_action == kFlushAll) {
+  if (flush_action == FillDBFlushAction::kFlushAll) {
     EXPECT_OK(db->Flush(FlushOptions()));
   }
   return bytes_written;
@@ -1127,8 +1127,8 @@ TEST_P(BackupEngineTestWithParam, OfflineIntegrationTest) {
       // ---- insert new data and back up ----
       OpenDBAndBackupEngine(destroy_data);
       destroy_data = false;
-      // kAutoFlushOnly to preserve legacy test behavior (consider updating)
-      FillDB(db_.get(), keys_iteration * i, fill_up_to, kAutoFlushOnly);
+      // FillDBFlushAction::kAutoFlushOnly to preserve legacy test behavior (consider updating)
+      FillDB(db_.get(), keys_iteration * i, fill_up_to, FillDBFlushAction::kAutoFlushOnly);
       ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), iter == 0))
           << "iter: " << iter << ", idx: " << i;
       CloseDBAndBackupEngine();
@@ -1177,8 +1177,8 @@ TEST_P(BackupEngineTestWithParam, OnlineIntegrationTest) {
     // in last iteration, put smaller amount of data,
     // so that backups can share sst files
     int fill_up_to = std::min(keys_iteration * (i + 1), max_key);
-    // kAutoFlushOnly to preserve legacy test behavior (consider updating)
-    FillDB(db_.get(), keys_iteration * i, fill_up_to, kAutoFlushOnly);
+    // FillDBFlushAction::kAutoFlushOnly to preserve legacy test behavior (consider updating)
+    FillDB(db_.get(), keys_iteration * i, fill_up_to, FillDBFlushAction::kAutoFlushOnly);
     // we should get consistent results with flush_before_backup
     // set to both true and false
     ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), !!(rnd.Next() % 2)));
@@ -1936,7 +1936,7 @@ TEST_F(BackupEngineTest, FailOverwritingBackups) {
     CloseDBAndBackupEngine();
     DeleteLogFiles();
     OpenDBAndBackupEngine(false);
-    FillDB(db_.get(), 100 * i, 100 * (i + 1), kFlushAll);
+    FillDB(db_.get(), 100 * i, 100 * (i + 1), FillDBFlushAction::kFlushAll);
     ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
   }
   CloseDBAndBackupEngine();
@@ -1948,7 +1948,7 @@ TEST_F(BackupEngineTest, FailOverwritingBackups) {
 
   OpenDBAndBackupEngine(false);
   // More data, bigger SST
-  FillDB(db_.get(), 1000, 1300, kFlushAll);
+  FillDB(db_.get(), 1000, 1300, FillDBFlushAction::kFlushAll);
   Status s = backup_engine_->CreateNewBackup(db_.get());
   // the new backup fails because new table files
   // clash with old table files from backups 4 and 5
@@ -2582,12 +2582,12 @@ TEST_F(BackupEngineTest, KeepLogFiles) {
   // basically infinite
   options_.WAL_ttl_seconds = 24 * 60 * 60;
   OpenDBAndBackupEngine(true);
-  FillDB(db_.get(), 0, 100, kFlushAll);
-  FillDB(db_.get(), 100, 200, kFlushAll);
+  FillDB(db_.get(), 0, 100, FillDBFlushAction::kFlushAll);
+  FillDB(db_.get(), 100, 200, FillDBFlushAction::kFlushAll);
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), false));
-  FillDB(db_.get(), 200, 300, kFlushAll);
-  FillDB(db_.get(), 300, 400, kFlushAll);
-  FillDB(db_.get(), 400, 500, kFlushAll);
+  FillDB(db_.get(), 200, 300, FillDBFlushAction::kFlushAll);
+  FillDB(db_.get(), 300, 400, FillDBFlushAction::kFlushAll);
+  FillDB(db_.get(), 400, 500, FillDBFlushAction::kFlushAll);
   CloseDBAndBackupEngine();
 
   // all data should be there if we call with keep_log_files = true
@@ -3219,7 +3219,7 @@ TEST_F(BackupEngineTest, ChangeManifestDuringBackupCreation) {
   DestroyDBWithoutCheck(dbname_, options_);
   options_.max_manifest_file_size = 0;  // always rollover manifest for file add
   OpenDBAndBackupEngine(true);
-  FillDB(db_.get(), 0, 100, kAutoFlushOnly);
+  FillDB(db_.get(), 0, 100, FillDBFlushAction::kAutoFlushOnly);
 
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency({
       {"CheckpointImpl::CreateCheckpoint:SavedLiveFiles1",
@@ -3243,7 +3243,7 @@ TEST_F(BackupEngineTest, ChangeManifestDuringBackupCreation) {
   DBImpl* db_impl = static_cast_with_check<DBImpl>(db_.get());
   std::string prev_manifest_path =
       DescriptorFileName(dbname_, db_impl->TEST_Current_Manifest_FileNo());
-  FillDB(db_.get(), 0, 100, kAutoFlushOnly);
+  FillDB(db_.get(), 0, 100, FillDBFlushAction::kAutoFlushOnly);
   ASSERT_OK(db_chroot_env_->FileExists(prev_manifest_path));
   ASSERT_OK(db_->Flush(FlushOptions()));
   // Even though manual flush completed above, the background thread may not
@@ -3861,7 +3861,7 @@ TEST_P(BackupEngineTestWithParam, BackupUsingDirectIO) {
   OpenDBAndBackupEngine(true /* destroy_old_data */);
   for (int i = 0; i < kNumBackups; ++i) {
     FillDB(db_.get(), i * kNumKeysPerBackup /* from */,
-           (i + 1) * kNumKeysPerBackup /* to */, kFlushAll);
+           (i + 1) * kNumKeysPerBackup /* to */, FillDBFlushAction::kFlushAll);
 
     // Clear the file open counters and then do a bunch of backup engine ops.
     // For all ops, files should be opened in direct mode.
@@ -4030,7 +4030,7 @@ TEST_F(BackupEngineTest, IOStats) {
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
                         kShareWithChecksum);
 
-  FillDB(db_.get(), 0 /* from */, 100 /* to */, kFlushMost);
+  FillDB(db_.get(), 0 /* from */, 100 /* to */, FillDBFlushAction::kFlushMost);
 
   ASSERT_EQ(0, options_.statistics->getTickerCount(BACKUP_READ_BYTES));
   ASSERT_EQ(0, options_.statistics->getTickerCount(BACKUP_WRITE_BYTES));
@@ -4053,7 +4053,7 @@ TEST_F(BackupEngineTest, IOStats) {
   ASSERT_LT(expected_bytes_written,
             2 * options_.statistics->getTickerCount(BACKUP_READ_BYTES));
 
-  FillDB(db_.get(), 100 /* from */, 200 /* to */, kFlushMost);
+  FillDB(db_.get(), 100 /* from */, 200 /* to */, FillDBFlushAction::kFlushMost);
 
   ASSERT_OK(options_.statistics->Reset());
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(),
