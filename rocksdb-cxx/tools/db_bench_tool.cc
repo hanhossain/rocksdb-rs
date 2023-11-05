@@ -2092,7 +2092,7 @@ class ReporterAgent {
   bool stop_;
 };
 
-enum OperationType : unsigned char {
+enum class OperationType : unsigned char {
   kRead = 0,
   kWrite,
   kDelete,
@@ -2106,13 +2106,13 @@ enum OperationType : unsigned char {
   kOthers
 };
 
-static std::unordered_map<OperationType, std::string, std::hash<unsigned char>>
-    OperationTypeString = {{kRead, "read"},         {kWrite, "write"},
-                           {kDelete, "delete"},     {kSeek, "seek"},
-                           {kMerge, "merge"},       {kUpdate, "update"},
-                           {kCompress, "compress"}, {kCompress, "uncompress"},
-                           {kCrc, "crc"},           {kHash, "hash"},
-                           {kOthers, "op"}};
+static std::unordered_map<OperationType, std::string>
+    OperationTypeString = {{OperationType::kRead, "read"},         {OperationType::kWrite, "write"},
+                           {OperationType::kDelete, "delete"},     {OperationType::kSeek, "seek"},
+                           {OperationType::kMerge, "merge"},       {OperationType::kUpdate, "update"},
+                           {OperationType::kCompress, "compress"}, {OperationType::kCompress, "uncompress"},
+                           {OperationType::kCrc, "crc"},           {OperationType::kHash, "hash"},
+                           {OperationType::kOthers, "op"}};
 
 class CombinedStats;
 class Stats {
@@ -2129,8 +2129,7 @@ class Stats {
   uint64_t bytes_;
   uint64_t last_op_finish_;
   uint64_t last_report_finish_;
-  std::unordered_map<OperationType, std::shared_ptr<HistogramImpl>,
-                     std::hash<unsigned char>>
+  std::unordered_map<OperationType, std::shared_ptr<HistogramImpl>>
       hist_;
   std::string message_;
   bool exclude_from_merge_;
@@ -2236,7 +2235,7 @@ class Stats {
   }
 
   void FinishedOps(DBWithColumnFamilies* db_with_cfh, DB* db, int64_t num_ops,
-                   OperationType op_type = kOthers) {
+                   OperationType op_type = OperationType::kOthers) {
     if (reporter_agent_) {
       reporter_agent_->ReportFinishedOps(num_ops);
     }
@@ -3955,19 +3954,19 @@ class Benchmark {
   }
 
   void Crc32c(ThreadState* thread) {
-    ChecksumBenchmark<kCrc>(crc32c::Value, thread);
+    ChecksumBenchmark<OperationType::kCrc>(crc32c::Value, thread);
   }
 
   void xxHash(ThreadState* thread) {
-    ChecksumBenchmark<kHash>(XXH32, thread, /*seed*/ 0);
+    ChecksumBenchmark<OperationType::kHash>(XXH32, thread, /*seed*/ 0);
   }
 
   void xxHash64(ThreadState* thread) {
-    ChecksumBenchmark<kHash>(XXH64, thread, /*seed*/ 0);
+    ChecksumBenchmark<OperationType::kHash>(XXH64, thread, /*seed*/ 0);
   }
 
   void xxh3(ThreadState* thread) {
-    ChecksumBenchmark<kHash>(XXH3_64bits, thread);
+    ChecksumBenchmark<OperationType::kHash>(XXH3_64bits, thread);
   }
 
   void AcquireLoad(ThreadState* thread) {
@@ -3981,7 +3980,7 @@ class Benchmark {
         ptr = ap.load(std::memory_order_acquire);
       }
       count++;
-      thread->stats.FinishedOps(nullptr, nullptr, 1, kOthers);
+      thread->stats.FinishedOps(nullptr, nullptr, 1, OperationType::kOthers);
     }
     if (ptr == nullptr) exit(1);  // Disable unused variable warning.
   }
@@ -4004,7 +4003,7 @@ class Benchmark {
       ok = CompressSlice(info, input, &compressed);
       produced += compressed.size();
       bytes += input.size();
-      thread->stats.FinishedOps(nullptr, nullptr, 1, kCompress);
+      thread->stats.FinishedOps(nullptr, nullptr, 1, OperationType::kCompress);
     }
 
     if (!ok) {
@@ -4045,7 +4044,7 @@ class Benchmark {
 
       ok = uncompressed.get() != nullptr;
       bytes += input.size();
-      thread->stats.FinishedOps(nullptr, nullptr, 1, kUncompress);
+      thread->stats.FinishedOps(nullptr, nullptr, 1, OperationType::kUncompress);
     }
 
     if (!ok) {
@@ -5367,7 +5366,7 @@ class Benchmark {
         s = db_with_cfh->db->Write(write_options_, &batch);
       }
       thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db,
-                                entries_per_batch_, kWrite);
+                                entries_per_batch_, OperationType::kWrite);
       if (FLAGS_sine_write_rate) {
         uint64_t now = FLAGS_env->NowMicros();
 
@@ -5749,7 +5748,7 @@ class Benchmark {
     int64_t bytes = 0;
     for (iter->SeekToFirst(); i < reads_ && iter->Valid(); iter->Next()) {
       bytes += iter->key().size() + iter->value().size();
-      thread->stats.FinishedOps(nullptr, db, 1, kRead);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kRead);
       ++i;
 
       if (thread->shared->read_rate_limiter.get() != nullptr &&
@@ -5806,7 +5805,7 @@ class Benchmark {
             256, Env::IO_HIGH, nullptr /* stats */, RateLimiter::OpType::kRead);
       }
 
-      thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, OperationType::kRead);
     }
 
     char msg[100];
@@ -5833,7 +5832,7 @@ class Benchmark {
     int64_t bytes = 0;
     for (iter->SeekToLast(); i < reads_ && iter->Valid(); iter->Prev()) {
       bytes += iter->key().size() + iter->value().size();
-      thread->stats.FinishedOps(nullptr, db, 1, kRead);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kRead);
       ++i;
       if (thread->shared->read_rate_limiter.get() != nullptr &&
           i % 1024 == 1023) {
@@ -5897,7 +5896,7 @@ class Benchmark {
             100, Env::IO_HIGH, nullptr /* stats */, RateLimiter::OpType::kRead);
       }
 
-      thread->stats.FinishedOps(nullptr, db, 100, kRead);
+      thread->stats.FinishedOps(nullptr, db, 100, OperationType::kRead);
     } while (!duration.Done(100));
 
     char msg[100];
@@ -6035,7 +6034,7 @@ class Benchmark {
             256, Env::IO_HIGH, nullptr /* stats */, RateLimiter::OpType::kRead);
       }
 
-      thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+      thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, OperationType::kRead);
     }
 
     char msg[100];
@@ -6135,7 +6134,7 @@ class Benchmark {
             256 * entries_per_batch_, Env::IO_HIGH, nullptr /* stats */,
             RateLimiter::OpType::kRead);
       }
-      thread->stats.FinishedOps(nullptr, db, entries_per_batch_, kRead);
+      thread->stats.FinishedOps(nullptr, db, entries_per_batch_, OperationType::kRead);
     }
 
     char msg[100];
@@ -6183,7 +6182,7 @@ class Benchmark {
       for (int64_t size : sizes) {
         size_sum += size;
       }
-      thread->stats.FinishedOps(nullptr, db, entries_per_batch_, kOthers);
+      thread->stats.FinishedOps(nullptr, db, entries_per_batch_, OperationType::kOthers);
     }
 
     char msg[100];
@@ -6538,7 +6537,7 @@ class Benchmark {
           thread->shared->read_rate_limiter->Request(100, Env::IO_HIGH,
                                                      nullptr /*stats*/);
         }
-        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kRead);
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, OperationType::kRead);
       } else if (query_type == 1) {
         // the Put query
         puts++;
@@ -6563,7 +6562,7 @@ class Benchmark {
           thread->shared->write_rate_limiter->Request(100, Env::IO_HIGH,
                                                       nullptr /*stats*/);
         }
-        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kWrite);
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, OperationType::kWrite);
       } else if (query_type == 2) {
         // Seek query
         if (db_with_cfh->db != nullptr) {
@@ -6591,7 +6590,7 @@ class Benchmark {
           }
           delete single_iter;
         }
-        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, kSeek);
+        thread->stats.FinishedOps(db_with_cfh, db_with_cfh->db, 1, OperationType::kSeek);
       }
     }
     char msg[256];
@@ -6623,7 +6622,7 @@ class Benchmark {
       }
       Iterator* iter = db->NewIterator(options);
       delete iter;
-      thread->stats.FinishedOps(nullptr, db, 1, kOthers);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kOthers);
     }
   }
 
@@ -6631,7 +6630,7 @@ class Benchmark {
     if (thread->tid > 0) {
       IteratorCreation(thread);
     } else {
-      BGWriter(thread, kWrite);
+      BGWriter(thread, OperationType::kWrite);
     }
   }
 
@@ -6743,7 +6742,7 @@ class Benchmark {
             256, Env::IO_HIGH, nullptr /* stats */, RateLimiter::OpType::kRead);
       }
 
-      thread->stats.FinishedOps(&db_, db_.db, 1, kSeek);
+      thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kSeek);
     }
     for (auto iter : tailing_iters) {
       delete iter;
@@ -6760,7 +6759,7 @@ class Benchmark {
     if (thread->tid > 0) {
       SeekRandom(thread);
     } else {
-      BGWriter(thread, kWrite);
+      BGWriter(thread, OperationType::kWrite);
     }
   }
 
@@ -6768,7 +6767,7 @@ class Benchmark {
     if (thread->tid > 0) {
       SeekRandom(thread);
     } else {
-      BGWriter(thread, kMerge);
+      BGWriter(thread, OperationType::kMerge);
     }
   }
 
@@ -6805,7 +6804,7 @@ class Benchmark {
         }
       }
       s = db->Write(write_options_, &batch);
-      thread->stats.FinishedOps(nullptr, db, entries_per_batch_, kDelete);
+      thread->stats.FinishedOps(nullptr, db, entries_per_batch_, OperationType::kDelete);
       if (!s.ok()) {
         fprintf(stderr, "del error: %s\n", s.ToString().c_str());
         exit(1);
@@ -6822,7 +6821,7 @@ class Benchmark {
     if (thread->tid > 0) {
       ReadRandom(thread);
     } else {
-      BGWriter(thread, kWrite);
+      BGWriter(thread, OperationType::kWrite);
     }
   }
 
@@ -6830,7 +6829,7 @@ class Benchmark {
     if (thread->tid > 0) {
       MultiReadRandom(thread);
     } else {
-      BGWriter(thread, kWrite);
+      BGWriter(thread, OperationType::kWrite);
     }
   }
 
@@ -6838,7 +6837,7 @@ class Benchmark {
     if (thread->tid > 0) {
       ReadRandom(thread);
     } else {
-      BGWriter(thread, kMerge);
+      BGWriter(thread, OperationType::kMerge);
     }
   }
 
@@ -6910,7 +6909,7 @@ class Benchmark {
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
       }
-      if (write_merge == kWrite) {
+      if (write_merge == OperationType::kWrite) {
         if (user_timestamp_size_ == 0) {
           s = db->Put(write_options_, key, val);
         } else {
@@ -6927,7 +6926,7 @@ class Benchmark {
         exit(1);
       }
       bytes += key.size() + val.size() + user_timestamp_size_;
-      thread->stats.FinishedOps(&db_, db_.db, 1, kWrite);
+      thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kWrite);
 
       if (FLAGS_benchmark_write_rate_limit > 0) {
         write_rate_limiter->Request(key.size() + val.size(), Env::IO_HIGH,
@@ -6965,7 +6964,7 @@ class Benchmark {
             exit(1);
           }
         }
-        thread->stats.FinishedOps(&db_, db_.db, 1, kWrite);
+        thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kWrite);
         // TODO: DeleteRange is not included in calculcation of bytes/rate
         // limiter request
       }
@@ -7018,7 +7017,7 @@ class Benchmark {
         num_next++;
       }
 
-      thread->stats.FinishedOps(&db_, db_.db, 1, kSeek);
+      thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kSeek);
     }
     (void)num_seek_to_first;
     (void)num_next;
@@ -7182,7 +7181,7 @@ class Benchmark {
         }
         get_weight--;
         gets_done++;
-        thread->stats.FinishedOps(&db_, db_.db, 1, kRead);
+        thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kRead);
       } else if (put_weight > 0) {
         // then do all the corresponding number of puts
         // for all the gets we have done earlier
@@ -7193,7 +7192,7 @@ class Benchmark {
         }
         put_weight--;
         puts_done++;
-        thread->stats.FinishedOps(&db_, db_.db, 1, kWrite);
+        thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kWrite);
       } else if (delete_weight > 0) {
         Status s = DeleteMany(db, write_options_, key);
         if (!s.ok()) {
@@ -7202,7 +7201,7 @@ class Benchmark {
         }
         delete_weight--;
         deletes_done++;
-        thread->stats.FinishedOps(&db_, db_.db, 1, kDelete);
+        thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kDelete);
       }
     }
     char msg[128];
@@ -7261,7 +7260,7 @@ class Benchmark {
         }
         get_weight--;
         reads_done++;
-        thread->stats.FinishedOps(nullptr, db, 1, kRead);
+        thread->stats.FinishedOps(nullptr, db, 1, OperationType::kRead);
       } else if (put_weight > 0) {
         // then do all the corresponding number of puts
         // for all the gets we have done earlier
@@ -7278,7 +7277,7 @@ class Benchmark {
         }
         put_weight--;
         writes_done++;
-        thread->stats.FinishedOps(nullptr, db, 1, kWrite);
+        thread->stats.FinishedOps(nullptr, db, 1, OperationType::kWrite);
       }
     }
     char msg[100];
@@ -7345,7 +7344,7 @@ class Benchmark {
         exit(1);
       }
       bytes += key.size() + val.size() + user_timestamp_size_;
-      thread->stats.FinishedOps(nullptr, db, 1, kUpdate);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kUpdate);
     }
     char msg[100];
     snprintf(msg, sizeof(msg), "( updates:%" PRIu64 " found:%" PRIu64 ")",
@@ -7483,7 +7482,7 @@ class Benchmark {
         ErrorExit();
       }
       bytes += key.size() + value.size() + user_timestamp_size_;
-      thread->stats.FinishedOps(nullptr, db, 1, kUpdate);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kUpdate);
     }
 
     char msg[100];
@@ -7530,7 +7529,7 @@ class Benchmark {
         exit(1);
       }
       bytes += key.size() + val.size();
-      thread->stats.FinishedOps(nullptr, db_with_cfh->db, 1, kMerge);
+      thread->stats.FinishedOps(nullptr, db_with_cfh->db, 1, OperationType::kMerge);
     }
 
     // Print some statistics
@@ -7572,7 +7571,7 @@ class Benchmark {
           exit(1);
         }
         num_merges++;
-        thread->stats.FinishedOps(nullptr, db, 1, kMerge);
+        thread->stats.FinishedOps(nullptr, db, 1, OperationType::kMerge);
       } else {
         Status s = db->Get(read_options_, key, &value);
         if (value.length() > max_length) max_length = value.length();
@@ -7585,7 +7584,7 @@ class Benchmark {
           num_hits++;
         }
         num_gets++;
-        thread->stats.FinishedOps(nullptr, db, 1, kRead);
+        thread->stats.FinishedOps(nullptr, db, 1, OperationType::kRead);
       }
     }
 
@@ -7620,7 +7619,7 @@ class Benchmark {
       GenerateKeyFromInt(i, FLAGS_num, &key);
       iter->Seek(key);
       assert(iter->Valid() && iter->key() == key);
-      thread->stats.FinishedOps(nullptr, db, 1, kSeek);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kSeek);
 
       for (int j = 0; j < FLAGS_seek_nexts && i + 1 < FLAGS_num; ++j) {
         if (!FLAGS_reverse_iterator) {
@@ -7630,12 +7629,12 @@ class Benchmark {
         }
         GenerateKeyFromInt(++i, FLAGS_num, &key);
         assert(iter->Valid() && iter->key() == key);
-        thread->stats.FinishedOps(nullptr, db, 1, kSeek);
+        thread->stats.FinishedOps(nullptr, db, 1, OperationType::kSeek);
       }
 
       iter->Seek(key);
       assert(iter->Valid() && iter->key() == key);
-      thread->stats.FinishedOps(nullptr, db, 1, kSeek);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kSeek);
     }
   }
 
@@ -7818,7 +7817,7 @@ class Benchmark {
         abort();
       }
 
-      thread->stats.FinishedOps(nullptr, db_.db, 1, kOthers);
+      thread->stats.FinishedOps(nullptr, db_.db, 1, OperationType::kOthers);
       transactions_done++;
     }
 
@@ -7922,7 +7921,7 @@ class Benchmark {
         exit(1);
       }
 
-      thread->stats.FinishedOps(nullptr, db, 1, kOthers);
+      thread->stats.FinishedOps(nullptr, db, 1, OperationType::kOthers);
     }
 
     char msg[200];
@@ -7978,14 +7977,14 @@ class Benchmark {
         if (do_deletion) {
           bytes += iter->key().size();
           if (KeyExpired(timestamp_emulator_.get(), iter->key())) {
-            thread->stats.FinishedOps(&db_, db_.db, 1, kDelete);
+            thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kDelete);
             db_.db->Delete(write_options_, iter->key());
           } else {
             break;
           }
         } else {
           bytes += iter->key().size() + iter->value().size();
-          thread->stats.FinishedOps(&db_, db_.db, 1, kRead);
+          thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kRead);
           Slice value = iter->value();
           memcpy(value_buffer, value.data(),
                  std::min(value.size(), sizeof(value_buffer)));
@@ -8059,7 +8058,7 @@ class Benchmark {
         ErrorExit();
       }
       bytes = key.size() + val.size();
-      thread->stats.FinishedOps(&db_, db_.db, 1, kWrite);
+      thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kWrite);
       thread->stats.AddBytes(bytes);
 
       if (FLAGS_benchmark_write_rate_limit > 0) {
