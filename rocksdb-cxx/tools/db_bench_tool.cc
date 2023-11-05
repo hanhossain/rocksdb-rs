@@ -2236,7 +2236,7 @@ class Stats {
   }
 
   void FinishedOps(DBWithColumnFamilies* db_with_cfh, DB* db, int64_t num_ops,
-                   enum OperationType op_type = kOthers) {
+                   OperationType op_type = kOthers) {
     if (reporter_agent_) {
       reporter_agent_->ReportFinishedOps(num_ops);
     }
@@ -6842,7 +6842,7 @@ class Benchmark {
     }
   }
 
-  void BGWriter(ThreadState* thread, enum OperationType write_merge) {
+  void BGWriter(ThreadState* thread, OperationType write_merge) {
     // Special thread that keeps writing until other threads are done.
     RandomGenerator gen;
     int64_t bytes = 0;
