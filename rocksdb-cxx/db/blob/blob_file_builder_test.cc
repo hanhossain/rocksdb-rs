@@ -79,7 +79,7 @@ class BlobFileBuilderTest : public testing::Test {
       uint64_t blob_offset = 0;
 
       ASSERT_OK(blob_log_reader.ReadRecord(
-          &record, BlobLogSequentialReader::kReadHeaderKeyBlob, &blob_offset));
+          &record, BlobLogSequentialReader::ReadLevel::kReadHeaderKeyBlob, &blob_offset));
 
       // Check the contents of the blob file
       const auto& expected_key_value = expected_key_value_pairs[i];

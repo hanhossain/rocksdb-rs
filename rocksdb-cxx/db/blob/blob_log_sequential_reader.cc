@@ -88,17 +88,17 @@ Status BlobLogSequentialReader::ReadRecord(BlobLogRecord* record,
   }
 
   switch (level) {
-    case kReadHeader:
+      case ReadLevel::kReadHeader:
       next_byte_ += kb_size;
       break;
 
-    case kReadHeaderKey:
+    case ReadLevel::kReadHeaderKey:
       record->key_buf.reset(new char[record->key_size]);
       s = ReadSlice(record->key_size, &record->key, record->key_buf.get());
       next_byte_ += record->value_size;
       break;
 
-    case kReadHeaderKeyBlob:
+    case ReadLevel::kReadHeaderKeyBlob:
       record->key_buf.reset(new char[record->key_size]);
       s = ReadSlice(record->key_size, &record->key, record->key_buf.get());
       if (s.ok()) {
