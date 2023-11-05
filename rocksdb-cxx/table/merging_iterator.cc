@@ -57,7 +57,7 @@ class MergingIterator : public InternalIterator {
                   const Slice* iterate_upper_bound = nullptr)
       : is_arena_mode_(is_arena_mode),
         prefix_seek_mode_(prefix_seek_mode),
-        direction_(kForward),
+        direction_(Direction::kForward),
         comparator_(comparator),
         current_(nullptr),
         minHeap_(MinHeapItemComparator(comparator_)),
@@ -259,7 +259,7 @@ class MergingIterator : public InternalIterator {
       }
     }
     FindNextVisibleKey();
-    direction_ = kForward;
+    direction_ = Direction::kForward;
     current_ = CurrentForward();
   }
 
@@ -282,7 +282,7 @@ class MergingIterator : public InternalIterator {
       }
     }
     FindPrevVisibleKey();
-    direction_ = kReverse;
+    direction_ = Direction::kReverse;
     current_ = CurrentReverse();
   }
 
@@ -312,7 +312,7 @@ class MergingIterator : public InternalIterator {
     SeekImpl(target);
     FindNextVisibleKey();
 
-    direction_ = kForward;
+    direction_ = Direction::kForward;
     {
       PERF_TIMER_GUARD(seek_min_heap_time);
       current_ = CurrentForward();
@@ -326,7 +326,7 @@ class MergingIterator : public InternalIterator {
     SeekForPrevImpl(target);
     FindPrevVisibleKey();
 
-    direction_ = kReverse;
+    direction_ = Direction::kReverse;
     {
       PERF_TIMER_GUARD(seek_max_heap_time);
       current_ = CurrentReverse();
@@ -339,7 +339,7 @@ class MergingIterator : public InternalIterator {
     // If we are moving in the forward direction, it is already
     // true for all the non-current children since current_ is
     // the smallest child and key() == current_->key().
-    if (direction_ != kForward) {
+    if (direction_ != Direction::kForward) {
       // The loop advanced all non-current children to be > key() so current_
       // should still be strictly the smallest key.
       SwitchToForward();
@@ -388,7 +388,7 @@ class MergingIterator : public InternalIterator {
     // If we are moving in the reverse direction, it is already
     // true for all the non-current children since current_ is
     // the largest child and key() == current_->key().
-    if (direction_ != kReverse) {
+    if (direction_ != Direction::kReverse) {
       // Otherwise, retreat the non-current children.  We retreat current_
       // just after the if-block.
       SwitchToBackward();
@@ -580,7 +580,7 @@ class MergingIterator : public InternalIterator {
   bool is_arena_mode_;
   bool prefix_seek_mode_;
   // Which direction is the iterator moving?
-  enum Direction : uint8_t { kForward, kReverse };
+  enum class Direction : uint8_t { kForward, kReverse };
   Direction direction_;
   const InternalKeyComparator* comparator_;
   // HeapItem for all child point iterators.
@@ -658,14 +658,14 @@ class MergingIterator : public InternalIterator {
   void SwitchToBackward();
 
   IteratorWrapper* CurrentForward() const {
-    assert(direction_ == kForward);
+    assert(direction_ == Direction::kForward);
     assert(minHeap_.empty() ||
            minHeap_.top()->type == HeapItem::Type::ITERATOR);
     return !minHeap_.empty() ? &minHeap_.top()->iter : nullptr;
   }
 
   IteratorWrapper* CurrentReverse() const {
-    assert(direction_ == kReverse);
+    assert(direction_ == Direction::kReverse);
     assert(maxHeap_);
     assert(maxHeap_->empty() ||
            maxHeap_->top()->type == HeapItem::Type::ITERATOR);
@@ -912,7 +912,7 @@ void MergingIterator::SeekImpl(const Slice& target, size_t starting_level,
 // == ITERATOR
 //
 // REQUIRES:
-// - min heap is currently not empty, and iter is in kForward direction.
+// - min heap is currently not empty, and iter is in Direction::kForward direction.
 // - minHeap_ top is not DELETE_RANGE_START (so that `active_` is current).
 bool MergingIterator::SkipNextDeleted() {
   // 3 types of keys:
@@ -1170,7 +1170,7 @@ void MergingIterator::SeekForPrevImpl(const Slice& target,
 
 // See more in comments above SkipNextDeleted().
 // REQUIRES:
-// - max heap is currently not empty, and iter is in kReverse direction.
+// - max heap is currently not empty, and iter is in Direction::kReverse direction.
 // - maxHeap_ top is not DELETE_RANGE_END (so that `active_` is current).
 bool MergingIterator::SkipPrevDeleted() {
   // 3 types of keys:
@@ -1352,7 +1352,7 @@ void MergingIterator::SwitchToForward() {
     }
   }
 
-  direction_ = kForward;
+  direction_ = Direction::kForward;
   assert(current_ == CurrentForward());
 }
 
@@ -1401,7 +1401,7 @@ void MergingIterator::SwitchToBackward() {
     }
   }
 
-  direction_ = kReverse;
+  direction_ = Direction::kReverse;
   if (!prefix_seek_mode_) {
     // Note that we don't do assert(current_ == CurrentReverse()) here
     // because it is possible to have some keys larger than the seek-key
