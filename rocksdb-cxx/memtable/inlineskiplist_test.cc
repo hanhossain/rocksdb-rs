@@ -519,7 +519,7 @@ class TestState {
   std::atomic<bool> quit_flag_;
   std::atomic<uint32_t> next_writer_;
 
-  enum class ReaderState { STARTING, RUNNING, DONE };
+  enum ReaderState { STARTING, RUNNING, DONE };
 
   explicit TestState(int s)
       : seed_(s),

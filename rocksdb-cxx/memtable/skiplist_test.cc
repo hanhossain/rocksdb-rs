@@ -313,7 +313,7 @@ class TestState {
   int seed_;
   std::atomic<bool> quit_flag_;
 
-  enum class ReaderState { STARTING, RUNNING, DONE };
+  enum ReaderState { STARTING, RUNNING, DONE };
 
   explicit TestState(int s)
       : seed_(s), quit_flag_(false), state_(STARTING), state_cv_(&mu_) {}

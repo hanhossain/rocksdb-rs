@@ -555,7 +555,7 @@ class FileManager : public EnvWrapper {
 // utility functions
 namespace {
 
-enum class FillDBFlushAction {
+enum FillDBFlushAction {
   kFlushMost,
   kFlushAll,
   kAutoFlushOnly,
@@ -607,7 +607,7 @@ void AssertEmpty(DB* db, int from, int to) {
 
 class BackupEngineTest : public testing::Test {
  public:
-  enum class ShareOption {
+  enum ShareOption {
     kNoShare,
     kShareNoChecksum,
     kShareWithChecksum,
