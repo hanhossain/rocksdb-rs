@@ -235,7 +235,7 @@ struct FilterInfo {
   uint64_t false_positives_ = 0;
 };
 
-enum TestMode {
+enum class TestMode {
   kSingleFilter,
   kBatchPrepared,
   kBatchUnprepared,
@@ -245,32 +245,32 @@ enum TestMode {
 };
 
 static const std::vector<TestMode> allTestModes = {
-    kSingleFilter,   kBatchPrepared,      kBatchUnprepared,
-    kFiftyOneFilter, kEightyTwentyFilter, kRandomFilter,
+    TestMode::kSingleFilter,   TestMode::kBatchPrepared,      TestMode::kBatchUnprepared,
+    TestMode::kFiftyOneFilter, TestMode::kEightyTwentyFilter, TestMode::kRandomFilter,
 };
 
 static const std::vector<TestMode> quickTestModes = {
-    kSingleFilter,
-    kRandomFilter,
+    TestMode::kSingleFilter,
+    TestMode::kRandomFilter,
 };
 
 static const std::vector<TestMode> bestCaseTestModes = {
-    kSingleFilter,
+    TestMode::kSingleFilter,
 };
 
 const char *TestModeToString(TestMode tm) {
   switch (tm) {
-    case kSingleFilter:
+    case TestMode::kSingleFilter:
       return "Single filter";
-    case kBatchPrepared:
+    case TestMode::kBatchPrepared:
       return "Batched, prepared";
-    case kBatchUnprepared:
+    case TestMode::kBatchUnprepared:
       return "Batched, unprepared";
-    case kFiftyOneFilter:
+    case TestMode::kFiftyOneFilter:
       return "Skewed 50% in 1%";
-    case kEightyTwentyFilter:
+    case TestMode::kEightyTwentyFilter:
       return "Skewed 80% in 20%";
-    case kRandomFilter:
+    case TestMode::kRandomFilter:
       return "Random filter";
   }
   return "Bad TestMode";
@@ -619,10 +619,10 @@ double FilterBench::RandomQueryTest(uint32_t inside_threshold, bool dry_run,
   // the primary filters (default = all). The remainder of queries are
   // against secondary filters.
   uint32_t primary_filter_threshold = 0xffffffff;
-  if (mode == kSingleFilter) {
+  if (mode == TestMode::kSingleFilter) {
     // 100% of queries to 1 filter
     num_primary_filters = 1;
-  } else if (mode == kFiftyOneFilter) {
+  } else if (mode == TestMode::kFiftyOneFilter) {
     if (num_infos < 50) {
       return 0.0;  // skip
     }
@@ -630,7 +630,7 @@ double FilterBench::RandomQueryTest(uint32_t inside_threshold, bool dry_run,
     primary_filter_threshold /= 2;
     // to 1% of filters
     num_primary_filters = (num_primary_filters + 99) / 100;
-  } else if (mode == kEightyTwentyFilter) {
+  } else if (mode == TestMode::kEightyTwentyFilter) {
     if (num_infos < 5) {
       return 0.0;  // skip
     }
@@ -638,7 +638,7 @@ double FilterBench::RandomQueryTest(uint32_t inside_threshold, bool dry_run,
     primary_filter_threshold = primary_filter_threshold / 5 * 4;
     // to 20% of filters
     num_primary_filters = (num_primary_filters + 4) / 5;
-  } else if (mode == kRandomFilter) {
+  } else if (mode == TestMode::kRandomFilter) {
     if (num_infos == 1) {
       return 0.0;  // skip
     }
@@ -647,7 +647,7 @@ double FilterBench::RandomQueryTest(uint32_t inside_threshold, bool dry_run,
   std::unique_ptr<Slice[]> batch_slices;
   std::unique_ptr<Slice *[]> batch_slice_ptrs;
   std::unique_ptr<bool[]> batch_results;
-  if (mode == kBatchPrepared || mode == kBatchUnprepared) {
+  if (mode == TestMode::kBatchPrepared || mode == TestMode::kBatchUnprepared) {
     batch_size = static_cast<uint32_t>(kms_.size());
   }
 
@@ -687,7 +687,7 @@ double FilterBench::RandomQueryTest(uint32_t inside_threshold, bool dry_run,
     }
     // TODO: implement batched interface to full block reader
     // TODO: implement batched interface to plain table bloom
-    if (mode == kBatchPrepared && !FLAGS_use_full_block_reader &&
+    if (mode == TestMode::kBatchPrepared && !FLAGS_use_full_block_reader &&
         !FLAGS_use_plain_table_bloom) {
       for (uint32_t i = 0; i < batch_size; ++i) {
         batch_results[i] = false;

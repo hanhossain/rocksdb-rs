@@ -18,7 +18,7 @@ namespace ROCKSDB_NAMESPACE {
 
 // Tags for custom fields. Note that these get persisted in the manifest,
 // so existing tags should not be modified.
-enum BlobFileGarbage::CustomFieldTags : uint32_t {
+enum class BlobFileGarbage::CustomFieldTags : uint32_t {
   kEndMarker,
 
   // Add forward compatible fields here
@@ -42,7 +42,7 @@ void BlobFileGarbage::EncodeTo(std::string* output) const {
 
   TEST_SYNC_POINT_CALLBACK("BlobFileGarbage::EncodeTo::CustomFields", output);
 
-  PutVarint32(output, kEndMarker);
+  PutVarint32(output, (uint32_t)CustomFieldTags::kEndMarker);
 }
 
 Status BlobFileGarbage::DecodeFrom(Slice* input) {
@@ -66,11 +66,11 @@ Status BlobFileGarbage::DecodeFrom(Slice* input) {
       return Status::Corruption(class_name, "Error decoding custom field tag");
     }
 
-    if (custom_field_tag == kEndMarker) {
+    if (custom_field_tag == (uint32_t)CustomFieldTags::kEndMarker) {
       break;
     }
 
-    if (custom_field_tag & kForwardIncompatibleMask) {
+    if (custom_field_tag & (uint32_t)CustomFieldTags::kForwardIncompatibleMask) {
       return Status::Corruption(
           class_name, "Forward incompatible custom field encountered");
     }
