@@ -607,14 +607,14 @@ void AssertEmpty(DB* db, int from, int to) {
 
 class BackupEngineTest : public testing::Test {
  public:
-  enum ShareOption {
+  enum class ShareOption {
     kNoShare,
     kShareNoChecksum,
     kShareWithChecksum,
   };
 
-  const std::vector<ShareOption> kAllShareOptions = {kNoShare, kShareNoChecksum,
-                                                     kShareWithChecksum};
+  const std::vector<ShareOption> kAllShareOptions = {ShareOption::kNoShare, ShareOption::kShareNoChecksum,
+                                                     ShareOption::kShareWithChecksum};
 
   BackupEngineTest() {
     // set up files
@@ -728,14 +728,14 @@ class BackupEngineTest : public testing::Test {
 
   virtual void OpenDBAndBackupEngine(
       bool destroy_old_data = false, bool dummy = false,
-      ShareOption shared_option = kShareNoChecksum) {
+      ShareOption shared_option = ShareOption::kShareNoChecksum) {
     InitializeDBAndBackupEngine(dummy);
     // reset backup env defaults
     test_backup_fs_->SetLimitWrittenFiles(1000000);
     engine_options_->destroy_old_data = destroy_old_data;
-    engine_options_->share_table_files = shared_option != kNoShare;
+    engine_options_->share_table_files = shared_option != ShareOption::kNoShare;
     engine_options_->share_files_with_checksum =
-        shared_option == kShareWithChecksum;
+        shared_option == ShareOption::kShareWithChecksum;
     OpenBackupEngine(destroy_old_data);
   }
 
@@ -1024,12 +1024,12 @@ class BackupEngineTestWithParam : public BackupEngineTest,
   }
   void OpenDBAndBackupEngine(
       bool destroy_old_data = false, bool dummy = false,
-      ShareOption shared_option = kShareNoChecksum) override {
+      ShareOption shared_option = ShareOption::kShareNoChecksum) override {
     BackupEngineTest::InitializeDBAndBackupEngine(dummy);
     // reset backup env defaults
     test_backup_fs_->SetLimitWrittenFiles(1000000);
     engine_options_->destroy_old_data = destroy_old_data;
-    engine_options_->share_table_files = shared_option != kNoShare;
+    engine_options_->share_table_files = shared_option != ShareOption::kNoShare;
     // NOTE: keep share_files_with_checksum setting from constructor
     OpenBackupEngine(destroy_old_data);
   }
@@ -1055,7 +1055,7 @@ TEST_F(BackupEngineTest, FileCollision) {
     FillDB(db_.get(), 0, keys_iteration);
     ASSERT_OK(db_->Flush(FlushOptions()));  // like backup would do
     FillDB(db_.get(), keys_iteration, keys_iteration * 2);
-    if (sopt != kShareNoChecksum) {
+    if (sopt != ShareOption::kShareNoChecksum) {
       ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
     } else {
       // The new table files created in FillDB() will clash with the old
@@ -1474,7 +1474,7 @@ TEST_F(BackupEngineTest, CorruptFileMaintainSize) {
   // set share_files_with_checksum to true and do two more backups
   // corrupt all the table files in shared_checksum but maintain their sizes
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   // creat two backups
   for (int i = 1; i < 3; ++i) {
     FillDB(db_.get(), keys_iteration * i, keys_iteration * (i + 1));
@@ -1554,7 +1554,7 @@ TEST_F(BackupEngineTest, TableFileCorruptedBeforeBackup) {
   const int keys_iteration = 50000;
 
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kNoShare);
+                        ShareOption::kNoShare);
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
@@ -1570,7 +1570,7 @@ TEST_F(BackupEngineTest, TableFileCorruptedBeforeBackup) {
   // Enable table file checksum in DB manifest
   options_.file_checksum_gen_factory = GetFileChecksumGenCrc32cFactory();
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kNoShare);
+                        ShareOption::kNoShare);
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
@@ -1587,7 +1587,7 @@ TEST_F(BackupEngineTest, BlobFileCorruptedBeforeBackup) {
   const int keys_iteration = 50000;
 
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kNoShare);
+                        ShareOption::kNoShare);
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
@@ -1603,7 +1603,7 @@ TEST_F(BackupEngineTest, BlobFileCorruptedBeforeBackup) {
   // Enable file checksum in DB manifest
   options_.file_checksum_gen_factory = GetFileChecksumGenCrc32cFactory();
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kNoShare);
+                        ShareOption::kNoShare);
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
@@ -1683,7 +1683,7 @@ TEST_F(BackupEngineTest, TableFileWithoutDbChecksumCorruptedDuringBackup) {
   // files before and after copying. So we can test whether a corruption has
   // happened during the file is copied to backup directory.
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
 
   FillDB(db_.get(), 0, keys_iteration);
   std::atomic<bool> corrupted{false};
@@ -1812,7 +1812,7 @@ TEST_F(BackupEngineTest, FlushCompactDuringBackupCheckpoint) {
     SyncPoint::GetInstance()->DisableProcessing();
     SyncPoint::GetInstance()->ClearAllCallBacks();
     /* FIXME(peterd): reinstate with option for checksum in file names
-    if (sopt == kShareWithChecksum) {
+    if (sopt == ShareOption::kShareWithChecksum) {
       // Ensure we actually got DB manifest checksums by inspecting
       // shared_checksum file names for hex checksum component
       TestRegex expected("[^_]+_[0-9A-F]{8}_[^_]+.sst");
@@ -1966,7 +1966,7 @@ TEST_F(BackupEngineTest, FailOverwritingBackups) {
 
 TEST_F(BackupEngineTest, NoShareTableFiles) {
   const int keys_iteration = 5000;
-  OpenDBAndBackupEngine(true, false, kNoShare);
+  OpenDBAndBackupEngine(true, false, ShareOption::kNoShare);
   for (int i = 0; i < 5; ++i) {
     FillDB(db_.get(), keys_iteration * i, keys_iteration * (i + 1));
     ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), !!(i % 2)));
@@ -1982,7 +1982,7 @@ TEST_F(BackupEngineTest, NoShareTableFiles) {
 // Verify that you can backup and restore with share_files_with_checksum on
 TEST_F(BackupEngineTest, ShareTableFilesWithChecksums) {
   const int keys_iteration = 5000;
-  OpenDBAndBackupEngine(true, false, kShareWithChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareWithChecksum);
   for (int i = 0; i < 5; ++i) {
     FillDB(db_.get(), keys_iteration * i, keys_iteration * (i + 1));
     ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), !!(i % 2)));
@@ -2000,7 +2000,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksums) {
 TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsTransition) {
   const int keys_iteration = 5000;
   // set share_files_with_checksum to false
-  OpenDBAndBackupEngine(true, false, kShareNoChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareNoChecksum);
   for (int i = 0; i < 5; ++i) {
     FillDB(db_.get(), keys_iteration * i, keys_iteration * (i + 1));
     ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
@@ -2014,7 +2014,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsTransition) {
 
   // set share_files_with_checksum to true and do some more backups
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   for (int i = 5; i < 10; ++i) {
     FillDB(db_.get(), keys_iteration * i, keys_iteration * (i + 1));
     ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
@@ -2026,7 +2026,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsTransition) {
 
   // For an extra challenge, make sure that GarbageCollect / DeleteBackup
   // is OK even if we open without share_table_files
-  OpenDBAndBackupEngine(false /* destroy_old_data */, false, kNoShare);
+  OpenDBAndBackupEngine(false /* destroy_old_data */, false, ShareOption::kNoShare);
   ASSERT_OK(backup_engine_->DeleteBackup(1));
   ASSERT_OK(backup_engine_->GarbageCollect());
   CloseDBAndBackupEngine();
@@ -2045,7 +2045,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNaming) {
 
   const int keys_iteration = 5000;
 
-  OpenDBAndBackupEngine(true, false, kShareWithChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareWithChecksum);
   FillDB(db_.get(), 0, keys_iteration);
   CloseDBAndBackupEngine();
 
@@ -2099,7 +2099,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsOldFileNaming) {
   // Ignore the unique id recorded in the manifest.
   options_.verify_sst_unique_id_in_manifest = false;
 
-  OpenDBAndBackupEngine(true, false, kShareWithChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareWithChecksum);
   FillDB(db_.get(), 0, keys_iteration);
   CloseDBAndBackupEngine();
 
@@ -2136,7 +2136,7 @@ TEST_F(BackupEngineTest, TableFileCorruptionBeforeIncremental) {
     for (ShareFilesNaming option :
          {share_no_checksum, kLegacyCrc32cAndFileSize, kNamingDefault}) {
       auto share =
-          option == share_no_checksum ? kShareNoChecksum : kShareWithChecksum;
+          option == share_no_checksum ? ShareOption::kShareNoChecksum : ShareOption::kShareWithChecksum;
       if (option != share_no_checksum) {
         engine_options_->share_files_with_checksum_naming = option;
       }
@@ -2245,7 +2245,7 @@ TEST_F(BackupEngineTest, FileSizeForIncremental) {
   for (ShareFilesNaming option : {share_no_checksum, kLegacyCrc32cAndFileSize,
                                   kNamingDefault, kUseDbSessionId}) {
     auto share =
-        option == share_no_checksum ? kShareNoChecksum : kShareWithChecksum;
+        option == share_no_checksum ? ShareOption::kShareNoChecksum : ShareOption::kShareWithChecksum;
     if (option != share_no_checksum) {
       engine_options_->share_files_with_checksum_naming = option;
     }
@@ -2371,7 +2371,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingTransition) {
   ASSERT_TRUE(engine_options_->share_files_with_checksum_naming ==
               kNamingDefault);
   // set share_files_with_checksum to false
-  OpenDBAndBackupEngine(true, false, kShareNoChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareNoChecksum);
   int j = 3;
   for (int i = 0; i < j; ++i) {
     FillDB(db_.get(), keys_iteration * i, keys_iteration * (i + 1));
@@ -2389,7 +2389,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingTransition) {
   ASSERT_TRUE(engine_options_->share_files_with_checksum_naming ==
               kNamingDefault);
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   FillDB(db_.get(), keys_iteration * j, keys_iteration * (j + 1));
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
   CloseDBAndBackupEngine();
@@ -2397,7 +2397,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingTransition) {
   ++j;
   options_.file_checksum_gen_factory = GetFileChecksumGenCrc32cFactory();
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   FillDB(db_.get(), keys_iteration * j, keys_iteration * (j + 1));
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
   CloseDBAndBackupEngine();
@@ -2410,7 +2410,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingTransition) {
   // share_files_with_checksum_naming based on kUseDbSessionId
   ASSERT_TRUE(engine_options_->share_files_with_checksum_naming ==
               kNamingDefault);
-  OpenDBAndBackupEngine(false /* destroy_old_data */, false, kNoShare);
+  OpenDBAndBackupEngine(false /* destroy_old_data */, false, ShareOption::kNoShare);
   ASSERT_OK(backup_engine_->DeleteBackup(1));
   ASSERT_OK(backup_engine_->GarbageCollect());
   CloseDBAndBackupEngine();
@@ -2422,7 +2422,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingTransition) {
   // share_table_files
   // Again, make sure that GarbageCollect / DeleteBackup is OK
   engine_options_->share_files_with_checksum_naming = kLegacyCrc32cAndFileSize;
-  OpenDBAndBackupEngine(false /* destroy_old_data */, false, kNoShare);
+  OpenDBAndBackupEngine(false /* destroy_old_data */, false, ShareOption::kNoShare);
   ASSERT_OK(backup_engine_->DeleteBackup(2));
   ASSERT_OK(backup_engine_->GarbageCollect());
   CloseDBAndBackupEngine();
@@ -2440,7 +2440,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingUpgrade) {
   engine_options_->share_files_with_checksum_naming = kLegacyCrc32cAndFileSize;
   const int keys_iteration = 5000;
   // set share_files_with_checksum to true
-  OpenDBAndBackupEngine(true, false, kShareWithChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareWithChecksum);
   int j = 3;
   for (int i = 0; i < j; ++i) {
     FillDB(db_.get(), keys_iteration * i, keys_iteration * (i + 1));
@@ -2455,7 +2455,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingUpgrade) {
 
   engine_options_->share_files_with_checksum_naming = kUseDbSessionId;
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   FillDB(db_.get(), keys_iteration * j, keys_iteration * (j + 1));
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
   CloseDBAndBackupEngine();
@@ -2463,7 +2463,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingUpgrade) {
   ++j;
   options_.file_checksum_gen_factory = GetFileChecksumGenCrc32cFactory();
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   FillDB(db_.get(), keys_iteration * j, keys_iteration * (j + 1));
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
   CloseDBAndBackupEngine();
@@ -2473,7 +2473,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingUpgrade) {
 
   // For an extra challenge, make sure that GarbageCollect / DeleteBackup
   // is OK even if we open without share_table_files
-  OpenDBAndBackupEngine(false /* destroy_old_data */, false, kNoShare);
+  OpenDBAndBackupEngine(false /* destroy_old_data */, false, ShareOption::kNoShare);
   ASSERT_OK(backup_engine_->DeleteBackup(1));
   ASSERT_OK(backup_engine_->GarbageCollect());
   CloseDBAndBackupEngine();
@@ -2485,7 +2485,7 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsNewNamingUpgrade) {
   // share_table_files
   // Again, make sure that GarbageCollect / DeleteBackup is OK
   engine_options_->share_files_with_checksum_naming = kLegacyCrc32cAndFileSize;
-  OpenDBAndBackupEngine(false /* destroy_old_data */, false, kNoShare);
+  OpenDBAndBackupEngine(false /* destroy_old_data */, false, ShareOption::kNoShare);
   ASSERT_OK(backup_engine_->DeleteBackup(2));
   ASSERT_OK(backup_engine_->GarbageCollect());
   CloseDBAndBackupEngine();
@@ -2784,7 +2784,7 @@ TEST_P(BackupEngineRateLimitingTestWithParam, RateLimitingChargeReadInBackup) {
 
   DestroyDBWithoutCheck(dbname_, Options());
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kShareWithChecksum /* shared_option */);
+                        ShareOption::kShareWithChecksum /* shared_option */);
   FillDB(db_.get(), 0, 10);
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(),
                                             false /* flush_before_backup */));
@@ -2932,7 +2932,7 @@ TEST_P(BackupEngineRateLimitingTestWithParam2,
 
   DestroyDBWithoutCheck(dbname_, Options());
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kShareWithChecksum /* shared_option */);
+                        ShareOption::kShareWithChecksum /* shared_option */);
 
   FillDB(db_.get(), 0, 100);
   int64_t total_bytes_through_before_backup =
@@ -3461,7 +3461,7 @@ TEST_F(BackupEngineTest, MetaSchemaVersion2_Restore) {
   TEST_BackupMetaSchemaOptions test_opts;
   const int keys_iteration = 5000;
 
-  OpenDBAndBackupEngine(true, false, kShareWithChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareWithChecksum);
   FillDB(db_.get(), 0, keys_iteration);
   // Start with minimum metadata to ensure it works without it being filled
   // based on shared files also in other backups with the metadata.
@@ -3474,7 +3474,7 @@ TEST_F(BackupEngineTest, MetaSchemaVersion2_Restore) {
   AssertBackupConsistency(1 /* id */, 0, keys_iteration, keys_iteration * 2);
 
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   test_opts.file_sizes = true;
   TEST_SetBackupMetaSchemaOptions(backup_engine_.get(), test_opts);
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
@@ -3485,7 +3485,7 @@ TEST_F(BackupEngineTest, MetaSchemaVersion2_Restore) {
   }
 
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   test_opts.crc32c_checksums = true;
   TEST_SetBackupMetaSchemaOptions(backup_engine_.get(), test_opts);
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
@@ -3496,7 +3496,7 @@ TEST_F(BackupEngineTest, MetaSchemaVersion2_Restore) {
   }
 
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   // No TEST_EnableWriteFutureSchemaVersion2
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
   CloseDBAndBackupEngine();
@@ -3506,7 +3506,7 @@ TEST_F(BackupEngineTest, MetaSchemaVersion2_Restore) {
   }
 
   OpenDBAndBackupEngine(false /* destroy_old_data */, false,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
   // Minor version updates should be forward-compatible
   test_opts.version = "2.5.70";
   test_opts.meta_fields["asdf.3456"] = "-42";
@@ -3542,7 +3542,7 @@ TEST_F(BackupEngineTest, Concurrency) {
   engine_options_->backup_rate_limiter = limiter;
   engine_options_->restore_rate_limiter = limiter;
 
-  OpenDBAndBackupEngine(true, false, kShareWithChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareWithChecksum);
 
   static constexpr int keys_iteration = 5000;
   FillDB(db_.get(), 0, keys_iteration);
@@ -4028,7 +4028,7 @@ TEST_F(BackupEngineTest, IOStats) {
 
   options_.statistics = CreateDBStatistics();
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
 
   FillDB(db_.get(), 0 /* from */, 100 /* to */, FillDBFlushAction::kFlushMost);
 
@@ -4090,7 +4090,7 @@ TEST_F(BackupEngineTest, FileTemperatures) {
   options_.level_compaction_dynamic_level_bytes = true;
 
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
-                        kShareWithChecksum);
+                        ShareOption::kShareWithChecksum);
 
   // generate a bottommost file (combined from 2) and a non-bottommost file
   DBImpl* dbi = static_cast_with_check<DBImpl>(db_.get());
@@ -4229,7 +4229,7 @@ TEST_F(BackupEngineTest, ExcludeFiles) {
   // Need a sufficent set of file numbers
   options_.level0_file_num_compaction_trigger = 100;
 
-  OpenDBAndBackupEngine(true, false, kShareWithChecksum);
+  OpenDBAndBackupEngine(true, false, ShareOption::kShareWithChecksum);
   // Need a sufficent set of file numbers
   const int keys_iteration = 5000;
   FillDB(db_.get(), 0, keys_iteration / 3);
