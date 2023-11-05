@@ -35,8 +35,8 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(std::make_tuple(false, false, WRITE_UNPREPARED),
                       std::make_tuple(false, true, WRITE_UNPREPARED)));
 
-enum SnapshotAction { NO_SNAPSHOT, RO_SNAPSHOT, REFRESH_SNAPSHOT };
-enum VerificationOperation { VERIFY_GET, VERIFY_NEXT, VERIFY_PREV };
+enum class SnapshotAction { NO_SNAPSHOT, RO_SNAPSHOT, REFRESH_SNAPSHOT };
+enum class VerificationOperation { VERIFY_GET, VERIFY_NEXT, VERIFY_PREV };
 class WriteUnpreparedSnapshotTest
     : public WriteUnpreparedTransactionTestBase,
       virtual public ::testing::WithParamInterface<
@@ -59,8 +59,8 @@ INSTANTIATE_TEST_CASE_P(
     WriteUnpreparedSnapshotTest, WriteUnpreparedSnapshotTest,
     ::testing::Combine(
         ::testing::Bool(),
-        ::testing::Values(NO_SNAPSHOT, RO_SNAPSHOT, REFRESH_SNAPSHOT),
-        ::testing::Values(VERIFY_GET, VERIFY_NEXT, VERIFY_PREV)));
+        ::testing::Values(SnapshotAction::NO_SNAPSHOT, SnapshotAction::RO_SNAPSHOT, SnapshotAction::REFRESH_SNAPSHOT),
+        ::testing::Values(VerificationOperation::VERIFY_GET, VerificationOperation::VERIFY_NEXT, VerificationOperation::VERIFY_PREV)));
 
 TEST_P(WriteUnpreparedTransactionTest, ReadYourOwnWrite) {
   // The following tests checks whether reading your own write for
@@ -177,7 +177,7 @@ TEST_P(WriteUnpreparedSnapshotTest, ReadYourOwnWrite) {
     for (uint32_t i = 0; i < kNumIter; i++) {
       txn = db->BeginTransaction(write_options, txn_options);
       txn->SetSnapshot();
-      if (snapshot_action >= RO_SNAPSHOT) {
+      if (snapshot_action >= SnapshotAction::RO_SNAPSHOT) {
         read_options.snapshot = txn->GetSnapshot();
         ASSERT_TRUE(read_options.snapshot != nullptr);
       }
@@ -195,7 +195,7 @@ TEST_P(WriteUnpreparedSnapshotTest, ReadYourOwnWrite) {
         if (!s.ok()) {
           break;
         }
-        if (snapshot_action == REFRESH_SNAPSHOT) {
+        if (snapshot_action == SnapshotAction::REFRESH_SNAPSHOT) {
           txn->SetSnapshot();
           read_options.snapshot = txn->GetSnapshot();
           snapshot_num = counter.fetch_add(1);
@@ -208,7 +208,7 @@ TEST_P(WriteUnpreparedSnapshotTest, ReadYourOwnWrite) {
                          &snapshot_num](const std::string& value) {
         ASSERT_EQ(value.size(), 8);
 
-        if (snapshot_action == REFRESH_SNAPSHOT) {
+        if (snapshot_action == SnapshotAction::REFRESH_SNAPSHOT) {
           // If refresh snapshot is true, then the snapshot is refreshed
           // after every Put(), meaning that the current snapshot in
           // snapshot_num must be greater than the "seqno" of any keys
@@ -225,7 +225,7 @@ TEST_P(WriteUnpreparedSnapshotTest, ReadYourOwnWrite) {
       // Validate one of Get()/Next()/Prev() depending on the verification
       // operation to use.
       switch (verify_op_) {
-        case VERIFY_GET:  // Validate Get()
+        case VerificationOperation::VERIFY_GET:  // Validate Get()
         {
           for (const auto& key : keys) {
             std::string value;
@@ -234,7 +234,7 @@ TEST_P(WriteUnpreparedSnapshotTest, ReadYourOwnWrite) {
           }
           break;
         }
-        case VERIFY_NEXT:  // Validate Next()
+        case VerificationOperation::VERIFY_NEXT:  // Validate Next()
         {
           Iterator* iter = txn->GetIterator(read_options);
           ASSERT_OK(iter->status());
@@ -245,7 +245,7 @@ TEST_P(WriteUnpreparedSnapshotTest, ReadYourOwnWrite) {
           delete iter;
           break;
         }
-        case VERIFY_PREV:  // Validate Prev()
+        case VerificationOperation::VERIFY_PREV:  // Validate Prev()
         {
           Iterator* iter = txn->GetIterator(read_options);
           ASSERT_OK(iter->status());
