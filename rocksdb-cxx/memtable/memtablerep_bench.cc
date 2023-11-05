@@ -157,13 +157,13 @@ class RandomGenerator {
   }
 };
 
-enum WriteMode { SEQUENTIAL, RANDOM, UNIQUE_RANDOM };
+enum class WriteMode { SEQUENTIAL, RANDOM, UNIQUE_RANDOM };
 
 class KeyGenerator {
  public:
   KeyGenerator(Random64* rand, WriteMode mode, uint64_t num)
       : rand_(rand), mode_(mode), num_(num), next_(0) {
-    if (mode_ == UNIQUE_RANDOM) {
+    if (mode_ == WriteMode::UNIQUE_RANDOM) {
       // NOTE: if memory consumption of this approach becomes a concern,
       // we can either break it into pieces and only random shuffle a section
       // each time. Alternatively, use a bit map implementation
@@ -179,11 +179,11 @@ class KeyGenerator {
 
   uint64_t Next() {
     switch (mode_) {
-      case SEQUENTIAL:
+      case WriteMode::SEQUENTIAL:
         return next_++;
-      case RANDOM:
+      case WriteMode::RANDOM:
         return rand_->Next() % num_;
-      case UNIQUE_RANDOM:
+      case WriteMode::UNIQUE_RANDOM:
         return values_[next_++];
     }
     assert(false);
@@ -639,36 +639,36 @@ int main(int argc, char** argv) {
     if (name == ROCKSDB_NAMESPACE::Slice("fillseq")) {
       memtablerep.reset(createMemtableRep());
       key_gen.reset(new ROCKSDB_NAMESPACE::KeyGenerator(
-          &rng, ROCKSDB_NAMESPACE::SEQUENTIAL, FLAGS_num_operations));
+          &rng, ROCKSDB_NAMESPACE::WriteMode::SEQUENTIAL, FLAGS_num_operations));
       benchmark.reset(new ROCKSDB_NAMESPACE::FillBenchmark(
           memtablerep.get(), key_gen.get(), &sequence));
     } else if (name == ROCKSDB_NAMESPACE::Slice("fillrandom")) {
       memtablerep.reset(createMemtableRep());
       key_gen.reset(new ROCKSDB_NAMESPACE::KeyGenerator(
-          &rng, ROCKSDB_NAMESPACE::UNIQUE_RANDOM, FLAGS_num_operations));
+          &rng, ROCKSDB_NAMESPACE::WriteMode::UNIQUE_RANDOM, FLAGS_num_operations));
       benchmark.reset(new ROCKSDB_NAMESPACE::FillBenchmark(
           memtablerep.get(), key_gen.get(), &sequence));
     } else if (name == ROCKSDB_NAMESPACE::Slice("readrandom")) {
       key_gen.reset(new ROCKSDB_NAMESPACE::KeyGenerator(
-          &rng, ROCKSDB_NAMESPACE::RANDOM, FLAGS_num_operations));
+          &rng, ROCKSDB_NAMESPACE::WriteMode::RANDOM, FLAGS_num_operations));
       benchmark.reset(new ROCKSDB_NAMESPACE::ReadBenchmark(
           memtablerep.get(), key_gen.get(), &sequence));
     } else if (name == ROCKSDB_NAMESPACE::Slice("readseq")) {
       key_gen.reset(new ROCKSDB_NAMESPACE::KeyGenerator(
-          &rng, ROCKSDB_NAMESPACE::SEQUENTIAL, FLAGS_num_operations));
+          &rng, ROCKSDB_NAMESPACE::WriteMode::SEQUENTIAL, FLAGS_num_operations));
       benchmark.reset(new ROCKSDB_NAMESPACE::SeqReadBenchmark(memtablerep.get(),
                                                               &sequence));
     } else if (name == ROCKSDB_NAMESPACE::Slice("readwrite")) {
       memtablerep.reset(createMemtableRep());
       key_gen.reset(new ROCKSDB_NAMESPACE::KeyGenerator(
-          &rng, ROCKSDB_NAMESPACE::RANDOM, FLAGS_num_operations));
+          &rng, ROCKSDB_NAMESPACE::WriteMode::RANDOM, FLAGS_num_operations));
       benchmark.reset(new ROCKSDB_NAMESPACE::ReadWriteBenchmark<
                       ROCKSDB_NAMESPACE::ConcurrentReadBenchmarkThread>(
           memtablerep.get(), key_gen.get(), &sequence));
     } else if (name == ROCKSDB_NAMESPACE::Slice("seqreadwrite")) {
       memtablerep.reset(createMemtableRep());
       key_gen.reset(new ROCKSDB_NAMESPACE::KeyGenerator(
-          &rng, ROCKSDB_NAMESPACE::RANDOM, FLAGS_num_operations));
+          &rng, ROCKSDB_NAMESPACE::WriteMode::RANDOM, FLAGS_num_operations));
       benchmark.reset(new ROCKSDB_NAMESPACE::ReadWriteBenchmark<
                       ROCKSDB_NAMESPACE::SeqConcurrentReadBenchmarkThread>(
           memtablerep.get(), key_gen.get(), &sequence));
