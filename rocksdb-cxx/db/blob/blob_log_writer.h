@@ -76,7 +76,7 @@ class BlobLogWriter {
   bool do_flush_;
 
  public:
-  enum ElemType { kEtNone, kEtFileHdr, kEtRecord, kEtFileFooter };
+  enum class ElemType { kEtNone, kEtFileHdr, kEtRecord, kEtFileFooter };
   ElemType last_elem_type_;
 };
 

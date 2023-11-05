@@ -5,7 +5,6 @@
 
 #include "db/blob/blob_log_writer.h"
 
-#include <cstdint>
 #include <string>
 
 #include "db/blob/blob_log_format.h"
@@ -13,7 +12,6 @@
 #include "monitoring/statistics_impl.h"
 #include "rocksdb/system_clock.h"
 #include "test_util/sync_point.h"
-#include "util/coding.h"
 #include "util/stop_watch.h"
 
 namespace ROCKSDB_NAMESPACE {
@@ -29,7 +27,7 @@ BlobLogWriter::BlobLogWriter(std::unique_ptr<WritableFileWriter>&& dest,
       block_offset_(boffset),
       use_fsync_(use_fs),
       do_flush_(do_flush),
-      last_elem_type_(kEtNone) {}
+      last_elem_type_(ElemType::kEtNone) {}
 
 BlobLogWriter::~BlobLogWriter() = default;
 
@@ -44,7 +42,7 @@ Status BlobLogWriter::Sync() {
 
 Status BlobLogWriter::WriteHeader(BlobLogHeader& header) {
   assert(block_offset_ == 0);
-  assert(last_elem_type_ == kEtNone);
+  assert(last_elem_type_ == ElemType::kEtNone);
   std::string str;
   header.EncodeTo(&str);
 
@@ -55,7 +53,7 @@ Status BlobLogWriter::WriteHeader(BlobLogHeader& header) {
       s = dest_->Flush();
     }
   }
-  last_elem_type_ = kEtFileHdr;
+  last_elem_type_ = ElemType::kEtFileHdr;
   RecordTick(statistics_, BLOB_DB_BLOB_FILE_BYTES_WRITTEN,
              BlobLogHeader::kSize);
   return s;
@@ -65,7 +63,7 @@ Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
                                    std::string* checksum_method,
                                    std::string* checksum_value) {
   assert(block_offset_ != 0);
-  assert(last_elem_type_ == kEtFileHdr || last_elem_type_ == kEtRecord);
+  assert(last_elem_type_ == ElemType::kEtFileHdr || last_elem_type_ == ElemType::kEtRecord);
 
   std::string str;
   footer.EncodeTo(&str);
@@ -110,7 +108,7 @@ Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
     dest_.reset();
   }
 
-  last_elem_type_ = kEtFileFooter;
+  last_elem_type_ = ElemType::kEtFileFooter;
   RecordTick(statistics_, BLOB_DB_BLOB_FILE_BYTES_WRITTEN,
              BlobLogFooter::kSize);
   return s;
@@ -120,7 +118,7 @@ Status BlobLogWriter::AddRecord(const Slice& key, const Slice& val,
                                 uint64_t expiration, uint64_t* key_offset,
                                 uint64_t* blob_offset) {
   assert(block_offset_ != 0);
-  assert(last_elem_type_ == kEtFileHdr || last_elem_type_ == kEtRecord);
+  assert(last_elem_type_ == ElemType::kEtFileHdr || last_elem_type_ == ElemType::kEtRecord);
 
   std::string buf;
   ConstructBlobHeader(&buf, key, val, expiration);
@@ -132,7 +130,7 @@ Status BlobLogWriter::AddRecord(const Slice& key, const Slice& val,
 Status BlobLogWriter::AddRecord(const Slice& key, const Slice& val,
                                 uint64_t* key_offset, uint64_t* blob_offset) {
   assert(block_offset_ != 0);
-  assert(last_elem_type_ == kEtFileHdr || last_elem_type_ == kEtRecord);
+  assert(last_elem_type_ == ElemType::kEtFileHdr || last_elem_type_ == ElemType::kEtRecord);
 
   std::string buf;
   ConstructBlobHeader(&buf, key, val, 0);
@@ -169,7 +167,7 @@ Status BlobLogWriter::EmitPhysicalRecord(const std::string& headerbuf,
   *key_offset = block_offset_ + BlobLogRecord::kHeaderSize;
   *blob_offset = *key_offset + key.size();
   block_offset_ = *blob_offset + val.size();
-  last_elem_type_ = kEtRecord;
+  last_elem_type_ = ElemType::kEtRecord;
   RecordTick(statistics_, BLOB_DB_BLOB_FILE_BYTES_WRITTEN,
              BlobLogRecord::kHeaderSize + key.size() + val.size());
   return s;
