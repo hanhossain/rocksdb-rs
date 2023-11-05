@@ -4893,23 +4893,23 @@ class Benchmark {
     }
   }
 
-  enum WriteMode { RANDOM, SEQUENTIAL, UNIQUE_RANDOM };
+  enum class WriteMode { RANDOM, SEQUENTIAL, UNIQUE_RANDOM };
 
   void WriteSeqDeterministic(ThreadState* thread) {
-    DoDeterministicCompact(thread, open_options_.compaction_style, SEQUENTIAL);
+    DoDeterministicCompact(thread, open_options_.compaction_style, WriteMode::SEQUENTIAL);
   }
 
   void WriteUniqueRandomDeterministic(ThreadState* thread) {
     DoDeterministicCompact(thread, open_options_.compaction_style,
-                           UNIQUE_RANDOM);
+                           WriteMode::UNIQUE_RANDOM);
   }
 
-  void WriteSeq(ThreadState* thread) { DoWrite(thread, SEQUENTIAL); }
+  void WriteSeq(ThreadState* thread) { DoWrite(thread, WriteMode::SEQUENTIAL); }
 
-  void WriteRandom(ThreadState* thread) { DoWrite(thread, RANDOM); }
+  void WriteRandom(ThreadState* thread) { DoWrite(thread, WriteMode::RANDOM); }
 
   void WriteUniqueRandom(ThreadState* thread) {
-    DoWrite(thread, UNIQUE_RANDOM);
+    DoWrite(thread, WriteMode::UNIQUE_RANDOM);
   }
 
   class KeyGenerator {
@@ -4917,7 +4917,7 @@ class Benchmark {
     KeyGenerator(Random64* rand, WriteMode mode, uint64_t num,
                  uint64_t /*num_per_set*/ = 64 * 1024)
         : rand_(rand), mode_(mode), num_(num), next_(0) {
-      if (mode_ == UNIQUE_RANDOM) {
+      if (mode_ == WriteMode::UNIQUE_RANDOM) {
         // NOTE: if memory consumption of this approach becomes a concern,
         // we can either break it into pieces and only random shuffle a section
         // each time. Alternatively, use a bit map implementation
@@ -4933,11 +4933,11 @@ class Benchmark {
 
     uint64_t Next() {
       switch (mode_) {
-        case SEQUENTIAL:
+        case WriteMode::SEQUENTIAL:
           return next_++;
-        case RANDOM:
+        case WriteMode::RANDOM:
           return rand_->Next() % num_;
-        case UNIQUE_RANDOM:
+        case WriteMode::UNIQUE_RANDOM:
           assert(next_ < num_);
           return values_[next_++];
       }
@@ -4947,7 +4947,7 @@ class Benchmark {
 
     // Only available for UNIQUE_RANDOM mode.
     uint64_t Fetch(uint64_t index) {
-      assert(mode_ == UNIQUE_RANDOM);
+      assert(mode_ == WriteMode::UNIQUE_RANDOM);
       assert(index < values_.size());
       return values_[index];
     }
@@ -4979,7 +4979,7 @@ class Benchmark {
   }
 
   void DoWrite(ThreadState* thread, WriteMode write_mode) {
-    const int test_duration = write_mode == RANDOM ? FLAGS_duration : 0;
+    const int test_duration = write_mode == WriteMode::RANDOM ? FLAGS_duration : 0;
     const int64_t num_ops = writes_ == 0 ? num_ : writes_;
 
     size_t num_key_gens = 1;
@@ -5029,7 +5029,7 @@ class Benchmark {
       p = FLAGS_overwrite_probability > 1.0 ? 1.0 : FLAGS_overwrite_probability;
       // If overwrite set by user, and UNIQUE_RANDOM mode on,
       // the overwrite_window_size must be > 0.
-      if (write_mode == UNIQUE_RANDOM && FLAGS_overwrite_window_size == 0) {
+      if (write_mode == WriteMode::UNIQUE_RANDOM && FLAGS_overwrite_window_size == 0) {
         fprintf(stderr,
                 "Overwrite_window_size must be  strictly greater than 0.\n");
         ErrorExit();
@@ -5069,7 +5069,7 @@ class Benchmark {
         FLAGS_disposable_entries_batch_size +
         FLAGS_persistent_entries_batch_size;
     if (kNumDispAndPersEntries > 0) {
-      if ((write_mode != UNIQUE_RANDOM) || (writes_per_range_tombstone_ > 0) ||
+      if ((write_mode != WriteMode::UNIQUE_RANDOM) || (writes_per_range_tombstone_ > 0) ||
           (p > 0.0)) {
         fprintf(
             stderr,
@@ -5126,7 +5126,7 @@ class Benchmark {
         }
       }
 
-      if (write_mode != SEQUENTIAL) {
+      if (write_mode != WriteMode::SEQUENTIAL) {
         id = thread->rand.Next() % num_key_gens;
       } else {
         // When doing a sequential load with multiple databases, load them in
@@ -5150,7 +5150,7 @@ class Benchmark {
 
       for (int64_t j = 0; j < entries_per_batch_; j++) {
         int64_t rand_num = 0;
-        if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
+        if ((write_mode == WriteMode::UNIQUE_RANDOM) && (p > 0.0)) {
           if ((inserted_key_window.size() > 0) &&
               overwrite_decider(overwrite_gen)) {
             num_overwrites++;
@@ -5398,7 +5398,7 @@ class Benchmark {
         ErrorExit();
       }
     }
-    if ((write_mode == UNIQUE_RANDOM) && (p > 0.0)) {
+    if ((write_mode == WriteMode::UNIQUE_RANDOM) && (p > 0.0)) {
       fprintf(stdout,
               "Number of unique keys inserted: %" PRIu64
               ".\nNumber of overwrites: %" PRIu64 "\n",
@@ -5455,7 +5455,7 @@ class Benchmark {
         if (sorted_runs[0].empty()) {
           DoWrite(thread, write_mode);
         } else {
-          DoWrite(thread, UNIQUE_RANDOM);
+          DoWrite(thread, WriteMode::UNIQUE_RANDOM);
         }
         for (size_t i = 0; i < num_db; i++) {
           auto db = db_list[i];
@@ -5515,7 +5515,7 @@ class Benchmark {
         if (sorted_runs[0].empty()) {
           DoWrite(thread, write_mode);
         } else {
-          DoWrite(thread, UNIQUE_RANDOM);
+          DoWrite(thread, WriteMode::UNIQUE_RANDOM);
         }
         for (size_t i = 0; i < num_db; i++) {
           auto db = db_list[i];
@@ -5577,7 +5577,7 @@ class Benchmark {
         if (sorted_runs[0].empty()) {
           DoWrite(thread, write_mode);
         } else {
-          DoWrite(thread, UNIQUE_RANDOM);
+          DoWrite(thread, WriteMode::UNIQUE_RANDOM);
         }
         db->Flush(FlushOptions());
         db->GetColumnFamilyMetaData(&meta);
@@ -7599,7 +7599,7 @@ class Benchmark {
 
   void WriteSeqSeekSeq(ThreadState* thread) {
     writes_ = FLAGS_num;
-    DoWrite(thread, SEQUENTIAL);
+    DoWrite(thread, WriteMode::SEQUENTIAL);
     // exclude writes from the ops/sec calculation
     thread->stats.Start(thread->tid);
 
