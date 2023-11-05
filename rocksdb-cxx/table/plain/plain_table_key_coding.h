@@ -21,7 +21,7 @@ namespace ROCKSDB_NAMESPACE {
 class WritableFile;
 struct ParsedInternalKey;
 struct PlainTableReaderFileInfo;
-enum PlainTableEntryType : unsigned char;
+enum class PlainTableEntryType : unsigned char;
 
 // Helper class for PlainTable format to write out a key to an output file
 // The class is used in PlainTableBuilder.

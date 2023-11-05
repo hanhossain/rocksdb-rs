@@ -15,7 +15,7 @@
 
 namespace ROCKSDB_NAMESPACE {
 
-enum PlainTableEntryType : unsigned char {
+enum class PlainTableEntryType : unsigned char {
   kFullKey = 0,
   kPrefixFromPreviousKey = 1,
   kKeySuffix = 2,
@@ -33,7 +33,7 @@ const unsigned char kSizeInlineLimit = 0x3F;
 // Return 0 for error
 size_t EncodeSize(PlainTableEntryType type, uint32_t key_size,
                   char* out_buffer) {
-  out_buffer[0] = type << 6;
+  out_buffer[0] = (unsigned char)type << 6;
 
   if (key_size < static_cast<uint32_t>(kSizeInlineLimit)) {
     // size inlined
@@ -118,7 +118,7 @@ IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key,
         key_count_for_prefix_ % index_sparseness_ == 0) {
       key_count_for_prefix_ = 1;
       pre_prefix_.SetUserKey(prefix);
-      size_bytes_pos += EncodeSize(kFullKey, user_key_size, size_bytes);
+      size_bytes_pos += EncodeSize(PlainTableEntryType::kFullKey, user_key_size, size_bytes);
       IOStatus io_s = file->Append(Slice(size_bytes, size_bytes_pos));
       if (!io_s.ok()) {
         return io_s;
@@ -129,13 +129,13 @@ IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key,
       if (key_count_for_prefix_ == 2) {
         // For second key within a prefix, need to encode prefix length
         size_bytes_pos +=
-            EncodeSize(kPrefixFromPreviousKey,
+            EncodeSize(PlainTableEntryType::kPrefixFromPreviousKey,
                        static_cast<uint32_t>(pre_prefix_.GetUserKey().size()),
                        size_bytes + size_bytes_pos);
       }
       uint32_t prefix_len =
           static_cast<uint32_t>(pre_prefix_.GetUserKey().size());
-      size_bytes_pos += EncodeSize(kKeySuffix, user_key_size - prefix_len,
+      size_bytes_pos += EncodeSize(PlainTableEntryType::kKeySuffix, user_key_size - prefix_len,
                                    size_bytes + size_bytes_pos);
       IOStatus io_s = file->Append(Slice(size_bytes, size_bytes_pos));
       if (!io_s.ok()) {
@@ -367,7 +367,7 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
     *bytes_read += my_bytes_read;
 
     switch (entry_type) {
-      case kFullKey: {
+      case PlainTableEntryType::kFullKey: {
         expect_suffix = false;
         Slice decoded_internal_key;
         s = ReadInternalKey(start_offset + *bytes_read, size, parsed_key,
@@ -398,7 +398,7 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
         }
         break;
       }
-      case kPrefixFromPreviousKey: {
+      case PlainTableEntryType::kPrefixFromPreviousKey: {
         if (seekable != nullptr) {
           *seekable = false;
         }
@@ -410,7 +410,7 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
         expect_suffix = true;
         break;
       }
-      case kKeySuffix: {
+      case PlainTableEntryType::kKeySuffix: {
         expect_suffix = false;
         if (seekable != nullptr) {
           *seekable = false;
