@@ -555,7 +555,7 @@ class FileManager : public EnvWrapper {
 // utility functions
 namespace {
 
-enum FillDBFlushAction {
+enum class FillDBFlushAction {
   kFlushMost,
   kFlushAll,
   kAutoFlushOnly,
