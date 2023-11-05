@@ -19,4 +19,4 @@ docker build -t rocksdb --target=test-all .
 ```
 
 ## Dev tips
-Regex to find enums which need to be convered to enum class: `enum\s+(?!class).*`
+Regex to find enums which need to be convered to enum class: `(?<!static )enum (?!class)`
