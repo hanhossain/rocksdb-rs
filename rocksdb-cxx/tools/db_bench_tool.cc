@@ -1770,19 +1770,19 @@ static Status CreateMemTableRepFactory(
 
 }  // namespace
 
-enum DistributionType : unsigned char { kFixed = 0, kUniform, kNormal };
+enum class DistributionType : unsigned char { kFixed = 0, kUniform, kNormal };
 
-static enum DistributionType FLAGS_value_size_distribution_type_e = kFixed;
+static enum DistributionType FLAGS_value_size_distribution_type_e = DistributionType::kFixed;
 
 static enum DistributionType StringToDistributionType(const char* ctype) {
   assert(ctype);
 
   if (!strcasecmp(ctype, "fixed"))
-    return kFixed;
+    return DistributionType::kFixed;
   else if (!strcasecmp(ctype, "uniform"))
-    return kUniform;
+    return DistributionType::kUniform;
   else if (!strcasecmp(ctype, "normal"))
-    return kNormal;
+    return DistributionType::kNormal;
 
   fprintf(stdout, "Cannot parse distribution type '%s'\n", ctype);
   exit(1);
@@ -1866,15 +1866,15 @@ class RandomGenerator {
   RandomGenerator() {
     auto max_value_size = FLAGS_value_size_max;
     switch (FLAGS_value_size_distribution_type_e) {
-      case kUniform:
+      case DistributionType::kUniform:
         dist_.reset(new UniformDistribution(FLAGS_value_size_min,
                                             FLAGS_value_size_max));
         break;
-      case kNormal:
+      case DistributionType::kNormal:
         dist_.reset(
             new NormalDistribution(FLAGS_value_size_min, FLAGS_value_size_max));
         break;
-      case kFixed:
+      case DistributionType::kFixed:
       default:
         dist_.reset(new FixedDistribution(value_size));
         max_value_size = value_size;
@@ -2762,7 +2762,7 @@ class Benchmark {
             "Keys:       %d bytes each (+ %d bytes user-defined timestamp)\n",
             FLAGS_key_size, FLAGS_user_timestamp_size);
     auto avg_value_size = FLAGS_value_size;
-    if (FLAGS_value_size_distribution_type_e == kFixed) {
+    if (FLAGS_value_size_distribution_type_e == DistributionType::kFixed) {
       fprintf(stdout,
               "Values:     %d bytes each (%d bytes after compression)\n",
               avg_value_size,
