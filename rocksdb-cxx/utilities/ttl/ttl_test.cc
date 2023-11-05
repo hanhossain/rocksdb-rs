@@ -3,7 +3,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include <map>
 #include <memory>
 
@@ -26,7 +25,7 @@ namespace {
 
 using KVMap = std::map<std::string, std::string>;
 
-enum BatchOperation { OP_PUT = 0, OP_DELETE = 1 };
+enum class BatchOperation { OP_PUT = 0, OP_DELETE = 1 };
 }  // namespace
 
 class SpecialTimeEnv : public EnvWrapper {
@@ -141,10 +140,10 @@ class TtlTest : public testing::Test {
     kv_it_ = kvmap_.begin();
     for (int64_t i = 0; i < num_ops && kv_it_ != kvmap_.end(); i++, ++kv_it_) {
       switch (batch_ops[i]) {
-        case OP_PUT:
+          case BatchOperation::OP_PUT:
           ASSERT_OK(batch.Put(kv_it_->first, kv_it_->second));
           break;
-        case OP_DELETE:
+        case BatchOperation::OP_DELETE:
           ASSERT_OK(batch.Delete(kv_it_->first));
           break;
         default:
@@ -578,13 +577,13 @@ TEST_F(TtlTest, WriteBatchTest) {
   MakeKVMap(kSampleSize_);
   BatchOperation batch_ops[kSampleSize_];
   for (int i = 0; i < kSampleSize_; i++) {
-    batch_ops[i] = OP_PUT;
+    batch_ops[i] = BatchOperation::OP_PUT;
   }
 
   OpenTtl(2);
   MakePutWriteBatch(batch_ops, kSampleSize_);
   for (int i = 0; i < kSampleSize_ / 2; i++) {
-    batch_ops[i] = OP_DELETE;
+    batch_ops[i] = BatchOperation::OP_DELETE;
   }
   MakePutWriteBatch(batch_ops, kSampleSize_ / 2);
   SleepCompactCheck(0, 0, kSampleSize_ / 2, false);

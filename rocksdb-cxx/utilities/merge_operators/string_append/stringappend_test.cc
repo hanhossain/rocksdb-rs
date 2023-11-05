@@ -366,18 +366,18 @@ TEST_P(StringAppendOperatorTest, RandomMixGetAppend) {
   std::map<std::string, std::string> parallel_copy;
 
   // Generate a bunch of random queries (Append and Get)!
-  enum query_t { APPEND_OP, GET_OP, NUM_OPS };
+  enum class query_t { APPEND_OP, GET_OP, NUM_OPS };
   Random randomGen(1337);  // deterministic seed; always get same results!
 
   const int kNumQueries = 30;
   for (int q = 0; q < kNumQueries; ++q) {
     // Generate a random query (Append or Get) and random parameters
-    query_t query = (query_t)randomGen.Uniform((int)NUM_OPS);
+    query_t query = (query_t)randomGen.Uniform((int)query_t::NUM_OPS);
     std::string key = keys[randomGen.Uniform((int)kKeyCount)];
     std::string word = words[randomGen.Uniform((int)kWordCount)];
 
     // Apply the query and any checks.
-    if (query == APPEND_OP) {
+    if (query == query_t::APPEND_OP) {
       // Apply the rocksdb test-harness Append defined above
       slists.Append(key, word);  // apply the rocksdb append
 
@@ -388,7 +388,7 @@ TEST_P(StringAppendOperatorTest, RandomMixGetAppend) {
         parallel_copy[key] = word;
       }
 
-    } else if (query == GET_OP) {
+    } else if (query == query_t::GET_OP) {
       // Assumes that a non-existent key just returns <empty>
       std::string res;
       slists.Get(key, &res);
@@ -415,18 +415,18 @@ TEST_P(StringAppendOperatorTest, BIGRandomMixGetAppend) {
   std::map<std::string, std::string> parallel_copy;
 
   // Generate a bunch of random queries (Append and Get)!
-  enum query_t { APPEND_OP, GET_OP, NUM_OPS };
+  enum class query_t { APPEND_OP, GET_OP, NUM_OPS };
   Random randomGen(9138204);  // deterministic seed
 
   const int kNumQueries = 1000;
   for (int q = 0; q < kNumQueries; ++q) {
     // Generate a random query (Append or Get) and random parameters
-    query_t query = (query_t)randomGen.Uniform((int)NUM_OPS);
+    query_t query = (query_t)randomGen.Uniform((int)query_t::NUM_OPS);
     std::string key = keys[randomGen.Uniform((int)kKeyCount)];
     std::string word = words[randomGen.Uniform((int)kWordCount)];
 
     // Apply the query and any checks.
-    if (query == APPEND_OP) {
+    if (query == query_t::APPEND_OP) {
       // Apply the rocksdb test-harness Append defined above
       slists.Append(key, word);  // apply the rocksdb append
 
@@ -437,7 +437,7 @@ TEST_P(StringAppendOperatorTest, BIGRandomMixGetAppend) {
         parallel_copy[key] = word;
       }
 
-    } else if (query == GET_OP) {
+    } else if (query == query_t::GET_OP) {
       // Assumes that a non-existent key just returns <empty>
       std::string res;
       slists.Get(key, &res);

@@ -4598,7 +4598,7 @@ TEST_F(OptionTypeInfoTest, TestOptionFlags) {
 }
 
 TEST_F(OptionTypeInfoTest, TestCustomEnum) {
-  enum TestEnum { kA, kB, kC };
+  enum class TestEnum { kA, kB, kC };
   std::unordered_map<std::string, TestEnum> enum_map = {
       {"A", TestEnum::kA},
       {"B", TestEnum::kB},
