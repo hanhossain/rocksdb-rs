@@ -485,7 +485,7 @@ void CompactionIterator::NextFromInput() {
     }
     TEST_SYNC_POINT_CALLBACK("CompactionIterator:ProcessKV", &ikey_);
     if (is_range_del_) {
-      validity_info_.SetValid(kRangeDeletion);
+      validity_info_.SetValid(ValidContext::kRangeDeletion);
       break;
     }
     // Update input statistics
