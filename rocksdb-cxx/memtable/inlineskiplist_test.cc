@@ -519,12 +519,12 @@ class TestState {
   std::atomic<bool> quit_flag_;
   std::atomic<uint32_t> next_writer_;
 
-  enum ReaderState { STARTING, RUNNING, DONE };
+  enum class ReaderState { STARTING, RUNNING, DONE };
 
   explicit TestState(int s)
       : seed_(s),
         quit_flag_(false),
-        state_(STARTING),
+        state_(ReaderState::STARTING),
         pending_writers_(0),
         state_cv_(&mu_) {}
 
@@ -571,13 +571,13 @@ static void ConcurrentReader(void* arg) {
   TestState* state = reinterpret_cast<TestState*>(arg);
   Random rnd(state->seed_);
   int64_t reads = 0;
-  state->Change(TestState::RUNNING);
+  state->Change(TestState::ReaderState::RUNNING);
   while (!state->quit_flag_.load(std::memory_order_acquire)) {
     state->t_.ReadStep(&rnd);
     ++reads;
   }
   (void)reads;
-  state->Change(TestState::DONE);
+  state->Change(TestState::ReaderState::DONE);
 }
 
 static void ConcurrentWriter(void* arg) {
@@ -599,12 +599,12 @@ static void RunConcurrentRead(int run) {
     TestState state(seed + 1);
     Env::Default()->SetBackgroundThreads(1);
     Env::Default()->Schedule(ConcurrentReader, &state);
-    state.Wait(TestState::RUNNING);
+    state.Wait(TestState::ReaderState::RUNNING);
     for (int k = 0; k < kSize; ++k) {
       state.t_.WriteStep(&rnd);
     }
     state.quit_flag_.store(true, std::memory_order_release);
-    state.Wait(TestState::DONE);
+    state.Wait(TestState::ReaderState::DONE);
   }
 }
 
@@ -623,7 +623,7 @@ static void RunConcurrentInsert(int run, bool use_hint = false,
     TestState state(seed + 1);
     state.use_hint_ = use_hint;
     Env::Default()->Schedule(ConcurrentReader, &state);
-    state.Wait(TestState::RUNNING);
+    state.Wait(TestState::ReaderState::RUNNING);
     for (int k = 0; k < kSize; k += write_parallelism) {
       state.next_writer_ = rnd.Next();
       state.AdjustPendingWriters(write_parallelism);
@@ -633,7 +633,7 @@ static void RunConcurrentInsert(int run, bool use_hint = false,
       state.WaitForPendingWriters();
     }
     state.quit_flag_.store(true, std::memory_order_release);
-    state.Wait(TestState::DONE);
+    state.Wait(TestState::ReaderState::DONE);
   }
 }
 
