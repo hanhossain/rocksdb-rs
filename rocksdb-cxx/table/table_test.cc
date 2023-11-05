@@ -621,7 +621,7 @@ class DBConstructor : public Constructor {
   DB* db_;
 };
 
-enum TestType {
+enum class TestType {
   BLOCK_BASED_TABLE_TEST,
   PLAIN_TABLE_SEMI_FIXED_PREFIX,
   PLAIN_TABLE_FULL_STR_PREFIX,
@@ -642,7 +642,7 @@ struct TestArgs {
 };
 
 std::ostream& operator<<(std::ostream& os, const TestArgs& args) {
-  os << "type: " << args.type << " reverse_compare: " << args.reverse_compare
+  os << "type: " << (int)args.type << " reverse_compare: " << args.reverse_compare
      << " restart_interval: " << args.restart_interval
      << " compression: " << args.compression
      << " compression_parallel_threads: " << args.compression_parallel_threads
@@ -654,13 +654,13 @@ std::ostream& operator<<(std::ostream& os, const TestArgs& args) {
 
 static std::vector<TestArgs> GenerateArgList() {
   std::vector<TestArgs> test_args;
-  std::vector<TestType> test_types = {BLOCK_BASED_TABLE_TEST,
-                                      PLAIN_TABLE_SEMI_FIXED_PREFIX,
-                                      PLAIN_TABLE_FULL_STR_PREFIX,
-                                      PLAIN_TABLE_TOTAL_ORDER,
-                                      BLOCK_TEST,
-                                      MEMTABLE_TEST,
-                                      DB_TEST};
+  std::vector<TestType> test_types = {TestType::BLOCK_BASED_TABLE_TEST,
+                                      TestType::PLAIN_TABLE_SEMI_FIXED_PREFIX,
+                                      TestType::PLAIN_TABLE_FULL_STR_PREFIX,
+                                      TestType::PLAIN_TABLE_TOTAL_ORDER,
+                                      TestType::BLOCK_TEST,
+                                      TestType::MEMTABLE_TEST,
+                                      TestType::DB_TEST};
   std::vector<bool> reverse_compare_types = {false, true};
   std::vector<int> restart_intervals = {16, 1, 1024};
   std::vector<uint32_t> compression_parallel_threads = {1, 4};
@@ -696,9 +696,9 @@ static std::vector<TestArgs> GenerateArgList() {
 
   for (auto test_type : test_types) {
     for (auto reverse_compare : reverse_compare_types) {
-      if (test_type == PLAIN_TABLE_SEMI_FIXED_PREFIX ||
-          test_type == PLAIN_TABLE_FULL_STR_PREFIX ||
-          test_type == PLAIN_TABLE_TOTAL_ORDER) {
+      if (test_type == TestType::PLAIN_TABLE_SEMI_FIXED_PREFIX ||
+          test_type == TestType::PLAIN_TABLE_FULL_STR_PREFIX ||
+          test_type == TestType::PLAIN_TABLE_TOTAL_ORDER) {
         // Plain table doesn't use restart index or compression.
         TestArgs one_arg;
         one_arg.type = test_type;
@@ -787,7 +787,7 @@ class HarnessTest : public testing::Test {
 
     options_.allow_mmap_reads = args_.use_mmap;
     switch (args_.type) {
-      case BLOCK_BASED_TABLE_TEST:
+      case TestType::BLOCK_BASED_TABLE_TEST:
         table_options_.flush_block_policy_factory.reset(
             new FlushBlockBySizePolicyFactory());
         table_options_.block_size = 256;
@@ -802,7 +802,7 @@ class HarnessTest : public testing::Test {
             new InternalKeyComparator(options_.comparator));
         break;
 
-      case PLAIN_TABLE_SEMI_FIXED_PREFIX:
+      case TestType::PLAIN_TABLE_SEMI_FIXED_PREFIX:
         support_prev_ = false;
         only_support_prefix_seek_ = true;
         options_.prefix_extractor.reset(new FixedOrLessPrefixTransform(2));
@@ -812,7 +812,7 @@ class HarnessTest : public testing::Test {
         internal_comparator_.reset(
             new InternalKeyComparator(options_.comparator));
         break;
-      case PLAIN_TABLE_FULL_STR_PREFIX:
+      case TestType::PLAIN_TABLE_FULL_STR_PREFIX:
         support_prev_ = false;
         only_support_prefix_seek_ = true;
         options_.prefix_extractor.reset(NewNoopTransform());
@@ -822,7 +822,7 @@ class HarnessTest : public testing::Test {
         internal_comparator_.reset(
             new InternalKeyComparator(options_.comparator));
         break;
-      case PLAIN_TABLE_TOTAL_ORDER:
+      case TestType::PLAIN_TABLE_TOTAL_ORDER:
         support_prev_ = false;
         only_support_prefix_seek_ = false;
         options_.prefix_extractor = nullptr;
@@ -841,20 +841,20 @@ class HarnessTest : public testing::Test {
         internal_comparator_.reset(
             new InternalKeyComparator(options_.comparator));
         break;
-      case BLOCK_TEST:
+      case TestType::BLOCK_TEST:
         table_options_.block_size = 256;
         options_.table_factory.reset(
             new BlockBasedTableFactory(table_options_));
         constructor_.reset(new BlockConstructor(options_.comparator));
         break;
-      case MEMTABLE_TEST:
+      case TestType::MEMTABLE_TEST:
         table_options_.block_size = 256;
         options_.table_factory.reset(
             new BlockBasedTableFactory(table_options_));
         constructor_.reset(
             new MemTableConstructor(options_.comparator, &write_buffer_));
         break;
-      case DB_TEST:
+      case TestType::DB_TEST:
         table_options_.block_size = 256;
         options_.table_factory.reset(
             new BlockBasedTableFactory(table_options_));
@@ -1086,7 +1086,7 @@ INSTANTIATE_TEST_CASE_P(TableTest, ParameterizedHarnessTest,
 class DBHarnessTest : public HarnessTest {
  public:
   DBHarnessTest()
-      : HarnessTest(TestArgs{DB_TEST, /* reverse_compare */ false,
+      : HarnessTest(TestArgs{TestType::DB_TEST, /* reverse_compare */ false,
                              /* restart_interval */ 16, kNoCompression,
                              /* compression_parallel_threads */ 1,
                              /* format_version */ 0, /* use_mmap */ false}) {}
