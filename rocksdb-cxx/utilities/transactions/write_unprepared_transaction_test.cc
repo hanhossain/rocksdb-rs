@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/transaction_test.h"
 #include "utilities/transactions/write_unprepared_txn.h"
 #include "utilities/transactions/write_unprepared_txn_db.h"
@@ -280,13 +279,13 @@ TEST_P(WriteUnpreparedTransactionTest, RecoveryTest) {
   WriteUnpreparedTxnDB* wup_db;
   options.disable_auto_compactions = true;
 
-  enum Action { UNPREPARED, ROLLBACK, COMMIT };
+  enum class Action { UNPREPARED, ROLLBACK, COMMIT };
 
   // batch_size of 1 causes writes to DB for every marker.
   for (size_t batch_size : {1, 1000000}) {
     txn_options.write_batch_flush_threshold = batch_size;
     for (bool empty : {true, false}) {
-      for (Action a : {UNPREPARED, ROLLBACK, COMMIT}) {
+      for (Action a : {Action::UNPREPARED, Action::ROLLBACK, Action::COMMIT}) {
         for (int num_batches = 1; num_batches < 10; num_batches++) {
           // Reset database.
           prepared_trans.clear();
@@ -316,7 +315,7 @@ TEST_P(WriteUnpreparedTransactionTest, RecoveryTest) {
               ASSERT_EQ(wup_txn->GetUnpreparedSequenceNumbers().size(), 0);
             }
           }
-          if (a == UNPREPARED) {
+          if (a == Action::UNPREPARED) {
             // This is done to prevent the destructor from rolling back the
             // transaction for us, since we want to pretend we crashed and
             // test that recovery does the rollback.
@@ -333,11 +332,11 @@ TEST_P(WriteUnpreparedTransactionTest, RecoveryTest) {
           assert(db != nullptr);
 
           db->GetAllPreparedTransactions(&prepared_trans);
-          ASSERT_EQ(prepared_trans.size(), a == UNPREPARED ? 0 : 1);
-          if (a == ROLLBACK) {
+          ASSERT_EQ(prepared_trans.size(), a == Action::UNPREPARED ? 0 : 1);
+          if (a == Action::ROLLBACK) {
             ASSERT_OK(prepared_trans[0]->Rollback());
             delete prepared_trans[0];
-          } else if (a == COMMIT) {
+          } else if (a == Action::COMMIT) {
             ASSERT_OK(prepared_trans[0]->Commit());
             delete prepared_trans[0];
           }
@@ -346,11 +345,11 @@ TEST_P(WriteUnpreparedTransactionTest, RecoveryTest) {
           ASSERT_OK(iter->status());
           iter->SeekToFirst();
           // Check that DB has before values.
-          if (!empty || a == COMMIT) {
+          if (!empty || a == Action::COMMIT) {
             for (int i = 0; i < num_batches; i++) {
               ASSERT_TRUE(iter->Valid());
               ASSERT_EQ(iter->key().ToString(), "k" + std::to_string(i));
-              if (a == COMMIT) {
+              if (a == Action::COMMIT) {
                 ASSERT_EQ(iter->value().ToString(),
                           "value" + std::to_string(i));
               } else {
@@ -552,9 +551,9 @@ TEST_P(WriteUnpreparedTransactionTest, IterateAndWrite) {
   TransactionOptions txn_options;
   txn_options.write_batch_flush_threshold = 1;
 
-  enum Action { DO_DELETE, DO_UPDATE };
+  enum class Action { DO_DELETE, DO_UPDATE };
 
-  for (Action a : {DO_DELETE, DO_UPDATE}) {
+  for (Action a : {Action::DO_DELETE, Action::DO_UPDATE}) {
     for (int i = 0; i < 100; i++) {
       ASSERT_OK(db->Put(woptions, std::to_string(i), std::to_string(i)));
     }
@@ -574,7 +573,7 @@ TEST_P(WriteUnpreparedTransactionTest, IterateAndWrite) {
         ASSERT_EQ(iter->key().ToString(), iter->value().ToString());
       }
 
-      if (a == DO_DELETE) {
+      if (a == Action::DO_DELETE) {
         ASSERT_OK(txn->Delete(iter->key()));
       } else {
         ASSERT_OK(txn->Put(iter->key(), "b"));
@@ -587,7 +586,7 @@ TEST_P(WriteUnpreparedTransactionTest, IterateAndWrite) {
 
     iter = db->NewIterator(roptions);
     ASSERT_OK(iter->status());
-    if (a == DO_DELETE) {
+    if (a == Action::DO_DELETE) {
       // Check that db is empty.
       iter->SeekToFirst();
       ASSERT_FALSE(iter->Valid());
@@ -613,9 +612,9 @@ TEST_P(WriteUnpreparedTransactionTest, IterateAfterClear) {
   TransactionOptions txn_options;
   txn_options.write_batch_flush_threshold = 1;
 
-  enum Action { kCommit, kRollback };
+  enum class Action { kCommit, kRollback };
 
-  for (Action a : {kCommit, kRollback}) {
+  for (Action a : {Action::kCommit, Action::kRollback}) {
     for (int i = 0; i < 100; i++) {
       ASSERT_OK(db->Put(woptions, std::to_string(i), std::to_string(i)));
     }
@@ -635,7 +634,7 @@ TEST_P(WriteUnpreparedTransactionTest, IterateAfterClear) {
     ASSERT_OK(iter1->status());
     ASSERT_OK(iter2->status());
 
-    if (a == kCommit) {
+    if (a == Action::kCommit) {
       ASSERT_OK(txn->Commit());
     } else {
       ASSERT_OK(txn->Rollback());
