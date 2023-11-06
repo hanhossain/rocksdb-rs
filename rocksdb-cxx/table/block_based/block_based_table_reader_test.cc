@@ -692,7 +692,7 @@ TEST_P(BlockBasedTableReaderTestVerifyChecksum, ChecksumMismatch) {
       table->VerifyChecksum(read_opts, TableReaderCaller::kUserVerifyChecksum);
   ASSERT_EQ(1,
             options.statistics->getTickerCount(BLOCK_CHECKSUM_MISMATCH_COUNT));
-  ASSERT_EQ(s.code(), Status::kCorruption);
+  ASSERT_EQ(s.code(), Status::Code::kCorruption);
 }
 
 // Param 1: compression type

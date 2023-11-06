@@ -632,7 +632,7 @@ namespace {
 // this is a helper struct to serialize and deserialize class Status, because
 // Status's members are not public.
 struct StatusSerializationAdapter {
-  uint8_t code;
+  Status::Code code;
   uint8_t subcode;
   uint8_t severity;
   std::string message;
