@@ -633,7 +633,7 @@ namespace {
 // Status's members are not public.
 struct StatusSerializationAdapter {
   Status::Code code;
-  uint8_t subcode;
+  Status::SubCode subcode;
   uint8_t severity;
   std::string message;
 

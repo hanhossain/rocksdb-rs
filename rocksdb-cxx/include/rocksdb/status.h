@@ -37,7 +37,7 @@ class Status {
   // Create a success status.
   Status()
       : code_(Code::kOk),
-        subcode_(kNone),
+        subcode_(SubCode::kNone),
         sev_(kNoError),
         retryable_(false),
         data_loss_(false),
@@ -97,7 +97,7 @@ class Status {
     return code_;
   }
 
-  enum SubCode : unsigned char {
+  enum class SubCode : unsigned char {
     kNone = 0,
     kMutexTimeout = 1,
     kLockTimeout = 2,
@@ -157,7 +157,7 @@ class Status {
   // Note: using variants of OK status for program logic is discouraged,
   // but it can be useful for communicating statistical information without
   // changing public APIs.
-  static Status OkOverwritten() { return Status(Code::kOk, kOverwritten); }
+  static Status OkOverwritten() { return Status(Code::kOk, SubCode::kOverwritten); }
 
   // Return error status of an appropriate type.
   static Status NotFound(const Slice& msg, const Slice& msg2 = Slice()) {
@@ -165,7 +165,7 @@ class Status {
   }
 
   // Fast path for not found without malloc;
-  static Status NotFound(SubCode msg = kNone) { return Status(Code::kNotFound, msg); }
+  static Status NotFound(SubCode msg = SubCode::kNone) { return Status(Code::kNotFound, msg); }
 
   static Status NotFound(SubCode sc, const Slice& msg,
                          const Slice& msg2 = Slice()) {
@@ -175,76 +175,76 @@ class Status {
   static Status Corruption(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kCorruption, msg, msg2);
   }
-  static Status Corruption(SubCode msg = kNone) {
+  static Status Corruption(SubCode msg = SubCode::kNone) {
     return Status(Code::kCorruption, msg);
   }
 
   static Status NotSupported(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kNotSupported, msg, msg2);
   }
-  static Status NotSupported(SubCode msg = kNone) {
+  static Status NotSupported(SubCode msg = SubCode::kNone) {
     return Status(Code::kNotSupported, msg);
   }
 
   static Status InvalidArgument(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kInvalidArgument, msg, msg2);
   }
-  static Status InvalidArgument(SubCode msg = kNone) {
+  static Status InvalidArgument(SubCode msg = SubCode::kNone) {
     return Status(Code::kInvalidArgument, msg);
   }
 
   static Status IOError(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kIOError, msg, msg2);
   }
-  static Status IOError(SubCode msg = kNone) { return Status(Code::kIOError, msg); }
+  static Status IOError(SubCode msg = SubCode::kNone) { return Status(Code::kIOError, msg); }
 
   static Status MergeInProgress(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kMergeInProgress, msg, msg2);
   }
-  static Status MergeInProgress(SubCode msg = kNone) {
+  static Status MergeInProgress(SubCode msg = SubCode::kNone) {
     return Status(Code::kMergeInProgress, msg);
   }
 
   static Status Incomplete(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kIncomplete, msg, msg2);
   }
-  static Status Incomplete(SubCode msg = kNone) {
+  static Status Incomplete(SubCode msg = SubCode::kNone) {
     return Status(Code::kIncomplete, msg);
   }
 
-  static Status ShutdownInProgress(SubCode msg = kNone) {
+  static Status ShutdownInProgress(SubCode msg = SubCode::kNone) {
     return Status(Code::kShutdownInProgress, msg);
   }
   static Status ShutdownInProgress(const Slice& msg,
                                    const Slice& msg2 = Slice()) {
     return Status(Code::kShutdownInProgress, msg, msg2);
   }
-  static Status Aborted(SubCode msg = kNone) { return Status(Code::kAborted, msg); }
+  static Status Aborted(SubCode msg = SubCode::kNone) { return Status(Code::kAborted, msg); }
   static Status Aborted(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kAborted, msg, msg2);
   }
 
-  static Status Busy(SubCode msg = kNone) { return Status(Code::kBusy, msg); }
+  static Status Busy(SubCode msg = SubCode::kNone) { return Status(Code::kBusy, msg); }
   static Status Busy(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kBusy, msg, msg2);
   }
 
-  static Status TimedOut(SubCode msg = kNone) { return Status(Code::kTimedOut, msg); }
+  static Status TimedOut(SubCode msg = SubCode::kNone) { return Status(Code::kTimedOut, msg); }
   static Status TimedOut(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kTimedOut, msg, msg2);
   }
 
-  static Status Expired(SubCode msg = kNone) { return Status(Code::kExpired, msg); }
+  static Status Expired(SubCode msg = SubCode::kNone) { return Status(Code::kExpired, msg); }
   static Status Expired(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kExpired, msg, msg2);
   }
 
-  static Status TryAgain(SubCode msg = kNone) { return Status(Code::kTryAgain, msg); }
+  static Status TryAgain(SubCode msg = SubCode::kNone) { return Status(Code::kTryAgain, msg); }
   static Status TryAgain(const Slice& msg, const Slice& msg2 = Slice()) {
     return Status(Code::kTryAgain, msg, msg2);
   }
 
-  static Status CompactionTooLarge(SubCode msg = kNone) {
+  static Status CompactionTooLarge(SubCode msg = SubCode::kNone) {
     return Status(Code::kCompactionTooLarge, msg);
   }
   static Status CompactionTooLarge(const Slice& msg,
@@ -252,7 +252,7 @@ class Status {
     return Status(Code::kCompactionTooLarge, msg, msg2);
   }
 
-  static Status ColumnFamilyDropped(SubCode msg = kNone) {
+  static Status ColumnFamilyDropped(SubCode msg = SubCode::kNone) {
     return Status(Code::kColumnFamilyDropped, msg);
   }
 
@@ -261,31 +261,31 @@ class Status {
     return Status(Code::kColumnFamilyDropped, msg, msg2);
   }
 
-  static Status NoSpace() { return Status(Code::kIOError, kNoSpace); }
+  static Status NoSpace() { return Status(Code::kIOError, SubCode::kNoSpace); }
   static Status NoSpace(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIOError, kNoSpace, msg, msg2);
+    return Status(Code::kIOError, SubCode::kNoSpace, msg, msg2);
   }
 
-  static Status MemoryLimit() { return Status(Code::kAborted, kMemoryLimit); }
+  static Status MemoryLimit() { return Status(Code::kAborted, SubCode::kMemoryLimit); }
   static Status MemoryLimit(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kAborted, kMemoryLimit, msg, msg2);
+    return Status(Code::kAborted, SubCode::kMemoryLimit, msg, msg2);
   }
 
-  static Status SpaceLimit() { return Status(Code::kIOError, kSpaceLimit); }
+  static Status SpaceLimit() { return Status(Code::kIOError, SubCode::kSpaceLimit); }
   static Status SpaceLimit(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIOError, kSpaceLimit, msg, msg2);
+    return Status(Code::kIOError, SubCode::kSpaceLimit, msg, msg2);
   }
 
-  static Status PathNotFound() { return Status(Code::kIOError, kPathNotFound); }
+  static Status PathNotFound() { return Status(Code::kIOError, SubCode::kPathNotFound); }
   static Status PathNotFound(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIOError, kPathNotFound, msg, msg2);
+    return Status(Code::kIOError, SubCode::kPathNotFound, msg, msg2);
   }
 
   static Status TxnNotPrepared() {
-    return Status(Code::kInvalidArgument, kTxnNotPrepared);
+    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared);
   }
   static Status TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kInvalidArgument, kTxnNotPrepared, msg, msg2);
+    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared, msg, msg2);
   }
 
   // Returns true iff the status indicates success.
@@ -298,7 +298,7 @@ class Status {
   // overwritten
   bool IsOkOverwritten() const {
     MarkChecked();
-    return code() == Code::kOk && subcode() == kOverwritten;
+    return code() == Code::kOk && subcode() == SubCode::kOverwritten;
   }
 
   // Returns true iff the status indicates a NotFound error.
@@ -361,7 +361,7 @@ class Status {
 
   bool IsLockLimit() const {
     MarkChecked();
-    return code() == Code::kAborted && subcode() == kLockLimit;
+    return code() == Code::kAborted && subcode() == SubCode::kLockLimit;
   }
 
   // Returns true iff the status indicates that a resource is Busy and
@@ -373,7 +373,7 @@ class Status {
 
   bool IsDeadlock() const {
     MarkChecked();
-    return code() == Code::kBusy && subcode() == kDeadlock;
+    return code() == Code::kBusy && subcode() == SubCode::kDeadlock;
   }
 
   // Returns true iff the status indicated that the operation has Expired.
@@ -409,7 +409,7 @@ class Status {
   // if needed
   bool IsNoSpace() const {
     MarkChecked();
-    return (code() == Code::kIOError) && (subcode() == kNoSpace);
+    return (code() == Code::kIOError) && (subcode() == SubCode::kNoSpace);
   }
 
   // Returns true iff the status indicates a memory limit error.  There may be
@@ -417,7 +417,7 @@ class Status {
   // of a write batch) in order to avoid out of memory exceptions.
   bool IsMemoryLimit() const {
     MarkChecked();
-    return (code() == Code::kAborted) && (subcode() == kMemoryLimit);
+    return (code() == Code::kAborted) && (subcode() == SubCode::kMemoryLimit);
   }
 
   // Returns true iff the status indicates a PathNotFound error
@@ -427,26 +427,26 @@ class Status {
   bool IsPathNotFound() const {
     MarkChecked();
     return (code() == Code::kIOError || code() == Code::kNotFound) &&
-           (subcode() == kPathNotFound);
+           (subcode() == SubCode::kPathNotFound);
   }
 
   // Returns true iff the status indicates manual compaction paused. This
   // is caused by a call to PauseManualCompaction
   bool IsManualCompactionPaused() const {
     MarkChecked();
-    return (code() == Code::kIncomplete) && (subcode() == kManualCompactionPaused);
+    return (code() == Code::kIncomplete) && (subcode() == SubCode::kManualCompactionPaused);
   }
 
   // Returns true iff the status indicates a TxnNotPrepared error.
   bool IsTxnNotPrepared() const {
     MarkChecked();
-    return (code() == Code::kInvalidArgument) && (subcode() == kTxnNotPrepared);
+    return (code() == Code::kInvalidArgument) && (subcode() == SubCode::kTxnNotPrepared);
   }
 
   // Returns true iff the status indicates a IOFenced error.
   bool IsIOFenced() const {
     MarkChecked();
-    return (code() == Code::kIOError) && (subcode() == kIOFenced);
+    return (code() == Code::kIOError) && (subcode() == SubCode::kIOFenced);
   }
 
   // Return a string representation of this status suitable for printing.
@@ -467,7 +467,7 @@ class Status {
   mutable bool checked_ = false;
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 
-  explicit Status(Code _code, SubCode _subcode = kNone)
+  explicit Status(Code _code, SubCode _subcode = SubCode::kNone)
       : code_(_code),
         subcode_(_subcode),
         sev_(kNoError),
@@ -487,7 +487,7 @@ class Status {
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2,
          Severity sev = kNoError);
   Status(Code _code, const Slice& msg, const Slice& msg2)
-      : Status(_code, kNone, msg, msg2) {}
+      : Status(_code, SubCode::kNone, msg, msg2) {}
 
   static std::unique_ptr<const char[]> CopyState(const char* s);
 
@@ -545,7 +545,7 @@ inline Status& Status::operator=(Status&& s) noexcept {
     code_ = std::move(s.code_);
     s.code_ = Code::kOk;
     subcode_ = std::move(s.subcode_);
-    s.subcode_ = kNone;
+    s.subcode_ = SubCode::kNone;
     sev_ = std::move(s.sev_);
     s.sev_ = kNoError;
     retryable_ = std::move(s.retryable_);
