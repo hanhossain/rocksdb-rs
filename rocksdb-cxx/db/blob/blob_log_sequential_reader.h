@@ -30,7 +30,7 @@ class SystemClock;
 
 class BlobLogSequentialReader {
  public:
-  enum ReadLevel {
+  enum class ReadLevel {
     kReadHeader,
     kReadHeaderKey,
     kReadHeaderKeyBlob,
@@ -53,7 +53,7 @@ class BlobLogSequentialReader {
   // *record will only be valid until the next mutating operation on this
   // reader.
   // If blob_offset is non-null, return offset of the blob through it.
-  Status ReadRecord(BlobLogRecord* record, ReadLevel level = kReadHeader,
+  Status ReadRecord(BlobLogRecord* record, ReadLevel level = ReadLevel::kReadHeader,
                     uint64_t* blob_offset = nullptr);
 
   Status ReadFooter(BlobLogFooter* footer);

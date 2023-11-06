@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <cinttypes>
-#include <iomanip>
 #include <memory>
 #include <sstream>
 
@@ -27,7 +26,6 @@
 #include "rocksdb/env.h"
 #include "rocksdb/iterator.h"
 #include "rocksdb/utilities/stackable_db.h"
-#include "rocksdb/utilities/transaction.h"
 #include "table/block_based/block.h"
 #include "table/block_based/block_based_table_builder.h"
 #include "table/block_based/block_builder.h"
@@ -36,9 +34,7 @@
 #include "util/cast_util.h"
 #include "util/crc32c.h"
 #include "util/mutexlock.h"
-#include "util/random.h"
 #include "util/stop_watch.h"
-#include "util/timer_queue.h"
 #include "utilities/blob_db/blob_compaction_filter.h"
 #include "utilities/blob_db/blob_db_iterator.h"
 #include "utilities/blob_db/blob_db_listener.h"
@@ -746,11 +742,11 @@ Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<BlobFile>& bfile) {
                     boffset);
   }
 
-  BlobLogWriter::ElemType et = BlobLogWriter::kEtNone;
+  BlobLogWriter::ElemType et = BlobLogWriter::ElemType::kEtNone;
   if (bfile->file_size_ == BlobLogHeader::kSize) {
-    et = BlobLogWriter::kEtFileHdr;
+    et = BlobLogWriter::ElemType::kEtFileHdr;
   } else if (bfile->file_size_ > BlobLogHeader::kSize) {
-    et = BlobLogWriter::kEtRecord;
+    et = BlobLogWriter::ElemType::kEtRecord;
   } else if (bfile->file_size_) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Open blob file: %s with wrong size: %" PRIu64,

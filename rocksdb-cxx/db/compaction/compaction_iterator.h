@@ -384,7 +384,7 @@ class CompactionIterator {
 
   // State
   //
-  enum ValidContext : uint8_t {
+  enum class ValidContext : uint8_t {
     kMerge1 = 0,
     kMerge2 = 1,
     kParseKeyError = 2,
@@ -404,7 +404,7 @@ class CompactionIterator {
     ValidContext GetContext() const {
       return static_cast<ValidContext>(rep >> 1);
     }
-    inline void SetValid(uint8_t ctx) { rep = (ctx << 1) | 1; }
+    inline void SetValid(ValidContext ctx) { rep = ((uint8_t)ctx << 1) | 1; }
     inline void Invalidate() { rep = 0; }
 
     uint8_t rep{0};
