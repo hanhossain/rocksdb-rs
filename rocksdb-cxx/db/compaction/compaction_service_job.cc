@@ -634,7 +634,7 @@ namespace {
 struct StatusSerializationAdapter {
   Status::Code code;
   Status::SubCode subcode;
-  uint8_t severity;
+  Status::Severity severity;
   std::string message;
 
   StatusSerializationAdapter() = default;

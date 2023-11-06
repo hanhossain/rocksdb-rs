@@ -38,7 +38,7 @@ class Status {
   Status()
       : code_(Code::kOk),
         subcode_(SubCode::kNone),
-        sev_(kNoError),
+        sev_(Severity::kNoError),
         retryable_(false),
         data_loss_(false),
         scope_(0),
@@ -122,7 +122,7 @@ class Status {
     return subcode_;
   }
 
-  enum Severity : unsigned char {
+  enum class Severity : unsigned char {
     kNoError = 0,
     kSoftError = 1,
     kHardError = 2,
@@ -470,7 +470,7 @@ class Status {
   explicit Status(Code _code, SubCode _subcode = SubCode::kNone)
       : code_(_code),
         subcode_(_subcode),
-        sev_(kNoError),
+        sev_(Severity::kNoError),
         retryable_(false),
         data_loss_(false),
         scope_(0) {}
@@ -479,13 +479,13 @@ class Status {
                   unsigned char scope)
       : code_(_code),
         subcode_(_subcode),
-        sev_(kNoError),
+        sev_(Severity::kNoError),
         retryable_(retryable),
         data_loss_(data_loss),
         scope_(scope) {}
 
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2,
-         Severity sev = kNoError);
+         Severity sev = Severity::kNoError);
   Status(Code _code, const Slice& msg, const Slice& msg2)
       : Status(_code, SubCode::kNone, msg, msg2) {}
 
@@ -547,7 +547,7 @@ inline Status& Status::operator=(Status&& s) noexcept {
     subcode_ = std::move(s.subcode_);
     s.subcode_ = SubCode::kNone;
     sev_ = std::move(s.sev_);
-    s.sev_ = kNoError;
+    s.sev_ = Severity::kNoError;
     retryable_ = std::move(s.retryable_);
     s.retryable_ = false;
     data_loss_ = std::move(s.data_loss_);
