@@ -633,7 +633,7 @@ namespace {
 // Status's members are not public.
 struct StatusSerializationAdapter {
   Status::Code code;
-  Status::SubCode subcode;
+  SubCode subcode;
   Severity severity;
   std::string message;
 
@@ -648,7 +648,7 @@ struct StatusSerializationAdapter {
 
   Status GetStatus() const {
     return Status{static_cast<Status::Code>(code),
-                  static_cast<Status::SubCode>(subcode),
+                  static_cast<SubCode>(subcode),
                   static_cast<Severity>(severity), message};
   }
 };

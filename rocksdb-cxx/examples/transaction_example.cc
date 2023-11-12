@@ -14,6 +14,7 @@ using ROCKSDB_NAMESPACE::Options;
 using ROCKSDB_NAMESPACE::ReadOptions;
 using ROCKSDB_NAMESPACE::Snapshot;
 using ROCKSDB_NAMESPACE::Status;
+using ROCKSDB_NAMESPACE::SubCode;
 using ROCKSDB_NAMESPACE::Transaction;
 using ROCKSDB_NAMESPACE::TransactionDB;
 using ROCKSDB_NAMESPACE::TransactionDBOptions;
@@ -71,7 +72,7 @@ int main() {
   // Write a key OUTSIDE of this transaction.
   // Fail because the key conflicts with the key written in txn.
   s = txn_db->Put(write_options, "abc", "def");
-  assert(s.subcode() == Status::SubCode::kLockTimeout);
+  assert(s.subcode() == SubCode::kLockTimeout);
 
   // Value for key "xyz" has been committed, can be read in txn.
   s = txn->Get(read_options, "xyz", &value);

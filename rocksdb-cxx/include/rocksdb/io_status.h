@@ -22,13 +22,14 @@
 #include <cstring>
 
 #include "status.h"
+#include "rocksdb-rs-cxx/lib.h"
 
 namespace ROCKSDB_NAMESPACE {
 
 class IOStatus : public Status {
  public:
   using Code = Status::Code;
-  using SubCode = Status::SubCode;
+  using SubCode = SubCode;
 
   enum IOErrorScope : unsigned char {
     kIOErrorScopeFileSystem,

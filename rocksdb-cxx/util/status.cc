@@ -55,7 +55,7 @@ Status::Code Status::code() const {
     return code_;
 }
 
-Status::SubCode Status::subcode() const {
+SubCode Status::subcode() const {
     MarkChecked();
     return subcode_;
 }
@@ -80,6 +80,8 @@ Status Status::NotFound(const Slice& msg, const Slice& msg2) {
 
 Status Status::NotFound(SubCode msg) { return Status(Code::kNotFound, msg); }
 
+Status Status::NotFound() { return Status::NotFound(SubCode::kNone); }
+
 Status Status::NotFound(SubCode sc, const Slice& msg,
                        const Slice& msg2) {
     return Status(Code::kNotFound, sc, msg, msg2);
@@ -91,12 +93,18 @@ Status Status::Corruption(const Slice& msg, const Slice& msg2) {
 Status Status::Corruption(SubCode msg) {
     return Status(Code::kCorruption, msg);
 }
+Status Status::Corruption() {
+    return Corruption(SubCode::kNone);
+}
 
 Status Status::NotSupported(const Slice& msg, const Slice& msg2) {
     return Status(Code::kNotSupported, msg, msg2);
 }
 Status Status::NotSupported(SubCode msg) {
     return Status(Code::kNotSupported, msg);
+}
+Status Status::NotSupported() {
+    return NotSupported(SubCode::kNone);
 }
 
 Status Status::InvalidArgument(const Slice& msg, const Slice& msg2) {
@@ -105,17 +113,24 @@ Status Status::InvalidArgument(const Slice& msg, const Slice& msg2) {
 Status Status::InvalidArgument(SubCode msg) {
     return Status(Code::kInvalidArgument, msg);
 }
+Status Status::InvalidArgument() {
+    return InvalidArgument(SubCode::kNone);
+}
 
 Status Status::IOError(const Slice& msg, const Slice& msg2) {
     return Status(Code::kIOError, msg, msg2);
 }
 Status Status::IOError(SubCode msg) { return Status(Code::kIOError, msg); }
+Status Status::IOError() { return IOError(SubCode::kNone); }
 
 Status Status::MergeInProgress(const Slice& msg, const Slice& msg2) {
     return Status(Code::kMergeInProgress, msg, msg2);
 }
 Status Status::MergeInProgress(SubCode msg) {
     return Status(Code::kMergeInProgress, msg);
+}
+Status Status::MergeInProgress() {
+    return MergeInProgress(SubCode::kNone);
 }
 
 Status Status::Incomplete(const Slice& msg, const Slice& msg2) {
@@ -124,41 +139,55 @@ Status Status::Incomplete(const Slice& msg, const Slice& msg2) {
 Status Status::Incomplete(SubCode msg) {
     return Status(Code::kIncomplete, msg);
 }
+Status Status::Incomplete() {
+    return Incomplete(SubCode::kNone);
+}
 
 Status Status::ShutdownInProgress(SubCode msg) {
     return Status(Code::kShutdownInProgress, msg);
+}
+Status Status::ShutdownInProgress() {
+    return ShutdownInProgress(SubCode::kNone);
 }
 Status Status::ShutdownInProgress(const Slice& msg,
                                  const Slice& msg2) {
     return Status(Code::kShutdownInProgress, msg, msg2);
 }
 Status Status::Aborted(SubCode msg) { return Status(Code::kAborted, msg); }
+Status Status::Aborted() { return Aborted(SubCode::kNone); }
 Status Status::Aborted(const Slice& msg, const Slice& msg2) {
     return Status(Code::kAborted, msg, msg2);
 }
 
 Status Status::Busy(SubCode msg) { return Status(Code::kBusy, msg); }
+Status Status::Busy() { return Busy(SubCode::kNone); }
 Status Status::Busy(const Slice& msg, const Slice& msg2) {
     return Status(Code::kBusy, msg, msg2);
 }
 
 Status Status::TimedOut(SubCode msg) { return Status(Code::kTimedOut, msg); }
+Status Status::TimedOut() { return TimedOut(SubCode::kNone); }
 Status Status::TimedOut(const Slice& msg, const Slice& msg2) {
     return Status(Code::kTimedOut, msg, msg2);
 }
 
 Status Status::Expired(SubCode msg) { return Status(Code::kExpired, msg); }
+Status Status::Expired() { return Expired(SubCode::kNone); }
 Status Status::Expired(const Slice& msg, const Slice& msg2) {
     return Status(Code::kExpired, msg, msg2);
 }
 
 Status Status::TryAgain(SubCode msg) { return Status(Code::kTryAgain, msg); }
+Status Status::TryAgain() { return TryAgain(SubCode::kNone); }
 Status Status::TryAgain(const Slice& msg, const Slice& msg2) {
     return Status(Code::kTryAgain, msg, msg2);
 }
 
 Status Status::CompactionTooLarge(SubCode msg) {
     return Status(Code::kCompactionTooLarge, msg);
+}
+Status Status::CompactionTooLarge() {
+    return CompactionTooLarge(SubCode::kNone);
 }
 Status Status::CompactionTooLarge(const Slice& msg, const Slice& msg2) {
     return Status(Code::kCompactionTooLarge, msg, msg2);
@@ -167,7 +196,9 @@ Status Status::CompactionTooLarge(const Slice& msg, const Slice& msg2) {
 Status Status::ColumnFamilyDropped(SubCode msg) {
     return Status(Code::kColumnFamilyDropped, msg);
 }
-
+Status Status::ColumnFamilyDropped() {
+    return ColumnFamilyDropped(SubCode::kNone);
+}
 Status Status::ColumnFamilyDropped(const Slice& msg, const Slice& msg2) {
     return Status(Code::kColumnFamilyDropped, msg, msg2);
 }
@@ -336,6 +367,8 @@ Status::Status(Code _code, SubCode _subcode)
     retryable_(false),
     data_loss_(false),
     scope_(0) {}
+Status::Status(Code _code)
+    : Status(_code, SubCode::kNone) {}
 Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
     unsigned char scope)
     : code_(_code),
@@ -436,7 +469,7 @@ std::unique_ptr<const char[]> Status::CopyState(const char* s) {
   return std::unique_ptr<const char[]>(rv);
 }
 
-static const char* msgs[static_cast<int>(Status::SubCode::kMaxSubCode)] = {
+static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
     "",                                                   // kNone
     "Timeout Acquiring Mutex",                            // kMutexTimeout
     "Timeout waiting to lock key",                        // kLockTimeout

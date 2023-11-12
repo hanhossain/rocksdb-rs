@@ -798,7 +798,7 @@ Status DBImplSecondary::CompactWithoutInstallation(
     const OpenAndCompactOptions& options, ColumnFamilyHandle* cfh,
     const CompactionServiceInput& input, CompactionServiceResult* result) {
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    return Status::Incomplete(SubCode::kManualCompactionPaused);
   }
   InstrumentedMutexLock l(&mutex_);
   auto cfd = static_cast_with_check<ColumnFamilyHandleImpl>(cfh)->cfd();
@@ -892,7 +892,7 @@ Status DB::OpenAndCompact(
     std::string* output,
     const CompactionServiceOptionsOverride& override_options) {
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    return Status::Incomplete(SubCode::kManualCompactionPaused);
   }
   CompactionServiceInput compaction_input;
   Status s = CompactionServiceInput::Read(input, &compaction_input);

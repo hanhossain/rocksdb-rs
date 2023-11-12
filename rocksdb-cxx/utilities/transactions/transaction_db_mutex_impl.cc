@@ -12,6 +12,7 @@
 #include <mutex>
 
 #include "rocksdb/utilities/transaction_db_mutex.h"
+#include "rocksdb-rs-cxx/lib.h"
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -83,7 +84,7 @@ Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
 
   if (!locked) {
     // timeout acquiring mutex
-    return Status::TimedOut(Status::SubCode::kMutexTimeout);
+    return Status::TimedOut(SubCode::kMutexTimeout);
   }
 
   return Status::OK();
@@ -118,7 +119,7 @@ Status TransactionDBCondVarImpl::WaitFor(
 
     // Check if the wait stopped due to timing out.
     if (cv_status == std::cv_status::timeout) {
-      s = Status::TimedOut(Status::SubCode::kMutexTimeout);
+      s = Status::TimedOut(SubCode::kMutexTimeout);
     }
   }
 

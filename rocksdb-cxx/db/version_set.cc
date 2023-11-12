@@ -2487,7 +2487,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
             "ROCKSDB_NAMESPACE::blob_db::BlobDB instead.");
         return;
       case GetContext::kMergeOperatorFailed:
-        *status = Status::Corruption(Status::SubCode::kMergeOperatorFailed);
+        *status = Status::Corruption(SubCode::kMergeOperatorFailed);
         return;
     }
     f = fp.GetNextFile();

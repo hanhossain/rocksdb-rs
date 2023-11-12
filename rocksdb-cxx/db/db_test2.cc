@@ -3409,7 +3409,7 @@ class CancelCompactionListener : public EventListener {
   std::atomic<size_t> num_compaction_started_;
   std::atomic<size_t> num_compaction_ended_;
   Status::Code code_;
-  Status::SubCode subcode_;
+  SubCode subcode_;
 };
 
 TEST_F(DBTest2, CancelManualCompactionWithListener) {
@@ -3450,7 +3450,7 @@ TEST_F(DBTest2, CancelManualCompactionWithListener) {
   // manual compaction in the callback function, 3 Compaction not run,
   // 4 Notify compaction end.
   listener->code_ = Status::Code::kIncomplete;
-  listener->subcode_ = Status::SubCode::kManualCompactionPaused;
+  listener->subcode_ = SubCode::kManualCompactionPaused;
 
   compact_options.canceled->store(false, std::memory_order_release);
   ASSERT_TRUE(dbfull()
@@ -3489,7 +3489,7 @@ TEST_F(DBTest2, CancelManualCompactionWithListener) {
       });
 
   listener->code_ = Status::Code::kOk;
-  listener->subcode_ = Status::SubCode::kNone;
+  listener->subcode_ = SubCode::kNone;
 
   compact_options.canceled->store(false, std::memory_order_release);
   ASSERT_OK(dbfull()->CompactRange(compact_options, nullptr, nullptr));
@@ -3540,7 +3540,7 @@ TEST_F(DBTest2, CompactionOnBottomPriorityWithListener) {
       [&](void* /*arg*/) { num_compaction_jobs++; });
 
   listener->code_ = Status::Code::kOk;
-  listener->subcode_ = Status::SubCode::kNone;
+  listener->subcode_ = SubCode::kNone;
 
   Random rnd(301);
   for (int i = 0; i < 1; ++i) {

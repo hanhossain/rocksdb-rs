@@ -113,7 +113,7 @@ Status MergeHelper::TimedFullMerge(
 
   if (!success) {
     RecordTick(statistics, NUMBER_MERGE_FAILURES);
-    return Status::Corruption(Status::SubCode::kMergeOperatorFailed);
+    return Status::Corruption(SubCode::kMergeOperatorFailed);
   }
 
   return Status::OK();

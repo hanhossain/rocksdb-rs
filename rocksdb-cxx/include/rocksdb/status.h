@@ -32,6 +32,7 @@
 
 namespace ROCKSDB_NAMESPACE {
 
+enum class SubCode : unsigned char;
 enum class Severity : unsigned char;
 
 class Status {
@@ -77,26 +78,6 @@ class Status {
 
   Code code() const;
 
-  enum class SubCode : unsigned char {
-    kNone = 0,
-    kMutexTimeout = 1,
-    kLockTimeout = 2,
-    kLockLimit = 3,
-    kNoSpace = 4,
-    kDeadlock = 5,
-    kStaleFile = 6,
-    kMemoryLimit = 7,
-    kSpaceLimit = 8,
-    kPathNotFound = 9,
-    KMergeOperandsInsufficientCapacity = 10,
-    kManualCompactionPaused = 11,
-    kOverwritten = 12,
-    kTxnNotPrepared = 13,
-    kIOFenced = 14,
-    kMergeOperatorFailed = 15,
-    kMaxSubCode
-  };
-
   SubCode subcode() const;
 
   Status(const Status& s, Severity sev);
@@ -124,51 +105,65 @@ class Status {
   static Status NotFound(const Slice& msg, const Slice& msg2 = Slice());
 
   // Fast path for not found without malloc;
-  static Status NotFound(SubCode msg = SubCode::kNone);
+  static Status NotFound(SubCode msg);
+  static Status NotFound();
 
   static Status NotFound(SubCode sc, const Slice& msg, const Slice& msg2 = Slice());
 
   static Status Corruption(const Slice& msg, const Slice& msg2 = Slice());
-  static Status Corruption(SubCode msg = SubCode::kNone);
+  static Status Corruption(SubCode msg);
+  static Status Corruption();
 
   static Status NotSupported(const Slice& msg, const Slice& msg2 = Slice());
-  static Status NotSupported(SubCode msg = SubCode::kNone);
+  static Status NotSupported(SubCode msg);
+  static Status NotSupported();
 
   static Status InvalidArgument(const Slice& msg, const Slice& msg2 = Slice());
-  static Status InvalidArgument(SubCode msg = SubCode::kNone);
+  static Status InvalidArgument(SubCode msg);
+  static Status InvalidArgument();
 
   static Status IOError(const Slice& msg, const Slice& msg2 = Slice());
-  static Status IOError(SubCode msg = SubCode::kNone);
+  static Status IOError(SubCode msg);
+  static Status IOError();
 
   static Status MergeInProgress(const Slice& msg, const Slice& msg2 = Slice());
-  static Status MergeInProgress(SubCode msg = SubCode::kNone);
+  static Status MergeInProgress(SubCode msg);
+  static Status MergeInProgress();
 
   static Status Incomplete(const Slice& msg, const Slice& msg2 = Slice());
-  static Status Incomplete(SubCode msg = SubCode::kNone);
+  static Status Incomplete(SubCode msg);
+  static Status Incomplete();
 
-  static Status ShutdownInProgress(SubCode msg = SubCode::kNone);
+  static Status ShutdownInProgress(SubCode msg);
+  static Status ShutdownInProgress();
   static Status ShutdownInProgress(const Slice& msg, const Slice& msg2 = Slice());
-  static Status Aborted(SubCode msg = SubCode::kNone);
+  static Status Aborted(SubCode msg);
+  static Status Aborted();
   static Status Aborted(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status Busy(SubCode msg = SubCode::kNone);
+  static Status Busy(SubCode msg);
+  static Status Busy();
   static Status Busy(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status TimedOut(SubCode msg = SubCode::kNone);
+  static Status TimedOut(SubCode msg);
+  static Status TimedOut();
   static Status TimedOut(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status Expired(SubCode msg = SubCode::kNone);
+  static Status Expired(SubCode msg);
+  static Status Expired();
   static Status Expired(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status TryAgain(SubCode msg = SubCode::kNone);
+  static Status TryAgain(SubCode msg);
+  static Status TryAgain();
   static Status TryAgain(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status CompactionTooLarge(SubCode msg = SubCode::kNone);
+  static Status CompactionTooLarge(SubCode msg);
+  static Status CompactionTooLarge();
   static Status CompactionTooLarge(const Slice& msg,
                                    const Slice& msg2 = Slice());
 
-  static Status ColumnFamilyDropped(SubCode msg = SubCode::kNone);
-
+  static Status ColumnFamilyDropped(SubCode msg);
+  static Status ColumnFamilyDropped();
   static Status ColumnFamilyDropped(const Slice& msg,
                                     const Slice& msg2 = Slice());
 
@@ -290,7 +285,8 @@ class Status {
   mutable bool checked_ = false;
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 
-  explicit Status(Code _code, SubCode _subcode = SubCode::kNone);
+  explicit Status(Code _code, SubCode _subcode);
+  explicit Status(Code _code);
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
