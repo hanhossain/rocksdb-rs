@@ -16,6 +16,7 @@
 #include <cstring>
 
 #include "port/port.h"
+#include "rocksdb-rs-cxx/lib.h"
 
 namespace ROCKSDB_NAMESPACE {
 // Create a success status.
@@ -59,7 +60,7 @@ Status::SubCode Status::subcode() const {
     return subcode_;
 }
 
-Status::Severity Status::severity() const {
+Severity Status::severity() const {
     MarkChecked();
     return sev_;
 }
@@ -478,6 +479,9 @@ Status::Status(Code _code, SubCode _subcode, const Slice& msg,
   result[size] = '\0';  // null terminator for C style string
   state_.reset(result);
 }
+
+Status::Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2)
+    : Status(_code, _subcode, msg, msg2, Severity::kNoError) {}
 
 Status Status::CopyAppendMessage(const Status& s, const Slice& delim,
                                  const Slice& msg) {

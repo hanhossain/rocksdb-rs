@@ -9,6 +9,7 @@
 #include "rocksdb/io_status.h"
 #include "rocksdb/listener.h"
 #include "rocksdb/status.h"
+#include "rocksdb-rs-cxx/lib.h"
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -48,7 +49,7 @@ class ErrorHandler {
 
   void EnableAutoRecovery() { auto_recovery_ = true; }
 
-  Status::Severity GetErrorSeverity(BackgroundErrorReason reason,
+  Severity GetErrorSeverity(BackgroundErrorReason reason,
                                     Status::Code code, Status::SubCode subcode);
 
   const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
@@ -65,7 +66,7 @@ class ErrorHandler {
     assert(db_mutex_);
     db_mutex_->AssertHeld();
     return !bg_error_.ok() &&
-           (bg_error_.severity() >= Status::Severity::kHardError ||
+           (bg_error_.severity() >= Severity::kHardError ||
             !auto_recovery_ || soft_error_no_bg_work_);
   }
 

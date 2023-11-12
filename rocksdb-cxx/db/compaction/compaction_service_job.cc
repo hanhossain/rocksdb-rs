@@ -634,7 +634,7 @@ namespace {
 struct StatusSerializationAdapter {
   Status::Code code;
   Status::SubCode subcode;
-  Status::Severity severity;
+  Severity severity;
   std::string message;
 
   StatusSerializationAdapter() = default;
@@ -649,7 +649,7 @@ struct StatusSerializationAdapter {
   Status GetStatus() const {
     return Status{static_cast<Status::Code>(code),
                   static_cast<Status::SubCode>(subcode),
-                  static_cast<Status::Severity>(severity), message};
+                  static_cast<Severity>(severity), message};
   }
 };
 }  // namespace

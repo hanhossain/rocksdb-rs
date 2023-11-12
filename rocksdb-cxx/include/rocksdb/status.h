@@ -32,6 +32,8 @@
 
 namespace ROCKSDB_NAMESPACE {
 
+enum class Severity : unsigned char;
+
 class Status {
  public:
   // Create a success status.
@@ -96,15 +98,6 @@ class Status {
   };
 
   SubCode subcode() const;
-
-  enum class Severity : unsigned char {
-    kNoError = 0,
-    kSoftError = 1,
-    kHardError = 2,
-    kFatalError = 3,
-    kUnrecoverableError = 4,
-    kMaxSeverity
-  };
 
   Status(const Status& s, Severity sev);
 
@@ -301,8 +294,8 @@ class Status {
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
-  Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2,
-         Severity sev = Severity::kNoError);
+  Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
+  Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
   Status(Code _code, const Slice& msg, const Slice& msg2);
 
   static std::unique_ptr<const char[]> CopyState(const char* s);

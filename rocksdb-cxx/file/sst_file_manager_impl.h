@@ -12,6 +12,7 @@
 #include "file/delete_scheduler.h"
 #include "port/port.h"
 #include "rocksdb/sst_file_manager.h"
+#include "rocksdb-rs-cxx/lib.h"
 
 namespace ROCKSDB_NAMESPACE {
 class ErrorHandler;
@@ -144,7 +145,7 @@ class SstFileManagerImpl : public SstFileManager {
 
   void ClearError();
   bool CheckFreeSpace() {
-    return bg_err_.severity() == Status::Severity::kSoftError;
+    return bg_err_.severity() == Severity::kSoftError;
   }
 
   std::shared_ptr<SystemClock> clock_;
