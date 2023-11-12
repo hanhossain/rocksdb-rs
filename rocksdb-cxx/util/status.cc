@@ -41,6 +41,14 @@ Status::~Status() {
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
 
+void Status::PermitUncheckedError() const { MarkChecked(); }
+
+void Status::MustCheck() const {
+#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
+    checked_ = false;
+#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
+}
+
 Status::Code Status::code() const {
     MarkChecked();
     return code_;

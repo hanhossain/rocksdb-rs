@@ -49,13 +49,9 @@ class Status {
   // In case of intentionally swallowing an error, user must explicitly call
   // this function. That way we are easily able to search the code to find where
   // error swallowing occurs.
-  inline void PermitUncheckedError() const { MarkChecked(); }
+  void PermitUncheckedError() const;
 
-  inline void MustCheck() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    checked_ = false;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-  }
+  void MustCheck() const;
 
   enum class Code : unsigned char {
     kOk = 0,
