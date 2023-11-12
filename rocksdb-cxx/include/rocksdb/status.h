@@ -35,23 +35,8 @@ namespace ROCKSDB_NAMESPACE {
 class Status {
  public:
   // Create a success status.
-  Status()
-      : code_(Code::kOk),
-        subcode_(SubCode::kNone),
-        sev_(Severity::kNoError),
-        retryable_(false),
-        data_loss_(false),
-        scope_(0),
-        state_(nullptr) {}
-  ~Status() {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    if (!checked_) {
-      fprintf(stderr, "Failed to check Status %p\n", this);
-      port::PrintStack();
-      std::abort();
-    }
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-  }
+  Status();
+  ~Status();
 
   // Copy the specified status.
   Status(const Status& s);
@@ -127,8 +112,7 @@ class Status {
 
   Status(const Status& s, Severity sev);
 
-  Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
-      : Status(_code, _subcode, msg, "", _sev) {}
+  Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg);
 
   static Status CopyAppendMessage(const Status& s, const Slice& delim,
                                   const Slice& msg);

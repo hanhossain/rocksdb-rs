@@ -18,6 +18,29 @@
 #include "port/port.h"
 
 namespace ROCKSDB_NAMESPACE {
+// Create a success status.
+Status::Status()
+    : code_(Code::kOk),
+      subcode_(SubCode::kNone),
+      sev_(Severity::kNoError),
+      retryable_(false),
+      data_loss_(false),
+      scope_(0),
+      state_(nullptr) {}
+
+Status::~Status() {
+#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
+    if (!checked_) {
+        fprintf(stderr, "Failed to check Status %p\n", this);
+        port::PrintStack();
+        std::abort();
+    }
+#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
+}
+
+Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
+    : Status(_code, _subcode, msg, "", _sev) {}
+
 Status::Code Status::code() const {
     MarkChecked();
     return code_;
