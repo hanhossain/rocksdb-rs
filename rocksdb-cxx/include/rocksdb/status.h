@@ -467,35 +467,16 @@ class Status {
   mutable bool checked_ = false;
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 
-  explicit Status(Code _code, SubCode _subcode = SubCode::kNone)
-      : code_(_code),
-        subcode_(_subcode),
-        sev_(Severity::kNoError),
-        retryable_(false),
-        data_loss_(false),
-        scope_(0) {}
-
+  explicit Status(Code _code, SubCode _subcode = SubCode::kNone);
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
-                  unsigned char scope)
-      : code_(_code),
-        subcode_(_subcode),
-        sev_(Severity::kNoError),
-        retryable_(retryable),
-        data_loss_(data_loss),
-        scope_(scope) {}
+                  unsigned char scope);
 
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2,
          Severity sev = Severity::kNoError);
-  Status(Code _code, const Slice& msg, const Slice& msg2)
-      : Status(_code, SubCode::kNone, msg, msg2) {}
+  Status(Code _code, const Slice& msg, const Slice& msg2);
 
   static std::unique_ptr<const char[]> CopyState(const char* s);
-
-  inline void MarkChecked() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    checked_ = true;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-  }
+  void MarkChecked() const;
 };
 
 }  // namespace ROCKSDB_NAMESPACE

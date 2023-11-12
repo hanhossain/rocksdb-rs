@@ -18,6 +18,31 @@
 #include "port/port.h"
 
 namespace ROCKSDB_NAMESPACE {
+Status::Status(Code _code, SubCode _subcode)
+    : code_(_code),
+    subcode_(_subcode),
+    sev_(Severity::kNoError),
+    retryable_(false),
+    data_loss_(false),
+    scope_(0) {}
+Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
+    unsigned char scope)
+    : code_(_code),
+    subcode_(_subcode),
+    sev_(Severity::kNoError),
+    retryable_(retryable),
+    data_loss_(data_loss),
+    scope_(scope) {}
+
+Status::Status(Code _code, const Slice& msg, const Slice& msg2)
+    : Status(_code, SubCode::kNone, msg, msg2) {}
+
+inline void Status::MarkChecked() const {
+#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
+    checked_ = true;
+#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
+}
+
 Status::Status(const Status& s)
         : code_(s.code_),
           subcode_(s.subcode_),
