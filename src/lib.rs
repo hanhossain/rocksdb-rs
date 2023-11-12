@@ -21,6 +21,15 @@ pub mod ffi {
     struct CommonRustData {
         value: String,
     }
+
+    enum Severity {
+        kNoError = 0,
+        kSoftError = 1,
+        kHardError = 2,
+        kFatalError = 3,
+        kUnrecoverableError = 4,
+        kMaxSeverity,
+    }
 }
 
 pub fn hello_common(data: &CommonRustData) -> String {

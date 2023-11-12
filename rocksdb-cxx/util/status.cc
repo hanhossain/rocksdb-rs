@@ -18,6 +18,17 @@
 #include "port/port.h"
 
 namespace ROCKSDB_NAMESPACE {
+bool Status::operator==(const Status& rhs) const {
+    MarkChecked();
+    rhs.MarkChecked();
+    return (code_ == rhs.code_);
+}
+
+bool Status::operator!=(const Status& rhs) const {
+    MarkChecked();
+    rhs.MarkChecked();
+    return !(*this == rhs);
+}
 
 std::unique_ptr<const char[]> Status::CopyState(const char* s) {
   const size_t cch = std::strlen(s) + 1;  // +1 for the null terminator

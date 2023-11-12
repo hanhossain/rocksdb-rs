@@ -559,16 +559,4 @@ inline Status& Status::operator=(Status&& s) noexcept {
   return *this;
 }
 
-inline bool Status::operator==(const Status& rhs) const {
-  MarkChecked();
-  rhs.MarkChecked();
-  return (code_ == rhs.code_);
-}
-
-inline bool Status::operator!=(const Status& rhs) const {
-  MarkChecked();
-  rhs.MarkChecked();
-  return !(*this == rhs);
-}
-
 }  // namespace ROCKSDB_NAMESPACE
