@@ -289,165 +289,89 @@ class Status {
   }
 
   // Returns true iff the status indicates success.
-  bool ok() const {
-    MarkChecked();
-    return code() == Code::kOk;
-  }
+  bool ok() const;
 
   // Returns true iff the status indicates success *with* something
   // overwritten
-  bool IsOkOverwritten() const {
-    MarkChecked();
-    return code() == Code::kOk && subcode() == SubCode::kOverwritten;
-  }
+  bool IsOkOverwritten() const;
 
   // Returns true iff the status indicates a NotFound error.
-  bool IsNotFound() const {
-    MarkChecked();
-    return code() == Code::kNotFound;
-  }
+  bool IsNotFound() const;
 
   // Returns true iff the status indicates a Corruption error.
-  bool IsCorruption() const {
-    MarkChecked();
-    return code() == Code::kCorruption;
-  }
+  bool IsCorruption() const;
 
   // Returns true iff the status indicates a NotSupported error.
-  bool IsNotSupported() const {
-    MarkChecked();
-    return code() == Code::kNotSupported;
-  }
+  bool IsNotSupported() const;
 
   // Returns true iff the status indicates an InvalidArgument error.
-  bool IsInvalidArgument() const {
-    MarkChecked();
-    return code() == Code::kInvalidArgument;
-  }
+  bool IsInvalidArgument() const;
 
   // Returns true iff the status indicates an IOError.
-  bool IsIOError() const {
-    MarkChecked();
-    return code() == Code::kIOError;
-  }
+  bool IsIOError() const;
 
   // Returns true iff the status indicates an MergeInProgress.
-  bool IsMergeInProgress() const {
-    MarkChecked();
-    return code() == Code::kMergeInProgress;
-  }
+  bool IsMergeInProgress() const;
 
   // Returns true iff the status indicates Incomplete
-  bool IsIncomplete() const {
-    MarkChecked();
-    return code() == Code::kIncomplete;
-  }
+  bool IsIncomplete() const;
 
   // Returns true iff the status indicates Shutdown In progress
-  bool IsShutdownInProgress() const {
-    MarkChecked();
-    return code() == Code::kShutdownInProgress;
-  }
+  bool IsShutdownInProgress() const;
 
-  bool IsTimedOut() const {
-    MarkChecked();
-    return code() == Code::kTimedOut;
-  }
+  bool IsTimedOut() const;
 
-  bool IsAborted() const {
-    MarkChecked();
-    return code() == Code::kAborted;
-  }
+  bool IsAborted() const;
 
-  bool IsLockLimit() const {
-    MarkChecked();
-    return code() == Code::kAborted && subcode() == SubCode::kLockLimit;
-  }
+  bool IsLockLimit() const;
 
   // Returns true iff the status indicates that a resource is Busy and
   // temporarily could not be acquired.
-  bool IsBusy() const {
-    MarkChecked();
-    return code() == Code::kBusy;
-  }
+  bool IsBusy() const;
 
-  bool IsDeadlock() const {
-    MarkChecked();
-    return code() == Code::kBusy && subcode() == SubCode::kDeadlock;
-  }
+  bool IsDeadlock() const;
 
   // Returns true iff the status indicated that the operation has Expired.
-  bool IsExpired() const {
-    MarkChecked();
-    return code() == Code::kExpired;
-  }
+  bool IsExpired() const;
 
   // Returns true iff the status indicates a TryAgain error.
   // This usually means that the operation failed, but may succeed if
   // re-attempted.
-  bool IsTryAgain() const {
-    MarkChecked();
-    return code() == Code::kTryAgain;
-  }
+  bool IsTryAgain() const;
 
   // Returns true iff the status indicates the proposed compaction is too large
-  bool IsCompactionTooLarge() const {
-    MarkChecked();
-    return code() == Code::kCompactionTooLarge;
-  }
+  bool IsCompactionTooLarge() const;
 
   // Returns true iff the status indicates Column Family Dropped
-  bool IsColumnFamilyDropped() const {
-    MarkChecked();
-    return code() == Code::kColumnFamilyDropped;
-  }
+  bool IsColumnFamilyDropped() const;
 
   // Returns true iff the status indicates a NoSpace error
   // This is caused by an I/O error returning the specific "out of space"
   // error condition. Stricto sensu, an NoSpace error is an I/O error
   // with a specific subcode, enabling users to take the appropriate action
   // if needed
-  bool IsNoSpace() const {
-    MarkChecked();
-    return (code() == Code::kIOError) && (subcode() == SubCode::kNoSpace);
-  }
+  bool IsNoSpace() const;
 
   // Returns true iff the status indicates a memory limit error.  There may be
   // cases where we limit the memory used in certain operations (eg. the size
   // of a write batch) in order to avoid out of memory exceptions.
-  bool IsMemoryLimit() const {
-    MarkChecked();
-    return (code() == Code::kAborted) && (subcode() == SubCode::kMemoryLimit);
-  }
+  bool IsMemoryLimit() const;
 
   // Returns true iff the status indicates a PathNotFound error
   // This is caused by an I/O error returning the specific "no such file or
   // directory" error condition. A PathNotFound error is an I/O error with
   // a specific subcode, enabling users to take appropriate action if necessary
-  bool IsPathNotFound() const {
-    MarkChecked();
-    return (code() == Code::kIOError || code() == Code::kNotFound) &&
-           (subcode() == SubCode::kPathNotFound);
-  }
+  bool IsPathNotFound() const;
 
   // Returns true iff the status indicates manual compaction paused. This
   // is caused by a call to PauseManualCompaction
-  bool IsManualCompactionPaused() const {
-    MarkChecked();
-    return (code() == Code::kIncomplete) && (subcode() == SubCode::kManualCompactionPaused);
-  }
+  bool IsManualCompactionPaused() const;
 
   // Returns true iff the status indicates a TxnNotPrepared error.
-  bool IsTxnNotPrepared() const {
-    MarkChecked();
-    return (code() == Code::kInvalidArgument) && (subcode() == SubCode::kTxnNotPrepared);
-  }
+  bool IsTxnNotPrepared() const;
 
   // Returns true iff the status indicates a IOFenced error.
-  bool IsIOFenced() const {
-    MarkChecked();
-    return (code() == Code::kIOError) && (subcode() == SubCode::kIOFenced);
-  }
+  bool IsIOFenced() const;
 
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.

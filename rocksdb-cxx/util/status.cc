@@ -18,6 +18,132 @@
 #include "port/port.h"
 
 namespace ROCKSDB_NAMESPACE {
+bool Status::ok() const {
+    MarkChecked();
+    return code() == Code::kOk;
+}
+
+bool Status::IsOkOverwritten() const {
+    MarkChecked();
+    return code() == Code::kOk && subcode() == SubCode::kOverwritten;
+}
+
+bool Status::IsNotFound() const {
+    MarkChecked();
+    return code() == Code::kNotFound;
+}
+
+bool Status::IsCorruption() const {
+    MarkChecked();
+    return code() == Code::kCorruption;
+}
+
+bool Status::IsNotSupported() const {
+    MarkChecked();
+    return code() == Code::kNotSupported;
+}
+
+bool Status::IsInvalidArgument() const {
+    MarkChecked();
+    return code() == Code::kInvalidArgument;
+}
+
+bool Status::IsIOError() const {
+    MarkChecked();
+    return code() == Code::kIOError;
+}
+
+bool Status::IsMergeInProgress() const {
+    MarkChecked();
+    return code() == Code::kMergeInProgress;
+}
+
+bool Status::IsIncomplete() const {
+    MarkChecked();
+    return code() == Code::kIncomplete;
+}
+
+bool Status::IsShutdownInProgress() const {
+    MarkChecked();
+    return code() == Code::kShutdownInProgress;
+}
+
+bool Status::IsTimedOut() const {
+    MarkChecked();
+    return code() == Code::kTimedOut;
+}
+
+bool Status::IsAborted() const {
+    MarkChecked();
+    return code() == Code::kAborted;
+}
+
+bool Status::IsLockLimit() const {
+    MarkChecked();
+    return code() == Code::kAborted && subcode() == SubCode::kLockLimit;
+}
+
+bool Status::IsBusy() const {
+    MarkChecked();
+    return code() == Code::kBusy;
+}
+
+bool Status::IsDeadlock() const {
+    MarkChecked();
+    return code() == Code::kBusy && subcode() == SubCode::kDeadlock;
+}
+
+bool Status::IsExpired() const {
+    MarkChecked();
+    return code() == Code::kExpired;
+}
+
+bool Status::IsTryAgain() const {
+    MarkChecked();
+    return code() == Code::kTryAgain;
+}
+
+bool Status::IsCompactionTooLarge() const {
+    MarkChecked();
+    return code() == Code::kCompactionTooLarge;
+}
+
+bool Status::IsColumnFamilyDropped() const {
+    MarkChecked();
+    return code() == Code::kColumnFamilyDropped;
+}
+
+bool Status::IsNoSpace() const {
+    MarkChecked();
+    return (code() == Code::kIOError) && (subcode() == SubCode::kNoSpace);
+}
+
+bool Status::IsMemoryLimit() const {
+    MarkChecked();
+    return (code() == Code::kAborted) && (subcode() == SubCode::kMemoryLimit);
+}
+
+bool Status::IsPathNotFound() const {
+    MarkChecked();
+    return (code() == Code::kIOError || code() == Code::kNotFound) &&
+           (subcode() == SubCode::kPathNotFound);
+}
+
+bool Status::IsManualCompactionPaused() const {
+    MarkChecked();
+    return (code() == Code::kIncomplete) && (subcode() == SubCode::kManualCompactionPaused);
+}
+
+bool Status::IsTxnNotPrepared() const {
+    MarkChecked();
+    return (code() == Code::kInvalidArgument) && (subcode() == SubCode::kTxnNotPrepared);
+}
+
+bool Status::IsIOFenced() const {
+    MarkChecked();
+    return (code() == Code::kIOError) && (subcode() == SubCode::kIOFenced);
+}
+
 Status::Status(Code _code, SubCode _subcode)
     : code_(_code),
     subcode_(_subcode),
