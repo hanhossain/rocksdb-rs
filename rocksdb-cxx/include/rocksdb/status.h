@@ -31,7 +31,7 @@
 #include "rocksdb/slice.h"
 
 namespace ROCKSDB_NAMESPACE {
-
+enum class Code : unsigned char;
 enum class SubCode : unsigned char;
 enum class Severity : unsigned char;
 
@@ -55,26 +55,6 @@ class Status {
   void PermitUncheckedError() const;
 
   void MustCheck() const;
-
-  enum class Code : unsigned char {
-    kOk = 0,
-    kNotFound = 1,
-    kCorruption = 2,
-    kNotSupported = 3,
-    kInvalidArgument = 4,
-    kIOError = 5,
-    kMergeInProgress = 6,
-    kIncomplete = 7,
-    kShutdownInProgress = 8,
-    kTimedOut = 9,
-    kAborted = 10,
-    kBusy = 11,
-    kExpired = 12,
-    kTryAgain = 13,
-    kCompactionTooLarge = 14,
-    kColumnFamilyDropped = 15,
-    kMaxCode
-  };
 
   Code code() const;
 

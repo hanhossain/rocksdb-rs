@@ -50,7 +50,7 @@ void Status::MustCheck() const {
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 }
 
-Status::Code Status::code() const {
+Code Status::code() const {
     MarkChecked();
     return code_;
 }

@@ -632,7 +632,7 @@ namespace {
 // this is a helper struct to serialize and deserialize class Status, because
 // Status's members are not public.
 struct StatusSerializationAdapter {
-  Status::Code code;
+  Code code;
   SubCode subcode;
   Severity severity;
   std::string message;
@@ -647,7 +647,7 @@ struct StatusSerializationAdapter {
   }
 
   Status GetStatus() const {
-    return Status{static_cast<Status::Code>(code),
+    return Status{static_cast<Code>(code),
                   static_cast<SubCode>(subcode),
                   static_cast<Severity>(severity), message};
   }

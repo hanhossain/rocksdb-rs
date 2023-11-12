@@ -50,7 +50,7 @@ class ErrorHandler {
   void EnableAutoRecovery() { auto_recovery_ = true; }
 
   Severity GetErrorSeverity(BackgroundErrorReason reason,
-                                    Status::Code code, SubCode subcode);
+                                    Code code, SubCode subcode);
 
   const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
 

@@ -28,7 +28,7 @@ namespace ROCKSDB_NAMESPACE {
 
 class IOStatus : public Status {
  public:
-  using Code = Status::Code;
+  using Code = Code;
   using SubCode = SubCode;
 
   enum IOErrorScope : unsigned char {

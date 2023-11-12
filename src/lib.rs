@@ -22,6 +22,26 @@ pub mod ffi {
         value: String,
     }
 
+    enum Code {
+        kOk = 0,
+        kNotFound = 1,
+        kCorruption = 2,
+        kNotSupported = 3,
+        kInvalidArgument = 4,
+        kIOError = 5,
+        kMergeInProgress = 6,
+        kIncomplete = 7,
+        kShutdownInProgress = 8,
+        kTimedOut = 9,
+        kAborted = 10,
+        kBusy = 11,
+        kExpired = 12,
+        kTryAgain = 13,
+        kCompactionTooLarge = 14,
+        kColumnFamilyDropped = 15,
+        kMaxCode,
+    }
+
     enum SubCode {
         kNone = 0,
         kMutexTimeout = 1,
