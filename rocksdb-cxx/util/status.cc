@@ -18,6 +18,69 @@
 #include "port/port.h"
 
 namespace ROCKSDB_NAMESPACE {
+Status::Status(const Status& s)
+        : code_(s.code_),
+          subcode_(s.subcode_),
+          sev_(s.sev_),
+          retryable_(s.retryable_),
+          data_loss_(s.data_loss_),
+          scope_(s.scope_) {
+    s.MarkChecked();
+    state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+}
+
+Status::Status(const Status& s, Severity sev)
+        : code_(s.code_),
+          subcode_(s.subcode_),
+          sev_(sev),
+          retryable_(s.retryable_),
+          data_loss_(s.data_loss_),
+          scope_(s.scope_) {
+    s.MarkChecked();
+    state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+}
+
+Status& Status::operator=(const Status& s) {
+    if (this != &s) {
+        s.MarkChecked();
+        MustCheck();
+        code_ = s.code_;
+        subcode_ = s.subcode_;
+        sev_ = s.sev_;
+        retryable_ = s.retryable_;
+        data_loss_ = s.data_loss_;
+        scope_ = s.scope_;
+        state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+    }
+    return *this;
+}
+
+Status::Status(Status&& s) noexcept : Status() {
+    s.MarkChecked();
+    *this = std::move(s);
+}
+
+Status& Status::operator=(Status&& s) noexcept {
+    if (this != &s) {
+        s.MarkChecked();
+        MustCheck();
+        code_ = std::move(s.code_);
+        s.code_ = Code::kOk;
+        subcode_ = std::move(s.subcode_);
+        s.subcode_ = SubCode::kNone;
+        sev_ = std::move(s.sev_);
+        s.sev_ = Severity::kNoError;
+        retryable_ = std::move(s.retryable_);
+        s.retryable_ = false;
+        data_loss_ = std::move(s.data_loss_);
+        s.data_loss_ = false;
+        scope_ = std::move(s.scope_);
+        s.scope_ = 0;
+        state_ = std::move(s.state_);
+    }
+    return *this;
+}
+
 bool Status::operator==(const Status& rhs) const {
     MarkChecked();
     rhs.MarkChecked();
