@@ -92,10 +92,7 @@ class Status {
     kMaxCode
   };
 
-  Code code() const {
-    MarkChecked();
-    return code_;
-  }
+  Code code() const;
 
   enum class SubCode : unsigned char {
     kNone = 0,
@@ -117,10 +114,7 @@ class Status {
     kMaxSubCode
   };
 
-  SubCode subcode() const {
-    MarkChecked();
-    return subcode_;
-  }
+  SubCode subcode() const;
 
   enum class Severity : unsigned char {
     kNoError = 0,
@@ -139,16 +133,10 @@ class Status {
   static Status CopyAppendMessage(const Status& s, const Slice& delim,
                                   const Slice& msg);
 
-  Severity severity() const {
-    MarkChecked();
-    return sev_;
-  }
+  Severity severity() const;
 
   // Returns a C style string indicating the message of the Status
-  const char* getState() const {
-    MarkChecked();
-    return state_.get();
-  }
+  const char* getState() const;
 
   // Return a success status.
   static Status OK();

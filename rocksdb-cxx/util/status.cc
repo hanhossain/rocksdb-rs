@@ -18,6 +18,26 @@
 #include "port/port.h"
 
 namespace ROCKSDB_NAMESPACE {
+Status::Code Status::code() const {
+    MarkChecked();
+    return code_;
+}
+
+Status::SubCode Status::subcode() const {
+    MarkChecked();
+    return subcode_;
+}
+
+Status::Severity Status::severity() const {
+    MarkChecked();
+    return sev_;
+}
+
+const char* Status::getState() const {
+    MarkChecked();
+    return state_.get();
+}
+
 Status Status::OK() { return Status(); }
 
 Status Status::OkOverwritten() { return Status(Code::kOk, SubCode::kOverwritten); }
