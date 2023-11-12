@@ -151,142 +151,80 @@ class Status {
   }
 
   // Return a success status.
-  static Status OK() { return Status(); }
+  static Status OK();
 
   // Successful, though an existing something was overwritten
   // Note: using variants of OK status for program logic is discouraged,
   // but it can be useful for communicating statistical information without
   // changing public APIs.
-  static Status OkOverwritten() { return Status(Code::kOk, SubCode::kOverwritten); }
+  static Status OkOverwritten();
 
   // Return error status of an appropriate type.
-  static Status NotFound(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kNotFound, msg, msg2);
-  }
+  static Status NotFound(const Slice& msg, const Slice& msg2 = Slice());
 
   // Fast path for not found without malloc;
-  static Status NotFound(SubCode msg = SubCode::kNone) { return Status(Code::kNotFound, msg); }
+  static Status NotFound(SubCode msg = SubCode::kNone);
 
-  static Status NotFound(SubCode sc, const Slice& msg,
-                         const Slice& msg2 = Slice()) {
-    return Status(Code::kNotFound, sc, msg, msg2);
-  }
+  static Status NotFound(SubCode sc, const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status Corruption(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kCorruption, msg, msg2);
-  }
-  static Status Corruption(SubCode msg = SubCode::kNone) {
-    return Status(Code::kCorruption, msg);
-  }
+  static Status Corruption(const Slice& msg, const Slice& msg2 = Slice());
+  static Status Corruption(SubCode msg = SubCode::kNone);
 
-  static Status NotSupported(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kNotSupported, msg, msg2);
-  }
-  static Status NotSupported(SubCode msg = SubCode::kNone) {
-    return Status(Code::kNotSupported, msg);
-  }
+  static Status NotSupported(const Slice& msg, const Slice& msg2 = Slice());
+  static Status NotSupported(SubCode msg = SubCode::kNone);
 
-  static Status InvalidArgument(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kInvalidArgument, msg, msg2);
-  }
-  static Status InvalidArgument(SubCode msg = SubCode::kNone) {
-    return Status(Code::kInvalidArgument, msg);
-  }
+  static Status InvalidArgument(const Slice& msg, const Slice& msg2 = Slice());
+  static Status InvalidArgument(SubCode msg = SubCode::kNone);
 
-  static Status IOError(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIOError, msg, msg2);
-  }
-  static Status IOError(SubCode msg = SubCode::kNone) { return Status(Code::kIOError, msg); }
+  static Status IOError(const Slice& msg, const Slice& msg2 = Slice());
+  static Status IOError(SubCode msg = SubCode::kNone);
 
-  static Status MergeInProgress(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kMergeInProgress, msg, msg2);
-  }
-  static Status MergeInProgress(SubCode msg = SubCode::kNone) {
-    return Status(Code::kMergeInProgress, msg);
-  }
+  static Status MergeInProgress(const Slice& msg, const Slice& msg2 = Slice());
+  static Status MergeInProgress(SubCode msg = SubCode::kNone);
 
-  static Status Incomplete(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIncomplete, msg, msg2);
-  }
-  static Status Incomplete(SubCode msg = SubCode::kNone) {
-    return Status(Code::kIncomplete, msg);
-  }
+  static Status Incomplete(const Slice& msg, const Slice& msg2 = Slice());
+  static Status Incomplete(SubCode msg = SubCode::kNone);
 
-  static Status ShutdownInProgress(SubCode msg = SubCode::kNone) {
-    return Status(Code::kShutdownInProgress, msg);
-  }
-  static Status ShutdownInProgress(const Slice& msg,
-                                   const Slice& msg2 = Slice()) {
-    return Status(Code::kShutdownInProgress, msg, msg2);
-  }
-  static Status Aborted(SubCode msg = SubCode::kNone) { return Status(Code::kAborted, msg); }
-  static Status Aborted(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kAborted, msg, msg2);
-  }
+  static Status ShutdownInProgress(SubCode msg = SubCode::kNone);
+  static Status ShutdownInProgress(const Slice& msg, const Slice& msg2 = Slice());
+  static Status Aborted(SubCode msg = SubCode::kNone);
+  static Status Aborted(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status Busy(SubCode msg = SubCode::kNone) { return Status(Code::kBusy, msg); }
-  static Status Busy(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kBusy, msg, msg2);
-  }
+  static Status Busy(SubCode msg = SubCode::kNone);
+  static Status Busy(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status TimedOut(SubCode msg = SubCode::kNone) { return Status(Code::kTimedOut, msg); }
-  static Status TimedOut(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kTimedOut, msg, msg2);
-  }
+  static Status TimedOut(SubCode msg = SubCode::kNone);
+  static Status TimedOut(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status Expired(SubCode msg = SubCode::kNone) { return Status(Code::kExpired, msg); }
-  static Status Expired(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kExpired, msg, msg2);
-  }
+  static Status Expired(SubCode msg = SubCode::kNone);
+  static Status Expired(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status TryAgain(SubCode msg = SubCode::kNone) { return Status(Code::kTryAgain, msg); }
-  static Status TryAgain(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kTryAgain, msg, msg2);
-  }
+  static Status TryAgain(SubCode msg = SubCode::kNone);
+  static Status TryAgain(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status CompactionTooLarge(SubCode msg = SubCode::kNone) {
-    return Status(Code::kCompactionTooLarge, msg);
-  }
+  static Status CompactionTooLarge(SubCode msg = SubCode::kNone);
   static Status CompactionTooLarge(const Slice& msg,
-                                   const Slice& msg2 = Slice()) {
-    return Status(Code::kCompactionTooLarge, msg, msg2);
-  }
+                                   const Slice& msg2 = Slice());
 
-  static Status ColumnFamilyDropped(SubCode msg = SubCode::kNone) {
-    return Status(Code::kColumnFamilyDropped, msg);
-  }
+  static Status ColumnFamilyDropped(SubCode msg = SubCode::kNone);
 
   static Status ColumnFamilyDropped(const Slice& msg,
-                                    const Slice& msg2 = Slice()) {
-    return Status(Code::kColumnFamilyDropped, msg, msg2);
-  }
+                                    const Slice& msg2 = Slice());
 
-  static Status NoSpace() { return Status(Code::kIOError, SubCode::kNoSpace); }
-  static Status NoSpace(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIOError, SubCode::kNoSpace, msg, msg2);
-  }
+  static Status NoSpace();
+  static Status NoSpace(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status MemoryLimit() { return Status(Code::kAborted, SubCode::kMemoryLimit); }
-  static Status MemoryLimit(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kAborted, SubCode::kMemoryLimit, msg, msg2);
-  }
+  static Status MemoryLimit();
+  static Status MemoryLimit(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status SpaceLimit() { return Status(Code::kIOError, SubCode::kSpaceLimit); }
-  static Status SpaceLimit(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIOError, SubCode::kSpaceLimit, msg, msg2);
-  }
+  static Status SpaceLimit();
+  static Status SpaceLimit(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status PathNotFound() { return Status(Code::kIOError, SubCode::kPathNotFound); }
-  static Status PathNotFound(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kIOError, SubCode::kPathNotFound, msg, msg2);
-  }
+  static Status PathNotFound();
+  static Status PathNotFound(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status TxnNotPrepared() {
-    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared);
-  }
-  static Status TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice()) {
-    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared, msg, msg2);
-  }
+  static Status TxnNotPrepared();
+  static Status TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
 
   // Returns true iff the status indicates success.
   bool ok() const;

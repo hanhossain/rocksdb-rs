@@ -18,6 +18,139 @@
 #include "port/port.h"
 
 namespace ROCKSDB_NAMESPACE {
+Status Status::OK() { return Status(); }
+
+Status Status::OkOverwritten() { return Status(Code::kOk, SubCode::kOverwritten); }
+
+Status Status::NotFound(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kNotFound, msg, msg2);
+}
+
+Status Status::NotFound(SubCode msg) { return Status(Code::kNotFound, msg); }
+
+Status Status::NotFound(SubCode sc, const Slice& msg,
+                       const Slice& msg2) {
+    return Status(Code::kNotFound, sc, msg, msg2);
+}
+
+Status Status::Corruption(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kCorruption, msg, msg2);
+}
+Status Status::Corruption(SubCode msg) {
+    return Status(Code::kCorruption, msg);
+}
+
+Status Status::NotSupported(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kNotSupported, msg, msg2);
+}
+Status Status::NotSupported(SubCode msg) {
+    return Status(Code::kNotSupported, msg);
+}
+
+Status Status::InvalidArgument(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kInvalidArgument, msg, msg2);
+}
+Status Status::InvalidArgument(SubCode msg) {
+    return Status(Code::kInvalidArgument, msg);
+}
+
+Status Status::IOError(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kIOError, msg, msg2);
+}
+Status Status::IOError(SubCode msg) { return Status(Code::kIOError, msg); }
+
+Status Status::MergeInProgress(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kMergeInProgress, msg, msg2);
+}
+Status Status::MergeInProgress(SubCode msg) {
+    return Status(Code::kMergeInProgress, msg);
+}
+
+Status Status::Incomplete(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kIncomplete, msg, msg2);
+}
+Status Status::Incomplete(SubCode msg) {
+    return Status(Code::kIncomplete, msg);
+}
+
+Status Status::ShutdownInProgress(SubCode msg) {
+    return Status(Code::kShutdownInProgress, msg);
+}
+Status Status::ShutdownInProgress(const Slice& msg,
+                                 const Slice& msg2) {
+    return Status(Code::kShutdownInProgress, msg, msg2);
+}
+Status Status::Aborted(SubCode msg) { return Status(Code::kAborted, msg); }
+Status Status::Aborted(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kAborted, msg, msg2);
+}
+
+Status Status::Busy(SubCode msg) { return Status(Code::kBusy, msg); }
+Status Status::Busy(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kBusy, msg, msg2);
+}
+
+Status Status::TimedOut(SubCode msg) { return Status(Code::kTimedOut, msg); }
+Status Status::TimedOut(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kTimedOut, msg, msg2);
+}
+
+Status Status::Expired(SubCode msg) { return Status(Code::kExpired, msg); }
+Status Status::Expired(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kExpired, msg, msg2);
+}
+
+Status Status::TryAgain(SubCode msg) { return Status(Code::kTryAgain, msg); }
+Status Status::TryAgain(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kTryAgain, msg, msg2);
+}
+
+Status Status::CompactionTooLarge(SubCode msg) {
+    return Status(Code::kCompactionTooLarge, msg);
+}
+Status Status::CompactionTooLarge(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kCompactionTooLarge, msg, msg2);
+}
+
+Status Status::ColumnFamilyDropped(SubCode msg) {
+    return Status(Code::kColumnFamilyDropped, msg);
+}
+
+Status Status::ColumnFamilyDropped(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kColumnFamilyDropped, msg, msg2);
+}
+
+Status Status::NoSpace() { return Status(Code::kIOError, SubCode::kNoSpace); }
+
+Status Status::NoSpace(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kIOError, SubCode::kNoSpace, msg, msg2);
+}
+Status Status::MemoryLimit() { return Status(Code::kAborted, SubCode::kMemoryLimit); }
+
+Status Status::MemoryLimit(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kAborted, SubCode::kMemoryLimit, msg, msg2);
+}
+
+Status Status::SpaceLimit() { return Status(Code::kIOError, SubCode::kSpaceLimit); }
+
+Status Status::SpaceLimit(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kIOError, SubCode::kSpaceLimit, msg, msg2);
+}
+
+Status Status::PathNotFound() { return Status(Code::kIOError, SubCode::kPathNotFound); }
+
+Status Status::PathNotFound(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kIOError, SubCode::kPathNotFound, msg, msg2);
+}
+
+Status Status::TxnNotPrepared() {
+    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared);
+}
+
+Status Status::TxnNotPrepared(const Slice& msg, const Slice& msg2) {
+    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared, msg, msg2);
+}
+
 bool Status::ok() const {
     MarkChecked();
     return code() == Code::kOk;
