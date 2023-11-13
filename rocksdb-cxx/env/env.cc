@@ -25,6 +25,7 @@
 #include "rocksdb/utilities/customizable_util.h"
 #include "rocksdb/utilities/object_registry.h"
 #include "rocksdb/utilities/options_type.h"
+#include "rust/cxx.h"
 #include "util/autovector.h"
 
 #ifndef ROCKSDB_RS
@@ -611,6 +612,7 @@ class LegacyFileSystemWrapper : public FileSystem {
     // would be part of the Env.  As such, do not serialize it here.
     return "";
   }
+
  private:
   Env* target_;
 };
@@ -1235,4 +1237,10 @@ Status SystemClock::CreateFromString(const ConfigOptions& config_options,
     return LoadSharedObject<SystemClock>(config_options, value, result);
   }
 }
+
+rust::String HelloCommonFromCpp() {
+  const CommonRustData rust_data = {.value = "c++"};
+  return hello_common(rust_data);
+}
+
 }  // namespace ROCKSDB_NAMESPACE
