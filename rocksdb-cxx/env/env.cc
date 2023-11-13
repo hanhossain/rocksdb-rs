@@ -27,6 +27,12 @@
 #include "rocksdb/utilities/options_type.h"
 #include "util/autovector.h"
 
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/lib.h"
+#else
+#include "rocksdb-rs/src/lib.rs.h"
+#endif
+
 namespace ROCKSDB_NAMESPACE {
 namespace {
 static int RegisterBuiltinEnvs(ObjectLibrary& library,

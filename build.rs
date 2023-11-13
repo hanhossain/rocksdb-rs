@@ -333,51 +333,54 @@ const SOURCES: &[&str] = &[
 ];
 
 fn main() {
-    // This will be called when building rocksdb-rs from cmake.
-    if let Ok("1") = std::env::var("SKIP_BUILD_SCRIPT").as_deref() {
-        return;
+    // This will be set when building rocksdb-rs from cmake.
+    let skip_build_script = std::env::var("SKIP_BUILD_SCRIPT").map_or(false, |x| x == "1");
+
+    if !skip_build_script {
+        let target = std::env::var("TARGET").unwrap();
+        let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
+        let mut config = cxx_build::bridge("src/lib.rs");
+
+        config.flag("-pthread");
+        config.flag("-Wsign-compare");
+        config.flag("-Wshadow");
+        config.flag("-Wno-unused-parameter");
+        config.flag("-Wno-unused-variable");
+        config.flag("-Woverloaded-virtual");
+        config.flag("-Wnon-virtual-dtor");
+        config.flag("-Wno-missing-field-initializers");
+        config.flag("-Wno-strict-aliasing");
+        config.flag("-Wno-invalid-offsetof");
+
+        // Let c++ know it's being built from rust.
+        config.define("ROCKSDB_RS", None);
+
+        if target.contains("darwin") {
+            config.define("OS_MACOSX", None);
+        } else if target.contains("linux") {
+            config.define("OS_LINUX", None);
+        } else {
+            panic!("Unsupported target: {}", target);
+        }
+
+        config.define("ROCKSDB_PLATFORM_POSIX", None);
+        config.define("ROCKSDB_LIB_IO_POSIX", None);
+
+        config.includes(&includes);
+
+        let mut sources = SOURCES.to_vec();
+
+        if target.contains("aarch64") || target.contains("arm64") {
+            config.flag_if_supported("-march=armv8-a+crc+crypto");
+            sources.push("util/crc32c_arm64.cc");
+        }
+
+        let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
+        config.files(sources);
+        config.file("build_version.cc");
+        config.flag_if_supported("-std=c++17");
+        config.compile("rocksdb-cxx");
     }
-
-    let target = std::env::var("TARGET").unwrap();
-    let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
-    let mut config = cxx_build::bridge("src/lib.rs");
-
-    config.flag("-pthread");
-    config.flag("-Wsign-compare");
-    config.flag("-Wshadow");
-    config.flag("-Wno-unused-parameter");
-    config.flag("-Wno-unused-variable");
-    config.flag("-Woverloaded-virtual");
-    config.flag("-Wnon-virtual-dtor");
-    config.flag("-Wno-missing-field-initializers");
-    config.flag("-Wno-strict-aliasing");
-    config.flag("-Wno-invalid-offsetof");
-
-    if target.contains("darwin") {
-        config.define("OS_MACOSX", None);
-    } else if target.contains("linux") {
-        config.define("OS_LINUX", None);
-    } else {
-        panic!("Unsupported target: {}", target);
-    }
-
-    config.define("ROCKSDB_PLATFORM_POSIX", None);
-    config.define("ROCKSDB_LIB_IO_POSIX", None);
-
-    config.includes(&includes);
-
-    let mut sources = SOURCES.to_vec();
-
-    if target.contains("aarch64") || target.contains("arm64") {
-        config.flag_if_supported("-march=armv8-a+crc+crypto");
-        sources.push("util/crc32c_arm64.cc");
-    }
-
-    let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
-    config.files(sources);
-    config.file("build_version.cc");
-    config.flag_if_supported("-std=c++17");
-    config.compile("rocksdb-cxx");
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
