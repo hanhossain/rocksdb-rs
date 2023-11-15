@@ -20,3 +20,12 @@ docker build -t rocksdb --target=test-all .
 
 ## Dev tips
 Regex to find enums which need to be convered to enum class: `(?<!(static )|\w)enum\s+(?!class)(?!.*=)`
+
+Use this to include the bridging header.
+```c++
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/lib.h"
+#else
+#include "rocksdb-rs/src/lib.rs.h"
+#endif
+```

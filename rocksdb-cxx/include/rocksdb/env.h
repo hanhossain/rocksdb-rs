@@ -31,6 +31,7 @@
 #include "rocksdb/port_defs.h"
 #include "rocksdb/status.h"
 #include "rocksdb/thread_status.h"
+#include "rust/cxx.h"
 
 #ifdef _WIN32
 // Windows API macro interference
@@ -1914,5 +1915,7 @@ class Rusty {
 [[maybe_unused]] static std::unique_ptr<Rusty> Rusty_new() {
   return std::make_unique<Rusty>();
 }
+
+[[maybe_unused]] rust::String HelloCommonFromCpp();
 
 }  // namespace ROCKSDB_NAMESPACE

@@ -14,8 +14,13 @@
 #include "rocksdb/convenience.h"
 #include "rocksdb/env.h"
 #include "rocksdb/env_encryption.h"
-#include "rocksdb-rs-cxx/lib.h"
 #include "test_util/testharness.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/lib.h"
+#else
+#include "rocksdb-rs/src/lib.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 namespace {
@@ -148,11 +153,11 @@ INSTANTIATE_TEST_CASE_P(CustomEnv, EnvMoreTestWithParam,
                         ::testing::ValuesIn(GetCustomEnvs()));
 
 TEST_P(EnvBasicTestWithParam, RustIntegration) {
-    CommonRustData common = {.value = "integration"};
-    ASSERT_EQ(common.value, "integration");
+  CommonRustData common = {.value = "integration"};
+  ASSERT_EQ(common.value, "integration");
 
-    rust::String value = hello_common(common);
-    ASSERT_EQ(value, "Hello integration from rust!");
+  rust::String value = hello_common(common);
+  ASSERT_EQ(value, "Hello integration from rust!");
 }
 
 TEST_P(EnvBasicTestWithParam, Basics) {

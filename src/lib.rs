@@ -12,6 +12,9 @@ pub mod ffi {
 
         #[cxx_name = "HelloWorld"]
         fn hello_world(&self) -> UniquePtr<CxxString>;
+
+        #[cxx_name = "HelloCommonFromCpp"]
+        fn hello_common_from_cpp() -> String;
     }
 
     extern "Rust" {
@@ -42,5 +45,11 @@ mod tests {
         let value = rusty.hello_world();
         let value = value.to_string();
         assert_eq!(value, "Hello World from C++!");
+    }
+
+    #[test]
+    fn hello_from_cpp() {
+        let value = ffi::hello_common_from_cpp();
+        assert_eq!(value, "Hello c++ from rust!");
     }
 }
