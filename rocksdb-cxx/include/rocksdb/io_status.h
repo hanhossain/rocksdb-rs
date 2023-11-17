@@ -181,7 +181,7 @@ inline IOStatus::IOStatus(const IOStatus& s) : Status(s.code_, s.subcode_) {
   retryable_ = s.retryable_;
   data_loss_ = s.data_loss_;
   scope_ = s.scope_;
-  state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+  state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 inline IOStatus& IOStatus::operator=(const IOStatus& s) {
   // The following condition catches both aliasing (when this == &s),
@@ -196,7 +196,7 @@ inline IOStatus& IOStatus::operator=(const IOStatus& s) {
     retryable_ = s.retryable_;
     data_loss_ = s.data_loss_;
     scope_ = s.scope_;
-    state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+    state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
   }
   return *this;
 }

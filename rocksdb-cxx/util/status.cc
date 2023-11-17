@@ -400,7 +400,7 @@ Status::Status(const Status& s)
           data_loss_(s.data_loss_),
           scope_(s.scope_) {
     s.MarkChecked();
-    state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+    state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status::Status(const Status& s, Severity sev)
@@ -411,7 +411,7 @@ Status::Status(const Status& s, Severity sev)
           data_loss_(s.data_loss_),
           scope_(s.scope_) {
     s.MarkChecked();
-    state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+    state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status& Status::operator=(const Status& s) {
@@ -424,7 +424,7 @@ Status& Status::operator=(const Status& s) {
         retryable_ = s.retryable_;
         data_loss_ = s.data_loss_;
         scope_ = s.scope_;
-        state_ = (s.state_ == nullptr) ? nullptr : CopyState(s.state_.get());
+        state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
     }
     return *this;
 }
@@ -467,7 +467,7 @@ bool Status::operator!=(const Status& rhs) const {
     return !(*this == rhs);
 }
 
-std::unique_ptr<const char[]> Status::CopyState(const char* s) {
+std::unique_ptr<const char[]> Status_CopyState(const char* s) {
   const size_t cch = std::strlen(s) + 1;  // +1 for the null terminator
   char* rv = new char[cch];
   std::strncpy(rv, s, cch);
