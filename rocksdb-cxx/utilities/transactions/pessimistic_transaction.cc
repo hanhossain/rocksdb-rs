@@ -603,7 +603,7 @@ Status PessimisticTransaction::Commit() {
     if (skip_prepare_) {
       commit_without_prepare = true;
     } else {
-      return Status::TxnNotPrepared();
+      return Status_TxnNotPrepared();
     }
   }
 

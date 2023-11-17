@@ -231,11 +231,11 @@ Status Status::PathNotFound(const Slice& msg, const Slice& msg2) {
     return Status(Code::kIOError, SubCode::kPathNotFound, msg, msg2);
 }
 
-Status Status::TxnNotPrepared() {
+Status Status_TxnNotPrepared() {
     return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared);
 }
 
-Status Status::TxnNotPrepared(const Slice& msg, const Slice& msg2) {
+Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2) {
     return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared, msg, msg2);
 }
 

@@ -159,8 +159,6 @@ class Status {
   static Status PathNotFound();
   static Status PathNotFound(const Slice& msg, const Slice& msg2 = Slice());
 
-  static Status TxnNotPrepared();
-  static Status TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
 
   // Returns true iff the status indicates success.
   bool ok() const;
@@ -251,7 +249,11 @@ class Status {
   // Returns the string "OK" for success.
   std::string ToString() const;
 
- protected:
+    explicit Status(Code _code, SubCode _subcode);
+
+    Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
+
+protected:
   Code code_;
   SubCode subcode_;
   Severity sev_;
@@ -265,19 +267,20 @@ class Status {
   mutable bool checked_ = false;
 #endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 
-  explicit Status(Code _code, SubCode _subcode);
   explicit Status(Code _code);
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
-  Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
-  Status(Code _code, const Slice& msg, const Slice& msg2);
+
+        Status(Code _code, const Slice& msg, const Slice& msg2);
 
   void MarkChecked() const;
 };
 
-std::unique_ptr<const char[]> Status_CopyState(const char* s);
+    Status Status_TxnNotPrepared();
+    Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
+    std::unique_ptr<const char[]> Status_CopyState(const char* s);
 
 
 }  // namespace ROCKSDB_NAMESPACE
