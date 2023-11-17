@@ -4,7 +4,11 @@ RUN apt-get update && apt-get install -y \
     cmake \
     ninja-build \
     libgflags-dev \
-    libclang-dev
+    libclang-dev \
+    clang
+
+ENV CC=/usr/bin/clang
+ENV CXX=/usr/bin/clang++
 
 FROM base AS dev
 WORKDIR /src
