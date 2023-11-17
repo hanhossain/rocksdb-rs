@@ -146,10 +146,10 @@ Status TtlMergeOperator::PrepareOptions(const ConfigOptions& config_options) {
 Status TtlMergeOperator::ValidateOptions(
     const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts) const {
   if (user_merge_op_ == nullptr) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "UserMergeOperator required by TtlMergeOperator");
   } else if (clock_ == nullptr) {
-    return Status::InvalidArgument("SystemClock required by TtlMergeOperator");
+    return Status_InvalidArgument("SystemClock required by TtlMergeOperator");
   } else {
     return MergeOperator::ValidateOptions(db_opts, cf_opts);
   }
@@ -231,7 +231,7 @@ Status TtlCompactionFilter::PrepareOptions(
 Status TtlCompactionFilter::ValidateOptions(
     const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts) const {
   if (clock_ == nullptr) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "SystemClock required by TtlCompactionFilter");
   } else {
     return LayeredCompactionFilterBase::ValidateOptions(db_opts, cf_opts);
@@ -272,7 +272,7 @@ Status TtlCompactionFilterFactory::PrepareOptions(
 Status TtlCompactionFilterFactory::ValidateOptions(
     const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts) const {
   if (clock_ == nullptr) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "SystemClock required by TtlCompactionFilterFactory");
   } else {
     return CompactionFilterFactory::ValidateOptions(db_opts, cf_opts);
@@ -315,7 +315,7 @@ DBWithTTLImpl::~DBWithTTLImpl() {
 }
 
 Status DBWithTTLImpl::Close() {
-  Status ret = Status::OK();
+  Status ret = Status_OK();
   if (!closed_) {
     Options default_options = GetOptions();
     // Need to stop background compaction before getting rid of the filter
@@ -360,7 +360,7 @@ Status DBWithTTL::Open(
     const std::vector<int32_t>& ttls, bool read_only) {
   DBWithTTLImpl::RegisterTtlClasses();
   if (ttls.size() != column_families.size()) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "ttls size has to be the same as number of column families");
   }
 
@@ -430,15 +430,15 @@ Status DBWithTTLImpl::AppendTS(const Slice& val, std::string* val_with_ts,
 // timestamp refers to a time lesser than ttl-feature release time
 Status DBWithTTLImpl::SanityCheckTimestamp(const Slice& str) {
   if (str.size() < kTSLength) {
-    return Status::Corruption("Error: value's length less than timestamp's\n");
+    return Status_Corruption("Error: value's length less than timestamp's\n");
   }
   // Checks that TS is not lesser than kMinTimestamp
   // Gaurds against corruption & normal database opened incorrectly in ttl mode
   int32_t timestamp_value = DecodeFixed32(str.data() + str.size() - kTSLength);
   if (timestamp_value < kMinTimestamp) {
-    return Status::Corruption("Error: Timestamp < ttl feature release time!\n");
+    return Status_Corruption("Error: Timestamp < ttl feature release time!\n");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // Checks if the string is stale or not according to TTl provided
@@ -463,21 +463,21 @@ bool DBWithTTLImpl::IsStale(const Slice& value, int32_t ttl,
 // Strips the TS from the end of the slice
 Status DBWithTTLImpl::StripTS(PinnableSlice* pinnable_val) {
   if (pinnable_val->size() < kTSLength) {
-    return Status::Corruption("Bad timestamp in key-value");
+    return Status_Corruption("Bad timestamp in key-value");
   }
   // Erasing characters which hold the TS
   pinnable_val->remove_suffix(kTSLength);
-  return Status::OK();
+  return Status_OK();
 }
 
 // Strips the TS from the end of the string
 Status DBWithTTLImpl::StripTS(std::string* str) {
   if (str->length() < kTSLength) {
-    return Status::Corruption("Bad timestamp in key-value");
+    return Status_Corruption("Bad timestamp in key-value");
   }
   // Erasing characters which hold the TS
   str->erase(str->length() - kTSLength, kTSLength);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBWithTTLImpl::Put(const WriteOptions& options,
@@ -597,7 +597,7 @@ Status DBWithTTLImpl::Write(const WriteOptions& opts, WriteBatch* updates) {
 Iterator* DBWithTTLImpl::NewIterator(const ReadOptions& opts,
                                      ColumnFamilyHandle* column_family) {
   if (opts.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status::InvalidArgument(
+    return NewErrorIterator(Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }

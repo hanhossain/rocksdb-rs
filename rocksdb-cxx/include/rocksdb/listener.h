@@ -504,7 +504,7 @@ struct BackgroundErrorRecoveryInfo {
   // The original error that triggered the recovery
   Status old_bg_error;
 
-  // The final bg_error after all recovery attempts. Status::OK() means
+  // The final bg_error after all recovery attempts. Status_OK() means
   // the recovery was successful and the database is fully operational.
   Status new_bg_error;
 };
@@ -536,7 +536,7 @@ struct IOErrorInfo {
 // from a compaction-related listener callback can hang RocksDB. For DB
 // writes from a callback we recommend a WriteBatch and no_slowdown=true,
 // because the WriteBatch can accumulate writes for later in case DB::Write
-// returns Status::Incomplete. Similarly, calling CompactRange or similar
+// returns Status_Incomplete. Similarly, calling CompactRange or similar
 // could hang by waiting for a background worker that is occupied until the
 // callback returns.
 //
@@ -724,7 +724,7 @@ class EventListener : public Customizable {
   // A callback function for RocksDB which will be called before setting the
   // background error status to a non-OK value. The new background error status
   // is provided in `bg_error` and can be modified by the callback. E.g., a
-  // callback can suppress errors by resetting it to Status::OK(), thus
+  // callback can suppress errors by resetting it to Status_OK(), thus
   // preventing the database from entering read-only mode. We do not provide any
   // guarantee when failed flushes/compactions will be rescheduled if the user
   // suppresses an error.
@@ -796,7 +796,7 @@ class EventListener : public Customizable {
   // A callback function for RocksDB which will be called once the recovery
   // attempt from a background retryable error is completed. The recovery
   // may have been successful or not. In either case, the callback is called
-  // with the old and new error. If info.new_bg_error is Status::OK(), that
+  // with the old and new error. If info.new_bg_error is Status_OK(), that
   // means the recovery succeeded.
   virtual void OnErrorRecoveryEnd(const BackgroundErrorRecoveryInfo& /*info*/) {
   }

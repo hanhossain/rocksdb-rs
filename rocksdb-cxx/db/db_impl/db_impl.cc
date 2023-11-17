@@ -302,12 +302,12 @@ Status DBImpl::Resume() {
 
   if (!error_handler_.IsDBStopped() && !error_handler_.IsBGWorkStopped()) {
     // Nothing to do
-    return Status::OK();
+    return Status_OK();
   }
 
   if (error_handler_.IsRecoveryInProgress()) {
     // Don't allow a mix of manual and automatic recovery
-    return Status::Busy();
+    return Status_Busy();
   }
 
   mutex_.Unlock();
@@ -339,12 +339,12 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
   if (shutdown_initiated_) {
     // Returning shutdown status to SFM during auto recovery will cause it
     // to abort the recovery and allow the shutdown to progress
-    s = Status::ShutdownInProgress();
+    s = Status_ShutdownInProgress();
   }
 
   if (s.ok()) {
     Status bg_error = error_handler_.GetBGError();
-    if (bg_error.severity() > Status::Severity::kHardError) {
+    if (bg_error.severity() > Severity::kHardError) {
       ROCKS_LOG_INFO(
           immutable_db_options_.info_log,
           "DB resume requested but failed due to Fatal/Unrecoverable error");
@@ -465,7 +465,7 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
   // Check for shutdown again before scheduling further compactions,
   // since we released and re-acquired the lock above
   if (shutdown_initiated_) {
-    s = Status::ShutdownInProgress();
+    s = Status_ShutdownInProgress();
   }
   if (s.ok()) {
     for (auto cfd : *versions_->GetColumnFamilySet()) {
@@ -541,10 +541,10 @@ Status DBImpl::MaybeReleaseTimestampedSnapshotsAndCheck() {
 
   // If there is unreleased snapshot, fail the close call
   if (num_snapshots > 0) {
-    return Status::Aborted("Cannot close DB with unreleased snapshot.");
+    return Status_Aborted("Cannot close DB with unreleased snapshot.");
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::CloseHelper() {
@@ -580,7 +580,7 @@ Status DBImpl::CloseHelper() {
     env_->UnSchedule(GetTaskTag(i), Env::Priority::HIGH);
   }
 
-  Status ret = Status::OK();
+  Status ret = Status_OK();
 
   // Wait for background work to finish
   while (bg_bottom_compaction_scheduled_ || bg_compaction_scheduled_ ||
@@ -726,7 +726,7 @@ Status DBImpl::CloseHelper() {
     // Reserve IsAborted() error for those where users didn't release
     // certain resource and they can release them and come back and
     // retry. In this case, we wrap this exception to something else.
-    return Status::Incomplete(ret.ToString());
+    return Status_Incomplete(ret.ToString());
   }
 
   return ret;
@@ -760,7 +760,7 @@ void DBImpl::MaybeIgnoreError(Status* s) const {
   } else {
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "Ignoring error %s",
                    s->ToString().c_str());
-    *s = Status::OK();
+    *s = Status_OK();
   }
 }
 
@@ -771,7 +771,7 @@ const Status DBImpl::CreateArchivalDirectory() {
         ArchivalDirectory(immutable_db_options_.GetWalDir());
     return env_->CreateDirIfMissing(archivalPath);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void DBImpl::PrintStatistics() {
@@ -791,7 +791,7 @@ Status DBImpl::StartPeriodicTaskScheduler() {
       "DBImpl::StartPeriodicTaskScheduler:DisableScheduler",
       &disable_scheduler);
   if (disable_scheduler) {
-    return Status::OK();
+    return Status_OK();
   }
 
   {
@@ -916,7 +916,7 @@ void DBImpl::PersistStats() {
 
   if (immutable_db_options_.persist_stats_to_disk) {
     WriteBatch batch;
-    Status s = Status::OK();
+    Status s = Status_OK();
     if (stats_slice_initialized_) {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "Reading %" ROCKSDB_PRIszt " stats from statistics\n",
@@ -1021,7 +1021,7 @@ Status DBImpl::GetStatsHistory(
     uint64_t start_time, uint64_t end_time,
     std::unique_ptr<StatsHistoryIterator>* stats_iterator) {
   if (!stats_iterator) {
-    return Status::InvalidArgument("stats_iterator not preallocated.");
+    return Status_InvalidArgument("stats_iterator not preallocated.");
   }
   if (immutable_db_options_.persist_stats_to_disk) {
     stats_iterator->reset(
@@ -1161,7 +1161,7 @@ Status DBImpl::SetOptions(
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "SetOptions() on column family [%s], empty input",
                    cfd->GetName().c_str());
-    return Status::InvalidArgument("empty input");
+    return Status_InvalidArgument("empty input");
   }
 
   MutableCFOptions new_options;
@@ -1219,12 +1219,12 @@ Status DBImpl::SetDBOptions(
   if (options_map.empty()) {
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "SetDBOptions(), empty input.");
-    return Status::InvalidArgument("empty input");
+    return Status_InvalidArgument("empty input");
   }
 
   MutableDBOptions new_options;
   Status s;
-  Status persist_options_status = Status::OK();
+  Status persist_options_status = Status_OK();
   bool wal_changed = false;
   WriteContext write_context;
   {
@@ -1367,7 +1367,7 @@ Status DBImpl::SetDBOptions(
     new_options.Dump(immutable_db_options_.info_log.get());
     if (!persist_options_status.ok()) {
       if (immutable_db_options_.fail_if_options_file_error) {
-        s = Status::IOError(
+        s = Status_IOError(
             "SetDBOptions() succeeded, but unable to persist options",
             persist_options_status.ToString());
       }
@@ -1426,7 +1426,7 @@ Status DBImpl::FlushWAL(bool sync) {
     }
   }
   if (!sync) {
-    return Status::OK();
+    return Status_OK();
   }
   // sync = true
   ROCKS_LOG_DEBUG(immutable_db_options_.info_log, "FlushWAL sync=true");
@@ -1461,7 +1461,7 @@ Status DBImpl::SyncWAL() {
     for (auto it = logs_.begin();
          it != logs_.end() && it->number <= current_log_number; ++it) {
       if (!it->writer->file()->writable_file()->IsSyncThreadSafe()) {
-        return Status::NotSupported(
+        return Status_NotSupported(
             "SyncWAL() is not supported for this implementation of WAL file",
             immutable_db_options_.allow_mmap_writes
                 ? "try setting Options::allow_mmap_writes to false"
@@ -1591,7 +1591,7 @@ Status DBImpl::UnlockWAL() {
   {
     InstrumentedMutexLock lock(&mutex_);
     if (lock_wal_count_ == 0) {
-      return Status::Aborted("No LockWAL() in effect");
+      return Status_Aborted("No LockWAL() in effect");
     }
     --lock_wal_count_;
     if (lock_wal_count_ == 0) {
@@ -1619,7 +1619,7 @@ Status DBImpl::UnlockWAL() {
   if (nonmem_maybe_stall_begun_count) {
     nonmem_write_thread_.WaitForStallEndedCount(nonmem_maybe_stall_begun_count);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void DBImpl::MarkLogsSynced(uint64_t up_to, bool synced_dir,
@@ -1678,7 +1678,7 @@ void DBImpl::SetLastPublishedSequence(SequenceNumber seq) {
 Status DBImpl::GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
                                    std::string* ts_low) {
   if (ts_low == nullptr) {
-    return Status::InvalidArgument("ts_low is nullptr");
+    return Status_InvalidArgument("ts_low is nullptr");
   }
   ColumnFamilyData* cfd = nullptr;
   if (column_family == nullptr) {
@@ -1690,13 +1690,13 @@ Status DBImpl::GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
   }
   assert(cfd != nullptr && cfd->user_comparator() != nullptr);
   if (cfd->user_comparator()->timestamp_size() == 0) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Timestamp is not enabled in this column family");
   }
   InstrumentedMutexLock l(&mutex_);
   *ts_low = cfd->GetFullHistoryTsLow();
   assert(cfd->user_comparator()->timestamp_size() == ts_low->size());
-  return Status::OK();
+  return Status_OK();
 }
 
 InternalIterator* DBImpl::NewInternalIterator(const ReadOptions& read_options,
@@ -1939,17 +1939,17 @@ Status DBImpl::GetEntity(const ReadOptions& read_options,
                          ColumnFamilyHandle* column_family, const Slice& key,
                          PinnableWideColumns* columns) {
   if (!column_family) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call GetEntity without a column family handle");
   }
 
   if (!columns) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call GetEntity without a PinnableWideColumns object");
   }
 
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call GetEntity with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -2000,7 +2000,7 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
   assert(get_impl_options.column_family);
 
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -2219,8 +2219,8 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
         if (*get_impl_options.number_of_operands >
             get_impl_options.get_merge_operands_options
                 ->expected_max_number_of_operands) {
-          s = Status::Incomplete(
-              Status::SubCode::KMergeOperandsInsufficientCapacity);
+          s = Status_Incomplete(
+              SubCode::KMergeOperandsInsufficientCapacity);
         } else {
           // Each operand depends on one of the following resources: `sv`,
           // `pinned_iters_mgr`, or `merge_context`. It would be crazy expensive
@@ -2329,7 +2329,7 @@ std::vector<Status> DBImpl::MultiGet(
   if (should_fail) {
     for (auto& s : stat_list) {
       if (s.ok()) {
-        s = Status::Incomplete(
+        s = Status_Incomplete(
             "DB not queried due to invalid argument(s) in the same MultiGet");
       }
     }
@@ -2454,7 +2454,7 @@ std::vector<Status> DBImpl::MultiGet(
       curr_value_size += value->size();
       if (curr_value_size > read_options.value_size_soft_limit) {
         while (++keys_read < num_keys) {
-          stat_list[keys_read] = Status::Aborted();
+          stat_list[keys_read] = Status_Aborted();
         }
         break;
       }
@@ -2472,7 +2472,7 @@ std::vector<Status> DBImpl::MultiGet(
     assert(immutable_db_options_.clock->NowMicros() >
            static_cast<uint64_t>(read_options.deadline.count()));
     for (++keys_read; keys_read < num_keys; ++keys_read) {
-      stat_list[keys_read] = Status::TimedOut();
+      stat_list[keys_read] = Status_TimedOut();
     }
   }
 
@@ -2666,7 +2666,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
   if (should_fail) {
     for (size_t i = 0; i < num_keys; ++i) {
       if (statuses[i].ok()) {
-        statuses[i] = Status::Incomplete(
+        statuses[i] = Status_Incomplete(
             "DB not queried due to invalid argument(s) in the same MultiGet");
       }
     }
@@ -2947,7 +2947,7 @@ void DBImpl::MultiGetWithCallback(
 //
 // The per key status is returned in the KeyContext structures pointed to by
 // sorted_keys. An overall Status is also returned, with the only possible
-// values being Status::OK() and Status::TimedOut(). The latter indicates
+// values being Status_OK() and Status_TimedOut(). The latter indicates
 // that the call exceeded read_options.deadline
 Status DBImpl::MultiGetImpl(
     const ReadOptions& read_options, size_t start_key, size_t num_keys,
@@ -2955,7 +2955,7 @@ Status DBImpl::MultiGetImpl(
     SuperVersion* super_version, SequenceNumber snapshot,
     ReadCallback* callback) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -2983,7 +2983,7 @@ Status DBImpl::MultiGetImpl(
     if (read_options.deadline.count() &&
         immutable_db_options_.clock->NowMicros() >
             static_cast<uint64_t>(read_options.deadline.count())) {
-      s = Status::TimedOut();
+      s = Status_TimedOut();
       break;
     }
 
@@ -3001,7 +3001,7 @@ Status DBImpl::MultiGetImpl(
     for (auto mget_iter = range.begin(); mget_iter != range.end();
          ++mget_iter) {
       mget_iter->merge_context.Clear();
-      *mget_iter->s = Status::OK();
+      *mget_iter->s = Status_OK();
     }
 
     bool skip_memtable =
@@ -3025,7 +3025,7 @@ Status DBImpl::MultiGetImpl(
     }
     curr_value_size = range.GetValueSize();
     if (curr_value_size > read_options.value_size_soft_limit) {
-      s = Status::Aborted();
+      s = Status_Aborted();
       break;
     }
   }
@@ -3183,7 +3183,7 @@ Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
 
     if (versions_->GetColumnFamilySet()->GetColumnFamily(column_family_name) !=
         nullptr) {
-      return Status::InvalidArgument("Column family already exists");
+      return Status_InvalidArgument("Column family already exists");
     }
     VersionEdit edit;
     edit.AddColumnFamily(column_family_name);
@@ -3285,7 +3285,7 @@ Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
   if (cfd->GetID() == 0) {
-    return Status::InvalidArgument("Can't drop default column family");
+    return Status_InvalidArgument("Can't drop default column family");
   }
 
   bool cf_support_snapshot = cfd->mem()->IsSnapshotSupported();
@@ -3298,7 +3298,7 @@ Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
   {
     InstrumentedMutexLock l(&mutex_);
     if (cfd->IsDropped()) {
-      s = Status::InvalidArgument("Column family already dropped!\n");
+      s = Status_InvalidArgument("Column family already dropped!\n");
     }
     if (s.ok()) {
       // we drop column family from a single write thread
@@ -3376,7 +3376,7 @@ bool DBImpl::KeyMayExist(const ReadOptions& read_options,
   value->assign(pinnable_val.data(), pinnable_val.size());
 
   // If block_cache is enabled and the index block of the table didn't
-  // not present in block_cache, the return value will be Status::Incomplete.
+  // not present in block_cache, the return value will be Status_Incomplete.
   // In this case, key may still exist in the table.
   return s.ok() || s.IsIncomplete();
 }
@@ -3385,15 +3385,15 @@ Iterator* DBImpl::NewIterator(const ReadOptions& read_options,
                               ColumnFamilyHandle* column_family) {
   if (read_options.managed) {
     return NewErrorIterator(
-        Status::NotSupported("Managed iterator is not supported anymore."));
+        Status_NotSupported("Managed iterator is not supported anymore."));
   }
   Iterator* result = nullptr;
   if (read_options.read_tier == kPersistedTier) {
-    return NewErrorIterator(Status::NotSupported(
+    return NewErrorIterator(Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators."));
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status::InvalidArgument(
+    return NewErrorIterator(Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -3526,14 +3526,14 @@ Status DBImpl::NewIterators(
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
   if (read_options.managed) {
-    return Status::NotSupported("Managed iterator is not supported anymore.");
+    return Status_NotSupported("Managed iterator is not supported anymore.");
   }
   if (read_options.read_tier == kPersistedTier) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call NewIterators with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -3588,7 +3588,7 @@ Status DBImpl::NewIterators(
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 const Snapshot* DBImpl::GetSnapshot() { return GetSnapshotImpl(false); }
@@ -3630,13 +3630,13 @@ Status DBImpl::GetTimestampedSnapshots(
     uint64_t ts_lb, uint64_t ts_ub,
     std::vector<std::shared_ptr<const Snapshot>>& timestamped_snapshots) const {
   if (ts_lb >= ts_ub) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "timestamp lower bound must be smaller than upper bound");
   }
   timestamped_snapshots.clear();
   InstrumentedMutexLock lock_guard(&mutex_);
   timestamped_snapshots_.GetSnapshots(ts_lb, ts_ub, timestamped_snapshots);
-  return Status::OK();
+  return Status_OK();
 }
 
 SnapshotImpl* DBImpl::GetSnapshotImpl(bool is_write_conflict_boundary,
@@ -3690,7 +3690,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
     }
     delete s;
     return std::make_pair(
-        Status::NotSupported("Memtable does not support snapshot"), nullptr);
+        Status_NotSupported("Memtable does not support snapshot"), nullptr);
   }
 
   // Caller is not write thread, thus didn't provide a valid snapshot_seq.
@@ -3718,7 +3718,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
       std::ostringstream oss;
       oss << "snapshot exists with larger timestamp " << latest_snap_ts << " > "
           << ts;
-      status = Status::InvalidArgument(oss.str());
+      status = Status_InvalidArgument(oss.str());
     } else if (latest_snap_ts == ts) {
       if (latest_snap_seq == snapshot_seq) {
         // We are requesting the same sequence number and timestamp, thus can
@@ -3735,7 +3735,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
         oss << "Allocated seq is " << snapshot_seq
             << ", while snapshot exists with smaller seq " << latest_snap_seq
             << " but same timestamp " << ts;
-        status = Status::InvalidArgument(oss.str());
+        status = Status_InvalidArgument(oss.str());
       }
     }
     if (!needs_create_snap) {
@@ -3774,7 +3774,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
   if (lock) {
     mutex_.Unlock();
   }
-  return std::make_pair(Status::OK(), ret);
+  return std::make_pair(Status_OK(), ret);
 }
 
 namespace {
@@ -3918,7 +3918,7 @@ Status DBImpl::StartIOTrace(const TraceOptions& trace_options,
 
 Status DBImpl::EndIOTrace() {
   io_tracer_->EndIOTrace();
-  return Status::OK();
+  return Status_OK();
 }
 
 
@@ -4056,7 +4056,7 @@ Status DBImpl::ResetStats() {
       cfd->internal_stats()->Clear();
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 bool DBImpl::GetAggregatedIntProperty(const Slice& property,
@@ -4200,7 +4200,7 @@ Status DBImpl::GetApproximateSizes(const SizeApproximationOptions& options,
                                    ColumnFamilyHandle* column_family,
                                    const Range* range, int n, uint64_t* sizes) {
   if (!options.include_memtables && !options.include_files) {
-    return Status::InvalidArgument("Invalid options");
+    return Status_InvalidArgument("Invalid options");
   }
 
   const Comparator* const ucmp = column_family->GetComparator();
@@ -4246,7 +4246,7 @@ Status DBImpl::GetApproximateSizes(const SizeApproximationOptions& options,
   }
 
   ReturnAndCleanupSuperVersion(cfd, sv);
-  return Status::OK();
+  return Status_OK();
 }
 
 std::list<uint64_t>::iterator
@@ -4273,12 +4273,12 @@ Status DBImpl::GetUpdatesSince(
     const TransactionLogIterator::ReadOptions& read_options) {
   RecordTick(stats_, GET_UPDATES_SINCE_CALLS);
   if (seq_per_batch_) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "This API is not yet compatible with write-prepared/write-unprepared "
         "transactions");
   }
   if (seq > versions_->LastSequence()) {
-    return Status::NotFound("Requested sequence not yet written in the db");
+    return Status_NotFound("Requested sequence not yet written in the db");
   }
   return wal_manager_.GetUpdatesSince(seq, iter, read_options, versions_.get());
 }
@@ -4293,7 +4293,7 @@ Status DBImpl::DeleteFile(std::string name) {
       (type != kTableFile && type != kWalFile)) {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log, "DeleteFile %s failed.\n",
                     name.c_str());
-    return Status::InvalidArgument("Invalid file name");
+    return Status_InvalidArgument("Invalid file name");
   }
 
   if (type == kWalFile) {
@@ -4302,7 +4302,7 @@ Status DBImpl::DeleteFile(std::string name) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DeleteFile %s failed - not archived log.\n",
                       name.c_str());
-      return Status::NotSupported("Delete only supported for archived logs");
+      return Status_NotSupported("Delete only supported for archived logs");
     }
     Status status = wal_manager_.DeleteFile(name, number);
     if (!status.ok()) {
@@ -4326,7 +4326,7 @@ Status DBImpl::DeleteFile(std::string name) {
       ROCKS_LOG_WARN(immutable_db_options_.info_log,
                      "DeleteFile %s failed. File not found\n", name.c_str());
       job_context.Clean();
-      return Status::InvalidArgument("File not found");
+      return Status_InvalidArgument("File not found");
     }
     assert(level < cfd->NumberLevels());
 
@@ -4336,7 +4336,7 @@ Status DBImpl::DeleteFile(std::string name) {
                      "DeleteFile %s Skipped. File about to be compacted\n",
                      name.c_str());
       job_context.Clean();
-      return Status::OK();
+      return Status_OK();
     }
 
     // Only the files in the last level can be deleted externally.
@@ -4349,7 +4349,7 @@ Status DBImpl::DeleteFile(std::string name) {
                        "DeleteFile %s FAILED. File not in last level\n",
                        name.c_str());
         job_context.Clean();
-        return Status::InvalidArgument("File not in last level");
+        return Status_InvalidArgument("File not in last level");
       }
     }
     // if level == 0, it has to be the oldest file
@@ -4360,7 +4360,7 @@ Status DBImpl::DeleteFile(std::string name) {
                      " target file in level 0 must be the oldest.",
                      name.c_str());
       job_context.Clean();
-      return Status::InvalidArgument("File in level 0, but not oldest");
+      return Status_InvalidArgument("File in level 0, but not oldest");
     }
     edit.SetColumnFamily(cfd->GetID());
     edit.DeleteFile(level, number);
@@ -4390,7 +4390,7 @@ Status DBImpl::DeleteFilesInRanges(ColumnFamilyHandle* column_family,
                                    bool include_end) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status status = Status::OK();
+  Status status = Status_OK();
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   ColumnFamilyData* cfd = cfh->cfd();
   VersionEdit edit;
@@ -4580,7 +4580,7 @@ Status DBImpl::CheckConsistency() {
       Status s = env_->GetFileSize(file_path, &fsize);
       if (!s.ok() &&
           env_->GetFileSize(Rocks2LevelTableFileName(file_path), &fsize).ok()) {
-        s = Status::OK();
+        s = Status_OK();
       }
       if (!s.ok()) {
         corruption_messages +=
@@ -4595,15 +4595,15 @@ Status DBImpl::CheckConsistency() {
   }
 
   if (corruption_messages.size() == 0) {
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::Corruption(corruption_messages);
+    return Status_Corruption(corruption_messages);
   }
 }
 
 Status DBImpl::GetDbIdentity(std::string& identity) const {
   identity.assign(db_id_);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::GetDbIdentityFromIdentityFile(std::string* identity) const {
@@ -4625,7 +4625,7 @@ Status DBImpl::GetDbIdentityFromIdentityFile(std::string* identity) const {
 
 Status DBImpl::GetDbSessionId(std::string& session_id) const {
   session_id.assign(db_session_id_);
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {
@@ -4661,38 +4661,38 @@ void DBImpl::SetDbSessionId() {
 Status DB::CreateColumnFamily(const ColumnFamilyOptions& /*cf_options*/,
                               const std::string& /*column_family_name*/,
                               ColumnFamilyHandle** /*handle*/) {
-  return Status::NotSupported("");
+  return Status_NotSupported("");
 }
 
 Status DB::CreateColumnFamilies(
     const ColumnFamilyOptions& /*cf_options*/,
     const std::vector<std::string>& /*column_family_names*/,
     std::vector<ColumnFamilyHandle*>* /*handles*/) {
-  return Status::NotSupported("");
+  return Status_NotSupported("");
 }
 
 Status DB::CreateColumnFamilies(
     const std::vector<ColumnFamilyDescriptor>& /*column_families*/,
     std::vector<ColumnFamilyHandle*>* /*handles*/) {
-  return Status::NotSupported("");
+  return Status_NotSupported("");
 }
 
 Status DB::DropColumnFamily(ColumnFamilyHandle* /*column_family*/) {
-  return Status::NotSupported("");
+  return Status_NotSupported("");
 }
 
 Status DB::DropColumnFamilies(
     const std::vector<ColumnFamilyHandle*>& /*column_families*/) {
-  return Status::NotSupported("");
+  return Status_NotSupported("");
 }
 
 Status DB::DestroyColumnFamilyHandle(ColumnFamilyHandle* column_family) {
   if (DefaultColumnFamily() == column_family) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot destroy the handle returned by DefaultColumnFamily()");
   }
   delete column_family;
-  return Status::OK();
+  return Status_OK();
 }
 
 DB::~DB() {}
@@ -4932,11 +4932,11 @@ Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "Unnable to persist options -- %s", s.ToString().c_str());
     if (immutable_db_options_.fail_if_options_file_error) {
-      return Status::IOError("Unable to persist options.",
+      return Status_IOError("Unable to persist options.",
                              s.ToString().c_str());
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {
@@ -4984,7 +4984,7 @@ Status DBImpl::DeleteObsoleteOptionsFiles() {
   const size_t kNumOptionsFilesKept = 2;
   DeleteOptionsFilesHelper(options_filenames, kNumOptionsFilesKept,
                            immutable_db_options_.info_log, GetEnv());
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
@@ -5147,14 +5147,14 @@ Status DBImpl::GetLatestSequenceForKey(
   if (*seq != kMaxSequenceNumber) {
     // Found a sequence number, no need to check immutable memtables
     *found_record_for_key = true;
-    return Status::OK();
+    return Status_OK();
   }
 
   SequenceNumber lower_bound_in_mem = sv->mem->GetEarliestSequenceNumber();
   if (lower_bound_in_mem != kMaxSequenceNumber &&
       lower_bound_in_mem < lower_bound_seq) {
     *found_record_for_key = false;
-    return Status::OK();
+    return Status_OK();
   }
 
   // Check if there is a record for this key in the immutable memtables
@@ -5179,14 +5179,14 @@ Status DBImpl::GetLatestSequenceForKey(
   if (*seq != kMaxSequenceNumber) {
     // Found a sequence number, no need to check memtable history
     *found_record_for_key = true;
-    return Status::OK();
+    return Status_OK();
   }
 
   SequenceNumber lower_bound_in_imm = sv->imm->GetEarliestSequenceNumber();
   if (lower_bound_in_imm != kMaxSequenceNumber &&
       lower_bound_in_imm < lower_bound_seq) {
     *found_record_for_key = false;
-    return Status::OK();
+    return Status_OK();
   }
 
   // Check if there is a record for this key in the immutable memtables
@@ -5214,7 +5214,7 @@ Status DBImpl::GetLatestSequenceForKey(
     // Found a sequence number, no need to check SST files
     assert(0 == ts_sz || *timestamp != std::string(ts_sz, '\xff'));
     *found_record_for_key = true;
-    return Status::OK();
+    return Status_OK();
   }
 
   // We could do a sv->imm->GetEarliestSequenceNumber(/*include_history*/ true)
@@ -5259,15 +5259,15 @@ Status DBImpl::IngestExternalFiles(
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   if (args.empty()) {
-    return Status::InvalidArgument("ingestion arg list is empty");
+    return Status_InvalidArgument("ingestion arg list is empty");
   }
   {
     std::unordered_set<ColumnFamilyHandle*> unique_cfhs;
     for (const auto& arg : args) {
       if (arg.column_family == nullptr) {
-        return Status::InvalidArgument("column family handle is null");
+        return Status_InvalidArgument("column family handle is null");
       } else if (unique_cfhs.count(arg.column_family) > 0) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "ingestion args have duplicate column families");
       }
       unique_cfhs.insert(arg.column_family);
@@ -5279,14 +5279,14 @@ Status DBImpl::IngestExternalFiles(
     if (args[i].external_files.empty()) {
       char err_msg[128] = {0};
       snprintf(err_msg, 128, "external_files[%zu] is empty", i);
-      return Status::InvalidArgument(err_msg);
+      return Status_InvalidArgument(err_msg);
     }
   }
   for (const auto& arg : args) {
     const IngestExternalFileOptions& ingest_opts = arg.options;
     if (ingest_opts.ingest_behind &&
         !immutable_db_options_.allow_ingest_behind) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "can't ingest_behind file in DB with allow_ingest_behind=false");
     }
   }
@@ -5395,7 +5395,7 @@ Status DBImpl::IngestExternalFiles(
       if (cfd->IsDropped()) {
         // TODO (yanqin) investigate whether we should abort ingestion or
         // proceed with other non-dropped column families.
-        status = Status::InvalidArgument(
+        status = Status_InvalidArgument(
             "cannot ingest an external file into a dropped CF");
         break;
       }
@@ -5587,7 +5587,7 @@ Status DBImpl::CreateColumnFamilyWithImport(
   std::vector<std::vector<LiveFileMetaData*>> metadata_files(metadatas.size());
   for (size_t i = 0; i < metadatas.size(); i++) {
     if (cf_comparator_name != metadatas[i]->db_comparator_name) {
-      return Status::InvalidArgument("Comparator name mismatch");
+      return Status_InvalidArgument("Comparator name mismatch");
     }
     for (auto& file : metadatas[i]->files) {
       metadata_files[i].push_back((LiveFileMetaData*)&file);
@@ -5706,7 +5706,7 @@ Status DBImpl::CreateColumnFamilyWithImport(
                       "DropColumnFamily failed with error %s",
                       temp_s.ToString().c_str());
     }
-    // Always returns Status::OK()
+    // Always returns Status_OK()
     temp_s = DestroyColumnFamilyHandle(*handle);
     assert(temp_s.ok());
     *handle = nullptr;
@@ -5807,7 +5807,7 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
   Status s;
 
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    s = Status::InvalidArgument(
+    s = Status_InvalidArgument(
         "Cannot verify file checksum with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return s;
@@ -5816,7 +5816,7 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
     FileChecksumGenFactory* const file_checksum_gen_factory =
         immutable_db_options_.file_checksum_gen_factory.get();
     if (!file_checksum_gen_factory) {
-      s = Status::InvalidArgument(
+      s = Status_InvalidArgument(
           "Cannot verify file checksum if options.file_checksum_gen_factory is "
           "null");
       return s;
@@ -5926,7 +5926,7 @@ Status DBImpl::VerifyFullFileChecksum(const std::string& file_checksum_expected,
                                       const std::string& fname,
                                       const ReadOptions& read_options) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call VerifyChecksum with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -5951,7 +5951,7 @@ Status DBImpl::VerifyFullFileChecksum(const std::string& file_checksum_expected,
       oss << "expecting "
           << Slice(file_checksum_expected).ToString(/*hex=*/true);
       oss << ", but actual " << Slice(file_checksum).ToString(/*hex=*/true);
-      s = Status::Corruption(oss.str());
+      s = Status_Corruption(oss.str());
       TEST_SYNC_POINT_CALLBACK("DBImpl::VerifyFullFileChecksum:mismatch", &s);
     }
   }
@@ -5982,7 +5982,7 @@ Status DBImpl::StartTrace(const TraceOptions& trace_options,
   InstrumentedMutexLock lock(&trace_mutex_);
   tracer_.reset(new Tracer(immutable_db_options_.clock, trace_options,
                            std::move(trace_writer)));
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::EndTrace() {
@@ -5992,7 +5992,7 @@ Status DBImpl::EndTrace() {
     s = tracer_->Close();
     tracer_.reset();
   } else {
-    s = Status::IOError("No trace file to close");
+    s = Status_IOError("No trace file to close");
   }
   return s;
 }
@@ -6002,7 +6002,7 @@ Status DBImpl::NewDefaultReplayer(
     std::unique_ptr<TraceReader>&& reader,
     std::unique_ptr<Replayer>* replayer) {
   replayer->reset(new ReplayerImpl(this, handles, std::move(reader)));
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::StartBlockCacheTrace(
@@ -6030,7 +6030,7 @@ Status DBImpl::StartBlockCacheTrace(
 
 Status DBImpl::EndBlockCacheTrace() {
   block_cache_tracer_.EndTrace();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
@@ -6113,9 +6113,9 @@ Status DBImpl::GetCreationTimeOfOldestFile(uint64_t* creation_time) {
       }
     }
     *creation_time = oldest_time;
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::NotSupported("This API only works if max_open_files = -1");
+    return Status_NotSupported("This API only works if max_open_files = -1");
   }
 }
 

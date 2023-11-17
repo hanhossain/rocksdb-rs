@@ -39,7 +39,7 @@ TEST_F(EnvMirrorTest, Basics) {
   ASSERT_OK(env_->CreateDir("/dir"));
 
   // Check that the directory is empty.
-  ASSERT_EQ(Status::NotFound(), env_->FileExists("/dir/non_existent"));
+  ASSERT_EQ(Status_NotFound(), env_->FileExists("/dir/non_existent"));
   ASSERT_TRUE(!env_->GetFileSize("/dir/non_existent", &file_size).ok());
   ASSERT_OK(env_->GetChildren("/dir", &children));
   ASSERT_EQ(0U, children.size());
@@ -80,7 +80,7 @@ TEST_F(EnvMirrorTest, Basics) {
   // Check that renaming works.
   ASSERT_TRUE(!env_->RenameFile("/dir/non_existent", "/dir/g").ok());
   ASSERT_OK(env_->RenameFile("/dir/f", "/dir/g"));
-  ASSERT_EQ(Status::NotFound(), env_->FileExists("/dir/f"));
+  ASSERT_EQ(Status_NotFound(), env_->FileExists("/dir/f"));
   ASSERT_OK(env_->FileExists("/dir/g"));
   ASSERT_OK(env_->GetFileSize("/dir/g", &file_size));
   ASSERT_EQ(3U, file_size);
@@ -105,7 +105,7 @@ TEST_F(EnvMirrorTest, Basics) {
   // Check that deleting works.
   ASSERT_TRUE(!env_->DeleteFile("/dir/non_existent").ok());
   ASSERT_OK(env_->DeleteFile("/dir/g"));
-  ASSERT_EQ(Status::NotFound(), env_->FileExists("/dir/g"));
+  ASSERT_EQ(Status_NotFound(), env_->FileExists("/dir/g"));
   ASSERT_OK(env_->GetChildren("/dir", &children));
   ASSERT_EQ(0U, children.size());
   ASSERT_OK(env_->DeleteDir("/dir"));

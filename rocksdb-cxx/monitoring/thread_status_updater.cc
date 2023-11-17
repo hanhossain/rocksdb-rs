@@ -216,7 +216,7 @@ Status ThreadStatusUpdater::GetThreadList(
         op_elapsed_micros, op_stage, op_props, state_type);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 ThreadStatusData* ThreadStatusUpdater::GetLocalThreadStatus() {
@@ -305,7 +305,7 @@ void ThreadStatusUpdater::ClearThreadState() {}
 
 Status ThreadStatusUpdater::GetThreadList(
     std::vector<ThreadStatus>* /*thread_list*/) {
-  return Status::NotSupported(
+  return Status_NotSupported(
       "GetThreadList is not supported in the current running environment.");
 }
 

@@ -224,7 +224,7 @@ Status ValidateOptionsByTable(
       return s;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace
 
@@ -244,59 +244,59 @@ Status DBImpl::ValidateOptions(
 
 Status DBImpl::ValidateOptions(const DBOptions& db_options) {
   if (db_options.db_paths.size() > 4) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "More than four DB paths are not supported yet. ");
   }
 
   if (db_options.allow_mmap_reads && db_options.use_direct_reads) {
     // Protect against assert in PosixMMapReadableFile constructor
-    return Status::NotSupported(
+    return Status_NotSupported(
         "If memory mapped reads (allow_mmap_reads) are enabled "
         "then direct I/O reads (use_direct_reads) must be disabled. ");
   }
 
   if (db_options.allow_mmap_writes &&
       db_options.use_direct_io_for_flush_and_compaction) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "If memory mapped writes (allow_mmap_writes) are enabled "
         "then direct I/O writes (use_direct_io_for_flush_and_compaction) must "
         "be disabled. ");
   }
 
   if (db_options.keep_log_file_num == 0) {
-    return Status::InvalidArgument("keep_log_file_num must be greater than 0");
+    return Status_InvalidArgument("keep_log_file_num must be greater than 0");
   }
 
   if (db_options.unordered_write &&
       !db_options.allow_concurrent_memtable_write) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "unordered_write is incompatible with "
         "!allow_concurrent_memtable_write");
   }
 
   if (db_options.unordered_write && db_options.enable_pipelined_write) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "unordered_write is incompatible with enable_pipelined_write");
   }
 
   if (db_options.atomic_flush && db_options.enable_pipelined_write) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "atomic_flush is incompatible with enable_pipelined_write");
   }
 
   // TODO remove this restriction
   if (db_options.atomic_flush && db_options.best_efforts_recovery) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "atomic_flush is currently incompatible with best-efforts recovery");
   }
 
   if (db_options.use_direct_io_for_flush_and_compaction &&
       0 == db_options.writable_file_max_buffer_size) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "writes in direct IO require writable_file_max_buffer_size > 0");
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::NewDB(std::vector<std::string>* new_filenames) {
@@ -435,7 +435,7 @@ Status DBImpl::Recover(
     if (!immutable_db_options_.best_efforts_recovery) {
       s = env_->FileExists(current_fname);
     } else {
-      s = Status::NotFound();
+      s = Status_NotFound();
       IOOptions io_opts;
       io_opts.do_not_recurse = true;
       Status io_s = immutable_db_options_.fs->GetChildren(
@@ -467,12 +467,12 @@ Status DBImpl::Recover(
           return s;
         }
       } else {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             current_fname, "does not exist (create_if_missing is false)");
       }
     } else if (s.ok()) {
       if (immutable_db_options_.error_if_exists) {
-        return Status::InvalidArgument(dbname_,
+        return Status_InvalidArgument(dbname_,
                                        "exists (error_if_exists is true)");
       }
     } else {
@@ -495,10 +495,10 @@ Status DBImpl::Recover(
         customized_fs.use_direct_reads = false;
         s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
         if (s.ok()) {
-          return Status::InvalidArgument(
+          return Status_InvalidArgument(
               "Direct I/O is not supported by the specified DB.");
         } else {
-          return Status::InvalidArgument(
+          return Status_InvalidArgument(
               "Found options incompatible with filesystem", error_str.c_str());
         }
       }
@@ -510,7 +510,7 @@ Status DBImpl::Recover(
     Status s = immutable_db_options_.fs->GetChildren(
         dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr);
     if (s.IsNotFound()) {
-      return Status::InvalidArgument(dbname_,
+      return Status_InvalidArgument(dbname_,
                                      "does not exist (open for read only)");
     } else if (s.IsIOError()) {
       return s;
@@ -684,7 +684,7 @@ Status DBImpl::Recover(
           wal_dir, io_opts, &files_in_wal_dir, /*IODebugContext*=*/nullptr);
     }
     if (s.IsNotFound()) {
-      return Status::InvalidArgument("wal_dir not found", wal_dir);
+      return Status_InvalidArgument("wal_dir not found", wal_dir);
     } else if (!s.ok()) {
       return s;
     }
@@ -695,7 +695,7 @@ Status DBImpl::Recover(
       FileType type;
       if (ParseFileName(file, &number, &type) && type == kWalFile) {
         if (is_new_db) {
-          return Status::Corruption(
+          return Status_Corruption(
               "While creating a new Db, wal_dir contains "
               "existing log file: ",
               file);
@@ -731,7 +731,7 @@ Status DBImpl::Recover(
 
     if (!wal_files.empty()) {
       if (error_if_wal_file_exists) {
-        return Status::Corruption(
+        return Status_Corruption(
             "The db was opened in readonly mode with error_if_wal_file_exists"
             "flag but a WAL file already exists");
       } else if (error_if_data_exists_in_wals) {
@@ -740,7 +740,7 @@ Status DBImpl::Recover(
           s = env_->GetFileSize(wal_file.second, &bytes);
           if (s.ok()) {
             if (bytes > 0) {
-              return Status::Corruption(
+              return Status_Corruption(
                   "error_if_data_exists_in_wals is set but there are data "
                   " in WAL files.");
             }
@@ -998,7 +998,7 @@ bool DBImpl::InvokeWalFilterIfNeededOnWalRecord(uint64_t wal_number,
       stop_replay = true;
       break;
     case WalFilter::WalProcessingOption::kCorruptedRecord: {
-      status = Status::Corruption("Corruption reported by Wal Filter ",
+      status = Status_Corruption("Corruption reported by Wal Filter ",
                                   wal_filter.Name());
       MaybeIgnoreError(&status);
       if (!status.ok()) {
@@ -1011,7 +1011,7 @@ bool DBImpl::InvokeWalFilterIfNeededOnWalRecord(uint64_t wal_number,
       // logical error which should not happen. If RocksDB throws, we would
       // just do `throw std::logic_error`.
       assert(false);
-      status = Status::NotSupported(
+      status = Status_NotSupported(
           "Unknown WalProcessingOption returned by Wal Filter ",
           wal_filter.Name());
       MaybeIgnoreError(&status);
@@ -1041,7 +1041,7 @@ bool DBImpl::InvokeWalFilterIfNeededOnWalRecord(uint64_t wal_number,
           "Aborting recovery.",
           wal_number, static_cast<int>(immutable_db_options_.wal_recovery_mode),
           wal_filter.Name(), new_count, original_count);
-      status = Status::NotSupported(
+      status = Status_NotSupported(
           "More than original # of records "
           "returned by Wal Filter ",
           wal_filter.Name());
@@ -1200,7 +1200,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
            status.ok()) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter.Corruption(record.size(),
-                            Status::Corruption("log record too small"));
+                            Status_Corruption("log record too small"));
         continue;
       }
 
@@ -1315,7 +1315,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
       if (immutable_db_options_.wal_recovery_mode ==
           WALRecoveryMode::kSkipAnyCorruptedRecords) {
         // We should ignore all errors unconditionally
-        status = Status::OK();
+        status = Status_OK();
       } else if (immutable_db_options_.wal_recovery_mode ==
                  WALRecoveryMode::kPointInTimeRecovery) {
         if (status.IsIOError()) {
@@ -1329,7 +1329,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
           return status;
         }
         // We should ignore the error but not continue replaying
-        status = Status::OK();
+        status = Status_OK();
         stop_replay_for_corruption = true;
         corrupted_wal_number = wal_number;
         if (corrupted_wal_found != nullptr) {
@@ -1393,7 +1393,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
         ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                         "Column family inconsistency: SST file contains data"
                         " beyond the point of corruption.");
-        return Status::Corruption("SST file is ahead of WALs in CF " +
+        return Status_Corruption("SST file is ahead of WALs in CF " +
                                   cfd->GetName());
       }
     }
@@ -1543,7 +1543,7 @@ Status DBImpl::GetLogSizeAndMaybeTruncate(uint64_t wal_number, bool truncate,
 
 Status DBImpl::RestoreAliveLogFiles(const std::vector<uint64_t>& wal_numbers) {
   if (wal_numbers.empty()) {
-    return Status::OK();
+    return Status_OK();
   }
   Status s;
   mutex_.AssertHeld();
@@ -1690,7 +1690,7 @@ Status DBImpl::WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
                        "[%s] [JOB %d] Level-0 flush during recover: %s",
                        cfd->GetName().c_str(), job_id, msg.c_str());
         if (immutable_db_options_.flush_verify_memtable_count) {
-          s = Status::Corruption(msg);
+          s = Status_Corruption(msg);
         }
       }
     }
@@ -1796,11 +1796,11 @@ Status DB::OpenAndTrimHistory(
   assert(handles != nullptr);
   auto validate_options = [&db_options] {
     if (db_options.avoid_flush_during_recovery) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "avoid_flush_during_recovery incompatible with "
           "OpenAndTrimHistory");
     }
-    return Status::OK();
+    return Status_OK();
   };
   auto s = validate_options();
   if (!s.ok()) {
@@ -2050,7 +2050,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
             break;
           }
         } else {
-          s = Status::InvalidArgument("Column family not found", cf.name);
+          s = Status_InvalidArgument("Column family not found", cf.name);
           break;
         }
       }
@@ -2078,7 +2078,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
       }
       if (cfd->ioptions()->merge_operator != nullptr &&
           !cfd->mem()->IsMergeOperatorSupported()) {
-        s = Status::InvalidArgument(
+        s = Status_InvalidArgument(
             "The memtable of column family %s does not support merge operator "
             "its options.merge_operator is non-null",
             cfd->GetName().c_str());
@@ -2204,7 +2204,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
       }
     }
     if (s.ok() && !persist_options_status.ok()) {
-      s = Status::IOError(
+      s = Status_IOError(
           "DB::Open() failed --- Unable to persist Options file",
           persist_options_status.ToString());
     }

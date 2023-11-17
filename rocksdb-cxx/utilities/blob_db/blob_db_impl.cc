@@ -103,7 +103,7 @@ BlobDBImpl::~BlobDBImpl() {
 
 Status BlobDBImpl::Close() {
   if (closed_) {
-    return Status::OK();
+    return Status_OK();
   }
   closed_ = true;
 
@@ -130,12 +130,12 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   assert(db_ == nullptr);
 
   if (blob_dir_.empty()) {
-    return Status::NotSupported("No blob directory in options");
+    return Status_NotSupported("No blob directory in options");
   }
 
   if (bdb_options_.garbage_collection_cutoff < 0.0 ||
       bdb_options_.garbage_collection_cutoff > 1.0) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Garbage collection cutoff must be in the interval [0.0, 1.0]");
   }
 
@@ -234,7 +234,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
     }
 
     if (blob_dir_same_as_cf_dir) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Using the base DB's storage directories for BlobDB files is not "
           "supported.");
     }
@@ -751,7 +751,7 @@ Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<BlobFile>& bfile) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Open blob file: %s with wrong size: %" PRIu64,
                    fpath.c_str(), boffset);
-    return Status::Corruption("Invalid blob file size");
+    return Status_Corruption("Invalid blob file size");
   }
 
   constexpr bool do_flush = true;
@@ -804,7 +804,7 @@ Status BlobDBImpl::CheckOrCreateWriterLocked(
   assert(writer != nullptr);
   *writer = blob_file->GetWriter();
   if (*writer != nullptr) {
-    return Status::OK();
+    return Status_OK();
   }
   Status s = CreateWriterLocked(blob_file);
   if (s.ok()) {
@@ -860,7 +860,7 @@ Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
     if (open_non_ttl_file_) {
       assert(!open_non_ttl_file_->Immutable());
       *blob_file = open_non_ttl_file_;
-      return Status::OK();
+      return Status_OK();
     }
   }
 
@@ -870,7 +870,7 @@ Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
   if (open_non_ttl_file_) {
     assert(!open_non_ttl_file_->Immutable());
     *blob_file = open_non_ttl_file_;
-    return Status::OK();
+    return Status_OK();
   }
 
   std::shared_ptr<BlobLogWriter> writer;
@@ -898,7 +898,7 @@ Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
     *blob_file = FindBlobFileLocked(expiration);
     if (*blob_file != nullptr) {
       assert(!(*blob_file)->Immutable());
-      return Status::OK();
+      return Status_OK();
     }
   }
 
@@ -908,7 +908,7 @@ Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
   *blob_file = FindBlobFileLocked(expiration);
   if (*blob_file != nullptr) {
     assert(!(*blob_file)->Immutable());
-    return Status::OK();
+    return Status_OK();
   }
 
   const uint64_t exp_low =
@@ -952,7 +952,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
   Status PutCF(uint32_t column_family_id, const Slice& key,
                const Slice& value) override {
     if (column_family_id != default_cf_id_) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     Status s = blob_db_impl_->PutBlobValue(options_, key, value, kNoExpiration,
@@ -962,7 +962,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
 
   Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
     if (column_family_id != default_cf_id_) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     Status s = WriteBatchInternal::Delete(&batch_, column_family_id, key);
@@ -972,7 +972,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
   virtual Status DeleteRange(uint32_t column_family_id, const Slice& begin_key,
                              const Slice& end_key) {
     if (column_family_id != default_cf_id_) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     Status s = WriteBatchInternal::DeleteRange(&batch_, column_family_id,
@@ -982,12 +982,12 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
 
   Status SingleDeleteCF(uint32_t /*column_family_id*/,
                         const Slice& /*key*/) override {
-    return Status::NotSupported("Not supported operation in blob db.");
+    return Status_NotSupported("Not supported operation in blob db.");
   }
 
   Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                  const Slice& /*value*/) override {
-    return Status::NotSupported("Not supported operation in blob db.");
+    return Status_NotSupported("Not supported operation in blob db.");
   }
 
   void LogData(const Slice& blob) override { batch_.PutLogData(blob); }
@@ -1164,13 +1164,13 @@ Status BlobDBImpl::DecompressSlice(const Slice& compressed_value,
         info, compressed_value.data(), compressed_value.size(), &contents,
         kBlockBasedTableVersionFormat, *(cfh->cfd()->ioptions()));
     if (!s.ok()) {
-      return Status::Corruption("Unable to decompress blob.");
+      return Status_Corruption("Unable to decompress blob.");
     }
   }
 
   value_output->PinSelf(contents.data);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobDBImpl::CompactFiles(
@@ -1274,14 +1274,14 @@ Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_size,
   if (bdb_options_.max_db_size == 0 ||
       live_sst_size + total_blob_size_.load() + blob_size <=
           bdb_options_.max_db_size) {
-    return Status::OK();
+    return Status_OK();
   }
 
   if (bdb_options_.is_fifo == false ||
       (!force_evict && live_sst_size + blob_size > bdb_options_.max_db_size)) {
     // FIFO eviction is disabled, or no space to insert new blob even we evict
     // all blob files.
-    return Status::NoSpace(
+    return Status_NoSpace(
         "Write failed, as writing it would exceed max_db_size limit.");
   }
 
@@ -1331,10 +1331,10 @@ Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_size,
   }
   if (live_sst_size + total_blob_size_.load() + blob_size >
       bdb_options_.max_db_size) {
-    return Status::NoSpace(
+    return Status_NoSpace(
         "Write failed, as writing it would exceed max_db_size limit.");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile>& bfile,
@@ -1426,7 +1426,7 @@ Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
   }
 
   if (blob_index.HasTTL() && blob_index.expiration() <= EpochNow()) {
-    return Status::NotFound("Key expired");
+    return Status_NotFound("Key expired");
   }
 
   if (expiration != nullptr) {
@@ -1441,7 +1441,7 @@ Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
     // TODO(yiwu): If index_entry is a PinnableSlice, we can also pin the same
     // memory buffer to avoid extra copy.
     value->PinSelf(blob_index.value());
-    return Status::OK();
+    return Status_OK();
   }
 
   CompressionType compression_type = kNoCompression;
@@ -1467,7 +1467,7 @@ Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
@@ -1480,7 +1480,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
 
   if (!size) {
     value->PinSelf("");
-    return Status::OK();
+    return Status_OK();
   }
 
   // offset has to have certain min, as we will read CRC
@@ -1497,7 +1497,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
                       key.ToString(/* output_hex */ true).c_str());
     }
 
-    return Status::NotFound("Invalid blob offset");
+    return Status_NotFound("Invalid blob offset");
   }
 
   std::shared_ptr<BlobFile> blob_file;
@@ -1508,7 +1508,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
 
     // file was deleted
     if (it == blob_files_.end()) {
-      return Status::NotFound("Blob Not Found as blob file missing");
+      return Status_NotFound("Blob Not Found as blob file missing");
     }
 
     blob_file = it->second;
@@ -1567,7 +1567,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
         ", read %" ROCKSDB_PRIszt " bytes, expected %" PRIu64 " bytes",
         file_number, offset, size, key.size(), blob_record.size(), record_size);
 
-    return Status::Corruption("Failed to retrieve blob from blob index.");
+    return Status_Corruption("Failed to retrieve blob from blob index.");
   }
 
   Slice crc_slice(blob_record.data(), sizeof(uint32_t));
@@ -1581,7 +1581,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
         "Unable to decode CRC from blob file %" PRIu64 ", blob_offset: %" PRIu64
         ", blob_size: %" PRIu64 ", key size: %" ROCKSDB_PRIszt ", status: '%s'",
         file_number, offset, size, key.size(), s.ToString().c_str());
-    return Status::Corruption("Unable to decode checksum.");
+    return Status_Corruption("Unable to decode checksum.");
   }
 
   uint32_t crc = crc32c::Value(blob_record.data() + sizeof(uint32_t),
@@ -1597,12 +1597,12 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
           key.ToString(/* output_hex */ true).c_str(), s.ToString().c_str());
     }
 
-    return Status::Corruption("Corruption. Blob CRC mismatch");
+    return Status_Corruption("Corruption. Blob CRC mismatch");
   }
 
   value->PinSelf(blob_value);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobDBImpl::Get(const ReadOptions& read_options,
@@ -1624,11 +1624,11 @@ Status BlobDBImpl::GetImpl(const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            PinnableSlice* value, uint64_t* expiration) {
   if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Blob DB doesn't support non-default column family.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -1777,7 +1777,7 @@ Status BlobDBImpl::CloseBlobFileIfNeeded(std::shared_ptr<BlobFile>& bfile) {
 
   // atomic read
   if (bfile->GetFileSize() < bdb_options_.blob_file_size) {
-    return Status::OK();
+    return Status_OK();
   }
 
   WriteLock lock(&mutex_);
@@ -1785,7 +1785,7 @@ Status BlobDBImpl::CloseBlobFileIfNeeded(std::shared_ptr<BlobFile>& bfile) {
 
   assert(!bfile->Obsolete() || bfile->Immutable());
   if (bfile->Immutable()) {
-    return Status::OK();
+    return Status_OK();
   }
 
   return CloseBlobFile(bfile);
@@ -2038,7 +2038,7 @@ void BlobDBImpl::CopyBlobFiles(
 
 Iterator* BlobDBImpl::NewIterator(const ReadOptions& read_options) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status::InvalidArgument(
+    return NewErrorIterator(Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }

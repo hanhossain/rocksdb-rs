@@ -177,13 +177,13 @@ Status TableCache::FindTable(
 
   if (*handle == nullptr) {
     if (no_io) {
-      return Status::Incomplete("Table not found in table_cache, no_io is set");
+      return Status_Incomplete("Table not found in table_cache, no_io is set");
     }
     MutexLock load_lock(&loader_mutex_.Get(key));
     // We check the cache again under loading mutex
     *handle = cache_.Lookup(key);
     if (*handle != nullptr) {
-      return Status::OK();
+      return Status_OK();
     }
 
     std::unique_ptr<TableReader> table_reader;
@@ -207,7 +207,7 @@ Status TableCache::FindTable(
     }
     return s;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 InternalIterator* TableCache::NewIterator(
@@ -474,7 +474,7 @@ Status TableCache::Get(
     } else if (options.read_tier == kBlockCacheTier && s.IsIncomplete()) {
       // Couldn't find Table in cache but treat as kFound if no_io set
       get_context->MarkKeyMayExist();
-      s = Status::OK();
+      s = Status_OK();
       done = true;
     }
   }
@@ -534,7 +534,7 @@ Status TableCache::MultiGetFilter(
   // lookup.
   KeyContext& first_key = *mget_range->begin();
   if (ioptions_.row_cache && !first_key.get_context->NeedToReadSequence()) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   Status s;
   TableReader* t = fd.table_reader;
@@ -583,7 +583,7 @@ Status TableCache::GetTableProperties(
   if (table_reader) {
     *properties = table_reader->GetTableProperties();
 
-    return Status::OK();
+    return Status_OK();
   }
 
   TypedHandle* table_handle = nullptr;

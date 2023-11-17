@@ -138,7 +138,7 @@ Status GetPlainTableOptionsFromString(const ConfigOptions& config_options,
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status::InvalidArgument(s.getState());
+    return Status_InvalidArgument(s.getState());
   }
 }
 
@@ -243,9 +243,9 @@ Status MemTableRepFactory::CreateFromString(
   } else if (value.empty()) {
     // No Id and no options.  Clear the object
     result->reset();
-    return Status::OK();
+    return Status_OK();
   } else if (id.empty()) {  // We have no Id but have options.  Not good
-    return Status::NotSupported("Cannot reset object ", id);
+    return Status_NotSupported("Cannot reset object ", id);
   } else {
     status = NewUniqueObject<MemTableRepFactory>(config_options, id, opt_map,
                                                  result);

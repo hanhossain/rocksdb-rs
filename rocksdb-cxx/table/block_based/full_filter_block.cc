@@ -108,7 +108,7 @@ Slice FullFilterBlockBuilder::Finish(
     std::unique_ptr<const char[]>* filter_data) {
   Reset();
   // In this impl we ignore BlockHandle
-  *status = Status::OK();
+  *status = Status_OK();
   if (any_added_) {
     any_added_ = false;
     Slice filter_content = filter_bits_builder_->Finish(

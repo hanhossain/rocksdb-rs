@@ -94,7 +94,7 @@ class BlobDB : public StackableDB {
                      ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& value) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     return Put(options, key, value);
@@ -105,7 +105,7 @@ class BlobDB : public StackableDB {
                         ColumnFamilyHandle* column_family,
                         const Slice& key) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     assert(db_ != nullptr);
@@ -118,7 +118,7 @@ class BlobDB : public StackableDB {
                             ColumnFamilyHandle* column_family, const Slice& key,
                             const Slice& value, uint64_t ttl) {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     return PutWithTTL(options, key, value, ttl);
@@ -132,7 +132,7 @@ class BlobDB : public StackableDB {
                           ColumnFamilyHandle* column_family, const Slice& key,
                           const Slice& value, uint64_t expiration) {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     return PutUntil(options, key, value, expiration);
@@ -165,7 +165,7 @@ class BlobDB : public StackableDB {
       if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
         return std::vector<Status>(
             column_families.size(),
-            Status::NotSupported(
+            Status_NotSupported(
                 "Blob DB doesn't support non-default column family."));
       }
     }
@@ -178,7 +178,7 @@ class BlobDB : public StackableDB {
                         const bool /*sorted_input*/ = false) override {
     for (size_t i = 0; i < num_keys; ++i) {
       statuses[i] =
-          Status::NotSupported("Blob DB doesn't support batched MultiGet");
+          Status_NotSupported("Blob DB doesn't support batched MultiGet");
     }
   }
 
@@ -186,14 +186,14 @@ class BlobDB : public StackableDB {
   virtual Status SingleDelete(const WriteOptions& /*wopts*/,
                               ColumnFamilyHandle* /*column_family*/,
                               const Slice& /*key*/) override {
-    return Status::NotSupported("Not supported operation in blob db.");
+    return Status_NotSupported("Not supported operation in blob db.");
   }
 
   using ROCKSDB_NAMESPACE::StackableDB::Merge;
   virtual Status Merge(const WriteOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/,
                        const Slice& /*key*/, const Slice& /*value*/) override {
-    return Status::NotSupported("Not supported operation in blob db.");
+    return Status_NotSupported("Not supported operation in blob db.");
   }
 
   virtual Status Write(const WriteOptions& opts,
@@ -224,7 +224,7 @@ class BlobDB : public StackableDB {
       std::vector<std::string>* const output_file_names = nullptr,
       CompactionJobInfo* compaction_job_info = nullptr) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
 

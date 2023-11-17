@@ -1644,10 +1644,10 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   Random rnd(static_cast<uint32_t>(time(nullptr)));
   Random64 rnd64(time(nullptr));
   std::vector<Status> status_list = {
-      Status::OK(),
-      Status::InvalidArgument("invalid option"),
-      Status::Aborted("failed to run"),
-      Status::NotSupported("not supported option"),
+      Status_OK(),
+      Status_InvalidArgument("invalid option"),
+      Status_Aborted("failed to run"),
+      Status_NotSupported("not supported option"),
   };
   result.status =
       status_list.at(rnd.Uniform(static_cast<int>(status_list.size())));

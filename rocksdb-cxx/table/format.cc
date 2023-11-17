@@ -65,24 +65,24 @@ char* BlockHandle::EncodeTo(char* dst) const {
 
 Status BlockHandle::DecodeFrom(Slice* input) {
   if (GetVarint64(input, &offset_) && GetVarint64(input, &size_)) {
-    return Status::OK();
+    return Status_OK();
   } else {
     // reset in case failure after partially decoding
     offset_ = 0;
     size_ = 0;
-    return Status::Corruption("bad block handle");
+    return Status_Corruption("bad block handle");
   }
 }
 
 Status BlockHandle::DecodeSizeFrom(uint64_t _offset, Slice* input) {
   if (GetVarint64(input, &size_)) {
     offset_ = _offset;
-    return Status::OK();
+    return Status_OK();
   } else {
     // reset in case failure after partially decoding
     offset_ = 0;
     size_ = 0;
-    return Status::Corruption("bad block handle");
+    return Status_Corruption("bad block handle");
   }
 }
 
@@ -122,7 +122,7 @@ Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
   if (previous_handle) {
     int64_t delta;
     if (!GetVarsignedint64(input, &delta)) {
-      return Status::Corruption("bad delta-encoded index value");
+      return Status_Corruption("bad delta-encoded index value");
     }
     // WART: this is specific to Block-based table
     handle = BlockHandle(previous_handle->offset() + previous_handle->size() +
@@ -138,10 +138,10 @@ Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
   if (!have_first_key) {
     first_internal_key = Slice();
   } else if (!GetLengthPrefixedSlice(input, &first_internal_key)) {
-    return Status::Corruption("bad first key in block info");
+    return Status_Corruption("bad first key in block info");
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 std::string IndexValue::ToString(bool hex, bool have_first_key) const {
@@ -276,7 +276,7 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
     magic = UpconvertLegacyFooterFormat(magic);
   }
   if (enforce_table_magic_number != 0 && enforce_table_magic_number != magic) {
-    return Status::Corruption("Bad table magic number: expected " +
+    return Status_Corruption("Bad table magic number: expected " +
                               std::to_string(enforce_table_magic_number) +
                               ", found " + std::to_string(magic));
   }
@@ -294,12 +294,12 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
     const char* part3_ptr = magic_ptr - 4;
     format_version_ = DecodeFixed32(part3_ptr);
     if (!IsSupportedFormatVersion(format_version_)) {
-      return Status::Corruption("Corrupt or unsupported format_version: " +
+      return Status_Corruption("Corrupt or unsupported format_version: " +
                                 std::to_string(format_version_));
     }
     // All known format versions >= 1 occupy exactly this many bytes.
     if (input.size() < kNewVersionsEncodedLength) {
-      return Status::Corruption("Input is too short to be an SST file");
+      return Status_Corruption("Input is too short to be an SST file");
     }
     uint64_t adjustment = input.size() - kNewVersionsEncodedLength;
     input.remove_prefix(adjustment);
@@ -308,7 +308,7 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
     char chksum = input.data()[0];
     checksum_type_ = lossless_cast<ChecksumType>(chksum);
     if (!IsSupportedChecksumType(checksum_type())) {
-      return Status::Corruption("Corrupt or unsupported checksum type: " +
+      return Status_Corruption("Corrupt or unsupported checksum type: " +
                                 std::to_string(lossless_cast<uint8_t>(chksum)));
     }
     // Consume checksum type field
@@ -350,7 +350,7 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
                           uint64_t file_size, Footer* footer,
                           uint64_t enforce_table_magic_number) {
   if (file_size < Footer::kMinEncodedLength) {
-    return Status::Corruption("file is too short (" +
+    return Status_Corruption("file is too short (" +
                               std::to_string(file_size) +
                               " bytes) to be an "
                               "sstable: " +
@@ -395,12 +395,12 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
             .ok()) {
       // Similar to CheckConsistency message, but not completely sure the
       // expected size always came from manifest.
-      return Status::Corruption("Sst file size mismatch: " + file->file_name() +
+      return Status_Corruption("Sst file size mismatch: " + file->file_name() +
                                 ". Expected " + std::to_string(file_size) +
                                 ", actual size " +
                                 std::to_string(size_on_disk) + "\n");
     } else {
-      return Status::Corruption(
+      return Status_Corruption(
           "Missing SST footer data in file " + file->file_name() +
           " File too short? Expected size: " + std::to_string(file_size));
     }
@@ -408,10 +408,10 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
 
   s = footer->DecodeFrom(footer_input, read_offset, enforce_table_magic_number);
   if (!s.ok()) {
-    s = Status::CopyAppendMessage(s, " in ", file->file_name());
+    s = Status_CopyAppendMessage(s, " in ", file->file_name());
     return s;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {
@@ -501,7 +501,7 @@ Status UncompressBlockData(const UncompressionInfo& uncompression_info,
                            BlockContents* out_contents, uint32_t format_version,
                            const ImmutableOptions& ioptions,
                            MemoryAllocator* allocator) {
-  Status ret = Status::OK();
+  Status ret = Status_OK();
 
   assert(uncompression_info.type() != kNoCompression &&
          "Invalid compression type");
@@ -514,11 +514,11 @@ Status UncompressBlockData(const UncompressionInfo& uncompression_info,
                      GetCompressFormatForVersion(format_version), allocator);
   if (!ubuf) {
     if (!CompressionTypeSupported(uncompression_info.type())) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Unsupported compression method for this build",
           CompressionTypeToString(uncompression_info.type()));
     } else {
-      return Status::Corruption(
+      return Status_Corruption(
           "Corrupted compressed block contents",
           CompressionTypeToString(uncompression_info.type()));
     }
@@ -568,6 +568,6 @@ Status ReifyDbHostIdProperty(Env* env, std::string* db_host_id) {
     return s;
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace ROCKSDB_NAMESPACE

@@ -229,7 +229,7 @@ class CompactionMergingIterator : public InternalIterator {
 
 void CompactionMergingIterator::SeekToFirst() {
   minHeap_.clear();
-  status_ = Status::OK();
+  status_ = Status_OK();
   for (auto& child : children_) {
     child.iter.SeekToFirst();
     AddToMinHeapOrCheckStatus(&child);
@@ -248,7 +248,7 @@ void CompactionMergingIterator::SeekToFirst() {
 
 void CompactionMergingIterator::Seek(const Slice& target) {
   minHeap_.clear();
-  status_ = Status::OK();
+  status_ = Status_OK();
   for (auto& child : children_) {
     child.iter.Seek(target);
     AddToMinHeapOrCheckStatus(&child);

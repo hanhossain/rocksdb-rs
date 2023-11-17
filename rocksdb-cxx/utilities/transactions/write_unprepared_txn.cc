@@ -200,19 +200,19 @@ Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch* wb) {
     Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status DeleteCF(uint32_t cf, const Slice& key) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
@@ -220,24 +220,24 @@ Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch* wb) {
         txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                        false /* read_only */, true /* exclusive */);
       }
-      return Status::OK();
+      return Status_OK();
     }
 
     // Recovered batches do not contain 2PC markers.
-    Status MarkBeginPrepare(bool) override { return Status::InvalidArgument(); }
+    Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
 
     Status MarkEndPrepare(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
-    Status MarkNoop(bool) override { return Status::InvalidArgument(); }
+    Status MarkNoop(bool) override { return Status_InvalidArgument(); }
 
     Status MarkCommit(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkRollback(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
   };
 
@@ -286,7 +286,7 @@ Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool prepared) {
     } else
 #endif
     {
-      return Status::InvalidArgument("Cannot write to DB without SetName.");
+      return Status_InvalidArgument("Cannot write to DB without SetName.");
     }
   }
 
@@ -304,7 +304,7 @@ Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool prepared) {
       if (!lock_status.locked) {
         txn_->untracked_keys_[cf].push_back(str);
       }
-      return Status::OK();
+      return Status_OK();
     }
 
     Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
@@ -323,26 +323,26 @@ Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool prepared) {
       if (rollback_merge_operands_) {
         return AddUntrackedKey(cf, key);
       }
-      return Status::OK();
+      return Status_OK();
     }
 
     // The only expected 2PC marker is the initial Noop marker.
     Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? Status::OK() : Status::InvalidArgument();
+      return empty_batch ? Status_OK() : Status_InvalidArgument();
     }
 
-    Status MarkBeginPrepare(bool) override { return Status::InvalidArgument(); }
+    Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
 
     Status MarkEndPrepare(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkCommit(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkRollback(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
   };
 
@@ -440,21 +440,21 @@ Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB() {
 
     // The only expected 2PC marker is the initial Noop marker.
     Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? Status::OK() : Status::InvalidArgument();
+      return empty_batch ? Status_OK() : Status_InvalidArgument();
     }
 
-    Status MarkBeginPrepare(bool) override { return Status::InvalidArgument(); }
+    Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
 
     Status MarkEndPrepare(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkCommit(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkRollback(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
   };
 
@@ -514,7 +514,7 @@ Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB() {
   }
 
   unflushed_save_points_->clear();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteUnpreparedTxn::PrepareInternal() {
@@ -556,7 +556,7 @@ Status WriteUnpreparedTxn::CommitInternal() {
     if (for_recovery) {
       WriteBatchInternal::SetAsLatestPersistentState(working_batch);
     } else {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Commit-time-batch can only be used if "
           "use_only_the_last_commit_time_batch_for_recovery is true");
     }
@@ -684,7 +684,7 @@ Status WriteUnpreparedTxn::WriteRollbackKeys(
       return s;
     }
 
-    return Status::OK();
+    return Status_OK();
   };
 
   std::unique_ptr<LockTracker::ColumnFamilyIterator> cf_it(
@@ -715,7 +715,7 @@ Status WriteUnpreparedTxn::WriteRollbackKeys(
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteUnpreparedTxn::RollbackInternal() {
@@ -833,7 +833,7 @@ void WriteUnpreparedTxn::Clear() {
   largest_validated_seq_ = 0;
   for (auto& it : active_iterators_) {
     auto bdit = static_cast<BaseDeltaIterator*>(it);
-    bdit->Invalidate(Status::InvalidArgument(
+    bdit->Invalidate(Status_InvalidArgument(
         "Cannot use iterator after transaction has finished"));
   }
   active_iterators_.clear();
@@ -867,7 +867,7 @@ Status WriteUnpreparedTxn::RollbackToSavePoint() {
     return RollbackToSavePointInternal();
   }
 
-  return Status::NotFound();
+  return Status_NotFound();
 }
 
 Status WriteUnpreparedTxn::RollbackToSavePointInternal() {
@@ -940,7 +940,7 @@ Status WriteUnpreparedTxn::PopSavePoint() {
     return s;
   }
 
-  return Status::NotFound();
+  return Status_NotFound();
 }
 
 void WriteUnpreparedTxn::MultiGet(const ReadOptions& options,
@@ -961,7 +961,7 @@ void WriteUnpreparedTxn::MultiGet(const ReadOptions& options,
                !wupt_db_->ValidateSnapshot(snap_seq, backed_by_snapshot))) {
     wupt_db_->WPRecordTick(TXN_GET_TRY_AGAIN);
     for (size_t i = 0; i < num_keys; i++) {
-      statuses[i] = Status::TryAgain();
+      statuses[i] = Status_TryAgain();
     }
   }
 }
@@ -970,7 +970,7 @@ Status WriteUnpreparedTxn::Get(const ReadOptions& options,
                                ColumnFamilyHandle* column_family,
                                const Slice& key, PinnableSlice* value) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -987,7 +987,7 @@ Status WriteUnpreparedTxn::Get(const ReadOptions& options,
   } else {
     res.PermitUncheckedError();
     wupt_db_->WPRecordTick(TXN_GET_TRY_AGAIN);
-    return Status::TryAgain();
+    return Status_TryAgain();
   }
 }
 
@@ -1032,7 +1032,7 @@ Status WriteUnpreparedTxn::ValidateSnapshot(ColumnFamilyHandle* column_family,
     // If the key has been previous validated at a sequence number earlier
     // than the curent snapshot's sequence number, we already know it has not
     // been modified.
-    return Status::OK();
+    return Status_OK();
   }
 
   *tracked_at_seq = snap_seq;

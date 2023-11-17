@@ -592,7 +592,7 @@ TEST_P(DBWriteTest, IOErrorOnSwitchMemtable) {
   options.wal_bytes_per_sync = 256 * 1024;
   options.manual_wal_flush = true;
   Reopen(options);
-  mock_env->SetFilesystemActive(false, Status::IOError("Not active"));
+  mock_env->SetFilesystemActive(false, Status_IOError("Not active"));
   Status s;
   for (int i = 0; i < 4 * 512; ++i) {
     s = Put(Key(i), rnd.RandomString(1024));
@@ -600,7 +600,7 @@ TEST_P(DBWriteTest, IOErrorOnSwitchMemtable) {
       break;
     }
   }
-  ASSERT_EQ(s.severity(), Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), Severity::kFatalError);
 
   mock_env->SetFilesystemActive(true);
   // Close before mock_env destruct.

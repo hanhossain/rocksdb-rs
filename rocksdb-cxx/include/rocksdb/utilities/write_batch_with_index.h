@@ -115,11 +115,11 @@ class WriteBatchWithIndex : public WriteBatchBase {
   Status PutEntity(ColumnFamilyHandle* column_family, const Slice& /* key */,
                    const WideColumns& /* columns */) override {
     if (!column_family) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Cannot call this method without a column family handle");
     }
 
-    return Status::NotSupported(
+    return Status_NotSupported(
         "PutEntity not supported by WriteBatchWithIndex");
   }
 
@@ -130,7 +130,7 @@ class WriteBatchWithIndex : public WriteBatchBase {
   Status Merge(const Slice& key, const Slice& value) override;
   Status Merge(ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
                const Slice& /*ts*/, const Slice& /*value*/) override {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Merge does not support user-defined timestamp");
   }
 
@@ -151,18 +151,18 @@ class WriteBatchWithIndex : public WriteBatchBase {
   Status DeleteRange(ColumnFamilyHandle* /* column_family */,
                      const Slice& /* begin_key */,
                      const Slice& /* end_key */) override {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
   Status DeleteRange(const Slice& /* begin_key */,
                      const Slice& /* end_key */) override {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
   Status DeleteRange(ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*begin_key*/, const Slice& /*end_key*/,
                      const Slice& /*ts*/) override {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
 
@@ -266,15 +266,15 @@ class WriteBatchWithIndex : public WriteBatchBase {
   //
   // Calling RollbackToSavePoint invalidates any open iterators on this batch.
   //
-  // Returns Status::OK() on success,
-  //         Status::NotFound() if no previous call to SetSavePoint(),
+  // Returns Status_OK() on success,
+  //         Status_NotFound() if no previous call to SetSavePoint(),
   //         or other Status on corruption.
   Status RollbackToSavePoint() override;
 
   // Pop the most recent save point.
-  // If there is no previous call to SetSavePoint(), Status::NotFound()
+  // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
-  // Otherwise returns Status::OK().
+  // Otherwise returns Status_OK().
   Status PopSavePoint() override;
 
   void SetMaxBytes(size_t max_bytes) override;

@@ -70,7 +70,7 @@ Status PersistentCacheHelper::LookupSerialized(
          handle.size() + BlockBasedTable::kBlockTrailerSize);
   assert(size == expected_data_size);
   RecordTick(cache_options.statistics, PERSISTENT_CACHE_HIT);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PersistentCacheHelper::LookupUncompressed(
@@ -81,7 +81,7 @@ Status PersistentCacheHelper::LookupUncompressed(
   if (!contents) {
     // We shouldn't lookup in the cache. Either
     // (1) Nowhere to store
-    return Status::NotFound();
+    return Status_NotFound();
   }
 
   CacheKey key =
@@ -105,7 +105,7 @@ Status PersistentCacheHelper::LookupUncompressed(
   RecordTick(cache_options.statistics, PERSISTENT_CACHE_HIT);
   // construct result and return
   *contents = BlockContents(std::move(data), size);
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

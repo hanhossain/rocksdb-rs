@@ -3387,7 +3387,7 @@ TEST_P(DBCompactionWaitForCompactTest,
 TEST_P(DBCompactionWaitForCompactTest, WaitForCompactAbortOnPause) {
   // Triggers a compaction. Before the compaction finishes, test
   // pauses the compaction. Calling WaitForCompact() with option
-  // abort_on_pause=true should return Status::Aborted Or
+  // abort_on_pause=true should return Status_Aborted Or
   // ContinueBackgroundWork() must be called
 
   // Now trigger L0 compaction by adding a file
@@ -6695,7 +6695,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       TEST_SYNC_POINT("PreCompaction");
       ResumeCompactionThread();
       // Without proper range conflict check,
-      // this would have been `Status::Corruption` about overlapping ranges
+      // this would have been `Status_Corruption` about overlapping ranges
       Status s = dbfull()->TEST_WaitForCompact();
       EXPECT_OK(s);
     } else if (compaction_path_to_test_ == "NonRefitLevelCompactRange") {
@@ -6707,7 +6707,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       Slice end(end_key);
       TEST_SYNC_POINT("PreCompaction");
       // Without proper range conflict check,
-      // this would have been `Status::Corruption` about overlapping ranges
+      // this would have been `Status_Corruption` about overlapping ranges
       Status s = dbfull()->CompactRange(cro, &start, &end);
       EXPECT_OK(s);
     } else if (compaction_path_to_test_ == "RefitLevelCompactRange") {
@@ -6721,7 +6721,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       TEST_SYNC_POINT("PreCompaction");
       Status s = dbfull()->CompactRange(cro, &start, &end);
       // Without proper range conflict check,
-      // this would have been `Status::Corruption` about overlapping ranges
+      // this would have been `Status_Corruption` about overlapping ranges
       // To see this, remove the fix AND replace
       // `DBImpl::CompactRange:PostRefitLevel` in sync point dependency with
       // `DBImpl::ReFitLevel:PostRegisterCompaction`
@@ -6739,7 +6739,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       TEST_SYNC_POINT("PreCompaction");
       Status s = db_->CompactFiles(CompactionOptions(), input_files, 1);
       // Without proper range conflict check,
-      // this would have been `Status::Corruption` about overlapping ranges
+      // this would have been `Status_Corruption` about overlapping ranges
       EXPECT_TRUE(s.IsAborted());
       EXPECT_TRUE(
           s.ToString().find(
@@ -7852,7 +7852,7 @@ TEST_F(DBCompactionTest, ChangeLevelCompactRangeConflictsWithManual) {
   //
   // This test ensures that case is not possible by verifying any manual
   // compaction issued during the `ReFitLevel()` phase fails with
-  // `Status::Incomplete`.
+  // `Status_Incomplete`.
   Options options = CurrentOptions();
   options.memtable_factory.reset(
       test::NewSpecialSkipListFactory(KNumKeysByGenerateNewFile - 1));
@@ -8124,7 +8124,7 @@ TEST_P(DBCompactionTestBlobError, CompactionError) {
     Status* const s = static_cast<Status*>(arg);
     assert(s);
 
-    (*s) = Status::IOError(sync_point_);
+    (*s) = Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -8530,12 +8530,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   Destroy(options);
   Reopen(options);
 
@@ -8546,7 +8546,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8557,10 +8557,10 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            ROCKSDB_NAMESPACE::Status::Severity::kUnrecoverableError);
+            ROCKSDB_NAMESPACE::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -8571,12 +8571,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
 
   // Each write will be similated as corrupted.
   // Since the file system returns IOStatus::Corruption, it is an
@@ -8585,7 +8585,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8595,10 +8595,10 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            ROCKSDB_NAMESPACE::Status::Severity::kUnrecoverableError);
+            ROCKSDB_NAMESPACE::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -8624,12 +8624,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   Destroy(options);
   Reopen(options);
 
@@ -8637,7 +8637,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8648,9 +8648,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -8661,19 +8661,19 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
 
   // options is not set, the checksum handoff will not be triggered
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8683,9 +8683,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
 
   Destroy(options);
 }
@@ -8711,12 +8711,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   Destroy(options);
   Reopen(options);
 
@@ -8727,7 +8727,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8738,9 +8738,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
 }
@@ -8768,12 +8768,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
 
   // Each write will be similated as corrupted.
   // Since the file system returns IOStatus::Corruption, it is mapped to
@@ -8782,7 +8782,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8792,9 +8792,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);

@@ -42,7 +42,7 @@ Status BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlock(
 
   if (!index_block_.IsEmpty()) {
     index_block->SetUnownedValue(index_block_.GetValue());
-    return Status::OK();
+    return Status_OK();
   }
 
   ReadOptions read_options = ro;

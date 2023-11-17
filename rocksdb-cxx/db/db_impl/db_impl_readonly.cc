@@ -41,7 +41,7 @@ Status DBImplReadOnly::Get(const ReadOptions& read_options,
                            PinnableSlice* pinnable_val,
                            std::string* timestamp) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -119,7 +119,7 @@ Status DBImplReadOnly::Get(const ReadOptions& read_options,
 Iterator* DBImplReadOnly::NewIterator(const ReadOptions& read_options,
                                       ColumnFamilyHandle* column_family) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status::InvalidArgument(
+    return NewErrorIterator(Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -183,7 +183,7 @@ Status DBImplReadOnly::NewIterators(
 
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (iterators == nullptr) {
-    return Status::InvalidArgument("iterators not allowed to be nullptr");
+    return Status_InvalidArgument("iterators not allowed to be nullptr");
   }
   iterators->clear();
   iterators->reserve(column_families.size());
@@ -209,7 +209,7 @@ Status DBImplReadOnly::NewIterators(
     iterators->push_back(db_iter);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {
@@ -301,7 +301,7 @@ Status DBImplReadOnly::OpenForReadOnlyWithoutCheck(
       auto cfd =
           impl->versions_->GetColumnFamilySet()->GetColumnFamily(cf.name);
       if (cfd == nullptr) {
-        s = Status::InvalidArgument("Column family not found", cf.name);
+        s = Status_InvalidArgument("Column family not found", cf.name);
         break;
       }
       handles->push_back(new ColumnFamilyHandleImpl(cfd, impl, &impl->mutex_));

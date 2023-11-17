@@ -179,13 +179,13 @@ Status DeleteScheduler::MarkAsTrash(const std::string& file_path,
   // Sanity check of the path
   size_t idx = file_path.rfind("/");
   if (idx == std::string::npos || idx == file_path.size() - 1) {
-    return Status::InvalidArgument("file_path is corrupted");
+    return Status_InvalidArgument("file_path is corrupted");
   }
 
   if (DeleteScheduler::IsTrashFile(file_path)) {
     // This is already a trash file
     *trash_file = file_path;
-    return Status::OK();
+    return Status_OK();
   }
 
   *trash_file = file_path + kTrashExtension;

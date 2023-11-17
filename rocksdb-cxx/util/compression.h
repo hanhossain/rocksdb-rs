@@ -1634,16 +1634,16 @@ class CompressionTypeRecord {
 
     uint32_t val;
     if (!GetFixed32(src, &val)) {
-      return Status::Corruption(class_name,
+      return Status_Corruption(class_name,
                                 "Error decoding WAL compression type");
     }
     CompressionType compression_type = static_cast<CompressionType>(val);
     if (!StreamingCompressionTypeSupported(compression_type)) {
-      return Status::Corruption(class_name,
+      return Status_Corruption(class_name,
                                 "WAL compression type not supported");
     }
     compression_type_ = compression_type;
-    return Status::OK();
+    return Status_OK();
   }
 
   inline std::string DebugString() const {

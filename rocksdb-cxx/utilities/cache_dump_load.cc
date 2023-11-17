@@ -50,7 +50,7 @@ Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
                              std::unique_ptr<CacheDumper>* cache_dumper) {
   cache_dumper->reset(
       new CacheDumperImpl(dump_options, cache, std::move(writer)));
-  return Status::OK();
+  return Status_OK();
 }
 
 Status NewDefaultCacheDumpedLoader(
@@ -61,7 +61,7 @@ Status NewDefaultCacheDumpedLoader(
     std::unique_ptr<CacheDumpedLoader>* cache_dump_loader) {
   cache_dump_loader->reset(new CacheDumpedLoaderImpl(
       dump_options, toptions, secondary_cache, std::move(reader)));
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

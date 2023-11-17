@@ -183,7 +183,7 @@ void CompactionIterator::Next() {
       validity_info_.SetValid(ValidContext::kMerge1);
     } else {
       if (merge_until_status_.IsMergeInProgress()) {
-        // `Status::MergeInProgress()` tells us that the previous `MergeUntil()`
+        // `Status_MergeInProgress()` tells us that the previous `MergeUntil()`
         // produced only merge operands. Those merge operands were accessed and
         // written out using `merge_out_iter_`. Since `merge_out_iter_` is
         // exhausted at this point, all merge operands have been written out.
@@ -264,7 +264,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
           !compaction_filter_->IsStackedBlobDbInternalCompactionFilter()) {
         if (!compaction_) {
           status_ =
-              Status::Corruption("Unexpected blob index outside of compaction");
+              Status_Corruption("Unexpected blob index outside of compaction");
           validity_info_.Invalidate();
           return false;
         }
@@ -348,7 +348,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
   if (decision == CompactionFilter::Decision::kUndetermined) {
     // Should not reach here, since FilterV2/FilterV3 should never return
     // kUndetermined.
-    status_ = Status::NotSupported(
+    status_ = Status_NotSupported(
         "FilterV2/FilterV3 should never return kUndetermined");
     validity_info_.Invalidate();
     return false;
@@ -396,7 +396,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
     // in the integrated BlobDB impl is made in subsequent call to
     // PrepareOutput() and its callees.
     if (!compaction_filter_->IsStackedBlobDbInternalCompactionFilter()) {
-      status_ = Status::NotSupported(
+      status_ = Status_NotSupported(
           "Only stacked BlobDB's internal compaction filter can return "
           "kChangeBlobIndex.");
       validity_info_.Invalidate();
@@ -411,13 +411,13 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
     value_ = compaction_filter_value_;
   } else if (decision == CompactionFilter::Decision::kIOError) {
     if (!compaction_filter_->IsStackedBlobDbInternalCompactionFilter()) {
-      status_ = Status::NotSupported(
+      status_ = Status_NotSupported(
           "CompactionFilter for integrated BlobDB should not return kIOError");
       validity_info_.Invalidate();
       return false;
     }
 
-    status_ = Status::IOError("Failed to access blob during compaction filter");
+    status_ = Status_IOError("Failed to access blob during compaction filter");
     validity_info_.Invalidate();
     return false;
   } else if (decision == CompactionFilter::Decision::kChangeWideColumnEntity) {
@@ -773,7 +773,7 @@ void CompactionIterator::NextFromInput() {
             if (enforce_single_del_contracts_) {
               ROCKS_LOG_ERROR(info_log_, "%s", oss.str().c_str());
               validity_info_.Invalidate();
-              status_ = Status::Corruption(oss.str());
+              status_ = Status_Corruption(oss.str());
               return;
             }
             ROCKS_LOG_WARN(info_log_, "%s", oss.str().c_str());
@@ -971,7 +971,7 @@ void CompactionIterator::NextFromInput() {
       }
     } else if (ikey_.type == kTypeMerge) {
       if (!merge_helper_->HasOperator()) {
-        status_ = Status::InvalidArgument(
+        status_ = Status_InvalidArgument(
             "merge_operator is not properly initialized.");
         return;
       }
@@ -1052,11 +1052,11 @@ void CompactionIterator::NextFromInput() {
   }
 
   if (!Valid() && IsShuttingDown()) {
-    status_ = Status::ShutdownInProgress();
+    status_ = Status_ShutdownInProgress();
   }
 
   if (IsPausingManualCompaction()) {
-    status_ = Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    status_ = Status_Incomplete(SubCode::kManualCompactionPaused);
   }
 
   // Propagate corruption status from memtable itereator
@@ -1178,14 +1178,14 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
 
     if (blob_decision == CompactionFilter::BlobDecision::kCorruption) {
       status_ =
-          Status::Corruption("Corrupted blob reference encountered during GC");
+          Status_Corruption("Corrupted blob reference encountered during GC");
       validity_info_.Invalidate();
 
       return;
     }
 
     if (blob_decision == CompactionFilter::BlobDecision::kIOError) {
-      status_ = Status::IOError("Could not relocate blob during GC");
+      status_ = Status_IOError("Could not relocate blob during GC");
       validity_info_.Invalidate();
 
       return;
@@ -1241,7 +1241,7 @@ void CompactionIterator::DecideOutputLevel() {
       // We will migrate the feature to `last_level_temperature` and maybe make
       // it not dynamically changeable.
       if (ikey_.sequence > earliest_snapshot_) {
-        status_ = Status::Corruption(
+        status_ = Status_Corruption(
             "Unsafe to store Seq later than snapshot in the last level if "
             "per_key_placement is enabled");
       }

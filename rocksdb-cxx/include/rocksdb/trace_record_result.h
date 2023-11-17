@@ -58,8 +58,8 @@ class TraceRecordResult {
 // The actual execution status or returned values may be hidden from
 // TraceRecord::Handler::Handle and TraceRecord::Accept. For example, a
 // GetQueryTraceRecord's execution calls DB::Get() internally. DB::Get() may
-// return Status::NotFound() but TraceRecord::Handler::Handle() or
-// TraceRecord::Accept() will still return Status::OK(). The actual status from
+// return Status_NotFound() but TraceRecord::Handler::Handle() or
+// TraceRecord::Accept() will still return Status_OK(). The actual status from
 // DB::Get() and the returned value string may be saved in a
 // SingleValueTraceExecutionResult.
 class TraceExecutionResult : public TraceRecordResult {

@@ -13,6 +13,12 @@
 #include "port/port.h"
 #include "rocksdb/sst_file_manager.h"
 
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/lib.h"
+#else
+#include "rocksdb-rs/src/lib.rs.h"
+#endif
+
 namespace ROCKSDB_NAMESPACE {
 class ErrorHandler;
 class FileSystem;
@@ -144,7 +150,7 @@ class SstFileManagerImpl : public SstFileManager {
 
   void ClearError();
   bool CheckFreeSpace() {
-    return bg_err_.severity() == Status::Severity::kSoftError;
+    return bg_err_.severity() == Severity::kSoftError;
   }
 
   std::shared_ptr<SystemClock> clock_;

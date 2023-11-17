@@ -66,7 +66,7 @@ IOStatus IOError(const std::string& context, const std::string& file_name,
       return s;
     }
     case ESTALE:
-      return IOStatus::IOError(IOStatus::kStaleFile);
+      return IOStatus::IOError(IOStatus::SubCode::kStaleFile);
     case ENOENT:
       return IOStatus::PathNotFound(IOErrorMsg(context, file_name),
                                     errnoStr(err_number).c_str());
@@ -457,11 +457,11 @@ Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std::string& directory,
   int fd = open(directory.c_str(), O_DIRECTORY | O_RDONLY);
   if (fd == -1) {
     close(fd);
-    return Status::IOError("Cannot open directory " + directory);
+    return Status_IOError("Cannot open directory " + directory);
   }
   *size = PosixHelper::GetLogicalBlockSizeOfFd(fd);
   close(fd);
-  return Status::OK();
+  return Status_OK();
 }
 
 size_t PosixHelper::GetLogicalBlockSizeOfFd(int fd) {

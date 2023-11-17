@@ -120,7 +120,7 @@ class BlobDBIterator : public Iterator {
   // Return true if caller should continue to next value.
   bool UpdateBlobValue() {
     value_.Reset();
-    status_ = Status::OK();
+    status_ = Status_OK();
     if (iter_->Valid() && iter_->status().ok() && iter_->IsBlob()) {
       Status s = blob_db_->GetBlobValue(iter_->key(), iter_->value(), &value_);
       if (s.IsNotFound()) {

@@ -274,7 +274,7 @@ TEST_F(DBSSTTest, DeleteObsoleteFilesPendingOutputs) {
   ASSERT_EQ(metadata.size(), 2U);
 
   // This file should have been deleted during last compaction
-  ASSERT_EQ(Status::NotFound(), env_->FileExists(dbname_ + file_on_L2));
+  ASSERT_EQ(Status_NotFound(), env_->FileExists(dbname_ + file_on_L2));
   listener->VerifyMatchedCount(1);
 }
 
@@ -845,7 +845,7 @@ TEST_P(DBWALTestWithParam, WALTrashCleanupOnOpen) {
     const char* Name() const override { return "MyEnv"; }
     Status DeleteFile(const std::string& fname) override {
       if (fname.find(".log.trash") != std::string::npos && fake_log_delete) {
-        return Status::OK();
+        return Status_OK();
       }
 
       return target()->DeleteFile(fname);
@@ -1340,7 +1340,7 @@ TEST_F(DBSSTTest, DBWithMaxSpaceAllowedRandomized) {
         bg_error_set = true;
         reached_max_space_on_flush++;
         // clear error to ensure compaction callback is called
-        *bg_error = Status::OK();
+        *bg_error = Status_OK();
       });
 
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(

@@ -85,7 +85,7 @@ Status WritePreparedTxnDB::Initialize(
                     size_t /*index*/, size_t /*total*/) override {
       assert(!is_mem_disabled);
       db_->AddCommitted(commit_seq, commit_seq);
-      return Status::OK();
+      return Status_OK();
     }
 
    private:
@@ -106,11 +106,11 @@ Status WritePreparedTxnDB::VerifyCFOptions(
     return s;
   }
   if (!cf_options.memtable_factory->CanHandleDuplicatedKey()) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "memtable_factory->CanHandleDuplicatedKey() cannot be false with "
         "WritePrpeared transactions");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Transaction* WritePreparedTxnDB::BeginTransaction(
@@ -163,7 +163,7 @@ Status WritePreparedTxnDB::WriteInternal(const WriteOptions& write_options_orig,
   if (batch->Count() == 0) {
     // Otherwise our 1 seq per batch logic will break since there is no seq
     // increased for this batch.
-    return Status::OK();
+    return Status_OK();
   }
 
   if (write_options_orig.protection_bytes_per_key > 0) {
@@ -251,7 +251,7 @@ Status WritePreparedTxnDB::Get(const ReadOptions& options,
                                ColumnFamilyHandle* column_family,
                                const Slice& key, PinnableSlice* value) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -273,7 +273,7 @@ Status WritePreparedTxnDB::Get(const ReadOptions& options,
   } else {
     res.PermitUncheckedError();
     WPRecordTick(TXN_GET_TRY_AGAIN);
-    return Status::TryAgain();
+    return Status_TryAgain();
   }
 }
 
@@ -349,7 +349,7 @@ static void CleanupWritePreparedTxnDBIterator(void* arg1, void* /*arg2*/) {
 Iterator* WritePreparedTxnDB::NewIterator(const ReadOptions& options,
                                           ColumnFamilyHandle* column_family) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status::InvalidArgument(
+    return NewErrorIterator(Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -420,7 +420,7 @@ Status WritePreparedTxnDB::NewIterators(
     db_iter->RegisterCleanup(CleanupWritePreparedTxnDBIterator, state, nullptr);
     iterators->push_back(db_iter);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void WritePreparedTxnDB::Init(const TransactionDBOptions& txn_db_opts) {

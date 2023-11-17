@@ -247,7 +247,7 @@ class ValidatedConfigurable : public SimpleConfigurable {
 
   Status PrepareOptions(const ConfigOptions& config_options) override {
     if (++prepared <= 0) {
-      return Status::InvalidArgument("Cannot prepare option");
+      return Status_InvalidArgument("Cannot prepare option");
     } else {
       return SimpleConfigurable::PrepareOptions(config_options);
     }
@@ -256,7 +256,7 @@ class ValidatedConfigurable : public SimpleConfigurable {
   Status ValidateOptions(const DBOptions& db_opts,
                          const ColumnFamilyOptions& cf_opts) const override {
     if (!validated) {
-      return Status::InvalidArgument("Not Validated");
+      return Status_InvalidArgument("Not Validated");
     } else {
       return SimpleConfigurable::ValidateOptions(db_opts, cf_opts);
     }

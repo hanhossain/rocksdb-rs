@@ -14,7 +14,7 @@ namespace ROCKSDB_NAMESPACE {
 Status MemkindKmemAllocator::PrepareOptions(const ConfigOptions& options) {
   std::string message;
   if (!IsSupported(&message)) {
-    return Status::NotSupported(message);
+    return Status_NotSupported(message);
   } else {
     return MemoryAllocator::PrepareOptions(options);
   }

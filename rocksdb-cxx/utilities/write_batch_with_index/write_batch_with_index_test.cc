@@ -55,7 +55,7 @@ struct TestHandler : public WriteBatch::Handler {
     e.value = value.ToString();
     e.type = kPutRecord;
     seen[column_family_id].push_back(e);
-    return Status::OK();
+    return Status_OK();
   }
   Status MergeCF(uint32_t column_family_id, const Slice& key,
                  const Slice& value) override {
@@ -64,7 +64,7 @@ struct TestHandler : public WriteBatch::Handler {
     e.value = value.ToString();
     e.type = kMergeRecord;
     seen[column_family_id].push_back(e);
-    return Status::OK();
+    return Status_OK();
   }
   void LogData(const Slice& /*blob*/) override {}
   Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
@@ -73,7 +73,7 @@ struct TestHandler : public WriteBatch::Handler {
     e.value = "";
     e.type = kDeleteRecord;
     seen[column_family_id].push_back(e);
-    return Status::OK();
+    return Status_OK();
   }
 };
 
@@ -108,7 +108,7 @@ class KVIter : public Iterator {
   }
   Slice key() const override { return iter_->first; }
   Slice value() const override { return iter_->second; }
-  Status status() const override { return Status::OK(); }
+  Status status() const override { return Status_OK(); }
 
  private:
   const KVMap* const map_;
@@ -2103,9 +2103,9 @@ TEST_P(WriteBatchWithIndexTest, GetFromBatchAfterMerge) {
   batch_->Merge("o", "bb");  // Merging bb under key "o"
   batch_->Merge("m", "cc");  // Merging bc under key "m"
   s = batch_->GetFromBatch(options_, "m", &value);
-  ASSERT_EQ(s.code(), Status::Code::kMergeInProgress);
+  ASSERT_EQ(s.code(), Code::kMergeInProgress);
   s = batch_->GetFromBatch(options_, "o", &value);
-  ASSERT_EQ(s.code(), Status::Code::kMergeInProgress);
+  ASSERT_EQ(s.code(), Code::kMergeInProgress);
 
   ASSERT_OK(db_->Write(write_opts_, batch_->GetWriteBatch()));
   ASSERT_OK(db_->Get(read_opts_, "o", &value));
@@ -2161,13 +2161,13 @@ TEST_P(WriteBatchWithIndexTest, GetAfterMergePut) {
 
   ASSERT_OK(batch_->Merge("key", "aa"));  // Merging aa under key
   Status s = batch_->GetFromBatch(cf0, options_, "key", &value);
-  ASSERT_EQ(s.code(), Status::Code::kMergeInProgress);
+  ASSERT_EQ(s.code(), Code::kMergeInProgress);
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "key", &value));
   ASSERT_EQ(value, "orig,aa");
 
   ASSERT_OK(batch_->Merge("key", "bb"));  // Merging bb under key
   s = batch_->GetFromBatch(cf0, options_, "key", &value);
-  ASSERT_EQ(s.code(), Status::Code::kMergeInProgress);
+  ASSERT_EQ(s.code(), Code::kMergeInProgress);
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "key", &value));
   ASSERT_EQ(value, "orig,aa,bb");
 
@@ -2191,13 +2191,13 @@ TEST_P(WriteBatchWithIndexTest, GetAfterMergeDelete) {
 
   ASSERT_OK(batch_->Merge("key", "aa"));  // Merging aa under key
   Status s = batch_->GetFromBatch(cf0, options_, "key", &value);
-  ASSERT_EQ(s.code(), Status::Code::kMergeInProgress);
+  ASSERT_EQ(s.code(), Code::kMergeInProgress);
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "key", &value));
   ASSERT_EQ(value, "aa");
 
   ASSERT_OK(batch_->Merge("key", "bb"));  // Merging bb under key
   s = batch_->GetFromBatch(cf0, options_, "key", &value);
-  ASSERT_EQ(s.code(), Status::Code::kMergeInProgress);
+  ASSERT_EQ(s.code(), Code::kMergeInProgress);
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "key", &value));
   ASSERT_EQ(value, "aa,bb");
 

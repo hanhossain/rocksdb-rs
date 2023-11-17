@@ -40,7 +40,7 @@ Status PartitionIndexReader::Create(
 
   index_reader->reset(new PartitionIndexReader(table, std::move(index_block)));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 InternalIteratorBase<IndexValue>* PartitionIndexReader::NewIterator(
@@ -119,7 +119,7 @@ Status PartitionIndexReader::CacheDependencies(
   if (!partition_map_.empty()) {
     // The dependencies are already cached since `partition_map_` is filled in
     // an all-or-nothing manner.
-    return Status::OK();
+    return Status_OK();
   }
   // Before read partitions, prefetch them to avoid lots of IOs
   BlockCacheLookupContext lookup_context{TableReaderCaller::kPrefetch};

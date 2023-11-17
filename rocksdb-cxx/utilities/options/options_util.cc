@@ -39,7 +39,7 @@ Status LoadOptionsFromFile(const ConfigOptions& config_options,
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
@@ -50,7 +50,7 @@ Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
   std::vector<std::string> file_names;
   s = env->GetChildren(dbpath, &file_names);
   if (s.IsNotFound()) {
-    return Status::NotFound(Status::kPathNotFound,
+    return Status_NotFound(SubCode::kPathNotFound,
                             "No options files found in the DB directory.",
                             dbpath);
   } else if (!s.ok()) {
@@ -67,12 +67,12 @@ Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
     }
   }
   if (latest_file_name.size() == 0) {
-    return Status::NotFound(Status::kPathNotFound,
+    return Status_NotFound(SubCode::kPathNotFound,
                             "No options files found in the DB directory.",
                             dbpath);
   }
   *options_file_name = latest_file_name;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status LoadLatestOptions(const ConfigOptions& config_options,

@@ -404,7 +404,7 @@ inline Status ParseInternalKey(const Slice& internal_key,
   const size_t n = internal_key.size();
 
   if (n < kNumInternalBytes) {
-    return Status::Corruption("Corrupted Key: Internal Key too small. Size=" +
+    return Status_Corruption("Corrupted Key: Internal Key too small. Size=" +
                               std::to_string(n) + ". ");
   }
 
@@ -416,9 +416,9 @@ inline Status ParseInternalKey(const Slice& internal_key,
   result->user_key = Slice(internal_key.data(), n - kNumInternalBytes);
 
   if (IsExtendedValueType(result->type)) {
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::Corruption("Corrupted Key",
+    return Status_Corruption("Corrupted Key",
                               result->DebugString(log_err_key, true));
   }
 }

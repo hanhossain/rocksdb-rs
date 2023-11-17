@@ -31,7 +31,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
       db_log_dir_(db_log_dir),
       fs_(fs),
       clock_(clock),
-      status_(Status::OK()),
+      status_(Status_OK()),
       kMaxLogFileSize(log_max_size),
       kLogFileTimeToRoll(log_file_time_to_roll),
       kKeepLogFileNum(keep_log_file_num),
@@ -70,7 +70,7 @@ Status AutoRollLogger::ResetLogger() {
   logger_->SetInfoLogLevel(Logger::GetInfoLogLevel());
 
   if (logger_->GetLogFileSize() == Logger::kDoNotSupportGetLogFileSize) {
-    status_ = Status::NotSupported(
+    status_ = Status_NotSupported(
         "The underlying logger doesn't support GetLogFileSize()");
   }
   if (status_.ok()) {
@@ -161,7 +161,7 @@ Status AutoRollLogger::TrimOldLogFiles() {
       return s;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 std::string AutoRollLogger::ValistToString(const char* format,
@@ -274,7 +274,7 @@ Status CreateLoggerFromOptions(const std::string& dbname,
                                std::shared_ptr<Logger>* logger) {
   if (options.info_log) {
     *logger = options.info_log;
-    return Status::OK();
+    return Status_OK();
   }
 
   Env* env = options.env;
@@ -299,7 +299,7 @@ Status CreateLoggerFromOptions(const std::string& dbname,
       // not exist and error should be ignored. db_log_dir creation will handle
       // the error in case there is any error in the creation of dbname on same
       // filesystem.
-      s = Status::OK();
+      s = Status_OK();
     }
   }
   assert(s.ok());
@@ -349,12 +349,12 @@ Status CreateLoggerFromOptions(const std::string& dbname,
     if (s.IsPathNotFound()) {
       s = env->FileExists(fname);
       if (s.IsNotFound()) {
-        s = Status::OK();
+        s = Status_OK();
       }
     }
   } else if (s.IsNotFound()) {
     // "LOG" is not required to exist since this could be a new DB.
-    s = Status::OK();
+    s = Status_OK();
   }
   if (s.ok()) {
     s = env->NewLogger(fname, logger);

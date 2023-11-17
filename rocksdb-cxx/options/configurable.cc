@@ -36,7 +36,7 @@ void Configurable::RegisterOptions(
 Status Configurable::PrepareOptions(const ConfigOptions& opts) {
   // We ignore the invoke_prepare_options here intentionally,
   // as if you are here, you must have called PrepareOptions explicitly.
-  Status status = Status::OK();
+  Status status = Status_OK();
   for (auto opt_iter : options_) {
     if (opt_iter.type_map != nullptr) {
       for (auto map_iter : *(opt_iter.type_map)) {
@@ -167,7 +167,7 @@ Status Configurable::ConfigureOptions(
 
 Status Configurable::ParseStringOptions(const ConfigOptions& /*config_options*/,
                                         const std::string& /*opts_str*/) {
-  return Status::OK();
+  return Status_OK();
 }
 
 Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
@@ -190,7 +190,7 @@ Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
   } else if (config_options.invoke_prepare_options) {
     s = PrepareOptions(config_options);
   } else {
-    s = Status::OK();
+    s = Status_OK();
   }
   return s;
 }
@@ -227,7 +227,7 @@ Status Configurable::ParseOption(const ConfigOptions& config_options,
       return opt_info.Parse(config_options, opt_name, opt_value, opt_ptr);
     }
   } else if (config_options.mutable_options_only) {
-    return Status::InvalidArgument("Option not changeable: " + opt_name);
+    return Status_InvalidArgument("Option not changeable: " + opt_name);
   } else {
     return opt_info.Parse(config_options, opt_name, opt_value, opt_ptr);
   }
@@ -239,7 +239,7 @@ Status ConfigurableHelper::ConfigureOptions(
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   std::unordered_map<std::string, std::string> remaining = opts_map;
-  Status s = Status::OK();
+  Status s = Status_OK();
   if (!opts_map.empty()) {
     for (const auto& iter : configurable.options_) {
       if (iter.type_map != nullptr) {
@@ -257,9 +257,9 @@ Status ConfigurableHelper::ConfigureOptions(
     unused->insert(remaining.begin(), remaining.end());
   }
   if (config_options.ignore_unknown_options) {
-    s = Status::OK();
+    s = Status_OK();
   } else if (s.ok() && unused == nullptr && !remaining.empty()) {
-    s = Status::NotFound("Could not find option: ", remaining.begin()->first);
+    s = Status_NotFound("Could not find option: ", remaining.begin()->first);
   }
   return s;
 }
@@ -280,8 +280,8 @@ Status ConfigurableHelper::ConfigureSomeOptions(
     const ConfigOptions& config_options, Configurable& configurable,
     const std::unordered_map<std::string, OptionTypeInfo>& type_map,
     std::unordered_map<std::string, std::string>* options, void* opt_ptr) {
-  Status result = Status::OK();  // The last non-OK result (if any)
-  Status notsup = Status::OK();  // The last NotSupported result (if any)
+  Status result = Status_OK();  // The last non-OK result (if any)
+  Status notsup = Status_OK();  // The last NotSupported result (if any)
   std::string elem_name;
   int found = 1;
   std::unordered_set<std::string> unsupported;
@@ -289,7 +289,7 @@ Status ConfigurableHelper::ConfigureSomeOptions(
   // go through the remaining unused properties and attempt to configure them.
   while (found > 0 && !options->empty()) {
     found = 0;
-    notsup = Status::OK();
+    notsup = Status_OK();
     for (auto it = options->begin(); it != options->end();) {
       const std::string& opt_name = configurable.GetOptionName(it->first);
       const std::string& opt_value = it->second;
@@ -327,13 +327,13 @@ Status ConfigurableHelper::ConfigureSomeOptions(
   if (config_options.ignore_unknown_options) {
     if (!result.ok()) result.PermitUncheckedError();
     if (!notsup.ok()) notsup.PermitUncheckedError();
-    return Status::OK();
+    return Status_OK();
   } else if (!result.ok()) {
     if (!notsup.ok()) notsup.PermitUncheckedError();
     return result;
   } else if (config_options.ignore_unsupported_options) {
     if (!notsup.ok()) notsup.PermitUncheckedError();
-    return Status::OK();
+    return Status_OK();
   } else {
     return notsup;
   }
@@ -348,7 +348,7 @@ Status ConfigurableHelper::ConfigureSingleOption(
   const auto opt_info =
       FindOption(configurable.options_, opt_name, &elem_name, &opt_ptr);
   if (opt_info == nullptr) {
-    return Status::NotFound("Could not find option: ", name);
+    return Status_NotFound("Could not find option: ", name);
   } else {
     return ConfigureOption(config_options, configurable, *opt_info, opt_name,
                            elem_name, value, opt_ptr);
@@ -371,7 +371,7 @@ Status ConfigurableHelper::ConfigureCustomizableOption(
         EndsWith(opt_name, OptionTypeInfo::kIdPropSuffix())) {
       return configurable.ParseOption(copy, opt_info, name, value, opt_ptr);
     } else if (value.empty()) {
-      return Status::OK();
+      return Status_OK();
     } else if (custom == nullptr || !StartsWith(name, custom->GetId() + ".")) {
       return configurable.ParseOption(copy, opt_info, name, value, opt_ptr);
     } else if (value.find("=") != std::string::npos) {
@@ -387,18 +387,18 @@ Status ConfigurableHelper::ConfigureCustomizableOption(
       // We do not have a Customizable to configure.  This is OK if the
       // value is empty (nothing being configured) but an error otherwise
       if (value.empty()) {
-        return Status::OK();
+        return Status_OK();
       } else {
-        return Status::InvalidArgument("Option not changeable: " + opt_name);
+        return Status_InvalidArgument("Option not changeable: " + opt_name);
       }
     } else if (EndsWith(opt_name, OptionTypeInfo::kIdPropSuffix()) ||
                name == OptionTypeInfo::kIdPropName()) {
       // We have a property of the form "id=value" or "table.id=value"
       // This is OK if we ID/value matches the current customizable object
       if (custom->GetId() == value) {
-        return Status::OK();
+        return Status_OK();
       } else {
-        return Status::InvalidArgument("Option not changeable: " + opt_name);
+        return Status_InvalidArgument("Option not changeable: " + opt_name);
       }
     } else if (opt_name == name) {
       // The properties are of one of forms:
@@ -416,9 +416,9 @@ Status ConfigurableHelper::ConfigureCustomizableOption(
       if (!s.ok()) {
         return s;
       } else if (custom->GetId() != id) {
-        return Status::InvalidArgument("Option not changeable: " + opt_name);
+        return Status_InvalidArgument("Option not changeable: " + opt_name);
       } else if (props.empty()) {
-        return Status::OK();
+        return Status_OK();
       } else {
         return custom->ConfigureFromMap(copy, props);
       }
@@ -444,7 +444,7 @@ Status ConfigurableHelper::ConfigureOption(
     return configurable.ParseOption(config_options, opt_info, name, value,
                                     opt_ptr);
   } else {
-    return Status::NotFound("Could not find option: ", name);
+    return Status_NotFound("Could not find option: ", name);
   }
 }
 
@@ -514,7 +514,7 @@ Status ConfigurableHelper::GetOption(const ConfigOptions& config_options,
       }
     }
   }
-  return Status::NotFound("Cannot find option: ", short_name);
+  return Status_NotFound("Cannot find option: ", short_name);
 }
 
 Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
@@ -559,7 +559,7 @@ Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 //********************************************************************************
@@ -690,7 +690,7 @@ Status Configurable::GetOptionsMap(
     if (!status.ok()) {       // There was an error creating the map.
       *id = value;            // Treat the value as id
       props->clear();         // Clear the properties
-      status = Status::OK();  // and ignore the error
+      status = Status_OK();  // and ignore the error
     } else {
       auto iter = props->find(OptionTypeInfo::kIdPropName());
       if (iter != props->end()) {

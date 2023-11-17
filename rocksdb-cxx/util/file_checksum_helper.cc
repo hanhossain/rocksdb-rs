@@ -28,7 +28,7 @@ Status FileChecksumListImpl::GetAllFileChecksums(
     std::vector<std::string>* checksum_func_names) {
   if (file_numbers == nullptr || checksums == nullptr ||
       checksum_func_names == nullptr) {
-    return Status::InvalidArgument("Pointer has not been initiated");
+    return Status_InvalidArgument("Pointer has not been initiated");
   }
 
   for (auto i : checksum_map_) {
@@ -36,24 +36,24 @@ Status FileChecksumListImpl::GetAllFileChecksums(
     checksums->push_back(i.second.first);
     checksum_func_names->push_back(i.second.second);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FileChecksumListImpl::SearchOneFileChecksum(
     uint64_t file_number, std::string* checksum,
     std::string* checksum_func_name) {
   if (checksum == nullptr || checksum_func_name == nullptr) {
-    return Status::InvalidArgument("Pointer has not been initiated");
+    return Status_InvalidArgument("Pointer has not been initiated");
   }
 
   auto it = checksum_map_.find(file_number);
   if (it == checksum_map_.end()) {
-    return Status::NotFound();
+    return Status_NotFound();
   } else {
     *checksum = it->second.first;
     *checksum_func_name = it->second.second;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FileChecksumListImpl::InsertOneFileChecksum(
@@ -67,17 +67,17 @@ Status FileChecksumListImpl::InsertOneFileChecksum(
     it->second.first = checksum;
     it->second.second = checksum_func_name;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FileChecksumListImpl::RemoveOneFileChecksum(uint64_t file_number) {
   auto it = checksum_map_.find(file_number);
   if (it == checksum_map_.end()) {
-    return Status::NotFound();
+    return Status_NotFound();
   } else {
     checksum_map_.erase(it);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 FileChecksumList* NewFileChecksumList() {
@@ -95,7 +95,7 @@ Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
                                     uint64_t manifest_file_size,
                                     FileChecksumList* checksum_list) {
   if (checksum_list == nullptr) {
-    return Status::InvalidArgument("checksum_list is nullptr");
+    return Status_InvalidArgument("checksum_list is nullptr");
   }
   assert(checksum_list);
   // TODO: plumb Env::IOActivity
@@ -161,7 +161,7 @@ Status FileChecksumGenFactory::CreateFromString(
   });
   if (value == FileChecksumGenCrc32cFactory::kClassName()) {
     *result = GetFileChecksumGenCrc32cFactory();
-    return Status::OK();
+    return Status_OK();
   } else {
     Status s = LoadSharedObject<FileChecksumGenFactory>(options, value, result);
     return s;

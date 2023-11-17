@@ -2323,7 +2323,7 @@ class DBImpl : public DB {
 
   // If zero, manual compactions are allowed to proceed. If non-zero, manual
   // compactions may still be running, but will quickly fail with
-  // `Status::Incomplete`. The value indicates how many threads have paused
+  // `Status_Incomplete`. The value indicates how many threads have paused
   // manual compactions. It is accessed in read mode outside the DB mutex in
   // compaction code paths.
   std::atomic<int> manual_compaction_paused_;
@@ -2793,16 +2793,16 @@ inline Status DBImpl::FailIfCfHasTs(
     std::ostringstream oss;
     oss << "cannot call this method on column family "
         << column_family->GetName() << " that enables timestamp";
-    return Status::InvalidArgument(oss.str());
+    return Status_InvalidArgument(oss.str());
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
                                          const Slice& ts,
                                          bool ts_for_read) const {
   if (!column_family) {
-    return Status::InvalidArgument("column family handle cannot be null");
+    return Status_InvalidArgument("column family handle cannot be null");
   }
   assert(column_family);
   const Comparator* const ucmp = column_family->GetComparator();
@@ -2811,14 +2811,14 @@ inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
     std::stringstream oss;
     oss << "cannot call this method on column family "
         << column_family->GetName() << " that does not enable timestamp";
-    return Status::InvalidArgument(oss.str());
+    return Status_InvalidArgument(oss.str());
   }
   const size_t ts_sz = ts.size();
   if (ts_sz != ucmp->timestamp_size()) {
     std::stringstream oss;
     oss << "Timestamp sizes mismatch: expect " << ucmp->timestamp_size() << ", "
         << ts_sz << " given";
-    return Status::InvalidArgument(oss.str());
+    return Status_InvalidArgument(oss.str());
   }
   if (ts_for_read) {
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
@@ -2830,10 +2830,10 @@ inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
       oss << "Read timestamp: " << ts.ToString(true)
           << " is smaller than full_history_ts_low: "
           << Slice(current_ts_low).ToString(true) << std::endl;
-      return Status::InvalidArgument(oss.str());
+      return Status_InvalidArgument(oss.str());
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

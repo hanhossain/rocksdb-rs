@@ -314,7 +314,7 @@ class DB {
   // auto-resume is in progress, without waiting for it to complete.
   // See DBOptions::max_bgerror_resume_count and
   // EventListener::OnErrorRecoveryBegin
-  virtual Status Resume() { return Status::NotSupported(); }
+  virtual Status Resume() { return Status_NotSupported(); }
 
   // Close the DB by releasing resources, closing files etc. This should be
   // called before calling the destructor so that the caller can get back a
@@ -328,7 +328,7 @@ class DB {
   // other status, re-calling Close() will be no-op and return the original
   // close status. If the return status is NotSupported(), then the DB
   // implementation does cleanup in the destructor
-  virtual Status Close() { return Status::NotSupported(); }
+  virtual Status Close() { return Status_NotSupported(); }
 
   // ListColumnFamilies will open the DB specified by argument name
   // and return the list of all column families in that DB
@@ -472,7 +472,7 @@ class DB {
   // contain any existing data in the range ["begin_key", "end_key").
   //
   // If "end_key" comes before "start_key" according to the user's comparator,
-  // a `Status::InvalidArgument` is returned.
+  // a `Status_InvalidArgument` is returned.
   //
   // This feature is now usable in production, with the following caveats:
   // 1) Accumulating too many range tombstones in the memtable will degrade read
@@ -560,7 +560,7 @@ class DB {
                      ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*key*/, PinnableSlice* /*value*/,
                      std::string* /*timestamp*/) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Get() that returns timestamp is not implemented.");
   }
   virtual Status Get(const ReadOptions& options, const Slice& key,
@@ -581,7 +581,7 @@ class DB {
                            ColumnFamilyHandle* /* column_family */,
                            const Slice& /* key */,
                            PinnableWideColumns* /* columns */) {
-    return Status::NotSupported("GetEntity not supported");
+    return Status_NotSupported("GetEntity not supported");
   }
 
   // Populates the `merge_operands` array with all the merge operands in the DB
@@ -592,7 +592,7 @@ class DB {
   // If the number of merge operands in DB for `key` is greater than
   // `merge_operands_options.expected_max_number_of_operands`,
   // `merge_operands` is not populated and the return value is
-  // `Status::Incomplete`. In that case, `*number_of_operands` will be assigned
+  // `Status_Incomplete`. In that case, `*number_of_operands` will be assigned
   // the number of merge operands found in the DB for `key`.
   //
   // `merge_operands`- Points to an array of at-least
@@ -642,7 +642,7 @@ class DB {
       const std::vector<Slice>& keys, std::vector<std::string>* /*values*/,
       std::vector<std::string>* /*timestamps*/) {
     return std::vector<Status>(
-        keys.size(), Status::NotSupported(
+        keys.size(), Status_NotSupported(
                          "MultiGet() returning timestamps not implemented."));
   }
   virtual std::vector<Status> MultiGet(const ReadOptions& options,
@@ -808,7 +808,7 @@ class DB {
                               Status* statuses,
                               bool /* sorted_input */ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status::NotSupported("MultiGetEntity not supported");
+      statuses[i] = Status_NotSupported("MultiGetEntity not supported");
     }
   }
 
@@ -840,7 +840,7 @@ class DB {
                               Status* statuses,
                               bool /* sorted_input */ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status::NotSupported("MultiGetEntity not supported");
+      statuses[i] = Status_NotSupported("MultiGetEntity not supported");
     }
   }
 
@@ -1276,7 +1276,7 @@ class DB {
   // Note this doesn't reset options.statistics as it is not owned by
   // DB.
   virtual Status ResetStats() {
-    return Status::NotSupported("Not implemented");
+    return Status_NotSupported("Not implemented");
   }
 
   // Same as GetIntProperty(), but this one returns the aggregated int
@@ -1340,7 +1340,7 @@ class DB {
   // needed to access the data.  This operation should typically only
   // be invoked by users who understand the underlying implementation.
   // This call blocks until the operation completes successfully, fails,
-  // or is aborted (Status::Incomplete). See DisableManualCompaction.
+  // or is aborted (Status_Incomplete). See DisableManualCompaction.
   //
   // begin==nullptr is treated as a key before all keys in the database.
   // end==nullptr is treated as a key after all keys in the database.
@@ -1381,7 +1381,7 @@ class DB {
   virtual Status SetOptions(
       ColumnFamilyHandle* /*column_family*/,
       const std::unordered_map<std::string, std::string>& /*opts_map*/) {
-    return Status::NotSupported("Not implemented");
+    return Status_NotSupported("Not implemented");
   }
   // Shortcut for SetOptions on the default column family handle.
   virtual Status SetOptions(
@@ -1460,7 +1460,7 @@ class DB {
 
   // Wait for all flush and compactions jobs to finish. Jobs to wait include the
   // unscheduled (queued, but not scheduled yet). If the db is shutting down,
-  // Status::ShutdownInProgress will be returned.
+  // Status_ShutdownInProgress will be returned.
   //
   // NOTE: This may also never return if there's sufficient ongoing writes that
   // keeps flush and compaction going without stopping. The user would have to
@@ -1533,7 +1533,7 @@ class DB {
   // included in a Checkpoint or Backup. Without manual_wal_flush, there is no
   // such internal buffer. If sync is true, it calls SyncWAL() afterwards.
   virtual Status FlushWAL(bool /*sync*/) {
-    return Status::NotSupported("FlushWAL not implemented");
+    return Status_NotSupported("FlushWAL not implemented");
   }
 
   // Ensure all WAL writes have been synced to storage, so that (assuming OS
@@ -1557,14 +1557,14 @@ class DB {
   // status is generally only possible with some kind of corruption or I/O
   // error.
   virtual Status LockWAL() {
-    return Status::NotSupported("LockWAL not implemented");
+    return Status_NotSupported("LockWAL not implemented");
   }
 
   // Unfreeze the DB state from a successful LockWAL().
   // The write stop on the database will be cleared when UnlockWAL() have been
   // called for each successful LockWAL().
   virtual Status UnlockWAL() {
-    return Status::NotSupported("UnlockWAL not implemented");
+    return Status_NotSupported("UnlockWAL not implemented");
   }
 
   // The sequence number of the most recent transaction.
@@ -1599,7 +1599,7 @@ class DB {
 
   // Retrieves the creation time of the oldest file in the DB.
   // This API only works if max_open_files = -1, if it is not then
-  // Status returned is Status::NotSupported()
+  // Status returned is Status_NotSupported()
   // The file creation time is set using the env provided to the DB.
   // If the DB was created from a very old release then its possible that
   // the SST files might not have file_creation_time property and even after
@@ -1616,7 +1616,7 @@ class DB {
   // write-batch exists, then iter is positioned at the next write-batch whose
   // start_seq > seq_number.
   //
-  // Returns Status::OK if iterator is valid
+  // Returns Status_OK if iterator is valid
   // Must set WAL_ttl_seconds or WAL_size_limit_MB to large values to
   // use this api, else the WAL files will get
   // cleared aggressively and the iterator might keep getting invalid before
@@ -1819,7 +1819,7 @@ class DB {
   // Verify the checksums of files in db. Currently the whole-file checksum of
   // table files are checked.
   virtual Status VerifyFileChecksums(const ReadOptions& /*read_options*/) {
-    return Status::NotSupported("File verification not supported");
+    return Status_NotSupported("File verification not supported");
   }
 
   // Verify the block checksums of files in db. The block checksums of table
@@ -1831,7 +1831,7 @@ class DB {
 
   // Returns the unique ID which is read from IDENTITY file during the opening
   // of database by setting in the identity variable
-  // Returns Status::OK if identity could be set properly
+  // Returns Status_OK if identity could be set properly
   virtual Status GetDbIdentity(std::string& identity) const = 0;
 
   // Return a unique identifier for each DB object that is opened
@@ -1857,49 +1857,49 @@ class DB {
   virtual Status SuggestCompactRange(ColumnFamilyHandle* /*column_family*/,
                                      const Slice* /*begin*/,
                                      const Slice* /*end*/) {
-    return Status::NotSupported("SuggestCompactRange() is not implemented.");
+    return Status_NotSupported("SuggestCompactRange() is not implemented.");
   }
 
   virtual Status PromoteL0(ColumnFamilyHandle* /*column_family*/,
                            int /*target_level*/) {
-    return Status::NotSupported("PromoteL0() is not implemented.");
+    return Status_NotSupported("PromoteL0() is not implemented.");
   }
 
   // Trace DB operations. Use EndTrace() to stop tracing.
   virtual Status StartTrace(const TraceOptions& /*options*/,
                             std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status::NotSupported("StartTrace() is not implemented.");
+    return Status_NotSupported("StartTrace() is not implemented.");
   }
 
   virtual Status EndTrace() {
-    return Status::NotSupported("EndTrace() is not implemented.");
+    return Status_NotSupported("EndTrace() is not implemented.");
   }
 
   // IO Tracing operations. Use EndIOTrace() to stop tracing.
   virtual Status StartIOTrace(const TraceOptions& /*options*/,
                               std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status::NotSupported("StartIOTrace() is not implemented.");
+    return Status_NotSupported("StartIOTrace() is not implemented.");
   }
 
   virtual Status EndIOTrace() {
-    return Status::NotSupported("EndIOTrace() is not implemented.");
+    return Status_NotSupported("EndIOTrace() is not implemented.");
   }
 
   // Trace block cache accesses. Use EndBlockCacheTrace() to stop tracing.
   virtual Status StartBlockCacheTrace(
       const TraceOptions& /*trace_options*/,
       std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status::NotSupported("StartBlockCacheTrace() is not implemented.");
+    return Status_NotSupported("StartBlockCacheTrace() is not implemented.");
   }
 
   virtual Status StartBlockCacheTrace(
       const BlockCacheTraceOptions& /*options*/,
       std::unique_ptr<BlockCacheTraceWriter>&& /*trace_writer*/) {
-    return Status::NotSupported("StartBlockCacheTrace() is not implemented.");
+    return Status_NotSupported("StartBlockCacheTrace() is not implemented.");
   }
 
   virtual Status EndBlockCacheTrace() {
-    return Status::NotSupported("EndBlockCacheTrace() is not implemented.");
+    return Status_NotSupported("EndBlockCacheTrace() is not implemented.");
   }
 
   // Create a default trace replayer.
@@ -1907,7 +1907,7 @@ class DB {
       const std::vector<ColumnFamilyHandle*>& /*handles*/,
       std::unique_ptr<TraceReader>&& /*reader*/,
       std::unique_ptr<Replayer>* /*replayer*/) {
-    return Status::NotSupported("NewDefaultReplayer() is not implemented.");
+    return Status_NotSupported("NewDefaultReplayer() is not implemented.");
   }
 
 
@@ -1920,7 +1920,7 @@ class DB {
   virtual Status GetStatsHistory(
       uint64_t /*start_time*/, uint64_t /*end_time*/,
       std::unique_ptr<StatsHistoryIterator>* /*stats_iterator*/) {
-    return Status::NotSupported("GetStatsHistory() is not implemented.");
+    return Status_NotSupported("GetStatsHistory() is not implemented.");
   }
 
   // Make the secondary instance catch up with the primary by tailing and
@@ -1934,7 +1934,7 @@ class DB {
   // handles, the data of the column family is still accessible to the
   // secondary.
   virtual Status TryCatchUpWithPrimary() {
-    return Status::NotSupported("Supported only by secondary instance");
+    return Status_NotSupported("Supported only by secondary instance");
   }
 };
 

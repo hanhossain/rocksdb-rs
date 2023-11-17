@@ -21,12 +21,12 @@ Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
-    return Status::OK();
+    return Status_OK();
   }
 
   flows_[blob_file_number].AddInFlow(bytes);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
@@ -39,7 +39,7 @@ Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Note: in order to measure the amount of additional garbage, we only need to
@@ -47,12 +47,12 @@ Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
   // (Newly written files would only have outflow.)
   auto it = flows_.find(blob_file_number);
   if (it == flows_.end()) {
-    return Status::OK();
+    return Status_OK();
   }
 
   it->second.AddOutFlow(bytes);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
@@ -73,7 +73,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
   }
 
   if (ikey.type != kTypeBlobIndex) {
-    return Status::OK();
+    return Status_OK();
   }
 
   BlobIndex blob_index;
@@ -86,7 +86,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
   }
 
   if (blob_index.IsInlined() || blob_index.HasTTL()) {
-    return Status::Corruption("Unexpected TTL/inlined blob index");
+    return Status_Corruption("Unexpected TTL/inlined blob index");
   }
 
   *blob_file_number = blob_index.file_number();
@@ -94,7 +94,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
       blob_index.size() +
       BlobLogRecord::CalculateAdjustmentForRecordHeader(ikey.user_key.size());
 
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

@@ -438,7 +438,7 @@ class BaseClockTable {
 
   // Helper for updating `usage_` for new entry with given `total_charge`
   // and evicting if needed under strict_capacity_limit=true rules. This
-  // means the operation might fail with Status::MemoryLimit. If
+  // means the operation might fail with Status_MemoryLimit. If
   // `need_evict_for_occupancy`, then eviction of at least one entry is
   // required, and the operation should fail if not possible.
   // NOTE: Otherwise, occupancy_ is not managed in this function

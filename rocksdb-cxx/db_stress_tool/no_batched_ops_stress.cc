@@ -100,7 +100,7 @@ class NonBatchedOpsStressTest : public StressTest {
             const int diff = iter->key().compare(k);
 
             if (diff > 0) {
-              s = Status::NotFound();
+              s = Status_NotFound();
             } else if (diff == 0) {
               if (!VerifyWideColumns(iter->value(), iter->columns())) {
                 VerificationAbort(shared, static_cast<int>(cf), i,
@@ -118,7 +118,7 @@ class NonBatchedOpsStressTest : public StressTest {
           } else {
             // The iterator found no value for the key in question, so do not
             // move to the next item in the iterator
-            s = Status::NotFound();
+            s = Status_NotFound();
           }
 
           VerifyOrSyncValue(static_cast<int>(cf), i, options, shared, from_db,
@@ -1176,7 +1176,7 @@ class NonBatchedOpsStressTest : public StressTest {
       }
 
       if (!VerifyWideColumns(iter->value(), iter->columns())) {
-        s = Status::Corruption("Value and columns inconsistent",
+        s = Status_Corruption("Value and columns inconsistent",
                                DebugString(iter->value(), iter->columns()));
         break;
       }
@@ -1206,7 +1206,7 @@ class NonBatchedOpsStressTest : public StressTest {
     }
     thread->stats.AddPrefixes(1, count);
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status TestPut(ThreadState* thread, WriteOptions& write_opts,
@@ -1314,10 +1314,10 @@ class NonBatchedOpsStressTest : public StressTest {
 
     if (!s.ok()) {
       if (FLAGS_injest_error_severity >= 2) {
-        if (!is_db_stopped_ && s.severity() >= Status::Severity::kFatalError) {
+        if (!is_db_stopped_ && s.severity() >= Severity::kFatalError) {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
-                   s.severity() < Status::Severity::kFatalError) {
+                   s.severity() < Severity::kFatalError) {
           fprintf(stderr, "put or merge error: %s\n", s.ToString().c_str());
           std::terminate();
         }
@@ -1379,10 +1379,10 @@ class NonBatchedOpsStressTest : public StressTest {
       if (!s.ok()) {
         if (FLAGS_injest_error_severity >= 2) {
           if (!is_db_stopped_ &&
-              s.severity() >= Status::Severity::kFatalError) {
+              s.severity() >= Severity::kFatalError) {
             is_db_stopped_ = true;
           } else if (!is_db_stopped_ ||
-                     s.severity() < Status::Severity::kFatalError) {
+                     s.severity() < Severity::kFatalError) {
             fprintf(stderr, "delete error: %s\n", s.ToString().c_str());
             std::terminate();
           }
@@ -1415,10 +1415,10 @@ class NonBatchedOpsStressTest : public StressTest {
       if (!s.ok()) {
         if (FLAGS_injest_error_severity >= 2) {
           if (!is_db_stopped_ &&
-              s.severity() >= Status::Severity::kFatalError) {
+              s.severity() >= Severity::kFatalError) {
             is_db_stopped_ = true;
           } else if (!is_db_stopped_ ||
-                     s.severity() < Status::Severity::kFatalError) {
+                     s.severity() < Severity::kFatalError) {
             fprintf(stderr, "single delete error: %s\n", s.ToString().c_str());
             std::terminate();
           }
@@ -1476,10 +1476,10 @@ class NonBatchedOpsStressTest : public StressTest {
     }
     if (!s.ok()) {
       if (FLAGS_injest_error_severity >= 2) {
-        if (!is_db_stopped_ && s.severity() >= Status::Severity::kFatalError) {
+        if (!is_db_stopped_ && s.severity() >= Severity::kFatalError) {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
-                   s.severity() < Status::Severity::kFatalError) {
+                   s.severity() < Severity::kFatalError) {
           fprintf(stderr, "delete range error: %s\n", s.ToString().c_str());
           std::terminate();
         }
@@ -1733,19 +1733,19 @@ class NonBatchedOpsStressTest : public StressTest {
           return iter->status();
         }
         if (!check_no_key_in_range(last_key + 1, ub)) {
-          return Status::OK();
+          return Status_OK();
         }
         break;
       }
 
       if (!check_columns()) {
-        return Status::OK();
+        return Status_OK();
       }
 
       // iter is valid, the range (last_key, current key) was skipped
       GetIntVal(iter->key().ToString(), &curr);
       if (!check_no_key_in_range(last_key + 1, static_cast<int64_t>(curr))) {
-        return Status::OK();
+        return Status_OK();
       }
 
       last_key = static_cast<int64_t>(curr);
@@ -1777,19 +1777,19 @@ class NonBatchedOpsStressTest : public StressTest {
           return iter->status();
         }
         if (!check_no_key_in_range(lb, last_key)) {
-          return Status::OK();
+          return Status_OK();
         }
         break;
       }
 
       if (!check_columns()) {
-        return Status::OK();
+        return Status_OK();
       }
 
       // the range (current key, last key) was skipped
       GetIntVal(iter->key().ToString(), &curr);
       if (!check_no_key_in_range(static_cast<int64_t>(curr + 1), last_key)) {
-        return Status::OK();
+        return Status_OK();
       }
 
       last_key = static_cast<int64_t>(curr);
@@ -1834,7 +1834,7 @@ class NonBatchedOpsStressTest : public StressTest {
       op_logs += " S " + key.ToString(true) + " ";
       if (!iter->Valid() && iter->status().ok()) {
         if (!check_no_key_in_range(mid, ub)) {
-          return Status::OK();
+          return Status_OK();
         }
       }
     } else {
@@ -1843,14 +1843,14 @@ class NonBatchedOpsStressTest : public StressTest {
       if (!iter->Valid() && iter->status().ok()) {
         // iterator says nothing <= mid
         if (!check_no_key_in_range(lb, mid + 1)) {
-          return Status::OK();
+          return Status_OK();
         }
       }
     }
 
     for (int64_t i = 0; i < num_iter && iter->Valid(); ++i) {
       if (!check_columns()) {
-        return Status::OK();
+        return Status_OK();
       }
 
       GetIntVal(iter->key().ToString(), &curr);
@@ -1894,7 +1894,7 @@ class NonBatchedOpsStressTest : public StressTest {
           GetIntVal(iter->key().ToString(), &next);
           if (!check_no_key_in_range(static_cast<int64_t>(curr + 1),
                                      static_cast<int64_t>(next))) {
-            return Status::OK();
+            return Status_OK();
           }
         } else {
           iter->Prev();
@@ -1906,7 +1906,7 @@ class NonBatchedOpsStressTest : public StressTest {
           GetIntVal(iter->key().ToString(), &prev);
           if (!check_no_key_in_range(static_cast<int64_t>(prev + 1),
                                      static_cast<int64_t>(curr))) {
-            return Status::OK();
+            return Status_OK();
           }
         }
       }
@@ -1924,7 +1924,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     thread->stats.AddIterations(1);
 
-    return Status::OK();
+    return Status_OK();
   }
 
   bool VerifyOrSyncValue(int cf, int64_t key, const ReadOptions& /*opts*/,

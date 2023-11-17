@@ -123,13 +123,13 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
   while (RestrictedRead(&record)) {
     if (record.size() < WriteBatchInternal::kHeader) {
       reporter_.Corruption(record.size(),
-                           Status::Corruption("very small log record"));
+                           Status_Corruption("very small log record"));
       continue;
     }
     UpdateCurrentWriteBatch(record);
     if (current_last_seq_ >= starting_sequence_number_) {
       if (strict && current_batch_seq_ != starting_sequence_number_) {
-        current_status_ = Status::Corruption(
+        current_status_ = Status_Corruption(
             "Gap in sequence number. Could not "
             "seek to required sequence number");
         reporter_.Info(current_status_.ToString().c_str());
@@ -152,12 +152,12 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
   // If strict is set, we want to seek exactly till the start sequence and it
   // should have been present in the file we scanned above
   if (strict) {
-    current_status_ = Status::Corruption(
+    current_status_ = Status_Corruption(
         "Gap in sequence number. Could not "
         "seek to required sequence number");
     reporter_.Info(current_status_.ToString().c_str());
   } else if (files_->size() != 1) {
-    current_status_ = Status::Corruption(
+    current_status_ = Status_Corruption(
         "Start sequence was not found, "
         "skipping to the next available");
     reporter_.Info(current_status_.ToString().c_str());
@@ -189,7 +189,7 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
     while (RestrictedRead(&record)) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter_.Corruption(record.size(),
-                             Status::Corruption("very small log record"));
+                             Status_Corruption("very small log record"));
         continue;
       } else {
         // started_ should be true if called by application
@@ -216,10 +216,10 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
     } else {
       is_valid_ = false;
       if (current_last_seq_ == versions_->LastSequence()) {
-        current_status_ = Status::OK();
+        current_status_ = Status_OK();
       } else {
         const char* msg = "Create a new iterator to fetch the new tail.";
-        current_status_ = Status::TryAgain(msg);
+        current_status_ = Status_TryAgain(msg);
       }
       return;
     }
@@ -263,7 +263,7 @@ void TransactionLogIteratorImpl::UpdateCurrentWriteBatch(const Slice& record) {
     // currentStatus_ will be set to Ok if reseek succeeds
     // Note: this is still ok in seq_pre_batch_ && two_write_queuesp_ mode
     // that allows gaps in the WAL since it will still skip over the gap.
-    current_status_ = Status::NotFound("Gap in sequence numbers");
+    current_status_ = Status_NotFound("Gap in sequence numbers");
     // In seq_per_batch_ mode, gaps in the seq are possible so the strict mode
     // should be disabled
     return SeekToStartSequence(current_file_index_, !seq_per_batch_);
@@ -278,7 +278,7 @@ void TransactionLogIteratorImpl::UpdateCurrentWriteBatch(const Slice& record) {
 
   current_batch_ = std::move(batch);
   is_valid_ = true;
-  current_status_ = Status::OK();
+  current_status_ = Status_OK();
 }
 
 Status TransactionLogIteratorImpl::OpenLogReader(const LogFile* log_file) {
@@ -291,6 +291,6 @@ Status TransactionLogIteratorImpl::OpenLogReader(const LogFile* log_file) {
   current_log_reader_.reset(
       new log::Reader(options_->info_log, std::move(file), &reporter_,
                       read_options_.verify_checksums_, log_file->LogNumber()));
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace ROCKSDB_NAMESPACE

@@ -66,7 +66,7 @@ Status AdaptiveTableFactory::NewTableReader(
     return cuckoo_table_factory_->NewTableReader(
         table_reader_options, std::move(file), file_size, table);
   } else {
-    return Status::NotSupported("Unidentified table format");
+    return Status_NotSupported("Unidentified table format");
   }
 }
 

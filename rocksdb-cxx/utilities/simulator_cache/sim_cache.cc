@@ -187,7 +187,7 @@ class SimCacheImpl : public SimCache {
 
     cache_activity_logger_.ReportAdd(key, charge);
     if (!target_) {
-      return Status::OK();
+      return Status_OK();
     }
     return target_->Insert(key, value, helper, charge, handle, priority);
   }

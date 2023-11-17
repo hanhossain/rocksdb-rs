@@ -21,12 +21,12 @@ Status SliceSaveTo(Cache::ObjectPtr from_obj, size_t from_offset, size_t length,
                    char* out) {
   const Slice& slice = *static_cast<Slice*>(from_obj);
   std::memcpy(out, slice.data() + from_offset, length);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FailCreate(const Slice&, Cache::CreateContext*, MemoryAllocator*,
                   Cache::ObjectPtr*, size_t*) {
-  return Status::NotSupported("Only for dumping data into SecondaryCache");
+  return Status_NotSupported("Only for dumping data into SecondaryCache");
 }
 
 }  // namespace

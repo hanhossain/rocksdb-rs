@@ -254,14 +254,14 @@ Status WriteBatchWithIndex::Rep::ReBuildIndex() {
       case kTypeNoop:
         break;
       default:
-        return Status::Corruption(
+        return Status_Corruption(
             "unknown WriteBatch tag in ReBuildIndex",
             std::to_string(static_cast<unsigned int>(tag)));
     }
   }
 
   if (s.ok() && found != write_batch.Count()) {
-    s = Status::Corruption("WriteBatch has wrong count");
+    s = Status_Corruption("WriteBatch has wrong count");
   }
 
   return s;
@@ -338,10 +338,10 @@ Status WriteBatchWithIndex::Put(ColumnFamilyHandle* column_family,
                                 const Slice& /*key*/, const Slice& /*ts*/,
                                 const Slice& /*value*/) {
   if (!column_family) {
-    return Status::InvalidArgument("column family handle cannot be nullptr");
+    return Status_InvalidArgument("column family handle cannot be nullptr");
   }
   // TODO: support WBWI::Put() with timestamp.
-  return Status::NotSupported();
+  return Status_NotSupported();
 }
 
 Status WriteBatchWithIndex::Delete(ColumnFamilyHandle* column_family,
@@ -366,10 +366,10 @@ Status WriteBatchWithIndex::Delete(const Slice& key) {
 Status WriteBatchWithIndex::Delete(ColumnFamilyHandle* column_family,
                                    const Slice& /*key*/, const Slice& /*ts*/) {
   if (!column_family) {
-    return Status::InvalidArgument("column family handle cannot be nullptr");
+    return Status_InvalidArgument("column family handle cannot be nullptr");
   }
   // TODO: support WBWI::Delete() with timestamp.
-  return Status::NotSupported();
+  return Status_NotSupported();
 }
 
 Status WriteBatchWithIndex::SingleDelete(ColumnFamilyHandle* column_family,
@@ -395,10 +395,10 @@ Status WriteBatchWithIndex::SingleDelete(ColumnFamilyHandle* column_family,
                                          const Slice& /*key*/,
                                          const Slice& /*ts*/) {
   if (!column_family) {
-    return Status::InvalidArgument("column family handle cannot be nullptr");
+    return Status_InvalidArgument("column family handle cannot be nullptr");
   }
   // TODO: support WBWI::SingleDelete() with timestamp.
-  return Status::NotSupported();
+  return Status_NotSupported();
 }
 
 Status WriteBatchWithIndex::Merge(ColumnFamilyHandle* column_family,
@@ -440,10 +440,10 @@ Status WriteBatchWithIndex::GetFromBatch(ColumnFamilyHandle* column_family,
       break;
     case WBWIIteratorImpl::kDeleted:
     case WBWIIteratorImpl::kNotFound:
-      s = Status::NotFound();
+      s = Status_NotFound();
       break;
     case WBWIIteratorImpl::kMergeInProgress:
-      s = Status::MergeInProgress();
+      s = Status_MergeInProgress();
       break;
     default:
       assert(false);
@@ -506,7 +506,7 @@ Status WriteBatchWithIndex::GetFromBatchAndDB(
   const Comparator* const ucmp = rep->comparator.GetComparator(column_family);
   size_t ts_sz = ucmp ? ucmp->timestamp_size() : 0;
   if (ts_sz > 0 && !read_options.timestamp) {
-    return Status::InvalidArgument("Must specify timestamp");
+    return Status_InvalidArgument("Must specify timestamp");
   }
 
   Status s;
@@ -524,7 +524,7 @@ Status WriteBatchWithIndex::GetFromBatchAndDB(
   } else if (!s.ok() || result == WBWIIteratorImpl::kError) {
     return s;
   } else if (result == WBWIIteratorImpl::kDeleted) {
-    return Status::NotFound();
+    return Status_NotFound();
   }
   assert(result == WBWIIteratorImpl::kMergeInProgress ||
          result == WBWIIteratorImpl::kNotFound);
@@ -577,7 +577,7 @@ void WriteBatchWithIndex::MultiGetFromBatchAndDB(
   size_t ts_sz = ucmp ? ucmp->timestamp_size() : 0;
   if (ts_sz > 0 && !read_options.timestamp) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status::InvalidArgument("Must specify timestamp");
+      statuses[i] = Status_InvalidArgument("Must specify timestamp");
     }
     return;
   }
@@ -608,7 +608,7 @@ void WriteBatchWithIndex::MultiGetFromBatchAndDB(
       continue;
     }
     if (result == WBWIIteratorImpl::kDeleted) {
-      *s = Status::NotFound();
+      *s = Status_NotFound();
       continue;
     }
     if (result == WBWIIteratorImpl::kError) {

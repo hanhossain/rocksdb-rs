@@ -243,7 +243,7 @@ size_t SizeFn(Cache::ObjectPtr /*obj*/) { return FLAGS_value_bytes; }
 Status SaveToFn(Cache::ObjectPtr from_obj, size_t /*from_offset*/,
                 size_t length, char* out) {
   memcpy(out, from_obj, length);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status CreateFn(const Slice& data, Cache::CreateContext* /*context*/,
@@ -252,7 +252,7 @@ Status CreateFn(const Slice& data, Cache::CreateContext* /*context*/,
   *out_obj = new char[data.size()];
   memcpy(*out_obj, data.data(), data.size());
   *out_charge = data.size();
-  return Status::OK();
+  return Status_OK();
 };
 
 void DeleteFn(Cache::ObjectPtr value, MemoryAllocator* /*alloc*/) {

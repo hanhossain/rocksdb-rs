@@ -40,13 +40,13 @@ static std::unordered_map<std::string, OptionTypeInfo> time_elapse_type_info = {
          const std::string& value, void* addr) {
         auto clock = static_cast<EmulatedSystemClock*>(addr);
         clock->SetTimeElapseOnlySleep(ParseBoolean("", value));
-        return Status::OK();
+        return Status_OK();
       },
       [](const ConfigOptions& /*opts*/, const std::string& /*name*/,
          const void* addr, std::string* value) {
         const auto clock = static_cast<const EmulatedSystemClock*>(addr);
         *value = clock->IsTimeElapseOnlySleep() ? "true" : "false";
-        return Status::OK();
+        return Status_OK();
       },
       nullptr}},
 };
@@ -58,13 +58,13 @@ static std::unordered_map<std::string, OptionTypeInfo> mock_sleep_type_info = {
          const std::string& value, void* addr) {
         auto clock = static_cast<EmulatedSystemClock*>(addr);
         clock->SetMockSleep(ParseBoolean("", value));
-        return Status::OK();
+        return Status_OK();
       },
       [](const ConfigOptions& /*opts*/, const std::string& /*name*/,
          const void* addr, std::string* value) {
         const auto clock = static_cast<const EmulatedSystemClock*>(addr);
         *value = clock->IsMockSleepEnabled() ? "true" : "false";
-        return Status::OK();
+        return Status_OK();
       },
       nullptr}},
 };
@@ -1025,10 +1025,10 @@ Status MockFileSystem::CorruptBuffer(const std::string& fname) {
   MutexLock lock(&mutex_);
   auto iter = file_map_.find(fn);
   if (iter == file_map_.end()) {
-    return Status::IOError(fn, "File not found");
+    return Status_IOError(fn, "File not found");
   }
   iter->second->CorruptBuffer();
-  return Status::OK();
+  return Status_OK();
 }
 
 MockEnv::MockEnv(Env* env, const std::shared_ptr<FileSystem>& fs,

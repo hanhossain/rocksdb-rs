@@ -364,7 +364,7 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
     return s;
   }
   if (snap_state.status != s) {
-    return Status::Corruption(
+    return Status_Corruption(
         "The snapshot gave inconsistent results for key " +
         std::to_string(Hash(snap_state.key.c_str(), snap_state.key.size(), 0)) +
         " in cf " + cf->GetName() + ": (" + snap_state.status.ToString() +
@@ -372,7 +372,7 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
   }
   if (s.ok()) {
     if (exp_v != v) {
-      return Status::Corruption("The snapshot gave inconsistent values: (" +
+      return Status_Corruption("The snapshot gave inconsistent values: (" +
                                 exp_v.ToString() + ") vs. (" + v.ToString() +
                                 ")");
     }
@@ -392,10 +392,10 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
     }
     if (!std::equal(snap_state.key_vec->begin(), snap_state.key_vec->end(),
                     tmp_bitvec.get()->begin())) {
-      return Status::Corruption("Found inconsistent keys at this snapshot");
+      return Status_Corruption("Found inconsistent keys at this snapshot");
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void StressTest::VerificationAbort(SharedState* shared, std::string msg,
@@ -631,13 +631,13 @@ void StressTest::ProcessRecoveredPreparedTxnsHelper(Transaction* txn,
 
 Status StressTest::NewTxn(WriteOptions& write_opts, Transaction** txn) {
   if (!FLAGS_use_txn) {
-    return Status::InvalidArgument("NewTxn when FLAGS_use_txn is not set");
+    return Status_InvalidArgument("NewTxn when FLAGS_use_txn is not set");
   }
   write_opts.disableWAL = FLAGS_disable_wal;
   static std::atomic<uint64_t> txn_id = {0};
   if (FLAGS_use_optimistic_txn) {
     *txn = optimistic_txn_db_->BeginTransaction(write_opts);
-    return Status::OK();
+    return Status_OK();
   } else {
     TransactionOptions txn_options;
     txn_options.use_only_the_last_commit_time_batch_for_recovery =
@@ -653,9 +653,9 @@ Status StressTest::NewTxn(WriteOptions& write_opts, Transaction** txn) {
 
 Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
   if (!FLAGS_use_txn) {
-    return Status::InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
+    return Status_InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
   }
-  Status s = Status::OK();
+  Status s = Status_OK();
   if (FLAGS_use_optimistic_txn) {
     assert(optimistic_txn_db_);
     s = txn->Commit();
@@ -702,7 +702,7 @@ Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
 
 Status StressTest::RollbackTxn(Transaction* txn) {
   if (!FLAGS_use_txn) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "RollbackTxn when FLAGS_use_txn is not"
         " set");
   }
@@ -1334,7 +1334,7 @@ Status StressTest::TestIterate(ThreadState* thread,
     op_logs += "; ";
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 // Test the return status of GetLiveFiles.
@@ -1616,7 +1616,7 @@ Status StressTest::TestBackupRestore(
     backup_engine->GetBackupInfo(&backup_info,
                                  /*include_file_details*/ inplace_not_restore);
     if (backup_info.empty()) {
-      s = Status::NotFound("no backups found");
+      s = Status_NotFound("no backups found");
       from = "BackupEngine::GetBackupInfo";
     }
   }
@@ -1727,14 +1727,14 @@ Status StressTest::TestBackupRestore(
         std::ostringstream oss;
         oss << "0x" << key.ToString(true)
             << " exists in restore but not in original db";
-        s = Status::Corruption(oss.str());
+        s = Status_Corruption(oss.str());
       }
     } else if (get_status.IsNotFound()) {
       if (exists && from_latest && ShouldAcquireMutexOnKey()) {
         std::ostringstream oss;
         oss << "0x" << key.ToString(true)
             << " exists in original db but not in restore";
-        s = Status::Corruption(oss.str());
+        s = Status_Corruption(oss.str());
       }
     } else {
       s = get_status;
@@ -1920,7 +1920,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
           std::ostringstream oss;
           oss << "0x" << key.ToString(true) << " exists in checkpoint "
               << checkpoint_dir << " but not in original db";
-          s = Status::Corruption(oss.str());
+          s = Status_Corruption(oss.str());
         }
       } else if (get_status.IsNotFound()) {
         if (exists && ShouldAcquireMutexOnKey()) {
@@ -1928,7 +1928,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
           oss << "0x" << key.ToString(true)
               << " exists in original db but not in checkpoint "
               << checkpoint_dir;
-          s = Status::Corruption(oss.str());
+          s = Status_Corruption(oss.str());
         }
       } else {
         s = get_status;
@@ -2195,7 +2195,7 @@ Status StressTest::MaybeReleaseSnapshots(ThreadState* thread, uint64_t i) {
       return s;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void StressTest::TestCompactRange(ThreadState* thread, int64_t rand_key,

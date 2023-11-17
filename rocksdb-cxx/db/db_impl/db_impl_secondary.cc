@@ -71,7 +71,7 @@ Status DBImplSecondary::Recover(
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Secondary tries to read WAL, but WAL file(s) have already "
                    "been purged by primary.");
-    s = Status::OK();
+    s = Status_OK();
   }
   // TODO: update options_file_number_ needed?
 
@@ -106,7 +106,7 @@ Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
                                             io_opts, &filenames,
                                             /*IODebugContext*=*/nullptr);
   if (s.IsNotFound()) {
-    return Status::InvalidArgument("Failed to open wal_dir",
+    return Status_InvalidArgument("Failed to open wal_dir",
                                    immutable_db_options_.GetWalDir());
   } else if (!s.ok()) {
     return s;
@@ -177,7 +177,7 @@ Status DBImplSecondary::MaybeInitLogReader(
   iter = log_readers_.find(log_number);
   assert(iter != log_readers_.end());
   *log_reader = iter->second->reader_;
-  return Status::OK();
+  return Status_OK();
 }
 
 // After manifest recovery, replay WALs and refresh log_readers_ if necessary
@@ -221,7 +221,7 @@ Status DBImplSecondary::RecoverLogFiles(
            wal_read_status->ok() && status.ok()) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reader->GetReporter()->Corruption(
-            record.size(), Status::Corruption("log record too small"));
+            record.size(), Status_Corruption("log record too small"));
         continue;
       }
       status = WriteBatchInternal::SetContents(&batch, record);
@@ -358,7 +358,7 @@ Status DBImplSecondary::GetImpl(const ReadOptions& read_options,
                                 const Slice& key, PinnableSlice* pinnable_val,
                                 std::string* timestamp) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -456,14 +456,14 @@ Iterator* DBImplSecondary::NewIterator(const ReadOptions& read_options,
                                        ColumnFamilyHandle* column_family) {
   if (read_options.managed) {
     return NewErrorIterator(
-        Status::NotSupported("Managed iterator is not supported anymore."));
+        Status_NotSupported("Managed iterator is not supported anymore."));
   }
   if (read_options.read_tier == kPersistedTier) {
-    return NewErrorIterator(Status::NotSupported(
+    return NewErrorIterator(Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators."));
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status::InvalidArgument(
+    return NewErrorIterator(Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -487,12 +487,12 @@ Iterator* DBImplSecondary::NewIterator(const ReadOptions& read_options,
   auto cfd = cfh->cfd();
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (read_options.tailing) {
-    return NewErrorIterator(Status::NotSupported(
+    return NewErrorIterator(Status_NotSupported(
         "tailing iterator not supported in secondary mode"));
   } else if (read_options.snapshot != nullptr) {
     // TODO (yanqin) support snapshot.
     return NewErrorIterator(
-        Status::NotSupported("snapshot not supported in secondary mode"));
+        Status_NotSupported("snapshot not supported in secondary mode"));
   } else {
     SequenceNumber snapshot(kMaxSequenceNumber);
     result = NewIteratorImpl(read_options, cfd, snapshot, read_callback);
@@ -527,20 +527,20 @@ Status DBImplSecondary::NewIterators(
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
   if (read_options.managed) {
-    return Status::NotSupported("Managed iterator is not supported anymore.");
+    return Status_NotSupported("Managed iterator is not supported anymore.");
   }
   if (read_options.read_tier == kPersistedTier) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call NewIterators with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (iterators == nullptr) {
-    return Status::InvalidArgument("iterators not allowed to be nullptr");
+    return Status_InvalidArgument("iterators not allowed to be nullptr");
   }
 
   if (read_options.timestamp) {
@@ -564,11 +564,11 @@ Status DBImplSecondary::NewIterators(
   iterators->clear();
   iterators->reserve(column_families.size());
   if (read_options.tailing) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "tailing iterator not supported in secondary mode");
   } else if (read_options.snapshot != nullptr) {
     // TODO (yanqin) support snapshot.
-    return Status::NotSupported("snapshot not supported in secondary mode");
+    return Status_NotSupported("snapshot not supported in secondary mode");
   } else {
     SequenceNumber read_seq(kMaxSequenceNumber);
     for (auto cfh : column_families) {
@@ -577,7 +577,7 @@ Status DBImplSecondary::NewIterators(
           NewIteratorImpl(read_options, cfd, read_seq, read_callback));
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImplSecondary::CheckConsistency() {
@@ -596,7 +596,7 @@ Status DBImplSecondary::CheckConsistency() {
       "DBImplSecondary::CheckConsistency:AfterFirstAttempt", &s);
 
   if (immutable_db_options_.skip_checking_sst_file_sizes_on_db_open) {
-    return Status::OK();
+    return Status_OK();
   }
 
   std::vector<LiveFileMetaData> metadata;
@@ -612,15 +612,15 @@ Status DBImplSecondary::CheckConsistency() {
     if (!s.ok() &&
         (env_->GetFileSize(Rocks2LevelTableFileName(file_path), &fsize).ok() ||
          s.IsPathNotFound())) {
-      s = Status::OK();
+      s = Status_OK();
     }
     if (!s.ok()) {
       corruption_messages +=
           "Can't access " + md.name + ": " + s.ToString() + "\n";
     }
   }
-  return corruption_messages.empty() ? Status::OK()
-                                     : Status::Corruption(corruption_messages);
+  return corruption_messages.empty() ? Status_OK()
+                                     : Status_Corruption(corruption_messages);
 }
 
 Status DBImplSecondary::TryCatchUpWithPrimary() {
@@ -660,7 +660,7 @@ Status DBImplSecondary::TryCatchUpWithPrimary() {
           immutable_db_options_.info_log,
           "Secondary tries to read WAL, but WAL file(s) have already "
           "been purged by primary.");
-      s = Status::OK();
+      s = Status_OK();
     }
     if (s.ok()) {
       for (auto cfd : cfds_changed) {
@@ -763,7 +763,7 @@ Status DB::OpenAsSecondary(
       auto cfd =
           impl->versions_->GetColumnFamilySet()->GetColumnFamily(cf.name);
       if (nullptr == cfd) {
-        s = Status::InvalidArgument("Column family not found", cf.name);
+        s = Status_InvalidArgument("Column family not found", cf.name);
         break;
       }
       handles->push_back(new ColumnFamilyHandleImpl(cfd, impl, &impl->mutex_));
@@ -798,12 +798,12 @@ Status DBImplSecondary::CompactWithoutInstallation(
     const OpenAndCompactOptions& options, ColumnFamilyHandle* cfh,
     const CompactionServiceInput& input, CompactionServiceResult* result) {
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    return Status_Incomplete(SubCode::kManualCompactionPaused);
   }
   InstrumentedMutexLock l(&mutex_);
   auto cfd = static_cast_with_check<ColumnFamilyHandleImpl>(cfh)->cfd();
   if (!cfd) {
-    return Status::InvalidArgument("Cannot find column family" +
+    return Status_InvalidArgument("Cannot find column family" +
                                    cfh->GetName());
   }
 
@@ -892,7 +892,7 @@ Status DB::OpenAndCompact(
     std::string* output,
     const CompactionServiceOptionsOverride& override_options) {
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    return Status_Incomplete(SubCode::kManualCompactionPaused);
   }
   CompactionServiceInput compaction_input;
   Status s = CompactionServiceInput::Read(input, &compaction_input);

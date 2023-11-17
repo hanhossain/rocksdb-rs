@@ -344,7 +344,7 @@ class VersionBuilder::Rep {
     const auto& level_files = vstorage->LevelFiles(level);
 
     if (level_files.empty()) {
-      return Status::OK();
+      return Status_OK();
     }
 
     assert(level_files[0]);
@@ -372,7 +372,7 @@ class VersionBuilder::Rep {
       }
     }
 
-    return Status::OK();
+    return Status_OK();
   }
 
   // Make sure table files are sorted correctly and that the links between
@@ -405,7 +405,7 @@ class VersionBuilder::Rep {
                   << ", #" << rhs->fd.GetNumber()
                   << " with seqnos (largest, smallest) "
                   << rhs->fd.largest_seqno << " , " << rhs->fd.smallest_seqno;
-              return Status::Corruption("VersionBuilder", oss.str());
+              return Status_Corruption("VersionBuilder", oss.str());
             }
           } else if (epoch_number_requirement ==
                      EpochNumberRequirement::kMustPresent) {
@@ -425,7 +425,7 @@ class VersionBuilder::Rep {
                     << " , smallest key: " << rhs->smallest.DebugString(true)
                     << " , largest key: " << rhs->largest.DebugString(true)
                     << " , epoch number: " << rhs->epoch_number;
-                return Status::Corruption("VersionBuilder", oss.str());
+                return Status_Corruption("VersionBuilder", oss.str());
               }
             }
 
@@ -435,11 +435,11 @@ class VersionBuilder::Rep {
                   << lhs->fd.GetNumber() << " with epoch number "
                   << lhs->epoch_number << ", #" << rhs->fd.GetNumber()
                   << " with epoch number " << rhs->epoch_number;
-              return Status::Corruption("VersionBuilder", oss.str());
+              return Status_Corruption("VersionBuilder", oss.str());
             }
           }
 
-          return Status::OK();
+          return Status_OK();
         };
 
         const Status s = CheckConsistencyDetailsForLevel(
@@ -463,7 +463,7 @@ class VersionBuilder::Rep {
             oss << 'L' << level << " files are not sorted properly: files #"
                 << lhs->fd.GetNumber() << ", #" << rhs->fd.GetNumber();
 
-            return Status::Corruption("VersionBuilder", oss.str());
+            return Status_Corruption("VersionBuilder", oss.str());
           }
 
           // Make sure there is no overlap in level
@@ -475,10 +475,10 @@ class VersionBuilder::Rep {
                 << " vs. file #" << rhs->fd.GetNumber()
                 << " smallest key: " << rhs->smallest.DebugString(true);
 
-            return Status::Corruption("VersionBuilder", oss.str());
+            return Status_Corruption("VersionBuilder", oss.str());
           }
 
-          return Status::OK();
+          return Status_OK();
         };
 
         const Status s = CheckConsistencyDetailsForLevel(
@@ -504,7 +504,7 @@ class VersionBuilder::Rep {
         oss << "Blob file #" << blob_file_number
             << " consists entirely of garbage";
 
-        return Status::Corruption("VersionBuilder", oss.str());
+        return Status_Corruption("VersionBuilder", oss.str());
       }
 
       if (blob_file_meta->GetLinkedSsts() !=
@@ -513,7 +513,7 @@ class VersionBuilder::Rep {
         oss << "Links are inconsistent between table files and blob file #"
             << blob_file_number;
 
-        return Status::Corruption("VersionBuilder", oss.str());
+        return Status_Corruption("VersionBuilder", oss.str());
       }
     }
 
@@ -529,7 +529,7 @@ class VersionBuilder::Rep {
     // Always run consistency checks in debug build
 #ifdef NDEBUG
     if (!vstorage->force_consistency_checks()) {
-      return Status::OK();
+      return Status_OK();
     }
 #endif
     Status s = CheckConsistencyDetails(vstorage);
@@ -541,7 +541,7 @@ class VersionBuilder::Rep {
 #else
       auto prefix = "force_consistency_checks(DEBUG)";
 #endif
-      s = Status::Corruption(prefix, s.getState());
+      s = Status_Corruption(prefix, s.getState());
     } else {
       // was only expecting corruption with message, or OK
       assert(s.ok());
@@ -604,7 +604,7 @@ class VersionBuilder::Rep {
       std::ostringstream oss;
       oss << "Blob file #" << blob_file_number << " already added";
 
-      return Status::Corruption("VersionBuilder", oss.str());
+      return Status_Corruption("VersionBuilder", oss.str());
     }
 
     // Note: we use C++11 for now but in C++14, this could be done in a more
@@ -634,7 +634,7 @@ class VersionBuilder::Rep {
     mutable_blob_file_metas_.emplace(
         blob_file_number, MutableBlobFileMetaData(std::move(shared_meta)));
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status ApplyBlobFileGarbage(const BlobFileGarbage& blob_file_garbage) {
@@ -647,17 +647,17 @@ class VersionBuilder::Rep {
       std::ostringstream oss;
       oss << "Blob file #" << blob_file_number << " not found";
 
-      return Status::Corruption("VersionBuilder", oss.str());
+      return Status_Corruption("VersionBuilder", oss.str());
     }
 
     if (!mutable_meta->AddGarbage(blob_file_garbage.GetGarbageBlobCount(),
                                   blob_file_garbage.GetGarbageBlobBytes())) {
       std::ostringstream oss;
       oss << "Garbage overflow for blob file #" << blob_file_number;
-      return Status::Corruption("VersionBuilder", oss.str());
+      return Status_Corruption("VersionBuilder", oss.str());
     }
 
-    return Status::OK();
+    return Status_OK();
   }
 
   int GetCurrentLevelForTableFile(uint64_t file_number) const {
@@ -712,7 +712,7 @@ class VersionBuilder::Rep {
         oss << "on level " << current_level;
       }
 
-      return Status::Corruption("VersionBuilder", oss.str());
+      return Status_Corruption("VersionBuilder", oss.str());
     }
 
     if (level >= num_levels_) {
@@ -722,7 +722,7 @@ class VersionBuilder::Rep {
       table_file_levels_[file_number] =
           VersionStorageInfo::FileLocation::Invalid().GetLevel();
 
-      return Status::OK();
+      return Status_OK();
     }
 
     const uint64_t blob_file_number =
@@ -752,7 +752,7 @@ class VersionBuilder::Rep {
     table_file_levels_[file_number] =
         VersionStorageInfo::FileLocation::Invalid().GetLevel();
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status ApplyFileAddition(int level, const FileMetaData& meta) {
@@ -771,14 +771,14 @@ class VersionBuilder::Rep {
       std::ostringstream oss;
       oss << "Cannot add table file #" << file_number << " to level " << level
           << " since it is already in the LSM tree on level " << current_level;
-      return Status::Corruption("VersionBuilder", oss.str());
+      return Status_Corruption("VersionBuilder", oss.str());
     }
 
     if (level >= num_levels_) {
       ++invalid_level_sizes_[level];
       table_file_levels_[file_number] = level;
 
-      return Status::OK();
+      return Status_OK();
     }
 
     auto& level_state = levels_[level];
@@ -797,7 +797,7 @@ class VersionBuilder::Rep {
           f->ApproximateMemoryUsage(), true /* increase */);
       if (!s.ok()) {
         delete f;
-        s = Status::MemoryLimit(
+        s = Status_MemoryLimit(
             "Can't allocate " +
             kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
                 CacheEntryRole::kFileMetadata)] +
@@ -824,7 +824,7 @@ class VersionBuilder::Rep {
 
     table_file_levels_[file_number] = level;
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status ApplyCompactCursors(int level,
@@ -834,13 +834,13 @@ class VersionBuilder::Rep {
       oss << "Cannot add compact cursor (" << level << ","
           << smallest_uncompacted_key.Encode().ToString()
           << " due to invalid level (level = " << level << ")";
-      return Status::Corruption("VersionBuilder", oss.str());
+      return Status_Corruption("VersionBuilder", oss.str());
     }
     if (level < num_levels_) {
       // Omit levels (>= num_levels_) when re-open with shrinking num_levels_
       updated_compact_cursors_[level] = smallest_uncompacted_key;
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // Apply all of the edits in *edit to the current state.
@@ -904,7 +904,7 @@ class VersionBuilder::Rep {
         return s;
       }
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // Helper function template for merging the blob file metadata from the base
@@ -1287,7 +1287,7 @@ class VersionBuilder::Rep {
       size_t table_cache_usage = table_cache_->get_cache().get()->GetUsage();
       if (table_cache_usage >= load_limit) {
         // TODO (yanqin) find a suitable status code.
-        return Status::OK();
+        return Status_OK();
       } else {
         max_load = load_limit - table_cache_usage;
       }
@@ -1302,7 +1302,7 @@ class VersionBuilder::Rep {
         // If the file has been opened before, just skip it.
         if (!file_meta->table_reader_handle) {
           files_meta.emplace_back(file_meta, level);
-          statuses.emplace_back(Status::OK());
+          statuses.emplace_back(Status_OK());
         }
         if (files_meta.size() >= max_load) {
           break;

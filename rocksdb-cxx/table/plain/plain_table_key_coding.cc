@@ -64,7 +64,7 @@ inline Status PlainTableKeyDecoder::DecodeSize(uint32_t start_offset,
   if (inline_key_size < kSizeInlineLimit) {
     *key_size = inline_key_size;
     *bytes_read = 1;
-    return Status::OK();
+    return Status_OK();
   } else {
     uint32_t extra_size;
     uint32_t tmp_bytes_read;
@@ -76,7 +76,7 @@ inline Status PlainTableKeyDecoder::DecodeSize(uint32_t start_offset,
     assert(tmp_bytes_read > 0);
     *key_size = kSizeInlineLimit + extra_size;
     *bytes_read = tmp_bytes_read + 1;
-    return Status::OK();
+    return Status_OK();
   }
 }
 
@@ -286,13 +286,13 @@ Status PlainTableKeyDecoder::ReadInternalKey(
     Status pik_status = ParseInternalKey(*internal_key, parsed_key,
                                          false /* log_err_key */);  // TODO
     if (!pik_status.ok()) {
-      return Status::Corruption(
+      return Status_Corruption(
           Slice("Corrupted key found during next key read. "),
           pik_status.getState());
     }
     *bytes_read += user_key_size + 8;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t start_offset,
@@ -341,7 +341,7 @@ Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t start_offset,
       *internal_key = cur_key_.GetInternalKey();
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PlainTableKeyDecoder::NextPrefixEncodingKey(
@@ -362,7 +362,7 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
       return s;
     }
     if (my_bytes_read == 0) {
-      return Status::Corruption("Unexpected EOF when reading size of the key");
+      return Status_Corruption("Unexpected EOF when reading size of the key");
     }
     *bytes_read += my_bytes_read;
 
@@ -449,10 +449,10 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
         break;
       }
       default:
-        return Status::Corruption("Un-identified size flag.");
+        return Status_Corruption("Un-identified size flag.");
     }
   } while (expect_suffix);  // Another round if suffix is expected.
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,
@@ -472,7 +472,7 @@ Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,
       return file_reader_.status();
     }
     if (value_size_bytes == 0) {
-      return Status::Corruption(
+      return Status_Corruption(
           "Unexpected EOF when reading the next value's size.");
     }
     *bytes_read += value_size_bytes;

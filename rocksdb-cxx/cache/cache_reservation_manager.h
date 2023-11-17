@@ -127,16 +127,16 @@ class CacheReservationManagerImpl
   //        order of calling UpdateCacheReservation() is needed if you want
   //        GetTotalMemoryUsed() indeed returns the latest memory used.
   //
-  // @return On inserting dummy entries, it returns Status::OK() if all dummy
+  // @return On inserting dummy entries, it returns Status_OK() if all dummy
   //         entry insertions succeed.
   //         Otherwise, it returns the first non-ok status;
-  //         On releasing dummy entries, it always returns Status::OK().
-  //         On keeping dummy entries the same, it always returns Status::OK().
+  //         On releasing dummy entries, it always returns Status_OK().
+  //         On keeping dummy entries the same, it always returns Status_OK().
   Status UpdateCacheReservation(std::size_t new_memory_used) override;
 
   Status UpdateCacheReservation(std::size_t /* memory_used_delta */,
                                 bool /* increase */) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   // One of the two ways of reserving cache space and releasing is done through
@@ -171,7 +171,7 @@ class CacheReservationManagerImpl
   //        manages the lifetime of the cache reservation represented by the
   //        handle.
   //
-  // @return It returns Status::OK() if all dummy
+  // @return It returns Status_OK() if all dummy
   //         entry insertions succeed.
   //         Otherwise, it returns the first non-ok status;
   //

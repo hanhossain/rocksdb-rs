@@ -98,7 +98,7 @@ class EnvLogger : public Logger {
     if (close_status.ok()) {
       return close_status;
     }
-    return Status::IOError("Close of log file failed with error:" +
+    return Status_IOError("Close of log file failed with error:" +
                            (close_status.getState()
                                 ? std::string(close_status.getState())
                                 : std::string()));

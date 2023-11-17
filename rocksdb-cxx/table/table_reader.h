@@ -100,7 +100,7 @@ class TableReader {
   // The last one tends to be the largest key.
   virtual Status ApproximateKeyAnchors(const ReadOptions& /*read_options*/,
                                        std::vector<Anchor>& /*anchors*/) {
-    return Status::NotSupported("ApproximateKeyAnchors() not supported.");
+    return Status_NotSupported("ApproximateKeyAnchors() not supported.");
   }
 
   // Set up the table for Compaction. Might change some parameters with
@@ -137,7 +137,7 @@ class TableReader {
   virtual Status MultiGetFilter(const ReadOptions& /*readOptions*/,
                                 const SliceTransform* /*prefix_extractor*/,
                                 MultiGetContext::Range* /*mget_range*/) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   virtual void MultiGet(const ReadOptions& readOptions,
@@ -169,18 +169,18 @@ class TableReader {
     (void)end;
     // Default implementation is NOOP.
     // The child class should implement functionality when applicable
-    return Status::OK();
+    return Status_OK();
   }
 
   // convert db file to a human readable form
   virtual Status DumpTable(WritableFile* /*out_file*/) {
-    return Status::NotSupported("DumpTable() not supported");
+    return Status_NotSupported("DumpTable() not supported");
   }
 
   // check whether there is corruption in this db file
   virtual Status VerifyChecksum(const ReadOptions& /*read_options*/,
                                 TableReaderCaller /*caller*/) {
-    return Status::NotSupported("VerifyChecksum() not supported");
+    return Status_NotSupported("VerifyChecksum() not supported");
   }
 };
 

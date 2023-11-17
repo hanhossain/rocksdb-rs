@@ -93,7 +93,7 @@ Status SstFileDumper::GetTableReader(const std::string& file_path) {
   // check empty file
   // if true, skip further processing of this file
   if (file_size == 0) {
-    return Status::Aborted(file_path, "Empty file");
+    return Status_Aborted(file_path, "Empty file");
   }
 
   file_.reset(new RandomAccessFileReader(std::move(file), file_path));
@@ -282,7 +282,7 @@ Status SstFileDumper::ShowAllCompressionSizes(
       fprintf(stdout, "Unsupported compression type: %s.\n", i.second);
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status SstFileDumper::ShowCompressionSize(
@@ -357,7 +357,7 @@ Status SstFileDumper::ShowCompressionSize(
           ratio_not_compressed_blocks, ratio_not_compressed_pcnt);
   fprintf(stdout, " Not compressed (abort): %6" PRIu64 " (%5.1f%%)\n",
           not_compressed_blocks, not_compressed_pcnt);
-  return Status::OK();
+  return Status_OK();
 }
 
 // Reads TableProperties prior to opening table reader in order to set up
@@ -429,10 +429,10 @@ Status SstFileDumper::SetTableOptionsByMagicNumber(
     snprintf(error_msg_buffer, sizeof(error_msg_buffer) - 1,
              "Unsupported table magic number --- %lx",
              (long)table_magic_number);
-    return Status::InvalidArgument(error_msg_buffer);
+    return Status_InvalidArgument(error_msg_buffer);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status SstFileDumper::SetOldTableOptions() {
@@ -442,7 +442,7 @@ Status SstFileDumper::SetOldTableOptions() {
     fprintf(stdout, "Sst file format: block-based(old version)\n");
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status SstFileDumper::ReadSequential(bool print_kv, uint64_t read_num,

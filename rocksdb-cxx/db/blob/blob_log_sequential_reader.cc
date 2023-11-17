@@ -38,7 +38,7 @@ Status BlobLogSequentialReader::ReadSlice(uint64_t size, Slice* slice,
   }
   RecordTick(statistics_, BLOB_DB_BLOB_FILE_BYTES_READ, slice->size());
   if (slice->size() != size) {
-    return Status::Corruption("EOF reached while reading record");
+    return Status_Corruption("EOF reached while reading record");
   }
   return s;
 }
@@ -56,7 +56,7 @@ Status BlobLogSequentialReader::ReadHeader(BlobLogHeader* header) {
   }
 
   if (buffer_.size() != BlobLogHeader::kSize) {
-    return Status::Corruption("EOF reached before file header");
+    return Status_Corruption("EOF reached before file header");
   }
 
   return header->DecodeFrom(buffer_);
@@ -74,7 +74,7 @@ Status BlobLogSequentialReader::ReadRecord(BlobLogRecord* record,
     return s;
   }
   if (buffer_.size() != BlobLogRecord::kHeaderSize) {
-    return Status::Corruption("EOF reached before record header");
+    return Status_Corruption("EOF reached before record header");
   }
 
   s = record->DecodeHeaderFrom(buffer_);
@@ -125,7 +125,7 @@ Status BlobLogSequentialReader::ReadFooter(BlobLogFooter* footer) {
   }
 
   if (buffer_.size() != BlobLogFooter::kSize) {
-    return Status::Corruption("EOF reached before file footer");
+    return Status_Corruption("EOF reached before file footer");
   }
 
   return footer->DecodeFrom(buffer_);

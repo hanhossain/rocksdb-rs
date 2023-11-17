@@ -100,7 +100,7 @@ Status BlobFile::WriteFooterAndCloseLocked(SequenceNumber sequence) {
 
 Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   if (file_size_ < (BlobLogHeader::kSize + BlobLogFooter::kSize)) {
-    return Status::IOError("File does not have footer", PathName());
+    return Status_IOError("File does not have footer", PathName());
   }
 
   uint64_t footer_offset = file_size_ - BlobLogFooter::kSize;
@@ -125,7 +125,7 @@ Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   if (!s.ok()) return s;
   if (result.size() != BlobLogFooter::kSize) {
     // should not happen
-    return Status::IOError("EOF reached before footer");
+    return Status_IOError("EOF reached before footer");
   }
 
   s = bf->DecodeFrom(result);
@@ -136,7 +136,7 @@ Status BlobFile::SetFromFooterLocked(const BlobLogFooter& footer) {
   blob_count_ = footer.blob_count;
   expiration_range_ = footer.expiration_range;
   closed_ = true;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFile::Fsync() {
@@ -217,7 +217,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
     ROCKS_LOG_ERROR(
         info_log_, "Incomplete blob file blob file %" PRIu64 ", size: %" PRIu64,
         file_number_, file_size);
-    return Status::Corruption("Incomplete blob file header.");
+    return Status_Corruption("Incomplete blob file header.");
   }
 
   // Create file reader.
@@ -273,7 +273,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
   if (file_size_ < BlobLogHeader::kSize + BlobLogFooter::kSize) {
     // OK not to have footer.
     assert(!footer_valid_);
-    return Status::OK();
+    return Status_OK();
   }
   std::string footer_buf;
   Slice footer_slice;
@@ -300,7 +300,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
   if (!s.ok()) {
     // OK not to have footer.
     assert(!footer_valid_);
-    return Status::OK();
+    return Status_OK();
   }
   blob_count_ = footer.blob_count;
   if (has_ttl_) {
@@ -309,7 +309,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
     expiration_range_ = footer.expiration_range;
   }
   footer_valid_ = true;
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace blob_db

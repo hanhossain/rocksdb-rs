@@ -887,7 +887,7 @@ TEST_P(BlobFileReaderIOErrorTest, IOError) {
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* /* arg */) {
     fault_injection_env_->SetFilesystemActive(false,
-                                              Status::IOError(sync_point_));
+                                              Status_IOError(sync_point_));
   });
   SyncPoint::GetInstance()->EnableProcessing();
 

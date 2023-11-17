@@ -270,9 +270,9 @@ class LocalSavePoint {
       }
       batch_->content_flags_.store(savepoint_.content_flags,
                                    std::memory_order_relaxed);
-      return Status::MemoryLimit();
+      return Status_MemoryLimit();
     }
-    return Status::OK();
+    return Status_OK();
   }
 
  private:
@@ -325,19 +325,19 @@ class TimestampUpdater : public WriteBatch::Handler {
     return UpdateTimestamp(cf, key);
   }
 
-  Status MarkBeginPrepare(bool) override { return Status::OK(); }
+  Status MarkBeginPrepare(bool) override { return Status_OK(); }
 
-  Status MarkEndPrepare(const Slice&) override { return Status::OK(); }
+  Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
 
-  Status MarkCommit(const Slice&) override { return Status::OK(); }
+  Status MarkCommit(const Slice&) override { return Status_OK(); }
 
   Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-    return Status::OK();
+    return Status_OK();
   }
 
-  Status MarkRollback(const Slice&) override { return Status::OK(); }
+  Status MarkRollback(const Slice&) override { return Status_OK(); }
 
-  Status MarkNoop(bool /*empty_batch*/) override { return Status::OK(); }
+  Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
 
  private:
   // @param is_key specifies whether the update is for key or value.
@@ -350,24 +350,24 @@ class TimestampUpdater : public WriteBatch::Handler {
   Status UpdateTimestampImpl(uint32_t cf, const Slice& buf, size_t /*idx*/,
                              bool is_key) {
     if (timestamp_.empty()) {
-      return Status::InvalidArgument("Timestamp is empty");
+      return Status_InvalidArgument("Timestamp is empty");
     }
     size_t cf_ts_sz = ts_sz_func_(cf);
     if (0 == cf_ts_sz) {
       // Skip this column family.
-      return Status::OK();
+      return Status_OK();
     } else if (std::numeric_limits<size_t>::max() == cf_ts_sz) {
       // Column family timestamp info not found.
-      return Status::NotFound();
+      return Status_NotFound();
     } else if (cf_ts_sz != timestamp_.size()) {
-      return Status::InvalidArgument("timestamp size mismatch");
+      return Status_InvalidArgument("timestamp size mismatch");
     }
     UpdateProtectionInformationIfNeeded(buf, timestamp_, is_key);
 
     char* ptr = const_cast<char*>(buf.data() + buf.size() - cf_ts_sz);
     assert(ptr);
     memcpy(ptr, timestamp_.data(), timestamp_.size());
-    return Status::OK();
+    return Status_OK();
   }
 
   void UpdateProtectionInformationIfNeeded(const Slice& buf, const Slice& ts,

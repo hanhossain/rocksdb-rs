@@ -427,7 +427,7 @@ static std::unordered_map<std::string, OptionTypeInfo> env_wrapper_type_info = {
                              const std::string& /*name*/, const void* addr) {
            const auto target = static_cast<const EnvWrapper::Target*>(addr);
            if (target->env == nullptr) {
-             return Status::InvalidArgument("Target Env not specified");
+             return Status_InvalidArgument("Target Env not specified");
            } else {
              return target->env->ValidateOptions(db_opts, cf_opts);
            }

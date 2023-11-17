@@ -45,19 +45,19 @@ static Status ParseCompressionOptions(const std::string& value,
   std::string field;
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status::InvalidArgument("unable to parse the specified CF option " +
+    return Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.window_bits = ParseInt(field);
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status::InvalidArgument("unable to parse the specified CF option " +
+    return Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.level = ParseInt(field);
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status::InvalidArgument("unable to parse the specified CF option " +
+    return Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.strategy = ParseInt(field);
@@ -65,7 +65,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // max_dict_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.max_dict_bytes = ParseInt(field);
@@ -74,7 +74,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // zstd_max_train_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.zstd_max_train_bytes = ParseInt(field);
@@ -83,7 +83,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // parallel_threads is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     // Since parallel_threads comes before enabled but was added optionally
@@ -101,7 +101,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // enabled is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.enabled = ParseBoolean("", field);
@@ -110,7 +110,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // max_dict_buffer_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.max_dict_buffer_bytes = ParseUint64(field);
@@ -119,17 +119,17 @@ static Status ParseCompressionOptions(const std::string& value,
   // use_zstd_dict_trainer is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.use_zstd_dict_trainer = ParseBoolean("", field);
   }
 
   if (!field_stream.eof()) {
-    return Status::InvalidArgument("unable to parse the specified CF option " +
+    return Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 const std::string kOptNameBMCompOpts = "bottommost_compression_opts";
@@ -418,7 +418,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                  // Old format. Parse just a single uint64_t value.
                  auto options = static_cast<CompactionOptionsFIFO*>(addr);
                  options->max_table_files_size = ParseUint64(value);
-                 return Status::OK();
+                 return Status_OK();
                } else {
                  return OptionTypeInfo::ParseStruct(
                      opts, "compaction_options_fifo",
@@ -656,7 +656,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                      }
                      *value = root_comp->ToString(opts);
                    }
-                   return Status::OK();
+                   return Status_OK();
                  })},
         {"memtable_insert_with_hint_prefix_extractor",
          OptionTypeInfo::AsCustomSharedPtr<const SliceTransform>(
@@ -725,7 +725,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             } else if (old_opts != nullptr) {
               return table_factory->get()->ConfigureOption(opts, name, value);
             } else {
-              return Status::NotFound("Mismatched table option: ", name);
+              return Status_NotFound("Mismatched table option: ", name);
             }
           }}},
         {"plain_table_factory",
@@ -756,7 +756,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             } else if (old_opts != nullptr) {
               return table_factory->get()->ConfigureOption(opts, name, value);
             } else {
-              return Status::NotFound("Mismatched table option: ", name);
+              return Status_NotFound("Mismatched table option: ", name);
             }
           }}},
         {"table_properties_collectors",

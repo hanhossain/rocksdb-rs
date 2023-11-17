@@ -200,8 +200,8 @@ class FilePrefetchBuffer {
   // result                : if data already exists in the buffer, result will
   //                         be updated with the data.
   //
-  // If data already exist in the buffer, it will return Status::OK, otherwise
-  // it will send asynchronous request and return Status::TryAgain.
+  // If data already exist in the buffer, it will return Status_OK, otherwise
+  // it will send asynchronous request and return Status_TryAgain.
   Status PrefetchAsync(const IOOptions& opts, RandomAccessFileReader* reader,
                        uint64_t offset, size_t n, Slice* result);
 

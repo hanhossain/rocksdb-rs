@@ -302,7 +302,7 @@ struct CreateBackupOptions {
 
   // Callback for reporting progress, based on callback_trigger_interval_size.
   //
-  // An exception thrown from the callback will result in Status::Aborted from
+  // An exception thrown from the callback will result in Status_Aborted from
   // the operation.
   std::function<void()> progress_callback = {};
 
@@ -322,7 +322,7 @@ struct CreateBackupOptions {
   // To restore the DB, RestoreOptions::alternate_dirs must be used to provide
   // the excluded files.
   //
-  // An exception thrown from the callback will result in Status::Aborted from
+  // An exception thrown from the callback will result in Status_Aborted from
   // the operation.
   std::function<void(MaybeExcludeBackupFile* files_begin,
                      MaybeExcludeBackupFile* files_end)>
@@ -515,7 +515,7 @@ class BackupEngineReadOnlyBase {
   // Otherwise, it compares the files' current sizes (and checksums) against
   // their sizes (and checksums) when the BackupEngine was opened.
   //
-  // Returns Status::OK() if all checks are good
+  // Returns Status_OK() if all checks are good
   virtual IOStatus VerifyBackup(BackupID backup_id,
                                 bool verify_with_checksum = false) const = 0;
 
@@ -570,7 +570,7 @@ class BackupEngineAppendOnlyBase {
   // that is currently happening. It will return immediately, will
   // not wait for the backup to stop.
   // The backup will stop ASAP and the call to CreateNewBackup will
-  // return Status::Incomplete(). It will not clean up after itself, but
+  // return Status_Incomplete(). It will not clean up after itself, but
   // the state will remain consistent. The state will be cleaned up the
   // next time you call CreateNewBackup or GarbageCollect.
   virtual void StopBackup() = 0;

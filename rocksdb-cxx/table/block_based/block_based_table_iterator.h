@@ -110,9 +110,9 @@ class BlockBasedTableIterator : public InternalIteratorBase<Slice> {
     } else if (block_iter_points_to_real_block_) {
       return block_iter_.status();
     } else if (async_read_in_progress_) {
-      return Status::TryAgain();
+      return Status_TryAgain();
     } else {
-      return Status::OK();
+      return Status_OK();
     }
   }
 
@@ -152,7 +152,7 @@ class BlockBasedTableIterator : public InternalIteratorBase<Slice> {
       if (pinned_iters_mgr_ != nullptr && pinned_iters_mgr_->PinningEnabled()) {
         block_iter_.DelegateCleanupsTo(pinned_iters_mgr_);
       }
-      block_iter_.Invalidate(Status::OK());
+      block_iter_.Invalidate(Status_OK());
       block_iter_points_to_real_block_ = false;
     }
     block_upper_bound_check_ = BlockUpperBound::kUnknown;

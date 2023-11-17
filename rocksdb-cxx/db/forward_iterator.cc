@@ -61,7 +61,7 @@ class ForwardLevelIterator : public InternalIterator {
 
   void SetFileIndex(uint32_t file_index) {
     assert(file_index < files_.size());
-    status_ = Status::OK();
+    status_ = Status_OK();
     if (file_index != file_index_) {
       file_index_ = file_index;
       Reset();
@@ -93,16 +93,16 @@ class ForwardLevelIterator : public InternalIterator {
     file_iter_->SetPinnedItersMgr(pinned_iters_mgr_);
     valid_ = false;
     if (!range_del_agg.IsEmpty()) {
-      status_ = Status::NotSupported(
+      status_ = Status_NotSupported(
           "Range tombstones unsupported with ForwardIterator");
     }
   }
   void SeekToLast() override {
-    status_ = Status::NotSupported("ForwardLevelIterator::SeekToLast()");
+    status_ = Status_NotSupported("ForwardLevelIterator::SeekToLast()");
     valid_ = false;
   }
   void Prev() override {
-    status_ = Status::NotSupported("ForwardLevelIterator::Prev()");
+    status_ = Status_NotSupported("ForwardLevelIterator::Prev()");
     valid_ = false;
   }
   bool Valid() const override { return valid_; }
@@ -132,7 +132,7 @@ class ForwardLevelIterator : public InternalIterator {
     valid_ = file_iter_->Valid();
   }
   void SeekForPrev(const Slice& /*internal_key*/) override {
-    status_ = Status::NotSupported("ForwardLevelIterator::SeekForPrev()");
+    status_ = Status_NotSupported("ForwardLevelIterator::SeekForPrev()");
     valid_ = false;
   }
   void Next() override {
@@ -173,7 +173,7 @@ class ForwardLevelIterator : public InternalIterator {
     } else if (file_iter_) {
       return file_iter_->status();
     }
-    return Status::OK();
+    return Status_OK();
   }
   bool PrepareValue() override {
     assert(valid_);
@@ -231,8 +231,8 @@ ForwardIterator::ForwardIterator(DBImpl* db, const ReadOptions& read_options,
       mutable_iter_(nullptr),
       current_(nullptr),
       valid_(false),
-      status_(Status::OK()),
-      immutable_status_(Status::OK()),
+      status_(Status_OK()),
+      immutable_status_(Status_OK()),
       has_iter_trimmed_for_upper_bound_(false),
       current_over_upper_bound_(false),
       is_prev_set_(false),
@@ -396,7 +396,7 @@ void ForwardIterator::SeekInternal(const Slice& internal_key,
   if (seek_to_first || seek_after_async_io ||
       NeedToSeekImmutable(internal_key)) {
     if (!seek_after_async_io) {
-      immutable_status_ = Status::OK();
+      immutable_status_ = Status_OK();
       if (has_iter_trimmed_for_upper_bound_ &&
           (
               // prev_ is not set yet
@@ -646,9 +646,9 @@ Status ForwardIterator::GetProperty(std::string prop_name, std::string* prop) {
   assert(prop != nullptr);
   if (prop_name == "rocksdb.iterator.super-version-number") {
     *prop = std::to_string(sv_->version_number);
-    return Status::OK();
+    return Status_OK();
   }
-  return Status::InvalidArgument();
+  return Status_InvalidArgument();
 }
 
 void ForwardIterator::SetPinnedItersMgr(
@@ -712,7 +712,7 @@ void ForwardIterator::RebuildIterators(bool refresh_sv) {
             read_options_, sv_->current->version_set()->LastSequence(),
             false /* immutable_memtable */));
     range_del_agg.AddTombstones(std::move(range_del_iter));
-    // Always return Status::OK().
+    // Always return Status_OK().
     Status temp_s = sv_->imm->AddRangeTombstoneIterators(read_options_, &arena_,
                                                          &range_del_agg);
     assert(temp_s.ok());
@@ -750,7 +750,7 @@ void ForwardIterator::RebuildIterators(bool refresh_sv) {
 
   UpdateChildrenPinnedItersMgr();
   if (!range_del_agg.IsEmpty()) {
-    status_ = Status::NotSupported(
+    status_ = Status_NotSupported(
         "Range tombstones unsupported with ForwardIterator");
     valid_ = false;
   }
@@ -779,7 +779,7 @@ void ForwardIterator::RenewIterators() {
             read_options_, sv_->current->version_set()->LastSequence(),
             false /* immutable_memtable */));
     range_del_agg.AddTombstones(std::move(range_del_iter));
-    // Always return Status::OK().
+    // Always return Status_OK().
     Status temp_s = svnew->imm->AddRangeTombstoneIterators(
         read_options_, &arena_, &range_del_agg);
     assert(temp_s.ok());
@@ -845,7 +845,7 @@ void ForwardIterator::RenewIterators() {
 
   UpdateChildrenPinnedItersMgr();
   if (!range_del_agg.IsEmpty()) {
-    status_ = Status::NotSupported(
+    status_ = Status_NotSupported(
         "Range tombstones unsupported with ForwardIterator");
     valid_ = false;
   }
@@ -929,7 +929,7 @@ void ForwardIterator::UpdateCurrent() {
   }
   valid_ = current_ != nullptr && immutable_status_.ok();
   if (!status_.ok()) {
-    status_ = Status::OK();
+    status_ = Status_OK();
   }
 
   // Upper bound doesn't apply to the memtable iterator. We want Valid() to

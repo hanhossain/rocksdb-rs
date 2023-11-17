@@ -176,11 +176,11 @@ uint64_t WinClock::NowNanos() {
 Status WinClock::GetCurrentTime(int64_t* unix_time) {
   time_t time = std::time(nullptr);
   if (time == (time_t)(-1)) {
-    return Status::NotSupported("Failed to get time");
+    return Status_NotSupported("Failed to get time");
   }
 
   *unix_time = time;
-  return Status::OK();
+  return Status_OK();
 }
 
 WinFileSystem::WinFileSystem(const std::shared_ptr<SystemClock>& clock)

@@ -16,7 +16,7 @@ namespace ROCKSDB_NAMESPACE {
 
 Status GetInfoLogList(DB* db, std::vector<std::string>* info_log_list) {
   if (!db) {
-    return Status::InvalidArgument("DB pointer is not valid");
+    return Status_InvalidArgument("DB pointer is not valid");
   }
   std::string parent_path;
   const Options& options = db->GetOptions();

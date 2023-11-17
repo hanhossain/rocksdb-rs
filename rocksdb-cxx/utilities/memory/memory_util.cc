@@ -45,6 +45,6 @@ Status MemoryUtil::GetApproximateMemoryUsageByType(
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace ROCKSDB_NAMESPACE

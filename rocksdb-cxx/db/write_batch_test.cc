@@ -274,7 +274,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "PutCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ", " + value.ToString() + ")";
     }
-    return Status::OK();
+    return Status_OK();
   }
   Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
     if (column_family_id == 0) {
@@ -283,7 +283,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "DeleteCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ")";
     }
-    return Status::OK();
+    return Status_OK();
   }
   Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override {
     if (column_family_id == 0) {
@@ -292,7 +292,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "SingleDeleteCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ")";
     }
-    return Status::OK();
+    return Status_OK();
   }
   Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
                        const Slice& end_key) override {
@@ -303,7 +303,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "DeleteRangeCF(" + std::to_string(column_family_id) + ", " +
               begin_key.ToString() + ", " + end_key.ToString() + ")";
     }
-    return Status::OK();
+    return Status_OK();
   }
   Status MergeCF(uint32_t column_family_id, const Slice& key,
                  const Slice& value) override {
@@ -313,7 +313,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "MergeCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ", " + value.ToString() + ")";
     }
-    return Status::OK();
+    return Status_OK();
   }
   void LogData(const Slice& blob) override {
     seen += "LogData(" + blob.ToString() + ")";
@@ -321,28 +321,28 @@ struct TestHandler : public WriteBatch::Handler {
   Status MarkBeginPrepare(bool unprepare) override {
     seen +=
         "MarkBeginPrepare(" + std::string(unprepare ? "true" : "false") + ")";
-    return Status::OK();
+    return Status_OK();
   }
   Status MarkEndPrepare(const Slice& xid) override {
     seen += "MarkEndPrepare(" + xid.ToString() + ")";
-    return Status::OK();
+    return Status_OK();
   }
   Status MarkNoop(bool empty_batch) override {
     seen += "MarkNoop(" + std::string(empty_batch ? "true" : "false") + ")";
-    return Status::OK();
+    return Status_OK();
   }
   Status MarkCommit(const Slice& xid) override {
     seen += "MarkCommit(" + xid.ToString() + ")";
-    return Status::OK();
+    return Status_OK();
   }
   Status MarkCommitWithTimestamp(const Slice& xid, const Slice& ts) override {
     seen += "MarkCommitWithTimestamp(" + xid.ToString() + ", " +
             ts.ToString(true) + ")";
-    return Status::OK();
+    return Status_OK();
   }
   Status MarkRollback(const Slice& xid) override {
     seen += "MarkRollback(" + xid.ToString() + ")";
-    return Status::OK();
+    return Status_OK();
   }
 };
 }  // anonymous namespace
@@ -439,7 +439,7 @@ TEST_F(WriteBatchTest, PrepareCommit) {
   batch.SetSavePoint();
   ASSERT_OK(WriteBatchInternal::MarkEndPrepare(&batch, Slice("xid1")));
   Status s = batch.RollbackToSavePoint();
-  ASSERT_EQ(s, Status::NotFound());
+  ASSERT_EQ(s, Status_NotFound());
   ASSERT_OK(WriteBatchInternal::MarkCommit(&batch, Slice("xid1")));
   ASSERT_OK(WriteBatchInternal::MarkRollback(&batch, Slice("xid1")));
   ASSERT_EQ(2u, batch.Count());
@@ -494,22 +494,22 @@ TEST_F(WriteBatchTest, DISABLED_ManyUpdates) {
         expected_char = 'A';
       }
       ++num_seen;
-      return Status::OK();
+      return Status_OK();
     }
     Status DeleteCF(uint32_t /*column_family_id*/,
                     const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status::OK();
+      return Status_OK();
     }
     Status SingleDeleteCF(uint32_t /*column_family_id*/,
                           const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status::OK();
+      return Status_OK();
     }
     Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                    const Slice& /*value*/) override {
       ADD_FAILURE();
-      return Status::OK();
+      return Status_OK();
     }
     void LogData(const Slice& /*blob*/) override { ADD_FAILURE(); }
     bool Continue() override { return num_seen < kNumUpdates; }
@@ -545,22 +545,22 @@ TEST_F(WriteBatchTest, DISABLED_LargeKeyValue) {
       EXPECT_EQ('A' - num_seen, key[kKeyValueSize - 1]);
       EXPECT_EQ('A' - num_seen, value[kKeyValueSize - 1]);
       ++num_seen;
-      return Status::OK();
+      return Status_OK();
     }
     Status DeleteCF(uint32_t /*column_family_id*/,
                     const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status::OK();
+      return Status_OK();
     }
     Status SingleDeleteCF(uint32_t /*column_family_id*/,
                           const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status::OK();
+      return Status_OK();
     }
     Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                    const Slice& /*value*/) override {
       ADD_FAILURE();
-      return Status::OK();
+      return Status_OK();
     }
     void LogData(const Slice& /*blob*/) override { ADD_FAILURE(); }
     bool Continue() override { return num_seen < 2; }
@@ -934,22 +934,22 @@ class TimestampChecker : public WriteBatch::Handler {
   Status PutCF(uint32_t cf, const Slice& key, const Slice& /*value*/) override {
     auto cf_iter = cf_to_ucmps_.find(cf);
     if (cf_iter == cf_to_ucmps_.end()) {
-      return Status::Corruption();
+      return Status_Corruption();
     }
     const Comparator* const ucmp = cf_iter->second;
     assert(ucmp);
     size_t ts_sz = ucmp->timestamp_size();
     if (ts_sz == 0) {
-      return Status::OK();
+      return Status_OK();
     }
     if (key.size() < ts_sz) {
-      return Status::Corruption();
+      return Status_Corruption();
     }
     Slice ts = ExtractTimestampFromUserKey(key, ts_sz);
     if (ts.compare(timestamp_) != 0) {
-      return Status::Corruption();
+      return Status_Corruption();
     }
-    return Status::OK();
+    return Status_OK();
   }
 
  private:

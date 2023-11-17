@@ -127,12 +127,12 @@ class SecondaryCache : public Customizable {
   //
   // The derived class can make this function no-op and return NotSupported().
   virtual Status SetCapacity(size_t /* capacity */) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   // The derived class can make this function no-op and return NotSupported().
   virtual Status GetCapacity(size_t& /* capacity */) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   // Temporarily decrease the cache capacity in RAM by the specified amount.
@@ -141,10 +141,10 @@ class SecondaryCache : public Customizable {
   // distributes the new capacity across all shards and is meant for large
   // changes in capacity, whereas the former is meant for relatively small
   // changes and may be uneven by lowering capacity in a single shard.
-  virtual Status Deflate(size_t /*decrease*/) { return Status::NotSupported(); }
+  virtual Status Deflate(size_t /*decrease*/) { return Status_NotSupported(); }
 
   // Restore the capacity reduced by a prior call to Deflate().
-  virtual Status Inflate(size_t /*increase*/) { return Status::NotSupported(); }
+  virtual Status Inflate(size_t /*increase*/) { return Status_NotSupported(); }
 };
 
 }  // namespace ROCKSDB_NAMESPACE

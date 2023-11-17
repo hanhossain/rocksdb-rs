@@ -45,7 +45,7 @@ class ReduceLevelTest : public testing::Test {
 
   Status Flush() {
     if (db_ == nullptr) {
-      return Status::InvalidArgument("DB not opened.");
+      return Status_InvalidArgument("DB not opened.");
     }
     DBImpl* db_impl = static_cast_with_check<DBImpl>(db_);
     return db_impl->TEST_FlushMemTable();

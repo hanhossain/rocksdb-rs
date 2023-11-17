@@ -43,10 +43,10 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
     // Make sure db is a DBImpl
     DBImpl* db_impl = dynamic_cast<DBImpl*>(db);
     if (db_impl == nullptr) {
-      return Status::InvalidArgument("");
+      return Status_InvalidArgument("");
     }
 
-    return Status::OK();
+    return Status_OK();
   }
 
   bool AllowWriteBatching() override { return true; }
@@ -54,7 +54,7 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
 
 class WriteCallbackTestWriteCallback2 : public WriteCallback {
  public:
-  Status Callback(DB* /*db*/) override { return Status::Busy(); }
+  Status Callback(DB* /*db*/) override { return Status_Busy(); }
   bool AllowWriteBatching() override { return true; }
 };
 
@@ -75,9 +75,9 @@ class MockWriteCallback : public WriteCallback {
   Status Callback(DB* /*db*/) override {
     was_called_.store(true);
     if (should_fail_) {
-      return Status::Busy();
+      return Status_Busy();
     } else {
-      return Status::OK();
+      return Status_OK();
     }
   }
 
@@ -319,7 +319,7 @@ TEST_P(WriteCallbackPTest, WriteWithCallbackTest) {
           Status Callback(SequenceNumber last_seq, bool /*not used*/, uint64_t,
                           size_t /*index*/, size_t /*total*/) override {
             db_impl_->SetLastPublishedSequence(last_seq);
-            return Status::OK();
+            return Status_OK();
           }
           DBImpl* db_impl_;
         } publish_seq_callback(db_impl);

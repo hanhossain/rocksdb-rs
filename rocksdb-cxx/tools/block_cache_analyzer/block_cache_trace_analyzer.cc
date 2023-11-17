@@ -1527,7 +1527,7 @@ Status BlockCacheTraceAnalyzer::RecordAccess(
 Status BlockCacheTraceAnalyzer::Analyze() {
   SystemClock* clock = env_->GetSystemClock().get();
   std::unique_ptr<BlockCacheTraceReader> reader;
-  Status s = Status::OK();
+  Status s = Status_OK();
   if (is_human_readable_trace_file_) {
     reader.reset(new BlockCacheHumanReadableTraceReader(trace_file_path_));
   } else {

@@ -47,7 +47,7 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
                             const Slice& key, PinnableSlice* value,
                             std::string* timestamp) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -86,7 +86,7 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
           ExtractUserKeyAndStripTimestamp(f.smallest_key,
                                           user_comparator_->timestamp_size()),
           /*b_has_ts=*/false) < 0) {
-    return Status::NotFound();
+    return Status_NotFound();
   }
   Status s = f.fd.table_reader->Get(options, lkey.internal_key(), &get_context,
                                     nullptr);
@@ -94,9 +94,9 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
     return s;
   }
   if (get_context.State() == GetContext::kFound) {
-    return Status::OK();
+    return Status_OK();
   }
-  return Status::NotFound();
+  return Status_NotFound();
 }
 
 std::vector<Status> CompactedDBImpl::MultiGet(
@@ -149,7 +149,7 @@ std::vector<Status> CompactedDBImpl::MultiGet(
       reader_list.push_back(f.fd.table_reader);
     }
   }
-  std::vector<Status> statuses(num_keys, Status::NotFound());
+  std::vector<Status> statuses(num_keys, Status_NotFound());
   values->resize(num_keys);
   if (timestamps) {
     timestamps->resize(num_keys);
@@ -173,7 +173,7 @@ std::vector<Status> CompactedDBImpl::MultiGet(
       } else {
         value.assign(pinnable_val.data(), pinnable_val.size());
         if (get_context.State() == GetContext::kFound) {
-          statuses[idx] = Status::OK();
+          statuses[idx] = Status_OK();
         }
       }
     }
@@ -203,33 +203,33 @@ Status CompactedDBImpl::Init(const Options& options) {
   user_comparator_ = cfd_->user_comparator();
   auto* vstorage = version_->storage_info();
   if (vstorage->num_non_empty_levels() == 0) {
-    return Status::NotSupported("no file exists");
+    return Status_NotSupported("no file exists");
   }
   const LevelFilesBrief& l0 = vstorage->LevelFilesBrief(0);
   // L0 should not have files
   if (l0.num_files > 1) {
-    return Status::NotSupported("L0 contain more than 1 file");
+    return Status_NotSupported("L0 contain more than 1 file");
   }
   if (l0.num_files == 1) {
     if (vstorage->num_non_empty_levels() > 1) {
-      return Status::NotSupported("Both L0 and other level contain files");
+      return Status_NotSupported("Both L0 and other level contain files");
     }
     files_ = l0;
-    return Status::OK();
+    return Status_OK();
   }
 
   for (int i = 1; i < vstorage->num_non_empty_levels() - 1; ++i) {
     if (vstorage->LevelFilesBrief(i).num_files > 0) {
-      return Status::NotSupported("Other levels also contain files");
+      return Status_NotSupported("Other levels also contain files");
     }
   }
 
   int level = vstorage->num_non_empty_levels() - 1;
   if (vstorage->LevelFilesBrief(level).num_files > 0) {
     files_ = vstorage->LevelFilesBrief(level);
-    return Status::OK();
+    return Status_OK();
   }
-  return Status::NotSupported("no file exists");
+  return Status_NotSupported("no file exists");
 }
 
 Status CompactedDBImpl::Open(const Options& options, const std::string& dbname,
@@ -237,10 +237,10 @@ Status CompactedDBImpl::Open(const Options& options, const std::string& dbname,
   *dbptr = nullptr;
 
   if (options.max_open_files != -1) {
-    return Status::InvalidArgument("require max_open_files = -1");
+    return Status_InvalidArgument("require max_open_files = -1");
   }
   if (options.merge_operator.get() != nullptr) {
-    return Status::InvalidArgument("merge operator is not supported");
+    return Status_InvalidArgument("merge operator is not supported");
   }
   DBOptions db_options(options);
   std::unique_ptr<CompactedDBImpl> db(new CompactedDBImpl(db_options, dbname));

@@ -226,7 +226,7 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
   if (mems_.empty()) {
     ROCKS_LOG_BUFFER(log_buffer_, "[%s] Nothing in memtable to flush",
                      cfd_->GetName().c_str());
-    return Status::OK();
+    return Status_OK();
   }
 
   // I/O measurement variables
@@ -247,7 +247,7 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
     prev_cpu_write_nanos = IOSTATS(cpu_write_nanos);
     prev_cpu_read_nanos = IOSTATS(cpu_read_nanos);
   }
-  Status mempurge_s = Status::NotFound("No MemPurge.");
+  Status mempurge_s = Status_NotFound("No MemPurge.");
   if ((mempurge_threshold > 0.0) &&
       (flush_reason_ == FlushReason::kWriteBufferFull) && (!mems_.empty()) &&
       MemPurgeDecider(mempurge_threshold) && !(db_options_.atomic_flush)) {
@@ -280,18 +280,18 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
   Status s;
   if (mempurge_s.ok()) {
     base_->Unref();
-    s = Status::OK();
+    s = Status_OK();
   } else {
     // This will release and re-acquire the mutex.
     s = WriteLevel0Table();
   }
 
   if (s.ok() && cfd_->IsDropped()) {
-    s = Status::ColumnFamilyDropped("Column family dropped during compaction");
+    s = Status_ColumnFamilyDropped("Column family dropped during compaction");
   }
   if ((s.ok() || s.IsColumnFamilyDropped()) &&
       shutting_down_->load(std::memory_order_acquire)) {
-    s = Status::ShutdownInProgress("Database shutdown");
+    s = Status_ShutdownInProgress("Database shutdown");
   }
 
   if (!s.ok()) {
@@ -450,7 +450,7 @@ Status FlushJob::MemPurge() {
           ioptions->compaction_filter_factory->CreateCompactionFilter(ctx);
       if (compaction_filter != nullptr &&
           !compaction_filter->IgnoreSnapshots()) {
-        s = Status::NotSupported(
+        s = Status_NotSupported(
             "CompactionFilter::IgnoreSnapshots() = false is not supported "
             "anymore.");
         return s;
@@ -524,7 +524,7 @@ Status FlushJob::MemPurge() {
       // then rollback to regular flush operation,
       // and destroy new_mem.
       if (new_mem->ApproximateMemoryUsage() > maxSize) {
-        s = Status::Aborted("Mempurge filled more than one memtable.");
+        s = Status_Aborted("Mempurge filled more than one memtable.");
         new_mem_capacity = 1.0;
         break;
       }
@@ -569,7 +569,7 @@ Status FlushJob::MemPurge() {
         // then rollback to regular flush operation,
         // and destroy new_mem.
         if (new_mem->ApproximateMemoryUsage() > maxSize) {
-          s = Status::Aborted(Slice("Mempurge filled more than one memtable."));
+          s = Status_Aborted(Slice("Mempurge filled more than one memtable."));
           new_mem_capacity = 1.0;
           break;
         }
@@ -607,7 +607,7 @@ Status FlushJob::MemPurge() {
         mems_[0]->SetFlushJobInfo(GetFlushJobInfo());
         db_mutex_->Unlock();
       } else {
-        s = Status::Aborted(Slice("Mempurge filled more than one memtable."));
+        s = Status_Aborted(Slice("Mempurge filled more than one memtable."));
         new_mem_capacity = 1.0;
         if (new_mem) {
           job_context_->memtables_to_free.push_back(new_mem);
@@ -961,7 +961,7 @@ Status FlushJob::WriteLevel0Table() {
                        cfd_->GetName().c_str(), job_context_->job_id,
                        msg.c_str());
         if (db_options_.flush_verify_memtable_count) {
-          s = Status::Corruption(msg);
+          s = Status_Corruption(msg);
         }
       }
       if (tboptions.reason == TableFileCreationReason::kFlush) {

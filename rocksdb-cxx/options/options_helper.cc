@@ -589,14 +589,14 @@ Status StringToMap(const std::string& opts_str,
   while (pos < opts.size()) {
     size_t eq_pos = opts.find_first_of("={};", pos);
     if (eq_pos == std::string::npos) {
-      return Status::InvalidArgument("Mismatched key value pair, '=' expected");
+      return Status_InvalidArgument("Mismatched key value pair, '=' expected");
     } else if (opts[eq_pos] != '=') {
-      return Status::InvalidArgument("Unexpected char in key");
+      return Status_InvalidArgument("Unexpected char in key");
     }
 
     std::string key = trim(opts.substr(pos, eq_pos - pos));
     if (key.empty()) {
-      return Status::InvalidArgument("Empty key found");
+      return Status_InvalidArgument("Empty key found");
     }
 
     std::string value;
@@ -613,7 +613,7 @@ Status StringToMap(const std::string& opts_str,
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 
@@ -656,9 +656,9 @@ Status GetStringFromCompressionType(std::string* compression_str,
   bool ok = SerializeEnum<CompressionType>(compression_type_string_map,
                                            compression_type, compression_str);
   if (ok) {
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::InvalidArgument("Invalid compression types");
+    return Status_InvalidArgument("Invalid compression types");
   }
 }
 
@@ -679,7 +679,7 @@ Status GetColumnFamilyOptionsFromMap(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status::InvalidArgument(s.getState());
+    return Status_InvalidArgument(s.getState());
   }
 }
 
@@ -711,7 +711,7 @@ Status GetDBOptionsFromMap(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status::InvalidArgument(s.getState());
+    return Status_InvalidArgument(s.getState());
   }
 }
 
@@ -772,7 +772,7 @@ Status GetOptionsFromString(const ConfigOptions& config_options,
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status::InvalidArgument(s.getState());
+    return Status_InvalidArgument(s.getState());
   }
 }
 
@@ -821,7 +821,7 @@ Status OptionTypeInfo::NextToken(const std::string& opts, char delimiter,
   if (pos >= opts.size()) {
     *token = "";
     *end = std::string::npos;
-    return Status::OK();
+    return Status_OK();
   } else if (opts[pos] == '{') {
     int count = 1;
     size_t brace_pos = pos + 1;
@@ -846,11 +846,11 @@ Status OptionTypeInfo::NextToken(const std::string& opts, char delimiter,
         ++pos;
       }
       if (pos < opts.size() && opts[pos] != delimiter) {
-        return Status::InvalidArgument("Unexpected chars after nested options");
+        return Status_InvalidArgument("Unexpected chars after nested options");
       }
       *end = pos;
     } else {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Mismatched curly braces for nested options");
     }
   } else {
@@ -862,14 +862,14 @@ Status OptionTypeInfo::NextToken(const std::string& opts, char delimiter,
       *token = trim(opts.substr(pos, *end - pos));
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
                              const std::string& opt_name,
                              const std::string& value, void* opt_ptr) const {
   if (IsDeprecated()) {
-    return Status::OK();
+    return Status_OK();
   }
   try {
     const std::string& opt_value = config_options.input_strings_escaped
@@ -877,21 +877,21 @@ Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
                                        : value;
 
     if (opt_ptr == nullptr) {
-      return Status::NotFound("Could not find option", opt_name);
+      return Status_NotFound("Could not find option", opt_name);
     } else if (parse_func_ != nullptr) {
       ConfigOptions copy = config_options;
       copy.invoke_prepare_options = false;
       void* opt_addr = GetOffset(opt_ptr);
       return parse_func_(copy, opt_name, opt_value, opt_addr);
     } else if (ParseOptionHelper(GetOffset(opt_ptr), type_, opt_value)) {
-      return Status::OK();
+      return Status_OK();
     } else if (IsConfigurable()) {
       // The option is <config>.<name>
       Configurable* config = AsRawPointer<Configurable>(opt_ptr);
       if (opt_value.empty()) {
-        return Status::OK();
+        return Status_OK();
       } else if (config == nullptr) {
-        return Status::NotFound("Could not find configurable: ", opt_name);
+        return Status_NotFound("Could not find configurable: ", opt_name);
       } else {
         ConfigOptions copy = config_options;
         copy.ignore_unknown_options = false;
@@ -903,13 +903,13 @@ Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
         }
       }
     } else if (IsByName()) {
-      return Status::NotSupported("Deserializing the option " + opt_name +
+      return Status_NotSupported("Deserializing the option " + opt_name +
                                   " is not supported");
     } else {
-      return Status::InvalidArgument("Error parsing:", opt_name);
+      return Status_InvalidArgument("Error parsing:", opt_name);
     }
   } catch (std::exception& e) {
-    return Status::InvalidArgument("Error parsing " + opt_name + ":" +
+    return Status_InvalidArgument("Error parsing " + opt_name + ":" +
                                    std::string(e.what()));
   }
 }
@@ -944,10 +944,10 @@ Status OptionTypeInfo::ParseType(
     } else if (unused != nullptr) {
       (*unused)[opts_iter.first] = opts_iter.second;
     } else if (!config_options.ignore_unknown_options) {
-      return Status::NotFound("Unrecognized option", opts_iter.first);
+      return Status_NotFound("Unrecognized option", opts_iter.first);
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status OptionTypeInfo::ParseStruct(
@@ -962,7 +962,7 @@ Status OptionTypeInfo::ParseStruct(
     status =
         ParseType(config_options, opt_value, *struct_map, opt_addr, &unused);
     if (status.ok() && !unused.empty()) {
-      status = Status::InvalidArgument(
+      status = Status_InvalidArgument(
           "Unrecognized option", struct_name + "." + unused.begin()->first);
     }
   } else if (StartsWith(opt_name, struct_name + ".")) {
@@ -973,7 +973,7 @@ Status OptionTypeInfo::ParseStruct(
     if (opt_info != nullptr) {
       status = opt_info->Parse(config_options, elem_name, opt_value, opt_addr);
     } else {
-      status = Status::InvalidArgument("Unrecognized option", opt_name);
+      status = Status_InvalidArgument("Unrecognized option", opt_name);
     }
   } else {
     // This option represents a field in the struct (e.g. field)
@@ -982,7 +982,7 @@ Status OptionTypeInfo::ParseStruct(
     if (opt_info != nullptr) {
       status = opt_info->Parse(config_options, elem_name, opt_value, opt_addr);
     } else {
-      status = Status::InvalidArgument("Unrecognized option",
+      status = Status_InvalidArgument("Unrecognized option",
                                        struct_name + "." + opt_name);
     }
   }
@@ -996,9 +996,9 @@ Status OptionTypeInfo::Serialize(const ConfigOptions& config_options,
   // If the option is no longer used in rocksdb and marked as deprecated,
   // we skip it in the serialization.
   if (opt_ptr == nullptr || IsDeprecated()) {
-    return Status::OK();
+    return Status_OK();
   } else if (IsEnabled(OptionTypeFlags::kDontSerialize)) {
-    return Status::NotSupported("Cannot serialize option: ", opt_name);
+    return Status_NotSupported("Cannot serialize option: ", opt_name);
   } else if (serialize_func_ != nullptr) {
     const void* opt_addr = GetOffset(opt_ptr);
     return serialize_func_(config_options, opt_name, opt_addr, opt_value);
@@ -1037,7 +1037,7 @@ Status OptionTypeInfo::Serialize(const ConfigOptions& config_options,
         *opt_value = "";
       }
     }
-    return Status::OK();
+    return Status_OK();
   } else if (IsConfigurable()) {
     const Configurable* config = AsRawPointer<Configurable>(opt_ptr);
     if (config != nullptr) {
@@ -1045,14 +1045,14 @@ Status OptionTypeInfo::Serialize(const ConfigOptions& config_options,
       embedded.delimiter = ";";
       *opt_value = config->ToString(embedded);
     }
-    return Status::OK();
+    return Status_OK();
   } else if (config_options.mutable_options_only && !IsMutable()) {
-    return Status::OK();
+    return Status_OK();
   } else if (SerializeSingleOptionHelper(GetOffset(opt_ptr), type_,
                                          opt_value)) {
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::InvalidArgument("Cannot serialize option: ", opt_name);
+    return Status_InvalidArgument("Cannot serialize option: ", opt_name);
   }
 }
 
@@ -1105,14 +1105,14 @@ Status OptionTypeInfo::SerializeStruct(
     if (opt_info != nullptr) {
       status = opt_info->Serialize(config_options, elem_name, opt_addr, value);
     } else {
-      status = Status::InvalidArgument("Unrecognized option", opt_name);
+      status = Status_InvalidArgument("Unrecognized option", opt_name);
     }
   } else {
     // This option represents a field in the struct (e.g. field)
     std::string elem_name;
     const auto opt_info = Find(opt_name, *struct_map, &elem_name);
     if (opt_info == nullptr) {
-      status = Status::InvalidArgument("Unrecognized option", opt_name);
+      status = Status_InvalidArgument("Unrecognized option", opt_name);
     } else if (opt_info->ShouldSerialize()) {
       status = opt_info->Serialize(config_options, opt_name + "." + elem_name,
                                    opt_addr, value);
@@ -1369,11 +1369,11 @@ Status OptionTypeInfo::Prepare(const ConfigOptions& config_options,
       if (config != nullptr) {
         return config->PrepareOptions(config_options);
       } else if (!CanBeNull()) {
-        return Status::NotFound("Missing configurable object", name);
+        return Status_NotFound("Missing configurable object", name);
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status OptionTypeInfo::Validate(const DBOptions& db_opts,
@@ -1389,11 +1389,11 @@ Status OptionTypeInfo::Validate(const DBOptions& db_opts,
       if (config != nullptr) {
         return config->ValidateOptions(db_opts, cf_opts);
       } else if (!CanBeNull()) {
-        return Status::NotFound("Missing configurable object", name);
+        return Status_NotFound("Missing configurable object", name);
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 const OptionTypeInfo* OptionTypeInfo::Find(

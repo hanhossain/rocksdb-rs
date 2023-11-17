@@ -253,13 +253,13 @@ Status BlockCacheTraceSimulator::InitializeCaches() {
             /*insert_blocks_upon_row_kvpair_miss=*/false);
       } else {
         // Not supported.
-        return Status::InvalidArgument("Unknown cache name " +
+        return Status_InvalidArgument("Unknown cache name " +
                                        config.cache_name);
       }
       sim_caches_[config].push_back(sim_cache);
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void BlockCacheTraceSimulator::Access(const BlockCacheTraceRecord& access) {

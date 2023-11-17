@@ -92,7 +92,7 @@ Status FilePrefetchBuffer::Read(const IOOptions& opts,
   if (result.size() < read_len) {
     // Fake an IO error to force db_stress fault injection to ignore
     // truncated read errors
-    IGNORE_STATUS_IF_ERROR(Status::IOError());
+    IGNORE_STATUS_IF_ERROR(Status_IOError());
   }
 #endif
   if (!s.ok()) {
@@ -137,14 +137,14 @@ Status FilePrefetchBuffer::Prefetch(const IOOptions& opts,
                                     uint64_t offset, size_t n,
                                     Env::IOPriority rate_limiter_priority) {
   if (!enable_ || reader == nullptr) {
-    return Status::OK();
+    return Status_OK();
   }
   TEST_SYNC_POINT("FilePrefetchBuffer::Prefetch:Start");
 
   if (offset + n <= bufs_[curr_].offset_ + bufs_[curr_].buffer_.CurrentSize()) {
     // All requested bytes are already in the curr_ buffer. So no need to Read
     // again.
-    return Status::OK();
+    return Status_OK();
   }
 
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
@@ -417,7 +417,7 @@ Status FilePrefetchBuffer::PrefetchAsyncInternal(
     size_t length, size_t readahead_size, Env::IOPriority rate_limiter_priority,
     bool& copy_to_third_buffer) {
   if (!enable_) {
-    return Status::OK();
+    return Status_OK();
   }
 
   TEST_SYNC_POINT("FilePrefetchBuffer::PrefetchAsyncInternal:Start");
@@ -793,7 +793,7 @@ void FilePrefetchBuffer::PrefetchAsyncCallback(const FSReadRequest& req,
   if (req.result.size() < req.len) {
     // Fake an IO error to force db_stress fault injection to ignore
     // truncated read errors
-    IGNORE_STATUS_IF_ERROR(Status::IOError());
+    IGNORE_STATUS_IF_ERROR(Status_IOError());
   }
   IGNORE_STATUS_IF_ERROR(req.status);
 #endif
@@ -821,7 +821,7 @@ Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
                                          Slice* result) {
   assert(reader != nullptr);
   if (!enable_) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   TEST_SYNC_POINT("FilePrefetchBuffer::PrefetchAsync:Start");
@@ -866,7 +866,7 @@ Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
     // 3.1 If second also has some data or is not eligible for prefetching,
     // return.
     if (!is_eligible_for_prefetching || DoesBufferContainData(second)) {
-      return Status::OK();
+      return Status_OK();
     }
   } else {
     // Partial data in curr_.
@@ -950,7 +950,7 @@ Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
     }
     readahead_size_ = std::min(max_readahead_size_, readahead_size_ * 2);
   }
-  return (data_found ? Status::OK() : Status::TryAgain());
+  return (data_found ? Status_OK() : Status_TryAgain());
 }
 
 }  // namespace ROCKSDB_NAMESPACE

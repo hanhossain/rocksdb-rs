@@ -89,7 +89,7 @@ DEFINE_SYNC_AND_ASYNC(Status, TableCache::MultiGet)
         if (status->IsIncomplete()) {
           // Couldn't find Table in cache but treat as kFound if no_io set
           iter->get_context->MarkKeyMayExist();
-          s = Status::OK();
+          s = Status_OK();
         }
       }
     }

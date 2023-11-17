@@ -47,8 +47,8 @@ TEST_F(DBBasicTest, OpenWhenOpen) {
     delete db2;
     return "db2 open: ok";
   }();
-  ASSERT_EQ(Status::Code::kIOError, s.code());
-  ASSERT_EQ(Status::SubCode::kNone, s.subcode());
+  ASSERT_EQ(Code::kIOError, s.code());
+  ASSERT_EQ(SubCode::kNone, s.subcode());
   ASSERT_TRUE(strstr(s.getState(), "lock ") != nullptr);
 
   delete db2;
@@ -1157,7 +1157,7 @@ class TestEnv : public EnvWrapper {
     Status CloseHelper() {
       env->CloseCountInc();
       ;
-      return Status::IOError();
+      return Status_IOError();
     }
     TestEnv* env;
   };
@@ -1169,7 +1169,7 @@ class TestEnv : public EnvWrapper {
   Status NewLogger(const std::string& /*fname*/,
                    std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
-    return Status::OK();
+    return Status_OK();
   }
 
  private:
@@ -1192,7 +1192,7 @@ TEST_F(DBBasicTest, DBClose) {
 
   s = db->Close();
   ASSERT_EQ(env->GetCloseCount(), 1);
-  ASSERT_EQ(s, Status::IOError());
+  ASSERT_EQ(s, Status_IOError());
 
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 1);
@@ -1212,7 +1212,7 @@ TEST_F(DBBasicTest, DBClose) {
   ASSERT_TRUE(db != nullptr);
 
   s = db->Close();
-  ASSERT_EQ(s, Status::OK());
+  ASSERT_EQ(s, Status_OK());
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 2);
   options.info_log.reset();
@@ -1268,15 +1268,15 @@ TEST_F(DBBasicTest, DBCloseFlushError) {
   ASSERT_OK(Put("key3", "value3"));
   fault_injection_env->SetFilesystemActive(false);
   Status s = dbfull()->Close();
-  ASSERT_NE(s, Status::OK());
+  ASSERT_NE(s, Status_OK());
   // retry should return the same error
   s = dbfull()->Close();
-  ASSERT_NE(s, Status::OK());
+  ASSERT_NE(s, Status_OK());
   fault_injection_env->SetFilesystemActive(true);
   // retry close() is no-op even the system is back. Could be improved if
   // Close() is retry-able: #9029
   s = dbfull()->Close();
-  ASSERT_NE(s, Status::OK());
+  ASSERT_NE(s, Status_OK());
   Destroy(options);
 }
 
@@ -2329,9 +2329,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_EQ(statuses[0], Status::OK());
-  ASSERT_EQ(statuses[1], Status::OK());
-  ASSERT_EQ(statuses[2], Status::OK());
+  ASSERT_EQ(statuses[0], Status_OK());
+  ASSERT_EQ(statuses[1], Status_OK());
+  ASSERT_EQ(statuses[2], Status_OK());
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(33));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(54));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2374,7 +2374,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
         // since 3 overlapping L0 files + 3 L1 files containing the keys
         if (count == 6) {
           Status* s = static_cast<Status*>(status);
-          *s = Status::IOError();
+          *s = Status_IOError();
         }
       });
   // DB open will create table readers unless we reduce the table cache
@@ -2400,9 +2400,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
                      keys.data(), values.data(), statuses.data());
   SyncPoint::GetInstance()->DisableProcessing();
   ASSERT_EQ(values.size(), 3);
-  ASSERT_EQ(statuses[0], Status::OK());
-  ASSERT_EQ(statuses[1], Status::OK());
-  ASSERT_EQ(statuses[2], Status::IOError());
+  ASSERT_EQ(statuses[0], Status_OK());
+  ASSERT_EQ(statuses[1], Status_OK());
+  ASSERT_EQ(statuses[2], Status_IOError());
 
   HistogramData multiget_io_batch_size;
 
@@ -2439,9 +2439,9 @@ TEST_P(DBMultiGetAsyncIOTest, LastKeyInFile) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_EQ(statuses[0], Status::OK());
-  ASSERT_EQ(statuses[1], Status::OK());
-  ASSERT_EQ(statuses[2], Status::OK());
+  ASSERT_EQ(statuses[0], Status_OK());
+  ASSERT_EQ(statuses[1], Status_OK());
+  ASSERT_EQ(statuses[2], Status_OK());
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(21));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(54));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2484,9 +2484,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_EQ(statuses[0], Status::OK());
-  ASSERT_EQ(statuses[1], Status::OK());
-  ASSERT_EQ(statuses[2], Status::OK());
+  ASSERT_EQ(statuses[0], Status_OK());
+  ASSERT_EQ(statuses[1], Status_OK());
+  ASSERT_EQ(statuses[2], Status_OK());
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(33));
   ASSERT_EQ(values[1], "val_l2_" + std::to_string(56));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2526,8 +2526,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeOverlapL0L1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 2);
-  ASSERT_EQ(statuses[0], Status::OK());
-  ASSERT_EQ(statuses[1], Status::OK());
+  ASSERT_EQ(statuses[0], Status_OK());
+  ASSERT_EQ(statuses[1], Status_OK());
   ASSERT_EQ(values[0], "val_l2_" + std::to_string(19));
   ASSERT_EQ(values[1], "val_l2_" + std::to_string(26));
 
@@ -2562,8 +2562,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeDelInL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 2);
-  ASSERT_EQ(statuses[0], Status::NotFound());
-  ASSERT_EQ(statuses[1], Status::NotFound());
+  ASSERT_EQ(statuses[0], Status_NotFound());
+  ASSERT_EQ(statuses[1], Status_NotFound());
 
   // Bloom filters in L0/L1 will avoid the coroutine calls in those levels
   ASSERT_EQ(statistics()->getTickerCount(MULTIGET_COROUTINE_COUNT), 2);
@@ -2593,10 +2593,10 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2WithRangeDelInL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), keys.size());
-  ASSERT_EQ(statuses[0], Status::NotFound());
-  ASSERT_EQ(statuses[1], Status::OK());
+  ASSERT_EQ(statuses[0], Status_NotFound());
+  ASSERT_EQ(statuses[1], Status_OK());
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(144));
-  ASSERT_EQ(statuses[2], Status::NotFound());
+  ASSERT_EQ(statuses[2], Status_NotFound());
 
   // Bloom filters in L0/L1 will avoid the coroutine calls in those levels
   ASSERT_EQ(statistics()->getTickerCount(MULTIGET_COROUTINE_COUNT), 3);
@@ -2627,9 +2627,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetNoIOUring) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_EQ(statuses[0], Status::OK());
-  ASSERT_EQ(statuses[1], Status::OK());
-  ASSERT_EQ(statuses[2], Status::OK());
+  ASSERT_EQ(statuses[0], Status_OK());
+  ASSERT_EQ(statuses[1], Status_OK());
+  ASSERT_EQ(statuses[2], Status_OK());
 
   HistogramData async_read_bytes;
 
@@ -2738,7 +2738,7 @@ TEST_F(DBBasicTest, MultiGetStats) {
     value.Reset();
   }
   for (Status& status : s) {
-    status = Status::OK();
+    status = Status_OK();
   }
   db_->MultiGet(read_opts, handles_[1], kMultiGetBatchSize, &keys[950],
                 values.data(), s.data(), false);
@@ -2862,7 +2862,7 @@ TEST_P(DBMultiGetRowCacheTest, MultiGetBatched) {
     keys.assign({"no_key", "k5", "k3", "k2"});
     for (size_t i = 0; i < keys.size(); ++i) {
       values[i].Reset();
-      s[i] = Status::OK();
+      s[i] = Status_OK();
     }
     get_perf_context()->Reset();
 
@@ -2979,7 +2979,7 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
     // Make the value compressible. A purely random string doesn't compress
     // and the resultant data block will not be compressed
     std::string value(rnd.RandomString(128) + zero_str);
-    assert(Put(Key(i), value) == Status::OK());
+    assert(Put(Key(i), value) == Status_OK());
   }
   ASSERT_OK(Flush());
 
@@ -3051,7 +3051,7 @@ TEST_F(DBBasicTest, BestEffortsRecoveryWithVersionBuildingFailure) {
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
         *(reinterpret_cast<Status*>(arg)) =
-            Status::Corruption("Inject corruption");
+            Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -3506,7 +3506,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         // and the resultant data block will not be compressed
         values_.emplace_back(rnd.RandomString(128) + zero_str);
         assert(((num_cfs == 1) ? Put(Key(i), values_[i])
-                               : Put(cf, Key(i), values_[i])) == Status::OK());
+                               : Put(cf, Key(i), values_[i])) == Status_OK());
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3520,7 +3520,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         std::string tmp_key = "a" + Key(i);
         assert(((num_cfs == 1) ? Put(tmp_key, uncompressable_values_[i])
                                : Put(cf, tmp_key, uncompressable_values_[i])) ==
-               Status::OK());
+               Status_OK());
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3724,7 +3724,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   for (size_t i = 0; i < key_ints.size(); ++i) {
     key_data[i] = Key(key_ints[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status::OK();
+    statuses[i] = Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3746,7 +3746,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   for (size_t i = 0; i < key_uncmp.size(); ++i) {
     key_data[i] = "a" + Key(key_uncmp[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status::OK();
+    statuses[i] = Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3768,7 +3768,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   for (size_t i = 0; i < key_tr.size(); ++i) {
     key_data[i] = "a" + Key(key_tr[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status::OK();
+    statuses[i] = Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3928,7 +3928,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
         Status* s = static_cast<Status*>(status);
         read_count++;
         if (read_count == 2) {
-          *s = Status::Corruption();
+          *s = Status_Corruption();
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();
@@ -3944,8 +3944,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
                      keys.data(), values.data(), statuses.data(), true);
   ASSERT_TRUE(CheckValue(0, values[0].ToString()));
   // ASSERT_TRUE(CheckValue(50, values[1].ToString()));
-  ASSERT_EQ(statuses[0], Status::OK());
-  ASSERT_EQ(statuses[1], Status::Corruption());
+  ASSERT_EQ(statuses[0], Status_OK());
+  ASSERT_EQ(statuses[1], Status_Corruption());
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
@@ -3963,7 +3963,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
   SyncPoint::GetInstance()->SetCallBack(
       "TableCache::MultiGet:FindTable", [&](void* status) {
         Status* s = static_cast<Status*>(status);
-        *s = Status::IOError();
+        *s = Status_IOError();
       });
   // DB open will create table readers unless we reduce the table cache
   // capacity.
@@ -3990,8 +3990,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
-  ASSERT_EQ(statuses[0], Status::IOError());
-  ASSERT_EQ(statuses[1], Status::IOError());
+  ASSERT_EQ(statuses[0], Status_IOError());
+  ASSERT_EQ(statuses[1], Status_IOError());
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
@@ -4223,8 +4223,8 @@ class DBBasicTestMultiGetDeadline : public DBBasicTestMultiGet,
       if (i < num_ok) {
         EXPECT_OK(statuses[i]);
       } else {
-        if (statuses[i] != Status::TimedOut()) {
-          EXPECT_EQ(statuses[i], Status::TimedOut());
+        if (statuses[i] != Status_TimedOut()) {
+          EXPECT_EQ(statuses[i], Status_TimedOut());
         }
       }
     }
@@ -4390,7 +4390,7 @@ TEST_F(DBBasicTest, ManifestWriteFailure) {
         auto* s = reinterpret_cast<Status*>(arg);
         ASSERT_OK(*s);
         // Manually overwrite return status
-        *s = Status::IOError();
+        *s = Status_IOError();
       });
   SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put("key", "value"));
@@ -4439,7 +4439,7 @@ TEST_F(DBBasicTest, FailOpenIfLoggerCreationFail) {
       "rocksdb::CreateLoggerFromOptions:AfterGetPath", [&](void* arg) {
         auto* s = reinterpret_cast<Status*>(arg);
         assert(s);
-        *s = Status::IOError("Injected");
+        *s = Status_IOError("Injected");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -4659,7 +4659,7 @@ TEST_P(DBBasicTestDeadline, PointLookupDeadline) {
       std::string value;
       Status s = dbfull()->Get(ro, "k50", &value);
       if (fs->TimedOut()) {
-        ASSERT_EQ(s, Status::TimedOut());
+        ASSERT_EQ(s, Status_TimedOut());
       } else {
         timedout = false;
         ASSERT_OK(s);
@@ -4746,7 +4746,7 @@ TEST_P(DBBasicTestDeadline, IteratorDeadline) {
       }
       if (fs->TimedOut()) {
         ASSERT_FALSE(iter->Valid());
-        ASSERT_EQ(iter->status(), Status::TimedOut());
+        ASSERT_EQ(iter->status(), Status_TimedOut());
       } else {
         timedout = false;
         ASSERT_OK(iter->status());

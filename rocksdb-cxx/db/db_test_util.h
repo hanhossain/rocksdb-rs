@@ -150,9 +150,9 @@ class SpecialEnv : public EnvWrapper {
         }
         if (env_->drop_writes_.load(std::memory_order_acquire)) {
           // Drop writes on the floor
-          return Status::OK();
+          return Status_OK();
         } else if (env_->no_space_.load(std::memory_order_acquire)) {
-          return Status::NoSpace("No space left on device");
+          return Status_NoSpace("No space left on device");
         } else {
           env_->bytes_written_ += data.size();
           return base_->Append(data);
@@ -169,9 +169,9 @@ class SpecialEnv : public EnvWrapper {
         }
         if (env_->drop_writes_.load(std::memory_order_acquire)) {
           // Drop writes on the floor
-          return Status::OK();
+          return Status_OK();
         } else if (env_->no_space_.load(std::memory_order_acquire)) {
-          return Status::NoSpace("No space left on device");
+          return Status_NoSpace("No space left on device");
         } else {
           env_->bytes_written_ += data.size();
           return base_->PositionedAppend(data, offset);
@@ -240,7 +240,7 @@ class SpecialEnv : public EnvWrapper {
           : env_(env), base_(std::move(b)) {}
       Status Append(const Slice& data) override {
         if (env_->manifest_write_error_.load(std::memory_order_acquire)) {
-          return Status::IOError("simulated writer error");
+          return Status_IOError("simulated writer error");
         } else {
           return base_->Append(data);
         }
@@ -257,10 +257,10 @@ class SpecialEnv : public EnvWrapper {
       Status Sync() override {
         ++env_->sync_counter_;
         if (env_->manifest_sync_error_.load(std::memory_order_acquire)) {
-          return Status::IOError("simulated sync error");
+          return Status_IOError("simulated sync error");
         } else {
           if (env_->skip_fsync_) {
-            return Status::OK();
+            return Status_OK();
           } else {
             return base_->Sync();
           }
@@ -288,7 +288,7 @@ class SpecialEnv : public EnvWrapper {
 #endif
         Status s;
         if (env_->log_write_error_.load(std::memory_order_acquire)) {
-          s = Status::IOError("simulated writer error");
+          s = Status_IOError("simulated writer error");
         } else {
           int slowdown =
               env_->log_write_slowdown_.load(std::memory_order_acquire);
@@ -331,10 +331,10 @@ class SpecialEnv : public EnvWrapper {
         ++env_->sync_counter_;
         if (env_->corrupt_in_sync_) {
           EXPECT_OK(Append(std::string(33000, ' ')));
-          return Status::IOError("Ingested Sync Failure");
+          return Status_IOError("Ingested Sync Failure");
         }
         if (env_->skip_fsync_) {
-          return Status::OK();
+          return Status_OK();
         } else {
           return base_->Sync();
         }
@@ -365,7 +365,7 @@ class SpecialEnv : public EnvWrapper {
       Status Flush() override { return base_->Flush(); }
       Status Sync() override {
         if (env_->skip_fsync_) {
-          return Status::OK();
+          return Status_OK();
         } else {
           return base_->Sync();
         }
@@ -382,7 +382,7 @@ class SpecialEnv : public EnvWrapper {
 
     if (no_file_overwrite_.load(std::memory_order_acquire) &&
         target()->FileExists(f).ok()) {
-      return Status::NotSupported("SpecialEnv::no_file_overwrite_ is true.");
+      return Status_NotSupported("SpecialEnv::no_file_overwrite_ is true.");
     }
 
     if (non_writeable_rate_.load(std::memory_order_acquire) > 0) {
@@ -392,7 +392,7 @@ class SpecialEnv : public EnvWrapper {
         random_number = rnd_.Uniform(100);
       }
       if (random_number < non_writeable_rate_.load()) {
-        return Status::IOError("simulated random write error");
+        return Status_IOError("simulated random write error");
       }
     }
 
@@ -400,7 +400,7 @@ class SpecialEnv : public EnvWrapper {
 
     if (non_writable_count_.load() > 0) {
       non_writable_count_--;
-      return Status::IOError("simulated write error");
+      return Status_IOError("simulated write error");
     }
 
     EnvOptions optimized = soptions;
@@ -467,7 +467,7 @@ class SpecialEnv : public EnvWrapper {
                           char* scratch) const override {
         if (Random::GetTLSInstance()->OneIn(fail_odd_)) {
           fail_cnt_->fetch_add(1);
-          return Status::IOError("random error");
+          return Status_IOError("random error");
         }
         return target_->Read(offset, n, result, scratch);
       }
@@ -594,19 +594,19 @@ class SpecialEnv : public EnvWrapper {
         NoopDirectory() {}
         ~NoopDirectory() {}
 
-        Status Fsync() override { return Status::OK(); }
-        Status Close() override { return Status::OK(); }
+        Status Fsync() override { return Status_OK(); }
+        Status Close() override { return Status_OK(); }
       };
 
       result->reset(new NoopDirectory());
-      return Status::OK();
+      return Status_OK();
     }
   }
 
   Status RenameFile(const std::string& src, const std::string& dest) override {
     rename_count_.fetch_add(1);
     if (rename_error_.load(std::memory_order_acquire)) {
-      return Status::NotSupported("Simulated `RenameFile()` error.");
+      return Status_NotSupported("Simulated `RenameFile()` error.");
     }
     return target()->RenameFile(src, dest);
   }
@@ -644,7 +644,7 @@ class SpecialEnv : public EnvWrapper {
   // Slow down every log write, in micro-seconds.
   std::atomic<int> log_write_slowdown_;
 
-  // If true, returns Status::NotSupported for file overwrite.
+  // If true, returns Status_NotSupported for file overwrite.
   std::atomic<bool> no_file_overwrite_;
 
   // Number of WAL files that are still open for write.

@@ -203,7 +203,7 @@ class TestIterator : public InternalIterator {
 
   Status status() const override {
     assert(initialized_);
-    return Status::OK();
+    return Status_OK();
   }
 
   bool IsKeyPinned() const override { return true; }

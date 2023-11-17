@@ -397,7 +397,7 @@ void Reader::UnmarkEOFInternal() {
 }
 
 void Reader::ReportCorruption(size_t bytes, const char* reason) {
-  ReportDrop(bytes, Status::Corruption(reason));
+  ReportDrop(bytes, Status_Corruption(reason));
 }
 
 void Reader::ReportDrop(size_t bytes, const Status& reason) {
@@ -600,19 +600,19 @@ Status Reader::UpdateRecordedTimestampSize(
   for (const auto& [cf, ts_sz] : cf_to_ts_sz) {
     // Zero user-defined timestamp size are not recorded.
     if (ts_sz == 0) {
-      return Status::Corruption(
+      return Status_Corruption(
           "User-defined timestamp size record contains zero timestamp size.");
     }
     // The user-defined timestamp size record for a column family should not be
     // updated in the same log file.
     if (recorded_cf_to_ts_sz_.count(cf) != 0) {
-      return Status::Corruption(
+      return Status_Corruption(
           "User-defined timestamp size record contains update to "
           "recorded column family.");
     }
     recorded_cf_to_ts_sz_.insert(std::make_pair(cf, ts_sz));
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 bool FragmentBufferedReader::ReadRecord(Slice* record, std::string* scratch,

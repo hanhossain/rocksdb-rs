@@ -29,7 +29,7 @@ Status TransactionUtil::CheckKeyForConflicts(
   SuperVersion* sv = db_impl->GetAndRefSuperVersion(cfd);
 
   if (sv == nullptr) {
-    result = Status::InvalidArgument("Could not access column family " +
+    result = Status_InvalidArgument("Could not access column family " +
                                      cfh->GetName());
   }
 
@@ -75,7 +75,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
     need_to_read_sst = true;
 
     if (cache_only) {
-      result = Status::TryAgain(
+      result = Status_TryAgain(
           "Transaction could not check for conflicts as the MemTable does not "
           "contain a long enough history to check write at SequenceNumber: ",
           std::to_string(snap_seq));
@@ -99,7 +99,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
                "frequency "
                "of this error.",
                snap_seq, earliest_seq);
-      result = Status::TryAgain(msg);
+      result = Status_TryAgain(msg);
     }
   }
 
@@ -141,7 +141,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
         write_conflict = ucmp->CompareTimestamp(*read_ts, timestamp) < 0;
       }
       if (write_conflict) {
-        result = Status::Busy();
+        result = Status_Busy();
       }
     }
   }
@@ -162,7 +162,7 @@ Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_impl,
 
     SuperVersion* sv = db_impl->GetAndRefSuperVersion(cf);
     if (sv == nullptr) {
-      result = Status::InvalidArgument("Could not access column family " +
+      result = Status_InvalidArgument("Could not access column family " +
                                        std::to_string(cf));
       break;
     }

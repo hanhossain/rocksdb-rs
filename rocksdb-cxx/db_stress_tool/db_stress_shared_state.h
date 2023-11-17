@@ -79,12 +79,12 @@ class SharedState {
     // compatibility checks.
     if (!FLAGS_expected_values_dir.empty()) {
       if (!std::atomic<uint32_t>{}.is_lock_free()) {
-        status = Status::InvalidArgument(
+        status = Status_InvalidArgument(
             "Cannot use --expected_values_dir on platforms without lock-free "
             "std::atomic<uint32_t>");
       }
       if (status.ok() && FLAGS_clear_column_family_one_in > 0) {
-        status = Status::InvalidArgument(
+        status = Status_InvalidArgument(
             "Cannot use --expected_values_dir on when "
             "--clear_column_family_one_in is greater than zero.");
       }

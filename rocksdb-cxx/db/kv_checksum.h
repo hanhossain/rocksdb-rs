@@ -287,9 +287,9 @@ class ProtectionInfoKV {
 template <typename T>
 Status ProtectionInfo<T>::GetStatus() const {
   if (val_ != 0) {
-    return Status::Corruption("ProtectionInfo mismatch");
+    return Status_Corruption("ProtectionInfo mismatch");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 template <typename T>

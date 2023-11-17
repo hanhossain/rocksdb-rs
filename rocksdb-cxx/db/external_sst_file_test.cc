@@ -552,14 +552,14 @@ class SstFileWriterCollector : public TablePropertiesCollector {
         {prefix_ + "_SstFileWriterCollector", "YES"},
         {prefix_ + "_Count", count},
     };
-    return Status::OK();
+    return Status_OK();
   }
 
   Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     ++count_;
-    return Status::OK();
+    return Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {

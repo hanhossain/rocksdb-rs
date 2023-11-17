@@ -230,7 +230,7 @@ class BlockBasedTable : public TableReader {
     virtual Status CacheDependencies(
         const ReadOptions& /*ro*/, bool /* pin */,
         FilePrefetchBuffer* /* tail_prefetch_buffer */) {
-      return Status::OK();
+      return Status_OK();
     }
   };
 
@@ -386,7 +386,7 @@ class BlockBasedTable : public TableReader {
   // However note that in some cases the returned iterator may be different
   // from input_iter. In such case the returned iterator should be freed.
   //
-  // Note: ErrorIterator with Status::Incomplete shall be returned if all the
+  // Note: ErrorIterator with Status_Incomplete shall be returned if all the
   // following conditions are met:
   //  1. We enabled table_options.cache_index_and_filter_blocks.
   //  2. index is not present in block cache.
@@ -401,7 +401,7 @@ class BlockBasedTable : public TableReader {
   Cache::Priority GetCachePriority() const;
 
   // Read block cache from block caches (if set): block_cache.
-  // On success, Status::OK with be returned and @block will be populated with
+  // On success, Status_OK with be returned and @block will be populated with
   // pointer to the block as well as its block handle.
   // @param uncompression_dict Data for presetting the compression library's
   //    dictionary.
@@ -413,7 +413,7 @@ class BlockBasedTable : public TableReader {
   // Put a maybe compressed block to the corresponding block caches.
   // This method will perform decompression against block_contents if needed
   // and then populate the block caches.
-  // On success, Status::OK will be returned; also @block will be populated with
+  // On success, Status_OK will be returned; also @block will be populated with
   // uncompressed block and its cache handle.
   //
   // Allocated memory managed by block_contents will be transferred to

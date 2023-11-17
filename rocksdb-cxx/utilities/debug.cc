@@ -54,7 +54,7 @@ Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
                          size_t max_num_ikeys,
                          std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
-    return Status::InvalidArgument("db cannot be null.");
+    return Status_InvalidArgument("db cannot be null.");
   }
   return GetAllKeyVersions(db, db->DefaultColumnFamily(), begin_key, end_key,
                            max_num_ikeys, key_versions);
@@ -64,13 +64,13 @@ Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
                          Slice end_key, size_t max_num_ikeys,
                          std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
-    return Status::InvalidArgument("db cannot be null.");
+    return Status_InvalidArgument("db cannot be null.");
   }
   if (nullptr == cfh) {
-    return Status::InvalidArgument("Column family handle cannot be null.");
+    return Status_InvalidArgument("Column family handle cannot be null.");
   }
   if (nullptr == key_versions) {
-    return Status::InvalidArgument("key_versions cannot be null.");
+    return Status_InvalidArgument("key_versions cannot be null.");
   }
   key_versions->clear();
 
@@ -111,7 +111,7 @@ Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
       break;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

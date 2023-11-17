@@ -13,6 +13,12 @@
 
 #include "rocksdb/utilities/transaction_db_mutex.h"
 
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/lib.h"
+#else
+#include "rocksdb-rs/src/lib.rs.h"
+#endif
+
 namespace ROCKSDB_NAMESPACE {
 
 class TransactionDBMutexImpl : public TransactionDBMutex {
@@ -62,7 +68,7 @@ TransactionDBMutexFactoryImpl::AllocateCondVar() {
 
 Status TransactionDBMutexImpl::Lock() {
   mutex_.lock();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
@@ -83,10 +89,10 @@ Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
 
   if (!locked) {
     // timeout acquiring mutex
-    return Status::TimedOut(Status::SubCode::kMutexTimeout);
+    return Status_TimedOut(SubCode::kMutexTimeout);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TransactionDBCondVarImpl::Wait(
@@ -99,7 +105,7 @@ Status TransactionDBCondVarImpl::Wait(
   // Make sure unique_lock doesn't unlock mutex when it destructs
   lock.release();
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TransactionDBCondVarImpl::WaitFor(
@@ -118,7 +124,7 @@ Status TransactionDBCondVarImpl::WaitFor(
 
     // Check if the wait stopped due to timing out.
     if (cv_status == std::cv_status::timeout) {
-      s = Status::TimedOut(Status::SubCode::kMutexTimeout);
+      s = Status_TimedOut(SubCode::kMutexTimeout);
     }
   }
 

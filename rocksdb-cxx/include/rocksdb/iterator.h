@@ -104,14 +104,14 @@ class Iterator : public Cleanable {
 
   // If an error has occurred, return it.  Else return an ok status.
   // If non-blocking IO is requested and this operation cannot be
-  // satisfied without doing some IO, then this returns Status::Incomplete().
+  // satisfied without doing some IO, then this returns Status_Incomplete().
   virtual Status status() const = 0;
 
   // If supported, renew the iterator to represent the latest state. The
   // iterator will be invalidated after the call. Not supported if
   // ReadOptions.snapshot is given when creating the iterator.
   virtual Status Refresh() {
-    return Status::NotSupported("Refresh() is not supported");
+    return Status_NotSupported("Refresh() is not supported");
   }
 
   // Property "rocksdb.iterator.is-key-pinned":

@@ -171,7 +171,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteError) {
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -221,7 +221,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoSpaceError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -264,7 +264,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteRetryableError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -290,7 +290,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteRetryableError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -304,7 +304,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteRetryableError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -340,7 +340,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -354,7 +354,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -368,7 +368,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -388,7 +388,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -425,7 +425,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWALWriteRetryableError) {
   ASSERT_OK(Put(Key(1), "val1", wo));
 
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   auto cfh = dbfull()->GetColumnFamilyHandle(1);
@@ -470,7 +470,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWALAtomicWriteRetryableError) {
   ASSERT_OK(Put(Key(1), "val1", wo));
 
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   auto cfh = dbfull()->GetColumnFamilyHandle(1);
@@ -515,7 +515,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableError1) {
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_OK(Put(Key(2), "val2", wo));
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   ASSERT_EQ("val2", Get(Key(2)));
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -571,7 +571,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError2) {
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_OK(Put(Key(2), "val2", wo));
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   ASSERT_EQ("val2", Get(Key(2)));
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -615,7 +615,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError3) {
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_OK(Put(Key(2), "val2", wo));
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   ASSERT_EQ("val2", Get(Key(2)));
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -657,7 +657,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteError) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -700,7 +700,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -746,7 +746,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteFileScopeError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -791,7 +791,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableError) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -832,12 +832,12 @@ TEST_F(DBErrorHandlingFSTest, DoubleManifestWriteError) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   fault_fs_->SetFilesystemActive(true);
 
   // This Resume() will attempt to create a new manifest file and fail again
   s = dbfull()->Resume();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   fault_fs_->SetFilesystemActive(true);
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->DisableProcessing();
@@ -953,7 +953,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Status::Severity::kHardError));
+  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -983,7 +983,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   TEST_SYNC_POINT("CompactionManifestWriteError:1");
 
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
 
   fault_fs_->SetFilesystemActive(true);
   SyncPoint::GetInstance()->ClearAllCallBacks();
@@ -1018,7 +1018,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   ASSERT_OK(s);
 
   listener->OverrideBGError(
-      Status(Status::NoSpace(), Status::Severity::kHardError));
+      Status(Status_NoSpace(), Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1035,7 +1035,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   ASSERT_OK(s);
 
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
 
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -1063,7 +1063,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Status::Severity::kHardError));
+  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1113,7 +1113,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Status::Severity::kHardError));
+  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1170,7 +1170,7 @@ TEST_F(DBErrorHandlingFSTest, CorruptionError) {
 
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            ROCKSDB_NAMESPACE::Status::Severity::kUnrecoverableError);
+            ROCKSDB_NAMESPACE::Severity::kUnrecoverableError);
 
   fault_fs_->SetFilesystemActive(true);
   s = dbfull()->Resume();
@@ -1201,7 +1201,7 @@ TEST_F(DBErrorHandlingFSTest, AutoRecoverFlushError) {
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
@@ -1245,7 +1245,7 @@ TEST_F(DBErrorHandlingFSTest, FailRecoverFlushError) {
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   // We should be able to shutdown the database while auto recovery is going
   // on in the background
   Close();
@@ -1302,7 +1302,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteError) {
     WriteOptions wopts;
     wopts.sync = true;
     s = dbfull()->Write(wopts, &batch);
-    ASSERT_EQ(s, s.NoSpace());
+    ASSERT_EQ(s, Status_NoSpace());
   }
   SyncPoint::GetInstance()->DisableProcessing();
   // `ClearAllCallBacks()` is needed in addition to `DisableProcessing()` to
@@ -1562,7 +1562,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBCompactionError) {
     ASSERT_OK(db[i]->Flush(FlushOptions()));
   }
 
-  def_env->SetFilesystemActive(false, Status::NoSpace("Out of space"));
+  def_env->SetFilesystemActive(false, Status_NoSpace("Out of space"));
   for (auto i = 0; i < kNumDbInstances; ++i) {
     WriteBatch batch;
 
@@ -1579,7 +1579,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBCompactionError) {
 
   for (auto i = 0; i < kNumDbInstances; ++i) {
     Status s = static_cast<DBImpl*>(db[i])->TEST_WaitForCompact();
-    ASSERT_EQ(s.severity(), Status::Severity::kSoftError);
+    ASSERT_EQ(s.severity(), Severity::kSoftError);
     fault_fs[i]->SetFilesystemActive(true);
   }
 
@@ -1681,7 +1681,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBVariousErrors) {
     ASSERT_OK(db[i]->Flush(FlushOptions()));
   }
 
-  def_env->SetFilesystemActive(false, Status::NoSpace("Out of space"));
+  def_env->SetFilesystemActive(false, Status_NoSpace("Out of space"));
   for (auto i = 0; i < kNumDbInstances; ++i) {
     WriteBatch batch;
 
@@ -1704,10 +1704,10 @@ TEST_F(DBErrorHandlingFSTest, MultiDBVariousErrors) {
     Status s = static_cast<DBImpl*>(db[i])->TEST_WaitForCompact();
     switch (i) {
       case 0:
-        ASSERT_EQ(s.severity(), Status::Severity::kSoftError);
+        ASSERT_EQ(s.severity(), Severity::kSoftError);
         break;
       case 1:
-        ASSERT_EQ(s.severity(), Status::Severity::kHardError);
+        ASSERT_EQ(s.severity(), Severity::kHardError);
         break;
       case 2:
         ASSERT_OK(s);
@@ -1789,7 +1789,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover1) {
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ("val1", Get(Key(1)));
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   TEST_SYNC_POINT("FLushWritNoWALRetryableeErrorAutoRecover1:1");
   ASSERT_EQ("val1", Get(Key(1)));
   ASSERT_EQ("val1", Get(Key(1)));
@@ -1815,7 +1815,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover1) {
   s = Flush();
   // Since auto resume fails, the bg error is not cleand, flush will
   // return the bg_error set before.
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   ASSERT_EQ("val2", Get(Key(2)));
 
   // call auto resume
@@ -1856,7 +1856,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover2) {
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ("val1", Get(Key(1)));
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
@@ -1913,7 +1913,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAutoRecover1) {
 
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
@@ -1959,7 +1959,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAutoRecover2) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   TEST_SYNC_POINT("FLushWritRetryableeErrorAutoRecover2:0");
   TEST_SYNC_POINT("FLushWritRetryableeErrorAutoRecover2:1");
   fault_fs_->SetFilesystemActive(true);
@@ -2017,7 +2017,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableErrorAutoRecover) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   TEST_SYNC_POINT("ManifestWriteRetryableErrorAutoRecover:0");
   fault_fs_->SetFilesystemActive(true);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
@@ -2072,7 +2072,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableErrorAutoRecover) {
       [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   TEST_SYNC_POINT("ManifestWriteNoWALRetryableErrorAutoRecover:0");
   fault_fs_->SetFilesystemActive(true);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
@@ -2114,7 +2114,7 @@ TEST_F(DBErrorHandlingFSTest,
   ASSERT_OK(Put(Key(2), "val"));
   ASSERT_OK(Flush());
 
-  listener->OverrideBGError(Status(error_msg, Status::Severity::kHardError));
+  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -2155,7 +2155,7 @@ TEST_F(DBErrorHandlingFSTest,
   TEST_SYNC_POINT("CompactionManifestWriteErrorAR:1");
 
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   TEST_SYNC_POINT("CompactionManifestWriteErrorAR:2");
   TEST_SYNC_POINT("CompactionManifestWriteErrorAR:3");
   fault_fs_->SetFilesystemActive(true);
@@ -2201,7 +2201,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Status::Severity::kHardError));
+  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2464,9 +2464,9 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAbortRecovery) {
 
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
-  ASSERT_EQ(listener->new_bg_error(), Status::Aborted());
+  ASSERT_EQ(listener->new_bg_error(), Status_Aborted());
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
 
@@ -2499,7 +2499,7 @@ TEST_F(DBErrorHandlingFSTest, FlushReadError) {
       [&](void*) { fault_fs_->SetFilesystemActive(true, IOStatus::OK()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
@@ -2548,7 +2548,7 @@ TEST_F(DBErrorHandlingFSTest, AtomicFlushReadError) {
       [&](void*) { fault_fs_->SetFilesystemActive(true, IOStatus::OK()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush({0, 1});
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kSoftError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
@@ -2595,7 +2595,7 @@ TEST_F(DBErrorHandlingFSTest, AtomicFlushNoSpaceError) {
       [&](void*) { fault_fs_->SetFilesystemActive(true, IOStatus::OK()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush({0, 1});
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kHardError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kHardError);
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
@@ -2643,7 +2643,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Status::Severity::kHardError));
+  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2699,7 +2699,7 @@ TEST_P(DBErrorHandlingFencingTest, FLushWriteFenced) {
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kFatalError);
   ASSERT_TRUE(s.IsIOFenced());
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
@@ -2733,7 +2733,7 @@ TEST_P(DBErrorHandlingFencingTest, ManifestWriteFenced) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kFatalError);
   ASSERT_TRUE(s.IsIOFenced());
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->DisableProcessing();
@@ -2775,7 +2775,7 @@ TEST_P(DBErrorHandlingFencingTest, CompactionWriteFenced) {
   ASSERT_OK(s);
 
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kFatalError);
   ASSERT_TRUE(s.IsIOFenced());
 
   fault_fs_->SetFilesystemActive(true);

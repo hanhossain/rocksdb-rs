@@ -141,7 +141,7 @@ class ExternalSSTFileBasicTest
           true_data->erase(key);
           break;
         default:
-          return Status::InvalidArgument("Value type is not supported");
+          return Status_InvalidArgument("Value type is not supported");
       }
       if (!s.ok()) {
         sst_file_writer.Finish();
@@ -263,7 +263,7 @@ class ChecksumVerifyHelper {
     if (file_checksum_gen_factory == nullptr) {
       *file_checksum = kUnknownFileChecksum;
       *file_checksum_func_name = kUnknownFileChecksumFuncName;
-      return Status::OK();
+      return Status_OK();
     } else {
       FileChecksumGenContext gen_context;
       std::unique_ptr<FileChecksumGenerator> file_checksum_gen =
@@ -283,7 +283,7 @@ class ChecksumVerifyHelper {
       file_checksum_gen->Finalize();
       *file_checksum = file_checksum_gen->GetChecksum();
     }
-    return Status::OK();
+    return Status_OK();
   }
 };
 
@@ -673,7 +673,7 @@ TEST_F(ExternalSSTFileBasicTest, NoCopy) {
 
   s = DeprecatedAddFile({file1}, true /* move file */);
   ASSERT_OK(s) << s.ToString();
-  ASSERT_EQ(Status::NotFound(), env_->FileExists(file1));
+  ASSERT_EQ(Status_NotFound(), env_->FileExists(file1));
 
   s = DeprecatedAddFile({file2}, false /* copy file */);
   ASSERT_OK(s) << s.ToString();
@@ -1213,7 +1213,7 @@ TEST_F(ExternalSSTFileBasicTest, ReopenNotSupported) {
   SyncPoint::GetInstance()->SetCallBack(
       "ExternalSstFileIngestionJob::Prepare:Reopen", [&](void* arg) {
         Status* s = static_cast<Status*>(arg);
-        *s = Status::NotSupported();
+        *s = Status_NotSupported();
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

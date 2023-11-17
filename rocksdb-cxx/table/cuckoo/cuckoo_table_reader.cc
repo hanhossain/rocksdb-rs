@@ -54,7 +54,7 @@ CuckooTableReader::CuckooTableReader(
       ucomp_(comparator),
       get_slice_hash_(get_slice_hash) {
   if (!ioptions.allow_mmap_reads) {
-    status_ = Status::InvalidArgument("File is not mmaped");
+    status_ = Status_InvalidArgument("File is not mmaped");
     return;
   }
   {
@@ -72,13 +72,13 @@ CuckooTableReader::CuckooTableReader(
   auto& user_props = table_props_->user_collected_properties;
   auto hash_funs = user_props.find(CuckooTablePropertyNames::kNumHashFunc);
   if (hash_funs == user_props.end()) {
-    status_ = Status::Corruption("Number of hash functions not found");
+    status_ = Status_Corruption("Number of hash functions not found");
     return;
   }
   num_hash_func_ = *reinterpret_cast<const uint32_t*>(hash_funs->second.data());
   auto unused_key = user_props.find(CuckooTablePropertyNames::kEmptyKey);
   if (unused_key == user_props.end()) {
-    status_ = Status::Corruption("Empty bucket value not found");
+    status_ = Status_Corruption("Empty bucket value not found");
     return;
   }
   unused_key_ = unused_key->second;
@@ -86,7 +86,7 @@ CuckooTableReader::CuckooTableReader(
   key_length_ = static_cast<uint32_t>(table_props_->fixed_key_len);
   auto user_key_len = user_props.find(CuckooTablePropertyNames::kUserKeyLength);
   if (user_key_len == user_props.end()) {
-    status_ = Status::Corruption("User key length not found");
+    status_ = Status_Corruption("User key length not found");
     return;
   }
   user_key_length_ =
@@ -94,7 +94,7 @@ CuckooTableReader::CuckooTableReader(
 
   auto value_length = user_props.find(CuckooTablePropertyNames::kValueLength);
   if (value_length == user_props.end()) {
-    status_ = Status::Corruption("Value length not found");
+    status_ = Status_Corruption("Value length not found");
     return;
   }
   value_length_ =
@@ -104,7 +104,7 @@ CuckooTableReader::CuckooTableReader(
   auto hash_table_size =
       user_props.find(CuckooTablePropertyNames::kHashTableSize);
   if (hash_table_size == user_props.end()) {
-    status_ = Status::Corruption("Hash table size not found");
+    status_ = Status_Corruption("Hash table size not found");
     return;
   }
   table_size_ =
@@ -112,7 +112,7 @@ CuckooTableReader::CuckooTableReader(
 
   auto is_last_level = user_props.find(CuckooTablePropertyNames::kIsLastLevel);
   if (is_last_level == user_props.end()) {
-    status_ = Status::Corruption("Is last level not found");
+    status_ = Status_Corruption("Is last level not found");
     return;
   }
   is_last_level_ = *reinterpret_cast<const bool*>(is_last_level->second.data());
@@ -120,7 +120,7 @@ CuckooTableReader::CuckooTableReader(
   auto identity_as_first_hash =
       user_props.find(CuckooTablePropertyNames::kIdentityAsFirstHash);
   if (identity_as_first_hash == user_props.end()) {
-    status_ = Status::Corruption("identity as first hash not found");
+    status_ = Status_Corruption("identity as first hash not found");
     return;
   }
   identity_as_first_hash_ =
@@ -129,7 +129,7 @@ CuckooTableReader::CuckooTableReader(
   auto use_module_hash =
       user_props.find(CuckooTablePropertyNames::kUseModuleHash);
   if (use_module_hash == user_props.end()) {
-    status_ = Status::Corruption("hash type is not found");
+    status_ = Status_Corruption("hash type is not found");
     return;
   }
   use_module_hash_ =
@@ -137,7 +137,7 @@ CuckooTableReader::CuckooTableReader(
   auto cuckoo_block_size =
       user_props.find(CuckooTablePropertyNames::kCuckooBlockSize);
   if (cuckoo_block_size == user_props.end()) {
-    status_ = Status::Corruption("Cuckoo block size not found");
+    status_ = Status_Corruption("Cuckoo block size not found");
     return;
   }
   cuckoo_block_size_ =
@@ -165,7 +165,7 @@ Status CuckooTableReader::Get(const ReadOptions& /*readOptions*/,
          ++block_idx, bucket += bucket_length_) {
       if (ucomp_->Equal(Slice(unused_key_.data(), user_key.size()),
                         Slice(bucket, user_key.size()))) {
-        return Status::OK();
+        return Status_OK();
       }
       // Here, we compare only the user key part as we support only one entry
       // per user key and we don't support snapshot.
@@ -188,11 +188,11 @@ Status CuckooTableReader::Get(const ReadOptions& /*readOptions*/,
           get_context->SaveValue(found_ikey, value, &dont_care);
         }
         // We don't support merge operations. So, we return here.
-        return Status::OK();
+        return Status_OK();
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void CuckooTableReader::Prepare(const Slice& key) {
@@ -224,7 +224,7 @@ class CuckooTableIterator : public InternalIterator {
   void Prev() override;
   Slice key() const override;
   Slice value() const override;
-  Status status() const override { return Status::OK(); }
+  Status status() const override { return Status_OK(); }
   void InitIfNeeded();
 
  private:
@@ -395,7 +395,7 @@ InternalIterator* CuckooTableReader::NewIterator(
     size_t /*compaction_readahead_size*/, bool /* allow_unprepared_value */) {
   if (!status().ok()) {
     return NewErrorInternalIterator<Slice>(
-        Status::Corruption("CuckooTableReader status is not okay."), arena);
+        Status_Corruption("CuckooTableReader status is not okay."), arena);
   }
   CuckooTableIterator* iter;
   if (arena == nullptr) {

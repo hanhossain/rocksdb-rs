@@ -47,7 +47,7 @@ class DBImplReadOnly : public DBImpl {
   virtual Status Put(const WriteOptions& /*options*/,
                      ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*key*/, const Slice& /*value*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   using DBImpl::PutEntity;
@@ -55,37 +55,37 @@ class DBImplReadOnly : public DBImpl {
                    ColumnFamilyHandle* /* column_family */,
                    const Slice& /* key */,
                    const WideColumns& /* columns */) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   using DBImpl::Merge;
   virtual Status Merge(const WriteOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/,
                        const Slice& /*key*/, const Slice& /*value*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
   using DBImpl::Delete;
   virtual Status Delete(const WriteOptions& /*options*/,
                         ColumnFamilyHandle* /*column_family*/,
                         const Slice& /*key*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
   using DBImpl::SingleDelete;
   virtual Status SingleDelete(const WriteOptions& /*options*/,
                               ColumnFamilyHandle* /*column_family*/,
                               const Slice& /*key*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
   virtual Status Write(const WriteOptions& /*options*/,
                        WriteBatch* /*updates*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
   using DBImpl::CompactRange;
   virtual Status CompactRange(const CompactRangeOptions& /*options*/,
                               ColumnFamilyHandle* /*column_family*/,
                               const Slice* /*begin*/,
                               const Slice* /*end*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   using DBImpl::CompactFiles;
@@ -96,15 +96,15 @@ class DBImplReadOnly : public DBImpl {
       const int /*output_level*/, const int /*output_path_id*/ = -1,
       std::vector<std::string>* const /*output_file_names*/ = nullptr,
       CompactionJobInfo* /*compaction_job_info*/ = nullptr) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   virtual Status DisableFileDeletions() override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   virtual Status EnableFileDeletions(bool /*force*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
   virtual Status GetLiveFiles(std::vector<std::string>& ret,
                               uint64_t* manifest_file_size,
@@ -116,12 +116,12 @@ class DBImplReadOnly : public DBImpl {
   using DBImpl::Flush;
   virtual Status Flush(const FlushOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   using DBImpl::SyncWAL;
   virtual Status SyncWAL() override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   using DB::IngestExternalFile;
@@ -129,7 +129,7 @@ class DBImplReadOnly : public DBImpl {
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*external_files*/,
       const IngestExternalFileOptions& /*ingestion_options*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   using DB::CreateColumnFamilyWithImport;
@@ -139,7 +139,7 @@ class DBImplReadOnly : public DBImpl {
       const ImportColumnFamilyOptions& /*import_options*/,
       const ExportImportFilesMetaData& /*metadata*/,
       ColumnFamilyHandle** /*handle*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   virtual Status CreateColumnFamilyWithImport(
@@ -148,14 +148,14 @@ class DBImplReadOnly : public DBImpl {
       const ImportColumnFamilyOptions& /*import_options*/,
       const std::vector<const ExportImportFilesMetaData*>& /*metadatas*/,
       ColumnFamilyHandle** /*handle*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   using DB::ClipColumnFamily;
   virtual Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
                                   const Slice& /*begin*/,
                                   const Slice& /*end*/) override {
-    return Status::NotSupported("Not supported operation in read only mode.");
+    return Status_NotSupported("Not supported operation in read only mode.");
   }
 
   // FIXME: some missing overrides for more "write" functions
@@ -163,7 +163,7 @@ class DBImplReadOnly : public DBImpl {
  protected:
   Status FlushForGetLiveFiles() override {
     // No-op for read-only DB
-    return Status::OK();
+    return Status_OK();
   }
 
  private:

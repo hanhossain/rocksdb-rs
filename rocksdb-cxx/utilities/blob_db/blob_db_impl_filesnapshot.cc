@@ -32,7 +32,7 @@ Status BlobDBImpl::DisableFileDeletions() {
 
   ROCKS_LOG_INFO(db_options_.info_log,
                  "Disabled blob file deletions. count: %d", count);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobDBImpl::EnableFileDeletions(bool force) {
@@ -57,14 +57,14 @@ Status BlobDBImpl::EnableFileDeletions(bool force) {
                  count);
   // Consider trigger DeleteobsoleteFiles once after re-enabled, if we are to
   // make DeleteobsoleteFiles re-run interval configuration.
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
                                 uint64_t* manifest_file_size,
                                 bool flush_memtable) {
   if (!bdb_options_.path_relative) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Not able to get relative blob file path from absolute blob_dir.");
   }
   // Hold a lock in the beginning to avoid updates to base DB during the call
@@ -80,7 +80,7 @@ Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
     ret.emplace_back(
         BlobFileName("", bdb_options_.blob_dir, blob_file->BlobFileNumber()));
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void BlobDBImpl::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {

@@ -182,7 +182,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
     if (s.ok()) {
       if ((req.result.size() != req.len) ||
           (req_offset + BlockSizeWithTrailer(handle) > req.result.size())) {
-        s = Status::Corruption("truncated block read from " +
+        s = Status_Corruption("truncated block read from " +
                                rep_->file->file_name() + " offset " +
                                std::to_string(handle.offset()) + ", expected " +
                                std::to_string(req.len) + " bytes, got " +
@@ -596,7 +596,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
           handle_present = !block_handles[idx_in_batch].IsNull();
           parsed_block_value = results[idx_in_batch].GetValue();
           if (handle_present || parsed_block_value) {
-            first_biter.Invalidate(Status::OK());
+            first_biter.Invalidate(Status_OK());
             NewDataBlockIterator<DataBlockIter>(
                 read_options, results[idx_in_batch].As<Block>(), &first_biter,
                 statuses[idx_in_batch]);
@@ -623,7 +623,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
             break;
           }
 
-          next_biter.Invalidate(Status::OK());
+          next_biter.Invalidate(Status_OK());
           Status tmp_s;
           NewDataBlockIterator<DataBlockIter>(
               read_options, iiter->value().handle, &next_biter,

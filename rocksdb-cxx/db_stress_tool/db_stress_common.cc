@@ -446,7 +446,7 @@ Status SaveFilesInDirectory(const std::string& src_dirname,
 Status InitUnverifiedSubdir(const std::string& dirname) {
   Status s = Env::Default()->FileExists(dirname);
   if (s.IsNotFound()) {
-    return Status::OK();
+    return Status_OK();
   }
 
   const std::string kUnverifiedDirname = dirname + "/unverified";
@@ -467,7 +467,7 @@ Status InitUnverifiedSubdir(const std::string& dirname) {
 Status DestroyUnverifiedSubdir(const std::string& dirname) {
   Status s = Env::Default()->FileExists(dirname);
   if (s.IsNotFound()) {
-    return Status::OK();
+    return Status_OK();
   }
 
   const std::string kUnverifiedDirname = dirname + "/unverified";
@@ -475,7 +475,7 @@ Status DestroyUnverifiedSubdir(const std::string& dirname) {
     s = Env::Default()->FileExists(kUnverifiedDirname);
   }
   if (s.IsNotFound()) {
-    return Status::OK();
+    return Status_OK();
   }
 
   if (s.ok()) {

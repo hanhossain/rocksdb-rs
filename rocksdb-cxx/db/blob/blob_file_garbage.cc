@@ -49,21 +49,21 @@ Status BlobFileGarbage::DecodeFrom(Slice* input) {
   constexpr char class_name[] = "BlobFileGarbage";
 
   if (!GetVarint64(input, &blob_file_number_)) {
-    return Status::Corruption(class_name, "Error decoding blob file number");
+    return Status_Corruption(class_name, "Error decoding blob file number");
   }
 
   if (!GetVarint64(input, &garbage_blob_count_)) {
-    return Status::Corruption(class_name, "Error decoding garbage blob count");
+    return Status_Corruption(class_name, "Error decoding garbage blob count");
   }
 
   if (!GetVarint64(input, &garbage_blob_bytes_)) {
-    return Status::Corruption(class_name, "Error decoding garbage blob bytes");
+    return Status_Corruption(class_name, "Error decoding garbage blob bytes");
   }
 
   while (true) {
     uint32_t custom_field_tag = 0;
     if (!GetVarint32(input, &custom_field_tag)) {
-      return Status::Corruption(class_name, "Error decoding custom field tag");
+      return Status_Corruption(class_name, "Error decoding custom field tag");
     }
 
     if (custom_field_tag == (uint32_t)CustomFieldTags::kEndMarker) {
@@ -71,18 +71,18 @@ Status BlobFileGarbage::DecodeFrom(Slice* input) {
     }
 
     if (custom_field_tag & (uint32_t)CustomFieldTags::kForwardIncompatibleMask) {
-      return Status::Corruption(
+      return Status_Corruption(
           class_name, "Forward incompatible custom field encountered");
     }
 
     Slice custom_field_value;
     if (!GetLengthPrefixedSlice(input, &custom_field_value)) {
-      return Status::Corruption(class_name,
+      return Status_Corruption(class_name,
                                 "Error decoding custom field value");
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 std::string BlobFileGarbage::DebugString() const {

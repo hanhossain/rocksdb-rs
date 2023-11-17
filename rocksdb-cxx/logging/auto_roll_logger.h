@@ -110,7 +110,7 @@ class AutoRollLogger : public Logger {
     if (logger_) {
       return logger_->Close();
     } else {
-      return Status::OK();
+      return Status_OK();
     }
   }
 

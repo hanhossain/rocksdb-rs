@@ -189,29 +189,29 @@ std::tuple<Status, uint32_t, uint32_t>
 MultiOpsTxnsStressTest::Record::DecodePrimaryIndexValue(
     Slice primary_index_value) {
   if (primary_index_value.size() != 8) {
-    return std::tuple<Status, uint32_t, uint32_t>{Status::Corruption(""), 0, 0};
+    return std::tuple<Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
   }
   uint32_t b = 0;
   uint32_t c = 0;
   if (!GetFixed32(&primary_index_value, &b) ||
       !GetFixed32(&primary_index_value, &c)) {
     assert(false);
-    return std::tuple<Status, uint32_t, uint32_t>{Status::Corruption(""), 0, 0};
+    return std::tuple<Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
   }
-  return std::tuple<Status, uint32_t, uint32_t>{Status::OK(), b, c};
+  return std::tuple<Status, uint32_t, uint32_t>{Status_OK(), b, c};
 }
 
 std::pair<Status, uint32_t>
 MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexValue(
     Slice secondary_index_value) {
   if (secondary_index_value.size() != 4) {
-    return std::make_pair(Status::Corruption(""), 0);
+    return std::make_pair(Status_Corruption(""), 0);
   }
   uint32_t crc = 0;
   bool result __attribute__((unused)) =
       GetFixed32(&secondary_index_value, &crc);
   assert(result);
-  return std::make_pair(Status::OK(), crc);
+  return std::make_pair(Status_OK(), crc);
 }
 
 std::pair<std::string, std::string>
@@ -252,7 +252,7 @@ Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
     Slice primary_index_key, Slice primary_index_value) {
   if (primary_index_key.size() != 8) {
     assert(false);
-    return Status::Corruption("Primary index key length is not 8");
+    return Status_Corruption("Primary index key length is not 8");
   }
 
   uint32_t index_id = 0;
@@ -264,7 +264,7 @@ Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
   if (index_id != kPrimaryIndexId) {
     std::ostringstream oss;
     oss << "Unexpected primary index id: " << index_id;
-    return Status::Corruption(oss.str());
+    return Status_Corruption(oss.str());
   }
 
   res = GetFixed32(&primary_index_key, &a_);
@@ -273,17 +273,17 @@ Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
   assert(primary_index_key.empty());
 
   if (primary_index_value.size() != 8) {
-    return Status::Corruption("Primary index value length is not 8");
+    return Status_Corruption("Primary index value length is not 8");
   }
   GetFixed32(&primary_index_value, &b_);
   GetFixed32(&primary_index_value, &c_);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
     Slice secondary_index_key, Slice secondary_index_value) {
   if (secondary_index_key.size() != 12) {
-    return Status::Corruption("Secondary index key length is not 12");
+    return Status_Corruption("Secondary index key length is not 12");
   }
   uint32_t crc =
       crc32c::Value(secondary_index_key.data(), secondary_index_key.size());
@@ -297,7 +297,7 @@ Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
   if (index_id != kSecondaryIndexId) {
     std::ostringstream oss;
     oss << "Unexpected secondary index id: " << index_id;
-    return Status::Corruption(oss.str());
+    return Status_Corruption(oss.str());
   }
 
   assert(secondary_index_key.size() == 8);
@@ -312,7 +312,7 @@ Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
   assert(secondary_index_key.empty());
 
   if (secondary_index_value.size() != 4) {
-    return Status::Corruption("Secondary index value length is not 4");
+    return Status_Corruption("Secondary index value length is not 4");
   }
   uint32_t val = 0;
   GetFixed32(&secondary_index_value, &val);
@@ -320,9 +320,9 @@ Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
     std::ostringstream oss;
     oss << "Secondary index key checksum mismatch, stored: " << val
         << ", recomputed: " << crc;
-    return Status::Corruption(oss.str());
+    return Status_Corruption(oss.str());
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void MultiOpsTxnsStressTest::FinishInitDb(SharedState* shared) {
@@ -384,7 +384,7 @@ std::vector<Status> MultiOpsTxnsStressTest::TestMultiGet(
     ThreadState* /*thread*/, const ReadOptions& /*read_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  return std::vector<Status>{Status::NotSupported()};
+  return std::vector<Status>{Status_NotSupported()};
 }
 
 // Wide columns are currently not supported by transactions.
@@ -407,7 +407,7 @@ Status MultiOpsTxnsStressTest::TestPrefixScan(
   (void)read_opts;
   (void)rand_column_families;
   (void)rand_keys;
-  return Status::OK();
+  return Status_OK();
 }
 
 // Given a key K, this creates an iterator which scans to K and then
@@ -430,7 +430,7 @@ Status MultiOpsTxnsStressTest::TestPut(ThreadState* /*thread*/,
                                        const std::vector<int64_t>& /*keys*/,
                                        char (&value)[100]) {
   (void)value;
-  return Status::NotSupported();
+  return Status_NotSupported();
 }
 
 // Not intended for use.
@@ -438,7 +438,7 @@ Status MultiOpsTxnsStressTest::TestDelete(
     ThreadState* /*thread*/, WriteOptions& /*write_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  return Status::NotSupported();
+  return Status_NotSupported();
 }
 
 // Not intended for use.
@@ -446,7 +446,7 @@ Status MultiOpsTxnsStressTest::TestDeleteRange(
     ThreadState* /*thread*/, WriteOptions& /*write_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  return Status::NotSupported();
+  return Status_NotSupported();
 }
 
 void MultiOpsTxnsStressTest::TestIngestExternalFile(
@@ -473,7 +473,7 @@ Status MultiOpsTxnsStressTest::TestBackupRestore(
   // TODO (yanqin)
   (void)thread;
   (void)rand_column_families;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status MultiOpsTxnsStressTest::TestCheckpoint(
@@ -482,7 +482,7 @@ Status MultiOpsTxnsStressTest::TestCheckpoint(
   // TODO (yanqin)
   (void)thread;
   (void)rand_column_families;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status MultiOpsTxnsStressTest::TestApproximateSize(
@@ -493,7 +493,7 @@ Status MultiOpsTxnsStressTest::TestApproximateSize(
   (void)thread;
   (void)iteration;
   (void)rand_column_families;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status MultiOpsTxnsStressTest::TestCustomOperations(
@@ -609,7 +609,7 @@ Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
   s = txn->GetForUpdate(ropts, new_pk, &empty_value);
   if (s.ok()) {
     assert(!empty_value.empty());
-    s = Status::Busy();
+    s = Status_Busy();
     return s;
   } else if (!s.IsNotFound()) {
     return s;
@@ -658,7 +658,7 @@ Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
   }
 
   if (FLAGS_rollback_one_in > 0 && thread->rand.OneIn(FLAGS_rollback_one_in)) {
-    s = Status::Incomplete();
+    s = Status_Incomplete();
     return s;
   }
 
@@ -745,7 +745,7 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
   assert(it);
   it->Seek(old_sk_prefix);
   if (!it->Valid()) {
-    s = Status::NotFound();
+    s = Status_NotFound();
     return s;
   }
   auto* wb = txn->GetWriteBatch();
@@ -817,7 +817,7 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
           << " (published " << dbimpl->GetLastPublishedSequence()
           << "), pk/sk mismatch. pk: (a=" << record.a_value() << ", "
           << "c=" << c << "), sk: (c=" << old_c << ")";
-      s = Status::Corruption();
+      s = Status_Corruption();
       fprintf(stderr, "%s\n", oss.str().c_str());
       assert(false);
       break;
@@ -856,7 +856,7 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
   }
 
   if (FLAGS_rollback_one_in > 0 && thread->rand.OneIn(FLAGS_rollback_one_in)) {
-    s = Status::Incomplete();
+    s = Status_Incomplete();
     return s;
   }
 
@@ -941,7 +941,7 @@ Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(ThreadState* thread,
   }
 
   if (FLAGS_rollback_one_in > 0 && thread->rand.OneIn(FLAGS_rollback_one_in)) {
-    s = Status::Incomplete();
+    s = Status_Incomplete();
     return s;
   }
 
@@ -1210,7 +1210,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
     oss << "Pk/sk mismatch: primary index has " << primary_index_entries_count
         << " entries. Secondary index has " << secondary_index_entries_count
         << " entries.";
-    VerificationAbort(thread->shared, oss.str(), Status::OK());
+    VerificationAbort(thread->shared, oss.str(), Status_OK());
     assert(false);
     return;
   }

@@ -353,7 +353,7 @@ Status DBImpl::FlushMemTableToOutputFile(
       sfm->OnAddFile(file_path).PermitUncheckedError();
       if (sfm->IsMaxAllowedSpaceReached()) {
         Status new_bg_error =
-            Status::SpaceLimit("Max allowed space was reached");
+            Status_SpaceLimit("Max allowed space was reached");
         TEST_SYNC_POINT_CALLBACK(
             "DBImpl::FlushMemTableToOutputFile:MaxAllowedSpaceReached",
             &new_bg_error);
@@ -517,7 +517,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   std::vector<bool> pick_status;
   for (int i = 0; i != num_cfs; ++i) {
     // Initially all jobs are not executed, with status OK.
-    exec_status.emplace_back(false, Status::OK());
+    exec_status.emplace_back(false, Status_OK());
     pick_status.push_back(false);
   }
 
@@ -569,7 +569,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   }
 
   if (s.IsColumnFamilyDropped()) {
-    s = Status::OK();
+    s = Status_OK();
   }
 
   if (s.ok() || s.IsShutdownInProgress()) {
@@ -612,7 +612,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         // turn to write/sync to MANIFEST or CURRENT. Just return.
         return std::make_pair(versions_->io_status(), false);
       } else if (shutting_down_.load(std::memory_order_acquire)) {
-        return std::make_pair(Status::ShutdownInProgress(), false);
+        return std::make_pair(Status_ShutdownInProgress(), false);
       }
       bool ready = true;
       for (size_t i = 0; i != cfds.size(); ++i) {
@@ -637,7 +637,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
           break;
         }
       }
-      return std::make_pair(Status::OK(), !ready);
+      return std::make_pair(Status_OK(), !ready);
     };
 
     bool resuming_from_bg_err =
@@ -772,7 +772,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         if (sfm->IsMaxAllowedSpaceReached() &&
             error_handler_.GetBGError().ok()) {
           Status new_bg_error =
-              Status::SpaceLimit("Max allowed space was reached");
+              Status_SpaceLimit("Max allowed space was reached");
           error_handler_.SetBGError(new_bg_error,
                                     BackgroundErrorReason::kFlush);
         }
@@ -897,11 +897,11 @@ Status DBImpl::CompactRange(const CompactRangeOptions& options,
                             const Slice* begin_without_ts,
                             const Slice* end_without_ts) {
   if (manual_compaction_paused_.load(std::memory_order_acquire) > 0) {
-    return Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    return Status_Incomplete(SubCode::kManualCompactionPaused);
   }
 
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    return Status_Incomplete(SubCode::kManualCompactionPaused);
   }
 
   const Comparator* const ucmp = column_family->GetComparator();
@@ -946,11 +946,11 @@ Status DBImpl::IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
   }
   assert(cfd != nullptr && cfd->user_comparator() != nullptr);
   if (cfd->user_comparator()->timestamp_size() == 0) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Timestamp is not enabled in this column family");
   }
   if (cfd->user_comparator()->timestamp_size() != ts_low.size()) {
-    return Status::InvalidArgument("ts_low size mismatch");
+    return Status_InvalidArgument("ts_low size mismatch");
   }
   return IncreaseFullHistoryTsLowImpl(cfd, ts_low);
 }
@@ -972,7 +972,7 @@ Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
   assert(ucmp->timestamp_size() == ts_low.size() && !ts_low.empty());
   if (!current_ts_low.empty() &&
       ucmp->CompareTimestamp(ts_low, current_ts_low) < 0) {
-    return Status::InvalidArgument("Cannot decrease full_history_ts_low");
+    return Status_InvalidArgument("Cannot decrease full_history_ts_low");
   }
 
   Status s = versions_->LogAndApply(cfd, *cfd->GetLatestMutableCFOptions(),
@@ -989,9 +989,9 @@ Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
         << " is set to be higher than the requested "
            "timestamp: "
         << Slice(ts_low).ToString(true) << std::endl;
-    return Status::TryAgain(oss.str());
+    return Status_TryAgain(oss.str());
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
@@ -1002,7 +1002,7 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
   auto cfd = cfh->cfd();
 
   if (options.target_path_id >= cfd->ioptions()->cf_paths.size()) {
-    return Status::InvalidArgument("Invalid target path ID");
+    return Status_InvalidArgument("Invalid target path ID");
   }
 
   bool flush_needed = true;
@@ -1012,7 +1012,7 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
       !options.full_history_ts_low->empty()) {
     std::string ts_low = options.full_history_ts_low->ToString();
     if (begin != nullptr || end != nullptr) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Cannot specify compaction range with full_history_ts_low");
     }
     Status s = IncreaseFullHistoryTsLowImpl(cfd, ts_low);
@@ -1265,7 +1265,7 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
       TEST_SYNC_POINT("DBImpl::CompactRange:PreRefitLevel");
       s = ReFitLevel(cfd, final_output_level, options.target_level);
       TEST_SYNC_POINT("DBImpl::CompactRange:PostRefitLevel");
-      // ContinueBackgroundWork always return Status::OK().
+      // ContinueBackgroundWork always return Status_OK().
       Status temp_s = ContinueBackgroundWork();
       assert(temp_s.ok());
     }
@@ -1292,7 +1292,7 @@ Status DBImpl::CompactFiles(const CompactionOptions& compact_options,
                             std::vector<std::string>* const output_file_names,
                             CompactionJobInfo* compaction_job_info) {
   if (column_family == nullptr) {
-    return Status::InvalidArgument("ColumnFamilyHandle must be non-null.");
+    return Status_InvalidArgument("ColumnFamilyHandle must be non-null.");
   }
 
   auto cfd =
@@ -1360,10 +1360,10 @@ Status DBImpl::CompactFilesImpl(
   mutex_.AssertHeld();
 
   if (shutting_down_.load(std::memory_order_acquire)) {
-    return Status::ShutdownInProgress();
+    return Status_ShutdownInProgress();
   }
   if (manual_compaction_paused_.load(std::memory_order_acquire) > 0) {
-    return Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+    return Status_Incomplete(SubCode::kManualCompactionPaused);
   }
 
   std::unordered_set<uint64_t> input_set;
@@ -1380,7 +1380,7 @@ Status DBImpl::CompactFilesImpl(
     if (cfd->ioptions()->cf_paths.size() == 1U) {
       output_path_id = 0;
     } else {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Automatic output path selection is not "
           "yet supported in CompactFiles()");
     }
@@ -1388,7 +1388,7 @@ Status DBImpl::CompactFilesImpl(
 
   if (cfd->ioptions()->allow_ingest_behind &&
       output_level >= cfd->ioptions()->num_levels - 1) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Exceed the maximum output level defined by "
         "the current compaction algorithm with ingest_behind --- " +
         std::to_string(cfd->ioptions()->num_levels - 1));
@@ -1410,7 +1410,7 @@ Status DBImpl::CompactFilesImpl(
 
   for (const auto& inputs : input_files) {
     if (cfd->compaction_picker()->AreFilesInCompaction(inputs.files)) {
-      return Status::Aborted(
+      return Status_Aborted(
           "Some of the necessary compaction input "
           "files are already being compacted");
     }
@@ -1423,7 +1423,7 @@ Status DBImpl::CompactFilesImpl(
   if (!enough_room) {
     // m's vars will get set properly at the end of this function,
     // as long as status == CompactionTooLarge
-    return Status::CompactionTooLarge();
+    return Status_CompactionTooLarge();
   }
 
   // At this point, CompactFiles will be run.
@@ -1571,13 +1571,13 @@ Status DBImpl::PauseBackgroundWork() {
     bg_cv_.Wait();
   }
   bg_work_paused_++;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::ContinueBackgroundWork() {
   InstrumentedMutexLock guard_lock(&mutex_);
   if (bg_work_paused_ == 0) {
-    return Status::InvalidArgument();
+    return Status_InvalidArgument();
   }
   assert(bg_work_paused_ > 0);
   assert(bg_compaction_paused_ > 0);
@@ -1588,7 +1588,7 @@ Status DBImpl::ContinueBackgroundWork() {
   if (bg_work_paused_ == 0) {
     MaybeScheduleFlushOrCompaction();
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void DBImpl::NotifyOnCompactionBegin(ColumnFamilyData* cfd, Compaction* c,
@@ -1664,7 +1664,7 @@ void DBImpl::NotifyOnCompactionCompleted(
 Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
   assert(level < cfd->NumberLevels());
   if (target_level >= cfd->NumberLevels()) {
-    return Status::InvalidArgument("Target level exceeds number of levels");
+    return Status_InvalidArgument("Target level exceeds number of levels");
   }
 
   const ReadOptions read_options(Env::IOActivity::kCompaction);
@@ -1675,13 +1675,13 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
 
   auto* vstorage = cfd->current()->storage_info();
   if (vstorage->LevelFiles(level).empty()) {
-    return Status::OK();
+    return Status_OK();
   }
   // only allow one thread refitting
   if (refitting_level_) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "[ReFitLevel] another thread is refitting");
-    return Status::NotSupported("another thread is refitting");
+    return Status_NotSupported("another thread is refitting");
   }
   refitting_level_ = true;
 
@@ -1705,21 +1705,21 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
     if (to_level > level) {
       if (level == 0) {
         refitting_level_ = false;
-        return Status::NotSupported(
+        return Status_NotSupported(
             "Cannot change from level 0 to other levels.");
       }
       // Check levels are empty for a trivial move
       for (int l = level + 1; l <= to_level; l++) {
         if (vstorage->NumLevelFiles(l) > 0) {
           refitting_level_ = false;
-          return Status::NotSupported(
+          return Status_NotSupported(
               "Levels between source and target are not empty for a move.");
         }
         if (cfd->RangeOverlapWithCompaction(refit_level_smallest.user_key(),
                                             refit_level_largest.user_key(),
                                             l)) {
           refitting_level_ = false;
-          return Status::NotSupported(
+          return Status_NotSupported(
               "Levels between source and target "
               "will have some ongoing compaction's output.");
         }
@@ -1730,14 +1730,14 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
       for (int l = to_level; l < level; l++) {
         if (vstorage->NumLevelFiles(l) > 0) {
           refitting_level_ = false;
-          return Status::NotSupported(
+          return Status_NotSupported(
               "Levels between source and target are not empty for a move.");
         }
         if (cfd->RangeOverlapWithCompaction(refit_level_smallest.user_key(),
                                             refit_level_largest.user_key(),
                                             l)) {
           refitting_level_ = false;
-          return Status::NotSupported(
+          return Status_NotSupported(
               "Levels between source and target "
               "will have some ongoing compaction's output.");
         }
@@ -1808,7 +1808,7 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
   }
 
   refitting_level_ = false;
-  return Status::OK();
+  return Status_OK();
 }
 
 int DBImpl::NumberLevels(ColumnFamilyHandle* column_family) {
@@ -1836,7 +1836,7 @@ Status DBImpl::FlushAllColumnFamilies(const FlushOptions& flush_options,
     mutex_.Unlock();
     status = AtomicFlushMemTables(flush_options, flush_reason);
     if (status.IsColumnFamilyDropped()) {
-      status = Status::OK();
+      status = Status_OK();
     }
     mutex_.Lock();
   } else {
@@ -1852,7 +1852,7 @@ Status DBImpl::FlushAllColumnFamilies(const FlushOptions& flush_options,
       if (!status.ok() && !status.IsColumnFamilyDropped()) {
         break;
       } else if (status.IsColumnFamilyDropped()) {
-        status = Status::OK();
+        status = Status_OK();
       }
     }
   }
@@ -1970,7 +1970,7 @@ Status DBImpl::RunManualCompaction(
     // to drain. So return immediately.
     TEST_SYNC_POINT("DBImpl::RunManualCompaction:PausedAtStart");
     manual.status =
-        Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+        Status_Incomplete(SubCode::kManualCompactionPaused);
     manual.done = true;
     return manual.status;
   }
@@ -2004,7 +2004,7 @@ Status DBImpl::RunManualCompaction(
         // handling code can process it.
         manual.done = true;
         manual.status =
-            Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+            Status_Incomplete(SubCode::kManualCompactionPaused);
         break;
       }
       TEST_SYNC_POINT("DBImpl::RunManualCompaction:WaitScheduled");
@@ -2046,7 +2046,7 @@ Status DBImpl::RunManualCompaction(
           // compaction so the below cleanup/error handling code can process it.
           manual.done = true;
           manual.status =
-              Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+              Status_Incomplete(SubCode::kManualCompactionPaused);
         }
       }
       if (!manual.done) {
@@ -2133,7 +2133,7 @@ Status DBImpl::RunManualCompaction(
   // any unscheduled compaction job which was blocked by exclusive manual
   // compaction.
   if (manual.status.IsIncomplete() &&
-      manual.status.subcode() == Status::SubCode::kManualCompactionPaused) {
+      manual.status.subcode() == SubCode::kManualCompactionPaused) {
     MaybeScheduleFlushOrCompaction();
   }
   bg_cv_.SignalAll();
@@ -2165,7 +2165,7 @@ Status DBImpl::FlushMemTable(ColumnFamilyData* cfd,
     std::ostringstream oss;
     oss << "Writes have been stopped, thus unable to perform manual flush. "
            "Please try again later after writes are resumed";
-    return Status::TryAgain(oss.str());
+    return Status_TryAgain(oss.str());
   }
   Status s;
   if (!flush_options.allow_write_stall) {
@@ -2311,7 +2311,7 @@ Status DBImpl::AtomicFlushMemTables(
     std::ostringstream oss;
     oss << "Writes have been stopped, thus unable to perform manual flush. "
            "Please try again later after writes are resumed";
-    return Status::TryAgain(oss.str());
+    return Status_TryAgain(oss.str());
   }
   Status s;
   autovector<ColumnFamilyData*> candidate_cfds;
@@ -2474,10 +2474,10 @@ Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
         bg_cv_.Wait();
       }
       if (cfd->IsDropped()) {
-        return Status::ColumnFamilyDropped();
+        return Status_ColumnFamilyDropped();
       }
       if (shutting_down_.load(std::memory_order_acquire)) {
-        return Status::ShutdownInProgress();
+        return Status_ShutdownInProgress();
       }
 
       uint64_t earliest_memtable_id =
@@ -2486,7 +2486,7 @@ Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
         // We waited so long that the memtable we were originally waiting on was
         // flushed.
         *flush_needed = false;
-        return Status::OK();
+        return Status_OK();
       }
 
       const auto& mutable_cf_options = *cfd->GetLatestMutableCFOptions();
@@ -2514,7 +2514,7 @@ Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
                                   .first;
     } while (write_stall_condition != WriteStallCondition::kNormal);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // Wait for memtables to be flushed for multiple column families.
@@ -2539,7 +2539,7 @@ Status DBImpl::WaitForFlushMemTables(
   // error_handler_.IsDBStopped() is true.
   while (resuming_from_bg_err || !error_handler_.IsDBStopped()) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      s = Status::ShutdownInProgress();
+      s = Status_ShutdownInProgress();
       return s;
     }
     // If an error has occurred during resumption, then no need to wait.
@@ -2552,7 +2552,7 @@ Status DBImpl::WaitForFlushMemTables(
     // If BGWorkStopped, which indicate that there is a BG error and
     // 1) soft error but requires no BG work, 2) no in auto_recovery_
     if (!resuming_from_bg_err && error_handler_.IsBGWorkStopped() &&
-        error_handler_.GetBGError().severity() < Status::Severity::kHardError) {
+        error_handler_.GetBGError().severity() < Severity::kHardError) {
       s = error_handler_.GetBGError();
       return s;
     }
@@ -2572,7 +2572,7 @@ Status DBImpl::WaitForFlushMemTables(
       }
     }
     if (1 == num_dropped && 1 == num) {
-      s = Status::ColumnFamilyDropped();
+      s = Status_ColumnFamilyDropped();
       return s;
     }
     // Column families involved in this flush request have either been dropped
@@ -2620,7 +2620,7 @@ void DBImpl::DisableManualCompaction() {
   bg_cv_.SignalAll();
 
   // Wait for any pending manual compactions to finish (typically through
-  // failing with `Status::Incomplete`) prior to returning. This way we are
+  // failing with `Status_Incomplete`) prior to returning. This way we are
   // guaranteed no pending manual compaction will commit while manual
   // compactions are "disabled".
   while (HasPendingManualCompaction()) {
@@ -2918,11 +2918,11 @@ void DBImpl::UnscheduleCompactionCallback(void* arg) {
     if (ca.prepicked_compaction->manual_compaction_state) {
       ca.prepicked_compaction->manual_compaction_state->done = true;
       ca.prepicked_compaction->manual_compaction_state->status =
-          Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+          Status_Incomplete(SubCode::kManualCompactionPaused);
     }
     if (ca.prepicked_compaction->compaction != nullptr) {
       ca.prepicked_compaction->compaction->ReleaseCompactionFiles(
-          Status::Incomplete(Status::SubCode::kManualCompactionPaused));
+          Status_Incomplete(SubCode::kManualCompactionPaused));
       delete ca.prepicked_compaction->compaction;
     }
     delete ca.prepicked_compaction;
@@ -2954,7 +2954,7 @@ Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
   // that means this flush is part of the recovery. So allow it to go through
   if (!error_handler_.IsBGWorkStopped()) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      status = Status::ShutdownInProgress();
+      status = Status_ShutdownInProgress();
     }
   } else if (!error_handler_.IsRecoveryInProgress()) {
     status = error_handler_.GetBGError();
@@ -3271,10 +3271,10 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   Status status;
   if (!error_handler_.IsBGWorkStopped()) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      status = Status::ShutdownInProgress();
+      status = Status_ShutdownInProgress();
     } else if (is_manual &&
                manual_compaction->canceled.load(std::memory_order_acquire)) {
-      status = Status::Incomplete(Status::SubCode::kManualCompactionPaused);
+      status = Status_Incomplete(SubCode::kManualCompactionPaused);
     }
   } else {
     status = error_handler_.GetBGError();
@@ -3335,7 +3335,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         c.reset();
         // m's vars will get set properly at the end of this function,
         // as long as status == CompactionTooLarge
-        status = Status::CompactionTooLarge();
+        status = Status_CompactionTooLarge();
       } else {
         ROCKS_LOG_BUFFER(
             log_buffer,
@@ -3357,7 +3357,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       // Stay in the compaction queue.
       unscheduled_compactions_++;
 
-      return Status::OK();
+      return Status_OK();
     }
 
     auto cfd = PickCompactionFromQueue(&task_token, log_buffer);
@@ -3365,7 +3365,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       // Can't find any executable task from the compaction queue.
       // All tasks have been throttled by compaction thread limiter.
       ++unscheduled_compactions_;
-      return Status::Busy();
+      return Status_Busy();
     }
 
     // We unreference here because the following code will take a Ref() on
@@ -3376,7 +3376,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     if (cfd->UnrefAndTryDelete()) {
       // This was the last reference of the column family, so no need to
       // compact.
-      return Status::OK();
+      return Status_OK();
     }
 
     // Pick up latest mutable CF Options and use it throughout the
@@ -3412,7 +3412,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
           c.reset();
           // Don't need to sleep here, because BackgroundCallCompaction
           // will sleep if !s.ok()
-          status = Status::CompactionTooLarge();
+          status = Status_CompactionTooLarge();
         } else {
           // update statistics
           size_t num_files = 0;
@@ -4023,10 +4023,10 @@ Status DBImpl::WaitForCompact(
   TEST_SYNC_POINT("DBImpl::WaitForCompact:StartWaiting");
   for (;;) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      return Status::ShutdownInProgress();
+      return Status_ShutdownInProgress();
     }
     if (bg_work_paused_ && wait_for_compact_options.abort_on_pause) {
-      return Status::Aborted();
+      return Status_Aborted();
     }
     if ((bg_bottom_compaction_scheduled_ || bg_compaction_scheduled_ ||
          bg_flush_scheduled_ || unscheduled_compactions_ ||

@@ -234,7 +234,7 @@ Status PointLockManager::TryLock(PessimisticTransaction* txn,
     snprintf(msg, sizeof(msg), "Column family id not found: %" PRIu32,
              column_family_id);
 
-    return Status::InvalidArgument(msg);
+    return Status_InvalidArgument(msg);
   }
 
   // Need to lock the mutex for the stripe that this key hashes to
@@ -305,7 +305,7 @@ Status PointLockManager::AcquireWithTimeout(
         if (txn->IsDeadlockDetect()) {
           if (IncrementWaiters(txn, wait_ids, key, column_family_id,
                                lock_info.exclusive, env)) {
-            result = Status::Busy(Status::SubCode::kDeadlock);
+            result = Status_Busy(SubCode::kDeadlock);
             stripe->stripe_mutex->UnLock();
             return result;
           }
@@ -505,7 +505,7 @@ Status PointLockManager::AcquireLocked(LockMap* lock_map, LockMapStripe* stripe,
           lock_info.expiration_time = txn_lock_info.expiration_time;
           // lock_cnt does not change
         } else {
-          result = Status::TimedOut(Status::SubCode::kLockTimeout);
+          result = Status_TimedOut(SubCode::kLockTimeout);
           *txn_ids = lock_info.txn_ids;
         }
       }
@@ -523,7 +523,7 @@ Status PointLockManager::AcquireLocked(LockMap* lock_map, LockMapStripe* stripe,
     // Check lock limit
     if (max_num_locks_ > 0 &&
         lock_map->lock_cnt.load(std::memory_order_acquire) >= max_num_locks_) {
-      result = Status::Busy(Status::SubCode::kLockLimit);
+      result = Status_Busy(SubCode::kLockLimit);
     } else {
       // acquire lock
       stripe->keys.emplace(key, txn_lock_info);
@@ -705,7 +705,7 @@ Status PointLockManager::TryLock(PessimisticTransaction* /* txn */,
                                  const Endpoint& /* start */,
                                  const Endpoint& /* end */, Env* /* env */,
                                  bool /* exclusive */) {
-  return Status::NotSupported(
+  return Status_NotSupported(
       "PointLockManager does not support range locking");
 }
 

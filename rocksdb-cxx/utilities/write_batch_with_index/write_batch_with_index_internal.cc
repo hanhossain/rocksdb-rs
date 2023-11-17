@@ -26,7 +26,7 @@ BaseDeltaIterator::BaseDeltaIterator(ColumnFamilyHandle* column_family,
     : forward_(true),
       current_at_base_(true),
       equal_keys_(false),
-      status_(Status::OK()),
+      status_(Status_OK()),
       base_iterator_(base_iterator),
       delta_iterator_(delta_iterator),
       comparator_(comparator),
@@ -70,7 +70,7 @@ void BaseDeltaIterator::SeekForPrev(const Slice& k) {
 
 void BaseDeltaIterator::Next() {
   if (!Valid()) {
-    status_ = Status::NotSupported("Next() on invalid iterator");
+    status_ = Status_NotSupported("Next() on invalid iterator");
     return;
   }
 
@@ -107,7 +107,7 @@ void BaseDeltaIterator::Next() {
 
 void BaseDeltaIterator::Prev() {
   if (!Valid()) {
-    status_ = Status::NotSupported("Prev() on invalid iterator");
+    status_ = Status_NotSupported("Prev() on invalid iterator");
     return;
   }
 
@@ -276,7 +276,7 @@ bool BaseDeltaIterator::DeltaValid() const { return delta_iterator_->Valid(); }
 void BaseDeltaIterator::UpdateCurrent() {
 // Suppress false positive clang analyzer warnings.
 #ifndef __clang_analyzer__
-  status_ = Status::OK();
+  status_ = Status_OK();
   while (true) {
     auto delta_result = WBWIIteratorImpl::kNotFound;
     WriteEntry delta_entry;
@@ -458,16 +458,16 @@ Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
                                                   Slice* xid) const {
   if (type == nullptr || Key == nullptr || value == nullptr ||
       blob == nullptr || xid == nullptr) {
-    return Status::InvalidArgument("Output parameters cannot be null");
+    return Status_InvalidArgument("Output parameters cannot be null");
   }
 
   if (data_offset == GetDataSize()) {
     // reached end of batch.
-    return Status::NotFound();
+    return Status_NotFound();
   }
 
   if (data_offset > GetDataSize()) {
-    return Status::InvalidArgument("data offset exceed write batch size");
+    return Status_InvalidArgument("data offset exceed write batch size");
   }
   Slice input = Slice(rep_.data() + data_offset, rep_.size() - data_offset);
   char tag;
@@ -512,10 +512,10 @@ Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
       *type = kXIDRecord;
       break;
     default:
-      return Status::Corruption("unknown WriteBatch tag ",
+      return Status_Corruption("unknown WriteBatch tag ",
                                 std::to_string(static_cast<unsigned int>(tag)));
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // If both of `entry1` and `entry2` point to real entry in write batch, we
@@ -654,7 +654,7 @@ Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family_);
     const auto merge_operator = cfh->cfd()->ioptions()->merge_operator.get();
     if (merge_operator == nullptr) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Merge_operator must be set for column_family");
     } else if (db_ != nullptr) {
       const ImmutableDBOptions& immutable_db_options =
@@ -693,14 +693,14 @@ Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
           /* op_failure_scope */ nullptr);
     }
   } else {
-    return Status::InvalidArgument("Must provide a column_family");
+    return Status_InvalidArgument("Must provide a column_family");
   }
 }
 
 WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
     WriteBatchWithIndex* batch, const Slice& key, MergeContext* context,
     std::string* value, Status* s) {
-  *s = Status::OK();
+  *s = Status_OK();
 
   std::unique_ptr<WBWIIteratorImpl> iter(
       static_cast_with_check<WBWIIteratorImpl>(
@@ -710,7 +710,7 @@ WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
   iter->Seek(key);
   auto result = iter->FindLatestUpdate(key, context);
   if (result == WBWIIteratorImpl::kError) {
-    (*s) = Status::Corruption("Unexpected entry in WriteBatchWithIndex:",
+    (*s) = Status_Corruption("Unexpected entry in WriteBatchWithIndex:",
                               std::to_string(iter->Entry().type));
     return result;
   } else if (result == WBWIIteratorImpl::kNotFound) {

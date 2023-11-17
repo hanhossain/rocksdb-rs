@@ -148,7 +148,7 @@ class CacheEntryStatsCollector {
     // Build an aliasing shared_ptr that keeps `ptr` in cache while there
     // are references.
     *ptr = cache.SharedGuard(h);
-    return Status::OK();
+    return Status_OK();
   }
 
  private:

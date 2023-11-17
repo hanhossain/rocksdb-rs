@@ -874,7 +874,7 @@ TEST_F(ImportColumnFamilyTest, ImportMultiColumnFamilyWithOverlap) {
 
   ASSERT_EQ(db_->CreateColumnFamilyWithImport(options, "toto", import_options,
                                               metadatas, &import_cfh_),
-            Status::InvalidArgument("CFs have overlapping ranges"));
+            Status_InvalidArgument("CFs have overlapping ranges"));
 
   ASSERT_OK(db_copy->DropColumnFamily(copy_cfh));
   ASSERT_OK(db_copy->DestroyColumnFamilyHandle(copy_cfh));

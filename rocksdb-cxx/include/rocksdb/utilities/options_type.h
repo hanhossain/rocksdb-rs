@@ -193,7 +193,7 @@ bool VectorsAreEqual(const ConfigOptions& config_options,
 
 // Function for converting a option string value into its underlying
 // representation in "addr"
-// On success, Status::OK is returned and addr is set to the parsed form
+// On success, Status_OK is returned and addr is set to the parsed form
 // On failure, a non-OK status is returned
 // @param opts  The ConfigOptions controlling how the value is parsed
 // @param name  The name of the options being parsed
@@ -204,7 +204,7 @@ using ParseFunc = std::function<Status(
     const std::string& /*value*/, void* /*addr*/)>;
 
 // Function for converting an option "addr" into its string representation.
-// On success, Status::OK is returned and value is the serialized form.
+// On success, Status_OK is returned and value is the serialized form.
 // On failure, a non-OK status is returned
 // @param opts  The ConfigOptions controlling how the values are serialized
 // @param name  The name of the options being serialized
@@ -310,11 +310,11 @@ class OptionTypeInfo {
         [map](const ConfigOptions&, const std::string& name,
               const std::string& value, void* addr) {
           if (map == nullptr) {
-            return Status::NotSupported("No enum mapping ", name);
+            return Status_NotSupported("No enum mapping ", name);
           } else if (ParseEnum<T>(*map, value, static_cast<T*>(addr))) {
-            return Status::OK();
+            return Status_OK();
           } else {
-            return Status::InvalidArgument("No mapping for enum ", name);
+            return Status_InvalidArgument("No mapping for enum ", name);
           }
         });
     info.SetSerializeFunc(
@@ -326,12 +326,12 @@ class OptionTypeInfo {
         [map](const ConfigOptions&, const std::string& name, const void* addr,
               std::string* value) {
           if (map == nullptr) {
-            return Status::NotSupported("No enum mapping ", name);
+            return Status_NotSupported("No enum mapping ", name);
           } else if (SerializeEnum<T>(*map, (*static_cast<const T*>(addr)),
                                       value)) {
-            return Status::OK();
+            return Status_OK();
           } else {
-            return Status::InvalidArgument("No mapping for enum ", name);
+            return Status_InvalidArgument("No mapping for enum ", name);
           }
         });
     info.SetEqualsFunc(
@@ -490,7 +490,7 @@ class OptionTypeInfo {
       auto* shared = static_cast<std::shared_ptr<T>*>(addr);
       if (name == kIdPropName() && value.empty()) {
         shared->reset();
-        return Status::OK();
+        return Status_OK();
       } else {
         return T::CreateFromString(opts, value, shared);
       }
@@ -530,7 +530,7 @@ class OptionTypeInfo {
       auto* unique = static_cast<std::unique_ptr<T>*>(addr);
       if (name == kIdPropName() && value.empty()) {
         unique->reset();
-        return Status::OK();
+        return Status_OK();
       } else {
         return T::CreateFromString(opts, value, unique);
       }
@@ -569,7 +569,7 @@ class OptionTypeInfo {
       auto** pointer = static_cast<T**>(addr);
       if (name == kIdPropName() && value.empty()) {
         *pointer = nullptr;
-        return Status::OK();
+        return Status_OK();
       } else {
         return T::CreateFromString(opts, value, pointer);
       }
@@ -777,7 +777,7 @@ class OptionTypeInfo {
 
   // Parses the option in "opt_value" according to the rules of this class
   // and updates the value at "opt_ptr".
-  // On success, Status::OK() is returned.  On failure:
+  // On success, Status_OK() is returned.  On failure:
   // NotFound means the opt_name is not valid for this option
   // NotSupported means we do not know how to parse the value for this option
   // InvalidArgument means the opt_value is not valid for this option.
@@ -982,7 +982,7 @@ Status ParseArray(const ConfigOptions& config_options,
           status.IsNotSupported()) {
         // If we were ignoring unsupported options and this one should be
         // ignored, ignore it by setting the status to OK
-        status = Status::OK();
+        status = Status_OK();
       }
     }
   }
@@ -991,11 +991,11 @@ Status ParseArray(const ConfigOptions& config_options,
   }
   // make sure the element number matches the array size
   if (i < kSize) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Serialized value has less elements than array size", name);
   }
   if (start < value.size() && end != std::string::npos) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Serialized value has more elements than array size", name);
   }
   return status;
@@ -1052,7 +1052,7 @@ Status SerializeArray(const ConfigOptions& config_options,
   } else {
     *value = result;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // Compares the input arrays array1 and array2 for equality
@@ -1126,7 +1126,7 @@ Status ParseVector(const ConfigOptions& config_options,
                  status.IsNotSupported()) {
         // If we were ignoring unsupported options and this one should be
         // ignored, ignore it by setting the status to OK
-        status = Status::OK();
+        status = Status_OK();
       }
     }
   }
@@ -1184,7 +1184,7 @@ Status SerializeVector(const ConfigOptions& config_options,
   } else {
     *value = result;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // Compares the input vectors vec1 and vec2 for equality

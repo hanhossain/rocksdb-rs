@@ -554,7 +554,7 @@ class CfConsistencyStressTest : public StressTest {
       ++count;
 
       if (!VerifyWideColumns(iter->value(), iter->columns())) {
-        s = Status::Corruption("Value and columns inconsistent",
+        s = Status_Corruption("Value and columns inconsistent",
                                DebugString(iter->value(), iter->columns()));
         break;
       }
@@ -576,7 +576,7 @@ class CfConsistencyStressTest : public StressTest {
 
     thread->stats.AddPrefixes(1, count);
 
-    return Status::OK();
+    return Status_OK();
   }
 
   ColumnFamilyHandle* GetControlCfh(ThreadState* thread,
@@ -613,7 +613,7 @@ class CfConsistencyStressTest : public StressTest {
       iters.back()->SeekToFirst();
     }
 
-    std::vector<Status> statuses(num, Status::OK());
+    std::vector<Status> statuses(num, Status_OK());
 
     assert(thread);
 
@@ -634,7 +634,7 @@ class CfConsistencyStressTest : public StressTest {
         if (iter->Valid()) {
           if (!VerifyWideColumns(iter->value(), iter->columns())) {
             statuses[i] =
-                Status::Corruption("Value and columns inconsistent",
+                Status_Corruption("Value and columns inconsistent",
                                    DebugString(iter->value(), iter->columns()));
           } else {
             ++valid_cnt;

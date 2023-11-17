@@ -935,7 +935,7 @@ class PosixFileSystem : public FileSystem {
   }
   Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
     logical_block_size_cache_.UnrefAndTryRemoveCachedLogicalBlockSize(paths);
-    return Status::OK();
+    return Status_OK();
   }
 #endif
  private:

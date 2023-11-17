@@ -19,212 +19,212 @@ namespace ROCKSDB_NAMESPACE {
 // (i.e from all 4 fields in a tuple to only the BackgroundErrorReason and
 // paranoid_checks). The less specific map serves as a catch all in case we miss
 // a specific error code or subcode.
-std::map<std::tuple<BackgroundErrorReason, Status::Code, Status::SubCode, bool>,
-         Status::Severity>
+std::map<std::tuple<BackgroundErrorReason, Code, SubCode, bool>,
+         Severity>
     ErrorSeverityMap = {
         // Errors during BG compaction
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          true),
-         Status::Severity::kSoftError},
+         Severity::kSoftError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          false),
-         Status::Severity::kNoError},
+         Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kIOError, Status::SubCode::kSpaceLimit,
+                         Code::kIOError, SubCode::kSpaceLimit,
                          true),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          false),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         // Errors during BG flush
-        {std::make_tuple(BackgroundErrorReason::kFlush, Status::Code::kIOError,
-                         Status::SubCode::kNoSpace, true),
-         Status::Severity::kHardError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Status::Code::kIOError,
-                         Status::SubCode::kNoSpace, false),
-         Status::Severity::kNoError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Status::Code::kIOError,
-                         Status::SubCode::kSpaceLimit, true),
-         Status::Severity::kHardError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Status::Code::kIOError,
-                         Status::SubCode::kIOFenced, true),
-         Status::Severity::kFatalError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Status::Code::kIOError,
-                         Status::SubCode::kIOFenced, false),
-         Status::Severity::kFatalError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
+                         SubCode::kNoSpace, true),
+         Severity::kHardError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
+                         SubCode::kNoSpace, false),
+         Severity::kNoError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
+                         SubCode::kSpaceLimit, true),
+         Severity::kHardError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
+                         SubCode::kIOFenced, true),
+         Severity::kFatalError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
+                         SubCode::kIOFenced, false),
+         Severity::kFatalError},
         // Errors during Write
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          true),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          false),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          false),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         // Errors during MANIFEST write
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          true),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          false),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          false),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         // Errors during BG flush with WAL disabled
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          true),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          false),
-         Status::Severity::kNoError},
+         Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kSpaceLimit,
+                         Code::kIOError, SubCode::kSpaceLimit,
                          true),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          false),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         // Errors during MANIFEST write when WAL is disabled
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          true),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kNoSpace,
+                         Code::kIOError, SubCode::kNoSpace,
                          false),
-         Status::Severity::kHardError},
+         Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Status::Code::kIOError, Status::SubCode::kIOFenced,
+                         Code::kIOError, SubCode::kIOFenced,
                          false),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
 
 };
 
-std::map<std::tuple<BackgroundErrorReason, Status::Code, bool>,
-         Status::Severity>
+std::map<std::tuple<BackgroundErrorReason, Code, bool>,
+         Severity>
     DefaultErrorSeverityMap = {
         // Errors during BG compaction
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kCorruption, true),
-         Status::Severity::kUnrecoverableError},
+                         Code::kCorruption, true),
+         Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kCorruption, false),
-         Status::Severity::kNoError},
+                         Code::kCorruption, false),
+         Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kIOError, true),
-         Status::Severity::kFatalError},
+                         Code::kIOError, true),
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Status::Code::kIOError, false),
-         Status::Severity::kNoError},
+                         Code::kIOError, false),
+         Severity::kNoError},
         // Errors during BG flush
         {std::make_tuple(BackgroundErrorReason::kFlush,
-                         Status::Code::kCorruption, true),
-         Status::Severity::kUnrecoverableError},
+                         Code::kCorruption, true),
+         Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kFlush,
-                         Status::Code::kCorruption, false),
-         Status::Severity::kNoError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Status::Code::kIOError,
+                         Code::kCorruption, false),
+         Severity::kNoError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
                          true),
-         Status::Severity::kFatalError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Status::Code::kIOError,
+         Severity::kFatalError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
                          false),
-         Status::Severity::kNoError},
+         Severity::kNoError},
         // Errors during Write
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kCorruption, true),
-         Status::Severity::kUnrecoverableError},
+                         Code::kCorruption, true),
+         Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kCorruption, false),
-         Status::Severity::kNoError},
+                         Code::kCorruption, false),
+         Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kIOError, true),
-         Status::Severity::kFatalError},
+                         Code::kIOError, true),
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Status::Code::kIOError, false),
-         Status::Severity::kNoError},
+                         Code::kIOError, false),
+         Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Status::Code::kIOError, true),
-         Status::Severity::kFatalError},
+                         Code::kIOError, true),
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Status::Code::kIOError, false),
-         Status::Severity::kFatalError},
+                         Code::kIOError, false),
+         Severity::kFatalError},
         // Errors during BG flush with WAL disabled
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kCorruption, true),
-         Status::Severity::kUnrecoverableError},
+                         Code::kCorruption, true),
+         Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kCorruption, false),
-         Status::Severity::kNoError},
+                         Code::kCorruption, false),
+         Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kIOError, true),
-         Status::Severity::kFatalError},
+                         Code::kIOError, true),
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Status::Code::kIOError, false),
-         Status::Severity::kNoError},
+                         Code::kIOError, false),
+         Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Status::Code::kIOError, true),
-         Status::Severity::kFatalError},
+                         Code::kIOError, true),
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Status::Code::kIOError, false),
-         Status::Severity::kFatalError},
+                         Code::kIOError, false),
+         Severity::kFatalError},
 };
 
-std::map<std::tuple<BackgroundErrorReason, bool>, Status::Severity>
+std::map<std::tuple<BackgroundErrorReason, bool>, Severity>
     DefaultReasonMap = {
         // Errors during BG compaction
         {std::make_tuple(BackgroundErrorReason::kCompaction, true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kCompaction, false),
-         Status::Severity::kNoError},
+         Severity::kNoError},
         // Errors during BG flush
         {std::make_tuple(BackgroundErrorReason::kFlush, true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kFlush, false),
-         Status::Severity::kNoError},
+         Severity::kNoError},
         // Errors during Write
         {std::make_tuple(BackgroundErrorReason::kWriteCallback, true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback, false),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         // Errors during Memtable update
         {std::make_tuple(BackgroundErrorReason::kMemTable, true),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kMemTable, false),
-         Status::Severity::kFatalError},
+         Severity::kFatalError},
 };
 
 void ErrorHandler::CancelErrorRecovery() {
@@ -250,7 +250,7 @@ void ErrorHandler::CancelErrorRecovery() {
   EndAutoRecovery();
 }
 
-STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status::OK()};
+STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status_OK()};
 
 // This is the main function for looking at an error during a background
 // operation and deciding the severity, and error recovery strategy. The high
@@ -263,7 +263,7 @@ STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status::OK()};
 // 3. Determine if auto recovery is possible. A listener notification callback
 //    is called, which can disable the auto recovery even if we decide its
 //    feasible
-// 4. For Status::NoSpace() errors, rely on SstFileManagerImpl to control
+// 4. For Status_NoSpace() errors, rely on SstFileManagerImpl to control
 //    the actual recovery. If no sst file manager is specified in DBOptions,
 //    a default one is allocated during DB::Open(), so there will always be
 //    one.
@@ -285,7 +285,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
                  "ErrorHandler: Set regular background error\n");
 
   bool paranoid = db_options_.paranoid_checks;
-  Status::Severity sev = Status::Severity::kFatalError;
+  Severity sev = Severity::kFatalError;
   Status new_bg_err;
   DBRecoverContext context;
   bool found = false;
@@ -324,7 +324,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
   }
 
   bool auto_recovery = auto_recovery_;
-  if (new_bg_err.severity() >= Status::Severity::kFatalError && auto_recovery) {
+  if (new_bg_err.severity() >= Severity::kFatalError && auto_recovery) {
     auto_recovery = false;
   }
 
@@ -357,7 +357,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
       RecoverFromNoSpace();
     }
   }
-  if (bg_error_.severity() >= Status::Severity::kHardError) {
+  if (bg_error_.severity() >= Severity::kHardError) {
     is_db_stopped_.store(true, std::memory_order_release);
   }
   return bg_error_;
@@ -413,7 +413,7 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
     // First, data loss (non file scope) is treated as unrecoverable error. So
     // it can directly overwrite any existing bg_error_.
     bool auto_recovery = false;
-    Status bg_err(new_bg_io_err, Status::Severity::kUnrecoverableError);
+    Status bg_err(new_bg_io_err, Severity::kUnrecoverableError);
     CheckAndSetRecoveryAndBGError(bg_err);
     if (bg_error_stats_ != nullptr) {
       RecordTick(bg_error_stats_.get(), ERROR_HANDLER_BG_ERROR_COUNT);
@@ -482,14 +482,14 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
       // continues to receive writes when BG error is soft error, to avoid
       // to many small memtable being generated during auto resume, the flush
       // reason is set to kErrorRecoveryRetryFlush.
-      Status bg_err(new_bg_io_err, Status::Severity::kSoftError);
+      Status bg_err(new_bg_io_err, Severity::kSoftError);
       CheckAndSetRecoveryAndBGError(bg_err);
       soft_error_no_bg_work_ = true;
       context.flush_reason = FlushReason::kErrorRecoveryRetryFlush;
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
     } else {
-      Status bg_err(new_bg_io_err, Status::Severity::kHardError);
+      Status bg_err(new_bg_io_err, Severity::kHardError);
       CheckAndSetRecoveryAndBGError(bg_err);
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
@@ -510,7 +510,7 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
 
 Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
                                           bool* auto_recovery) {
-  if (bg_error.severity() >= Status::Severity::kFatalError) {
+  if (bg_error.severity() >= Severity::kFatalError) {
     return bg_error;
   }
 
@@ -521,18 +521,18 @@ Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
   }
 
   if (db_options_.allow_2pc &&
-      (bg_error.severity() <= Status::Severity::kSoftError)) {
+      (bg_error.severity() <= Severity::kSoftError)) {
     // Don't know how to recover, as the contents of the current WAL file may
     // be inconsistent, and it may be needed for 2PC. If 2PC is not enabled,
     // we can just flush the memtable and discard the log
     *auto_recovery = false;
-    return Status(bg_error, Status::Severity::kFatalError);
+    return Status(bg_error, Severity::kFatalError);
   }
 
   {
     uint64_t free_space;
     if (db_options_.env->GetFreeSpace(db_options_.db_paths[0].path,
-                                      &free_space) == Status::NotSupported()) {
+                                      &free_space) == Status_NotSupported()) {
       *auto_recovery = false;
     }
   }
@@ -559,7 +559,7 @@ Status ErrorHandler::ClearBGError() {
     // old_bg_error is only for notifying listeners, so may not be checked
     old_bg_error.PermitUncheckedError();
     // Clear and check the recovery IO and BG error
-    bg_error_ = Status::OK();
+    bg_error_ = Status_OK();
     recovery_io_error_ = IOStatus::OK();
     bg_error_.PermitUncheckedError();
     recovery_io_error_.PermitUncheckedError();
@@ -578,7 +578,7 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
     // If its a manual recovery and there's a background recovery in progress
     // return busy status
     if (recovery_in_prog_) {
-      return Status::Busy();
+      return Status_Busy();
     }
     recovery_in_prog_ = true;
 
@@ -597,17 +597,17 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
     }
   }
 
-  if (bg_error_.severity() == Status::Severity::kSoftError &&
+  if (bg_error_.severity() == Severity::kSoftError &&
       recover_context_.flush_reason == FlushReason::kErrorRecovery) {
     // Simply clear the background error and return
-    recovery_error_ = Status::OK();
+    recovery_error_ = Status_OK();
     return ClearBGError();
   }
 
   // Reset recovery_error_. We will use this to record any errors that happen
   // during the recovery process. While recovering, the only operations that
   // can generate background errors should be the flush operations
-  recovery_error_ = Status::OK();
+  recovery_error_ = Status_OK();
   recovery_error_.PermitUncheckedError();
   Status s = db_->ResumeImpl(recover_context_);
   if (s.ok()) {
@@ -620,7 +620,7 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
   // recovery_in_prog_ to false. For automatic background recovery, leave it
   // as is regardless of success or failure as it will be retried
   if (is_manual || s.IsShutdownInProgress() ||
-      bg_error_.severity() >= Status::Severity::kFatalError) {
+      bg_error_.severity() >= Severity::kFatalError) {
     recovery_in_prog_ = false;
   }
   return s;
@@ -670,7 +670,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   InstrumentedMutexLock l(db_mutex_);
   if (end_recovery_) {
     EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                           Status::ShutdownInProgress(),
+                                           Status_ShutdownInProgress(),
                                            db_mutex_);
     return;
   }
@@ -682,14 +682,14 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   while (resume_count > 0) {
     if (end_recovery_) {
       EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                             Status::ShutdownInProgress(),
+                                             Status_ShutdownInProgress(),
                                              db_mutex_);
       return;
     }
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume0");
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume1");
     recovery_io_error_ = IOStatus::OK();
-    recovery_error_ = Status::OK();
+    recovery_error_ = Status_OK();
     retry_count++;
     Status s = db_->ResumeImpl(context);
     if (bg_error_stats_ != nullptr) {
@@ -697,7 +697,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
                  ERROR_HANDLER_AUTORESUME_RETRY_TOTAL_COUNT);
     }
     if (s.IsShutdownInProgress() ||
-        bg_error_.severity() >= Status::Severity::kFatalError) {
+        bg_error_.severity() >= Severity::kFatalError) {
       // If DB shutdown in progress or the error severity is higher than
       // Hard Error, stop auto resume and returns.
       recovery_in_prog_ = false;
@@ -710,7 +710,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
       return;
     }
     if (!recovery_io_error_.ok() &&
-        recovery_error_.severity() <= Status::Severity::kHardError &&
+        recovery_error_.severity() <= Severity::kHardError &&
         recovery_io_error_.GetRetryable()) {
       // If new BG IO error happens during auto recovery and it is retryable
       // and its severity is Hard Error or lower, the auto resmue sleep for
@@ -729,7 +729,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
         TEST_SYNC_POINT("RecoverFromRetryableBGIOError:RecoverSuccess");
         Status old_bg_error = bg_error_;
         is_db_stopped_.store(false, std::memory_order_release);
-        bg_error_ = Status::OK();
+        bg_error_ = Status_OK();
         bg_error_.PermitUncheckedError();
         EventHelpers::NotifyOnErrorRecoveryEnd(
             db_options_.listeners, old_bg_error, bg_error_, db_mutex_);
@@ -766,7 +766,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   recovery_in_prog_ = false;
   EventHelpers::NotifyOnErrorRecoveryEnd(
       db_options_.listeners, bg_error_,
-      Status::Aborted("Exceeded resume retry count"), db_mutex_);
+      Status_Aborted("Exceeded resume retry count"), db_mutex_);
   TEST_SYNC_POINT("RecoverFromRetryableBGIOError:LoopOut");
   if (bg_error_stats_ != nullptr) {
     RecordInHistogram(bg_error_stats_.get(),
@@ -782,7 +782,7 @@ void ErrorHandler::CheckAndSetRecoveryAndBGError(const Status& bg_err) {
   if (bg_err.severity() > bg_error_.severity()) {
     bg_error_ = bg_err;
   }
-  if (bg_error_.severity() >= Status::Severity::kHardError) {
+  if (bg_error_.severity() >= Severity::kHardError) {
     is_db_stopped_.store(true, std::memory_order_release);
   }
   return;

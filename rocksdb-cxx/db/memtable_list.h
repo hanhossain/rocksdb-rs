@@ -275,7 +275,7 @@ class MemTableList {
                              uint64_t file_number);
 
   // Try commit a successful flush in the manifest file. It might just return
-  // Status::OK letting a concurrent flush to do the actual the recording.
+  // Status_OK letting a concurrent flush to do the actual the recording.
   Status TryInstallMemtableFlushResults(
       ColumnFamilyData* cfd, const MutableCFOptions& mutable_cf_options,
       const autovector<MemTable*>& m, LogsWithPrepTracker* prep_tracker,

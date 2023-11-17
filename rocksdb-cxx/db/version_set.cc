@@ -1018,7 +1018,7 @@ class LevelIterator final : public InternalIterator {
   }
 
   Status status() const override {
-    return file_iter_.iter() ? file_iter_.status() : Status::OK();
+    return file_iter_.iter() ? file_iter_.status() : Status_OK();
   }
 
   bool PrepareValue() override { return file_iter_.PrepareValue(); }
@@ -1225,11 +1225,11 @@ void LevelIterator::Seek(const Slice& target) {
 
   if (file_iter_.iter() != nullptr) {
     file_iter_.Seek(target);
-    // Status::TryAgain indicates asynchronous request for retrieval of data
+    // Status_TryAgain indicates asynchronous request for retrieval of data
     // blocks has been submitted. So it should return at this point and Seek
     // should be called again to retrieve the requested block and execute the
     // remaining code.
-    if (file_iter_.status() == Status::TryAgain()) {
+    if (file_iter_.status() == Status_TryAgain()) {
       return;
     }
     if (!file_iter_.Valid() && file_iter_.status().ok() &&
@@ -1601,13 +1601,13 @@ Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status Version::TablesRangeTombstoneSummary(int max_entries_to_print,
                                             std::string* out_str) {
   if (max_entries_to_print <= 0) {
-    return Status::OK();
+    return Status_OK();
   }
   int num_entries_left = max_entries_to_print;
 
@@ -1659,7 +1659,7 @@ Status Version::TablesRangeTombstoneSummary(int max_entries_to_print,
   }
 
   *out_str = ss.str();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
@@ -1681,7 +1681,7 @@ Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status Version::GetPropertiesOfTablesInRange(
@@ -1715,7 +1715,7 @@ Status Version::GetPropertiesOfTablesInRange(
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status Version::GetAggregatedTableProperties(
@@ -1737,7 +1737,7 @@ Status Version::GetAggregatedTableProperties(
     new_tp->Add(*item.second);
   }
   tp->reset(new_tp);
-  return Status::OK();
+  return Status_OK();
 }
 
 size_t Version::GetMemoryUsageByTableReaders(const ReadOptions& read_options) {
@@ -2222,14 +2222,14 @@ Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
   assert(value);
 
   if (blob_index.HasTTL() || blob_index.IsInlined()) {
-    return Status::Corruption("Unexpected TTL/inlined blob index");
+    return Status_Corruption("Unexpected TTL/inlined blob index");
   }
 
   const uint64_t blob_file_number = blob_index.file_number();
 
   auto blob_file_meta = storage_info_.GetBlobFileMetaData(blob_file_number);
   if (!blob_file_meta) {
-    return Status::Corruption("Invalid blob file number");
+    return Status_Corruption("Invalid blob file number");
   }
 
   assert(blob_source_);
@@ -2270,13 +2270,13 @@ void Version::MultiGetBlob(
       }
 
       if (!blob_file_meta) {
-        *key_context->s = Status::Corruption("Invalid blob file number");
+        *key_context->s = Status_Corruption("Invalid blob file number");
         continue;
       }
 
       if (blob_index.HasTTL() || blob_index.IsInlined()) {
         *key_context->s =
-            Status::Corruption("Unexpected TTL/inlined blob index");
+            Status_Corruption("Unexpected TTL/inlined blob index");
         continue;
       }
 
@@ -2315,7 +2315,7 @@ void Version::MultiGetBlob(
         }
 
         if (range.GetValueSize() > read_options.value_size_soft_limit) {
-          *key_context->s = Status::Aborted();
+          *key_context->s = Status_Aborted();
         }
       } else if (key_context->s->IsIncomplete()) {
         // read_options.read_tier == kBlockCacheTier
@@ -2475,19 +2475,19 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
         return;
       case GetContext::kDeleted:
         // Use empty error message for speed
-        *status = Status::NotFound();
+        *status = Status_NotFound();
         return;
       case GetContext::kCorrupt:
-        *status = Status::Corruption("corrupted key for ", user_key);
+        *status = Status_Corruption("corrupted key for ", user_key);
         return;
       case GetContext::kUnexpectedBlobIndex:
         ROCKS_LOG_ERROR(info_log_, "Encounter unexpected blob index.");
-        *status = Status::NotSupported(
+        *status = Status_NotSupported(
             "Encounter unexpected blob index. Please open DB with "
             "ROCKSDB_NAMESPACE::blob_db::BlobDB instead.");
         return;
       case GetContext::kMergeOperatorFailed:
-        *status = Status::Corruption(Status::SubCode::kMergeOperatorFailed);
+        *status = Status_Corruption(SubCode::kMergeOperatorFailed);
         return;
     }
     f = fp.GetNextFile();
@@ -2497,11 +2497,11 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
   }
   if (GetContext::kMerge == get_context.State()) {
     if (!do_merge) {
-      *status = Status::OK();
+      *status = Status_OK();
       return;
     }
     if (!merge_operator_) {
-      *status = Status::InvalidArgument(
+      *status = Status_InvalidArgument(
           "merge_operator is not properly initialized.");
       return;
     }
@@ -2530,7 +2530,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
     if (key_exists != nullptr) {
       *key_exists = false;
     }
-    *status = Status::NotFound();  // Use an empty error message for speed
+    *status = Status_NotFound();  // Use an empty error message for speed
   }
 }
 
@@ -2567,7 +2567,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
     // state, so we set status to ok here. From now on, the iter status will
     // be used for IO errors, and get_context state will be used for any
     // key level errors
-    *(iter->s) = Status::OK();
+    *(iter->s) = Status_OK();
   }
   int get_ctx_index = 0;
   for (auto iter = range->begin(); iter != range->end();
@@ -2752,7 +2752,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
     }
     if (GetContext::kMerge == get_context.State()) {
       if (!merge_operator_) {
-        *status = Status::InvalidArgument(
+        *status = Status_InvalidArgument(
             "merge_operator is not properly initialized.");
         range->MarkKeyDone(iter);
         continue;
@@ -2780,12 +2780,12 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
 
       range->MarkKeyDone(iter);
       if (range->GetValueSize() > read_options.value_size_soft_limit) {
-        s = Status::Aborted();
+        s = Status_Aborted();
         break;
       }
     } else {
       range->MarkKeyDone(iter);
-      *status = Status::NotFound();  // Use an empty error message for speed
+      *status = Status_NotFound();  // Use an empty error message for speed
     }
   }
 
@@ -4964,24 +4964,24 @@ Status AtomicGroupReadBuffer::AddEdit(VersionEdit* edit) {
         static_cast<uint32_t>(replay_buffer_.size())) {
       TEST_SYNC_POINT_CALLBACK(
           "AtomicGroupReadBuffer::AddEdit:IncorrectAtomicGroupSize", edit);
-      return Status::Corruption("corrupted atomic group");
+      return Status_Corruption("corrupted atomic group");
     }
     replay_buffer_[read_edits_in_atomic_group_ - 1] = *edit;
     if (read_edits_in_atomic_group_ == replay_buffer_.size()) {
       TEST_SYNC_POINT_CALLBACK(
           "AtomicGroupReadBuffer::AddEdit:LastInAtomicGroup", edit);
-      return Status::OK();
+      return Status_OK();
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // A normal edit.
   if (!replay_buffer().empty()) {
     TEST_SYNC_POINT_CALLBACK(
         "AtomicGroupReadBuffer::AddEdit:AtomicGroupMixedWithNormalEdits", edit);
-    return Status::Corruption("corrupted atomic group");
+    return Status_Corruption("corrupted atomic group");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 bool AtomicGroupReadBuffer::IsFull() const {
@@ -5356,7 +5356,7 @@ Status VersionSet::ProcessManifestWrites(
           if (db_options_->paranoid_checks) {
             break;
           }
-          s = Status::OK();
+          s = Status_OK();
         }
       }
     }
@@ -5410,7 +5410,7 @@ Status VersionSet::ProcessManifestWrites(
         auto& e = batch_edits[bidx];
         std::string record;
         if (!e->EncodeTo(&record, batch_edits_ts_sz[bidx])) {
-          s = Status::Corruption("Unable to encode VersionEdit:" +
+          s = Status_Corruption("Unable to encode VersionEdit:" +
                                  e->DebugString(true));
           break;
         }
@@ -5692,7 +5692,7 @@ Status VersionSet::LogAndApply(
     num_edits += static_cast<int>(elist.size());
   }
   if (num_edits == 0) {
-    return Status::OK();
+    return Status_OK();
   } else if (num_edits > 1) {
 #ifndef NDEBUG
     for (const auto& edit_list : edit_lists) {
@@ -5756,7 +5756,7 @@ Status VersionSet::LogAndApply(
     if (!manifest_writers_.empty()) {
       manifest_writers_.front()->cv.Signal();
     }
-    return Status::ColumnFamilyDropped();
+    return Status_ColumnFamilyDropped();
   }
   return ProcessManifestWrites(writers, mu, dir_contains_current_file,
                                new_descriptor_log, new_cf_options,
@@ -5805,9 +5805,9 @@ Status VersionSet::LogAndApplyHelper(ColumnFamilyData* cfd,
 
   // The builder can be nullptr only if edit is WAL manipulation,
   // because WAL edits do not need to be applied to versions,
-  // we return Status::OK() in this case.
+  // we return Status_OK() in this case.
   assert(builder || edit->IsWalManipulation());
-  return builder ? builder->Apply(edit) : Status::OK();
+  return builder ? builder->Apply(edit) : Status_OK();
 }
 
 Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
@@ -5824,21 +5824,21 @@ Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
     return s;
   }
   if (fname.empty() || fname.back() != '\n') {
-    return Status::Corruption("CURRENT file does not end with newline");
+    return Status_Corruption("CURRENT file does not end with newline");
   }
   // remove the trailing '\n'
   fname.resize(fname.size() - 1);
   FileType type;
   bool parse_ok = ParseFileName(fname, manifest_file_number, &type);
   if (!parse_ok || type != kDescriptorFile) {
-    return Status::Corruption("CURRENT file corrupted");
+    return Status_Corruption("CURRENT file corrupted");
   }
   *manifest_path = dbname;
   if (dbname.back() != '/') {
     manifest_path->push_back('/');
   }
   manifest_path->append(fname);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status VersionSet::Recover(
@@ -6007,7 +6007,7 @@ Status VersionSet::TryRecover(
     bool* has_missing_table_file) {
   ManifestPicker manifest_picker(dbname_, files_in_dbname);
   if (!manifest_picker.Valid()) {
-    return Status::Corruption("Cannot locate MANIFEST file in " + dbname_);
+    return Status_Corruption("Cannot locate MANIFEST file in " + dbname_);
   }
   Status s;
   std::string manifest_path =
@@ -6137,7 +6137,7 @@ Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
                                         const FileOptions& file_options,
                                         int new_levels) {
   if (new_levels <= 1) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Number of levels needs to be bigger than 1");
   }
 
@@ -6171,7 +6171,7 @@ Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
   int current_levels = vstorage->num_levels();
 
   if (current_levels <= new_levels) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Make sure there are file only on one level from
@@ -6191,7 +6191,7 @@ Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
                  "[%d:%d],[%d:%d].\n",
                  first_nonempty_level, first_nonempty_level_filenum, i,
                  file_num);
-        return Status::InvalidArgument(msg);
+        return Status_InvalidArgument(msg);
       }
     }
   }
@@ -6244,7 +6244,7 @@ Status VersionSet::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
   // Clean the previously stored checksum information if any.
   Status s;
   if (checksum_list == nullptr) {
-    s = Status::InvalidArgument("checksum_list is nullptr");
+    s = Status_InvalidArgument("checksum_list is nullptr");
     return s;
   }
   checksum_list->reset();
@@ -6390,7 +6390,7 @@ Status VersionSet::WriteCurrentStateToManifest(
     edit_for_db_id.SetDBId(db_id_);
     std::string db_id_record;
     if (!edit_for_db_id.EncodeTo(&db_id_record)) {
-      return Status::Corruption("Unable to Encode VersionEdit:" +
+      return Status_Corruption("Unable to Encode VersionEdit:" +
                                 edit_for_db_id.DebugString(true));
     }
     io_s = log->AddRecord(db_id_record);
@@ -6405,7 +6405,7 @@ Status VersionSet::WriteCurrentStateToManifest(
                              const_cast<VersionEdit*>(&wal_additions));
     std::string record;
     if (!wal_additions.EncodeTo(&record)) {
-      return Status::Corruption("Unable to Encode VersionEdit: " +
+      return Status_Corruption("Unable to Encode VersionEdit: " +
                                 wal_additions.DebugString(true));
     }
     io_s = log->AddRecord(record);
@@ -6422,7 +6422,7 @@ Status VersionSet::WriteCurrentStateToManifest(
   wal_deletions.DeleteWalsBefore(min_log_number_to_keep());
   std::string wal_deletions_record;
   if (!wal_deletions.EncodeTo(&wal_deletions_record)) {
-    return Status::Corruption("Unable to Encode VersionEdit: " +
+    return Status_Corruption("Unable to Encode VersionEdit: " +
                               wal_deletions.DebugString(true));
   }
   io_s = log->AddRecord(wal_deletions_record);
@@ -6450,7 +6450,7 @@ Status VersionSet::WriteCurrentStateToManifest(
           cfd->internal_comparator().user_comparator()->Name());
       std::string record;
       if (!edit.EncodeTo(&record)) {
-        return Status::Corruption("Unable to Encode VersionEdit:" +
+        return Status_Corruption("Unable to Encode VersionEdit:" +
                                   edit.DebugString(true));
       }
       io_s = log->AddRecord(record);
@@ -6532,7 +6532,7 @@ Status VersionSet::WriteCurrentStateToManifest(
       assert(ucmp);
       std::string record;
       if (!edit.EncodeTo(&record, ucmp->timestamp_size())) {
-        return Status::Corruption("Unable to Encode VersionEdit:" +
+        return Status_Corruption("Unable to Encode VersionEdit:" +
                                   edit.DebugString(true));
       }
       io_s = log->AddRecord(record);
@@ -6541,7 +6541,7 @@ Status VersionSet::WriteCurrentStateToManifest(
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // TODO(aekmekji): in CompactionJob::GenSubcompactionBoundaries(), this
@@ -6952,12 +6952,12 @@ Status VersionSet::GetMetadataForFile(uint64_t number, int* filelevel,
           *meta = file;
           *filelevel = level;
           *cfd = cfd_iter;
-          return Status::OK();
+          return Status_OK();
         }
       }
     }
   }
-  return Status::NotFound("File not present in any level");
+  return Status_NotFound("File not present in any level");
 }
 
 void VersionSet::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
@@ -7145,7 +7145,7 @@ Status VersionSet::VerifyFileMetadata(const ReadOptions& read_options,
   Status status = fs_->GetFileSize(fpath, IOOptions(), &fsize, nullptr);
   if (status.ok()) {
     if (fsize != meta.fd.GetFileSize()) {
-      status = Status::Corruption("File size mismatch: " + fpath);
+      status = Status_Corruption("File size mismatch: " + fpath);
     }
   }
   if (status.ok() && db_options_->verify_sst_unique_id_in_manifest) {
@@ -7275,7 +7275,7 @@ Status ReactiveVersionSet::MaybeSwitchManifest(
          manifest_reader->get()->file()->file_name() != manifest_path);
   s = fs_->FileExists(manifest_path, IOOptions(), nullptr);
   if (s.IsNotFound()) {
-    return Status::TryAgain(
+    return Status_TryAgain(
         "The primary may have switched to a new MANIFEST and deleted the old "
         "one.");
   } else if (!s.ok()) {
@@ -7310,7 +7310,7 @@ Status ReactiveVersionSet::MaybeSwitchManifest(
     // This can happen if the primary switches to a new MANIFEST after the
     // secondary reads the CURRENT file but before the secondary actually tries
     // to open the MANIFEST.
-    s = Status::TryAgain(
+    s = Status_TryAgain(
         "The primary may have switched to a new MANIFEST and deleted the old "
         "one.");
   }

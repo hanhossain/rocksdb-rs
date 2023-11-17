@@ -103,7 +103,7 @@ Status ListColumnFamiliesHandler::ApplyVersionEdit(
   if (edit.is_column_family_add_) {
     if (column_family_names_.find(edit.column_family_) !=
         column_family_names_.end()) {
-      s = Status::Corruption("Manifest adding the same column family twice");
+      s = Status_Corruption("Manifest adding the same column family twice");
     } else {
       column_family_names_.insert(
           {edit.column_family_, edit.column_family_name_});
@@ -111,7 +111,7 @@ Status ListColumnFamiliesHandler::ApplyVersionEdit(
   } else if (edit.is_column_family_drop_) {
     if (column_family_names_.find(edit.column_family_) ==
         column_family_names_.end()) {
-      s = Status::Corruption("Manifest - dropping non-existing column family");
+      s = Status_Corruption("Manifest - dropping non-existing column family");
     } else {
       column_family_names_.erase(edit.column_family_);
     }
@@ -149,7 +149,7 @@ Status FileChecksumRetriever::ApplyVersionEdit(VersionEdit& edit,
       return s;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 VersionEditHandler::VersionEditHandler(
@@ -179,7 +179,7 @@ Status VersionEditHandler::Initialize() {
     }
     auto default_cf_iter = name_to_options_.find(kDefaultColumnFamilyName);
     if (default_cf_iter == name_to_options_.end()) {
-      s = Status::InvalidArgument("Default column family not specified");
+      s = Status_InvalidArgument("Default column family not specified");
     }
     if (s.ok()) {
       VersionEdit default_cf_edit;
@@ -228,7 +228,7 @@ Status VersionEditHandler::OnColumnFamilyAdd(VersionEdit& edit,
   *cfd = nullptr;
   Status s;
   if (cf_in_builders || cf_in_not_found) {
-    s = Status::Corruption("MANIFEST adding the same column family twice: " +
+    s = Status_Corruption("MANIFEST adding the same column family twice: " +
                            edit.column_family_name_);
   }
   if (s.ok()) {
@@ -271,7 +271,7 @@ Status VersionEditHandler::OnColumnFamilyDrop(VersionEdit& edit,
   } else if (cf_in_not_found) {
     column_families_not_found_.erase(edit.column_family_);
   } else {
-    s = Status::Corruption("MANIFEST - dropping non-existing column family");
+    s = Status_Corruption("MANIFEST - dropping non-existing column family");
   }
   *cfd = tmp_cfd;
   return s;
@@ -299,7 +299,7 @@ Status VersionEditHandler::OnNonCfOperation(VersionEdit& edit,
   Status s;
   if (!cf_in_not_found) {
     if (!cf_in_builders) {
-      s = Status::Corruption(
+      s = Status_Corruption(
           "MANIFEST record referencing unknown column family");
     }
     ColumnFamilyData* tmp_cfd = nullptr;
@@ -392,7 +392,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
     }
     msg = msg.substr(0, msg.size() - 2);
     msg.append(" entry in MANIFEST");
-    *s = Status::Corruption(msg);
+    *s = Status_Corruption(msg);
   }
   // There were some column families in the MANIFEST that weren't specified
   // in the argument. This is OK in read_only mode
@@ -404,7 +404,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       msg.append(cf.second);
     }
     msg = msg.substr(2);
-    *s = Status::InvalidArgument("Column families not opened: " + msg);
+    *s = Status_InvalidArgument("Column families not opened: " + msg);
   }
   if (s->ok()) {
     version_set_->GetColumnFamilySet()->UpdateMaxColumnFamily(
@@ -421,7 +421,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       assert(builder_iter != builders_.end());
       auto* builder = builder_iter->second->version_builder();
       if (!builder->CheckConsistencyForNumLevels()) {
-        *s = Status::InvalidArgument(
+        *s = Status_InvalidArgument(
             "db has more levels than options.num_levels");
         break;
       }
@@ -440,7 +440,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       if (!s->ok()) {
         // If s is IOError::PathNotFound, then we mark the db as corrupted.
         if (s->IsPathNotFound()) {
-          *s = Status::Corruption("Corruption: " + s->ToString());
+          *s = Status_Corruption("Corruption: " + s->ToString());
         }
         break;
       }
@@ -569,7 +569,7 @@ Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
       "VersionEditHandler::LoadTables:skip_load_table_files",
       &skip_load_table_files);
   if (skip_load_table_files) {
-    return Status::OK();
+    return Status_OK();
   }
   assert(cfd != nullptr);
   assert(!cfd->IsDropped());
@@ -586,10 +586,10 @@ Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
       moptions->prefix_extractor, MaxFileSizeForL0MetaPin(*moptions),
       read_options_, moptions->block_protection_bytes_per_key);
   if ((s.IsPathNotFound() || s.IsCorruption()) && no_error_if_files_missing_) {
-    s = Status::OK();
+    s = Status_OK();
   }
   if (!s.ok() && !version_set_->db_options_->paranoid_checks) {
-    s = Status::OK();
+    s = Status_OK();
   }
   return s;
 }
@@ -616,7 +616,7 @@ Status VersionEditHandler::ExtractInfoFromVersionEdit(ColumnFamilyData* cfd,
     if (edit.has_comparator_ &&
         edit.comparator_ != cfd->user_comparator()->Name()) {
       if (!cf_to_cmp_names_) {
-        s = Status::InvalidArgument(
+        s = Status_InvalidArgument(
             cfd->user_comparator()->Name(),
             "does not match existing comparator " + edit.comparator_);
       } else {
@@ -662,13 +662,13 @@ Status VersionEditHandler::ExtractInfoFromVersionEdit(ColumnFamilyData* cfd,
 Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
     VersionEdit& edit, const ColumnFamilyData* cfd) {
   if (edit.GetNewFiles().empty()) {
-    return Status::OK();
+    return Status_OK();
   }
   auto ucmp = cfd->user_comparator();
   assert(ucmp);
   size_t ts_sz = ucmp->timestamp_size();
   if (ts_sz == 0) {
-    return Status::OK();
+    return Status_OK();
   }
 
   VersionEdit::NewFiles& new_files = edit.GetMutableNewFiles();
@@ -682,7 +682,7 @@ Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
       // at the time when the SST file was created. As a result, all added SST
       // files in one `VersionEdit` should have the same value for it.
       if (file_boundaries_need_handling) {
-        return Status::Corruption(
+        return Status_Corruption(
             "New files in one VersionEdit has different "
             "user_defined_timestamps_persisted value.");
       }
@@ -697,7 +697,7 @@ Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
     meta.smallest.DecodeFrom(smallest_buf);
     meta.largest.DecodeFrom(largest_buf);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 VersionEditHandlerPointInTime::VersionEditHandlerPointInTime(
@@ -806,7 +806,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     s = VerifyFile(cfd, fpath, level, meta);
     if (s.IsPathNotFound() || s.IsNotFound() || s.IsCorruption()) {
       missing_files.insert(file_num);
-      s = Status::OK();
+      s = Status_OK();
     } else if (!s.ok()) {
       break;
     }
@@ -818,7 +818,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     s = VerifyBlobFile(cfd, file_num, elem);
     if (s.IsPathNotFound() || s.IsNotFound() || s.IsCorruption()) {
       missing_blob_file_num = std::max(missing_blob_file_num, file_num);
-      s = Status::OK();
+      s = Status_OK();
     } else if (!s.ok()) {
       break;
     }
@@ -878,7 +878,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     if (!s.ok()) {
       delete version;
       if (s.IsCorruption()) {
-        s = Status::OK();
+        s = Status_OK();
       }
       return s;
     }
@@ -929,7 +929,7 @@ Status VersionEditHandlerPointInTime::VerifyBlobFile(
 Status VersionEditHandlerPointInTime::LoadTables(
     ColumnFamilyData* /*cfd*/, bool /*prefetch_index_and_filter_in_cache*/,
     bool /*is_initial_load*/) {
-  return Status::OK();
+  return Status_OK();
 }
 
 Status ManifestTailer::Initialize() {
@@ -985,7 +985,7 @@ Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
   *cfd = tmp_cfd;
   if (!tmp_cfd) {
     // For now, ignore new column families created after Recover() succeeds.
-    return Status::OK();
+    return Status_OK();
   }
   auto builder_iter = builders_.find(edit.GetColumnFamily());
   assert(builder_iter != builders_.end());
@@ -1003,7 +1003,7 @@ Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
   auto version_iter = versions_.find(edit.GetColumnFamily());
   assert(version_iter == versions_.end());
 #endif  // !NDEBUG
-  return Status::OK();
+  return Status_OK();
 }
 
 void ManifestTailer::CheckIterationResult(const log::Reader& reader,

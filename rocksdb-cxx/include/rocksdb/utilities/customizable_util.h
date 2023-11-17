@@ -52,7 +52,7 @@ static Status NewSharedObject(
     Status status;
     status = config_options.registry->NewSharedObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-      status = Status::OK();
+      status = Status_OK();
     } else if (status.ok()) {
       status = Customizable::ConfigureNewObject(config_options, result->get(),
                                                 opt_map);
@@ -61,9 +61,9 @@ static Status NewSharedObject(
   } else if (opt_map.empty()) {
     // There was no ID and no map (everything empty), so reset/clear the result
     result->reset();
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::NotSupported("Cannot reset object ");
+    return Status_NotSupported("Cannot reset object ");
   }
 }
 
@@ -105,10 +105,10 @@ static Status NewManagedObject(
           return object->ConfigureFromMap(config_options, opt_map);
         });
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-      return Status::OK();
+      return Status_OK();
     }
   } else {
-    status = Status::NotSupported("Cannot reset object ");
+    status = Status_NotSupported("Cannot reset object ");
   }
   return status;
 }
@@ -192,7 +192,7 @@ static Status LoadManagedObject(const ConfigOptions& config_options,
     return status;
   } else if (value.empty()) {  // No Id and no options.  Clear the object
     *result = nullptr;
-    return Status::OK();
+    return Status_OK();
   } else {
     return NewManagedObject(config_options, id, opt_map, result);
   }
@@ -220,7 +220,7 @@ static Status NewUniqueObject(
     Status status;
     status = config_options.registry->NewUniqueObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-      status = Status::OK();
+      status = Status_OK();
     } else if (status.ok()) {
       status = Customizable::ConfigureNewObject(config_options, result->get(),
                                                 opt_map);
@@ -229,9 +229,9 @@ static Status NewUniqueObject(
   } else if (opt_map.empty()) {
     // There was no ID and no map (everything empty), so reset/clear the result
     result->reset();
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::NotSupported("Cannot reset object ");
+    return Status_NotSupported("Cannot reset object ");
   }
 }
 
@@ -281,7 +281,7 @@ static Status NewStaticObject(
     Status status;
     status = config_options.registry->NewStaticObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-      status = Status::OK();
+      status = Status_OK();
     } else if (status.ok()) {
       status =
           Customizable::ConfigureNewObject(config_options, *result, opt_map);
@@ -290,9 +290,9 @@ static Status NewStaticObject(
   } else if (opt_map.empty()) {
     // There was no ID and no map (everything empty), so reset/clear the result
     *result = nullptr;
-    return Status::OK();
+    return Status_OK();
   } else {
-    return Status::NotSupported("Cannot reset object ");
+    return Status_NotSupported("Cannot reset object ");
   }
 }
 

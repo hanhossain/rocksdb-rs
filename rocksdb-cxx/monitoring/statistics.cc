@@ -477,7 +477,7 @@ Status StatisticsImpl::Reset() {
       per_core_stats_.AccessAtCore(core_idx)->histograms_[i].Clear();
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {

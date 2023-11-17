@@ -399,7 +399,7 @@ Status TraceAnalyzer::PrepareProcessing() {
       return s;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TraceAnalyzer::ReadTraceHeader(Trace* header) {
@@ -414,10 +414,10 @@ Status TraceAnalyzer::ReadTraceHeader(Trace* header) {
   s = TracerHelper::DecodeTrace(encoded_trace, header);
 
   if (header->type != kTraceBegin) {
-    return Status::Corruption("Corrupted trace file. Incorrect header.");
+    return Status_Corruption("Corrupted trace file. Incorrect header.");
   }
   if (header->payload.substr(0, kTraceMagic.length()) != kTraceMagic) {
-    return Status::Corruption("Corrupted trace file. Incorrect magic.");
+    return Status_Corruption("Corrupted trace file. Incorrect magic.");
   }
 
   return s;
@@ -430,7 +430,7 @@ Status TraceAnalyzer::ReadTraceFooter(Trace* footer) {
     return s;
   }
   if (footer->type != kTraceEnd) {
-    return Status::Corruption("Corrupted trace file. Incorrect footer.");
+    return Status_Corruption("Corrupted trace file. Incorrect footer.");
   }
   return s;
 }
@@ -498,7 +498,7 @@ Status TraceAnalyzer::StartProcessing() {
   }
   if (s.IsIncomplete()) {
     // Fix it: Reaching eof returns Incomplete status at the moment.
-    return Status::OK();
+    return Status_OK();
   }
   return s;
 }
@@ -567,7 +567,7 @@ Status TraceAnalyzer::MakeStatistics() {
                          "access_count: %" PRIu64 " num: %" PRIu64 "\n",
                          record.first, record.second);
           if (ret < 0) {
-            return Status::IOError("Format the output failed");
+            return Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_count_dist_f->Append(printout);
@@ -591,7 +591,7 @@ Status TraceAnalyzer::MakeStatistics() {
           ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %" PRIu64 "\n",
                          record.first, record.second);
           if (ret < 0) {
-            return Status::IOError("Format output failed");
+            return Status_IOError("Format output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_key_size_f->Append(printout);
@@ -621,7 +621,7 @@ Status TraceAnalyzer::MakeStatistics() {
                          " is: %" PRIu64 "\n",
                          v_begin, v_end, record.second);
           if (ret < 0) {
-            return Status::IOError("Format output failed");
+            return Status_IOError("Format output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_value_size_f->Append(printout);
@@ -642,7 +642,7 @@ Status TraceAnalyzer::MakeStatistics() {
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 // Process the statistics of the key access and
@@ -659,7 +659,7 @@ Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceStats& stats) {
   for (auto& record : stats.a_key_stats) {
     // write the key access statistic file
     if (!stats.a_key_f) {
-      return Status::IOError("Failed to open accessed_key_stats file.");
+      return Status_IOError("Failed to open accessed_key_stats file.");
     }
     stats.a_succ_count += record.second.succ_count;
     double succ_ratio = 0.0;
@@ -672,7 +672,7 @@ Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceStats& stats) {
                    record.second.value_size, record.second.key_id,
                    record.second.access_count, succ_ratio);
     if (ret < 0) {
-      return Status::IOError("Format output failed");
+      return Status_IOError("Format output failed");
     }
     std::string printout(buffer_);
     s = stats.a_key_f->Append(printout);
@@ -703,7 +703,7 @@ Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceStats& stats) {
                      record.second.key_id, prefix_access, prefix_count,
                      prefix_ave_access, prefix_succ_ratio, prefix_out.c_str());
         if (ret < 0) {
-          return Status::IOError("Format output failed");
+          return Status_IOError("Format output failed");
         }
         std::string pout(buffer_);
         s = stats.a_prefix_cut_f->Append(pout);
@@ -747,7 +747,7 @@ Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceStats& stats) {
       prefix_succ_access += record.second.succ_count;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // Process the statistics of different query type
@@ -756,7 +756,7 @@ Status TraceAnalyzer::MakeStatisticCorrelation(TraceStats& stats,
                                                StatsUnit& unit) {
   if (stats.correlation_output.size() !=
       analyzer_opts_.correlation_list.size()) {
-    return Status::Corruption("Cannot make the statistic of correlation.");
+    return Status_Corruption("Cannot make the statistic of correlation.");
   }
 
   for (int i = 0; i < static_cast<int>(analyzer_opts_.correlation_list.size());
@@ -768,7 +768,7 @@ Status TraceAnalyzer::MakeStatisticCorrelation(TraceStats& stats,
     stats.correlation_output[i].first += unit.v_correlation[i].count;
     stats.correlation_output[i].second += unit.v_correlation[i].total_ts;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // Process the statistics of QPS
@@ -807,7 +807,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
           while (time_line < time_it.first) {
             ret = snprintf(buffer_, sizeof(buffer_), "%u\n", 0);
             if (ret < 0) {
-              return Status::IOError("Format the output failed");
+              return Status_IOError("Format the output failed");
             }
             std::string printout(buffer_);
             s = stat.second.a_qps_f->Append(printout);
@@ -819,7 +819,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
           }
           ret = snprintf(buffer_, sizeof(buffer_), "%u\n", time_it.second);
           if (ret < 0) {
-            return Status::IOError("Format the output failed");
+            return Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_qps_f->Append(printout);
@@ -869,7 +869,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
           ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %.12f\n",
                          cur_num, cur_ratio);
           if (ret < 0) {
-            return Status::IOError("Format the output failed");
+            return Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_key_num_f->Append(printout);
@@ -888,7 +888,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
                          stat.second.top_k_qps_sec.top().second,
                          stat.second.top_k_qps_sec.top().first);
           if (ret < 0) {
-            return Status::IOError("Format the output failed");
+            return Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_top_qps_prefix_f->Append(printout);
@@ -907,7 +907,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
                              "The prefix: %s Access count: %u\n",
                              qps_prefix_out.c_str(), qps_prefix.second);
               if (ret < 0) {
-                return Status::IOError("Format the output failed");
+                return Status_IOError("Format the output failed");
               }
               std::string pout(buffer_);
               s = stat.second.a_top_qps_prefix_f->Append(pout);
@@ -931,7 +931,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
           ret = snprintf(buffer_, sizeof(buffer_), "%u\n", type_qps[i][type]);
         }
         if (ret < 0) {
-          return Status::IOError("Format the output failed");
+          return Status_IOError("Format the output failed");
         }
         std::string printout(buffer_);
         s = qps_f_->Append(printout);
@@ -962,7 +962,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
           ret = snprintf(buffer_, sizeof(buffer_), "%u\n", v);
         }
         if (ret < 0) {
-          return Status::IOError("Format the output failed");
+          return Status_IOError("Format the output failed");
         }
         std::string printout(buffer_);
         s = cf_qps_f_->Append(printout);
@@ -982,7 +982,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 // In reprocessing, if we have the whole key space
@@ -1019,7 +1019,7 @@ Status TraceAnalyzer::ReProcessing() {
                        stat.time_series.front().type,
                        stat.time_series.front().ts, key_id);
           if (ret < 0) {
-            return Status::IOError("Format the output failed");
+            return Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.time_series_f->Append(printout);
@@ -1068,7 +1068,7 @@ Status TraceAnalyzer::ReProcessing() {
                                "%" PRIu64 " %" PRIu64 "\n", cfs_[cf_id].w_count,
                                stat.a_key_stats[input_key].access_count);
                 if (ret < 0) {
-                  return Status::IOError("Format the output failed");
+                  return Status_IOError("Format the output failed");
                 }
                 std::string printout(buffer_);
                 s = stat.w_key_f->Append(printout);
@@ -1089,7 +1089,7 @@ Status TraceAnalyzer::ReProcessing() {
                 ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %s\n",
                                cfs_[cf_id].w_count, prefix_out.c_str());
                 if (ret < 0) {
-                  return Status::IOError("Format the output failed");
+                  return Status_IOError("Format the output failed");
                 }
                 std::string printout(buffer_);
                 s = stat.w_prefix_cut_f->Append(printout);
@@ -1144,7 +1144,7 @@ Status TraceAnalyzer::ReProcessing() {
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // End the processing, print the requested results
@@ -1326,7 +1326,7 @@ Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& unit,
                                                  const std::string& key) {
   if (type_second >= kTaTypeNum) {
     fprintf(stderr, "Unknown Type Id: %u\n", type_second);
-    return Status::NotFound();
+    return Status_NotFound();
   }
 
   for (int type_first = 0; type_first < kTaTypeNum; type_first++) {
@@ -1356,7 +1356,7 @@ Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& unit,
   }
 
   unit.latest_ts = ts;
-  return Status::OK();
+  return Status_OK();
 }
 
 // when a new trace statistic is created, the file handler
@@ -1437,7 +1437,7 @@ Status TraceAnalyzer::CreateOutputFile(
     fprintf(stderr, "Cannot open file: %s\n", path.c_str());
     exit(1);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // Close the output files in the TraceStats if they are opened
@@ -1506,7 +1506,7 @@ Status TraceAnalyzer::Handle(const WriteQueryTraceRecord& record,
   // HasBeginPrepare()==false, so we process it normally.
   WriteBatch batch(record.GetWriteBatchRep().ToString());
   if (batch.Count() == 0 || (batch.HasBeginPrepare() && !batch.HasCommit())) {
-    return Status::OK();
+    return Status_OK();
   }
   write_batch_ts_ = record.GetTimestamp();
 
@@ -1518,7 +1518,7 @@ Status TraceAnalyzer::Handle(const WriteQueryTraceRecord& record,
     return s;
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TraceAnalyzer::Handle(const GetQueryTraceRecord& record,
@@ -1635,7 +1635,7 @@ Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,
       s = WriteTraceSequence(op_type, cf_ids[i], keys[i], value_sizes[i],
                              timestamp);
       if (!s.ok()) {
-        return Status::Corruption("Failed to write the trace sequence to file");
+        return Status_Corruption("Failed to write the trace sequence to file");
       }
     }
   }
@@ -1645,12 +1645,12 @@ Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,
   }
   if (ta_[op_type].sample_count > 0) {
     ta_[op_type].sample_count++;
-    return Status::OK();
+    return Status_OK();
   }
   ta_[op_type].sample_count++;
 
   if (!ta_[op_type].enabled) {
-    return Status::OK();
+    return Status_OK();
   }
 
   for (size_t i = 0; i < cf_ids.size(); i++) {
@@ -1660,11 +1660,11 @@ Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,
         op_type, cf_ids[i], keys[i].ToString(),
         value_sizes[i] == 0 ? kShadowValueSize : value_sizes[i], timestamp);
     if (!s.ok()) {
-      return Status::Corruption("Failed to insert key statistics");
+      return Status_Corruption("Failed to insert key statistics");
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,
@@ -1854,7 +1854,7 @@ Status TraceAnalyzer::WriteTraceSequence(const uint32_t& type,
   ret = snprintf(buffer_, sizeof(buffer_), "%u %u %zu %" PRIu64 "\n", type,
                  cf_id, value_size, ts);
   if (ret < 0) {
-    return Status::IOError("failed to format the output");
+    return Status_IOError("failed to format the output");
   }
   std::string printout(buffer_);
   if (!FLAGS_no_key) {

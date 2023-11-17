@@ -101,7 +101,7 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
   assert(blob_index->empty());
 
   if (value.size() < min_blob_size_) {
-    return Status::OK();
+    return Status_OK();
   }
 
   {
@@ -152,12 +152,12 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
   BlobIndex::EncodeBlob(blob_index, blob_file_number, blob_offset, blob.size(),
                         blob_compression_type_);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileBuilder::Finish() {
   if (!IsBlobFileOpen()) {
-    return Status::OK();
+    return Status_OK();
   }
 
   return CloseBlobFile();
@@ -167,7 +167,7 @@ bool BlobFileBuilder::IsBlobFileOpen() const { return !!writer_; }
 
 Status BlobFileBuilder::OpenBlobFileIfNeeded() {
   if (IsBlobFileOpen()) {
-    return Status::OK();
+    return Status_OK();
   }
 
   assert(!blob_count_);
@@ -245,7 +245,7 @@ Status BlobFileBuilder::OpenBlobFileIfNeeded() {
 
   assert(IsBlobFileOpen());
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileBuilder::CompressBlobIfNeeded(
@@ -256,7 +256,7 @@ Status BlobFileBuilder::CompressBlobIfNeeded(
   assert(immutable_options_);
 
   if (blob_compression_type_ == kNoCompression) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // TODO: allow user CompressionOptions, including max_compressed_bytes_per_kb
@@ -279,12 +279,12 @@ Status BlobFileBuilder::CompressBlobIfNeeded(
   }
 
   if (!success) {
-    return Status::Corruption("Error compressing blob");
+    return Status_Corruption("Error compressing blob");
   }
 
   *blob = Slice(*compressed_blob);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileBuilder::WriteBlobToFile(const Slice& key, const Slice& blob,
@@ -309,7 +309,7 @@ Status BlobFileBuilder::WriteBlobToFile(const Slice& key, const Slice& blob,
   ++blob_count_;
   blob_bytes_ += BlobLogRecord::kHeaderSize + key.size() + blob.size();
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileBuilder::CloseBlobFile() {
@@ -364,7 +364,7 @@ Status BlobFileBuilder::CloseBlobFileIfNeeded() {
   assert(file_writer);
 
   if (file_writer->GetFileSize() < blob_file_size_) {
-    return Status::OK();
+    return Status_OK();
   }
 
   return CloseBlobFile();
@@ -393,7 +393,7 @@ void BlobFileBuilder::Abandon(const Status& s) {
 Status BlobFileBuilder::PutBlobIntoCacheIfNeeded(const Slice& blob,
                                                  uint64_t blob_file_number,
                                                  uint64_t blob_offset) const {
-  Status s = Status::OK();
+  Status s = Status_OK();
 
   BlobSource::SharedCacheInterface blob_cache{immutable_options_->blob_cache};
   auto statistics = immutable_options_->statistics.get();

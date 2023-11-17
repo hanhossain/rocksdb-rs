@@ -1915,7 +1915,7 @@ TEST_F(DBFlushTest, FlushError) {
   Status s = dbfull()->TEST_SwitchMemtable();
   fault_injection_env->SetFilesystemActive(true);
   Destroy(options);
-  ASSERT_NE(s, Status::OK());
+  ASSERT_NE(s, Status_OK());
 }
 
 TEST_F(DBFlushTest, ManualFlushFailsInReadOnlyMode) {
@@ -2192,7 +2192,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   SyncPoint::GetInstance()->EnableProcessing();
   Status s = Flush();
   ASSERT_EQ(s.severity(),
-            ROCKSDB_NAMESPACE::Status::Severity::kUnrecoverableError);
+            ROCKSDB_NAMESPACE::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -2216,7 +2216,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(),
-            ROCKSDB_NAMESPACE::Status::Severity::kUnrecoverableError);
+            ROCKSDB_NAMESPACE::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -2311,7 +2311,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest1) {
   ASSERT_OK(Put("key4", "value4"));
   SyncPoint::GetInstance()->EnableProcessing();
   Status s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
 }
@@ -2350,7 +2350,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest2) {
   ASSERT_OK(Put("key8", "value8"));
   SyncPoint::GetInstance()->EnableProcessing();
   Status s = Flush();
-  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Status::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -2427,7 +2427,7 @@ TEST_P(DBFlushTestBlobError, FlushError) {
     Status* const s = static_cast<Status*>(arg);
     assert(s);
 
-    (*s) = Status::IOError(sync_point_);
+    (*s) = Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 

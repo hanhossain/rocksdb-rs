@@ -26,31 +26,31 @@ Status WalAddition::DecodeFrom(Slice* src) {
   constexpr char class_name[] = "WalAddition";
 
   if (!GetVarint64(src, &number_)) {
-    return Status::Corruption(class_name, "Error decoding WAL log number");
+    return Status_Corruption(class_name, "Error decoding WAL log number");
   }
 
   while (true) {
     uint32_t tag_value = 0;
     if (!GetVarint32(src, &tag_value)) {
-      return Status::Corruption(class_name, "Error decoding tag");
+      return Status_Corruption(class_name, "Error decoding tag");
     }
     WalAdditionTag tag = static_cast<WalAdditionTag>(tag_value);
     switch (tag) {
       case WalAdditionTag::kSyncedSize: {
         uint64_t size = 0;
         if (!GetVarint64(src, &size)) {
-          return Status::Corruption(class_name, "Error decoding WAL file size");
+          return Status_Corruption(class_name, "Error decoding WAL file size");
         }
         metadata_.SetSyncedSizeInBytes(size);
         break;
       }
       // TODO: process future tags such as checksum.
       case WalAdditionTag::kTerminate:
-        return Status::OK();
+        return Status_OK();
       default: {
         std::stringstream ss;
         ss << "Unknown tag " << tag_value;
-        return Status::Corruption(class_name, ss.str());
+        return Status_Corruption(class_name, ss.str());
       }
     }
   }
@@ -82,10 +82,10 @@ Status WalDeletion::DecodeFrom(Slice* src) {
   constexpr char class_name[] = "WalDeletion";
 
   if (!GetVarint64(src, &number_)) {
-    return Status::Corruption(class_name, "Error decoding WAL log number");
+    return Status_Corruption(class_name, "Error decoding WAL log number");
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 JSONWriter& operator<<(JSONWriter& jw, const WalDeletion& wal) {
@@ -107,7 +107,7 @@ std::string WalDeletion::DebugString() const {
 Status WalSet::AddWal(const WalAddition& wal) {
   if (wal.GetLogNumber() < min_wal_number_to_keep_) {
     // The WAL has been obsolete, ignore it.
-    return Status::OK();
+    return Status_OK();
   }
 
   auto it = wals_.lower_bound(wal.GetLogNumber());
@@ -115,14 +115,14 @@ Status WalSet::AddWal(const WalAddition& wal) {
 
   if (!existing) {
     wals_.insert(it, {wal.GetLogNumber(), wal.GetMetadata()});
-    return Status::OK();
+    return Status_OK();
   }
 
   assert(existing);
   if (!wal.GetMetadata().HasSyncedSize()) {
     std::stringstream ss;
     ss << "WAL " << wal.GetLogNumber() << " is created more than once";
-    return Status::Corruption("WalSet::AddWal", ss.str());
+    return Status_Corruption("WalSet::AddWal", ss.str());
   }
 
   assert(wal.GetMetadata().HasSyncedSize());
@@ -134,12 +134,12 @@ Status WalSet::AddWal(const WalAddition& wal) {
     // bytes of 1.log. It's possible that thread 1 calls LogAndApply() after
     // thread 2.
     // In this case, just return ok.
-    return Status::OK();
+    return Status_OK();
   }
 
   // Update synced size for the given WAL.
   it->second.SetSyncedSizeInBytes(wal.GetMetadata().GetSyncedSizeInBytes());
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WalSet::AddWals(const WalAdditions& wals) {
@@ -158,7 +158,7 @@ Status WalSet::DeleteWalsBefore(WalNumber wal) {
     min_wal_number_to_keep_ = wal;
     wals_.erase(wals_.begin(), wals_.lower_bound(wal));
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void WalSet::Reset() {
@@ -186,7 +186,7 @@ Status WalSet::CheckWals(
     if (logs_on_disk.find(log_number) == logs_on_disk.end()) {
       std::stringstream ss;
       ss << "Missing WAL with log number: " << log_number << ".";
-      s = Status::Corruption(ss.str());
+      s = Status_Corruption(ss.str());
       break;
     }
 
@@ -200,7 +200,7 @@ Status WalSet::CheckWals(
       ss << "Size mismatch: WAL (log number: " << log_number
          << ") in MANIFEST is " << wal_meta.GetSyncedSizeInBytes()
          << " bytes , but actually is " << log_file_size << " bytes on disk.";
-      s = Status::Corruption(ss.str());
+      s = Status_Corruption(ss.str());
       break;
     }
   }

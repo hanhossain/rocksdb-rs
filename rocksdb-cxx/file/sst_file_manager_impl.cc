@@ -77,7 +77,7 @@ Status SstFileManagerImpl::OnAddFile(const std::string& file_path,
   OnAddFileImpl(file_path, file_size);
   TEST_SYNC_POINT_CALLBACK("SstFileManagerImpl::OnAddFile",
                            const_cast<std::string*>(&file_path));
-  return Status::OK();
+  return Status_OK();
 }
 
 Status SstFileManagerImpl::OnDeleteFile(const std::string& file_path) {
@@ -87,7 +87,7 @@ Status SstFileManagerImpl::OnDeleteFile(const std::string& file_path) {
   }
   TEST_SYNC_POINT_CALLBACK("SstFileManagerImpl::OnDeleteFile",
                            const_cast<std::string*>(&file_path));
-  return Status::OK();
+  return Status_OK();
 }
 
 void SstFileManagerImpl::OnCompactionCompletion(Compaction* c) {
@@ -114,7 +114,7 @@ Status SstFileManagerImpl::OnMoveFile(const std::string& old_path,
     OnDeleteFileImpl(old_path);
   }
   TEST_SYNC_POINT("SstFileManagerImpl::OnMoveFile");
-  return Status::OK();
+  return Status_OK();
 }
 
 void SstFileManagerImpl::SetMaxAllowedSpaceUsage(uint64_t max_allowed_space) {
@@ -269,7 +269,7 @@ void SstFileManagerImpl::ClearError() {
       // error will basically override previously reported soft errors. Once
       // we clear the hard error, we don't keep track of previous errors for
       // now
-      if (bg_err_.severity() == Status::Severity::kHardError) {
+      if (bg_err_.severity() == Severity::kHardError) {
         if (free_space < reserved_disk_buffer_) {
           ROCKS_LOG_ERROR(logger_,
                           "free space [%" PRIu64
@@ -277,9 +277,9 @@ void SstFileManagerImpl::ClearError() {
                           "required disk buffer [%" PRIu64 " bytes]\n",
                           free_space, reserved_disk_buffer_);
           ROCKS_LOG_ERROR(logger_, "Cannot clear hard error\n");
-          s = Status::NoSpace();
+          s = Status_NoSpace();
         }
-      } else if (bg_err_.severity() == Status::Severity::kSoftError) {
+      } else if (bg_err_.severity() == Severity::kSoftError) {
         if (free_space < free_space_trigger_) {
           ROCKS_LOG_WARN(logger_,
                          "free space [%" PRIu64
@@ -288,7 +288,7 @@ void SstFileManagerImpl::ClearError() {
                          " bytes]\n",
                          free_space, free_space_trigger_);
           ROCKS_LOG_WARN(logger_, "Cannot clear soft error\n");
-          s = Status::NoSpace();
+          s = Status_NoSpace();
         }
       }
     }
@@ -318,14 +318,14 @@ void SstFileManagerImpl::ClearError() {
         // the list
         Status err = cur_instance_->GetBGError();
         if (s.ok() && err.subcode() == IOStatus::SubCode::kNoSpace &&
-            err.severity() < Status::Severity::kFatalError) {
+            err.severity() < Severity::kFatalError) {
           s = err;
         }
         cur_instance_ = nullptr;
       }
 
       if (s.ok() || s.IsShutdownInProgress() ||
-          (!s.ok() && s.severity() >= Status::Severity::kFatalError)) {
+          (!s.ok() && s.severity() >= Severity::kFatalError)) {
         // If shutdown is in progress, abandon this handler instance
         // and continue with the others
         error_handler_list_.pop_front();
@@ -343,7 +343,7 @@ void SstFileManagerImpl::ClearError() {
     // could have removed it from the queue while we were in timed wait
     if (error_handler_list_.empty()) {
       ROCKS_LOG_INFO(logger_, "Clearing error\n");
-      bg_err_ = Status::OK();
+      bg_err_ = Status_OK();
       return;
     }
   }
@@ -352,7 +352,7 @@ void SstFileManagerImpl::ClearError() {
 void SstFileManagerImpl::StartErrorRecovery(ErrorHandler* handler,
                                             Status bg_error) {
   MutexLock l(&mu_);
-  if (bg_error.severity() == Status::Severity::kSoftError) {
+  if (bg_error.severity() == Severity::kSoftError) {
     if (bg_err_.ok()) {
       // Setting bg_err_ basically means we're in degraded mode
       // Assume that all pending compactions will fail similarly. The trigger
@@ -361,7 +361,7 @@ void SstFileManagerImpl::StartErrorRecovery(ErrorHandler* handler,
       // EnoughRoomForCompaction once this much free space is available
       bg_err_ = bg_error;
     }
-  } else if (bg_error.severity() == Status::Severity::kHardError) {
+  } else if (bg_error.severity() == Severity::kHardError) {
     bg_err_ = bg_error;
   } else {
     assert(false);
@@ -476,7 +476,7 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
 
   // trash_dir is deprecated and not needed anymore, but if user passed it
   // we will still remove files in it.
-  Status s = Status::OK();
+  Status s = Status_OK();
   if (delete_existing_trash && trash_dir != "") {
     std::vector<std::string> files_in_trash;
     s = fs->GetChildren(trash_dir, IOOptions(), &files_in_trash, nullptr);

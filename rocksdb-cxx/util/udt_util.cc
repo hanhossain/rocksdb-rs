@@ -84,12 +84,12 @@ Status CheckWriteBatchTimestampSizeConsistency(
                                   : std::nullopt);
     if (recovery_type != RecoveryType::kNoop) {
       if (check_mode == TimestampSizeConsistencyMode::kVerifyConsistency) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "WriteBatch contains timestamp size inconsistency.");
       }
 
       if (recovery_type == RecoveryType::kUnrecoverable) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "WriteBatch contains unrecoverable timestamp size inconsistency.");
       }
 
@@ -98,7 +98,7 @@ Status CheckWriteBatchTimestampSizeConsistency(
       *ts_need_recovery = true;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace
 
@@ -198,7 +198,7 @@ Status TimestampRecoveryHandler::ReconcileTimestampDiscrepancy(
     // The column family referred to by the WriteBatch is no longer running.
     // Copy over the entry as is to the new WriteBatch.
     *new_key = key;
-    return Status::OK();
+    return Status_OK();
   }
   size_t running_ts_sz = running_iter->second;
   auto record_iter = record_ts_sz_.find(cf);
@@ -223,13 +223,13 @@ Status TimestampRecoveryHandler::ReconcileTimestampDiscrepancy(
       new_batch_diff_from_orig_batch_ = true;
       break;
     case RecoveryType::kUnrecoverable:
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Unrecoverable timestamp size inconsistency encountered by "
           "TimestampRecoveryHandler.");
     default:
       assert(false);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status HandleWriteBatchTimestampSizeDifference(
@@ -240,7 +240,7 @@ Status HandleWriteBatchTimestampSizeDifference(
     std::unique_ptr<WriteBatch>* new_batch) {
   // Quick path to bypass checking the WriteBatch.
   if (AllRunningColumnFamiliesConsistent(running_ts_sz, record_ts_sz)) {
-    return Status::OK();
+    return Status_OK();
   }
   bool need_recovery = false;
   Status status = CheckWriteBatchTimestampSizeConsistency(
@@ -259,6 +259,6 @@ Status HandleWriteBatchTimestampSizeDifference(
       WriteBatchInternal::SetSequence(new_batch->get(), sequence);
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace ROCKSDB_NAMESPACE

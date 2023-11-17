@@ -36,7 +36,7 @@ Status BinarySearchIndexReader::Create(
   index_reader->reset(
       new BinarySearchIndexReader(table, std::move(index_block)));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 InternalIteratorBase<IndexValue>* BinarySearchIndexReader::NewIterator(

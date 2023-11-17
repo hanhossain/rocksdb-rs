@@ -176,7 +176,7 @@ Status AnonExpectedState::Open(bool /* create */) {
                                 sizeof(std::atomic<uint32_t>)]);
   values_ = &values_allocation_[0];
   Reset();
-  return Status::OK();
+  return Status_OK();
 }
 
 ExpectedStateManager::ExpectedStateManager(size_t max_key,
@@ -386,7 +386,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   Status Handle(const WriteQueryTraceRecord& record,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
     if (IsDone()) {
-      return Status::OK();
+      return Status_OK();
     }
     WriteBatch batch(record.GetWriteBatchRep().ToString());
     return batch.Iterate(this);
@@ -395,19 +395,19 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   // Ignore reads.
   Status Handle(const GetQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Ignore reads.
   Status Handle(const IteratorSeekQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Ignore reads.
   Status Handle(const MultiGetQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Below are the WriteBatch::Handler overrides. We could use a separate
@@ -420,7 +420,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
     uint64_t key_id;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return Status::Corruption("unable to parse key", key.ToString());
+      return Status_Corruption("unable to parse key", key.ToString());
     }
     uint32_t value_base = GetValueBase(value);
 
@@ -432,7 +432,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     state_->SyncPut(column_family_id, static_cast<int64_t>(key_id), value_base);
     ++num_write_ops_;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status PutEntityCF(uint32_t column_family_id, const Slice& key_with_ts,
@@ -442,18 +442,18 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     uint64_t key_id = 0;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return Status::Corruption("Unable to parse key", key.ToString());
+      return Status_Corruption("Unable to parse key", key.ToString());
     }
 
     Slice entity_copy = entity;
     WideColumns columns;
     if (!WideColumnSerialization::Deserialize(entity_copy, columns).ok()) {
-      return Status::Corruption("Unable to deserialize entity",
+      return Status_Corruption("Unable to deserialize entity",
                                 entity.ToString(/* hex */ true));
     }
 
     if (!VerifyWideColumns(columns)) {
-      return Status::Corruption("Wide columns in entity inconsistent",
+      return Status_Corruption("Wide columns in entity inconsistent",
                                 entity.ToString(/* hex */ true));
     }
 
@@ -471,7 +471,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     ++num_write_ops_;
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status DeleteCF(uint32_t column_family_id,
@@ -480,7 +480,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
     uint64_t key_id;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return Status::Corruption("unable to parse key", key.ToString());
+      return Status_Corruption("unable to parse key", key.ToString());
     }
 
     bool should_buffer_write = !(buffered_writes_ == nullptr);
@@ -491,7 +491,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     state_->SyncDelete(column_family_id, static_cast<int64_t>(key_id));
     ++num_write_ops_;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status SingleDeleteCF(uint32_t column_family_id,
@@ -520,11 +520,11 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
         StripTimestampFromUserKey(end_key_with_ts, FLAGS_user_timestamp_size);
     uint64_t begin_key_id, end_key_id;
     if (!GetIntVal(begin_key.ToString(), &begin_key_id)) {
-      return Status::Corruption("unable to parse begin key",
+      return Status_Corruption("unable to parse begin key",
                                 begin_key.ToString());
     }
     if (!GetIntVal(end_key.ToString(), &end_key_id)) {
-      return Status::Corruption("unable to parse end key", end_key.ToString());
+      return Status_Corruption("unable to parse end key", end_key.ToString());
     }
 
     bool should_buffer_write = !(buffered_writes_ == nullptr);
@@ -537,7 +537,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
                             static_cast<int64_t>(begin_key_id),
                             static_cast<int64_t>(end_key_id));
     ++num_write_ops_;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MergeCF(uint32_t column_family_id, const Slice& key_with_ts,
@@ -557,7 +557,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   Status MarkBeginPrepare(bool = false) override {
     assert(!buffered_writes_);
     buffered_writes_.reset(new WriteBatch());
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkEndPrepare(const Slice& xid) override {
@@ -570,7 +570,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     buffered_writes_.reset();
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkCommit(const Slice& xid) override {
@@ -592,7 +592,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     assert(xid_to_buffered_writes_.at(xid_str));
     xid_to_buffered_writes_.erase(xid_str);
 
-    return Status::OK();
+    return Status_OK();
   }
 
  private:
@@ -610,7 +610,7 @@ Status FileExpectedStateManager::Restore(DB* db) {
   assert(HasHistory());
   SequenceNumber seqno = db->GetLatestSequenceNumber();
   if (seqno < saved_seqno_) {
-    return Status::Corruption("DB is older than any restorable expected state");
+    return Status_Corruption("DB is older than any restorable expected state");
   }
 
   std::string state_filename =
@@ -675,12 +675,12 @@ Status FileExpectedStateManager::Restore(DB* db) {
       // `db_stress` crashing while writing it. It shouldn't matter as long as
       // we already found all the write ops we need to catch up the expected
       // state.
-      s = Status::OK();
+      s = Status_OK();
     }
     if (s.IsIncomplete()) {
-      // OK because `Status::Incomplete` is expected upon finishing all the
+      // OK because `Status_Incomplete` is expected upon finishing all the
       // trace records.
-      s = Status::OK();
+      s = Status_OK();
     }
   }
 

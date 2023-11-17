@@ -1719,7 +1719,7 @@ class ReactiveVersionSet : public VersionSet {
       bool /*new_descriptor_log*/, const ColumnFamilyOptions* /*new_cf_option*/,
       const std::vector<std::function<void(const Status&)>>& /*manifest_wcbs*/)
       override {
-    return Status::NotSupported("not supported in reactive mode");
+    return Status_NotSupported("not supported in reactive mode");
   }
 
   // No copy allowed

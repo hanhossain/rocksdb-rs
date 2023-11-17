@@ -243,7 +243,7 @@ class MergingIterator : public InternalIterator {
 
   void SeekToFirst() override {
     ClearHeaps();
-    status_ = Status::OK();
+    status_ = Status_OK();
     for (auto& child : children_) {
       child.iter.SeekToFirst();
       AddToMinHeapOrCheckStatus(&child);
@@ -266,7 +266,7 @@ class MergingIterator : public InternalIterator {
   void SeekToLast() override {
     ClearHeaps();
     InitMaxHeap();
-    status_ = Status::OK();
+    status_ = Status_OK();
     for (auto& child : children_) {
       child.iter.SeekToLast();
       AddToMaxHeapOrCheckStatus(&child);
@@ -308,7 +308,7 @@ class MergingIterator : public InternalIterator {
     // holds after this call, and minHeap_.top().iter points to the
     // first key >= target among children_ that is not covered by any range
     // tombstone.
-    status_ = Status::OK();
+    status_ = Status_OK();
     SeekImpl(target);
     FindNextVisibleKey();
 
@@ -322,7 +322,7 @@ class MergingIterator : public InternalIterator {
   void SeekForPrev(const Slice& target) override {
     assert(range_tombstone_iters_.empty() ||
            range_tombstone_iters_.size() == children_.size());
-    status_ = Status::OK();
+    status_ = Status_OK();
     SeekForPrevImpl(target);
     FindPrevVisibleKey();
 
@@ -861,7 +861,7 @@ void MergingIterator::SeekImpl(const Slice& target, size_t starting_level,
         }
       }
     }
-    // child.iter.status() is set to Status::TryAgain indicating asynchronous
+    // child.iter.status() is set to Status_TryAgain indicating asynchronous
     // request for retrieval of data blocks has been submitted. So it should
     // return at this point and Seek should be called again to retrieve the
     // requested block and add the child to min heap.
@@ -1129,7 +1129,7 @@ void MergingIterator::SeekForPrevImpl(const Slice& target,
         }
       }
     }
-    // child.iter.status() is set to Status::TryAgain indicating asynchronous
+    // child.iter.status() is set to Status_TryAgain indicating asynchronous
     // request for retrieval of data blocks has been submitted. So it should
     // return at this point and Seek should be called again to retrieve the
     // requested block and add the child to min heap.
@@ -1297,11 +1297,11 @@ void MergingIterator::SwitchToForward() {
   for (auto& child : children_) {
     if (&child.iter != current_) {
       child.iter.Seek(target);
-      // child.iter.status() is set to Status::TryAgain indicating asynchronous
+      // child.iter.status() is set to Status_TryAgain indicating asynchronous
       // request for retrieval of data blocks has been submitted. So it should
       // return at this point and Seek should be called again to retrieve the
       // requested block and add the child to min heap.
-      if (child.iter.status() == Status::TryAgain()) {
+      if (child.iter.status() == Status_TryAgain()) {
         continue;
       }
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
@@ -1313,7 +1313,7 @@ void MergingIterator::SwitchToForward() {
   }
 
   for (auto& child : children_) {
-    if (child.iter.status() == Status::TryAgain()) {
+    if (child.iter.status() == Status_TryAgain()) {
       child.iter.Seek(target);
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
         assert(child.iter.status().ok());

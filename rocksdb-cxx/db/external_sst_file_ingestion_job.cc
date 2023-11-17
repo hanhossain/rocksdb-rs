@@ -47,18 +47,18 @@ Status ExternalSstFileIngestionJob::Prepare(
     if (file_to_ingest.cf_id !=
             TablePropertiesCollectorFactory::Context::kUnknownColumnFamily &&
         file_to_ingest.cf_id != cfd_->GetID()) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "External file column family id don't match");
     }
 
     if (file_to_ingest.num_entries == 0 &&
         file_to_ingest.num_range_deletions == 0) {
-      return Status::InvalidArgument("File contain no entries");
+      return Status_InvalidArgument("File contain no entries");
     }
 
     if (!file_to_ingest.smallest_internal_key.Valid() ||
         !file_to_ingest.largest_internal_key.Valid()) {
-      return Status::Corruption("Generated table have corrupted keys");
+      return Status_Corruption("Generated table have corrupted keys");
     }
 
     files_to_ingest_.emplace_back(std::move(file_to_ingest));
@@ -67,7 +67,7 @@ Status ExternalSstFileIngestionJob::Prepare(
   const Comparator* ucmp = cfd_->internal_comparator().user_comparator();
   auto num_files = files_to_ingest_.size();
   if (num_files == 0) {
-    return Status::InvalidArgument("The list of files is empty");
+    return Status_InvalidArgument("The list of files is empty");
   } else if (num_files > 1) {
     // Verify that passed files don't have overlapping ranges
     autovector<const IngestedFileInfo*> sorted_files;
@@ -97,7 +97,7 @@ Status ExternalSstFileIngestionJob::Prepare(
   }
 
   if (ingestion_options_.ingest_behind && files_overlap_) {
-    return Status::NotSupported("Files have overlapping ranges");
+    return Status_NotSupported("Files have overlapping ranges");
   }
 
   // Copy/Move external files into DB
@@ -254,7 +254,7 @@ Status ExternalSstFileIngestionJob::Prepare(
           for (size_t i = 0; i < files_to_ingest_.size(); i++) {
             if (files_checksum_func_names[i] !=
                 generated_checksum_func_names[i]) {
-              status = Status::InvalidArgument(
+              status = Status_InvalidArgument(
                   "Checksum function name does not match with the checksum "
                   "function name of this DB");
               ROCKS_LOG_WARN(
@@ -264,7 +264,7 @@ Status ExternalSstFileIngestionJob::Prepare(
               break;
             }
             if (files_checksums[i] != generated_checksums[i]) {
-              status = Status::Corruption(
+              status = Status_Corruption(
                   "Ingested checksum does not match with the generated "
                   "checksum");
               ROCKS_LOG_WARN(
@@ -282,7 +282,7 @@ Status ExternalSstFileIngestionJob::Prepare(
           // in the Manifest.
           for (size_t i = 0; i < files_to_ingest_.size(); i++) {
             if (files_checksum_func_names[i] != file_checksum_gen->Name()) {
-              status = Status::InvalidArgument(
+              status = Status_InvalidArgument(
                   "Checksum function name does not match with the checksum "
                   "function name of this DB");
               ROCKS_LOG_WARN(
@@ -301,7 +301,7 @@ Status ExternalSstFileIngestionJob::Prepare(
                   files_checksums.size() != 0)) {
         // The checksum or checksum function name vector are not both empty
         // and they are incomplete.
-        status = Status::InvalidArgument(
+        status = Status_InvalidArgument(
             "The checksum information of ingested sst files are nonempty and "
             "the size of checksums or the size of the checksum function "
             "names "
@@ -366,7 +366,7 @@ Status ExternalSstFileIngestionJob::NeedsFlush(bool* flush_needed,
       ranges, super_version, db_options_.allow_data_in_errors, flush_needed);
   if (status.ok() && *flush_needed &&
       !ingestion_options_.allow_blocking_flush) {
-    status = Status::InvalidArgument("External file requires flush");
+    status = Status_InvalidArgument("External file requires flush");
   }
   return status;
 }
@@ -385,7 +385,7 @@ Status ExternalSstFileIngestionJob::Run() {
     return status;
   }
   if (need_flush) {
-    return Status::TryAgain();
+    return Status_TryAgain();
   }
   assert(status.ok() && need_flush == false);
 #endif
@@ -725,7 +725,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
   // Get table version
   auto version_iter = uprops.find(ExternalSstFilePropertyNames::kVersion);
   if (version_iter == uprops.end()) {
-    return Status::Corruption("External file version not found");
+    return Status_Corruption("External file version not found");
   }
   file_to_ingest->version = DecodeFixed32(version_iter->second.c_str());
 
@@ -733,7 +733,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
   if (file_to_ingest->version == 2) {
     // version 2 imply that we have global sequence number
     if (seqno_iter == uprops.end()) {
-      return Status::Corruption(
+      return Status_Corruption(
           "External file global sequence number not found");
     }
 
@@ -741,7 +741,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     file_to_ingest->original_seqno = DecodeFixed64(seqno_iter->second.c_str());
     if (props->external_sst_file_global_seqno_offset == 0) {
       file_to_ingest->global_seqno_offset = 0;
-      return Status::Corruption("Was not able to find file global seqno field");
+      return Status_Corruption("Was not able to find file global seqno field");
     }
     file_to_ingest->global_seqno_offset =
         static_cast<size_t>(props->external_sst_file_global_seqno_offset);
@@ -751,11 +751,11 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     file_to_ingest->original_seqno = 0;
     if (ingestion_options_.allow_blocking_flush ||
         ingestion_options_.allow_global_seqno) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "External SST file V1 does not support global seqno");
     }
   } else {
-    return Status::InvalidArgument("External file version is not supported");
+    return Status_InvalidArgument("External file version is not supported");
   }
   // Get number of entries in table
   file_to_ingest->num_entries = props->num_entries;
@@ -782,22 +782,22 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     Status pik_status =
         ParseInternalKey(iter->key(), &key, allow_data_in_errors);
     if (!pik_status.ok()) {
-      return Status::Corruption("Corrupted key in external file. ",
+      return Status_Corruption("Corrupted key in external file. ",
                                 pik_status.getState());
     }
     if (key.sequence != 0) {
-      return Status::Corruption("External file has non zero sequence number");
+      return Status_Corruption("External file has non zero sequence number");
     }
     file_to_ingest->smallest_internal_key.SetFrom(key);
 
     iter->SeekToLast();
     pik_status = ParseInternalKey(iter->key(), &key, allow_data_in_errors);
     if (!pik_status.ok()) {
-      return Status::Corruption("Corrupted key in external file. ",
+      return Status_Corruption("Corrupted key in external file. ",
                                 pik_status.getState());
     }
     if (key.sequence != 0) {
-      return Status::Corruption("External file has non zero sequence number");
+      return Status_Corruption("External file has non zero sequence number");
     }
     file_to_ingest->largest_internal_key.SetFrom(key);
 
@@ -813,7 +813,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
       Status pik_status =
           ParseInternalKey(range_del_iter->key(), &key, allow_data_in_errors);
       if (!pik_status.ok()) {
-        return Status::Corruption("Corrupted key in external file. ",
+        return Status_Corruption("Corrupted key in external file. ",
                                   pik_status.getState());
       }
       RangeTombstone tombstone(key, range_del_iter->value());
@@ -861,7 +861,7 @@ Status ExternalSstFileIngestionJob::AssignLevelAndSeqnoForIngestedFile(
     *assigned_seqno = last_seqno + 1;
     if (compaction_style == kCompactionStyleUniversal || files_overlap_) {
       if (ingestion_options_.fail_if_not_bottommost_level) {
-        status = Status::TryAgain(
+        status = Status_TryAgain(
             "Files cannot be ingested to Lmax. Please make sure key range of "
             "Lmax does not overlap with files to ingest.");
         return status;
@@ -947,7 +947,7 @@ Status ExternalSstFileIngestionJob::AssignLevelAndSeqnoForIngestedFile(
 
   if (ingestion_options_.fail_if_not_bottommost_level &&
       target_level < cfd_->NumberLevels() - 1) {
-    status = Status::TryAgain(
+    status = Status_TryAgain(
         "Files cannot be ingested to Lmax. Please make sure key range of Lmax "
         "and ongoing compaction's output to Lmax"
         "does not overlap with files to ingest.");
@@ -970,7 +970,7 @@ Status ExternalSstFileIngestionJob::CheckLevelForIngestedBehindFile(
   // First, check if new files fit in the bottommost level
   int bottom_lvl = cfd_->NumberLevels() - 1;
   if (!IngestedFileFitInLevel(file_to_ingest, bottom_lvl)) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Can't ingest_behind file as it doesn't fit "
         "at the bottommost level!");
   }
@@ -980,7 +980,7 @@ Status ExternalSstFileIngestionJob::CheckLevelForIngestedBehindFile(
   for (int lvl = 0; lvl < cfd_->NumberLevels() - 1; lvl++) {
     for (auto file : vstorage->LevelFiles(lvl)) {
       if (file->fd.smallest_seqno == 0) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "Can't ingest_behind file as despite allow_ingest_behind=true "
             "there are files with 0 seqno in database at upper levels!");
       }
@@ -988,18 +988,18 @@ Status ExternalSstFileIngestionJob::CheckLevelForIngestedBehindFile(
   }
 
   file_to_ingest->picked_level = bottom_lvl;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForIngestedFile(
     IngestedFileInfo* file_to_ingest, SequenceNumber seqno) {
   if (file_to_ingest->original_seqno == seqno) {
     // This file already have the correct global seqno
-    return Status::OK();
+    return Status_OK();
   } else if (!ingestion_options_.allow_global_seqno) {
-    return Status::InvalidArgument("Global seqno is required, but disabled");
+    return Status_InvalidArgument("Global seqno is required, but disabled");
   } else if (file_to_ingest->global_seqno_offset == 0) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Trying to set global seqno for a file that don't have a global seqno "
         "field");
   }
@@ -1041,7 +1041,7 @@ Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForIngestedFile(
   }
 
   file_to_ingest->assigned_seqno = seqno;
-  return Status::OK();
+  return Status_OK();
 }
 
 IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(

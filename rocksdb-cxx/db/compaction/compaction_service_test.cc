@@ -286,7 +286,7 @@ TEST_F(CompactionServiceTest, BasicCompactions) {
       "DBImplSecondary::CompactWithoutInstallation::End", [&](void* status) {
         // override job status
         auto s = static_cast<Status*>(status);
-        *s = Status::Aborted("MyTestCompactionService failed to compact!");
+        *s = Status_Aborted("MyTestCompactionService failed to compact!");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -863,7 +863,7 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
       *properties = UserCollectedProperties{
           {kUserPropertyName, std::to_string(count_)},
       };
-      return Status::OK();
+      return Status_OK();
     }
 
     UserCollectedProperties GetReadableProperties() const override {
@@ -876,7 +876,7 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
                       EntryType /*type*/, SequenceNumber /*seq*/,
                       uint64_t /*file_size*/) override {
       count_++;
-      return Status::OK();
+      return Status_OK();
     }
 
    private:

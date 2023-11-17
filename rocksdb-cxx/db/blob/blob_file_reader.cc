@@ -73,7 +73,7 @@ Status BlobFileReader::Create(
       new BlobFileReader(std::move(file_reader), file_size, compression_type,
                          immutable_options.clock, statistics));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileReader::OpenFile(
@@ -106,7 +106,7 @@ Status BlobFileReader::OpenFile(
   }
 
   if (*file_size < BlobLogHeader::kSize + BlobLogFooter::kSize) {
-    return Status::Corruption("Malformed blob file");
+    return Status_Corruption("Malformed blob file");
   }
 
   std::unique_ptr<FSRandomAccessFile> file;
@@ -133,7 +133,7 @@ Status BlobFileReader::OpenFile(
       blob_file_read_hist, immutable_options.rate_limiter.get(),
       immutable_options.listeners));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
@@ -179,16 +179,16 @@ Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
   constexpr ExpirationRange no_expiration_range;
 
   if (header.has_ttl || header.expiration_range != no_expiration_range) {
-    return Status::Corruption("Unexpected TTL blob file");
+    return Status_Corruption("Unexpected TTL blob file");
   }
 
   if (header.column_family_id != column_family_id) {
-    return Status::Corruption("Column family ID mismatch");
+    return Status_Corruption("Column family ID mismatch");
   }
 
   *compression_type = header.compression;
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
@@ -232,10 +232,10 @@ Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
   constexpr ExpirationRange no_expiration_range;
 
   if (footer.expiration_range != no_expiration_range) {
-    return Status::Corruption("Unexpected TTL blob file");
+    return Status_Corruption("Unexpected TTL blob file");
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
@@ -278,10 +278,10 @@ Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
   }
 
   if (slice->size() != read_size) {
-    return Status::Corruption("Failed to read data from blob file");
+    return Status_Corruption("Failed to read data from blob file");
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 BlobFileReader::BlobFileReader(
@@ -308,11 +308,11 @@ Status BlobFileReader::GetBlob(
   const uint64_t key_size = user_key.size();
 
   if (!IsValidBlobOffset(offset, key_size, value_size, file_size_)) {
-    return Status::Corruption("Invalid blob offset");
+    return Status_Corruption("Invalid blob offset");
   }
 
   if (compression_type != compression_type_) {
-    return Status::Corruption("Compression type mismatch when reading blob");
+    return Status_Corruption("Compression type mismatch when reading blob");
   }
 
   // Note: if verify_checksum is set, we read the entire blob record to be able
@@ -390,7 +390,7 @@ Status BlobFileReader::GetBlob(
     *bytes_read = record_size;
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 void BlobFileReader::MultiGetBlob(
@@ -423,12 +423,12 @@ void BlobFileReader::MultiGetBlob(
     const uint64_t value_size = req->len;
 
     if (!IsValidBlobOffset(offset, key_size, value_size, file_size_)) {
-      *req->status = Status::Corruption("Invalid blob offset");
+      *req->status = Status_Corruption("Invalid blob offset");
       continue;
     }
     if (req->compression != compression_type_) {
       *req->status =
-          Status::Corruption("Compression type mismatch when reading a blob");
+          Status_Corruption("Compression type mismatch when reading a blob");
       continue;
     }
 
@@ -553,17 +553,17 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
   }
 
   if (record.key_size != user_key.size()) {
-    return Status::Corruption("Key size mismatch when reading blob");
+    return Status_Corruption("Key size mismatch when reading blob");
   }
 
   if (record.value_size != value_size) {
-    return Status::Corruption("Value size mismatch when reading blob");
+    return Status_Corruption("Value size mismatch when reading blob");
   }
 
   record.key =
       Slice(record_slice.data() + BlobLogRecord::kHeaderSize, record.key_size);
   if (record.key != user_key) {
-    return Status::Corruption("Key mismatch when reading blob");
+    return Status_Corruption("Key mismatch when reading blob");
   }
 
   record.value = Slice(record.key.data() + record.key_size, value_size);
@@ -578,7 +578,7 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobFileReader::UncompressBlobIfNeeded(
@@ -589,7 +589,7 @@ Status BlobFileReader::UncompressBlobIfNeeded(
 
   if (compression_type == kNoCompression) {
     BlobContentsCreator::Create(result, nullptr, value_slice, allocator);
-    return Status::OK();
+    return Status_OK();
   }
 
   UncompressionContext context(compression_type);
@@ -613,12 +613,12 @@ Status BlobFileReader::UncompressBlobIfNeeded(
       "BlobFileReader::UncompressBlobIfNeeded:TamperWithResult", &output);
 
   if (!output) {
-    return Status::Corruption("Unable to uncompress blob");
+    return Status_Corruption("Unable to uncompress blob");
   }
 
   result->reset(new BlobContents(std::move(output), uncompressed_size));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

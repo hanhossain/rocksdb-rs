@@ -305,10 +305,10 @@ class AnonExpectedStateManager : public ExpectedStateManager {
 
   // See `ExpectedStateManager::SaveAtAndAfter()` API doc.
   //
-  // This implementation returns `Status::NotSupported` since we do not
+  // This implementation returns `Status_NotSupported` since we do not
   // currently have a need to keep history of expected state within a process.
   Status SaveAtAndAfter(DB* /* db */) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   // See `ExpectedStateManager::HasHistory()` API doc.
@@ -316,9 +316,9 @@ class AnonExpectedStateManager : public ExpectedStateManager {
 
   // See `ExpectedStateManager::Restore()` API doc.
   //
-  // This implementation returns `Status::NotSupported` since we do not
+  // This implementation returns `Status_NotSupported` since we do not
   // currently have a need to keep history of expected state within a process.
-  Status Restore(DB* /* db */) override { return Status::NotSupported(); }
+  Status Restore(DB* /* db */) override { return Status_NotSupported(); }
 
   // Requires external locking preventing concurrent execution with any other
   // member function.

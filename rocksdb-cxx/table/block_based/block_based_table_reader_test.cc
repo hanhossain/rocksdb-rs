@@ -559,7 +559,7 @@ TEST_P(ChargeTableReaderTest, Basic) {
          "between "
          "charge_table_reader_ == kDisabled and == kEnabled)";
 
-  Status s = Status::OK();
+  Status s = Status_OK();
   std::size_t opened_table_reader_num = 0;
   std::string table_name;
   std::vector<std::unique_ptr<BlockBasedTable>> tables;
@@ -692,7 +692,7 @@ TEST_P(BlockBasedTableReaderTestVerifyChecksum, ChecksumMismatch) {
       table->VerifyChecksum(read_opts, TableReaderCaller::kUserVerifyChecksum);
   ASSERT_EQ(1,
             options.statistics->getTickerCount(BLOCK_CHECKSUM_MISMATCH_COUNT));
-  ASSERT_EQ(s.code(), Status::kCorruption);
+  ASSERT_EQ(s.code(), Code::kCorruption);
 }
 
 // Param 1: compression type

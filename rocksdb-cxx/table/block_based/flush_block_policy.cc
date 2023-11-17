@@ -123,7 +123,7 @@ Status FlushBlockPolicyFactory::CreateFromString(
 
   if (value.empty()) {
     factory->reset(new FlushBlockBySizePolicyFactory());
-    return Status::OK();
+    return Status_OK();
   } else {
     return LoadSharedObject<FlushBlockPolicyFactory>(config_options, value,
                                                      factory);

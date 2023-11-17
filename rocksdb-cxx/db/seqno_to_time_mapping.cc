@@ -175,11 +175,11 @@ void SeqnoToTimeMapping::Encode(std::string& dest, const SequenceNumber start,
 Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
   Slice input(seqno_time_mapping_str);
   if (input.empty()) {
-    return Status::OK();
+    return Status_OK();
   }
   uint64_t size;
   if (!GetVarint64(&input, &size)) {
-    return Status::Corruption("Invalid sequence number time size");
+    return Status_Corruption("Invalid sequence number time size");
   }
   is_sorted_ = false;
   SeqnoTimePair base;
@@ -193,7 +193,7 @@ Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
     seqno_time_mapping_.emplace_back(val);
     base = val;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void SeqnoToTimeMapping::SeqnoTimePair::Encode(std::string& dest) const {
@@ -202,12 +202,12 @@ void SeqnoToTimeMapping::SeqnoTimePair::Encode(std::string& dest) const {
 
 Status SeqnoToTimeMapping::SeqnoTimePair::Decode(Slice& input) {
   if (!GetVarint64(&input, &seqno)) {
-    return Status::Corruption("Invalid sequence number");
+    return Status_Corruption("Invalid sequence number");
   }
   if (!GetVarint64(&input, &time)) {
-    return Status::Corruption("Invalid time");
+    return Status_Corruption("Invalid time");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 bool SeqnoToTimeMapping::Append(SequenceNumber seqno, uint64_t time) {
@@ -256,11 +256,11 @@ bool SeqnoToTimeMapping::Resize(uint64_t min_time_duration,
 
 Status SeqnoToTimeMapping::Sort() {
   if (is_sorted_) {
-    return Status::OK();
+    return Status_OK();
   }
   if (seqno_time_mapping_.empty()) {
     is_sorted_ = true;
-    return Status::OK();
+    return Status_OK();
   }
 
   std::deque<SeqnoTimePair> copy = std::move(seqno_time_mapping_);
@@ -293,7 +293,7 @@ Status SeqnoToTimeMapping::Sort() {
   seqno_time_mapping_.emplace_back(prev);
 
   is_sorted_ = true;
-  return Status::OK();
+  return Status_OK();
 }
 
 std::string SeqnoToTimeMapping::ToHumanString() const {

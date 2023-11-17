@@ -22,7 +22,7 @@ class EnvWithCustomLogicalBlockSizeCache : public EnvWrapper {
 
   Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
     cache_->UnrefAndTryRemoveCachedLogicalBlockSize(paths);
-    return Status::OK();
+    return Status_OK();
   }
 
  private:
@@ -40,7 +40,7 @@ class DBLogicalBlockSizeCacheTest : public testing::Test {
     auto get_fd_block_size = [&](int fd) { return fd; };
     auto get_dir_block_size = [&](const std::string& /*dir*/, size_t* size) {
       *size = 1024;
-      return Status::OK();
+      return Status_OK();
     };
     cache_.reset(
         new LogicalBlockSizeCache(get_fd_block_size, get_dir_block_size));

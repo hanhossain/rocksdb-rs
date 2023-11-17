@@ -67,7 +67,7 @@ Status MergeHelper::TimedFullMerge(
   if (operands.empty()) {
     assert(value != nullptr && result != nullptr);
     result->assign(value->data(), value->size());
-    return Status::OK();
+    return Status_OK();
   }
 
   if (update_num_ops_stats) {
@@ -113,10 +113,10 @@ Status MergeHelper::TimedFullMerge(
 
   if (!success) {
     RecordTick(statistics, NUMBER_MERGE_FAILURES);
-    return Status::Corruption(Status::SubCode::kMergeOperatorFailed);
+    return Status_Corruption(SubCode::kMergeOperatorFailed);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status MergeHelper::TimedFullMergeWithEntity(
@@ -169,7 +169,7 @@ Status MergeHelper::TimedFullMergeWithEntity(
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 // PRE:  iter points to the first merge type entry
@@ -228,7 +228,7 @@ Status MergeHelper::MergeUntil(InternalIterator* iter,
   int cmp_with_full_history_ts_low = 0;
   for (; iter->Valid(); iter->Next(), original_key_is_iter = false) {
     if (IsShuttingDown()) {
-      s = Status::ShutdownInProgress();
+      s = Status_ShutdownInProgress();
       return s;
     }
     // Skip range tombstones emitted by the compaction iterator.
@@ -290,7 +290,7 @@ Status MergeHelper::MergeUntil(InternalIterator* iter,
       //   => change the entry type to kTypeValue for keys_.back()
       // We are done! Success!
 
-      // If there are no operands, just return the Status::OK(). That will cause
+      // If there are no operands, just return the Status_OK(). That will cause
       // the compaction iterator to write out the key we're currently at, which
       // is the put/delete we just encountered.
       if (keys_.empty()) {
@@ -383,10 +383,10 @@ Status MergeHelper::MergeUntil(InternalIterator* iter,
         iter->Next();
       } else if (op_failure_scope ==
                  MergeOperator::OpFailureScope::kMustMerge) {
-        // Change to `Status::MergeInProgress()` to denote output consists of
+        // Change to `Status_MergeInProgress()` to denote output consists of
         // merge operands only. Leave `iter` at the non-merge entry so it will
         // be output after.
-        s = Status::MergeInProgress();
+        s = Status_MergeInProgress();
       }
       return s;
     } else {
@@ -516,15 +516,15 @@ Status MergeHelper::MergeUntil(InternalIterator* iter,
       keys_.emplace_front(std::move(original_key));
       merge_context_.PushOperand(merge_result);
     } else if (op_failure_scope == MergeOperator::OpFailureScope::kMustMerge) {
-      // Change to `Status::MergeInProgress()` to denote output consists of
+      // Change to `Status_MergeInProgress()` to denote output consists of
       // merge operands only.
-      s = Status::MergeInProgress();
+      s = Status_MergeInProgress();
     }
   } else {
     // We haven't seen the beginning of the key nor a Put/Delete.
     // Attempt to use the user's associative merge function to
     // merge the stacked merge operands into a single operand.
-    s = Status::MergeInProgress();
+    s = Status_MergeInProgress();
     if (merge_context_.GetNumOperands() >= 2 ||
         (allow_single_operand_ && merge_context_.GetNumOperands() == 1)) {
       bool merge_success = false;

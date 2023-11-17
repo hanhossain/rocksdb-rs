@@ -279,7 +279,7 @@ Status PartitionedIndexBuilder::Finish(
     }
     top_level_index_size_ = index_blocks->index_block_contents.size();
     index_size_ += top_level_index_size_;
-    return Status::OK();
+    return Status_OK();
   } else {
     // Finish the next partition index in line and Incomplete() to indicate we
     // expect more calls to Finish
@@ -289,7 +289,7 @@ Status PartitionedIndexBuilder::Finish(
     auto s = entry.value->Finish(index_blocks);
     index_size_ += index_blocks->index_block_contents.size();
     finishing_indexes = true;
-    return s.ok() ? Status::Incomplete() : s;
+    return s.ok() ? Status_Incomplete() : s;
   }
 }
 

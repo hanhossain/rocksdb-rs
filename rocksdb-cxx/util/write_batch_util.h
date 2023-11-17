@@ -20,7 +20,7 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
 
   Status AddColumnFamilyId(uint32_t column_family_id) {
     column_family_ids_.insert(column_family_id);
-    return Status::OK();
+    return Status_OK();
   }
 
  public:
@@ -55,19 +55,19 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
     return AddColumnFamilyId(column_family_id);
   }
 
-  Status MarkBeginPrepare(bool) override { return Status::OK(); }
+  Status MarkBeginPrepare(bool) override { return Status_OK(); }
 
-  Status MarkEndPrepare(const Slice&) override { return Status::OK(); }
+  Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
 
-  Status MarkRollback(const Slice&) override { return Status::OK(); }
+  Status MarkRollback(const Slice&) override { return Status_OK(); }
 
-  Status MarkCommit(const Slice&) override { return Status::OK(); }
+  Status MarkCommit(const Slice&) override { return Status_OK(); }
 
   Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-    return Status::OK();
+    return Status_OK();
   }
 
-  Status MarkNoop(bool) override { return Status::OK(); }
+  Status MarkNoop(bool) override { return Status_OK(); }
 
   const std::unordered_set<uint32_t>& column_families() const {
     return column_family_ids_;

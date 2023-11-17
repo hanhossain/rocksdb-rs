@@ -57,7 +57,7 @@ void WritePreparedTxn::MultiGet(const ReadOptions& options,
                !wpt_db_->ValidateSnapshot(snap_seq, backed_by_snapshot))) {
     wpt_db_->WPRecordTick(TXN_GET_TRY_AGAIN);
     for (size_t i = 0; i < num_keys; i++) {
-      statuses[i] = Status::TryAgain();
+      statuses[i] = Status_TryAgain();
     }
   }
 }
@@ -66,7 +66,7 @@ Status WritePreparedTxn::Get(const ReadOptions& options,
                              ColumnFamilyHandle* column_family,
                              const Slice& key, PinnableSlice* pinnable_val) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -85,7 +85,7 @@ Status WritePreparedTxn::Get(const ReadOptions& options,
                 wpt_db_->ValidateSnapshot(callback.max_visible_seq(),
                                           backed_by_snapshot))) {
       wpt_db_->WPRecordTick(TXN_GET_TRY_AGAIN);
-      res = Status::TryAgain();
+      res = Status_TryAgain();
     }
   }
 
@@ -166,7 +166,7 @@ Status WritePreparedTxn::CommitInternal() {
     if (for_recovery) {
       WriteBatchInternal::SetAsLatestPersistentState(working_batch);
     } else {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Commit-time-batch can only be used if "
           "use_only_the_last_commit_time_batch_for_recovery is true");
     }
@@ -368,16 +368,16 @@ Status WritePreparedTxn::RollbackInternal() {
       if (rollback_merge_operands_) {
         return Rollback(cf, key);
       } else {
-        return Status::OK();
+        return Status_OK();
       }
     }
 
-    Status MarkNoop(bool) override { return Status::OK(); }
-    Status MarkBeginPrepare(bool) override { return Status::OK(); }
-    Status MarkEndPrepare(const Slice&) override { return Status::OK(); }
-    Status MarkCommit(const Slice&) override { return Status::OK(); }
+    Status MarkNoop(bool) override { return Status_OK(); }
+    Status MarkBeginPrepare(bool) override { return Status_OK(); }
+    Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+    Status MarkCommit(const Slice&) override { return Status_OK(); }
     Status MarkRollback(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
    protected:
@@ -484,7 +484,7 @@ Status WritePreparedTxn::ValidateSnapshot(ColumnFamilyHandle* column_family,
     // If the key has been previous validated at a sequence number earlier
     // than the curent snapshot's sequence number, we already know it has not
     // been modified.
-    return Status::OK();
+    return Status_OK();
   }
 
   *tracked_at_seq = snap_seq;

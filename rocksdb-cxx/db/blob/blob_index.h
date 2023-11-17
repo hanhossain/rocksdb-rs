@@ -96,14 +96,14 @@ class BlobIndex {
     assert(slice.size() > 0);
     type_ = static_cast<Type>(*slice.data());
     if (type_ >= Type::kUnknown) {
-      return Status::Corruption(kErrorMessage,
+      return Status_Corruption(kErrorMessage,
                                 "Unknown blob index type: " +
                                     std::to_string(static_cast<char>(type_)));
     }
     slice = Slice(slice.data() + 1, slice.size() - 1);
     if (HasTTL()) {
       if (!GetVarint64(&slice, &expiration_)) {
-        return Status::Corruption(kErrorMessage, "Corrupted expiration");
+        return Status_Corruption(kErrorMessage, "Corrupted expiration");
       }
     }
     if (IsInlined()) {
@@ -113,10 +113,10 @@ class BlobIndex {
           GetVarint64(&slice, &size_) && slice.size() == 1) {
         compression_ = static_cast<CompressionType>(*slice.data());
       } else {
-        return Status::Corruption(kErrorMessage, "Corrupted blob offset");
+        return Status_Corruption(kErrorMessage, "Corrupted blob offset");
       }
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   std::string DebugString(bool output_hex) const {

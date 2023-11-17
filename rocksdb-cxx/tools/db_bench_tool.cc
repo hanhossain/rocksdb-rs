@@ -240,7 +240,7 @@ DEFINE_string(
     "are sorted sub-lists. The MergeOperator used is sortlist.h\n"
     "\treadrandomoperands -- read random keys using `GetMergeOperands()`. An "
     "operation includes a rare but possible retry in case it got "
-    "`Status::Incomplete()`. This happens upon encountering more keys than "
+    "`Status_Incomplete()`. This happens upon encountering more keys than "
     "have ever been seen by the thread (or eight initially)\n"
     "\tbackup --  Create a backup of the current DB and verify that a new backup is corrected. "
     "Rate limit can be specified through --backup_rate_limit\n"
@@ -5389,7 +5389,7 @@ class Benchmark {
         }
       }
       if (!s.ok()) {
-        s = listener_->WaitForRecovery(600000000) ? Status::OK() : s;
+        s = listener_->WaitForRecovery(600000000) ? Status_OK() : s;
       }
 
       if (!s.ok()) {
@@ -5447,7 +5447,7 @@ class Benchmark {
     std::vector<size_t> num_files_at_level0(num_db, 0);
     if (compaction_style == kCompactionStyleLevel) {
       if (num_levels == 0) {
-        return Status::InvalidArgument("num_levels should be larger than 1");
+        return Status_InvalidArgument("num_levels should be larger than 1");
       }
       bool should_stop = false;
       while (!should_stop) {
@@ -5564,11 +5564,11 @@ class Benchmark {
       }
     } else if (compaction_style == kCompactionStyleFIFO) {
       if (num_levels != 1) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "num_levels should be 1 for FIFO compaction");
       }
       if (FLAGS_num_multi_db != 0) {
-        return Status::InvalidArgument("Doesn't support multiDB");
+        return Status_InvalidArgument("Doesn't support multiDB");
       }
       auto db = db_list[0];
       std::vector<std::string> file_names;
@@ -5600,7 +5600,7 @@ class Benchmark {
       fprintf(stdout,
               "%-12s : skipped (-compaction_stype=kCompactionStyleNone)\n",
               "filldeterministic");
-      return Status::InvalidArgument("None compaction is not supported");
+      return Status_InvalidArgument("None compaction is not supported");
     }
 
 // Verify seqno and key range
@@ -5717,7 +5717,7 @@ class Benchmark {
            {"level0_stop_writes_trigger",
             std::to_string(options_list[i].level0_stop_writes_trigger)}});
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   void ReadSequential(ThreadState* thread) {
@@ -6124,7 +6124,7 @@ class Benchmark {
                     stat_list[i].ToString().c_str());
             abort();
           }
-          stat_list[i] = Status::OK();
+          stat_list[i] = Status_OK();
           pin_values[i].Reset();
         }
       }
@@ -6245,7 +6245,7 @@ class Benchmark {
         type_.push_back(range_);
         ratio_.push_back(ratio / sum);
       }
-      return Status::OK();
+      return Status_OK();
     }
 
     int GetType(int64_t rand_num) {
@@ -6364,7 +6364,7 @@ class Benchmark {
         offset += p_unit.keyrange_access;
       }
 
-      return Status::OK();
+      return Status_OK();
     }
 
     // Generate the Key ID according to the input ini_rand and key distribution

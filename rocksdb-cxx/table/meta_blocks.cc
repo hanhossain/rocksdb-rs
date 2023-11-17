@@ -329,7 +329,7 @@ Status ReadTablePropertiesHelper(
     // properties block should be strictly sorted with no duplicate key.
     if (!last_key.empty() &&
         BytewiseComparator()->Compare(key, last_key) <= 0) {
-      s = Status::Corruption("properties unsorted");
+      s = Status_Corruption("properties unsorted");
       break;
     }
     last_key = key;
@@ -440,7 +440,7 @@ Status ReadTableProperties(RandomAccessFileReader* file, uint64_t file_size,
                                   prefetch_buffer, footer, ioptions, properties,
                                   memory_allocator);
   } else {
-    s = Status::NotFound();
+    s = Status_NotFound();
   }
   return s;
 }
@@ -475,7 +475,7 @@ Status FindMetaBlock(InternalIterator* meta_index_iter,
   Status s =
       FindOptionalMetaBlock(meta_index_iter, meta_block_name, block_handle);
   if (s.ok() && block_handle->IsNull()) {
-    return Status::Corruption("Cannot find the meta block", meta_block_name);
+    return Status_Corruption("Cannot find the meta block", meta_block_name);
   } else {
     return s;
   }

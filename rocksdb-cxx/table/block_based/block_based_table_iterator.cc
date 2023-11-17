@@ -101,7 +101,7 @@ void BlockBasedTableIterator::SeekImpl(const Slice* target,
           AsyncInitDataBlock(is_first_pass);
         }
         if (async_read_in_progress_) {
-          // Status::TryAgain indicates asynchronous request for retrieval of
+          // Status_TryAgain indicates asynchronous request for retrieval of
           // data blocks has been submitted. So it should return at this point
           // and Seek should be called again to retrieve the requested block and
           // execute the remaining code.
@@ -382,7 +382,7 @@ bool BlockBasedTableIterator::MaterializeCurrentBlock() {
   if (!block_iter_.Valid() ||
       icomp_.Compare(block_iter_.key(),
                      index_iter_->value().first_internal_key) != 0) {
-    block_iter_.Invalidate(Status::Corruption(
+    block_iter_.Invalidate(Status_Corruption(
         "first key in index doesn't match first key in block"));
     return false;
   }

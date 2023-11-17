@@ -118,7 +118,7 @@ class InternalIteratorBase : public Cleanable {
 
   // If an error has occurred, return it.  Else return an ok status.
   // If non-blocking IO is requested and this operation cannot be
-  // satisfied without doing some IO, then this returns Status::Incomplete().
+  // satisfied without doing some IO, then this returns Status_Incomplete().
   virtual Status status() const = 0;
 
   // For some types of iterators, sometimes Seek()/Next()/SeekForPrev()/etc may
@@ -171,7 +171,7 @@ class InternalIteratorBase : public Cleanable {
   virtual bool IsValuePinned() const { return false; }
 
   virtual Status GetProperty(std::string /*prop_name*/, std::string* /*prop*/) {
-    return Status::NotSupported("");
+    return Status_NotSupported("");
   }
 
   // When iterator moves from one file to another file at same level, new file's
