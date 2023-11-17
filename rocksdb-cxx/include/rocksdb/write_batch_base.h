@@ -132,9 +132,9 @@ class WriteBatchBase {
   virtual Status RollbackToSavePoint() = 0;
 
   // Pop the most recent save point.
-  // If there is no previous call to SetSavePoint(), Status::NotFound()
+  // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
-  // Otherwise returns Status::OK().
+  // Otherwise returns Status_OK().
   virtual Status PopSavePoint() = 0;
 
   // Sets the maximum size of the write batch in bytes. 0 means no limit.

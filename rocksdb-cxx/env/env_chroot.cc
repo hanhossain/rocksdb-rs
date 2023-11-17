@@ -32,7 +32,7 @@ Status ChrootFileSystem::PrepareOptions(const ConfigOptions& options) {
   if (!s.ok()) {
     return s;
   } else if (chroot_dir_.empty()) {
-    s = Status::InvalidArgument("ChRootFileSystem requires a chroot dir");
+    s = Status_InvalidArgument("ChRootFileSystem requires a chroot dir");
   } else {
     s = target_->FileExists(chroot_dir_, IOOptions(), nullptr);
   }

@@ -55,7 +55,7 @@ struct TestHandler : public WriteBatch::Handler {
     e.value = value.ToString();
     e.type = kPutRecord;
     seen[column_family_id].push_back(e);
-    return Status::OK();
+    return Status_OK();
   }
   Status MergeCF(uint32_t column_family_id, const Slice& key,
                  const Slice& value) override {
@@ -64,7 +64,7 @@ struct TestHandler : public WriteBatch::Handler {
     e.value = value.ToString();
     e.type = kMergeRecord;
     seen[column_family_id].push_back(e);
-    return Status::OK();
+    return Status_OK();
   }
   void LogData(const Slice& /*blob*/) override {}
   Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
@@ -73,7 +73,7 @@ struct TestHandler : public WriteBatch::Handler {
     e.value = "";
     e.type = kDeleteRecord;
     seen[column_family_id].push_back(e);
-    return Status::OK();
+    return Status_OK();
   }
 };
 
@@ -108,7 +108,7 @@ class KVIter : public Iterator {
   }
   Slice key() const override { return iter_->first; }
   Slice value() const override { return iter_->second; }
-  Status status() const override { return Status::OK(); }
+  Status status() const override { return Status_OK(); }
 
  private:
   const KVMap* const map_;

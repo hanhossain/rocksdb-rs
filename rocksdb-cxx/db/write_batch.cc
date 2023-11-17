@@ -95,38 +95,38 @@ struct BatchContentClassifier : public WriteBatch::Handler {
 
   Status PutCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_PUT;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status PutEntityCF(uint32_t /* column_family_id */, const Slice& /* key */,
                      const Slice& /* entity */) override {
     content_flags |= (uint32_t)ContentFlags::HAS_PUT_ENTITY;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status DeleteCF(uint32_t, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_DELETE;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status SingleDeleteCF(uint32_t, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_SINGLE_DELETE;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status DeleteRangeCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_DELETE_RANGE;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MergeCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_MERGE;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status PutBlobIndexCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_BLOB_INDEX;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkBeginPrepare(bool unprepare) override {
@@ -134,27 +134,27 @@ struct BatchContentClassifier : public WriteBatch::Handler {
     if (unprepare) {
       content_flags |= (uint32_t)ContentFlags::HAS_BEGIN_UNPREPARE;
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkEndPrepare(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_END_PREPARE;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkCommit(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_COMMIT;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_COMMIT;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkRollback(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_ROLLBACK;
-    return Status::OK();
+    return Status_OK();
   }
 };
 
@@ -366,65 +366,65 @@ Status ReadRecordFromWriteBatch(Slice* input, char* tag,
   switch (*tag) {
     case kTypeColumnFamilyValue:
       if (!GetVarint32(input, column_family)) {
-        return Status::Corruption("bad WriteBatch Put");
+        return Status_Corruption("bad WriteBatch Put");
       }
       FALLTHROUGH_INTENDED;
     case kTypeValue:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status::Corruption("bad WriteBatch Put");
+        return Status_Corruption("bad WriteBatch Put");
       }
       break;
     case kTypeColumnFamilyDeletion:
     case kTypeColumnFamilySingleDeletion:
       if (!GetVarint32(input, column_family)) {
-        return Status::Corruption("bad WriteBatch Delete");
+        return Status_Corruption("bad WriteBatch Delete");
       }
       FALLTHROUGH_INTENDED;
     case kTypeDeletion:
     case kTypeSingleDeletion:
       if (!GetLengthPrefixedSlice(input, key)) {
-        return Status::Corruption("bad WriteBatch Delete");
+        return Status_Corruption("bad WriteBatch Delete");
       }
       break;
     case kTypeColumnFamilyRangeDeletion:
       if (!GetVarint32(input, column_family)) {
-        return Status::Corruption("bad WriteBatch DeleteRange");
+        return Status_Corruption("bad WriteBatch DeleteRange");
       }
       FALLTHROUGH_INTENDED;
     case kTypeRangeDeletion:
       // for range delete, "key" is begin_key, "value" is end_key
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status::Corruption("bad WriteBatch DeleteRange");
+        return Status_Corruption("bad WriteBatch DeleteRange");
       }
       break;
     case kTypeColumnFamilyMerge:
       if (!GetVarint32(input, column_family)) {
-        return Status::Corruption("bad WriteBatch Merge");
+        return Status_Corruption("bad WriteBatch Merge");
       }
       FALLTHROUGH_INTENDED;
     case kTypeMerge:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status::Corruption("bad WriteBatch Merge");
+        return Status_Corruption("bad WriteBatch Merge");
       }
       break;
     case kTypeColumnFamilyBlobIndex:
       if (!GetVarint32(input, column_family)) {
-        return Status::Corruption("bad WriteBatch BlobIndex");
+        return Status_Corruption("bad WriteBatch BlobIndex");
       }
       FALLTHROUGH_INTENDED;
     case kTypeBlobIndex:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status::Corruption("bad WriteBatch BlobIndex");
+        return Status_Corruption("bad WriteBatch BlobIndex");
       }
       break;
     case kTypeLogData:
       assert(blob != nullptr);
       if (!GetLengthPrefixedSlice(input, blob)) {
-        return Status::Corruption("bad WriteBatch Blob");
+        return Status_Corruption("bad WriteBatch Blob");
       }
       break;
     case kTypeNoop:
@@ -437,44 +437,44 @@ Status ReadRecordFromWriteBatch(Slice* input, char* tag,
       break;
     case kTypeEndPrepareXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status::Corruption("bad EndPrepare XID");
+        return Status_Corruption("bad EndPrepare XID");
       }
       break;
     case kTypeCommitXIDAndTimestamp:
       if (!GetLengthPrefixedSlice(input, key)) {
-        return Status::Corruption("bad commit timestamp");
+        return Status_Corruption("bad commit timestamp");
       }
       FALLTHROUGH_INTENDED;
     case kTypeCommitXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status::Corruption("bad Commit XID");
+        return Status_Corruption("bad Commit XID");
       }
       break;
     case kTypeRollbackXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status::Corruption("bad Rollback XID");
+        return Status_Corruption("bad Rollback XID");
       }
       break;
     case kTypeColumnFamilyWideColumnEntity:
       if (!GetVarint32(input, column_family)) {
-        return Status::Corruption("bad WriteBatch PutEntity");
+        return Status_Corruption("bad WriteBatch PutEntity");
       }
       FALLTHROUGH_INTENDED;
     case kTypeWideColumnEntity:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status::Corruption("bad WriteBatch PutEntity");
+        return Status_Corruption("bad WriteBatch PutEntity");
       }
       break;
     default:
-      return Status::Corruption("unknown WriteBatch tag");
+      return Status_Corruption("unknown WriteBatch tag");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatch::Iterate(Handler* handler) const {
   if (rep_.size() < WriteBatchInternal::kHeader) {
-    return Status::Corruption("malformed WriteBatch (too small)");
+    return Status_Corruption("malformed WriteBatch (too small)");
   }
 
   return WriteBatchInternal::Iterate(this, handler, WriteBatchInternal::kHeader,
@@ -485,7 +485,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
                                    WriteBatch::Handler* handler, size_t begin,
                                    size_t end) {
   if (begin > wb->rep_.size() || end > wb->rep_.size() || end < begin) {
-    return Status::Corruption("Invalid start/end bounds for Iterate");
+    return Status_Corruption("Invalid start/end bounds for Iterate");
   }
   assert(begin <= end);
   Slice input(wb->rep_.data() + begin, static_cast<size_t>(end - begin));
@@ -525,12 +525,12 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
       assert(s.IsTryAgain());
       assert(!last_was_try_again);  // to detect infinite loop bugs
       if (UNLIKELY(last_was_try_again)) {
-        return Status::Corruption(
+        return Status_Corruption(
             "two consecutive TryAgain in WriteBatch handler; this is either a "
             "software bug or data corruption.");
       }
       last_was_try_again = true;
-      s = Status::OK();
+      s = Status_OK();
     }
 
     switch (tag) {
@@ -606,7 +606,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kDisabled) {
-          s = Status::NotSupported(
+          s = Status_NotSupported(
               "WriteCommitted txn tag when write_after_commit_ is disabled (in "
               "WritePrepared/WriteUnprepared mode). If it is not due to "
               "corruption, the WAL must be emptied before changing the "
@@ -614,7 +614,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         }
         if (handler->WriteBeforePrepare() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status::NotSupported(
+          s = Status_NotSupported(
               "WriteCommitted txn tag when write_before_prepare_ is enabled "
               "(in WriteUnprepared mode). If it is not due to corruption, the "
               "WAL must be emptied before changing the WritePolicy.");
@@ -628,7 +628,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status::NotSupported(
+          s = Status_NotSupported(
               "WritePrepared/WriteUnprepared txn tag when write_after_commit_ "
               "is enabled (in default WriteCommitted mode). If it is not due "
               "to corruption, the WAL must be emptied before changing the "
@@ -643,14 +643,14 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status::NotSupported(
+          s = Status_NotSupported(
               "WriteUnprepared txn tag when write_after_commit_ is enabled (in "
               "default WriteCommitted mode). If it is not due to corruption, "
               "the WAL must be emptied before changing the WritePolicy.");
         }
         if (handler->WriteBeforePrepare() ==
             WriteBatch::Handler::OptionState::kDisabled) {
-          s = Status::NotSupported(
+          s = Status_NotSupported(
               "WriteUnprepared txn tag when write_before_prepare_ is disabled "
               "(in WriteCommitted/WritePrepared mode). If it is not due to "
               "corruption, the WAL must be emptied before changing the "
@@ -704,7 +704,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         }
         break;
       default:
-        return Status::Corruption("unknown WriteBatch tag");
+        return Status_Corruption("unknown WriteBatch tag");
     }
   }
   if (!s.ok()) {
@@ -712,9 +712,9 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
   }
   if (handler_continue && whole_batch &&
       found != WriteBatchInternal::Count(wb)) {
-    return Status::Corruption("WriteBatch has wrong count");
+    return Status_Corruption("WriteBatch has wrong count");
   } else {
-    return Status::OK();
+    return Status_OK();
   }
 }
 
@@ -757,7 +757,7 @@ WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(
     if (ucmp) {
       ts_sz = ucmp->timestamp_size();
       if (0 == cf_id && b->default_cf_ts_sz_ != ts_sz) {
-        s = Status::InvalidArgument("Default cf timestamp size mismatch");
+        s = Status_InvalidArgument("Default cf timestamp size mismatch");
       }
     }
   } else if (b->default_cf_ts_sz_ > 0) {
@@ -770,28 +770,28 @@ namespace {
 Status CheckColumnFamilyTimestampSize(ColumnFamilyHandle* column_family,
                                       const Slice& ts) {
   if (!column_family) {
-    return Status::InvalidArgument("column family handle cannot be null");
+    return Status_InvalidArgument("column family handle cannot be null");
   }
   const Comparator* const ucmp = column_family->GetComparator();
   assert(ucmp);
   size_t cf_ts_sz = ucmp->timestamp_size();
   if (0 == cf_ts_sz) {
-    return Status::InvalidArgument("timestamp disabled");
+    return Status_InvalidArgument("timestamp disabled");
   }
   if (cf_ts_sz != ts.size()) {
-    return Status::InvalidArgument("timestamp size mismatch");
+    return Status_InvalidArgument("timestamp size mismatch");
   }
-  return Status::OK();
+  return Status_OK();
 }
 }  // anonymous namespace
 
 Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
                                const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("key is too large");
+    return Status_InvalidArgument("key is too large");
   }
   if (value.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("value is too large");
+    return Status_InvalidArgument("value is too large");
   }
 
   LocalSavePoint save(b);
@@ -868,7 +868,7 @@ Status WriteBatchInternal::CheckSlicePartsLength(const SliceParts& key,
     total_key_bytes += key.parts[i].size();
   }
   if (total_key_bytes >= size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("key is too large");
+    return Status_InvalidArgument("key is too large");
   }
 
   size_t total_value_bytes = 0;
@@ -876,9 +876,9 @@ Status WriteBatchInternal::CheckSlicePartsLength(const SliceParts& key,
     total_value_bytes += value.parts[i].size();
   }
   if (total_value_bytes >= size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("value is too large");
+    return Status_InvalidArgument("value is too large");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
@@ -929,7 +929,7 @@ Status WriteBatch::Put(ColumnFamilyHandle* column_family, const SliceParts& key,
     return WriteBatchInternal::Put(this, cf_id, key, value);
   }
 
-  return Status::InvalidArgument(
+  return Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -939,7 +939,7 @@ Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
   assert(b);
 
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("key is too large");
+    return Status_InvalidArgument("key is too large");
   }
 
   WideColumns sorted_columns(columns);
@@ -955,7 +955,7 @@ Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
   }
 
   if (entity.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("wide column entity is too large");
+    return Status_InvalidArgument("wide column entity is too large");
   }
 
   LocalSavePoint save(b);
@@ -989,7 +989,7 @@ Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
 Status WriteBatch::PutEntity(ColumnFamilyHandle* column_family,
                              const Slice& key, const WideColumns& columns) {
   if (!column_family) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call this method without a column family handle");
   }
 
@@ -1006,7 +1006,7 @@ Status WriteBatch::PutEntity(ColumnFamilyHandle* column_family,
   }
 
   if (ts_sz) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call this method on column family enabling timestamp");
   }
 
@@ -1015,7 +1015,7 @@ Status WriteBatch::PutEntity(ColumnFamilyHandle* column_family,
 
 Status WriteBatchInternal::InsertNoop(WriteBatch* b) {
   b->rep_.push_back(static_cast<char>(kTypeNoop));
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::MarkEndPrepare(WriteBatch* b, const Slice& xid,
@@ -1047,7 +1047,7 @@ Status WriteBatchInternal::MarkEndPrepare(WriteBatch* b, const Slice& xid,
                                     (uint32_t)ContentFlags::HAS_BEGIN_UNPREPARE,
                             std::memory_order_relaxed);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::MarkCommit(WriteBatch* b, const Slice& xid) {
@@ -1056,7 +1056,7 @@ Status WriteBatchInternal::MarkCommit(WriteBatch* b, const Slice& xid) {
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_COMMIT,
                           std::memory_order_relaxed);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::MarkCommitWithTimestamp(WriteBatch* b,
@@ -1069,7 +1069,7 @@ Status WriteBatchInternal::MarkCommitWithTimestamp(WriteBatch* b,
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_COMMIT,
                           std::memory_order_relaxed);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::MarkRollback(WriteBatch* b, const Slice& xid) {
@@ -1078,7 +1078,7 @@ Status WriteBatchInternal::MarkRollback(WriteBatch* b, const Slice& xid) {
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_ROLLBACK,
                           std::memory_order_relaxed);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
@@ -1190,7 +1190,7 @@ Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::Delete(this, cf_id, key);
   }
 
-  return Status::InvalidArgument(
+  return Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -1307,7 +1307,7 @@ Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::SingleDelete(this, cf_id, key);
   }
 
-  return Status::InvalidArgument(
+  return Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -1431,17 +1431,17 @@ Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::DeleteRange(this, cf_id, begin_key, end_key);
   }
 
-  return Status::InvalidArgument(
+  return Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
 Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
                                  const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("key is too large");
+    return Status_InvalidArgument("key is too large");
   }
   if (value.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status::InvalidArgument("value is too large");
+    return Status_InvalidArgument("value is too large");
   }
 
   LocalSavePoint save(b);
@@ -1557,7 +1557,7 @@ Status WriteBatch::Merge(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::Merge(this, cf_id, key, value);
   }
 
-  return Status::InvalidArgument(
+  return Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -1606,7 +1606,7 @@ void WriteBatch::SetSavePoint() {
 
 Status WriteBatch::RollbackToSavePoint() {
   if (save_points_ == nullptr || save_points_->stack.size() == 0) {
-    return Status::NotFound();
+    return Status_NotFound();
   }
 
   // Pop the most recent savepoint off the stack
@@ -1630,18 +1630,18 @@ Status WriteBatch::RollbackToSavePoint() {
     content_flags_.store(savepoint.content_flags, std::memory_order_relaxed);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatch::PopSavePoint() {
   if (save_points_ == nullptr || save_points_->stack.size() == 0) {
-    return Status::NotFound();
+    return Status_NotFound();
   }
 
   // Pop the most recent savepoint off the stack
   save_points_->stack.pop();
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatch::UpdateTimestamps(
@@ -1657,7 +1657,7 @@ Status WriteBatch::UpdateTimestamps(
 
 Status WriteBatch::VerifyChecksum() const {
   if (prot_info_ == nullptr) {
-    return Status::OK();
+    return Status_OK();
   }
   Slice input(rep_.data() + WriteBatchInternal::kHeader,
               rep_.size() - WriteBatchInternal::kHeader);
@@ -1725,7 +1725,7 @@ Status WriteBatch::VerifyChecksum() const {
         tag = kTypeWideColumnEntity;
         break;
       default:
-        return Status::Corruption(
+        return Status_Corruption(
             "unknown WriteBatch tag",
             std::to_string(static_cast<unsigned int>(tag)));
     }
@@ -1741,10 +1741,10 @@ Status WriteBatch::VerifyChecksum() const {
   }
 
   if (prot_info_idx != WriteBatchInternal::Count(this)) {
-    return Status::Corruption("WriteBatch has wrong count");
+    return Status_Corruption("WriteBatch has wrong count");
   }
   assert(WriteBatchInternal::Count(this) == prot_info_->entries_.size());
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {
@@ -1959,9 +1959,9 @@ class MemTableInserter : public WriteBatch::Handler {
     bool found = cf_mems_->Seek(column_family_id);
     if (!found) {
       if (ignore_missing_column_families_) {
-        *s = Status::OK();
+        *s = Status_OK();
       } else {
-        *s = Status::InvalidArgument(
+        *s = Status_InvalidArgument(
             "Invalid column family specified in write batch");
       }
       return false;
@@ -1975,7 +1975,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // column family already contains updates from this log. We can't apply
       // updates twice because of update-in-place or merge workloads -- ignore
       // the update
-      *s = Status::OK();
+      *s = Status_OK();
       return false;
     }
 
@@ -2053,7 +2053,7 @@ class MemTableInserter : public WriteBatch::Handler {
         std::string merged_value;
 
         auto cf_handle = cf_mems_->GetColumnFamilyHandle();
-        Status get_status = Status::NotSupported();
+        Status get_status = Status_NotSupported();
         if (db_ != nullptr && recovering_log_number_ == 0) {
           if (cf_handle == nullptr) {
             cf_handle = db_->DefaultColumnFamily();
@@ -2065,7 +2065,7 @@ class MemTableInserter : public WriteBatch::Handler {
         if (!get_status.ok() && !get_status.IsNotFound()) {
           ret_status = get_status;
         } else {
-          ret_status = Status::OK();
+          ret_status = Status_OK();
         }
         if (ret_status.ok()) {
           UpdateStatus update_status;
@@ -2371,7 +2371,7 @@ class MemTableInserter : public WriteBatch::Handler {
       if (!cfd->is_delete_range_supported()) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
         ret_status.PermitUncheckedError();
-        return Status::NotSupported(
+        return Status_NotSupported(
             std::string("DeleteRange not supported for table type ") +
             cfd->ioptions()->table_factory->Name() + " in CF " +
             cfd->GetName());
@@ -2383,12 +2383,12 @@ class MemTableInserter : public WriteBatch::Handler {
         ret_status.PermitUncheckedError();
         // It's an empty range where endpoints appear mistaken. Don't bother
         // applying it to the DB, and return an error to the user.
-        return Status::InvalidArgument("end key comes before start key");
+        return Status_InvalidArgument("end key comes before start key");
       } else if (cmp == 0) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
         ret_status.PermitUncheckedError();
         // It's an empty range. Don't bother applying it to the DB.
-        return Status::OK();
+        return Status_OK();
       }
     }
 
@@ -2454,7 +2454,7 @@ class MemTableInserter : public WriteBatch::Handler {
     MemTable* mem = cf_mems_->GetMemTable();
     auto* moptions = mem->GetImmutableMemTableOptions();
     if (moptions->merge_operator == nullptr) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Merge requires `ColumnFamilyOptions::merge_operator != nullptr`");
     }
     bool perform_merge = false;
@@ -2651,7 +2651,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // during recovery we rebuild a hollow transaction
       // from all encountered prepare sections of the wal
       if (db_->allow_2pc() == false) {
-        return Status::NotSupported(
+        return Status_NotSupported(
             "WAL contains prepared transactions. Open with "
             "TransactionDB::Open().");
       }
@@ -2670,7 +2670,7 @@ class MemTableInserter : public WriteBatch::Handler {
       }
     }
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkEndPrepare(const Slice& name) override {
@@ -2695,7 +2695,7 @@ class MemTableInserter : public WriteBatch::Handler {
     const bool batch_boundry = true;
     MaybeAdvanceSeq(batch_boundry);
 
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkNoop(bool empty_batch) override {
@@ -2711,7 +2711,7 @@ class MemTableInserter : public WriteBatch::Handler {
       const bool batch_boundry = true;
       MaybeAdvanceSeq(batch_boundry);
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkCommit(const Slice& name) override {
@@ -2859,7 +2859,7 @@ class MemTableInserter : public WriteBatch::Handler {
     const bool batch_boundry = true;
     MaybeAdvanceSeq(batch_boundry);
 
-    return Status::OK();
+    return Status_OK();
   }
 
  private:
@@ -2910,7 +2910,7 @@ Status WriteBatchInternal::InsertInto(
     assert(!seq_per_batch || w->batch_cnt != 0);
     assert(!seq_per_batch || inserter.sequence() - w->sequence == w->batch_cnt);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::InsertInto(
@@ -3006,23 +3006,23 @@ class ProtectionInfoUpdater : public WriteBatch::Handler {
   }
 
   Status MarkBeginPrepare(bool /* unprepare */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkEndPrepare(const Slice& /* xid */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
-  Status MarkCommit(const Slice& /* xid */) override { return Status::OK(); }
+  Status MarkCommit(const Slice& /* xid */) override { return Status_OK(); }
 
   Status MarkCommitWithTimestamp(const Slice& /* xid */,
                                  const Slice& /* ts */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
-  Status MarkRollback(const Slice& /* xid */) override { return Status::OK(); }
+  Status MarkRollback(const Slice& /* xid */) override { return Status_OK(); }
 
-  Status MarkNoop(bool /* empty_batch */) override { return Status::OK(); }
+  Status MarkNoop(bool /* empty_batch */) override { return Status_OK(); }
 
  private:
   Status UpdateProtInfo(uint32_t cf, const Slice& key, const Slice& val,
@@ -3031,7 +3031,7 @@ class ProtectionInfoUpdater : public WriteBatch::Handler {
       prot_info_->entries_.emplace_back(
           ProtectionInfo64().ProtectKVO(key, val, op_type).ProtectC(cf));
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // No copy or move.
@@ -3051,7 +3051,7 @@ Status WriteBatchInternal::SetContents(WriteBatch* b, const Slice& contents) {
 
   b->rep_.assign(contents.data(), contents.size());
   b->content_flags_.store((uint32_t)ContentFlags::DEFERRED, std::memory_order_relaxed);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
@@ -3062,7 +3062,7 @@ Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
        src->prot_info_->entries_.size() != src->Count()) ||
       (dst->prot_info_ != nullptr &&
        dst->prot_info_->entries_.size() != dst->Count())) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Write batch has inconsistent count and number of checksums");
   }
 
@@ -3101,7 +3101,7 @@ Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
   dst->content_flags_.store(
       dst->content_flags_.load(std::memory_order_relaxed) | src_flags,
       std::memory_order_relaxed);
-  return Status::OK();
+  return Status_OK();
 }
 
 size_t WriteBatchInternal::AppendedByteSize(size_t leftByteSize,
@@ -3119,10 +3119,10 @@ Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* wb,
   if (bytes_per_key == 0) {
     if (wb->prot_info_ != nullptr) {
       wb->prot_info_.reset();
-      return Status::OK();
+      return Status_OK();
     } else {
       // Already not protected.
-      return Status::OK();
+      return Status_OK();
     }
   } else if (bytes_per_key == 8) {
     if (wb->prot_info_ == nullptr) {
@@ -3132,16 +3132,16 @@ Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* wb,
       if (s.ok() && checksum != nullptr) {
         uint64_t expected_hash = XXH3_64bits(wb->rep_.data(), wb->rep_.size());
         if (expected_hash != *checksum) {
-          return Status::Corruption("Write batch content corrupted.");
+          return Status_Corruption("Write batch content corrupted.");
         }
       }
       return s;
     } else {
       // Already protected.
-      return Status::OK();
+      return Status_OK();
     }
   }
-  return Status::NotSupported(
+  return Status_NotSupported(
       "WriteBatch protection info must be zero or eight bytes/key");
 }
 

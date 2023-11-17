@@ -250,7 +250,7 @@ void ErrorHandler::CancelErrorRecovery() {
   EndAutoRecovery();
 }
 
-STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status::OK()};
+STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status_OK()};
 
 // This is the main function for looking at an error during a background
 // operation and deciding the severity, and error recovery strategy. The high
@@ -263,7 +263,7 @@ STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status::OK()};
 // 3. Determine if auto recovery is possible. A listener notification callback
 //    is called, which can disable the auto recovery even if we decide its
 //    feasible
-// 4. For Status::NoSpace() errors, rely on SstFileManagerImpl to control
+// 4. For Status_NoSpace() errors, rely on SstFileManagerImpl to control
 //    the actual recovery. If no sst file manager is specified in DBOptions,
 //    a default one is allocated during DB::Open(), so there will always be
 //    one.
@@ -532,7 +532,7 @@ Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
   {
     uint64_t free_space;
     if (db_options_.env->GetFreeSpace(db_options_.db_paths[0].path,
-                                      &free_space) == Status::NotSupported()) {
+                                      &free_space) == Status_NotSupported()) {
       *auto_recovery = false;
     }
   }
@@ -559,7 +559,7 @@ Status ErrorHandler::ClearBGError() {
     // old_bg_error is only for notifying listeners, so may not be checked
     old_bg_error.PermitUncheckedError();
     // Clear and check the recovery IO and BG error
-    bg_error_ = Status::OK();
+    bg_error_ = Status_OK();
     recovery_io_error_ = IOStatus::OK();
     bg_error_.PermitUncheckedError();
     recovery_io_error_.PermitUncheckedError();
@@ -578,7 +578,7 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
     // If its a manual recovery and there's a background recovery in progress
     // return busy status
     if (recovery_in_prog_) {
-      return Status::Busy();
+      return Status_Busy();
     }
     recovery_in_prog_ = true;
 
@@ -600,14 +600,14 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
   if (bg_error_.severity() == Severity::kSoftError &&
       recover_context_.flush_reason == FlushReason::kErrorRecovery) {
     // Simply clear the background error and return
-    recovery_error_ = Status::OK();
+    recovery_error_ = Status_OK();
     return ClearBGError();
   }
 
   // Reset recovery_error_. We will use this to record any errors that happen
   // during the recovery process. While recovering, the only operations that
   // can generate background errors should be the flush operations
-  recovery_error_ = Status::OK();
+  recovery_error_ = Status_OK();
   recovery_error_.PermitUncheckedError();
   Status s = db_->ResumeImpl(recover_context_);
   if (s.ok()) {
@@ -670,7 +670,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   InstrumentedMutexLock l(db_mutex_);
   if (end_recovery_) {
     EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                           Status::ShutdownInProgress(),
+                                           Status_ShutdownInProgress(),
                                            db_mutex_);
     return;
   }
@@ -682,14 +682,14 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   while (resume_count > 0) {
     if (end_recovery_) {
       EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                             Status::ShutdownInProgress(),
+                                             Status_ShutdownInProgress(),
                                              db_mutex_);
       return;
     }
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume0");
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume1");
     recovery_io_error_ = IOStatus::OK();
-    recovery_error_ = Status::OK();
+    recovery_error_ = Status_OK();
     retry_count++;
     Status s = db_->ResumeImpl(context);
     if (bg_error_stats_ != nullptr) {
@@ -729,7 +729,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
         TEST_SYNC_POINT("RecoverFromRetryableBGIOError:RecoverSuccess");
         Status old_bg_error = bg_error_;
         is_db_stopped_.store(false, std::memory_order_release);
-        bg_error_ = Status::OK();
+        bg_error_ = Status_OK();
         bg_error_.PermitUncheckedError();
         EventHelpers::NotifyOnErrorRecoveryEnd(
             db_options_.listeners, old_bg_error, bg_error_, db_mutex_);
@@ -766,7 +766,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   recovery_in_prog_ = false;
   EventHelpers::NotifyOnErrorRecoveryEnd(
       db_options_.listeners, bg_error_,
-      Status::Aborted("Exceeded resume retry count"), db_mutex_);
+      Status_Aborted("Exceeded resume retry count"), db_mutex_);
   TEST_SYNC_POINT("RecoverFromRetryableBGIOError:LoopOut");
   if (bg_error_stats_ != nullptr) {
     RecordInHistogram(bg_error_stats_.get(),

@@ -29,7 +29,7 @@ Status Transaction::CommitAndTryCreateSnapshot(
   TxnTimestamp commit_ts = GetCommitTimestamp();
   if (commit_ts == kMaxTxnTimestamp) {
     if (ts == kMaxTxnTimestamp) {
-      return Status::InvalidArgument("Commit timestamp unset");
+      return Status_InvalidArgument("Commit timestamp unset");
     } else {
       const Status s = SetCommitTimestamp(ts);
       if (!s.ok()) {
@@ -39,7 +39,7 @@ Status Transaction::CommitAndTryCreateSnapshot(
   } else if (ts != kMaxTxnTimestamp) {
     if (ts != commit_ts) {
       // For now we treat this as error.
-      return Status::InvalidArgument("Different commit ts specified");
+      return Status_InvalidArgument("Different commit ts specified");
     }
   }
   SetSnapshotOnNextOperation(notifier);
@@ -54,7 +54,7 @@ Status Transaction::CommitAndTryCreateSnapshot(
   if (snapshot) {
     *snapshot = new_snapshot;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 TransactionBaseImpl::TransactionBaseImpl(
@@ -203,7 +203,7 @@ Status TransactionBaseImpl::RollbackToSavePoint() {
     return s;
   } else {
     assert(write_batch_.RollbackToSavePoint().IsNotFound());
-    return Status::NotFound();
+    return Status_NotFound();
   }
 }
 
@@ -211,7 +211,7 @@ Status TransactionBaseImpl::PopSavePoint() {
   if (save_points_ == nullptr || save_points_->empty()) {
     // No SavePoint yet.
     assert(write_batch_.PopSavePoint().IsNotFound());
-    return Status::NotFound();
+    return Status_NotFound();
   }
 
   assert(!save_points_->empty());
@@ -236,7 +236,7 @@ Status TransactionBaseImpl::Get(const ReadOptions& read_options,
                                 ColumnFamilyHandle* column_family,
                                 const Slice& key, std::string* value) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -263,12 +263,12 @@ Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
                                          bool exclusive,
                                          const bool do_validate) {
   if (!do_validate && read_options.snapshot != nullptr) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with snapshot is not "
         "defined.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -294,12 +294,12 @@ Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
                                          bool exclusive,
                                          const bool do_validate) {
   if (!do_validate && read_options.snapshot != nullptr) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with snapshot is not "
         "defined.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -318,7 +318,7 @@ std::vector<Status> TransactionBaseImpl::MultiGet(
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
   size_t num_keys = keys.size();
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    Status s = Status::InvalidArgument(
+    Status s = Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return std::vector<Status>(num_keys, s);
@@ -352,7 +352,7 @@ std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
   // Regardless of whether the MultiGet succeeded, track these keys.
   size_t num_keys = keys.size();
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    Status s = Status::InvalidArgument(
+    Status s = Status_InvalidArgument(
         "Cannot call MultiGetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return std::vector<Status>(num_keys, s);
@@ -728,22 +728,22 @@ Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch* src_batch) {
     // this is used for reconstructing prepared transactions upon
     // recovery. there should not be any meta markers in the batches
     // we are processing.
-    Status MarkBeginPrepare(bool) override { return Status::InvalidArgument(); }
+    Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
 
     Status MarkEndPrepare(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkCommit(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
 
     Status MarkRollback(const Slice&) override {
-      return Status::InvalidArgument();
+      return Status_InvalidArgument();
     }
   };
 

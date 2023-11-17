@@ -28,22 +28,22 @@ void BlobLogHeader::EncodeTo(std::string* dst) {
 Status BlobLogHeader::DecodeFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob log header";
   if (src.size() != BlobLogHeader::kSize) {
-    return Status::Corruption(kErrorMessage,
+    return Status_Corruption(kErrorMessage,
                               "Unexpected blob file header size");
   }
   uint32_t magic_number;
   unsigned char flags;
   if (!GetFixed32(&src, &magic_number) || !GetFixed32(&src, &version) ||
       !GetFixed32(&src, &column_family_id)) {
-    return Status::Corruption(
+    return Status_Corruption(
         kErrorMessage,
         "Error decoding magic number, version and column family id");
   }
   if (magic_number != kMagicNumber) {
-    return Status::Corruption(kErrorMessage, "Magic number mismatch");
+    return Status_Corruption(kErrorMessage, "Magic number mismatch");
   }
   if (version != kVersion1) {
-    return Status::Corruption(kErrorMessage, "Unknown header version");
+    return Status_Corruption(kErrorMessage, "Unknown header version");
   }
   flags = src.data()[0];
   compression = static_cast<CompressionType>(src.data()[1]);
@@ -51,9 +51,9 @@ Status BlobLogHeader::DecodeFrom(Slice src) {
   src.remove_prefix(2);
   if (!GetFixed64(&src, &expiration_range.first) ||
       !GetFixed64(&src, &expiration_range.second)) {
-    return Status::Corruption(kErrorMessage, "Error decoding expiration range");
+    return Status_Corruption(kErrorMessage, "Error decoding expiration range");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void BlobLogFooter::EncodeTo(std::string* dst) {
@@ -72,7 +72,7 @@ void BlobLogFooter::EncodeTo(std::string* dst) {
 Status BlobLogFooter::DecodeFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob log footer";
   if (src.size() != BlobLogFooter::kSize) {
-    return Status::Corruption(kErrorMessage,
+    return Status_Corruption(kErrorMessage,
                               "Unexpected blob file footer size");
   }
   uint32_t src_crc = 0;
@@ -82,15 +82,15 @@ Status BlobLogFooter::DecodeFrom(Slice src) {
   if (!GetFixed32(&src, &magic_number) || !GetFixed64(&src, &blob_count) ||
       !GetFixed64(&src, &expiration_range.first) ||
       !GetFixed64(&src, &expiration_range.second) || !GetFixed32(&src, &crc)) {
-    return Status::Corruption(kErrorMessage, "Error decoding content");
+    return Status_Corruption(kErrorMessage, "Error decoding content");
   }
   if (magic_number != kMagicNumber) {
-    return Status::Corruption(kErrorMessage, "Magic number mismatch");
+    return Status_Corruption(kErrorMessage, "Magic number mismatch");
   }
   if (src_crc != crc) {
-    return Status::Corruption(kErrorMessage, "CRC mismatch");
+    return Status_Corruption(kErrorMessage, "CRC mismatch");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void BlobLogRecord::EncodeHeaderTo(std::string* dst) {
@@ -112,7 +112,7 @@ void BlobLogRecord::EncodeHeaderTo(std::string* dst) {
 Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob record";
   if (src.size() != BlobLogRecord::kHeaderSize) {
-    return Status::Corruption(kErrorMessage,
+    return Status_Corruption(kErrorMessage,
                               "Unexpected blob record header size");
   }
   uint32_t src_crc = 0;
@@ -121,12 +121,12 @@ Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
   if (!GetFixed64(&src, &key_size) || !GetFixed64(&src, &value_size) ||
       !GetFixed64(&src, &expiration) || !GetFixed32(&src, &header_crc) ||
       !GetFixed32(&src, &blob_crc)) {
-    return Status::Corruption(kErrorMessage, "Error decoding content");
+    return Status_Corruption(kErrorMessage, "Error decoding content");
   }
   if (src_crc != header_crc) {
-    return Status::Corruption(kErrorMessage, "Header CRC mismatch");
+    return Status_Corruption(kErrorMessage, "Header CRC mismatch");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlobLogRecord::CheckBlobCRC() const {
@@ -135,9 +135,9 @@ Status BlobLogRecord::CheckBlobCRC() const {
   expected_crc = crc32c::Extend(expected_crc, value.data(), value.size());
   expected_crc = crc32c::Mask(expected_crc);
   if (expected_crc != blob_crc) {
-    return Status::Corruption("Blob CRC mismatch");
+    return Status_Corruption("Blob CRC mismatch");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

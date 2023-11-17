@@ -173,8 +173,8 @@ TEST_F(DBBlobIndexTest, Write) {
 
 // Note: the following test case pertains to the StackableDB-based BlobDB
 // implementation. Get should be able to return blob index if is_blob_index is
-// provided, otherwise it should return Status::NotSupported (when reading from
-// memtable) or Status::Corruption (when reading from SST). Reading from SST
+// provided, otherwise it should return Status_NotSupported (when reading from
+// memtable) or Status_Corruption (when reading from SST). Reading from SST
 // returns Corruption because we can't differentiate between the application
 // accidentally opening the base DB of a stacked BlobDB and actual corruption
 // when using the integrated BlobDB.
@@ -214,7 +214,7 @@ TEST_F(DBBlobIndexTest, Get) {
 }
 
 // Note: the following test case pertains to the StackableDB-based BlobDB
-// implementation. Get should NOT return Status::NotSupported/Status::Corruption
+// implementation. Get should NOT return Status_NotSupported/Status_Corruption
 // if blob index is updated with a normal value. See the test case above for
 // more details.
 TEST_F(DBBlobIndexTest, Updated) {
@@ -266,7 +266,7 @@ TEST_F(DBBlobIndexTest, Updated) {
 // implementation. When a blob iterator is used, it should set the
 // expose_blob_index flag for the underlying DBIter, and retrieve/return the
 // corresponding blob value. If a regular DBIter is created (i.e.
-// expose_blob_index is not set), it should return Status::Corruption.
+// expose_blob_index is not set), it should return Status_Corruption.
 TEST_F(DBBlobIndexTest, Iterate) {
   const std::vector<std::vector<ValueType>> data = {
       /*00*/ {kTypeValue},

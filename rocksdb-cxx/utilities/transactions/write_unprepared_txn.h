@@ -151,7 +151,7 @@ class WriteUnpreparedTxn : public WritePreparedTxn {
   //
   // TODO(lth): Investigate whether it is worth having snapshot validation
   // validate all values larger than snap_seq. Otherwise, we should return
-  // Status::NotSupported for untracked writes.
+  // Status_NotSupported for untracked writes.
 
   virtual Status RebuildFromWriteBatch(WriteBatch*) override;
 

@@ -1822,20 +1822,20 @@ Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
   }
   auto corrupt_itr = corrupt_backups_.find(backup_id);
   if (corrupt_itr != corrupt_backups_.end()) {
-    return Status::Corruption(corrupt_itr->second.first.ToString());
+    return Status_Corruption(corrupt_itr->second.first.ToString());
   }
   auto backup_itr = backups_.find(backup_id);
   if (backup_itr == backups_.end()) {
-    return Status::NotFound("Backup not found");
+    return Status_NotFound("Backup not found");
   }
   auto& backup = backup_itr->second;
   if (backup->Empty()) {
-    return Status::NotFound("Backup not found");
+    return Status_NotFound("Backup not found");
   }
 
   SetBackupInfoFromBackupMeta(backup_id, *backup, backup_info,
                               include_file_details);
-  return Status::OK();
+  return Status_OK();
 }
 
 void BackupEngineImpl::GetBackupInfo(std::vector<BackupInfo>* backup_info,
@@ -2211,7 +2211,7 @@ IOStatus BackupEngineImpl::CopyOrCreateFile(
   Slice data;
   do {
     if (stop_backup_.load(std::memory_order_acquire)) {
-      return status_to_io_status(Status::Incomplete("Backup stopped"));
+      return status_to_io_status(Status_Incomplete("Backup stopped"));
     }
     if (!src.empty()) {
       size_t buffer_to_read =
@@ -2319,7 +2319,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
   if (kDbFileChecksumFuncName == src_checksum_func_name) {
     if (src_checksum_str == kUnknownFileChecksum) {
       return status_to_io_status(
-          Status::Aborted("Unknown checksum value for " + fname));
+          Status_Aborted("Unknown checksum value for " + fname));
     }
     checksum_hex = ChecksumStrToHex(src_checksum_str);
   }
@@ -2531,7 +2531,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
     const EnvOptions& src_env_options, uint64_t size_limit,
     std::string* checksum_hex, const Temperature src_temperature) const {
   if (checksum_hex == nullptr) {
-    return status_to_io_status(Status::Aborted("Checksum pointer is null"));
+    return status_to_io_status(Status_Aborted("Checksum pointer is null"));
   }
   uint32_t checksum_value = 0;
   if (size_limit == 0) {
@@ -2561,7 +2561,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
 
   do {
     if (stop_backup_.load(std::memory_order_acquire)) {
-      return status_to_io_status(Status::Incomplete("Backup stopped"));
+      return status_to_io_status(Status_Incomplete("Backup stopped"));
     }
     size_t buffer_to_read =
         (buf_size < size_limit) ? buf_size : static_cast<size_t>(size_limit);
@@ -2628,14 +2628,14 @@ Status BackupEngineImpl::GetFileDbIdentities(
     if (db_session_id != nullptr) {
       db_session_id->assign(table_properties->db_session_id);
       if (db_session_id->empty()) {
-        s = Status::NotFound("DB session identity not found in " + file_path);
+        s = Status_NotFound("DB session identity not found in " + file_path);
         ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString().c_str());
         return s;
       }
     }
-    return Status::OK();
+    return Status_OK();
   } else {
-    s = Status::Corruption("Table properties missing in " + file_path);
+    s = Status_Corruption("Table properties missing in " + file_path);
     ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString().c_str());
     return s;
   }

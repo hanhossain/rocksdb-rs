@@ -17,13 +17,13 @@ namespace ROCKSDB_NAMESPACE {
 
 Status Iterator::GetProperty(std::string prop_name, std::string* prop) {
   if (prop == nullptr) {
-    return Status::InvalidArgument("prop is nullptr");
+    return Status_InvalidArgument("prop is nullptr");
   }
   if (prop_name == "rocksdb.iterator.is-key-pinned") {
     *prop = "0";
-    return Status::OK();
+    return Status_OK();
   }
-  return Status::InvalidArgument("Unidentified property.");
+  return Status_InvalidArgument("Unidentified property.");
 }
 
 namespace {
@@ -77,7 +77,7 @@ class EmptyInternalIterator : public InternalIteratorBase<TValue> {
 };
 }  // namespace
 
-Iterator* NewEmptyIterator() { return new EmptyIterator(Status::OK()); }
+Iterator* NewEmptyIterator() { return new EmptyIterator(Status_OK()); }
 
 Iterator* NewErrorIterator(const Status& status) {
   return new EmptyIterator(status);
@@ -109,7 +109,7 @@ template InternalIteratorBase<Slice>* NewErrorInternalIterator(
 
 template <class TValue>
 InternalIteratorBase<TValue>* NewEmptyInternalIterator() {
-  return new EmptyInternalIterator<TValue>(Status::OK());
+  return new EmptyInternalIterator<TValue>(Status_OK());
 }
 template InternalIteratorBase<IndexValue>* NewEmptyInternalIterator();
 template InternalIteratorBase<Slice>* NewEmptyInternalIterator();
@@ -120,7 +120,7 @@ InternalIteratorBase<TValue>* NewEmptyInternalIterator(Arena* arena) {
     return NewEmptyInternalIterator<TValue>();
   } else {
     auto mem = arena->AllocateAligned(sizeof(EmptyInternalIterator<TValue>));
-    return new (mem) EmptyInternalIterator<TValue>(Status::OK());
+    return new (mem) EmptyInternalIterator<TValue>(Status_OK());
   }
 }
 template InternalIteratorBase<IndexValue>* NewEmptyInternalIterator(

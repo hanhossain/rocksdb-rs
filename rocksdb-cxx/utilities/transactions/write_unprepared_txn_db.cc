@@ -141,23 +141,23 @@ Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
         if (rollback_merge_operands_) {
           return Rollback(cf, key);
         } else {
-          return Status::OK();
+          return Status_OK();
         }
       }
 
       // Recovered batches do not contain 2PC markers.
-      Status MarkNoop(bool) override { return Status::InvalidArgument(); }
+      Status MarkNoop(bool) override { return Status_InvalidArgument(); }
       Status MarkBeginPrepare(bool) override {
-        return Status::InvalidArgument();
+        return Status_InvalidArgument();
       }
       Status MarkEndPrepare(const Slice&) override {
-        return Status::InvalidArgument();
+        return Status_InvalidArgument();
       }
       Status MarkCommit(const Slice&) override {
-        return Status::InvalidArgument();
+        return Status_InvalidArgument();
       }
       Status MarkRollback(const Slice&) override {
-        return Status::InvalidArgument();
+        return Status_InvalidArgument();
       }
     } rollback_handler(db_impl_, last_visible_txn, &rollback_batch,
                        *cf_comp_map_shared_ptr.get(), *cf_map_shared_ptr.get(),
@@ -191,7 +191,7 @@ Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteUnpreparedTxnDB::Initialize(
@@ -212,7 +212,7 @@ Status WriteUnpreparedTxnDB::Initialize(
                     size_t /*index*/, size_t /*total*/) override {
       assert(!is_mem_disabled);
       db_->AddCommitted(commit_seq, commit_seq);
-      return Status::OK();
+      return Status_OK();
     }
 
    private:
@@ -389,7 +389,7 @@ Iterator* WriteUnpreparedTxnDB::NewIterator(const ReadOptions& options,
                                             ColumnFamilyHandle* column_family,
                                             WriteUnpreparedTxn* txn) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status::InvalidArgument(
+    return NewErrorIterator(Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }

@@ -790,7 +790,7 @@ Status NewEncryptedFileSystemImpl(
     const std::shared_ptr<EncryptionProvider>& provider,
     std::unique_ptr<FileSystem>* result) {
   result->reset(new EncryptedFileSystemImpl(base, provider));
-  return Status::OK();
+  return Status_OK();
 }
 
 std::shared_ptr<FileSystem> NewEncryptedFS(
@@ -851,7 +851,7 @@ Status BlockAccessCipherStream::Encrypt(uint64_t fileOffset, char* data,
     }
     dataSize -= n;
     if (dataSize == 0) {
-      return Status::OK();
+      return Status_OK();
     }
     data += n;
     blockOffset = 0;
@@ -898,12 +898,12 @@ Status BlockAccessCipherStream::Decrypt(uint64_t fileOffset, char* data,
     // which will very likely make it read over the original bounds later
     assert(dataSize >= n);
     if (dataSize < n) {
-      return Status::Corruption("Cannot decrypt data at given offset");
+      return Status_Corruption("Cannot decrypt data at given offset");
     }
 
     dataSize -= n;
     if (dataSize == 0) {
-      return Status::OK();
+      return Status_OK();
     }
     data += n;
     blockOffset = 0;
@@ -941,7 +941,7 @@ class ROT13BlockCipher : public BlockCipher {
     for (size_t i = 0; i < blockSize_; ++i) {
       data[i] += 13;
     }
-    return Status::OK();
+    return Status_OK();
   }
   Status Decrypt(char* data) override { return Encrypt(data); }
 };
@@ -977,7 +977,7 @@ Status CTRCipherStream::EncryptBlock(uint64_t blockIndex, char* data,
   for (size_t i = 0; i < blockSize; i++) {
     data[i] = data[i] ^ scratch[i];
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status CTRCipherStream::DecryptBlock(uint64_t blockIndex, char* data,
@@ -1009,10 +1009,10 @@ Status CTREncryptionProvider::AddCipher(const std::string& /*descriptor*/,
                                         const char* cipher, size_t len,
                                         bool /*for_write*/) {
   if (cipher_) {
-    return Status::NotSupported("Cannot add keys to CTREncryptionProvider");
+    return Status_NotSupported("Cannot add keys to CTREncryptionProvider");
   } else if (strcmp(ROT13BlockCipher::kClassName(), cipher) == 0) {
     cipher_.reset(new ROT13BlockCipher(len));
-    return Status::OK();
+    return Status_OK();
   } else {
     return BlockCipher::CreateFromString(ConfigOptions(), std::string(cipher),
                                          &cipher_);
@@ -1033,7 +1033,7 @@ Status CTREncryptionProvider::CreateNewPrefix(const std::string& /*fname*/,
                                               char* prefix,
                                               size_t prefixLength) const {
   if (!cipher_) {
-    return Status::InvalidArgument("Encryption Cipher is missing");
+    return Status_InvalidArgument("Encryption Cipher is missing");
   }
   // Create & seed rnd.
   Random rnd((uint32_t)SystemClock::Default()->NowMicros());
@@ -1078,7 +1078,7 @@ Status CTREncryptionProvider::CreateCipherStream(
     const std::string& fname, const EnvOptions& options, Slice& prefix,
     std::unique_ptr<BlockAccessCipherStream>* result) {
   if (!cipher_) {
-    return Status::InvalidArgument("Encryption Cipher is missing");
+    return Status_InvalidArgument("Encryption Cipher is missing");
   }
   // Read plain text part of prefix.
   auto blockSize = cipher_->BlockSize();
@@ -1090,7 +1090,7 @@ Status CTREncryptionProvider::CreateCipherStream(
   // very large chunk of the file (and very likely read over the bounds)
   assert(prefix.size() >= 2 * blockSize);
   if (prefix.size() < 2 * blockSize) {
-    return Status::Corruption("Unable to read from file " + fname +
+    return Status_Corruption("Unable to read from file " + fname +
                               ": read attempt would read beyond file bounds");
   }
 
@@ -1120,7 +1120,7 @@ Status CTREncryptionProvider::CreateCipherStreamFromPrefix(
     std::unique_ptr<BlockAccessCipherStream>* result) {
   (*result) = std::unique_ptr<BlockAccessCipherStream>(
       new CTRCipherStream(cipher_, iv.data(), initialCounter));
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {

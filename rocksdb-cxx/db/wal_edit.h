@@ -140,7 +140,7 @@ class WalSet {
   // Add WAL(s).
   // If the WAL is closed,
   // then there must be an existing unclosed WAL,
-  // otherwise, return Status::Corruption.
+  // otherwise, return Status_Corruption.
   // Can happen when applying a VersionEdit or recovering from MANIFEST.
   Status AddWal(const WalAddition& wal);
   Status AddWals(const WalAdditions& wals);
@@ -158,8 +158,8 @@ class WalSet {
   const std::map<WalNumber, WalMetadata>& GetWals() const { return wals_; }
 
   // Checks whether there are missing or corrupted WALs.
-  // Returns Status::OK if there is no missing nor corrupted WAL,
-  // otherwise returns Status::Corruption.
+  // Returns Status_OK if there is no missing nor corrupted WAL,
+  // otherwise returns Status_Corruption.
   // logs_on_disk is a map from log number to the log filename.
   // Note that logs_on_disk may contain logs that is obsolete but
   // haven't been deleted from disk.

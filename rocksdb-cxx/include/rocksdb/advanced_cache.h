@@ -216,7 +216,7 @@ class Cache {
   // Insert a mapping from key->object into the cache and assign it
   // the specified charge against the total cache capacity. If
   // strict_capacity_limit is true and cache reaches its full capacity,
-  // return Status::MemoryLimit. `obj` must be non-nullptr if compatible
+  // return Status_MemoryLimit. `obj` must be non-nullptr if compatible
   // with secondary cache (helper->size_cb != nullptr), because Value() ==
   // nullptr is reserved for indicating some secondary cache failure cases.
   // On success, returns OK and takes ownership of `obj`, eventually deleting

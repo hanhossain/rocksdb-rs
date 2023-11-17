@@ -226,7 +226,7 @@ struct FilterInfo {
   uint32_t filter_id_ = 0;
   std::unique_ptr<const char[]> owner_;
   Slice filter_;
-  Status filter_construction_status = Status::OK();
+  Status filter_construction_status = rocksdb::Status_OK();
   uint32_t keys_added_ = 0;
   std::unique_ptr<FilterBitsReader> reader_;
   std::unique_ptr<FullFilterBlockReader> full_block_reader_;

@@ -88,7 +88,7 @@ Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
   *manifest_file_size = versions_->manifest_file_size();
 
   mutex_.Unlock();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
@@ -137,7 +137,7 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
     while (required != required_by_manifest.end()) {
       if (included == files.end() || *required < (*included)->LogNumber()) {
         // FAIL - did not find
-        return Status::Corruption(
+        return Status_Corruption(
             "WAL file " + std::to_string(*required) +
             " required by manifest but not in directory list");
       }
@@ -355,7 +355,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     s = FlushWAL(
         immutable_db_options_.track_and_verify_wals_in_manifest /* sync */);
     if (s.IsNotSupported()) {  // read-only DB or similar
-      s = Status::OK();
+      s = Status_OK();
     }
   }
 

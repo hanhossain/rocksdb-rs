@@ -358,7 +358,7 @@ struct BlockBasedTableOptions {
   // If such a table reader exceeds
   // the avaible space left in the block cache at some point (i.e, causing
   // a cache full under `LRUCacheOptions::strict_capacity_limit` = true),
-  // creation will fail with Status::MemoryLimit().
+  // creation will fail with Status_MemoryLimit().
   // (ii) If kDisabled:
   // Does not charge the memory usage mentioned above.
   // (iii) Compatible existing behavior:
@@ -371,7 +371,7 @@ struct BlockBasedTableOptions {
   // If such file metadata's
   // memory exceeds the avaible space left in the block cache at some point
   // (i.e, causing a cache full under `LRUCacheOptions::strict_capacity_limit` =
-  // true), creation will fail with Status::MemoryLimit().
+  // true), creation will fail with Status_MemoryLimit().
   // (ii) If kDisabled:
   // Does not charge the memory usage mentioned above.
   // (iii) Compatible existing behavior:

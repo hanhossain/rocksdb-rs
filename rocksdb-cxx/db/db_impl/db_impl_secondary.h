@@ -135,7 +135,7 @@ class DBImplSecondary : public DBImpl {
   Status Put(const WriteOptions& /*options*/,
              ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
              const Slice& /*value*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::PutEntity;
@@ -143,40 +143,40 @@ class DBImplSecondary : public DBImpl {
                    ColumnFamilyHandle* /* column_family */,
                    const Slice& /* key */,
                    const WideColumns& /* columns */) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::Merge;
   Status Merge(const WriteOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
                const Slice& /*value*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::Delete;
   Status Delete(const WriteOptions& /*options*/,
                 ColumnFamilyHandle* /*column_family*/,
                 const Slice& /*key*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SingleDelete;
   Status SingleDelete(const WriteOptions& /*options*/,
                       ColumnFamilyHandle* /*column_family*/,
                       const Slice& /*key*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   Status Write(const WriteOptions& /*options*/,
                WriteBatch* /*updates*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::CompactRange;
   Status CompactRange(const CompactRangeOptions& /*options*/,
                       ColumnFamilyHandle* /*column_family*/,
                       const Slice* /*begin*/, const Slice* /*end*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::CompactFiles;
@@ -187,27 +187,27 @@ class DBImplSecondary : public DBImpl {
       const int /*output_level*/, const int /*output_path_id*/ = -1,
       std::vector<std::string>* const /*output_file_names*/ = nullptr,
       CompactionJobInfo* /*compaction_job_info*/ = nullptr) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   Status DisableFileDeletions() override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   Status EnableFileDeletions(bool /*force*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   Status GetLiveFiles(std::vector<std::string>&,
                       uint64_t* /*manifest_file_size*/,
                       bool /*flush_memtable*/ = true) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::Flush;
   Status Flush(const FlushOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SetDBOptions;
@@ -215,7 +215,7 @@ class DBImplSecondary : public DBImpl {
                       /*options_map*/) override {
     // Currently not supported because changing certain options may cause
     // flush/compaction.
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SetOptions;
@@ -225,12 +225,12 @@ class DBImplSecondary : public DBImpl {
       override {
     // Currently not supported because changing certain options may cause
     // flush/compaction and/or write to MANIFEST.
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SyncWAL;
   Status SyncWAL() override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DB::IngestExternalFile;
@@ -238,7 +238,7 @@ class DBImplSecondary : public DBImpl {
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*external_files*/,
       const IngestExternalFileOptions& /*ingestion_options*/) override {
-    return Status::NotSupported("Not supported operation in secondary mode.");
+    return Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   // Try to catch up with the primary by reading as much as possible from the
@@ -270,7 +270,7 @@ class DBImplSecondary : public DBImpl {
  protected:
   Status FlushForGetLiveFiles() override {
     // No-op for read-only DB
-    return Status::OK();
+    return Status_OK();
   }
 
   bool OwnTablesAndLogs() const override {

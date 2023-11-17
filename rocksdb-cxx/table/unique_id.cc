@@ -30,30 +30,30 @@ Status DecodeSessionId(const std::string &db_session_id, uint64_t *upper,
                        uint64_t *lower) {
   const size_t len = db_session_id.size();
   if (len == 0) {
-    return Status::NotSupported("Missing db_session_id");
+    return Status_NotSupported("Missing db_session_id");
   }
   // Anything from 13 to 24 chars is reasonable. We don't have to limit to
   // exactly 20.
   if (len < 13) {
-    return Status::NotSupported("Too short db_session_id");
+    return Status_NotSupported("Too short db_session_id");
   }
   if (len > 24) {
-    return Status::NotSupported("Too long db_session_id");
+    return Status_NotSupported("Too long db_session_id");
   }
   uint64_t a = 0, b = 0;
   const char *buf = &db_session_id.front();
   bool success = ParseBaseChars<36>(&buf, len - 12U, &a);
   if (!success) {
-    return Status::NotSupported("Bad digit in db_session_id");
+    return Status_NotSupported("Bad digit in db_session_id");
   }
   success = ParseBaseChars<36>(&buf, 12U, &b);
   if (!success) {
-    return Status::NotSupported("Bad digit in db_session_id");
+    return Status_NotSupported("Bad digit in db_session_id");
   }
   assert(buf == &db_session_id.back() + 1);
   *upper = a >> 2;
   *lower = (b & (UINT64_MAX >> 2)) | (a << 62);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status GetSstInternalUniqueId(const std::string &db_id,
@@ -62,13 +62,13 @@ Status GetSstInternalUniqueId(const std::string &db_id,
                               bool force) {
   if (!force) {
     if (db_id.empty()) {
-      return Status::NotSupported("Missing db_id");
+      return Status_NotSupported("Missing db_id");
     }
     if (file_number == 0) {
-      return Status::NotSupported("Missing or bad file number");
+      return Status_NotSupported("Missing or bad file number");
     }
     if (db_session_id.empty()) {
-      return Status::NotSupported("Missing db_session_id");
+      return Status_NotSupported("Missing db_session_id");
     }
   }
   uint64_t session_upper = 0;  // Assignment to appease clang-analyze
@@ -116,7 +116,7 @@ Status GetSstInternalUniqueId(const std::string &db_id,
     out.ptr[2] = db_b;
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {
@@ -162,7 +162,7 @@ std::string EncodeUniqueIdBytes(UniqueIdPtr in) {
 
 Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out) {
   if (unique_id.size() != (out.extended ? 24 : 16)) {
-    return Status::NotSupported("Not a valid unique_id");
+    return Status_NotSupported("Not a valid unique_id");
   }
   const char *buf = &unique_id.front();
   out.ptr[0] = DecodeFixed64(&buf[0]);
@@ -170,7 +170,7 @@ Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out) {
   if (out.extended) {
     out.ptr[2] = DecodeFixed64(&buf[16]);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 template <typename ID>

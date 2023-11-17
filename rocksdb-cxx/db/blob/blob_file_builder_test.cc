@@ -643,7 +643,7 @@ TEST_P(BlobFileBuilderIOErrorTest, IOError) {
     Status* const s = static_cast<Status*>(arg);
     assert(s);
 
-    (*s) = Status::IOError(sync_point_);
+    (*s) = Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 

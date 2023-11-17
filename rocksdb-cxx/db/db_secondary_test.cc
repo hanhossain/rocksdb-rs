@@ -133,7 +133,7 @@ TEST_F(DBSecondaryTest, FailOpenIfLoggerCreationFail) {
       "rocksdb::CreateLoggerFromOptions:AfterGetPath", [&](void* arg) {
         auto* s = reinterpret_cast<Status*>(arg);
         assert(s);
-        *s = Status::IOError("Injected");
+        *s = Status_IOError("Injected");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1211,7 +1211,7 @@ TEST_F(DBSecondaryTest, StartFromInconsistent) {
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
         *(reinterpret_cast<Status*>(arg)) =
-            Status::Corruption("Inject corruption");
+            Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
   Options options1;
@@ -1245,7 +1245,7 @@ TEST_F(DBSecondaryTest, InconsistencyDuringCatchUp) {
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
         *(reinterpret_cast<Status*>(arg)) =
-            Status::Corruption("Inject corruption");
+            Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
   Status s = db_secondary_->TryCatchUpWithPrimary();

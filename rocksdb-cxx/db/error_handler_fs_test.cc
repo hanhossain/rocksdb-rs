@@ -1018,7 +1018,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   ASSERT_OK(s);
 
   listener->OverrideBGError(
-      Status(Status::NoSpace(), Severity::kHardError));
+      Status(Status_NoSpace(), Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1302,7 +1302,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteError) {
     WriteOptions wopts;
     wopts.sync = true;
     s = dbfull()->Write(wopts, &batch);
-    ASSERT_EQ(s, s.NoSpace());
+    ASSERT_EQ(s, Status_NoSpace());
   }
   SyncPoint::GetInstance()->DisableProcessing();
   // `ClearAllCallBacks()` is needed in addition to `DisableProcessing()` to
@@ -1562,7 +1562,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBCompactionError) {
     ASSERT_OK(db[i]->Flush(FlushOptions()));
   }
 
-  def_env->SetFilesystemActive(false, Status::NoSpace("Out of space"));
+  def_env->SetFilesystemActive(false, Status_NoSpace("Out of space"));
   for (auto i = 0; i < kNumDbInstances; ++i) {
     WriteBatch batch;
 
@@ -1681,7 +1681,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBVariousErrors) {
     ASSERT_OK(db[i]->Flush(FlushOptions()));
   }
 
-  def_env->SetFilesystemActive(false, Status::NoSpace("Out of space"));
+  def_env->SetFilesystemActive(false, Status_NoSpace("Out of space"));
   for (auto i = 0; i < kNumDbInstances; ++i) {
     WriteBatch batch;
 
@@ -2466,7 +2466,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAbortRecovery) {
   s = Flush();
   ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
-  ASSERT_EQ(listener->new_bg_error(), Status::Aborted());
+  ASSERT_EQ(listener->new_bg_error(), Status_Aborted());
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
 

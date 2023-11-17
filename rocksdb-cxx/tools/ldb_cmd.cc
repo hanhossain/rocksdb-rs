@@ -2523,30 +2523,30 @@ class InMemoryHandler : public WriteBatch::Handler {
   Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
     row_ << "PUT(" << cf << ") : ";
     commonPutMerge(key, value);
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
     row_ << "MERGE(" << cf << ") : ";
     commonPutMerge(key, value);
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkNoop(bool) override {
     row_ << "NOOP ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status DeleteCF(uint32_t cf, const Slice& key) override {
     row_ << "DELETE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(key.ToString()) << " ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
     row_ << "SINGLE_DELETE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(key.ToString()) << " ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
@@ -2554,31 +2554,31 @@ class InMemoryHandler : public WriteBatch::Handler {
     row_ << "DELETE_RANGE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(begin_key.ToString()) << " ";
     row_ << LDBCommand::StringToHex(end_key.ToString()) << " ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkBeginPrepare(bool unprepare) override {
     row_ << "BEGIN_PREPARE(";
     row_ << (unprepare ? "true" : "false") << ") ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkEndPrepare(const Slice& xid) override {
     row_ << "END_PREPARE(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkRollback(const Slice& xid) override {
     row_ << "ROLLBACK(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkCommit(const Slice& xid) override {
     row_ << "COMMIT(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status::OK();
+    return Status_OK();
   }
 
   Status MarkCommitWithTimestamp(const Slice& xid,
@@ -2586,7 +2586,7 @@ class InMemoryHandler : public WriteBatch::Handler {
     row_ << "COMMIT_WITH_TIMESTAMP(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ", ";
     row_ << LDBCommand::StringToHex(commit_ts.ToString()) << ") ";
-    return Status::OK();
+    return Status_OK();
   }
 
   ~InMemoryHandler() override {}
@@ -2651,7 +2651,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
       row.str("");
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter.Corruption(record.size(),
-                            Status::Corruption("log record too small"));
+                            Status_Corruption("log record too small"));
       } else {
         status = WriteBatchInternal::SetContents(&batch, record);
         if (!status.ok()) {

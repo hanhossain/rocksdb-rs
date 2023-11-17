@@ -441,9 +441,9 @@ Status GetGlobalSequenceNumber(const TableProperties& table_properties,
           msg_buf.data(), msg_buf.max_size(),
           "A non-external sst file have global seqno property with value %s",
           seqno_pos->second.c_str());
-      return Status::Corruption(msg_buf.data());
+      return Status_Corruption(msg_buf.data());
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   uint32_t version = DecodeFixed32(version_pos->second.c_str());
@@ -455,9 +455,9 @@ Status GetGlobalSequenceNumber(const TableProperties& table_properties,
                "An external sst file with version %u have global seqno "
                "property with value %s",
                version, seqno_pos->second.c_str());
-      return Status::Corruption(msg_buf.data());
+      return Status_Corruption(msg_buf.data());
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // Since we have a plan to deprecate global_seqno, we do not return failure
@@ -481,7 +481,7 @@ Status GetGlobalSequenceNumber(const TableProperties& table_properties,
           "with value %s, while largest seqno in the file is %llu",
           version, seqno_pos->second.c_str(),
           static_cast<unsigned long long>(largest_seqno));
-      return Status::Corruption(msg_buf.data());
+      return Status_Corruption(msg_buf.data());
     }
   }
   *seqno = global_seqno;
@@ -492,10 +492,10 @@ Status GetGlobalSequenceNumber(const TableProperties& table_properties,
              "An external sst file with version %u have global seqno property "
              "with value %llu, which is greater than kMaxSequenceNumber",
              version, static_cast<unsigned long long>(global_seqno));
-    return Status::Corruption(msg_buf.data());
+    return Status_Corruption(msg_buf.data());
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace
 
@@ -626,7 +626,7 @@ Status BlockBasedTable::Open(
     return s;
   }
   if (!IsSupportedFormatVersion(footer.format_version())) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Unknown Footer version. Maybe this file was created with newer "
         "version of RocksDB?");
   }
@@ -685,7 +685,7 @@ Status BlockBasedTable::Open(
   if (expected_unique_id != kNullUniqueId64x2) {
     auto props = rep->table_properties;
     if (!props) {
-      return Status::Corruption("Missing table properties on file " +
+      return Status_Corruption("Missing table properties on file " +
                                 std::to_string(cur_file_num) +
                                 " with known unique ID");
     }
@@ -695,7 +695,7 @@ Status BlockBasedTable::Open(
                                /*force*/ true);
     assert(s.ok());  // because force=true
     if (expected_unique_id != actual_unique_id) {
-      return Status::Corruption(
+      return Status_Corruption(
           "Mismatch in unique ID on table file " +
           std::to_string(cur_file_num) +
           ". Expected: " + InternalUniqueIdToHumanString(&expected_unique_id) +
@@ -791,7 +791,7 @@ Status BlockBasedTable::Open(
     s = table_reader_cache_res_mgr->MakeCacheReservation(
         mem_usage, &(rep->table_reader_cache_res_handle));
     if (s.IsMemoryLimit()) {
-      s = Status::MemoryLimit(
+      s = Status_MemoryLimit(
           "Can't allocate " +
           kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
               CacheEntryRole::kBlockBasedTableReader)] +
@@ -866,7 +866,7 @@ Status BlockBasedTable::PrefetchTail(
       prefetch_buffer->reset(new FilePrefetchBuffer(
           0 /* readahead_size */, 0 /* max_readahead_size */,
           false /* enable */, true /* track_min_offset */));
-      return Status::OK();
+      return Status_OK();
     }
   }
 
@@ -1288,7 +1288,7 @@ Status BlockBasedTable::ReadMetaIndexBlock(
   *metaindex_block = std::move(metaindex);
   // meta block uses bytewise comparator.
   iter->reset(metaindex_block->get()->NewMetaIterator());
-  return Status::OK();
+  return Status_OK();
 }
 
 template <typename TBlocklike>
@@ -1731,7 +1731,7 @@ WithBlocklikeCheck<Status, TBlocklike> BlockBasedTable::RetrieveBlock(
 
   const bool no_io = ro.read_tier == kBlockCacheTier;
   if (no_io) {
-    return Status::Incomplete("no blocking io");
+    return Status_Incomplete("no blocking io");
   }
 
   const bool maybe_compressed =
@@ -2073,7 +2073,7 @@ Status BlockBasedTable::ApproximateKeyAnchors(const ReadOptions& read_options,
   if (count != 0) {
     anchors.emplace_back(last_key, range_size);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 bool BlockBasedTable::TimestampMayMatch(const ReadOptions& read_options) const {
@@ -2096,7 +2096,7 @@ Status BlockBasedTable::Get(const ReadOptions& read_options, const Slice& key,
   // Similar to Bloom filter !may_match
   // If timestamp is beyond the range of the table, skip
   if (!TimestampMayMatch(read_options)) {
-    return Status::OK();
+    return Status_OK();
   }
   assert(key.size() >= 8);  // key must be internal key
   assert(get_context != nullptr);
@@ -2262,12 +2262,12 @@ Status BlockBasedTable::MultiGetFilter(const ReadOptions& read_options,
   if (mget_range->empty()) {
     // Caller should ensure non-empty (performance bug)
     assert(false);
-    return Status::OK();  // Nothing to do
+    return Status_OK();  // Nothing to do
   }
 
   FilterBlockReader* const filter = rep_->filter.get();
   if (!filter) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // First check the full filter
@@ -2283,7 +2283,7 @@ Status BlockBasedTable::MultiGetFilter(const ReadOptions& read_options,
   FullFilterKeysMayMatch(filter, mget_range, no_io, prefix_extractor,
                          &lookup_context, read_options);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlockBasedTable::Prefetch(const ReadOptions& read_options,
@@ -2293,7 +2293,7 @@ Status BlockBasedTable::Prefetch(const ReadOptions& read_options,
   UserComparatorWrapper user_comparator(comparator.user_comparator());
   // pre-condition
   if (begin && end && comparator.Compare(*begin, *end) > 0) {
-    return Status::InvalidArgument(*begin, *end);
+    return Status_InvalidArgument(*begin, *end);
   }
   BlockCacheLookupContext lookup_context{TableReaderCaller::kPrefetch};
   IndexBlockIter iiter_on_stack;
@@ -2345,7 +2345,7 @@ Status BlockBasedTable::Prefetch(const ReadOptions& read_options,
     }
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlockBasedTable::VerifyChecksum(const ReadOptions& read_options,
@@ -2572,7 +2572,7 @@ Status BlockBasedTable::CreateIndexReader(
     default: {
       std::string error_message =
           "Unrecognized index type: " + std::to_string(rep_->index_type);
-      return Status::InvalidArgument(error_message.c_str());
+      return Status_InvalidArgument(error_message.c_str());
     }
   }
 }
@@ -2766,7 +2766,7 @@ Status BlockBasedTable::GetKVPairsFromDataBlocks(
     }
     kv_pair_blocks->push_back(std::move(kv_pair_block));
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlockBasedTable::DumpTable(WritableFile* out_file) {
@@ -2879,9 +2879,9 @@ Status BlockBasedTable::DumpTable(WritableFile* out_file) {
   }
 
   if (!out_stream.good()) {
-    return Status::IOError("Failed to write to output file");
+    return Status_IOError("Failed to write to output file");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlockBasedTable::DumpIndexBlock(std::ostream& out_stream) {
@@ -2934,7 +2934,7 @@ Status BlockBasedTable::DumpIndexBlock(std::ostream& out_stream) {
     out_stream << "  ------\n";
   }
   out_stream << "\n";
-  return Status::OK();
+  return Status_OK();
 }
 
 Status BlockBasedTable::DumpDataBlocks(std::ostream& out_stream) {
@@ -3012,7 +3012,7 @@ Status BlockBasedTable::DumpDataBlocks(std::ostream& out_stream) {
                << std::to_string(datablock_size_avg) << "\n";
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 void BlockBasedTable::DumpKeyValue(const Slice& key, const Slice& value,

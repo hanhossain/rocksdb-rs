@@ -63,7 +63,7 @@ Status DBImpl::DisableFileDeletions() {
 Status DBImpl::DisableFileDeletionsWithLock() {
   mutex_.AssertHeld();
   ++disable_delete_obsolete_files_;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::EnableFileDeletions(bool force) {
@@ -97,7 +97,7 @@ Status DBImpl::EnableFileDeletions(bool force) {
   }
   job_context.Clean();
   LogFlush(immutable_db_options_.info_log);
-  return Status::OK();
+  return Status_OK();
 }
 
 bool DBImpl::IsFileDeletionsEnabled() const {
@@ -938,7 +938,7 @@ Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
     }
   }
   if (s.IsNotFound()) {
-    s = Status::OK();
+    s = Status_OK();
   }
   if (!s.ok()) {
     assert(s.IsIOError());

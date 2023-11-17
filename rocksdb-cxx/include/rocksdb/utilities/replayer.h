@@ -50,19 +50,19 @@ class Replayer {
 
   // Atomically read one trace into a TraceRecord (excluding the header and
   // footer traces).
-  // Return Status::OK() on success;
-  // Status::Incomplete() if Prepare() was not called or no more available
+  // Return Status_OK() on success;
+  // Status_Incomplete() if Prepare() was not called or no more available
   // trace;
-  // Status::NotSupported() if the read trace type is not supported.
+  // Status_NotSupported() if the read trace type is not supported.
   virtual Status Next(std::unique_ptr<TraceRecord>* record) = 0;
 
   // Execute one TraceRecord.
-  // Return Status::OK() if the execution was successful. Get/MultiGet traces
-  // will still return Status::OK() even if they got Status::NotFound()
+  // Return Status_OK() if the execution was successful. Get/MultiGet traces
+  // will still return Status_OK() even if they got Status_NotFound()
   // from DB::Get() or DB::MultiGet();
-  // Status::Incomplete() if Prepare() was not called or no more available
+  // Status_Incomplete() if Prepare() was not called or no more available
   // trace;
-  // Status::NotSupported() if the operation is not supported;
+  // Status_NotSupported() if the operation is not supported;
   // Otherwise, return the corresponding error status.
   //
   // The actual operation execution status and result(s) will be saved in

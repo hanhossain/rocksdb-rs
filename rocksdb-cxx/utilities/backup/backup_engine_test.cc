@@ -89,13 +89,13 @@ class DummyDB : public StackableDB {
   Status EnableFileDeletions(bool /*force*/) override {
     EXPECT_TRUE(!deletions_enabled_);
     deletions_enabled_ = true;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status DisableFileDeletions() override {
     EXPECT_TRUE(deletions_enabled_);
     deletions_enabled_ = false;
-    return Status::OK();
+    return Status_OK();
   }
 
   ColumnFamilyHandle* DefaultColumnFamily() const override { return nullptr; }
@@ -109,7 +109,7 @@ class DummyDB : public StackableDB {
     for (auto& f : live_files_) {
       bool success = ParseFileName(f, &number, &type);
       if (!success) {
-        return Status::InvalidArgument("Bad file name: " + f);
+        return Status_InvalidArgument("Bad file name: " + f);
       }
       files->emplace_back();
       LiveFileStorageInfo& info = files->back();
@@ -131,11 +131,11 @@ class DummyDB : public StackableDB {
         info.file_checksum_func_name = kUnknownFileChecksumFuncName;
       }
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // To avoid FlushWAL called on stacked db which is nullptr
-  Status FlushWAL(bool /*sync*/) override { return Status::OK(); }
+  Status FlushWAL(bool /*sync*/) override { return Status_OK(); }
 
   std::vector<std::string> live_files_;
 
@@ -419,18 +419,18 @@ class FileManager : public EnvWrapper {
     if (!s.ok()) {
       return s;
     } else if (children.size() <= 2) {  // . and ..
-      return Status::NotFound("Empty directory: " + dir);
+      return Status_NotFound("Empty directory: " + dir);
     }
     assert(fname != nullptr);
     while (true) {
       int i = rnd_.Next() % children.size();
       fname->assign(dir + "/" + children[i].name);
       *fsize = children[i].size_bytes;
-      return Status::OK();
+      return Status_OK();
     }
     // should never get here
     assert(false);
-    return Status::NotFound("");
+    return Status_NotFound("");
   }
 
   Status DeleteRandomFileInDir(const std::string& dir) {
@@ -445,7 +445,7 @@ class FileManager : public EnvWrapper {
     }
     // should never get here
     assert(false);
-    return Status::NotFound("");
+    return Status_NotFound("");
   }
 
   Status AppendToRandomFileInDir(const std::string& dir,
@@ -461,7 +461,7 @@ class FileManager : public EnvWrapper {
     }
     // should never get here
     assert(false);
-    return Status::NotFound("");
+    return Status_NotFound("");
   }
 
   Status CorruptFile(const std::string& fname, uint64_t bytes_to_corrupt) {
@@ -512,15 +512,15 @@ class FileManager : public EnvWrapper {
 
     auto pos = metadata.find("private");
     if (pos == std::string::npos) {
-      return Status::Corruption("private file is expected");
+      return Status_Corruption("private file is expected");
     }
     pos = metadata.find(" crc32 ", pos + 6);
     if (pos == std::string::npos) {
-      return Status::Corruption("checksum not found");
+      return Status_Corruption("checksum not found");
     }
 
     if (metadata.size() < pos + 7) {
-      return Status::Corruption("bad CRC32 checksum value");
+      return Status_Corruption("bad CRC32 checksum value");
     }
 
     if (appear_valid) {
@@ -902,14 +902,14 @@ class BackupEngineTest : public testing::Test {
       return s;
     }
     if (files.empty()) {
-      return Status::NotFound("");
+      return Status_NotFound("");
     }
     size_t i = rnd.Uniform(static_cast<int>(files.size()));
     *fname_out = dbname_ + "/" + files[i].name;
     if (fsize_out) {
       *fsize_out = files[i].size_bytes;
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   Status CorruptRandomDataFileInDB(const FileType& file_type) {
@@ -1275,7 +1275,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00010.sst"));
 
   // 00011.sst was only in backup 1, should be deleted
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             test_backup_env_->FileExists(backupdir_ + "/shared/00011.sst"));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00015.sst"));
 
@@ -1312,7 +1312,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
 
   // Make sure dangling sst file has been removed (somewhere along this
   // process). GarbageCollect should not be needed.
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             test_backup_env_->FileExists(backupdir_ + "/shared/00015.sst"));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00017.sst"));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00019.sst"));
@@ -1320,7 +1320,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
   // Now actually purge a good one
   ASSERT_OK(backup_engine_->PurgeOldBackups(1));
 
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             test_backup_env_->FileExists(backupdir_ + "/shared/00017.sst"));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00019.sst"));
 
@@ -1408,21 +1408,21 @@ TEST_F(BackupEngineTest, CorruptionsTest) {
   ASSERT_OK(backup_engine_->DeleteBackup(2));
   // Should not be needed anymore with auto-GC on DeleteBackup
   //(void)backup_engine_->GarbageCollect();
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/meta/5"));
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/private/5"));
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/meta/4"));
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/private/4"));
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/meta/3"));
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/private/3"));
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/meta/2"));
-  ASSERT_EQ(Status::NotFound(),
+  ASSERT_EQ(Status_NotFound(),
             file_manager_->FileExists(backupdir_ + "/private/2"));
   CloseBackupEngine();
   AssertBackupConsistency(0, 0, keys_iteration * 1, keys_iteration * 5);
@@ -2569,7 +2569,7 @@ TEST_F(BackupEngineTest, DeleteTmpFiles) {
       }
       CloseDBAndBackupEngine();
       for (std::string file_or_dir : tmp_files_and_dirs) {
-        if (file_manager_->FileExists(file_or_dir) != Status::NotFound()) {
+        if (file_manager_->FileExists(file_or_dir) != Status_NotFound()) {
           FAIL() << file_or_dir << " was expected to be deleted." << cleanup_fn;
         }
       }

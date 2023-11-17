@@ -88,7 +88,7 @@ class GenericRateLimiter : public RateLimiter {
     } else {
       *total_pending_requests = static_cast<int64_t>(queue_[pri].size());
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual int64_t GetBytesPerSecond() const override {

@@ -133,7 +133,7 @@ Status BuildTable(
       if (compaction_filter != nullptr &&
           !compaction_filter->IgnoreSnapshots()) {
         s.PermitUncheckedError();
-        return Status::NotSupported(
+        return Status_NotSupported(
             "CompactionFilter::IgnoreSnapshots() = false is not supported "
             "anymore.");
       }
@@ -417,7 +417,7 @@ Status BuildTable(
         }
         s = it->status();
         if (s.ok() && !output_validator.CompareValidator(file_validator)) {
-          s = Status::Corruption("Paranoid checksums do not match");
+          s = Status_Corruption("Paranoid checksums do not match");
         }
       }
     }
@@ -454,7 +454,7 @@ Status BuildTable(
   if (meta->fd.GetFileSize() == 0) {
     fname = "(nil)";
     if (s.ok()) {
-      status_for_listener = Status::Aborted("Empty SST file not kept");
+      status_for_listener = Status_Aborted("Empty SST file not kept");
     }
   }
   // Output to event logger and fire events.

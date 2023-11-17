@@ -309,9 +309,9 @@ class FileSystem : public Customizable {
   // do not need to be called for the paths.
   //
   // Different implementations may take different actions.
-  // By default, it's a no-op and returns Status::OK.
+  // By default, it's a no-op and returns Status_OK.
   virtual Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status::OK();
+    return Status_OK();
   }
   // Handles the event a DB or a ColumnFamily stops using the specified data
   // paths.
@@ -319,9 +319,9 @@ class FileSystem : public Customizable {
   // It should be called corresponding to each successful RegisterDbPaths.
   //
   // Different implementations may take different actions.
-  // By default, it's a no-op and returns Status::OK.
+  // By default, it's a no-op and returns Status_OK.
   virtual Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Create a brand new sequentially-readable file with the specified name.
@@ -1260,7 +1260,7 @@ class FSRandomRWFile {
   // aligned buffer for Direct I/O
   virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
 
-  // Write bytes in `data` at  offset `offset`, Returns Status::OK() on success.
+  // Write bytes in `data` at  offset `offset`, Returns Status_OK() on success.
   // Pass aligned buffer when use_direct_io() returns true.
   virtual IOStatus Write(uint64_t offset, const Slice& data,
                          const IOOptions& options, IODebugContext* dbg) = 0;
@@ -1272,7 +1272,7 @@ class FSRandomRWFile {
   // reached (or non-OK status). Read might fail if called again after
   // first result->size() < n.
   //
-  // Returns Status::OK() on success.
+  // Returns Status_OK() on success.
   virtual IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                         Slice* result, char* scratch,
                         IODebugContext* dbg) const = 0;

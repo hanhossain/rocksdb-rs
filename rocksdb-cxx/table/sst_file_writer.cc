@@ -65,7 +65,7 @@ struct SstFileWriter::Rep {
   Status AddImpl(const Slice& user_key, const Slice& value,
                  ValueType value_type) {
     if (!builder) {
-      return Status::InvalidArgument("File is not opened");
+      return Status_InvalidArgument("File is not opened");
     }
 
     if (file_info.num_entries == 0) {
@@ -74,7 +74,7 @@ struct SstFileWriter::Rep {
       if (internal_comparator.user_comparator()->Compare(
               user_key, file_info.largest_key) <= 0) {
         // Make sure that keys are added in order
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "Keys must be added in strict ascending order.");
       }
     }
@@ -95,12 +95,12 @@ struct SstFileWriter::Rep {
     file_info.file_size = builder->FileSize();
 
     InvalidatePageCache(false /* closing */).PermitUncheckedError();
-    return Status::OK();
+    return Status_OK();
   }
 
   Status Add(const Slice& user_key, const Slice& value, ValueType value_type) {
     if (internal_comparator.user_comparator()->timestamp_size() != 0) {
-      return Status::InvalidArgument("Timestamp size mismatch");
+      return Status_InvalidArgument("Timestamp size mismatch");
     }
 
     return AddImpl(user_key, value, value_type);
@@ -112,7 +112,7 @@ struct SstFileWriter::Rep {
 
     if (internal_comparator.user_comparator()->timestamp_size() !=
         timestamp_size) {
-      return Status::InvalidArgument("Timestamp size mismatch");
+      return Status_InvalidArgument("Timestamp size mismatch");
     }
 
     const size_t user_key_size = user_key.size();
@@ -132,17 +132,17 @@ struct SstFileWriter::Rep {
 
   Status DeleteRangeImpl(const Slice& begin_key, const Slice& end_key) {
     if (!builder) {
-      return Status::InvalidArgument("File is not opened");
+      return Status_InvalidArgument("File is not opened");
     }
     int cmp = internal_comparator.user_comparator()->CompareWithoutTimestamp(
         begin_key, end_key);
     if (cmp > 0) {
       // It's an empty range where endpoints appear mistaken. Don't bother
       // applying it to the DB, and return an error to the user.
-      return Status::InvalidArgument("end key comes before start key");
+      return Status_InvalidArgument("end key comes before start key");
     } else if (cmp == 0) {
       // It's an empty range. Don't bother applying it to the DB.
-      return Status::OK();
+      return Status_OK();
     }
 
     RangeTombstone tombstone(begin_key, end_key, 0 /* Sequence Number */);
@@ -172,12 +172,12 @@ struct SstFileWriter::Rep {
     file_info.file_size = builder->FileSize();
 
     InvalidatePageCache(false /* closing */).PermitUncheckedError();
-    return Status::OK();
+    return Status_OK();
   }
 
   Status DeleteRange(const Slice& begin_key, const Slice& end_key) {
     if (internal_comparator.user_comparator()->timestamp_size() != 0) {
-      return Status::InvalidArgument("Timestamp size mismatch");
+      return Status_InvalidArgument("Timestamp size mismatch");
     }
     return DeleteRangeImpl(begin_key, end_key);
   }
@@ -189,7 +189,7 @@ struct SstFileWriter::Rep {
 
     if (internal_comparator.user_comparator()->timestamp_size() !=
         timestamp_size) {
-      return Status::InvalidArgument("Timestamp size mismatch");
+      return Status_InvalidArgument("Timestamp size mismatch");
     }
 
     const size_t begin_key_size = begin_key.size();
@@ -215,7 +215,7 @@ struct SstFileWriter::Rep {
   }
 
   Status InvalidatePageCache(bool closing) {
-    Status s = Status::OK();
+    Status s = Status_OK();
     if (invalidate_page_cache == false) {
       // Fadvise disabled
       return s;
@@ -229,7 +229,7 @@ struct SstFileWriter::Rep {
       if (s.IsNotSupported()) {
         // NotSupported is fine as it could be a file type that doesn't use page
         // cache.
-        s = Status::OK();
+        s = Status_OK();
       }
       last_fadvise_size = builder->FileSize();
     }
@@ -397,11 +397,11 @@ Status SstFileWriter::DeleteRange(const Slice& begin_key, const Slice& end_key,
 Status SstFileWriter::Finish(ExternalSstFileInfo* file_info) {
   Rep* r = rep_.get();
   if (!r->builder) {
-    return Status::InvalidArgument("File is not opened");
+    return Status_InvalidArgument("File is not opened");
   }
   if (r->file_info.num_entries == 0 &&
       r->file_info.num_range_del_entries == 0) {
-    return Status::InvalidArgument("Cannot create sst file with no entries");
+    return Status_InvalidArgument("Cannot create sst file with no entries");
   }
 
   Status s = r->builder->Finish();

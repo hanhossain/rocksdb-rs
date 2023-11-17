@@ -43,7 +43,7 @@ Status BlobDB::Open(const DBOptions& db_options,
 
   if (column_families.size() != 1 ||
       column_families[0].name != kDefaultColumnFamilyName) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Blob DB doesn't support non-default column family.");
   }
 

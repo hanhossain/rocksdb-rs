@@ -324,15 +324,15 @@ class ObjectRegistry {
       std::string errmsg;
       *object = factory(target, guard, &errmsg);
       if (*object != nullptr) {
-        return Status::OK();
+        return Status_OK();
       } else if (errmsg.empty()) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             std::string("Could not load ") + T::Type(), target);
       } else {
-        return Status::InvalidArgument(errmsg, target);
+        return Status_InvalidArgument(errmsg, target);
       }
     } else {
-      return Status::NotSupported(std::string("Could not load ") + T::Type(),
+      return Status_NotSupported(std::string("Could not load ") + T::Type(),
                                   target);
     }
   }
@@ -351,9 +351,9 @@ class ObjectRegistry {
       return s;
     } else if (guard) {
       result->reset(guard.release());
-      return Status::OK();
+      return Status_OK();
     } else {
-      return Status::InvalidArgument(std::string("Cannot make a unique ") +
+      return Status_InvalidArgument(std::string("Cannot make a unique ") +
                                          T::Type() + " from unguarded one ",
                                      target);
     }
@@ -374,9 +374,9 @@ class ObjectRegistry {
       return s;
     } else if (guard) {
       result->reset(guard.release());
-      return Status::OK();
+      return Status_OK();
     } else {
-      return Status::InvalidArgument(std::string("Cannot make a shared ") +
+      return Status_InvalidArgument(std::string("Cannot make a shared ") +
                                          T::Type() + " from unguarded one ",
                                      target);
     }
@@ -395,12 +395,12 @@ class ObjectRegistry {
     if (!s.ok()) {
       return s;
     } else if (guard.get()) {
-      return Status::InvalidArgument(std::string("Cannot make a static ") +
+      return Status_InvalidArgument(std::string("Cannot make a static ") +
                                          T::Type() + " from a guarded one ",
                                      target);
     } else {
       *result = ptr;
-      return Status::OK();
+      return Status_OK();
     }
   }
 
@@ -470,7 +470,7 @@ class ObjectRegistry {
       auto object = parent_->GetManagedObject(T::Type(), id);
       if (object != nullptr) {
         *result = std::static_pointer_cast<T>(object);
-        return Status::OK();
+        return Status_OK();
       }
     }
     {
@@ -481,7 +481,7 @@ class ObjectRegistry {
         auto object = iter->second.lock();
         if (object != nullptr) {
           *result = std::static_pointer_cast<T>(object);
-          return Status::OK();
+          return Status_OK();
         }
       }
       std::shared_ptr<T> object;

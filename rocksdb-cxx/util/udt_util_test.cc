@@ -33,7 +33,7 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
 
     Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
-        return Status::InvalidArgument();
+        return Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }
@@ -57,7 +57,7 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
 
     Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
-        return Status::InvalidArgument();
+        return Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }
@@ -65,24 +65,24 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
     Status PutBlobIndexCF(uint32_t cf, const Slice& key,
                           const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
-        return Status::InvalidArgument();
+        return Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }
 
-    Status MarkBeginPrepare(bool) override { return Status::OK(); }
+    Status MarkBeginPrepare(bool) override { return Status_OK(); }
 
-    Status MarkEndPrepare(const Slice&) override { return Status::OK(); }
+    Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
 
-    Status MarkRollback(const Slice&) override { return Status::OK(); }
+    Status MarkRollback(const Slice&) override { return Status_OK(); }
 
-    Status MarkCommit(const Slice&) override { return Status::OK(); }
+    Status MarkCommit(const Slice&) override { return Status_OK(); }
 
     Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-      return Status::OK();
+      return Status_OK();
     }
 
-    Status MarkNoop(bool) override { return Status::OK(); }
+    Status MarkNoop(bool) override { return Status_OK(); }
 
     const std::vector<std::pair<uint32_t, const Slice>>& GetKeys() const {
       return keys_;
@@ -91,7 +91,7 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
    private:
     Status AddKey(uint32_t cf, const Slice& key) {
       keys_.push_back(std::make_pair(cf, key));
-      return Status::OK();
+      return Status_OK();
     }
     std::vector<std::pair<uint32_t, const Slice>> keys_;
   };

@@ -64,100 +64,12 @@ class Status {
 
   Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg);
 
-  static Status CopyAppendMessage(const Status& s, const Slice& delim,
-                                  const Slice& msg);
-
   Severity severity() const;
 
   // Returns a C style string indicating the message of the Status
   const char* getState() const;
 
-  // Return a success status.
-  static Status OK();
 
-  // Successful, though an existing something was overwritten
-  // Note: using variants of OK status for program logic is discouraged,
-  // but it can be useful for communicating statistical information without
-  // changing public APIs.
-  static Status OkOverwritten();
-
-  // Return error status of an appropriate type.
-  static Status NotFound(const Slice& msg, const Slice& msg2 = Slice());
-
-  // Fast path for not found without malloc;
-  static Status NotFound(SubCode msg);
-  static Status NotFound();
-
-  static Status NotFound(SubCode sc, const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status Corruption(const Slice& msg, const Slice& msg2 = Slice());
-  static Status Corruption(SubCode msg);
-  static Status Corruption();
-
-  static Status NotSupported(const Slice& msg, const Slice& msg2 = Slice());
-  static Status NotSupported(SubCode msg);
-  static Status NotSupported();
-
-  static Status InvalidArgument(const Slice& msg, const Slice& msg2 = Slice());
-  static Status InvalidArgument(SubCode msg);
-  static Status InvalidArgument();
-
-  static Status IOError(const Slice& msg, const Slice& msg2 = Slice());
-  static Status IOError(SubCode msg);
-  static Status IOError();
-
-  static Status MergeInProgress(const Slice& msg, const Slice& msg2 = Slice());
-  static Status MergeInProgress(SubCode msg);
-  static Status MergeInProgress();
-
-  static Status Incomplete(const Slice& msg, const Slice& msg2 = Slice());
-  static Status Incomplete(SubCode msg);
-  static Status Incomplete();
-
-  static Status ShutdownInProgress(SubCode msg);
-  static Status ShutdownInProgress();
-  static Status ShutdownInProgress(const Slice& msg, const Slice& msg2 = Slice());
-  static Status Aborted(SubCode msg);
-  static Status Aborted();
-  static Status Aborted(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status Busy(SubCode msg);
-  static Status Busy();
-  static Status Busy(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status TimedOut(SubCode msg);
-  static Status TimedOut();
-  static Status TimedOut(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status Expired(SubCode msg);
-  static Status Expired();
-  static Status Expired(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status TryAgain(SubCode msg);
-  static Status TryAgain();
-  static Status TryAgain(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status CompactionTooLarge(SubCode msg);
-  static Status CompactionTooLarge();
-  static Status CompactionTooLarge(const Slice& msg,
-                                   const Slice& msg2 = Slice());
-
-  static Status ColumnFamilyDropped(SubCode msg);
-  static Status ColumnFamilyDropped();
-  static Status ColumnFamilyDropped(const Slice& msg,
-                                    const Slice& msg2 = Slice());
-
-  static Status NoSpace();
-  static Status NoSpace(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status MemoryLimit();
-  static Status MemoryLimit(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status SpaceLimit();
-  static Status SpaceLimit(const Slice& msg, const Slice& msg2 = Slice());
-
-  static Status PathNotFound();
-  static Status PathNotFound(const Slice& msg, const Slice& msg2 = Slice());
 
 
   // Returns true iff the status indicates success.
@@ -252,6 +164,8 @@ class Status {
     explicit Status(Code _code, SubCode _subcode);
 
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
+    Status(Code _code, const Slice& msg, const Slice& msg2);
+
 
 protected:
   Code code_;
@@ -273,14 +187,101 @@ protected:
 
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
 
-        Status(Code _code, const Slice& msg, const Slice& msg2);
-
   void MarkChecked() const;
 };
+
+    Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
+    // Return a success status.
+    Status Status_OK();
+
+    // Successful, though an existing something was overwritten
+    // Note: using variants of OK status for program logic is discouraged,
+    // but it can be useful for communicating statistical information without
+    // changing public APIs.
+    Status Status_OkOverwritten();
+
+    // Return error status of an appropriate type.
+    Status Status_NotFound(const Slice& msg, const Slice& msg2 = Slice());
+
+    // Fast path for not found without malloc;
+    Status Status_NotFound(SubCode msg);
+    Status Status_NotFound();
+
+    Status Status_NotFound(SubCode sc, const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_Corruption(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_Corruption(SubCode msg);
+    Status Status_Corruption();
+
+    Status Status_NotSupported(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_NotSupported(SubCode msg);
+    Status Status_NotSupported();
+
+    Status Status_InvalidArgument(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_InvalidArgument(SubCode msg);
+    Status Status_InvalidArgument();
+
+    Status Status_IOError(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_IOError(SubCode msg);
+    Status Status_IOError();
+
+    Status Status_MergeInProgress(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_MergeInProgress(SubCode msg);
+    Status Status_MergeInProgress();
+
+    Status Status_Incomplete(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_Incomplete(SubCode msg);
+    Status Status_Incomplete();
+
+    Status Status_ShutdownInProgress(SubCode msg);
+    Status Status_ShutdownInProgress();
+    Status Status_ShutdownInProgress(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_Aborted(SubCode msg);
+    Status Status_Aborted();
+    Status Status_Aborted(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_Busy(SubCode msg);
+    Status Status_Busy();
+    Status Status_Busy(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_TimedOut(SubCode msg);
+    Status Status_TimedOut();
+    Status Status_TimedOut(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_Expired(SubCode msg);
+    Status Status_Expired();
+    Status Status_Expired(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_TryAgain(SubCode msg);
+    Status Status_TryAgain();
+    Status Status_TryAgain(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_CompactionTooLarge(SubCode msg);
+    Status Status_CompactionTooLarge();
+    Status Status_CompactionTooLarge(const Slice& msg,
+                                   const Slice& msg2 = Slice());
+
+    Status Status_ColumnFamilyDropped(SubCode msg);
+    Status Status_ColumnFamilyDropped();
+    Status Status_ColumnFamilyDropped(const Slice& msg,
+                                    const Slice& msg2 = Slice());
+
+    Status Status_NoSpace();
+    Status Status_NoSpace(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_MemoryLimit();
+    Status Status_MemoryLimit(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_SpaceLimit();
+    Status Status_SpaceLimit(const Slice& msg, const Slice& msg2 = Slice());
+
+    Status Status_PathNotFound();
+    Status Status_PathNotFound(const Slice& msg, const Slice& msg2 = Slice());
 
     Status Status_TxnNotPrepared();
     Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
     std::unique_ptr<const char[]> Status_CopyState(const char* s);
+
 
 
 }  // namespace ROCKSDB_NAMESPACE

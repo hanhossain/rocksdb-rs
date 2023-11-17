@@ -40,7 +40,7 @@ Status UncompressionDictReader::Create(
   uncompression_dict_reader->reset(
       new UncompressionDictReader(table, std::move(uncompression_dict)));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status UncompressionDictReader::ReadUncompressionDictionary(
@@ -85,7 +85,7 @@ Status UncompressionDictReader::GetOrReadUncompressionDictionary(
 
   if (!uncompression_dict_.IsEmpty()) {
     uncompression_dict->SetUnownedValue(uncompression_dict_.GetValue());
-    return Status::OK();
+    return Status_OK();
   }
 
   ReadOptions read_options;

@@ -1072,7 +1072,7 @@ TEST_F(DBTest2, WalFilterTestWithColumnFamilies) {
             cf_wal_keys_[column_family_id].push_back(
                 std::string(key.data(), key.size()));
           }
-          return Status::OK();
+          return Status_OK();
         }
       } handler(log_number, cf_log_number_map_, cf_wal_keys_);
 
@@ -1739,7 +1739,7 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
         "UncompressBlockData:TamperWithReturnValue", [](void* arg) {
           Status* ret = static_cast<Status*>(arg);
           ASSERT_OK(*ret);
-          *ret = Status::Corruption("kTestDecompressionFail");
+          *ret = Status_Corruption("kTestDecompressionFail");
         });
   } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionCorruption) {
     ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
@@ -1761,7 +1761,7 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
   const int kValSize = 256;
   Random rnd(405);
 
-  Status s = Status::OK();
+  Status s = Status_OK();
 
   DestroyAndReopen(options);
   // Write 10 random files
@@ -2370,7 +2370,7 @@ class MockPersistentCache : public PersistentCache {
 
     data_.insert(std::make_pair(page_key.ToString(), std::string(data, size)));
     size_ += size;
-    return Status::OK();
+    return Status_OK();
   }
 
   Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
@@ -2378,14 +2378,14 @@ class MockPersistentCache : public PersistentCache {
     MutexLock _(&lock_);
     auto it = data_.find(page_key.ToString());
     if (it == data_.end()) {
-      return Status::NotFound();
+      return Status_NotFound();
     }
 
     assert(page_key.ToString() == it->first);
     data->reset(new char[it->second.size()]);
     memcpy(data->get(), it->second.c_str(), it->second.size());
     *size = it->second.size();
-    return Status::OK();
+    return Status_OK();
   }
 
   bool IsCompressed() override { return is_compressed_; }
@@ -2739,7 +2739,7 @@ TEST_F(DBTest2, ReadAmpBitmapLiveInCacheAfterDBClose) {
   {
     const int kIdBufLen = 100;
     char id_buf[kIdBufLen];
-    Status s = Status::NotSupported();
+    Status s = Status_NotSupported();
 #ifndef OS_WIN
     // You can't open a directory on windows using random access file
     std::unique_ptr<RandomAccessFile> file;
@@ -4206,7 +4206,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
 
   virtual Status Handle(const StatusOnlyTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status::InvalidArgument("Invalid timestamps.");
+      return Status_InvalidArgument("Invalid timestamps.");
     }
     result.GetStatus().PermitUncheckedError();
     switch (result.GetTraceType()) {
@@ -4217,15 +4217,15 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status::Corruption("Type mismatch.");
+        return Status_Corruption("Type mismatch.");
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual Status Handle(
       const SingleValueTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status::InvalidArgument("Invalid timestamps.");
+      return Status_InvalidArgument("Invalid timestamps.");
     }
     result.GetStatus().PermitUncheckedError();
     switch (result.GetTraceType()) {
@@ -4236,15 +4236,15 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status::Corruption("Type mismatch.");
+        return Status_Corruption("Type mismatch.");
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual Status Handle(
       const MultiValuesTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status::InvalidArgument("Invalid timestamps.");
+      return Status_InvalidArgument("Invalid timestamps.");
     }
     for (const Status& s : result.GetMultiStatus()) {
       s.PermitUncheckedError();
@@ -4257,14 +4257,14 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status::Corruption("Type mismatch.");
+        return Status_Corruption("Type mismatch.");
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual Status Handle(const IteratorTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status::InvalidArgument("Invalid timestamps.");
+      return Status_InvalidArgument("Invalid timestamps.");
     }
     result.GetStatus().PermitUncheckedError();
     switch (result.GetTraceType()) {
@@ -4276,9 +4276,9 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status::Corruption("Type mismatch.");
+        return Status_Corruption("Type mismatch.");
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   void Reset() {
@@ -4416,7 +4416,7 @@ TEST_F(DBTest2, TraceAndReplay) {
         }
       };
 
-  // Unprepared replay should fail with Status::Incomplete()
+  // Unprepared replay should fail with Status_Incomplete()
   ASSERT_TRUE(replayer->Replay(ReplayOptions(), nullptr).IsIncomplete());
   ASSERT_OK(replayer->Prepare());
   // Ok to repeatedly Prepare().
@@ -4442,7 +4442,7 @@ TEST_F(DBTest2, TraceAndReplay) {
   ASSERT_OK(db2->Get(ro, handles[1], "rocksdb", &value));
   ASSERT_EQ("rocks", value);
 
-  // Re-replay should fail with Status::Incomplete() if Prepare() was not
+  // Re-replay should fail with Status_Incomplete() if Prepare() was not
   // called. Currently we don't distinguish between unprepared and trace end.
   ASSERT_TRUE(replayer->Replay(ReplayOptions(), nullptr).IsIncomplete());
 
@@ -4607,7 +4607,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
     // Next should fail if unprepared.
     ASSERT_TRUE(replayer->Next(nullptr).IsIncomplete());
     ASSERT_OK(replayer->Prepare());
-    Status s = Status::OK();
+    Status s = Status_OK();
     // Looping until trace end.
     while (s.ok()) {
       s = replayer->Next(&record);
@@ -4653,7 +4653,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
         }
       }
     }
-    // Status::Incomplete() will be returned when manually reading the trace
+    // Status_Incomplete() will be returned when manually reading the trace
     // end, or Prepare() was not called.
     ASSERT_TRUE(s.IsIncomplete());
     ASSERT_TRUE(replayer->Next(nullptr).IsIncomplete());
@@ -4705,7 +4705,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
   ASSERT_OK(replayer->Execute(record, &result));
   ASSERT_TRUE(result != nullptr);
   ASSERT_OK(result->Accept(&res_handler));  // Get x 1
-  // Get an non-existing key, should still return Status::OK().
+  // Get an non-existing key, should still return Status_OK().
   record.reset(new GetQueryTraceRecord(handles[0]->GetID(), "trace-record-get",
                                        fake_ts++));
   ASSERT_OK(replayer->Execute(record, &result));
@@ -4733,7 +4733,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
     ASSERT_OK(replayer->Execute(record, &result));
     ASSERT_TRUE(result != nullptr);
     ASSERT_OK(result->Accept(&res_handler));  // Seek x 1 in one iteration
-    // Seek to an non-existing key, should still return Status::OK().
+    // Seek to an non-existing key, should still return Status_OK().
     record.reset(new IteratorSeekQueryTraceRecord(
         seekType, handles[0]->GetID(), "trace-record-get", fake_ts++));
     ASSERT_OK(replayer->Execute(record, &result));
@@ -4760,7 +4760,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
   ASSERT_OK(replayer->Execute(record, &result));
   ASSERT_TRUE(result != nullptr);
   ASSERT_OK(result->Accept(&res_handler));  // MultiGet x 1
-  // Get all non-existing keys, should still return Status::OK().
+  // Get all non-existing keys, should still return Status_OK().
   record.reset(new MultiGetQueryTraceRecord(
       std::vector<uint32_t>({handles[0]->GetID(), handles[1]->GetID()}),
       std::vector<std::string>({"no1", "no2"}), fake_ts++));
@@ -4768,7 +4768,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
   ASSERT_TRUE(result != nullptr);
   ASSERT_OK(result->Accept(&res_handler));  // MultiGet x 2
   // Get mixed of existing and non-existing keys, should still return
-  // Status::OK().
+  // Status_OK().
   record.reset(new MultiGetQueryTraceRecord(
       std::vector<uint32_t>({handles[0]->GetID(), handles[1]->GetID()}),
       std::vector<std::string>({"a", "no2"}), fake_ts++));
@@ -5161,7 +5161,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   ASSERT_OK(Flush());
 
   PinnableSlice pinned_value;
-  ASSERT_EQ(Get("foo", &pinned_value), Status::OK());
+  ASSERT_EQ(Get("foo", &pinned_value), Status_OK());
   // It is not safe to pin mmap files as they might disappear by compaction
   ASSERT_FALSE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
@@ -5178,7 +5178,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   // Unsafe to pin mmap files when they could be kicked out of table cache
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
-  ASSERT_EQ(Get("foo", &pinned_value), Status::OK());
+  ASSERT_EQ(Get("foo", &pinned_value), Status_OK());
   ASSERT_FALSE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
 
@@ -5188,7 +5188,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   Close();
   options.max_open_files = -1;
   ASSERT_OK(ReadOnlyReopen(options));
-  ASSERT_EQ(Get("foo", &pinned_value), Status::OK());
+  ASSERT_EQ(Get("foo", &pinned_value), Status_OK());
   ASSERT_TRUE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
 }
@@ -5837,7 +5837,7 @@ TEST_F(DBTest2, FileConsistencyCheckInOpen) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         Status* ret_s = static_cast<Status*>(arg);
-        *ret_s = Status::Corruption("fcc");
+        *ret_s = Status_Corruption("fcc");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -6444,7 +6444,7 @@ class RenameCurrentTest : public DBTestBase,
     SyncPoint::GetInstance()->SetCallBack(sync_point_, [&](void* arg) {
       Status* s = reinterpret_cast<Status*>(arg);
       assert(s);
-      *s = Status::IOError("Injected IO error.");
+      *s = Status_IOError("Injected IO error.");
     });
   }
 
@@ -7111,7 +7111,7 @@ TEST_F(DBTest2, PointInTimeRecoveryWithIOErrorWhileReadingWal) {
       "LogReader::ReadMore:AfterReadFile", [&](void* arg) {
         if (should_inject_error) {
           ASSERT_NE(nullptr, arg);
-          *reinterpret_cast<Status*>(arg) = Status::IOError("Injected IOError");
+          *reinterpret_cast<Status*>(arg) = Status_IOError("Injected IOError");
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();

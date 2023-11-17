@@ -135,7 +135,7 @@ class DbKvChecksumTest
       case WriteMode::kNum:
         assert(false);
     }
-    return Status::NotSupported("WriteMode " +
+    return Status_NotSupported("WriteMode " +
                                 std::to_string(static_cast<int>(write_mode_)));
   }
 
@@ -223,7 +223,7 @@ TEST_P(DbKvChecksumTest, MemTableAddCorrupted) {
   // entry of type `op_type_`. Each attempt has one byte corrupted in its
   // memtable entry by adding `corrupt_byte_addend_` to its original value. The
   // test repeats until an attempt has been made on each byte in the encoded
-  // memtable entry. All attempts are expected to fail with `Status::Corruption`
+  // memtable entry. All attempts are expected to fail with `Status_Corruption`
   SyncPoint::GetInstance()->SetCallBack(
       "MemTable::Add:Encoded",
       std::bind(&DbKvChecksumTest::CorruptNextByteCallBack, this,
@@ -255,7 +255,7 @@ TEST_P(DbKvChecksumTest, MemTableAddWithColumnFamilyCorrupted) {
   // one byte corrupted in its memtable entry by adding `corrupt_byte_addend_`
   // to its original value. The test repeats until an attempt has been made on
   // each byte in the encoded memtable entry. All attempts are expected to fail
-  // with `Status::Corruption`.
+  // with `Status_Corruption`.
   Options options = CurrentOptions();
   if (op_type_ == WriteBatchOpType::kMerge) {
     options.merge_operator = MergeOperators::CreateStringAppendOperator();
@@ -296,7 +296,7 @@ TEST_P(DbKvChecksumTest, WriteToWALCorrupted) {
   // entry of type `op_type_`. Each attempt has one byte corrupted by adding
   // `corrupt_byte_addend_` to its original value. The test repeats until an
   // attempt has been made on each byte in the encoded write batch. All attempts
-  // are expected to fail with `Status::Corruption`
+  // are expected to fail with `Status_Corruption`
   Options options = CurrentOptions();
   if (op_type_ == WriteBatchOpType::kMerge) {
     options.merge_operator = MergeOperators::CreateStringAppendOperator();
@@ -333,7 +333,7 @@ TEST_P(DbKvChecksumTest, WriteToWALWithColumnFamilyCorrupted) {
   // entry of type `op_type_`. Each attempt has one byte corrupted by adding
   // `corrupt_byte_addend_` to its original value. The test repeats until an
   // attempt has been made on each byte in the encoded write batch. All attempts
-  // are expected to fail with `Status::Corruption`
+  // are expected to fail with `Status_Corruption`
   Options options = CurrentOptions();
   if (op_type_ == WriteBatchOpType::kMerge) {
     options.merge_operator = MergeOperators::CreateStringAppendOperator();
@@ -411,7 +411,7 @@ TEST_P(DbKvChecksumTestMergedBatch, WriteToWALCorrupted) {
   // `corrupt_byte_addend_` to the batch's original value during each attempt.
   // The test repeats until an attempt has been made on each byte in both
   // pre-merged write batches. All attempts are expected to fail with
-  // `Status::Corruption`.
+  // `Status_Corruption`.
   Options options = CurrentOptions();
   if (op_type1_ == WriteBatchOpType::kMerge ||
       op_type2_ == WriteBatchOpType::kMerge) {
@@ -522,7 +522,7 @@ TEST_P(DbKvChecksumTestMergedBatch, WriteToWALWithColumnFamilyCorrupted) {
   // `corrupt_byte_addend_` to the batch's original value during each attempt.
   // The test repeats until an attempt has been made on each byte in both
   // pre-merged write batches. All attempts are expected to fail with
-  // `Status::Corruption`.
+  // `Status_Corruption`.
   Options options = CurrentOptions();
   if (op_type1_ == WriteBatchOpType::kMerge ||
       op_type2_ == WriteBatchOpType::kMerge) {

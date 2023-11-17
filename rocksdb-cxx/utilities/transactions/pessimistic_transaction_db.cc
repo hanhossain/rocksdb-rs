@@ -76,19 +76,19 @@ Status PessimisticTransactionDB::VerifyCFOptions(
   assert(ucmp);
   size_t ts_sz = ucmp->timestamp_size();
   if (0 == ts_sz) {
-    return Status::OK();
+    return Status_OK();
   }
   if (ts_sz != sizeof(TxnTimestamp)) {
     std::ostringstream oss;
     oss << "Timestamp of transaction must have " << sizeof(TxnTimestamp)
         << " bytes. CF comparator " << std::string(ucmp->Name())
         << " timestamp size is " << ts_sz << " bytes";
-    return Status::InvalidArgument(oss.str());
+    return Status_InvalidArgument(oss.str());
   }
   if (txn_db_options_.write_policy != WRITE_COMMITTED) {
-    return Status::NotSupported("Only WriteCommittedTxn supports timestamp");
+    return Status_NotSupported("Only WriteCommittedTxn supports timestamp");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PessimisticTransactionDB::Initialize(
@@ -227,18 +227,18 @@ Status TransactionDB::Open(
   DB* db = nullptr;
   if (txn_db_options.write_policy == WRITE_COMMITTED &&
       db_options.unordered_write) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "WRITE_COMMITTED is incompatible with unordered_writes");
   }
   if (txn_db_options.write_policy == WRITE_UNPREPARED &&
       db_options.unordered_write) {
     // TODO(lth): support it
-    return Status::NotSupported(
+    return Status_NotSupported(
         "WRITE_UNPREPARED is currently incompatible with unordered_writes");
   }
   if (txn_db_options.write_policy == WRITE_PREPARED &&
       db_options.unordered_write && !db_options.two_write_queues) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "WRITE_PREPARED is incompatible with unordered_writes if "
         "two_write_queues is not enabled.");
   }
@@ -717,7 +717,7 @@ void PessimisticTransactionDB::UnregisterTransaction(Transaction* txn) {
 std::pair<Status, std::shared_ptr<const Snapshot>>
 PessimisticTransactionDB::CreateTimestampedSnapshot(TxnTimestamp ts) {
   if (kMaxTxnTimestamp == ts) {
-    return std::make_pair(Status::InvalidArgument("invalid ts"), nullptr);
+    return std::make_pair(Status_InvalidArgument("invalid ts"), nullptr);
   }
   assert(db_impl_);
   return db_impl_->CreateTimestampedSnapshot(kMaxSequenceNumber, ts);
@@ -774,7 +774,7 @@ Status SnapshotCreationCallback::operator()(SequenceNumber seq,
   if (snapshot_ && snapshot_notifier_) {
     snapshot_notifier_->SnapshotCreated(snapshot_.get());
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

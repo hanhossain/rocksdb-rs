@@ -116,12 +116,12 @@ Status RandomTransactionInserter::DBGet(
     if (*int_value == 0 || *int_value == ULONG_MAX) {
       *unexpected_error = true;
       fprintf(stderr, "Get returned unexpected value: %s\n", value.c_str());
-      s = Status::Corruption();
+      s = Status_Corruption();
     }
   } else if (s.IsNotFound()) {
     // Have not yet written to this key, so assume its value is 0
     *int_value = 0;
-    s = Status::OK();
+    s = Status_OK();
   }
   return s;
 }
@@ -350,7 +350,7 @@ Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
         if (int_value == 0 || int_value == ULONG_MAX) {
           fprintf(stderr, "Iter returned unexpected value: %s\n",
                   value.ToString().c_str());
-          return Status::Corruption();
+          return Status_Corruption();
         }
         ROCKS_LOG_DEBUG(
             db->GetDBOptions().info_log,
@@ -376,7 +376,7 @@ Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
               use_point_lookup, prev_i, prev_total, set_i, total,
               roptions.snapshot ? roptions.snapshot->GetSequenceNumber() : 0ul);
       fflush(stdout);
-      return Status::Corruption();
+      return Status_Corruption();
     } else {
       ROCKS_LOG_DEBUG(
           db->GetDBOptions().info_log,
@@ -393,7 +393,7 @@ Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
     db->ReleaseSnapshot(roptions.snapshot);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

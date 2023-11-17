@@ -88,7 +88,7 @@ class WriteUnpreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
     }
     // else SequenceNumber that is updated as part of the write already does the
     // publishing
-    return Status::OK();
+    return Status_OK();
   }
 
  private:

@@ -61,8 +61,8 @@ struct ConfigOptions;
 //
 // @return the function returns an OK status when it went successfully.  If
 //     the specified "dbpath" does not contain any option file, then a
-//     Status::NotFound will be returned.  A return value other than
-//     Status::OK or Status::NotFound indicates there is some error related
+//     Status_NotFound will be returned.  A return value other than
+//     Status_OK or Status_NotFound indicates there is some error related
 //     to the options file itself.
 //
 // @see LoadOptionsFromFile
@@ -85,7 +85,7 @@ Status LoadOptionsFromFile(const ConfigOptions& config_options,
 Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
                                 std::string* options_file_name);
 
-// Returns Status::OK if the input DBOptions and ColumnFamilyDescriptors
+// Returns Status_OK if the input DBOptions and ColumnFamilyDescriptors
 // are compatible with the latest options stored in the specified DB path.
 //
 // If the return status is non-ok, it means the specified RocksDB instance

@@ -81,9 +81,9 @@ class FilterBlockBuilder {
 
   // To optionally post-verify the filter returned from
   // FilterBlockBuilder::Finish.
-  // Return Status::OK() if skipped.
+  // Return Status_OK() if skipped.
   virtual Status MaybePostVerifyFilter(const Slice& /* filter_content */) {
-    return Status::OK();
+    return Status_OK();
   }
 };
 
@@ -166,7 +166,7 @@ class FilterBlockReader {
   virtual Status CacheDependencies(
       const ReadOptions& /*ro*/, bool /*pin*/,
       FilePrefetchBuffer* /* tail_prefetch_buffer */) {
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual bool RangeMayExist(const Slice* /*iterate_upper_bound*/,

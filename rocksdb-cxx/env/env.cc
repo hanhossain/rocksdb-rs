@@ -165,7 +165,7 @@ class LegacyRandomAccessFileWrapper : public FSRandomAccessFile {
       req.offset = fs_reqs[i].offset;
       req.len = fs_reqs[i].len;
       req.scratch = fs_reqs[i].scratch;
-      req.status = Status::OK();
+      req.status = Status_OK();
       reqs.emplace_back(std::move(req));
     }
     status = target_->MultiRead(reqs.data(), num_reqs);
@@ -644,7 +644,7 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
   Env* base = Env::Default();
   if (value.empty() || base->IsInstanceOf(value)) {
     *result = base;
-    return Status::OK();
+    return Status_OK();
   } else {
     RegisterSystemEnvs();
     Env* env = *result;
@@ -675,14 +675,14 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
   Env* base = Env::Default();
   if (id.empty() || base->IsInstanceOf(id)) {
     env = base;
-    status = Status::OK();
+    status = Status_OK();
   } else {
     RegisterSystemEnvs();
     // First, try to load the Env as a unique object.
     status = config_options.registry->NewObject<Env>(id, &env, &uniq);
   }
   if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-    status = Status::OK();
+    status = Status_OK();
   } else if (status.ok()) {
     status = Customizable::ConfigureNewObject(config_options, env, opt_map);
   }
@@ -700,10 +700,10 @@ Status Env::CreateFromUri(const ConfigOptions& config_options,
   if (env_uri.empty() && fs_uri.empty()) {
     // Neither specified.  Use the default
     guard->reset();
-    return Status::OK();
+    return Status_OK();
   } else if (!env_uri.empty() && !fs_uri.empty()) {
     // Both specified.  Cannot choose.  Return Invalid
-    return Status::InvalidArgument("cannot specify both fs_uri and env_uri");
+    return Status_InvalidArgument("cannot specify both fs_uri and env_uri");
   } else if (fs_uri.empty()) {  // Only have an ENV URI.  Create an Env from it
     return CreateFromString(config_options, env_uri, result, guard);
   } else {
@@ -772,7 +772,7 @@ Status Env::GetChildrenFileAttributes(const std::string& dir,
     result_size++;
   }
   result->resize(result_size);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status Env::GetHostNameString(std::string* result) {
@@ -840,11 +840,11 @@ Status Logger::Close() {
     closed_ = true;
     return CloseImpl();
   } else {
-    return Status::OK();
+    return Status_OK();
   }
 }
 
-Status Logger::CloseImpl() { return Status::NotSupported(); }
+Status Logger::CloseImpl() { return Status_NotSupported(); }
 
 FileLock::~FileLock() {}
 
@@ -1159,7 +1159,7 @@ Status NewEnvLogger(const std::string& fname, Env* env,
 
   *result = std::make_shared<EnvLogger>(std::move(writable_file), fname,
                                         options, env);
-  return Status::OK();
+  return Status_OK();
 }
 
 const std::shared_ptr<FileSystem>& Env::GetFileSystem() const {
@@ -1228,7 +1228,7 @@ Status SystemClock::CreateFromString(const ConfigOptions& config_options,
   auto clock = SystemClock::Default();
   if (clock->IsInstanceOf(value)) {
     *result = clock;
-    return Status::OK();
+    return Status_OK();
   } else {
     static std::once_flag once;
     std::call_once(once, [&]() {

@@ -499,7 +499,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
       info_log_list->push_back(f);
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 std::string NormalizePath(const std::string& path) {

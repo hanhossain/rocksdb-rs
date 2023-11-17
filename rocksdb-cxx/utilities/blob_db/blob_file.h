@@ -207,7 +207,7 @@ class BlobFile {
 
   // Read blob file header and footer. Return corruption if file header is
   // malform or incomplete. If footer is malform or incomplete, set
-  // footer_valid_ to false and return Status::OK.
+  // footer_valid_ to false and return Status_OK.
   Status ReadMetadata(const std::shared_ptr<FileSystem>& fs,
                       const FileOptions& file_options);
 

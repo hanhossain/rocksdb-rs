@@ -730,7 +730,7 @@ class Statistics : public Customizable {
   }
 
   // Resets all ticker and histogram stats
-  virtual Status Reset() { return Status::NotSupported("Not implemented"); }
+  virtual Status Reset() { return Status_NotSupported("Not implemented"); }
 
   using Customizable::ToString;
   // String representation of the statistic object. Must be thread-safe.

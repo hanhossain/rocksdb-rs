@@ -85,7 +85,7 @@ Status FileSystem::CreateFromString(const ConfigOptions& config_options,
   auto default_fs = FileSystem::Default();
   if (default_fs->IsInstanceOf(value)) {
     *result = default_fs;
-    return Status::OK();
+    return Status_OK();
   } else {
     static std::once_flag once;
     std::call_once(once, [&]() {

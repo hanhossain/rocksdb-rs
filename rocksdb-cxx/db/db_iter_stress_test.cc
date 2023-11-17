@@ -102,9 +102,9 @@ struct StressTestIterator : public InternalIterator {
       return false;
     }
     if (rnd->Next() % 2) {
-      status_ = Status::Incomplete("test");
+      status_ = Status_Incomplete("test");
     } else {
-      status_ = Status::IOError("test");
+      status_ = Status_IOError("test");
     }
     if (trace) {
       std::cout << "injecting " << status_.ToString() << std::endl;
@@ -180,7 +180,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status::OK();
+    status_ = Status_OK();
     iter = 0;
     SkipForward();
   }
@@ -188,7 +188,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status::OK();
+    status_ = Status_OK();
     iter = (int)data->entries.size() - 1;
     SkipBackward();
   }
@@ -197,7 +197,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status::OK();
+    status_ = Status_OK();
     // Binary search.
     auto it = std::partition_point(
         data->entries.begin(), data->entries.end(),
@@ -209,7 +209,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status::OK();
+    status_ = Status_OK();
     // Binary search.
     auto it = std::partition_point(
         data->entries.begin(), data->entries.end(),

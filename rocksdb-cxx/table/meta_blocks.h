@@ -159,7 +159,7 @@ Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file,
 
 // Read the specified meta block with name meta_block_name
 // from `file` and initialize `contents` with contents of this block.
-// Return Status::OK in case of success.
+// Return Status_OK in case of success.
 Status ReadMetaBlock(RandomAccessFileReader* file,
                      FilePrefetchBuffer* prefetch_buffer, uint64_t file_size,
                      uint64_t table_magic_number,

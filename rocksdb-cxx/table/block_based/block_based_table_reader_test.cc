@@ -559,7 +559,7 @@ TEST_P(ChargeTableReaderTest, Basic) {
          "between "
          "charge_table_reader_ == kDisabled and == kEnabled)";
 
-  Status s = Status::OK();
+  Status s = Status_OK();
   std::size_t opened_table_reader_num = 0;
   std::string table_name;
   std::vector<std::unique_ptr<BlockBasedTable>> tables;

@@ -113,7 +113,7 @@ class MockTableIterator : public InternalIterator {
 
   Slice value() const override { return Slice(itr_->second); }
 
-  Status status() const override { return Status::OK(); }
+  Status status() const override { return Status_OK(); }
 
  private:
   const KVVector& table_;
@@ -162,7 +162,7 @@ class MockTableBuilder : public TableBuilder {
   }
 
   // Return non-ok iff some error has been detected.
-  Status status() const override { return Status::OK(); }
+  Status status() const override { return Status_OK(); }
 
   // Return non-ok iff some error happens during IO.
   IOStatus io_status() const override { return IOStatus::OK(); }
@@ -170,7 +170,7 @@ class MockTableBuilder : public TableBuilder {
   Status Finish() override {
     MutexLock lock_guard(&file_system_->mutex);
     file_system_->files.insert({id_, table_});
-    return Status::OK();
+    return Status_OK();
   }
 
   void Abandon() override {}
@@ -225,7 +225,7 @@ Status MockTableReader::Get(const ReadOptions&, const Slice& key,
       break;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 std::shared_ptr<const TableProperties> MockTableReader::GetTableProperties()
@@ -252,12 +252,12 @@ Status MockTableFactory::NewTableReader(
 
   auto it = file_system_.files.find(id);
   if (it == file_system_.files.end()) {
-    return Status::IOError("Mock file not found");
+    return Status_IOError("Mock file not found");
   }
 
   table_reader->reset(new MockTableReader(it->second));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 TableBuilder* MockTableFactory::NewTableBuilder(

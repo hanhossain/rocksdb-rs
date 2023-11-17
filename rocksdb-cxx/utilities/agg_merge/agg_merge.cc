@@ -30,11 +30,11 @@ const std::string kErrorFuncName = "kErrorFuncName";
 Status AddAggregator(const std::string& function_name,
                      std::unique_ptr<Aggregator>&& agg) {
   if (function_name == kErrorFuncName) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot register function name kErrorFuncName");
   }
   func_map.emplace(function_name, std::move(agg));
-  return Status::OK();
+  return Status_OK();
 }
 
 AggMergeOperator::AggMergeOperator() {}
@@ -50,14 +50,14 @@ std::string EncodeAggFuncAndPayloadNoCheck(const Slice& function_name,
 Status EncodeAggFuncAndPayload(const Slice& function_name, const Slice& payload,
                                std::string& output) {
   if (function_name == kErrorFuncName) {
-    return Status::InvalidArgument("Cannot use error function name");
+    return Status_InvalidArgument("Cannot use error function name");
   }
   if (function_name != kUnnamedFuncName &&
       func_map.find(function_name.ToString()) == func_map.end()) {
-    return Status::InvalidArgument("Function name not registered");
+    return Status_InvalidArgument("Function name not registered");
   }
   output = EncodeAggFuncAndPayloadNoCheck(function_name, payload);
-  return Status::OK();
+  return Status_OK();
 }
 
 bool ExtractAggFuncAndValue(const Slice& op, Slice& func, Slice& value) {

@@ -547,7 +547,7 @@ TEST_F(CustomizableTest, PrepareOptionsTest) {
 
     Status PrepareOptions(const ConfigOptions& opts) override {
       if (!can_prepare_) {
-        return Status::InvalidArgument("Cannot Prepare");
+        return Status_InvalidArgument("Cannot Prepare");
       } else {
         return TestCustomizable::PrepareOptions(opts);
       }
@@ -1231,7 +1231,7 @@ class TestSecondaryCache : public SecondaryCache {
   const char* Name() const override { return kClassName(); }
   Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
                 const Cache::CacheItemHelper* /*helper*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   std::unique_ptr<SecondaryCacheResultHandle> Lookup(
       const Slice& /*key*/, const Cache::CacheItemHelper* /*helper*/,
@@ -1298,26 +1298,26 @@ class MockEncryptionProvider : public EncryptionProvider {
   size_t GetPrefixLength() const override { return 0; }
   Status CreateNewPrefix(const std::string& /*fname*/, char* /*prefix*/,
                          size_t /*prefixLength*/) const override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   Status AddCipher(const std::string& /*descriptor*/, const char* /*cipher*/,
                    size_t /*len*/, bool /*for_write*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   Status CreateCipherStream(
       const std::string& /*fname*/, const EnvOptions& /*options*/,
       Slice& /*prefix*/,
       std::unique_ptr<BlockAccessCipherStream>* /*result*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   Status ValidateOptions(const DBOptions& db_opts,
                          const ColumnFamilyOptions& cf_opts) const override {
     if (EndsWith(id_, "://test")) {
       return EncryptionProvider::ValidateOptions(db_opts, cf_opts);
     } else {
-      return Status::InvalidArgument("MockProvider not initialized");
+      return Status_InvalidArgument("MockProvider not initialized");
     }
   }
 
@@ -1329,7 +1329,7 @@ class MockCipher : public BlockCipher {
  public:
   const char* Name() const override { return "Mock"; }
   size_t BlockSize() override { return 0; }
-  Status Encrypt(char* /*data*/) override { return Status::NotSupported(); }
+  Status Encrypt(char* /*data*/) override { return Status_NotSupported(); }
   Status Decrypt(char* data) override { return Encrypt(data); }
 };
 

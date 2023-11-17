@@ -96,7 +96,7 @@ DBIter::DBIter(Env* _env, const ReadOptions& read_options,
 
 Status DBIter::GetProperty(std::string prop_name, std::string* prop) {
   if (prop == nullptr) {
-    return Status::InvalidArgument("prop is nullptr");
+    return Status_InvalidArgument("prop is nullptr");
   }
   if (prop_name == "rocksdb.iterator.super-version-number") {
     // First try to pass the value returned from inner iterator.
@@ -107,18 +107,18 @@ Status DBIter::GetProperty(std::string prop_name, std::string* prop) {
     } else {
       *prop = "Iterator is not valid.";
     }
-    return Status::OK();
+    return Status_OK();
   } else if (prop_name == "rocksdb.iterator.internal-key") {
     *prop = saved_key_.GetUserKey().ToString();
-    return Status::OK();
+    return Status_OK();
   }
-  return Status::InvalidArgument("Unidentified property.");
+  return Status_InvalidArgument("Unidentified property.");
 }
 
 bool DBIter::ParseKey(ParsedInternalKey* ikey) {
   Status s = ParseInternalKey(iter_.key(), ikey, false /* log_err_key */);
   if (!s.ok()) {
-    status_ = Status::Corruption("In DBIter: ", s.getState());
+    status_ = Status_Corruption("In DBIter: ", s.getState());
     valid_ = false;
     ROCKS_LOG_ERROR(logger_, "In DBIter: %s", status_.getState());
     return false;
@@ -189,7 +189,7 @@ bool DBIter::SetBlobValueIfNeeded(const Slice& user_key,
   }
 
   if (!version_) {
-    status_ = Status::Corruption("Encountered unexpected blob index.");
+    status_ = Status_Corruption("Encountered unexpected blob index.");
     valid_ = false;
     return false;
   }
@@ -414,7 +414,7 @@ bool DBIter::FindNextUserEntryInternal(bool skipping_saved_key,
             break;
           default:
             valid_ = false;
-            status_ = Status::Corruption(
+            status_ = Status_Corruption(
                 "Unknown value type: " +
                 std::to_string(static_cast<unsigned int>(ikey_.type)));
             return false;
@@ -512,7 +512,7 @@ bool DBIter::FindNextUserEntryInternal(bool skipping_saved_key,
 bool DBIter::MergeValuesNewToOld() {
   if (!merge_operator_) {
     ROCKS_LOG_ERROR(logger_, "Options::merge_operator is null.");
-    status_ = Status::InvalidArgument("merge_operator_ must be set.");
+    status_ = Status_InvalidArgument("merge_operator_ must be set.");
     valid_ = false;
     return false;
   }
@@ -574,7 +574,7 @@ bool DBIter::MergeValuesNewToOld() {
     } else if (kTypeBlobIndex == ikey.type) {
       if (expose_blob_index_) {
         status_ =
-            Status::NotSupported("BlobDB does not support merge operator.");
+            Status_NotSupported("BlobDB does not support merge operator.");
         valid_ = false;
         return false;
       }
@@ -612,7 +612,7 @@ bool DBIter::MergeValuesNewToOld() {
       return true;
     } else {
       valid_ = false;
-      status_ = Status::Corruption(
+      status_ = Status_Corruption(
           "Unrecognized value type: " +
           std::to_string(static_cast<unsigned int>(ikey.type)));
       return false;
@@ -902,7 +902,7 @@ bool DBIter::FindValueForCurrentKey() {
           pinned_value_ = iter_.value();
         } else {
           valid_ = false;
-          status_ = Status::NotSupported(
+          status_ = Status_NotSupported(
               "Backward iteration not supported if underlying iterator's value "
               "cannot be pinned.");
         }
@@ -927,7 +927,7 @@ bool DBIter::FindValueForCurrentKey() {
       } break;
       default:
         valid_ = false;
-        status_ = Status::Corruption(
+        status_ = Status_Corruption(
             "Unknown value type: " +
             std::to_string(static_cast<unsigned int>(last_key_entry_type)));
         return false;
@@ -986,7 +986,7 @@ bool DBIter::FindValueForCurrentKey() {
       } else if (last_not_merge_type == kTypeBlobIndex) {
         if (expose_blob_index_) {
           status_ =
-              Status::NotSupported("BlobDB does not support merge operator.");
+              Status_NotSupported("BlobDB does not support merge operator.");
           valid_ = false;
           return false;
         }
@@ -1035,7 +1035,7 @@ bool DBIter::FindValueForCurrentKey() {
       break;
     default:
       valid_ = false;
-      status_ = Status::Corruption(
+      status_ = Status_Corruption(
           "Unknown value type: " +
           std::to_string(static_cast<unsigned int>(last_key_entry_type)));
       return false;
@@ -1197,7 +1197,7 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
     } else if (ikey.type == kTypeBlobIndex) {
       if (expose_blob_index_) {
         status_ =
-            Status::NotSupported("BlobDB does not support merge operator.");
+            Status_NotSupported("BlobDB does not support merge operator.");
         valid_ = false;
         return false;
       }
@@ -1220,7 +1220,7 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
       return true;
     } else {
       valid_ = false;
-      status_ = Status::Corruption(
+      status_ = Status_Corruption(
           "Unknown value type: " +
           std::to_string(static_cast<unsigned int>(ikey.type)));
       return false;
@@ -1362,7 +1362,7 @@ bool DBIter::TooManyInternalKeysSkipped(bool increment) {
   if ((max_skippable_internal_keys_ > 0) &&
       (num_internal_keys_skipped_ > max_skippable_internal_keys_)) {
     valid_ = false;
-    status_ = Status::Incomplete("Too many internal keys skipped.");
+    status_ = Status_Incomplete("Too many internal keys skipped.");
     return true;
   } else if (increment) {
     num_internal_keys_skipped_++;
@@ -1460,7 +1460,7 @@ void DBIter::Seek(const Slice& target) {
         .PermitUncheckedError();
   }
 
-  status_ = Status::OK();
+  status_ = Status_OK();
   ReleaseTempPinnedData();
   ResetBlobValue();
   ResetValueAndColumns();
@@ -1536,7 +1536,7 @@ void DBIter::SeekForPrev(const Slice& target) {
         .PermitUncheckedError();
   }
 
-  status_ = Status::OK();
+  status_ = Status_OK();
   ReleaseTempPinnedData();
   ResetBlobValue();
   ResetValueAndColumns();
@@ -1594,7 +1594,7 @@ void DBIter::SeekToFirst() {
   if (!expect_total_order_inner_iter()) {
     max_skip_ = std::numeric_limits<uint64_t>::max();
   }
-  status_ = Status::OK();
+  status_ = Status_OK();
   // if iterator is empty, this status_ could be unchecked.
   status_.PermitUncheckedError();
   direction_ = Direction::kForward;
@@ -1657,7 +1657,7 @@ void DBIter::SeekToLast() {
   if (!expect_total_order_inner_iter()) {
     max_skip_ = std::numeric_limits<uint64_t>::max();
   }
-  status_ = Status::OK();
+  status_ = Status_OK();
   // if iterator is empty, this status_ could be unchecked.
   status_.PermitUncheckedError();
   direction_ = Direction::kReverse;

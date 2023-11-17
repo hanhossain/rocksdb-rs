@@ -16,7 +16,7 @@ namespace experimental {
 Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
                            const Slice* begin, const Slice* end) {
   if (db == nullptr) {
-    return Status::InvalidArgument("DB is empty");
+    return Status_InvalidArgument("DB is empty");
   }
 
   return db->SuggestCompactRange(column_family, begin, end);
@@ -24,7 +24,7 @@ Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
 
 Status PromoteL0(DB* db, ColumnFamilyHandle* column_family, int target_level) {
   if (db == nullptr) {
-    return Status::InvalidArgument("Didn't recognize DB object");
+    return Status_InvalidArgument("Didn't recognize DB object");
   }
   return db->PromoteL0(column_family, target_level);
 }

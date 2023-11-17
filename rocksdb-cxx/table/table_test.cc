@@ -93,11 +93,11 @@ class DummyPropertiesCollector : public TablePropertiesCollector {
   const char* Name() const override { return "DummyPropertiesCollector"; }
 
   Status Finish(UserCollectedProperties* /*properties*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status Add(const Slice& /*user_key*/, const Slice& /*value*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {
@@ -329,7 +329,7 @@ class BlockConstructor : public Constructor {
     BlockContents contents;
     contents.data = data_;
     block_ = new Block(std::move(contents));
-    return Status::OK();
+    return Status_OK();
   }
   InternalIterator* NewIterator(
       const SliceTransform* /*prefix_extractor*/) const override {
@@ -530,7 +530,7 @@ class MemTableConstructor : public Constructor {
       }
       seq++;
     }
-    return Status::OK();
+    return Status_OK();
   }
   InternalIterator* NewIterator(
       const SliceTransform* /*prefix_extractor*/) const override {
@@ -591,7 +591,7 @@ class DBConstructor : public Constructor {
       EXPECT_OK(batch.Put(kv.first, kv.second));
       EXPECT_TRUE(db_->Write(WriteOptions(), &batch).ok());
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   InternalIterator* NewIterator(
@@ -1149,7 +1149,7 @@ class BlockBasedTableTest
         NewBlockCacheTraceWriter(env_->GetSystemClock().get(), trace_writer_opt,
                                  std::move(trace_writer));
     ASSERT_NE(block_cache_trace_writer, nullptr);
-    // Always return Status::OK().
+    // Always return Status_OK().
     ASSERT_OK(c->block_cache_tracer_.StartTrace(
         trace_opt, std::move(block_cache_trace_writer)));
 
@@ -1275,7 +1275,7 @@ class FileChecksumTestHelper {
   Status ResetTableBuilder(std::unique_ptr<TableBuilder>&& builder) {
     assert(builder != nullptr);
     table_builder_ = std::move(builder);
-    return Status::OK();
+    return Status_OK();
   }
 
   void AddKVtoKVMap(int num_entries) {
@@ -1347,7 +1347,7 @@ class FileChecksumTestHelper {
     EXPECT_EQ(offset, static_cast<uint64_t>(table_builder_->FileSize()));
     file_checksum_generator->Finalize();
     *checksum = file_checksum_generator->GetChecksum();
-    return Status::OK();
+    return Status_OK();
   }
 
  private:
@@ -1954,7 +1954,7 @@ void PrefetchRange(TableConstructor* c, Options* opt,
                    const char* key_end,
                    const std::vector<std::string>& keys_in_cache,
                    const std::vector<std::string>& keys_not_in_cache,
-                   const Status expected_status = Status::OK()) {
+                   const Status expected_status = Status_OK()) {
   // reset the cache and reopen the table
   table_options->block_cache = NewLRUCache(16 * 1024 * 1024, 4);
   opt->table_factory.reset(NewBlockBasedTableFactory(*table_options));
@@ -2057,7 +2057,7 @@ TEST_P(BlockBasedTableTest, PrefetchTest) {
                 {"k01", "k02", "k03", "k04", "k05"}, {"k06", "k07"});
   // invalid
   PrefetchRange(&c, &opt, &table_options, "k06", "k00", {}, {},
-                Status::InvalidArgument(Slice("k06 "), Slice("k07")));
+                Status_InvalidArgument(Slice("k06 "), Slice("k07")));
   c.ResetTableReader();
 }
 

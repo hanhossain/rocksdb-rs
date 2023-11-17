@@ -47,13 +47,13 @@ Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
   static std::atomic<uint64_t> initial_delay(0);
 
   if (repeat_period_seconds == kInvalidPeriodSec) {
-    return Status::InvalidArgument("Invalid task repeat period");
+    return Status_InvalidArgument("Invalid task repeat period");
   }
   auto it = tasks_map_.find(task_type);
   if (it != tasks_map_.end()) {
     // the task already exists and it's the same, no update needed
     if (it->second.repeat_every_sec == repeat_period_seconds) {
-      return Status::OK();
+      return Status_OK();
     }
     // cancel the existing one before register new one
     timer_->Cancel(it->second.name);
@@ -70,14 +70,14 @@ Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
       (initial_delay.fetch_add(1) % repeat_period_seconds) * kMicrosInSecond,
       repeat_period_seconds * kMicrosInSecond);
   if (!succeeded) {
-    return Status::Aborted("Failed to register periodic task");
+    return Status_Aborted("Failed to register periodic task");
   }
   auto result = tasks_map_.try_emplace(
       task_type, TaskInfo{unique_id, repeat_period_seconds});
   if (!result.second) {
-    return Status::Aborted("Failed to add periodic task");
+    return Status_Aborted("Failed to add periodic task");
   };
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
@@ -90,7 +90,7 @@ Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
   if (!timer_->HasPendingTask()) {
     timer_->Shutdown();
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Timer* PeriodicTaskScheduler::Default() {

@@ -2043,52 +2043,52 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
 
     Status Append(const Slice& /*data*/) override {
       inc(1);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status Append(
         const Slice& /*data*/,
         const DataVerificationInfo& /* verification_info */) override {
       inc(1);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status PositionedAppend(const Slice& /*data*/,
                             uint64_t /*offset*/) override {
       inc(2);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status PositionedAppend(
         const Slice& /*data*/, uint64_t /*offset*/,
         const DataVerificationInfo& /* verification_info */) override {
       inc(2);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status Truncate(uint64_t /*size*/) override {
       inc(3);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status Close() override {
       inc(4);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status Flush() override {
       inc(5);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status Sync() override {
       inc(6);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status Fsync() override {
       inc(7);
-      return Status::OK();
+      return Status_OK();
     }
 
     bool IsSyncThreadSafe() const override {
@@ -2141,19 +2141,19 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
 
     Status InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
       inc(19);
-      return Status::OK();
+      return Status_OK();
     }
 
     Status RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/) override {
       inc(20);
-      return Status::OK();
+      return Status_OK();
     }
 
     void PrepareWrite(size_t /*offset*/, size_t /*len*/) override { inc(21); }
 
     Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) override {
       inc(22);
-      return Status::OK();
+      return Status_OK();
     }
 
    public:
@@ -2393,7 +2393,7 @@ class TestEnv : public EnvWrapper {
    private:
     Status CloseHelper() {
       env->CloseCountInc();
-      return Status::OK();
+      return Status_OK();
     }
     TestEnv* env;
   };
@@ -2405,7 +2405,7 @@ class TestEnv : public EnvWrapper {
   Status NewLogger(const std::string& /*fname*/,
                    std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
-    return Status::OK();
+    return Status_OK();
   }
 
  private:

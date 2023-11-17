@@ -116,7 +116,7 @@ struct ColumnFamilyOptions : public AdvancedColumnFamilyOptions {
 
   // REQUIRES: The client must provide a merge operator if Merge operation
   // needs to be accessed. Calling Merge on a DB without a merge operator
-  // would result in Status::NotSupported. The client must ensure that the
+  // would result in Status_NotSupported. The client must ensure that the
   // merge operator supplied here has the same name and *exactly* the same
   // semantics as the merge operator provided to previous open calls on
   // the same DB. The only exception is reserved for upgrade, where a DB
@@ -1497,7 +1497,7 @@ struct ReadOptions {
 
   // Specify if this read request should process data that ALREADY
   // resides on a particular cache. If the required data is not
-  // found at the specified cache, then Status::Incomplete is returned.
+  // found at the specified cache, then Status_Incomplete is returned.
   ReadTier read_tier = kReadAllTier;
 
   // For file reads associated with this option, charge the internal rate
@@ -1720,13 +1720,13 @@ struct WriteOptions {
   bool ignore_missing_column_families;
 
   // If true and we need to wait or sleep for the write request, fails
-  // immediately with Status::Incomplete().
+  // immediately with Status_Incomplete().
   // Default: false
   bool no_slowdown;
 
   // If true, this write request is of lower priority if compaction is
   // behind. In this case, no_slowdown = true, the request will be canceled
-  // immediately with Status::Incomplete() returned. Otherwise, it will be
+  // immediately with Status_Incomplete() returned. Otherwise, it will be
   // slowed down. The slowdown value is determined by RocksDB to guarantee
   // it introduces minimum impacts to high priority writes.
   //
@@ -1966,7 +1966,7 @@ struct IngestExternalFileOptions {
   // ingested files, DB will generate the checksum and store in the Manifest.
   bool verify_file_checksum = true;
   // Set to TRUE if user wants file to be ingested to the bottommost level. An
-  // error of Status::TryAgain() will be returned if a file cannot fit in the
+  // error of Status_TryAgain() will be returned if a file cannot fit in the
   // bottommost level when calling
   // DB::IngestExternalFile()/DB::IngestExternalFiles(). The user should clear
   // the bottommost level in the overlapping range before re-attempt.
@@ -2085,7 +2085,7 @@ struct LiveFilesStorageInfoOptions {
 
 struct WaitForCompactOptions {
   // A boolean to abort waiting in case of a pause (PauseBackgroundWork()
-  // called) If true, Status::Aborted will be returned immediately. If false,
+  // called) If true, Status_Aborted will be returned immediately. If false,
   // ContinueBackgroundWork() must be called to resume the background jobs.
   // Otherwise, jobs that were queued, but not scheduled yet may never finish
   // and WaitForCompact() may wait indefinitely.

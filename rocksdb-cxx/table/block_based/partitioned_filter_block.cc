@@ -99,7 +99,7 @@ void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(
 
   total_added_in_built_ += filter_bits_builder_->EstimateEntriesAdded();
   std::unique_ptr<const char[]> filter_data;
-  Status filter_construction_status = Status::OK();
+  Status filter_construction_status = Status_OK();
   Slice filter =
       filter_bits_builder_->Finish(&filter_data, &filter_construction_status);
   if (filter_construction_status.ok()) {
@@ -161,7 +161,7 @@ Slice PartitionedFilterBlockBuilder::Finish(
   // If there is no filter partition left, then return the index on filter
   // partitions
   if (UNLIKELY(filters.empty())) {
-    *status = Status::OK();
+    *status = Status_OK();
     last_filter_data.reset();
     if (finishing_filters) {
       // Simplest to just add them all at the end
@@ -178,7 +178,7 @@ Slice PartitionedFilterBlockBuilder::Finish(
   } else {
     // Return the next filter partition in line and set Incomplete() status to
     // indicate we expect more calls to Finish
-    *status = Status::Incomplete();
+    *status = Status_Incomplete();
     finishing_filters = true;
 
     last_filter_entry_key = filters.front().key;
@@ -308,7 +308,7 @@ Status PartitionedFilterBlockReader::GetFilterPartitionBlock(
     // for the partition
     if (iter != filter_map_.end()) {
       filter_block->SetUnownedValue(iter->second.GetValue());
-      return Status::OK();
+      return Status_OK();
     }
   }
 

@@ -1423,7 +1423,7 @@ TEST_P(DBBlobBasicIOErrorTest, GetBlob_IOError) {
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* /* arg */) {
     fault_injection_env_->SetFilesystemActive(false,
-                                              Status::IOError(sync_point_));
+                                              Status_IOError(sync_point_));
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1463,7 +1463,7 @@ TEST_P(DBBlobBasicIOErrorMultiGetTest, MultiGetBlobs_IOError) {
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* /* arg */) {
     fault_injection_env_->SetFilesystemActive(false,
-                                              Status::IOError(sync_point_));
+                                              Status_IOError(sync_point_));
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1511,7 +1511,7 @@ TEST_P(DBBlobBasicIOErrorMultiGetTest, MultipleBlobFiles) {
           return;
         }
         fault_injection_env_->SetFilesystemActive(false,
-                                                  Status::IOError(sync_point_));
+                                                  Status_IOError(sync_point_));
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1565,7 +1565,7 @@ TEST_P(DBBlobBasicIOErrorTest, CompactionFilterReadBlob_IOError) {
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* /* arg */) {
     fault_injection_env_->SetFilesystemActive(false,
-                                              Status::IOError(sync_point_));
+                                              Status_IOError(sync_point_));
   });
   SyncPoint::GetInstance()->EnableProcessing();
 

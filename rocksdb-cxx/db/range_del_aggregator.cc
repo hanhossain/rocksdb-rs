@@ -444,7 +444,7 @@ class TruncatedRangeDelMergingIter : public InternalIterator {
   bool Valid() const override {
     return !heap_.empty() && !AfterEndKey(heap_.top());
   }
-  Status status() const override { return Status::OK(); }
+  Status status() const override { return Status_OK(); }
 
   void SeekToFirst() override {
     heap_.clear();

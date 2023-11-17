@@ -187,7 +187,7 @@ class FaultInjectionTestEnv : public EnvWrapper {
     if (!IsFilesystemActive() &&
         error_.subcode() == IOStatus::SubCode::kNoSpace) {
       *disk_free = 0;
-      return Status::OK();
+      return Status_OK();
     } else {
       return target()->GetFreeSpace(path, disk_free);
     }
@@ -227,7 +227,7 @@ class FaultInjectionTestEnv : public EnvWrapper {
     return filesystem_active_;
   }
   void SetFilesystemActiveNoLock(
-      bool active, Status error = Status::Corruption("Not active")) {
+      bool active, Status error = Status_Corruption("Not active")) {
     error.PermitUncheckedError();
     filesystem_active_ = active;
     if (!active) {
@@ -236,7 +236,7 @@ class FaultInjectionTestEnv : public EnvWrapper {
     error.PermitUncheckedError();
   }
   void SetFilesystemActive(bool active,
-                           Status error = Status::Corruption("Not active")) {
+                           Status error = Status_Corruption("Not active")) {
     error.PermitUncheckedError();
     MutexLock l(&mutex_);
     SetFilesystemActiveNoLock(active, error);

@@ -563,7 +563,7 @@ Status CreateEnvFromSystem(const ConfigOptions& config_options, Env** result,
     // Neither specified.  Use the default
     *result = config_options.env;
     guard->reset();
-    return Status::OK();
+    return Status_OK();
   }
 }
 namespace {

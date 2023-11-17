@@ -975,7 +975,7 @@ class TestSecondaryCache : public SecondaryCache {
   Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const Cache::CacheItemHelper* helper) override {
     if (inject_failure_) {
-      return Status::Corruption("Insertion Data Corrupted");
+      return Status_Corruption("Insertion Data Corrupted");
     }
     CheckCacheKeyCommonPrefix(key);
     size_t size;

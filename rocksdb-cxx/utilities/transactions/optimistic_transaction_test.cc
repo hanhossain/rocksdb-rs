@@ -1543,12 +1543,12 @@ Status OptimisticTransactionStressTestInserter(OptimisticTransactionDB* db,
   // Make sure at least some of the transactions succeeded.  It's ok if
   // some failed due to write-conflicts.
   if (inserter.GetFailureCount() > num_transactions / 2) {
-    return Status::TryAgain("Too many transactions failed! " +
+    return Status_TryAgain("Too many transactions failed! " +
                             std::to_string(inserter.GetFailureCount()) + " / " +
                             std::to_string(num_transactions));
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace
 

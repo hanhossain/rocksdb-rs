@@ -234,7 +234,7 @@ class FaultInjectionTest
         return s;
       }
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // Return the ith key
@@ -542,7 +542,7 @@ TEST_P(FaultInjectionTest, WriteBatchWalTerminationTest) {
   std::string val;
   ASSERT_OK(db_->Get(ro, "cats", &val));
   ASSERT_EQ("dogs", val);
-  ASSERT_EQ(db_->Get(ro, "boys", &val), Status::NotFound());
+  ASSERT_EQ(db_->Get(ro, "boys", &val), Status_NotFound());
 }
 
 TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {

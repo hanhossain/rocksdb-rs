@@ -77,7 +77,7 @@ Status SstFileManagerImpl::OnAddFile(const std::string& file_path,
   OnAddFileImpl(file_path, file_size);
   TEST_SYNC_POINT_CALLBACK("SstFileManagerImpl::OnAddFile",
                            const_cast<std::string*>(&file_path));
-  return Status::OK();
+  return Status_OK();
 }
 
 Status SstFileManagerImpl::OnDeleteFile(const std::string& file_path) {
@@ -87,7 +87,7 @@ Status SstFileManagerImpl::OnDeleteFile(const std::string& file_path) {
   }
   TEST_SYNC_POINT_CALLBACK("SstFileManagerImpl::OnDeleteFile",
                            const_cast<std::string*>(&file_path));
-  return Status::OK();
+  return Status_OK();
 }
 
 void SstFileManagerImpl::OnCompactionCompletion(Compaction* c) {
@@ -114,7 +114,7 @@ Status SstFileManagerImpl::OnMoveFile(const std::string& old_path,
     OnDeleteFileImpl(old_path);
   }
   TEST_SYNC_POINT("SstFileManagerImpl::OnMoveFile");
-  return Status::OK();
+  return Status_OK();
 }
 
 void SstFileManagerImpl::SetMaxAllowedSpaceUsage(uint64_t max_allowed_space) {
@@ -277,7 +277,7 @@ void SstFileManagerImpl::ClearError() {
                           "required disk buffer [%" PRIu64 " bytes]\n",
                           free_space, reserved_disk_buffer_);
           ROCKS_LOG_ERROR(logger_, "Cannot clear hard error\n");
-          s = Status::NoSpace();
+          s = Status_NoSpace();
         }
       } else if (bg_err_.severity() == Severity::kSoftError) {
         if (free_space < free_space_trigger_) {
@@ -288,7 +288,7 @@ void SstFileManagerImpl::ClearError() {
                          " bytes]\n",
                          free_space, free_space_trigger_);
           ROCKS_LOG_WARN(logger_, "Cannot clear soft error\n");
-          s = Status::NoSpace();
+          s = Status_NoSpace();
         }
       }
     }
@@ -343,7 +343,7 @@ void SstFileManagerImpl::ClearError() {
     // could have removed it from the queue while we were in timed wait
     if (error_handler_list_.empty()) {
       ROCKS_LOG_INFO(logger_, "Clearing error\n");
-      bg_err_ = Status::OK();
+      bg_err_ = Status_OK();
       return;
     }
   }
@@ -476,7 +476,7 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
 
   // trash_dir is deprecated and not needed anymore, but if user passed it
   // we will still remove files in it.
-  Status s = Status::OK();
+  Status s = Status_OK();
   if (delete_existing_trash && trash_dir != "") {
     std::vector<std::string> files_in_trash;
     s = fs->GetChildren(trash_dir, IOOptions(), &files_in_trash, nullptr);

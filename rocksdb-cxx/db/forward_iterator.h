@@ -58,15 +58,15 @@ class ForwardIterator : public InternalIterator {
   virtual ~ForwardIterator();
 
   void SeekForPrev(const Slice& /*target*/) override {
-    status_ = Status::NotSupported("ForwardIterator::SeekForPrev()");
+    status_ = Status_NotSupported("ForwardIterator::SeekForPrev()");
     valid_ = false;
   }
   void SeekToLast() override {
-    status_ = Status::NotSupported("ForwardIterator::SeekToLast()");
+    status_ = Status_NotSupported("ForwardIterator::SeekToLast()");
     valid_ = false;
   }
   void Prev() override {
-    status_ = Status::NotSupported("ForwardIterator::Prev");
+    status_ = Status_NotSupported("ForwardIterator::Prev");
     valid_ = false;
   }
 

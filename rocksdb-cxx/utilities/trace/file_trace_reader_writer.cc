@@ -28,15 +28,15 @@ FileTraceReader::~FileTraceReader() {
 
 Status FileTraceReader::Close() {
   file_reader_.reset();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FileTraceReader::Reset() {
   if (file_reader_ == nullptr) {
-    return Status::IOError("TraceReader is closed.");
+    return Status_IOError("TraceReader is closed.");
   }
   offset_ = 0;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FileTraceReader::Read(std::string* data) {
@@ -51,10 +51,10 @@ Status FileTraceReader::Read(std::string* data) {
     // No more data to read
     // Todo: Come up with a better way to indicate end of data. May be this
     // could be avoided once footer is introduced.
-    return Status::Incomplete();
+    return Status_Incomplete();
   }
   if (result_.size() < kTraceMetadataSize) {
-    return Status::Corruption("Corrupted trace file.");
+    return Status_Corruption("Corrupted trace file.");
   }
   *data = result_.ToString();
   offset_ += kTraceMetadataSize;
@@ -73,7 +73,7 @@ Status FileTraceReader::Read(std::string* data) {
       return s;
     }
     if (result_.size() < to_read) {
-      return Status::Corruption("Corrupted trace file.");
+      return Status_Corruption("Corrupted trace file.");
     }
     data->append(result_.data(), result_.size());
 
@@ -93,7 +93,7 @@ FileTraceWriter::~FileTraceWriter() { Close().PermitUncheckedError(); }
 
 Status FileTraceWriter::Close() {
   file_writer_.reset();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FileTraceWriter::Write(const Slice& data) {

@@ -219,12 +219,12 @@ class TraceAnalyzer : private TraceRecord::Handler,
   Status MergeCF(uint32_t column_family_id, const Slice& key,
                  const Slice& value) override;
 
-  // The following hanlders are not implemented, return Status::OK() to avoid
+  // The following hanlders are not implemented, return Status_OK() to avoid
   // the running time assertion and other irrelevant falures.
   using WriteBatch::Handler::PutBlobIndexCF;
   Status PutBlobIndexCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                         const Slice& /*value*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   // The default implementation of LogData does nothing.
@@ -232,24 +232,24 @@ class TraceAnalyzer : private TraceRecord::Handler,
   void LogData(const Slice& /*blob*/) override {}
 
   using WriteBatch::Handler::MarkBeginPrepare;
-  Status MarkBeginPrepare(bool = false) override { return Status::OK(); }
+  Status MarkBeginPrepare(bool = false) override { return Status_OK(); }
 
   using WriteBatch::Handler::MarkEndPrepare;
-  Status MarkEndPrepare(const Slice& /*xid*/) override { return Status::OK(); }
+  Status MarkEndPrepare(const Slice& /*xid*/) override { return Status_OK(); }
 
   using WriteBatch::Handler::MarkNoop;
-  Status MarkNoop(bool /*empty_batch*/) override { return Status::OK(); }
+  Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
 
   using WriteBatch::Handler::MarkRollback;
-  Status MarkRollback(const Slice& /*xid*/) override { return Status::OK(); }
+  Status MarkRollback(const Slice& /*xid*/) override { return Status_OK(); }
 
   using WriteBatch::Handler::MarkCommit;
-  Status MarkCommit(const Slice& /*xid*/) override { return Status::OK(); }
+  Status MarkCommit(const Slice& /*xid*/) override { return Status_OK(); }
 
   using WriteBatch::Handler::MarkCommitWithTimestamp;
   Status MarkCommitWithTimestamp(const Slice& /*xid*/,
                                  const Slice& /*commit_ts*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Process each trace operation and output the analysis result to

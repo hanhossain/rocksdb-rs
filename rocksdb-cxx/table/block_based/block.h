@@ -559,7 +559,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
   void CorruptionError(const std::string& error_msg = "bad entry in block") {
     current_ = restarts_;
     restart_index_ = num_restarts_;
-    status_ = Status::Corruption(error_msg);
+    status_ = Status_Corruption(error_msg);
     raw_key_.Clear();
     value_.clear();
   }
@@ -904,7 +904,7 @@ class IndexBlockIter final : public BlockIter<IndexValue> {
     assert(false);
     current_ = restarts_;
     restart_index_ = num_restarts_;
-    status_ = Status::InvalidArgument(
+    status_ = Status_InvalidArgument(
         "RocksDB internal error: should never call SeekForPrev() on index "
         "blocks");
     raw_key_.Clear();

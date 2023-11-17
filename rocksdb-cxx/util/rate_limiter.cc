@@ -356,7 +356,7 @@ Status GenericRateLimiter::TuneLocked() {
     SetBytesPerSecondLocked(new_bytes_per_sec);
   }
   num_drains_ = 0;
-  return Status::OK();
+  return Status_OK();
 }
 
 RateLimiter* NewGenericRateLimiter(

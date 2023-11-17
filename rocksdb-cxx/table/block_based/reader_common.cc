@@ -35,14 +35,14 @@ Status VerifyBlockChecksum(ChecksumType type, const char* data,
 
   uint32_t computed = ComputeBuiltinChecksum(type, data, len);
   if (stored == computed) {
-    return Status::OK();
+    return Status_OK();
   } else {
     // Unmask for people who might look for reference crc value
     if (type == kCRC32c) {
       stored = crc32c::Unmask(stored);
       computed = crc32c::Unmask(computed);
     }
-    return Status::Corruption(
+    return Status_Corruption(
         "block checksum mismatch: stored = " + std::to_string(stored) +
         ", computed = " + std::to_string(computed) +
         ", type = " + std::to_string(type) + "  in " + file_name + " offset " +

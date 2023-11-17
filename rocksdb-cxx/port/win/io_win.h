@@ -433,14 +433,14 @@ class WinRandomRWFile : private WinFileData,
   // buffer for Write() when use_direct_io() returns true
   virtual size_t GetRequiredBufferAlignment() const override;
 
-  // Write bytes in `data` at  offset `offset`, Returns Status::OK() on success.
+  // Write bytes in `data` at  offset `offset`, Returns Status_OK() on success.
   // Pass aligned buffer when use_direct_io() returns true.
   IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
                  IODebugContext* dbg) override;
 
   // Read up to `n` bytes starting from offset `offset` and store them in
   // result, provided `scratch` size should be at least `n`.
-  // Returns Status::OK() on success.
+  // Returns Status_OK() on success.
   IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override;

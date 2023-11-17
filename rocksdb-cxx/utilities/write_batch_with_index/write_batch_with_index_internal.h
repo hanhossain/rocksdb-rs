@@ -255,7 +255,7 @@ class WBWIIteratorImpl : public WBWIIterator {
   Status status() const override {
     // this is in-memory data structure, so the only way status can be non-ok is
     // through memory corruption
-    return Status::OK();
+    return Status_OK();
   }
 
   const WriteBatchIndexEntry* GetRawEntry() const {

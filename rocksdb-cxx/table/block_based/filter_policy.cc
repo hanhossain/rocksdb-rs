@@ -231,7 +231,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
   // it iterates to ResetAndFindSeedToSolve
   Status MaybeVerifyHashEntriesChecksum() {
     if (!detect_filter_construct_corruption_) {
-      return Status::OK();
+      return Status_OK();
     }
 
     uint64_t actual_hash_entries_xor_checksum = 0;
@@ -240,12 +240,12 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
     }
 
     if (actual_hash_entries_xor_checksum == hash_entries_info_.xor_checksum) {
-      return Status::OK();
+      return Status_OK();
     } else {
       // Since these hash entries are corrupted and they will not be used
       // anymore, we can reset them and release memory.
       ResetEntries();
-      return Status::Corruption("Filter's hash entries checksum mismatched");
+      return Status_Corruption("Filter's hash entries checksum mismatched");
     }
   }
 
@@ -394,7 +394,7 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
     final_filter_cache_res_handles_.push_back(
         std::move(final_filter_cache_res_handle));
     if (status) {
-      *status = Status::OK();
+      *status = Status_OK();
     }
     return rv;
   }
@@ -626,7 +626,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
       // Save a conditional in Ribbon queries by using alternate reader
       // for zero entries added.
       if (status) {
-        *status = Status::OK();
+        *status = Status_OK();
       }
       return FinishAlwaysFalse(buf);
     }
@@ -652,7 +652,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     BandingType banding;
     std::size_t bytes_banding = ribbon::StandardBanding<
         Standard128RibbonTypesAndSettings>::EstimateMemoryUsage(num_slots);
-    Status status_banding_cache_res = Status::OK();
+    Status status_banding_cache_res = Status_OK();
 
     // Cache charging for banding
     std::unique_ptr<CacheReservationManager::CacheReservationHandle>
@@ -757,7 +757,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     final_filter_cache_res_handles_.push_back(
         std::move(final_filter_cache_res_handle));
     if (status) {
-      *status = Status::OK();
+      *status = Status_OK();
     }
     return rv;
   }
@@ -1276,7 +1276,7 @@ class AlwaysFalseFilter : public BuiltinFilterBitsReader {
 };
 
 Status XXPH3FilterBitsBuilder::MaybePostVerify(const Slice& filter_content) {
-  Status s = Status::OK();
+  Status s = Status_OK();
 
   if (!detect_filter_construct_corruption_) {
     return s;
@@ -1292,7 +1292,7 @@ Status XXPH3FilterBitsBuilder::MaybePostVerify(const Slice& filter_content) {
     // given the extra implementation complixity to detect such case.
     bool may_match = bits_reader->HashMayMatch(h);
     if (!may_match) {
-      s = Status::Corruption("Corrupted filter content");
+      s = Status_Corruption("Corrupted filter content");
       break;
     }
   }
@@ -1923,10 +1923,10 @@ Status FilterPolicy::CreateFromString(
     std::shared_ptr<const FilterPolicy>* policy) {
   if (value == kNullptrString || value.empty()) {
     policy->reset();
-    return Status::OK();
+    return Status_OK();
   } else if (value == ReadOnlyBuiltinFilterPolicy::kClassName()) {
     *policy = std::make_shared<ReadOnlyBuiltinFilterPolicy>();
-    return Status::OK();
+    return Status_OK();
   }
 
   std::string id;
@@ -1936,7 +1936,7 @@ Status FilterPolicy::CreateFromString(
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else if (id.empty()) {  // We have no Id but have options.  Not good
-    return Status::NotSupported("Cannot reset object ", id);
+    return Status_NotSupported("Cannot reset object ", id);
   } else {
     static std::once_flag loaded;
     std::call_once(loaded, [&]() {
@@ -1945,7 +1945,7 @@ Status FilterPolicy::CreateFromString(
     status = options.registry->NewSharedObject(id, policy);
   }
   if (options.ignore_unsupported_options && status.IsNotSupported()) {
-    return Status::OK();
+    return Status_OK();
   } else if (status.ok()) {
     status = Customizable::ConfigureNewObject(
         options, const_cast<FilterPolicy*>(policy->get()), opt_map);

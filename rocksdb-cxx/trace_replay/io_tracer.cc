@@ -30,7 +30,7 @@ Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
                                 IODebugContext* dbg) {
   uint64_t trace_file_size = trace_writer_->GetFileSize();
   if (trace_file_size > trace_options_.max_trace_file_size) {
-    return Status::OK();
+    return Status_OK();
   }
   Trace trace;
   trace.ts = record.access_timestamp;
@@ -128,30 +128,30 @@ Status IOTraceReader::ReadHeader(IOTraceHeader* header) {
   Slice enc_slice = Slice(trace.payload);
   Slice magic_number;
   if (!GetLengthPrefixedSlice(&enc_slice, &magic_number)) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Corrupted header in the trace file: Failed to read the magic number.");
   }
   if (magic_number.ToString() != kTraceMagic) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Corrupted header in the trace file: Magic number does not match.");
   }
   if (!GetFixed32(&enc_slice, &header->rocksdb_major_version)) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb major "
         "version number.");
   }
   if (!GetFixed32(&enc_slice, &header->rocksdb_minor_version)) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb minor "
         "version number.");
   }
   // We should have retrieved all information in the header.
   if (!enc_slice.empty()) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Corrupted header in the trace file: The length of header is too "
         "long.");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
@@ -171,28 +171,28 @@ Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
   Slice enc_slice = Slice(trace.payload);
 
   if (!GetFixed64(&enc_slice, &record->io_op_data)) {
-    return Status::Incomplete(
+    return Status_Incomplete(
         "Incomplete access record: Failed to read trace data.");
   }
   Slice file_operation;
   if (!GetLengthPrefixedSlice(&enc_slice, &file_operation)) {
-    return Status::Incomplete(
+    return Status_Incomplete(
         "Incomplete access record: Failed to read file operation.");
   }
   record->file_operation = file_operation.ToString();
   if (!GetFixed64(&enc_slice, &record->latency)) {
-    return Status::Incomplete(
+    return Status_Incomplete(
         "Incomplete access record: Failed to read latency.");
   }
   Slice io_status;
   if (!GetLengthPrefixedSlice(&enc_slice, &io_status)) {
-    return Status::Incomplete(
+    return Status_Incomplete(
         "Incomplete access record: Failed to read IO status.");
   }
   record->io_status = io_status.ToString();
   Slice file_name;
   if (!GetLengthPrefixedSlice(&enc_slice, &file_name)) {
-    return Status::Incomplete(
+    return Status_Incomplete(
         "Incomplete access record: Failed to read file name.");
   }
   record->file_name = file_name.ToString();
@@ -212,19 +212,19 @@ Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
     switch (set_pos) {
       case IOTraceOp::kIOFileSize:
         if (!GetFixed64(&enc_slice, &record->file_size)) {
-          return Status::Incomplete(
+          return Status_Incomplete(
               "Incomplete access record: Failed to read file size.");
         }
         break;
       case IOTraceOp::kIOLen:
         if (!GetFixed64(&enc_slice, &record->len)) {
-          return Status::Incomplete(
+          return Status_Incomplete(
               "Incomplete access record: Failed to read length.");
         }
         break;
       case IOTraceOp::kIOOffset:
         if (!GetFixed64(&enc_slice, &record->offset)) {
-          return Status::Incomplete(
+          return Status_Incomplete(
               "Incomplete access record: Failed to read offset.");
         }
         break;
@@ -236,7 +236,7 @@ Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
   }
 
   if (!GetFixed64(&enc_slice, &record->trace_data)) {
-    return Status::Incomplete(
+    return Status_Incomplete(
         "Incomplete access record: Failed to read trace op.");
   }
   int64_t trace_data = static_cast<int64_t>(record->trace_data);
@@ -247,7 +247,7 @@ Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
       case IODebugContext::TraceData::kRequestID: {
         Slice request_id;
         if (!GetLengthPrefixedSlice(&enc_slice, &request_id)) {
-          return Status::Incomplete(
+          return Status_Incomplete(
               "Incomplete access record: Failed to request id.");
         }
         record->request_id = request_id.ToString();
@@ -259,7 +259,7 @@ Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
     trace_data &= (trace_data - 1);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 IOTracer::IOTracer() : tracing_enabled(false) { writer_.store(nullptr); }
@@ -271,7 +271,7 @@ Status IOTracer::StartIOTrace(SystemClock* clock,
                               std::unique_ptr<TraceWriter>&& trace_writer) {
   InstrumentedMutexLock lock_guard(&trace_writer_mutex_);
   if (writer_.load()) {
-    return Status::Busy();
+    return Status_Busy();
   }
   trace_options_ = trace_options;
   writer_.store(

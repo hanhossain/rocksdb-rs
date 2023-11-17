@@ -56,7 +56,7 @@ Status DBImpl::Merge(const WriteOptions& o, ColumnFamilyHandle* column_family,
   }
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   if (!cfh->cfd()->ioptions()->merge_operator) {
-    return Status::NotSupported("Provide a merge_operator when opening DB");
+    return Status_NotSupported("Provide a merge_operator when opening DB");
   } else {
     return DB::Merge(o, column_family, key, val);
   }
@@ -179,7 +179,7 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
          write_options.protection_bytes_per_key ==
              my_batch->GetProtectionBytesPerKey());
   if (my_batch == nullptr) {
-    return Status::InvalidArgument("Batch is nullptr!");
+    return Status_InvalidArgument("Batch is nullptr!");
   } else if (!disable_memtable &&
              WriteBatchInternal::TimestampsUpdateNeeded(*my_batch)) {
     // If writing to memtable, then we require the caller to set/update the
@@ -192,22 +192,22 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
     // without inserting to memtable. The keys in the batch do not have to be
     // assigned timestamps because they will be used only during recovery if
     // there is a commit marker which includes their commit timestamp.
-    return Status::InvalidArgument("write batch must have timestamp(s) set");
+    return Status_InvalidArgument("write batch must have timestamp(s) set");
   } else if (write_options.rate_limiter_priority != Env::IO_TOTAL &&
              write_options.rate_limiter_priority != Env::IO_USER) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "WriteOptions::rate_limiter_priority only allows "
         "Env::IO_TOTAL and Env::IO_USER due to implementation constraints");
   } else if (write_options.rate_limiter_priority != Env::IO_TOTAL &&
              (write_options.disableWAL || manual_wal_flush_)) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "WriteOptions::rate_limiter_priority currently only supports "
         "rate-limiting automatic WAL flush, which requires "
         "`WriteOptions::disableWAL` and "
         "`DBOptions::manual_wal_flush` both set to false");
   } else if (write_options.protection_bytes_per_key != 0 &&
              write_options.protection_bytes_per_key != 8) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "`WriteOptions::protection_bytes_per_key` must be zero or eight");
   }
   // TODO: this use of operator bool on `tracer_` can avoid unnecessary lock
@@ -223,29 +223,29 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
     }
   }
   if (write_options.sync && write_options.disableWAL) {
-    return Status::InvalidArgument("Sync writes has to enable WAL.");
+    return Status_InvalidArgument("Sync writes has to enable WAL.");
   }
   if (two_write_queues_ && immutable_db_options_.enable_pipelined_write) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "pipelined_writes is not compatible with concurrent prepares");
   }
   if (seq_per_batch_ && immutable_db_options_.enable_pipelined_write) {
     // TODO(yiwu): update pipeline write with seq_per_batch and batch_cnt
-    return Status::NotSupported(
+    return Status_NotSupported(
         "pipelined_writes is not compatible with seq_per_batch");
   }
   if (immutable_db_options_.unordered_write &&
       immutable_db_options_.enable_pipelined_write) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "pipelined_writes is not compatible with unordered_write");
   }
   if (immutable_db_options_.enable_pipelined_write &&
       post_memtable_callback != nullptr) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "pipelined write currently does not honor post_memtable_callback");
   }
   if (seq_per_batch_ && post_memtable_callback != nullptr) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "seq_per_batch currently does not honor post_memtable_callback");
   }
   // Otherwise IsLatestPersistentState optimization does not make sense
@@ -873,7 +873,7 @@ Status DBImpl::UnorderedWriteMemtable(const WriteOptions& write_options,
   if (!w.FinalStatus().ok()) {
     return w.FinalStatus();
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 // The 2nd write queue. If enabled it will be used only for WAL-only writes.
@@ -1219,7 +1219,7 @@ Status DBImpl::PreprocessWrite(const WriteOptions& write_options,
         InternalStats::kIntStatsWriteBufferManagerLimitStopsCounts, 1,
         true /* concurrent */);
     if (write_options.no_slowdown) {
-      status = Status::Incomplete("Write stall");
+      status = Status_Incomplete("Write stall");
     } else {
       InstrumentedMutexLock l(&mutex_);
       WriteBufferManagerStallWrites();
@@ -1298,7 +1298,7 @@ Status DBImpl::MergeBatch(const WriteThread::WriteGroup& write_group,
     }
   }
   // return merged_batch;
-  return Status::OK();
+  return Status_OK();
 }
 
 // When two_write_queues_ is disabled, this function is called from the only
@@ -1552,7 +1552,7 @@ Status DBImpl::WriteRecoverableState() {
     }
     return status;
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void DBImpl::SelectColumnFamiliesForAtomicFlush(
@@ -1829,7 +1829,7 @@ Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
     TEST_SYNC_POINT("DBImpl::DelayWrite:Start");
     if (delay > 0) {
       if (write_options.no_slowdown) {
-        return Status::Incomplete("Write stall");
+        return Status_Incomplete("Write stall");
       }
       TEST_SYNC_POINT("DBImpl::DelayWrite:Sleep");
 
@@ -1865,7 +1865,7 @@ Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
     while (error_handler_.GetBGError().ok() && write_controller_.IsStopped() &&
            !shutting_down_.load(std::memory_order_relaxed)) {
       if (write_options.no_slowdown) {
-        return Status::Incomplete("Write stall");
+        return Status_Incomplete("Write stall");
       }
       delayed = true;
 
@@ -1897,9 +1897,9 @@ Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
     if (!shutting_down_.load(std::memory_order_relaxed)) {
       // If writes are still stopped and db not shutdown, it means we bailed
       // due to a background error
-      s = Status::Incomplete(error_handler_.GetBGError().ToString());
+      s = Status_Incomplete(error_handler_.GetBGError().ToString());
     } else {
-      s = Status::ShutdownInProgress("stalled writes");
+      s = Status_ShutdownInProgress("stalled writes");
     }
   }
   if (error_handler_.IsDBStopped()) {
@@ -1942,10 +1942,10 @@ Status DBImpl::ThrottleLowPriWritesIfNeeded(const WriteOptions& write_options,
   if (write_controller_.NeedSpeedupCompaction()) {
     if (allow_2pc() && (my_batch->HasCommit() || my_batch->HasRollback())) {
       // For 2PC, we only rate limit prepare, not commit.
-      return Status::OK();
+      return Status_OK();
     }
     if (write_options.no_slowdown) {
-      return Status::Incomplete("Low priority write stall");
+      return Status_Incomplete("Low priority write stall");
     } else {
       assert(my_batch != nullptr);
       // Rate limit those writes. The reason that we don't completely wait
@@ -1958,7 +1958,7 @@ Status DBImpl::ThrottleLowPriWritesIfNeeded(const WriteOptions& write_options,
           RateLimiter::OpType::kWrite);
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void DBImpl::MaybeFlushStatsCF(autovector<ColumnFamilyData*>* cfds) {
@@ -2016,7 +2016,7 @@ Status DBImpl::TrimMemtableHistory(WriteContext* context) {
       cfd = nullptr;
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::ScheduleFlushes(WriteContext* context) {

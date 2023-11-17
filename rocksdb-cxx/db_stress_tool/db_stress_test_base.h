@@ -163,7 +163,7 @@ class StressTest {
       ThreadState* /* thread */, const ReadOptions& /* read_opts */,
       const std::vector<int>& /* rand_column_families */,
       const std::vector<int64_t>& /* rand_keys */) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   // Enum used by VerifyIterator() to identify the mode to validate.
@@ -218,7 +218,7 @@ class StressTest {
   virtual Status TestCustomOperations(
       ThreadState* /*thread*/,
       const std::vector<int>& /*rand_column_families*/) {
-    return Status::NotSupported("TestCustomOperations() must be overridden");
+    return Status_NotSupported("TestCustomOperations() must be overridden");
   }
 
   void VerificationAbort(SharedState* shared, std::string msg, Status s) const;

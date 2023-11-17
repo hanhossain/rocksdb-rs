@@ -89,7 +89,7 @@ Status ColumnFamilyHandleImpl::GetDescriptor(ColumnFamilyDescriptor* desc) {
   // accessing mutable cf-options requires db mutex.
   InstrumentedMutexLock l(mutex_);
   *desc = ColumnFamilyDescriptor(cfd()->GetName(), cfd()->GetLatestCFOptions());
-  return Status::OK();
+  return Status_OK();
 }
 
 const Comparator* ColumnFamilyHandleImpl::GetComparator() const {
@@ -115,7 +115,7 @@ Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
     for (size_t level = 0; level < cf_options.compression_per_level.size();
          ++level) {
       if (!CompressionTypeSupported(cf_options.compression_per_level[level])) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "Compression type " +
             CompressionTypeToString(cf_options.compression_per_level[level]) +
             " is not linked with the binary.");
@@ -123,7 +123,7 @@ Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
     }
   } else {
     if (!CompressionTypeSupported(cf_options.compression)) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "Compression type " +
           CompressionTypeToString(cf_options.compression) +
           " is not linked with the binary.");
@@ -132,17 +132,17 @@ Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
   if (cf_options.compression_opts.zstd_max_train_bytes > 0) {
     if (cf_options.compression_opts.use_zstd_dict_trainer) {
       if (!ZSTD_TrainDictionarySupported()) {
-        return Status::InvalidArgument(
+        return Status_InvalidArgument(
             "zstd dictionary trainer cannot be used because ZSTD 1.1.3+ "
             "is not linked with the binary.");
       }
     } else if (!ZSTD_FinalizeDictionarySupported()) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "zstd finalizeDictionary cannot be used because ZSTD 1.4.5+ "
           "is not linked with the binary.");
     }
     if (cf_options.compression_opts.max_dict_bytes == 0) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "The dictionary size limit (`CompressionOptions::max_dict_bytes`) "
           "should be nonzero if we're using zstd's dictionary generator.");
     }
@@ -154,23 +154,23 @@ Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
         << CompressionTypeToString(cf_options.blob_compression_type)
         << " is not available.";
 
-    return Status::InvalidArgument(oss.str());
+    return Status_InvalidArgument(oss.str());
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status CheckConcurrentWritesSupported(const ColumnFamilyOptions& cf_options) {
   if (cf_options.inplace_update_support) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "In-place memtable updates (inplace_update_support) is not compatible "
         "with concurrent writes (allow_concurrent_memtable_write)");
   }
   if (!cf_options.memtable_factory->IsInsertConcurrentlySupported()) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Memtable doesn't concurrent writes (allow_concurrent_memtable_write)");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status CheckCFPathsSupported(const DBOptions& db_options,
@@ -182,16 +182,16 @@ Status CheckCFPathsSupported(const DBOptions& db_options,
   if ((cf_options.compaction_style != kCompactionStyleUniversal) &&
       (cf_options.compaction_style != kCompactionStyleLevel)) {
     if (cf_options.cf_paths.size() > 1) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "More than one CF paths are only supported in "
           "universal and level compaction styles. ");
     } else if (cf_options.cf_paths.empty() && db_options.db_paths.size() > 1) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "More than one DB paths are only supported in "
           "universal and level compaction styles. ");
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 namespace {
@@ -1156,7 +1156,7 @@ Status ColumnFamilyData::RangesOverlapWithMemtables(
   Status status;
   status = super_version->imm->AddRangeTombstoneIterators(
       read_opts, nullptr /* arena */, &range_del_agg);
-  // AddRangeTombstoneIterators always return Status::OK.
+  // AddRangeTombstoneIterators always return Status_OK.
   assert(status.ok());
 
   for (size_t i = 0; i < ranges.size() && status.ok() && !*overlap; ++i) {
@@ -1348,7 +1348,7 @@ Status ColumnFamilyData::ValidateOptions(
   }
   if (s.ok() && db_options.unordered_write &&
       cf_options.max_successive_merges != 0) {
-    s = Status::InvalidArgument(
+    s = Status_InvalidArgument(
         "max_successive_merges > 0 is incompatible with unordered_write");
   }
   if (s.ok()) {
@@ -1361,7 +1361,7 @@ Status ColumnFamilyData::ValidateOptions(
   if (cf_options.ttl > 0 && cf_options.ttl != kDefaultTtl) {
     if (!cf_options.table_factory->IsInstanceOf(
             TableFactory::kBlockBasedTableName())) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "TTL is only supported in Block-Based Table format. ");
     }
   }
@@ -1370,7 +1370,7 @@ Status ColumnFamilyData::ValidateOptions(
       cf_options.periodic_compaction_seconds != kDefaultPeriodicCompSecs) {
     if (!cf_options.table_factory->IsInstanceOf(
             TableFactory::kBlockBasedTableName())) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Periodic Compaction is only supported in "
           "Block-Based Table format. ");
     }
@@ -1379,13 +1379,13 @@ Status ColumnFamilyData::ValidateOptions(
   if (cf_options.enable_blob_garbage_collection) {
     if (cf_options.blob_garbage_collection_age_cutoff < 0.0 ||
         cf_options.blob_garbage_collection_age_cutoff > 1.0) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "The age cutoff for blob garbage collection should be in the range "
           "[0.0, 1.0].");
     }
     if (cf_options.blob_garbage_collection_force_threshold < 0.0 ||
         cf_options.blob_garbage_collection_force_threshold > 1.0) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "The garbage ratio threshold for forcing blob garbage collection "
           "should be in the range [0.0, 1.0].");
     }
@@ -1393,7 +1393,7 @@ Status ColumnFamilyData::ValidateOptions(
 
   if (cf_options.compaction_style == kCompactionStyleFIFO &&
       db_options.max_open_files != -1 && cf_options.ttl > 0) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "FIFO compaction only supported with max_open_files = -1.");
   }
 
@@ -1401,13 +1401,13 @@ Status ColumnFamilyData::ValidateOptions(
   if (std::find(supported.begin(), supported.end(),
                 cf_options.memtable_protection_bytes_per_key) ==
       supported.end()) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Memtable per key-value checksum protection only supports 0, 1, 2, 4 "
         "or 8 bytes per key.");
   }
   if (std::find(supported.begin(), supported.end(),
                 cf_options.block_protection_bytes_per_key) == supported.end()) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Block per key-value checksum protection only supports 0, 1, 2, 4 "
         "or 8 bytes per key.");
   }
@@ -1415,11 +1415,11 @@ Status ColumnFamilyData::ValidateOptions(
   if (!cf_options.compaction_options_fifo.file_temperature_age_thresholds
            .empty()) {
     if (cf_options.compaction_style != kCompactionStyleFIFO) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Option file_temperature_age_thresholds only supports FIFO "
           "compaction.");
     } else if (cf_options.num_levels > 1) {
-      return Status::NotSupported(
+      return Status_NotSupported(
           "Option file_temperature_age_thresholds is only supported when "
           "num_levels = 1.");
     } else {
@@ -1429,7 +1429,7 @@ Status ColumnFamilyData::ValidateOptions(
       // check that age is sorted
       for (size_t i = 0; i < ages.size() - 1; ++i) {
         if (ages[i].age >= ages[i + 1].age) {
-          return Status::NotSupported(
+          return Status_NotSupported(
               "Option file_temperature_age_thresholds requires elements to be "
               "sorted in increasing order with respect to `age` field.");
         }

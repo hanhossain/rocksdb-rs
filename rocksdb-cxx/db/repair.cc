@@ -149,7 +149,7 @@ class Repairer {
     const ReadOptions read_options;
     const auto* cf_opts = GetColumnFamilyOptions(cf_name);
     if (cf_opts == nullptr) {
-      return Status::Corruption("Encountered unknown column family with name=" +
+      return Status_Corruption("Encountered unknown column family with name=" +
                                 cf_name + ", id=" + std::to_string(cf_id));
     }
     Options opts(db_options_, *cf_opts);
@@ -177,7 +177,7 @@ class Repairer {
   }
 
   Status Close() {
-    Status s = Status::OK();
+    Status s = Status_OK();
     if (!closed_) {
       if (db_lock_ != nullptr) {
         s = env_->UnlockFile(db_lock_);
@@ -327,9 +327,9 @@ class Repairer {
       }
     }
     if (!found_file) {
-      return Status::Corruption(dbname_, "repair found no files");
+      return Status_Corruption(dbname_, "repair found no files");
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   void ConvertLogFilesToTables() {
@@ -404,7 +404,7 @@ class Repairer {
     while (reader.ReadRecord(&record, &scratch)) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter.Corruption(record.size(),
-                            Status::Corruption("log record too small"));
+                            Status_Corruption("log record too small"));
         continue;
       }
       Status record_status = WriteBatchInternal::SetContents(&batch, record);
@@ -585,7 +585,7 @@ class Repairer {
             "family id %" PRIu32 ".",
             t->meta.fd.GetNumber(), props->column_family_name.c_str(),
             cfd->GetName().c_str(), t->column_family_id);
-        status = Status::Corruption(dbname_, "inconsistent column family name");
+        status = Status_Corruption(dbname_, "inconsistent column family name");
       }
     }
     if (status.ok()) {
@@ -757,7 +757,7 @@ class Repairer {
         return s;
       }
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   void ArchiveFile(const std::string& fname) {
@@ -790,11 +790,11 @@ Status GetDefaultCFOptions(
                              return cfd.name == kDefaultColumnFamilyName;
                            });
   if (iter == column_families.end()) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "column_families", "Must contain entry for default column family");
   }
   *res = iter->options;
-  return Status::OK();
+  return Status_OK();
 }
 }  // anonymous namespace
 

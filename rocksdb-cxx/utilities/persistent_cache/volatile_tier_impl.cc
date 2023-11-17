@@ -53,7 +53,7 @@ Status VolatileCacheTier::Insert(const Slice& page_key, const char* data,
       // latency
       assert(size_ >= size);
       size_ -= size;
-      return Status::TryAgain("Unable to evict any data");
+      return Status_TryAgain("Unable to evict any data");
     }
   }
 
@@ -70,12 +70,12 @@ Status VolatileCacheTier::Insert(const Slice& page_key, const char* data,
     assert(size_ >= size);
     size_ -= size;
     // failed to insert to cache, block already in cache
-    return Status::TryAgain("key already exists in volatile cache");
+    return Status_TryAgain("key already exists in volatile cache");
   }
 
   cache_data.release();
   stats_.cache_inserts_++;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status VolatileCacheTier::Lookup(const Slice& page_key,
@@ -93,7 +93,7 @@ Status VolatileCacheTier::Lookup(const Slice& page_key,
     kv->refs_--;
     // update stats
     stats_.cache_hits_++;
-    return Status::OK();
+    return Status_OK();
   }
 
   stats_.cache_misses_++;
@@ -102,7 +102,7 @@ Status VolatileCacheTier::Lookup(const Slice& page_key,
     return next_tier()->Lookup(page_key, result, size);
   }
 
-  return Status::NotFound("key not found in volatile cache");
+  return Status_NotFound("key not found in volatile cache");
 }
 
 bool VolatileCacheTier::Erase(const Slice& /*key*/) {

@@ -61,7 +61,7 @@ Status CacheReservationManagerImpl<R>::UpdateCacheReservation(
   std::size_t cur_cache_allocated_size =
       cache_allocated_size_.load(std::memory_order_relaxed);
   if (new_mem_used == cur_cache_allocated_size) {
-    return Status::OK();
+    return Status_OK();
   } else if (new_mem_used > cur_cache_allocated_size) {
     Status s = IncreaseCacheReservation(new_mem_used);
     return s;
@@ -76,7 +76,7 @@ Status CacheReservationManagerImpl<R>::UpdateCacheReservation(
     // which is likely to happen when the memory usage is greater than or equal
     // to 3/4 of what we reserve
     if (delayed_decrease_ && new_mem_used >= cur_cache_allocated_size / 4 * 3) {
-      return Status::OK();
+      return Status_OK();
     } else {
       Status s = DecreaseCacheReservation(new_mem_used);
       return s;
@@ -111,12 +111,12 @@ Status CacheReservationManagerImpl<R>::ReleaseCacheReservation(
 template <CacheEntryRole R>
 Status CacheReservationManagerImpl<R>::IncreaseCacheReservation(
     std::size_t new_mem_used) {
-  Status return_status = Status::OK();
+  Status return_status = Status_OK();
   while (new_mem_used > cache_allocated_size_.load(std::memory_order_relaxed)) {
     Cache::Handle* handle = nullptr;
     return_status = cache_.Insert(GetNextCacheKey(), kSizeDummyEntry, &handle);
 
-    if (return_status != Status::OK()) {
+    if (return_status != Status_OK()) {
       return return_status;
     }
 
@@ -129,7 +129,7 @@ Status CacheReservationManagerImpl<R>::IncreaseCacheReservation(
 template <CacheEntryRole R>
 Status CacheReservationManagerImpl<R>::DecreaseCacheReservation(
     std::size_t new_mem_used) {
-  Status return_status = Status::OK();
+  Status return_status = Status_OK();
 
   // Decrease to the smallest multiple of kSizeDummyEntry that is greater than
   // or equal to new_mem_used We do addition instead of new_mem_used <=

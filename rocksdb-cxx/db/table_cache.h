@@ -127,7 +127,7 @@ class TableCache {
       std::unique_ptr<FragmentedRangeTombstoneIterator>* out_iter);
 
   // Call table reader's MultiGetFilter to use the bloom filter to filter out
-  // keys. Returns Status::NotSupported() if row cache needs to be checked.
+  // keys. Returns Status_NotSupported() if row cache needs to be checked.
   // If the table cache is looked up to get the table reader, the cache handle
   // is returned in table_handle. This handle should be passed back to
   // MultiGet() so it can be released.
@@ -181,7 +181,7 @@ class TableCache {
   // @no_io: indicates if we should load table to the cache if it is not present
   //         in table cache yet.
   // @returns: `properties` will be reset on success. Please note that we will
-  //            return Status::Incomplete() if table is not present in cache and
+  //            return Status_Incomplete() if table is not present in cache and
   //            we set `no_io` to be true.
   Status GetTableProperties(
       const FileOptions& toptions, const ReadOptions& read_options,

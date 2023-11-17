@@ -33,7 +33,7 @@ const uint64_t kStatsCFCompatibleFormatVersion = 1;
 Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
                                           uint64_t* version_number) {
   if (type >= StatsVersionKeyType::kKeyTypeMax) {
-    return Status::InvalidArgument("Invalid stats version key type provided");
+    return Status_InvalidArgument("Invalid stats version key type provided");
   }
   std::string key;
   if (type == StatsVersionKeyType::kFormatVersion) {
@@ -46,13 +46,13 @@ Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
   std::string result;
   Status s = db->Get(options, db->PersistentStatsColumnFamily(), key, &result);
   if (!s.ok() || result.empty()) {
-    return Status::NotFound("Persistent stats version key " + key +
+    return Status_NotFound("Persistent stats version key " + key +
                             " not found.");
   }
 
   // read version_number but do nothing in current version
   *version_number = ParseUint64(result);
-  return Status::OK();
+  return Status_OK();
 }
 
 int EncodePersistentStatsKey(uint64_t now_seconds, const std::string& key,

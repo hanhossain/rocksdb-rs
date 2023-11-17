@@ -262,19 +262,19 @@ TEST_F(DBTestXactLogIterator, TransactionLogIteratorBlobs) {
     Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
       seen += "Put(" + std::to_string(cf) + ", " + key.ToString() + ", " +
               std::to_string(value.size()) + ")";
-      return Status::OK();
+      return Status_OK();
     }
     Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
       seen += "Merge(" + std::to_string(cf) + ", " + key.ToString() + ", " +
               std::to_string(value.size()) + ")";
-      return Status::OK();
+      return Status_OK();
     }
     void LogData(const Slice& blob) override {
       seen += "LogData(" + blob.ToString() + ")";
     }
     Status DeleteCF(uint32_t cf, const Slice& key) override {
       seen += "Delete(" + std::to_string(cf) + ", " + key.ToString() + ")";
-      return Status::OK();
+      return Status_OK();
     }
   } handler;
   ASSERT_OK(res.writeBatchPtr->Iterate(&handler));

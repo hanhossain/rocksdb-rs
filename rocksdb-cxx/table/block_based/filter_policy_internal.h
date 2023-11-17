@@ -44,8 +44,8 @@ class FilterBitsBuilder {
 
   // Similar to Finish(std::unique_ptr<const char[]>* buf), except that
   // for a non-null status pointer argument, it will point to
-  // Status::Corruption() when there is any corruption during filter
-  // construction or Status::OK() otherwise.
+  // Status_Corruption() when there is any corruption during filter
+  // construction or Status_OK() otherwise.
   //
   // WARNING: do not use a filter resulted from a corrupted construction
   // TODO: refactor this to have a better signature, consolidate
@@ -55,13 +55,13 @@ class FilterBitsBuilder {
   }
 
   // Verify the filter returned from calling FilterBitsBuilder::Finish.
-  // The function returns Status::Corruption() if there is any corruption in the
-  // constructed filter or Status::OK() otherwise.
+  // The function returns Status_Corruption() if there is any corruption in the
+  // constructed filter or Status_OK() otherwise.
   //
   // Implementations should normally consult
   // FilterBuildingContext::table_options.detect_filter_construct_corruption
   // to determine whether to perform verification or to skip by returning
-  // Status::OK(). The decision is left to the FilterBitsBuilder so that
+  // Status_OK(). The decision is left to the FilterBitsBuilder so that
   // verification prerequisites before PostVerify can be skipped when not
   // configured.
   //
@@ -71,7 +71,7 @@ class FilterBitsBuilder {
   // status, which indicates the filter is already in a corrupted state and
   // there is no need to post-verify
   virtual Status MaybePostVerify(const Slice& /* filter_content */) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Approximate the number of keys that can be added and generate a filter

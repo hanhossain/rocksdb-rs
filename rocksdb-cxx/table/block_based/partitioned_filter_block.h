@@ -58,7 +58,7 @@ class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
   // Therefore we are skipping it in here.
   virtual Status MaybePostVerifyFilter(
       const Slice& /* filter_content */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
  private:

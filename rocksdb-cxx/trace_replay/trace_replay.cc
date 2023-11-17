@@ -35,7 +35,7 @@ void DecodeCFAndKey(std::string& buffer, uint32_t* cf_id, Slice* key) {
 Status TracerHelper::ParseVersionStr(std::string& v_string, int* v_num) {
   if (v_string.find_first_of('.') == std::string::npos ||
       v_string.find_first_of('.') != v_string.find_last_of('.')) {
-    return Status::Corruption(
+    return Status_Corruption(
         "Corrupted trace file. Incorrect version format.");
   }
   int tmp_num = 0;
@@ -45,12 +45,12 @@ Status TracerHelper::ParseVersionStr(std::string& v_string, int* v_num) {
     } else if (isdigit(v_string[i])) {
       tmp_num = tmp_num * 10 + (v_string[i] - '0');
     } else {
-      return Status::Corruption(
+      return Status_Corruption(
           "Corrupted trace file. Incorrect version format");
     }
   }
   *v_num = tmp_num;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
@@ -73,7 +73,7 @@ Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
 
   Status s;
   s = ParseVersionStr(t_v_str, trace_version);
-  if (s != Status::OK()) {
+  if (s != Status_OK()) {
     return s;
   }
   s = ParseVersionStr(db_v_str, db_version);
@@ -93,15 +93,15 @@ Status TracerHelper::DecodeTrace(const std::string& encoded_trace,
   assert(trace != nullptr);
   Slice enc_slice = Slice(encoded_trace);
   if (!GetFixed64(&enc_slice, &trace->ts)) {
-    return Status::Incomplete("Decode trace string failed");
+    return Status_Incomplete("Decode trace string failed");
   }
   if (enc_slice.size() < kTraceTypeSize + kTracePayloadLengthSize) {
-    return Status::Incomplete("Decode trace string failed");
+    return Status_Incomplete("Decode trace string failed");
   }
   trace->type = static_cast<TraceType>(enc_slice[0]);
   enc_slice.remove_prefix(kTraceTypeSize + kTracePayloadLengthSize);
   trace->payload = enc_slice.ToString();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TracerHelper::DecodeHeader(const std::string& encoded_trace,
@@ -109,10 +109,10 @@ Status TracerHelper::DecodeHeader(const std::string& encoded_trace,
   Status s = TracerHelper::DecodeTrace(encoded_trace, header);
 
   if (header->type != kTraceBegin) {
-    return Status::Corruption("Corrupted trace file. Incorrect header.");
+    return Status_Corruption("Corrupted trace file. Incorrect header.");
   }
   if (header->payload.substr(0, kTraceMagic.length()) != kTraceMagic) {
-    return Status::Corruption("Corrupted trace file. Incorrect magic.");
+    return Status_Corruption("Corrupted trace file. Incorrect magic.");
   }
 
   return s;
@@ -168,7 +168,7 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
         record->reset(new WriteQueryTraceRecord(std::move(rep), trace->ts));
       }
 
-      return Status::OK();
+      return Status_OK();
     }
     // Get
     case kTraceGet: {
@@ -209,7 +209,7 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
         record->reset(new GetQueryTraceRecord(cf_id, std::move(ps), trace->ts));
       }
 
-      return Status::OK();
+      return Status_OK();
     }
     // Iterator Seek and SeekForPrev
     case kTraceIteratorSeek:
@@ -268,12 +268,12 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
             trace->ts));
       }
 
-      return Status::OK();
+      return Status_OK();
     }
     // MultiGet
     case kTraceMultiGet: {
       if (trace_file_version < 2) {
-        return Status::Corruption("MultiGet is not supported.");
+        return Status_Corruption("MultiGet is not supported.");
       }
 
       uint32_t multiget_size = 0;
@@ -310,7 +310,7 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
         payload_map &= (payload_map - 1);
       }
       if (multiget_size == 0) {
-        return Status::InvalidArgument("Empty MultiGet cf_ids or keys.");
+        return Status_InvalidArgument("Empty MultiGet cf_ids or keys.");
       }
 
       // Decode the cfids_payload and keys_payload
@@ -333,10 +333,10 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
             std::move(cf_ids), std::move(multiget_keys), trace->ts));
       }
 
-      return Status::OK();
+      return Status_OK();
     }
     default:
-      return Status::NotSupported("Unsupported trace type.");
+      return Status_NotSupported("Unsupported trace type.");
   }
 }
 
@@ -355,7 +355,7 @@ Tracer::~Tracer() { trace_writer_.reset(); }
 Status Tracer::Write(WriteBatch* write_batch) {
   TraceType trace_type = kTraceWrite;
   if (ShouldSkipTrace(trace_type)) {
-    return Status::OK();
+    return Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -370,7 +370,7 @@ Status Tracer::Write(WriteBatch* write_batch) {
 Status Tracer::Get(ColumnFamilyHandle* column_family, const Slice& key) {
   TraceType trace_type = kTraceGet;
   if (ShouldSkipTrace(trace_type)) {
-    return Status::OK();
+    return Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -390,7 +390,7 @@ Status Tracer::IteratorSeek(const uint32_t& cf_id, const Slice& key,
                             const Slice& lower_bound, const Slice upper_bound) {
   TraceType trace_type = kTraceIteratorSeek;
   if (ShouldSkipTrace(trace_type)) {
-    return Status::OK();
+    return Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -426,7 +426,7 @@ Status Tracer::IteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
                                    const Slice upper_bound) {
   TraceType trace_type = kTraceIteratorSeekForPrev;
   if (ShouldSkipTrace(trace_type)) {
-    return Status::OK();
+    return Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -461,7 +461,7 @@ Status Tracer::MultiGet(const size_t num_keys,
                         ColumnFamilyHandle** column_families,
                         const Slice* keys) {
   if (num_keys == 0) {
-    return Status::OK();
+    return Status_OK();
   }
   std::vector<ColumnFamilyHandle*> v_column_families;
   std::vector<Slice> v_keys;
@@ -477,7 +477,7 @@ Status Tracer::MultiGet(const size_t num_keys,
 Status Tracer::MultiGet(const size_t num_keys,
                         ColumnFamilyHandle* column_family, const Slice* keys) {
   if (num_keys == 0) {
-    return Status::OK();
+    return Status_OK();
   }
   std::vector<ColumnFamilyHandle*> column_families;
   std::vector<Slice> v_keys;
@@ -493,11 +493,11 @@ Status Tracer::MultiGet(const size_t num_keys,
 Status Tracer::MultiGet(const std::vector<ColumnFamilyHandle*>& column_families,
                         const std::vector<Slice>& keys) {
   if (column_families.size() != keys.size()) {
-    return Status::Corruption("the CFs size and keys size does not match!");
+    return Status_Corruption("the CFs size and keys size does not match!");
   }
   TraceType trace_type = kTraceMultiGet;
   if (ShouldSkipTrace(trace_type)) {
-    return Status::OK();
+    return Status_OK();
   }
   uint32_t multiget_size = static_cast<uint32_t>(keys.size());
   Trace trace;

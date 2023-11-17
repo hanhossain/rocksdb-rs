@@ -74,10 +74,10 @@ class SanityTest {
         return s;
       }
       if (result != v) {
-        return Status::Corruption("Unexpected value for key " + k);
+        return Status_Corruption("Unexpected value for key " + k);
       }
     }
-    return Status::OK();
+    return Status_OK();
   }
 
  private:

@@ -264,7 +264,7 @@ struct TransactionOptions {
 
   // Setting to true means that before acquiring locks, this transaction will
   // check if doing so will cause a deadlock. If so, it will return with
-  // Status::Busy.  The user should retry their transaction.
+  // Status_Busy.  The user should retry their transaction.
   bool deadlock_detect = false;
 
   // If set, it states that the CommitTimeWriteBatch represents the latest state
@@ -392,7 +392,7 @@ class TransactionDB : public StackableDB {
   using StackableDB::DeleteRange;
   virtual Status DeleteRange(const WriteOptions&, ColumnFamilyHandle*,
                              const Slice&, const Slice&) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   // Open a TransactionDB similar to DB::Open().
   // Internally call PrepareWrap() and WrapDB()

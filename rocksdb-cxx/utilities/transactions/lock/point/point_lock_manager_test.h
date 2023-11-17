@@ -27,7 +27,7 @@ class MockColumnFamilyHandle : public ColumnFamilyHandle {
   ColumnFamilyId GetID() const override { return cf_id_; }
 
   Status GetDescriptor(ColumnFamilyDescriptor*) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   const Comparator* GetComparator() const override {

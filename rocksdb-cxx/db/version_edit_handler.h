@@ -35,7 +35,7 @@ class VersionEditHandlerBase {
   explicit VersionEditHandlerBase(const ReadOptions& read_options,
                                   uint64_t max_read_size)
       : read_options_(read_options), max_manifest_read_size_(max_read_size) {}
-  virtual Status Initialize() { return Status::OK(); }
+  virtual Status Initialize() { return Status_OK(); }
 
   virtual Status ApplyVersionEdit(VersionEdit& edit,
                                   ColumnFamilyData** cfd) = 0;

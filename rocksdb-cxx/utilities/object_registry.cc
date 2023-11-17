@@ -252,7 +252,7 @@ Status ObjectRegistry::SetManagedObject(
     if (iter != managed_objects_.end()) {  // The object exists
       curr = iter->second.lock();
       if (curr != nullptr && curr != object) {
-        return Status::InvalidArgument("Object already exists: ", object_key);
+        return Status_InvalidArgument("Object already exists: ", object_key);
       } else {
         iter->second = object;
       }
@@ -261,9 +261,9 @@ Status ObjectRegistry::SetManagedObject(
       managed_objects_[object_key] = object;
     }
   } else if (curr != object) {
-    return Status::InvalidArgument("Object already exists: ", object_key);
+    return Status_InvalidArgument("Object already exists: ", object_key);
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 std::shared_ptr<Customizable> ObjectRegistry::GetManagedObject(
@@ -302,7 +302,7 @@ Status ObjectRegistry::ListManagedObjects(
   if (parent_ != nullptr) {
     return parent_->ListManagedObjects(type, name, results);
   } else {
-    return Status::OK();
+    return Status_OK();
   }
 }
 

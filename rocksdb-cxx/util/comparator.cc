@@ -360,15 +360,15 @@ Status Comparator::CreateFromString(const ConfigOptions& config_options,
   } else if (value.empty()) {
     // No Id and no options.  Clear the object
     *result = nullptr;
-    return Status::OK();
+    return Status_OK();
   } else if (id.empty()) {  // We have no Id but have options.  Not good
-    return Status::NotSupported("Cannot reset object ", id);
+    return Status_NotSupported("Cannot reset object ", id);
   } else {
     status = config_options.registry->NewStaticObject(id, result);
     if (!status.ok()) {
       if (config_options.ignore_unsupported_options &&
           status.IsNotSupported()) {
-        return Status::OK();
+        return Status_OK();
       } else {
         return status;
       }

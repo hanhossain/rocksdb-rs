@@ -25,7 +25,7 @@ Status SaveToCallback(Cache::ObjectPtr from_obj, size_t from_offset,
   EXPECT_EQ(length, item->Size());
   EXPECT_EQ(from_offset, 0);
   memcpy(out, buf, length);
-  return Status::OK();
+  return Status_OK();
 }
 
 void DeletionCallback(Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
@@ -34,7 +34,7 @@ void DeletionCallback(Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
 
 Status SaveToCallbackFail(Cache::ObjectPtr /*obj*/, size_t /*offset*/,
                           size_t /*size*/, char* /*out*/) {
-  return Status::NotSupported();
+  return Status_NotSupported();
 }
 
 Status CreateCallback(const Slice& data, Cache::CreateContext* context,
@@ -42,11 +42,11 @@ Status CreateCallback(const Slice& data, Cache::CreateContext* context,
                       size_t* out_charge) {
   auto t = static_cast<TestCreateContext*>(context);
   if (t->fail_create_) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   *out_obj = new TestItem(data.data(), data.size());
   *out_charge = data.size();
-  return Status::OK();
+  return Status_OK();
 }
 
 // If helpers without_secondary are provided, returns helpers with secondary

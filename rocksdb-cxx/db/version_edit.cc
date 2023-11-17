@@ -39,7 +39,7 @@ Status FileMetaData::UpdateBoundaries(const Slice& key, const Slice& value,
 
     if (!blob_index.IsInlined() && !blob_index.HasTTL()) {
       if (blob_index.file_number() == kInvalidBlobFileNumber) {
-        return Status::Corruption("Invalid blob file number");
+        return Status_Corruption("Invalid blob file number");
       }
 
       if (oldest_blob_file_number == kInvalidBlobFileNumber ||
@@ -56,7 +56,7 @@ Status FileMetaData::UpdateBoundaries(const Slice& key, const Slice& value,
   fd.smallest_seqno = std::min(fd.smallest_seqno, seqno);
   fd.largest_seqno = std::max(fd.largest_seqno, seqno);
 
-  return Status::OK();
+  return Status_OK();
 }
 
 void VersionEdit::Clear() {
@@ -803,7 +803,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
 
   Status result;
   if (msg != nullptr) {
-    result = Status::Corruption("VersionEdit", msg);
+    result = Status_Corruption("VersionEdit", msg);
   }
   return result;
 }

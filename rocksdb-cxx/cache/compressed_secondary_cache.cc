@@ -111,7 +111,7 @@ Status CompressedSecondaryCache::Insert(const Slice& key,
                                         Cache::ObjectPtr value,
                                         const Cache::CacheItemHelper* helper) {
   if (value == nullptr) {
-    return Status::InvalidArgument();
+    return Status_InvalidArgument();
   }
 
   Cache::Handle* lru_handle = cache_->Lookup(key);
@@ -151,7 +151,7 @@ Status CompressedSecondaryCache::Insert(const Slice& key,
                      cache_options_.compress_format_version, &compressed_val);
 
     if (!success) {
-      return Status::Corruption("Error compressing value.");
+      return Status_Corruption("Error compressing value.");
     }
 
     val = Slice(compressed_val);
@@ -182,13 +182,13 @@ Status CompressedSecondaryCache::SetCapacity(size_t capacity) {
   MutexLock l(&capacity_mutex_);
   cache_options_.capacity = capacity;
   cache_->SetCapacity(capacity);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status CompressedSecondaryCache::GetCapacity(size_t& capacity) {
   MutexLock l(&capacity_mutex_);
   capacity = cache_options_.capacity;
-  return Status::OK();
+  return Status_OK();
 }
 
 std::string CompressedSecondaryCache::GetPrintableOptions() const {

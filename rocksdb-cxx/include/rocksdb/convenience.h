@@ -250,13 +250,13 @@ struct ConfigOptions {
 //     back to the raw string before assigning to the associated options.
 // @param ignore_unknown_options when set to true, unknown options are ignored
 //     instead of resulting in an unknown-option error.
-// @return Status::OK() on success.  Otherwise, a non-ok status indicating
+// @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_options" will be set to "base_options".
-// @return Status::NotFound means the one (or more) of the option name in
+// @return Status_NotFound means the one (or more) of the option name in
 //     the opts_map is not valid for this option
-// @return Status::NotSupported means we do not know how to parse one of the
+// @return Status_NotSupported means we do not know how to parse one of the
 //     value for this option
-// @return Status::InvalidArgument means the one of the option values is not
+// @return Status_InvalidArgument means the one of the option values is not
 //     valid for this option.
 Status GetColumnFamilyOptionsFromMap(
     const ConfigOptions& config_options,
@@ -288,13 +288,13 @@ Status GetColumnFamilyOptionsFromMap(
 //     back to the raw string before assigning to the associated options.
 // @param ignore_unknown_options when set to true, unknown options are ignored
 //     instead of resulting in an unknown-option error.
-// @return Status::OK() on success.  Otherwise, a non-ok status indicating
+// @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_options" will be set to "base_options".
-// @return Status::NotFound means the one (or more) of the option name in
+// @return Status_NotFound means the one (or more) of the option name in
 //     the opts_map is not valid for this option
-// @return Status::NotSupported means we do not know how to parse one of the
+// @return Status_NotSupported means we do not know how to parse one of the
 //     value for this option
-// @return Status::InvalidArgument means the one of the option values is not
+// @return Status_InvalidArgument means the one of the option values is not
 //     valid for this option.
 Status GetDBOptionsFromMap(
     const ConfigOptions& cfg_options, const DBOptions& base_options,
@@ -338,7 +338,7 @@ Status GetDBOptionsFromMap(
 //     back to the raw string before assigning to the associated options.
 // @param ignore_unknown_options when set to true, unknown options are ignored
 //     instead of resulting in an unknown-option error.
-// @return Status::OK() on success.  Otherwise, a non-ok status indicating
+// @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
 Status GetBlockBasedTableOptionsFromMap(
@@ -363,7 +363,7 @@ Status GetBlockBasedTableOptionsFromMap(
 //     back to the raw string before assigning to the associated options.
 // @param ignore_unknown_options when set to true, unknown options are ignored
 //     instead of resulting in an unknown-option error.
-// @return Status::OK() on success.  Otherwise, a non-ok status indicating
+// @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
 Status GetPlainTableOptionsFromMap(

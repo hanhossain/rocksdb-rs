@@ -105,7 +105,7 @@ Status WalManager::GetUpdatesSince(
     const TransactionLogIterator::ReadOptions& read_options,
     VersionSet* version_set) {
   if (seq_per_batch_) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   assert(!seq_per_batch_);
@@ -324,7 +324,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
           s = env_->GetFileSize(archived_file, &size_bytes);
           if (!s.ok() && env_->FileExists(archived_file).IsNotFound()) {
             // oops, the file just got deleted from archived dir! move on
-            s = Status::OK();
+            s = Status_OK();
             continue;
           }
         }
@@ -370,7 +370,7 @@ Status WalManager::RetainProbableWalFiles(VectorLogPtr& all_logs,
       static_cast<size_t>(std::max(static_cast<int64_t>(0), end));
   // The last wal file is always included
   all_logs.erase(all_logs.begin(), all_logs.begin() + start_index);
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WalManager::ReadFirstRecord(const WalFileType type,
@@ -380,14 +380,14 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
   if (type != kAliveLogFile && type != kArchivedLogFile) {
     ROCKS_LOG_ERROR(db_options_.info_log, "[WalManger] Unknown file type %s",
                     std::to_string(type).c_str());
-    return Status::NotSupported("File Type Not Known " + std::to_string(type));
+    return Status_NotSupported("File Type Not Known " + std::to_string(type));
   }
   {
     MutexLock l(&read_first_record_cache_mutex_);
     auto itr = read_first_record_cache_.find(number);
     if (itr != read_first_record_cache_.end()) {
       *sequence = itr->second;
-      return Status::OK();
+      return Status_OK();
     }
   }
   Status s;
@@ -405,10 +405,10 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
     std::string archived_file = ArchivedLogFileName(wal_dir_, number);
     s = ReadFirstLine(archived_file, number, sequence);
     // maybe the file was deleted from archive dir. If that's the case, return
-    // Status::OK(). The caller with identify this as empty file because
+    // Status_OK(). The caller with identify this as empty file because
     // *sequence == 0
     if (!s.ok() && env_->FileExists(archived_file).IsNotFound()) {
-      return Status::OK();
+      return Status_OK();
     }
   }
 
@@ -422,11 +422,11 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
 Status WalManager::GetLiveWalFile(uint64_t number,
                                   std::unique_ptr<LogFile>* log_file) {
   if (!log_file) {
-    return Status::InvalidArgument("log_file not preallocated.");
+    return Status_InvalidArgument("log_file not preallocated.");
   }
 
   if (!number) {
-    return Status::PathNotFound("log file not available");
+    return Status_PathNotFound("log file not available");
   }
 
   Status s;
@@ -442,7 +442,7 @@ Status WalManager::GetLiveWalFile(uint64_t number,
                                   0,  // SequenceNumber
                                   size_bytes));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 // the function returns status.ok() and sequence == 0 if the file exists, but is
@@ -493,7 +493,7 @@ Status WalManager::ReadFirstLine(const std::string& fname,
       (status.ok() || !db_options_.paranoid_checks)) {
     if (record.size() < WriteBatchInternal::kHeader) {
       reporter.Corruption(record.size(),
-                          Status::Corruption("log record too small"));
+                          Status_Corruption("log record too small"));
       // TODO read record's till the first no corrupt entry?
     } else {
       WriteBatch batch;

@@ -23,7 +23,7 @@ class SequentialFileMirror : public SequentialFile {
   Status Read(size_t n, Slice* result, char* scratch) override {
     Slice aslice;
     Status as = a_->Read(n, &aslice, scratch);
-    if (as == Status::OK()) {
+    if (as == Status_OK()) {
       char* bscratch = new char[n];
       Slice bslice;
 #ifndef NDEBUG
@@ -71,7 +71,7 @@ class RandomAccessFileMirror : public RandomAccessFile {
   Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override {
     Status as = a_->Read(offset, n, result, scratch);
-    if (as == Status::OK()) {
+    if (as == Status_OK()) {
       char* bscratch = new char[n];
       Slice bslice;
       size_t off = 0;

@@ -136,30 +136,30 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
           }
 
           if (file_range.GetValueSize() > read_options.value_size_soft_limit) {
-            s = Status::Aborted();
+            s = Status_Aborted();
             break;
           }
         }
         continue;
       case GetContext::kDeleted:
         // Use empty error message for speed
-        *status = Status::NotFound();
+        *status = Status_NotFound();
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kCorrupt:
         *status =
-            Status::Corruption("corrupted key for ", iter->lkey->user_key());
+            Status_Corruption("corrupted key for ", iter->lkey->user_key());
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kUnexpectedBlobIndex:
         ROCKS_LOG_ERROR(info_log_, "Encounter unexpected blob index.");
-        *status = Status::NotSupported(
+        *status = Status_NotSupported(
             "Encounter unexpected blob index. Please open DB with "
             "ROCKSDB_NAMESPACE::blob_db::BlobDB instead.");
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kMergeOperatorFailed:
-        *status = Status::Corruption(SubCode::kMergeOperatorFailed);
+        *status = Status_Corruption(SubCode::kMergeOperatorFailed);
         file_range.MarkKeyDone(iter);
         continue;
     }

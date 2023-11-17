@@ -47,15 +47,15 @@ Status ReplayerImpl::Prepare() {
   header_ts_ = header.ts;
   prepared_ = true;
   trace_end_ = false;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
   if (!prepared_) {
-    return Status::Incomplete("Not prepared!");
+    return Status_Incomplete("Not prepared!");
   }
   if (trace_end_) {
-    return Status::Incomplete("Trace end.");
+    return Status_Incomplete("Trace end.");
   }
 
   Trace trace;
@@ -63,7 +63,7 @@ Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
   // Reached the trace end.
   if (s.ok() && trace.type == kTraceEnd) {
     trace_end_ = true;
-    return Status::Incomplete("Trace end.");
+    return Status_Incomplete("Trace end.");
   }
   if (!s.ok() || record == nullptr) {
     return s;
@@ -82,17 +82,17 @@ Status ReplayerImpl::Replay(
     const std::function<void(Status, std::unique_ptr<TraceRecordResult>&&)>&
         result_callback) {
   if (options.fast_forward <= 0.0) {
-    return Status::InvalidArgument("Wrong fast forward speed!");
+    return Status_InvalidArgument("Wrong fast forward speed!");
   }
 
   if (!prepared_) {
-    return Status::Incomplete("Not prepared!");
+    return Status_Incomplete("Not prepared!");
   }
   if (trace_end_) {
-    return Status::Incomplete("Trace end.");
+    return Status_Incomplete("Trace end.");
   }
 
-  Status s = Status::OK();
+  Status s = Status_OK();
 
   if (options.num_threads <= 1) {
     // num_threads == 0 or num_threads == 1 uses single thread.
@@ -102,7 +102,7 @@ Status ReplayerImpl::Replay(
     while (s.ok()) {
       Trace trace;
       s = ReadTrace(&trace);
-      // If already at trace end, ReadTrace should return Status::Incomplete().
+      // If already at trace end, ReadTrace should return Status_Incomplete().
       if (!s.ok()) {
         break;
       }
@@ -110,7 +110,7 @@ Status ReplayerImpl::Replay(
       // No need to sleep before breaking the loop if at the trace end.
       if (trace.type == kTraceEnd) {
         trace_end_ = true;
-        s = Status::Incomplete("Trace end.");
+        s = Status_Incomplete("Trace end.");
         break;
       }
 
@@ -134,7 +134,7 @@ Status ReplayerImpl::Replay(
         if (result_callback != nullptr) {
           result_callback(s, nullptr);
         }
-        s = Status::OK();
+        s = Status_OK();
         continue;
       }
 
@@ -154,7 +154,7 @@ Status ReplayerImpl::Replay(
 
     std::mutex mtx;
     // Background decoding and execution status.
-    Status bg_s = Status::OK();
+    Status bg_s = Status_OK();
     uint64_t last_err_ts = static_cast<uint64_t>(-1);
     // Callback function used in background work to update bg_s for the ealiest
     // TraceRecord which has execution error. This is different from the
@@ -186,7 +186,7 @@ Status ReplayerImpl::Replay(
     while (bg_s.ok() && s.ok()) {
       Trace trace;
       s = ReadTrace(&trace);
-      // If already at trace end, ReadTrace should return Status::Incomplete().
+      // If already at trace end, ReadTrace should return Status_Incomplete().
       if (!s.ok()) {
         break;
       }
@@ -196,7 +196,7 @@ Status ReplayerImpl::Replay(
       // No need to sleep before breaking the loop if at the trace end.
       if (trace_type == kTraceEnd) {
         trace_end_ = true;
-        s = Status::Incomplete("Trace end.");
+        s = Status_Incomplete("Trace end.");
         break;
       }
 
@@ -225,7 +225,7 @@ Status ReplayerImpl::Replay(
       } else {
         // Skip unsupported traces.
         if (result_callback != nullptr) {
-          result_callback(Status::NotSupported("Unsupported trace type."),
+          result_callback(Status_NotSupported("Unsupported trace type."),
                           nullptr);
         }
       }
@@ -242,7 +242,7 @@ Status ReplayerImpl::Replay(
     // Could happen when killing a process without calling EndTrace() API.
     // TODO: Add better error handling.
     trace_end_ = true;
-    return Status::OK();
+    return Status_OK();
   }
   return s;
 }

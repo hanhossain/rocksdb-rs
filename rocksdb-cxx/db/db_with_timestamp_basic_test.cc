@@ -367,30 +367,30 @@ TEST_F(DBBasicTestWithTimestamp, UpdateFullHistoryTsLowWithPublicAPI) {
   std::string ts_low_str_back = Timestamp(8, 0);
   auto s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                          ts_low_str_back);
-  ASSERT_EQ(s, Status::InvalidArgument());
+  ASSERT_EQ(s, Status_InvalidArgument());
   // test IncreaseFullHistoryTsLow with a timestamp whose length is longger
   // than the cf's timestamp size
   std::string ts_low_str_long(Timestamp(0, 0).size() + 1, 'a');
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                     ts_low_str_long);
-  ASSERT_EQ(s, Status::InvalidArgument());
+  ASSERT_EQ(s, Status_InvalidArgument());
   // test IncreaseFullHistoryTsLow with a timestamp which is null
   std::string ts_low_str_null = "";
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                     ts_low_str_null);
-  ASSERT_EQ(s, Status::InvalidArgument());
+  ASSERT_EQ(s, Status_InvalidArgument());
   // test IncreaseFullHistoryTsLow for a column family that does not enable
   // timestamp
   options.comparator = BytewiseComparator();
   DestroyAndReopen(options);
   ts_low_str = Timestamp(10, 0);
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(), ts_low_str);
-  ASSERT_EQ(s, Status::InvalidArgument());
+  ASSERT_EQ(s, Status_InvalidArgument());
   // test GetFullHistoryTsLow for a column family that does not enable
   // timestamp
   std::string current_ts_low;
   s = db_->GetFullHistoryTsLow(db_->DefaultColumnFamily(), &current_ts_low);
-  ASSERT_EQ(s, Status::InvalidArgument());
+  ASSERT_EQ(s, Status_InvalidArgument());
   Close();
 }
 
@@ -581,7 +581,7 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   ASSERT_OK(db_->Put(WriteOptions(), "k1", Timestamp(4, 0), "v2"));
   ASSERT_OK(db_->Delete(WriteOptions(), "k1", Timestamp(5, 0)));
   ASSERT_OK(db_->Put(WriteOptions(), "k1", Timestamp(6, 0), "v3"));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status::OK(), "v3",
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status_OK(), "v3",
                     Timestamp(6, 0));
   ASSERT_OK(Flush());
   Close();
@@ -595,27 +595,27 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   // Trim data whose version > Timestamp(5, 0), read(k1, ts(7)) <- NOT_FOUND.
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(5, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status::NotFound(), "",
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status_NotFound(), "",
                     Timestamp(5, 0));
   Close();
 
   // Trim data whose timestamp > Timestamp(4, 0), read(k1, ts(7)) <- v2
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(4, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status::OK(), "v2",
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status_OK(), "v2",
                     Timestamp(4, 0));
   Close();
 
   Reopen(options);
   ASSERT_OK(db_->DeleteRange(WriteOptions(), db_->DefaultColumnFamily(), "k1",
                              "k3", Timestamp(7, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(8, 0), Status::NotFound(), "",
+  check_value_by_ts(db_, "k1", Timestamp(8, 0), Status_NotFound(), "",
                     Timestamp(7, 0));
   Close();
   // Trim data whose timestamp > Timestamp(6, 0), read(k1, ts(8)) <- v2
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(6, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(8, 0), Status::OK(), "v2",
+  check_value_by_ts(db_, "k1", Timestamp(8, 0), Status_OK(), "v2",
                     Timestamp(4, 0));
   Close();
 }
@@ -2940,7 +2940,7 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetNoReturnTs) {
     ColumnFamilyHandle* column_families[] = {cfh, cfh};
     Slice keys[] = {"foo", "bar"};
     PinnableSlice values[] = {PinnableSlice(), PinnableSlice()};
-    Status statuses[] = {Status::OK(), Status::OK()};
+    Status statuses[] = {Status_OK(), Status_OK()};
     dbfull()->MultiGet(read_opts, /*num_keys=*/2, &column_families[0], &keys[0],
                        &values[0], &statuses[0], /*sorted_input=*/false);
     for (const auto& s : statuses) {
@@ -2954,8 +2954,8 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetNoReturnTs) {
     Slice keys[] = {"fooxxxxxxxxxxxxxxxx", "barxxxxxxxxxxxxxxxx", "foo", "bar"};
     PinnableSlice values[] = {PinnableSlice(), PinnableSlice(), PinnableSlice(),
                               PinnableSlice()};
-    Status statuses[] = {Status::OK(), Status::OK(), Status::OK(),
-                         Status::OK()};
+    Status statuses[] = {Status_OK(), Status_OK(), Status_OK(),
+                         Status_OK()};
     dbfull()->MultiGet(read_opts, /*num_keys=*/4, &column_families[0], &keys[0],
                        &values[0], &statuses[0], /*sorted_input=*/false);
     for (const auto& s : statuses) {
@@ -3649,7 +3649,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_opts.timestamp = &read_ts;
   read_opts.snapshot = before_tombstone;
   std::vector<Status> expected_status = {
-      Status::OK(), Status::NotFound(), Status::NotFound(), Status::NotFound()};
+      Status_OK(), Status_NotFound(), Status_NotFound(), Status_NotFound()};
   std::vector<std::string> expected_values(kNum);
   expected_values[0] = "val" + std::to_string(0);
   std::vector<std::string> expected_timestamps(kNum);
@@ -3719,7 +3719,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_ts = read_ts_str;
   read_opts.timestamp = &read_ts;
   read_opts.snapshot = before_tombstone;
-  expected_status[1] = Status::OK();
+  expected_status[1] = Status_OK();
   expected_timestamps[1] = Timestamp(1, 0);
   expected_values[1] = "val" + std::to_string(1);
   verify();
@@ -3729,7 +3729,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_ts = read_ts_str;
   read_opts.timestamp = &read_ts;
   read_opts.snapshot = after_tombstone;
-  expected_status[1] = Status::NotFound();
+  expected_status[1] = Status_NotFound();
   expected_timestamps[1].clear();
   expected_values[1].clear();
   verify();
@@ -3741,10 +3741,10 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_opts.snapshot = after_tombstone;
   for (int i = 0; i < kNum; ++i) {
     if (i == kRangeBegin) {
-      expected_status[i] = Status::NotFound();
+      expected_status[i] = Status_NotFound();
       expected_values[i].clear();
     } else {
-      expected_status[i] = Status::OK();
+      expected_status[i] = Status_OK();
       expected_values[i] = "val" + std::to_string(i);
     }
     expected_timestamps[i] = Timestamp(i, 0);

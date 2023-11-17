@@ -91,11 +91,11 @@ class IndexBuilder {
   //
   // index_blocks will be filled with the resulting index data. If the return
   // value is Status::InComplete() then it means that the index is partitioned
-  // and the callee should keep calling Finish until Status::OK() is returned.
+  // and the callee should keep calling Finish until Status_OK() is returned.
   // In that case, last_partition_block_handle is pointer to the block written
   // with the result of the last call to Finish. This can be utilized to build
   // the second level index pointing to each block of partitioned indexes. The
-  // last call to Finish() that returns Status::OK() populates index_blocks with
+  // last call to Finish() that returns Status_OK() populates index_blocks with
   // the 2nd level index content.
   virtual Status Finish(IndexBlocks* index_blocks,
                         const BlockHandle& last_partition_block_handle) = 0;
@@ -242,7 +242,7 @@ class ShortenedIndexBuilder : public IndexBuilder {
           index_block_builder_without_seq_.Finish();
     }
     index_size_ = index_blocks->index_block_contents.size();
-    return Status::OK();
+    return Status_OK();
   }
 
   size_t IndexSize() const override { return index_size_; }
@@ -404,7 +404,7 @@ class HashIndexBuilder : public IndexBuilder {
 /**
  * IndexBuilder for two-level indexing. Internally it creates a new index for
  * each partition and Finish then in order when Finish is called on it
- * continiously until Status::OK() is returned.
+ * continiously until Status_OK() is returned.
  *
  * The format on the disk would be I I I I I I IP where I is block containing a
  * partition of indexes built using ShortenedIndexBuilder and IP is a block

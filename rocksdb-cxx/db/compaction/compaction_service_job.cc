@@ -80,7 +80,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
     case CompactionServiceJobStatus::kSuccess:
       break;
     case CompactionServiceJobStatus::kFailure:
-      sub_compact->status = Status::Incomplete(
+      sub_compact->status = Status_Incomplete(
           "CompactionService failed to start compaction job.");
       ROCKS_LOG_WARN(db_options_.info_log,
                      "[%s] [JOB %d] Remote compaction failed to start.",
@@ -119,7 +119,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
   if (compaction_status == CompactionServiceJobStatus::kFailure) {
     if (s.ok()) {
       if (compaction_result.status.ok()) {
-        sub_compact->status = Status::Incomplete(
+        sub_compact->status = Status_Incomplete(
             "CompactionService failed to run the compaction job (even though "
             "the internal status is okay).");
       } else {
@@ -128,7 +128,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
         sub_compact->status = compaction_result.status;
       }
     } else {
-      sub_compact->status = Status::Incomplete(
+      sub_compact->status = Status_Incomplete(
           "CompactionService failed to run the compaction job (and no valid "
           "result is returned).");
       compaction_result.status.PermitUncheckedError();
@@ -747,7 +747,7 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_result_type_info = {
 Status CompactionServiceInput::Read(const std::string& data_str,
                                     CompactionServiceInput* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return Status::InvalidArgument("Invalid CompactionServiceInput string");
+    return Status_InvalidArgument("Invalid CompactionServiceInput string");
   }
   auto format_version = DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -758,7 +758,7 @@ Status CompactionServiceInput::Read(const std::string& data_str,
         cf, data_str.substr(sizeof(BinaryFormatVersion)), cs_input_type_info,
         obj);
   } else {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Compaction Service Input data version not supported: " +
         std::to_string(format_version));
   }
@@ -776,7 +776,7 @@ Status CompactionServiceInput::Write(std::string* output) {
 Status CompactionServiceResult::Read(const std::string& data_str,
                                      CompactionServiceResult* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return Status::InvalidArgument("Invalid CompactionServiceResult string");
+    return Status_InvalidArgument("Invalid CompactionServiceResult string");
   }
   auto format_version = DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -787,7 +787,7 @@ Status CompactionServiceResult::Read(const std::string& data_str,
         cf, data_str.substr(sizeof(BinaryFormatVersion)), cs_result_type_info,
         obj);
   } else {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Compaction Service Result data version not supported: " +
         std::to_string(format_version));
   }

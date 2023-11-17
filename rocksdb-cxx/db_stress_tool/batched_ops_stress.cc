@@ -109,7 +109,7 @@ class BatchedOpsStressTest : public StressTest {
                          const std::vector<int>& /* rand_column_families */,
                          const std::vector<int64_t>& /* rand_keys */) override {
     assert(false);
-    return Status::NotSupported(
+    return Status_NotSupported(
         "BatchedOpsStressTest does not support "
         "TestDeleteRange");
   }
@@ -555,7 +555,7 @@ class BatchedOpsStressTest : public StressTest {
 
     thread->stats.AddPrefixes(1, count);
 
-    return Status::OK();
+    return Status_OK();
   }
 
   void VerifyDb(ThreadState* /* thread */) const override {}

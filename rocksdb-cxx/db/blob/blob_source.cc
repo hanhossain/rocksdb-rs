@@ -62,12 +62,12 @@ Status BlobSource::GetBlobFromCache(
     RecordTick(statistics_, BLOB_DB_CACHE_BYTES_READ,
                cached_blob->GetValue()->size());
 
-    return Status::OK();
+    return Status_OK();
   }
 
   RecordTick(statistics_, BLOB_DB_CACHE_MISS);
 
-  return Status::NotFound("Blob not found in cache");
+  return Status_NotFound("Blob not found in cache");
 }
 
 Status BlobSource::PutBlobIntoCache(
@@ -199,7 +199,7 @@ Status BlobSource::GetBlob(const ReadOptions& read_options,
 
   const bool no_io = read_options.read_tier == kBlockCacheTier;
   if (no_io) {
-    s = Status::Incomplete("Cannot read blob(s): no disk I/O allowed");
+    s = Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
     return s;
   }
 
@@ -218,7 +218,7 @@ Status BlobSource::GetBlob(const ReadOptions& read_options,
     assert(blob_file_reader.GetValue());
 
     if (compression_type != blob_file_reader.GetValue()->GetCompressionType()) {
-      return Status::Corruption("Compression type mismatch when reading blob");
+      return Status_Corruption("Compression type mismatch when reading blob");
     }
 
     MemoryAllocator* const allocator =
@@ -354,7 +354,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
         assert(req.status);
 
         *req.status =
-            Status::Incomplete("Cannot read blob(s): no disk I/O allowed");
+            Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
       }
     }
     return;

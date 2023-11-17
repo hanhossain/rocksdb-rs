@@ -106,7 +106,7 @@ class RateLimiter {
     assert(total_pending_requests != nullptr);
     (void)total_pending_requests;
     (void)pri;
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   virtual int64_t GetBytesPerSecond() const = 0;

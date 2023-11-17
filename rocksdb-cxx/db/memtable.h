@@ -227,7 +227,7 @@ class MemTable {
   // REQUIRES: if allow_concurrent = false, external synchronization to prevent
   // simultaneous operations on the same MemTable.
   //
-  // Returns `Status::TryAgain` if the `seq`, `key` combination already exists
+  // Returns `Status_TryAgain` if the `seq`, `key` combination already exists
   // in the memtable and `MemTableRepFactory::CanHandleDuplicatedKey()` is true.
   // The next attempt should try a larger value for `seq`.
   Status Add(SequenceNumber seq, ValueType type, const Slice& key,
@@ -290,7 +290,7 @@ class MemTable {
   // value is at least as large as the new value, updates it in-place. Otherwise
   // adds the new value to the memtable out-of-place.
   //
-  // Returns `Status::TryAgain` if the `seq`, `key` combination already exists
+  // Returns `Status_TryAgain` if the `seq`, `key` combination already exists
   // in the memtable and `MemTableRepFactory::CanHandleDuplicatedKey()` is true.
   // The next attempt should try a larger value for `seq`.
   //
@@ -304,10 +304,10 @@ class MemTable {
   // if `key` exists in current memtable with type `kTypeValue`, adds the new
   // value to the memtable out-of-place.
   //
-  // Returns `Status::NotFound` if `key` does not exist in current memtable or
+  // Returns `Status_NotFound` if `key` does not exist in current memtable or
   // the latest version of `key` does not have `kTypeValue`.
   //
-  // Returns `Status::TryAgain` if the `seq`, `key` combination already exists
+  // Returns `Status_TryAgain` if the `seq`, `key` combination already exists
   // in the memtable and `MemTableRepFactory::CanHandleDuplicatedKey()` is true.
   // The next attempt should try a larger value for `seq`.
   //

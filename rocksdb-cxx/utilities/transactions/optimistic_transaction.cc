@@ -55,7 +55,7 @@ OptimisticTransaction::~OptimisticTransaction() {}
 void OptimisticTransaction::Clear() { TransactionBaseImpl::Clear(); }
 
 Status OptimisticTransaction::Prepare() {
-  return Status::InvalidArgument(
+  return Status_InvalidArgument(
       "Two phase commit not supported for optimistic transactions.");
 }
 
@@ -72,7 +72,7 @@ Status OptimisticTransaction::Commit() {
       assert(0);
   }
   // unreachable, just void compiler complain
-  return Status::OK();
+  return Status_OK();
 }
 
 Status OptimisticTransaction::CommitWithSerialValidate() {
@@ -151,7 +151,7 @@ Status OptimisticTransaction::CommitWithParallelValidate() {
 
 Status OptimisticTransaction::Rollback() {
   Clear();
-  return Status::OK();
+  return Status_OK();
 }
 
 // Record this key so that we can check it for conflicts at commit time.
@@ -164,7 +164,7 @@ Status OptimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
   assert(!assume_tracked);  // not supported
   (void)assume_tracked;
   if (!do_validate) {
-    return Status::OK();
+    return Status_OK();
   }
   uint32_t cfh_id = GetColumnFamilyID(column_family);
 
@@ -182,10 +182,10 @@ Status OptimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
   TrackKey(cfh_id, key_str, seq, read_only, exclusive);
 
   // Always return OK. Confilct checking will happen at commit time.
-  return Status::OK();
+  return Status_OK();
 }
 
-// Returns OK if it is safe to commit this transaction.  Returns Status::Busy
+// Returns OK if it is safe to commit this transaction.  Returns Status_Busy
 // if there are read or write conflicts that would prevent us from committing OR
 // if we can not determine whether there would be any such conflicts.
 //
@@ -203,7 +203,7 @@ Status OptimisticTransaction::CheckTransactionForConflicts(DB* db) {
 }
 
 Status OptimisticTransaction::SetName(const TransactionName& /* unused */) {
-  return Status::InvalidArgument("Optimistic transactions cannot be named.");
+  return Status_InvalidArgument("Optimistic transactions cannot be named.");
 }
 
 }  // namespace ROCKSDB_NAMESPACE

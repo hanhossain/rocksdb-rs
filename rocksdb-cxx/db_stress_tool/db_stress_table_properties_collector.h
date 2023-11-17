@@ -26,11 +26,11 @@ class DbStressTablePropertiesCollector : public TablePropertiesCollector {
   virtual Status AddUserKey(const Slice& /* key */, const Slice& /* value */,
                             EntryType /*type*/, SequenceNumber /*seq*/,
                             uint64_t /*file_size*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual Status Finish(UserCollectedProperties* /* properties */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual UserCollectedProperties GetReadableProperties() const override {

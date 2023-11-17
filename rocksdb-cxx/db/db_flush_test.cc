@@ -1915,7 +1915,7 @@ TEST_F(DBFlushTest, FlushError) {
   Status s = dbfull()->TEST_SwitchMemtable();
   fault_injection_env->SetFilesystemActive(true);
   Destroy(options);
-  ASSERT_NE(s, Status::OK());
+  ASSERT_NE(s, Status_OK());
 }
 
 TEST_F(DBFlushTest, ManualFlushFailsInReadOnlyMode) {
@@ -2427,7 +2427,7 @@ TEST_P(DBFlushTestBlobError, FlushError) {
     Status* const s = static_cast<Status*>(arg);
     assert(s);
 
-    (*s) = Status::IOError(sync_point_);
+    (*s) = Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 

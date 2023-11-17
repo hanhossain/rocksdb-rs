@@ -223,7 +223,7 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
                      uint64_t /*file_size*/) override {
     // Intentionally left blank. Have no interest in collecting stats for
     // individual key/value pairs.
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual void BlockAdd(uint64_t /* block_uncomp_bytes */,
@@ -242,7 +242,7 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
                         whole_key_filtering_ ? kPropTrue : kPropFalse});
     properties->insert({BlockBasedTablePropertyNames::kPrefixFiltering,
                         prefix_filtering_ ? kPropTrue : kPropFalse});
-    return Status::OK();
+    return Status_OK();
   }
 
   // The name of the properties collector can be used for debugging purpose.
@@ -373,7 +373,7 @@ struct BlockBasedTableBuilder::Rep {
     // to false, and this is ensured by status_mutex, so no special memory
     // order for status_ok is required.
     if (status_ok.load(std::memory_order_relaxed)) {
-      return Status::OK();
+      return Status_OK();
     } else {
       return CopyStatus();
     }
@@ -831,7 +831,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
       block_rep_buf[i].first_key_in_next_block.reset(new std::string());
       block_rep_buf[i].keys.reset(new Keys());
       block_rep_buf[i].slot.reset(new BlockRepSlot());
-      block_rep_buf[i].status = Status::OK();
+      block_rep_buf[i].status = Status_OK();
       block_rep_pool.push(&block_rep_buf[i]);
     }
   }
@@ -1226,12 +1226,12 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
           const char* const msg =
               "Decompressed block did not match pre-compression block";
           ROCKS_LOG_ERROR(r->ioptions.logger, "%s", msg);
-          *out_status = Status::Corruption(msg);
+          *out_status = Status_Corruption(msg);
           *type = kNoCompression;
         }
       } else {
         // Decompression reported an error. abort.
-        *out_status = Status::Corruption(std::string("Could not decompress: ") +
+        *out_status = Status_Corruption(std::string("Could not decompress: ") +
                                          uncompress_status.getState());
         *type = kNoCompression;
       }
@@ -1389,7 +1389,7 @@ void BlockBasedTableBuilder::BGWorkWriteMaybeCompressedBlock() {
       r->SetStatus(block_rep->status);
       // Reap block so that blocked Flush() can finish
       // if there is one, and Flush() will notice !ok() next time.
-      block_rep->status = Status::OK();
+      block_rep->status = Status_OK();
       r->pc_rep->ReapBlock(block_rep);
       continue;
     }
@@ -1496,7 +1496,7 @@ void BlockBasedTableBuilder::WriteFilterBlock(
   if (ok()) {
     rep_->props.num_filter_entries +=
         rep_->filter_builder->EstimateEntriesAdded();
-    Status s = Status::Incomplete();
+    Status s = Status_Incomplete();
     while (ok() && s.IsIncomplete()) {
       // filter_data is used to store the transferred filter data payload from
       // FilterBlockBuilder and deallocate the payload by going out of scope.

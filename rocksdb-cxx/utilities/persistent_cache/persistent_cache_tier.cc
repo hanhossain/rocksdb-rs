@@ -59,14 +59,14 @@ Status PersistentCacheTier::Open() {
   if (next_tier_) {
     return next_tier_->Open();
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PersistentCacheTier::Close() {
   if (next_tier_) {
     return next_tier_->Close();
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 bool PersistentCacheTier::Reserve(const size_t /*size*/) {

@@ -207,7 +207,7 @@ Status MemTableListVersion::AddRangeTombstoneIterators(
                                      true /* immutable_memtable */));
     range_del_agg->AddTombstones(std::move(range_del_iter));
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 void MemTableListVersion::AddIterators(
@@ -454,7 +454,7 @@ void MemTableList::RollbackMemtableFlush(const autovector<MemTable*>& mems,
 }
 
 // Try record a successful flush in the manifest file. It might just return
-// Status::OK letting a concurrent flush to do actual the recording..
+// Status_OK letting a concurrent flush to do actual the recording..
 Status MemTableList::TryInstallMemtableFlushResults(
     ColumnFamilyData* cfd, const MutableCFOptions& mutable_cf_options,
     const autovector<MemTable*>& mems, LogsWithPrepTracker* prep_tracker,
@@ -808,7 +808,7 @@ Status InstallMemtableAtomicFlushResults(
     assert(imm_lists->size() == num);
   }
   if (num == 0) {
-    return Status::OK();
+    return Status_OK();
   }
 
   for (size_t k = 0; k != num; ++k) {

@@ -68,7 +68,7 @@ TransactionDBMutexFactoryImpl::AllocateCondVar() {
 
 Status TransactionDBMutexImpl::Lock() {
   mutex_.lock();
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
@@ -89,10 +89,10 @@ Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
 
   if (!locked) {
     // timeout acquiring mutex
-    return Status::TimedOut(SubCode::kMutexTimeout);
+    return Status_TimedOut(SubCode::kMutexTimeout);
   }
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TransactionDBCondVarImpl::Wait(
@@ -105,7 +105,7 @@ Status TransactionDBCondVarImpl::Wait(
   // Make sure unique_lock doesn't unlock mutex when it destructs
   lock.release();
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status TransactionDBCondVarImpl::WaitFor(
@@ -124,7 +124,7 @@ Status TransactionDBCondVarImpl::WaitFor(
 
     // Check if the wait stopped due to timing out.
     if (cv_status == std::cv_status::timeout) {
-      s = Status::TimedOut(SubCode::kMutexTimeout);
+      s = Status_TimedOut(SubCode::kMutexTimeout);
     }
   }
 

@@ -224,12 +224,12 @@ class Transaction {
   // May return any error status that could be returned by DB:Write().
   //
   // If this transaction was created by an OptimisticTransactionDB(),
-  // Status::Busy() may be returned if the transaction could not guarantee
-  // that there are no write conflicts.  Status::TryAgain() may be returned
+  // Status_Busy() may be returned if the transaction could not guarantee
+  // that there are no write conflicts.  Status_TryAgain() may be returned
   // if the memtable history size is not large enough
   //  (See max_write_buffer_size_to_maintain).
   //
-  // If this transaction was created by a TransactionDB(), Status::Expired()
+  // If this transaction was created by a TransactionDB(), Status_Expired()
   // may be returned if this transaction has lived for longer than
   // TransactionOptions.expiration. Status::TxnNotPrepared() may be returned if
   // TransactionOptions.skip_prepare is false and Prepare is not called on this
@@ -269,18 +269,18 @@ class Transaction {
   // Undo all operations in this transaction (Put, Merge, Delete, PutLogData)
   // since the most recent call to SetSavePoint() and removes the most recent
   // SetSavePoint().
-  // If there is no previous call to SetSavePoint(), returns Status::NotFound()
+  // If there is no previous call to SetSavePoint(), returns Status_NotFound()
   virtual Status RollbackToSavePoint() = 0;
 
   // Pop the most recent save point.
-  // If there is no previous call to SetSavePoint(), Status::NotFound()
+  // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
-  // Otherwise returns Status::OK().
+  // Otherwise returns Status_OK().
   virtual Status PopSavePoint() = 0;
 
   // This function is similar to DB::Get() except it will also read pending
   // changes in this transaction.  Currently, this function will return
-  // Status::MergeInProgress if the most recent write to the queried key in
+  // Status_MergeInProgress if the most recent write to the queried key in
   // this batch is a Merge.
   //
   // If read_options.snapshot is not set, the current version of the key will
@@ -346,7 +346,7 @@ class Transaction {
   // that GetForUpdate returns the latest committed value. The transaction
   // behavior is the same regardless of whether the key exists or not.
   //
-  // Note: Currently, this function will return Status::MergeInProgress
+  // Note: Currently, this function will return Status_MergeInProgress
   // if the most recent write to the queried key in this batch is a Merge.
   //
   // The values returned by this function are similar to Transaction::Get().
@@ -359,12 +359,12 @@ class Transaction {
   // that could be returned by DB::Get().
   //
   // If this transaction was created by a TransactionDB, it can return
-  // Status::OK() on success,
-  // Status::Busy() if there is a write conflict,
-  // Status::TimedOut() if a lock could not be acquired,
-  // Status::TryAgain() if the memtable history size is not large enough
+  // Status_OK() on success,
+  // Status_Busy() if there is a write conflict,
+  // Status_TimedOut() if a lock could not be acquired,
+  // Status_TryAgain() if the memtable history size is not large enough
   //  (See max_write_buffer_size_to_maintain)
-  // Status::MergeInProgress() if merge operations cannot be resolved.
+  // Status_MergeInProgress() if merge operations cannot be resolved.
   // or other errors if this key could not be read.
   virtual Status GetForUpdate(const ReadOptions& options,
                               ColumnFamilyHandle* column_family,
@@ -394,7 +394,7 @@ class Transaction {
   // Get a range lock on [start_endpoint; end_endpoint].
   virtual Status GetRangeLock(ColumnFamilyHandle*, const Endpoint&,
                               const Endpoint&) {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   virtual Status GetForUpdate(const ReadOptions& options, const Slice& key,
@@ -438,14 +438,14 @@ class Transaction {
   // If valid then it skips ValidateSnapshot.  Returns error otherwise.
   //
   // If this Transaction was created on an OptimisticTransactionDB, these
-  // functions should always return Status::OK().
+  // functions should always return Status_OK().
   //
   // If this Transaction was created on a TransactionDB, the status returned
   // can be:
-  // Status::OK() on success,
-  // Status::Busy() if there is a write conflict,
-  // Status::TimedOut() if a lock could not be acquired,
-  // Status::TryAgain() if the memtable history size is not large enough
+  // Status_OK() on success,
+  // Status_Busy() if there is a write conflict,
+  // Status_TimedOut() if a lock could not be acquired,
+  // Status_TryAgain() if the memtable history size is not large enough
   //  (See max_write_buffer_size_to_maintain)
   // or other errors on unexpected failures.
   virtual Status Put(ColumnFamilyHandle* column_family, const Slice& key,
@@ -485,7 +485,7 @@ class Transaction {
   //
   // If this Transaction was created on a PessimisticTransactionDB, this
   // function will still acquire locks necessary to make sure this write doesn't
-  // cause conflicts in other transactions and may return Status::Busy().
+  // cause conflicts in other transactions and may return Status_Busy().
   virtual Status PutUntracked(ColumnFamilyHandle* column_family,
                               const Slice& key, const Slice& value) = 0;
   virtual Status PutUntracked(const Slice& key, const Slice& value) = 0;
@@ -644,11 +644,11 @@ class Transaction {
   uint64_t GetId() { return id_; }
 
   virtual Status SetReadTimestampForValidation(TxnTimestamp /*ts*/) {
-    return Status::NotSupported("timestamp not supported");
+    return Status_NotSupported("timestamp not supported");
   }
 
   virtual Status SetCommitTimestamp(TxnTimestamp /*ts*/) {
-    return Status::NotSupported("timestamp not supported");
+    return Status_NotSupported("timestamp not supported");
   }
 
   virtual TxnTimestamp GetCommitTimestamp() const { return kMaxTxnTimestamp; }

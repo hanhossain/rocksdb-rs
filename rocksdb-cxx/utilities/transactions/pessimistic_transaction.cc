@@ -167,7 +167,7 @@ inline Status WriteCommittedTxn::GetForUpdateImpl(
     const ReadOptions& read_options, ColumnFamilyHandle* column_family,
     const Slice& key, TValue* value, bool exclusive, const bool do_validate) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -191,11 +191,11 @@ inline Status WriteCommittedTxn::GetForUpdateImpl(
   }
 
   if (!do_validate) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with read_timestamp is not "
         "defined.");
   } else if (kMaxTxnTimestamp == read_timestamp_) {
-    return Status::InvalidArgument("read_timestamp must be set for validation");
+    return Status_InvalidArgument("read_timestamp must be set for validation");
   }
 
   if (!read_options.timestamp) {
@@ -212,7 +212,7 @@ inline Status WriteCommittedTxn::GetForUpdateImpl(
   assert(read_options.timestamp->size() == sizeof(kMaxTxnTimestamp));
   TxnTimestamp ts = DecodeFixed64(ts_buf);
   if (ts != read_timestamp_) {
-    return Status::InvalidArgument("Must read from the same read_timestamp");
+    return Status_InvalidArgument("Must read from the same read_timestamp");
   }
   return TransactionBaseImpl::GetForUpdate(read_options, column_family, key,
                                            value, exclusive, do_validate);
@@ -420,20 +420,20 @@ Status WriteCommittedTxn::Operate(ColumnFamilyHandle* column_family,
 
 Status WriteCommittedTxn::SetReadTimestampForValidation(TxnTimestamp ts) {
   if (read_timestamp_ < kMaxTxnTimestamp && ts < read_timestamp_) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot decrease read timestamp for validation");
   }
   read_timestamp_ = ts;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status WriteCommittedTxn::SetCommitTimestamp(TxnTimestamp ts) {
   if (read_timestamp_ < kMaxTxnTimestamp && ts <= read_timestamp_) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot commit at timestamp smaller than or equal to read timestamp");
   }
   commit_timestamp_ = ts;
-  return Status::OK();
+  return Status_OK();
 }
 
 Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
@@ -444,7 +444,7 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
     // This means timestamp order may violate the order of locking, thus
     // violate the sequence number order for the same user key.
     // Therefore, we disallow this operation for now.
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Batch to commit includes timestamp assigned before locking");
   }
 
@@ -458,7 +458,7 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
   bool can_commit = false;
 
   if (IsExpired()) {
-    s = Status::Expired();
+    s = Status_Expired();
   } else if (expiration_time_ > 0) {
     TransactionState expected = STARTED;
     can_commit = std::atomic_compare_exchange_strong(&txn_state_, &expected,
@@ -475,9 +475,9 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
       txn_state_.store(COMMITTED);
     }
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status::Expired();
+    s = Status_Expired();
   } else {
-    s = Status::InvalidArgument("Transaction is not in state for commit.");
+    s = Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   txn_db_impl_->UnLock(this, *keys_to_unlock);
@@ -487,12 +487,12 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
 
 Status PessimisticTransaction::Prepare() {
   if (name_.empty()) {
-    return Status::InvalidArgument(
+    return Status_InvalidArgument(
         "Cannot prepare a transaction that has not been named.");
   }
 
   if (IsExpired()) {
-    return Status::Expired();
+    return Status_Expired();
   }
 
   Status s;
@@ -521,15 +521,15 @@ Status PessimisticTransaction::Prepare() {
       txn_state_.store(PREPARED);
     }
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status::Expired();
+    s = Status_Expired();
   } else if (txn_state_ == PREPARED) {
-    s = Status::InvalidArgument("Transaction has already been prepared.");
+    s = Status_InvalidArgument("Transaction has already been prepared.");
   } else if (txn_state_ == COMMITTED) {
-    s = Status::InvalidArgument("Transaction has already been committed.");
+    s = Status_InvalidArgument("Transaction has already been committed.");
   } else if (txn_state_ == ROLLEDBACK) {
-    s = Status::InvalidArgument("Transaction has already been rolledback.");
+    s = Status_InvalidArgument("Transaction has already been rolledback.");
   } else {
-    s = Status::InvalidArgument("Transaction is not in state for commit.");
+    s = Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   return s;
@@ -556,7 +556,7 @@ Status WriteCommittedTxn::PrepareInternal() {
       assert(log_number != 0);
       assert(!two_write_queues_ || is_mem_disabled);  // implies the 2nd queue
       db_->logs_with_prep_tracker()->MarkLogAsContainingPrepSection(log_number);
-      return Status::OK();
+      return Status_OK();
     }
 
    private:
@@ -582,7 +582,7 @@ Status PessimisticTransaction::Commit() {
   bool commit_prepared = false;
 
   if (IsExpired()) {
-    return Status::Expired();
+    return Status_Expired();
   }
 
   if (expiration_time_ > 0) {
@@ -611,7 +611,7 @@ Status PessimisticTransaction::Commit() {
   if (commit_without_prepare) {
     assert(!commit_prepared);
     if (WriteBatchInternal::Count(GetCommitTimeWriteBatch()) > 0) {
-      s = Status::InvalidArgument(
+      s = Status_InvalidArgument(
           "Commit-time batch contains values that will not be committed.");
     } else {
       txn_state_.store(AWAITING_COMMIT);
@@ -650,13 +650,13 @@ Status PessimisticTransaction::Commit() {
     Clear();
     txn_state_.store(COMMITTED);
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status::Expired();
+    s = Status_Expired();
   } else if (txn_state_ == COMMITTED) {
-    s = Status::InvalidArgument("Transaction has already been committed.");
+    s = Status_InvalidArgument("Transaction has already been committed.");
   } else if (txn_state_ == ROLLEDBACK) {
-    s = Status::InvalidArgument("Transaction has already been rolledback.");
+    s = Status_InvalidArgument("Transaction has already been rolledback.");
   } else {
-    s = Status::InvalidArgument("Transaction is not in state for commit.");
+    s = Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   return s;
@@ -670,7 +670,7 @@ Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
 
   const bool needs_ts = WriteBatchInternal::HasKeyWithTimestamp(*wb);
   if (needs_ts && commit_timestamp_ == kMaxTxnTimestamp) {
-    return Status::InvalidArgument("Must assign a commit timestamp");
+    return Status_InvalidArgument("Must assign a commit timestamp");
   }
 
   if (needs_ts) {
@@ -701,7 +701,7 @@ Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
   PostMemTableCallback* post_mem_cb = nullptr;
   if (snapshot_needed_) {
     if (commit_timestamp_ == kMaxTxnTimestamp) {
-      return Status::InvalidArgument("Must set transaction commit timestamp");
+      return Status_InvalidArgument("Must set transaction commit timestamp");
     } else {
       post_mem_cb = &snapshot_creation_cb;
     }
@@ -738,7 +738,7 @@ Status WriteCommittedTxn::CommitInternal() {
 
   const bool needs_ts = WriteBatchInternal::HasKeyWithTimestamp(*wb);
   if (needs_ts && commit_timestamp_ == kMaxTxnTimestamp) {
-    return Status::InvalidArgument("Must assign a commit timestamp");
+    return Status_InvalidArgument("Must assign a commit timestamp");
   }
   // We take the commit-time batch and append the Commit marker.
   // The Memtable will ignore the Commit marker in non-recovery mode
@@ -787,7 +787,7 @@ Status WriteCommittedTxn::CommitInternal() {
   PostMemTableCallback* post_mem_cb = nullptr;
   if (snapshot_needed_) {
     if (commit_timestamp_ == kMaxTxnTimestamp) {
-      s = Status::InvalidArgument("Must set transaction commit timestamp");
+      s = Status_InvalidArgument("Must set transaction commit timestamp");
       return s;
     } else {
       post_mem_cb = &snapshot_creation_cb;
@@ -834,9 +834,9 @@ Status PessimisticTransaction::Rollback() {
     // prepare couldn't have taken place
     Clear();
   } else if (txn_state_ == COMMITTED) {
-    s = Status::InvalidArgument("This transaction has already been committed.");
+    s = Status_InvalidArgument("This transaction has already been committed.");
   } else {
-    s = Status::InvalidArgument(
+    s = Status_InvalidArgument(
         "Two phase transaction is not in state for rollback.");
   }
 
@@ -853,7 +853,7 @@ Status WriteCommittedTxn::RollbackInternal() {
 
 Status PessimisticTransaction::RollbackToSavePoint() {
   if (txn_state_ != STARTED) {
-    return Status::InvalidArgument("Transaction is beyond state for rollback.");
+    return Status_InvalidArgument("Transaction is beyond state for rollback.");
   }
 
   if (save_points_ != nullptr && !save_points_->empty()) {
@@ -874,7 +874,7 @@ Status PessimisticTransaction::RollbackToSavePoint() {
 Status PessimisticTransaction::LockBatch(WriteBatch* batch,
                                          LockTracker* keys_to_unlock) {
   if (!batch) {
-    return Status::InvalidArgument("batch is nullptr");
+    return Status_InvalidArgument("batch is nullptr");
   }
 
   class Handler : public WriteBatch::Handler {
@@ -901,16 +901,16 @@ Status PessimisticTransaction::LockBatch(WriteBatch* batch,
     Status PutCF(uint32_t column_family_id, const Slice& key,
                  const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
-      return Status::OK();
+      return Status_OK();
     }
     Status MergeCF(uint32_t column_family_id, const Slice& key,
                    const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
-      return Status::OK();
+      return Status_OK();
     }
     Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
       RecordKey(column_family_id, key);
-      return Status::OK();
+      return Status_OK();
     }
   };
 
@@ -1012,7 +1012,7 @@ Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
                        (0 == ts_sz || kMaxTxnTimestamp == read_timestamp_))) {
     if (assume_tracked && !previously_locked &&
         tracked_locks_->IsPointLockSupported()) {
-      s = Status::InvalidArgument(
+      s = Status_InvalidArgument(
           "assume_tracked is set but it is not tracked yet");
     }
     // Need to remember the earliest sequence number that we know that this
@@ -1110,7 +1110,7 @@ Status PessimisticTransaction::ValidateSnapshot(
       // If the key has been previous validated (or locked) at a sequence number
       // earlier than the current snapshot's sequence number, we already know it
       // has not been modified aftter snap_seq either.
-      return Status::OK();
+      return Status_OK();
     }
   } else {
     snap_seq = db_impl_->GetLatestSequenceNumber();
@@ -1158,18 +1158,18 @@ Status PessimisticTransaction::SetName(const TransactionName& name) {
   Status s;
   if (txn_state_ == STARTED) {
     if (name_.length()) {
-      s = Status::InvalidArgument("Transaction has already been named.");
+      s = Status_InvalidArgument("Transaction has already been named.");
     } else if (txn_db_impl_->GetTransactionByName(name) != nullptr) {
-      s = Status::InvalidArgument("Transaction name must be unique.");
+      s = Status_InvalidArgument("Transaction name must be unique.");
     } else if (name.length() < 1 || name.length() > 512) {
-      s = Status::InvalidArgument(
+      s = Status_InvalidArgument(
           "Transaction name length must be between 1 and 512 chars.");
     } else {
       name_ = name;
       txn_db_impl_->RegisterTransaction(this);
     }
   } else {
-    s = Status::InvalidArgument("Transaction is beyond state for naming.");
+    s = Status_InvalidArgument("Transaction is beyond state for naming.");
   }
   return s;
 }

@@ -207,12 +207,12 @@ Status TestWritableFile::Flush() {
 
 Status TestWritableFile::Sync() {
   if (!env_->IsFilesystemActive()) {
-    return Status::IOError("FaultInjectionTestEnv: not active");
+    return Status_IOError("FaultInjectionTestEnv: not active");
   }
   // No need to actual sync.
   state_.pos_at_last_sync_ = state_.pos_;
   env_->WritableFileSynced(state_);
-  return Status::OK();
+  return Status_OK();
 }
 
 TestRandomRWFile::TestRandomRWFile(const std::string& /*fname*/,
@@ -271,7 +271,7 @@ Status FaultInjectionTestEnv::NewDirectory(const std::string& name,
     return s;
   }
   result->reset(new TestDirectory(this, TrimDirname(name), r.release()));
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FaultInjectionTestEnv::NewWritableFile(
@@ -283,7 +283,7 @@ Status FaultInjectionTestEnv::NewWritableFile(
   // Not allow overwriting files
   Status s = target()->FileExists(fname);
   if (s.ok()) {
-    return Status::Corruption("File already exists.");
+    return Status_Corruption("File already exists.");
   } else if (!s.IsNotFound()) {
     assert(s.IsIOError());
     return s;
@@ -393,7 +393,7 @@ Status FaultInjectionTestEnv::NewRandomAccessFile(
   assert(result);
   result->reset(new TestRandomAccessFile(std::move(*result), this));
 
-  return Status::OK();
+  return Status_OK();
 }
 
 Status FaultInjectionTestEnv::DeleteFile(const std::string& f) {
@@ -535,7 +535,7 @@ Status FaultInjectionTestEnv::DeleteFilesCreatedAfterLastDirSync() {
       }
     }
   }
-  return Status::OK();
+  return Status_OK();
 }
 void FaultInjectionTestEnv::ResetState() {
   MutexLock l(&mutex_);

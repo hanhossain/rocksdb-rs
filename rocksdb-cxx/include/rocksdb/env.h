@@ -212,11 +212,11 @@ class Env : public Customizable {
 
   // See FileSystem::RegisterDbPaths.
   virtual Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status::OK();
+    return Status_OK();
   }
   // See FileSystem::UnregisterDbPaths.
   virtual Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Create a brand new sequentially-readable file with the specified name.
@@ -272,7 +272,7 @@ class Env : public Customizable {
   virtual Status ReopenWritableFile(const std::string& /*fname*/,
                                     std::unique_ptr<WritableFile>* /*result*/,
                                     const EnvOptions& /*options*/) {
-    return Status::NotSupported("Env::ReopenWritableFile() not supported.");
+    return Status_NotSupported("Env::ReopenWritableFile() not supported.");
   }
 
   // Reuse an existing file by renaming it and opening it as writable.
@@ -289,7 +289,7 @@ class Env : public Customizable {
   virtual Status NewRandomRWFile(const std::string& /*fname*/,
                                  std::unique_ptr<RandomRWFile>* /*result*/,
                                  const EnvOptions& /*options*/) {
-    return Status::NotSupported("RandomRWFile is not implemented in this Env");
+    return Status_NotSupported("RandomRWFile is not implemented in this Env");
   }
 
   // Opens `fname` as a memory-mapped file for read and write (in-place updates
@@ -298,7 +298,7 @@ class Env : public Customizable {
   virtual Status NewMemoryMappedFileBuffer(
       const std::string& /*fname*/,
       std::unique_ptr<MemoryMappedFileBuffer>* /*result*/) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "MemoryMappedFileBuffer is not implemented in this Env");
   }
 
@@ -349,7 +349,7 @@ class Env : public Customizable {
 
   // Truncate the named file to the specified size.
   virtual Status Truncate(const std::string& /*fname*/, size_t /*size*/) {
-    return Status::NotSupported("Truncate is not supported for this Env");
+    return Status_NotSupported("Truncate is not supported for this Env");
   }
 
   // Create the specified directory. Returns error if directory exists.
@@ -377,18 +377,18 @@ class Env : public Customizable {
   // Hard Link file src to target.
   virtual Status LinkFile(const std::string& /*src*/,
                           const std::string& /*target*/) {
-    return Status::NotSupported("LinkFile is not supported for this Env");
+    return Status_NotSupported("LinkFile is not supported for this Env");
   }
 
   virtual Status NumFileLinks(const std::string& /*fname*/,
                               uint64_t* /*count*/) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Getting number of file links is not supported for this Env");
   }
 
   virtual Status AreFilesSame(const std::string& /*first*/,
                               const std::string& /*second*/, bool* /*res*/) {
-    return Status::NotSupported("AreFilesSame is not supported for this Env");
+    return Status_NotSupported("AreFilesSame is not supported for this Env");
   }
 
   // Lock the specified file.  Used to prevent concurrent access to
@@ -421,7 +421,7 @@ class Env : public Customizable {
   virtual Status LoadLibrary(const std::string& /*lib_name*/,
                              const std::string& /*search_path */,
                              std::shared_ptr<DynamicLibrary>* /*result*/) {
-    return Status::NotSupported("LoadLibrary is not implemented in this Env");
+    return Status_NotSupported("LoadLibrary is not implemented in this Env");
   }
 
   // Priority for scheduling job in thread pool
@@ -556,7 +556,7 @@ class Env : public Customizable {
   virtual int GetBackgroundThreads(Priority pri = LOW) = 0;
 
   virtual Status SetAllowNonOwnerAccess(bool /*allow_non_owner_access*/) {
-    return Status::NotSupported("Env::SetAllowNonOwnerAccess() not supported.");
+    return Status_NotSupported("Env::SetAllowNonOwnerAccess() not supported.");
   }
 
   // Enlarge number of background worker threads of a specific thread pool
@@ -570,7 +570,7 @@ class Env : public Customizable {
   // Lower CPU priority for threads from the specified pool.
   virtual Status LowerThreadPoolCPUPriority(Priority /*pool*/,
                                             CpuPriority /*pri*/) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Env::LowerThreadPoolCPUPriority(Priority, CpuPriority) not supported");
   }
 
@@ -630,7 +630,7 @@ class Env : public Customizable {
 
   // Returns the status of all threads that belong to the current Env.
   virtual Status GetThreadList(std::vector<ThreadStatus>* /*thread_list*/) {
-    return Status::NotSupported("Env::GetThreadList() not supported.");
+    return Status_NotSupported("Env::GetThreadList() not supported.");
   }
 
   // Returns the pointer to ThreadStatusUpdater.  This function will be
@@ -649,12 +649,12 @@ class Env : public Customizable {
   // Get the amount of free disk space
   virtual Status GetFreeSpace(const std::string& /*path*/,
                               uint64_t* /*diskfree*/) {
-    return Status::NotSupported("Env::GetFreeSpace() not supported.");
+    return Status_NotSupported("Env::GetFreeSpace() not supported.");
   }
 
   // Check whether the specified path is a directory
   virtual Status IsDirectory(const std::string& /*path*/, bool* /*is_dir*/) {
-    return Status::NotSupported("Env::IsDirectory() not supported.");
+    return Status_NotSupported("Env::IsDirectory() not supported.");
   }
 
   virtual void SanitizeEnvOptions(EnvOptions* /*env_opts*/) const {}
@@ -730,7 +730,7 @@ class SequentialFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   virtual Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "SequentialFile::InvalidateCache not supported.");
   }
 
@@ -738,7 +738,7 @@ class SequentialFile {
   // If Direct I/O enabled, offset, n, and scratch should be properly aligned
   virtual Status PositionedRead(uint64_t /*offset*/, size_t /*n*/,
                                 Slice* /*result*/, char* /*scratch*/) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "SequentialFile::PositionedRead() not supported.");
   }
 
@@ -792,7 +792,7 @@ class RandomAccessFile {
 
   // Readahead the file starting from offset by n bytes for caching.
   virtual Status Prefetch(uint64_t /*offset*/, size_t /*n*/) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // Read a bunch of blocks as described by reqs. The blocks can
@@ -808,7 +808,7 @@ class RandomAccessFile {
       ReadRequest& req = reqs[i];
       req.status = Read(req.offset, req.len, &req.result, req.scratch);
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // Tries to get an unique ID for this file that will be the same each time
@@ -847,7 +847,7 @@ class RandomAccessFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   virtual Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "RandomAccessFile::InvalidateCache not supported.");
   }
 
@@ -921,7 +921,7 @@ class WritableFile {
   // required is queried via GetRequiredBufferAlignment()
   virtual Status PositionedAppend(const Slice& /* data */,
                                   uint64_t /* offset */) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "WritableFile::PositionedAppend() not supported.");
   }
 
@@ -935,14 +935,14 @@ class WritableFile {
   virtual Status PositionedAppend(
       const Slice& /* data */, uint64_t /* offset */,
       const DataVerificationInfo& /* verification_info */) {
-    return Status::NotSupported("PositionedAppend");
+    return Status_NotSupported("PositionedAppend");
   }
 
   // Truncate is necessary to trim the file to the correct size
   // before closing. It is not always possible to keep track of the file
   // size due to whole pages writes. The behavior is undefined if called
   // with other writes to follow.
-  virtual Status Truncate(uint64_t /*size*/) { return Status::OK(); }
+  virtual Status Truncate(uint64_t /*size*/) { return Status_OK(); }
 
   // The caller should call Close() before destroying the WritableFile to
   // surface any errors associated with finishing writes to the file.
@@ -1024,7 +1024,7 @@ class WritableFile {
   // If the system is not caching the file contents, then this is a noop.
   // This call has no effect on dirty pages in the cache.
   virtual Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status::NotSupported("WritableFile::InvalidateCache not supported.");
+    return Status_NotSupported("WritableFile::InvalidateCache not supported.");
   }
 
   // Sync a file range with disk.
@@ -1037,7 +1037,7 @@ class WritableFile {
     if (strict_bytes_per_sync_) {
       return Sync();
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   // PrepareWrite performs any necessary preparation for a write
@@ -1068,7 +1068,7 @@ class WritableFile {
 
   // Pre-allocates space for a file.
   virtual Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) {
-    return Status::OK();
+    return Status_OK();
   }
 
   // If you're adding methods here, remember to add them to
@@ -1108,7 +1108,7 @@ class RandomRWFile {
   // aligned buffer for Direct I/O
   virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
 
-  // Write bytes in `data` at  offset `offset`, Returns Status::OK() on success.
+  // Write bytes in `data` at  offset `offset`, Returns Status_OK() on success.
   // Pass aligned buffer when use_direct_io() returns true.
   virtual Status Write(uint64_t offset, const Slice& data) = 0;
 
@@ -1119,7 +1119,7 @@ class RandomRWFile {
   // reached (or non-OK status). Read might fail if called again after
   // first result->size() < n.
   //
-  // Returns Status::OK() on success.
+  // Returns Status_OK() on success.
   virtual Status Read(uint64_t offset, size_t n, Slice* result,
                       char* scratch) const = 0;
 
@@ -1174,7 +1174,7 @@ class Directory {
   // Calling Close() before destroying a Directory is recommended to surface
   // any errors associated with finishing writes (in case of future features).
   // The directory is considered closed regardless of return status.
-  virtual Status Close() { return Status::NotSupported("Close"); }
+  virtual Status Close() { return Status_NotSupported("Close"); }
 
   virtual size_t GetUniqueId(char* /*id*/, size_t /*max_size*/) const {
     return 0;

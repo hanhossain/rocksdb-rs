@@ -757,7 +757,7 @@ Status CompactionJob::Run() {
           }
           if (s.ok() &&
               !validator.CompareValidator(files_output[file_idx]->validator)) {
-            s = Status::Corruption("Paranoid checksums do not match");
+            s = Status_Corruption("Paranoid checksums do not match");
           }
         }
 
@@ -1061,7 +1061,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     compaction_filter = compaction_filter_from_factory.get();
   }
   if (compaction_filter != nullptr && !compaction_filter->IgnoreSnapshots()) {
-    sub_compact->status = Status::NotSupported(
+    sub_compact->status = Status_NotSupported(
         "CompactionFilter::IgnoreSnapshots() = false is not supported "
         "anymore.");
     return;
@@ -1352,15 +1352,15 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
 
   if (status.ok() && cfd->IsDropped()) {
     status =
-        Status::ColumnFamilyDropped("Column family dropped during compaction");
+        Status_ColumnFamilyDropped("Column family dropped during compaction");
   }
   if ((status.ok() || status.IsColumnFamilyDropped()) &&
       shutting_down_->load(std::memory_order_relaxed)) {
-    status = Status::ShutdownInProgress("Database shutdown");
+    status = Status_ShutdownInProgress("Database shutdown");
   }
   if ((status.ok() || status.IsColumnFamilyDropped()) &&
       (manual_compaction_canceled_.load(std::memory_order_relaxed))) {
-    status = Status::Incomplete(SubCode::kManualCompactionPaused);
+    status = Status_Incomplete(SubCode::kManualCompactionPaused);
   }
   if (status.ok()) {
     status = input->status();
@@ -1604,7 +1604,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   } else {
     fname = "(nil)";
     if (s.ok()) {
-      status_for_listener = Status::Aborted("Empty SST file not kept");
+      status_for_listener = Status_Aborted("Empty SST file not kept");
     }
   }
   EventHelpers::LogAndNotifyTableFileCreationFinished(
@@ -1624,7 +1624,7 @@ Status CompactionJob::FinishCompactionOutputFile(
     if (sfm->IsMaxAllowedSpaceReached()) {
       // TODO(ajkr): should we return OK() if max space was reached by the final
       // compaction output file (similarly to how flush works when full)?
-      s = Status::SpaceLimit("Max allowed space was reached");
+      s = Status_SpaceLimit("Max allowed space was reached");
       TEST_SYNC_POINT(
           "CompactionJob::FinishCompactionOutputFile:MaxAllowedSpaceReached");
       InstrumentedMutexLock l(db_mutex_);

@@ -60,7 +60,7 @@ class OptimisticTransaction : public TransactionBaseImpl {
 
   void Initialize(const OptimisticTransactionOptions& txn_options);
 
-  // Returns OK if it is safe to commit this transaction.  Returns Status::Busy
+  // Returns OK if it is safe to commit this transaction.  Returns Status_Busy
   // if there are read or write conflicts that would prevent us from committing
   // OR if we can not determine whether there would be any such conflicts.
   //

@@ -19,15 +19,15 @@ Status OutputValidator::Add(const Slice& key, const Slice& value) {
     TEST_SYNC_POINT_CALLBACK("OutputValidator::Add:order_check",
                              /*arg=*/nullptr);
     if (key.size() < kNumInternalBytes) {
-      return Status::Corruption(
+      return Status_Corruption(
           "Compaction tries to write a key without internal bytes.");
     }
     // prev_key_ starts with empty.
     if (!prev_key_.empty() && icmp_.Compare(key, prev_key_) < 0) {
-      return Status::Corruption("Compaction sees out-of-order keys.");
+      return Status_Corruption("Compaction sees out-of-order keys.");
     }
     prev_key_.assign(key.data(), key.size());
   }
-  return Status::OK();
+  return Status_OK();
 }
 }  // namespace ROCKSDB_NAMESPACE

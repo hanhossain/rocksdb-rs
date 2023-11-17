@@ -75,7 +75,7 @@ Status FilterBlockReaderCommon<TBlocklike>::GetOrReadFilterBlock(
 
   if (!filter_block_.IsEmpty()) {
     filter_block->SetUnownedValue(filter_block_.GetValue());
-    return Status::OK();
+    return Status_OK();
   }
 
   ReadOptions ro = read_options;

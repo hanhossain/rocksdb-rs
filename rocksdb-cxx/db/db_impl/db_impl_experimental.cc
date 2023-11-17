@@ -50,7 +50,7 @@ Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
     SchedulePendingCompaction(cfd);
     MaybeScheduleFlushOrCompaction();
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
@@ -59,7 +59,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
   if (target_level < 1) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "PromoteL0 FAILED. Invalid target level %d\n", target_level);
-    return Status::InvalidArgument("Invalid target level");
+    return Status_InvalidArgument("Invalid target level");
   }
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
@@ -76,7 +76,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
                      "PromoteL0 FAILED. Target level %d does not exist\n",
                      target_level);
       job_context.Clean();
-      status = Status::InvalidArgument("Target level does not exist");
+      status = Status_InvalidArgument("Target level does not exist");
       return status;
     }
 
@@ -98,7 +98,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
                        f->fd.GetNumber());
         job_context.Clean();
         status =
-            Status::InvalidArgument("PromoteL0 called during L0 compaction");
+            Status_InvalidArgument("PromoteL0 called during L0 compaction");
         return status;
       }
 
@@ -110,7 +110,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
                        " have overlapping ranges\n",
                        prev_f->fd.GetNumber(), f->fd.GetNumber());
         job_context.Clean();
-        status = Status::InvalidArgument("L0 has overlapping files");
+        status = Status_InvalidArgument("L0 has overlapping files");
         return status;
       }
     }
@@ -121,7 +121,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
         ROCKS_LOG_INFO(immutable_db_options_.info_log,
                        "PromoteL0 FAILED. Level %d not empty\n", level);
         job_context.Clean();
-        status = Status::InvalidArgument(
+        status = Status_InvalidArgument(
             "All levels up to target_level "
             "must be empty");
         return status;

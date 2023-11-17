@@ -204,15 +204,15 @@ class WriteBatch : public WriteBatchBase {
 
   // Remove all entries in this batch (Put, Merge, Delete, PutLogData) since the
   // most recent call to SetSavePoint() and removes the most recent save point.
-  // If there is no previous call to SetSavePoint(), Status::NotFound()
+  // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
-  // Otherwise returns Status::OK().
+  // Otherwise returns Status_OK().
   Status RollbackToSavePoint() override;
 
   // Pop the most recent save point.
-  // If there is no previous call to SetSavePoint(), Status::NotFound()
+  // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
-  // Otherwise returns Status::OK().
+  // Otherwise returns Status_OK().
   Status PopSavePoint() override;
 
   // Support for iterating over the contents of a batch.
@@ -233,11 +233,11 @@ class WriteBatch : public WriteBatchBase {
       if (column_family_id == 0) {
         // Put() historically doesn't return status. We didn't want to be
         // backwards incompatible so we didn't change the return status
-        // (this is a public API). We do an ordinary get and return Status::OK()
+        // (this is a public API). We do an ordinary get and return Status_OK()
         Put(key, value);
-        return Status::OK();
+        return Status_OK();
       }
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "non-default column family and PutCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -247,16 +247,16 @@ class WriteBatch : public WriteBatchBase {
     virtual Status PutEntityCF(uint32_t /* column_family_id */,
                                const Slice& /* key */,
                                const Slice& /* entity */) {
-      return Status::NotSupported("PutEntityCF not implemented");
+      return Status_NotSupported("PutEntityCF not implemented");
     }
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
     virtual Status DeleteCF(uint32_t column_family_id, const Slice& key) {
       if (column_family_id == 0) {
         Delete(key);
-        return Status::OK();
+        return Status_OK();
       }
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "non-default column family and DeleteCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -266,9 +266,9 @@ class WriteBatch : public WriteBatchBase {
     virtual Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) {
       if (column_family_id == 0) {
         SingleDelete(key);
-        return Status::OK();
+        return Status_OK();
       }
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "non-default column family and SingleDeleteCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -279,7 +279,7 @@ class WriteBatch : public WriteBatchBase {
     virtual Status DeleteRangeCF(uint32_t /*column_family_id*/,
                                  const Slice& /*begin_key*/,
                                  const Slice& /*end_key*/) {
-      return Status::InvalidArgument("DeleteRangeCF not implemented");
+      return Status_InvalidArgument("DeleteRangeCF not implemented");
     }
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -287,9 +287,9 @@ class WriteBatch : public WriteBatchBase {
                            const Slice& value) {
       if (column_family_id == 0) {
         Merge(key, value);
-        return Status::OK();
+        return Status_OK();
       }
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "non-default column family and MergeCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -299,36 +299,36 @@ class WriteBatch : public WriteBatchBase {
     virtual Status PutBlobIndexCF(uint32_t /*column_family_id*/,
                                   const Slice& /*key*/,
                                   const Slice& /*value*/) {
-      return Status::InvalidArgument("PutBlobIndexCF not implemented");
+      return Status_InvalidArgument("PutBlobIndexCF not implemented");
     }
 
     // The default implementation of LogData does nothing.
     virtual void LogData(const Slice& blob);
 
     virtual Status MarkBeginPrepare(bool = false) {
-      return Status::InvalidArgument("MarkBeginPrepare() handler not defined.");
+      return Status_InvalidArgument("MarkBeginPrepare() handler not defined.");
     }
 
     virtual Status MarkEndPrepare(const Slice& /*xid*/) {
-      return Status::InvalidArgument("MarkEndPrepare() handler not defined.");
+      return Status_InvalidArgument("MarkEndPrepare() handler not defined.");
     }
 
     virtual Status MarkNoop(bool /*empty_batch*/) {
-      return Status::InvalidArgument("MarkNoop() handler not defined.");
+      return Status_InvalidArgument("MarkNoop() handler not defined.");
     }
 
     virtual Status MarkRollback(const Slice& /*xid*/) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "MarkRollbackPrepare() handler not defined.");
     }
 
     virtual Status MarkCommit(const Slice& /*xid*/) {
-      return Status::InvalidArgument("MarkCommit() handler not defined.");
+      return Status_InvalidArgument("MarkCommit() handler not defined.");
     }
 
     virtual Status MarkCommitWithTimestamp(const Slice& /*xid*/,
                                            const Slice& /*commit_ts*/) {
-      return Status::InvalidArgument(
+      return Status_InvalidArgument(
           "MarkCommitWithTimestamp() handler not defined.");
     }
 

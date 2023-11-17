@@ -51,7 +51,7 @@ Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
   }
   file = NewReadaheadRandomAccessFile(std::move(file), kReadaheadSize);
   if (file_size == 0) {
-    return Status::Corruption("File is empty.");
+    return Status_Corruption("File is empty.");
   }
   reader_.reset(new RandomAccessFileReader(std::move(file), filename));
   uint64_t offset = 0;
@@ -108,7 +108,7 @@ Status BlobDumpTool::Read(uint64_t offset, size_t size, Slice* result) {
     return s;
   }
   if (result->size() != size) {
-    return Status::Corruption("Reach the end of the file unexpectedly.");
+    return Status_Corruption("Reach the end of the file unexpectedly.");
   }
   return s;
 }
@@ -148,7 +148,7 @@ Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
   auto no_footer = [&]() {
     *footer_offset = file_size;
     fprintf(stdout, "No blob log footer.\n");
-    return Status::OK();
+    return Status_OK();
   };
   if (file_size < BlobLogHeader::kSize + BlobLogFooter::kSize) {
     return no_footer();

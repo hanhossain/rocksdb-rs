@@ -369,7 +369,7 @@ void LRUCacheShard::SetStrictCapacityLimit(bool strict_capacity_limit) {
 }
 
 Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
-  Status s = Status::OK();
+  Status s = Status_OK();
   autovector<LRUHandle*> last_reference_list;
 
   {
@@ -390,7 +390,7 @@ Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
         free(e);
         e = nullptr;
         *handle = nullptr;
-        s = Status::MemoryLimit("Insert failed due to LRU cache being full.");
+        s = Status_MemoryLimit("Insert failed due to LRU cache being full.");
       }
     } else {
       // Insert into the cache. Note that the cache might get larger than its
@@ -398,7 +398,7 @@ Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
       LRUHandle* old = table_.Insert(e);
       usage_ += e->total_charge;
       if (old != nullptr) {
-        s = Status::OkOverwritten();
+        s = Status_OkOverwritten();
         assert(old->InCache());
         old->SetInCache(false);
         if (!old->HasRefs()) {

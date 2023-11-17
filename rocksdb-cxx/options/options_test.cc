@@ -55,7 +55,7 @@ class UnregisteredTableFactory : public TableFactory {
   Status NewTableReader(const ReadOptions&, const TableReaderOptions&,
                         std::unique_ptr<RandomAccessFileReader>&&, uint64_t,
                         std::unique_ptr<TableReader>*, bool) const override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   TableBuilder* NewTableBuilder(const TableBuilderOptions&,
                                 WritableFileWriter*) const override {
@@ -4412,7 +4412,7 @@ TEST_F(OptionTypeInfoTest, TestInvalidArgs) {
                               const std::string& value, void* addr) {
                              auto ptr = static_cast<int*>(addr);
                              *ptr = ParseInt(value);
-                             return Status::OK();
+                             return Status_OK();
                            });
   ASSERT_OK(func_info.Parse(config_options, "b", "1", &i));
   ASSERT_NOK(func_info.Parse(config_options, "b", "x", &i));
@@ -4427,10 +4427,10 @@ TEST_F(OptionTypeInfoTest, TestParseFunc) {
                            void* addr) {
     auto ptr = static_cast<std::string*>(addr);
     if (name == "Oops") {
-      return Status::InvalidArgument(value);
+      return Status_InvalidArgument(value);
     } else {
       *ptr = value + " " + name;
-      return Status::OK();
+      return Status_OK();
     }
   });
   ConfigOptions config_options;
@@ -4448,10 +4448,10 @@ TEST_F(OptionTypeInfoTest, TestSerializeFunc) {
                                const std::string& name, const void* /*addr*/,
                                std::string* value) {
     if (name == "Oops") {
-      return Status::InvalidArgument(name);
+      return Status_InvalidArgument(name);
     } else {
       *value = name;
-      return Status::OK();
+      return Status_OK();
     }
   });
   ConfigOptions config_options;
@@ -4507,9 +4507,9 @@ TEST_F(OptionTypeInfoTest, TestPrepareFunc) {
         } else if (name == "/2") {
           *i1 /= 2;
         } else {
-          return Status::InvalidArgument("Bad Argument", name);
+          return Status_InvalidArgument("Bad Argument", name);
         }
-        return Status::OK();
+        return Status_OK();
       });
   ConfigOptions config_options;
   int int1 = 100;
@@ -4535,9 +4535,9 @@ TEST_F(OptionTypeInfoTest, TestValidateFunc) {
       is_valid = (*sz == cf_opts.write_buffer_size);
     }
     if (is_valid) {
-      return Status::OK();
+      return Status_OK();
     } else {
-      return Status::InvalidArgument("Mismatched value", name);
+      return Status_InvalidArgument("Mismatched value", name);
     }
   });
   ConfigOptions config_options;

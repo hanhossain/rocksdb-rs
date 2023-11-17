@@ -2996,7 +2996,7 @@ class ModelDB : public DB {
   Status Put(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
              const Slice& /*k*/, const Slice& /*ts*/,
              const Slice& /*v*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   using DB::PutEntity;
@@ -3004,11 +3004,11 @@ class ModelDB : public DB {
                    ColumnFamilyHandle* /* column_family */,
                    const Slice& /* key */,
                    const WideColumns& /* columns */) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
   using DB::Close;
-  Status Close() override { return Status::OK(); }
+  Status Close() override { return Status_OK(); }
   using DB::Delete;
   Status Delete(const WriteOptions& o, ColumnFamilyHandle* cf,
                 const Slice& key) override {
@@ -3021,7 +3021,7 @@ class ModelDB : public DB {
   }
   Status Delete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                 const Slice& /*key*/, const Slice& /*ts*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   using DB::SingleDelete;
   Status SingleDelete(const WriteOptions& o, ColumnFamilyHandle* cf,
@@ -3035,7 +3035,7 @@ class ModelDB : public DB {
   }
   Status SingleDelete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                       const Slice& /*key*/, const Slice& /*ts*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   using DB::Merge;
   Status Merge(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
@@ -3050,12 +3050,12 @@ class ModelDB : public DB {
   Status Merge(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                const Slice& /*k*/, const Slice& /*ts*/,
                const Slice& /*value*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
   using DB::Get;
   Status Get(const ReadOptions& /*options*/, ColumnFamilyHandle* /*cf*/,
              const Slice& key, PinnableSlice* /*value*/) override {
-    return Status::NotSupported(key);
+    return Status_NotSupported(key);
   }
 
   using DB::GetMergeOperands;
@@ -3064,7 +3064,7 @@ class ModelDB : public DB {
       const Slice& key, PinnableSlice* /*slice*/,
       GetMergeOperandsOptions* /*merge_operands_options*/,
       int* /*number_of_operands*/) override {
-    return Status::NotSupported(key);
+    return Status_NotSupported(key);
   }
 
   using DB::MultiGet;
@@ -3074,7 +3074,7 @@ class ModelDB : public DB {
       const std::vector<Slice>& keys,
       std::vector<std::string>* /*values*/) override {
     std::vector<Status> s(keys.size(),
-                          Status::NotSupported("Not implemented."));
+                          Status_NotSupported("Not implemented."));
     return s;
   }
 
@@ -3083,13 +3083,13 @@ class ModelDB : public DB {
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*external_files*/,
       const IngestExternalFileOptions& /*options*/) override {
-    return Status::NotSupported("Not implemented.");
+    return Status_NotSupported("Not implemented.");
   }
 
   using DB::IngestExternalFiles;
   Status IngestExternalFiles(
       const std::vector<IngestExternalFileArg>& /*args*/) override {
-    return Status::NotSupported("Not implemented");
+    return Status_NotSupported("Not implemented");
   }
 
   using DB::CreateColumnFamilyWithImport;
@@ -3099,19 +3099,19 @@ class ModelDB : public DB {
       const ImportColumnFamilyOptions& /*import_options*/,
       const std::vector<const ExportImportFilesMetaData*>& /*metadatas*/,
       ColumnFamilyHandle** /*handle*/) override {
-    return Status::NotSupported("Not implemented.");
+    return Status_NotSupported("Not implemented.");
   }
 
   using DB::VerifyChecksum;
   Status VerifyChecksum(const ReadOptions&) override {
-    return Status::NotSupported("Not implemented.");
+    return Status_NotSupported("Not implemented.");
   }
 
   using DB::ClipColumnFamily;
   virtual Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
                                   const Slice& /*begin*/,
                                   const Slice& /*end*/) override {
-    return Status::NotSupported("Not implemented.");
+    return Status_NotSupported("Not implemented.");
   }
 
   using DB::GetPropertiesOfAllTables;
@@ -3153,7 +3153,7 @@ class ModelDB : public DB {
   Status NewIterators(const ReadOptions& /*options*/,
                       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
                       std::vector<Iterator*>* /*iterators*/) override {
-    return Status::NotSupported("Not supported yet");
+    return Status_NotSupported("Not supported yet");
   }
   const Snapshot* GetSnapshot() override {
     ModelSnapshot* snapshot = new ModelSnapshot;
@@ -3212,7 +3212,7 @@ class ModelDB : public DB {
     for (int i = 0; i < n; i++) {
       sizes[i] = 0;
     }
-    return Status::OK();
+    return Status_OK();
   }
   using DB::GetApproximateMemTableStats;
   void GetApproximateMemTableStats(ColumnFamilyHandle* /*column_family*/,
@@ -3226,13 +3226,13 @@ class ModelDB : public DB {
   Status CompactRange(const CompactRangeOptions& /*options*/,
                       ColumnFamilyHandle* /*column_family*/,
                       const Slice* /*start*/, const Slice* /*end*/) override {
-    return Status::NotSupported("Not supported operation.");
+    return Status_NotSupported("Not supported operation.");
   }
 
   Status SetDBOptions(
       const std::unordered_map<std::string, std::string>& /*new_options*/)
       override {
-    return Status::NotSupported("Not supported operation.");
+    return Status_NotSupported("Not supported operation.");
   }
 
   using DB::CompactFiles;
@@ -3243,21 +3243,21 @@ class ModelDB : public DB {
       const int /*output_level*/, const int /*output_path_id*/ = -1,
       std::vector<std::string>* const /*output_file_names*/ = nullptr,
       CompactionJobInfo* /*compaction_job_info*/ = nullptr) override {
-    return Status::NotSupported("Not supported operation.");
+    return Status_NotSupported("Not supported operation.");
   }
 
   Status PauseBackgroundWork() override {
-    return Status::NotSupported("Not supported operation.");
+    return Status_NotSupported("Not supported operation.");
   }
 
   Status ContinueBackgroundWork() override {
-    return Status::NotSupported("Not supported operation.");
+    return Status_NotSupported("Not supported operation.");
   }
 
   Status EnableAutoCompaction(
       const std::vector<ColumnFamilyHandle*>& /*column_family_handles*/)
       override {
-    return Status::NotSupported("Not supported operation.");
+    return Status_NotSupported("Not supported operation.");
   }
 
   void EnableManualCompaction() override { return; }
@@ -3266,7 +3266,7 @@ class ModelDB : public DB {
 
   virtual Status WaitForCompact(
       const WaitForCompactOptions& /* wait_for_compact_options */) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   using DB::NumberLevels;
@@ -3303,76 +3303,76 @@ class ModelDB : public DB {
   Status Flush(
       const ROCKSDB_NAMESPACE::FlushOptions& /*options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_families*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
-  Status SyncWAL() override { return Status::OK(); }
+  Status SyncWAL() override { return Status_OK(); }
 
-  Status DisableFileDeletions() override { return Status::OK(); }
+  Status DisableFileDeletions() override { return Status_OK(); }
 
-  Status EnableFileDeletions(bool /*force*/) override { return Status::OK(); }
+  Status EnableFileDeletions(bool /*force*/) override { return Status_OK(); }
 
   Status GetLiveFiles(std::vector<std::string>&, uint64_t* /*size*/,
                       bool /*flush_memtable*/ = true) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status GetLiveFilesChecksumInfo(
       FileChecksumList* /*checksum_list*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status GetLiveFilesStorageInfo(
       const LiveFilesStorageInfoOptions& /*opts*/,
       std::vector<LiveFileStorageInfo>* /*files*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status GetSortedWalFiles(VectorLogPtr& /*files*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status GetCurrentWalFile(
       std::unique_ptr<LogFile>* /*current_log_file*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   virtual Status GetCreationTimeOfOldestFile(
       uint64_t* /*creation_time*/) override {
-    return Status::NotSupported();
+    return Status_NotSupported();
   }
 
-  Status DeleteFile(std::string /*name*/) override { return Status::OK(); }
+  Status DeleteFile(std::string /*name*/) override { return Status_OK(); }
 
   Status GetUpdatesSince(
       ROCKSDB_NAMESPACE::SequenceNumber,
       std::unique_ptr<ROCKSDB_NAMESPACE::TransactionLogIterator>*,
       const TransactionLogIterator::ReadOptions& /*read_options*/ =
           TransactionLogIterator::ReadOptions()) override {
-    return Status::NotSupported("Not supported in Model DB");
+    return Status_NotSupported("Not supported in Model DB");
   }
 
   void GetColumnFamilyMetaData(ColumnFamilyHandle* /*column_family*/,
                                ColumnFamilyMetaData* /*metadata*/) override {}
 
   Status GetDbIdentity(std::string& /*identity*/) const override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status GetDbSessionId(std::string& /*session_id*/) const override {
-    return Status::OK();
+    return Status_OK();
   }
 
   SequenceNumber GetLatestSequenceNumber() const override { return 0; }
 
   Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
                                   std::string /*ts_low*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   Status GetFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
                              std::string* /*ts_low*/) override {
-    return Status::OK();
+    return Status_OK();
   }
 
   ColumnFamilyHandle* DefaultColumnFamily() const override { return nullptr; }
@@ -3412,7 +3412,7 @@ class ModelDB : public DB {
 
     Slice key() const override { return iter_->first; }
     Slice value() const override { return iter_->second; }
-    Status status() const override { return Status::OK(); }
+    Status status() const override { return Status_OK(); }
 
    private:
     const KVMap* const map_;
@@ -6945,7 +6945,7 @@ TEST_F(DBTest, PinnableSliceAndRowCache) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_EQ(Get("foo", &pin_slice), Status::OK());
+    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
     ASSERT_EQ(pin_slice.ToString(), "bar");
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -6974,8 +6974,8 @@ TEST_F(DBTest, ReusePinnableSlice) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_EQ(Get("foo", &pin_slice), Status::OK());
-    ASSERT_EQ(Get("foo", &pin_slice), Status::OK());
+    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
+    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
     ASSERT_EQ(pin_slice.ToString(), "bar");
 
     // Entry is already in cache, lookup will remove the element from lru
@@ -6992,16 +6992,16 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses({Status::NotFound()});
+    std::vector<Status> statuses({Status_NotFound()});
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_EQ(Status::OK(), statuses[0]);
+    ASSERT_EQ(Status_OK(), statuses[0]);
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_EQ(Status::OK(), statuses[0]);
+    ASSERT_EQ(Status_OK(), statuses[0]);
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7019,16 +7019,16 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses({Status::NotFound()});
+    std::vector<Status> statuses({Status_NotFound()});
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_EQ(Status::OK(), statuses[0]);
+    ASSERT_EQ(Status_OK(), statuses[0]);
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_EQ(Status::OK(), statuses[0]);
+    ASSERT_EQ(Status_OK(), statuses[0]);
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7237,7 +7237,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t creation_time;
   Status s1 = dbfull()->GetCreationTimeOfOldestFile(&creation_time);
   ASSERT_EQ(0, creation_time);
-  ASSERT_EQ(s1, Status::OK());
+  ASSERT_EQ(s1, Status_OK());
 
   // Testing with non-zero file creation time.
   set_file_creation_time_to_zero = false;
@@ -7262,14 +7262,14 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t ctime;
   Status s2 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
   ASSERT_EQ(uint_time_1, ctime);
-  ASSERT_EQ(s2, Status::OK());
+  ASSERT_EQ(s2, Status_OK());
 
   // Testing with max_open_files != -1
   options = CurrentOptions();
   options.max_open_files = 10;
   DestroyAndReopen(options);
   Status s3 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
-  ASSERT_EQ(s3, Status::NotSupported());
+  ASSERT_EQ(s3, Status_NotSupported());
 
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
 }

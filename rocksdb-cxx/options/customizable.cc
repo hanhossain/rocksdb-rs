@@ -40,7 +40,7 @@ Status Customizable::GetOption(const ConfigOptions& config_options,
                                std::string* value) const {
   if (opt_name == OptionTypeInfo::kIdPropName()) {
     *value = GetId();
-    return Status::OK();
+    return Status_OK();
   } else {
     return Configurable::GetOption(config_options, opt_name, value);
   }
@@ -126,7 +126,7 @@ Status Customizable::ConfigureNewObject(
   if (object != nullptr) {
     status = object->ConfigureFromMap(config_options, opt_map);
   } else if (!opt_map.empty()) {
-    status = Status::InvalidArgument("Cannot configure null object ");
+    status = Status_InvalidArgument("Cannot configure null object ");
   }
   return status;
 }

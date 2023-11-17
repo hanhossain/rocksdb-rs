@@ -263,11 +263,11 @@ class WriteCommittedTxnDB : public PessimisticTransactionDB {
 inline Status PessimisticTransactionDB::FailIfBatchHasTs(
     const WriteBatch* batch) {
   if (batch != nullptr && WriteBatchInternal::HasKeyWithTimestamp(*batch)) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Writes with timestamp must go through transaction API instead of "
         "TransactionDB.");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 inline Status PessimisticTransactionDB::FailIfCfEnablesTs(
@@ -278,11 +278,11 @@ inline Status PessimisticTransactionDB::FailIfCfEnablesTs(
   const Comparator* const ucmp = column_family->GetComparator();
   assert(ucmp);
   if (ucmp->timestamp_size() > 0) {
-    return Status::NotSupported(
+    return Status_NotSupported(
         "Write operation with user timestamp must go through the transaction "
         "API instead of TransactionDB.");
   }
-  return Status::OK();
+  return Status_OK();
 }
 
 class SnapshotCreationCallback : public PostMemTableCallback {

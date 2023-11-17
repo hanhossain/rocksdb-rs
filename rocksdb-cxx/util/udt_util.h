@@ -49,19 +49,19 @@ class UserDefinedTimestampSizeRecord {
       std::ostringstream oss;
       oss << "User-defined timestamp size record length: " << total_size
           << " is not a multiple of " << kSizePerColumnFamily << std::endl;
-      return Status::Corruption(oss.str());
+      return Status_Corruption(oss.str());
     }
     int num_of_entries = static_cast<int>(total_size / kSizePerColumnFamily);
     for (int i = 0; i < num_of_entries; i++) {
       uint32_t cf_id = 0;
       uint16_t ts_sz = 0;
       if (!GetFixed32(src, &cf_id) || !GetFixed16(src, &ts_sz)) {
-        return Status::Corruption(
+        return Status_Corruption(
             "Error decoding user-defined timestamp size record entry");
       }
       cf_to_ts_sz_.emplace_back(cf_id, static_cast<size_t>(ts_sz));
     }
-    return Status::OK();
+    return Status_OK();
   }
 
   inline std::string DebugString() const {
@@ -100,7 +100,7 @@ class UserDefinedTimestampSizeRecord {
 // bytes of length recorded timestamp size is stripped from user key.
 // 3) If recorded timestamp size is the same as running timestamp size, no-op.
 // 4) If recorded timestamp size and running timestamp size are both non-zero
-// but not equal, return Status::InvalidArgument.
+// but not equal, return Status_InvalidArgument.
 class TimestampRecoveryHandler : public WriteBatch::Handler {
  public:
   TimestampRecoveryHandler(const UnorderedMap<uint32_t, size_t>& running_ts_sz,
@@ -128,19 +128,19 @@ class TimestampRecoveryHandler : public WriteBatch::Handler {
   Status PutBlobIndexCF(uint32_t cf, const Slice& key,
                         const Slice& value) override;
 
-  Status MarkBeginPrepare(bool) override { return Status::OK(); }
+  Status MarkBeginPrepare(bool) override { return Status_OK(); }
 
-  Status MarkEndPrepare(const Slice&) override { return Status::OK(); }
+  Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
 
-  Status MarkCommit(const Slice&) override { return Status::OK(); }
+  Status MarkCommit(const Slice&) override { return Status_OK(); }
 
   Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-    return Status::OK();
+    return Status_OK();
   }
 
-  Status MarkRollback(const Slice&) override { return Status::OK(); }
+  Status MarkRollback(const Slice&) override { return Status_OK(); }
 
-  Status MarkNoop(bool /*empty_batch*/) override { return Status::OK(); }
+  Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
 
   std::unique_ptr<WriteBatch>&& TransferNewBatch() {
     assert(new_batch_diff_from_orig_batch_);

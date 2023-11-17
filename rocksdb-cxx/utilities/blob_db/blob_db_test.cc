@@ -436,7 +436,7 @@ TEST_F(BlobDBTest, GetIOError) {
   ColumnFamilyHandle *column_family = blob_db_->DefaultColumnFamily();
   PinnableSlice value;
   ASSERT_OK(Put("foo", "bar"));
-  fault_injection_env_->SetFilesystemActive(false, Status::IOError());
+  fault_injection_env_->SetFilesystemActive(false, Status_IOError());
   Status s = blob_db_->Get(ReadOptions(), column_family, "foo", &value);
   ASSERT_TRUE(s.IsIOError());
   // Reactivate file system to allow test to close DB.
@@ -450,9 +450,9 @@ TEST_F(BlobDBTest, PutIOError) {
   bdb_options.min_blob_size = 0;  // Make sure value write to blob file
   bdb_options.disable_background_tasks = true;
   Open(bdb_options, options);
-  fault_injection_env_->SetFilesystemActive(false, Status::IOError());
+  fault_injection_env_->SetFilesystemActive(false, Status_IOError());
   ASSERT_TRUE(Put("foo", "v1").IsIOError());
-  fault_injection_env_->SetFilesystemActive(true, Status::IOError());
+  fault_injection_env_->SetFilesystemActive(true, Status_IOError());
   ASSERT_OK(Put("bar", "v1"));
 }
 
@@ -1501,7 +1501,7 @@ TEST_F(BlobDBTest, UserCompactionFilter_BlobIOError) {
 
     SyncPoint::GetInstance()->SetCallBack(
         io_failure_cases[case_num], [&](void * /*arg*/) {
-          fault_injection_env_->SetFilesystemActive(false, Status::IOError());
+          fault_injection_env_->SetFilesystemActive(false, Status_IOError());
         });
     SyncPoint::GetInstance()->EnableProcessing();
     auto s = blob_db_->CompactRange(CompactRangeOptions(), nullptr, nullptr);
@@ -2219,7 +2219,7 @@ TEST_F(BlobDBTest, MaintainBlobFileToSstMapping) {
     info.input_file_infos.emplace_back(CompactionFileInfo{1, 7, 2});
     info.input_file_infos.emplace_back(CompactionFileInfo{2, 22, 5});
     info.output_file_infos.emplace_back(CompactionFileInfo{2, 25, 3});
-    info.status = Status::Corruption();
+    info.status = Status_Corruption();
 
     blob_db_impl()->TEST_ProcessCompactionJobInfo(info);
 
@@ -2406,7 +2406,7 @@ TEST_F(BlobDBTest, SyncBlobFileBeforeCloseIOError) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "BlobLogWriter::Sync", [this](void * /* arg */) {
-        fault_injection_env_->SetFilesystemActive(false, Status::IOError());
+        fault_injection_env_->SetFilesystemActive(false, Status_IOError());
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
