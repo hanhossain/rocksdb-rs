@@ -1,6 +1,7 @@
 # C++
 /build
 /cmake-build-*
+/rocksdb-cxx/cmake-build-*
 
 # Rust
 /target
