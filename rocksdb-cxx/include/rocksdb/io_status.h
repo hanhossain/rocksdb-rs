@@ -22,7 +22,12 @@
 #include <cstring>
 
 #include "status.h"
+
+#ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/lib.h"
+#else
+#include "rocksdb-rs/src/lib.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

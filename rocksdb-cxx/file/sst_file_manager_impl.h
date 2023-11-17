@@ -12,7 +12,12 @@
 #include "file/delete_scheduler.h"
 #include "port/port.h"
 #include "rocksdb/sst_file_manager.h"
+
+#ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/lib.h"
+#else
+#include "rocksdb-rs/src/lib.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 class ErrorHandler;
