@@ -1492,10 +1492,6 @@ Status DBImpl::CompactFilesImpl(
                                        &job_context->superversion_contexts[0],
                                        *c->mutable_cf_options());
   }
-  // status above captures any error during compaction_job.Install, so its ok
-  // not check compaction_job.io_status() explicitly if we're not calling
-  // SetBGError
-  compaction_job.io_status();
   c->ReleaseCompactionFiles(s);
   // Need to make sure SstFileManager does its bookkeeping
   auto sfm = static_cast<SstFileManagerImpl*>(
