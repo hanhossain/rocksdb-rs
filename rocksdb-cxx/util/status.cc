@@ -34,10 +34,6 @@ Status::Status()
       scope_(0),
       state_(nullptr) {}
 
-Status::~Status() {
-    // TODO: remove me
-}
-
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
 

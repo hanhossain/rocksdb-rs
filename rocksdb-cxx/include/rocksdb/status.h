@@ -30,7 +30,6 @@ class Status {
  public:
   // Create a success status.
   Status();
-  ~Status();
 
   // Copy the specified status.
   Status(const Status& s);
@@ -59,9 +58,6 @@ class Status {
 
   // Returns a C style string indicating the message of the Status
   const char* getState() const;
-
-
-
 
   // Returns true iff the status indicates success.
   bool ok() const;
