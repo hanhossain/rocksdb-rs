@@ -16,17 +16,8 @@
 
 #pragma once
 
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-#include <stdio.h>
-#include <stdlib.h>
-#endif
-
 #include <memory>
 #include <string>
-
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-#include "port/stack_trace.h"
-#endif
 
 #include "rocksdb/slice.h"
 
@@ -177,9 +168,6 @@ protected:
   // A nullptr state_ (which is at least the case for OK) means the extra
   // message is empty.
   std::unique_ptr<const char[]> state_;
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-  mutable bool checked_ = false;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 
   explicit Status(Code _code);
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,

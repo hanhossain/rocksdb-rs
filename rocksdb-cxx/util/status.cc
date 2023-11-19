@@ -35,13 +35,7 @@ Status::Status()
       state_(nullptr) {}
 
 Status::~Status() {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    if (!checked_) {
-        fprintf(stderr, "Failed to check Status %p\n", this);
-        port::PrintStack();
-        std::abort();
-    }
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
+    // TODO: remove me
 }
 
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
@@ -50,9 +44,7 @@ Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
 void Status::PermitUncheckedError() const { MarkChecked(); }
 
 void Status::MustCheck() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    checked_ = false;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
+    // TODO: remove me
 }
 
 Code Status::code() const {
@@ -387,9 +379,7 @@ Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : Status(_code, SubCode::kNone, msg, msg2) {}
 
 inline void Status::MarkChecked() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    checked_ = true;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
+    // TODO: remove me
 }
 
 Status::Status(const Status& s)
@@ -529,9 +519,6 @@ Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
 }
 
 std::string Status::ToString() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-  checked_ = true;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
   const char* type = nullptr;
   switch (code_) {
     case Code::kOk:
