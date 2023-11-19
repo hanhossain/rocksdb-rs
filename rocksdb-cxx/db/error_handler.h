@@ -46,10 +46,6 @@ class ErrorHandler {
         soft_error_no_bg_work_(false),
         is_db_stopped_(false),
         bg_error_stats_(db_options.statistics) {
-    // Clear the checked flag for uninitialized errors
-    bg_error_.PermitUncheckedError();
-    recovery_error_.PermitUncheckedError();
-    recovery_io_error_.PermitUncheckedError();
   }
 
   void EnableAutoRecovery() { auto_recovery_ = true; }

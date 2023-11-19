@@ -48,7 +48,6 @@ class WritableFileWriter {
     for (auto& listener : listeners_) {
       listener->OnFileWriteFinish(info);
     }
-    info.status.PermitUncheckedError();
   }
   void NotifyOnFileFlushFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
@@ -60,7 +59,6 @@ class WritableFileWriter {
     for (auto& listener : listeners_) {
       listener->OnFileFlushFinish(info);
     }
-    info.status.PermitUncheckedError();
   }
   void NotifyOnFileSyncFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
@@ -73,7 +71,6 @@ class WritableFileWriter {
     for (auto& listener : listeners_) {
       listener->OnFileSyncFinish(info);
     }
-    info.status.PermitUncheckedError();
   }
   void NotifyOnFileRangeSyncFinish(
       uint64_t offset, size_t length,
@@ -88,7 +85,6 @@ class WritableFileWriter {
     for (auto& listener : listeners_) {
       listener->OnFileRangeSyncFinish(info);
     }
-    info.status.PermitUncheckedError();
   }
   void NotifyOnFileTruncateFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
@@ -100,7 +96,6 @@ class WritableFileWriter {
     for (auto& listener : listeners_) {
       listener->OnFileTruncateFinish(info);
     }
-    info.status.PermitUncheckedError();
   }
   void NotifyOnFileCloseFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
@@ -112,7 +107,6 @@ class WritableFileWriter {
     for (auto& listener : listeners_) {
       listener->OnFileCloseFinish(info);
     }
-    info.status.PermitUncheckedError();
   }
 
   void NotifyOnIOError(const IOStatus& io_status, FileOperationType operation,
@@ -125,7 +119,6 @@ class WritableFileWriter {
     for (auto& listener : listeners_) {
       listener->OnIOError(io_error_info);
     }
-    io_error_info.io_status.PermitUncheckedError();
   }
 
   bool ShouldNotifyListeners() const { return !listeners_.empty(); }
@@ -228,7 +221,6 @@ class WritableFileWriter {
 
   ~WritableFileWriter() {
     auto s = Close();
-    s.PermitUncheckedError();
   }
 
   std::string file_name() const { return file_name_; }

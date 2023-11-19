@@ -91,7 +91,7 @@ class PlainTableBuilder : public TableBuilder {
       for (const auto& prop : collector->GetReadableProperties()) {
         ret.readable_properties.insert(prop);
       }
-      collector->Finish(&ret.user_collected_properties).PermitUncheckedError();
+      collector->Finish(&ret.user_collected_properties);
     }
     return ret;
   }

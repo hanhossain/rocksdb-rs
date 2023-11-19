@@ -348,8 +348,7 @@ ColumnFamilyOptions SanitizeOptions(const ImmutableDBOptions& db_options,
       static_cast<SstFileManagerImpl*>(db_options.sst_file_manager.get());
   for (size_t i = 0; i < result.cf_paths.size(); i++) {
     DeleteScheduler::CleanupDirectory(db_options.env, sfm,
-                                      result.cf_paths[i].path)
-        .PermitUncheckedError();
+                                      result.cf_paths[i].path);
   }
 
   if (result.cf_paths.empty()) {

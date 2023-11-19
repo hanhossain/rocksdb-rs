@@ -331,9 +331,6 @@ IOStatus RandomAccessFileReader::MultiRead(
           // head + n
           aligned_reqs.push_back(std::move(r));
 
-        } else {
-          // unused
-          r.status.PermitUncheckedError();
         }
       }
       TEST_SYNC_POINT_CALLBACK("RandomAccessFileReader::MultiRead:AlignedReqs",
@@ -477,7 +474,6 @@ IOStatus RandomAccessFileReader::ReadAsync(
   uint64_t elapsed = 0;
   if (use_direct_io() && is_aligned == false) {
     FSReadRequest aligned_req = Align(req, alignment);
-    aligned_req.status.PermitUncheckedError();
 
     // Allocate aligned buffer.
     read_async_info->buf_.Alignment(alignment);

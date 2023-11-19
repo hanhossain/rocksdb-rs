@@ -322,7 +322,7 @@ TEST_P(DBWriteTest, IOErrorOnWALWritePropagateToWriteThreadFollower) {
 
   // The Failed PUT operations can cause a BG error to be set.
   // Mark it as Checked for the ASSERT_STATUS_CHECKED
-  dbfull()->Resume().PermitUncheckedError();
+  dbfull()->Resume();
 
   // Close before mock_env destruct.
   Close();

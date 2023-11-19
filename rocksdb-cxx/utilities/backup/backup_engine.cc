@@ -596,16 +596,6 @@ class BackupEngineImpl {
                              std::string* db_id, std::string* db_session_id);
 
   struct CopyOrCreateResult {
-    ~CopyOrCreateResult() {
-      // The Status needs to be ignored here for two reasons.
-      // First, if the BackupEngineImpl shuts down with jobs outstanding, then
-      // it is possible that the Status in the future/promise is never read,
-      // resulting in an unchecked Status. Second, if there are items in the
-      // channel when the BackupEngineImpl is shutdown, these will also have
-      // Status that have not been checked.  This
-      // TODO: Fix those issues so that the Status
-      io_status.PermitUncheckedError();
-    }
     uint64_t size;
     std::string checksum_hex;
     std::string db_id;
@@ -1056,9 +1046,6 @@ BackupEngineImpl::~BackupEngineImpl() {
     t.join();
   }
   LogFlush(options_.info_log);
-  for (const auto& it : corrupt_backups_) {
-    it.second.first.PermitUncheckedError();
-  }
 }
 
 IOStatus BackupEngineImpl::Initialize() {
@@ -1583,7 +1570,7 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
 
   // we copied all the files, enable file deletions
   if (disabled.ok()) {  // If we successfully disabled file deletions
-    db->EnableFileDeletions(false).PermitUncheckedError();
+    db->EnableFileDeletions(false);
   }
   auto backup_time = backup_env_->NowMicros() - start_backup;
 
@@ -1596,8 +1583,7 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
     std::unique_ptr<FSDirectory> backup_private_directory;
     backup_fs_
         ->NewDirectory(GetAbsolutePath(GetPrivateFileRel(new_backup_id, false)),
-                       io_options_, &backup_private_directory, nullptr)
-        .PermitUncheckedError();
+                       io_options_, &backup_private_directory, nullptr);
     if (backup_private_directory != nullptr) {
       io_s = backup_private_directory->FsyncWithDirOptions(io_options_, nullptr,
                                                            DirFsyncOptions());
@@ -1651,7 +1637,7 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
                    backup_statistics_.ToString().c_str());
     // delete files that we might have already written
     might_need_garbage_collect_ = true;
-    DeleteBackup(new_backup_id).PermitUncheckedError();
+    DeleteBackup(new_backup_id);
   }
 
   RecordTick(stats, BACKUP_READ_BYTES, IOSTATS(bytes_read) - prev_bytes_read);
@@ -1706,7 +1692,6 @@ IOStatus BackupEngineImpl::DeleteBackup(BackupID backup_id) {
   if (!s1.ok()) {
     // Any failure in the primary objective trumps any failure in the
     // secondary objective.
-    s2.PermitUncheckedError();
     return s1;
   } else {
     return s2;
@@ -1740,7 +1725,6 @@ IOStatus BackupEngineImpl::DeleteBackupNoGC(BackupID backup_id) {
     if (!io_s.ok()) {
       return io_s;
     }
-    corrupt->second.first.PermitUncheckedError();
     corrupt_backups_.erase(corrupt);
   }
 
@@ -1888,10 +1872,8 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
                  static_cast<int>(options.keep_log_files));
 
   // just in case. Ignore errors
-  db_fs_->CreateDirIfMissing(db_dir, io_options_, nullptr)
-      .PermitUncheckedError();
-  db_fs_->CreateDirIfMissing(wal_dir, io_options_, nullptr)
-      .PermitUncheckedError();
+  db_fs_->CreateDirIfMissing(db_dir, io_options_, nullptr);
+  db_fs_->CreateDirIfMissing(wal_dir, io_options_, nullptr);
 
   if (options.keep_log_files) {
     // delete files in db_dir, but keep all the log files
@@ -1899,8 +1881,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     // move all the files from archive dir to wal_dir
     std::string archive_dir = ArchivalDirectory(wal_dir);
     std::vector<std::string> archive_files;
-    db_fs_->GetChildren(archive_dir, io_options_, &archive_files, nullptr)
-        .PermitUncheckedError();  // ignore errors
+    db_fs_->GetChildren(archive_dir, io_options_, &archive_files, nullptr);
     for (const auto& f : archive_files) {
       uint64_t number;
       FileType type;
@@ -2106,8 +2087,7 @@ IOStatus BackupEngineImpl::VerifyBackup(BackupID backup_id,
     const auto abs_dir = GetAbsolutePath(rel_dir);
     // Shared directories allowed to be missing in some cases. Expected but
     // missing files will be reported a few lines down.
-    ReadChildFileCurrentSizes(abs_dir, backup_fs_, &curr_abs_path_to_size)
-        .PermitUncheckedError();
+    ReadChildFileCurrentSizes(abs_dir, backup_fs_, &curr_abs_path_to_size);
   }
 
   // For all files registered in backup
@@ -2332,8 +2312,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
       // Ignore the returned status
       // In the failed cases, db_id and db_session_id will be empty
       GetFileDbIdentities(db_env_, src_env_options, src_path, src_temperature,
-                          rate_limiter, &db_id, &db_session_id)
-          .PermitUncheckedError();
+                          rate_limiter, &db_id, &db_session_id);
     }
     // Calculate checksum if checksum and db session id are not available.
     // If db session id is available, we will not calculate the checksum
@@ -2427,8 +2406,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
           fname.c_str());
       need_to_copy = true;
       // Defer any failure reporting to when we try to write the file
-      backup_fs_->DeleteFile(final_dest_path, io_options_, nullptr)
-          .PermitUncheckedError();
+      backup_fs_->DeleteFile(final_dest_path, io_options_, nullptr);
     } else {
       // file exists and referenced
       if (checksum_hex.empty()) {
@@ -2660,8 +2638,7 @@ void BackupEngineImpl::LoopRateLimitRequestHelper(
 void BackupEngineImpl::DeleteChildren(const std::string& dir,
                                       uint32_t file_type_filter) const {
   std::vector<std::string> children;
-  db_fs_->GetChildren(dir, io_options_, &children, nullptr)
-      .PermitUncheckedError();  // ignore errors
+  db_fs_->GetChildren(dir, io_options_, &children, nullptr);
 
   for (const auto& f : children) {
     uint64_t number;
@@ -2671,8 +2648,7 @@ void BackupEngineImpl::DeleteChildren(const std::string& dir,
       // don't delete this file
       continue;
     }
-    db_fs_->DeleteFile(dir + "/" + f, io_options_, nullptr)
-        .PermitUncheckedError();  // ignore errors
+    db_fs_->DeleteFile(dir + "/" + f, io_options_, nullptr);
   }
 }
 

@@ -26,7 +26,7 @@ namespace ROCKSDB_NAMESPACE {
 namespace {
 int64_t MaybeCurrentTime(Env* env) {
   int64_t time = 1337346000;  // arbitrary fallback default
-  env->GetCurrentTime(&time).PermitUncheckedError();
+  env->GetCurrentTime(&time);
   return time;
 }
 }  // anonymous namespace
@@ -690,7 +690,7 @@ void DBTestBase::Destroy(const Options& options, bool delete_cf_paths) {
   if (delete_cf_paths) {
     for (size_t i = 0; i < handles_.size(); ++i) {
       ColumnFamilyDescriptor cfdescriptor;
-      handles_[i]->GetDescriptor(&cfdescriptor).PermitUncheckedError();
+      handles_[i]->GetDescriptor(&cfdescriptor);
       column_families.push_back(cfdescriptor);
     }
   }

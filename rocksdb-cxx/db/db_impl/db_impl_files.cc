@@ -206,7 +206,6 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       std::vector<std::string> files;
       Status s = immutable_db_options_.fs->GetChildren(
           path, io_opts, &files, /*IODebugContext*=*/nullptr);
-      s.PermitUncheckedError();  // TODO: What should we do on error?
       for (const std::string& file : files) {
         uint64_t number;
         FileType type;
@@ -234,7 +233,6 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.wal_dir, io_opts, &log_files,
           /*IODebugContext*=*/nullptr);
-      s.PermitUncheckedError();  // TODO: What should we do on error?
       for (const std::string& log_file : log_files) {
         job_context->full_scan_candidate_files.emplace_back(
             log_file, immutable_db_options_.wal_dir);
@@ -248,7 +246,6 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.db_log_dir, io_opts, &info_log_files,
           /*IODebugContext*=*/nullptr);
-      s.PermitUncheckedError();  // TODO: What should we do on error?
       for (std::string& log_file : info_log_files) {
         job_context->full_scan_candidate_files.emplace_back(
             log_file, immutable_db_options_.db_log_dir);
@@ -508,7 +505,6 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
   for (const auto w : state.logs_to_free) {
     // TODO: maybe check the return value of Close.
     auto s = w->Close();
-    s.PermitUncheckedError();
   }
 
   bool own_files = OwnTablesAndLogs();

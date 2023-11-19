@@ -47,7 +47,6 @@ class ForwardLevelIterator : public InternalIterator {
         prefix_extractor_(prefix_extractor),
         allow_unprepared_value_(allow_unprepared_value),
         block_protection_bytes_per_key_(block_protection_bytes_per_key) {
-    status_.PermitUncheckedError();  // Allow uninitialized status through
   }
 
   ~ForwardLevelIterator() override {
@@ -245,11 +244,6 @@ ForwardIterator::ForwardIterator(DBImpl* db, const ReadOptions& read_options,
                              FSSupportedOps::kAsyncIO)) {
     read_options_.async_io = false;
   }
-  // immutable_status_ is a local aggregation of the
-  // status of the immutable Iterators.
-  // We have to PermitUncheckedError in case it is never
-  // used, otherwise it will fail ASSERT_STATUS_CHECKED.
-  immutable_status_.PermitUncheckedError();
 }
 
 ForwardIterator::~ForwardIterator() { Cleanup(true); }

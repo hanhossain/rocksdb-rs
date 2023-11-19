@@ -37,10 +37,6 @@ Status::Status()
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
 
-void Status::PermitUncheckedError() const {
-    // TODO: remove me
-}
-
 Code Status::code() const {
     return code_;
 }

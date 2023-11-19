@@ -34,7 +34,6 @@ template <CacheEntryRole R>
 CacheReservationManagerImpl<
     R>::CacheReservationHandle::~CacheReservationHandle() {
   Status s = cache_res_mgr_->ReleaseCacheReservation(incremental_memory_used_);
-  s.PermitUncheckedError();
 }
 
 template <CacheEntryRole R>

@@ -666,7 +666,7 @@ class BackupEngineTest : public testing::Test {
 
     // delete old LATEST_BACKUP file, which some tests create for compatibility
     // testing.
-    backup_chroot_env_->DeleteFile(latest_backup_).PermitUncheckedError();
+    backup_chroot_env_->DeleteFile(latest_backup_);
   }
 
   void SetEnvsFromFileSystems() {
@@ -796,8 +796,7 @@ class BackupEngineTest : public testing::Test {
     child_dirs.push_back("shared_checksum");  // might not exist
     for (auto& dir : child_dirs) {
       std::vector<std::string> children;
-      test_backup_env_->GetChildren(backupdir_ + "/" + dir, &children)
-          .PermitUncheckedError();
+      test_backup_env_->GetChildren(backupdir_ + "/" + dir, &children);
       // fprintf(stderr, "ls %s\n", (backupdir_ + "/" + dir).c_str());
       for (auto& file : children) {
         uint64_t size;
@@ -1004,7 +1003,7 @@ class BackupEngineTest : public testing::Test {
   void DestroyDBWithoutCheck(const std::string& dbname,
                              const Options& options) {
     // DestroyDB may fail because the db might not be existed for some tests
-    DestroyDB(dbname, options).PermitUncheckedError();
+    DestroyDB(dbname, options);
   }
 
   std::unique_ptr<BackupEngineOptions> engine_options_;
@@ -3603,7 +3602,7 @@ TEST_F(BackupEngineTest, Concurrency) {
 
       // (Eventually, see below) Restore one of the backups, or "latest"
       std::string restore_db_dir = dbname_ + "/restore" + std::to_string(i);
-      DestroyDir(test_db_env_.get(), restore_db_dir).PermitUncheckedError();
+      DestroyDir(test_db_env_.get(), restore_db_dir);
       BackupID to_restore;
       if (latest) {
         to_restore = count;

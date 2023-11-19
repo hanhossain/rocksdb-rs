@@ -149,7 +149,6 @@ class FaultInjectionTestEnv : public EnvWrapper {
  public:
   explicit FaultInjectionTestEnv(Env* base)
       : EnvWrapper(base), filesystem_active_(true) {}
-  virtual ~FaultInjectionTestEnv() { error_.PermitUncheckedError(); }
 
   static const char* kClassName() { return "FaultInjectionTestEnv"; }
   const char* Name() const override { return kClassName(); }
@@ -228,19 +227,15 @@ class FaultInjectionTestEnv : public EnvWrapper {
   }
   void SetFilesystemActiveNoLock(
       bool active, Status error = Status_Corruption("Not active")) {
-    error.PermitUncheckedError();
     filesystem_active_ = active;
     if (!active) {
       error_ = error;
     }
-    error.PermitUncheckedError();
   }
   void SetFilesystemActive(bool active,
                            Status error = Status_Corruption("Not active")) {
-    error.PermitUncheckedError();
     MutexLock l(&mutex_);
     SetFilesystemActiveNoLock(active, error);
-    error.PermitUncheckedError();
   }
   void AssertNoOpenFile() { assert(open_managed_files_.empty()); }
   Status GetError() { return error_; }

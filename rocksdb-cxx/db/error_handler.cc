@@ -403,7 +403,7 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
       BackgroundErrorReason::kManifestWriteNoWAL == reason) {
     // Always returns ok
     ROCKS_LOG_INFO(db_options_.info_log, "Disabling File Deletions");
-    db_->DisableFileDeletionsWithLock().PermitUncheckedError();
+    db_->DisableFileDeletionsWithLock();
   }
 
   Status new_bg_io_err = bg_io_err;
@@ -500,10 +500,6 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
       RecordTick(bg_error_stats_.get(),
                  ERROR_HANDLER_BG_IO_ERROR_COUNT_MISSPELLED);
     }
-    // HandleKnownErrors() will use recovery_error_, so ignore
-    // recovery_io_error_.
-    // TODO: Do some refactoring and use only one recovery_error_
-    recovery_io_error_.PermitUncheckedError();
     return HandleKnownErrors(new_bg_io_err, reason);
   }
 }
@@ -556,13 +552,9 @@ Status ErrorHandler::ClearBGError() {
   // Signal that recovery succeeded
   if (recovery_error_.ok()) {
     Status old_bg_error = bg_error_;
-    // old_bg_error is only for notifying listeners, so may not be checked
-    old_bg_error.PermitUncheckedError();
     // Clear and check the recovery IO and BG error
     bg_error_ = Status_OK();
     recovery_io_error_ = IOStatus::OK();
-    bg_error_.PermitUncheckedError();
-    recovery_io_error_.PermitUncheckedError();
     recovery_in_prog_ = false;
     soft_error_no_bg_work_ = false;
     EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, old_bg_error,
@@ -608,7 +600,6 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
   // during the recovery process. While recovering, the only operations that
   // can generate background errors should be the flush operations
   recovery_error_ = Status_OK();
-  recovery_error_.PermitUncheckedError();
   Status s = db_->ResumeImpl(recover_context_);
   if (s.ok()) {
     soft_error_no_bg_work_ = false;
@@ -730,7 +721,6 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
         Status old_bg_error = bg_error_;
         is_db_stopped_.store(false, std::memory_order_release);
         bg_error_ = Status_OK();
-        bg_error_.PermitUncheckedError();
         EventHelpers::NotifyOnErrorRecoveryEnd(
             db_options_.listeners, old_bg_error, bg_error_, db_mutex_);
         if (bg_error_stats_ != nullptr) {

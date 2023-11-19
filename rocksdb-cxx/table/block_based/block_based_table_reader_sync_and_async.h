@@ -277,7 +277,6 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
         // block cache is configured. In that case, fall
         // through and set up the block explicitly
         if (block_entry->GetValue() != nullptr) {
-          s.PermitUncheckedError();
           continue;
         }
       }
@@ -390,7 +389,6 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
                                      sst_file_range.end());
       CachableEntry<UncompressionDict> uncompression_dict;
       Status uncompression_dict_status;
-      uncompression_dict_status.PermitUncheckedError();
       bool uncompression_dict_inited = false;
       size_t total_len = 0;
 

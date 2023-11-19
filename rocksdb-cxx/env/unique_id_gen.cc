@@ -78,11 +78,10 @@ struct EntropyTrackEnvDetails {
     if (opts.exclude_env_details) {
       return;
     }
-    opts.env->GetHostName(hostname_buf.data(), hostname_buf.size())
-        .PermitUncheckedError();
+    opts.env->GetHostName(hostname_buf.data(), hostname_buf.size());
     process_id = port::GetProcessID();
     thread_id = opts.env->GetThreadID();
-    opts.env->GetCurrentTime(&unix_time).PermitUncheckedError();
+    opts.env->GetCurrentTime(&unix_time);
     nano_time = opts.env->NowNanos();
   }
 };

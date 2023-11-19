@@ -150,7 +150,6 @@ Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
       if (disabled_file_deletions) {
         Status ss = db_->EnableFileDeletions(false);
         assert(ss.ok());
-        ss.PermitUncheckedError();
       }
     }
   }

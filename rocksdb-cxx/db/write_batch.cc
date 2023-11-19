@@ -268,7 +268,7 @@ uint32_t WriteBatch::ComputeContentFlags() const {
   if ((rv & (uint32_t)ContentFlags::DEFERRED) != 0) {
     BatchContentClassifier classifier;
     // Should we handle status here?
-    Iterate(&classifier).PermitUncheckedError();
+    Iterate(&classifier);
     rv = classifier.content_flags;
 
     // this method is conceptually const, because it is performing a lazy
@@ -2370,7 +2370,6 @@ class MemTableInserter : public WriteBatch::Handler {
           static_cast_with_check<ColumnFamilyHandleImpl>(cf_handle)->cfd();
       if (!cfd->is_delete_range_supported()) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
-        ret_status.PermitUncheckedError();
         return Status_NotSupported(
             std::string("DeleteRange not supported for table type ") +
             cfd->ioptions()->table_factory->Name() + " in CF " +
@@ -2380,13 +2379,11 @@ class MemTableInserter : public WriteBatch::Handler {
           cfd->user_comparator()->CompareWithoutTimestamp(begin_key, end_key);
       if (cmp > 0) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
-        ret_status.PermitUncheckedError();
         // It's an empty range where endpoints appear mistaken. Don't bother
         // applying it to the DB, and return an error to the user.
         return Status_InvalidArgument("end key comes before start key");
       } else if (cmp == 0) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
-        ret_status.PermitUncheckedError();
         // It's an empty range. Don't bother applying it to the DB.
         return Status_OK();
       }

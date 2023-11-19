@@ -303,7 +303,6 @@ class VersionBuilder::Rep {
       if (file_metadata_cache_res_mgr_) {
         Status s = file_metadata_cache_res_mgr_->UpdateCacheReservation(
             f->ApproximateMemoryUsage(), false /* increase */);
-        s.PermitUncheckedError();
       }
       delete f;
     }

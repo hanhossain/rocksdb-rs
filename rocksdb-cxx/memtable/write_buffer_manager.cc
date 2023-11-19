@@ -80,7 +80,6 @@ void WriteBufferManager::ReserveMemWithCache(size_t mem) {
   // from happening if this cache charging fails.
   // [TODO] We'll need to improve it in the future and figure out what to do on
   // error
-  s.PermitUncheckedError();
 }
 
 void WriteBufferManager::ScheduleFreeMem(size_t mem) {
@@ -107,12 +106,6 @@ void WriteBufferManager::FreeMemWithCache(size_t mem) {
   size_t new_mem_used = memory_used_.load(std::memory_order_relaxed) - mem;
   memory_used_.store(new_mem_used, std::memory_order_relaxed);
   Status s = cache_res_mgr_->UpdateCacheReservation(new_mem_used);
-
-  // We absorb the error since WriteBufferManager is not able to handle
-  // this failure properly.
-  // [TODO] We'll need to improve it in the future and figure out what to do on
-  // error
-  s.PermitUncheckedError();
 }
 
 void WriteBufferManager::BeginWriteStall(StallInterface* wbm_stall) {

@@ -108,11 +108,6 @@ PlainTableReader::PlainTableReader(
       file_size_(file_size),
       table_properties_(nullptr) {}
 
-PlainTableReader::~PlainTableReader() {
-  // Should fix?
-  status_.PermitUncheckedError();
-}
-
 Status PlainTableReader::Open(
     const ImmutableOptions& ioptions, const EnvOptions& env_options,
     const InternalKeyComparator& internal_comparator,

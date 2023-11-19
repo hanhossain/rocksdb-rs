@@ -89,7 +89,6 @@ DBIter::DBIter(Env* _env, const ReadOptions& read_options,
   if (iter_.iter()) {
     iter_.iter()->SetPinnedItersMgr(&pinned_iters_mgr_);
   }
-  status_.PermitUncheckedError();
   assert(timestamp_size_ ==
          user_comparator_.user_comparator()->timestamp_size());
 }
@@ -1456,8 +1455,7 @@ void DBIter::Seek(const Slice& target) {
     } else {
       upper_bound = Slice("");
     }
-    db_impl_->TraceIteratorSeek(cfd_->GetID(), target, lower_bound, upper_bound)
-        .PermitUncheckedError();
+    db_impl_->TraceIteratorSeek(cfd_->GetID(), target, lower_bound, upper_bound);
   }
 
   status_ = Status_OK();
@@ -1532,8 +1530,7 @@ void DBIter::SeekForPrev(const Slice& target) {
     }
     db_impl_
         ->TraceIteratorSeekForPrev(cfd_->GetID(), target, lower_bound,
-                                   upper_bound)
-        .PermitUncheckedError();
+                                   upper_bound);
   }
 
   status_ = Status_OK();
@@ -1595,8 +1592,6 @@ void DBIter::SeekToFirst() {
     max_skip_ = std::numeric_limits<uint64_t>::max();
   }
   status_ = Status_OK();
-  // if iterator is empty, this status_ could be unchecked.
-  status_.PermitUncheckedError();
   direction_ = Direction::kForward;
   ReleaseTempPinnedData();
   ResetBlobValue();
@@ -1658,8 +1653,6 @@ void DBIter::SeekToLast() {
     max_skip_ = std::numeric_limits<uint64_t>::max();
   }
   status_ = Status_OK();
-  // if iterator is empty, this status_ could be unchecked.
-  status_.PermitUncheckedError();
   direction_ = Direction::kReverse;
   ReleaseTempPinnedData();
   ResetBlobValue();

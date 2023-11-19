@@ -155,7 +155,7 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
       std::unique_ptr<WritableFileWriter>&& file_writer)
       : file_writer_(std::move(file_writer)) {}
 
-  ~ToFileCacheDumpWriter() { Close().PermitUncheckedError(); }
+  ~ToFileCacheDumpWriter() { Close(); }
 
   // Write the serialized metadata to the file
   virtual IOStatus WriteMetadata(const Slice& metadata) override {

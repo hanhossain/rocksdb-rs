@@ -94,7 +94,7 @@ struct SstFileWriter::Rep {
     file_info.largest_key.assign(user_key.data(), user_key.size());
     file_info.file_size = builder->FileSize();
 
-    InvalidatePageCache(false /* closing */).PermitUncheckedError();
+    InvalidatePageCache(false /* closing */);
     return Status_OK();
   }
 
@@ -171,7 +171,7 @@ struct SstFileWriter::Rep {
     file_info.num_range_del_entries++;
     file_info.file_size = builder->FileSize();
 
-    InvalidatePageCache(false /* closing */).PermitUncheckedError();
+    InvalidatePageCache(false /* closing */);
     return Status_OK();
   }
 
@@ -409,7 +409,7 @@ Status SstFileWriter::Finish(ExternalSstFileInfo* file_info) {
 
   if (s.ok()) {
     s = r->file_writer->Sync(r->ioptions.use_fsync);
-    r->InvalidatePageCache(true /* closing */).PermitUncheckedError();
+    r->InvalidatePageCache(true /* closing */);
     if (s.ok()) {
       s = r->file_writer->Close();
     }

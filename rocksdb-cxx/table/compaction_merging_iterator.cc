@@ -55,7 +55,6 @@ class CompactionMergingIterator : public InternalIterator {
     for (auto& child : children_) {
       child.iter.DeleteIter(is_arena_mode_);
     }
-    status_.PermitUncheckedError();
   }
 
   bool Valid() const override { return current_ != nullptr && status_.ok(); }
@@ -255,8 +254,7 @@ void CompactionMergingIterator::Seek(const Slice& target) {
   }
 
   ParsedInternalKey pik;
-  ParseInternalKey(target, &pik, false /* log_err_key */)
-      .PermitUncheckedError();
+  ParseInternalKey(target, &pik, false /* log_err_key */);
   for (size_t i = 0; i < range_tombstone_iters_.size(); ++i) {
     if (range_tombstone_iters_[i]) {
       range_tombstone_iters_[i]->Seek(pik.user_key);

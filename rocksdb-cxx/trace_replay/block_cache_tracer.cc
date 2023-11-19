@@ -312,8 +312,8 @@ Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
 
 BlockCacheHumanReadableTraceWriter::~BlockCacheHumanReadableTraceWriter() {
   if (human_readable_trace_file_writer_) {
-    human_readable_trace_file_writer_->Flush().PermitUncheckedError();
-    human_readable_trace_file_writer_->Close().PermitUncheckedError();
+    human_readable_trace_file_writer_->Flush();
+    human_readable_trace_file_writer_->Close();
   }
 }
 

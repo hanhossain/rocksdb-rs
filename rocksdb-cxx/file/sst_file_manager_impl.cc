@@ -42,7 +42,6 @@ SstFileManagerImpl::SstFileManagerImpl(
 
 SstFileManagerImpl::~SstFileManagerImpl() {
   Close();
-  bg_err_.PermitUncheckedError();
 }
 
 void SstFileManagerImpl::Close() {
@@ -177,7 +176,6 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
                       inputs[0][0]->fd.GetPathId());
     uint64_t free_space = 0;
     Status s = fs_->GetFreeSpace(fn, IOOptions(), &free_space, nullptr);
-    s.PermitUncheckedError();  // TODO: Check the status
     // needed_headroom is based on current size reserved by compactions,
     // minus any files created by running compactions as they would count
     // against the reserved size. If user didn't specify any compaction
@@ -495,9 +493,6 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
 
   if (status) {
     *status = s;
-  } else {
-    // No one passed us a Status, so they must not care about the error...
-    s.PermitUncheckedError();
   }
 
   return res;

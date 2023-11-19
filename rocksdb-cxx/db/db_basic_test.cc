@@ -1145,7 +1145,7 @@ class TestEnv : public EnvWrapper {
     explicit TestLogger(TestEnv* env_ptr) : Logger() { env = env_ptr; }
     ~TestLogger() override {
       if (!closed_) {
-        CloseHelper().PermitUncheckedError();
+        CloseHelper();
       }
     }
     void Logv(const char* /*format*/, va_list /*ap*/) override {}

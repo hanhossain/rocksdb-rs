@@ -28,7 +28,6 @@ bool GhostCache::Admit(const Slice& lookup_key) {
   // TODO: Should we check for errors here?
   auto s = sim_cache_->Insert(lookup_key, /*obj=*/nullptr,
                               &kNoopCacheItemHelper, lookup_key.size());
-  s.PermitUncheckedError();
   return false;
 }
 
@@ -53,7 +52,6 @@ void CacheSimulator::Access(const BlockCacheTraceRecord& access) {
       // Ignore errors on insert
       auto s = sim_cache_->Insert(access.block_key, /*obj=*/nullptr,
                                   &kNoopCacheItemHelper, access.block_size);
-      s.PermitUncheckedError();
     }
   }
   miss_ratio_stats_.UpdateMetrics(access.access_timestamp, is_user_access,
@@ -111,7 +109,6 @@ void PrioritizedCacheSimulator::AccessKVPair(
     auto s = sim_cache_->Insert(key, /*obj=*/nullptr, &kNoopCacheItemHelper,
                                 value_size,
                                 /*handle=*/nullptr, priority);
-    s.PermitUncheckedError();
   }
   if (update_metrics) {
     miss_ratio_stats_.UpdateMetrics(access.access_timestamp, is_user_access,
@@ -191,7 +188,6 @@ void HybridRowBlockCacheSimulator::Access(const BlockCacheTraceRecord& access) {
           sim_cache_->Insert(row_key, /*obj=*/nullptr, &kNoopCacheItemHelper,
                              access.referenced_data_size,
                              /*handle=*/nullptr, Cache::Priority::HIGH);
-      s.PermitUncheckedError();
       status.row_key_status[row_key] = InsertResult::INSERTED;
     }
     return;

@@ -1915,7 +1915,6 @@ void BlockBasedTableBuilder::EnterUnbuffered() {
   if (r->compression_dict_buffer_cache_res_mgr != nullptr) {
     Status s = r->compression_dict_buffer_cache_res_mgr->UpdateCacheReservation(
         r->data_begin_offset);
-    s.PermitUncheckedError();
   }
 }
 
@@ -1983,8 +1982,8 @@ void BlockBasedTableBuilder::Abandon() {
     StopParallelCompression();
   }
   rep_->state = Rep::State::kClosed;
-  rep_->CopyStatus().PermitUncheckedError();
-  rep_->CopyIOStatus().PermitUncheckedError();
+  rep_->CopyStatus();
+  rep_->CopyIOStatus();
 }
 
 uint64_t BlockBasedTableBuilder::NumEntries() const {
@@ -2024,7 +2023,7 @@ TableProperties BlockBasedTableBuilder::GetTableProperties() const {
     for (const auto& prop : collector->GetReadableProperties()) {
       ret.readable_properties.insert(prop);
     }
-    collector->Finish(&ret.user_collected_properties).PermitUncheckedError();
+    collector->Finish(&ret.user_collected_properties);
   }
   return ret;
 }

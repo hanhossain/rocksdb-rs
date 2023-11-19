@@ -298,6 +298,6 @@ void IOTracer::WriteIOOp(const IOTraceRecord& record, IODebugContext* dbg) {
   if (!writer_.load()) {
     return;
   }
-  writer_.load()->WriteIOOp(record, dbg).PermitUncheckedError();
+  writer_.load()->WriteIOOp(record, dbg);
 }
 }  // namespace ROCKSDB_NAMESPACE

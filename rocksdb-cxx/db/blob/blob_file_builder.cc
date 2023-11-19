@@ -381,8 +381,7 @@ void BlobFileBuilder::Abandon(const Status& s) {
         ->OnBlobFileCompleted(blob_file_paths_->back(), column_family_name_,
                               job_id_, writer_->get_log_number(),
                               creation_reason_, s, "", "", blob_count_,
-                              blob_bytes_)
-        .PermitUncheckedError();
+                              blob_bytes_);
   }
 
   writer_.reset();

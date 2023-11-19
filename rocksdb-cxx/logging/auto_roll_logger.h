@@ -70,9 +70,8 @@ class AutoRollLogger : public Logger {
 
   virtual ~AutoRollLogger() {
     if (logger_ && !closed_) {
-      logger_->Close().PermitUncheckedError();
+      logger_->Close();
     }
-    status_.PermitUncheckedError();
   }
 
   using Logger::GetInfoLogLevel;

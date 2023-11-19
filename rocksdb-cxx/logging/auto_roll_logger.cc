@@ -103,7 +103,7 @@ void AutoRollLogger::RollLogFile() {
   // fails there is nothing much we can do and we will continue with the
   // rename and hence ignoring the result status.
   if (logger_) {
-    logger_->Close().PermitUncheckedError();
+    logger_->Close();
   }
   Status s = fs_->RenameFile(log_fname_, old_fname, io_options_, &io_context_);
   if (!s.ok()) {

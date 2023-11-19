@@ -121,7 +121,7 @@ bool CacheWithSecondaryAdapter::EvictionHandler(const Slice& key,
     // Ignore dummy entry
     if (obj != kDummyObj) {
       // Spill into secondary cache.
-      secondary_cache_->Insert(key, obj, helper).PermitUncheckedError();
+      secondary_cache_->Insert(key, obj, helper);
     }
   }
   // Never takes ownership of obj
@@ -192,7 +192,6 @@ Cache::Handle* CacheWithSecondaryAdapter::Promote(
     // regular entry
     Status s = Insert(key, kDummyObj, &kNoopCacheItemHelper, /*charge=*/0,
                       /*handle=*/nullptr, priority);
-    s.PermitUncheckedError();
     // Nothing to do or clean up on dummy insertion failure
   } else {
     // Insert regular entry into primary cache.

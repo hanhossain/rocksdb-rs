@@ -1694,7 +1694,6 @@ TEST_F(CompactionJobTest, ResultSerialization) {
     deserialized_tmp.output_files[0].unique_id[0] += 1;
     ASSERT_FALSE(deserialized_tmp.TEST_Equals(&result, &mismatch));
     ASSERT_EQ(mismatch, "output_files.unique_id");
-    deserialized_tmp.status.PermitUncheckedError();
   }
 
   // Test unknown field
@@ -1734,9 +1733,6 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   output.replace(0, kDataVersionSize, buf, kDataVersionSize);
   Status s = CompactionServiceResult::Read(output, &deserialized3);
   ASSERT_TRUE(s.IsNotSupported());
-  for (const auto& item : status_list) {
-    item.PermitUncheckedError();
-  }
 }
 
 class CompactionJobDynamicFileSizeTest

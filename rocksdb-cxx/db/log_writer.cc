@@ -39,7 +39,7 @@ Writer::Writer(std::unique_ptr<WritableFileWriter>&& dest, uint64_t log_number,
 
 Writer::~Writer() {
   if (dest_) {
-    WriteBuffer().PermitUncheckedError();
+    WriteBuffer();
   }
   if (compress_) {
     delete compress_;

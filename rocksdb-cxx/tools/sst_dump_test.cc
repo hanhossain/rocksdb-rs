@@ -49,7 +49,7 @@ void cleanup(const Options& opts, const std::string& file_name) {
   ASSERT_OK(env->DeleteFile(file_name));
   std::string outfile_name = file_name.substr(0, file_name.length() - 4);
   outfile_name.append("_dump.txt");
-  env->DeleteFile(outfile_name).PermitUncheckedError();
+  env->DeleteFile(outfile_name);
 }
 }  // namespace
 

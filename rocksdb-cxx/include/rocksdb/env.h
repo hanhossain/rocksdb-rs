@@ -1060,8 +1060,7 @@ class WritableFile {
           new_last_preallocated_block - last_preallocated_block_;
       // TODO: Don't ignore errors from allocate
       Allocate(block_size * last_preallocated_block_,
-               block_size * num_spanned_blocks)
-          .PermitUncheckedError();
+               block_size * num_spanned_blocks);
       last_preallocated_block_ = new_last_preallocated_block;
     }
   }

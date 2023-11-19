@@ -209,7 +209,6 @@ class CountUniqueFilterBitsBuilderWrapper : public FilterBitsBuilder {
   Slice Finish(std::unique_ptr<const char[]>* buf) override {
     Slice rv = b_->Finish(buf);
     Status s_dont_care = b_->MaybePostVerify(rv);
-    s_dont_care.PermitUncheckedError();
     uniq_.clear();
     return rv;
   }

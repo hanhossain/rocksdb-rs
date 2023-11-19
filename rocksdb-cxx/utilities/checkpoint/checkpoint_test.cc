@@ -71,7 +71,7 @@ class CheckpointTest : public testing::Test {
     test::DeleteDir(env_, snapshot_tmp_name);
     Reopen(options);
     export_path_ = test::PerThreadDBPath("/export");
-    DestroyDir(env_, export_path_).PermitUncheckedError();
+    DestroyDir(env_, export_path_);
     cfh_reverse_comp_ = nullptr;
     metadata_ = nullptr;
   }
@@ -96,7 +96,7 @@ class CheckpointTest : public testing::Test {
     options.db_paths.emplace_back(dbname_ + "_4", 0);
     EXPECT_OK(DestroyDB(dbname_, options));
     EXPECT_OK(DestroyDB(snapshot_name_, options));
-    DestroyDir(env_, export_path_).PermitUncheckedError();
+    DestroyDir(env_, export_path_);
   }
 
   // Return the current option configuration.

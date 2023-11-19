@@ -39,11 +39,6 @@ class Status {
   bool operator==(const Status& rhs) const;
   bool operator!=(const Status& rhs) const;
 
-  // In case of intentionally swallowing an error, user must explicitly call
-  // this function. That way we are easily able to search the code to find where
-  // error swallowing occurs.
-  void PermitUncheckedError() const;
-
   Code code() const;
 
   SubCode subcode() const;

@@ -1695,8 +1695,7 @@ void BlockBasedTable::FinishTraceRecord(
   // TODO: Should handle status here?
   block_cache_tracer_
       ->WriteBlockAccess(access_record, block_key, rep_->cf_name_for_tracing(),
-                         referenced_key)
-      .PermitUncheckedError();
+                         referenced_key);
 }
 
 template <typename TBlocklike /*, auto*/>

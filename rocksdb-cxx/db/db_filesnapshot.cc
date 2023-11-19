@@ -123,7 +123,6 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
   if (deletions_disabled.ok()) {
     Status s2 = EnableFileDeletions(/*force*/ false);
     assert(s2.ok());
-    s2.PermitUncheckedError();
   } else {
     assert(deletions_disabled.IsNotSupported());
   }

@@ -1992,7 +1992,7 @@ TEST_P(EnvPosixTestWithParam, ConsistentChildrenAttributes) {
 
   std::string data;
   std::string test_base_dir = test::PerThreadDBPath(env_, "env_test_chr_attr");
-  env_->CreateDir(test_base_dir).PermitUncheckedError();
+  env_->CreateDir(test_base_dir);
   for (int i = 0; i < kNumChildren; ++i) {
     const std::string path = test_base_dir + "/testfile_" + std::to_string(i);
     std::unique_ptr<WritableFile> file;
@@ -2200,7 +2200,7 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
 TEST_P(EnvPosixTestWithParam, PosixRandomRWFile) {
   const std::string path = test::PerThreadDBPath(env_, "random_rw_file");
 
-  env_->DeleteFile(path).PermitUncheckedError();
+  env_->DeleteFile(path);
 
   std::unique_ptr<RandomRWFile> file;
 
@@ -2327,7 +2327,7 @@ class RandomRWFileWithMirrorString {
 
 TEST_P(EnvPosixTestWithParam, PosixRandomRWFileRandomized) {
   const std::string path = test::PerThreadDBPath(env_, "random_rw_file_rand");
-  env_->DeleteFile(path).PermitUncheckedError();
+  env_->DeleteFile(path);
 
   std::unique_ptr<RandomRWFile> file;
 
@@ -2382,7 +2382,6 @@ class TestEnv : public EnvWrapper {
     ~TestLogger() override {
       if (!closed_) {
         Status s = CloseHelper();
-        s.PermitUncheckedError();
       }
     }
     void Logv(const char* /*format*/, va_list /*ap*/) override {}

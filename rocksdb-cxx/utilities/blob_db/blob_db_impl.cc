@@ -2083,7 +2083,7 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
       }
     }
     // TODO: What to do if we cannot delete the directory?
-    env->DeleteDir(blobdir).PermitUncheckedError();
+    env->DeleteDir(blobdir);
   }
   Status destroy = DestroyDB(dbname, options);
   if (status.ok() && !destroy.ok()) {
