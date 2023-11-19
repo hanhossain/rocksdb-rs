@@ -868,7 +868,6 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
                                                  blob_offsets[i]));
         ca_read_bytes += blob_sizes[i];
       } else {
-        statuses_buf[i];
         ASSERT_TRUE(value_buf[i].empty());
         ASSERT_FALSE(value_buf[i].IsPinned());
         ASSERT_FALSE(blob_source.TEST_BlobInCache(blob_file_number, file_size,

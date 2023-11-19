@@ -86,7 +86,6 @@ JemallocNodumpAllocator::~JemallocNodumpAllocator() {
     // Destroy arena. Silently ignore error.
     Status s = DestroyArena(arena_index);
     assert(s.ok());
-    s.PermitUncheckedError();
   }
 }
 

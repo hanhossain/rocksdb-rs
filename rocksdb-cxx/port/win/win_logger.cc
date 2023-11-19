@@ -55,7 +55,7 @@ void WinLogger::DebugWriter(const char* str, int len) {
   }
 }
 
-WinLogger::~WinLogger() { CloseInternal().PermitUncheckedError(); }
+WinLogger::~WinLogger() { CloseInternal(); }
 
 Status WinLogger::CloseImpl() { return CloseInternal(); }
 

@@ -482,7 +482,6 @@ class WinDirectory : public FSDirectory {
   ~WinDirectory() {
     if (handle_ != NULL) {
       IOStatus s = WinDirectory::Close(IOOptions(), nullptr);
-      s.PermitUncheckedError();
     }
   }
   const std::string& GetName() const { return filename_; }
