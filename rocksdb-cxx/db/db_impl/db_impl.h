@@ -148,7 +148,6 @@ class Directories {
     }
 
     // Ready for caller
-    s.MustCheck();
     return s;
   }
 

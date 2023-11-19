@@ -39,10 +39,6 @@ Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
 
 void Status::PermitUncheckedError() const { MarkChecked(); }
 
-void Status::MustCheck() const {
-    // TODO: remove me
-}
-
 Code Status::code() const {
     MarkChecked();
     return code_;
@@ -403,7 +399,6 @@ Status::Status(const Status& s, Severity sev)
 Status& Status::operator=(const Status& s) {
     if (this != &s) {
         s.MarkChecked();
-        MustCheck();
         code_ = s.code_;
         subcode_ = s.subcode_;
         sev_ = s.sev_;
@@ -423,7 +418,6 @@ Status::Status(Status&& s) noexcept : Status() {
 Status& Status::operator=(Status&& s) noexcept {
     if (this != &s) {
         s.MarkChecked();
-        MustCheck();
         code_ = std::move(s.code_);
         s.code_ = Code::kOk;
         subcode_ = std::move(s.subcode_);

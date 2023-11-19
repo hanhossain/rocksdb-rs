@@ -44,8 +44,6 @@ class Status {
   // error swallowing occurs.
   void PermitUncheckedError() const;
 
-  void MustCheck() const;
-
   Code code() const;
 
   SubCode subcode() const;

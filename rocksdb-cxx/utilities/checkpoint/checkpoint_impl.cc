@@ -252,7 +252,6 @@ Status CheckpointImpl::CreateCustomCheckpoint(
           same_fs = false;
           s = Status_OK();
         }
-        s.MustCheck();
       }
       if (!same_fs || info.trim_to_size) {
         assert(info.file_checksum_func_name.empty() ==
