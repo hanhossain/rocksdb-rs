@@ -168,8 +168,6 @@ protected:
                   unsigned char scope);
 
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
-
-  void MarkChecked() const;
 };
 
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
