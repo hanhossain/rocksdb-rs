@@ -329,8 +329,8 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
   }
 
   // Allow some error specific overrides
-  if (new_bg_err.subcode() == IOStatus::SubCode::kNoSpace ||
-      new_bg_err.subcode() == IOStatus::SubCode::kSpaceLimit) {
+  if (new_bg_err.subcode() == SubCode::kNoSpace ||
+      new_bg_err.subcode() == SubCode::kSpaceLimit) {
     new_bg_err = OverrideNoSpaceError(new_bg_err, &auto_recovery);
   }
 
@@ -352,8 +352,8 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
     recovery_in_prog_ = true;
 
     // Kick-off error specific recovery
-    if (new_bg_err.subcode() == IOStatus::SubCode::kNoSpace ||
-        new_bg_err.subcode() == IOStatus::SubCode::kSpaceLimit) {
+    if (new_bg_err.subcode() == SubCode::kNoSpace ||
+        new_bg_err.subcode() == SubCode::kSpaceLimit) {
       RecoverFromNoSpace();
     }
   }
@@ -430,7 +430,7 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
                                           &bg_err, db_mutex_, &auto_recovery);
     recover_context_ = context;
     return bg_error_;
-  } else if (bg_io_err.subcode() != IOStatus::SubCode::kNoSpace &&
+  } else if (bg_io_err.subcode() != SubCode::kNoSpace &&
              (bg_io_err.GetScope() ==
                   IOStatus::IOErrorScope::kIOErrorScopeFile ||
               bg_io_err.GetRetryable())) {

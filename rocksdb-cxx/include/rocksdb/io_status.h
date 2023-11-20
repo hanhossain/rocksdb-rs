@@ -33,9 +33,6 @@ namespace ROCKSDB_NAMESPACE {
 
 class IOStatus : public Status {
  public:
-  using Code = Code;
-  using SubCode = SubCode;
-
   enum IOErrorScope : unsigned char {
     kIOErrorScopeFileSystem,
     kIOErrorScopeFile,
@@ -45,7 +42,6 @@ class IOStatus : public Status {
 
   // Create a success status.
   IOStatus() : IOStatus(Code::kOk, SubCode::kNone) {}
-  ~IOStatus() {}
 
   // Copy the specified status.
   IOStatus(const IOStatus& s);

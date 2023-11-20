@@ -261,7 +261,7 @@ class FaultInjectionTestFS : public FileSystemWrapper {
                                 IODebugContext* dbg) override {
     IOStatus io_s;
     if (!IsFilesystemActive() &&
-        error_.subcode() == IOStatus::SubCode::kNoSpace) {
+        error_.subcode() == SubCode::kNoSpace) {
       *disk_free = 0;
     } else {
       io_s = target()->GetFreeSpace(path, options, disk_free, dbg);

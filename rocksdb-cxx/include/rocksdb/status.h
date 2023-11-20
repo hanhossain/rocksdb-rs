@@ -166,6 +166,7 @@ protected:
 };
 
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
+
     // Return a success status.
     Status Status_OK();
 
@@ -256,7 +257,4 @@ protected:
     Status Status_TxnNotPrepared();
     Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
     std::unique_ptr<const char[]> Status_CopyState(const char* s);
-
-
-
 }  // namespace ROCKSDB_NAMESPACE
