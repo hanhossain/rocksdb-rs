@@ -146,8 +146,6 @@ class Status {
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
-
-protected:
   Code code_;
   SubCode subcode_;
   Severity sev_;
