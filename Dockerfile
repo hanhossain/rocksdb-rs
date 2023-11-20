@@ -19,10 +19,11 @@ FROM dev AS build-test-cxx
 WORKDIR /src/build
 
 
-RUN cmake -G Ninja -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
+RUN cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_COLOR_DIAGNOSTICS=ON \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
 RUN ninja
 
-FROM build-test AS test-cxx
+FROM build-test-cxx AS test-cxx
 WORKDIR /src/build
 
 RUN ctest -j $(nproc)
@@ -30,10 +31,11 @@ RUN ctest -j $(nproc)
 FROM dev AS build-test-all-cxx
 WORKDIR /src/build
 
-RUN cmake -G Ninja -DWITH_ALL_TESTS=ON ../rocksdb-cxx
+RUN cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_COLOR_DIAGNOSTICS=ON \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=ON ../rocksdb-cxx
 RUN ninja
 
-FROM build-test-all AS test-all-cxx
+FROM build-test-all-cxx AS test-all-cxx
 WORKDIR /src/build
 
 RUN ctest -j $(nproc)
