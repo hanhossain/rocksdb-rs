@@ -16,7 +16,6 @@
 #include "file/sst_file_manager_impl.h"
 #include "logging/logging.h"
 #include "monitoring/iostats_context_imp.h"
-#include "monitoring/perf_context_imp.h"
 #include "monitoring/thread_status_updater.h"
 #include "monitoring/thread_status_util.h"
 #include "test_util/sync_point.h"
@@ -38,8 +37,6 @@ bool DBImpl::EnoughRoomForCompaction(
     // optimistic and not do disk space checks
     Status bg_error = error_handler_.GetBGError();
     enough_room = sfm->EnoughRoomForCompaction(cfd, inputs, bg_error);
-    bg_error.PermitUncheckedError();  // bg_error is just a copy of the Status
-                                      // from the error_handler_
     if (enough_room) {
       *sfm_reserved_compact_space = true;
     }
@@ -350,7 +347,7 @@ Status DBImpl::FlushMemTableToOutputFile(
       // TODO (PR7798).  We should only add the file to the FileManager if it
       // exists. Otherwise, some tests may fail.  Ignore the error in the
       // interim.
-      sfm->OnAddFile(file_path).PermitUncheckedError();
+      sfm->OnAddFile(file_path);
       if (sfm->IsMaxAllowedSpaceReached()) {
         Status new_bg_error =
             Status_SpaceLimit("Max allowed space was reached");
@@ -768,7 +765,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         // TODO (PR7798).  We should only add the file to the FileManager if it
         // exists. Otherwise, some tests may fail.  Ignore the error in the
         // interim.
-        sfm->OnAddFile(file_path).PermitUncheckedError();
+        sfm->OnAddFile(file_path);
         if (sfm->IsMaxAllowedSpaceReached() &&
             error_handler_.GetBGError().ok()) {
           Status new_bg_error =
@@ -1483,7 +1480,7 @@ Status DBImpl::CompactFilesImpl(
   TEST_SYNC_POINT("CompactFilesImpl:0");
   TEST_SYNC_POINT("CompactFilesImpl:1");
   // Ignore the status here, as it will be checked in the Install down below...
-  compaction_job.Run().PermitUncheckedError();
+  compaction_job.Run();
   TEST_SYNC_POINT("CompactFilesImpl:2");
   TEST_SYNC_POINT("CompactFilesImpl:3");
   mutex_.Lock();
@@ -1495,10 +1492,6 @@ Status DBImpl::CompactFilesImpl(
                                        &job_context->superversion_contexts[0],
                                        *c->mutable_cf_options());
   }
-  // status above captures any error during compaction_job.Install, so its ok
-  // not check compaction_job.io_status() explicitly if we're not calling
-  // SetBGError
-  compaction_job.io_status().PermitUncheckedError();
   c->ReleaseCompactionFiles(s);
   // Need to make sure SstFileManager does its bookkeeping
   auto sfm = static_cast<SstFileManagerImpl*>(
@@ -1619,7 +1612,6 @@ void DBImpl::NotifyOnCompactionBegin(ColumnFamilyData* cfd, Compaction* c,
     for (auto listener : immutable_db_options_.listeners) {
       listener->OnCompactionBegin(this, info);
     }
-    info.status.PermitUncheckedError();
   }
   mutex_.Lock();
   current->Unref();
@@ -3623,7 +3615,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     TEST_SYNC_POINT_CALLBACK(
         "DBImpl::BackgroundCompaction:NonTrivial:BeforeRun", nullptr);
     // Should handle error?
-    compaction_job.Run().PermitUncheckedError();
+    compaction_job.Run();
     TEST_SYNC_POINT("DBImpl::BackgroundCompaction:NonTrivial:AfterRun");
     mutex_.Lock();
 
@@ -3641,8 +3633,6 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
   if (status.ok() && !io_s.ok()) {
     status = io_s;
-  } else {
-    io_s.PermitUncheckedError();
   }
 
   if (c != nullptr) {

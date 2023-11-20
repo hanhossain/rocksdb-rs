@@ -39,9 +39,6 @@ void SubcompactionState::Cleanup(Cache* cache) {
       TableCache::Evict(cache, out.meta.fd.GetNumber());
     }
   }
-  // TODO: sub_compact.io_status is not checked like status. Not sure if thats
-  // intentional. So ignoring the io_status as of now.
-  io_status.PermitUncheckedError();
 }
 
 Slice SubcompactionState::SmallestUserKey() const {

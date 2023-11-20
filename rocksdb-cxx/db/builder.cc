@@ -132,7 +132,6 @@ Status BuildTable(
           ioptions.compaction_filter_factory->CreateCompactionFilter(context);
       if (compaction_filter != nullptr &&
           !compaction_filter->IgnoreSnapshots()) {
-        s.PermitUncheckedError();
         return Status_NotSupported(
             "CompactionFilter::IgnoreSnapshots() = false is not supported "
             "anymore.");
@@ -249,9 +248,7 @@ Status BuildTable(
             ThreadStatus::FLUSH_BYTES_WRITTEN, IOSTATS(bytes_written));
       }
     }
-    if (!s.ok()) {
-      c_iter.status().PermitUncheckedError();
-    } else if (!c_iter.status().ok()) {
+    if (s.ok() && !c_iter.status().ok()) {
       s = c_iter.status();
     }
 
@@ -413,7 +410,7 @@ Status BuildTable(
                                        /*enable_hash=*/true);
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
           // Generate a rolling 64-bit hash of the key and values
-          file_validator.Add(it->key(), it->value()).PermitUncheckedError();
+          file_validator.Add(it->key(), it->value());
         }
         s = it->status();
         if (s.ok() && !output_validator.CompareValidator(file_validator)) {
@@ -435,7 +432,6 @@ Status BuildTable(
 
     if (table_file_created) {
       Status ignored = fs->DeleteFile(fname, IOOptions(), dbg);
-      ignored.PermitUncheckedError();
     }
 
     assert(blob_file_additions || blob_file_paths.empty());
@@ -444,7 +440,6 @@ Status BuildTable(
       for (const std::string& blob_file_path : blob_file_paths) {
         Status ignored = DeleteDBFile(&db_options, blob_file_path, dbname,
                                       /*force_bg=*/false, /*force_fg=*/false);
-        ignored.PermitUncheckedError();
         TEST_SYNC_POINT("BuildTable::AfterDeleteFile");
       }
     }

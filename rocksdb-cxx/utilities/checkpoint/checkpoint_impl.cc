@@ -150,7 +150,6 @@ Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
       if (disabled_file_deletions) {
         Status ss = db_->EnableFileDeletions(false);
         assert(ss.ok());
-        ss.PermitUncheckedError();
       }
     }
   }
@@ -252,7 +251,6 @@ Status CheckpointImpl::CreateCustomCheckpoint(
           same_fs = false;
           s = Status_OK();
         }
-        s.MustCheck();
       }
       if (!same_fs || info.trim_to_size) {
         assert(info.file_checksum_func_name.empty() ==

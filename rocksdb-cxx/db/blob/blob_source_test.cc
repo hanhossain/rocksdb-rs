@@ -6,8 +6,6 @@
 #include "db/blob/blob_source.h"
 
 #include <cassert>
-#include <cstdint>
-#include <cstdio>
 #include <memory>
 #include <string>
 
@@ -246,7 +244,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
     blob_bytes = 0;
     total_bytes = 0;
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     for (size_t i = 0; i < num_blobs; ++i) {
       ASSERT_FALSE(blob_source.TEST_BlobInCache(blob_file_number, file_size,
@@ -290,7 +288,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
     total_bytes = 0;
     blob_bytes = 0;
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     for (size_t i = 0; i < num_blobs; ++i) {
       ASSERT_TRUE(blob_source.TEST_BlobInCache(blob_file_number, file_size,
@@ -329,7 +327,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
     total_bytes = 0;
     blob_bytes = 0;
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     for (size_t i = 0; i < num_blobs; ++i) {
       ASSERT_TRUE(blob_source.TEST_BlobInCache(blob_file_number, file_size,
@@ -374,7 +372,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
     read_options.read_tier = ReadTier::kBlockCacheTier;
     read_options.fill_cache = true;
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     for (size_t i = 0; i < num_blobs; ++i) {
       ASSERT_FALSE(blob_source.TEST_BlobInCache(blob_file_number, file_size,
@@ -416,7 +414,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
     read_options.read_tier = ReadTier::kReadAllTier;
     read_options.fill_cache = true;
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     for (size_t i = 0; i < num_blobs; ++i) {
       ASSERT_FALSE(blob_source.TEST_BlobInCache(file_number, file_size,
@@ -672,7 +670,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromMultiFiles) {
     }
 
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     blob_source.MultiGetBlob(read_options, blob_reqs, &bytes_read);
 
@@ -709,7 +707,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromMultiFiles) {
               blob_value_bytes * blob_files);  // MultiGetBlob
 
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     autovector<BlobReadRequest> fake_blob_reqs_in_file;
     std::array<PinnableSlice, num_blobs> fake_value_buf;
@@ -851,7 +849,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     read_options.fill_cache = true;
     read_options.read_tier = ReadTier::kReadAllTier;
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     // Get half of blobs
     blob_source.MultiGetBlobFromOneFile(read_options, blob_file_number,
@@ -870,7 +868,6 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
                                                  blob_offsets[i]));
         ca_read_bytes += blob_sizes[i];
       } else {
-        statuses_buf[i].PermitUncheckedError();
         ASSERT_TRUE(value_buf[i].empty());
         ASSERT_FALSE(value_buf[i].IsPinned());
         ASSERT_FALSE(blob_source.TEST_BlobInCache(blob_file_number, file_size,
@@ -916,7 +913,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     // Cache-only MultiGetBlobFromOneFile
     read_options.read_tier = ReadTier::kBlockCacheTier;
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     blob_reqs.clear();
     for (size_t i = 0; i < num_blobs; ++i) {
@@ -972,7 +969,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     }
 
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     blob_source.MultiGetBlobFromOneFile(read_options, blob_file_number,
                                         file_size, blob_reqs, &bytes_read);
@@ -1016,7 +1013,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     }
 
     get_perf_context()->Reset();
-    statistics->Reset().PermitUncheckedError();
+    statistics->Reset();
 
     blob_source.MultiGetBlobFromOneFile(read_options, non_existing_file_number,
                                         file_size, blob_reqs, &bytes_read);

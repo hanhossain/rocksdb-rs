@@ -84,8 +84,6 @@ CuckooTableBuilder::CuckooTableBuilder(
   properties_.db_id = db_id;
   properties_.db_session_id = db_session_id;
   properties_.orig_file_number = file_number;
-  status_.PermitUncheckedError();
-  io_status_.PermitUncheckedError();
 }
 
 void CuckooTableBuilder::Add(const Slice& key, const Slice& value) {

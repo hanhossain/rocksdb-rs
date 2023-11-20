@@ -37,8 +37,6 @@ Status CompactionOutputs::Finish(const Status& intput_status,
   Status io_s = builder_->io_status();
   if (s.ok()) {
     s = io_s;
-  } else {
-    io_s.PermitUncheckedError();
   }
   const uint64_t current_bytes = builder_->FileSize();
   if (s.ok()) {
@@ -531,8 +529,7 @@ Status CompactionOutputs::AddRangeDels(
     // keys preceding `next_table_min_key`'s user key.
     ParsedInternalKey next_table_min_key_parsed;
     ParseInternalKey(next_table_min_key, &next_table_min_key_parsed,
-                     false /* log_err_key */)
-        .PermitUncheckedError();
+                     false /* log_err_key */);
     assert(next_table_min_key_parsed.sequence < kMaxSequenceNumber);
     assert(meta.largest.size() == 0 ||
            icmp.Compare(meta.largest.Encode(), next_table_min_key) < 0);
@@ -620,8 +617,7 @@ Status CompactionOutputs::AddRangeDels(
       // key. Ideally there would be a simpler API usage
       ParsedInternalKey tombstone_start_parsed;
       ParseInternalKey(tombstone_start.Encode(), &tombstone_start_parsed,
-                       false /* log_err_key */)
-          .PermitUncheckedError();
+                       false /* log_err_key */);
       // timestamp should be from where sequence number is from, which is from
       // tombstone in this case
       std::string ts =

@@ -408,11 +408,7 @@ IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
           IOOptions(), nullptr, DirFsyncOptions(CurrentFileName(dbname)));
     }
   } else {
-    fs->DeleteFile(tmp, IOOptions(), nullptr)
-        .PermitUncheckedError();  // NOTE: PermitUncheckedError is acceptable
-                                  // here as we are already handling an error
-                                  // case, and this is just a best-attempt
-                                  // effort at some cleanup
+    fs->DeleteFile(tmp, IOOptions(), nullptr);
   }
   return s;
 }
@@ -449,15 +445,13 @@ Status SetIdentityFile(Env* env, const std::string& dbname,
   if (s.ok()) {
     Status temp_s = dir_obj->Close(IOOptions(), nullptr);
     if (!temp_s.ok()) {
-      if (temp_s.IsNotSupported()) {
-        temp_s.PermitUncheckedError();
-      } else {
+      if (!temp_s.IsNotSupported()) {
         s = temp_s;
       }
     }
   }
   if (!s.ok()) {
-    env->DeleteFile(tmp).PermitUncheckedError();
+    env->DeleteFile(tmp);
   }
   return s;
 }

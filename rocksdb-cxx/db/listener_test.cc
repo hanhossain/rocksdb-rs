@@ -212,9 +212,6 @@ class TestFlushListener : public EventListener {
     db_closed = false;
   }
 
-  virtual ~TestFlushListener() {
-    prev_fc_info_.status.PermitUncheckedError();  // Ignore the status
-  }
   void OnTableFileCreated(const TableFileCreationInfo& info) override {
     // remember the info for later checking the FlushJobInfo.
     prev_fc_info_ = info;

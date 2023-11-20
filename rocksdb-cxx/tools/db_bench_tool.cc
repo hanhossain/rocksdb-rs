@@ -2202,7 +2202,7 @@ class Stats {
             "State", "OperationProperties");
 
     int64_t current_time = 0;
-    clock_->GetCurrentTime(&current_time).PermitUncheckedError();
+    clock_->GetCurrentTime(&current_time);
     for (auto ts : thread_list) {
       fprintf(stderr, "%18" PRIu64 " %10s %12s %20s %13s %45s %12s",
               ts.thread_id,

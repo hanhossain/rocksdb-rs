@@ -131,7 +131,6 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
       sub_compact->status = Status_Incomplete(
           "CompactionService failed to run the compaction job (and no valid "
           "result is returned).");
-      compaction_result.status.PermitUncheckedError();
     }
     ROCKS_LOG_WARN(db_options_.info_log,
                    "[%s] [JOB %d] Remote compaction failed.",
@@ -141,7 +140,6 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
 
   if (!s.ok()) {
     sub_compact->status = s;
-    compaction_result.status.PermitUncheckedError();
     return CompactionServiceJobStatus::kFailure;
   }
   sub_compact->status = compaction_result.status;
@@ -322,7 +320,6 @@ Status CompactionServiceCompactionJob::Run() {
 
   LogFlush(db_options_.info_log);
   compact_->status = status;
-  compact_->status.PermitUncheckedError();
 
   // Build compaction result
   compaction_result_->output_level = compact_->compaction->output_level();

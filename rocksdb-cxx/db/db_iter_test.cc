@@ -102,7 +102,6 @@ class TestIterator : public InternalIterator {
       ParsedInternalKey ikey;
       Status pik_status =
           ParseInternalKey(it->first, &ikey, true /* log_err_key */);
-      pik_status.PermitUncheckedError();
       assert(pik_status.ok());
       if (!pik_status.ok() || ikey.user_key != _key) {
         continue;

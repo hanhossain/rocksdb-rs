@@ -386,7 +386,6 @@ class NonBatchedOpsStressTest : public StressTest {
         std::string key_ts;
         s = cmp_db_->Get(read_opts, handle, key_str, &value,
                          FLAGS_user_timestamp_size > 0 ? &key_ts : nullptr);
-        s.PermitUncheckedError();
       } else {
         // Use range scan
         std::unique_ptr<Iterator> iter(cmp_db_->NewIterator(read_opts, handle));

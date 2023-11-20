@@ -126,17 +126,12 @@ class Directories {
       }
     }
 
-    // Attempt to close everything even if one fails
-    s.PermitUncheckedError();
-
     if (wal_dir_) {
       IOStatus temp_s = wal_dir_->Close(options, dbg);
       if (!temp_s.ok() && !temp_s.IsNotSupported() && s.ok()) {
         s = std::move(temp_s);
       }
     }
-
-    s.PermitUncheckedError();
 
     for (auto& data_dir_ptr : data_dirs_) {
       if (data_dir_ptr) {
@@ -148,7 +143,6 @@ class Directories {
     }
 
     // Ready for caller
-    s.MustCheck();
     return s;
   }
 

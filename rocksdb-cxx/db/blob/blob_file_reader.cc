@@ -472,9 +472,6 @@ void BlobFileReader::MultiGetBlob(
                               direct_io ? &aligned_buf : nullptr,
                               read_options.rate_limiter_priority);
   if (!s.ok()) {
-    for (auto& req : read_reqs) {
-      req.status.PermitUncheckedError();
-    }
     for (auto& blob_req : blob_reqs) {
       BlobReadRequest* const req = blob_req.first;
       assert(req);

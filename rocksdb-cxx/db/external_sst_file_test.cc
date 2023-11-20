@@ -57,7 +57,7 @@ class ExternalSSTFileTestBase : public DBTestBase {
   }
 
   ~ExternalSSTFileTestBase() override {
-    DestroyDir(env_, sst_files_dir_).PermitUncheckedError();
+    DestroyDir(env_, sst_files_dir_);
   }
 
  protected:
@@ -127,7 +127,7 @@ class ExternalSSTFileTest
     for (const auto& entry : data) {
       s = sst_file_writer.Put(entry.first, entry.second);
       if (!s.ok()) {
-        sst_file_writer.Finish().PermitUncheckedError();
+        sst_file_writer.Finish();
         return s;
       }
     }
@@ -182,7 +182,7 @@ class ExternalSSTFileTest
     for (auto& entry : data) {
       s = sst_file_writer.Put(entry.first, entry.second);
       if (!s.ok()) {
-        sst_file_writer.Finish().PermitUncheckedError();
+        sst_file_writer.Finish();
         return s;
       }
     }

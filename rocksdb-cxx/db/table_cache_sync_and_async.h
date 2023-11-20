@@ -115,8 +115,7 @@ DEFINE_SYNC_AND_ASYNC(Status, TableCache::MultiGet)
         size_t charge = row_cache_entry.capacity() + sizeof(std::string);
         auto row_ptr = new std::string(std::move(row_cache_entry));
         // If row cache is full, it's OK.
-        row_cache.Insert(row_cache_key.GetUserKey(), row_ptr, charge)
-            .PermitUncheckedError();
+        row_cache.Insert(row_cache_key.GetUserKey(), row_ptr, charge);
       }
     }
   }

@@ -4936,7 +4936,6 @@ struct VersionSet::ManifestWriter {
         mutable_cf_options(cf_options),
         edit_list(e),
         manifest_write_callback(manifest_wcb) {}
-  ~ManifestWriter() { status.PermitUncheckedError(); }
 
   bool IsAllWalEdits() const {
     bool all_wal_edits = true;
@@ -5042,7 +5041,6 @@ VersionSet::~VersionSet() {
     file.DeleteMetadata();
   }
   obsolete_files_.clear();
-  io_status_.PermitUncheckedError();
 }
 
 void VersionSet::Reset() {

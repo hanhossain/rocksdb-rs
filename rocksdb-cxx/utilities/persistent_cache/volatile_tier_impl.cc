@@ -124,7 +124,6 @@ bool VolatileCacheTier::Evict() {
     // TODO: Should the insert error be ignored?
     Status s = next_tier()->Insert(Slice(edata->key), edata->value.c_str(),
                                    edata->value.size());
-    s.PermitUncheckedError();
   }
 
   // adjust size and destroy data

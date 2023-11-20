@@ -347,7 +347,7 @@ Tracer::Tracer(SystemClock* clock, const TraceOptions& trace_options,
       trace_writer_(std::move(trace_writer)),
       trace_request_count_(0) {
   // TODO: What if this fails?
-  WriteHeader().PermitUncheckedError();
+  WriteHeader();
 }
 
 Tracer::~Tracer() { trace_writer_.reset(); }

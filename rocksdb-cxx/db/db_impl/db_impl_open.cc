@@ -169,13 +169,12 @@ DBOptions SanitizeOptions(const std::string& dbname, const DBOptions& src,
     auto wal_dir = immutable_db_options.GetWalDir();
     Status s = immutable_db_options.fs->GetChildren(
         wal_dir, io_opts, &filenames, /*IODebugContext*=*/nullptr);
-    s.PermitUncheckedError();  //**TODO: What to do on error?
     for (std::string& filename : filenames) {
       if (filename.find(".log.trash", filename.length() -
                                           std::string(".log.trash").length()) !=
           std::string::npos) {
         std::string trash_file = wal_dir + "/" + filename;
-        result.env->DeleteFile(trash_file).PermitUncheckedError();
+        result.env->DeleteFile(trash_file);
       }
     }
   }
@@ -185,8 +184,7 @@ DBOptions SanitizeOptions(const std::string& dbname, const DBOptions& src,
   // was not used)
   auto sfm = static_cast<SstFileManagerImpl*>(result.sst_file_manager.get());
   for (size_t i = 0; i < result.db_paths.size(); i++) {
-    DeleteScheduler::CleanupDirectory(result.env, sfm, result.db_paths[i].path)
-        .PermitUncheckedError();
+    DeleteScheduler::CleanupDirectory(result.env, sfm, result.db_paths[i].path);
   }
 
   // Create a default SstFileManager for purposes of tracking compaction size
@@ -318,7 +316,7 @@ Status DBImpl::NewDB(std::vector<std::string>* new_filenames) {
   const std::string manifest = DescriptorFileName(dbname_, 1);
   {
     if (fs_->FileExists(manifest, IOOptions(), nullptr).ok()) {
-      fs_->DeleteFile(manifest, IOOptions(), nullptr).PermitUncheckedError();
+      fs_->DeleteFile(manifest, IOOptions(), nullptr);
     }
     std::unique_ptr<FSWritableFile> file;
     FileOptions file_options = fs_->OptimizeForManifestWrite(file_options_);
@@ -350,7 +348,7 @@ Status DBImpl::NewDB(std::vector<std::string>* new_filenames) {
           manifest.substr(manifest.find_last_of("/\\") + 1));
     }
   } else {
-    fs_->DeleteFile(manifest, IOOptions(), nullptr).PermitUncheckedError();
+    fs_->DeleteFile(manifest, IOOptions(), nullptr);
   }
   return s;
 }
@@ -1494,8 +1492,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
       // truncate the log file. If the process goes into a crash loop before
       // the file is deleted, the preallocated space will never get freed.
       const bool truncate = !read_only;
-      GetLogSizeAndMaybeTruncate(wal_numbers.back(), truncate, nullptr)
-          .PermitUncheckedError();
+      GetLogSizeAndMaybeTruncate(wal_numbers.back(), truncate, nullptr);
     }
   }
 
@@ -1613,8 +1610,7 @@ Status DBImpl::WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
         cfd->GetLatestMutableCFOptions()->paranoid_file_checks;
 
     int64_t _current_time = 0;
-    immutable_db_options_.clock->GetCurrentTime(&_current_time)
-        .PermitUncheckedError();  // ignore error
+    immutable_db_options_.clock->GetCurrentTime(&_current_time);
     const uint64_t current_time = static_cast<uint64_t>(_current_time);
     meta.oldest_ancester_time = current_time;
     meta.epoch_number = cfd->NewEpochNumber();
@@ -2101,8 +2097,6 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
     impl->DeleteObsoleteFiles();
     TEST_SYNC_POINT("DBImpl::Open:AfterDeleteFiles");
     impl->MaybeScheduleFlushOrCompaction();
-  } else {
-    persist_options_status.PermitUncheckedError();
   }
   impl->mutex_.Unlock();
 
@@ -2159,8 +2153,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
       std::vector<std::string> existing_files;
       impl->immutable_db_options_.fs
           ->GetChildren(path, io_opts, &existing_files,
-                        /*IODebugContext*=*/nullptr)
-          .PermitUncheckedError();  //**TODO: What do to on error?
+                        /*IODebugContext*=*/nullptr);
       for (auto& file_name : existing_files) {
         uint64_t file_number;
         FileType file_type;
@@ -2171,10 +2164,9 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
           if (known_file_sizes.count(file_name)) {
             // We're assuming that each sst file name exists in at most one of
             // the paths.
-            sfm->OnAddFile(file_path, known_file_sizes.at(file_name))
-                .PermitUncheckedError();
+            sfm->OnAddFile(file_path, known_file_sizes.at(file_name));
           } else {
-            sfm->OnAddFile(file_path).PermitUncheckedError();
+            sfm->OnAddFile(file_path);
           }
         }
       }

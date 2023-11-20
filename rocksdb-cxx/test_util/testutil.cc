@@ -146,7 +146,6 @@ const Comparator* BytewiseComparatorWithU64TsWrapper() {
   const Comparator* user_comparator = nullptr;
   Status s = Comparator::CreateFromString(
       config_options, "leveldb.BytewiseComparator.u64ts", &user_comparator);
-  s.PermitUncheckedError();
   return user_comparator;
 }
 
@@ -548,7 +547,7 @@ Status TryDeleteDir(Env* env, const std::string& dirname) {
 
 // Delete a directory if it exists
 void DeleteDir(Env* env, const std::string& dirname) {
-  TryDeleteDir(env, dirname).PermitUncheckedError();
+  TryDeleteDir(env, dirname);
 }
 
 Status CreateEnvFromSystem(const ConfigOptions& config_options, Env** result,

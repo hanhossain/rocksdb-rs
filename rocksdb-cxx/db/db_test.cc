@@ -247,7 +247,7 @@ TEST_F(DBTest, SkipDelay) {
       std::string large_value(1024, 'x');
       // Perhaps ideally this first write would fail because of delay, but
       // the current implementation does not guarantee that.
-      dbfull()->Put(wo, "foo", large_value).PermitUncheckedError();
+      dbfull()->Put(wo, "foo", large_value);
       // We need the 2nd write to trigger delay. This is because delay is
       // estimated based on the last write size which is 0 for the first write.
       ASSERT_NOK(dbfull()->Put(wo, "foo2", large_value));
@@ -1355,7 +1355,7 @@ TEST_F(DBTest, AllMetaDataTest) {
   constexpr char checksum_value[] = "\x3d\x87\xff\x57";
 
   int64_t temp_time = 0;
-  options.env->GetCurrentTime(&temp_time).PermitUncheckedError();
+  options.env->GetCurrentTime(&temp_time);
   uint64_t start_time = static_cast<uint64_t>(temp_time);
 
   Random rnd(301);
@@ -1375,7 +1375,7 @@ TEST_F(DBTest, AllMetaDataTest) {
   dbfull()->TEST_GetFilesMetaData(handles_[0], &default_files_by_level);
   dbfull()->TEST_GetFilesMetaData(handles_[1], &pikachu_files_by_level);
 
-  options.env->GetCurrentTime(&temp_time).PermitUncheckedError();
+  options.env->GetCurrentTime(&temp_time);
   uint64_t end_time = static_cast<uint64_t>(temp_time);
 
   ASSERT_EQ(all_meta.size(), 2);

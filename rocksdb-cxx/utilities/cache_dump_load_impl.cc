@@ -154,7 +154,7 @@ CacheDumperImpl::DumpOneBlockCallBack(std::string& buf) {
 
     if (s.ok()) {
       // Write it out
-      WriteBlock(type, key, buf).PermitUncheckedError();
+      WriteBlock(type, key, buf);
     }
   };
 }

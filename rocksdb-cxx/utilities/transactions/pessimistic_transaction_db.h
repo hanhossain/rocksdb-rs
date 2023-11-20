@@ -298,10 +298,6 @@ class SnapshotCreationCallback : public PostMemTableCallback {
     assert(db_impl_);
   }
 
-  ~SnapshotCreationCallback() override {
-    snapshot_creation_status_.PermitUncheckedError();
-  }
-
   Status operator()(SequenceNumber seq, bool disable_memtable) override;
 
  private:

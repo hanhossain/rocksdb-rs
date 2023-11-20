@@ -9,7 +9,6 @@
 
 #include "env/mock_env.h"
 
-#include <algorithm>
 #include <chrono>
 
 #include "env/emulated_clock.h"
@@ -28,7 +27,7 @@ namespace ROCKSDB_NAMESPACE {
 namespace {
 int64_t MaybeCurrentTime(const std::shared_ptr<SystemClock>& clock) {
   int64_t time = 1337346000;  // arbitrary fallback default
-  clock->GetCurrentTime(&time).PermitUncheckedError();
+  clock->GetCurrentTime(&time);
   return time;
 }
 
@@ -849,7 +848,7 @@ IOStatus MockFileSystem::CreateDir(const std::string& dirname,
 IOStatus MockFileSystem::CreateDirIfMissing(const std::string& dirname,
                                             const IOOptions& options,
                                             IODebugContext* dbg) {
-  CreateDir(dirname, options, dbg).PermitUncheckedError();
+  CreateDir(dirname, options, dbg);
   return IOStatus::OK();
 }
 

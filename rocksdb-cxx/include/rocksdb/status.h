@@ -16,17 +16,8 @@
 
 #pragma once
 
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-#include <stdio.h>
-#include <stdlib.h>
-#endif
-
 #include <memory>
 #include <string>
-
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-#include "port/stack_trace.h"
-#endif
 
 #include "rocksdb/slice.h"
 
@@ -39,7 +30,6 @@ class Status {
  public:
   // Create a success status.
   Status();
-  ~Status();
 
   // Copy the specified status.
   Status(const Status& s);
@@ -48,13 +38,6 @@ class Status {
   Status& operator=(Status&& s) noexcept;
   bool operator==(const Status& rhs) const;
   bool operator!=(const Status& rhs) const;
-
-  // In case of intentionally swallowing an error, user must explicitly call
-  // this function. That way we are easily able to search the code to find where
-  // error swallowing occurs.
-  void PermitUncheckedError() const;
-
-  void MustCheck() const;
 
   Code code() const;
 
@@ -68,9 +51,6 @@ class Status {
 
   // Returns a C style string indicating the message of the Status
   const char* getState() const;
-
-
-
 
   // Returns true iff the status indicates success.
   bool ok() const;
@@ -177,17 +157,12 @@ protected:
   // A nullptr state_ (which is at least the case for OK) means the extra
   // message is empty.
   std::unique_ptr<const char[]> state_;
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-  mutable bool checked_ = false;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 
   explicit Status(Code _code);
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
-
-  void MarkChecked() const;
 };
 
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);

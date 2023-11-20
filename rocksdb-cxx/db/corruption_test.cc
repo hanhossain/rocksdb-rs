@@ -200,7 +200,6 @@ class CorruptionTest : public testing::Test {
         correct++;
       }
     }
-    iter->status().PermitUncheckedError();
     delete iter;
 
     fprintf(

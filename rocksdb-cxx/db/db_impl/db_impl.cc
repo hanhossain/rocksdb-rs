@@ -452,7 +452,7 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
     // NOTE: this is needed to pass ASSERT_STATUS_CHECKED
     // in the DBSSTTest.DBWithMaxSpaceAllowedRandomized test.
     // See https://github.com/facebook/rocksdb/pull/7715#issuecomment-754947952
-    error_handler_.GetRecoveryError().PermitUncheckedError();
+    error_handler_.GetRecoveryError();
   }
 
   if (s.ok()) {
@@ -513,14 +513,12 @@ void DBImpl::CancelAllBackgroundWork(bool wait) {
     if (immutable_db_options_.atomic_flush) {
       mutex_.Unlock();
       Status s = AtomicFlushMemTables(FlushOptions(), FlushReason::kShutDown);
-      s.PermitUncheckedError();  //**TODO: What to do on error?
       mutex_.Lock();
     } else {
       for (auto cfd : versions_->GetRefedColumnFamilySet()) {
         if (!cfd->IsDropped() && cfd->initialized() && !cfd->mem()->IsEmpty()) {
           InstrumentedMutexUnlock u(&mutex_);
           Status s = FlushMemTable(cfd, FlushOptions(), FlushReason::kShutDown);
-          s.PermitUncheckedError();  //**TODO: What to do on error?
         }
       }
     }
@@ -561,7 +559,7 @@ Status DBImpl::CloseHelper() {
   // Below check is added as recovery_error_ is not checked and it causes crash
   // in DBSSTTest.DBWithMaxSpaceAllowedWithBlobFiles when space limit is
   // reached.
-  error_handler_.GetRecoveryError().PermitUncheckedError();
+  error_handler_.GetRecoveryError();
 
   // CancelAllBackgroundWork called with false means we just set the shutdown
   // marker. After this we do a variant of the waiting and unschedule work
@@ -692,7 +690,7 @@ Status DBImpl::CloseHelper() {
   mutex_.Unlock();
   if (db_lock_ != nullptr) {
     // TODO: Check for unlock error
-    env_->UnlockFile(db_lock_).PermitUncheckedError();
+    env_->UnlockFile(db_lock_);
   }
 
   ROCKS_LOG_INFO(immutable_db_options_.info_log, "Shutdown complete");
@@ -735,9 +733,6 @@ Status DBImpl::CloseHelper() {
 Status DBImpl::CloseImpl() { return CloseHelper(); }
 
 DBImpl::~DBImpl() {
-  // TODO: remove this.
-  init_logger_creation_s_.PermitUncheckedError();
-
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
   if (closed_) {
     return;
@@ -747,11 +742,9 @@ DBImpl::~DBImpl() {
 
   {
     const Status s = MaybeReleaseTimestampedSnapshotsAndCheck();
-    s.PermitUncheckedError();
   }
 
   closing_status_ = CloseImpl();
-  closing_status_.PermitUncheckedError();
 }
 
 void DBImpl::MaybeIgnoreError(Status* s) const {
@@ -1206,7 +1199,6 @@ Status DBImpl::SetOptions(
       s = persist_options_status;
     }
   } else {
-    persist_options_status.PermitUncheckedError();  // less important
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "[%s] SetOptions() failed",
                    cfd->GetName().c_str());
   }
@@ -1240,7 +1232,6 @@ Status DBImpl::SetDBOptions(
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "SetDBOptions(), input option value is not changed, "
                      "skipping updating.");
-      persist_options_status.PermitUncheckedError();
       return s;
     }
 
@@ -1354,7 +1345,6 @@ Status DBImpl::SetDBOptions(
     } else {
       // To get here, we must have had invalid options and will not attempt to
       // persist the options, which means the status is "OK/Uninitialized.
-      persist_options_status.PermitUncheckedError();
     }
   }
   ROCKS_LOG_INFO(immutable_db_options_.info_log, "SetDBOptions(), inputs:");
@@ -1579,7 +1569,7 @@ Status DBImpl::LockWAL() {
   Status s = FlushWAL(/*sync=*/false);
   if (!s.ok()) {
     // Non-OK return should not be in locked state
-    UnlockWAL().PermitUncheckedError();
+    UnlockWAL();
   }
   return s;
 }
@@ -2041,7 +2031,7 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
       // TODO: maybe handle the tracing status?
-      tracer_->Get(get_impl_options.column_family, key).PermitUncheckedError();
+      tracer_->Get(get_impl_options.column_family, key);
     }
   }
 
@@ -2342,7 +2332,7 @@ std::vector<Status> DBImpl::MultiGet(
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
       // TODO: maybe handle the tracing status?
-      tracer_->MultiGet(column_family, keys).PermitUncheckedError();
+      tracer_->MultiGet(column_family, keys);
     }
   }
 
@@ -2679,7 +2669,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
       // TODO: maybe handle the tracing status?
-      tracer_->MultiGet(num_keys, column_families, keys).PermitUncheckedError();
+      tracer_->MultiGet(num_keys, column_families, keys);
     }
   }
 
@@ -2849,7 +2839,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
       // TODO: maybe handle the tracing status?
-      tracer_->MultiGet(num_keys, column_family, keys).PermitUncheckedError();
+      tracer_->MultiGet(num_keys, column_family, keys);
     }
   }
   autovector<KeyContext, MultiGetContext::MAX_BATCH_SIZE> key_context;
@@ -3642,8 +3632,7 @@ Status DBImpl::GetTimestampedSnapshots(
 SnapshotImpl* DBImpl::GetSnapshotImpl(bool is_write_conflict_boundary,
                                       bool lock) {
   int64_t unix_time = 0;
-  immutable_db_options_.clock->GetCurrentTime(&unix_time)
-      .PermitUncheckedError();  // Ignore error
+  immutable_db_options_.clock->GetCurrentTime(&unix_time);
   SnapshotImpl* s = new SnapshotImpl;
 
   if (lock) {
@@ -3672,8 +3661,7 @@ std::pair<Status, std::shared_ptr<const SnapshotImpl>>
 DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
                                       bool lock) {
   int64_t unix_time = 0;
-  immutable_db_options_.clock->GetCurrentTime(&unix_time)
-      .PermitUncheckedError();  // Ignore error
+  immutable_db_options_.clock->GetCurrentTime(&unix_time);
   SnapshotImpl* s = new SnapshotImpl;
 
   const bool need_update_seq = (snapshot_seq != kMaxSequenceNumber);
@@ -3744,8 +3732,6 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
       }
       delete s;
       return std::make_pair(status, ret);
-    } else {
-      status.PermitUncheckedError();
     }
   }
 
@@ -4738,8 +4724,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
   // Ignore error in case directory does not exist
   soptions.fs
       ->GetChildren(dbname, io_opts, &filenames,
-                    /*IODebugContext*=*/nullptr)
-      .PermitUncheckedError();
+                    /*IODebugContext*=*/nullptr);
 
   FileLock* lock;
   const std::string lockname = LockFileName(dbname);
@@ -4798,7 +4783,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
           }
         }
         // TODO: Should we return an error if we cannot delete the directory?
-        env->DeleteDir(path).PermitUncheckedError();
+        env->DeleteDir(path);
       }
     }
 
@@ -4834,7 +4819,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
         }
       }
       // Ignore error in case dir contains other files
-      env->DeleteDir(archivedir).PermitUncheckedError();
+      env->DeleteDir(archivedir);
     }
 
     // Delete log files in the WAL dir
@@ -4851,19 +4836,19 @@ Status DestroyDB(const std::string& dbname, const Options& options,
         }
       }
       // Ignore error in case dir contains other files
-      env->DeleteDir(soptions.wal_dir).PermitUncheckedError();
+      env->DeleteDir(soptions.wal_dir);
     }
 
     // Ignore error since state is already gone
-    env->UnlockFile(lock).PermitUncheckedError();
-    env->DeleteFile(lockname).PermitUncheckedError();
+    env->UnlockFile(lock);
+    env->DeleteFile(lockname);
 
     // sst_file_manager holds a ref to the logger. Make sure the logger is
     // gone before trying to remove the directory.
     soptions.sst_file_manager.reset();
 
     // Ignore error in case dir contains other files
-    env->DeleteDir(dbname).PermitUncheckedError();
+    env->DeleteDir(dbname);
     ;
   }
   return result;
@@ -5012,9 +4997,7 @@ Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
       // if it is not impelmented. Detailed explanations can be found in
       // db/db_impl/db_impl.h
       if (!temp_s.ok()) {
-        if (temp_s.IsNotSupported()) {
-          temp_s.PermitUncheckedError();
-        } else {
+        if (!temp_s.IsNotSupported()) {
           s = temp_s;
         }
       }
@@ -5028,7 +5011,7 @@ Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
 
   if (0 == disable_delete_obsolete_files_) {
     // TODO: Should we check for errors here?
-    DeleteObsoleteOptionsFiles().PermitUncheckedError();
+    DeleteObsoleteOptionsFiles();
   }
   return s;
 }
@@ -6123,8 +6106,7 @@ void DBImpl::RecordSeqnoToTimeMapping() {
   // Get time first then sequence number, so the actual time of seqno is <=
   // unix_time recorded
   int64_t unix_time = 0;
-  immutable_db_options_.clock->GetCurrentTime(&unix_time)
-      .PermitUncheckedError();  // Ignore error
+  immutable_db_options_.clock->GetCurrentTime(&unix_time);
   SequenceNumber seqno = GetLatestSequenceNumber();
   bool appended = false;
   {

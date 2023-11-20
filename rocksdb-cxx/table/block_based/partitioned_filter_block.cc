@@ -70,7 +70,6 @@ PartitionedFilterBlockBuilder::PartitionedFilterBlockBuilder(
 }
 
 PartitionedFilterBlockBuilder::~PartitionedFilterBlockBuilder() {
-  partitioned_filters_construction_status_.PermitUncheckedError();
 }
 
 void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(

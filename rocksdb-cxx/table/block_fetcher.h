@@ -67,7 +67,6 @@ class BlockFetcher {
         memory_allocator_(memory_allocator),
         memory_allocator_compressed_(memory_allocator_compressed),
         for_compaction_(for_compaction) {
-    io_status_.PermitUncheckedError();  // TODO(AR) can we improve on this?
   }
 
   IOStatus ReadBlockContents();

@@ -50,7 +50,7 @@ class TraceAnalyzerTest : public testing::Test {
     // test_path_ = test::TmpDir() + "trace_analyzer_test";
     test_path_ = test::PerThreadDBPath("trace_analyzer_test");
     env_ = ROCKSDB_NAMESPACE::Env::Default();
-    env_->CreateDir(test_path_).PermitUncheckedError();
+    env_->CreateDir(test_path_);
     dbname_ = test_path_ + "/db";
   }
 
@@ -112,7 +112,7 @@ class TraceAnalyzerTest : public testing::Test {
     delete single_iter;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    db_->Get(ro, "g", &value).PermitUncheckedError();
+    db_->Get(ro, "g", &value);
 
     ASSERT_OK(db_->EndTrace());
 

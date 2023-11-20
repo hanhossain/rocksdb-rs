@@ -97,8 +97,7 @@ std::unique_ptr<SecondaryCacheResultHandle> CompressedSecondaryCache::Lookup(
     cache_
         ->Insert(key, /*obj=*/nullptr,
                  GetHelper(cache_options_.enable_custom_split_merge),
-                 /*charge=*/0)
-        .PermitUncheckedError();
+                 /*charge=*/0);
   } else {
     kept_in_sec_cache = true;
     cache_->Release(lru_handle, /*erase_if_last_ref=*/false);

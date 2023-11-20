@@ -28,7 +28,6 @@ class CacheActivityLogger {
     MutexLock l(&mutex_);
 
     StopLoggingInternal();
-    bg_status_.PermitUncheckedError();
   }
 
   Status StartLogging(const std::string& activity_log_file, Env* env,
@@ -180,7 +179,6 @@ class SimCacheImpl : public SimCache {
       // TODO: Check for error here?
       auto s = key_only_cache_->Insert(key, nullptr, &kNoopCacheItemHelper,
                                        charge, nullptr, priority);
-      s.PermitUncheckedError();
     } else {
       key_only_cache_->Release(h);
     }

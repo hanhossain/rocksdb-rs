@@ -4208,7 +4208,6 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
     }
-    result.GetStatus().PermitUncheckedError();
     switch (result.GetTraceType()) {
       case kTraceWrite: {
         total_latency_ += result.GetLatency();
@@ -4227,7 +4226,6 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
     }
-    result.GetStatus().PermitUncheckedError();
     switch (result.GetTraceType()) {
       case kTraceGet: {
         total_latency_ += result.GetLatency();
@@ -4246,9 +4244,6 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
     }
-    for (const Status& s : result.GetMultiStatus()) {
-      s.PermitUncheckedError();
-    }
     switch (result.GetTraceType()) {
       case kTraceMultiGet: {
         total_latency_ += result.GetLatency();
@@ -4266,7 +4261,6 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
     }
-    result.GetStatus().PermitUncheckedError();
     switch (result.GetTraceType()) {
       case kTraceIteratorSeek:
       case kTraceIteratorSeekForPrev: {
@@ -7055,7 +7049,7 @@ TEST_F(DBTest2, FileTemperatureManifestFixup) {
   std::vector<ColumnFamilyDescriptor> column_families;
   for (size_t i = 0; i < handles_.size(); ++i) {
     ColumnFamilyDescriptor cfdescriptor;
-    handles_[i]->GetDescriptor(&cfdescriptor).PermitUncheckedError();
+    handles_[i]->GetDescriptor(&cfdescriptor);
     column_families.push_back(cfdescriptor);
   }
   Close();

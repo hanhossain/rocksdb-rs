@@ -219,7 +219,7 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
       // efficient to trace here than to add latency to a phase of the log/apply
       // pipeline.
       // TODO: maybe handle the tracing status?
-      tracer_->Write(my_batch).PermitUncheckedError();
+      tracer_->Write(my_batch);
     }
   }
   if (write_options.sync && write_options.disableWAL) {
@@ -410,7 +410,7 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
       if (tracer_ && tracer_->IsWriteOrderPreserved()) {
         for (auto* writer : write_group) {
           // TODO: maybe handle the tracing status?
-          tracer_->Write(writer->batch).PermitUncheckedError();
+          tracer_->Write(writer->batch);
         }
       }
     }
@@ -695,7 +695,7 @@ Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_options,
         if (tracer_ != nullptr && tracer_->IsWriteOrderPreserved()) {
           for (auto* writer : wal_write_group) {
             // TODO: maybe handle the tracing status?
-            tracer_->Write(writer->batch).PermitUncheckedError();
+            tracer_->Write(writer->batch);
           }
         }
       }
@@ -729,7 +729,6 @@ Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_options,
     PERF_TIMER_STOP(write_pre_and_post_process_time);
 
     IOStatus io_s;
-    io_s.PermitUncheckedError();  // Allow io_s to be uninitialized
 
     if (w.status.ok() && !write_options.disableWAL) {
       PERF_TIMER_GUARD(write_wal_time);
@@ -801,7 +800,6 @@ Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_options,
   } else {
     // NOTE: the memtable_write_group is never really used,
     // so we need to set its status to pass ASSERT_STATUS_CHECKED
-    memtable_write_group.status.PermitUncheckedError();
   }
 
   if (w.state == WriteThread::STATE_PARALLEL_MEMTABLE_WRITER) {
@@ -950,7 +948,7 @@ Status DBImpl::WriteImplWALOnly(
     if (tracer_ != nullptr && tracer_->IsWriteOrderPreserved()) {
       for (auto* writer : write_group) {
         // TODO: maybe handle the tracing status?
-        tracer_->Write(writer->batch).PermitUncheckedError();
+        tracer_->Write(writer->batch);
       }
     }
   }
@@ -1137,8 +1135,7 @@ void DBImpl::MemTableInsertStatusCheck(const Status& status) {
     mutex_.Lock();
     assert(!error_handler_.IsBGWorkStopped());
     // Maybe change the return status to void?
-    error_handler_.SetBGError(status, BackgroundErrorReason::kMemTable)
-        .PermitUncheckedError();
+    error_handler_.SetBGError(status, BackgroundErrorReason::kMemTable);
     mutex_.Unlock();
   }
 }
@@ -2299,7 +2296,6 @@ Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context) {
   // It is possible that we got here without checking the value of i_os, but
   // that is okay.  If we did, it most likely means that s was already an error.
   // In any case, ignore any unchecked error for i_os here.
-  io_s.PermitUncheckedError();
   return s;
 }
 

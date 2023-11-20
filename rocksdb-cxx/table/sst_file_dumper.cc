@@ -211,7 +211,7 @@ Status SstFileDumper::DumpTable(const std::string& out_filename) {
   }
   if (!s.ok()) {
     // close the file before return error, ignore the close error if there's any
-    out_file->Close().PermitUncheckedError();
+    out_file->Close();
     return s;
   }
   return out_file->Close();

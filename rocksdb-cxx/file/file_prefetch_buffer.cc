@@ -125,7 +125,6 @@ Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
       reader->ReadAsync(req, opts, fp, &(bufs_[index].pos_),
                         &(bufs_[index].io_handle_), &(bufs_[index].del_fn_),
                         /*aligned_buf=*/nullptr);
-  req.status.PermitUncheckedError();
   if (s.ok()) {
     bufs_[index].async_read_in_progress_ = true;
   }
@@ -316,7 +315,7 @@ void FilePrefetchBuffer::PollAndUpdateBuffersIfNeeded(uint64_t offset) {
       std::vector<void*> handles;
       handles.emplace_back(bufs_[curr_].io_handle_);
       StopWatch sw(clock_, stats_, POLL_WAIT_MICROS);
-      fs_->Poll(handles, 1).PermitUncheckedError();
+      fs_->Poll(handles, 1);
     }
 
     // Reset and Release io_handle after the Poll API as request has been
@@ -652,8 +651,6 @@ bool FilePrefetchBuffer::TryReadFromCacheUntracked(
       } else {
         if (implicit_auto_readahead_) {
           if (!IsEligibleForPrefetch(offset, n)) {
-            // Ignore status as Prefetch is not called.
-            s.PermitUncheckedError();
             return false;
           }
         }
@@ -747,8 +744,6 @@ bool FilePrefetchBuffer::TryReadFromCacheAsyncUntracked(
 
       if (implicit_auto_readahead_) {
         if (!IsEligibleForPrefetch(offset, n)) {
-          // Ignore status as Prefetch is not called.
-          s.PermitUncheckedError();
           return false;
         }
       }

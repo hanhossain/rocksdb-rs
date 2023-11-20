@@ -799,7 +799,6 @@ struct ObsoleteFileInfo {
     if (file_metadata_cache_res_mgr) {
       Status s = file_metadata_cache_res_mgr->UpdateCacheReservation(
           metadata->ApproximateMemoryUsage(), false /* increase */);
-      s.PermitUncheckedError();
     }
     delete metadata;
     metadata = nullptr;

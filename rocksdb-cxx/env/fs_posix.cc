@@ -743,8 +743,7 @@ class PosixFileSystem : public FileSystem {
     int64_t current_time = 0;
     // Ignore status code as the time is only used for error message.
     SystemClock::Default()
-        ->GetCurrentTime(&current_time)
-        .PermitUncheckedError();
+        ->GetCurrentTime(&current_time);
     lhi.acquire_time = current_time;
     lhi.acquiring_thread = Env::Default()->GetThreadID();
 

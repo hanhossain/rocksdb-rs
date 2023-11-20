@@ -428,7 +428,6 @@ Status MergeHelper::MergeUntil(InternalIterator* iter,
           // original_key before
           pik_status =
               ParseInternalKey(keys_.back(), &orig_ikey, allow_data_in_errors);
-          pik_status.PermitUncheckedError();
           assert(pik_status.ok());
         }
         if (filter == CompactionFilter::Decision::kKeep) {

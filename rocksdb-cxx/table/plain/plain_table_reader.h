@@ -117,7 +117,6 @@ class PlainTableReader : public TableReader {
                    EncodingType encoding_type, uint64_t file_size,
                    const TableProperties* table_properties,
                    const SliceTransform* prefix_extractor);
-  virtual ~PlainTableReader();
 
  protected:
   // Check bloom filter to see whether it might contain this prefix.

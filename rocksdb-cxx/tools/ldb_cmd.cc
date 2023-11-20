@@ -513,7 +513,6 @@ void LDBCommand::CloseDB() {
       delete pair.second;
     }
     Status s = db_->Close();
-    s.PermitUncheckedError();
     delete db_;
     db_ = nullptr;
   }

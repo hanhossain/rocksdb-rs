@@ -265,8 +265,7 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
   {
     // Same priority, no-op.
     env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM,
-                                     CpuPriority::kNormal)
-        .PermitUncheckedError();
+                                     CpuPriority::kNormal);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, CpuPriority::kNormal);
     ASSERT_EQ(to_priority, CpuPriority::kNormal);
@@ -274,8 +273,7 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Higher priority, no-op.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kHigh)
-        .PermitUncheckedError();
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kHigh);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, CpuPriority::kNormal);
     ASSERT_EQ(to_priority, CpuPriority::kNormal);
@@ -283,8 +281,7 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Lower priority from kNormal -> kLow.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kLow)
-        .PermitUncheckedError();
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kLow);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, CpuPriority::kNormal);
     ASSERT_EQ(to_priority, CpuPriority::kLow);
@@ -292,8 +289,7 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Lower priority from kLow -> kIdle.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kIdle)
-        .PermitUncheckedError();
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kIdle);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, CpuPriority::kLow);
     ASSERT_EQ(to_priority, CpuPriority::kIdle);
@@ -301,8 +297,7 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Lower priority from kNormal -> kIdle for another pool.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::HIGH, CpuPriority::kIdle)
-        .PermitUncheckedError();
+    env_->LowerThreadPoolCPUPriority(Env::Priority::HIGH, CpuPriority::kIdle);
     RunTask(Env::Priority::HIGH);
     ASSERT_EQ(from_priority, CpuPriority::kNormal);
     ASSERT_EQ(to_priority, CpuPriority::kIdle);
@@ -1684,8 +1679,6 @@ TEST_F(EnvPosixTest, MultiReadIOUringError) {
   Status s = file->MultiRead(reqs.data(), reqs.size());
   if (io_uring_wait_cqe_called) {
     ASSERT_NOK(s);
-  } else {
-    s.PermitUncheckedError();
   }
 
   SyncPoint::GetInstance()->DisableProcessing();
@@ -1726,8 +1719,6 @@ TEST_F(EnvPosixTest, MultiReadIOUringError2) {
   Status s = file->MultiRead(reqs.data(), reqs.size());
   if (io_uring_submit_and_wait_called) {
     ASSERT_NOK(s);
-  } else {
-    s.PermitUncheckedError();
   }
 
   SyncPoint::GetInstance()->DisableProcessing();
@@ -1992,7 +1983,7 @@ TEST_P(EnvPosixTestWithParam, ConsistentChildrenAttributes) {
 
   std::string data;
   std::string test_base_dir = test::PerThreadDBPath(env_, "env_test_chr_attr");
-  env_->CreateDir(test_base_dir).PermitUncheckedError();
+  env_->CreateDir(test_base_dir);
   for (int i = 0; i < kNumChildren; ++i) {
     const std::string path = test_base_dir + "/testfile_" + std::to_string(i);
     std::unique_ptr<WritableFile> file;
@@ -2200,7 +2191,7 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
 TEST_P(EnvPosixTestWithParam, PosixRandomRWFile) {
   const std::string path = test::PerThreadDBPath(env_, "random_rw_file");
 
-  env_->DeleteFile(path).PermitUncheckedError();
+  env_->DeleteFile(path);
 
   std::unique_ptr<RandomRWFile> file;
 
@@ -2327,7 +2318,7 @@ class RandomRWFileWithMirrorString {
 
 TEST_P(EnvPosixTestWithParam, PosixRandomRWFileRandomized) {
   const std::string path = test::PerThreadDBPath(env_, "random_rw_file_rand");
-  env_->DeleteFile(path).PermitUncheckedError();
+  env_->DeleteFile(path);
 
   std::unique_ptr<RandomRWFile> file;
 
@@ -2382,7 +2373,6 @@ class TestEnv : public EnvWrapper {
     ~TestLogger() override {
       if (!closed_) {
         Status s = CloseHelper();
-        s.PermitUncheckedError();
       }
     }
     void Logv(const char* /*format*/, va_list /*ap*/) override {}

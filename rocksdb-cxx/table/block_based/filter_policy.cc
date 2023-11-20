@@ -93,7 +93,6 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
         Status s = cache_res_mgr_->MakeCacheReservation(
             kUint64tHashEntryCacheResBucketSize * sizeof(hash),
             &hash_entries_info_.cache_res_bucket_handles.back());
-        s.PermitUncheckedError();
       }
     }
   }
@@ -341,7 +340,6 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
     if (cache_res_mgr_) {
       Status s = cache_res_mgr_->MakeCacheReservation(
           len_with_metadata * sizeof(char), &final_filter_cache_res_handle);
-      s.PermitUncheckedError();
     }
 
     assert(mutable_buf);
@@ -720,7 +718,6 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     if (cache_res_mgr_) {
       Status s = cache_res_mgr_->MakeCacheReservation(
           len_with_metadata * sizeof(char), &final_filter_cache_res_handle);
-      s.PermitUncheckedError();
     }
 
     SolnType soln(mutable_buf.get(), len_with_metadata);

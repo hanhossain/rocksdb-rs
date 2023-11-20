@@ -156,7 +156,7 @@ TestFSWritableFile::TestFSWritableFile(const std::string& fname,
 
 TestFSWritableFile::~TestFSWritableFile() {
   if (writable_file_opened_) {
-    Close(IOOptions(), nullptr).PermitUncheckedError();
+    Close(IOOptions(), nullptr);
   }
 }
 
@@ -167,7 +167,7 @@ IOStatus TestFSWritableFile::Append(const Slice& data, const IOOptions& options,
     return fs_->GetError();
   }
   if (target_->use_direct_io()) {
-    target_->Append(data, options, dbg).PermitUncheckedError();
+    target_->Append(data, options, dbg);
   } else {
     state_.buffer_.append(data.data(), data.size());
     state_.pos_ += data.size();
@@ -202,7 +202,7 @@ IOStatus TestFSWritableFile::Append(
     return IOStatus::Corruption(msg);
   }
   if (target_->use_direct_io()) {
-    target_->Append(data, options, dbg).PermitUncheckedError();
+    target_->Append(data, options, dbg);
   } else {
     state_.buffer_.append(data.data(), data.size());
     state_.pos_ += data.size();
@@ -260,7 +260,7 @@ IOStatus TestFSWritableFile::Close(const IOOptions& options,
   if (io_s.ok()) {
     state_.buffer_.resize(0);
     // Ignore sync errors
-    target_->Sync(options, dbg).PermitUncheckedError();
+    target_->Sync(options, dbg);
     io_s = target_->Close(options, dbg);
   }
   if (io_s.ok()) {
@@ -297,7 +297,7 @@ IOStatus TestFSWritableFile::Sync(const IOOptions& options,
   IOStatus io_s = target_->Append(state_.buffer_, options, dbg);
   state_.buffer_.resize(0);
   // Ignore sync errors
-  target_->Sync(options, dbg).PermitUncheckedError();
+  target_->Sync(options, dbg);
   state_.pos_at_last_sync_ = state_.pos_;
   fs_->WritableFileSynced(state_);
   return io_s;
@@ -325,7 +325,7 @@ IOStatus TestFSWritableFile::RangeSync(uint64_t offset, uint64_t nbytes,
   io_s = target_->Append(buf_to_sync, options, dbg);
   state_.buffer_ = state_.buffer_.substr(num_to_sync);
   // Ignore sync errors
-  target_->RangeSync(offset, nbytes, options, dbg).PermitUncheckedError();
+  target_->RangeSync(offset, nbytes, options, dbg);
   state_.pos_at_last_sync_ = offset + num_to_sync;
   fs_->WritableFileSynced(state_);
   return io_s;
@@ -340,7 +340,7 @@ TestFSRandomRWFile::TestFSRandomRWFile(const std::string& /*fname*/,
 
 TestFSRandomRWFile::~TestFSRandomRWFile() {
   if (file_opened_) {
-    Close(IOOptions(), nullptr).PermitUncheckedError();
+    Close(IOOptions(), nullptr);
   }
 }
 
@@ -758,7 +758,7 @@ IOStatus FaultInjectionTestFS::RenameFile(const std::string& s,
     uint64_t file_size;
     if (target()->GetFileSize(t, IOOptions(), &file_size, nullptr).ok() &&
         file_size < 1024) {
-      ReadFileToString(target(), t, &previous_contents).PermitUncheckedError();
+      ReadFileToString(target(), t, &previous_contents);
     }
   }
   IOStatus io_s = FileSystemWrapper::RenameFile(s, t, options, dbg);

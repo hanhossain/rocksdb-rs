@@ -642,8 +642,6 @@ bool WriteThread::CompleteParallelMemTableWriter(Writer* w) {
   }
   // else we're the last parallel worker and should perform exit duties.
   w->status = write_group->status;
-  // Callers of this function must ensure w->status is checked.
-  write_group->status.PermitUncheckedError();
   return true;
 }
 
@@ -667,12 +665,6 @@ void WriteThread::ExitAsBatchGroupLeader(WriteGroup& write_group,
   Writer* leader = write_group.leader;
   Writer* last_writer = write_group.last_writer;
   assert(leader->link_older == nullptr);
-
-  // If status is non-ok already, then write_group.status won't have the chance
-  // of being propagated to caller.
-  if (!status.ok()) {
-    write_group.status.PermitUncheckedError();
-  }
 
   // Propagate memtable write error to the whole group.
   if (status.ok() && !write_group.status.ok()) {

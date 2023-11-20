@@ -60,11 +60,6 @@ class ErrorHandlerFSListener : public EventListener {
         override_bg_error_(false),
         file_count_(0),
         fault_fs_(nullptr) {}
-  ~ErrorHandlerFSListener() {
-    file_creation_error_.PermitUncheckedError();
-    bg_error_.PermitUncheckedError();
-    new_bg_error_.PermitUncheckedError();
-  }
 
   void OnTableFileCreationStarted(
       const TableFileCreationBriefInfo& /*ti*/) override {
@@ -81,7 +76,6 @@ class ErrorHandlerFSListener : public EventListener {
 
   void OnErrorRecoveryBegin(BackgroundErrorReason /*reason*/, Status bg_error,
                             bool* auto_recovery) override {
-    bg_error.PermitUncheckedError();
     if (*auto_recovery && no_auto_recovery_) {
       *auto_recovery = false;
     }
@@ -1249,7 +1243,7 @@ TEST_F(DBErrorHandlingFSTest, FailRecoverFlushError) {
   // We should be able to shutdown the database while auto recovery is going
   // on in the background
   Close();
-  DestroyDB(dbname_, options).PermitUncheckedError();
+  DestroyDB(dbname_, options);
 }
 
 TEST_F(DBErrorHandlingFSTest, WALWriteError) {

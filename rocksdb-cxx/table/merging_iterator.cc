@@ -132,7 +132,6 @@ class MergingIterator : public InternalIterator {
     for (auto& child : children_) {
       child.iter.DeleteIter(is_arena_mode_);
     }
-    status_.PermitUncheckedError();
   }
 
   bool Valid() const override { return current_ != nullptr && status_.ok(); }
@@ -753,7 +752,7 @@ void MergingIterator::SeekImpl(const Slice& target, size_t starting_level,
   ParsedInternalKey pik;
   if (!range_tombstone_iters_.empty()) {
     // pik is only used in InsertRangeTombstoneToMinHeap().
-    ParseInternalKey(target, &pik, false).PermitUncheckedError();
+    ParseInternalKey(target, &pik, false);
   }
 
   // TODO: perhaps we could save some upheap cost by add all child iters first
@@ -1004,7 +1003,7 @@ bool MergingIterator::SkipNextDeleted() {
   assert(current->type == HeapItem::Type::ITERATOR);
   // Point key case: check active_ for range tombstone coverage.
   ParsedInternalKey pik;
-  ParseInternalKey(current->iter.key(), &pik, false).PermitUncheckedError();
+  ParseInternalKey(current->iter.key(), &pik, false);
   if (!active_.empty()) {
     auto i = *active_.begin();
     if (i < current->level) {
@@ -1061,7 +1060,7 @@ void MergingIterator::SeekForPrevImpl(const Slice& target,
   InitMaxHeap();
   ParsedInternalKey pik;
   if (!range_tombstone_iters_.empty()) {
-    ParseInternalKey(target, &pik, false).PermitUncheckedError();
+    ParseInternalKey(target, &pik, false);
   }
   for (size_t level = 0; level < starting_level; ++level) {
     PERF_TIMER_GUARD(seek_max_heap_time);
@@ -1217,7 +1216,7 @@ bool MergingIterator::SkipPrevDeleted() {
   assert(current->type == HeapItem::Type::ITERATOR);
   // Point key case: check active_ for range tombstone coverage.
   ParsedInternalKey pik;
-  ParseInternalKey(current->iter.key(), &pik, false).PermitUncheckedError();
+  ParseInternalKey(current->iter.key(), &pik, false);
   if (!active_.empty()) {
     auto i = *active_.begin();
     if (i < current->level) {
@@ -1329,8 +1328,7 @@ void MergingIterator::SwitchToForward() {
   // tombstone iter is !Valid(). Need to reseek here to make it valid again.
   if (!range_tombstone_iters_.empty()) {
     ParsedInternalKey pik;
-    ParseInternalKey(target, &pik, false /* log_err_key */)
-        .PermitUncheckedError();
+    ParseInternalKey(target, &pik, false /* log_err_key */);
     for (size_t i = 0; i < range_tombstone_iters_.size(); ++i) {
       auto iter = range_tombstone_iters_[i];
       if (iter) {
@@ -1375,8 +1373,7 @@ void MergingIterator::SwitchToBackward() {
   }
 
   ParsedInternalKey pik;
-  ParseInternalKey(target, &pik, false /* log_err_key */)
-      .PermitUncheckedError();
+  ParseInternalKey(target, &pik, false /* log_err_key */);
   for (size_t i = 0; i < range_tombstone_iters_.size(); ++i) {
     auto iter = range_tombstone_iters_[i];
     if (iter) {

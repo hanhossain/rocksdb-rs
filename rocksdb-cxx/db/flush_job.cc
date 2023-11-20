@@ -532,9 +532,7 @@ Status FlushJob::MemPurge() {
 
     // Check status and propagate
     // potential error status from c_iter
-    if (!s.ok()) {
-      c_iter.status().PermitUncheckedError();
-    } else if (!c_iter.status().ok()) {
+    if (s.ok() && !c_iter.status().ok()) {
       s = c_iter.status();
     }
 
@@ -952,7 +950,6 @@ Status FlushJob::WriteLevel0Table() {
                      &memtable_payload_bytes, &memtable_garbage_bytes);
       // TODO: Cleanup io_status in BuildTable and table builders
       assert(!s.ok() || io_s.ok());
-      io_s.PermitUncheckedError();
       if (num_input_entries != total_num_entries && s.ok()) {
         std::string msg = "Expected " + std::to_string(total_num_entries) +
                           " entries in memtables, but read " +

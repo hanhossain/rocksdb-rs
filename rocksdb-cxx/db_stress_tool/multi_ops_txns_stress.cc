@@ -594,7 +594,7 @@ Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
     }
     auto& key_gen = key_gen_for_a_[thread->tid];
     key_gen->UndoAllocation(new_a);
-    RollbackTxn(txn).PermitUncheckedError();
+    RollbackTxn(txn);
   });
 
   ReadOptions ropts;
@@ -719,7 +719,7 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
     }
     auto& key_gen = key_gen_for_c_[thread->tid];
     key_gen->UndoAllocation(new_c);
-    RollbackTxn(txn).PermitUncheckedError();
+    RollbackTxn(txn);
   });
 
   // TODO (yanqin) try SetSnapshotOnNextOperation(). We currently need to take
@@ -908,7 +908,7 @@ Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(ThreadState* thread,
     } else {
       thread->stats.AddErrors(1);
     }
-    RollbackTxn(txn).PermitUncheckedError();
+    RollbackTxn(txn);
   });
   ReadOptions ropts;
   ropts.rate_limiter_priority =
@@ -984,7 +984,7 @@ Status MultiOpsTxnsStressTest::PointLookupTxn(ThreadState* thread,
     } else {
       thread->stats.AddErrors(1);
     }
-    RollbackTxn(txn).PermitUncheckedError();
+    RollbackTxn(txn);
   });
 
   std::shared_ptr<const Snapshot> snapshot;
@@ -1028,7 +1028,7 @@ Status MultiOpsTxnsStressTest::RangeScanTxn(ThreadState* thread,
       return;
     }
     thread->stats.AddErrors(1);
-    RollbackTxn(txn).PermitUncheckedError();
+    RollbackTxn(txn);
   });
 
   std::shared_ptr<const Snapshot> snapshot;

@@ -357,7 +357,7 @@ TEST_P(EnvMoreTestWithParam, GetChildren) {
   ASSERT_EQ(3U, children.size());
   ASSERT_EQ(3U, childAttr.size());
   for (auto each : children) {
-    env_->DeleteDir(test_dir_ + "/" + each).PermitUncheckedError();
+    env_->DeleteDir(test_dir_ + "/" + each);
   }  // necessary for default POSIX env
 
   // non-exist directory returns IOError

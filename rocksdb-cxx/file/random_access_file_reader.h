@@ -59,7 +59,6 @@ class RandomAccessFileReader {
     for (auto& listener : listeners_) {
       listener->OnFileReadFinish(info);
     }
-    info.status.PermitUncheckedError();
   }
 
   void NotifyOnIOError(const IOStatus& io_status, FileOperationType operation,
@@ -73,7 +72,6 @@ class RandomAccessFileReader {
     for (auto& listener : listeners_) {
       listener->OnIOError(io_error_info);
     }
-    io_status.PermitUncheckedError();
   }
 
 

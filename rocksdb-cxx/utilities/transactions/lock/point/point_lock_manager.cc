@@ -591,7 +591,7 @@ void PointLockManager::UnLock(PessimisticTransaction* txn,
   assert(lock_map->lock_map_stripes_.size() > stripe_num);
   LockMapStripe* stripe = lock_map->lock_map_stripes_.at(stripe_num);
 
-  stripe->stripe_mutex->Lock().PermitUncheckedError();
+  stripe->stripe_mutex->Lock();
   UnLockKey(txn, key, stripe, lock_map, env);
   stripe->stripe_mutex->UnLock();
 
@@ -633,7 +633,7 @@ void PointLockManager::UnLock(PessimisticTransaction* txn,
       assert(lock_map->lock_map_stripes_.size() > stripe_num);
       LockMapStripe* stripe = lock_map->lock_map_stripes_.at(stripe_num);
 
-      stripe->stripe_mutex->Lock().PermitUncheckedError();
+      stripe->stripe_mutex->Lock();
 
       for (const std::string* key : stripe_keys) {
         UnLockKey(txn, *key, stripe, lock_map, env);
@@ -664,7 +664,7 @@ PointLockManager::PointLockStatus PointLockManager::GetPointLockStatus() {
     const auto& stripes = lock_maps_[i]->lock_map_stripes_;
     // Iterate and lock all stripes in ascending order.
     for (const auto& j : stripes) {
-      j->stripe_mutex->Lock().PermitUncheckedError();
+      j->stripe_mutex->Lock();
       for (const auto& it : j->keys) {
         struct KeyLockInfo info;
         info.exclusive = it.second.exclusive;

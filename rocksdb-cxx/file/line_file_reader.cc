@@ -31,8 +31,6 @@ bool LineFileReader::ReadLine(std::string* out,
                               Env::IOPriority rate_limiter_priority) {
   assert(out);
   if (!io_status_.ok()) {
-    // Status should be checked (or permit unchecked) any time we return false.
-    io_status_.MustCheck();
     return false;
   }
   out->clear();
@@ -48,7 +46,6 @@ bool LineFileReader::ReadLine(std::string* out,
       return true;
     }
     if (at_eof_) {
-      io_status_.MustCheck();
       return false;
     }
     // else flush and reload buffer
@@ -58,7 +55,6 @@ bool LineFileReader::ReadLine(std::string* out,
         sfr_.Read(buf_.size(), &result, buf_.data(), rate_limiter_priority);
     IOSTATS_ADD(bytes_read, result.size());
     if (!io_status_.ok()) {
-      io_status_.MustCheck();
       return false;
     }
     if (result.size() != buf_.size()) {

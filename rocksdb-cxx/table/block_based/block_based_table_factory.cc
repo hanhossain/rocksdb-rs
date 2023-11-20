@@ -512,14 +512,12 @@ Status CheckCacheOptionCompatibility(const BlockBasedTableOptions& bbto) {
   static char kPersistentCacheMarker{'p'};
   if (bbto.block_cache) {
     bbto.block_cache
-        ->Insert(sentinel_key.AsSlice(), &kRegularBlockCacheMarker, &kHelper, 1)
-        .PermitUncheckedError();
+        ->Insert(sentinel_key.AsSlice(), &kRegularBlockCacheMarker, &kHelper, 1);
   }
   if (bbto.persistent_cache) {
     // Note: persistent cache copies the data, not keeping the pointer
     bbto.persistent_cache
-        ->Insert(sentinel_key.AsSlice(), &kPersistentCacheMarker, 1)
-        .PermitUncheckedError();
+        ->Insert(sentinel_key.AsSlice(), &kPersistentCacheMarker, 1);
   }
   // If we get something different from what we inserted, that indicates
   // dangerously overlapping key spaces.
@@ -542,8 +540,7 @@ Status CheckCacheOptionCompatibility(const BlockBasedTableOptions& bbto) {
   if (bbto.persistent_cache) {
     std::unique_ptr<char[]> data;
     size_t size = 0;
-    bbto.persistent_cache->Lookup(sentinel_key.AsSlice(), &data, &size)
-        .PermitUncheckedError();
+    bbto.persistent_cache->Lookup(sentinel_key.AsSlice(), &data, &size);
     if (data && size > 0) {
       if (data[0] == kRegularBlockCacheMarker.c) {
         return Status_InvalidArgument(

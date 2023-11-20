@@ -373,7 +373,6 @@ struct CompactionFileInfo {
 };
 
 struct SubcompactionJobInfo {
-  ~SubcompactionJobInfo() { status.PermitUncheckedError(); }
   // the id of the column family where the compaction happened.
   uint32_t cf_id;
   // the name of the column family where the compaction happened.
@@ -409,7 +408,6 @@ struct SubcompactionJobInfo {
 };
 
 struct CompactionJobInfo {
-  ~CompactionJobInfo() { status.PermitUncheckedError(); }
   // the id of the column family where the compaction happened.
   uint32_t cf_id;
   // the name of the column family where the compaction happened.
@@ -790,7 +788,6 @@ class EventListener : public Customizable {
   // means normal writes to the database can be issued and the user can
   // initiate any further recovery actions needed
   virtual void OnErrorRecoveryCompleted(Status old_bg_error) {
-    old_bg_error.PermitUncheckedError();
   }
 
   // A callback function for RocksDB which will be called once the recovery

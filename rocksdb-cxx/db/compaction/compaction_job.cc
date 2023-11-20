@@ -296,8 +296,7 @@ void CompactionJob::Prepare() {
         Status s =
             cfd->current()->GetTableProperties(read_options, &tp, fmd, nullptr);
         if (s.ok()) {
-          seqno_time_mapping_.Add(tp->seqno_to_time_mapping)
-              .PermitUncheckedError();
+          seqno_time_mapping_.Add(tp->seqno_to_time_mapping);
           seqno_time_mapping_.Add(fmd->fd.smallest_seqno,
                                   fmd->oldest_ancester_time);
         }
@@ -1004,8 +1003,6 @@ void CompactionJob::NotifyOnSubcompactionBegin(
   for (const auto& listener : db_options_.listeners) {
     listener->OnSubcompactionBegin(info);
   }
-  info.status.PermitUncheckedError();
-
 }
 
 void CompactionJob::NotifyOnSubcompactionCompleted(
@@ -1406,16 +1403,6 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
       SetPerfLevel(prev_perf_level);
     }
   }
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-  if (!status.ok()) {
-    if (c_iter) {
-      c_iter->status().PermitUncheckedError();
-    }
-    if (input) {
-      input->status().PermitUncheckedError();
-    }
-  }
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
 
   blob_counter.reset();
   clip.reset();
@@ -1546,9 +1533,6 @@ Status CompactionJob::FinishCompactionOutputFile(
   }
   if (sub_compact->io_status.ok()) {
     sub_compact->io_status = io_s;
-    // Since this error is really a copy of the
-    // "normal" status, it does not also need to be checked
-    sub_compact->io_status.PermitUncheckedError();
   }
 
   TableProperties tp;
@@ -1785,9 +1769,6 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
   s = io_s;
   if (sub_compact->io_status.ok()) {
     sub_compact->io_status = io_s;
-    // Since this error is really a copy of the io_s that is checked below as s,
-    // it does not also need to be checked.
-    sub_compact->io_status.PermitUncheckedError();
   }
   if (!s.ok()) {
     ROCKS_LOG_ERROR(

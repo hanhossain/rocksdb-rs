@@ -34,44 +34,22 @@ Status::Status()
       scope_(0),
       state_(nullptr) {}
 
-Status::~Status() {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    if (!checked_) {
-        fprintf(stderr, "Failed to check Status %p\n", this);
-        port::PrintStack();
-        std::abort();
-    }
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-}
-
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
 
-void Status::PermitUncheckedError() const { MarkChecked(); }
-
-void Status::MustCheck() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    checked_ = false;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-}
-
 Code Status::code() const {
-    MarkChecked();
     return code_;
 }
 
 SubCode Status::subcode() const {
-    MarkChecked();
     return subcode_;
 }
 
 Severity Status::severity() const {
-    MarkChecked();
     return sev_;
 }
 
 const char* Status::getState() const {
-    MarkChecked();
     return state_.get();
 }
 
@@ -240,128 +218,103 @@ Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2) {
 }
 
 bool Status::ok() const {
-    MarkChecked();
     return code() == Code::kOk;
 }
 
 bool Status::IsOkOverwritten() const {
-    MarkChecked();
     return code() == Code::kOk && subcode() == SubCode::kOverwritten;
 }
 
 bool Status::IsNotFound() const {
-    MarkChecked();
     return code() == Code::kNotFound;
 }
 
 bool Status::IsCorruption() const {
-    MarkChecked();
     return code() == Code::kCorruption;
 }
 
 bool Status::IsNotSupported() const {
-    MarkChecked();
     return code() == Code::kNotSupported;
 }
 
 bool Status::IsInvalidArgument() const {
-    MarkChecked();
     return code() == Code::kInvalidArgument;
 }
 
 bool Status::IsIOError() const {
-    MarkChecked();
     return code() == Code::kIOError;
 }
 
 bool Status::IsMergeInProgress() const {
-    MarkChecked();
     return code() == Code::kMergeInProgress;
 }
 
 bool Status::IsIncomplete() const {
-    MarkChecked();
     return code() == Code::kIncomplete;
 }
 
 bool Status::IsShutdownInProgress() const {
-    MarkChecked();
     return code() == Code::kShutdownInProgress;
 }
 
 bool Status::IsTimedOut() const {
-    MarkChecked();
     return code() == Code::kTimedOut;
 }
 
 bool Status::IsAborted() const {
-    MarkChecked();
     return code() == Code::kAborted;
 }
 
 bool Status::IsLockLimit() const {
-    MarkChecked();
     return code() == Code::kAborted && subcode() == SubCode::kLockLimit;
 }
 
 bool Status::IsBusy() const {
-    MarkChecked();
     return code() == Code::kBusy;
 }
 
 bool Status::IsDeadlock() const {
-    MarkChecked();
     return code() == Code::kBusy && subcode() == SubCode::kDeadlock;
 }
 
 bool Status::IsExpired() const {
-    MarkChecked();
     return code() == Code::kExpired;
 }
 
 bool Status::IsTryAgain() const {
-    MarkChecked();
     return code() == Code::kTryAgain;
 }
 
 bool Status::IsCompactionTooLarge() const {
-    MarkChecked();
     return code() == Code::kCompactionTooLarge;
 }
 
 bool Status::IsColumnFamilyDropped() const {
-    MarkChecked();
     return code() == Code::kColumnFamilyDropped;
 }
 
 bool Status::IsNoSpace() const {
-    MarkChecked();
     return (code() == Code::kIOError) && (subcode() == SubCode::kNoSpace);
 }
 
 bool Status::IsMemoryLimit() const {
-    MarkChecked();
     return (code() == Code::kAborted) && (subcode() == SubCode::kMemoryLimit);
 }
 
 bool Status::IsPathNotFound() const {
-    MarkChecked();
     return (code() == Code::kIOError || code() == Code::kNotFound) &&
            (subcode() == SubCode::kPathNotFound);
 }
 
 bool Status::IsManualCompactionPaused() const {
-    MarkChecked();
     return (code() == Code::kIncomplete) && (subcode() == SubCode::kManualCompactionPaused);
 }
 
 bool Status::IsTxnNotPrepared() const {
-    MarkChecked();
     return (code() == Code::kInvalidArgument) && (subcode() == SubCode::kTxnNotPrepared);
 }
 
 bool Status::IsIOFenced() const {
-    MarkChecked();
     return (code() == Code::kIOError) && (subcode() == SubCode::kIOFenced);
 }
 
@@ -386,12 +339,6 @@ Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
 Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : Status(_code, SubCode::kNone, msg, msg2) {}
 
-inline void Status::MarkChecked() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-    checked_ = true;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
-}
-
 Status::Status(const Status& s)
         : code_(s.code_),
           subcode_(s.subcode_),
@@ -399,7 +346,6 @@ Status::Status(const Status& s)
           retryable_(s.retryable_),
           data_loss_(s.data_loss_),
           scope_(s.scope_) {
-    s.MarkChecked();
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
@@ -410,14 +356,11 @@ Status::Status(const Status& s, Severity sev)
           retryable_(s.retryable_),
           data_loss_(s.data_loss_),
           scope_(s.scope_) {
-    s.MarkChecked();
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status& Status::operator=(const Status& s) {
     if (this != &s) {
-        s.MarkChecked();
-        MustCheck();
         code_ = s.code_;
         subcode_ = s.subcode_;
         sev_ = s.sev_;
@@ -430,14 +373,11 @@ Status& Status::operator=(const Status& s) {
 }
 
 Status::Status(Status&& s) noexcept : Status() {
-    s.MarkChecked();
     *this = std::move(s);
 }
 
 Status& Status::operator=(Status&& s) noexcept {
     if (this != &s) {
-        s.MarkChecked();
-        MustCheck();
         code_ = std::move(s.code_);
         s.code_ = Code::kOk;
         subcode_ = std::move(s.subcode_);
@@ -456,14 +396,10 @@ Status& Status::operator=(Status&& s) noexcept {
 }
 
 bool Status::operator==(const Status& rhs) const {
-    MarkChecked();
-    rhs.MarkChecked();
     return (code_ == rhs.code_);
 }
 
 bool Status::operator!=(const Status& rhs) const {
-    MarkChecked();
-    rhs.MarkChecked();
     return !(*this == rhs);
 }
 
@@ -529,9 +465,6 @@ Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
 }
 
 std::string Status::ToString() const {
-#ifdef ROCKSDB_ASSERT_STATUS_CHECKED
-  checked_ = true;
-#endif  // ROCKSDB_ASSERT_STATUS_CHECKED
   const char* type = nullptr;
   switch (code_) {
     case Code::kOk:

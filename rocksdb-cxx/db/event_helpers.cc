@@ -60,7 +60,6 @@ void EventHelpers::NotifyOnBackgroundError(
   db_mutex->Unlock();
   for (auto& listener : listeners) {
     listener->OnBackgroundError(reason, bg_error);
-    bg_error->PermitUncheckedError();
     if (*auto_recovery) {
       listener->OnErrorRecoveryBegin(reason, *bg_error, auto_recovery);
     }
@@ -184,7 +183,6 @@ void EventHelpers::LogAndNotifyTableFileCreationFinished(
   for (auto& listener : listeners) {
     listener->OnTableFileCreated(info);
   }
-  info.status.PermitUncheckedError();
 }
 
 void EventHelpers::LogAndNotifyTableFileDeletion(
@@ -217,7 +215,6 @@ void EventHelpers::LogAndNotifyTableFileDeletion(
   for (auto& listener : listeners) {
     listener->OnTableFileDeleted(info);
   }
-  info.status.PermitUncheckedError();
 }
 
 void EventHelpers::NotifyOnErrorRecoveryEnd(
@@ -234,8 +231,6 @@ void EventHelpers::NotifyOnErrorRecoveryEnd(
       info.new_bg_error = new_bg_error;
       listener->OnErrorRecoveryCompleted(old_bg_error);
       listener->OnErrorRecoveryEnd(info);
-      info.old_bg_error.PermitUncheckedError();
-      info.new_bg_error.PermitUncheckedError();
     }
     db_mutex->Lock();
   }
@@ -288,7 +283,6 @@ void EventHelpers::LogAndNotifyBlobFileCreationFinished(
   for (const auto& listener : listeners) {
     listener->OnBlobFileCreated(info);
   }
-  info.status.PermitUncheckedError();
 }
 
 void EventHelpers::LogAndNotifyBlobFileDeletion(
@@ -317,7 +311,6 @@ void EventHelpers::LogAndNotifyBlobFileDeletion(
   for (const auto& listener : listeners) {
     listener->OnBlobFileDeleted(info);
   }
-  info.status.PermitUncheckedError();
 }
 
 }  // namespace ROCKSDB_NAMESPACE

@@ -146,7 +146,7 @@ Status Configurable::ConfigureOptions(
       // reset
       copy.depth = ConfigOptions::kDepthDetailed;
       copy.delimiter = "; ";
-      GetOptionString(copy, &curr_opts).PermitUncheckedError();
+      GetOptionString(copy, &curr_opts);
     }
 
     s = ConfigurableHelper::ConfigureOptions(copy, *this, opts_map, unused);
@@ -160,7 +160,7 @@ Status Configurable::ConfigureOptions(
     reset.invoke_prepare_options = true;
     reset.ignore_unsupported_options = true;
     // There are some options to reset from this current error
-    ConfigureFromString(reset, curr_opts).PermitUncheckedError();
+    ConfigureFromString(reset, curr_opts);
   }
   return s;
 }
@@ -325,14 +325,10 @@ Status ConfigurableHelper::ConfigureSomeOptions(
     }
   }
   if (config_options.ignore_unknown_options) {
-    if (!result.ok()) result.PermitUncheckedError();
-    if (!notsup.ok()) notsup.PermitUncheckedError();
     return Status_OK();
   } else if (!result.ok()) {
-    if (!notsup.ok()) notsup.PermitUncheckedError();
     return result;
   } else if (config_options.ignore_unsupported_options) {
-    if (!notsup.ok()) notsup.PermitUncheckedError();
     return Status_OK();
   } else {
     return notsup;

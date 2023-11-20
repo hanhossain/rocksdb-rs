@@ -21,8 +21,7 @@ void PersistentCacheHelper::InsertSerialized(
   CacheKey key =
       BlockBasedTable::GetCacheKey(cache_options.base_cache_key, handle);
 
-  cache_options.persistent_cache->Insert(key.AsSlice(), data, size)
-      .PermitUncheckedError();
+  cache_options.persistent_cache->Insert(key.AsSlice(), data, size);
 }
 
 void PersistentCacheHelper::InsertUncompressed(
@@ -38,8 +37,7 @@ void PersistentCacheHelper::InsertUncompressed(
       BlockBasedTable::GetCacheKey(cache_options.base_cache_key, handle);
 
   cache_options.persistent_cache
-      ->Insert(key.AsSlice(), contents.data.data(), contents.data.size())
-      .PermitUncheckedError();
+      ->Insert(key.AsSlice(), contents.data.data(), contents.data.size());
   ;
 }
 
