@@ -79,12 +79,12 @@ inline bool BlockFetcher::TryGetFromPrefetchBuffer() {
       bool read_from_prefetch_buffer = false;
       if (read_options_.async_io && !for_compaction_) {
         read_from_prefetch_buffer = prefetch_buffer_->TryReadFromCacheAsync(
-            opts, file_, handle_.offset(), block_size_with_trailer_, &slice_,
-            &io_s, read_options_.rate_limiter_priority);
+                opts, file_, handle_.offset(), block_size_with_trailer_, &slice_,
+                reinterpret_cast<Status *>(&io_s), read_options_.rate_limiter_priority);
       } else {
         read_from_prefetch_buffer = prefetch_buffer_->TryReadFromCache(
-            opts, file_, handle_.offset(), block_size_with_trailer_, &slice_,
-            &io_s, read_options_.rate_limiter_priority, for_compaction_);
+                opts, file_, handle_.offset(), block_size_with_trailer_, &slice_,
+                reinterpret_cast<Status *>(&io_s), read_options_.rate_limiter_priority, for_compaction_);
       }
       if (read_from_prefetch_buffer) {
         ProcessTrailerIfPresent();

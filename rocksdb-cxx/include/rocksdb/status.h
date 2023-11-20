@@ -146,8 +146,6 @@ class Status {
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
-
-protected:
   Code code_;
   SubCode subcode_;
   Severity sev_;
@@ -166,6 +164,7 @@ protected:
 };
 
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
+
     // Return a success status.
     Status Status_OK();
 
@@ -256,7 +255,4 @@ protected:
     Status Status_TxnNotPrepared();
     Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
     std::unique_ptr<const char[]> Status_CopyState(const char* s);
-
-
-
 }  // namespace ROCKSDB_NAMESPACE
