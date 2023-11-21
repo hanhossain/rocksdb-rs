@@ -18,10 +18,10 @@
 #include "port/port.h"
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/lib.h"
+#include "rocksdb-rs-cxx/status.h"
 #include "rust/cxx.h"
 #else
-#include "rocksdb-rs/src/lib.rs.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rust/cxx.h"
 #endif
 

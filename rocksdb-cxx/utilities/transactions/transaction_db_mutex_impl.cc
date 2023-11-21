@@ -14,9 +14,9 @@
 #include "rocksdb/utilities/transaction_db_mutex.h"
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/lib.h"
+#include "rocksdb-rs-cxx/status.h"
 #else
-#include "rocksdb-rs/src/lib.rs.h"
+#include "rocksdb-rs/src/status.rs.h"
 #endif
 
 namespace ROCKSDB_NAMESPACE {
