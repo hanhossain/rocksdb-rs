@@ -1,4 +1,4 @@
-use crate::ffi::{Code, CommonRustData};
+use crate::ffi::{Code, CommonRustData, SubCode};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
@@ -23,13 +23,12 @@ pub mod ffi {
         fn hello_common(data: &CommonRustData) -> String;
 
         #[cxx_name = "RsStatus_new"]
-        fn rs_status_new() -> Box<RsStatus>;
-
-        #[cxx_name = "RsStatus_new"]
-        fn rs_status_new1(code: Code) -> Box<RsStatus>;
+        fn rs_status_new(code: Code, subcode: SubCode) -> Box<RsStatus>;
 
         fn code(&self) -> Code;
         fn set_code(&mut self, code: Code);
+        fn subcode(&self) -> SubCode;
+        fn set_subcode(&mut self, subcode: SubCode);
     }
 
     struct CommonRustData {
@@ -88,6 +87,7 @@ pub mod ffi {
 
 pub struct RsStatus {
     code: Code,
+    subcode: SubCode,
 }
 
 impl RsStatus {
@@ -98,14 +98,18 @@ impl RsStatus {
     pub fn set_code(&mut self, code: Code) {
         self.code = code;
     }
+
+    pub fn subcode(&self) -> SubCode {
+        self.subcode
+    }
+
+    pub fn set_subcode(&mut self, subcode: SubCode) {
+        self.subcode = subcode;
+    }
 }
 
-pub fn rs_status_new() -> Box<RsStatus> {
-    Box::new(RsStatus { code: Code::kOk })
-}
-
-pub fn rs_status_new1(code: Code) -> Box<RsStatus> {
-    Box::new(RsStatus { code })
+pub fn rs_status_new(code: Code, subcode: SubCode) -> Box<RsStatus> {
+    Box::new(RsStatus { code, subcode })
 }
 
 pub fn hello_common(data: &CommonRustData) -> String {

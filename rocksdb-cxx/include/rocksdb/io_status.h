@@ -178,7 +178,7 @@ inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
                           const Slice& msg2) {
     status_ = Status(_code, _subcode, false, false, kIOErrorScopeFileSystem);
     assert(status_.rs_status_->code() != Code::kOk);
-    assert(status_.subcode_ != SubCode::kMaxSubCode);
+    assert(status_.rs_status_->subcode() != SubCode::kMaxSubCode);
     const size_t len1 = msg.size();
     const size_t len2 = msg2.size();
     const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -194,7 +194,7 @@ inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
 }
 
 inline IOStatus::IOStatus(const IOStatus& s) {
-    status_ = Status(s.status_.rs_status_->code(), s.status_.subcode_);
+    status_ = Status(s.status_.rs_status_->code(), s.status_.rs_status_->subcode());
     status_.retryable_ = s.status_.retryable_;
     status_.data_loss_ = s.status_.data_loss_;
     status_.scope_ = s.status_.scope_;
@@ -206,7 +206,7 @@ inline IOStatus& IOStatus::operator=(const IOStatus& s) {
   // and the common case where both s and *this are ok.
   if (this != &s) {
     status_.rs_status_->set_code(s.status_.rs_status_->code());
-    status_.subcode_ = s.status_.subcode_;
+    status_.rs_status_->set_subcode(s.status_.rs_status_->subcode());
     status_.retryable_ = s.status_.retryable_;
     status_.data_loss_ = s.status_.data_loss_;
     status_.scope_ = s.status_.scope_;
@@ -223,8 +223,8 @@ inline IOStatus& IOStatus::operator=(IOStatus&& s) noexcept {
   if (this != &s) {
     status_.rs_status_->set_code(s.status_.rs_status_->code());
     s.status_.rs_status_->set_code(Code::kOk);
-    status_.subcode_ = s.status_.subcode_;
-    s.status_.subcode_ = SubCode::kNone;
+    status_.rs_status_->set_subcode(s.status_.rs_status_->subcode());
+    s.status_.rs_status_->set_subcode(SubCode::kNone);
     status_.retryable_ = s.status_.retryable_;
     status_.data_loss_ = s.status_.data_loss_;
     status_.scope_ = s.status_.scope_;

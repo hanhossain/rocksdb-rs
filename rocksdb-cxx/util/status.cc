@@ -28,13 +28,12 @@
 namespace ROCKSDB_NAMESPACE {
 // Create a success status.
 Status::Status()
-    : subcode_(SubCode::kNone),
-      sev_(Severity::kNoError),
+    : sev_(Severity::kNoError),
       retryable_(false),
       data_loss_(false),
       scope_(0),
       state_(nullptr),
-      rs_status_(RsStatus_new()){}
+      rs_status_(RsStatus_new(Code::kOk, SubCode::kNone)){}
 
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
@@ -44,7 +43,7 @@ Code Status::code() const {
 }
 
 SubCode Status::subcode() const {
-    return subcode_;
+    return rs_status_->subcode();
 }
 
 Severity Status::severity() const {
@@ -321,52 +320,48 @@ bool Status::IsIOFenced() const {
 }
 
 Status::Status(Code _code, SubCode _subcode)
-    : subcode_(_subcode),
-    sev_(Severity::kNoError),
+    : sev_(Severity::kNoError),
     retryable_(false),
     data_loss_(false),
     scope_(0),
-    rs_status_(RsStatus_new(_code)) {}
+    rs_status_(RsStatus_new(_code, _subcode)) {}
 
 Status::Status(Code _code)
     : Status(_code, SubCode::kNone) {}
 
 Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
     unsigned char scope)
-    : subcode_(_subcode),
-    sev_(Severity::kNoError),
+    : sev_(Severity::kNoError),
     retryable_(retryable),
     data_loss_(data_loss),
     scope_(scope),
-    rs_status_(RsStatus_new(_code)) {}
+    rs_status_(RsStatus_new(_code, _subcode)) {}
 
 Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : Status(_code, SubCode::kNone, msg, msg2) {}
 
 Status::Status(const Status& s)
-        : subcode_(s.subcode_),
-          sev_(s.sev_),
+        : sev_(s.sev_),
           retryable_(s.retryable_),
           data_loss_(s.data_loss_),
           scope_(s.scope_),
-          rs_status_(RsStatus_new(s.rs_status_->code())) {
+          rs_status_(RsStatus_new(s.rs_status_->code(), s.rs_status_->subcode())) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status::Status(const Status& s, Severity sev)
-        : subcode_(s.subcode_),
-          sev_(sev),
+        : sev_(sev),
           retryable_(s.retryable_),
           data_loss_(s.data_loss_),
           scope_(s.scope_),
-          rs_status_(RsStatus_new(s.rs_status_->code())) {
+          rs_status_(RsStatus_new(s.rs_status_->code(), s.rs_status_->subcode())) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status& Status::operator=(const Status& s) {
     if (this != &s) {
         rs_status_->set_code(s.rs_status_->code());
-        subcode_ = s.subcode_;
+        rs_status_->set_subcode(s.rs_status_->subcode());
         sev_ = s.sev_;
         retryable_ = s.retryable_;
         data_loss_ = s.data_loss_;
@@ -384,8 +379,8 @@ Status& Status::operator=(Status&& s) noexcept {
     if (this != &s) {
         rs_status_->set_code(s.rs_status_->code());
         s.rs_status_->set_code(Code::kOk);
-        subcode_ = std::move(s.subcode_);
-        s.subcode_ = SubCode::kNone;
+        rs_status_->set_subcode(s.rs_status_->subcode());
+        s.rs_status_->set_subcode(SubCode::kNone);
         sev_ = std::move(s.sev_);
         s.sev_ = Severity::kNoError;
         retryable_ = std::move(s.retryable_);
@@ -437,13 +432,12 @@ static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
 
 Status::Status(Code _code, SubCode _subcode, const Slice& msg,
                const Slice& msg2, Severity sev)
-    : subcode_(_subcode),
-      sev_(sev),
+    : sev_(sev),
       retryable_(false),
       data_loss_(false),
       scope_(0),
-      rs_status_(RsStatus_new(_code)) {
-  assert(subcode_ != SubCode::kMaxSubCode);
+      rs_status_(RsStatus_new(_code, _subcode)) {
+  assert(rs_status_->subcode() != SubCode::kMaxSubCode);
   const size_t len1 = msg.size();
   const size_t len2 = msg2.size();
   const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -532,14 +526,14 @@ std::string Status::ToString() const {
     type = tmp;
   }
   std::string result(type);
-  if (subcode_ != SubCode::kNone) {
-    uint32_t index = static_cast<int32_t>(subcode_);
+  if (rs_status_->subcode() != SubCode::kNone) {
+    uint32_t index = static_cast<int32_t>(rs_status_->subcode());
     assert(sizeof(msgs) / sizeof(msgs[0]) > index);
     result.append(msgs[index]);
   }
 
   if (state_ != nullptr) {
-    if (subcode_ != SubCode::kNone) {
+    if (rs_status_->subcode() != SubCode::kNone) {
       result.append(": ");
     }
     result.append(state_.get());
