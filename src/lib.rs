@@ -25,9 +25,13 @@ pub mod ffi {
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new(code: Code, subcode: SubCode) -> Box<RsStatus>;
 
+        #[cxx_name = "Code"]
         fn code(&self) -> Code;
+        #[cxx_name = "SetCode"]
         fn set_code(&mut self, code: Code);
+        #[cxx_name = "SubCode"]
         fn subcode(&self) -> SubCode;
+        #[cxx_name = "SetSubCode"]
         fn set_subcode(&mut self, subcode: SubCode);
     }
 
