@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 #include "rocksdb/slice.h"
@@ -190,7 +191,7 @@ inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
         memcpy(result + len1 + 2, msg2.data(), len2);
     }
     result[size] = '\0';  // null terminator for C style string
-    status_.state_.reset(result);
+    status_.rs_status_.state = std::make_unique<std::string>(result);
 }
 
 inline IOStatus::IOStatus(const IOStatus& s) {
@@ -200,7 +201,7 @@ inline IOStatus::IOStatus(const IOStatus& s) {
         s.status_.rs_status_.retryable,
         s.status_.rs_status_.data_loss,
         s.status_.rs_status_.scope);
-    status_.state_ = (s.status_.state_ == nullptr) ? nullptr : Status_CopyState(s.status_.state_.get());
+    status_.rs_status_.state = s.status_.rs_status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.rs_status_.state);
 }
 
 inline IOStatus& IOStatus::operator=(const IOStatus& s) {
@@ -212,7 +213,7 @@ inline IOStatus& IOStatus::operator=(const IOStatus& s) {
     status_.rs_status_.retryable = s.status_.rs_status_.retryable;
     status_.rs_status_.data_loss = s.status_.rs_status_.data_loss;
     status_.rs_status_.scope = s.status_.rs_status_.scope;
-    status_.state_ = (s.status_.state_ == nullptr) ? nullptr : Status_CopyState(s.status_.state_.get());
+      status_.rs_status_.state = s.status_.rs_status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.rs_status_.state);
   }
   return *this;
 }
@@ -231,7 +232,7 @@ inline IOStatus& IOStatus::operator=(IOStatus&& s) noexcept {
     status_.rs_status_.data_loss = s.status_.rs_status_.data_loss;
     status_.rs_status_.scope = s.status_.rs_status_.scope;
     s.status_.rs_status_.scope = kIOErrorScopeFileSystem;
-    status_.state_ = std::move(s.status_.state_);
+    status_.rs_status_.state = std::move(s.status_.rs_status_.state);
   }
   return *this;
 }

@@ -1,4 +1,5 @@
 use crate::status::ffi::{Code, RsStatus, Severity, SubCode};
+use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
@@ -11,6 +12,7 @@ pub mod ffi {
             retryable: bool,
             data_loss: bool,
             scope: u8,
+            state: UniquePtr<CxxString>,
         ) -> RsStatus;
     }
 
@@ -70,6 +72,7 @@ pub mod ffi {
         retryable: bool,
         data_loss: bool,
         scope: u8,
+        state: UniquePtr<CxxString>,
     }
 }
 
@@ -80,6 +83,7 @@ pub fn rs_status_new(
     retryable: bool,
     data_loss: bool,
     scope: u8,
+    state: UniquePtr<CxxString>,
 ) -> RsStatus {
     RsStatus {
         code,
@@ -88,5 +92,6 @@ pub fn rs_status_new(
         retryable,
         data_loss,
         scope,
+        state,
     }
 }

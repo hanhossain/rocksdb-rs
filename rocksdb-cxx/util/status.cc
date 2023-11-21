@@ -14,6 +14,7 @@
 #include <string.h>
 #endif
 #include <cstring>
+#include <memory>
 
 #include "port/port.h"
 
@@ -28,14 +29,14 @@
 namespace ROCKSDB_NAMESPACE {
 // Create a success status.
 Status::Status()
-    : state_(nullptr),
-      rs_status_(RsStatus_new(
+    : rs_status_(RsStatus_new(
               Code::kOk,
               SubCode::kNone,
               Severity::kNoError,
               false,
               false,
-              0)) {}
+              0,
+              nullptr)) {}
 
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
@@ -53,7 +54,7 @@ Severity Status::severity() const {
 }
 
 const char* Status::getState() const {
-    return state_.get();
+    return rs_status_.state == nullptr ? nullptr : rs_status_.state->c_str();
 }
 
 Status Status_OK() { return Status(); }
@@ -328,7 +329,8 @@ Status::Status(Code _code, SubCode _subcode)
             Severity::kNoError,
             false,
             false,
-            0)) {}
+            0,
+            nullptr)) {}
 
 Status::Status(Code _code)
     : Status(_code, SubCode::kNone) {}
@@ -341,7 +343,8 @@ Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
             Severity::kNoError,
             retryable,
             data_loss,
-            scope)) {}
+            scope,
+            nullptr)) {}
 
 Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : Status(_code, SubCode::kNone, msg, msg2) {}
@@ -353,8 +356,9 @@ Status::Status(const Status& s)
                   s.rs_status_.severity,
                   s.rs_status_.retryable,
                   s.rs_status_.data_loss,
-                  s.rs_status_.scope)) {
-    state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
+                  s.rs_status_.scope,
+                  nullptr)) {
+    rs_status_.state = s.rs_status_.state == nullptr ? nullptr : Status_CopyState(s.rs_status_.state->c_str());
 }
 
 Status::Status(const Status& s, Severity sev)
@@ -364,8 +368,9 @@ Status::Status(const Status& s, Severity sev)
                   sev,
                   s.rs_status_.retryable,
                   s.rs_status_.data_loss,
-                  s.rs_status_.scope)) {
-    state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
+                  s.rs_status_.scope,
+                  nullptr)) {
+    rs_status_.state = s.rs_status_.state == nullptr ? nullptr : Status_CopyState(s.rs_status_.state->c_str());
 }
 
 Status& Status::operator=(const Status& s) {
@@ -376,7 +381,7 @@ Status& Status::operator=(const Status& s) {
         rs_status_.retryable = s.rs_status_.retryable;
         rs_status_.data_loss = s.rs_status_.data_loss;
         rs_status_.scope = s.rs_status_.scope;
-        state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
+        rs_status_.state = s.rs_status_.state == nullptr ? nullptr : Status_CopyState(s.rs_status_.state->c_str());
     }
     return *this;
 }
@@ -399,7 +404,7 @@ Status& Status::operator=(Status&& s) noexcept {
         s.rs_status_.data_loss = false;
         rs_status_.scope = s.rs_status_.scope;
         s.rs_status_.scope = 0;
-        state_ = std::move(s.state_);
+        rs_status_.state = std::move(s.rs_status_.state);
     }
     return *this;
 }
@@ -412,11 +417,9 @@ bool Status::operator!=(const Status& rhs) const {
     return !(*this == rhs);
 }
 
-std::unique_ptr<const char[]> Status_CopyState(const char* s) {
-  const size_t cch = std::strlen(s) + 1;  // +1 for the null terminator
-  char* rv = new char[cch];
-  std::strncpy(rv, s, cch);
-  return std::unique_ptr<const char[]>(rv);
+std::unique_ptr<std::string> Status_CopyState(const std::string& s) {
+    auto value = std::make_unique<std::string>(s);
+    return value;
 }
 
 static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
@@ -442,7 +445,7 @@ static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
 
 Status::Status(Code _code, SubCode _subcode, const Slice& msg,
                const Slice& msg2, Severity sev)
-    : rs_status_(RsStatus_new(_code, _subcode, sev, false, false, 0)) {
+    : rs_status_(RsStatus_new(_code, _subcode, sev, false, false, 0, nullptr)) {
   assert(rs_status_.subcode != SubCode::kMaxSubCode);
   const size_t len1 = msg.size();
   const size_t len2 = msg2.size();
@@ -455,7 +458,7 @@ Status::Status(Code _code, SubCode _subcode, const Slice& msg,
     memcpy(result + len1 + 2, msg2.data(), len2);
   }
   result[size] = '\0';  // null terminator for C style string
-  state_.reset(result);
+  rs_status_.state = std::make_unique<std::string>(result);
 }
 
 Status::Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2)
@@ -538,11 +541,11 @@ std::string Status::ToString() const {
     result.append(msgs[index]);
   }
 
-  if (state_ != nullptr) {
+  if (rs_status_.state != nullptr) {
     if (rs_status_.subcode != SubCode::kNone) {
       result.append(": ");
     }
-    result.append(state_.get());
+    result.append(*rs_status_.state);
   }
   return result;
 }

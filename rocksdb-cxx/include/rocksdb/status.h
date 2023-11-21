@@ -148,9 +148,6 @@ class Status {
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
-  // A nullptr state_ (which is at least the case for OK) means the extra
-  // message is empty.
-  std::unique_ptr<const char[]> state_;
   RsStatus rs_status_;
 
   explicit Status(Code _code);
@@ -251,5 +248,6 @@ class Status {
 
     Status Status_TxnNotPrepared();
     Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
-    std::unique_ptr<const char[]> Status_CopyState(const char* s);
+
+    std::unique_ptr<std::string> Status_CopyState(const std::string& s);
 }  // namespace ROCKSDB_NAMESPACE
