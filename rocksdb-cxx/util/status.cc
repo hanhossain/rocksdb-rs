@@ -28,11 +28,14 @@
 namespace ROCKSDB_NAMESPACE {
 // Create a success status.
 Status::Status()
-    : retryable_(false),
-      data_loss_(false),
-      scope_(0),
-      state_(nullptr),
-      rs_status_(RsStatus_new(Code::kOk, SubCode::kNone, Severity::kNoError)){}
+    : state_(nullptr),
+      rs_status_(RsStatus_new(
+              Code::kOk,
+              SubCode::kNone,
+              Severity::kNoError,
+              false,
+              false,
+              0)){}
 
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
@@ -319,37 +322,49 @@ bool Status::IsIOFenced() const {
 }
 
 Status::Status(Code _code, SubCode _subcode)
-    : retryable_(false),
-    data_loss_(false),
-    scope_(0),
-    rs_status_(RsStatus_new(_code, _subcode, Severity::kNoError)) {}
+    : rs_status_(RsStatus_new(
+            _code,
+            _subcode,
+            Severity::kNoError,
+            false,
+            false,
+            0)) {}
 
 Status::Status(Code _code)
     : Status(_code, SubCode::kNone) {}
 
 Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
     unsigned char scope)
-    : retryable_(retryable),
-    data_loss_(data_loss),
-    scope_(scope),
-    rs_status_(RsStatus_new(_code, _subcode, Severity::kNoError)) {}
+    : rs_status_(RsStatus_new(
+            _code,
+            _subcode,
+            Severity::kNoError,
+            retryable,
+            data_loss,
+            scope)) {}
 
 Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : Status(_code, SubCode::kNone, msg, msg2) {}
 
 Status::Status(const Status& s)
-        : retryable_(s.retryable_),
-          data_loss_(s.data_loss_),
-          scope_(s.scope_),
-          rs_status_(RsStatus_new(s.rs_status_->Code(), s.rs_status_->SubCode(), s.rs_status_->Severity())) {
+        : rs_status_(RsStatus_new(
+                  s.rs_status_->Code(),
+                  s.rs_status_->SubCode(),
+                  s.rs_status_->Severity(),
+                  s.rs_status_->Retryable(),
+                  s.rs_status_->DataLoss(),
+                  s.rs_status_->Scope())) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status::Status(const Status& s, Severity sev)
-        : retryable_(s.retryable_),
-          data_loss_(s.data_loss_),
-          scope_(s.scope_),
-          rs_status_(RsStatus_new(s.rs_status_->Code(), s.rs_status_->SubCode(), sev)) {
+        : rs_status_(RsStatus_new(
+                  s.rs_status_->Code(),
+                  s.rs_status_->SubCode(),
+                  sev,
+                  s.rs_status_->Retryable(),
+                  s.rs_status_->DataLoss(),
+                  s.rs_status_->Scope())) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
@@ -358,9 +373,9 @@ Status& Status::operator=(const Status& s) {
         rs_status_->SetCode(s.rs_status_->Code());
         rs_status_->SetSubCode(s.rs_status_->SubCode());
         rs_status_->SetSeverity(s.rs_status_->Severity());
-        retryable_ = s.retryable_;
-        data_loss_ = s.data_loss_;
-        scope_ = s.scope_;
+        rs_status_->SetRetryable(s.rs_status_->Retryable());
+        rs_status_->SetDataLoss(s.rs_status_->DataLoss());
+        rs_status_->SetScope(s.rs_status_->Scope());
         state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
     }
     return *this;
@@ -378,12 +393,12 @@ Status& Status::operator=(Status&& s) noexcept {
         s.rs_status_->SetSubCode(SubCode::kNone);
         rs_status_->SetSeverity(s.rs_status_->Severity());
         s.rs_status_->SetSeverity(Severity::kNoError);
-        retryable_ = std::move(s.retryable_);
-        s.retryable_ = false;
-        data_loss_ = std::move(s.data_loss_);
-        s.data_loss_ = false;
-        scope_ = std::move(s.scope_);
-        s.scope_ = 0;
+        rs_status_->SetRetryable(s.rs_status_->Retryable());
+        s.rs_status_->SetRetryable(false);
+        rs_status_->SetDataLoss(s.rs_status_->DataLoss());
+        s.rs_status_->SetDataLoss(false);
+        rs_status_->SetScope(s.rs_status_->Scope());
+        s.rs_status_->SetScope(0);
         state_ = std::move(s.state_);
     }
     return *this;
@@ -427,10 +442,7 @@ static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
 
 Status::Status(Code _code, SubCode _subcode, const Slice& msg,
                const Slice& msg2, Severity sev)
-    : retryable_(false),
-      data_loss_(false),
-      scope_(0),
-      rs_status_(RsStatus_new(_code, _subcode, sev)) {
+    : rs_status_(RsStatus_new(_code, _subcode, sev, false, false, 0)) {
   assert(rs_status_->SubCode() != SubCode::kMaxSubCode);
   const size_t len1 = msg.size();
   const size_t len2 = msg2.size();

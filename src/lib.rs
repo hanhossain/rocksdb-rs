@@ -23,7 +23,14 @@ pub mod ffi {
         fn hello_common(data: &CommonRustData) -> String;
 
         #[cxx_name = "RsStatus_new"]
-        fn rs_status_new(code: Code, subcode: SubCode, severity: Severity) -> Box<RsStatus>;
+        fn rs_status_new(
+            code: Code,
+            subcode: SubCode,
+            severity: Severity,
+            retryable: bool,
+            data_loss: bool,
+            scope: u8,
+        ) -> Box<RsStatus>;
 
         #[cxx_name = "Code"]
         fn code(&self) -> Code;
@@ -37,6 +44,18 @@ pub mod ffi {
         fn severity(&self) -> Severity;
         #[cxx_name = "SetSeverity"]
         fn set_severity(&mut self, severity: Severity);
+        #[cxx_name = "Retryable"]
+        fn retryable(&self) -> bool;
+        #[cxx_name = "SetRetryable"]
+        fn set_retryable(&mut self, retryable: bool);
+        #[cxx_name = "DataLoss"]
+        fn data_loss(&self) -> bool;
+        #[cxx_name = "SetDataLoss"]
+        fn set_data_loss(&mut self, data_loss: bool);
+        #[cxx_name = "Scope"]
+        fn scope(&self) -> u8;
+        #[cxx_name = "SetScope"]
+        fn set_scope(&mut self, scope: u8);
     }
 
     struct CommonRustData {
@@ -97,6 +116,9 @@ pub struct RsStatus {
     code: Code,
     subcode: SubCode,
     severity: Severity,
+    retryable: bool,
+    data_loss: bool,
+    scope: u8,
 }
 
 impl RsStatus {
@@ -123,13 +145,47 @@ impl RsStatus {
     pub fn set_severity(&mut self, severity: Severity) {
         self.severity = severity;
     }
+
+    pub fn retryable(&self) -> bool {
+        self.retryable
+    }
+
+    pub fn set_retryable(&mut self, retryable: bool) {
+        self.retryable = retryable;
+    }
+
+    pub fn data_loss(&self) -> bool {
+        self.data_loss
+    }
+
+    pub fn set_data_loss(&mut self, data_loss: bool) {
+        self.data_loss = data_loss;
+    }
+
+    pub fn scope(&self) -> u8 {
+        self.scope
+    }
+
+    pub fn set_scope(&mut self, scope: u8) {
+        self.scope = scope;
+    }
 }
 
-pub fn rs_status_new(code: Code, subcode: SubCode, severity: Severity) -> Box<RsStatus> {
+pub fn rs_status_new(
+    code: Code,
+    subcode: SubCode,
+    severity: Severity,
+    retryable: bool,
+    data_loss: bool,
+    scope: u8,
+) -> Box<RsStatus> {
     Box::new(RsStatus {
         code,
         subcode,
         severity,
+        retryable,
+        data_loss,
+        scope,
     })
 }
 

@@ -51,15 +51,15 @@ class IOStatus {
   bool operator==(const IOStatus& rhs) const;
   bool operator!=(const IOStatus& rhs) const;
 
-  void SetRetryable(bool retryable) { status_.retryable_ = retryable; }
-  void SetDataLoss(bool data_loss) { status_.data_loss_ = data_loss; }
+  void SetRetryable(bool retryable) { status_.rs_status_->SetRetryable(retryable); }
+  void SetDataLoss(bool data_loss) { status_.rs_status_->SetDataLoss(data_loss); }
   void SetScope(IOErrorScope scope) {
-      status_.scope_ = static_cast<unsigned char>(scope);
+      status_.rs_status_->SetScope(static_cast<unsigned char>(scope));
   }
 
-  bool GetRetryable() const { return status_.retryable_; }
-  bool GetDataLoss() const { return status_.data_loss_; }
-  IOErrorScope GetScope() const { return static_cast<IOErrorScope>(status_.scope_); }
+  bool GetRetryable() const { return status_.rs_status_->Retryable(); }
+  bool GetDataLoss() const { return status_.rs_status_->DataLoss(); }
+  IOErrorScope GetScope() const { return static_cast<IOErrorScope>(status_.rs_status_->Scope()); }
 
     bool ok() const { return status_.ok(); }
     bool IsNotFound() const { return status_.IsNotFound(); }
@@ -194,10 +194,12 @@ inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
 }
 
 inline IOStatus::IOStatus(const IOStatus& s) {
-    status_ = Status(s.status_.rs_status_->Code(), s.status_.rs_status_->SubCode());
-    status_.retryable_ = s.status_.retryable_;
-    status_.data_loss_ = s.status_.data_loss_;
-    status_.scope_ = s.status_.scope_;
+    status_ = Status(
+        s.status_.rs_status_->Code(),
+        s.status_.rs_status_->SubCode(),
+        s.status_.rs_status_->Retryable(),
+        s.status_.rs_status_->DataLoss(),
+        s.status_.rs_status_->Scope());
     status_.state_ = (s.status_.state_ == nullptr) ? nullptr : Status_CopyState(s.status_.state_.get());
 }
 
@@ -207,9 +209,9 @@ inline IOStatus& IOStatus::operator=(const IOStatus& s) {
   if (this != &s) {
     status_.rs_status_->SetCode(s.status_.rs_status_->Code());
     status_.rs_status_->SetSubCode(s.status_.rs_status_->SubCode());
-    status_.retryable_ = s.status_.retryable_;
-    status_.data_loss_ = s.status_.data_loss_;
-    status_.scope_ = s.status_.scope_;
+    status_.rs_status_->SetRetryable(s.status_.rs_status_->Retryable());
+    status_.rs_status_->SetDataLoss(s.status_.rs_status_->DataLoss());
+    status_.rs_status_->SetScope(s.status_.rs_status_->Scope());
     status_.state_ = (s.status_.state_ == nullptr) ? nullptr : Status_CopyState(s.status_.state_.get());
   }
   return *this;
@@ -225,10 +227,10 @@ inline IOStatus& IOStatus::operator=(IOStatus&& s) noexcept {
     s.status_.rs_status_->SetCode(Code::kOk);
     status_.rs_status_->SetSubCode(s.status_.rs_status_->SubCode());
     s.status_.rs_status_->SetSubCode(SubCode::kNone);
-    status_.retryable_ = s.status_.retryable_;
-    status_.data_loss_ = s.status_.data_loss_;
-    status_.scope_ = s.status_.scope_;
-    s.status_.scope_ = kIOErrorScopeFileSystem;
+    status_.rs_status_->SetRetryable(s.status_.rs_status_->Retryable());
+    status_.rs_status_->SetDataLoss(s.status_.rs_status_->DataLoss());
+    status_.rs_status_->SetScope(s.status_.rs_status_->Scope());
+    s.status_.rs_status_->SetScope(kIOErrorScopeFileSystem);
     status_.state_ = std::move(s.status_.state_);
   }
   return *this;

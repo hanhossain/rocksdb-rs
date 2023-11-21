@@ -149,9 +149,6 @@ class Status {
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
-  bool retryable_;
-  bool data_loss_;
-  unsigned char scope_;
   // A nullptr state_ (which is at least the case for OK) means the extra
   // message is empty.
   std::unique_ptr<const char[]> state_;
