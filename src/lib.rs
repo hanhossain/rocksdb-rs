@@ -1,4 +1,4 @@
-use crate::ffi::CommonRustData;
+use crate::ffi::{Code, CommonRustData};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
@@ -18,7 +18,18 @@ pub mod ffi {
     }
 
     extern "Rust" {
+        type RsStatus;
+
         fn hello_common(data: &CommonRustData) -> String;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new() -> Box<RsStatus>;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new1(code: Code) -> Box<RsStatus>;
+
+        fn code(&self) -> Code;
+        fn set_code(&mut self, code: Code);
     }
 
     struct CommonRustData {
@@ -73,6 +84,28 @@ pub mod ffi {
         kUnrecoverableError = 4,
         kMaxSeverity,
     }
+}
+
+pub struct RsStatus {
+    code: Code,
+}
+
+impl RsStatus {
+    pub fn code(&self) -> Code {
+        self.code
+    }
+
+    pub fn set_code(&mut self, code: Code) {
+        self.code = code;
+    }
+}
+
+pub fn rs_status_new() -> Box<RsStatus> {
+    Box::new(RsStatus { code: Code::kOk })
+}
+
+pub fn rs_status_new1(code: Code) -> Box<RsStatus> {
+    Box::new(RsStatus { code })
 }
 
 pub fn hello_common(data: &CommonRustData) -> String {

@@ -19,26 +19,28 @@
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/lib.h"
+#include "rust/cxx.h"
 #else
 #include "rocksdb-rs/src/lib.rs.h"
+#include "rust/cxx.h"
 #endif
 
 namespace ROCKSDB_NAMESPACE {
 // Create a success status.
 Status::Status()
-    : code_(Code::kOk),
-      subcode_(SubCode::kNone),
+    : subcode_(SubCode::kNone),
       sev_(Severity::kNoError),
       retryable_(false),
       data_loss_(false),
       scope_(0),
-      state_(nullptr) {}
+      state_(nullptr),
+      rs_status_(RsStatus_new()){}
 
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
 
 Code Status::code() const {
-    return code_;
+    return rs_status_->code();
 }
 
 SubCode Status::subcode() const {
@@ -319,49 +321,51 @@ bool Status::IsIOFenced() const {
 }
 
 Status::Status(Code _code, SubCode _subcode)
-    : code_(_code),
-    subcode_(_subcode),
+    : subcode_(_subcode),
     sev_(Severity::kNoError),
     retryable_(false),
     data_loss_(false),
-    scope_(0) {}
+    scope_(0),
+    rs_status_(RsStatus_new(_code)) {}
+
 Status::Status(Code _code)
     : Status(_code, SubCode::kNone) {}
+
 Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
     unsigned char scope)
-    : code_(_code),
-    subcode_(_subcode),
+    : subcode_(_subcode),
     sev_(Severity::kNoError),
     retryable_(retryable),
     data_loss_(data_loss),
-    scope_(scope) {}
+    scope_(scope),
+    rs_status_(RsStatus_new(_code)) {}
 
 Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : Status(_code, SubCode::kNone, msg, msg2) {}
 
 Status::Status(const Status& s)
-        : code_(s.code_),
-          subcode_(s.subcode_),
+        : subcode_(s.subcode_),
           sev_(s.sev_),
           retryable_(s.retryable_),
           data_loss_(s.data_loss_),
-          scope_(s.scope_) {
+          scope_(s.scope_),
+          rs_status_(RsStatus_new(s.rs_status_->code())) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status::Status(const Status& s, Severity sev)
-        : code_(s.code_),
-          subcode_(s.subcode_),
+        : subcode_(s.subcode_),
           sev_(sev),
           retryable_(s.retryable_),
           data_loss_(s.data_loss_),
-          scope_(s.scope_) {
+          scope_(s.scope_),
+          rs_status_(RsStatus_new(s.rs_status_->code())) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status& Status::operator=(const Status& s) {
     if (this != &s) {
-        code_ = s.code_;
+        rs_status_->set_code(s.rs_status_->code());
         subcode_ = s.subcode_;
         sev_ = s.sev_;
         retryable_ = s.retryable_;
@@ -378,8 +382,8 @@ Status::Status(Status&& s) noexcept : Status() {
 
 Status& Status::operator=(Status&& s) noexcept {
     if (this != &s) {
-        code_ = std::move(s.code_);
-        s.code_ = Code::kOk;
+        rs_status_->set_code(s.rs_status_->code());
+        s.rs_status_->set_code(Code::kOk);
         subcode_ = std::move(s.subcode_);
         s.subcode_ = SubCode::kNone;
         sev_ = std::move(s.sev_);
@@ -396,7 +400,7 @@ Status& Status::operator=(Status&& s) noexcept {
 }
 
 bool Status::operator==(const Status& rhs) const {
-    return (code_ == rhs.code_);
+    return rs_status_->code() == rhs.rs_status_->code();
 }
 
 bool Status::operator!=(const Status& rhs) const {
@@ -433,12 +437,12 @@ static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
 
 Status::Status(Code _code, SubCode _subcode, const Slice& msg,
                const Slice& msg2, Severity sev)
-    : code_(_code),
-      subcode_(_subcode),
+    : subcode_(_subcode),
       sev_(sev),
       retryable_(false),
       data_loss_(false),
-      scope_(0) {
+      scope_(0),
+      rs_status_(RsStatus_new(_code)) {
   assert(subcode_ != SubCode::kMaxSubCode);
   const size_t len1 = msg.size();
   const size_t len2 = msg2.size();
@@ -466,7 +470,7 @@ Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
 
 std::string Status::ToString() const {
   const char* type = nullptr;
-  switch (code_) {
+  switch (rs_status_->code()) {
     case Code::kOk:
       return "OK";
     case Code::kNotFound:
