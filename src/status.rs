@@ -1,10 +1,8 @@
-use crate::status::ffi::{Code, Severity, SubCode};
+use crate::status::ffi::{Code, RsStatus, Severity, SubCode};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
     extern "Rust" {
-        type RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new(
             code: Code,
@@ -13,32 +11,7 @@ pub mod ffi {
             retryable: bool,
             data_loss: bool,
             scope: u8,
-        ) -> Box<RsStatus>;
-
-        #[cxx_name = "Code"]
-        fn code(&self) -> Code;
-        #[cxx_name = "SetCode"]
-        fn set_code(&mut self, code: Code);
-        #[cxx_name = "SubCode"]
-        fn subcode(&self) -> SubCode;
-        #[cxx_name = "SetSubCode"]
-        fn set_subcode(&mut self, subcode: SubCode);
-        #[cxx_name = "Severity"]
-        fn severity(&self) -> Severity;
-        #[cxx_name = "SetSeverity"]
-        fn set_severity(&mut self, severity: Severity);
-        #[cxx_name = "Retryable"]
-        fn retryable(&self) -> bool;
-        #[cxx_name = "SetRetryable"]
-        fn set_retryable(&mut self, retryable: bool);
-        #[cxx_name = "DataLoss"]
-        fn data_loss(&self) -> bool;
-        #[cxx_name = "SetDataLoss"]
-        fn set_data_loss(&mut self, data_loss: bool);
-        #[cxx_name = "Scope"]
-        fn scope(&self) -> u8;
-        #[cxx_name = "SetScope"]
-        fn set_scope(&mut self, scope: u8);
+        ) -> RsStatus;
     }
 
     enum Code {
@@ -89,64 +62,14 @@ pub mod ffi {
         kUnrecoverableError = 4,
         kMaxSeverity,
     }
-}
 
-pub struct RsStatus {
-    code: Code,
-    subcode: SubCode,
-    severity: Severity,
-    retryable: bool,
-    data_loss: bool,
-    scope: u8,
-}
-
-impl RsStatus {
-    pub fn code(&self) -> Code {
-        self.code
-    }
-
-    pub fn set_code(&mut self, code: Code) {
-        self.code = code;
-    }
-
-    pub fn subcode(&self) -> SubCode {
-        self.subcode
-    }
-
-    pub fn set_subcode(&mut self, subcode: SubCode) {
-        self.subcode = subcode;
-    }
-
-    pub fn severity(&self) -> Severity {
-        self.severity
-    }
-
-    pub fn set_severity(&mut self, severity: Severity) {
-        self.severity = severity;
-    }
-
-    pub fn retryable(&self) -> bool {
-        self.retryable
-    }
-
-    pub fn set_retryable(&mut self, retryable: bool) {
-        self.retryable = retryable;
-    }
-
-    pub fn data_loss(&self) -> bool {
-        self.data_loss
-    }
-
-    pub fn set_data_loss(&mut self, data_loss: bool) {
-        self.data_loss = data_loss;
-    }
-
-    pub fn scope(&self) -> u8 {
-        self.scope
-    }
-
-    pub fn set_scope(&mut self, scope: u8) {
-        self.scope = scope;
+    struct RsStatus {
+        code: Code,
+        subcode: SubCode,
+        severity: Severity,
+        retryable: bool,
+        data_loss: bool,
+        scope: u8,
     }
 }
 
@@ -157,13 +80,13 @@ pub fn rs_status_new(
     retryable: bool,
     data_loss: bool,
     scope: u8,
-) -> Box<RsStatus> {
-    Box::new(RsStatus {
+) -> RsStatus {
+    RsStatus {
         code,
         subcode,
         severity,
         retryable,
         data_loss,
         scope,
-    })
+    }
 }

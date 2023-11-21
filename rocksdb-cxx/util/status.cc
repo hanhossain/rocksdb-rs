@@ -35,21 +35,21 @@ Status::Status()
               Severity::kNoError,
               false,
               false,
-              0)){}
+              0)) {}
 
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
 
 Code Status::code() const {
-    return rs_status_->Code();
+    return rs_status_.code;
 }
 
 SubCode Status::subcode() const {
-    return rs_status_->SubCode();
+    return rs_status_.subcode;
 }
 
 Severity Status::severity() const {
-    return rs_status_->Severity();
+    return rs_status_.severity;
 }
 
 const char* Status::getState() const {
@@ -348,34 +348,34 @@ Status::Status(Code _code, const Slice& msg, const Slice& msg2)
 
 Status::Status(const Status& s)
         : rs_status_(RsStatus_new(
-                  s.rs_status_->Code(),
-                  s.rs_status_->SubCode(),
-                  s.rs_status_->Severity(),
-                  s.rs_status_->Retryable(),
-                  s.rs_status_->DataLoss(),
-                  s.rs_status_->Scope())) {
+                  s.rs_status_.code,
+                  s.rs_status_.subcode,
+                  s.rs_status_.severity,
+                  s.rs_status_.retryable,
+                  s.rs_status_.data_loss,
+                  s.rs_status_.scope)) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status::Status(const Status& s, Severity sev)
         : rs_status_(RsStatus_new(
-                  s.rs_status_->Code(),
-                  s.rs_status_->SubCode(),
+                  s.rs_status_.code,
+                  s.rs_status_.subcode,
                   sev,
-                  s.rs_status_->Retryable(),
-                  s.rs_status_->DataLoss(),
-                  s.rs_status_->Scope())) {
+                  s.rs_status_.retryable,
+                  s.rs_status_.data_loss,
+                  s.rs_status_.scope)) {
     state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
 }
 
 Status& Status::operator=(const Status& s) {
     if (this != &s) {
-        rs_status_->SetCode(s.rs_status_->Code());
-        rs_status_->SetSubCode(s.rs_status_->SubCode());
-        rs_status_->SetSeverity(s.rs_status_->Severity());
-        rs_status_->SetRetryable(s.rs_status_->Retryable());
-        rs_status_->SetDataLoss(s.rs_status_->DataLoss());
-        rs_status_->SetScope(s.rs_status_->Scope());
+        rs_status_.code = s.rs_status_.code;
+        rs_status_.subcode = s.rs_status_.subcode;
+        rs_status_.severity = s.rs_status_.severity;
+        rs_status_.retryable = s.rs_status_.retryable;
+        rs_status_.data_loss = s.rs_status_.data_loss;
+        rs_status_.scope = s.rs_status_.scope;
         state_ = (s.state_ == nullptr) ? nullptr : Status_CopyState(s.state_.get());
     }
     return *this;
@@ -387,25 +387,25 @@ Status::Status(Status&& s) noexcept : Status() {
 
 Status& Status::operator=(Status&& s) noexcept {
     if (this != &s) {
-        rs_status_->SetCode(s.rs_status_->Code());
-        s.rs_status_->SetCode(Code::kOk);
-        rs_status_->SetSubCode(s.rs_status_->SubCode());
-        s.rs_status_->SetSubCode(SubCode::kNone);
-        rs_status_->SetSeverity(s.rs_status_->Severity());
-        s.rs_status_->SetSeverity(Severity::kNoError);
-        rs_status_->SetRetryable(s.rs_status_->Retryable());
-        s.rs_status_->SetRetryable(false);
-        rs_status_->SetDataLoss(s.rs_status_->DataLoss());
-        s.rs_status_->SetDataLoss(false);
-        rs_status_->SetScope(s.rs_status_->Scope());
-        s.rs_status_->SetScope(0);
+        rs_status_.code = s.rs_status_.code;
+        s.rs_status_.code = Code::kOk;
+        rs_status_.subcode = s.rs_status_.subcode;
+        s.rs_status_.subcode = SubCode::kNone;
+        rs_status_.severity = s.rs_status_.severity;
+        s.rs_status_.severity = Severity::kNoError;
+        rs_status_.retryable = s.rs_status_.retryable;
+        s.rs_status_.retryable = false;
+        rs_status_.data_loss = s.rs_status_.data_loss;
+        s.rs_status_.data_loss = false;
+        rs_status_.scope = s.rs_status_.scope;
+        s.rs_status_.scope = 0;
         state_ = std::move(s.state_);
     }
     return *this;
 }
 
 bool Status::operator==(const Status& rhs) const {
-    return rs_status_->Code() == rhs.rs_status_->Code();
+    return rs_status_.code == rhs.rs_status_.code;
 }
 
 bool Status::operator!=(const Status& rhs) const {
@@ -443,7 +443,7 @@ static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
 Status::Status(Code _code, SubCode _subcode, const Slice& msg,
                const Slice& msg2, Severity sev)
     : rs_status_(RsStatus_new(_code, _subcode, sev, false, false, 0)) {
-  assert(rs_status_->SubCode() != SubCode::kMaxSubCode);
+  assert(rs_status_.subcode != SubCode::kMaxSubCode);
   const size_t len1 = msg.size();
   const size_t len2 = msg2.size();
   const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -470,7 +470,7 @@ Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
 
 std::string Status::ToString() const {
   const char* type = nullptr;
-  switch (rs_status_->Code()) {
+  switch (rs_status_.code) {
     case Code::kOk:
       return "OK";
     case Code::kNotFound:
@@ -532,14 +532,14 @@ std::string Status::ToString() const {
     type = tmp;
   }
   std::string result(type);
-  if (rs_status_->SubCode() != SubCode::kNone) {
-    uint32_t index = static_cast<int32_t>(rs_status_->SubCode());
+  if (rs_status_.subcode != SubCode::kNone) {
+    uint32_t index = static_cast<int32_t>(rs_status_.subcode);
     assert(sizeof(msgs) / sizeof(msgs[0]) > index);
     result.append(msgs[index]);
   }
 
   if (state_ != nullptr) {
-    if (rs_status_->SubCode() != SubCode::kNone) {
+    if (rs_status_.subcode != SubCode::kNone) {
       result.append(": ");
     }
     result.append(state_.get());

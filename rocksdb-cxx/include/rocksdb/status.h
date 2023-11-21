@@ -20,15 +20,14 @@
 #include <string>
 
 #include "rocksdb/slice.h"
-#include "rust/cxx.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
-enum class Code : unsigned char;
-enum class SubCode : unsigned char;
-enum class Severity : unsigned char;
-
-struct RsStatus;
-
 class Status {
  public:
   // Create a success status.
@@ -152,7 +151,7 @@ class Status {
   // A nullptr state_ (which is at least the case for OK) means the extra
   // message is empty.
   std::unique_ptr<const char[]> state_;
-  rust::Box<RsStatus> rs_status_;
+  RsStatus rs_status_;
 
   explicit Status(Code _code);
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
