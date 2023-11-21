@@ -1,4 +1,4 @@
-use crate::ffi::{Code, CommonRustData, SubCode};
+use crate::ffi::{Code, CommonRustData, Severity, SubCode};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
@@ -23,7 +23,7 @@ pub mod ffi {
         fn hello_common(data: &CommonRustData) -> String;
 
         #[cxx_name = "RsStatus_new"]
-        fn rs_status_new(code: Code, subcode: SubCode) -> Box<RsStatus>;
+        fn rs_status_new(code: Code, subcode: SubCode, severity: Severity) -> Box<RsStatus>;
 
         #[cxx_name = "Code"]
         fn code(&self) -> Code;
@@ -33,6 +33,10 @@ pub mod ffi {
         fn subcode(&self) -> SubCode;
         #[cxx_name = "SetSubCode"]
         fn set_subcode(&mut self, subcode: SubCode);
+        #[cxx_name = "Severity"]
+        fn severity(&self) -> Severity;
+        #[cxx_name = "SetSeverity"]
+        fn set_severity(&mut self, severity: Severity);
     }
 
     struct CommonRustData {
@@ -92,6 +96,7 @@ pub mod ffi {
 pub struct RsStatus {
     code: Code,
     subcode: SubCode,
+    severity: Severity,
 }
 
 impl RsStatus {
@@ -110,10 +115,22 @@ impl RsStatus {
     pub fn set_subcode(&mut self, subcode: SubCode) {
         self.subcode = subcode;
     }
+
+    pub fn severity(&self) -> Severity {
+        self.severity
+    }
+
+    pub fn set_severity(&mut self, severity: Severity) {
+        self.severity = severity;
+    }
 }
 
-pub fn rs_status_new(code: Code, subcode: SubCode) -> Box<RsStatus> {
-    Box::new(RsStatus { code, subcode })
+pub fn rs_status_new(code: Code, subcode: SubCode, severity: Severity) -> Box<RsStatus> {
+    Box::new(RsStatus {
+        code,
+        subcode,
+        severity,
+    })
 }
 
 pub fn hello_common(data: &CommonRustData) -> String {

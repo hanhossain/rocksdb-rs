@@ -149,7 +149,6 @@ class Status {
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
-  Severity sev_;
   bool retryable_;
   bool data_loss_;
   unsigned char scope_;
