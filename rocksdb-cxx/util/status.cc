@@ -322,28 +322,14 @@ bool Status::IsIOFenced() const {
 }
 
 Status::Status(Code _code, SubCode _subcode)
-    : rs_status_(RsStatus_new(
-            _code,
-            _subcode,
-            Severity::kNoError,
-            false,
-            false,
-            0,
-            nullptr)) {}
+    : rs_status_(RsStatus_new(_code, _subcode)) {}
 
 Status::Status(Code _code)
-    : Status(_code, SubCode::kNone) {}
+    : rs_status_(RsStatus_new(_code)) {}
 
 Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
     unsigned char scope)
-    : rs_status_(RsStatus_new(
-            _code,
-            _subcode,
-            Severity::kNoError,
-            retryable,
-            data_loss,
-            scope,
-            nullptr)) {}
+    : rs_status_(RsStatus_new(_code, _subcode, retryable, data_loss, scope)) {}
 
 Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : Status(_code, SubCode::kNone, msg, msg2) {}

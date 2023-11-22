@@ -80,6 +80,21 @@ pub mod ffi {
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new1() -> RsStatus;
 
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new2(code: Code) -> RsStatus;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new3(code: Code, subcode: SubCode) -> RsStatus;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new4(
+            code: Code,
+            subcode: SubCode,
+            retryable: bool,
+            data_loss: bool,
+            scope: u8,
+        ) -> RsStatus;
+
         fn code(self: &RsStatus) -> Code;
         fn subcode(self: &RsStatus) -> SubCode;
         fn severity(self: &RsStatus) -> Severity;
@@ -134,6 +149,12 @@ pub mod ffi {
         fn is_txn_not_prepared(self: &RsStatus) -> bool;
         #[cxx_name = "IsIOFenced"]
         fn is_io_fenced(self: &RsStatus) -> bool;
+    }
+
+    unsafe extern "C++" {
+        include!("rocksdb/slice.h");
+
+        type Slice;
     }
 }
 
@@ -323,4 +344,36 @@ pub fn rs_status_new(
 /// Create a success status.
 pub fn rs_status_new1() -> RsStatus {
     RsStatus::default()
+}
+
+pub fn rs_status_new2(code: Code) -> RsStatus {
+    RsStatus {
+        code,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_new3(code: Code, subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_new4(
+    code: Code,
+    subcode: SubCode,
+    retryable: bool,
+    data_loss: bool,
+    scope: u8,
+) -> RsStatus {
+    RsStatus {
+        code,
+        subcode,
+        retryable,
+        data_loss,
+        scope,
+        ..RsStatus::default()
+    }
 }

@@ -151,7 +151,6 @@ class Status {
   // TODO: Rust
   std::string ToString() const;
 
-    // TODO: Rust
     explicit Status(Code _code, SubCode _subcode);
 
     // TODO: Rust
@@ -161,9 +160,7 @@ class Status {
 
   RsStatus rs_status_;
 
-    // TODO: Rust
   explicit Status(Code _code);
-    // TODO: Rust
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
