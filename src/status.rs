@@ -1,8 +1,9 @@
-use crate::status::ffi::{Code, RsStatus, Severity, SubCode};
+use crate::status::ffi::{Code, RsStatus, Severity, Slice, SubCode};
 use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
+    #[derive(Debug)]
     enum Code {
         kOk = 0,
         kNotFound = 1,
@@ -23,6 +24,7 @@ pub mod ffi {
         kMaxCode,
     }
 
+    #[derive(Debug)]
     enum SubCode {
         kNone = 0,
         kMutexTimeout = 1,
@@ -43,6 +45,7 @@ pub mod ffi {
         kMaxSubCode,
     }
 
+    #[derive(Debug)]
     enum Severity {
         kNoError = 0,
         kSoftError = 1,
@@ -52,6 +55,7 @@ pub mod ffi {
         kMaxSeverity,
     }
 
+    #[derive(Debug)]
     struct RsStatus {
         #[cxx_name = "code_"]
         code: Code,
@@ -94,6 +98,24 @@ pub mod ffi {
             data_loss: bool,
             scope: u8,
         ) -> RsStatus;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new5(
+            code: Code,
+            subcode: SubCode,
+            msg: &Slice,
+            msg2: &Slice,
+            sev: Severity,
+        ) -> RsStatus;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new6(code: Code, msg: &Slice, msg2: &Slice) -> RsStatus;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new7(code: Code, subcode: SubCode, msg: &Slice, msg2: &Slice) -> RsStatus;
+
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> RsStatus;
 
         fn code(self: &RsStatus) -> Code;
         fn subcode(self: &RsStatus) -> SubCode;
@@ -155,10 +177,50 @@ pub mod ffi {
         include!("rocksdb/slice.h");
 
         type Slice;
+
+        #[cxx_name = "ToUniquePtrString"]
+        fn to_unique_ptr_string(self: &Slice) -> UniquePtr<CxxString>;
     }
 }
 
 impl RsStatus {
+    pub fn new_with_slices(
+        code: Code,
+        subcode: SubCode,
+        msg: &Slice,
+        msg2: &Slice,
+        sev: Severity,
+    ) -> RsStatus {
+        assert_ne!(subcode, SubCode::kMaxSubCode);
+        let msg = msg.to_unique_ptr_string();
+        let msg2 = msg2.to_unique_ptr_string();
+
+        RsStatus::new_with_messages(code, subcode, msg, msg2, sev)
+    }
+
+    fn new_with_messages(
+        code: Code,
+        subcode: SubCode,
+        mut msg: UniquePtr<CxxString>,
+        msg2: UniquePtr<CxxString>,
+        severity: Severity,
+    ) -> RsStatus {
+        assert_ne!(subcode, SubCode::kMaxSubCode);
+
+        if !msg2.is_null() && msg2.len() > 0 {
+            msg.pin_mut().push_str(": ");
+            msg.pin_mut().push_str(msg2.to_str().unwrap());
+        }
+
+        RsStatus {
+            code,
+            subcode,
+            severity,
+            state: msg,
+            ..RsStatus::default()
+        }
+    }
+
     pub fn code(&self) -> Code {
         self.code
     }
@@ -376,4 +438,32 @@ pub fn rs_status_new4(
         scope,
         ..RsStatus::default()
     }
+}
+
+pub fn rs_status_new5(
+    code: Code,
+    subcode: SubCode,
+    msg: &Slice,
+    msg2: &Slice,
+    sev: Severity,
+) -> RsStatus {
+    RsStatus::new_with_slices(code, subcode, msg, msg2, sev)
+}
+
+pub fn rs_status_new6(code: Code, msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(code, SubCode::kNone, msg, msg2, Severity::kNoError)
+}
+
+pub fn rs_status_new7(code: Code, subcode: SubCode, msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(code, subcode, msg, msg2, Severity::kNoError)
+}
+
+pub fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        code,
+        subcode,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        sev,
+    )
 }

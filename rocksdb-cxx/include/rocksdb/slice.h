@@ -96,6 +96,10 @@ class Slice {
     return std::string_view(data_, size_);
   }
 
+  std::unique_ptr<std::string> ToUniquePtrString() const {
+      return std::make_unique<std::string>(data_, size_);
+  }
+
   // Decodes the current slice interpreted as an hexadecimal string into result,
   // if successful returns true, if this isn't a valid hex string
   // (e.g not coming from Slice::ToString(true)) DecodeHex returns false.

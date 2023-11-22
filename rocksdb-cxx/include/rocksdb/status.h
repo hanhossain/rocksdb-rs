@@ -53,7 +53,6 @@ class Status {
   // TODO: Rust
   Status(const Status& s, Severity sev);
 
-  // TODO: Rust
   Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg);
 
   Severity severity() const;
@@ -153,9 +152,7 @@ class Status {
 
     explicit Status(Code _code, SubCode _subcode);
 
-    // TODO: Rust
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
-    // TODO: Rust
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
   RsStatus rs_status_;
@@ -164,7 +161,6 @@ class Status {
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
-    // TODO: Rust
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
 };
 
