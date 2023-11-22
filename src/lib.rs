@@ -1,3 +1,4 @@
+mod slice;
 mod status;
 
 use crate::ffi::CommonRustData;
