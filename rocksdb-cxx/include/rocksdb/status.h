@@ -34,19 +34,26 @@ class Status {
   Status();
 
   // Copy the specified status.
+  // TODO: Rust
   Status(const Status& s);
+  // TODO: Rust
   Status& operator=(const Status& s);
+  // TODO: Rust
   Status(Status&& s) noexcept;
+  // TODO: Rust
   Status& operator=(Status&& s) noexcept;
+  // TODO: Rust
   bool operator==(const Status& rhs) const;
+  // TODO: Rust
   bool operator!=(const Status& rhs) const;
 
   Code code() const;
-
   SubCode subcode() const;
 
+  // TODO: Rust
   Status(const Status& s, Severity sev);
 
+  // TODO: Rust
   Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg);
 
   Severity severity() const;
@@ -141,113 +148,180 @@ class Status {
 
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
+  // TODO: Rust
   std::string ToString() const;
 
+    // TODO: Rust
     explicit Status(Code _code, SubCode _subcode);
 
+    // TODO: Rust
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
+    // TODO: Rust
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
   RsStatus rs_status_;
 
+    // TODO: Rust
   explicit Status(Code _code);
+    // TODO: Rust
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
+    // TODO: Rust
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
 };
 
+    // TODO: Rust
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
 
     // Return a success status.
+    // TODO: Rust
     Status Status_OK();
 
     // Successful, though an existing something was overwritten
     // Note: using variants of OK status for program logic is discouraged,
     // but it can be useful for communicating statistical information without
     // changing public APIs.
+    // TODO: Rust
     Status Status_OkOverwritten();
 
     // Return error status of an appropriate type.
+    // TODO: Rust
     Status Status_NotFound(const Slice& msg, const Slice& msg2 = Slice());
 
     // Fast path for not found without malloc;
+    // TODO: Rust
     Status Status_NotFound(SubCode msg);
+    // TODO: Rust
     Status Status_NotFound();
 
+    // TODO: Rust
     Status Status_NotFound(SubCode sc, const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_Corruption(const Slice& msg, const Slice& msg2 = Slice());
+    // TODO: Rust
     Status Status_Corruption(SubCode msg);
+    // TODO: Rust
     Status Status_Corruption();
 
+    // TODO: Rust
     Status Status_NotSupported(const Slice& msg, const Slice& msg2 = Slice());
+    // TODO: Rust
     Status Status_NotSupported(SubCode msg);
+    // TODO: Rust
     Status Status_NotSupported();
 
+    // TODO: Rust
     Status Status_InvalidArgument(const Slice& msg, const Slice& msg2 = Slice());
+    // TODO: Rust
     Status Status_InvalidArgument(SubCode msg);
+    // TODO: Rust
     Status Status_InvalidArgument();
 
+    // TODO: Rust
     Status Status_IOError(const Slice& msg, const Slice& msg2 = Slice());
+    // TODO: Rust
     Status Status_IOError(SubCode msg);
+    // TODO: Rust
     Status Status_IOError();
 
+    // TODO: Rust
     Status Status_MergeInProgress(const Slice& msg, const Slice& msg2 = Slice());
+    // TODO: Rust
     Status Status_MergeInProgress(SubCode msg);
+    // TODO: Rust
     Status Status_MergeInProgress();
 
+    // TODO: Rust
     Status Status_Incomplete(const Slice& msg, const Slice& msg2 = Slice());
+    // TODO: Rust
     Status Status_Incomplete(SubCode msg);
+    // TODO: Rust
     Status Status_Incomplete();
 
+    // TODO: Rust
     Status Status_ShutdownInProgress(SubCode msg);
+    // TODO: Rust
     Status Status_ShutdownInProgress();
+    // TODO: Rust
     Status Status_ShutdownInProgress(const Slice& msg, const Slice& msg2 = Slice());
+    // TODO: Rust
     Status Status_Aborted(SubCode msg);
+    // TODO: Rust
     Status Status_Aborted();
+    // TODO: Rust
     Status Status_Aborted(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_Busy(SubCode msg);
+    // TODO: Rust
     Status Status_Busy();
+    // TODO: Rust
     Status Status_Busy(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_TimedOut(SubCode msg);
+    // TODO: Rust
     Status Status_TimedOut();
+    // TODO: Rust
     Status Status_TimedOut(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_Expired(SubCode msg);
+    // TODO: Rust
     Status Status_Expired();
+    // TODO: Rust
     Status Status_Expired(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_TryAgain(SubCode msg);
+    // TODO: Rust
     Status Status_TryAgain();
+    // TODO: Rust
     Status Status_TryAgain(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_CompactionTooLarge(SubCode msg);
+    // TODO: Rust
     Status Status_CompactionTooLarge();
+    // TODO: Rust
     Status Status_CompactionTooLarge(const Slice& msg,
                                    const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_ColumnFamilyDropped(SubCode msg);
+    // TODO: Rust
     Status Status_ColumnFamilyDropped();
+    // TODO: Rust
     Status Status_ColumnFamilyDropped(const Slice& msg,
                                     const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_NoSpace();
+    // TODO: Rust
     Status Status_NoSpace(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_MemoryLimit();
+    // TODO: Rust
     Status Status_MemoryLimit(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_SpaceLimit();
+    // TODO: Rust
     Status Status_SpaceLimit(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_PathNotFound();
+    // TODO: Rust
     Status Status_PathNotFound(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     Status Status_TxnNotPrepared();
+    // TODO: Rust
     Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
 
+    // TODO: Rust
     std::unique_ptr<std::string> Status_CopyState(const std::string& s);
 }  // namespace ROCKSDB_NAMESPACE

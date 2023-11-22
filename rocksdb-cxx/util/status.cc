@@ -42,19 +42,19 @@ Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : Status(_code, _subcode, msg, "", _sev) {}
 
 Code Status::code() const {
-    return rs_status_.code;
+    return rs_status_.code();
 }
 
 SubCode Status::subcode() const {
-    return rs_status_.subcode;
+    return rs_status_.subcode();
 }
 
 Severity Status::severity() const {
-    return rs_status_.severity;
+    return rs_status_.severity();
 }
 
 const char* Status::getState() const {
-    return rs_status_.state == nullptr ? nullptr : rs_status_.state->c_str();
+    return rs_status_.getState() == nullptr ? nullptr : rs_status_.getState()->c_str();
 }
 
 Status Status_OK() { return Status(); }
@@ -222,104 +222,103 @@ Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2) {
 }
 
 bool Status::ok() const {
-    return code() == Code::kOk;
+    return rs_status_.ok();
 }
 
 bool Status::IsOkOverwritten() const {
-    return code() == Code::kOk && subcode() == SubCode::kOverwritten;
+    return rs_status_.IsOkOverwritten();
 }
 
 bool Status::IsNotFound() const {
-    return code() == Code::kNotFound;
+    return rs_status_.IsNotFound();
 }
 
 bool Status::IsCorruption() const {
-    return code() == Code::kCorruption;
+    return rs_status_.IsCorruption();
 }
 
 bool Status::IsNotSupported() const {
-    return code() == Code::kNotSupported;
+    return rs_status_.IsNotSupported();
 }
 
 bool Status::IsInvalidArgument() const {
-    return code() == Code::kInvalidArgument;
+    return rs_status_.IsInvalidArgument();
 }
 
 bool Status::IsIOError() const {
-    return code() == Code::kIOError;
+    return rs_status_.IsIOError();
 }
 
 bool Status::IsMergeInProgress() const {
-    return code() == Code::kMergeInProgress;
+    return rs_status_.IsMergeInProgress();
 }
 
 bool Status::IsIncomplete() const {
-    return code() == Code::kIncomplete;
+    return rs_status_.IsIncomplete();
 }
 
 bool Status::IsShutdownInProgress() const {
-    return code() == Code::kShutdownInProgress;
+    return rs_status_.IsShutdownInProgress();
 }
 
 bool Status::IsTimedOut() const {
-    return code() == Code::kTimedOut;
+    return rs_status_.IsTimedOut();
 }
 
 bool Status::IsAborted() const {
-    return code() == Code::kAborted;
+    return rs_status_.IsAborted();
 }
 
 bool Status::IsLockLimit() const {
-    return code() == Code::kAborted && subcode() == SubCode::kLockLimit;
+    return rs_status_.IsLockLimit();
 }
 
 bool Status::IsBusy() const {
-    return code() == Code::kBusy;
+    return rs_status_.IsBusy();
 }
 
 bool Status::IsDeadlock() const {
-    return code() == Code::kBusy && subcode() == SubCode::kDeadlock;
+    return rs_status_.IsDeadlock();
 }
 
 bool Status::IsExpired() const {
-    return code() == Code::kExpired;
+    return rs_status_.IsExpired();
 }
 
 bool Status::IsTryAgain() const {
-    return code() == Code::kTryAgain;
+    return rs_status_.IsTryAgain();
 }
 
 bool Status::IsCompactionTooLarge() const {
-    return code() == Code::kCompactionTooLarge;
+    return rs_status_.IsCompactionTooLarge();
 }
 
 bool Status::IsColumnFamilyDropped() const {
-    return code() == Code::kColumnFamilyDropped;
+    return rs_status_.IsColumnFamilyDropped();
 }
 
 bool Status::IsNoSpace() const {
-    return (code() == Code::kIOError) && (subcode() == SubCode::kNoSpace);
+    return rs_status_.IsNoSpace();
 }
 
 bool Status::IsMemoryLimit() const {
-    return (code() == Code::kAborted) && (subcode() == SubCode::kMemoryLimit);
+    return rs_status_.IsMemoryLimit();
 }
 
 bool Status::IsPathNotFound() const {
-    return (code() == Code::kIOError || code() == Code::kNotFound) &&
-           (subcode() == SubCode::kPathNotFound);
+    return rs_status_.IsPathNotFound();
 }
 
 bool Status::IsManualCompactionPaused() const {
-    return (code() == Code::kIncomplete) && (subcode() == SubCode::kManualCompactionPaused);
+    return rs_status_.IsManualCompactionPaused();
 }
 
 bool Status::IsTxnNotPrepared() const {
-    return (code() == Code::kInvalidArgument) && (subcode() == SubCode::kTxnNotPrepared);
+    return rs_status_.IsTxnNotPrepared();
 }
 
 bool Status::IsIOFenced() const {
-    return (code() == Code::kIOError) && (subcode() == SubCode::kIOFenced);
+    return rs_status_.IsIOFenced();
 }
 
 Status::Status(Code _code, SubCode _subcode)
@@ -351,9 +350,9 @@ Status::Status(Code _code, const Slice& msg, const Slice& msg2)
 
 Status::Status(const Status& s)
         : rs_status_(RsStatus_new(
-                  s.rs_status_.code,
-                  s.rs_status_.subcode,
-                  s.rs_status_.severity,
+                  s.rs_status_.code_,
+                  s.rs_status_.subcode_,
+                  s.rs_status_.severity_,
                   s.rs_status_.retryable,
                   s.rs_status_.data_loss,
                   s.rs_status_.scope,
@@ -363,8 +362,8 @@ Status::Status(const Status& s)
 
 Status::Status(const Status& s, Severity sev)
         : rs_status_(RsStatus_new(
-                  s.rs_status_.code,
-                  s.rs_status_.subcode,
+                  s.rs_status_.code_,
+                  s.rs_status_.subcode_,
                   sev,
                   s.rs_status_.retryable,
                   s.rs_status_.data_loss,
@@ -375,9 +374,9 @@ Status::Status(const Status& s, Severity sev)
 
 Status& Status::operator=(const Status& s) {
     if (this != &s) {
-        rs_status_.code = s.rs_status_.code;
-        rs_status_.subcode = s.rs_status_.subcode;
-        rs_status_.severity = s.rs_status_.severity;
+        rs_status_.code_ = s.rs_status_.code_;
+        rs_status_.subcode_ = s.rs_status_.subcode_;
+        rs_status_.severity_ = s.rs_status_.severity_;
         rs_status_.retryable = s.rs_status_.retryable;
         rs_status_.data_loss = s.rs_status_.data_loss;
         rs_status_.scope = s.rs_status_.scope;
@@ -392,12 +391,12 @@ Status::Status(Status&& s) noexcept : Status() {
 
 Status& Status::operator=(Status&& s) noexcept {
     if (this != &s) {
-        rs_status_.code = s.rs_status_.code;
-        s.rs_status_.code = Code::kOk;
-        rs_status_.subcode = s.rs_status_.subcode;
-        s.rs_status_.subcode = SubCode::kNone;
-        rs_status_.severity = s.rs_status_.severity;
-        s.rs_status_.severity = Severity::kNoError;
+        rs_status_.code_ = s.rs_status_.code_;
+        s.rs_status_.code_ = Code::kOk;
+        rs_status_.subcode_ = s.rs_status_.subcode_;
+        s.rs_status_.subcode_ = SubCode::kNone;
+        rs_status_.severity_ = s.rs_status_.severity_;
+        s.rs_status_.severity_ = Severity::kNoError;
         rs_status_.retryable = s.rs_status_.retryable;
         s.rs_status_.retryable = false;
         rs_status_.data_loss = s.rs_status_.data_loss;
@@ -410,7 +409,7 @@ Status& Status::operator=(Status&& s) noexcept {
 }
 
 bool Status::operator==(const Status& rhs) const {
-    return rs_status_.code == rhs.rs_status_.code;
+    return rs_status_.code_ == rhs.rs_status_.code_;
 }
 
 bool Status::operator!=(const Status& rhs) const {
@@ -446,7 +445,7 @@ static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
 Status::Status(Code _code, SubCode _subcode, const Slice& msg,
                const Slice& msg2, Severity sev)
     : rs_status_(RsStatus_new(_code, _subcode, sev, false, false, 0, nullptr)) {
-  assert(rs_status_.subcode != SubCode::kMaxSubCode);
+  assert(rs_status_.subcode_ != SubCode::kMaxSubCode);
   const size_t len1 = msg.size();
   const size_t len2 = msg2.size();
   const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -473,7 +472,7 @@ Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
 
 std::string Status::ToString() const {
   const char* type = nullptr;
-  switch (rs_status_.code) {
+  switch (rs_status_.code_) {
     case Code::kOk:
       return "OK";
     case Code::kNotFound:
@@ -535,14 +534,14 @@ std::string Status::ToString() const {
     type = tmp;
   }
   std::string result(type);
-  if (rs_status_.subcode != SubCode::kNone) {
-    uint32_t index = static_cast<int32_t>(rs_status_.subcode);
+  if (rs_status_.subcode_ != SubCode::kNone) {
+    uint32_t index = static_cast<int32_t>(rs_status_.subcode_);
     assert(sizeof(msgs) / sizeof(msgs[0]) > index);
     result.append(msgs[index]);
   }
 
   if (rs_status_.state != nullptr) {
-    if (rs_status_.subcode != SubCode::kNone) {
+    if (rs_status_.subcode_ != SubCode::kNone) {
       result.append(": ");
     }
     result.append(*rs_status_.state);

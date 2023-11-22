@@ -178,8 +178,8 @@ class IOStatus {
 inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
                           const Slice& msg2) {
     status_ = Status(_code, _subcode, false, false, kIOErrorScopeFileSystem);
-    assert(status_.rs_status_.code != Code::kOk);
-    assert(status_.rs_status_.subcode != SubCode::kMaxSubCode);
+    assert(status_.rs_status_.code_ != Code::kOk);
+    assert(status_.rs_status_.subcode_ != SubCode::kMaxSubCode);
     const size_t len1 = msg.size();
     const size_t len2 = msg2.size();
     const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -196,8 +196,8 @@ inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
 
 inline IOStatus::IOStatus(const IOStatus& s) {
     status_ = Status(
-        s.status_.rs_status_.code,
-        s.status_.rs_status_.subcode,
+        s.status_.rs_status_.code_,
+        s.status_.rs_status_.subcode_,
         s.status_.rs_status_.retryable,
         s.status_.rs_status_.data_loss,
         s.status_.rs_status_.scope);
@@ -208,8 +208,8 @@ inline IOStatus& IOStatus::operator=(const IOStatus& s) {
   // The following condition catches both aliasing (when this == &s),
   // and the common case where both s and *this are ok.
   if (this != &s) {
-    status_.rs_status_.code = s.status_.rs_status_.code;
-    status_.rs_status_.subcode = s.status_.rs_status_.subcode;
+    status_.rs_status_.code_ = s.status_.rs_status_.code_;
+    status_.rs_status_.subcode_ = s.status_.rs_status_.subcode_;
     status_.rs_status_.retryable = s.status_.rs_status_.retryable;
     status_.rs_status_.data_loss = s.status_.rs_status_.data_loss;
     status_.rs_status_.scope = s.status_.rs_status_.scope;
@@ -224,10 +224,10 @@ inline IOStatus::IOStatus(IOStatus&& s) noexcept : IOStatus() {
 
 inline IOStatus& IOStatus::operator=(IOStatus&& s) noexcept {
   if (this != &s) {
-    status_.rs_status_.code = s.status_.rs_status_.code;
-    s.status_.rs_status_.code = Code::kOk;
-    status_.rs_status_.subcode = s.status_.rs_status_.subcode;
-    s.status_.rs_status_.subcode = SubCode::kNone;
+    status_.rs_status_.code_ = s.status_.rs_status_.code_;
+    s.status_.rs_status_.code_ = Code::kOk;
+    status_.rs_status_.subcode_ = s.status_.rs_status_.subcode_;
+    s.status_.rs_status_.subcode_ = SubCode::kNone;
     status_.rs_status_.retryable = s.status_.rs_status_.retryable;
     status_.rs_status_.data_loss = s.status_.rs_status_.data_loss;
     status_.rs_status_.scope = s.status_.rs_status_.scope;
@@ -238,7 +238,7 @@ inline IOStatus& IOStatus::operator=(IOStatus&& s) noexcept {
 }
 
 inline bool IOStatus::operator==(const IOStatus& rhs) const {
-  return (status_.rs_status_.code == rhs.status_.rs_status_.code);
+  return (status_.rs_status_.code_ == rhs.status_.rs_status_.code_);
 }
 
 inline bool IOStatus::operator!=(const IOStatus& rhs) const {
