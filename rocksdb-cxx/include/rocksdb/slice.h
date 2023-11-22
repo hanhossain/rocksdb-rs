@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <string_view>  // RocksDB now requires C++17 support
 
