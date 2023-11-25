@@ -223,6 +223,7 @@ const SOURCES: &[&str] = &[
     "util/async_file_reader.cc",
     "util/cleanable.cc",
     "util/coding.cc",
+    "util/common_ffi.cc",
     "util/compaction_job_stats_impl.cc",
     "util/comparator.cc",
     "util/compression.cc",

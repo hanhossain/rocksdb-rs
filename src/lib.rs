@@ -7,6 +7,7 @@ use crate::ffi::CommonRustData;
 pub mod ffi {
     unsafe extern "C++" {
         include!("rocksdb/env.h");
+        include!("rocksdb/common_ffi.h");
 
         type Rusty;
 
@@ -18,6 +19,8 @@ pub mod ffi {
 
         #[cxx_name = "HelloCommonFromCpp"]
         fn hello_common_from_cpp() -> String;
+
+        fn make_string() -> UniquePtr<CxxString>;
     }
 
     extern "Rust" {
@@ -54,5 +57,12 @@ mod tests {
     fn hello_from_cpp() {
         let value = ffi::hello_common_from_cpp();
         assert_eq!(value, "Hello c++ from rust!");
+    }
+
+    #[test]
+    fn create_string() {
+        let mut cxx_str = ffi::make_string();
+        cxx_str.pin_mut().push_str("hello world");
+        assert_eq!(cxx_str.to_str().unwrap(), "hello world");
     }
 }
