@@ -207,7 +207,9 @@ impl RsStatus {
 
         if !msg2.is_null() && msg2.len() > 0 {
             msg.pin_mut().push_str(": ");
-            msg.pin_mut().push_str(msg2.to_str().unwrap());
+
+            // Can't treat this as a string yet because it's not guaranteed to be valid UTF-8.
+            msg.pin_mut().push_bytes(msg2.as_bytes());
         }
 
         RsStatus {
