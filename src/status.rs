@@ -172,6 +172,8 @@ pub mod ffi {
         fn is_txn_not_prepared(self: &RsStatus) -> bool;
         #[cxx_name = "IsIOFenced"]
         fn is_io_fenced(self: &RsStatus) -> bool;
+        #[cxx_name = "ToString"]
+        fn to_string(self: &RsStatus) -> UniquePtr<CxxString>;
     }
 
     unsafe extern "C++" {
@@ -367,6 +369,67 @@ impl RsStatus {
     pub fn is_io_fenced(&self) -> bool {
         self.code == Code::kIOError && self.subcode == SubCode::kIOFenced
     }
+
+    pub fn to_string(&self) -> UniquePtr<CxxString> {
+        let msg = match self.code {
+            Code::kOk => {
+                let mut s = crate::ffi::make_string();
+                s.pin_mut().push_str("OK");
+                return s;
+            }
+            Code::kNotFound => "NotFound: ",
+            Code::kCorruption => "Corruption: ",
+            Code::kNotSupported => "Not implemented: ",
+            Code::kInvalidArgument => "Invalid argument: ",
+            Code::kIOError => "IO error: ",
+            Code::kMergeInProgress => "Merge in progress: ",
+            Code::kIncomplete => "Result incomplete: ",
+            Code::kShutdownInProgress => "Shutdown in progress: ",
+            Code::kTimedOut => "Operation timed out: ",
+            Code::kAborted => "Operation aborted: ",
+            Code::kBusy => "Resource busy: ",
+            Code::kExpired => "Operation expired: ",
+            Code::kTryAgain => "Operation failed. Try again.: ",
+            Code::kCompactionTooLarge => "Compaction too large: ",
+            Code::kColumnFamilyDropped => "Column family dropped: ",
+            x => unreachable!("{:?} is not a valid status code", x),
+        };
+
+        let mut res = crate::ffi::make_string();
+        res.pin_mut().push_str(msg);
+
+        if self.subcode != SubCode::kNone {
+            let subcode_msg = match self.subcode {
+                SubCode::kMutexTimeout => "Timeout Acquiring Mutex",
+                SubCode::kLockTimeout => "Timeout waiting to lock key",
+                SubCode::kLockLimit => "Failed to acquire lock due to max_num_locks limit",
+                SubCode::kNoSpace => "No space left on device",
+                SubCode::kDeadlock => "Deadlock",
+                SubCode::kStaleFile => "Stale file handle",
+                SubCode::kMemoryLimit => "Memory limit reached",
+                SubCode::kSpaceLimit => "Space limit reached",
+                SubCode::kPathNotFound => "No such file or directory",
+                SubCode::KMergeOperandsInsufficientCapacity => {
+                    "Insufficient capacity for merge operands"
+                }
+                SubCode::kManualCompactionPaused => "Manual compaction paused",
+                SubCode::kOverwritten => " (overwritten)",
+                SubCode::kTxnNotPrepared => "Txn not prepared",
+                SubCode::kIOFenced => "IO fenced off",
+                SubCode::kMergeOperatorFailed => "Merge operator failed",
+                x => unreachable!("{:?} is not a valid status subcode", x),
+            };
+
+            res.pin_mut().push_str(subcode_msg);
+        }
+
+        if !self.state.is_null() {
+            res.pin_mut().push_str(": ");
+            res.pin_mut().push_bytes(self.state.as_bytes());
+        }
+
+        res
+    }
 }
 
 impl Default for RsStatus {
@@ -466,4 +529,30 @@ pub fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) 
         UniquePtr::null(),
         sev,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn to_string_ok() {
+        let status = RsStatus::default();
+        let s = status.to_string();
+        assert_eq!(s.to_str().unwrap(), "OK");
+    }
+
+    #[test]
+    fn to_string_memory_limit() {
+        let status = RsStatus {
+            code: Code::kAborted,
+            subcode: SubCode::kMemoryLimit,
+            ..RsStatus::default()
+        };
+        let s = status.to_string();
+        assert_eq!(
+            s.to_str().unwrap(),
+            "Operation aborted: Memory limit reached"
+        );
+    }
 }

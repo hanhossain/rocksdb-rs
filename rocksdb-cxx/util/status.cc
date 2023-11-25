@@ -407,27 +407,6 @@ std::unique_ptr<std::string> Status_CopyState(const std::string& s) {
     return value;
 }
 
-static const char* msgs[static_cast<int>(SubCode::kMaxSubCode)] = {
-    "",                                                   // kNone
-    "Timeout Acquiring Mutex",                            // kMutexTimeout
-    "Timeout waiting to lock key",                        // kLockTimeout
-    "Failed to acquire lock due to max_num_locks limit",  // kLockLimit
-    "No space left on device",                            // kNoSpace
-    "Deadlock",                                           // kDeadlock
-    "Stale file handle",                                  // kStaleFile
-    "Memory limit reached",                               // kMemoryLimit
-    "Space limit reached",                                // kSpaceLimit
-    "No such file or directory",                          // kPathNotFound
-    // KMergeOperandsInsufficientCapacity
-    "Insufficient capacity for merge operands",
-    // kManualCompactionPaused
-    "Manual compaction paused",
-    " (overwritten)",         // kOverwritten, subcode of OK
-    "Txn not prepared",       // kTxnNotPrepared
-    "IO fenced off",          // kIOFenced
-    "Merge operator failed",  // kMergeOperatorFailed
-};
-
 Status::Status(Code _code, SubCode _subcode, const Slice& msg,
                const Slice& msg2, Severity sev)
     : rs_status_(RsStatus_new(_code, _subcode, msg, msg2, sev)) {}
@@ -443,82 +422,8 @@ Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
 }
 
 std::string Status::ToString() const {
-  const char* type = nullptr;
-  switch (rs_status_.code_) {
-    case Code::kOk:
-      return "OK";
-    case Code::kNotFound:
-      type = "NotFound: ";
-      break;
-    case Code::kCorruption:
-      type = "Corruption: ";
-      break;
-    case Code::kNotSupported:
-      type = "Not implemented: ";
-      break;
-    case Code::kInvalidArgument:
-      type = "Invalid argument: ";
-      break;
-    case Code::kIOError:
-      type = "IO error: ";
-      break;
-    case Code::kMergeInProgress:
-      type = "Merge in progress: ";
-      break;
-    case Code::kIncomplete:
-      type = "Result incomplete: ";
-      break;
-    case Code::kShutdownInProgress:
-      type = "Shutdown in progress: ";
-      break;
-    case Code::kTimedOut:
-      type = "Operation timed out: ";
-      break;
-    case Code::kAborted:
-      type = "Operation aborted: ";
-      break;
-    case Code::kBusy:
-      type = "Resource busy: ";
-      break;
-    case Code::kExpired:
-      type = "Operation expired: ";
-      break;
-    case Code::kTryAgain:
-      type = "Operation failed. Try again.: ";
-      break;
-    case Code::kCompactionTooLarge:
-      type = "Compaction too large: ";
-      break;
-    case Code::kColumnFamilyDropped:
-      type = "Column family dropped: ";
-      break;
-    case Code::kMaxCode:
-      assert(false);
-      break;
-  }
-  char tmp[30];
-  if (type == nullptr) {
-    // This should not happen since `code_` should be a valid non-`kMaxCode`
-    // member of the `Code` enum. The above switch-statement should have had a
-    // case assigning `type` to a corresponding string.
-    assert(false);
-    snprintf(tmp, sizeof(tmp), "Unknown code(%d): ", static_cast<int>(code()));
-    type = tmp;
-  }
-  std::string result(type);
-  if (rs_status_.subcode_ != SubCode::kNone) {
-    uint32_t index = static_cast<int32_t>(rs_status_.subcode_);
-    assert(sizeof(msgs) / sizeof(msgs[0]) > index);
-    result.append(msgs[index]);
-  }
-
-  if (rs_status_.state != nullptr) {
-    if (rs_status_.subcode_ != SubCode::kNone) {
-      result.append(": ");
-    }
-    result.append(*rs_status_.state);
-  }
-  return result;
+    auto rs_string = rs_status_.ToString();
+    return rs_string == nullptr ? "" : rs_string->c_str();
 }
 
 }  // namespace ROCKSDB_NAMESPACE
