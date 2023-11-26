@@ -299,6 +299,10 @@ pub mod ffi {
         #[cxx_name = "RsStatus_CopyState"]
         fn rs_status_copy_state(s: &CxxString) -> UniquePtr<CxxString>;
 
+        #[cxx_name = "RsStatus_CopyAppendMessage"]
+        fn rs_status_copy_append_message(status: &RsStatus, delim: &Slice, msg: &Slice)
+            -> RsStatus;
+
         fn code(self: &RsStatus) -> Code;
         fn subcode(self: &RsStatus) -> SubCode;
         fn severity(self: &RsStatus) -> Severity;
@@ -1390,6 +1394,22 @@ pub fn rs_status_copy_state(s: &CxxString) -> UniquePtr<CxxString> {
     let mut res = crate::ffi::make_string();
     res.pin_mut().push_bytes(s.as_bytes());
     res
+}
+
+pub fn rs_status_copy_append_message(status: &RsStatus, delim: &Slice, msg: &Slice) -> RsStatus {
+    let mut new_msg = crate::ffi::make_string();
+    new_msg.pin_mut().push_bytes(status.state.as_bytes());
+    new_msg
+        .pin_mut()
+        .push_bytes(delim.to_unique_ptr_string().as_bytes());
+    new_msg
+        .pin_mut()
+        .push_bytes(msg.to_unique_ptr_string().as_bytes());
+
+    RsStatus {
+        state: new_msg,
+        ..RsStatus::default()
+    }
 }
 
 #[cfg(test)]

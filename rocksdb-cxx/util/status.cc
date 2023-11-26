@@ -477,8 +477,7 @@ Status::Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2
 Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
                                  const Slice& msg) {
   // (No attempt at efficiency)
-  return Status(s.code(), s.subcode(), s.severity(),
-                std::string(s.getState()) + delim.ToString() + msg.ToString());
+  return Status(RsStatus_CopyAppendMessage(s.rs_status_, delim, msg));
 }
 
 std::string Status::ToString() const {

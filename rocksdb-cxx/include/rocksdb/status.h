@@ -166,7 +166,6 @@ class Status {
     Status(RsStatus _rs_status);
 };
 
-    // TODO: Rust
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
 
     // Return a success status.
