@@ -118,6 +118,184 @@ pub mod ffi {
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> RsStatus;
 
+        #[cxx_name = "RsStatus_OK"]
+        fn rs_status_ok() -> RsStatus;
+
+        #[cxx_name = "RsStatus_OkOverwritten"]
+        fn rs_status_ok_overwritten() -> RsStatus;
+
+        #[cxx_name = "RsStatus_NotFound"]
+        fn rs_status_not_found() -> RsStatus;
+        #[cxx_name = "RsStatus_NotFound"]
+        fn rs_status_not_found1(msg: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_NotFound"]
+        fn rs_status_not_found2(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_NotFound"]
+        fn rs_status_not_found3(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_NotFound"]
+        fn rs_status_not_found4(subcode: SubCode, msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_NotFound"]
+        fn rs_status_not_found5(subcode: SubCode, msg: &Slice) -> RsStatus;
+
+        #[cxx_name = "RsStatus_Corruption"]
+        fn rs_status_corruption(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Corruption"]
+        fn rs_status_corruption2(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_Corruption"]
+        fn rs_status_corruption3() -> RsStatus;
+
+        #[cxx_name = "RsStatus_NotSupported"]
+        fn rs_status_not_supported(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_NotSupported"]
+        fn rs_status_not_supported2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_NotSupported"]
+        fn rs_status_not_supported3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_NotSupported"]
+        fn rs_status_not_supported4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_InvalidArgument"]
+        fn rs_status_invalid_argument(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_InvalidArgument"]
+        fn rs_status_invalid_argument2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_InvalidArgument"]
+        fn rs_status_invalid_argument3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_InvalidArgument"]
+        fn rs_status_invalid_argument4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_IOError"]
+        fn rs_status_io_error(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_IOError"]
+        fn rs_status_io_error2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_IOError"]
+        fn rs_status_io_error3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_IOError"]
+        fn rs_status_io_error4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_MergeInProgress"]
+        fn rs_status_merge_in_progress(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_MergeInProgress"]
+        fn rs_status_merge_in_progress2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_MergeInProgress"]
+        fn rs_status_merge_in_progress3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_MergeInProgress"]
+        fn rs_status_merge_in_progress4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_Incomplete"]
+        fn rs_status_incomplete(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Incomplete"]
+        fn rs_status_incomplete2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Incomplete"]
+        fn rs_status_incomplete3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_Incomplete"]
+        fn rs_status_incomplete4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_ShutdownInProgress"]
+        fn rs_status_shutdown_in_progress(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_ShutdownInProgress"]
+        fn rs_status_shutdown_in_progress2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_ShutdownInProgress"]
+        fn rs_status_shutdown_in_progress3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_ShutdownInProgress"]
+        fn rs_status_shutdown_in_progress4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_Aborted"]
+        fn rs_status_aborted(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Aborted"]
+        fn rs_status_aborted2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Aborted"]
+        fn rs_status_aborted3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_Aborted"]
+        fn rs_status_aborted4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_Busy"]
+        fn rs_status_busy(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Busy"]
+        fn rs_status_busy2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Busy"]
+        fn rs_status_busy3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_Busy"]
+        fn rs_status_busy4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_TimedOut"]
+        fn rs_status_timed_out(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_TimedOut"]
+        fn rs_status_timed_out2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_TimedOut"]
+        fn rs_status_timed_out3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_TimedOut"]
+        fn rs_status_timed_out4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_Expired"]
+        fn rs_status_expired(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Expired"]
+        fn rs_status_expired2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_Expired"]
+        fn rs_status_expired3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_Expired"]
+        fn rs_status_expired4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_TryAgain"]
+        fn rs_status_try_again(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_TryAgain"]
+        fn rs_status_try_again2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_TryAgain"]
+        fn rs_status_try_again3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_TryAgain"]
+        fn rs_status_try_again4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_CompactionTooLarge"]
+        fn rs_status_compaction_too_large(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_CompactionTooLarge"]
+        fn rs_status_compaction_too_large2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_CompactionTooLarge"]
+        fn rs_status_compaction_too_large3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_CompactionTooLarge"]
+        fn rs_status_compaction_too_large4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_ColumnFamilyDropped"]
+        fn rs_status_column_family_dropped(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_ColumnFamilyDropped"]
+        fn rs_status_column_family_dropped2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_ColumnFamilyDropped"]
+        fn rs_status_column_family_dropped3(subcode: SubCode) -> RsStatus;
+        #[cxx_name = "RsStatus_ColumnFamilyDropped"]
+        fn rs_status_column_family_dropped4() -> RsStatus;
+
+        #[cxx_name = "RsStatus_NoSpace"]
+        fn rs_status_no_space(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_NoSpace"]
+        fn rs_status_no_space2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_NoSpace"]
+        fn rs_status_no_space3() -> RsStatus;
+
+        #[cxx_name = "RsStatus_MemoryLimit"]
+        fn rs_status_memory_limit(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_MemoryLimit"]
+        fn rs_status_memory_limit2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_MemoryLimit"]
+        fn rs_status_memory_limit3() -> RsStatus;
+
+        #[cxx_name = "RsStatus_SpaceLimit"]
+        fn rs_status_space_limit(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_SpaceLimit"]
+        fn rs_status_space_limit2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_SpaceLimit"]
+        fn rs_status_space_limit3() -> RsStatus;
+
+        #[cxx_name = "RsStatus_PathNotFound"]
+        fn rs_status_path_not_found(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_PathNotFound"]
+        fn rs_status_path_not_found2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_PathNotFound"]
+        fn rs_status_path_not_found3() -> RsStatus;
+
+        #[cxx_name = "RsStatus_TxnNotPrepared"]
+        fn rs_status_txn_not_prepared(msg: &Slice, msg2: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_TxnNotPrepared"]
+        fn rs_status_txn_not_prepared2(msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_TxnNotPrepared"]
+        fn rs_status_txn_not_prepared3() -> RsStatus;
+
         fn code(self: &RsStatus) -> Code;
         fn subcode(self: &RsStatus) -> SubCode;
         fn severity(self: &RsStatus) -> Severity;
@@ -531,6 +709,678 @@ pub fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) 
         UniquePtr::null(),
         sev,
     )
+}
+
+pub fn rs_status_ok() -> RsStatus {
+    RsStatus::default()
+}
+
+pub fn rs_status_ok_overwritten() -> RsStatus {
+    RsStatus {
+        code: Code::kOk,
+        subcode: SubCode::kOverwritten,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_not_found() -> RsStatus {
+    RsStatus {
+        code: Code::kNotFound,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_not_found1(msg: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kNotFound,
+        subcode: msg,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_not_found2(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kNotFound,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_not_found3(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kNotFound,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_not_found4(subcode: SubCode, msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(Code::kNotFound, subcode, msg, msg2, Severity::kNoError)
+}
+
+pub fn rs_status_not_found5(subcode: SubCode, msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kNotFound,
+        subcode,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_corruption(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kCorruption,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_corruption2(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kCorruption,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_corruption3() -> RsStatus {
+    RsStatus {
+        code: Code::kCorruption,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_not_supported(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kNotSupported,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_not_supported2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kNotSupported,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_not_supported3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kNotSupported,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_not_supported4() -> RsStatus {
+    RsStatus {
+        code: Code::kNotSupported,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_invalid_argument(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kInvalidArgument,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_invalid_argument2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kInvalidArgument,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_invalid_argument3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kInvalidArgument,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_invalid_argument4() -> RsStatus {
+    RsStatus {
+        code: Code::kInvalidArgument,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_io_error(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kIOError,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+pub fn rs_status_io_error2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kIOError,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+pub fn rs_status_io_error3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kIOError,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+pub fn rs_status_io_error4() -> RsStatus {
+    RsStatus {
+        code: Code::kIOError,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_merge_in_progress(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kMergeInProgress,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_merge_in_progress2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kMergeInProgress,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_merge_in_progress3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kMergeInProgress,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_merge_in_progress4() -> RsStatus {
+    RsStatus {
+        code: Code::kMergeInProgress,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_incomplete(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kIncomplete,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_incomplete2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kIncomplete,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_incomplete3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kIncomplete,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_incomplete4() -> RsStatus {
+    RsStatus {
+        code: Code::kIncomplete,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_shutdown_in_progress(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kShutdownInProgress,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_shutdown_in_progress2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kShutdownInProgress,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_shutdown_in_progress3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kShutdownInProgress,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_shutdown_in_progress4() -> RsStatus {
+    RsStatus {
+        code: Code::kShutdownInProgress,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_aborted(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kAborted,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_aborted2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kAborted,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_aborted3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kAborted,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_aborted4() -> RsStatus {
+    RsStatus {
+        code: Code::kAborted,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_busy(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(Code::kBusy, SubCode::kNone, msg, msg2, Severity::kNoError)
+}
+
+pub fn rs_status_busy2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kBusy,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_busy3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kBusy,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_busy4() -> RsStatus {
+    RsStatus {
+        code: Code::kBusy,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_timed_out(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kTimedOut,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_timed_out2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kTimedOut,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_timed_out3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kTimedOut,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_timed_out4() -> RsStatus {
+    RsStatus {
+        code: Code::kTimedOut,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_expired(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kTimedOut,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_expired2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kExpired,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_expired3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kExpired,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_expired4() -> RsStatus {
+    RsStatus {
+        code: Code::kExpired,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_try_again(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kTryAgain,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_try_again2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kTryAgain,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_try_again3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kTryAgain,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_try_again4() -> RsStatus {
+    RsStatus {
+        code: Code::kTryAgain,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_compaction_too_large(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kCompactionTooLarge,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_compaction_too_large2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kCompactionTooLarge,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_compaction_too_large3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kCompactionTooLarge,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_compaction_too_large4() -> RsStatus {
+    RsStatus {
+        code: Code::kCompactionTooLarge,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_column_family_dropped(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kColumnFamilyDropped,
+        SubCode::kNone,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_column_family_dropped2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kColumnFamilyDropped,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_column_family_dropped3(subcode: SubCode) -> RsStatus {
+    RsStatus {
+        code: Code::kColumnFamilyDropped,
+        subcode,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_column_family_dropped4() -> RsStatus {
+    RsStatus {
+        code: Code::kColumnFamilyDropped,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_no_space(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kIOError,
+        SubCode::kNoSpace,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_no_space2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kIOError,
+        SubCode::kNoSpace,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_no_space3() -> RsStatus {
+    RsStatus {
+        code: Code::kIOError,
+        subcode: SubCode::kNoSpace,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_memory_limit(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kAborted,
+        SubCode::kMemoryLimit,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_memory_limit2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kAborted,
+        SubCode::kMemoryLimit,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_memory_limit3() -> RsStatus {
+    RsStatus {
+        code: Code::kAborted,
+        subcode: SubCode::kMemoryLimit,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_space_limit(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kIOError,
+        SubCode::kSpaceLimit,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_space_limit2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kIOError,
+        SubCode::kSpaceLimit,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_space_limit3() -> RsStatus {
+    RsStatus {
+        code: Code::kIOError,
+        subcode: SubCode::kSpaceLimit,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_path_not_found(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kIOError,
+        SubCode::kPathNotFound,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_path_not_found2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kIOError,
+        SubCode::kPathNotFound,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_path_not_found3() -> RsStatus {
+    RsStatus {
+        code: Code::kIOError,
+        subcode: SubCode::kPathNotFound,
+        ..RsStatus::default()
+    }
+}
+
+pub fn rs_status_txn_not_prepared(msg: &Slice, msg2: &Slice) -> RsStatus {
+    RsStatus::new_with_slices(
+        Code::kInvalidArgument,
+        SubCode::kTxnNotPrepared,
+        msg,
+        msg2,
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_txn_not_prepared2(msg: &Slice) -> RsStatus {
+    RsStatus::new_with_messages(
+        Code::kInvalidArgument,
+        SubCode::kTxnNotPrepared,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
+}
+
+pub fn rs_status_txn_not_prepared3() -> RsStatus {
+    RsStatus {
+        code: Code::kInvalidArgument,
+        subcode: SubCode::kTxnNotPrepared,
+        ..RsStatus::default()
+    }
 }
 
 #[cfg(test)]

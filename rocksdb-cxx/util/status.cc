@@ -38,6 +38,9 @@ Status::Status()
               0,
               nullptr)) {}
 
+Status::Status(RsStatus _rs_status) : rs_status_(std::move(_rs_status)) {}
+
+
 Status::Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg)
     : rs_status_(RsStatus_new(_code, _subcode, _sev, msg)) {}
 
@@ -57,168 +60,225 @@ const char* Status::getState() const {
     return rs_status_.getState() == nullptr ? nullptr : rs_status_.getState()->c_str();
 }
 
-Status Status_OK() { return Status(); }
+Status Status_OK() { return Status(RsStatus_OK()); }
 
-Status Status_OkOverwritten() { return Status(Code::kOk, SubCode::kOverwritten); }
+Status Status_OkOverwritten() { return Status(RsStatus_OkOverwritten()); }
 
 Status Status_NotFound(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kNotFound, msg, msg2);
+    return Status(RsStatus_NotFound(msg, msg2));
 }
 
-Status Status_NotFound(SubCode msg) { return Status(Code::kNotFound, msg); }
+Status Status_NotFound(const Slice& msg) {
+    return Status(RsStatus_NotFound(msg));
+}
 
-Status Status_NotFound() { return Status_NotFound(SubCode::kNone); }
+Status Status_NotFound(SubCode msg) { return Status(RsStatus_NotFound(msg)); }
 
-Status Status_NotFound(SubCode sc, const Slice& msg,
-                       const Slice& msg2) {
-    return Status(Code::kNotFound, sc, msg, msg2);
+Status Status_NotFound() { return Status(RsStatus_NotFound()); }
+
+Status Status_NotFound(SubCode sc, const Slice& msg, const Slice& msg2) {
+    return Status(RsStatus_NotFound(sc, msg, msg2));
+}
+
+Status Status_NotFound(SubCode sc, const Slice& msg) {
+    return Status(RsStatus_NotFound(sc, msg));
 }
 
 Status Status_Corruption(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kCorruption, msg, msg2);
+    return Status(RsStatus_Corruption(msg, msg2));
 }
 Status Status_Corruption(SubCode msg) {
-    return Status(Code::kCorruption, msg);
+    return Status(RsStatus_Corruption(msg));
 }
 Status Status_Corruption() {
-    return Status_Corruption(SubCode::kNone);
+    return Status(RsStatus_Corruption());
 }
 
 Status Status_NotSupported(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kNotSupported, msg, msg2);
+    return Status(RsStatus_NotSupported(msg, msg2));
+}
+Status Status_NotSupported(const Slice& msg) {
+    return Status(RsStatus_NotSupported(msg));
 }
 Status Status_NotSupported(SubCode msg) {
-    return Status(Code::kNotSupported, msg);
+    return Status(RsStatus_NotSupported(msg));
 }
 Status Status_NotSupported() {
-    return Status_NotSupported(SubCode::kNone);
+    return Status(RsStatus_NotSupported());
 }
 
 Status Status_InvalidArgument(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kInvalidArgument, msg, msg2);
+    return Status(RsStatus_InvalidArgument(msg, msg2));
+}
+Status Status_InvalidArgument(const Slice& msg) {
+    return Status(RsStatus_InvalidArgument(msg));
 }
 Status Status_InvalidArgument(SubCode msg) {
-    return Status(Code::kInvalidArgument, msg);
+    return Status(RsStatus_InvalidArgument(msg));
 }
 Status Status_InvalidArgument() {
-    return Status_InvalidArgument(SubCode::kNone);
+    return Status(RsStatus_InvalidArgument());
 }
 
 Status Status_IOError(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kIOError, msg, msg2);
+    return Status(RsStatus_IOError(msg, msg2));
 }
-Status Status_IOError(SubCode msg) { return Status(Code::kIOError, msg); }
-Status Status_IOError() { return Status_IOError(SubCode::kNone); }
+Status Status_IOError(const Slice& msg) {
+    return Status(RsStatus_IOError(msg));
+}
+Status Status_IOError(SubCode msg) { return Status(RsStatus_IOError(msg)); }
+Status Status_IOError() { return Status(RsStatus_IOError()); }
 
 Status Status_MergeInProgress(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kMergeInProgress, msg, msg2);
+    return Status(RsStatus_MergeInProgress(msg, msg2));
+}
+Status Status_MergeInProgress(const Slice& msg) {
+    return Status(RsStatus_MergeInProgress(msg));
 }
 Status Status_MergeInProgress(SubCode msg) {
-    return Status(Code::kMergeInProgress, msg);
+    return Status(RsStatus_MergeInProgress(msg));
 }
 Status Status_MergeInProgress() {
-    return Status_MergeInProgress(SubCode::kNone);
+    return Status(RsStatus_MergeInProgress());
 }
 
 Status Status_Incomplete(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kIncomplete, msg, msg2);
+    return Status(RsStatus_Incomplete(msg, msg2));
+}
+Status Status_Incomplete(const Slice& msg) {
+    return Status(RsStatus_Incomplete(msg));
 }
 Status Status_Incomplete(SubCode msg) {
-    return Status(Code::kIncomplete, msg);
+    return Status(RsStatus_Incomplete(msg));
 }
 Status Status_Incomplete() {
-    return Status_Incomplete(SubCode::kNone);
+    return Status(RsStatus_Incomplete());
 }
 
 Status Status_ShutdownInProgress(SubCode msg) {
-    return Status(Code::kShutdownInProgress, msg);
+    return Status(RsStatus_ShutdownInProgress(msg));
 }
 Status Status_ShutdownInProgress() {
-    return Status_ShutdownInProgress(SubCode::kNone);
+    return Status(RsStatus_ShutdownInProgress());
 }
-Status Status_ShutdownInProgress(const Slice& msg,
-                                 const Slice& msg2) {
-    return Status(Code::kShutdownInProgress, msg, msg2);
+Status Status_ShutdownInProgress(const Slice& msg, const Slice& msg2) {
+    return Status(RsStatus_ShutdownInProgress(msg, msg2));
 }
-Status Status_Aborted(SubCode msg) { return Status(Code::kAborted, msg); }
-Status Status_Aborted() { return Status_Aborted(SubCode::kNone); }
+Status Status_ShutdownInProgress(const Slice& msg) {
+    return Status(RsStatus_ShutdownInProgress(msg));
+}
+
+Status Status_Aborted(SubCode msg) { return Status(RsStatus_Aborted(msg)); }
+Status Status_Aborted() { return Status(RsStatus_Aborted()); }
 Status Status_Aborted(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kAborted, msg, msg2);
+    return Status(RsStatus_Aborted(msg, msg2));
+}
+Status Status_Aborted(const Slice& msg) {
+    return Status(RsStatus_Aborted(msg));
 }
 
-Status Status_Busy(SubCode msg) { return Status(Code::kBusy, msg); }
-Status Status_Busy() { return Status_Busy(SubCode::kNone); }
+Status Status_Busy(SubCode msg) { return Status(RsStatus_Busy(msg)); }
+Status Status_Busy() { return Status(RsStatus_Busy()); }
 Status Status_Busy(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kBusy, msg, msg2);
+    return Status(RsStatus_Busy(msg, msg2));
+}
+Status Status_Busy(const Slice& msg) {
+    return Status(RsStatus_Busy(msg));
 }
 
-Status Status_TimedOut(SubCode msg) { return Status(Code::kTimedOut, msg); }
-Status Status_TimedOut() { return Status_TimedOut(SubCode::kNone); }
+Status Status_TimedOut(SubCode msg) { return Status(RsStatus_TimedOut(msg)); }
+Status Status_TimedOut() { return Status(RsStatus_TimedOut()); }
 Status Status_TimedOut(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kTimedOut, msg, msg2);
+    return Status(RsStatus_TimedOut(msg, msg2));
+}
+Status Status_TimedOut(const Slice& msg) {
+    return Status(RsStatus_TimedOut(msg));
 }
 
-Status Status_Expired(SubCode msg) { return Status(Code::kExpired, msg); }
-Status Status_Expired() { return Status_Expired(SubCode::kNone); }
+Status Status_Expired(SubCode msg) { return Status(RsStatus_Expired(msg)); }
+Status Status_Expired() { return Status(RsStatus_Expired()); }
 Status Status_Expired(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kExpired, msg, msg2);
+    return Status(RsStatus_Expired(msg, msg2));
+}
+Status Status_Expired(const Slice& msg) {
+    return Status(RsStatus_Expired(msg));
 }
 
-Status Status_TryAgain(SubCode msg) { return Status(Code::kTryAgain, msg); }
-Status Status_TryAgain() { return Status_TryAgain(SubCode::kNone); }
+Status Status_TryAgain(SubCode msg) { return Status(RsStatus_TryAgain(msg)); }
+Status Status_TryAgain() { return Status(RsStatus_TryAgain()); }
 Status Status_TryAgain(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kTryAgain, msg, msg2);
+    return Status(RsStatus_TryAgain(msg, msg2));
+}
+Status Status_TryAgain(const Slice& msg) {
+    return Status(RsStatus_TryAgain(msg));
 }
 
 Status Status_CompactionTooLarge(SubCode msg) {
-    return Status(Code::kCompactionTooLarge, msg);
+    return Status(RsStatus_CompactionTooLarge(msg));
 }
 Status Status_CompactionTooLarge() {
-    return Status_CompactionTooLarge(SubCode::kNone);
+    return Status(RsStatus_CompactionTooLarge());
 }
 Status Status_CompactionTooLarge(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kCompactionTooLarge, msg, msg2);
+    return Status(RsStatus_CompactionTooLarge(msg, msg2));
+}
+Status Status_CompactionTooLarge(const Slice& msg) {
+    return Status(RsStatus_CompactionTooLarge(msg));
 }
 
 Status Status_ColumnFamilyDropped(SubCode msg) {
-    return Status(Code::kColumnFamilyDropped, msg);
+    return Status(RsStatus_ColumnFamilyDropped(msg));
 }
 Status Status_ColumnFamilyDropped() {
-    return Status_ColumnFamilyDropped(SubCode::kNone);
+    return Status(RsStatus_ColumnFamilyDropped());
 }
 Status Status_ColumnFamilyDropped(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kColumnFamilyDropped, msg, msg2);
+    return Status(RsStatus_ColumnFamilyDropped(msg, msg2));
+}
+Status Status_ColumnFamilyDropped(const Slice& msg) {
+    return Status(RsStatus_ColumnFamilyDropped(msg));
 }
 
-Status Status_NoSpace() { return Status(Code::kIOError, SubCode::kNoSpace); }
-
+Status Status_NoSpace() { return Status(RsStatus_NoSpace()); }
 Status Status_NoSpace(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kIOError, SubCode::kNoSpace, msg, msg2);
+    return Status(RsStatus_NoSpace(msg, msg2));
 }
-Status Status_MemoryLimit() { return Status(Code::kAborted, SubCode::kMemoryLimit); }
+Status Status_NoSpace(const Slice& msg) {
+    return Status(RsStatus_NoSpace(msg));
+}
 
+Status Status_MemoryLimit() { return Status(RsStatus_MemoryLimit()); }
 Status Status_MemoryLimit(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kAborted, SubCode::kMemoryLimit, msg, msg2);
+    return Status(RsStatus_MemoryLimit(msg, msg2));
+}
+Status Status_MemoryLimit(const Slice& msg) {
+    return Status(RsStatus_MemoryLimit(msg));
 }
 
-Status Status_SpaceLimit() { return Status(Code::kIOError, SubCode::kSpaceLimit); }
-
+Status Status_SpaceLimit() { return Status(RsStatus_SpaceLimit()); }
 Status Status_SpaceLimit(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kIOError, SubCode::kSpaceLimit, msg, msg2);
+    return Status(RsStatus_SpaceLimit(msg, msg2));
+}
+Status Status_SpaceLimit(const Slice& msg) {
+    return Status(RsStatus_SpaceLimit(msg));
 }
 
-Status Status_PathNotFound() { return Status(Code::kIOError, SubCode::kPathNotFound); }
-
+Status Status_PathNotFound() { return Status(RsStatus_PathNotFound()); }
 Status Status_PathNotFound(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kIOError, SubCode::kPathNotFound, msg, msg2);
+    return Status(RsStatus_PathNotFound(msg, msg2));
+}
+Status Status_PathNotFound(const Slice& msg) {
+    return Status(RsStatus_PathNotFound(msg));
 }
 
 Status Status_TxnNotPrepared() {
-    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared);
+    return Status(RsStatus_TxnNotPrepared());
 }
-
 Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2) {
-    return Status(Code::kInvalidArgument, SubCode::kTxnNotPrepared, msg, msg2);
+    return Status(RsStatus_TxnNotPrepared(msg, msg2));
+}
+Status Status_TxnNotPrepared(const Slice& msg) {
+    return Status(RsStatus_TxnNotPrepared(msg));
 }
 
 bool Status::ok() const {
