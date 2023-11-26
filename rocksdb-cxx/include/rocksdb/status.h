@@ -147,7 +147,6 @@ class Status {
 
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
-  // TODO: Rust
   std::string ToString() const;
 
     explicit Status(Code _code, SubCode _subcode);
