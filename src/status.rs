@@ -424,7 +424,9 @@ impl RsStatus {
         }
 
         if !self.state.is_null() {
-            res.pin_mut().push_str(": ");
+            if self.subcode != SubCode::kNone {
+                res.pin_mut().push_str(": ");
+            }
             res.pin_mut().push_bytes(self.state.as_bytes());
         }
 
