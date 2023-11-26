@@ -278,6 +278,5 @@ class Status {
     Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2);
     Status Status_TxnNotPrepared(const Slice& msg);
 
-    // TODO: Rust
     std::unique_ptr<std::string> Status_CopyState(const std::string& s);
 }  // namespace ROCKSDB_NAMESPACE

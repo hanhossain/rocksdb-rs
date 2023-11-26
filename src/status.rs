@@ -296,6 +296,9 @@ pub mod ffi {
         #[cxx_name = "RsStatus_TxnNotPrepared"]
         fn rs_status_txn_not_prepared3() -> RsStatus;
 
+        #[cxx_name = "RsStatus_CopyState"]
+        fn rs_status_copy_state(s: &CxxString) -> UniquePtr<CxxString>;
+
         fn code(self: &RsStatus) -> Code;
         fn subcode(self: &RsStatus) -> SubCode;
         fn severity(self: &RsStatus) -> Severity;
@@ -1381,6 +1384,12 @@ pub fn rs_status_txn_not_prepared3() -> RsStatus {
         subcode: SubCode::kTxnNotPrepared,
         ..RsStatus::default()
     }
+}
+
+pub fn rs_status_copy_state(s: &CxxString) -> UniquePtr<CxxString> {
+    let mut res = crate::ffi::make_string();
+    res.pin_mut().push_bytes(s.as_bytes());
+    res
 }
 
 #[cfg(test)]

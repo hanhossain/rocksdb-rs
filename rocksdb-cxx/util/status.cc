@@ -463,7 +463,7 @@ bool Status::operator!=(const Status& rhs) const {
 }
 
 std::unique_ptr<std::string> Status_CopyState(const std::string& s) {
-    auto value = std::make_unique<std::string>(s);
+    auto value = RsStatus_CopyState(s);
     return value;
 }
 
