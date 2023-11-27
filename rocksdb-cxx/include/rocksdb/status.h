@@ -34,11 +34,9 @@ class Status {
   Status();
 
   // Copy the specified status.
-  // TODO: Rust
   Status(const Status& s);
   // TODO: Rust
   Status& operator=(const Status& s);
-  // TODO: Rust
   Status(Status&& s) noexcept;
   // TODO: Rust
   Status& operator=(Status&& s) noexcept;

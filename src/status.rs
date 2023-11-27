@@ -303,6 +303,9 @@ pub mod ffi {
         fn rs_status_copy_append_message(status: &RsStatus, delim: &Slice, msg: &Slice)
             -> RsStatus;
 
+        #[cxx_name = "RsStatus_Move"]
+        fn rs_status_move(status: RsStatus) -> RsStatus;
+
         fn code(self: &RsStatus) -> Code;
         fn subcode(self: &RsStatus) -> SubCode;
         fn severity(self: &RsStatus) -> Severity;
@@ -359,6 +362,8 @@ pub mod ffi {
         fn is_io_fenced(self: &RsStatus) -> bool;
         #[cxx_name = "ToString"]
         fn to_string(self: &RsStatus) -> UniquePtr<CxxString>;
+        #[cxx_name = "Clone"]
+        fn clone(self: &RsStatus) -> RsStatus;
     }
 
     unsafe extern "C++" {
@@ -629,6 +634,25 @@ impl Default for RsStatus {
             data_loss: false,
             scope: 0,
             state: UniquePtr::null(),
+        }
+    }
+}
+
+impl Clone for RsStatus {
+    fn clone(&self) -> Self {
+        let state = if self.state.is_null() {
+            UniquePtr::null()
+        } else {
+            rs_status_copy_state(&self.state)
+        };
+        Self {
+            code: self.code,
+            subcode: self.subcode,
+            severity: self.severity,
+            retryable: self.retryable,
+            data_loss: self.data_loss,
+            scope: self.scope,
+            state,
         }
     }
 }
@@ -1414,6 +1438,18 @@ pub fn rs_status_copy_append_message(status: &RsStatus, delim: &Slice, msg: &Sli
         data_loss: status.data_loss,
         scope: status.scope,
         state: new_msg,
+    }
+}
+
+pub fn rs_status_move(status: RsStatus) -> RsStatus {
+    RsStatus {
+        code: status.code,
+        subcode: status.subcode,
+        severity: status.severity,
+        retryable: status.retryable,
+        data_loss: status.data_loss,
+        scope: status.scope,
+        state: status.state,
     }
 }
 
