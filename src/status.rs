@@ -359,6 +359,8 @@ pub mod ffi {
         #[cxx_name = "Clone"]
         fn clone(self: &RsStatus) -> RsStatus;
         fn eq(self: &RsStatus, other: &RsStatus) -> bool;
+        fn copy_from(self: &mut RsStatus, other: &RsStatus);
+        fn move_from(self: &mut RsStatus, other: RsStatus);
     }
 
     unsafe extern "C++" {
@@ -616,6 +618,30 @@ impl RsStatus {
         }
 
         res
+    }
+
+    pub fn copy_from(&mut self, other: &RsStatus) {
+        self.code = other.code;
+        self.subcode = other.subcode;
+        self.severity = other.severity;
+        self.retryable = other.retryable;
+        self.data_loss = other.data_loss;
+        self.scope = other.scope;
+        self.state = if other.state.is_null() {
+            UniquePtr::null()
+        } else {
+            rs_status_copy_state(&other.state)
+        };
+    }
+
+    pub fn move_from(&mut self, other: RsStatus) {
+        self.code = other.code;
+        self.subcode = other.subcode;
+        self.severity = other.severity;
+        self.retryable = other.retryable;
+        self.data_loss = other.data_loss;
+        self.scope = other.scope;
+        self.state = other.state;
     }
 }
 

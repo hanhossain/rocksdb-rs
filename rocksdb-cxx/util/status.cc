@@ -401,15 +401,7 @@ Status::Status(const Status& s, Severity sev)
         : rs_status_(RsStatus_new(s.rs_status_, sev)) {}
 
 Status& Status::operator=(const Status& s) {
-    if (this != &s) {
-        rs_status_.code_ = s.rs_status_.code_;
-        rs_status_.subcode_ = s.rs_status_.subcode_;
-        rs_status_.severity_ = s.rs_status_.severity_;
-        rs_status_.retryable = s.rs_status_.retryable;
-        rs_status_.data_loss = s.rs_status_.data_loss;
-        rs_status_.scope = s.rs_status_.scope;
-        rs_status_.state = s.rs_status_.state == nullptr ? nullptr : Status_CopyState(s.rs_status_.state->c_str());
-    }
+    rs_status_.copy_from(s.rs_status_);
     return *this;
 }
 
@@ -417,21 +409,7 @@ Status::Status(Status&& s) noexcept
     : Status(RsStatus_Move(std::move(s.rs_status_))) {}
 
 Status& Status::operator=(Status&& s) noexcept {
-    if (this != &s) {
-        rs_status_.code_ = s.rs_status_.code_;
-        s.rs_status_.code_ = Code::kOk;
-        rs_status_.subcode_ = s.rs_status_.subcode_;
-        s.rs_status_.subcode_ = SubCode::kNone;
-        rs_status_.severity_ = s.rs_status_.severity_;
-        s.rs_status_.severity_ = Severity::kNoError;
-        rs_status_.retryable = s.rs_status_.retryable;
-        s.rs_status_.retryable = false;
-        rs_status_.data_loss = s.rs_status_.data_loss;
-        s.rs_status_.data_loss = false;
-        rs_status_.scope = s.rs_status_.scope;
-        s.rs_status_.scope = 0;
-        rs_status_.state = std::move(s.rs_status_.state);
-    }
+    rs_status_.move_from(std::move(s.rs_status_));
     return *this;
 }
 
