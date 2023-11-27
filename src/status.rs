@@ -627,11 +627,7 @@ impl RsStatus {
         self.retryable = other.retryable;
         self.data_loss = other.data_loss;
         self.scope = other.scope;
-        self.state = if other.state.is_null() {
-            UniquePtr::null()
-        } else {
-            rs_status_copy_state(&other.state)
-        };
+        self.state = other.copy_state();
     }
 
     pub fn move_from(&mut self, other: RsStatus) {
@@ -642,6 +638,14 @@ impl RsStatus {
         self.data_loss = other.data_loss;
         self.scope = other.scope;
         self.state = other.state;
+    }
+
+    fn copy_state(&self) -> UniquePtr<CxxString> {
+        if self.state.is_null() {
+            UniquePtr::null()
+        } else {
+            rs_status_copy_state(&self.state)
+        }
     }
 }
 
@@ -661,11 +665,7 @@ impl Default for RsStatus {
 
 impl Clone for RsStatus {
     fn clone(&self) -> Self {
-        let state = if self.state.is_null() {
-            UniquePtr::null()
-        } else {
-            rs_status_copy_state(&self.state)
-        };
+        let state = self.copy_state();
         Self {
             code: self.code,
             subcode: self.subcode,
@@ -773,11 +773,7 @@ pub fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) 
 }
 
 pub fn rs_status_new9(status: &RsStatus, severity: Severity) -> RsStatus {
-    let state = if status.state.is_null() {
-        UniquePtr::null()
-    } else {
-        rs_status_copy_state(&status.state)
-    };
+    let state = status.copy_state();
     RsStatus {
         code: status.code,
         subcode: status.subcode,
