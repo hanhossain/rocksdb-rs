@@ -1407,8 +1407,13 @@ pub fn rs_status_copy_append_message(status: &RsStatus, delim: &Slice, msg: &Sli
         .push_bytes(msg.to_unique_ptr_string().as_bytes());
 
     RsStatus {
+        code: status.code,
+        subcode: status.subcode,
+        severity: status.severity,
+        retryable: status.retryable,
+        data_loss: status.data_loss,
+        scope: status.scope,
         state: new_msg,
-        ..RsStatus::default()
     }
 }
 
