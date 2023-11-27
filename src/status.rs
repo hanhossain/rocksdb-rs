@@ -81,16 +81,12 @@ pub mod ffi {
             scope: u8,
             state: UniquePtr<CxxString>,
         ) -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new1() -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new2(code: Code) -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new3(code: Code, subcode: SubCode) -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new4(
             code: Code,
@@ -99,7 +95,6 @@ pub mod ffi {
             data_loss: bool,
             scope: u8,
         ) -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new5(
             code: Code,
@@ -108,15 +103,14 @@ pub mod ffi {
             msg2: &Slice,
             sev: Severity,
         ) -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new6(code: Code, msg: &Slice, msg2: &Slice) -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new7(code: Code, subcode: SubCode, msg: &Slice, msg2: &Slice) -> RsStatus;
-
         #[cxx_name = "RsStatus_new"]
         fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> RsStatus;
+        #[cxx_name = "RsStatus_new"]
+        fn rs_status_new9(status: &RsStatus, severity: Severity) -> RsStatus;
 
         #[cxx_name = "RsStatus_OK"]
         fn rs_status_ok() -> RsStatus;
@@ -750,6 +744,23 @@ pub fn rs_status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) 
         UniquePtr::null(),
         sev,
     )
+}
+
+pub fn rs_status_new9(status: &RsStatus, severity: Severity) -> RsStatus {
+    let state = if status.state.is_null() {
+        UniquePtr::null()
+    } else {
+        rs_status_copy_state(&status.state)
+    };
+    RsStatus {
+        code: status.code,
+        subcode: status.subcode,
+        severity,
+        retryable: status.retryable,
+        data_loss: status.data_loss,
+        scope: status.scope,
+        state,
+    }
 }
 
 pub fn rs_status_ok() -> RsStatus {

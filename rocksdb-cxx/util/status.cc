@@ -398,16 +398,7 @@ Status::Status(const Status& s)
         : rs_status_(s.rs_status_.Clone()) {}
 
 Status::Status(const Status& s, Severity sev)
-        : rs_status_(RsStatus_new(
-                  s.rs_status_.code_,
-                  s.rs_status_.subcode_,
-                  sev,
-                  s.rs_status_.retryable,
-                  s.rs_status_.data_loss,
-                  s.rs_status_.scope,
-                  nullptr)) {
-    rs_status_.state = s.rs_status_.state == nullptr ? nullptr : Status_CopyState(s.rs_status_.state->c_str());
-}
+        : rs_status_(RsStatus_new(s.rs_status_, sev)) {}
 
 Status& Status::operator=(const Status& s) {
     if (this != &s) {

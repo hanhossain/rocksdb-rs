@@ -46,7 +46,6 @@ class Status {
   Code code() const;
   SubCode subcode() const;
 
-  // TODO: Rust
   Status(const Status& s, Severity sev);
 
   Status(Code _code, SubCode _subcode, Severity _sev, const Slice& msg);
