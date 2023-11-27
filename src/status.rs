@@ -364,6 +364,7 @@ pub mod ffi {
         fn to_string(self: &RsStatus) -> UniquePtr<CxxString>;
         #[cxx_name = "Clone"]
         fn clone(self: &RsStatus) -> RsStatus;
+        fn eq(self: &RsStatus, other: &RsStatus) -> bool;
     }
 
     unsafe extern "C++" {
@@ -656,6 +657,15 @@ impl Clone for RsStatus {
         }
     }
 }
+
+impl PartialEq<Self> for RsStatus {
+    fn eq(&self, other: &Self) -> bool {
+        // Original implementation only checks whether code == code.
+        self.code == other.code
+    }
+}
+
+impl Eq for RsStatus {}
 
 pub fn rs_status_new(
     code: Code,

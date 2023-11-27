@@ -40,9 +40,7 @@ class Status {
   Status(Status&& s) noexcept;
   // TODO: Rust
   Status& operator=(Status&& s) noexcept;
-  // TODO: Rust
   bool operator==(const Status& rhs) const;
-  // TODO: Rust
   bool operator!=(const Status& rhs) const;
 
   Code code() const;
