@@ -1985,7 +1985,7 @@ TEST_F(VersionSetTest, WalCreateTwice) {
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(s.ToString()->find("WAL 10 is created more than once") !=
               std::string::npos)
-      << s.ToString();
+      << *s.ToString();
 }
 
 TEST_F(VersionSetTest, WalCreateAfterClose) {
@@ -2013,7 +2013,7 @@ TEST_F(VersionSetTest, WalCreateAfterClose) {
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("WAL 10 is created more than once") !=
                 std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 }
 

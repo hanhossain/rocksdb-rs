@@ -209,7 +209,7 @@ class Constructor {
     data_.clear();
     Status s = FinishImpl(options, ioptions, moptions, table_options,
                           internal_comparator, *kvmap);
-    ASSERT_TRUE(s.ok()) << s.ToString();
+    ASSERT_TRUE(s.ok()) << *s.ToString();
   }
 
   // Construct the data structure from the data in "data"
@@ -402,7 +402,7 @@ class TableConstructor : public Constructor {
     }
     Status s = builder->Finish();
     EXPECT_OK(file_writer_->Flush());
-    EXPECT_TRUE(s.ok()) << s.ToString();
+    EXPECT_TRUE(s.ok()) << *s.ToString();
 
     EXPECT_EQ(TEST_GetSink()->contents().size(), builder->FileSize());
 
@@ -608,13 +608,13 @@ class DBConstructor : public Constructor {
     Options options;
     options.comparator = comparator_;
     Status status = DestroyDB(name, options);
-    ASSERT_TRUE(status.ok()) << status.ToString();
+    ASSERT_TRUE(status.ok()) << *status.ToString();
 
     options.create_if_missing = true;
     options.error_if_exists = true;
     options.write_buffer_size = 10000;  // Something small to force merging
     status = DB::Open(options, name, &db_);
-    ASSERT_TRUE(status.ok()) << status.ToString();
+    ASSERT_TRUE(status.ok()) << *status.ToString();
   }
 
   const Comparator* comparator_;

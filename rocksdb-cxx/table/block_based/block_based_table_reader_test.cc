@@ -582,7 +582,7 @@ TEST_P(ChargeTableReaderTest, Basic) {
   }
 
   if (charge_table_reader_ == CacheEntryRoleOptions::Decision::kEnabled) {
-    EXPECT_TRUE(s.IsMemoryLimit()) << "s: " << s.ToString();
+    EXPECT_TRUE(s.IsMemoryLimit()) << "s: " << *s.ToString();
     EXPECT_TRUE(s.ToString()->find(
                     kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
                         CacheEntryRole::kBlockBasedTableReader)]) !=
@@ -611,14 +611,14 @@ TEST_P(ChargeTableReaderTest, Basic) {
         FileOptions(), ImmutableOptions(options_),
         InternalKeyComparator(options_.comparator), table_name, &tables.back(),
         false /* prefetch_index_and_filter_in_cache */, &s);
-    EXPECT_TRUE(s.ok()) << s.ToString();
+    EXPECT_TRUE(s.ok()) << *s.ToString();
 
     tables.clear();
     EXPECT_EQ(table_reader_charge_tracking_cache_->GetCacheCharge(), 0);
   } else {
     EXPECT_TRUE(s.ok() &&
                 opened_table_reader_num == max_table_reader_num_uncapped)
-        << "s: " << s.ToString() << " opened_table_reader_num: "
+        << "s: " << *s.ToString() << " opened_table_reader_num: "
         << std::to_string(opened_table_reader_num);
     EXPECT_EQ(table_reader_charge_tracking_cache_->GetCacheCharge(), 0);
   }

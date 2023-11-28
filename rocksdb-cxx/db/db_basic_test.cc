@@ -457,7 +457,7 @@ TEST_F(DBBasicTest, CheckLock) {
       return "localdb open: ok";
     }();
 #ifdef OS_LINUX
-    ASSERT_TRUE(s.ToString().find("lock ") != std::string::npos);
+    ASSERT_TRUE(s.ToString()->find("lock ") != std::string::npos);
 #endif  // OS_LINUX
   } while (ChangeCompactOptions());
 }

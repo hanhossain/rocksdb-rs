@@ -33,7 +33,7 @@ static void TestEncodeDecode(const VersionEdit& edit) {
   edit.EncodeTo(&encoded, 0 /* ts_sz */);
   VersionEdit parsed;
   Status s = parsed.DecodeFrom(encoded);
-  ASSERT_TRUE(s.ok()) << s.ToString();
+  ASSERT_TRUE(s.ok()) << *s.ToString();
   parsed.EncodeTo(&encoded2, 0 /* ts_sz */);
   ASSERT_EQ(encoded, encoded2);
 }
@@ -104,7 +104,7 @@ TEST_F(VersionEditTest, EncodeDecodeNewFile4) {
   edit.EncodeTo(&encoded, 0 /* ts_sz */);
   VersionEdit parsed;
   Status s = parsed.DecodeFrom(encoded);
-  ASSERT_TRUE(s.ok()) << s.ToString();
+  ASSERT_TRUE(s.ok()) << *s.ToString();
   auto& new_files = parsed.GetNewFiles();
   ASSERT_TRUE(new_files[0].second.marked_for_compaction);
   ASSERT_FALSE(new_files[1].second.marked_for_compaction);
@@ -161,7 +161,7 @@ TEST_F(VersionEditTest, EncodeDecodeNewFile4HandleFileBoundary) {
   edit.EncodeTo(&encoded, ts_sz);
   VersionEdit parsed;
   Status s = parsed.DecodeFrom(encoded);
-  ASSERT_TRUE(s.ok()) << s.ToString();
+  ASSERT_TRUE(s.ok()) << *s.ToString();
   auto& new_files = parsed.GetNewFiles();
   ASSERT_TRUE(new_files.size() == 2);
   ASSERT_FALSE(new_files[0].second.user_defined_timestamps_persisted);
@@ -222,7 +222,7 @@ TEST_F(VersionEditTest, ForwardCompatibleNewFile4) {
 
   VersionEdit parsed;
   Status s = parsed.DecodeFrom(encoded);
-  ASSERT_TRUE(s.ok()) << s.ToString();
+  ASSERT_TRUE(s.ok()) << *s.ToString();
   ASSERT_TRUE(!first);
   auto& new_files = parsed.GetNewFiles();
   ASSERT_TRUE(new_files[0].second.marked_for_compaction);
@@ -418,7 +418,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadLogNumber) {
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding WAL log number") !=
                 std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 
   {
@@ -435,7 +435,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadLogNumber) {
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding WAL log number") !=
                 std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 }
 
@@ -453,7 +453,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadTag) {
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 
   {
@@ -469,7 +469,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadTag) {
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 
   {
@@ -504,7 +504,7 @@ TEST_F(VersionEditTest, AddWalDecodeNoSize) {
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding WAL file size") !=
                 std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 
   {
@@ -517,7 +517,7 @@ TEST_F(VersionEditTest, AddWalDecodeNoSize) {
     ASSERT_TRUE(s.IsCorruption());
     // The terminate tag is misunderstood as the size.
     ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 }
 

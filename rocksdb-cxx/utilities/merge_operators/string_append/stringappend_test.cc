@@ -85,7 +85,7 @@ class StringLists {
     if (s.ok()) {
       return true;
     } else {
-      std::cerr << "ERROR " << s.ToString() << std::endl;
+      std::cerr << "ERROR " << *s.ToString() << std::endl;
       return false;
     }
   }
@@ -105,7 +105,7 @@ class StringLists {
     // NotFound is okay; just return empty (similar to std::map)
     // But network or db errors, etc, should fail the test (or at least yell)
     if (!s.IsNotFound()) {
-      std::cerr << "ERROR " << s.ToString() << std::endl;
+      std::cerr << "ERROR " << *s.ToString() << std::endl;
     }
 
     // Always return false if s.ok() was not true

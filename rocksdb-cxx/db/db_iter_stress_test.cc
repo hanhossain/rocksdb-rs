@@ -107,7 +107,7 @@ struct StressTestIterator : public InternalIterator {
       status_ = Status_IOError("test");
     }
     if (trace) {
-      std::cout << "injecting " << status_.ToString() << std::endl;
+      std::cout << "injecting " << *status_.ToString() << std::endl;
     }
     iter = -1;
     return true;
