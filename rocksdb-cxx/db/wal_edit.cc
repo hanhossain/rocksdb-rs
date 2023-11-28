@@ -148,7 +148,7 @@ Status WalSet::AddWal(const WalAddition& wal) {
 }
 
 Status WalSet::AddWals(const WalAdditions& wals) {
-  Status s;
+  Status s = Status_new();
   for (const WalAddition& wal : wals) {
     s = AddWal(wal);
     if (!s.ok()) {
@@ -176,7 +176,7 @@ Status WalSet::CheckWals(
     const std::unordered_map<WalNumber, std::string>& logs_on_disk) const {
   assert(env != nullptr);
 
-  Status s;
+  Status s = Status_new();
   for (const auto& wal : wals_) {
     const uint64_t log_number = wal.first;
     const WalMetadata& wal_meta = wal.second;

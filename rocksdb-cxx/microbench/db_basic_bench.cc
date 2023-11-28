@@ -190,7 +190,7 @@ static void DBOpen(benchmark::State& state) {
     }
     state.PauseTiming();
     auto wo = WriteOptions();
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 100; j++) {
         s = db->Put(wo, rnd.RandomString(10), rnd.RandomString(100));
@@ -239,7 +239,7 @@ static void DBClose(benchmark::State& state) {
       db.reset(db_ptr);
     }
     auto wo = WriteOptions();
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < 2; i++) {
       for (int j = 0; j < 100; j++) {
         s = db->Put(wo, rnd.RandomString(10), rnd.RandomString(100));

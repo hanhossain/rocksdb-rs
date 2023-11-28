@@ -487,6 +487,7 @@ struct BlockBasedTableBuilder::Rep {
                            BlockBasedTableOptions::kBinarySearchWithFirstKey),
         tail_size(0),
         status_ok(true),
+        status(Status_new()),
         io_status_ok(true) {
     if (tbo.target_file_size == 0) {
       buffer_limit = compression_opts.max_dict_buffer_bytes;
@@ -652,6 +653,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
   // BlockRep instances are fetched from and recycled to
   // block_rep_pool during parallel compression.
   struct BlockRep {
+      BlockRep() : status(Status_new()) {}
     Slice contents;
     Slice compressed_contents;
     std::unique_ptr<std::string> data;
@@ -1112,7 +1114,7 @@ void BlockBasedTableBuilder::WriteBlock(const Slice& uncompressed_block_data,
   assert(r->state == Rep::State::kUnbuffered);
   Slice block_contents;
   CompressionType type;
-  Status compress_status;
+  Status compress_status = Status_new();
   bool is_data_block = block_type == BlockType::kData;
   CompressAndVerifyBlock(uncompressed_block_data, is_data_block,
                          *(r->compression_ctxs[0]), r->verify_ctxs[0].get(),
@@ -1464,7 +1466,7 @@ Status BlockBasedTableBuilder::InsertBlockInCacheHelper(
     BlockType block_type) {
 
   Cache* block_cache = rep_->table_options.block_cache.get();
-  Status s;
+  Status s = Status_new();
   auto helper =
       GetCacheItemHelper(block_type, rep_->ioptions.lowest_used_cache_tier);
   if (block_cache && helper && helper->create_cb) {

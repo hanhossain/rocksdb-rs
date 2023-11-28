@@ -516,7 +516,7 @@ class ChargeTableReaderTest
     CreateTable(table_name, ioptions, compression_type_, kv_);
 
     std::unique_ptr<BlockBasedTable> table;
-    Status s;
+    Status s = Status_new();
     NewBlockBasedTableReader(
         FileOptions(), ImmutableOptions(options_),
         InternalKeyComparator(options_.comparator), table_name, &table,

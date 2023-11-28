@@ -231,7 +231,7 @@ IOStatus GenerateOneFileChecksum(
 }
 
 Status DestroyDir(Env* env, const std::string& dir) {
-  Status s;
+  Status s = Status_new();
   if (env->FileExists(dir).IsNotFound()) {
     return s;
   }

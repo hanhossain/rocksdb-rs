@@ -1100,7 +1100,7 @@ TEST_F(DBBlobBasicTest, GenerateIOTracing) {
 
     // Read records.
     int blob_files_op_count = 0;
-    Status status;
+    Status status = Status_new();
     while (true) {
       IOTraceRecord record;
       status = reader.ReadIOOp(&record);

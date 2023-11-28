@@ -42,6 +42,7 @@ class ForwardLevelIterator : public InternalIterator {
         files_(files),
         valid_(false),
         file_index_(std::numeric_limits<uint32_t>::max()),
+        status_(Status_new()),
         file_iter_(nullptr),
         pinned_iters_mgr_(nullptr),
         prefix_extractor_(prefix_extractor),

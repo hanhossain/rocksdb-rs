@@ -290,7 +290,7 @@ TEST_F(CompactionServiceTest, BasicCompactions) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s;
+  Status s = Status_new();
   for (int i = 0; i < 10; i++) {
     for (int j = 0; j < 10; j++) {
       int key_id = i * 20 + j * 2;

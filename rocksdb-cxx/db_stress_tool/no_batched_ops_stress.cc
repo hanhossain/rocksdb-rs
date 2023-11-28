@@ -630,7 +630,7 @@ class NonBatchedOpsStressTest : public StressTest {
         // keys and exercise some corner cases in the code
         if (thread->rand.OneIn(10)) {
           int op = thread->rand.Uniform(2);
-          Status s;
+          Status s = Status_new();
           assert(txn);
           switch (op) {
             case 0:
@@ -772,7 +772,7 @@ class NonBatchedOpsStressTest : public StressTest {
       // If test use transaction, after consistency check, also do a read your
       // own write check.
       if (do_consistency_check && !error_count && (s.ok() || s.IsNotFound())) {
-        Status tmp_s;
+        Status tmp_s = Status_new();
         std::string value;
 
         if (use_txn) {
@@ -1152,7 +1152,7 @@ class NonBatchedOpsStressTest : public StressTest {
     std::unique_ptr<Iterator> iter(db_->NewIterator(ro_copy, cfh));
 
     uint64_t count = 0;
-    Status s;
+    Status s = Status_new();
 
     if (fault_fs_guard) {
       fault_fs_guard->EnableErrorInjection();
@@ -1267,7 +1267,7 @@ class NonBatchedOpsStressTest : public StressTest {
     const Slice v(value, sz);
 
 
-    Status s;
+    Status s = Status_new();
 
     if (FLAGS_use_merge) {
       if (!FLAGS_use_txn) {
@@ -1352,7 +1352,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     // Use delete if the key may be overwritten and a single deletion
     // otherwise.
-    Status s;
+    Status s = Status_new();
     if (shared->AllowsOverwrite(rand_key)) {
       PendingExpectedValue pending_expected_value =
           shared->PrepareDelete(rand_column_family, rand_key);
@@ -1465,7 +1465,7 @@ class NonBatchedOpsStressTest : public StressTest {
     Slice end_key = end_keystr;
     std::string write_ts_str;
     Slice write_ts;
-    Status s;
+    Status s = Status_new();
     if (FLAGS_user_timestamp_size) {
       write_ts_str = GetNowNanos();
       write_ts = write_ts_str;
@@ -1501,7 +1501,7 @@ class NonBatchedOpsStressTest : public StressTest {
                               const std::vector<int64_t>& rand_keys) override {
     const std::string sst_filename =
         FLAGS_db + "/." + std::to_string(thread->tid) + ".sst";
-    Status s;
+    Status s = Status_new();
     if (db_stress_env->FileExists(sst_filename).ok()) {
       // Maybe we terminated abnormally before, so cleanup to give this file
       // ingestion a clean slate

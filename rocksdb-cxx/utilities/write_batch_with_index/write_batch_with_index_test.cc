@@ -1123,7 +1123,7 @@ TEST_P(WriteBatchWithIndexTest, TestIteraratorWithBaseReverseCmp) {
 
 TEST_P(WriteBatchWithIndexTest, TestGetFromBatch) {
   Options options;
-  Status s;
+  Status s = Status_new();
   std::string value;
 
   s = batch_->GetFromBatch(options_, "b", &value);
@@ -1648,7 +1648,7 @@ TEST_P(WriteBatchWithIndexTest, SavePointTest) {
       batch_->NewIteratorWithBase(new KVIter(&empty_map)));
   std::unique_ptr<Iterator> cf1_iter(
       batch_->NewIteratorWithBase(&cf1, new KVIter(&empty_map)));
-  Status s;
+  Status s = Status_new();
   KVMap kvm_cf0_0 = {{"A", "aa"}, {"B", "b"}};
   KVMap kvm_cf1_0 = {{"A", "a1"}, {"C", "c1"}, {"E", "e1"}};
   KVIter kvi_cf0_0(&kvm_cf0_0);
@@ -1751,7 +1751,7 @@ TEST_P(WriteBatchWithIndexTest, SavePointTest) {
 }
 
 TEST_P(WriteBatchWithIndexTest, SingleDeleteTest) {
-  Status s;
+  Status s = Status_new();
   std::string value;
 
   ASSERT_OK(batch_->SingleDelete("A"));
@@ -2096,7 +2096,7 @@ TEST_P(WriteBatchWithIndexTest, IteratorMergeTestWithOrig) {
 
 TEST_P(WriteBatchWithIndexTest, GetFromBatchAfterMerge) {
   std::string value;
-  Status s;
+  Status s = Status_new();
 
   ASSERT_OK(OpenDB());
   ASSERT_OK(db_->Put(write_opts_, "o", "aa"));
@@ -2335,7 +2335,7 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
   for (uint32_t i = 0; i < kMaxKey; ++i) {
     std::string key;
     PutFixed32(&key, i);
-    Status s;
+    Status s = Status_new();
     if (0 == (i % 2)) {
       s = batch_->Delete(&cf2, key);
     } else {

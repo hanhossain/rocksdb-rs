@@ -193,7 +193,7 @@ void RunPrimary() {
   char val_buf[kMaxValueLength] = {0};
   uint64_t curr_key = 0;
   while (curr_key < kMaxKey) {
-    Status s;
+    Status s = Status_new();
     if (nullptr == db) {
       s = DB::Open(options, kDBPath, column_families, &handles, &db);
       if (!s.ok()) {

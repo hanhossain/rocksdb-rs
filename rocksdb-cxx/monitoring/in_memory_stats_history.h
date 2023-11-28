@@ -30,6 +30,7 @@ class InMemoryStatsHistoryIterator final : public StatsHistoryIterator {
                                DBImpl* db_impl)
       : start_time_(start_time),
         end_time_(end_time),
+        status_(Status_new()),
         valid_(true),
         db_impl_(db_impl) {
     AdvanceIteratorByTime(start_time_, end_time_);

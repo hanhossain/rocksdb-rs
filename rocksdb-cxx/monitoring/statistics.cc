@@ -343,7 +343,7 @@ Status Statistics::CreateFromString(const ConfigOptions& config_options,
   std::call_once(once, [&]() {
     RegisterBuiltinStatistics(*(ObjectLibrary::Default().get()), "");
   });
-  Status s;
+  Status s = Status_new();
   if (id == "" || id == StatisticsImpl::kClassName()) {
     result->reset(new StatisticsImpl(nullptr));
   } else if (id == kNullptrString) {

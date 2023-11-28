@@ -103,7 +103,7 @@ std::shared_ptr<DB> OpenDb(const std::string& dbname, const bool ttl = false,
   options.max_successive_merges = max_successive_merges;
   options.env = EnvMergeTest::GetInstance();
   EXPECT_OK(DestroyDB(dbname, Options()));
-  Status s;
+  Status s = Status_new();
   if (ttl) {
     DBWithTTL* db_with_ttl;
     s = DBWithTTL::Open(options, dbname, &db_with_ttl);

@@ -376,7 +376,7 @@ Status DBWithTTL::Open(
   }
   DB* db;
 
-  Status st;
+  Status st = Status_new();
   if (read_only) {
     st = DB::OpenForReadOnly(db_options, dbname, column_families_sanitized,
                              handles, &db);

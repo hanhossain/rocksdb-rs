@@ -110,7 +110,7 @@ Status TransactionDBCondVarImpl::Wait(
 
 Status TransactionDBCondVarImpl::WaitFor(
     std::shared_ptr<TransactionDBMutex> mutex, int64_t timeout_time) {
-  Status s;
+  Status s = Status_new();
 
   auto mutex_impl = reinterpret_cast<TransactionDBMutexImpl*>(mutex.get());
   std::unique_lock<std::mutex> lock(mutex_impl->mutex_, std::adopt_lock);

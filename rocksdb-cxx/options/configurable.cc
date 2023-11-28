@@ -60,7 +60,7 @@ Status Configurable::PrepareOptions(const ConfigOptions& opts) {
 
 Status Configurable::ValidateOptions(const DBOptions& db_opts,
                                      const ColumnFamilyOptions& cf_opts) const {
-  Status status;
+  Status status = Status_new();
   for (auto opt_iter : options_) {
     if (opt_iter.type_map != nullptr) {
       for (auto map_iter : *(opt_iter.type_map)) {
@@ -138,7 +138,7 @@ Status Configurable::ConfigureOptions(
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   std::string curr_opts;
-  Status s;
+  Status s = Status_new();
   if (!opts_map.empty()) {
     // There are options in the map.
     // Save the current configuration in curr_opts and then configure the
@@ -177,7 +177,7 @@ Status Configurable::ParseStringOptions(const ConfigOptions& /*config_options*/,
 
 Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
                                          const std::string& opts_str) {
-  Status s;
+  Status s = Status_new();
   if (!opts_str.empty()) {
     if (opts_str.find(';') != std::string::npos ||
         opts_str.find('=') != std::string::npos) {
@@ -530,7 +530,7 @@ Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
         const auto& opt_info = map_iter.second;
         if (opt_info.ShouldSerialize()) {
           std::string value;
-          Status s;
+          Status s = Status_new();
           if (!config_options.mutable_options_only) {
             s = opt_info.Serialize(config_options, prefix + opt_name,
                                    opt_iter.opt_ptr, &value);
@@ -578,7 +578,7 @@ Status Configurable::GetOptionNames(
 Status ConfigurableHelper::ListOptions(
     const ConfigOptions& config_options, const Configurable& configurable,
     const std::string& prefix, std::unordered_set<std::string>* result) {
-  Status status;
+  Status status = Status_new();
   for (auto const& opt_iter : configurable.options_) {
     if (opt_iter.type_map != nullptr) {
       for (const auto& map_iter : *(opt_iter.type_map)) {
@@ -681,7 +681,7 @@ Status Configurable::GetOptionsMap(
     std::unordered_map<std::string, std::string>* props) {
   assert(id);
   assert(props);
-  Status status;
+  Status status = Status_new();
   if (value.empty() || value == kNullptrString) {
     *id = default_id;
   } else if (value.find('=') == std::string::npos) {

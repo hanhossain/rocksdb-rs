@@ -1289,7 +1289,7 @@ TEST_F(DBBasicTestWithTimestamp, ReseekToTargetTimestamp) {
   DestroyAndReopen(options);
   // Insert kNumKeys
   WriteOptions write_opts;
-  Status s;
+  Status s = Status_new();
   for (size_t i = 0; i != kNumKeys; ++i) {
     std::string ts = Timestamp(static_cast<uint64_t>(i + 1), 0);
     s = db_->Put(write_opts, "foo", ts, "value" + std::to_string(i));
@@ -1332,7 +1332,7 @@ TEST_F(DBBasicTestWithTimestamp, ReseekToNextUserKey) {
   DestroyAndReopen(options);
   // Write kNumKeys + 1 keys
   WriteOptions write_opts;
-  Status s;
+  Status s = Status_new();
   for (size_t i = 0; i != kNumKeys; ++i) {
     std::string ts = Timestamp(static_cast<uint64_t>(i + 1), 0);
     s = db_->Put(write_opts, "a", ts, "value" + std::to_string(i));
@@ -1663,7 +1663,7 @@ TEST_F(DBBasicTestWithTimestamp, MaxKeysSkippedDuringNext) {
   constexpr size_t max_skippable_internal_keys = 2;
   const size_t kNumKeys = max_skippable_internal_keys + 2;
   WriteOptions write_opts;
-  Status s;
+  Status s = Status_new();
   {
     std::string ts = Timestamp(1, 0);
     ASSERT_OK(db_->Put(write_opts, "a", ts, "value"));
@@ -1698,7 +1698,7 @@ TEST_F(DBBasicTestWithTimestamp, MaxKeysSkippedDuringPrev) {
   constexpr size_t max_skippable_internal_keys = 2;
   const size_t kNumKeys = max_skippable_internal_keys + 2;
   WriteOptions write_opts;
-  Status s;
+  Status s = Status_new();
   {
     std::string ts = Timestamp(1, 0);
     ASSERT_OK(db_->Put(write_opts, "b", ts, "value"));
@@ -3177,7 +3177,7 @@ TEST_P(DBBasicTestWithTsIterTombstones, IterWithDelete) {
   } while (true);
 
   for (key = kMaxKey; key >= kMinKey; --key) {
-    Status s;
+    Status s = Status_new();
     if (0 != (key % 2)) {
       s = db_->Put(write_opts, Key1(key), write_ts_strs[1],
                    "value1" + std::to_string(key));
@@ -3369,7 +3369,7 @@ TEST_F(DBBasicTestWithTimestamp,
   CompactRangeOptions cro;
   cro.full_history_ts_low = nullptr;
   std::string value, key_ts;
-  Status s;
+  Status s = Status_new();
   auto verify = [&] {
     s = db_->Get(ropts, "k1", &value);
     ASSERT_TRUE(s.IsNotFound());
@@ -3573,7 +3573,7 @@ TEST_P(DBBasicTestWithTimestampTableOptions, DeleteRangeBaiscReadAndIterate) {
   read_ts_slice = read_ts;
   read_opts.timestamp = &read_ts_slice;
   std::string value, timestamp;
-  Status s;
+  Status s = Status_new();
   for (int i = 0; i < kNum; ++i) {
     s = db_->Get(read_opts, Key1(i), &value, &timestamp);
     if (i >= kRangeBegin && i < kNum / 2) {
@@ -3674,7 +3674,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
                   keys.data(), values.data(), timestamps.data(),
                   statuses.data(), true /* sorted_input */);
     std::string value, timestamp;
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < kNum; ++i) {
       s = db_->Get(read_opts, Key1(i), &value, &timestamp);
       ASSERT_TRUE(s.eq(expected_status[i]));
@@ -3775,7 +3775,7 @@ TEST_F(DBBasicTestWithTimestamp, MergeBasic) {
 
   for (size_t i = 0; i < write_ts_strs.size(); ++i) {
     for (size_t j = 0; j < kNumOfUniqKeys; ++j) {
-      Status s;
+      Status s = Status_new();
       if (i == 0) {
         const std::string val = "v" + std::to_string(j) + "_0";
         s = db_->Put(WriteOptions(), Key1(j), write_ts_strs[i], val);

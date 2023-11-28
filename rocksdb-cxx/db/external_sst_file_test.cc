@@ -1116,7 +1116,7 @@ TEST_F(ExternalSSTFileTest, OverlappingRanges) {
       int range_start = key_ranges[i].first;
       int range_end = key_ranges[i].second;
 
-      Status s;
+      Status s = Status_new();
       std::string range_val = "range_" + std::to_string(i);
 
       // For 20% of ranges we use DB::Put, for 80% we use DB::AddFile

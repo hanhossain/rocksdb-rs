@@ -320,6 +320,7 @@ class Block {
 template <class TValue>
 class BlockIter : public InternalIteratorBase<TValue> {
  public:
+    BlockIter() : status_(Status_new()) {}
   // Makes Valid() return false, status() return `s`, and Seek()/Prev()/etc do
   // nothing. Calls cleanup functions.
   virtual void Invalidate(const Status& s) {

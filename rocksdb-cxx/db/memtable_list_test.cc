@@ -236,7 +236,7 @@ TEST_F(MemTableListTest, GetTest) {
 
   SequenceNumber seq = 1;
   std::string value;
-  Status s;
+  Status s = Status_new();
   MergeContext merge_context;
   InternalKeyComparator ikey_cmp(options.comparator);
   SequenceNumber max_covering_tombstone_seq = 0;
@@ -371,7 +371,7 @@ TEST_F(MemTableListTest, GetFromHistoryTest) {
 
   SequenceNumber seq = 1;
   std::string value;
-  Status s;
+  Status s = Status_new();
   MergeContext merge_context;
   InternalKeyComparator ikey_cmp(options.comparator);
   SequenceNumber max_covering_tombstone_seq = 0;
@@ -589,7 +589,7 @@ TEST_F(MemTableListTest, GetFromHistoryTest) {
 TEST_F(MemTableListTest, FlushPendingTest) {
   const int num_tables = 6;
   SequenceNumber seq = 1;
-  Status s;
+  Status s = Status_new();
 
   auto factory = std::make_shared<SkipListFactory>();
   options.memtable_factory = factory;

@@ -27,7 +27,8 @@ class BlobDBIterator : public Iterator {
         iter_(iter),
         blob_db_(blob_db),
         clock_(clock),
-        statistics_(statistics) {}
+        statistics_(statistics),
+        status_(Status_new()) {}
 
   virtual ~BlobDBIterator() = default;
 

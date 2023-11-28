@@ -74,7 +74,7 @@ Status DBImplReadOnly::Get(const ReadOptions& read_options,
   assert(ucmp);
   std::string* ts = ucmp->timestamp_size() > 0 ? timestamp : nullptr;
 
-  Status s;
+  Status s = Status_new();
   SequenceNumber snapshot = versions_->LastSequence();
   GetWithTimestampReadCallback read_cb(snapshot);
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
@@ -217,7 +217,7 @@ namespace {
 // create_if_missing
 Status OpenForReadOnlyCheckExistence(const DBOptions& db_options,
                                      const std::string& dbname) {
-  Status s;
+  Status s = Status_new();
   if (!db_options.create_if_missing) {
     // Attempt to read "CURRENT" file
     const std::shared_ptr<FileSystem>& fs = db_options.env->GetFileSystem();

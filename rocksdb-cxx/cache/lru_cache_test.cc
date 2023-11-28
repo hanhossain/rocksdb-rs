@@ -526,7 +526,7 @@ TEST_F(ClockCacheTest, Limits) {
     {
       size_t n = shard_->GetTableAddressCount() + 1;
       std::unique_ptr<HandleImpl* []> ha { new HandleImpl* [n] {} };
-      Status s;
+      Status s = Status_new();
       for (size_t i = 0; i < n && s.ok(); ++i) {
         hkey[1] = i;
         s = shard_->Insert(TestKey(hkey), hkey, nullptr /*value*/,
@@ -980,7 +980,7 @@ class TestSecondaryCache : public SecondaryCache {
     CheckCacheKeyCommonPrefix(key);
     size_t size;
     char* buf;
-    Status s;
+    Status s = Status_new();
 
     num_inserts_++;
     size = (*helper->size_cb)(value);
@@ -1017,7 +1017,7 @@ class TestSecondaryCache : public SecondaryCache {
     if (handle) {
       Cache::ObjectPtr value = nullptr;
       size_t charge = 0;
-      Status s;
+      Status s = Status_new();
       if (type != ResultType::DEFER_AND_FAIL) {
         char* ptr = cache_.Value(handle);
         size_t size = DecodeFixed64(ptr);

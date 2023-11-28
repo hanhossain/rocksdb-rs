@@ -33,7 +33,7 @@ Status ExternalSstFileIngestionJob::Prepare(
     const std::vector<std::string>& files_checksum_func_names,
     const Temperature& file_temperature, uint64_t next_file_number,
     SuperVersion* sv) {
-  Status status;
+  Status status = Status_new();
 
   // Read the information of files we are ingesting
   for (const std::string& file_path : external_files_paths) {
@@ -374,7 +374,7 @@ Status ExternalSstFileIngestionJob::NeedsFlush(bool* flush_needed,
 // REQUIRES: we have become the only writer by entering both write_thread_ and
 // nonmem_write_thread_
 Status ExternalSstFileIngestionJob::Run() {
-  Status status;
+  Status status = Status_new();
   SuperVersion* super_version = cfd_->GetSuperVersion();
 #ifndef NDEBUG
   // We should never run the job with a memtable that is overlapping
@@ -855,7 +855,7 @@ Status ExternalSstFileIngestionJob::AssignLevelAndSeqnoForIngestedFile(
     SuperVersion* sv, bool force_global_seqno, CompactionStyle compaction_style,
     SequenceNumber last_seqno, IngestedFileInfo* file_to_ingest,
     SequenceNumber* assigned_seqno) {
-  Status status;
+  Status status = Status_new();
   *assigned_seqno = 0;
   if (force_global_seqno) {
     *assigned_seqno = last_seqno + 1;

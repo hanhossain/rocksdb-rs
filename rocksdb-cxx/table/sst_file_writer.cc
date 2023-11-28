@@ -265,7 +265,7 @@ SstFileWriter::~SstFileWriter() {
 
 Status SstFileWriter::Open(const std::string& file_path) {
   Rep* r = rep_.get();
-  Status s;
+  Status s = Status_new();
   std::unique_ptr<FSWritableFile> sst_file;
   FileOptions cur_file_opts(r->env_options);
   s = r->ioptions.env->GetFileSystem()->NewWritableFile(

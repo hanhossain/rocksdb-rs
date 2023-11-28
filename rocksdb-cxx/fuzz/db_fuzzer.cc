@@ -99,7 +99,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       }
       case kColumn: {
         ROCKSDB_NAMESPACE::ColumnFamilyHandle* cf;
-        ROCKSDB_NAMESPACE::Status s;
+        ROCKSDB_NAMESPACE::Status s = Status_new();
         s = db->CreateColumnFamily(ROCKSDB_NAMESPACE::ColumnFamilyOptions(),
                                    "new_cf", &cf);
         s = db->DestroyColumnFamilyHandle(cf);

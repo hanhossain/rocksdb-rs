@@ -62,9 +62,9 @@ struct TableFileCreationBriefInfo : public FileCreationBriefInfo {
 };
 
 struct TableFileCreationInfo : public TableFileCreationBriefInfo {
-  TableFileCreationInfo() = default;
+  TableFileCreationInfo() : status(Status_new()) {}
   explicit TableFileCreationInfo(TableProperties&& prop)
-      : table_properties(prop) {}
+      : table_properties(prop), status(Status_new()) {}
   TableFileCreationInfo& operator=(const TableFileCreationInfo& other) {
     if (this != &other) {
       db_name = other.db_name;
@@ -226,7 +226,7 @@ struct WriteStallInfo {
 
 
 struct FileDeletionInfo {
-  FileDeletionInfo() = default;
+  FileDeletionInfo() : status(Status_new()) {}
 
   FileDeletionInfo(const std::string& _db_name, const std::string& _file_path,
                    int _job_id, Status _status)
@@ -393,6 +393,8 @@ struct CompactionFileInfo {
 };
 
 struct SubcompactionJobInfo {
+  SubcompactionJobInfo() : status(Status_new()) {}
+
   // the id of the column family where the compaction happened.
   uint32_t cf_id;
   // the name of the column family where the compaction happened.
@@ -428,6 +430,8 @@ struct SubcompactionJobInfo {
 };
 
 struct CompactionJobInfo {
+  CompactionJobInfo() : status(Status_new()) {}
+
   // the id of the column family where the compaction happened.
   uint32_t cf_id;
   // the name of the column family where the compaction happened.
@@ -519,6 +523,8 @@ struct ExternalFileIngestionInfo {
 
 // Result of auto background error recovery
 struct BackgroundErrorRecoveryInfo {
+  BackgroundErrorRecoveryInfo() : old_bg_error(Status_new()), new_bg_error(Status_new()) {}
+
   // The original error that triggered the recovery
   Status old_bg_error;
 

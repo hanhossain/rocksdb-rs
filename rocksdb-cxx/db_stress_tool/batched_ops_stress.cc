@@ -85,7 +85,7 @@ class BatchedOpsStressTest : public StressTest {
     WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                      FLAGS_batch_protection_bytes_per_key,
                      FLAGS_user_timestamp_size);
-    Status s;
+    Status s = Status_new();
     auto cfh = column_families_[rand_column_families[0]];
     std::string key_str = Key(rand_keys[0]);
     for (int i = 0; i < 10; i++) {
@@ -142,7 +142,7 @@ class BatchedOpsStressTest : public StressTest {
     Slice key = key_str;
     auto cfh = column_families_[rand_column_families[0]];
     std::string from_db;
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < 10; i++) {
       keys[i] += key.ToString();
       key_slices[i] = keys[i];

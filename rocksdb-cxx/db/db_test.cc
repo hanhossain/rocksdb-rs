@@ -3299,7 +3299,7 @@ class ModelDB : public DB {
   using DB::Flush;
   Status Flush(const ROCKSDB_NAMESPACE::FlushOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/) override {
-    Status ret;
+    Status ret = Status_new();
     return ret;
   }
   Status Flush(
@@ -6258,7 +6258,7 @@ TEST_F(DBTest, PromoteL0Failure) {
   ASSERT_OK(Put(Key(1), ""));
   ASSERT_OK(Flush());
 
-  Status status;
+  Status status = Status_new();
   // Fails because L0 has overlapping files.
   status = experimental::PromoteL0(db_, db_->DefaultColumnFamily());
   ASSERT_TRUE(status.IsInvalidArgument());

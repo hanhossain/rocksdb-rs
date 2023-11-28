@@ -1074,7 +1074,7 @@ IOStatus WinFileSystem::IsDirectory(const std::string& path,
 }
 
 Status WinEnvIO::GetHostName(char* name, uint64_t len) {
-  Status s;
+  Status s = Status_new();
   DWORD nSize = static_cast<DWORD>(
       std::min<uint64_t>(len, std::numeric_limits<DWORD>::max()));
 

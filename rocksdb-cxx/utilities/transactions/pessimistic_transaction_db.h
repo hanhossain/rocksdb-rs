@@ -70,7 +70,7 @@ class PessimisticTransactionDB : public TransactionDB {
   virtual Status Write(const WriteOptions& opts, WriteBatch* updates) override;
   inline Status WriteWithConcurrencyControl(const WriteOptions& opts,
                                             WriteBatch* updates) {
-    Status s;
+    Status s = Status_new();
     if (opts.protection_bytes_per_key > 0) {
       s = WriteBatchInternal::UpdateProtectionInfo(
           updates, opts.protection_bytes_per_key);
@@ -294,7 +294,8 @@ class SnapshotCreationCallback : public PostMemTableCallback {
       : db_impl_(dbi),
         commit_ts_(commit_ts),
         snapshot_notifier_(notifier),
-        snapshot_(snapshot) {
+        snapshot_(snapshot),
+        snapshot_creation_status_(Status_new()) {
     assert(db_impl_);
   }
 

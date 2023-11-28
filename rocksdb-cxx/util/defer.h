@@ -17,7 +17,7 @@ namespace ROCKSDB_NAMESPACE {
 // Usage example:
 //
 // Status DeferTest() {
-//   Status s;
+//   Status s = Status_new();
 //   Defer defer([&s]() {
 //     if (!s.ok()) {
 //       // do cleanups ...

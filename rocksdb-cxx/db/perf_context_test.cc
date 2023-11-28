@@ -54,7 +54,7 @@ std::shared_ptr<DB> OpenDb(bool read_only = false) {
     options.memtable_factory.reset(NewHashSkipListRepFactory());
   }
 
-  Status s;
+  Status s = Status_new();
   if (!read_only) {
     s = DB::Open(options, kDbName, &db);
   } else {

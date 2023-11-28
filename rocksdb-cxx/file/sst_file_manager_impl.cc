@@ -36,6 +36,7 @@ SstFileManagerImpl::SstFileManagerImpl(
       cv_(&mu_),
       closing_(false),
       bg_thread_(nullptr),
+      bg_err_(Status_new()),
       reserved_disk_buffer_(0),
       free_space_trigger_(0),
       cur_instance_(nullptr) {}

@@ -27,7 +27,7 @@ class BlobCountingIterator : public InternalIterator {
  public:
   BlobCountingIterator(InternalIterator* iter,
                        BlobGarbageMeter* blob_garbage_meter)
-      : iter_(iter), blob_garbage_meter_(blob_garbage_meter) {
+      : iter_(iter), blob_garbage_meter_(blob_garbage_meter), status_(Status_new()) {
     assert(iter_);
     assert(blob_garbage_meter_);
 

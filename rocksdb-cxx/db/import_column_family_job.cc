@@ -28,7 +28,7 @@ namespace ROCKSDB_NAMESPACE {
 
 Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
                                       SuperVersion* sv) {
-  Status status;
+  Status status = Status_new();
   std::vector<ColumnFamilyIngestFileInfo> cf_ingest_infos;
   for (const auto& metadata_per_cf : metadatas_) {
     // Read the information of files we are importing
@@ -186,7 +186,7 @@ Status ImportColumnFamilyJob::Run() {
       cfd_->NumberLevels(), cfd_->ioptions()->compaction_style,
       nullptr /* src_vstorage */, cfd_->ioptions()->force_consistency_checks,
       EpochNumberRequirement::kMightMissing);
-  Status s;
+  Status s = Status_new();
 
   for (size_t i = 0; s.ok() && i < files_to_import_.size(); ++i) {
     for (size_t j = 0; s.ok() && j < files_to_import_[i].size(); ++j) {
@@ -292,7 +292,7 @@ Status ImportColumnFamilyJob::GetIngestedFileInfo(
     SuperVersion* sv, const LiveFileMetaData& file_meta,
     IngestedFileInfo* file_to_import) {
   file_to_import->external_file_path = external_file;
-  Status status;
+  Status status = Status_new();
   if (file_meta.size > 0) {
     file_to_import->file_size = file_meta.size;
   } else {

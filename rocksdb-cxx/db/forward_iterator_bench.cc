@@ -327,7 +327,7 @@ int main(int argc, char** argv) {
   GFLAGS_NAMESPACE::ParseCommandLineFlags(&argc, &argv, true);
 
   std::mt19937 rng{std::random_device()()};
-  ROCKSDB_NAMESPACE::Status status;
+  ROCKSDB_NAMESPACE::Status status = Status_new();
   std::string path =
       ROCKSDB_NAMESPACE::test::PerThreadDBPath("forward_iterator_test");
   fprintf(stderr, "db path is %s\n", path.c_str());

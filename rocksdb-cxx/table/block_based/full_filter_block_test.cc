@@ -278,7 +278,7 @@ TEST_F(FullFilterBlockTest, SingleChunk) {
   // "box" only counts once
   ASSERT_EQ(4, builder.EstimateEntriesAdded());
   ASSERT_FALSE(builder.IsEmpty());
-  Status s;
+  Status s = Status_new();
   Slice slice = builder.Finish(BlockHandle(), &s);
   ASSERT_OK(s);
 

@@ -231,7 +231,7 @@ Status CheckpointImpl::CreateCustomCheckpoint(
   bool same_fs = true;
 
   for (auto& info : infos) {
-    Status s;
+    Status s = Status_new();
     if (!info.replacement_contents.empty()) {
       // Currently should only be used for CURRENT file.
       assert(info.file_type == kCurrentFile);
@@ -422,7 +422,7 @@ Status CheckpointImpl::ExportFilesInMetaData(
     std::function<Status(const std::string& src_dirname,
                          const std::string& src_fname)>
         copy_file_cb) {
-  Status s;
+  Status s = Status_new();
   auto hardlink_file = true;
 
   // Copy/hard link files in metadata.

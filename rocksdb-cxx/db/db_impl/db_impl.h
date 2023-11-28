@@ -1723,6 +1723,7 @@ class DBImpl : public DB {
           input_level(_input_level),
           output_level(_output_level),
           output_path_id(_output_path_id),
+          status(Status_new()),
           exclusive(_exclusive),
           disallow_trivial_move(_disallow_trivial_move),
           canceled(_canceled ? *_canceled : canceled_internal_storage) {}

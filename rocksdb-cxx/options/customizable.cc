@@ -98,7 +98,7 @@ Status Customizable::GetOptionsMap(
     const ConfigOptions& config_options, const Customizable* customizable,
     const std::string& value, std::string* id,
     std::unordered_map<std::string, std::string>* props) {
-  Status status;
+  Status status = Status_new();
   if (value.empty() || value == kNullptrString) {
     *id = "";
     props->clear();
@@ -127,7 +127,7 @@ Status Customizable::GetOptionsMap(
 Status Customizable::ConfigureNewObject(
     const ConfigOptions& config_options, Customizable* object,
     const std::unordered_map<std::string, std::string>& opt_map) {
-  Status status;
+  Status status = Status_new();
   if (object != nullptr) {
     status = object->ConfigureFromMap(config_options, opt_map);
   } else if (!opt_map.empty()) {

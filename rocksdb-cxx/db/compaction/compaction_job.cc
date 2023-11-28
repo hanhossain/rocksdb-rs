@@ -660,7 +660,7 @@ Status CompactionJob::Run() {
   TEST_SYNC_POINT("CompactionJob::Run:BeforeVerify");
 
   // Check if any thread encountered an error during execution
-  Status status;
+  Status status = Status_new();
   IOStatus io_s;
   bool wrote_new_blob_files = false;
 
@@ -1282,7 +1282,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
             sub_compact->end.has_value() ? &end_user_key : nullptr);
       };
 
-  Status status;
+  Status status = Status_new();
   TEST_SYNC_POINT_CALLBACK(
       "CompactionJob::ProcessKeyValueCompaction()::Processing",
       reinterpret_cast<void*>(
@@ -1769,7 +1769,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
   }
   fo_copy.temperature = temperature;
 
-  Status s;
+  Status s = Status_new();
   IOStatus io_s = NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
   s = io_s;
   if (sub_compact->io_status.ok()) {

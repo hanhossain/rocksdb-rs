@@ -2413,7 +2413,7 @@ class EnvTest : public testing::Test {
 TEST_F(EnvTest, Close) {
   TestEnv* env = new TestEnv();
   std::shared_ptr<Logger> logger;
-  Status s;
+  Status s = Status_new();
 
   s = env->NewLogger("", &logger);
   ASSERT_OK(s);

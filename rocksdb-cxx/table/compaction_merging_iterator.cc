@@ -17,6 +17,7 @@ class CompactionMergingIterator : public InternalIterator {
       : is_arena_mode_(is_arena_mode),
         comparator_(comparator),
         current_(nullptr),
+        status_(Status_new()),
         minHeap_(CompactionHeapItemComparator(comparator_)),
         pinned_iters_mgr_(nullptr) {
     children_.resize(n);

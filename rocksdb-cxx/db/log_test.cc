@@ -822,7 +822,7 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
   }
 
   Status SetupTestEnv() {
-    Status s;
+    Status s = Status_new();
     FileOptions fopts;
     auto fs = env_->GetFileSystem();
     s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr);

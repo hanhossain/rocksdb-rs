@@ -47,7 +47,7 @@ WriteMode operator+(WriteMode lhs, const int rhs) {
 std::pair<WriteBatch, Status> GetWriteBatch(ColumnFamilyHandle* cf_handle,
                                             size_t protection_bytes_per_key,
                                             WriteBatchOpType op_type) {
-  Status s;
+  Status s = Status_new();
   WriteBatch wb(0 /* reserved_bytes */, 0 /* max_bytes */,
                 protection_bytes_per_key, 0 /* default_cf_ts_sz */);
   switch (op_type) {

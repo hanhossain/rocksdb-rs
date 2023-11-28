@@ -493,7 +493,7 @@ void FaultInjectionTestEnv::WritableFileAppended(const FileState& state) {
 // FileState of the file as the parameter.
 Status FaultInjectionTestEnv::DropFileData(
     std::function<Status(Env*, FileState)> func) {
-  Status s;
+  Status s = Status_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FileState>::const_iterator it =
            db_file_state_.begin();

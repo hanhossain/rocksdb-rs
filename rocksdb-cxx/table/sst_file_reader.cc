@@ -40,7 +40,7 @@ SstFileReader::~SstFileReader() {}
 
 Status SstFileReader::Open(const std::string& file_path) {
   auto r = rep_.get();
-  Status s;
+  Status s = Status_new();
   uint64_t file_size = 0;
   std::unique_ptr<FSRandomAccessFile> file;
   std::unique_ptr<RandomAccessFileReader> file_reader;

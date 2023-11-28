@@ -301,7 +301,7 @@ Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t start_offset,
                                                   uint32_t* bytes_read,
                                                   bool* /*seekable*/) {
   uint32_t user_key_size = 0;
-  Status s;
+  Status s = Status_new();
   if (fixed_user_key_len_ != kPlainTableVariableLength) {
     user_key_size = fixed_user_key_len_;
   } else {
@@ -350,7 +350,7 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
   PlainTableEntryType entry_type;
 
   bool expect_suffix = false;
-  Status s;
+  Status s = Status_new();
   do {
     uint32_t size = 0;
     // dummy initial value to avoid compiler complain

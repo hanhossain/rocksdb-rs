@@ -100,7 +100,7 @@ void WriteUnpreparedTxn::Initialize(const TransactionOptions& txn_options) {
 }
 
 Status WriteUnpreparedTxn::HandleWrite(std::function<Status()> do_write) {
-  Status s;
+  Status s = Status_new();
   if (active_iterators_.empty()) {
     s = MaybeFlushWriteBatchToDB();
     if (!s.ok()) {
@@ -248,7 +248,7 @@ Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch* wb) {
 
 Status WriteUnpreparedTxn::MaybeFlushWriteBatchToDB() {
   const bool kPrepared = true;
-  Status s;
+  Status s = Status_new();
   if (write_batch_flush_threshold_ > 0 &&
       write_batch_.GetWriteBatch()->Count() > 0 &&
       write_batch_.GetDataSize() >
@@ -725,7 +725,7 @@ Status WriteUnpreparedTxn::RollbackInternal() {
       write_options_.protection_bytes_per_key);
   assert(GetId() != kMaxSequenceNumber);
   assert(GetId() > 0);
-  Status s;
+  Status s = Status_new();
   auto read_at_seq = kMaxSequenceNumber;
   ReadOptions roptions;
   // to prevent callback's seq to be overrriden inside DBImpk::Get
@@ -871,7 +871,7 @@ Status WriteUnpreparedTxn::RollbackToSavePoint() {
 }
 
 Status WriteUnpreparedTxn::RollbackToSavePointInternal() {
-  Status s;
+  Status s = Status_new();
 
   const bool kClear = true;
   TransactionBaseImpl::InitWriteBatch(kClear);

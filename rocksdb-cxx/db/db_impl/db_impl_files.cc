@@ -41,7 +41,7 @@ uint64_t DBImpl::GetObsoleteSstFilesSize() {
 }
 
 Status DBImpl::DisableFileDeletions() {
-  Status s;
+  Status s = Status_new();
   int my_disable_delete_obsolete_files;
   {
     InstrumentedMutexLock l(&mutex_);
@@ -355,7 +355,7 @@ void DBImpl::DeleteObsoleteFileImpl(int job_id, const std::string& fname,
   TEST_SYNC_POINT_CALLBACK("DBImpl::DeleteObsoleteFileImpl::BeforeDeletion",
                            const_cast<std::string*>(&fname));
 
-  Status file_deletion_status;
+  Status file_deletion_status = Status_new();//TODO
   if (type == kTableFile || type == kBlobFile || type == kWalFile) {
     // Rate limit WAL deletion only if its in the DB dir
     file_deletion_status = DeleteDBFile(
@@ -915,7 +915,7 @@ void DBImpl::SetDBId(std::string&& id, bool read_only,
 }
 
 Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
-  Status s;
+  Status s = Status_new();
   // Check for the IDENTITY file and create it if not there or
   // broken or not matching manifest
   std::string db_id_in_file;
@@ -972,7 +972,7 @@ Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
 
   uint64_t next_file_number = versions_->current_next_file_number();
   uint64_t largest_file_number = next_file_number;
-  Status s;
+  Status s = Status_new();
   for (const auto& path : paths) {
     std::vector<std::string> files;
     s = env_->GetChildren(path, &files);

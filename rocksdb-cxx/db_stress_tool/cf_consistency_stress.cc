@@ -132,7 +132,7 @@ class CfConsistencyStressTest : public StressTest {
                  const std::vector<int64_t>& rand_keys) override {
     std::string key_str = Key(rand_keys[0]);
     Slice key = key_str;
-    Status s;
+    Status s = Status_new();
     bool is_consistent = true;
 
     if (thread->rand.OneIn(2)) {
@@ -260,7 +260,7 @@ class CfConsistencyStressTest : public StressTest {
 
     const std::string key = Key(rand_keys[0]);
 
-    Status s;
+    Status s = Status_new();
     bool is_consistent = true;
 
     if (thread->rand.OneIn(2)) {
@@ -547,7 +547,7 @@ class CfConsistencyStressTest : public StressTest {
     std::unique_ptr<Iterator> iter(db_->NewIterator(ro_copy, cfh));
 
     uint64_t count = 0;
-    Status s;
+    Status s = Status_new();
 
     for (iter->Seek(prefix); iter->Valid() && iter->key().starts_with(prefix);
          iter->Next()) {
@@ -785,7 +785,7 @@ class CfConsistencyStressTest : public StressTest {
 
   void ContinuouslyVerifyDb(ThreadState* thread) const override {
     assert(thread);
-    Status status;
+    Status status = Status_new();
 
     DB* db_ptr = cmp_db_ ? cmp_db_ : db_;
     const auto& cfhs = cmp_db_ ? cmp_cfhs_ : column_families_;

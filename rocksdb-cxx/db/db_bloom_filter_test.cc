@@ -1429,7 +1429,7 @@ TEST_P(DBFilterConstructionCorruptionTestWithParam, DetectCorruption) {
 
   DestroyAndReopen(options);
   int num_key = static_cast<int>(GetNumKey());
-  Status s;
+  Status s = Status_new();
 
   // Case 1: No corruption in filter construction
   for (int i = 0; i < num_key; i++) {
@@ -1519,7 +1519,7 @@ TEST_P(DBFilterConstructionCorruptionTestWithParam,
   options.create_if_missing = true;
 
   int num_key = static_cast<int>(GetNumKey());
-  Status s;
+  Status s = Status_new();
 
   DestroyAndReopen(options);
 

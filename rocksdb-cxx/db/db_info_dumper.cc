@@ -36,7 +36,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
   Header(options.info_log, "DB SUMMARY\n");
   Header(options.info_log, "DB Session ID:  %s\n", session_id.c_str());
 
-  Status s;
+  Status s = Status_new();
   // Get files in dbname dir
   s = env->GetChildren(dbname, &files);
   if (!s.ok()) {

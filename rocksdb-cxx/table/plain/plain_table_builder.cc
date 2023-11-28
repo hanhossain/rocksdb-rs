@@ -71,6 +71,7 @@ PlainTableBuilder::PlainTableBuilder(
       file_(file),
       bloom_bits_per_key_(bloom_bits_per_key),
       huge_page_tlb_size_(huge_page_tlb_size),
+      status_(Status_new()),
       encoder_(encoding_type, user_key_len, moptions.prefix_extractor.get(),
                index_sparseness),
       store_index_in_file_(store_index_in_file),

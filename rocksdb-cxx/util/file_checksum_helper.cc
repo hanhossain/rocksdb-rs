@@ -101,7 +101,7 @@ Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   checksum_list->reset();
-  Status s;
+  Status s = Status_new();
 
   std::unique_ptr<SequentialFileReader> file_reader;
   {

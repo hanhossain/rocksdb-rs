@@ -66,7 +66,7 @@ class PlainTableKeyEncoder {
 class PlainTableFileReader {
  public:
   explicit PlainTableFileReader(const PlainTableReaderFileInfo* _file_info)
-      : file_info_(_file_info), num_buf_(0) {}
+      : file_info_(_file_info), num_buf_(0), status_(Status_new()) {}
 
   // In mmaped mode, the results point to mmaped area of the file, which
   // means it is always valid before closing the file.

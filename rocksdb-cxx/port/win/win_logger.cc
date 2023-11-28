@@ -60,7 +60,7 @@ WinLogger::~WinLogger() { CloseInternal(); }
 Status WinLogger::CloseImpl() { return CloseInternal(); }
 
 Status WinLogger::CloseInternal() {
-  Status s;
+  Status s = Status_new();
   if (INVALID_HANDLE_VALUE != file_) {
     BOOL ret = FlushFileBuffers(file_);
     if (ret == 0) {

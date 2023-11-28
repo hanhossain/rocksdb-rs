@@ -127,6 +127,7 @@ class SubcompactionState {
       : compaction(c),
         start(_start),
         end(_end),
+        status(Status_new()),
         sub_job_id(_sub_job_id),
         compaction_outputs_(c, /*is_penultimate_level=*/false),
         penultimate_level_outputs_(c, /*is_penultimate_level=*/true) {

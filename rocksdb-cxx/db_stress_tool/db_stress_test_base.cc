@@ -343,7 +343,7 @@ void StressTest::TrackExpectedState(SharedState* shared) {
 
 Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
                               ThreadState::SnapshotState& snap_state) {
-  Status s;
+  Status s = Status_new();
   if (cf->GetName() != snap_state.cf_at_name) {
     return s;
   }
@@ -478,7 +478,7 @@ void StressTest::PreloadDbAndReopenAsReadOnly(int64_t number_of_keys,
   }
   char value[100];
   int cf_idx = 0;
-  Status s;
+  Status s = Status_new();
   for (auto cfh : column_families_) {
     for (int64_t k = 0; k != number_of_keys; ++k) {
       const std::string key = Key(k);
@@ -2563,7 +2563,7 @@ void StressTest::Open(SharedState* shared) {
 
   fprintf(stdout, "DB path: [%s]\n", FLAGS_db.c_str());
 
-  Status s;
+  Status s = Status_new();
 
   if (FLAGS_ttl == -1) {
     std::vector<std::string> existing_column_families;
@@ -3316,7 +3316,7 @@ void InitializeOptionsGeneral(
 
   if (FLAGS_sst_file_manager_bytes_per_sec > 0 ||
       FLAGS_sst_file_manager_bytes_per_truncate > 0) {
-    Status status;
+    Status status = Status_new();
     options.sst_file_manager.reset(NewSstFileManager(
         db_stress_env, options.info_log, "" /* trash_dir */,
         static_cast<int64_t>(FLAGS_sst_file_manager_bytes_per_sec),

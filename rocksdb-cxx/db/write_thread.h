@@ -81,6 +81,7 @@ class WriteThread {
   struct Writer;
 
   struct WriteGroup {
+    WriteGroup() : status(Status_new()) {}
     Writer* leader = nullptr;
     Writer* last_writer = nullptr;
     SequenceNumber last_sequence;
@@ -162,6 +163,8 @@ class WriteThread {
           state(STATE_INIT),
           write_group(nullptr),
           sequence(kMaxSequenceNumber),
+          status(Status_new()),
+          callback_status(Status_new()),
           link_older(nullptr),
           link_newer(nullptr) {}
 

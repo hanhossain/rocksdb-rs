@@ -1728,7 +1728,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForFileDeletedTwice) {
 }
 
 TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
-  Status s;
+  Status s = Status_new();
   // To verify files of same epoch number of overlapping ranges are caught as
   // corrupted
   VersionEdit version_edit_1;

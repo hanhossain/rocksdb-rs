@@ -752,6 +752,8 @@ class SequentialFile {
 
 // A read IO request structure for use in MultiRead
 struct ReadRequest {
+  ReadRequest() : offset(0), len(0), scratch(nullptr), result(), status(Status_new()) {}
+
   // File offset in bytes
   uint64_t offset;
 
