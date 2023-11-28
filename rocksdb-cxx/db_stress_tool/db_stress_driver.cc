@@ -66,7 +66,7 @@ bool RunStressTestImpl(SharedState* shared) {
     }
     if (!s.ok()) {
       fprintf(stderr, "Failed to setup unverified state dir: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     }
   }
@@ -133,7 +133,7 @@ bool RunStressTestImpl(SharedState* shared) {
         }
         if (!s.ok()) {
           fprintf(stderr, "Failed to cleanup unverified state dir: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           exit(1);
         }
       }

@@ -229,16 +229,16 @@ class FaultInjectionTestEnv : public EnvWrapper {
       bool active, Status error = Status_Corruption("Not active")) {
     filesystem_active_ = active;
     if (!active) {
-      error_ = error;
+      error_ = error.Clone();
     }
   }
   void SetFilesystemActive(bool active,
                            Status error = Status_Corruption("Not active")) {
     MutexLock l(&mutex_);
-    SetFilesystemActiveNoLock(active, error);
+    SetFilesystemActiveNoLock(active, error.Clone());
   }
   void AssertNoOpenFile() { assert(open_managed_files_.empty()); }
-  Status GetError() { return error_; }
+  Status GetError() { return error_.Clone(); }
 
  private:
   port::Mutex mutex_;

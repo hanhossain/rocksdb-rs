@@ -170,7 +170,7 @@ class DBIter final : public Iterator {
       return iter_.status();
     } else {
       assert(!valid_);
-      return status_;
+      return status_.Clone();
     }
   }
   Slice timestamp() const override {

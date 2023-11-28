@@ -330,7 +330,7 @@ Status WrapAnotherDBInternal(
     // txn_db still owns db, and ~StackableDB() will be called when txn_db goes
     // out of scope, deleting the input db pointer.
     ROCKS_LOG_FATAL(db->GetDBOptions().info_log,
-                    "Failed to initialize txn_db: %s", s.ToString().c_str());
+                    "Failed to initialize txn_db: %s", s.ToString()->c_str());
   }
   return s;
 }
@@ -764,7 +764,7 @@ Status SnapshotCreationCallback::operator()(SequenceNumber seq,
 
   // Create a snapshot which can also be used for write conflict checking.
   auto ret = db_impl_->CreateTimestampedSnapshot(seq, commit_ts_);
-  snapshot_creation_status_ = ret.first;
+  snapshot_creation_status_.copy_from(ret.first);
   snapshot_ = ret.second;
   if (snapshot_creation_status_.ok()) {
     assert(snapshot_);

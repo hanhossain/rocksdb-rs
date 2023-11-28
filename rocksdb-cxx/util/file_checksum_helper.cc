@@ -120,7 +120,7 @@ Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
     Status* status_ptr;
     virtual void Corruption(size_t /*bytes*/, const Status& st) override {
       if (status_ptr->ok()) {
-        *status_ptr = st;
+        status_ptr->copy_from(st);
       }
     }
   } reporter;
@@ -134,7 +134,7 @@ Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
          manifest_file_size == std::numeric_limits<uint64_t>::max() ||
          reader.LastRecordEnd() == manifest_file_size);
 
-  return retriever.status();
+  return retriever.status().Clone();
 }
 
 namespace {

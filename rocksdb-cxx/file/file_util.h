@@ -11,10 +11,15 @@
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/sst_file_writer.h"
-#include "rocksdb/status.h"
 #include "rocksdb/system_clock.h"
 #include "rocksdb/types.h"
 #include "trace_replay/io_tracer.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 // use_fsync maps to options.use_fsync, which determines the way that

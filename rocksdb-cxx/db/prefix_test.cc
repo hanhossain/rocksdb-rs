@@ -179,7 +179,7 @@ std::string Get(DB* db, const ReadOptions& read_options, uint64_t prefix,
   if (s.IsNotFound()) {
     result = kNotFoundResult;
   } else if (!s.ok()) {
-    result = s.ToString();
+    result = *s.ToString();
   }
   return result;
 }

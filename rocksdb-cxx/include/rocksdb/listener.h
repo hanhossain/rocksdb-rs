@@ -17,9 +17,14 @@
 #include "rocksdb/compression_type.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/io_status.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table_properties.h"
 #include "rocksdb/types.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -28,7 +33,7 @@ using TablePropertiesCollection =
 
 class DB;
 class ColumnFamilyHandle;
-class Status;
+struct Status;
 struct CompactionJobStats;
 
 struct FileCreationBriefInfo {
@@ -60,6 +65,21 @@ struct TableFileCreationInfo : public TableFileCreationBriefInfo {
   TableFileCreationInfo() = default;
   explicit TableFileCreationInfo(TableProperties&& prop)
       : table_properties(prop) {}
+  TableFileCreationInfo& operator=(const TableFileCreationInfo& other) {
+    if (this != &other) {
+      db_name = other.db_name;
+      cf_name = other.cf_name;
+      file_path = other.file_path;
+      job_id = other.job_id;
+      reason = other.reason;
+      file_size = other.file_size;
+      table_properties = other.table_properties;
+      status = other.status.Clone();
+      file_checksum = other.file_checksum;
+      file_checksum_func_name = other.file_checksum_func_name;
+    }
+    return *this;
+  }
   // the size of the file.
   uint64_t file_size;
   // Detailed properties of the created file.
@@ -94,7 +114,7 @@ struct BlobFileCreationInfo : public BlobFileCreationBriefInfo {
                                   _reason),
         total_blob_count(_total_blob_count),
         total_blob_bytes(_total_blob_bytes),
-        status(_status),
+        status(_status.Clone()),
         file_checksum(_file_checksum),
         file_checksum_func_name(_file_checksum_func_name) {}
 
@@ -213,7 +233,7 @@ struct FileDeletionInfo {
       : db_name(_db_name),
         file_path(_file_path),
         job_id(_job_id),
-        status(_status) {}
+        status(_status.Clone()) {}
   // The name of the database where the file was deleted.
   std::string db_name;
   // The path to the deleted file.
@@ -230,7 +250,7 @@ struct BlobFileDeletionInfo : public FileDeletionInfo {
   BlobFileDeletionInfo(const std::string& _db_name,
                        const std::string& _file_path, int _job_id,
                        Status _status)
-      : FileDeletionInfo(_db_name, _file_path, _job_id, _status) {}
+      : FileDeletionInfo(_db_name, _file_path, _job_id, _status.Clone()) {}
 };
 
 enum class FileOperationType {
@@ -277,7 +297,7 @@ struct FileOperationInfo {
         duration(std::chrono::duration_cast<std::chrono::nanoseconds>(
             _finish_ts - _start_ts.second)),
         start_ts(_start_ts.first),
-        status(_status) {}
+        status(_status.Clone()) {}
   static StartTimePoint StartNow() {
     return std::make_pair<SystemTimePoint, SteadyTimePoint>(
         std::chrono::system_clock::now(), std::chrono::steady_clock::now());

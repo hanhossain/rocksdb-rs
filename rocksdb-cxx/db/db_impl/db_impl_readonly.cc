@@ -55,12 +55,12 @@ Status DBImplReadOnly::Get(const ReadOptions& read_options,
     const Status s = FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   } else {
     const Status s = FailIfCfHasTs(column_family);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -168,7 +168,7 @@ Status DBImplReadOnly::NewIterators(
       const Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
                                           /*ts_for_read=*/true);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   } else {
@@ -176,7 +176,7 @@ Status DBImplReadOnly::NewIterators(
       assert(cf);
       const Status s = FailIfCfHasTs(cf);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   }

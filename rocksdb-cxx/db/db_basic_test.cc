@@ -49,7 +49,7 @@ TEST_F(DBBasicTest, OpenWhenOpen) {
   }();
   ASSERT_EQ(Code::kIOError, s.code());
   ASSERT_EQ(SubCode::kNone, s.subcode());
-  ASSERT_TRUE(strstr(s.getState(), "lock ") != nullptr);
+  ASSERT_TRUE(strstr(s.getState()->c_str(), "lock ") != nullptr);
 
   delete db2;
 }
@@ -231,14 +231,14 @@ TEST_F(DBBasicTest, CompactedDB) {
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
   Status s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported operation in read only mode.");
   ASSERT_EQ(DummyString(kFileSize / 2, '1'), Get("aaa"));
   Close();
   options.max_open_files = -1;
   ASSERT_OK(ReadOnlyReopen(options));
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported in compacted db mode.");
   ASSERT_EQ(DummyString(kFileSize / 2, '1'), Get("aaa"));
   Close();
@@ -257,7 +257,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   ASSERT_OK(ReadOnlyReopen(options));
   // Fallback to read-only DB
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported operation in read only mode.");
 
   // TODO: validate that other write ops return NotImplemented
@@ -289,7 +289,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   // CompactedDB
   ASSERT_OK(ReadOnlyReopen(options));
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported in compacted db mode.");
   ASSERT_EQ("NOT_FOUND", Get("abc"));
   ASSERT_EQ(DummyString(kFileSize / 2, 'a'), Get("aaa"));
@@ -335,7 +335,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported operation in read only mode.");
 }
 
@@ -355,7 +355,7 @@ TEST_F(DBBasicTest, LevelLimitReopen) {
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
   Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
 
   options.num_levels = 10;
@@ -849,7 +849,7 @@ TEST_F(DBBasicTest, DBOpen_Options) {
   DB* db = nullptr;
   options.create_if_missing = false;
   Status s = DB::Open(options, dbname_, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "does not exist") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "does not exist") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does not exist, and create_if_missing == true: OK
@@ -865,7 +865,7 @@ TEST_F(DBBasicTest, DBOpen_Options) {
   options.create_if_missing = false;
   options.error_if_exists = true;
   s = DB::Open(options, dbname_, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "exists") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "exists") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does exist, and error_if_exists == false: OK
@@ -1192,7 +1192,7 @@ TEST_F(DBBasicTest, DBClose) {
 
   s = db->Close();
   ASSERT_EQ(env->GetCloseCount(), 1);
-  ASSERT_EQ(s, Status_IOError());
+  ASSERT_TRUE(s.eq(Status_IOError()));
 
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 1);
@@ -1212,7 +1212,7 @@ TEST_F(DBBasicTest, DBClose) {
   ASSERT_TRUE(db != nullptr);
 
   s = db->Close();
-  ASSERT_EQ(s, Status_OK());
+  ASSERT_TRUE(s.eq(Status_OK()));
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 2);
   options.info_log.reset();
@@ -1268,15 +1268,15 @@ TEST_F(DBBasicTest, DBCloseFlushError) {
   ASSERT_OK(Put("key3", "value3"));
   fault_injection_env->SetFilesystemActive(false);
   Status s = dbfull()->Close();
-  ASSERT_NE(s, Status_OK());
+  ASSERT_FALSE(s.eq(Status_OK()));
   // retry should return the same error
   s = dbfull()->Close();
-  ASSERT_NE(s, Status_OK());
+  ASSERT_FALSE(s.eq(Status_OK()));
   fault_injection_env->SetFilesystemActive(true);
   // retry close() is no-op even the system is back. Could be improved if
   // Close() is retry-able: #9029
   s = dbfull()->Close();
-  ASSERT_NE(s, Status_OK());
+  ASSERT_FALSE(s.eq(Status_OK()));
   Destroy(options);
 }
 
@@ -2979,7 +2979,7 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
     // Make the value compressible. A purely random string doesn't compress
     // and the resultant data block will not be compressed
     std::string value(rnd.RandomString(128) + zero_str);
-    assert(Put(Key(i), value) == Status_OK());
+    assert(Put(Key(i), value).eq(Status_OK()));
   }
   ASSERT_OK(Flush());
 
@@ -3506,7 +3506,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         // and the resultant data block will not be compressed
         values_.emplace_back(rnd.RandomString(128) + zero_str);
         assert(((num_cfs == 1) ? Put(Key(i), values_[i])
-                               : Put(cf, Key(i), values_[i])) == Status_OK());
+                               : Put(cf, Key(i), values_[i])).eq(Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3519,8 +3519,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         uncompressable_values_.emplace_back(rnd.RandomString(256) + '\0');
         std::string tmp_key = "a" + Key(i);
         assert(((num_cfs == 1) ? Put(tmp_key, uncompressable_values_[i])
-                               : Put(cf, tmp_key, uncompressable_values_[i])) ==
-               Status_OK());
+                               : Put(cf, tmp_key, uncompressable_values_[i])).eq(Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3944,8 +3943,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
                      keys.data(), values.data(), statuses.data(), true);
   ASSERT_TRUE(CheckValue(0, values[0].ToString()));
   // ASSERT_TRUE(CheckValue(50, values[1].ToString()));
-  ASSERT_EQ(statuses[0], Status_OK());
-  ASSERT_EQ(statuses[1], Status_Corruption());
+  ASSERT_TRUE(statuses[0].eq(Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(Status_Corruption()));
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
@@ -3990,8 +3989,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
-  ASSERT_EQ(statuses[0], Status_IOError());
-  ASSERT_EQ(statuses[1], Status_IOError());
+  ASSERT_TRUE(statuses[0].eq(Status_IOError()));
+  ASSERT_TRUE(statuses[1].eq(Status_IOError()));
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
@@ -4223,8 +4222,8 @@ class DBBasicTestMultiGetDeadline : public DBBasicTestMultiGet,
       if (i < num_ok) {
         EXPECT_OK(statuses[i]);
       } else {
-        if (statuses[i] != Status_TimedOut()) {
-          EXPECT_EQ(statuses[i], Status_TimedOut());
+        if (!statuses[i].eq(Status_TimedOut())) {
+          EXPECT_TRUE(statuses[i].eq(Status_TimedOut()));
         }
       }
     }
@@ -4659,7 +4658,7 @@ TEST_P(DBBasicTestDeadline, PointLookupDeadline) {
       std::string value;
       Status s = dbfull()->Get(ro, "k50", &value);
       if (fs->TimedOut()) {
-        ASSERT_EQ(s, Status_TimedOut());
+        ASSERT_TRUE(s.eq(Status_TimedOut()));
       } else {
         timedout = false;
         ASSERT_OK(s);
@@ -4746,7 +4745,7 @@ TEST_P(DBBasicTestDeadline, IteratorDeadline) {
       }
       if (fs->TimedOut()) {
         ASSERT_FALSE(iter->Valid());
-        ASSERT_EQ(iter->status(), Status_TimedOut());
+        ASSERT_TRUE(iter->status().eq(Status_TimedOut()));
       } else {
         timedout = false;
         ASSERT_OK(iter->status());

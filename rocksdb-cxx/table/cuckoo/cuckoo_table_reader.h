@@ -37,7 +37,7 @@ class CuckooTableReader : public TableReader {
     return table_props_;
   }
 
-  Status status() const { return status_; }
+  Status status() const { return status_.Clone(); }
 
   Status Get(const ReadOptions& readOptions, const Slice& key,
              GetContext* get_context, const SliceTransform* prefix_extractor,

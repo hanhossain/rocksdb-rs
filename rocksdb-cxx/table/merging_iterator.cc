@@ -72,7 +72,7 @@ class MergingIterator : public InternalIterator {
 
   void considerStatus(Status s) {
     if (!s.ok() && status_.ok()) {
-      status_ = s;
+      status_.copy_from(s);
     }
   }
 
@@ -136,7 +136,7 @@ class MergingIterator : public InternalIterator {
 
   bool Valid() const override { return current_ != nullptr && status_.ok(); }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   // Add range_tombstone_iters_[level] into min heap.
   // Updates active_ if the end key of a range tombstone is inserted.
@@ -1300,7 +1300,7 @@ void MergingIterator::SwitchToForward() {
       // request for retrieval of data blocks has been submitted. So it should
       // return at this point and Seek should be called again to retrieve the
       // requested block and add the child to min heap.
-      if (child.iter.status() == Status_TryAgain()) {
+      if (child.iter.status().eq(Status_TryAgain())) {
         continue;
       }
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
@@ -1312,7 +1312,7 @@ void MergingIterator::SwitchToForward() {
   }
 
   for (auto& child : children_) {
-    if (child.iter.status() == Status_TryAgain()) {
+    if (child.iter.status().eq(Status_TryAgain())) {
       child.iter.Seek(target);
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
         assert(child.iter.status().ok());

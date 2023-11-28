@@ -52,7 +52,7 @@ Compaction* FIFOCompactionPicker::PickTTLCompaction(
     ROCKS_LOG_BUFFER(log_buffer,
                      "[%s] FIFO compaction: Couldn't get current time: %s. "
                      "Not doing compactions based on TTL. ",
-                     cf_name.c_str(), status.ToString().c_str());
+                     cf_name.c_str(), status.ToString()->c_str());
     return nullptr;
   }
   const uint64_t current_time = static_cast<uint64_t>(_current_time);
@@ -314,7 +314,7 @@ Compaction* FIFOCompactionPicker::PickTemperatureChangeCompaction(
         log_buffer,
         "[%s] FIFO compaction: Couldn't get current time: %s. "
         "Not doing compactions based on file temperature-age threshold. ",
-        cf_name.c_str(), status.ToString().c_str());
+        cf_name.c_str(), status.ToString()->c_str());
     return nullptr;
   }
   const uint64_t current_time = static_cast<uint64_t>(_current_time);

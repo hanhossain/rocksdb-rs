@@ -466,7 +466,7 @@ Status RocksDBOptionsParser::EndSection(
       if (s.ok() || s.IsInvalidArgument()) {
         return s;
       } else {
-        return Status_InvalidArgument(s.getState());
+        return Status_InvalidArgument(s.getState()->c_str());
       }
     } else {
       // Return OK for not supported table factories as TableFactory
@@ -657,7 +657,7 @@ Status RocksDBOptionsParser::VerifyDBOptions(
     } else {
       snprintf(buffer + offset, sizeof(buffer) - static_cast<size_t>(offset),
                "-- Unable to re-serialize an option: %s.\n",
-               s.ToString().c_str());
+               s.ToString()->c_str());
     }
     return Status_InvalidArgument(Slice(buffer, strlen(buffer)));
   }
@@ -704,7 +704,7 @@ Status RocksDBOptionsParser::VerifyCFOptions(
     } else {
       snprintf(buffer + offset, sizeof(buffer) - static_cast<size_t>(offset),
                "--- Unable to re-serialize an option: %s.\n",
-               s.ToString().c_str());
+               s.ToString()->c_str());
     }
     return Status_InvalidArgument(Slice(buffer, sizeof(buffer)));
   }  // For each option

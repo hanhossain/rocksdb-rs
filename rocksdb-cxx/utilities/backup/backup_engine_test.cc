@@ -1274,8 +1274,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00010.sst"));
 
   // 00011.sst was only in backup 1, should be deleted
-  ASSERT_EQ(Status_NotFound(),
-            test_backup_env_->FileExists(backupdir_ + "/shared/00011.sst"));
+  ASSERT_TRUE(Status_NotFound().eq(test_backup_env_->FileExists(backupdir_ + "/shared/00011.sst")));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00015.sst"));
 
   // MANIFEST file size should be only 100
@@ -1311,16 +1310,14 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
 
   // Make sure dangling sst file has been removed (somewhere along this
   // process). GarbageCollect should not be needed.
-  ASSERT_EQ(Status_NotFound(),
-            test_backup_env_->FileExists(backupdir_ + "/shared/00015.sst"));
+  ASSERT_TRUE(Status_NotFound().eq(test_backup_env_->FileExists(backupdir_ + "/shared/00015.sst")));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00017.sst"));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00019.sst"));
 
   // Now actually purge a good one
   ASSERT_OK(backup_engine_->PurgeOldBackups(1));
 
-  ASSERT_EQ(Status_NotFound(),
-            test_backup_env_->FileExists(backupdir_ + "/shared/00017.sst"));
+  ASSERT_TRUE(Status_NotFound().eq(test_backup_env_->FileExists(backupdir_ + "/shared/00017.sst")));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00019.sst"));
 
   CloseDBAndBackupEngine();
@@ -1407,22 +1404,14 @@ TEST_F(BackupEngineTest, CorruptionsTest) {
   ASSERT_OK(backup_engine_->DeleteBackup(2));
   // Should not be needed anymore with auto-GC on DeleteBackup
   //(void)backup_engine_->GarbageCollect();
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/meta/5"));
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/private/5"));
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/meta/4"));
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/private/4"));
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/meta/3"));
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/private/3"));
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/meta/2"));
-  ASSERT_EQ(Status_NotFound(),
-            file_manager_->FileExists(backupdir_ + "/private/2"));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/5")));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/5")));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/4")));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/4")));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/3")));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/3")));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/2")));
+  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/2")));
   CloseBackupEngine();
   AssertBackupConsistency(0, 0, keys_iteration * 1, keys_iteration * 5);
 
@@ -2568,7 +2557,7 @@ TEST_F(BackupEngineTest, DeleteTmpFiles) {
       }
       CloseDBAndBackupEngine();
       for (std::string file_or_dir : tmp_files_and_dirs) {
-        if (file_manager_->FileExists(file_or_dir) != Status_NotFound()) {
+        if (!file_manager_->FileExists(file_or_dir).eq(Status_NotFound())) {
           FAIL() << file_or_dir << " was expected to be deleted." << cleanup_fn;
         }
       }

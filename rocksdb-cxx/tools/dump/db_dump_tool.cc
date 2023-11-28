@@ -211,7 +211,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
     status = dumpfile->Read(keysize, &keyslice, keyscratch.get());
     if (!status.ok() || keyslice.size() != keysize) {
       std::cerr << "Key read failure: "
-                << (status.ok() ? "insufficient data" : status.ToString())
+                << (status.ok() ? "insufficient data" : status.ToString()->c_str())
                 << std::endl;
       return false;
     }
@@ -219,7 +219,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
     status = dumpfile->Read(4, &slice, scratch8);
     if (!status.ok() || slice.size() != 4) {
       std::cerr << "Unable to read value size: "
-                << (status.ok() ? "insufficient data" : status.ToString())
+                << (status.ok() ? "insufficient data" : status.ToString()->c_str())
                 << std::endl;
       return false;
     }
@@ -232,7 +232,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
     status = dumpfile->Read(valsize, &valslice, valscratch.get());
     if (!status.ok() || valslice.size() != valsize) {
       std::cerr << "Unable to read value: "
-                << (status.ok() ? "insufficient data" : status.ToString())
+                << (status.ok() ? "insufficient data" : status.ToString()->c_str())
                 << std::endl;
       return false;
     }

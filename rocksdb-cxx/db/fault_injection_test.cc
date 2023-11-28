@@ -225,12 +225,12 @@ class FaultInjectionTest
       if (expected == ExpectedVerifResult::kValExpectFound) {
         if (!s.ok()) {
           fprintf(stderr, "Error when read %dth record (expect found): %s\n", i,
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           return s;
         }
       } else if (!s.ok() && !s.IsNotFound()) {
         fprintf(stderr, "Error when read %dth record: %s\n", i,
-                s.ToString().c_str());
+                s.ToString()->c_str());
         return s;
       }
     }
@@ -542,7 +542,7 @@ TEST_P(FaultInjectionTest, WriteBatchWalTerminationTest) {
   std::string val;
   ASSERT_OK(db_->Get(ro, "cats", &val));
   ASSERT_EQ("dogs", val);
-  ASSERT_EQ(db_->Get(ro, "boys", &val), Status_NotFound());
+  ASSERT_TRUE(db_->Get(ro, "boys", &val).eq(Status_NotFound()));
 }
 
 TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
@@ -596,7 +596,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
       explicit LogReporter(Status* _s) : status_(_s) {}
       void Corruption(size_t /*bytes*/, const Status& _s) override {
         if (status_->ok()) {
-          *status_ = _s;
+          status_->copy_from(_s);
         }
       }
     } reporter(&log_read_s);

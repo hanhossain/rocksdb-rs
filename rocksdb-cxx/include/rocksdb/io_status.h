@@ -22,8 +22,6 @@
 #endif
 #include <cstring>
 
-#include "status.h"
-
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"
 #else
@@ -52,15 +50,15 @@ class IOStatus {
   bool operator==(const IOStatus& rhs) const;
   bool operator!=(const IOStatus& rhs) const;
 
-  void SetRetryable(bool retryable) { status_.rs_status_.retryable = retryable; }
-  void SetDataLoss(bool data_loss) { status_.rs_status_.data_loss = data_loss; }
+  void SetRetryable(bool retryable) { status_.retryable = retryable; }
+  void SetDataLoss(bool data_loss) { status_.data_loss = data_loss; }
   void SetScope(IOErrorScope scope) {
-      status_.rs_status_.scope = static_cast<unsigned char>(scope);
+      status_.scope = static_cast<unsigned char>(scope);
   }
 
-  bool GetRetryable() const { return status_.rs_status_.retryable; }
-  bool GetDataLoss() const { return status_.rs_status_.data_loss; }
-  IOErrorScope GetScope() const { return static_cast<IOErrorScope>(status_.rs_status_.scope); }
+  bool GetRetryable() const { return status_.retryable; }
+  bool GetDataLoss() const { return status_.data_loss; }
+  IOErrorScope GetScope() const { return static_cast<IOErrorScope>(status_.scope); }
 
     bool ok() const { return status_.ok(); }
     bool IsNotFound() const { return status_.IsNotFound(); }
@@ -76,11 +74,11 @@ class IOStatus {
     bool IsAborted() const { return status_.IsAborted(); }
     bool IsPathNotFound() const { return status_.IsPathNotFound(); }
     bool IsInvalidArgument() const { return status_.IsInvalidArgument(); }
-    operator Status() const { return status_; }
+    operator Status() const { return status_.Clone(); }
 
     SubCode subcode() const { return status_.subcode(); }
-    std::string ToString() const { return status_.ToString(); }
-    const char* getState() const { return status_.getState(); }
+    std::string ToString() const { return status_.ToString()->c_str(); }
+    const char* getState() const { return status_.getState()->c_str(); }
 
   // Return a success status.
   static IOStatus OK() { return IOStatus(); }
@@ -167,7 +165,7 @@ class IOStatus {
   friend IOStatus status_to_io_status(Status&&);
 
   explicit IOStatus(Code _code, SubCode _subcode = SubCode::kNone) {
-      status_ = Status(_code, _subcode, false, false, kIOErrorScopeFileSystem);
+      status_ = Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem);
   }
 
   IOStatus(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
@@ -177,9 +175,9 @@ class IOStatus {
 
 inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
                           const Slice& msg2) {
-    status_ = Status(_code, _subcode, false, false, kIOErrorScopeFileSystem);
-    assert(status_.rs_status_.code_ != Code::kOk);
-    assert(status_.rs_status_.subcode_ != SubCode::kMaxSubCode);
+    status_ = Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem);
+    assert(status_.code_ != Code::kOk);
+    assert(status_.subcode_ != SubCode::kMaxSubCode);
     const size_t len1 = msg.size();
     const size_t len2 = msg2.size();
     const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -191,29 +189,29 @@ inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
         memcpy(result + len1 + 2, msg2.data(), len2);
     }
     result[size] = '\0';  // null terminator for C style string
-    status_.rs_status_.state = std::make_unique<std::string>(result);
+    status_.state = std::make_unique<std::string>(result);
 }
 
 inline IOStatus::IOStatus(const IOStatus& s) {
-    status_ = Status(
-        s.status_.rs_status_.code_,
-        s.status_.rs_status_.subcode_,
-        s.status_.rs_status_.retryable,
-        s.status_.rs_status_.data_loss,
-        s.status_.rs_status_.scope);
-    status_.rs_status_.state = s.status_.rs_status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.rs_status_.state);
+    status_ = Status_new(
+        s.status_.code_,
+        s.status_.subcode_,
+        s.status_.retryable,
+        s.status_.data_loss,
+        s.status_.scope);
+    status_.state = s.status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.state);
 }
 
 inline IOStatus& IOStatus::operator=(const IOStatus& s) {
   // The following condition catches both aliasing (when this == &s),
   // and the common case where both s and *this are ok.
   if (this != &s) {
-    status_.rs_status_.code_ = s.status_.rs_status_.code_;
-    status_.rs_status_.subcode_ = s.status_.rs_status_.subcode_;
-    status_.rs_status_.retryable = s.status_.rs_status_.retryable;
-    status_.rs_status_.data_loss = s.status_.rs_status_.data_loss;
-    status_.rs_status_.scope = s.status_.rs_status_.scope;
-      status_.rs_status_.state = s.status_.rs_status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.rs_status_.state);
+    status_.code_ = s.status_.code_;
+    status_.subcode_ = s.status_.subcode_;
+    status_.retryable = s.status_.retryable;
+    status_.data_loss = s.status_.data_loss;
+    status_.scope = s.status_.scope;
+      status_.state = s.status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.state);
   }
   return *this;
 }
@@ -224,21 +222,21 @@ inline IOStatus::IOStatus(IOStatus&& s) noexcept : IOStatus() {
 
 inline IOStatus& IOStatus::operator=(IOStatus&& s) noexcept {
   if (this != &s) {
-    status_.rs_status_.code_ = s.status_.rs_status_.code_;
-    s.status_.rs_status_.code_ = Code::kOk;
-    status_.rs_status_.subcode_ = s.status_.rs_status_.subcode_;
-    s.status_.rs_status_.subcode_ = SubCode::kNone;
-    status_.rs_status_.retryable = s.status_.rs_status_.retryable;
-    status_.rs_status_.data_loss = s.status_.rs_status_.data_loss;
-    status_.rs_status_.scope = s.status_.rs_status_.scope;
-    s.status_.rs_status_.scope = kIOErrorScopeFileSystem;
-    status_.rs_status_.state = std::move(s.status_.rs_status_.state);
+    status_.code_ = s.status_.code_;
+    s.status_.code_ = Code::kOk;
+    status_.subcode_ = s.status_.subcode_;
+    s.status_.subcode_ = SubCode::kNone;
+    status_.retryable = s.status_.retryable;
+    status_.data_loss = s.status_.data_loss;
+    status_.scope = s.status_.scope;
+    s.status_.scope = kIOErrorScopeFileSystem;
+    status_.state = std::move(s.status_.state);
   }
   return *this;
 }
 
 inline bool IOStatus::operator==(const IOStatus& rhs) const {
-  return (status_.rs_status_.code_ == rhs.status_.rs_status_.code_);
+  return (status_.code_ == rhs.status_.code_);
 }
 
 inline bool IOStatus::operator!=(const IOStatus& rhs) const {

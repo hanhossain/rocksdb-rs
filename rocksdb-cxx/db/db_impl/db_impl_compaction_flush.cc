@@ -327,8 +327,8 @@ Status DBImpl::FlushMemTableToOutputFile(
         error_handler_.SetBGError(s, BackgroundErrorReason::kFlushNoWAL);
       }
     } else {
-      assert(s == log_io_s);
-      Status new_bg_error = s;
+      assert(s.eq(log_io_s));
+      Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
   }
@@ -551,18 +551,18 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
     Status error_status;
     for (const auto& e : exec_status) {
       if (!e.second.ok()) {
-        s = e.second;
+        s.copy_from(e.second);
         if (!e.second.IsShutdownInProgress() &&
             !e.second.IsColumnFamilyDropped()) {
           // If a flush job did not return OK, and the CF is not dropped, and
           // the DB is not shutting down, then we have to return this result to
           // caller later.
-          error_status = e.second;
+          error_status.copy_from(e.second);
         }
       }
     }
 
-    s = error_status.ok() ? s : error_status;
+    s.copy_from(error_status.ok() ? s : error_status);
   }
 
   if (s.IsColumnFamilyDropped()) {
@@ -577,7 +577,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
             IOOptions(), nullptr,
             DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced));
         if (!error_status.ok()) {
-          s = error_status;
+          s.copy_from(error_status);
           break;
         }
       }
@@ -649,7 +649,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
           "DBImpl::AtomicFlushMemTablesToOutputFiles:WaitToCommit", &res);
 
       if (!res.first.ok()) {
-        s = res.first;
+        s.copy_from(res.first);
         break;
       } else if (!res.second) {
         break;
@@ -800,8 +800,8 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         error_handler_.SetBGError(s, BackgroundErrorReason::kFlushNoWAL);
       }
     } else {
-      assert(s == log_io_s);
-      Status new_bg_error = s;
+      assert(s.eq(log_io_s));
+      Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
   }
@@ -1492,7 +1492,7 @@ Status DBImpl::CompactFilesImpl(
                                        &job_context->superversion_contexts[0],
                                        *c->mutable_cf_options());
   }
-  c->ReleaseCompactionFiles(s);
+  c->ReleaseCompactionFiles(s.Clone());
   // Need to make sure SstFileManager does its bookkeeping
   auto sfm = static_cast<SstFileManagerImpl*>(
       immutable_db_options_.sst_file_manager.get());
@@ -1521,7 +1521,7 @@ Status DBImpl::CompactFilesImpl(
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "[%s] [JOB %d] Compaction error: %s",
                    c->column_family_data()->GetName().c_str(),
-                   job_context->job_id, status.ToString().c_str());
+                   job_context->job_id, status.ToString()->c_str());
     IOStatus io_s = compaction_job.io_status();
     if (!io_s.ok()) {
       error_handler_.SetBGError(io_s, BackgroundErrorReason::kCompaction);
@@ -1786,7 +1786,7 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
     InstallSuperVersionAndScheduleWork(cfd, &sv_context, mutable_cf_options);
 
     ROCKS_LOG_DEBUG(immutable_db_options_.info_log, "[%s] LogAndApply: %s\n",
-                    cfd->GetName().c_str(), status.ToString().data());
+                    cfd->GetName().c_str(), status.ToString()->data());
 
     if (status.ok()) {
       ROCKS_LOG_DEBUG(immutable_db_options_.info_log,
@@ -1866,7 +1866,7 @@ Status DBImpl::Flush(const FlushOptions& flush_options,
 
   ROCKS_LOG_INFO(immutable_db_options_.info_log,
                  "[%s] Manual flush finished, status: %s\n",
-                 cfh->GetName().c_str(), s.ToString().c_str());
+                 cfh->GetName().c_str(), s.ToString()->c_str());
   return s;
 }
 
@@ -1901,7 +1901,7 @@ Status DBImpl::Flush(const FlushOptions& flush_options,
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Manual atomic flush finished, status: %s\n"
                    "=====Column families:=====",
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
     for (auto cfh : column_families) {
       auto cfhi = static_cast<ColumnFamilyHandleImpl*>(cfh);
       ROCKS_LOG_INFO(immutable_db_options_.info_log, "%s",
@@ -1964,7 +1964,7 @@ Status DBImpl::RunManualCompaction(
     manual.status =
         Status_Incomplete(SubCode::kManualCompactionPaused);
     manual.done = true;
-    return manual.status;
+    return manual.status.Clone();
   }
 
   // When a manual compaction arrives, temporarily disable scheduling of
@@ -2129,7 +2129,7 @@ Status DBImpl::RunManualCompaction(
     MaybeScheduleFlushOrCompaction();
   }
   bg_cv_.SignalAll();
-  return manual.status;
+  return manual.status.Clone();
 }
 
 void DBImpl::GenerateFlushRequest(const autovector<ColumnFamilyData*>& cfds,
@@ -2589,7 +2589,7 @@ Status DBImpl::EnableAutoCompaction(
     Status status =
         this->SetOptions(cf_ptr, {{"disable_auto_compactions", "false"}});
     if (!status.ok()) {
-      s = status;
+      s.copy_from(status);
     }
   }
 
@@ -3062,7 +3062,7 @@ void DBImpl::BackgroundCallFlush(Env::Priority thread_pri) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "Waiting after background flush error: %s"
                       "Accumulated background error counts: %" PRIu64,
-                      s.ToString().c_str(), error_cnt);
+                      s.ToString()->c_str(), error_cnt);
       log_buffer.FlushBufferToLog();
       LogFlush(immutable_db_options_.info_log);
       immutable_db_options_.clock->SleepForMicroseconds(1000000);
@@ -3151,7 +3151,7 @@ void DBImpl::BackgroundCallCompaction(PrepickedCompaction* prepicked_compaction,
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "Waiting after background compaction error: %s, "
                       "Accumulated background error counts: %" PRIu64,
-                      s.ToString().c_str(), error_cnt);
+                      s.ToString()->c_str(), error_cnt);
       LogFlush(immutable_db_options_.info_log);
       immutable_db_options_.clock->SleepForMicroseconds(1000000);
       mutex_.Lock();
@@ -3279,13 +3279,13 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
   if (!status.ok()) {
     if (is_manual) {
-      manual_compaction->status = status;
+      manual_compaction->status.copy_from(status);
       manual_compaction->done = true;
       manual_compaction->in_progress = false;
       manual_compaction = nullptr;
     }
     if (c) {
-      c->ReleaseCompactionFiles(status);
+      c->ReleaseCompactionFiles(status.Clone());
       c.reset();
     }
     return status;
@@ -3323,7 +3323,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
       if (!enough_room) {
         // Then don't do the compaction
-        c->ReleaseCompactionFiles(status);
+        c->ReleaseCompactionFiles(status.Clone());
         c.reset();
         // m's vars will get set properly at the end of this function,
         // as long as status == CompactionTooLarge
@@ -3392,7 +3392,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
         if (!enough_room) {
           // Then don't do the compaction
-          c->ReleaseCompactionFiles(status);
+          c->ReleaseCompactionFiles(status.Clone());
           c->column_family_data()
               ->current()
               ->storage_info()
@@ -3546,7 +3546,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         log_buffer,
         "[%s] Moved #%d files to level-%d %" PRIu64 " bytes %s: %s\n",
         c->column_family_data()->GetName().c_str(), moved_files,
-        c->output_level(), moved_bytes, status.ToString().c_str(),
+        c->output_level(), moved_bytes, status.ToString()->c_str(),
         c->column_family_data()->current()->storage_info()->LevelSummary(&tmp));
     *made_progress = true;
 
@@ -3636,7 +3636,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   }
 
   if (c != nullptr) {
-    c->ReleaseCompactionFiles(status);
+    c->ReleaseCompactionFiles(status.Clone());
     *made_progress = true;
 
     // Need to make sure SstFileManager does its bookkeeping
@@ -3657,7 +3657,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     // Ignore compaction errors found during shutting down
   } else {
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "Compaction error: %s",
-                   status.ToString().c_str());
+                   status.ToString()->c_str());
     if (!io_s.ok()) {
       // Error while writing to MANIFEST.
       // In fact, versions_->io_status() can also be the result of renaming
@@ -3695,7 +3695,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   if (is_manual) {
     ManualCompactionState* m = manual_compaction;
     if (!status.ok()) {
-      m->status = status;
+      m->status.copy_from(status);
       m->done = true;
     }
     // For universal compaction:
@@ -3828,7 +3828,7 @@ void DBImpl::BuildCompactionJobInfo(
   assert(compaction_job_info != nullptr);
   compaction_job_info->cf_id = cfd->GetID();
   compaction_job_info->cf_name = cfd->GetName();
-  compaction_job_info->status = st;
+  compaction_job_info->status.copy_from(st);
   compaction_job_info->thread_id = env_->GetThreadID();
   compaction_job_info->job_id = job_id;
   compaction_job_info->base_input_level = c->start_level();

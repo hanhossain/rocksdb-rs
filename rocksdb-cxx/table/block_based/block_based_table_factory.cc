@@ -920,7 +920,7 @@ Status GetBlockBasedTableOptionsFromString(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(s.getState());
+    return Status_InvalidArgument(*s.getState());
   }
 }
 

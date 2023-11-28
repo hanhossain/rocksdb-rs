@@ -133,7 +133,7 @@ static std::string PrintContents(WriteBatch* b,
       state.append("CountMismatch()");
     }
   } else {
-    state.append(s.ToString());
+    state.append(*s.ToString());
   }
   delete mem->Unref();
   return state;
@@ -439,7 +439,7 @@ TEST_F(WriteBatchTest, PrepareCommit) {
   batch.SetSavePoint();
   ASSERT_OK(WriteBatchInternal::MarkEndPrepare(&batch, Slice("xid1")));
   Status s = batch.RollbackToSavePoint();
-  ASSERT_EQ(s, Status_NotFound());
+  ASSERT_TRUE(s.eq(Status_NotFound()));
   ASSERT_OK(WriteBatchInternal::MarkCommit(&batch, Slice("xid1")));
   ASSERT_OK(WriteBatchInternal::MarkRollback(&batch, Slice("xid1")));
   ASSERT_EQ(2u, batch.Count());

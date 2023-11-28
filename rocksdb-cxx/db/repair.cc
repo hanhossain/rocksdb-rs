@@ -342,7 +342,7 @@ class Repairer {
       if (!status.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
                        "Log #%" PRIu64 ": ignoring conversion error: %s",
-                       logs_[i], status.ToString().c_str());
+                       logs_[i], status.ToString()->c_str());
       }
       ArchiveFile(logname);
     }
@@ -356,7 +356,7 @@ class Repairer {
       void Corruption(size_t bytes, const Status& s) override {
         // We print error messages for corruption, but continue repairing.
         ROCKS_LOG_ERROR(info_log, "Log #%" PRIu64 ": dropping %d bytes; %s",
-                        lognum, static_cast<int>(bytes), s.ToString().c_str());
+                        lognum, static_cast<int>(bytes), s.ToString()->c_str());
       }
     };
 
@@ -423,7 +423,7 @@ class Repairer {
         counter += WriteBatchInternal::Count(&batch);
       } else {
         ROCKS_LOG_WARN(db_options_.info_log, "Log #%" PRIu64 ": ignoring %s",
-                       log, record_status.ToString().c_str());
+                       log, record_status.ToString()->c_str());
       }
     }
 
@@ -482,7 +482,7 @@ class Repairer {
       ROCKS_LOG_INFO(db_options_.info_log,
                      "Log #%" PRIu64 ": %d ops saved to Table #%" PRIu64 " %s",
                      log, counter, meta.fd.GetNumber(),
-                     status.ToString().c_str());
+                     status.ToString()->c_str());
       if (status.ok()) {
         if (meta.fd.GetFileSize() > 0) {
           table_fds_.push_back(meta.fd);
@@ -507,7 +507,7 @@ class Repairer {
         FormatFileNumber(t.meta.fd.GetNumber(), t.meta.fd.GetPathId(),
                          file_num_buf, sizeof(file_num_buf));
         ROCKS_LOG_WARN(db_options_.info_log, "Table #%s: ignoring %s",
-                       file_num_buf, status.ToString().c_str());
+                       file_num_buf, status.ToString()->c_str());
         ArchiveFile(fname);
       } else {
         tables_.push_back(t);
@@ -610,7 +610,7 @@ class Repairer {
         if (!pik_status.ok()) {
           ROCKS_LOG_ERROR(db_options_.info_log,
                           "Table #%" PRIu64 ": unparsable key - %s",
-                          t->meta.fd.GetNumber(), pik_status.getState());
+                          t->meta.fd.GetNumber(), pik_status.getState()->c_str());
           continue;
         }
 
@@ -629,7 +629,7 @@ class Repairer {
 
       ROCKS_LOG_INFO(db_options_.info_log, "Table #%" PRIu64 ": %d entries %s",
                      t->meta.fd.GetNumber(), counter,
-                     status.ToString().c_str());
+                     status.ToString()->c_str());
     }
     if (status.ok()) {
       // XXX/FIXME: This is just basic, naive handling of range tombstones,
@@ -776,7 +776,7 @@ class Repairer {
     new_file.append((slash == nullptr) ? fname.c_str() : slash + 1);
     Status s = env_->RenameFile(fname, new_file);
     ROCKS_LOG_INFO(db_options_.info_log, "Archiving %s: %s\n", fname.c_str(),
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
   }
 };
 

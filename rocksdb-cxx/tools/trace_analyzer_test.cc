@@ -25,12 +25,17 @@ int main() {
 #include "file/line_file_reader.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
-#include "rocksdb/status.h"
 #include "rocksdb/trace_reader_writer.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 #include "tools/trace_analyzer_tool.h"
 #include "trace_replay/trace_replay.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

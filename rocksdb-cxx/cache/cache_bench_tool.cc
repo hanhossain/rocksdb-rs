@@ -317,7 +317,7 @@ class CacheBench {
           fprintf(
               stderr,
               "No secondary cache registered matching string: %s status=%s\n",
-              FLAGS_secondary_cache_uri.c_str(), s.ToString().c_str());
+              FLAGS_secondary_cache_uri.c_str(), s.ToString()->c_str());
           exit(1);
         }
         opts.secondary_cache = secondary_cache;

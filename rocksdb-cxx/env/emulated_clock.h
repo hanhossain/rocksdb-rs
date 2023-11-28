@@ -11,8 +11,13 @@
 #include <atomic>
 #include <string>
 
-#include "rocksdb/status.h"
 #include "rocksdb/system_clock.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 // A SystemClock that can "mock" sleep and counts its operations.

@@ -16,9 +16,14 @@
 #include "rocksdb/options.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/slice_transform.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -259,7 +264,7 @@ bool RunSanityTests(const std::string& command, const std::string& path) {
       assert(command == "verify");
       s = sanity_test->Verify();
     }
-    fprintf(stderr, "%s\n", s.ToString().c_str());
+    fprintf(stderr, "%s\n", s.ToString()->c_str());
     if (!s.ok()) {
       fprintf(stderr, "FAIL\n");
       result = false;

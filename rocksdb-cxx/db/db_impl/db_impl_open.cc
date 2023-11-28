@@ -63,7 +63,7 @@ DBOptions SanitizeOptions(const std::string& dbname, const DBOptions& src,
       // No place suitable for logging
       result.info_log = nullptr;
       if (logger_creation_s) {
-        *logger_creation_s = s;
+        logger_creation_s->copy_from(s);
       }
     }
   }
@@ -439,7 +439,7 @@ Status DBImpl::Recover(
       Status io_s = immutable_db_options_.fs->GetChildren(
           dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr);
       if (!io_s.ok()) {
-        s = io_s;
+        s.copy_from(io_s);
         files_in_dbname.clear();
       }
       for (const std::string& file : files_in_dbname) {
@@ -488,7 +488,7 @@ Status DBImpl::Recover(
           manifest_path.empty() ? current_fname : manifest_path;
       s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
       if (!s.ok()) {
-        std::string error_str = s.ToString();
+        std::string error_str = *s.ToString();
         // Check if unsupported Direct I/O is the root cause
         customized_fs.use_direct_reads = false;
         s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
@@ -844,7 +844,7 @@ Status DBImpl::PersistentStatsProcessFormatVersion() {
             "Recreating persistent stats column family since reading "
             "persistent stats version key failed. Format key: %s, compatible "
             "key: %s",
-            s_format.ToString().c_str(), s_compatible.ToString().c_str());
+            s_format.ToString()->c_str(), s_compatible.ToString()->c_str());
       } else {
         ROCKS_LOG_WARN(
             immutable_db_options_.info_log,
@@ -1067,9 +1067,9 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
     void Corruption(size_t bytes, const Status& s) override {
       ROCKS_LOG_WARN(info_log, "%s%s: dropping %d bytes; %s",
                      (status == nullptr ? "(ignoring error) " : ""), fname,
-                     static_cast<int>(bytes), s.ToString().c_str());
+                     static_cast<int>(bytes), s.ToString()->c_str());
       if (status != nullptr && status->ok()) {
-        *status = s;
+        status->copy_from(s);
       }
     }
   };
@@ -1323,7 +1323,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
                           ". %s. This likely mean loss of synced WAL, "
                           "thus recovery fails.",
                           wal_number, *next_sequence,
-                          status.ToString().c_str());
+                          status.ToString()->c_str());
           return status;
         }
         // We should ignore the error but not continue replaying
@@ -1529,7 +1529,7 @@ Status DBImpl::GetLogSizeAndMaybeTruncate(uint64_t wal_number, bool truncate,
     if (!truncate_status.ok() && !truncate_status.IsNotSupported()) {
       ROCKS_LOG_WARN(immutable_db_options_.info_log,
                      "Failed to truncate log #%" PRIu64 ": %s", wal_number,
-                     truncate_status.ToString().c_str());
+                     truncate_status.ToString()->c_str());
     }
   }
   if (log_ptr) {
@@ -1669,7 +1669,7 @@ Status DBImpl::WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
                       "[%s] [WriteLevel0TableForRecovery]"
                       " Level-0 table #%" PRIu64 ": %" PRIu64 " bytes %s",
                       cfd->GetName().c_str(), meta.fd.GetNumber(),
-                      meta.fd.GetFileSize(), s.ToString().c_str());
+                      meta.fd.GetFileSize(), s.ToString()->c_str());
       mutex_.Lock();
 
       // TODO(AR) is this ok?
@@ -1917,7 +1917,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
 
   DBImpl* impl = new DBImpl(db_options, dbname, seq_per_batch, batch_per_txn);
   if (!impl->immutable_db_options_.info_log) {
-    s = impl->init_logger_creation_s_;
+    s.copy_from(impl->init_logger_creation_s_);
     delete impl;
     return s;
   } else {
@@ -1948,7 +1948,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
     }
   }
   if (s.ok()) {
-    s = impl->CreateArchivalDirectory();
+    s.copy_from(impl->CreateArchivalDirectory());
   }
   if (!s.ok()) {
     delete impl;
@@ -2198,12 +2198,12 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
     if (s.ok() && !persist_options_status.ok()) {
       s = Status_IOError(
           "DB::Open() failed --- Unable to persist Options file",
-          persist_options_status.ToString());
+          *persist_options_status.ToString());
     }
   }
   if (!s.ok()) {
     ROCKS_LOG_WARN(impl->immutable_db_options_.info_log,
-                   "DB::Open() failed: %s", s.ToString().c_str());
+                   "DB::Open() failed: %s", s.ToString()->c_str());
   }
   if (s.ok()) {
     s = impl->StartPeriodicTaskScheduler();

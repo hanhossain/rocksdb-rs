@@ -101,7 +101,7 @@ class SharedState {
     }
     if (!status.ok()) {
       fprintf(stderr, "Failed setting up expected state with error: %s\n",
-              status.ToString().c_str());
+              status.ToString()->c_str());
       exit(1);
     }
 
@@ -427,6 +427,30 @@ struct ThreadState {
     std::vector<bool>* key_vec;
 
     std::string timestamp;
+
+    // create ctor
+    SnapshotState(const Snapshot* _snapshot, int _cf_at,
+                  const std::string& _cf_at_name, const std::string& _key,
+                  const Status& _status, const std::string& _value,
+                  std::vector<bool>* _key_vec, const std::string& _timestamp)
+        : snapshot(_snapshot),
+          cf_at(_cf_at),
+          cf_at_name(_cf_at_name),
+          key(_key),
+          status(_status.Clone()),
+          value(_value),
+          key_vec(_key_vec),
+          timestamp(_timestamp) {}
+
+    SnapshotState(const SnapshotState& other)
+        : snapshot(other.snapshot),
+          cf_at(other.cf_at),
+          cf_at_name(other.cf_at_name),
+          key(other.key),
+          status(other.status.Clone()),
+          value(other.value),
+          key_vec(other.key_vec),
+          timestamp(other.timestamp) {}
   };
   std::queue<std::pair<uint64_t, SnapshotState>> snapshot_queue;
 

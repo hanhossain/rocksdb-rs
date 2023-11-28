@@ -73,7 +73,7 @@ Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
 
   Status s;
   s = ParseVersionStr(t_v_str, trace_version);
-  if (s != Status_OK()) {
+  if (!s.eq(Status_OK())) {
     return s;
   }
   s = ParseVersionStr(db_v_str, db_version);

@@ -89,7 +89,7 @@ int main(int argc, const char** argv) {
   Status s = DB::Open(options, default_db_path, &db);
 
   if (!s.ok()) {
-    fprintf(stderr, "Could not open DB due to %s\n", s.ToString().c_str());
+    fprintf(stderr, "Could not open DB due to %s\n", s.ToString()->c_str());
     exit(1);
   }
 

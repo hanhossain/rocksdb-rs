@@ -122,7 +122,7 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
           ROCKS_LOG_INFO(db_options_.info_log,
                          "Try to link file %s but it's not supported : %s",
                          f.internal_file_path.c_str(),
-                         status.ToString().c_str());
+                         status.ToString()->c_str());
         }
       }
       if (!hardlink_files) {
@@ -379,7 +379,7 @@ Status ImportColumnFamilyJob::GetIngestedFileInfo(
                                              db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
           return Status_Corruption("Corrupted key in external file. ",
-                                    pik_status.getState());
+                                    *pik_status.getState());
         }
         RangeTombstone first_tombstone(key, range_del_iter->value());
         InternalKey start_key = first_tombstone.SerializeKey();
@@ -395,7 +395,7 @@ Status ImportColumnFamilyJob::GetIngestedFileInfo(
                                       db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
           return Status_Corruption("Corrupted key in external file. ",
-                                    pik_status.getState());
+                                    *pik_status.getState());
         }
         RangeTombstone last_tombstone(key, range_del_iter->value());
         InternalKey end_key = last_tombstone.SerializeEndKey();

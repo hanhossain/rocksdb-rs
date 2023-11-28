@@ -1994,7 +1994,7 @@ struct DBWithColumnFamilies {
           db->CreateColumnFamily(options, ColumnFamilyName(i), &(cfh[i]));
       if (!s.ok()) {
         fprintf(stderr, "create column family error: %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         abort();
       }
     }
@@ -2021,7 +2021,7 @@ class ReporterAgent {
     }
     if (!s.ok()) {
       fprintf(stderr, "Can't open %s: %s\n", fname.c_str(),
-              s.ToString().c_str());
+              s.ToString()->c_str());
       abort();
     }
 
@@ -2073,7 +2073,7 @@ class ReporterAgent {
       if (!s.ok()) {
         fprintf(stderr,
                 "Can't write to report file (%s), stopping the reporting\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         break;
       }
       last_report_ = total_ops_done_snapshot;
@@ -3068,7 +3068,7 @@ class Benchmark {
           fprintf(
               stderr,
               "No secondary cache registered matching string: %s status=%s\n",
-              FLAGS_secondary_cache_uri.c_str(), s.ToString().c_str());
+              FLAGS_secondary_cache_uri.c_str(), s.ToString()->c_str());
           exit(1);
         }
         opts.secondary_cache = secondary_cache;
@@ -3285,7 +3285,7 @@ class Benchmark {
     DBWithColumnFamilies truth_db;
     auto s = DB::OpenForReadOnly(open_options_, truth_db_name, &truth_db.db);
     if (!s.ok()) {
-      fprintf(stderr, "open error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "open error: %s\n", s.ToString()->c_str());
       exit(1);
     }
     ReadOptions ro;
@@ -3683,13 +3683,13 @@ class Benchmark {
                                         FLAGS_trace_file, &trace_writer);
           if (!s.ok()) {
             fprintf(stderr, "Encountered an error starting a trace, %s\n",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
             ErrorExit();
           }
           s = db_.db->StartTrace(trace_options_, std::move(trace_writer));
           if (!s.ok()) {
             fprintf(stderr, "Encountered an error starting a trace, %s\n",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
             ErrorExit();
           }
           fprintf(stdout, "Tracing the workload to: [%s]\n",
@@ -3721,7 +3721,7 @@ class Benchmark {
           if (!s.ok()) {
             fprintf(stderr,
                     "Encountered an error when creating trace writer, %s\n",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
             ErrorExit();
           }
           s = db_.db->StartBlockCacheTrace(block_cache_trace_options_,
@@ -3730,7 +3730,7 @@ class Benchmark {
             fprintf(
                 stderr,
                 "Encountered an error when starting block cache tracing, %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
             ErrorExit();
           }
           fprintf(stdout, "Tracing block cache accesses to: [%s]\n",
@@ -3778,7 +3778,7 @@ class Benchmark {
       Status s = db_.db->EndTrace();
       if (!s.ok()) {
         fprintf(stderr, "Encountered an error ending the trace, %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
       }
     }
     if (!FLAGS_block_cache_trace_file.empty()) {
@@ -3786,7 +3786,7 @@ class Benchmark {
       if (!s.ok()) {
         fprintf(stderr,
                 "Encountered an error ending the block cache tracing, %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
       }
     }
 
@@ -4073,7 +4073,7 @@ class Benchmark {
         return true;
       }
       fprintf(stderr, "Unable to load options file %s --- %s\n",
-              FLAGS_options_file.c_str(), s.ToString().c_str());
+              FLAGS_options_file.c_str(), s.ToString()->c_str());
       exit(1);
     }
     return false;
@@ -4180,7 +4180,7 @@ class Benchmark {
         CreateMemTableRepFactory(config_options, &options.memtable_factory);
     if (!s.ok()) {
       fprintf(stderr, "Could not create memtable factory: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     } else if ((FLAGS_prefix_size == 0) &&
                (options.memtable_factory->IsInstanceOf("prefix_hash") ||
@@ -4395,7 +4395,7 @@ class Benchmark {
 
         if (!rc_status.ok()) {
           fprintf(stderr, "Error initializing read cache, %s\n",
-                  rc_status.ToString().c_str());
+                  rc_status.ToString()->c_str());
           exit(1);
         }
       }
@@ -4529,7 +4529,7 @@ class Benchmark {
                                           &options.merge_operator);
       if (!s.ok()) {
         fprintf(stderr, "invalid merge operator[%s]: %s\n",
-                FLAGS_merge_operator.c_str(), s.ToString().c_str());
+                FLAGS_merge_operator.c_str(), s.ToString()->c_str());
         exit(1);
       }
     }
@@ -4869,7 +4869,7 @@ class Benchmark {
                     _db->db->TryCatchUpWithPrimary();
                 if (!secondary_update_status.ok()) {
                   fprintf(stderr, "Failed to catch up with primary: %s\n",
-                          secondary_update_status.ToString().c_str());
+                          secondary_update_status.ToString()->c_str());
                   break;
                 }
                 ++secondary_db_updates_;
@@ -4887,7 +4887,7 @@ class Benchmark {
                 << " milliseconds\n";
     }
     if (!s.ok()) {
-      fprintf(stderr, "open error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "open error: %s\n", s.ToString()->c_str());
       exit(1);
     }
   }
@@ -5357,7 +5357,7 @@ class Benchmark {
             user_ts, [this](uint32_t) { return user_timestamp_size_; });
         if (!s.ok()) {
           fprintf(stderr, "assign timestamp to write batch: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           ErrorExit();
         }
       }
@@ -5389,11 +5389,11 @@ class Benchmark {
         }
       }
       if (!s.ok()) {
-        s = listener_->WaitForRecovery(600000000) ? Status_OK() : s;
+        s = listener_->WaitForRecovery(600000000) ? Status_OK() : s.Clone();
       }
 
       if (!s.ok()) {
-        fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "put error: %s\n", s.ToString()->c_str());
         ErrorExit();
       }
     }
@@ -5795,7 +5795,7 @@ class Benchmark {
         found++;
         bytes += key.size() + pinnable_val.size();
       } else if (!s.IsNotFound()) {
-        fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "Get returned an error: %s\n", s.ToString()->c_str());
         abort();
       }
 
@@ -5884,7 +5884,7 @@ class Benchmark {
           ++found;
         } else if (!status.IsNotFound()) {
           fprintf(stderr, "Get returned an error: %s\n",
-                  status.ToString().c_str());
+                  status.ToString()->c_str());
           abort();
         }
         if (key_rand >= FLAGS_num) {
@@ -6024,7 +6024,7 @@ class Benchmark {
           pinnable_vals[i].Reset();
         }
       } else if (!s.IsNotFound()) {
-        fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "Get returned an error: %s\n", s.ToString()->c_str());
         abort();
       }
 
@@ -6104,7 +6104,7 @@ class Benchmark {
             ++found;
           } else if (!statuses[i].IsNotFound()) {
             fprintf(stderr, "MultiGet returned an error: %s\n",
-                    statuses[i].ToString().c_str());
+                    statuses[i].ToString()->c_str());
             abort();
           }
         }
@@ -6121,7 +6121,7 @@ class Benchmark {
             ++found;
           } else if (!stat_list[i].IsNotFound()) {
             fprintf(stderr, "MultiGet returned an error: %s\n",
-                    stat_list[i].ToString().c_str());
+                    stat_list[i].ToString()->c_str());
             abort();
           }
           stat_list[i] = Status_OK();
@@ -6529,7 +6529,7 @@ class Benchmark {
           get_found++;
           bytes += key.size() + pinnable_val.size();
         } else if (!s.IsNotFound()) {
-          fprintf(stderr, "Get returned an error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "Get returned an error: %s\n", s.ToString()->c_str());
           abort();
         }
 
@@ -6554,7 +6554,7 @@ class Benchmark {
             write_options_, key,
             gen.Generate(static_cast<unsigned int>(val_size)));
         if (!s.ok()) {
-          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "put error: %s\n", s.ToString()->c_str());
           ErrorExit();
         }
 
@@ -6799,14 +6799,14 @@ class Benchmark {
         s = batch.UpdateTimestamps(
             ts, [this](uint32_t) { return user_timestamp_size_; });
         if (!s.ok()) {
-          fprintf(stderr, "assign timestamp: %s\n", s.ToString().c_str());
+          fprintf(stderr, "assign timestamp: %s\n", s.ToString()->c_str());
           ErrorExit();
         }
       }
       s = db->Write(write_options_, &batch);
       thread->stats.FinishedOps(nullptr, db, entries_per_batch_, OperationType::kDelete);
       if (!s.ok()) {
-        fprintf(stderr, "del error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "del error: %s\n", s.ToString()->c_str());
         exit(1);
       }
       i += entries_per_batch_;
@@ -6922,7 +6922,7 @@ class Benchmark {
       written++;
 
       if (!s.ok()) {
-        fprintf(stderr, "put or merge error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "put or merge error: %s\n", s.ToString()->c_str());
         exit(1);
       }
       bytes += key.size() + val.size() + user_timestamp_size_;
@@ -6949,7 +6949,7 @@ class Benchmark {
             GenerateKeyFromInt(begin_num + offset, FLAGS_num,
                                &expanded_keys[offset]);
             if (!db->Delete(write_options_, expanded_keys[offset]).ok()) {
-              fprintf(stderr, "delete error: %s\n", s.ToString().c_str());
+              fprintf(stderr, "delete error: %s\n", s.ToString()->c_str());
               exit(1);
             }
           }
@@ -6960,7 +6960,7 @@ class Benchmark {
           if (!db->DeleteRange(write_options_, db->DefaultColumnFamily(),
                                begin_key, end_key)
                    .ok()) {
-            fprintf(stderr, "deleterange error: %s\n", s.ToString().c_str());
+            fprintf(stderr, "deleterange error: %s\n", s.ToString()->c_str());
             exit(1);
           }
         }
@@ -7010,7 +7010,7 @@ class Benchmark {
         num_seek_to_first++;
       } else if (!iter->status().ok()) {
         fprintf(stderr, "Iterator error: %s\n",
-                iter->status().ToString().c_str());
+                iter->status().ToString()->c_str());
         abort();
       } else {
         iter->Next();
@@ -7048,7 +7048,7 @@ class Benchmark {
           ts, [this](uint32_t) { return user_timestamp_size_; });
       if (!s.ok()) {
         fprintf(stderr, "assign timestamp to batch: %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         ErrorExit();
       }
     }
@@ -7080,7 +7080,7 @@ class Benchmark {
           ts, [this](uint32_t) { return user_timestamp_size_; });
       if (!s.ok()) {
         fprintf(stderr, "assign timestamp to batch: %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         ErrorExit();
       }
     }
@@ -7114,7 +7114,7 @@ class Benchmark {
       key_slices[i] = keys[i];
       s = db->Get(readoptionscopy, key_slices[i], value);
       if (!s.ok() && !s.IsNotFound()) {
-        fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "get error: %s\n", s.ToString()->c_str());
         values[i] = "";
         // we continue after error rather than exiting so that we can
         // find more errors if any
@@ -7173,7 +7173,7 @@ class Benchmark {
         // do all the gets first
         Status s = GetMany(db, key, &value);
         if (!s.ok() && !s.IsNotFound()) {
-          fprintf(stderr, "getmany error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "getmany error: %s\n", s.ToString()->c_str());
           // we continue after error rather than exiting so that we can
           // find more errors if any
         } else if (!s.IsNotFound()) {
@@ -7187,7 +7187,7 @@ class Benchmark {
         // for all the gets we have done earlier
         Status s = PutMany(db, write_options_, key, gen.Generate());
         if (!s.ok()) {
-          fprintf(stderr, "putmany error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "putmany error: %s\n", s.ToString()->c_str());
           exit(1);
         }
         put_weight--;
@@ -7196,7 +7196,7 @@ class Benchmark {
       } else if (delete_weight > 0) {
         Status s = DeleteMany(db, write_options_, key);
         if (!s.ok()) {
-          fprintf(stderr, "deletemany error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "deletemany error: %s\n", s.ToString()->c_str());
           exit(1);
         }
         delete_weight--;
@@ -7252,7 +7252,7 @@ class Benchmark {
         }
         Status s = db->Get(options, key, &value);
         if (!s.ok() && !s.IsNotFound()) {
-          fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "get error: %s\n", s.ToString()->c_str());
           // we continue after error rather than exiting so that we can
           // find more errors if any
         } else if (!s.IsNotFound()) {
@@ -7272,7 +7272,7 @@ class Benchmark {
           s = db->Put(write_options_, key, gen.Generate());
         }
         if (!s.ok()) {
-          fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "put error: %s\n", s.ToString()->c_str());
           ErrorExit();
         }
         put_weight--;
@@ -7321,7 +7321,7 @@ class Benchmark {
         bytes += key.size() + value.size() + user_timestamp_size_;
       } else if (!status.IsNotFound()) {
         fprintf(stderr, "Get returned an error: %s\n",
-                status.ToString().c_str());
+                status.ToString()->c_str());
         abort();
       }
 
@@ -7340,7 +7340,7 @@ class Benchmark {
         s = db->Put(write_options_, key, val);
       }
       if (!s.ok()) {
-        fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "put error: %s\n", s.ToString()->c_str());
         exit(1);
       }
       bytes += key.size() + val.size() + user_timestamp_size_;
@@ -7387,7 +7387,7 @@ class Benchmark {
         ++found;
       } else if (!status.IsNotFound()) {
         fprintf(stderr, "Get returned an error: %s\n",
-                status.ToString().c_str());
+                status.ToString()->c_str());
         exit(1);
       }
 
@@ -7410,7 +7410,7 @@ class Benchmark {
         s = db->Put(write_options_, key, Slice(new_value));
       }
       if (!s.ok()) {
-        fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "put error: %s\n", s.ToString()->c_str());
         ErrorExit();
       }
       thread->stats.FinishedOps(nullptr, db, 1);
@@ -7454,7 +7454,7 @@ class Benchmark {
         bytes += key.size() + value.size() + user_timestamp_size_;
       } else if (!status.IsNotFound()) {
         fprintf(stderr, "Get returned an error: %s\n",
-                status.ToString().c_str());
+                status.ToString()->c_str());
         abort();
       } else {
         // If not existing, then just assume an empty string of data
@@ -7478,7 +7478,7 @@ class Benchmark {
         s = db->Put(write_options_, key, value);
       }
       if (!s.ok()) {
-        fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "put error: %s\n", s.ToString()->c_str());
         ErrorExit();
       }
       bytes += key.size() + value.size() + user_timestamp_size_;
@@ -7525,7 +7525,7 @@ class Benchmark {
       }
 
       if (!s.ok()) {
-        fprintf(stderr, "merge error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "merge error: %s\n", s.ToString()->c_str());
         exit(1);
       }
       bytes += key.size() + val.size();
@@ -7567,7 +7567,7 @@ class Benchmark {
       if (do_merge) {
         Status s = db->Merge(write_options_, key, gen.Generate());
         if (!s.ok()) {
-          fprintf(stderr, "merge error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "merge error: %s\n", s.ToString()->c_str());
           exit(1);
         }
         num_merges++;
@@ -7577,7 +7577,7 @@ class Benchmark {
         if (value.length() > max_length) max_length = value.length();
 
         if (!s.ok() && !s.IsNotFound()) {
-          fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "get error: %s\n", s.ToString()->c_str());
           // we continue after error rather than exiting so that we can
           // find more errors if any
         } else if (!s.IsNotFound()) {
@@ -7739,7 +7739,7 @@ class Benchmark {
     ro.readahead_size = FLAGS_readahead_size;
     Status s = db->VerifyChecksum(ro);
     if (!s.ok()) {
-      fprintf(stderr, "VerifyChecksum() failed: %s\n", s.ToString().c_str());
+      fprintf(stderr, "VerifyChecksum() failed: %s\n", s.ToString()->c_str());
       exit(1);
     }
   }
@@ -7755,7 +7755,7 @@ class Benchmark {
     Status s = db->VerifyFileChecksums(ro);
     if (!s.ok()) {
       fprintf(stderr, "VerifyFileChecksums() failed: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     }
   }
@@ -7813,7 +7813,7 @@ class Benchmark {
 
       if (!success) {
         fprintf(stderr, "Unexpected error: %s\n",
-                inserter.GetLastStatus().ToString().c_str());
+                inserter.GetLastStatus().ToString()->c_str());
         abort();
       }
 
@@ -7879,7 +7879,7 @@ class Benchmark {
         s = db->Put(write_options_, key, gen.Generate());
       }
       if (!s.ok()) {
-        fprintf(stderr, "Operation failed: %s\n", s.ToString().c_str());
+        fprintf(stderr, "Operation failed: %s\n", s.ToString()->c_str());
         exit(1);
       }
     }
@@ -7917,7 +7917,7 @@ class Benchmark {
       }
 
       if (!s.ok()) {
-        fprintf(stderr, "Operation failed: %s\n", s.ToString().c_str());
+        fprintf(stderr, "Operation failed: %s\n", s.ToString()->c_str());
         exit(1);
       }
 
@@ -8054,7 +8054,7 @@ class Benchmark {
       s = db->Put(write_options_, key, val);
 
       if (!s.ok()) {
-        fprintf(stderr, "put error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "put error: %s\n", s.ToString()->c_str());
         ErrorExit();
       }
       bytes = key.size() + val.size();
@@ -8223,7 +8223,7 @@ class Benchmark {
       // Having read the current cases for which an error is raised I prefer
       // not to figure out whether an exception should be thrown here.
       fprintf(stderr, "compact%d CompactFiles failed: %s\n", from_level,
-              status.ToString().c_str());
+              status.ToString()->c_str());
       return false;
     }
     return true;
@@ -8251,7 +8251,7 @@ class Benchmark {
       }
 
       if (!s.ok()) {
-        fprintf(stderr, "Flush failed: %s\n", s.ToString().c_str());
+        fprintf(stderr, "Flush failed: %s\n", s.ToString()->c_str());
         exit(1);
       }
     } else {
@@ -8265,7 +8265,7 @@ class Benchmark {
         }
 
         if (!s.ok()) {
-          fprintf(stderr, "Flush failed: %s\n", s.ToString().c_str());
+          fprintf(stderr, "Flush failed: %s\n", s.ToString()->c_str());
           exit(1);
         }
       }
@@ -8300,7 +8300,7 @@ class Benchmark {
     Status s =
         db->GetStatsHistory(0, std::numeric_limits<uint64_t>::max(), &shi);
     if (!s.ok()) {
-      fprintf(stdout, "%s\n", s.ToString().c_str());
+      fprintf(stdout, "%s\n", s.ToString()->c_str());
       return;
     }
     assert(shi);
@@ -8377,7 +8377,7 @@ class Benchmark {
           stderr,
           "Encountered an error creating a TraceReader from the trace file. "
           "Error: %s\n",
-          s.ToString().c_str());
+          s.ToString()->c_str());
       exit(1);
     }
     std::unique_ptr<Replayer> replayer;
@@ -8387,13 +8387,13 @@ class Benchmark {
       fprintf(stderr,
               "Encountered an error creating a default Replayer. "
               "Error: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     }
     s = replayer->Prepare();
     if (!s.ok()) {
       fprintf(stderr, "Prepare for replay failed. Error: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
     }
     s = replayer->Replay(
         ReplayOptions(static_cast<uint32_t>(FLAGS_trace_replay_threads),
@@ -8404,7 +8404,7 @@ class Benchmark {
       fprintf(stdout, "Replay completed from trace_file: %s\n",
               FLAGS_trace_file.c_str());
     } else {
-      fprintf(stderr, "Replay failed. Error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "Replay failed. Error: %s\n", s.ToString()->c_str());
     }
   }
 
@@ -8475,7 +8475,7 @@ int db_bench_tool(int argc, char** argv) {
     if (dbstats == nullptr) {
       fprintf(stderr,
               "No Statistics registered matching string: %s status=%s\n",
-              FLAGS_statistics_string.c_str(), s.ToString().c_str());
+              FLAGS_statistics_string.c_str(), s.ToString()->c_str());
       exit(1);
     }
   }
@@ -8522,7 +8522,7 @@ int db_bench_tool(int argc, char** argv) {
     Status s = Env::CreateFromUri(config_options, FLAGS_env_uri, FLAGS_fs_uri,
                                   &FLAGS_env, &env_guard);
     if (!s.ok()) {
-      fprintf(stderr, "Failed creating env: %s\n", s.ToString().c_str());
+      fprintf(stderr, "Failed creating env: %s\n", s.ToString()->c_str());
       exit(1);
     }
   } else if (FLAGS_simulate_hdd || FLAGS_simulate_hybrid_fs_file != "") {

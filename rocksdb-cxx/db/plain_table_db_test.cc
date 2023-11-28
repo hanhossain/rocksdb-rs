@@ -207,7 +207,7 @@ class PlainTableDBTest : public testing::Test,
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
-      result = s.ToString();
+      result = *s.ToString();
     }
     return result;
   }
@@ -392,14 +392,14 @@ TEST_P(PlainTableDBTest, BadOptions1) {
   ASSERT_EQ(
       "Invalid argument: Prefix extractor is missing when opening a PlainTable "
       "built using a prefix extractor",
-      TryReopen(&options).ToString());
+      *TryReopen(&options).ToString());
 
   // Bad attempt to re-open with different prefix extractor
   options.prefix_extractor.reset(NewFixedPrefixTransform(6));
   ASSERT_EQ(
       "Invalid argument: Prefix extractor given doesn't match the one used to "
       "build PlainTable",
-      TryReopen(&options).ToString());
+      *TryReopen(&options).ToString());
 
   // Correct prefix extractor
   options.prefix_extractor.reset(NewFixedPrefixTransform(8));
@@ -424,7 +424,7 @@ TEST_P(PlainTableDBTest, BadOptions2) {
   ASSERT_EQ(
       "Not implemented: PlainTable requires a prefix extractor enable prefix "
       "hash mode.",
-      s.ToString());
+      *s.ToString());
 
   // OK to open with hash_table_ratio == 0 and no prefix extractor
   PlainTableOptions plain_table_options;

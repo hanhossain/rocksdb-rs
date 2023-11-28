@@ -158,7 +158,7 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
     }
 
     if (status) {
-      *status = s;
+      status->copy_from(s);
     }
   }
 
@@ -583,11 +583,11 @@ TEST_P(ChargeTableReaderTest, Basic) {
 
   if (charge_table_reader_ == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_TRUE(s.IsMemoryLimit()) << "s: " << s.ToString();
-    EXPECT_TRUE(s.ToString().find(
+    EXPECT_TRUE(s.ToString()->find(
                     kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
                         CacheEntryRole::kBlockBasedTableReader)]) !=
                 std::string::npos);
-    EXPECT_TRUE(s.ToString().find("memory limit based on cache capacity") !=
+    EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                 std::string::npos);
 
     EXPECT_GE(opened_table_reader_num, max_table_reader_num_capped_lower_bound);

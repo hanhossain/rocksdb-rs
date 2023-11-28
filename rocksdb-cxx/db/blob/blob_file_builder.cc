@@ -23,10 +23,15 @@
 #include "options/cf_options.h"
 #include "options/options_helper.h"
 #include "rocksdb/slice.h"
-#include "rocksdb/status.h"
 #include "test_util/sync_point.h"
 #include "trace_replay/io_tracer.h"
 #include "util/compression.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -107,7 +112,7 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
   {
     const Status s = OpenBlobFileIfNeeded();
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -117,7 +122,7 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
   {
     const Status s = CompressBlobIfNeeded(&blob, &compressed_blob);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -128,14 +133,14 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
     const Status s =
         WriteBlobToFile(key, blob, &blob_file_number, &blob_offset);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
   {
     const Status s = CloseBlobFileIfNeeded();
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -145,7 +150,7 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
     if (!s.ok()) {
       ROCKS_LOG_WARN(immutable_options_->info_log,
                      "Failed to pre-populate the blob into blob cache: %s",
-                     s.ToString().c_str());
+                     s.ToString()->c_str());
     }
   }
 

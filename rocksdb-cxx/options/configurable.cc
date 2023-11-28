@@ -9,11 +9,16 @@
 #include "options/configurable_helper.h"
 #include "options/options_helper.h"
 #include "rocksdb/customizable.h"
-#include "rocksdb/status.h"
 #include "rocksdb/utilities/object_registry.h"
 #include "rocksdb/utilities/options_type.h"
 #include "util/coding.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -303,14 +308,14 @@ Status ConfigurableHelper::ConfigureSomeOptions(
         if (s.IsNotFound()) {
           ++it;
         } else if (s.IsNotSupported()) {
-          notsup = s;
+          notsup = s.Clone();
           unsupported.insert(it->first);
           ++it;  // Skip it for now
         } else {
           found++;
           it = options->erase(it);
           if (!s.ok()) {
-            result = s;
+            result = s.Clone();
           }
         }
       }

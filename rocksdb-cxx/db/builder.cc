@@ -249,7 +249,7 @@ Status BuildTable(
       }
     }
     if (s.ok() && !c_iter.status().ok()) {
-      s = c_iter.status();
+      s.copy_from(c_iter.status());
     }
 
     if (s.ok()) {
@@ -445,7 +445,7 @@ Status BuildTable(
     }
   }
 
-  Status status_for_listener = s;
+  Status status_for_listener = s.Clone();
   if (meta->fd.GetFileSize() == 0) {
     fname = "(nil)";
     if (s.ok()) {

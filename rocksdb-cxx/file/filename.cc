@@ -446,7 +446,7 @@ Status SetIdentityFile(Env* env, const std::string& dbname,
     Status temp_s = dir_obj->Close(IOOptions(), nullptr);
     if (!temp_s.ok()) {
       if (!temp_s.IsNotSupported()) {
-        s = temp_s;
+        s.copy_from(temp_s);
       }
     }
   }

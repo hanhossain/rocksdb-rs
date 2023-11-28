@@ -57,9 +57,9 @@ class LogReaderContainer {
       ROCKS_LOG_WARN(info_log, "%s%s: dropping %d bytes; %s",
                      (this->status == nullptr ? "(ignoring error) " : ""),
                      fname.c_str(), static_cast<int>(bytes),
-                     s.ToString().c_str());
+                     s.ToString()->c_str());
       if (this->status != nullptr && this->status->ok()) {
-        *this->status = s;
+        this->status->copy_from(s);
       }
     }
   };

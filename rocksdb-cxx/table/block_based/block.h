@@ -328,7 +328,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
 
     data_ = nullptr;
     current_ = restarts_;
-    status_ = s;
+    status_.copy_from(s);
 
     // Call cleanup callbacks.
     Cleanable::Reset();
@@ -379,7 +379,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
     UpdateKey();
   }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   Slice key() const override {
     assert(Valid());

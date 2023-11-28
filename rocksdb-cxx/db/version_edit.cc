@@ -34,7 +34,7 @@ Status FileMetaData::UpdateBoundaries(const Slice& key, const Slice& value,
     BlobIndex blob_index;
     const Status s = blob_index.DecodeFrom(value);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
 
     if (!blob_index.IsInlined() && !blob_index.HasTTL()) {
@@ -660,7 +660,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         BlobFileAddition blob_file_addition;
         const Status s = blob_file_addition.DecodeFrom(&input);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
 
         AddBlobFile(std::move(blob_file_addition));
@@ -672,7 +672,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         BlobFileGarbage blob_file_garbage;
         const Status s = blob_file_garbage.DecodeFrom(&input);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
 
         AddBlobFileGarbage(std::move(blob_file_garbage));
@@ -683,7 +683,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         WalAddition wal_addition;
         const Status s = wal_addition.DecodeFrom(&input);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
 
         wal_additions_.emplace_back(std::move(wal_addition));
@@ -700,7 +700,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         WalAddition wal_addition;
         const Status s = wal_addition.DecodeFrom(&encoded);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
 
         wal_additions_.emplace_back(std::move(wal_addition));
@@ -711,7 +711,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         WalDeletion wal_deletion;
         const Status s = wal_deletion.DecodeFrom(&input);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
 
         wal_deletion_ = std::move(wal_deletion);
@@ -728,7 +728,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         WalDeletion wal_deletion;
         const Status s = wal_deletion.DecodeFrom(&encoded);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
 
         wal_deletion_ = std::move(wal_deletion);

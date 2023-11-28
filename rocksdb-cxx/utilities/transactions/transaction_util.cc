@@ -11,10 +11,15 @@
 #include <vector>
 
 #include "db/db_impl/db_impl.h"
-#include "rocksdb/status.h"
 #include "rocksdb/utilities/write_batch_with_index.h"
 #include "util/cast_util.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -124,7 +129,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
         /*is_blob_index=*/nullptr);
 
     if (!(s.ok() || s.IsNotFound() || s.IsMergeInProgress())) {
-      result = s;
+      result.copy_from(s);
     } else if (found_record_for_key) {
       bool write_conflict = snap_checker == nullptr
                                 ? snap_seq < seq

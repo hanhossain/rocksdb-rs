@@ -792,7 +792,7 @@ std::string DBTestBase::Get(const std::string& k, const Snapshot* snapshot) {
   if (s.IsNotFound()) {
     result = "NOT_FOUND";
   } else if (!s.ok()) {
-    result = s.ToString();
+    result = *s.ToString();
   }
   return result;
 }
@@ -807,7 +807,7 @@ std::string DBTestBase::Get(int cf, const std::string& k,
   if (s.IsNotFound()) {
     result = "NOT_FOUND";
   } else if (!s.ok()) {
-    result = s.ToString();
+    result = *s.ToString();
   }
   return result;
 }
@@ -836,7 +836,7 @@ std::vector<std::string> DBTestBase::MultiGet(std::vector<int> cfs,
       if (s[i].IsNotFound()) {
         result[i] = "NOT_FOUND";
       } else if (!s[i].ok()) {
-        result[i] = s[i].ToString();
+        result[i] = *s[i].ToString();
       }
     }
   } else {
@@ -849,7 +849,7 @@ std::vector<std::string> DBTestBase::MultiGet(std::vector<int> cfs,
       if (s[i].IsNotFound()) {
         result[i] = "NOT_FOUND";
       } else if (!s[i].ok()) {
-        result[i] = s[i].ToString();
+        result[i] = *s[i].ToString();
       } else {
         result[i].assign(pin_values[i].data(), pin_values[i].size());
         // Increase likelihood of detecting potential use-after-free bugs with
@@ -882,7 +882,7 @@ std::vector<std::string> DBTestBase::MultiGet(const std::vector<std::string>& k,
     if (statuses[i].IsNotFound()) {
       result[i] = "NOT_FOUND";
     } else if (!statuses[i].ok()) {
-      result[i] = statuses[i].ToString();
+      result[i] = *statuses[i].ToString();
     } else {
       result[i].assign(pin_values[i].data(), pin_values[i].size());
       // Increase likelihood of detecting potential use-after-free bugs with
@@ -984,14 +984,13 @@ std::string DBTestBase::AllEntriesFor(const Slice& user_key, int cf) {
   iter->Seek(target.Encode());
   std::string result;
   if (!iter->status().ok()) {
-    result = iter->status().ToString();
+    result = *iter->status().ToString();
   } else {
     result = "[ ";
     bool first = true;
     while (iter->Valid()) {
       ParsedInternalKey ikey(Slice(), 0, kTypeValue);
-      if (ParseInternalKey(iter->key(), &ikey, true /* log_err_key */) !=
-          Status_OK()) {
+      if (!ParseInternalKey(iter->key(), &ikey, true /* log_err_key */).eq(Status_OK())) {
         result += "CORRUPTED";
       } else {
         if (!last_options_.comparator->Equal(ikey.user_key, user_key)) {
@@ -1549,12 +1548,12 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
   size_t total_reads = 0;
 
   for (auto& kv : true_data) {
-    Status s = status[kv.first];
+    Status s = status[kv.first].Clone();
     if (s.ok()) {
       ASSERT_EQ(Get(kv.first), kv.second);
     } else {
       std::string value;
-      ASSERT_EQ(s, db_->Get(ReadOptions(), kv.first, &value));
+      ASSERT_TRUE(s.eq(db_->Get(ReadOptions(), kv.first, &value)));
     }
     total_reads++;
   }
@@ -1571,11 +1570,11 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     Status s;
     for (iter->SeekToFirst(); iter->Valid(); iter->Next(), data_iter++) {
       ASSERT_EQ(iter->key().ToString(), data_iter->first);
-      Status current_status = status[data_iter->first];
+      Status current_status = status[data_iter->first].Clone();
       if (!current_status.ok()) {
-        s = current_status;
+        s.copy_from(current_status);
       }
-      ASSERT_EQ(iter->status(), s);
+      ASSERT_TRUE(iter->status().eq(s));
       if (current_status.ok()) {
         ASSERT_EQ(iter->value().ToString(), data_iter->second);
       }
@@ -1594,11 +1593,11 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     auto data_rev = true_data.rbegin();
     for (iter->SeekToLast(); iter->Valid(); iter->Prev(), data_rev++) {
       ASSERT_EQ(iter->key().ToString(), data_rev->first);
-      Status current_status = status[data_rev->first];
+      Status current_status = status[data_rev->first].Clone();
       if (!current_status.ok()) {
-        s = current_status;
+        s.copy_from(current_status);
       }
-      ASSERT_EQ(iter->status(), s);
+      ASSERT_TRUE(iter->status().eq(s));
       if (current_status.ok()) {
         ASSERT_EQ(iter->value().ToString(), data_rev->second);
       }

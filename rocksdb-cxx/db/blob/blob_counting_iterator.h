@@ -9,9 +9,14 @@
 
 #include "db/blob/blob_garbage_meter.h"
 #include "rocksdb/rocksdb_namespace.h"
-#include "rocksdb/status.h"
 #include "table/internal_iterator.h"
 #include "test_util/sync_point.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -88,7 +93,7 @@ class BlobCountingIterator : public InternalIterator {
     return iter_->value();
   }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   bool PrepareValue() override {
     assert(Valid());

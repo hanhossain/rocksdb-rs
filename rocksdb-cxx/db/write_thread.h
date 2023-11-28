@@ -20,10 +20,15 @@
 #include "db/write_callback.h"
 #include "monitoring/instrumented_mutex.h"
 #include "rocksdb/options.h"
-#include "rocksdb/status.h"
 #include "rocksdb/types.h"
 #include "rocksdb/write_batch.h"
 #include "util/autovector.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -215,18 +220,18 @@ class WriteThread {
       if (!status.ok()) {
         // a non-ok memtable write status takes presidence
         assert(callback == nullptr || callback_status.ok());
-        return status;
+        return status.Clone();
       } else if (!callback_status.ok()) {
         // if the callback failed then that is the status we want
         // because a memtable insert should not have been attempted
         assert(callback != nullptr);
         assert(status.ok());
-        return callback_status;
+        return callback_status.Clone();
       } else {
         // if there is no callback then we only care about
         // the memtable insert status
         assert(callback == nullptr || callback_status.ok());
-        return status;
+        return status.Clone();
       }
     }
 

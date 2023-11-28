@@ -12,8 +12,13 @@
 #include <vector>
 
 #include "rocksdb/db.h"
-#include "rocksdb/status.h"
 #include "rocksdb/utilities/stackable_db.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -163,10 +168,12 @@ class BlobDB : public StackableDB {
       std::vector<std::string>* values) override {
     for (auto column_family : column_families) {
       if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-        return std::vector<Status>(
-            column_families.size(),
-            Status_NotSupported(
-                "Blob DB doesn't support non-default column family."));
+        std::vector<Status> vec;
+        for (size_t i = 0; i < column_families.size(); i++) {
+          vec.push_back(Status_NotSupported(
+              "Blob DB doesn't support non-default column family."));
+        }
+        return vec;
       }
     }
     return MultiGet(options, keys, values);

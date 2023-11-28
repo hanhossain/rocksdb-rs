@@ -278,15 +278,15 @@ class KeyConvertingIterator : public InternalIterator {
     Status pik_status =
         ParseInternalKey(iter_->key(), &parsed_key, true /* log_err_key */);
     if (!pik_status.ok()) {
-      status_ = pik_status;
-      return Slice(status_.getState());
+      status_.copy_from(pik_status);
+      return Slice(status_.getState()->c_str());
     }
     return parsed_key.user_key;
   }
 
   Slice value() const override { return iter_->value(); }
   Status status() const override {
-    return status_.ok() ? iter_->status() : status_;
+    return status_.ok() ? iter_->status() : status_.Clone();
   }
 
  private:
@@ -2265,7 +2265,7 @@ TEST_P(BlockBasedTableTest, BadChecksumType) {
   Status s = c.Reopen(new_ioptions, new_moptions);
   ASSERT_NOK(s);
   // "test" is file name
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Corruption: Corrupt or unsupported checksum type: 123 in test");
 }
 
@@ -5847,10 +5847,10 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
   s = TryReopen(options);
   EXPECT_TRUE(s.IsNotSupported());
   EXPECT_TRUE(
-      s.ToString().find("Enable/Disable CacheEntryRoleOptions::charged") !=
+      s.ToString()->find("Enable/Disable CacheEntryRoleOptions::charged") !=
       std::string::npos);
   EXPECT_TRUE(
-      s.ToString().find(kCacheEntryRoleToCamelString[static_cast<uint32_t>(
+      s.ToString()->find(kCacheEntryRoleToCamelString[static_cast<uint32_t>(
           CacheEntryRole::kDataBlock)]) != std::string::npos);
   Destroy(options);
 
@@ -5864,12 +5864,12 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
   Destroy(options);
   s = TryReopen(options);
   EXPECT_TRUE(s.IsInvalidArgument());
-  EXPECT_TRUE(s.ToString().find("Enable CacheEntryRoleOptions::charged") !=
+  EXPECT_TRUE(s.ToString()->find("Enable CacheEntryRoleOptions::charged") !=
               std::string::npos);
   EXPECT_TRUE(
-      s.ToString().find(kCacheEntryRoleToCamelString[static_cast<std::size_t>(
+      s.ToString()->find(kCacheEntryRoleToCamelString[static_cast<std::size_t>(
           CacheEntryRole::kFilterConstruction)]) != std::string::npos);
-  EXPECT_TRUE(s.ToString().find("block cache is disabled") !=
+  EXPECT_TRUE(s.ToString()->find("block cache is disabled") !=
               std::string::npos);
   Destroy(options);
 }

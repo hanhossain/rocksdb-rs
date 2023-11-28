@@ -135,7 +135,7 @@ Status UpdateManifestForFilesState(
   }
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_opts.info_log, "UpdateManifestForFilesState failed: %s",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
   }
 
   return s;

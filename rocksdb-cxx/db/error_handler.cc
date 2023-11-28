@@ -315,12 +315,12 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
     }
   }
 
-  new_bg_err = Status(bg_err, sev);
+  new_bg_err = Status_new(bg_err, sev);
 
   // Check if recovery is currently in progress. If it is, we will save this
   // error so we can check it at the end to see if recovery succeeded or not
   if (recovery_in_prog_ && recovery_error_.ok()) {
-    recovery_error_ = new_bg_err;
+    recovery_error_.copy_from(new_bg_err);
   }
 
   bool auto_recovery = auto_recovery_;
@@ -335,11 +335,11 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
   }
 
   if (!new_bg_err.ok()) {
-    Status s = new_bg_err;
+    Status s = new_bg_err.Clone();
     EventHelpers::NotifyOnBackgroundError(db_options_.listeners, reason, &s,
                                           db_mutex_, &auto_recovery);
     if (!s.ok() && (s.severity() > bg_error_.severity())) {
-      bg_error_ = s;
+      bg_error_.copy_from(s);
     } else {
       // This error is less severe than previously encountered error. Don't
       // take any further action
@@ -387,7 +387,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
 const Status& ErrorHandler::SetBGError(const Status& bg_status,
                                        BackgroundErrorReason reason) {
   db_mutex_->AssertHeld();
-  Status tmp_status = bg_status;
+  Status tmp_status = bg_status.Clone();
   IOStatus bg_io_err = status_to_io_status(std::move(tmp_status));
 
   if (bg_io_err.ok()) {
@@ -413,7 +413,7 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
     // First, data loss (non file scope) is treated as unrecoverable error. So
     // it can directly overwrite any existing bg_error_.
     bool auto_recovery = false;
-    Status bg_err(new_bg_io_err, Severity::kUnrecoverableError);
+    Status bg_err = Status_new(new_bg_io_err, Severity::kUnrecoverableError);
     CheckAndSetRecoveryAndBGError(bg_err);
     if (bg_error_stats_ != nullptr) {
       RecordTick(bg_error_stats_.get(), ERROR_HANDLER_BG_ERROR_COUNT);
@@ -482,14 +482,14 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
       // continues to receive writes when BG error is soft error, to avoid
       // to many small memtable being generated during auto resume, the flush
       // reason is set to kErrorRecoveryRetryFlush.
-      Status bg_err(new_bg_io_err, Severity::kSoftError);
+      Status bg_err = Status_new(new_bg_io_err, Severity::kSoftError);
       CheckAndSetRecoveryAndBGError(bg_err);
       soft_error_no_bg_work_ = true;
       context.flush_reason = FlushReason::kErrorRecoveryRetryFlush;
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
     } else {
-      Status bg_err(new_bg_io_err, Severity::kHardError);
+      Status bg_err = Status_new(new_bg_io_err, Severity::kHardError);
       CheckAndSetRecoveryAndBGError(bg_err);
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
@@ -507,13 +507,13 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
 Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
                                           bool* auto_recovery) {
   if (bg_error.severity() >= Severity::kFatalError) {
-    return bg_error;
+    return bg_error.Clone();
   }
 
   if (db_options_.sst_file_manager.get() == nullptr) {
     // We rely on SFM to poll for enough disk space and recover
     *auto_recovery = false;
-    return bg_error;
+    return bg_error.Clone();
   }
 
   if (db_options_.allow_2pc &&
@@ -522,18 +522,18 @@ Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
     // be inconsistent, and it may be needed for 2PC. If 2PC is not enabled,
     // we can just flush the memtable and discard the log
     *auto_recovery = false;
-    return Status(bg_error, Severity::kFatalError);
+    return Status_new(bg_error, Severity::kFatalError);
   }
 
   {
     uint64_t free_space;
     if (db_options_.env->GetFreeSpace(db_options_.db_paths[0].path,
-                                      &free_space) == Status_NotSupported()) {
+                                      &free_space).eq(Status_NotSupported())) {
       *auto_recovery = false;
     }
   }
 
-  return bg_error;
+  return bg_error.Clone();
 }
 
 void ErrorHandler::RecoverFromNoSpace() {
@@ -542,7 +542,7 @@ void ErrorHandler::RecoverFromNoSpace() {
 
   // Inform SFM of the error, so it can kick-off the recovery
   if (sfm) {
-    sfm->StartErrorRecovery(this, bg_error_);
+    sfm->StartErrorRecovery(this, bg_error_.Clone());
   }
 }
 
@@ -551,7 +551,7 @@ Status ErrorHandler::ClearBGError() {
 
   // Signal that recovery succeeded
   if (recovery_error_.ok()) {
-    Status old_bg_error = bg_error_;
+    Status old_bg_error = bg_error_.Clone();
     // Clear and check the recovery IO and BG error
     bg_error_ = Status_OK();
     recovery_io_error_ = IOStatus::OK();
@@ -560,7 +560,7 @@ Status ErrorHandler::ClearBGError() {
     EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, old_bg_error,
                                            bg_error_, db_mutex_);
   }
-  return recovery_error_;
+  return recovery_error_.Clone();
 }
 
 Status ErrorHandler::RecoverFromBGError(bool is_manual) {
@@ -718,7 +718,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
         // recover from the retryable IO error and no other BG errors. Clean
         // the bg_error and notify user.
         TEST_SYNC_POINT("RecoverFromRetryableBGIOError:RecoverSuccess");
-        Status old_bg_error = bg_error_;
+        Status old_bg_error = bg_error_.Clone();
         is_db_stopped_.store(false, std::memory_order_release);
         bg_error_ = Status_OK();
         EventHelpers::NotifyOnErrorRecoveryEnd(
@@ -746,7 +746,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
             db_options_.listeners, bg_error_,
             !recovery_io_error_.ok()
                 ? recovery_io_error_
-                : (!recovery_error_.ok() ? recovery_error_ : s),
+                : (!recovery_error_.ok() ? recovery_error_ : s).Clone(),
             db_mutex_);
         return;
       }
@@ -767,10 +767,10 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
 
 void ErrorHandler::CheckAndSetRecoveryAndBGError(const Status& bg_err) {
   if (recovery_in_prog_ && recovery_error_.ok()) {
-    recovery_error_ = bg_err;
+    recovery_error_.copy_from(bg_err);
   }
   if (bg_err.severity() > bg_error_.severity()) {
-    bg_error_ = bg_err;
+    bg_error_.copy_from(bg_err);
   }
   if (bg_error_.severity() >= Severity::kHardError) {
     is_db_stopped_.store(true, std::memory_order_release);

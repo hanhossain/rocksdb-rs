@@ -495,7 +495,7 @@ class WritePreparedTransactionTestBase : public TransactionTestBase {
                                 {kv.first}, &values);
       ASSERT_EQ(1, values.size());
       ASSERT_EQ(1, s_vec.size());
-      s = s_vec[0];
+      s.copy_from(s_vec[0]);
       ASSERT_TRUE(s.ok() || s.IsNotFound());
       if (s.ok()) {
         ASSERT_TRUE(kv.second == values[0]);
@@ -1440,7 +1440,7 @@ TEST_P(WritePreparedTransactionTest, MaxCatchupWithUnbackedSnapshot) {
           txn->MultiGet(ropt, {db->DefaultColumnFamily()}, {"key"}, &values);
       ASSERT_EQ(1, values.size());
       ASSERT_EQ(1, s_vec.size());
-      s = s_vec[0];
+      s.copy_from(s_vec[0]);
       ASSERT_TRUE(s.ok() || s.IsTryAgain());
       Slice key("key");
       txn->MultiGet(ropt, db->DefaultColumnFamily(), 1, &key, &pinnable_val, &s,
@@ -2191,7 +2191,7 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, Status exp_s,
   Status s;
   PinnableSlice v;
   s = db->Get(roptions, db->DefaultColumnFamily(), key, &v);
-  ASSERT_EQ(exp_s, s);
+  ASSERT_TRUE(exp_s.eq(s));
   ASSERT_TRUE(s.ok() || s.IsNotFound());
   if (s.ok()) {
     ASSERT_TRUE(exp_v == v);
@@ -2203,8 +2203,8 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, Status exp_s,
       db->MultiGet(roptions, {db->DefaultColumnFamily()}, {key}, &values);
   ASSERT_EQ(1, values.size());
   ASSERT_EQ(1, s_vec.size());
-  s = s_vec[0];
-  ASSERT_EQ(exp_s, s);
+  s.copy_from(s_vec[0]);
+  ASSERT_TRUE(exp_s.eq(s));
   ASSERT_TRUE(s.ok() || s.IsNotFound());
   if (s.ok()) {
     ASSERT_TRUE(exp_v == values[0]);
@@ -2213,7 +2213,7 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, Status exp_s,
 
 void ASSERT_SAME(TransactionDB* db, Status exp_s, PinnableSlice& exp_v,
                  Slice key) {
-  ASSERT_SAME(ReadOptions(), db, exp_s, exp_v, key);
+  ASSERT_SAME(ReadOptions(), db, exp_s.Clone(), exp_v, key);
 }
 
 TEST_P(WritePreparedTransactionTest, Rollback) {
@@ -2279,10 +2279,10 @@ TEST_P(WritePreparedTransactionTest, Rollback) {
           ASSERT_EQ(txn->GetId(), wp_db->prepared_txns_.top());
         }
 
-        ASSERT_SAME(db, s1, v1, "key1");
-        ASSERT_SAME(db, s2, v2, "key2");
-        ASSERT_SAME(db, s3, v3, "key3");
-        ASSERT_SAME(db, s4, v4, "key4");
+        ASSERT_SAME(db, s1.Clone(), v1, "key1");
+        ASSERT_SAME(db, s2.Clone(), v2, "key2");
+        ASSERT_SAME(db, s3.Clone(), v3, "key3");
+        ASSERT_SAME(db, s4.Clone(), v4, "key4");
 
         if (crash) {
           delete txn;
@@ -2301,10 +2301,10 @@ TEST_P(WritePreparedTransactionTest, Rollback) {
                       wp_db->delayed_prepared_.end());
         }
 
-        ASSERT_SAME(db, s1, v1, "key1");
-        ASSERT_SAME(db, s2, v2, "key2");
-        ASSERT_SAME(db, s3, v3, "key3");
-        ASSERT_SAME(db, s4, v4, "key4");
+        ASSERT_SAME(db, s1.Clone(), v1, "key1");
+        ASSERT_SAME(db, s2.Clone(), v2, "key2");
+        ASSERT_SAME(db, s3.Clone(), v3, "key3");
+        ASSERT_SAME(db, s4.Clone(), v4, "key4");
 
         s = txn->Rollback();
         ASSERT_OK(s);
@@ -2316,10 +2316,10 @@ TEST_P(WritePreparedTransactionTest, Rollback) {
           ASSERT_TRUE(wp_db->delayed_prepared_.empty());
         }
 
-        ASSERT_SAME(db, s1, v1, "key1");
-        ASSERT_SAME(db, s2, v2, "key2");
-        ASSERT_SAME(db, s3, v3, "key3");
-        ASSERT_SAME(db, s4, v4, "key4");
+        ASSERT_SAME(db, s1.Clone(), v1, "key1");
+        ASSERT_SAME(db, s2.Clone(), v2, "key2");
+        ASSERT_SAME(db, s3.Clone(), v3, "key3");
+        ASSERT_SAME(db, s4.Clone(), v4, "key4");
         delete txn;
       }
     }
@@ -3959,7 +3959,7 @@ TEST_P(WritePreparedTransactionTest, AtomicCommit) {
       auto s = db->Get(roptions, db->DefaultColumnFamily(), "key", &val);
       TEST_SYNC_POINT("AtomicCommit::Get:end");
       TEST_SYNC_POINT("AtomicCommit::Get2:start");
-      ASSERT_SAME(roptions, db, s, val, "key");
+      ASSERT_SAME(roptions, db, s.Clone(), val, "key");
       TEST_SYNC_POINT("AtomicCommit::Get2:end");
       db->ReleaseSnapshot(roptions.snapshot);
     });

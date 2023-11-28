@@ -88,7 +88,7 @@ IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key,
   Status pik_status =
       ParseInternalKey(key, &parsed_key, false /* log_err_key */);  // TODO
   if (!pik_status.ok()) {
-    return IOStatus::Corruption(pik_status.getState());
+    return IOStatus::Corruption(*pik_status.getState());
   }
 
   Slice key_to_write = key;  // Portion of internal key to write out.
@@ -218,7 +218,7 @@ bool PlainTableFileReader::ReadNonMmap(uint32_t file_offset, uint32_t len,
                              &read_result, new_buffer->buf.get(), nullptr,
                              Env::IO_TOTAL /* rate_limiter_priority */);
   if (!s.ok()) {
-    status_ = s;
+    status_.copy_from(s);
     return false;
   }
   new_buffer->buf_start_offset = file_offset;
@@ -288,7 +288,7 @@ Status PlainTableKeyDecoder::ReadInternalKey(
     if (!pik_status.ok()) {
       return Status_Corruption(
           Slice("Corrupted key found during next key read. "),
-          pik_status.getState());
+          *pik_status.getState());
     }
     *bytes_read += user_key_size + 8;
   }

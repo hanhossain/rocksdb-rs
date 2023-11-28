@@ -20,8 +20,13 @@
 #include "cache/cache_key.h"
 #include "cache/typed_cache.h"
 #include "rocksdb/slice.h"
-#include "rocksdb/status.h"
 #include "util/coding.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 // CacheReservationManager is an interface for reserving cache space for the

@@ -872,7 +872,7 @@ TEST_F(DBWriteBufferManagerTest, RuntimeChangeableAllowStall) {
   wo_no_slowdown.no_slowdown = true;
   Status s = Put(Key(0), DummyString(kBigValue), wo_no_slowdown);
   ASSERT_TRUE(s.IsIncomplete());
-  ASSERT_TRUE(s.ToString().find("Write stall") != std::string::npos);
+  ASSERT_TRUE(s.ToString()->find("Write stall") != std::string::npos);
 
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"WBMStallInterface::BlockDB",
@@ -910,7 +910,7 @@ TEST_F(DBWriteBufferManagerTest, RuntimeChangeableAllowStall) {
   // Otherwise the following write will not be stalled and therefore succeed.
   s = Put(Key(0), DummyString(kBigValue), wo_no_slowdown);
   ASSERT_TRUE(s.IsIncomplete());
-  ASSERT_TRUE(s.ToString().find("Write stall") != std::string::npos);
+  ASSERT_TRUE(s.ToString()->find("Write stall") != std::string::npos);
   sleeping_task->WakeUp();
 }
 

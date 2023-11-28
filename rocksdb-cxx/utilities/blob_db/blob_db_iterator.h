@@ -42,7 +42,7 @@ class BlobDBIterator : public Iterator {
     if (!iter_->status().ok()) {
       return iter_->status();
     }
-    return status_;
+    return status_.Clone();
   }
 
   void SeekToFirst() override {
@@ -127,7 +127,7 @@ class BlobDBIterator : public Iterator {
         return true;
       } else {
         if (!s.ok()) {
-          status_ = s;
+          status_.copy_from(s);
         }
         return false;
       }

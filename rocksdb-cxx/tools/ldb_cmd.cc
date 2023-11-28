@@ -338,8 +338,8 @@ void LDBCommand::Run() {
     Status s = Env::CreateFromUri(config_options_, env_uri_, fs_uri_, &env,
                                   &env_guard_);
     if (!s.ok()) {
-      fprintf(stderr, "%s\n", s.ToString().c_str());
-      exec_state_ = LDBCommandExecuteResult::Failed(s.ToString());
+      fprintf(stderr, "%s\n", s.ToString()->c_str());
+      exec_state_ = LDBCommandExecuteResult::Failed(*s.ToString());
       return;
     }
     options_.env = env;
@@ -480,7 +480,7 @@ void LDBCommand::OpenDB() {
     }
   }
   if (!st.ok()) {
-    std::string msg = st.ToString();
+    std::string msg = *st.ToString();
     exec_state_ = LDBCommandExecuteResult::Failed(msg);
   } else if (!handles_opened.empty()) {
     assert(handles_opened.size() == column_families_.size());
@@ -923,7 +923,7 @@ void LDBCommand::PrepareOptions() {
                                  &column_families_);
     if (!s.ok() && !s.IsNotFound()) {
       // Option file exists but load option file error.
-      std::string msg = s.ToString();
+      std::string msg = *s.ToString();
       exec_state_ = LDBCommandExecuteResult::Failed(msg);
       db_ = nullptr;
       return;
@@ -1329,7 +1329,7 @@ void DumpManifestFile(Options options, std::string file, bool verbose, bool hex,
   Status s = versions.DumpManifest(options, file, verbose, hex, json, cf_descs);
   if (!s.ok()) {
     fprintf(stderr, "Error in processing file %s %s\n", file.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
   }
 }
 
@@ -1382,7 +1382,7 @@ void ManifestDumpCommand::DoCommand() {
     std::vector<std::string> files;
     Status s = options_.env->GetChildren(db_path_, &files);
     if (!s.ok()) {
-      std::string err_msg = s.ToString();
+      std::string err_msg = *s.ToString();
       err_msg.append(": Failed to list the content of ");
       err_msg.append(db_path_);
       exec_state_ = LDBCommandExecuteResult::Failed(err_msg);
@@ -1546,7 +1546,7 @@ void FileChecksumDumpCommand::DoCommand() {
   }
 
   if (!s.ok()) {
-    exec_state_ = LDBCommandExecuteResult::Failed(s.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*s.ToString());
   }
 }
 
@@ -1621,7 +1621,7 @@ void ListColumnFamiliesCommand::DoCommand() {
   Status s = DB::ListColumnFamilies(options_, db_path_, &column_families);
   if (!s.ok()) {
     fprintf(stderr, "Error in processing db %s %s\n", db_path_.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
   } else {
     fprintf(stdout, "Column families in %s: \n{", db_path_.c_str());
     bool first = true;
@@ -1667,7 +1667,7 @@ void CreateColumnFamilyCommand::DoCommand() {
     fprintf(stdout, "OK\n");
   } else {
     exec_state_ = LDBCommandExecuteResult::Failed(
-        "Fail to create new column family: " + st.ToString());
+        "Fail to create new column family: " + *st.ToString());
   }
   delete new_cf_handle;
   CloseDB();
@@ -1710,7 +1710,7 @@ void DropColumnFamilyCommand::DoCommand() {
     fprintf(stdout, "OK\n");
   } else {
     exec_state_ = LDBCommandExecuteResult::Failed(
-        "Fail to drop column family: " + st.ToString());
+        "Fail to drop column family: " + *st.ToString());
   }
   CloseDB();
 }
@@ -1834,7 +1834,7 @@ void InternalDumpCommand::DoCommand() {
   Status st = GetAllKeyVersions(db_, GetCfHandle(), from_, to_, max_keys_,
                                 &key_versions);
   if (!st.ok()) {
-    exec_state_ = LDBCommandExecuteResult::Failed(st.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
     return;
   }
   std::string rtype1, rtype2, row, val;
@@ -2084,7 +2084,7 @@ void DBDumperCommand::DoDumpCommand() {
   Status st = iter->status();
   if (!st.ok()) {
     exec_state_ =
-        LDBCommandExecuteResult::Failed("Iterator error." + st.ToString());
+        LDBCommandExecuteResult::Failed("Iterator error." + *st.ToString());
   }
 
   if (!null_from_) {
@@ -2305,7 +2305,7 @@ void ReduceDBLevelsCommand::DoCommand() {
   int old_level_num = -1;
   st = GetOldNumOfLevels(options_, &old_level_num);
   if (!st.ok()) {
-    exec_state_ = LDBCommandExecuteResult::Failed(st.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
     return;
   }
 
@@ -2337,7 +2337,7 @@ void ReduceDBLevelsCommand::DoCommand() {
                                           new_levels_);
   }
   if (!st.ok()) {
-    exec_state_ = LDBCommandExecuteResult::Failed(st.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
     return;
   }
 }
@@ -2614,7 +2614,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
   if (!status.ok()) {
     if (exec_state) {
       *exec_state = LDBCommandExecuteResult::Failed("Failed to open WAL file " +
-                                                    status.ToString());
+                                                    *status.ToString());
     } else {
       std::cerr << "Error: Failed to open WAL file " << status.ToString()
                 << std::endl;
@@ -3055,7 +3055,7 @@ void ScanCommand::DoCommand() {
     }
   }
   if (!it->status().ok()) {  // Check for any errors found during the scan
-    exec_state_ = LDBCommandExecuteResult::Failed(it->status().ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*it->status().ToString());
   }
   delete it;
 }
@@ -3093,7 +3093,7 @@ void DeleteCommand::DoCommand() {
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(st.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
   }
 }
 
@@ -3129,7 +3129,7 @@ void SingleDeleteCommand::DoCommand() {
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(st.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
   }
 }
 
@@ -3168,7 +3168,7 @@ void DeleteRangeCommand::DoCommand() {
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(st.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
   }
 }
 
@@ -3214,7 +3214,7 @@ void PutCommand::DoCommand() {
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(st.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
   }
 }
 
@@ -3384,7 +3384,7 @@ void CheckPointCommand::DoCommand() {
   if (status.ok()) {
     fprintf(stdout, "OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(status.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*status.ToString());
   }
 }
 
@@ -3418,7 +3418,7 @@ void RepairCommand::DoCommand() {
   if (status.ok()) {
     fprintf(stdout, "OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(status.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*status.ToString());
   }
 }
 
@@ -3516,7 +3516,7 @@ void BackupCommand::DoCommand() {
         Env::CreateFromUri(config_options_, backup_env_uri_, backup_fs_uri_,
                            &custom_env, &backup_env_guard_);
     if (!s.ok()) {
-      exec_state_ = LDBCommandExecuteResult::Failed(s.ToString());
+      exec_state_ = LDBCommandExecuteResult::Failed(*s.ToString());
       return;
     }
   }
@@ -3530,14 +3530,14 @@ void BackupCommand::DoCommand() {
   if (status.ok()) {
     fprintf(stdout, "open backup engine OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(status.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*status.ToString());
     return;
   }
   status = backup_engine->CreateNewBackup(db_);
   if (status.ok()) {
     fprintf(stdout, "create new backup OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(status.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*status.ToString());
     return;
   }
 }
@@ -3561,7 +3561,7 @@ void RestoreCommand::DoCommand() {
         Env::CreateFromUri(config_options_, backup_env_uri_, backup_fs_uri_,
                            &custom_env, &backup_env_guard_);
     if (!s.ok()) {
-      exec_state_ = LDBCommandExecuteResult::Failed(s.ToString());
+      exec_state_ = LDBCommandExecuteResult::Failed(*s.ToString());
       return;
     }
   }
@@ -3587,7 +3587,7 @@ void RestoreCommand::DoCommand() {
   if (status.ok()) {
     fprintf(stdout, "restore from backup OK\n");
   } else {
-    exec_state_ = LDBCommandExecuteResult::Failed(status.ToString());
+    exec_state_ = LDBCommandExecuteResult::Failed(*status.ToString());
   }
 }
 
@@ -3655,7 +3655,7 @@ void DumpBlobFile(const std::string& filename, bool is_key_hex,
   Status s = tool.Run(filename, show_key, show_blob, show_uncompressed_blob,
                       /* show_summary */ true);
   if (!s.ok()) {
-    fprintf(stderr, "Failed: %s\n", s.ToString().c_str());
+    fprintf(stderr, "Failed: %s\n", s.ToString()->c_str());
   }
 }
 }  // namespace
@@ -3933,7 +3933,7 @@ void WriteExternalSstFilesCommand::DoCommand() {
   Status status = sst_file_writer.Open(output_sst_path_);
   if (!status.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed("failed to open SST file: " +
-                                                  status.ToString());
+                                                  *status.ToString());
     return;
   }
 
@@ -3948,7 +3948,7 @@ void WriteExternalSstFilesCommand::DoCommand() {
       status = sst_file_writer.Put(key, value);
       if (!status.ok()) {
         exec_state_ = LDBCommandExecuteResult::Failed(
-            "failed to write record to file: " + status.ToString());
+            "failed to write record to file: " + *status.ToString());
         return;
       }
     } else if (0 == line.find("Keys in range:")) {
@@ -3963,7 +3963,7 @@ void WriteExternalSstFilesCommand::DoCommand() {
   status = sst_file_writer.Finish();
   if (!status.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed(
-        "Failed to finish writing to file: " + status.ToString());
+        "Failed to finish writing to file: " + *status.ToString());
     return;
   }
 
@@ -4081,7 +4081,7 @@ void IngestExternalSstFilesCommand::DoCommand() {
   Status status = db_->IngestExternalFile(cfh, {input_sst_path_}, ifo);
   if (!status.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed(
-        "failed to ingest external SST: " + status.ToString());
+        "failed to ingest external SST: " + *status.ToString());
   } else {
     exec_state_ =
         LDBCommandExecuteResult::Succeed("external SST files ingested");
@@ -4202,7 +4202,7 @@ void UnsafeRemoveSstFileCommand::DoCommand() {
 
   if (!s.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed(
-        "failed to unsafely remove SST file: " + s.ToString());
+        "failed to unsafely remove SST file: " + *s.ToString());
   } else {
     exec_state_ = LDBCommandExecuteResult::Succeed("unsafely removed SST file");
   }
@@ -4255,7 +4255,7 @@ void UpdateManifestCommand::DoCommand() {
 
   if (!s.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed(
-        "failed to update manifest: " + s.ToString());
+        "failed to update manifest: " + *s.ToString());
   } else {
     exec_state_ =
         LDBCommandExecuteResult::Succeed("Manifest updates successful");

@@ -1229,7 +1229,7 @@ void LevelIterator::Seek(const Slice& target) {
     // blocks has been submitted. So it should return at this point and Seek
     // should be called again to retrieve the requested block and execute the
     // remaining code.
-    if (file_iter_.status() == Status_TryAgain()) {
+    if (file_iter_.status().eq(Status_TryAgain())) {
       return;
     }
     if (!file_iter_.Valid() && file_iter_.status().ok() &&
@@ -2239,7 +2239,7 @@ Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
       blob_file_meta->GetBlobFileSize(), blob_index.size(),
       blob_index.compression(), prefetch_buffer, value, bytes_read);
 
-  return s;
+  return s.Clone();
 }
 
 void Version::MultiGetBlob(
@@ -2791,7 +2791,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
 
   for (auto iter = range->begin(); iter != range->end(); ++iter) {
     range->MarkKeyDone(iter);
-    *(iter->s) = s;
+    iter->s->copy_from(s);
   }
 }
 
@@ -3085,7 +3085,7 @@ bool Version::MaybeInitializeFileMetaData(const ReadOptions& read_options,
     ROCKS_LOG_ERROR(vset_->db_options_->info_log,
                     "Unable to load table properties for file %" PRIu64
                     " --- %s\n",
-                    file_meta->fd.GetNumber(), s.ToString().c_str());
+                    file_meta->fd.GetNumber(), s.ToString()->c_str());
     return false;
   }
   if (tp.get() == nullptr) return false;
@@ -3688,7 +3688,7 @@ void VersionStorageInfo::ComputeFilesMarkedForPeriodicCompaction(
           if (!status.ok()) {
             ROCKS_LOG_WARN(ioptions.logger,
                            "Can't get file modification time: %s: %s",
-                           file_path.c_str(), status.ToString().c_str());
+                           file_path.c_str(), status.ToString()->c_str());
             continue;
           }
         }
@@ -5441,7 +5441,7 @@ Status VersionSet::ProcessManifestWrites(
       if (!io_s.ok()) {
         s = io_s;
         ROCKS_LOG_ERROR(db_options_->info_log, "MANIFEST write %s\n",
-                        s.ToString().c_str());
+                        s.ToString()->c_str());
       }
     }
 
@@ -5613,7 +5613,7 @@ Status VersionSet::ProcessManifestWrites(
         ROCKS_LOG_WARN(db_options_->info_log,
                        "Failed to delete manifest %" PRIu64 ": %s",
                        pending_manifest_file_number_,
-                       manifest_del_status.ToString().c_str());
+                       manifest_del_status.ToString()->c_str());
       }
     }
   }
@@ -5648,7 +5648,7 @@ Status VersionSet::ProcessManifestWrites(
         break;
       }
     }
-    ready->status = s;
+    ready->status.copy_from(s);
     ready->done = true;
     if (ready->manifest_write_callback) {
       (ready->manifest_write_callback)(s);
@@ -5736,7 +5736,7 @@ Status VersionSet::LogAndApply(
     }
     TEST_SYNC_POINT_CALLBACK("VersionSet::LogAndApply:WakeUpAndDone", mu);
 #endif /* !NDEBUG */
-    return first_writer.status;
+    return first_writer.status.Clone();
   }
 
   int num_undropped_cfds = 0;
@@ -5881,7 +5881,7 @@ Status VersionSet::Recover(
         /*track_missing_files=*/false, no_error_if_files_missing, io_tracer_,
         read_options, EpochNumberRequirement::kMightMissing);
     handler.Iterate(reader, &log_read_status);
-    s = handler.status();
+    s.copy_from(handler.status());
     if (s.ok()) {
       log_number = handler.GetVersionEditParams().log_number_;
       current_manifest_file_size = reader.GetReadOffset();
@@ -6061,7 +6061,7 @@ Status VersionSet::TryRecoverFromOneManifest(
   assert(nullptr != has_missing_table_file);
   *has_missing_table_file = handler_pit.HasMissingFiles();
 
-  s = handler_pit.status();
+  s.copy_from(handler_pit.status());
   if (s.ok()) {
     RecoverEpochNumbers();
   }
@@ -6127,7 +6127,7 @@ Status VersionSet::ListColumnFamiliesFromManifest(
     }
   }
 
-  return handler.status();
+  return handler.status().Clone();
 }
 
 Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
@@ -6352,7 +6352,7 @@ Status VersionSet::DumpManifest(
     handler.Iterate(reader, &s);
   }
 
-  return handler.status();
+  return handler.status().Clone();
 }
 
 void VersionSet::MarkFileNumberUsed(uint64_t number) {
@@ -7219,7 +7219,7 @@ Status ReactiveVersionSet::Recover(
 
   manifest_tailer_->Iterate(*reader, manifest_reader_status->get());
 
-  s = manifest_tailer_->status();
+  s.copy_from(manifest_tailer_->status());
   if (s.ok()) {
     RecoverEpochNumbers();
   }
@@ -7243,7 +7243,7 @@ Status ReactiveVersionSet::ReadAndApply(
     return s;
   }
   manifest_tailer_->Iterate(*(manifest_reader->get()), manifest_read_status);
-  s = manifest_tailer_->status();
+  s.copy_from(manifest_tailer_->status());
   if (s.ok()) {
     *cfds_changed = std::move(manifest_tailer_->GetUpdatedColumnFamilies());
   }

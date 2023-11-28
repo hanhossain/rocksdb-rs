@@ -100,7 +100,7 @@ Status BlobSource::PutBlobIntoCache(
     RecordTick(statistics_, BLOB_DB_CACHE_ADD_FAILURES);
   }
 
-  return s;
+  return s.Clone();
 }
 
 BlobSource::TypedHandle* BlobSource::GetEntryFromCache(const Slice& key) const {
@@ -317,7 +317,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
 
       if (s.ok()) {
         assert(req.status);
-        *req.status = s;
+        *req.status = s.Clone();
 
         PinCachedBlob(&blob_handle, req.result);
 
@@ -381,7 +381,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
         assert(req);
         assert(req->status);
 
-        *req->status = s;
+        *req->status = s.Clone();
       }
       return;
     }
@@ -408,7 +408,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
           const Slice key = cache_key.AsSlice();
           s = PutBlobIntoCache(key, &blob_contents, &blob_handle);
           if (!s.ok()) {
-            *req->status = s;
+            *req->status = s.Clone();
           } else {
             PinCachedBlob(&blob_handle, req->result);
           }

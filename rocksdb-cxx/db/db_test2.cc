@@ -1807,10 +1807,10 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
     }
     ASSERT_EQ(0, key_value_written.size());
   } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionFail) {
-    ASSERT_EQ(std::string(s.getState()),
+    ASSERT_EQ(std::string(*s.getState()),
               "Could not decompress: kTestDecompressionFail");
   } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionCorruption) {
-    ASSERT_EQ(std::string(s.getState()),
+    ASSERT_EQ(std::string(*s.getState()),
               "Decompressed block did not match pre-compression block");
   }
 }
@@ -5155,7 +5155,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   ASSERT_OK(Flush());
 
   PinnableSlice pinned_value;
-  ASSERT_EQ(Get("foo", &pinned_value), Status_OK());
+  ASSERT_TRUE(Get("foo", &pinned_value).eq(Status_OK()));
   // It is not safe to pin mmap files as they might disappear by compaction
   ASSERT_FALSE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
@@ -5172,7 +5172,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   // Unsafe to pin mmap files when they could be kicked out of table cache
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
-  ASSERT_EQ(Get("foo", &pinned_value), Status_OK());
+  ASSERT_TRUE(Get("foo", &pinned_value).eq(Status_OK()));
   ASSERT_FALSE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
 
@@ -5182,7 +5182,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   Close();
   options.max_open_files = -1;
   ASSERT_OK(ReadOnlyReopen(options));
-  ASSERT_EQ(Get("foo", &pinned_value), Status_OK());
+  ASSERT_TRUE(Get("foo", &pinned_value).eq(Status_OK()));
   ASSERT_TRUE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
 }

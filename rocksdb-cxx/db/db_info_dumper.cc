@@ -41,7 +41,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
   s = env->GetChildren(dbname, &files);
   if (!s.ok()) {
     Error(options.info_log, "Error when reading %s dir %s\n", dbname.c_str(),
-          s.ToString().c_str());
+          s.ToString()->c_str());
   }
   std::sort(files.begin(), files.end());
   for (const std::string& file : files) {
@@ -64,7 +64,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
         } else {
           Error(options.info_log,
                 "Error when reading MANIFEST file: %s/%s %s\n", dbname.c_str(),
-                file.c_str(), s.ToString().c_str());
+                file.c_str(), s.ToString()->c_str());
         }
         break;
       case kWalFile:
@@ -76,7 +76,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
               .append(" ; ");
         } else {
           Error(options.info_log, "Error when reading LOG file: %s/%s %s\n",
-                dbname.c_str(), file.c_str(), s.ToString().c_str());
+                dbname.c_str(), file.c_str(), s.ToString()->c_str());
         }
         break;
       case kTableFile:
@@ -95,7 +95,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       s = env->GetChildren(db_path.path, &files);
       if (!s.ok()) {
         Error(options.info_log, "Error when reading %s dir %s\n",
-              db_path.path.c_str(), s.ToString().c_str());
+              db_path.path.c_str(), s.ToString()->c_str());
         continue;
       }
       std::sort(files.begin(), files.end());
@@ -120,7 +120,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
     s = env->GetChildren(wal_dir, &files);
     if (!s.ok()) {
       Error(options.info_log, "Error when reading %s dir %s\n", wal_dir.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
       return;
     }
     wal_info.clear();
@@ -135,7 +135,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
                 .append(" ; ");
           } else {
             Error(options.info_log, "Error when reading LOG file %s/%s %s\n",
-                  wal_dir.c_str(), file.c_str(), s.ToString().c_str());
+                  wal_dir.c_str(), file.c_str(), s.ToString()->c_str());
           }
         }
       }

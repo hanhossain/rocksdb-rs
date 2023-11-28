@@ -466,7 +466,7 @@ TEST_F(DBTest, LevelLimitReopen) {
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
   Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
 
   options.num_levels = 10;
@@ -2252,7 +2252,7 @@ TEST_F(DBTest, ComparatorCheck) {
     Status s = TryReopenWithColumnFamilies(
         {"default", "pikachu"}, std::vector<Options>({options, new_options}));
     ASSERT_TRUE(!s.ok());
-    ASSERT_TRUE(s.ToString().find("comparator") != std::string::npos)
+    ASSERT_TRUE(s.ToString()->find("comparator") != std::string::npos)
         << s.ToString();
   } while (ChangeCompactOptions());
 }
@@ -2327,7 +2327,7 @@ TEST_F(DBTest, DBOpen_Options) {
   DB* db = nullptr;
   options.create_if_missing = false;
   Status s = DB::Open(options, dbname, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "does not exist") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "does not exist") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does not exist, and create_if_missing == true: OK
@@ -2343,7 +2343,7 @@ TEST_F(DBTest, DBOpen_Options) {
   options.create_if_missing = false;
   options.error_if_exists = true;
   s = DB::Open(options, dbname, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "exists") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "exists") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does exist, and error_if_exists == false: OK
@@ -2373,7 +2373,7 @@ TEST_F(DBTest, DBOpen_Change_NumLevels) {
   options.create_if_missing = false;
   options.num_levels = 2;
   Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "Invalid argument") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "Invalid argument") != nullptr);
   ASSERT_TRUE(db_ == nullptr);
 }
 
@@ -2778,7 +2778,7 @@ static void MTThreadBody(void* arg) {
           }
         }
       }
-      Status s = statuses[0];
+      Status s = statuses[0].Clone();
       // all statuses have to be the same
       for (size_t i = 1; i < statuses.size(); ++i) {
         // they are either both ok or both not-found
@@ -3073,8 +3073,10 @@ class ModelDB : public DB {
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys,
       std::vector<std::string>* /*values*/) override {
-    std::vector<Status> s(keys.size(),
-                          Status_NotSupported("Not implemented."));
+    std::vector<Status> s;
+    for (size_t i = 0; i < keys.size(); i++) {
+      s.push_back(Status_NotSupported("Not implemented."));
+    }
     return s;
   }
 
@@ -6945,7 +6947,7 @@ TEST_F(DBTest, PinnableSliceAndRowCache) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
     ASSERT_EQ(pin_slice.ToString(), "bar");
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -6974,8 +6976,8 @@ TEST_F(DBTest, ReusePinnableSlice) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
-    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
     ASSERT_EQ(pin_slice.ToString(), "bar");
 
     // Entry is already in cache, lookup will remove the element from lru
@@ -6992,16 +6994,17 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses({Status_NotFound()});
+    std::vector<Status> statuses;
+    statuses.push_back(Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7019,16 +7022,17 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses({Status_NotFound()});
+    std::vector<Status> statuses;
+    statuses.push_back(Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7237,7 +7241,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t creation_time;
   Status s1 = dbfull()->GetCreationTimeOfOldestFile(&creation_time);
   ASSERT_EQ(0, creation_time);
-  ASSERT_EQ(s1, Status_OK());
+  ASSERT_TRUE(s1.eq(Status_OK()));
 
   // Testing with non-zero file creation time.
   set_file_creation_time_to_zero = false;
@@ -7262,14 +7266,14 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t ctime;
   Status s2 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
   ASSERT_EQ(uint_time_1, ctime);
-  ASSERT_EQ(s2, Status_OK());
+  ASSERT_TRUE(s2.eq(Status_OK()));
 
   // Testing with max_open_files != -1
   options = CurrentOptions();
   options.max_open_files = 10;
   DestroyAndReopen(options);
   Status s3 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
-  ASSERT_EQ(s3, Status_NotSupported());
+  ASSERT_TRUE(s3.eq(Status_NotSupported()));
 
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
 }

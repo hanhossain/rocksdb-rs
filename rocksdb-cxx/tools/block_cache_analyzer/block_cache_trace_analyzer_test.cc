@@ -19,13 +19,18 @@ int main() {
 
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
-#include "rocksdb/status.h"
 #include "rocksdb/trace_reader_writer.h"
 #include "rocksdb/trace_record.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 #include "tools/block_cache_analyzer/block_cache_trace_analyzer.h"
 #include "trace_replay/block_cache_tracer.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -666,7 +671,7 @@ TEST_F(BlockCacheTracerTest, MixedBlocks) {
         /*is_block_cache_human_readable_trace=*/false,
         /*simulator=*/nullptr);
     // The analyzer ends when it detects an incomplete access record.
-    ASSERT_EQ(Status_Incomplete(""), analyzer.Analyze());
+    ASSERT_TRUE(Status_Incomplete("").eq(analyzer.Analyze()));
     const uint64_t expected_num_cfs = 1;
     std::vector<uint64_t> expected_fds{kSSTStoringOddKeys, kSSTStoringEvenKeys};
     const std::vector<TraceType> expected_types{
@@ -775,7 +780,7 @@ TEST_F(BlockCacheTracerTest, MultiGetWithNullReferenceKey) {
         /*is_human_readable_trace_file=*/false,
         /*cache_simulator=*/nullptr);
     // The analyzer ends when it detects an incomplete access record.
-    ASSERT_EQ(Status_Incomplete(""), analyzer.Analyze());
+    ASSERT_TRUE(Status_Incomplete("").eq(analyzer.Analyze()));
 
     ASSERT_OK(env_->DeleteFile(human_readable_trace_file_path));
   }

@@ -19,8 +19,13 @@
 #include "options/configurable_helper.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/customizable.h"
-#include "rocksdb/status.h"
 #include "rocksdb/utilities/object_registry.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 // Creates a new shared customizable instance object based on the

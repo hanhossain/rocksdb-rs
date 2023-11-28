@@ -1643,14 +1643,12 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   const int kStrMaxLen = 1000;
   Random rnd(static_cast<uint32_t>(time(nullptr)));
   Random64 rnd64(time(nullptr));
-  std::vector<Status> status_list = {
-      Status_OK(),
-      Status_InvalidArgument("invalid option"),
-      Status_Aborted("failed to run"),
-      Status_NotSupported("not supported option"),
-  };
-  result.status =
-      status_list.at(rnd.Uniform(static_cast<int>(status_list.size())));
+  std::vector<Status> status_list;
+  status_list.push_back(Status_OK());
+  status_list.push_back(Status_InvalidArgument("invalid option"));
+  status_list.push_back(Status_Aborted("failed to run"));
+  status_list.push_back(Status_NotSupported("not supported option"));
+  result.status.copy_from(status_list.at(rnd.Uniform(static_cast<int>(status_list.size()))));
   while (!rnd.OneIn(10)) {
     UniqueId64x2 id{rnd64.Uniform(UINT64_MAX), rnd64.Uniform(UINT64_MAX)};
     result.output_files.emplace_back(

@@ -79,7 +79,7 @@ BatchResult TransactionLogIteratorImpl::GetBatch() {
   return result;
 }
 
-Status TransactionLogIteratorImpl::status() { return current_status_; }
+Status TransactionLogIteratorImpl::status() { return current_status_.Clone(); }
 
 bool TransactionLogIteratorImpl::Valid() { return started_ && is_valid_; }
 
@@ -115,8 +115,8 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
   Status s =
       OpenLogReader(files_->at(static_cast<size_t>(start_file_index)).get());
   if (!s.ok()) {
-    current_status_ = s;
-    reporter_.Info(current_status_.ToString().c_str());
+    current_status_.copy_from(s);
+    reporter_.Info(current_status_.ToString()->c_str());
     return;
   }
   while (RestrictedRead(&record)) {
@@ -131,7 +131,7 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
         current_status_ = Status_Corruption(
             "Gap in sequence number. Could not "
             "seek to required sequence number");
-        reporter_.Info(current_status_.ToString().c_str());
+        reporter_.Info(current_status_.ToString()->c_str());
         return;
       } else if (strict) {
         reporter_.Info(
@@ -154,12 +154,12 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
     current_status_ = Status_Corruption(
         "Gap in sequence number. Could not "
         "seek to required sequence number");
-    reporter_.Info(current_status_.ToString().c_str());
+    reporter_.Info(current_status_.ToString()->c_str());
   } else if (files_->size() != 1) {
     current_status_ = Status_Corruption(
         "Start sequence was not found, "
         "skipping to the next available");
-    reporter_.Info(current_status_.ToString().c_str());
+    reporter_.Info(current_status_.ToString()->c_str());
     // Let NextImpl find the next available entry. started_ remains false
     // because we don't want to check for gaps while moving to start sequence
     NextImpl(true);
@@ -209,7 +209,7 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
       Status s = OpenLogReader(files_->at(current_file_index_).get());
       if (!s.ok()) {
         is_valid_ = false;
-        current_status_ = s;
+        current_status_.copy_from(s);
         return;
       }
     } else {

@@ -60,7 +60,7 @@ class TwoLevelIndexIterator : public InternalIteratorBase<IndexValue> {
                !second_level_iter_.status().ok()) {
       return second_level_iter_.status();
     } else {
-      return status_;
+      return status_.Clone();
     }
   }
   void SetPinnedItersMgr(
@@ -70,7 +70,7 @@ class TwoLevelIndexIterator : public InternalIteratorBase<IndexValue> {
 
  private:
   void SaveError(const Status& s) {
-    if (status_.ok() && !s.ok()) status_ = s;
+    if (status_.ok() && !s.ok()) status_.copy_from(s);
   }
   void SkipEmptyDataBlocksForward();
   void SkipEmptyDataBlocksBackward();

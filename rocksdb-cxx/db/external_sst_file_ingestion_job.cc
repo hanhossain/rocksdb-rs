@@ -123,7 +123,7 @@ Status ExternalSstFileIngestionJob::Prepare(
         // reopening a file for writing and don't require reopening and
         // syncing the file. Ignore the NotSupported error in that case.
         if (!s.IsNotSupported()) {
-          status = s;
+          status.copy_from(s);
           if (status.ok()) {
             TEST_SYNC_POINT(
                 "ExternalSstFileIngestionJob::BeforeSyncIngestedFile");
@@ -133,7 +133,7 @@ Status ExternalSstFileIngestionJob::Prepare(
             if (!status.ok()) {
               ROCKS_LOG_WARN(db_options_.info_log,
                              "Failed to sync ingested file %s: %s",
-                             path_inside_db.c_str(), status.ToString().c_str());
+                             path_inside_db.c_str(), status.ToString()->c_str());
             }
           }
         }
@@ -143,7 +143,7 @@ Status ExternalSstFileIngestionJob::Prepare(
         f.copy_file = true;
         ROCKS_LOG_INFO(db_options_.info_log,
                        "Triy to link file %s but it's not supported : %s",
-                       path_outside_db.c_str(), status.ToString().c_str());
+                       path_outside_db.c_str(), status.ToString()->c_str());
       }
     } else {
       f.copy_file = true;
@@ -178,7 +178,7 @@ Status ExternalSstFileIngestionJob::Prepare(
         ROCKS_LOG_WARN(db_options_.info_log,
                        "Failed to sync directory %" ROCKSDB_PRIszt
                        " while ingest file: %s",
-                       path_id, status.ToString().c_str());
+                       path_id, status.ToString()->c_str());
         break;
       }
     }
@@ -231,7 +231,7 @@ Status ExternalSstFileIngestionJob::Prepare(
           ROCKS_LOG_WARN(db_options_.info_log,
                          "Sst file checksum generation of file: %s failed: %s",
                          files_to_ingest_[i].internal_file_path.c_str(),
-                         status.ToString().c_str());
+                         status.ToString()->c_str());
           break;
         }
         if (ingestion_options_.write_global_seqno == false) {
@@ -260,7 +260,7 @@ Status ExternalSstFileIngestionJob::Prepare(
               ROCKS_LOG_WARN(
                   db_options_.info_log,
                   "Sst file checksum verification of file: %s failed: %s",
-                  external_files_paths[i].c_str(), status.ToString().c_str());
+                  external_files_paths[i].c_str(), status.ToString()->c_str());
               break;
             }
             if (files_checksums[i] != generated_checksums[i]) {
@@ -271,7 +271,7 @@ Status ExternalSstFileIngestionJob::Prepare(
                   db_options_.info_log,
                   "Sst file checksum verification of file: %s failed: %s",
                   files_to_ingest_[i].internal_file_path.c_str(),
-                  status.ToString().c_str());
+                  status.ToString()->c_str());
               break;
             }
           }
@@ -288,7 +288,7 @@ Status ExternalSstFileIngestionJob::Prepare(
               ROCKS_LOG_WARN(
                   db_options_.info_log,
                   "Sst file checksum verification of file: %s failed: %s",
-                  external_files_paths[i].c_str(), status.ToString().c_str());
+                  external_files_paths[i].c_str(), status.ToString()->c_str());
               break;
             }
             files_to_ingest_[i].file_checksum = files_checksums[i];
@@ -309,7 +309,7 @@ Status ExternalSstFileIngestionJob::Prepare(
         ROCKS_LOG_WARN(
             db_options_.info_log,
             "The ingested sst files checksum information is incomplete: %s",
-            status.ToString().c_str());
+            status.ToString()->c_str());
       }
     }
   }
@@ -326,7 +326,7 @@ Status ExternalSstFileIngestionJob::Prepare(
       if (!s.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
                        "AddFile() clean up for file %s failed : %s",
-                       f.internal_file_path.c_str(), s.ToString().c_str());
+                       f.internal_file_path.c_str(), s.ToString()->c_str());
       }
     }
   }
@@ -637,7 +637,7 @@ void ExternalSstFileIngestionJob::Cleanup(const Status& status) {
       if (!s.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
                        "AddFile() clean up for file %s failed : %s",
-                       f.internal_file_path.c_str(), s.ToString().c_str());
+                       f.internal_file_path.c_str(), s.ToString()->c_str());
       }
     }
     consumed_seqno_count_ = 0;
@@ -651,7 +651,7 @@ void ExternalSstFileIngestionJob::Cleanup(const Status& status) {
             db_options_.info_log,
             "%s was added to DB successfully but failed to remove original "
             "file link : %s",
-            f.external_file_path.c_str(), s.ToString().c_str());
+            f.external_file_path.c_str(), s.ToString()->c_str());
       }
     }
   }
@@ -783,7 +783,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
         ParseInternalKey(iter->key(), &key, allow_data_in_errors);
     if (!pik_status.ok()) {
       return Status_Corruption("Corrupted key in external file. ",
-                                pik_status.getState());
+                                *pik_status.getState());
     }
     if (key.sequence != 0) {
       return Status_Corruption("External file has non zero sequence number");
@@ -794,7 +794,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     pik_status = ParseInternalKey(iter->key(), &key, allow_data_in_errors);
     if (!pik_status.ok()) {
       return Status_Corruption("Corrupted key in external file. ",
-                                pik_status.getState());
+                                *pik_status.getState());
     }
     if (key.sequence != 0) {
       return Status_Corruption("External file has non zero sequence number");
@@ -814,7 +814,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
           ParseInternalKey(range_del_iter->key(), &key, allow_data_in_errors);
       if (!pik_status.ok()) {
         return Status_Corruption("Corrupted key in external file. ",
-                                  pik_status.getState());
+                                  *pik_status.getState());
       }
       RangeTombstone tombstone(key, range_del_iter->value());
 
@@ -1029,7 +1029,7 @@ Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForIngestedFile(
                          "Failed to sync ingested file %s after writing global "
                          "sequence number: %s",
                          file_to_ingest->internal_file_path.c_str(),
-                         status.ToString().c_str());
+                         status.ToString()->c_str());
         }
       }
       if (!status.ok()) {

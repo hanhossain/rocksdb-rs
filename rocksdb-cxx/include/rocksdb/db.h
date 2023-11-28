@@ -641,9 +641,10 @@ class DB {
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys, std::vector<std::string>* /*values*/,
       std::vector<std::string>* /*timestamps*/) {
-    return std::vector<Status>(
-        keys.size(), Status_NotSupported(
+    auto v = std::vector<Status>(keys.size());
+    v.push_back(Status_NotSupported(
                          "MultiGet() returning timestamps not implemented."));
+    return v;
   }
   virtual std::vector<Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
@@ -689,7 +690,11 @@ class DB {
       user_keys.emplace_back(keys[i]);
     }
     status = MultiGet(options, cf, user_keys, &vals);
-    std::copy(status.begin(), status.end(), statuses);
+
+    for (auto& s : status) {
+        statuses->copy_from(s);
+        statuses++;
+    }
     for (auto& value : vals) {
       values->PinSelf(value);
       values++;
@@ -712,7 +717,10 @@ class DB {
       user_keys.emplace_back(keys[i]);
     }
     status = MultiGet(options, cf, user_keys, &vals, &tss);
-    std::copy(status.begin(), status.end(), statuses);
+    for (auto& s : status) {
+        statuses->copy_from(s);
+        statuses++;
+    }
     std::copy(tss.begin(), tss.end(), timestamps);
     for (auto& value : vals) {
       values->PinSelf(value);
@@ -753,7 +761,10 @@ class DB {
       user_keys.emplace_back(keys[i]);
     }
     status = MultiGet(options, cf, user_keys, &vals);
-    std::copy(status.begin(), status.end(), statuses);
+    for (auto& s : status) {
+        statuses->copy_from(s);
+        statuses++;
+    }
     for (auto& value : vals) {
       values->PinSelf(value);
       values++;
@@ -774,7 +785,10 @@ class DB {
       user_keys.emplace_back(keys[i]);
     }
     status = MultiGet(options, cf, user_keys, &vals, &tss);
-    std::copy(status.begin(), status.end(), statuses);
+    for (auto& s : status) {
+        statuses->copy_from(s);
+        statuses++;
+    }
     std::copy(tss.begin(), tss.end(), timestamps);
     for (auto& value : vals) {
       values->PinSelf(value);

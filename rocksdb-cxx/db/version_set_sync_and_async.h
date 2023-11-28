@@ -37,7 +37,7 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
   if (!s.ok()) {
     // TODO: Set status for individual keys appropriately
     for (auto iter = file_range.begin(); iter != file_range.end(); ++iter) {
-      *iter->s = s;
+      iter->s->copy_from(s);
       file_range.MarkKeyDone(iter);
     }
     CO_RETURN s;
@@ -125,7 +125,7 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
             const uint64_t blob_file_num = blob_index.file_number();
             blob_ctxs[blob_file_num].emplace_back(blob_index, &*iter);
           } else {
-            *(iter->s) = tmp_s;
+            iter->s->copy_from(tmp_s);
           }
         } else {
           if (iter->value) {

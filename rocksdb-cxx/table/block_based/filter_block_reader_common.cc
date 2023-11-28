@@ -35,7 +35,7 @@ Status FilterBlockReaderCommon<TBlocklike>::ReadFilterBlock(
                            /* for_compaction */ false, use_cache,
                            /* async_read */ false);
 
-  return s;
+  return s.Clone();
 }
 
 template <typename TBlocklike>

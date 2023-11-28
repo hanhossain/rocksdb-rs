@@ -1587,7 +1587,7 @@ class LoadCustomizableTest : public testing::Test {
         }
       }
       if (!s.ok()) {
-        result = s;
+        result.copy_from(s);
         failed->push_back(name);
       } else {
         EXPECT_NE(object->get(), nullptr);
@@ -1612,10 +1612,10 @@ class LoadCustomizableTest : public testing::Test {
           if (!s.ok()) {
             failed->push_back(name);
             if (result.ok()) {
-              result = s;
+              result.copy_from(s);
             }
             printf("%s: Failed creating plugin[%s]: %s\n", T::Type(),
-                   name.c_str(), s.ToString().c_str());
+                   name.c_str(), s.ToString()->c_str());
           } else if (object->get() == nullptr ||
                      !object->get()->IsInstanceOf(name)) {
             failed->push_back(name);
@@ -1667,7 +1667,7 @@ class LoadCustomizableTest : public testing::Test {
       created++;
       s = TestCreateStatic<T>(name, object, delete_objects);
       if (!s.ok()) {
-        result = s;
+        result.copy_from(s);
         failed->push_back(name);
       }
     }
@@ -1682,10 +1682,10 @@ class LoadCustomizableTest : public testing::Test {
               !((*object)->IsInstanceOf(name))) {
             failed->push_back(name);
             if (result.ok() && !s.ok()) {
-              result = s;
+              result.copy_from(s);
             }
             printf("%s: Failed creating plugin[%s]: %s\n", T::Type(),
-                   name.c_str(), s.ToString().c_str());
+                   name.c_str(), s.ToString()->c_str());
           }
           if (delete_objects) {
             delete *object;
@@ -1987,7 +1987,7 @@ TEST_F(LoadCustomizableTest, LoadMemoryAllocatorTest) {
       } else if (failure == MemkindKmemAllocator::kClassName()) {
         ASSERT_FALSE(MemkindKmemAllocator::IsSupported());
       } else {
-        printf("BYPASSED: %s -- %s\n", failure.c_str(), s.ToString().c_str());
+        printf("BYPASSED: %s -- %s\n", failure.c_str(), s.ToString()->c_str());
       }
     }
   }

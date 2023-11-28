@@ -8,12 +8,13 @@
 #include "options/db_options.h"
 #include "rocksdb/io_status.h"
 #include "rocksdb/listener.h"
-#include "rocksdb/status.h"
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/lib.h"
+#include "rocksdb-rs-cxx/status.h"
 #else
 #include "rocksdb-rs/src/lib.rs.h"
+#include "rocksdb-rs/src/status.rs.h"
 #endif
 
 namespace ROCKSDB_NAMESPACE {
@@ -55,9 +56,9 @@ class ErrorHandler {
 
   const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
 
-  Status GetBGError() const { return bg_error_; }
+  Status GetBGError() const { return bg_error_.Clone(); }
 
-  Status GetRecoveryError() const { return recovery_error_; }
+  Status GetRecoveryError() const { return recovery_error_.Clone(); }
 
   Status ClearBGError();
 

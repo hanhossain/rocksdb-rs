@@ -22,7 +22,7 @@ Status CompactionOutputs::Finish(const Status& intput_status,
                                  const SeqnoToTimeMapping& seqno_time_mapping) {
   FileMetaData* meta = GetMetaData();
   assert(meta != nullptr);
-  Status s = intput_status;
+  Status s = intput_status.Clone();
   if (s.ok()) {
     std::string seqno_time_mapping_str;
     seqno_time_mapping.Encode(seqno_time_mapping_str, meta->fd.smallest_seqno,
@@ -36,7 +36,7 @@ Status CompactionOutputs::Finish(const Status& intput_status,
   }
   Status io_s = builder_->io_status();
   if (s.ok()) {
-    s = io_s;
+    s.copy_from(io_s);
   }
   const uint64_t current_bytes = builder_->FileSize();
   if (s.ok()) {

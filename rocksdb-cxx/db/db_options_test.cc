@@ -1255,7 +1255,7 @@ TEST_F(DBOptionsTest, FIFOTemperatureAgeThresholdValidation) {
   Status s = TryReopen(options);
   ASSERT_TRUE(s.IsNotSupported());
   ASSERT_TRUE(std::strstr(
-      s.getState(),
+      s.getState()->c_str(),
       "Option file_temperature_age_thresholds requires elements to be sorted "
       "in increasing order with respect to `age` field."));
   // Dynamically set option
@@ -1266,7 +1266,7 @@ TEST_F(DBOptionsTest, FIFOTemperatureAgeThresholdValidation) {
                         "age=1000000}:{temperature=kWarm;age=1}}}"}});
   ASSERT_TRUE(s.IsNotSupported());
   ASSERT_TRUE(std::strstr(
-      s.getState(),
+      s.getState()->c_str(),
       "Option file_temperature_age_thresholds requires elements to be sorted "
       "in increasing order with respect to `age` field."));
 
@@ -1275,7 +1275,7 @@ TEST_F(DBOptionsTest, FIFOTemperatureAgeThresholdValidation) {
   options.num_levels = 2;
   s = TryReopen(options);
   ASSERT_TRUE(s.IsNotSupported());
-  ASSERT_TRUE(std::strstr(s.getState(),
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Option file_temperature_age_thresholds is only "
                           "supported when num_levels = 1."));
   // Dynamically set option
@@ -1285,7 +1285,7 @@ TEST_F(DBOptionsTest, FIFOTemperatureAgeThresholdValidation) {
       {{"compaction_options_fifo",
         "{file_temperature_age_thresholds={temperature=kCold;age=1000}}"}});
   ASSERT_TRUE(s.IsNotSupported());
-  ASSERT_TRUE(std::strstr(s.getState(),
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Option file_temperature_age_thresholds is only "
                           "supported when num_levels = 1."));
 }

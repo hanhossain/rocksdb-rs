@@ -234,7 +234,7 @@ class CheckpointTest : public testing::Test {
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
-      result = s.ToString();
+      result = *s.ToString();
     }
     return result;
   }
@@ -249,7 +249,7 @@ class CheckpointTest : public testing::Test {
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
-      result = s.ToString();
+      result = *s.ToString();
     }
     return result;
   }
@@ -443,16 +443,14 @@ TEST_F(CheckpointTest, ExportColumnFamilyNegativeTest) {
 
   // Export onto existing directory
   ASSERT_OK(env_->CreateDirIfMissing(export_path_));
-  ASSERT_EQ(checkpoint->ExportColumnFamily(db_->DefaultColumnFamily(),
-                                           export_path_, &metadata_),
-            Status_InvalidArgument("Specified export_dir exists"));
+  ASSERT_TRUE(checkpoint->ExportColumnFamily(db_->DefaultColumnFamily(), export_path_, &metadata_)
+    .eq(Status_InvalidArgument("Specified export_dir exists")));
   ASSERT_OK(DestroyDir(env_, export_path_));
 
   // Export with invalid directory specification
   export_path_ = "";
-  ASSERT_EQ(checkpoint->ExportColumnFamily(db_->DefaultColumnFamily(),
-                                           export_path_, &metadata_),
-            Status_InvalidArgument("Specified export_dir invalid"));
+  ASSERT_TRUE(checkpoint->ExportColumnFamily(db_->DefaultColumnFamily(), export_path_, &metadata_)
+            .eq(Status_InvalidArgument("Specified export_dir invalid")));
   delete checkpoint;
 }
 

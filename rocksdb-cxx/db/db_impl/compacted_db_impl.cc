@@ -56,12 +56,12 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
     const Status s = FailIfTsMismatchCf(
         DefaultColumnFamily(), *(options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   } else {
     const Status s = FailIfCfHasTs(DefaultColumnFamily());
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -116,12 +116,20 @@ std::vector<Status> CompactedDBImpl::MultiGet(
     Status s = FailIfTsMismatchCf(DefaultColumnFamily(), *(options.timestamp),
                                   /*ts_for_read=*/true);
     if (!s.ok()) {
-      return std::vector<Status>(num_keys, s);
+        std::vector<Status> vec;
+        for (size_t i = 0; i < num_keys; i++) {
+            vec.push_back(s.Clone());
+        }
+        return vec;
     }
   } else {
     Status s = FailIfCfHasTs(DefaultColumnFamily());
     if (!s.ok()) {
-      return std::vector<Status>(num_keys, s);
+        std::vector<Status> vec;
+        for (size_t i = 0; i < num_keys; i++) {
+            vec.push_back(s.Clone());
+        }
+        return vec;
     }
   }
 
@@ -149,7 +157,10 @@ std::vector<Status> CompactedDBImpl::MultiGet(
       reader_list.push_back(f.fd.table_reader);
     }
   }
-  std::vector<Status> statuses(num_keys, Status_NotFound());
+  std::vector<Status> statuses;
+  for (size_t i = 0; i < num_keys; i++) {
+    statuses.push_back(Status_NotFound());
+  }
   values->resize(num_keys);
   if (timestamps) {
     timestamps->resize(num_keys);
@@ -169,7 +180,7 @@ std::vector<Status> CompactedDBImpl::MultiGet(
       Status s = r->Get(options, lkey.internal_key(), &get_context, nullptr);
       assert(static_cast<size_t>(idx) < statuses.size());
       if (!s.ok() && !s.IsNotFound()) {
-        statuses[idx] = s;
+        statuses[idx].copy_from(s);
       } else {
         value.assign(pinnable_val.data(), pinnable_val.size());
         if (get_context.State() == GetContext::kFound) {

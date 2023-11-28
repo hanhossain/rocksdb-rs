@@ -25,7 +25,7 @@ struct ImmutableOptions;
 struct MutableCFOptions;
 struct FileOptions;
 class BlobFileAddition;
-class Status;
+struct Status;
 class Slice;
 class BlobLogWriter;
 class IOTracer;

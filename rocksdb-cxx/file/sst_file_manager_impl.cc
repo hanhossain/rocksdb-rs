@@ -317,7 +317,7 @@ void SstFileManagerImpl::ClearError() {
         Status err = cur_instance_->GetBGError();
         if (s.ok() && err.subcode() == SubCode::kNoSpace &&
             err.severity() < Severity::kFatalError) {
-          s = err;
+          s.copy_from(err);
         }
         cur_instance_ = nullptr;
       }
@@ -357,10 +357,10 @@ void SstFileManagerImpl::StartErrorRecovery(ErrorHandler* handler,
       // for clearing this condition is set to current compaction reserved
       // size, so we stop checking disk space available in
       // EnoughRoomForCompaction once this much free space is available
-      bg_err_ = bg_error;
+      bg_err_.copy_from(bg_error);
     }
   } else if (bg_error.severity() == Severity::kHardError) {
-    bg_err_ = bg_error;
+    bg_err_.copy_from(bg_error);
   } else {
     assert(false);
   }
@@ -485,14 +485,14 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
         Status file_delete =
             res->ScheduleFileDeletion(path_in_trash, trash_dir);
         if (s.ok() && !file_delete.ok()) {
-          s = file_delete;
+          s.copy_from(file_delete);
         }
       }
     }
   }
 
   if (status) {
-    *status = s;
+    status->copy_from(s);
   }
 
   return res;

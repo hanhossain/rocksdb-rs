@@ -77,7 +77,7 @@ class DBBlobIndexTest : public DBTestBase {
       return "NOT_SUPPORTED";
     }
     if (!s.ok()) {
-      return s.ToString();
+      return *s.ToString();
     }
     return value.ToString();
   }
@@ -499,7 +499,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
 
   auto check_iterator = [&](Iterator* iterator, Status expected_status,
                             const Slice& expected_value) {
-    ASSERT_EQ(expected_status, iterator->status());
+    ASSERT_TRUE(expected_status.eq(iterator->status()));
     if (expected_status.ok()) {
       ASSERT_TRUE(iterator->Valid());
       ASSERT_EQ(expected_value, iterator->value());
@@ -517,7 +517,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
       ASSERT_OK(iterator->status());
       ASSERT_OK(iterator->Refresh());
       iterator->Seek(get_key(index));
-      check_iterator(iterator, expected_status, expected_value);
+      check_iterator(iterator, expected_status.Clone(), expected_value);
     }
     // Next
     {
@@ -528,7 +528,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
       ASSERT_TRUE(iterator->Valid());
       ASSERT_OK(iterator->status());
       iterator->Next();
-      check_iterator(iterator, expected_status, expected_value);
+      check_iterator(iterator, expected_status.Clone(), expected_value);
     }
     // SeekForPrev
     {
@@ -537,7 +537,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
       ASSERT_OK(iterator->status());
       ASSERT_OK(iterator->Refresh());
       iterator->SeekForPrev(get_key(index));
-      check_iterator(iterator, expected_status, expected_value);
+      check_iterator(iterator, expected_status.Clone(), expected_value);
     }
     // Prev
     {
@@ -547,7 +547,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
       ASSERT_TRUE(iterator->Valid());
       ASSERT_OK(iterator->status());
       iterator->Prev();
-      check_iterator(iterator, expected_status, expected_value);
+      check_iterator(iterator, expected_status.Clone(), expected_value);
     }
   };
 
@@ -575,12 +575,12 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
   std::string expected_value = get_value(1, 0) + "," + get_value(1, 1) + "," +
                                get_value(1, 2) + "," + get_value(1, 3);
   Status expected_status;
-  verify(1, expected_status, expected_value);
+  verify(1, expected_status.Clone(), expected_value);
 
   // Test DBIter::FindValueForCurrentKeyUsingSeek flow.
   ASSERT_OK(dbfull()->SetOptions(cfh(),
                                  {{"max_sequential_skip_in_iterations", "0"}}));
-  verify(1, expected_status, expected_value);
+  verify(1, expected_status.Clone(), expected_value);
 }
 
 }  // namespace ROCKSDB_NAMESPACE

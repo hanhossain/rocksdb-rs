@@ -188,7 +188,7 @@ bool BlobIndexCompactionFilterBase::OpenNewBlobFileIfNeeded() const {
     ROCKS_LOG_ERROR(
         blob_db_impl->db_options_.info_log,
         "Error opening new blob file during compaction/GC, status: %s",
-        s.ToString().c_str());
+        s.ToString()->c_str());
     blob_file_.reset();
     writer_.reset();
     return false;
@@ -216,7 +216,7 @@ bool BlobIndexCompactionFilterBase::ReadBlobFromOldFile(
         "Error reading blob during compaction/GC, key: %s (%s), status: %s",
         key.ToString(/* output_hex */ true).c_str(),
         blob_index.DebugString(/* output_hex */ true).c_str(),
-        s.ToString().c_str());
+        s.ToString()->c_str());
 
     return false;
   }
@@ -230,7 +230,7 @@ bool BlobIndexCompactionFilterBase::ReadBlobFromOldFile(
           " blob_offset: %" PRIu64 " blob_size: %" PRIu64
           " key: %s status: '%s'",
           blob_index.file_number(), blob_index.offset(), blob_index.size(),
-          key.ToString(/* output_hex */ true).c_str(), s.ToString().c_str());
+          key.ToString(/* output_hex */ true).c_str(), s.ToString()->c_str());
 
       return false;
     }
@@ -263,7 +263,7 @@ bool BlobIndexCompactionFilterBase::WriteBlobToNewFile(
                     "key: %s, status: %s",
                     blob_file_->PathName().c_str(),
                     key.ToString(/* output_hex */ true).c_str(),
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
     return false;
   }
 
@@ -315,7 +315,7 @@ bool BlobIndexCompactionFilterBase::CloseAndRegisterNewBlobFile() const {
     ROCKS_LOG_ERROR(
         blob_db_impl->db_options_.info_log,
         "Error closing new blob file %s during compaction/GC, status: %s",
-        blob_file_->PathName().c_str(), s.ToString().c_str());
+        blob_file_->PathName().c_str(), s.ToString()->c_str());
   }
 
   blob_file_.reset();

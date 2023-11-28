@@ -179,7 +179,7 @@ Slice BaseDeltaIterator::value() const {
 
 Status BaseDeltaIterator::status() const {
   if (!status_.ok()) {
-    return status_;
+    return status_.Clone();
   }
   if (!base_iterator_->status().ok()) {
     return base_iterator_->status();
@@ -187,7 +187,7 @@ Status BaseDeltaIterator::status() const {
   return delta_iterator_->status();
 }
 
-void BaseDeltaIterator::Invalidate(Status s) { status_ = s; }
+void BaseDeltaIterator::Invalidate(Status s) { status_.copy_from(s); }
 
 void BaseDeltaIterator::AssertInvariants() {
 #ifndef NDEBUG

@@ -761,6 +761,6 @@ Slice PlainTableIterator::value() const {
   return value_;
 }
 
-Status PlainTableIterator::status() const { return status_; }
+Status PlainTableIterator::status() const { return status_.Clone(); }
 
 }  // namespace ROCKSDB_NAMESPACE

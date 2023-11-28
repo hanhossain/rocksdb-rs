@@ -8,7 +8,12 @@
 #include <string>
 
 #include "rocksdb/options.h"
-#include "rocksdb/status.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 // Try to migrate DB created with old_opts to be use new_opts.

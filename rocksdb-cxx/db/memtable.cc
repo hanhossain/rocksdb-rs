@@ -488,7 +488,7 @@ class MemTableIterator : public InternalIterator {
     return GetLengthPrefixedSlice(key_slice.data() + key_slice.size());
   }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   bool IsKeyPinned() const override {
     // memtable data is always pinned
@@ -517,7 +517,7 @@ class MemTableIterator : public InternalIterator {
       status_ = MemTable::VerifyEntryChecksum(iter_->key(),
                                               protection_bytes_per_key_);
       if (!status_.ok()) {
-        ROCKS_LOG_ERROR(logger_, "In MemtableIterator: %s", status_.getState());
+        ROCKS_LOG_ERROR(logger_, "In MemtableIterator: %s", status_.getState()->c_str());
       }
     }
   }
@@ -891,7 +891,7 @@ static bool SaveValue(void* arg, const char* entry) {
     *(s->status) = MemTable::VerifyEntryChecksum(
         entry, s->protection_bytes_per_key, s->allow_data_in_errors);
     if (!s->status->ok()) {
-      ROCKS_LOG_ERROR(s->logger, "In SaveValue: %s", s->status->getState());
+      ROCKS_LOG_ERROR(s->logger, "In SaveValue: %s", s->status->getState()->c_str());
       // Memtable entry corrupted
       return false;
     }

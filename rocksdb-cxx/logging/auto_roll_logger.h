@@ -39,7 +39,7 @@ class AutoRollLogger : public Logger {
   virtual void LogHeader(const char* format, va_list ap) override;
 
   // check if the logger has encountered any problem.
-  Status GetStatus() { return status_; }
+  Status GetStatus() { return status_.Clone(); }
 
   size_t GetLogFileSize() const override {
     if (!logger_) {

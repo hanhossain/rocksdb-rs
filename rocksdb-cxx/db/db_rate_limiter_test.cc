@@ -415,7 +415,7 @@ TEST_P(DBRateLimiterOnWriteWALTest, AutoWalFlush) {
     EXPECT_TRUE(s.ok());
   } else {
     EXPECT_TRUE(s.IsInvalidArgument());
-    EXPECT_TRUE(s.ToString().find("WriteOptions::rate_limiter_priority") !=
+    EXPECT_TRUE(s.ToString()->find("WriteOptions::rate_limiter_priority") !=
                 std::string::npos);
   }
 

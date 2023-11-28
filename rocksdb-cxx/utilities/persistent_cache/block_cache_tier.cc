@@ -38,7 +38,7 @@ Status BlockCacheTier::Open() {
   status = opt_.env->CreateDirIfMissing(opt_.path);
   if (!status.ok()) {
     Error(opt_.log, "Error creating directory %s. %s", opt_.path.c_str(),
-          status.ToString().c_str());
+          status.ToString()->c_str());
     return status;
   }
 
@@ -50,7 +50,7 @@ Status BlockCacheTier::Open() {
     assert(status.ok());
     if (!status.ok()) {
       Error(opt_.log, "Error creating directory %s. %s", opt_.path.c_str(),
-            status.ToString().c_str());
+            status.ToString()->c_str());
       return status;
     }
   }
@@ -60,7 +60,7 @@ Status BlockCacheTier::Open() {
   status = NewCacheFile();
   if (!status.ok()) {
     Error(opt_.log, "Error creating new file %s. %s", opt_.path.c_str(),
-          status.ToString().c_str());
+          status.ToString()->c_str());
     return status;
   }
 
@@ -92,7 +92,7 @@ Status BlockCacheTier::CleanupCacheFolder(const std::string& folder) {
   Status status = opt_.env->GetChildren(folder, &files);
   if (!status.ok()) {
     Error(opt_.log, "Error getting files for %s. %s", folder.c_str(),
-          status.ToString().c_str());
+          status.ToString()->c_str());
     return status;
   }
 
@@ -104,7 +104,7 @@ Status BlockCacheTier::CleanupCacheFolder(const std::string& folder) {
       status = opt_.env->DeleteFile(folder + "/" + file);
       if (!status.ok()) {
         Error(opt_.log, "Error deleting file %s. %s", file.c_str(),
-              status.ToString().c_str());
+              status.ToString()->c_str());
         return status;
       }
     } else {

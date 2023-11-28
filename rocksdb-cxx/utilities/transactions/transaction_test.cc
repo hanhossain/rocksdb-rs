@@ -407,7 +407,7 @@ TEST_P(TransactionTest, WaitingTxn) {
 
   s = txn2->GetForUpdate(read_options, "foo", &value);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
   ASSERT_EQ(get_perf_context()->key_lock_wait_count, 1);
   ASSERT_GE(get_perf_context()->key_lock_wait_time, 0);
 
@@ -474,12 +474,12 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn3->GetForUpdate(read_options, "foo", nullptr);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn1->UndoGetForUpdate("foo");
   s = txn3->GetForUpdate(read_options, "foo", nullptr);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn2->UndoGetForUpdate("foo");
   s = txn3->GetForUpdate(read_options, "foo", nullptr);
@@ -498,7 +498,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn1->UndoGetForUpdate("foo");
   s = txn2->GetForUpdate(read_options, "foo", nullptr);
@@ -513,7 +513,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   // Should still fail after "downgrading".
   s = txn1->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
@@ -521,7 +521,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   ASSERT_OK(txn1->Rollback());
   ASSERT_OK(txn2->Rollback());
@@ -533,7 +533,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn1->UndoGetForUpdate("foo");
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
@@ -939,7 +939,7 @@ TEST_P(TransactionTest, CommitTimeBatchFailTest) {
 
   // fails due to non-empty commit-time batch
   s = txn1->Commit();
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   delete txn1;
 }
@@ -1056,7 +1056,7 @@ TEST_P(TransactionTest, SimpleTwoPhaseTransactionTest) {
 
     // we already committed
     s = txn->Commit();
-    ASSERT_EQ(s, Status_InvalidArgument());
+    ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
     // no longer is prepared results
     db->GetAllPreparedTransactions(&prepared_trans);
@@ -1129,15 +1129,15 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant prepare txn without name
   s = txn1->Prepare();
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   // name too short
   s = txn1->SetName("");
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   // name too long
   s = txn1->SetName(std::string(513, 'x'));
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   // valid set name
   s = txn1->SetName("name1");
@@ -1145,11 +1145,11 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant have duplicate name
   s = txn2->SetName("name1");
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   // shouldn't be able to prepare
   s = txn2->Prepare();
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   // valid name set
   s = txn2->SetName("name2");
@@ -1157,7 +1157,7 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant reset name
   s = txn2->SetName("name3");
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   ASSERT_EQ(txn1->GetName(), "name1");
   ASSERT_EQ(txn2->GetName(), "name2");
@@ -1167,7 +1167,7 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // can't rename after prepare
   s = txn1->SetName("name4");
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   ASSERT_OK(txn1->Rollback());
   ASSERT_OK(txn2->Rollback());
@@ -1270,7 +1270,7 @@ TEST_P(TransactionStressTest, TwoPhaseExpirationTest) {
   ASSERT_OK(s);
 
   s = txn2->Prepare();
-  ASSERT_EQ(s, Status_Expired());
+  ASSERT_TRUE(s.eq(Status_Expired()));
 
   delete txn1;
   delete txn2;
@@ -1336,11 +1336,11 @@ TEST_P(TransactionTest, TwoPhaseRollbackTest) {
 
   // make commit
   s = txn->Commit();
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   // try rollback again
   s = txn->Rollback();
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   delete txn;
 }
@@ -1435,7 +1435,7 @@ TEST_P(TransactionTest, PersistentTwoPhaseTransactionTest) {
 
   // we already committed
   s = txn->Commit();
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
 
   // no longer is prepared results
   prepared_trans.clear();
@@ -1616,7 +1616,7 @@ TEST_P(TransactionStressTest, TwoPhaseLongPrepareTest) {
 
   // verify data txn data
   s = db->Get(read_options, "foo", &value);
-  ASSERT_EQ(s, Status_OK());
+  ASSERT_TRUE(s.eq(Status_OK()));
   ASSERT_EQ(value, "bar");
 
   // verify non txn data
@@ -1624,7 +1624,7 @@ TEST_P(TransactionStressTest, TwoPhaseLongPrepareTest) {
     std::string key(i, 'k');
     std::string val(1000, 'v');
     s = db->Get(read_options, key, &value);
-    ASSERT_EQ(s, Status_OK());
+    ASSERT_TRUE(s.eq(Status_OK()));
     ASSERT_EQ(value, val);
   }
 
@@ -1673,7 +1673,7 @@ TEST_P(TransactionTest, TwoPhaseSequenceTest) {
 
   // value is now available
   s = db->Get(read_options, "foo4", &value);
-  ASSERT_EQ(s, Status_OK());
+  ASSERT_TRUE(s.eq(Status_OK()));
   ASSERT_EQ(value, "bar4");
 }
 #endif  // !defined(ROCKSDB_VALGRIND_RUN) || defined(ROCKSDB_FULL_VALGRIND_RUN)
@@ -1716,7 +1716,7 @@ TEST_P(TransactionTest, TwoPhaseDoubleRecoveryTest) {
   ASSERT_OK(s);
 
   s = db->Get(read_options, "foo", &value);
-  ASSERT_EQ(s, Status_OK());
+  ASSERT_TRUE(s.eq(Status_OK()));
   ASSERT_EQ(value, "bar");
 
   delete txn;
@@ -1743,11 +1743,11 @@ TEST_P(TransactionTest, TwoPhaseDoubleRecoveryTest) {
 
   // value is now available
   s = db->Get(read_options, "foo", &value);
-  ASSERT_EQ(s, Status_OK());
+  ASSERT_TRUE(s.eq(Status_OK()));
   ASSERT_EQ(value, "bar");
 
   s = db->Get(read_options, "foo2", &value);
-  ASSERT_EQ(s, Status_OK());
+  ASSERT_TRUE(s.eq(Status_OK()));
   ASSERT_EQ(value, "bar2");
 }
 
@@ -4785,7 +4785,7 @@ TEST_P(TransactionTest, TimeoutTest) {
   // txn2 has a smaller lock timeout than txn1's expiration, so it will time out
   s = txn2->Delete("asdf");
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   s = txn1->Commit();
   ASSERT_OK(s);

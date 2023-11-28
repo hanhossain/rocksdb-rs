@@ -148,7 +148,7 @@ class WriteStress {
     DB* db;
     Status s = DB::Open(options, FLAGS_db, &db);
     if (!s.ok()) {
-      fprintf(stderr, "Can't open database: %s\n", s.ToString().c_str());
+      fprintf(stderr, "Can't open database: %s\n", s.ToString()->c_str());
       std::abort();
     }
     db_.reset(db);
@@ -179,7 +179,7 @@ class WriteStress {
       woptions.sync = dist(rng) < FLAGS_sync_probability;
       auto s = db_->Put(woptions, key, value);
       if (!s.ok()) {
-        fprintf(stderr, "Write to DB failed: %s\n", s.ToString().c_str());
+        fprintf(stderr, "Write to DB failed: %s\n", s.ToString()->c_str());
         std::abort();
       }
     }
@@ -194,7 +194,7 @@ class WriteStress {
       }
       if (!iterator->status().ok()) {
         fprintf(stderr, "Iterator statuts not OK: %s\n",
-                iterator->status().ToString().c_str());
+                iterator->status().ToString()->c_str());
         std::abort();
       }
     }

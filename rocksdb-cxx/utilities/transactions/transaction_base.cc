@@ -13,10 +13,15 @@
 #include "logging/logging.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
-#include "rocksdb/status.h"
 #include "util/cast_util.h"
 #include "util/string_util.h"
 #include "utilities/transactions/lock/lock_tracker.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -33,7 +38,7 @@ Status Transaction::CommitAndTryCreateSnapshot(
     } else {
       const Status s = SetCommitTimestamp(ts);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   } else if (ts != kMaxTxnTimestamp) {
@@ -319,7 +324,11 @@ std::vector<Status> TransactionBaseImpl::MultiGet(
     Status s = Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
-    return std::vector<Status>(num_keys, s);
+      std::vector<Status> vec;
+      for (size_t i = 0; i < num_keys; i++) {
+          vec.push_back(s.Clone());
+      }
+      return vec;
   }
 
   values->resize(num_keys);
@@ -353,7 +362,11 @@ std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
     Status s = Status_InvalidArgument(
         "Cannot call MultiGetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
-    return std::vector<Status>(num_keys, s);
+      std::vector<Status> vec;
+      for (size_t i = 0; i < num_keys; i++) {
+          vec.push_back(s.Clone());
+      }
+      return vec;
   }
   values->resize(num_keys);
 
@@ -363,7 +376,11 @@ std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
                        true /* exclusive */);
     if (!s.ok()) {
       // Fail entire multiget if we cannot lock all keys
-      return std::vector<Status>(num_keys, s);
+        std::vector<Status> vec;
+        for (size_t j = 0; j < num_keys; j++) {
+            vec.push_back(s.Clone());
+        }
+        return vec;
     }
   }
 

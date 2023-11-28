@@ -121,7 +121,7 @@ Status TableCache::GetTableReader(
     }
     if (temp_s.ok()) {
       RecordTick(ioptions_.stats, NO_FILE_OPENS);
-      s = temp_s;
+      s.copy_from(temp_s);
     }
   }
 

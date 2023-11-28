@@ -130,7 +130,7 @@ Status MergeHelper::TimedFullMergeWithEntity(
     const Status s =
         WideColumnSerialization::Deserialize(base_entity, base_columns);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -150,7 +150,7 @@ Status MergeHelper::TimedFullMergeWithEntity(
                                     clock, nullptr /* result_operand */,
                                     update_num_ops_stats, op_failure_scope);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -159,13 +159,13 @@ Status MergeHelper::TimedFullMergeWithEntity(
 
     const Status s = WideColumnSerialization::Serialize(base_columns, *result);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   } else {
     const Status s =
         WideColumnSerialization::Serialize(merge_result, base_columns, *result);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 

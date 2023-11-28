@@ -117,9 +117,9 @@ Status DBIter::GetProperty(std::string prop_name, std::string* prop) {
 bool DBIter::ParseKey(ParsedInternalKey* ikey) {
   Status s = ParseInternalKey(iter_.key(), ikey, false /* log_err_key */);
   if (!s.ok()) {
-    status_ = Status_Corruption("In DBIter: ", s.getState());
+    status_ = Status_Corruption("In DBIter: ", *s.getState());
     valid_ = false;
-    ROCKS_LOG_ERROR(logger_, "In DBIter: %s", status_.getState());
+    ROCKS_LOG_ERROR(logger_, "In DBIter: %s", status_.getState()->c_str());
     return false;
   } else {
     return true;
@@ -208,7 +208,7 @@ bool DBIter::SetBlobValueIfNeeded(const Slice& user_key,
                                      prefetch_buffer, &blob_value_, bytes_read);
 
   if (!s.ok()) {
-    status_ = s;
+    status_.copy_from(s);
     valid_ = false;
     return false;
   }
@@ -224,7 +224,7 @@ bool DBIter::SetValueAndColumnsFromEntity(Slice slice) {
   const Status s = WideColumnSerialization::Deserialize(slice, wide_columns_);
 
   if (!s.ok()) {
-    status_ = s;
+    status_.copy_from(s);
     valid_ = false;
     return false;
   }
@@ -1259,7 +1259,7 @@ bool DBIter::Merge(const Slice* val, const Slice& user_key) {
       /* op_failure_scope */ nullptr);
   if (!s.ok()) {
     valid_ = false;
-    status_ = s;
+    status_.copy_from(s);
     return false;
   }
 
@@ -1280,7 +1280,7 @@ bool DBIter::MergeEntity(const Slice& entity, const Slice& user_key) {
       /* op_failure_scope */ nullptr);
   if (!s.ok()) {
     valid_ = false;
-    status_ = s;
+    status_.copy_from(s);
     return false;
   }
 

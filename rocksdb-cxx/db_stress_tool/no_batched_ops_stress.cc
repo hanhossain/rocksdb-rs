@@ -372,7 +372,7 @@ class NonBatchedOpsStressTest : public StressTest {
       s = checksum_column_family(it.get(), &crc);
       if (!s.ok()) {
         fprintf(stderr, "Computing checksum of default cf: %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         assert(false);
       }
     }
@@ -440,7 +440,7 @@ class NonBatchedOpsStressTest : public StressTest {
         delete column_families_[cf];
         if (!s.ok()) {
           fprintf(stderr, "dropping column family error: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           std::terminate();
         }
         s = db_->CreateColumnFamily(ColumnFamilyOptions(options_), new_name,
@@ -449,7 +449,7 @@ class NonBatchedOpsStressTest : public StressTest {
         thread->shared->ClearColumnFamily(cf);
         if (!s.ok()) {
           fprintf(stderr, "creating column family error: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           std::terminate();
         }
         thread->shared->UnlockColumnFamily(cf);
@@ -610,7 +610,7 @@ class NonBatchedOpsStressTest : public StressTest {
       }
       Status s = NewTxn(wo, &txn);
       if (!s.ok()) {
-        fprintf(stderr, "NewTxn: %s\n", s.ToString().c_str());
+        fprintf(stderr, "NewTxn: %s\n", s.ToString()->c_str());
         std::terminate();
       }
     }
@@ -660,7 +660,7 @@ class NonBatchedOpsStressTest : public StressTest {
               assert(false);
           }
           if (!s.ok()) {
-            fprintf(stderr, "Transaction put: %s\n", s.ToString().c_str());
+            fprintf(stderr, "Transaction put: %s\n", s.ToString()->c_str());
             std::terminate();
           }
         } else {
@@ -782,7 +782,7 @@ class NonBatchedOpsStressTest : public StressTest {
           tmp_s = db_->Get(readoptionscopy, cfh, key, &value);
         }
         if (!tmp_s.ok() && !tmp_s.IsNotFound()) {
-          fprintf(stderr, "Get error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "Get error: %s\n", s.ToString()->c_str());
           is_consistent = false;
         } else if (!s.ok() && tmp_s.ok()) {
           fprintf(stderr, "MultiGet returned different results with key %s\n",
@@ -834,7 +834,7 @@ class NonBatchedOpsStressTest : public StressTest {
       } else {
         if (error_count == 0) {
           // errors case
-          fprintf(stderr, "MultiGet error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "MultiGet error: %s\n", s.ToString()->c_str());
           thread->stats.AddErrors(1);
         } else {
           thread->stats.AddVerifiedErrors(1);
@@ -1062,7 +1062,7 @@ class NonBatchedOpsStressTest : public StressTest {
             db_->GetEntity(read_opts_copy, cfh, key_slices[i], &cmp_result);
 
         if (!cmp_s.ok() && !cmp_s.IsNotFound()) {
-          fprintf(stderr, "GetEntity error: %s\n", cmp_s.ToString().c_str());
+          fprintf(stderr, "GetEntity error: %s\n", cmp_s.ToString()->c_str());
           is_consistent = false;
         } else if (cmp_s.IsNotFound()) {
           if (s.ok()) {
@@ -1111,7 +1111,7 @@ class NonBatchedOpsStressTest : public StressTest {
         thread->stats.AddGets(1, 0);
       } else {
         if (error_count == 0) {
-          fprintf(stderr, "MultiGetEntity error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "MultiGetEntity error: %s\n", s.ToString()->c_str());
           thread->stats.AddErrors(1);
         } else {
           thread->stats.AddVerifiedErrors(1);
@@ -1194,7 +1194,7 @@ class NonBatchedOpsStressTest : public StressTest {
       error_count = fault_fs_guard->GetAndResetErrorCount();
     }
     if (!s.ok() && (!fault_fs_guard || (fault_fs_guard && !error_count))) {
-      fprintf(stderr, "TestPrefixScan error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "TestPrefixScan error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
 
       return s;
@@ -1317,11 +1317,11 @@ class NonBatchedOpsStressTest : public StressTest {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
                    s.severity() < Severity::kFatalError) {
-          fprintf(stderr, "put or merge error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "put or merge error: %s\n", s.ToString()->c_str());
           std::terminate();
         }
       } else {
-        fprintf(stderr, "put or merge error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "put or merge error: %s\n", s.ToString()->c_str());
         std::terminate();
       }
     }
@@ -1382,11 +1382,11 @@ class NonBatchedOpsStressTest : public StressTest {
             is_db_stopped_ = true;
           } else if (!is_db_stopped_ ||
                      s.severity() < Severity::kFatalError) {
-            fprintf(stderr, "delete error: %s\n", s.ToString().c_str());
+            fprintf(stderr, "delete error: %s\n", s.ToString()->c_str());
             std::terminate();
           }
         } else {
-          fprintf(stderr, "delete error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "delete error: %s\n", s.ToString()->c_str());
           std::terminate();
         }
       }
@@ -1418,11 +1418,11 @@ class NonBatchedOpsStressTest : public StressTest {
             is_db_stopped_ = true;
           } else if (!is_db_stopped_ ||
                      s.severity() < Severity::kFatalError) {
-            fprintf(stderr, "single delete error: %s\n", s.ToString().c_str());
+            fprintf(stderr, "single delete error: %s\n", s.ToString()->c_str());
             std::terminate();
           }
         } else {
-          fprintf(stderr, "single delete error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "single delete error: %s\n", s.ToString()->c_str());
           std::terminate();
         }
       }
@@ -1479,11 +1479,11 @@ class NonBatchedOpsStressTest : public StressTest {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
                    s.severity() < Severity::kFatalError) {
-          fprintf(stderr, "delete range error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "delete range error: %s\n", s.ToString()->c_str());
           std::terminate();
         }
       } else {
-        fprintf(stderr, "delete range error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "delete range error: %s\n", s.ToString()->c_str());
         std::terminate();
       }
     }
@@ -1565,7 +1565,7 @@ class NonBatchedOpsStressTest : public StressTest {
                                   {sst_filename}, IngestExternalFileOptions());
     }
     if (!s.ok()) {
-      fprintf(stderr, "file ingestion error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "file ingestion error: %s\n", s.ToString()->c_str());
       std::terminate();
     }
 
@@ -1725,7 +1725,7 @@ class NonBatchedOpsStressTest : public StressTest {
         if (!iter->status().ok()) {
           thread->shared->SetVerificationFailure();
           fprintf(stderr, "TestIterate against expected state error: %s\n",
-                  iter->status().ToString().c_str());
+                  iter->status().ToString()->c_str());
           fprintf(stderr, "Column family: %s, op_logs: %s\n",
                   cfh->GetName().c_str(), op_logs.c_str());
           thread->stats.AddErrors(1);
@@ -1769,7 +1769,7 @@ class NonBatchedOpsStressTest : public StressTest {
         if (!iter->status().ok()) {
           thread->shared->SetVerificationFailure();
           fprintf(stderr, "TestIterate against expected state error: %s\n",
-                  iter->status().ToString().c_str());
+                  iter->status().ToString()->c_str());
           fprintf(stderr, "Column family: %s, op_logs: %s\n",
                   cfh->GetName().c_str(), op_logs.c_str());
           thread->stats.AddErrors(1);
@@ -1914,7 +1914,7 @@ class NonBatchedOpsStressTest : public StressTest {
     if (!iter->status().ok()) {
       thread->shared->SetVerificationFailure();
       fprintf(stderr, "TestIterate against expected state error: %s\n",
-              iter->status().ToString().c_str());
+              iter->status().ToString()->c_str());
       fprintf(stderr, "Column family: %s, op_logs: %s\n",
               cfh->GetName().c_str(), op_logs.c_str());
       thread->stats.AddErrors(1);
@@ -1986,7 +1986,7 @@ class NonBatchedOpsStressTest : public StressTest {
             GenerateValue(expected_value.GetValueBase(), expected_value_data,
                           sizeof(expected_value_data));
         VerificationAbort(
-            shared, msg_prefix + ": Value not found: " + s.ToString(), cf, key,
+            shared, msg_prefix + ": Value not found: " + *s.ToString(), cf, key,
             "", Slice(expected_value_data, expected_value_data_size));
         return false;
       }

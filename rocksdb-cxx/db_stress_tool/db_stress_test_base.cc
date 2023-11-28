@@ -82,7 +82,7 @@ StressTest::StressTest()
                                                   blob_db::BlobDBOptions());
 
     if (!s.ok()) {
-      fprintf(stderr, "Cannot destroy original db: %s\n", s.ToString().c_str());
+      fprintf(stderr, "Cannot destroy original db: %s\n", s.ToString()->c_str());
       exit(1);
     }
   }
@@ -116,7 +116,7 @@ std::shared_ptr<Cache> StressTest::NewCache(size_t capacity,
     if (secondary_cache == nullptr) {
       fprintf(stderr,
               "No secondary cache registered matching string: %s status=%s\n",
-              FLAGS_secondary_cache_uri.c_str(), s.ToString().c_str());
+              FLAGS_secondary_cache_uri.c_str(), s.ToString()->c_str());
       exit(1);
     }
     if (FLAGS_secondary_cache_fault_one_in > 0) {
@@ -297,7 +297,7 @@ void StressTest::FinishInitDb(SharedState* shared) {
     Status s = shared->Restore(db_);
     if (!s.ok()) {
       fprintf(stderr, "Error restoring historical expected values: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     }
   }
@@ -335,7 +335,7 @@ void StressTest::TrackExpectedState(SharedState* shared) {
     Status s = shared->SaveAtAndAfter(db_);
     if (!s.ok()) {
       fprintf(stderr, "Error enabling history tracing: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     }
   }
@@ -363,12 +363,12 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
   if (!s.ok() && !s.IsNotFound()) {
     return s;
   }
-  if (snap_state.status != s) {
+  if (!snap_state.status.eq(s)) {
     return Status_Corruption(
         "The snapshot gave inconsistent results for key " +
         std::to_string(Hash(snap_state.key.c_str(), snap_state.key.size(), 0)) +
-        " in cf " + cf->GetName() + ": (" + snap_state.status.ToString() +
-        ") vs. (" + s.ToString() + ")");
+        " in cf " + cf->GetName() + ": (" + *snap_state.status.ToString() +
+        ") vs. (" + *s.ToString() + ")");
   }
   if (s.ok()) {
     if (exp_v != v) {
@@ -401,7 +401,7 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
 void StressTest::VerificationAbort(SharedState* shared, std::string msg,
                                    Status s) const {
   fprintf(stderr, "Verification failed: %s. Status is %s\n", msg.c_str(),
-          s.ToString().c_str());
+          s.ToString()->c_str());
   shared->SetVerificationFailure();
 }
 
@@ -818,14 +818,14 @@ void StressTest::OperateDb(ThreadState* thread) {
         Status s = db_->FlushWAL(sync);
         if (!s.ok() && !(sync && s.IsNotSupported())) {
           fprintf(stderr, "FlushWAL(sync=%s) failed: %s\n",
-                  (sync ? "true" : "false"), s.ToString().c_str());
+                  (sync ? "true" : "false"), s.ToString()->c_str());
         }
       }
 
       if (thread->rand.OneInOpt(FLAGS_lock_wal_one_in)) {
         Status s = db_->LockWAL();
         if (!s.ok()) {
-          fprintf(stderr, "LockWAL() failed: %s\n", s.ToString().c_str());
+          fprintf(stderr, "LockWAL() failed: %s\n", s.ToString()->c_str());
         } else {
           auto old_seqno = db_->GetLatestSequenceNumber();
           // Yield for a while
@@ -842,7 +842,7 @@ void StressTest::OperateDb(ThreadState* thread) {
           }
           s = db_->UnlockWAL();
           if (!s.ok()) {
-            fprintf(stderr, "UnlockWAL() failed: %s\n", s.ToString().c_str());
+            fprintf(stderr, "UnlockWAL() failed: %s\n", s.ToString()->c_str());
           }
         }
       }
@@ -850,7 +850,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       if (thread->rand.OneInOpt(FLAGS_sync_wal_one_in)) {
         Status s = db_->SyncWAL();
         if (!s.ok() && !s.IsNotSupported()) {
-          fprintf(stderr, "SyncWAL() failed: %s\n", s.ToString().c_str());
+          fprintf(stderr, "SyncWAL() failed: %s\n", s.ToString()->c_str());
         }
       }
 
@@ -879,7 +879,7 @@ void StressTest::OperateDb(ThreadState* thread) {
         Status status = TestFlush(rand_column_families);
         if (!status.ok()) {
           fprintf(stdout, "Unable to perform Flush(): %s\n",
-                  status.ToString().c_str());
+                  status.ToString()->c_str());
         }
       }
 
@@ -888,7 +888,7 @@ void StressTest::OperateDb(ThreadState* thread) {
           !FLAGS_write_fault_one_in) {
         Status status = VerifyGetLiveFiles();
         if (!status.ok()) {
-          VerificationAbort(shared, "VerifyGetLiveFiles status not OK", status);
+          VerificationAbort(shared, "VerifyGetLiveFiles status not OK", status.Clone());
         }
       }
 
@@ -897,7 +897,7 @@ void StressTest::OperateDb(ThreadState* thread) {
         Status status = VerifyGetSortedWalFiles();
         if (!status.ok()) {
           VerificationAbort(shared, "VerifyGetSortedWalFiles status not OK",
-                            status);
+                            status.Clone());
         }
       }
 
@@ -906,7 +906,7 @@ void StressTest::OperateDb(ThreadState* thread) {
         Status status = VerifyGetCurrentWalFile();
         if (!status.ok()) {
           VerificationAbort(shared, "VerifyGetCurrentWalFile status not OK",
-                            status);
+                            status.Clone());
         }
       }
 
@@ -914,14 +914,14 @@ void StressTest::OperateDb(ThreadState* thread) {
         Status status = TestPauseBackground(thread);
         if (!status.ok()) {
           VerificationAbort(
-              shared, "Pause/ContinueBackgroundWork status not OK", status);
+              shared, "Pause/ContinueBackgroundWork status not OK", status.Clone());
         }
       }
 
       if (thread->rand.OneInOpt(FLAGS_verify_checksum_one_in)) {
         Status status = db_->VerifyChecksum();
         if (!status.ok()) {
-          VerificationAbort(shared, "VerifyChecksum status not OK", status);
+          VerificationAbort(shared, "VerifyChecksum status not OK", status.Clone());
         }
       }
 
@@ -951,7 +951,7 @@ void StressTest::OperateDb(ThreadState* thread) {
           Status s = TestBackupRestore(thread, rand_column_families, rand_keys);
           if (!s.ok()) {
             VerificationAbort(shared, "Backup/restore gave inconsistent state",
-                              s);
+                              s.Clone());
           }
         }
       }
@@ -959,7 +959,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       if (thread->rand.OneInOpt(FLAGS_checkpoint_one_in)) {
         Status s = TestCheckpoint(thread, rand_column_families, rand_keys);
         if (!s.ok()) {
-          VerificationAbort(shared, "Checkpoint gave inconsistent state", s);
+          VerificationAbort(shared, "Checkpoint gave inconsistent state", s.Clone());
         }
       }
 
@@ -967,7 +967,7 @@ void StressTest::OperateDb(ThreadState* thread) {
         Status s =
             TestApproximateSize(thread, i, rand_column_families, rand_keys);
         if (!s.ok()) {
-          VerificationAbort(shared, "ApproximateSize Failed", s);
+          VerificationAbort(shared, "ApproximateSize Failed", s.Clone());
         }
       }
       if (thread->rand.OneInOpt(FLAGS_acquire_snapshot_one_in)) {
@@ -977,7 +977,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       /*always*/ {
         Status s = MaybeReleaseSnapshots(thread, i);
         if (!s.ok()) {
-          VerificationAbort(shared, "Snapshot gave inconsistent state", s);
+          VerificationAbort(shared, "Snapshot gave inconsistent state", s.Clone());
         }
       }
 
@@ -1737,7 +1737,7 @@ Status StressTest::TestBackupRestore(
         s = Status_Corruption(oss.str());
       }
     } else {
-      s = get_status;
+      s.copy_from(get_status);
       if (!s.ok()) {
         from = "DB::Get in backup/restore";
       }
@@ -1783,7 +1783,7 @@ Status StressTest::TestBackupRestore(
   }
   if (!s.ok()) {
     fprintf(stderr, "Failure in %s with: %s\n", from.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
   }
   return s;
 }
@@ -1867,7 +1867,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
         }
       } else {
         fprintf(stderr, "Fail to get files under the directory to %s\n",
-                my_s.ToString().c_str());
+                my_s.ToString()->c_str());
       }
     }
   }
@@ -1931,7 +1931,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
           s = Status_Corruption(oss.str());
         }
       } else {
-        s = get_status;
+        s.copy_from(get_status);
       }
     }
     for (auto cfh : cf_handles) {
@@ -1944,7 +1944,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
 
   if (!s.ok()) {
     fprintf(stderr, "A checkpoint operation failed with: %s\n",
-            s.ToString().c_str());
+            s.ToString()->c_str());
   } else {
     DestroyDB(checkpoint_dir, tmp_opts);
   }
@@ -2070,7 +2070,7 @@ void StressTest::TestCompactFiles(ThreadState* thread,
                                  input_files, static_cast<int>(output_level));
       if (!s.ok()) {
         fprintf(stdout, "Unable to perform CompactFiles(): %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         thread->stats.AddNumCompactFilesFailed(1);
       } else {
         thread->stats.AddNumCompactFilesSucceed(1);
@@ -2248,7 +2248,7 @@ void StressTest::TestCompactRange(ThreadState* thread, int64_t rand_key,
 
   if (!status.ok()) {
     fprintf(stdout, "Unable to perform CompactRange(): %s\n",
-            status.ToString().c_str());
+            status.ToString()->c_str());
   }
 
   if (pre_snapshot != nullptr) {
@@ -2308,7 +2308,7 @@ uint32_t StressTest::GetRangeHash(ThreadState* thread, const Snapshot* snapshot,
 
   if (!it->status().ok()) {
     fprintf(stderr, "Iterator non-OK when calculating range CRC: %s\n",
-            it->status().ToString().c_str());
+            it->status().ToString()->c_str());
     thread->stats.AddErrors(1);
     // Fail fast to preserve the DB state.
     thread->shared->SetVerificationFailure();
@@ -2750,7 +2750,7 @@ void StressTest::Open(SharedState* shared) {
             &column_families_, &optimistic_txn_db_);
         if (!s.ok()) {
           fprintf(stderr, "Error in opening the OptimisticTransactionDB [%s]\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           fflush(stderr);
         }
         assert(s.ok());
@@ -2781,7 +2781,7 @@ void StressTest::Open(SharedState* shared) {
                                 cf_descriptors, &column_families_, &txn_db_);
         if (!s.ok()) {
           fprintf(stderr, "Error in opening the TransactionDB [%s]\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           fflush(stderr);
         }
         assert(s.ok());
@@ -2794,7 +2794,7 @@ void StressTest::Open(SharedState* shared) {
       }
     }
     if (!s.ok()) {
-      fprintf(stderr, "Error in opening the DB [%s]\n", s.ToString().c_str());
+      fprintf(stderr, "Error in opening the DB [%s]\n", s.ToString()->c_str());
       fflush(stderr);
     }
     assert(s.ok());
@@ -2836,7 +2836,7 @@ void StressTest::Open(SharedState* shared) {
   }
 
   if (!s.ok()) {
-    fprintf(stderr, "open error: %s\n", s.ToString().c_str());
+    fprintf(stderr, "open error: %s\n", s.ToString()->c_str());
     exit(1);
   }
 }
@@ -2863,7 +2863,7 @@ void StressTest::Reopen(ThreadState* thread) {
   if (thread->rand.OneIn(2)) {
     Status s = db_->Close();
     if (!s.ok()) {
-      fprintf(stderr, "Non-ok close status: %s\n", s.ToString().c_str());
+      fprintf(stderr, "Non-ok close status: %s\n", s.ToString()->c_str());
       fflush(stderr);
     }
     assert(s.ok());
@@ -2887,7 +2887,7 @@ void StressTest::Reopen(ThreadState* thread) {
     Status s = thread->shared->SaveAtAndAfter(db_);
     if (!s.ok()) {
       fprintf(stderr, "Error enabling history tracing: %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     }
   }
@@ -3003,7 +3003,7 @@ bool InitializeOptionsFromFile(Options& options) {
                                    &db_options, &cf_descriptors);
     if (!s.ok()) {
       fprintf(stderr, "Unable to load options file %s --- %s\n",
-              FLAGS_options_file.c_str(), s.ToString().c_str());
+              FLAGS_options_file.c_str(), s.ToString()->c_str());
       exit(1);
     }
     db_options.env = new CompositeEnvWrapper(db_stress_env);
@@ -3325,7 +3325,7 @@ void InitializeOptionsGeneral(
         FLAGS_sst_file_manager_bytes_per_truncate));
     if (!status.ok()) {
       fprintf(stderr, "SstFileManager creation failed: %s\n",
-              status.ToString().c_str());
+              status.ToString()->c_str());
       exit(1);
     }
   }

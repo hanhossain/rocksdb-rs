@@ -64,7 +64,7 @@ inline bool BlockFetcher::TryGetUncompressBlockFromPersistentCache() {
         assert(!status.ok());
         ROCKS_LOG_INFO(ioptions_.logger,
                        "Error reading from persistent cache. %s",
-                       status.ToString().c_str());
+                       status.ToString()->c_str());
       }
     }
   }

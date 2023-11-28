@@ -35,7 +35,7 @@ class SstFileDumper {
 
   Status VerifyChecksum();
   Status DumpTable(const std::string& out_filename);
-  Status getStatus() { return init_result_; }
+  Status getStatus() { return init_result_.Clone(); }
 
   Status ShowAllCompressionSizes(
       size_t block_size,

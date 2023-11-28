@@ -65,14 +65,14 @@ class BatchedOpsStressTest : public StressTest {
     const Status s = db_->Write(write_opts, &batch);
 
     if (!s.ok()) {
-      fprintf(stderr, "multiput error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "multiput error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     } else {
       // we did 10 writes each of size sz + 1
       thread->stats.AddBytesForWrites(10, (sz + 1) * 10);
     }
 
-    return s;
+    return s.Clone();
   }
 
   // Given a key K, this deletes ("0"+K), ("1"+K), ..., ("9"+K)
@@ -95,7 +95,7 @@ class BatchedOpsStressTest : public StressTest {
 
     s = db_->Write(writeoptions, &batch);
     if (!s.ok()) {
-      fprintf(stderr, "multidelete error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "multidelete error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     } else {
       thread->stats.AddDeletes(10);
@@ -148,7 +148,7 @@ class BatchedOpsStressTest : public StressTest {
       key_slices[i] = keys[i];
       s = db_->Get(readoptionscopy, cfh, key_slices[i], &from_db);
       if (!s.ok() && !s.IsNotFound()) {
-        fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "get error: %s\n", s.ToString()->c_str());
         values[i] = "";
         thread->stats.AddErrors(1);
         // we continue after error rather than exiting so that we can
@@ -221,16 +221,16 @@ class BatchedOpsStressTest : public StressTest {
       db_->MultiGet(readoptionscopy, cfh, num_prefixes, key_slices.data(),
                     values.data(), statuses.data());
       for (size_t i = 0; i < num_prefixes; i++) {
-        Status s = statuses[i];
+        Status s = statuses[i].Clone();
         if (!s.ok() && !s.IsNotFound()) {
-          fprintf(stderr, "multiget error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "multiget error: %s\n", s.ToString()->c_str());
           thread->stats.AddErrors(1);
-          ret_status[rand_key] = s;
+          ret_status[rand_key] = s.Clone();
           // we continue after error rather than exiting so that we can
           // find more errors if any
         } else if (s.IsNotFound()) {
           thread->stats.AddGets(1, 0);
-          ret_status[rand_key] = s;
+          ret_status[rand_key] = s.Clone();
         } else {
           assert(!keys[i].empty());
           assert(!values[i].empty());
@@ -298,7 +298,7 @@ class BatchedOpsStressTest : public StressTest {
       const Status s = db_->GetEntity(read_opts_copy, cfh, key, &results[i]);
 
       if (!s.ok() && !s.IsNotFound()) {
-        fprintf(stderr, "GetEntity error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "GetEntity error: %s\n", s.ToString()->c_str());
         thread->stats.AddErrors(1);
       } else if (s.IsNotFound()) {
         thread->stats.AddGets(1, 0);
@@ -390,7 +390,7 @@ class BatchedOpsStressTest : public StressTest {
         const Status& s = statuses[j];
 
         if (!s.ok() && !s.IsNotFound()) {
-          fprintf(stderr, "MultiGetEntity error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "MultiGetEntity error: %s\n", s.ToString()->c_str());
           thread->stats.AddErrors(1);
         } else if (s.IsNotFound()) {
           thread->stats.AddGets(1, 0);

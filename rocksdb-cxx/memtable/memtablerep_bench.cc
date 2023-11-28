@@ -604,7 +604,7 @@ int main(int argc, char** argv) {
         ROCKSDB_NAMESPACE::MemTableRepFactory::CreateFromString(
             config_options, FLAGS_memtablerep, &factory);
     if (!s.ok()) {
-      fprintf(stdout, "Unknown memtablerep: %s\n", s.ToString().c_str());
+      fprintf(stdout, "Unknown memtablerep: %s\n", s.ToString()->c_str());
       exit(1);
     }
   }

@@ -166,7 +166,7 @@ void CompactionIterator::Next() {
         ROCKS_LOG_FATAL(
             info_log_, "Invalid ikey %s in compaction. %s",
             allow_data_in_errors_ ? key_.ToString(true).c_str() : "hidden",
-            s.getState());
+            s.getState()->c_str());
         assert(false);
       }
 
@@ -278,7 +278,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
         BlobIndex blob_index;
         Status s = blob_index.DecodeFrom(value_);
         if (!s.ok()) {
-          status_ = s;
+          status_.copy_from(s);
           validity_info_.Invalidate();
           return false;
         }
@@ -296,7 +296,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
                                      prefetch_buffer, &blob_value_,
                                      &bytes_read);
         if (!s.ok()) {
-          status_ = s;
+          status_.copy_from(s);
           validity_info_.Invalidate();
           return false;
         }
@@ -326,7 +326,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
             WideColumnSerialization::Deserialize(value_copy, existing_columns);
 
         if (!s.ok()) {
-          status_ = s;
+          status_.copy_from(s);
           validity_info_.Invalidate();
           return false;
         }
@@ -436,7 +436,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
       const Status s = WideColumnSerialization::Serialize(
           sorted_columns, compaction_filter_value_);
       if (!s.ok()) {
-        status_ = s;
+        status_.copy_from(s);
         validity_info_.Invalidate();
         return false;
       }
@@ -472,7 +472,7 @@ void CompactionIterator::NextFromInput() {
       // If `expect_valid_internal_key_` is false, return the corrupted key
       // and let the caller decide what to do with it.
       if (expect_valid_internal_key_) {
-        status_ = pik_status;
+        status_.copy_from(pik_status);
         return;
       }
       key_ = current_key_.SetInternalKey(key_);
@@ -989,7 +989,7 @@ void CompactionIterator::NextFromInput() {
 
       if (!merge_until_status_.ok() &&
           !merge_until_status_.IsMergeInProgress()) {
-        status_ = merge_until_status_;
+        status_.copy_from(merge_until_status_);
         return;
       } else if (merge_out_iter_.Valid()) {
         // NOTE: key, value, and ikey_ refer to old entries.
@@ -1003,7 +1003,7 @@ void CompactionIterator::NextFromInput() {
           ROCKS_LOG_FATAL(
               info_log_, "Invalid key %s in compaction. %s",
               allow_data_in_errors_ ? key_.ToString(true).c_str() : "hidden",
-              pik_status.getState());
+              pik_status.getState()->c_str());
           assert(false);
         }
         // Keep current_key_ in sync.
@@ -1073,7 +1073,7 @@ bool CompactionIterator::ExtractLargeValueIfNeededImpl() {
   const Status s = blob_file_builder_->Add(user_key(), value_, &blob_index_);
 
   if (!s.ok()) {
-    status_ = s;
+    status_.copy_from(s);
     validity_info_.Invalidate();
 
     return false;
@@ -1118,7 +1118,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
       const Status s = blob_index.DecodeFrom(value_);
 
       if (!s.ok()) {
-        status_ = s;
+        status_.copy_from(s);
         validity_info_.Invalidate();
 
         return;
@@ -1144,7 +1144,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
           user_key(), blob_index, prefetch_buffer, &blob_value_, &bytes_read);
 
       if (!s.ok()) {
-        status_ = s;
+        status_.copy_from(s);
         validity_info_.Invalidate();
 
         return;

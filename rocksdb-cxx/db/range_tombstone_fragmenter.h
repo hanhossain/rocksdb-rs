@@ -13,8 +13,13 @@
 
 #include "db/dbformat.h"
 #include "db/pinned_iterators_manager.h"
-#include "rocksdb/status.h"
 #include "table/internal_iterator.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 struct FragmentedRangeTombstoneList;

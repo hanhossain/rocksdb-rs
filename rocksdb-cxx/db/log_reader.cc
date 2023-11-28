@@ -206,7 +206,7 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch,
           s = UpdateRecordedTimestampSize(
               ts_record.GetUserDefinedTimestampSize());
           if (!s.ok()) {
-            ReportCorruption(fragment.size(), s.getState());
+            ReportCorruption(fragment.size(), s.getState()->c_str());
           }
         }
         break;
@@ -728,7 +728,7 @@ bool FragmentBufferedReader::ReadRecord(Slice* record, std::string* scratch,
           s = UpdateRecordedTimestampSize(
               ts_record.GetUserDefinedTimestampSize());
           if (!s.ok()) {
-            ReportCorruption(fragment.size(), s.getState());
+            ReportCorruption(fragment.size(), s.getState()->c_str());
           }
         }
         break;

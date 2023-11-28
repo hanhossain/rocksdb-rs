@@ -384,7 +384,9 @@ std::vector<Status> MultiOpsTxnsStressTest::TestMultiGet(
     ThreadState* /*thread*/, const ReadOptions& /*read_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  return std::vector<Status>{Status_NotSupported()};
+  std::vector<Status> v;
+  v.push_back(Status_NotSupported());
+  return v;
 }
 
 // Wide columns are currently not supported by transactions.
@@ -616,7 +618,7 @@ Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
   }
 
   auto result = Record::DecodePrimaryIndexValue(value);
-  s = std::get<0>(result);
+  s.copy_from(std::get<0>(result));
   if (!s.ok()) {
     return s;
   }
@@ -758,7 +760,7 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
     if (!s.ok()) {
       fprintf(stderr, "Cannot decode secondary key (%s => %s): %s\n",
               it->key().ToString(true).c_str(),
-              it->value().ToString(true).c_str(), s.ToString().c_str());
+              it->value().ToString(true).c_str(), s.ToString()->c_str());
       assert(false);
       break;
     }
@@ -800,10 +802,10 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
       break;
     }
     auto result = Record::DecodePrimaryIndexValue(value);
-    s = std::get<0>(result);
+    s.copy_from(std::get<0>(result));
     if (!s.ok()) {
       fprintf(stderr, "Cannot decode primary index value %s: %s\n",
-              Slice(value).ToString(true).c_str(), s.ToString().c_str());
+              Slice(value).ToString(true).c_str(), s.ToString()->c_str());
       assert(false);
       break;
     }
@@ -920,9 +922,9 @@ Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(ThreadState* thread,
   }
   auto result = Record::DecodePrimaryIndexValue(value);
   if (!std::get<0>(result).ok()) {
-    s = std::get<0>(result);
+    s.copy_from(std::get<0>(result));
     fprintf(stderr, "Cannot decode primary index value %s: %s\n",
-            Slice(value).ToString(true).c_str(), s.ToString().c_str());
+            Slice(value).ToString(true).c_str(), s.ToString()->c_str());
     assert(false);
     return s;
   }
@@ -1117,7 +1119,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
       if (!s.ok()) {
         oss << "Cannot decode primary index entry " << it->key().ToString(true)
             << "=>" << it->value().ToString(true);
-        VerificationAbort(thread->shared, oss.str(), s);
+        VerificationAbort(thread->shared, oss.str(), s.Clone());
         assert(false);
         return;
       }
@@ -1138,7 +1140,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
       s = db_->Get(ropts, sk, &value);
       if (!s.ok()) {
         oss << "Cannot find secondary index entry " << sk.ToString(true);
-        VerificationAbort(thread->shared, oss.str(), s);
+        VerificationAbort(thread->shared, oss.str(), s.Clone());
         assert(false);
         return;
       }
@@ -1166,7 +1168,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
       if (!s.ok()) {
         oss << "Cannot decode secondary index entry "
             << it->key().ToString(true) << "=>" << it->value().ToString(true);
-        VerificationAbort(thread->shared, oss.str(), s);
+        VerificationAbort(thread->shared, oss.str(), s.Clone());
         assert(false);
         return;
       }
@@ -1180,16 +1182,16 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
       if (!s.ok()) {
         oss << "Error searching pk " << Slice(pk).ToString(true) << ". "
             << s.ToString() << ". sk " << it->key().ToString(true);
-        VerificationAbort(thread->shared, oss.str(), s);
+        VerificationAbort(thread->shared, oss.str(), s.Clone());
         assert(false);
         return;
       }
       auto result = Record::DecodePrimaryIndexValue(value);
-      s = std::get<0>(result);
+      s.copy_from(std::get<0>(result));
       if (!s.ok()) {
         oss << "Error decoding primary index value "
             << Slice(value).ToString(true) << ". " << s.ToString();
-        VerificationAbort(thread->shared, oss.str(), s);
+        VerificationAbort(thread->shared, oss.str(), s.Clone());
         assert(false);
         return;
       }
@@ -1199,7 +1201,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
             << Slice(value).ToString(true) << " (a=" << record.a_value()
             << ", c=" << c_in_primary << "), sk: " << it->key().ToString(true)
             << " (c=" << record.c_value() << ")";
-        VerificationAbort(thread->shared, oss.str(), s);
+        VerificationAbort(thread->shared, oss.str(), s.Clone());
         assert(false);
         return;
       }
@@ -1278,7 +1280,7 @@ void MultiOpsTxnsStressTest::VerifyPkSkFast(const ReadOptions& read_options,
       assert(false);
     }
     auto result = Record::DecodePrimaryIndexValue(value);
-    s = std::get<0>(result);
+    s.copy_from(std::get<0>(result));
     if (!s.ok()) {
       oss << "Error decoding primary index value "
           << Slice(value).ToString(true) << ". " << s.ToString();
@@ -1615,7 +1617,7 @@ void MultiOpsTxnsStressTest::ScanExistingDb(SharedState* shared, int threads) {
       if (!s.ok()) {
         fprintf(stderr, "Cannot decode primary index entry (%s => %s): %s\n",
                 it->key().ToString(true).c_str(),
-                it->value().ToString(true).c_str(), s.ToString().c_str());
+                it->value().ToString(true).c_str(), s.ToString()->c_str());
         assert(false);
       }
       uint32_t a = record.a_value();

@@ -367,7 +367,7 @@ class VersionBuilder::Rep {
 
       const Status s = checker(lhs, rhs);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
 
@@ -445,7 +445,7 @@ class VersionBuilder::Rep {
             vstorage, /* level */ 0, l0_checker,
             "VersionBuilder::CheckConsistency0", &expected_linked_ssts);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
       }
 
@@ -484,7 +484,7 @@ class VersionBuilder::Rep {
             vstorage, level, checker, "VersionBuilder::CheckConsistency1",
             &expected_linked_ssts);
         if (!s.ok()) {
-          return s;
+          return s.Clone();
         }
       }
     }
@@ -540,7 +540,7 @@ class VersionBuilder::Rep {
 #else
       auto prefix = "force_consistency_checks(DEBUG)";
 #endif
-      s = Status_Corruption(prefix, s.getState());
+      s = Status_Corruption(prefix, *s.getState());
     } else {
       // was only expecting corruption with message, or OK
       assert(s.ok());
@@ -847,7 +847,7 @@ class VersionBuilder::Rep {
     {
       const Status s = CheckConsistency(base_vstorage_);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
 
@@ -859,7 +859,7 @@ class VersionBuilder::Rep {
     for (const auto& blob_file_addition : edit->GetBlobFileAdditions()) {
       const Status s = ApplyBlobFileAddition(blob_file_addition);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
 
@@ -867,7 +867,7 @@ class VersionBuilder::Rep {
     for (const auto& blob_file_garbage : edit->GetBlobFileGarbages()) {
       const Status s = ApplyBlobFileGarbage(blob_file_garbage);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
 
@@ -878,7 +878,7 @@ class VersionBuilder::Rep {
 
       const Status s = ApplyFileDeletion(level, file_number);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
 
@@ -889,7 +889,7 @@ class VersionBuilder::Rep {
 
       const Status s = ApplyFileAddition(level, meta);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
 
@@ -900,7 +900,7 @@ class VersionBuilder::Rep {
       const InternalKey smallest_uncompacted_key = cursor.second;
       const Status s = ApplyCompactCursors(level, smallest_uncompacted_key);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
     return Status_OK();
@@ -1350,7 +1350,7 @@ class VersionBuilder::Rep {
     for (const auto& s : statuses) {
       if (!s.ok()) {
         if (ret.ok()) {
-          ret = s;
+          ret.copy_from(s);
         }
       }
     }

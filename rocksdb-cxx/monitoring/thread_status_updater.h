@@ -37,9 +37,14 @@
 #include <vector>
 
 #include "port/port.h"
-#include "rocksdb/status.h"
 #include "rocksdb/thread_status.h"
 #include "util/thread_operation.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

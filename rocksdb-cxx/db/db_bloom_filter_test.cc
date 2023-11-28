@@ -1458,7 +1458,7 @@ TEST_P(DBFilterConstructionCorruptionTestWithParam, DetectCorruption) {
   if (table_options.detect_filter_construct_corruption) {
     EXPECT_TRUE(s.IsCorruption());
     EXPECT_TRUE(
-        s.ToString().find("Filter's hash entries checksum mismatched") !=
+        s.ToString()->find("Filter's hash entries checksum mismatched") !=
         std::string::npos);
   } else {
     EXPECT_TRUE(s.ok());
@@ -1493,7 +1493,7 @@ TEST_P(DBFilterConstructionCorruptionTestWithParam, DetectCorruption) {
 
   if (table_options.detect_filter_construct_corruption) {
     EXPECT_TRUE(s.IsCorruption());
-    EXPECT_TRUE(s.ToString().find("Corrupted filter content") !=
+    EXPECT_TRUE(s.ToString()->find("Corrupted filter content") !=
                 std::string::npos);
   } else {
     EXPECT_TRUE(s.ok());
@@ -1578,7 +1578,7 @@ TEST_P(DBFilterConstructionCorruptionTestWithParam,
       db_->GetOptions().table_factory->GetOptions<BlockBasedTableOptions>();
   EXPECT_TRUE(updated_table_options->detect_filter_construct_corruption);
   EXPECT_TRUE(s.IsCorruption());
-  EXPECT_TRUE(s.ToString().find("Filter's hash entries checksum mismatched") !=
+  EXPECT_TRUE(s.ToString()->find("Filter's hash entries checksum mismatched") !=
               std::string::npos);
 
   // Case 3: dynamically turn off

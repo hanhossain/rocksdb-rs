@@ -111,7 +111,7 @@ class SubcompactionState {
 
     subcompaction_job_info.cf_id = cfd->GetID();
     subcompaction_job_info.cf_name = cfd->GetName();
-    subcompaction_job_info.status = status;
+    subcompaction_job_info.status.copy_from(status);
     subcompaction_job_info.subcompaction_job_id = static_cast<int>(sub_job_id);
     subcompaction_job_info.base_input_level = c->start_level();
     subcompaction_job_info.output_level = c->output_level();

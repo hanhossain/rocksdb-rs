@@ -132,7 +132,7 @@ Status ReplayerImpl::Replay(
       // Skip unsupported traces, stop for other errors.
       if (s.IsNotSupported()) {
         if (result_callback != nullptr) {
-          result_callback(s, nullptr);
+          result_callback(s.Clone(), nullptr);
         }
         s = Status_OK();
         continue;
@@ -143,7 +143,7 @@ Status ReplayerImpl::Replay(
       } else {
         std::unique_ptr<TraceRecordResult> res;
         s = Execute(record, &res);
-        result_callback(s, std::move(res));
+        result_callback(s.Clone(), std::move(res));
       }
     }
   } else {
@@ -175,7 +175,7 @@ Status ReplayerImpl::Replay(
       std::lock_guard<std::mutex> gd(mtx);
       // Only record the first error.
       if (!err.ok() && !err.IsNotSupported() && err_ts < last_err_ts) {
-        bg_s = err;
+        bg_s.copy_from(err);
         last_err_ts = err_ts;
       }
     };
@@ -233,7 +233,7 @@ Status ReplayerImpl::Replay(
 
     thread_pool.WaitForJobsAndJoinAllThreads();
     if (!bg_s.ok()) {
-      s = bg_s;
+      s.copy_from(bg_s);
     }
   }
 
@@ -292,11 +292,11 @@ void ReplayerImpl::BackgroundWork(void* arg) {
   if (!s.ok()) {
     // Stop the replay
     if (ra->error_cb != nullptr) {
-      ra->error_cb(s, ra->trace_entry.ts);
+      ra->error_cb(s.Clone(), ra->trace_entry.ts);
     }
     // Report the result
     if (ra->result_cb != nullptr) {
-      ra->result_cb(s, nullptr);
+      ra->result_cb(s.Clone(), nullptr);
     }
     return;
   }
@@ -306,7 +306,7 @@ void ReplayerImpl::BackgroundWork(void* arg) {
   } else {
     std::unique_ptr<TraceRecordResult> res;
     s = record->Accept(ra->handler, &res);
-    ra->result_cb(s, std::move(res));
+    ra->result_cb(s.Clone(), std::move(res));
   }
   record.reset();
 }

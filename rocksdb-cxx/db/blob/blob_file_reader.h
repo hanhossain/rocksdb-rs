@@ -16,7 +16,7 @@
 
 namespace ROCKSDB_NAMESPACE {
 
-class Status;
+struct Status;
 struct ImmutableOptions;
 struct FileOptions;
 class HistogramImpl;

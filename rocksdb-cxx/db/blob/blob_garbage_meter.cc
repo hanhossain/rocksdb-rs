@@ -17,7 +17,7 @@ Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
 
   const Status s = Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
@@ -35,7 +35,7 @@ Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
 
   const Status s = Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
@@ -68,7 +68,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
     constexpr bool log_err_key = false;
     const Status s = ParseInternalKey(key, &ikey, log_err_key);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -81,7 +81,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
   {
     const Status s = blob_index.DecodeFrom(value);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 

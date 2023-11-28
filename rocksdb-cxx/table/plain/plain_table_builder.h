@@ -12,13 +12,18 @@
 
 #include "db/version_edit.h"
 #include "rocksdb/options.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table.h"
 #include "rocksdb/table_properties.h"
 #include "table/plain/plain_table_bloom.h"
 #include "table/plain/plain_table_index.h"
 #include "table/plain/plain_table_key_coding.h"
 #include "table/table_builder.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -61,7 +66,7 @@ class PlainTableBuilder : public TableBuilder {
   void Add(const Slice& key, const Slice& value) override;
 
   // Return non-ok iff some error has been detected.
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   // Return non-ok iff some error happens during IO.
   IOStatus io_status() const override { return io_status_; }

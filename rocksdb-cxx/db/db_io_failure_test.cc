@@ -305,7 +305,7 @@ TEST_F(DBIOFailureTest, FlushSstRangeSyncError) {
   ASSERT_OK(Put(1, "foo4", "bar"));
   Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
   ASSERT_TRUE(s.IsIOError());
-  ASSERT_STREQ(s.getState(), io_error_msg);
+  ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
   // Following writes should fail as flush failed.
   ASSERT_NOK(Put(1, "foo2", "bar3"));
@@ -374,7 +374,7 @@ TEST_F(DBIOFailureTest, CompactSstRangeSyncError) {
                                  }));
   Status s = dbfull()->TEST_WaitForCompact();
   ASSERT_TRUE(s.IsIOError());
-  ASSERT_STREQ(s.getState(), io_error_msg);
+  ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
   // Following writes should fail as flush failed.
   ASSERT_NOK(Put(1, "foo2", "bar3"));
@@ -416,7 +416,7 @@ TEST_F(DBIOFailureTest, FlushSstCloseError) {
   ASSERT_OK(Put(1, "foo", "bar2"));
   Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
   ASSERT_TRUE(s.IsIOError());
-  ASSERT_STREQ(s.getState(), io_error_msg);
+  ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
   // Following writes should fail as flush failed.
   ASSERT_NOK(Put(1, "foo2", "bar3"));
@@ -470,7 +470,7 @@ TEST_F(DBIOFailureTest, CompactionSstCloseError) {
                                  }));
   Status s = dbfull()->TEST_WaitForCompact();
   ASSERT_TRUE(s.IsIOError());
-  ASSERT_STREQ(s.getState(), io_error_msg);
+  ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
   // Following writes should fail as compaction failed.
   ASSERT_NOK(Put(1, "foo2", "bar3"));
@@ -512,7 +512,7 @@ TEST_F(DBIOFailureTest, FlushSstSyncError) {
   ASSERT_OK(Put(1, "foo", "bar2"));
   Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
   ASSERT_TRUE(s.IsIOError());
-  ASSERT_STREQ(s.getState(), io_error_msg);
+  ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
   // Following writes should fail as flush failed.
   ASSERT_NOK(Put(1, "foo2", "bar3"));
@@ -567,7 +567,7 @@ TEST_F(DBIOFailureTest, CompactionSstSyncError) {
                                  }));
   Status s = dbfull()->TEST_WaitForCompact();
   ASSERT_TRUE(s.IsIOError());
-  ASSERT_STREQ(s.getState(), io_error_msg);
+  ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
   // Following writes should fail as compaction failed.
   ASSERT_NOK(Put(1, "foo2", "bar3"));

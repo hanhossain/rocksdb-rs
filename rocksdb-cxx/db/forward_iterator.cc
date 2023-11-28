@@ -168,7 +168,7 @@ class ForwardLevelIterator : public InternalIterator {
   }
   Status status() const override {
     if (!status_.ok()) {
-      return status_;
+      return status_.Clone();
     } else if (file_iter_) {
       return file_iter_->status();
     }
@@ -612,12 +612,12 @@ Slice ForwardIterator::value() const {
 
 Status ForwardIterator::status() const {
   if (!status_.ok()) {
-    return status_;
+    return status_.Clone();
   } else if (!mutable_iter_->status().ok()) {
     return mutable_iter_->status();
   }
 
-  return immutable_status_;
+  return immutable_status_.Clone();
 }
 
 bool ForwardIterator::PrepareValue() {

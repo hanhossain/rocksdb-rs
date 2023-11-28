@@ -8,7 +8,6 @@
 #include <set>
 
 #include "rocksdb/filter_policy.h"
-#include "rocksdb/status.h"
 #include "table/block_based/block_based_table_reader.h"
 #include "table/block_based/filter_policy_internal.h"
 #include "table/block_based/mock_block_based_table.h"
@@ -18,6 +17,12 @@
 #include "util/coding.h"
 #include "util/hash.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

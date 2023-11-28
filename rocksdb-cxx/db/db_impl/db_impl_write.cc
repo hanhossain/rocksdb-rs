@@ -23,7 +23,7 @@ Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle* column_family,
                    const Slice& key, const Slice& val) {
   const Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::Put(o, column_family, key, val);
 }
@@ -32,7 +32,7 @@ Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle* column_family,
                    const Slice& key, const Slice& ts, const Slice& val) {
   const Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::Put(o, column_family, key, ts, val);
 }
@@ -42,7 +42,7 @@ Status DBImpl::PutEntity(const WriteOptions& options,
                          const WideColumns& columns) {
   const Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   return DB::PutEntity(options, column_family, key, columns);
@@ -52,7 +52,7 @@ Status DBImpl::Merge(const WriteOptions& o, ColumnFamilyHandle* column_family,
                      const Slice& key, const Slice& val) {
   const Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   if (!cfh->cfd()->ioptions()->merge_operator) {
@@ -66,7 +66,7 @@ Status DBImpl::Merge(const WriteOptions& o, ColumnFamilyHandle* column_family,
                      const Slice& key, const Slice& ts, const Slice& val) {
   const Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::Merge(o, column_family, key, ts, val);
 }
@@ -75,7 +75,7 @@ Status DBImpl::Delete(const WriteOptions& write_options,
                       ColumnFamilyHandle* column_family, const Slice& key) {
   const Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::Delete(write_options, column_family, key);
 }
@@ -85,7 +85,7 @@ Status DBImpl::Delete(const WriteOptions& write_options,
                       const Slice& ts) {
   const Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::Delete(write_options, column_family, key, ts);
 }
@@ -95,7 +95,7 @@ Status DBImpl::SingleDelete(const WriteOptions& write_options,
                             const Slice& key) {
   const Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::SingleDelete(write_options, column_family, key);
 }
@@ -105,7 +105,7 @@ Status DBImpl::SingleDelete(const WriteOptions& write_options,
                             const Slice& ts) {
   const Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::SingleDelete(write_options, column_family, key, ts);
 }
@@ -115,7 +115,7 @@ Status DBImpl::DeleteRange(const WriteOptions& write_options,
                            const Slice& begin_key, const Slice& end_key) {
   const Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::DeleteRange(write_options, column_family, begin_key, end_key);
 }
@@ -126,7 +126,7 @@ Status DBImpl::DeleteRange(const WriteOptions& write_options,
                            const Slice& ts) {
   const Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   return DB::DeleteRange(write_options, column_family, begin_key, end_key, ts);
 }
@@ -529,7 +529,8 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
               writer->sequence, disable_memtable, writer->log_used, index++,
               pre_release_callback_cnt);
           if (!ws.ok()) {
-            status = pre_release_cb_status = ws;
+            pre_release_cb_status.copy_from(ws);
+            status.copy_from(pre_release_cb_status);
             break;
           }
         }
@@ -1060,7 +1061,7 @@ Status DBImpl::WriteImplWALOnly(
             writer->sequence, disable_memtable, writer->log_used, index++,
             pre_release_callback_cnt);
         if (!ws.ok()) {
-          status = ws;
+          status.copy_from(ws);
           break;
         }
       }
@@ -1894,7 +1895,7 @@ Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
     if (!shutting_down_.load(std::memory_order_relaxed)) {
       // If writes are still stopped and db not shutdown, it means we bailed
       // due to a background error
-      s = Status_Incomplete(error_handler_.GetBGError().ToString());
+      s = Status_Incomplete(*error_handler_.GetBGError().ToString());
     } else {
       s = Status_ShutdownInProgress("stalled writes");
     }
@@ -2249,8 +2250,8 @@ Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context) {
       s = versions_->LogAndApplyToDefaultColumnFamily(
           read_options, &wal_deletion, &mutex_, directories_.GetDbDir());
       if (!s.ok() && versions_->io_status().IsIOError()) {
-        s = error_handler_.SetBGError(versions_->io_status(),
-                                      BackgroundErrorReason::kManifestWrite);
+        s.copy_from(error_handler_.SetBGError(versions_->io_status(),
+                                      BackgroundErrorReason::kManifestWrite));
       }
       if (!s.ok()) {
         return s;
@@ -2368,7 +2369,7 @@ Status DB::PutEntity(const WriteOptions& options,
 
   const Status s = batch.PutEntity(column_family, key, columns);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   return Write(options, &batch);

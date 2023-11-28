@@ -45,7 +45,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
   if (s.IsNotSupported()) {
     db_absolute_path_ = dbname;
   } else {
-    status_ = s;
+    status_.copy_from(s);
   }
   log_fname_ = InfoLogFileName(dbname_, db_absolute_path_, db_log_dir_);
   if (fs_->FileExists(log_fname_, io_options_, &io_context_).ok()) {
@@ -64,7 +64,7 @@ Status AutoRollLogger::ResetLogger() {
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:AfterNewLogger");
 
   if (!status_.ok()) {
-    return status_;
+    return status_.Clone();
   }
   assert(logger_);
   logger_->SetInfoLogLevel(Logger::GetInfoLogLevel());
@@ -79,7 +79,7 @@ Status AutoRollLogger::ResetLogger() {
     cached_now_access_count = 0;
   }
 
-  return status_;
+  return status_.Clone();
 }
 
 void AutoRollLogger::RollLogFile() {
@@ -124,7 +124,7 @@ void AutoRollLogger::GetExistingFiles() {
   Status s =
       GetInfoLogFiles(fs_, db_log_dir_, dbname_, &parent_dir, &info_log_files);
   if (status_.ok()) {
-    status_ = s;
+    status_.copy_from(s);
   }
   // We need to sort the file before enqueing it so that when we
   // delete file from the front, it is the oldest file.
@@ -215,7 +215,7 @@ void AutoRollLogger::Logv(const char* format, va_list ap) {
 
       if (!s2.ok()) {
         ROCKS_LOG_WARN(logger.get(), "Fail to trim old info log file: %s",
-                       s2.ToString().c_str());
+                       s2.ToString()->c_str());
       }
     }
 

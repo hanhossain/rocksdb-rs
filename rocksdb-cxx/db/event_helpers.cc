@@ -61,7 +61,7 @@ void EventHelpers::NotifyOnBackgroundError(
   for (auto& listener : listeners) {
     listener->OnBackgroundError(reason, bg_error);
     if (*auto_recovery) {
-      listener->OnErrorRecoveryBegin(reason, *bg_error, auto_recovery);
+      listener->OnErrorRecoveryBegin(reason, bg_error->Clone(), auto_recovery);
     }
   }
   db_mutex->Lock();
@@ -177,7 +177,7 @@ void EventHelpers::LogAndNotifyTableFileCreationFinished(
   info.job_id = job_id;
   info.table_properties = table_properties;
   info.reason = reason;
-  info.status = s;
+  info.status.copy_from(s);
   info.file_checksum = file_checksum;
   info.file_checksum_func_name = file_checksum_func_name;
   for (auto& listener : listeners) {
@@ -211,7 +211,7 @@ void EventHelpers::LogAndNotifyTableFileDeletion(
   info.db_name = dbname;
   info.job_id = job_id;
   info.file_path = file_path;
-  info.status = status;
+  info.status.copy_from(status);
   for (auto& listener : listeners) {
     listener->OnTableFileDeleted(info);
   }
@@ -227,9 +227,9 @@ void EventHelpers::NotifyOnErrorRecoveryEnd(
     db_mutex->Unlock();
     for (auto& listener : listeners) {
       BackgroundErrorRecoveryInfo info;
-      info.old_bg_error = old_bg_error;
-      info.new_bg_error = new_bg_error;
-      listener->OnErrorRecoveryCompleted(old_bg_error);
+      info.old_bg_error.copy_from(old_bg_error);
+      info.new_bg_error.copy_from(new_bg_error);
+      listener->OnErrorRecoveryCompleted(old_bg_error.Clone());
       listener->OnErrorRecoveryEnd(info);
     }
     db_mutex->Lock();
@@ -279,7 +279,7 @@ void EventHelpers::LogAndNotifyBlobFileCreationFinished(
   }
   BlobFileCreationInfo info(db_name, cf_name, file_path, job_id,
                             creation_reason, total_blob_count, total_blob_bytes,
-                            s, file_checksum, file_checksum_func_name);
+                            s.Clone(), file_checksum, file_checksum_func_name);
   for (const auto& listener : listeners) {
     listener->OnBlobFileCreated(info);
   }
@@ -307,7 +307,7 @@ void EventHelpers::LogAndNotifyBlobFileDeletion(
   if (listeners.empty()) {
     return;
   }
-  BlobFileDeletionInfo info(dbname, file_path, job_id, status);
+  BlobFileDeletionInfo info(dbname, file_path, job_id, status.Clone());
   for (const auto& listener : listeners) {
     listener->OnBlobFileDeleted(info);
   }

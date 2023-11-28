@@ -72,7 +72,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   {
     const Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "blob file number"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "blob file number"));
   }
 
   constexpr uint64_t blob_file_number = 123;
@@ -82,7 +82,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   {
     const Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "total blob count"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "total blob count"));
   }
 
   constexpr uint64_t total_blob_count = 4567;
@@ -92,7 +92,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   {
     const Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "total blob bytes"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "total blob bytes"));
   }
 
   constexpr uint64_t total_blob_bytes = 12345678;
@@ -102,7 +102,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   {
     const Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "checksum method"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "checksum method"));
   }
 
   constexpr char checksum_method[] = "SHA1";
@@ -112,7 +112,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   {
     const Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "checksum value"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "checksum value"));
   }
 
   constexpr char checksum_value[] =
@@ -124,7 +124,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   {
     const Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "custom field tag"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field tag"));
   }
 
   constexpr uint32_t custom_tag = 2;
@@ -134,7 +134,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   {
     const Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "custom field value"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field value"));
   }
 }
 
@@ -196,7 +196,7 @@ TEST_F(BlobFileAdditionTest, ForwardIncompatibleCustomField) {
   const Status s = decoded_blob_file_addition.DecodeFrom(&input);
 
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "Forward incompatible"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Forward incompatible"));
 
   SyncPoint::GetInstance()->DisableProcessing();
   SyncPoint::GetInstance()->ClearAllCallBacks();

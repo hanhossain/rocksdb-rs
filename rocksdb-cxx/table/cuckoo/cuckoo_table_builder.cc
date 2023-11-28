@@ -96,7 +96,7 @@ void CuckooTableBuilder::Add(const Slice& key, const Slice& value) {
       ParseInternalKey(key, &ikey, false /* log_err_key */);  // TODO
   if (!pik_status.ok()) {
     status_ = Status_Corruption("Unable to parse key into internal key. ",
-                                 pik_status.getState());
+                                 *pik_status.getState());
     return;
   }
   if (ikey.type != kTypeDeletion && ikey.type != kTypeValue) {
@@ -273,7 +273,7 @@ Status CuckooTableBuilder::Finish() {
     }
     status_ = MakeHashTable(&buckets);
     if (!status_.ok()) {
-      return status_;
+      return status_.Clone();
     }
     // Determine unused_user_key to fill empty buckets.
     std::string unused_user_key = smallest_user_key_;
@@ -331,7 +331,7 @@ Status CuckooTableBuilder::Finish() {
     }
     if (!io_status_.ok()) {
       status_ = io_status_;
-      return status_;
+      return status_.Clone();
     }
   }
   assert(num_added == NumEntries());
@@ -385,7 +385,7 @@ Status CuckooTableBuilder::Finish() {
   offset += property_block.size();
   if (!io_status_.ok()) {
     status_ = io_status_;
-    return status_;
+    return status_.Clone();
   }
 
   meta_index_builder.Add(kPropertiesBlockName, property_block_handle);
@@ -397,7 +397,7 @@ Status CuckooTableBuilder::Finish() {
   io_status_ = file_->Append(meta_index_block);
   if (!io_status_.ok()) {
     status_ = io_status_;
-    return status_;
+    return status_.Clone();
   }
 
   FooterBuilder footer;
@@ -405,7 +405,7 @@ Status CuckooTableBuilder::Finish() {
                kNoChecksum, meta_index_block_handle);
   io_status_ = file_->Append(footer.GetSlice());
   status_ = io_status_;
-  return status_;
+  return status_.Clone();
 }
 
 void CuckooTableBuilder::Abandon() {

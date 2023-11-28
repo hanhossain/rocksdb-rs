@@ -85,7 +85,7 @@ class ErrorHandlerFSListener : public EventListener {
     InstrumentedMutexLock l(&mutex_);
     recovery_complete_ = true;
     cv_.SignalAll();
-    new_bg_error_ = info.new_bg_error;
+    new_bg_error_.copy_from(info.new_bg_error);
   }
 
   bool WaitForRecovery(uint64_t /*abs_time_us*/) {
@@ -111,7 +111,7 @@ class ErrorHandlerFSListener : public EventListener {
   void OnBackgroundError(BackgroundErrorReason /*reason*/,
                          Status* bg_error) override {
     if (override_bg_error_) {
-      *bg_error = bg_error_;
+      bg_error->copy_from(bg_error_);
       override_bg_error_ = false;
     }
   }
@@ -119,7 +119,7 @@ class ErrorHandlerFSListener : public EventListener {
   void EnableAutoRecovery(bool enable = true) { no_auto_recovery_ = !enable; }
 
   void OverrideBGError(Status bg_err) {
-    bg_error_ = bg_err;
+    bg_error_.copy_from(bg_err);
     override_bg_error_ = true;
   }
 
@@ -130,7 +130,7 @@ class ErrorHandlerFSListener : public EventListener {
     file_creation_error_ = io_s;
   }
 
-  Status new_bg_error() { return new_bg_error_; }
+  Status new_bg_error() { return new_bg_error_.Clone(); }
 
  private:
   InstrumentedMutex mutex_;
@@ -947,7 +947,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -1012,7 +1012,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   ASSERT_OK(s);
 
   listener->OverrideBGError(
-      Status(Status_NoSpace(), Severity::kHardError));
+      Status_new(Status_NoSpace(), Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1057,7 +1057,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1107,7 +1107,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1296,7 +1296,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteError) {
     WriteOptions wopts;
     wopts.sync = true;
     s = dbfull()->Write(wopts, &batch);
-    ASSERT_EQ(s, Status_NoSpace());
+    ASSERT_TRUE(s.eq(Status_NoSpace()));
   }
   SyncPoint::GetInstance()->DisableProcessing();
   // `ClearAllCallBacks()` is needed in addition to `DisableProcessing()` to
@@ -2108,7 +2108,7 @@ TEST_F(DBErrorHandlingFSTest,
   ASSERT_OK(Put(Key(2), "val"));
   ASSERT_OK(Flush());
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -2195,7 +2195,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2460,7 +2460,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAbortRecovery) {
   s = Flush();
   ASSERT_EQ(s.severity(), ROCKSDB_NAMESPACE::Severity::kSoftError);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
-  ASSERT_EQ(listener->new_bg_error(), Status_Aborted());
+  ASSERT_TRUE(listener->new_bg_error().eq(Status_Aborted()));
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
 
@@ -2637,7 +2637,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",

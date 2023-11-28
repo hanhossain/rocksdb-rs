@@ -751,7 +751,7 @@ Status BlockBasedTable::Open(
         ROCKS_LOG_ERROR(rep->ioptions.logger,
                         "Failed to create prefix extractor[%s]: %s",
                         rep->table_properties->prefix_extractor_name.c_str(),
-                        st.ToString().c_str());
+                        st.ToString()->c_str());
       }
     }
   }
@@ -898,7 +898,7 @@ Status BlockBasedTable::ReadPropertiesBlock(
   if (!s.ok()) {
     ROCKS_LOG_WARN(rep_->ioptions.logger,
                    "Error when seeking to properties block from file: %s",
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
   } else if (!handle.IsNull()) {
     s = meta_iter->status();
     std::unique_ptr<TableProperties> table_properties;
@@ -913,7 +913,7 @@ Status BlockBasedTable::ReadPropertiesBlock(
       ROCKS_LOG_WARN(rep_->ioptions.logger,
                      "Encountered error while reading data from properties "
                      "block %s",
-                     s.ToString().c_str());
+                     s.ToString()->c_str());
     } else {
       assert(table_properties != nullptr);
       rep_->table_properties = std::move(table_properties);
@@ -965,7 +965,7 @@ Status BlockBasedTable::ReadPropertiesBlock(
     s = GetGlobalSequenceNumber(*(rep_->table_properties), largest_seqno,
                                 &(rep_->global_seqno));
     if (!s.ok()) {
-      ROCKS_LOG_ERROR(rep_->ioptions.logger, "%s", s.ToString().c_str());
+      ROCKS_LOG_ERROR(rep_->ioptions.logger, "%s", s.ToString()->c_str());
     }
   }
   return s;
@@ -983,7 +983,7 @@ Status BlockBasedTable::ReadRangeDelBlock(
     ROCKS_LOG_WARN(
         rep_->ioptions.logger,
         "Error when seeking to range delete tombstones block from file: %s",
-        s.ToString().c_str());
+        s.ToString()->c_str());
   } else if (!range_del_handle.IsNull()) {
     Status tmp_status;
     std::unique_ptr<InternalIterator> iter(NewDataBlockIterator<DataBlockIter>(
@@ -997,7 +997,7 @@ Status BlockBasedTable::ReadRangeDelBlock(
       ROCKS_LOG_WARN(
           rep_->ioptions.logger,
           "Encountered error while reading data from range del block %s",
-          s.ToString().c_str());
+          s.ToString()->c_str());
       IGNORE_STATUS_IF_ERROR(s);
     } else {
       rep_->fragmented_range_dels =
@@ -1281,7 +1281,7 @@ Status BlockBasedTable::ReadMetaIndexBlock(
     ROCKS_LOG_ERROR(rep_->ioptions.logger,
                     "Encountered error while reading data from properties"
                     " block %s",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
     return s;
   }
 
@@ -2197,7 +2197,7 @@ Status BlockBasedTable::Get(const ReadOptions& read_options, const Slice& key,
           Status pik_status = ParseInternalKey(
               biter.key(), &parsed_key, false /* log_err_key */);  // TODO
           if (!pik_status.ok()) {
-            s = pik_status;
+            s.copy_from(pik_status);
           }
 
           if (!get_context->SaveValue(
