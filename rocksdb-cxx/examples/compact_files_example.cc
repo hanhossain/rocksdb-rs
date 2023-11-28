@@ -123,7 +123,7 @@ class FullCompactor : public Compactor {
     assert(task->db);
     Status s = task->db->CompactFiles(
         task->compact_options, task->input_file_names, task->output_level);
-    printf("CompactFiles() finished with status %s\n", s.ToString().c_str());
+    printf("CompactFiles() finished with status %s\n", s.ToString()->c_str());
     if (!s.ok() && !s.IsIOError() && task->retry_on_fail) {
       // If a compaction task with its retry_on_fail=true failed,
       // try to schedule another compaction in case the reason
