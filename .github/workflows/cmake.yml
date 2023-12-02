@@ -29,7 +29,7 @@ jobs:
           cpus: 3
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
 
     - name: Install dependencies
@@ -65,7 +65,7 @@ jobs:
           cpus: 3
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
 
     - name: Install dependencies
@@ -97,7 +97,7 @@ jobs:
         - os: macos-latest
           deps: brew install ninja gflags
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
     - name: Install dependencies
       run: ${{ matrix.deps }}
