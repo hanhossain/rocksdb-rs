@@ -335,10 +335,12 @@ fn main() {
     // This will be set when building rocksdb-rs from cmake.
     let skip_build_script = std::env::var("SKIP_BUILD_SCRIPT").map_or(false, |x| x == "1");
 
+    let bridges = vec!["src/env.rs"];
+
     if !skip_build_script {
         let target = std::env::var("TARGET").unwrap();
         let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
-        let mut config = cxx_build::bridge("src/lib.rs");
+        let mut config = cxx_build::bridges(&bridges);
 
         config.flag("-pthread");
         config.flag("-Wsign-compare");
@@ -383,5 +385,8 @@ fn main() {
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
-    println!("cargo:rerun-if-changed=src/lib.rs");
+
+    for bridge in bridges {
+        println!("cargo:rerun-if-changed=src/{bridge}");
+    }
 }
