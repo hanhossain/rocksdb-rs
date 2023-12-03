@@ -93,6 +93,7 @@ class LegacySystemClock : public SystemClock {
   // Get the number of seconds since the Epoch, 1970-01-01 00:00:00 (UTC).
   // Only overwrites *unix_time on success.
   Status GetCurrentTime(int64_t* unix_time) override {
+      std::cout << "LegacySystemClock" << std::endl;
     return env_->GetCurrentTime(unix_time);
   }
   // Converts seconds-since-Jan-01-1970 to a printable string

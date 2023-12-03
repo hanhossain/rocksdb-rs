@@ -138,7 +138,7 @@ Status Configurable::ConfigureOptions(
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   std::string curr_opts;
-  Status s;
+  Status s = Status_new();
   if (!opts_map.empty()) {
     // There are options in the map.
     // Save the current configuration in curr_opts and then configure the
@@ -681,7 +681,7 @@ Status Configurable::GetOptionsMap(
     std::unordered_map<std::string, std::string>* props) {
   assert(id);
   assert(props);
-  Status status;
+  Status status = Status_new();
   if (value.empty() || value == kNullptrString) {
     *id = default_id;
   } else if (value.find('=') == std::string::npos) {

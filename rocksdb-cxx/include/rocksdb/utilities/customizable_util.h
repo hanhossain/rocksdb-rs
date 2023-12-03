@@ -54,8 +54,7 @@ static Status NewSharedObject(
     const std::unordered_map<std::string, std::string>& opt_map,
     std::shared_ptr<T>* result) {
   if (!id.empty()) {
-    Status status;
-    status = config_options.registry->NewSharedObject(id, result);
+    Status status = config_options.registry->NewSharedObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
       status = Status_OK();
     } else if (status.ok()) {

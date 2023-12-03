@@ -6,6 +6,7 @@
 #pragma once
 
 #include <atomic>
+#include <iostream>
 #include <limits>
 
 #include "rocksdb/system_clock.h"
@@ -23,6 +24,7 @@ class MockSystemClock : public SystemClockWrapper {
   static const char* kClassName() { return "MockSystemClock"; }
   const char* Name() const override { return kClassName(); }
   virtual Status GetCurrentTime(int64_t* time_sec) override {
+      std::cout << "MockSystemClock::GetCurrentTime" << std::endl;
     assert(time_sec != nullptr);
     *time_sec = static_cast<int64_t>(current_time_us_ / kMicrosInSecond);
     return Status_OK();

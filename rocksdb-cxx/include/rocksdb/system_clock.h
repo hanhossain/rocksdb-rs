@@ -9,6 +9,7 @@
 #pragma once
 #include <stdint.h>
 
+#include <iostream>
 #include <memory>
 
 #include "rocksdb/customizable.h"
@@ -100,6 +101,7 @@ class SystemClockWrapper : public SystemClock {
   }
 
   Status GetCurrentTime(int64_t* unix_time) override {
+      std::cout << "SystemClockWrapper" << std::endl;
     return target_->GetCurrentTime(unix_time);
   }
 
