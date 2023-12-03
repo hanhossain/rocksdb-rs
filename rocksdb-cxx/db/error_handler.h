@@ -10,10 +10,8 @@
 #include "rocksdb/listener.h"
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/lib.h"
 #include "rocksdb-rs-cxx/status.h"
 #else
-#include "rocksdb-rs/src/lib.rs.h"
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
@@ -48,13 +46,12 @@ class ErrorHandler {
         recovery_in_prog_(false),
         soft_error_no_bg_work_(false),
         is_db_stopped_(false),
-        bg_error_stats_(db_options.statistics) {
-  }
+        bg_error_stats_(db_options.statistics) {}
 
   void EnableAutoRecovery() { auto_recovery_ = true; }
 
-  Severity GetErrorSeverity(BackgroundErrorReason reason,
-                                    Code code, SubCode subcode);
+  Severity GetErrorSeverity(BackgroundErrorReason reason, Code code,
+                            SubCode subcode);
 
   const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
 
@@ -69,9 +66,8 @@ class ErrorHandler {
   bool IsBGWorkStopped() {
     assert(db_mutex_);
     db_mutex_->AssertHeld();
-    return !bg_error_.ok() &&
-           (bg_error_.severity() >= Severity::kHardError ||
-            !auto_recovery_ || soft_error_no_bg_work_);
+    return !bg_error_.ok() && (bg_error_.severity() >= Severity::kHardError ||
+                               !auto_recovery_ || soft_error_no_bg_work_);
   }
 
   bool IsSoftErrorNoBGWork() { return soft_error_no_bg_work_; }

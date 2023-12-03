@@ -53,32 +53,34 @@ class IOStatus {
   void SetRetryable(bool retryable) { status_.retryable = retryable; }
   void SetDataLoss(bool data_loss) { status_.data_loss = data_loss; }
   void SetScope(IOErrorScope scope) {
-      status_.scope = static_cast<unsigned char>(scope);
+    status_.scope = static_cast<unsigned char>(scope);
   }
 
   bool GetRetryable() const { return status_.retryable; }
   bool GetDataLoss() const { return status_.data_loss; }
-  IOErrorScope GetScope() const { return static_cast<IOErrorScope>(status_.scope); }
+  IOErrorScope GetScope() const {
+    return static_cast<IOErrorScope>(status_.scope);
+  }
 
-    bool ok() const { return status_.ok(); }
-    bool IsNotFound() const { return status_.IsNotFound(); }
-    bool IsNotSupported() const { return status_.IsNotSupported(); }
-    bool IsIncomplete() const { return status_.IsIncomplete(); }
-    bool IsCorruption() const { return status_.IsCorruption(); }
-    bool IsBusy() const { return status_.IsBusy(); }
-    bool IsIOFenced() const { return status_.IsIOFenced(); }
-    bool IsIOError() const { return status_.IsIOError(); }
-    bool IsShutdownInProgress() const { return status_.IsShutdownInProgress(); }
-    bool IsColumnFamilyDropped() const { return status_.IsColumnFamilyDropped(); }
-    bool IsTryAgain() const { return status_.IsTryAgain(); }
-    bool IsAborted() const { return status_.IsAborted(); }
-    bool IsPathNotFound() const { return status_.IsPathNotFound(); }
-    bool IsInvalidArgument() const { return status_.IsInvalidArgument(); }
-    operator Status() const { return status_.Clone(); }
+  bool ok() const { return status_.ok(); }
+  bool IsNotFound() const { return status_.IsNotFound(); }
+  bool IsNotSupported() const { return status_.IsNotSupported(); }
+  bool IsIncomplete() const { return status_.IsIncomplete(); }
+  bool IsCorruption() const { return status_.IsCorruption(); }
+  bool IsBusy() const { return status_.IsBusy(); }
+  bool IsIOFenced() const { return status_.IsIOFenced(); }
+  bool IsIOError() const { return status_.IsIOError(); }
+  bool IsShutdownInProgress() const { return status_.IsShutdownInProgress(); }
+  bool IsColumnFamilyDropped() const { return status_.IsColumnFamilyDropped(); }
+  bool IsTryAgain() const { return status_.IsTryAgain(); }
+  bool IsAborted() const { return status_.IsAborted(); }
+  bool IsPathNotFound() const { return status_.IsPathNotFound(); }
+  bool IsInvalidArgument() const { return status_.IsInvalidArgument(); }
+  operator Status() const { return status_.Clone(); }
 
-    SubCode subcode() const { return status_.subcode(); }
-    std::string ToString() const { return status_.ToString()->c_str(); }
-    const char* getState() const { return status_.getState()->c_str(); }
+  SubCode subcode() const { return status_.subcode(); }
+  std::string ToString() const { return status_.ToString()->c_str(); }
+  const char* getState() const { return status_.getState()->c_str(); }
 
   // Return a success status.
   static IOStatus OK() { return IOStatus(); }
@@ -121,7 +123,9 @@ class IOStatus {
     return IOStatus(Code::kIOError, msg);
   }
 
-  static IOStatus Busy(SubCode msg = SubCode::kNone) { return IOStatus(Code::kBusy, msg); }
+  static IOStatus Busy(SubCode msg = SubCode::kNone) {
+    return IOStatus(Code::kBusy, msg);
+  }
   static IOStatus Busy(const Slice& msg, const Slice& msg2 = Slice()) {
     return IOStatus(Code::kBusy, msg, msg2);
   }
@@ -133,17 +137,23 @@ class IOStatus {
     return IOStatus(Code::kTimedOut, msg, msg2);
   }
 
-  static IOStatus NoSpace() { return IOStatus(Code::kIOError, SubCode::kNoSpace); }
+  static IOStatus NoSpace() {
+    return IOStatus(Code::kIOError, SubCode::kNoSpace);
+  }
   static IOStatus NoSpace(const Slice& msg, const Slice& msg2 = Slice()) {
     return IOStatus(Code::kIOError, SubCode::kNoSpace, msg, msg2);
   }
 
-  static IOStatus PathNotFound() { return IOStatus(Code::kIOError, SubCode::kPathNotFound); }
+  static IOStatus PathNotFound() {
+    return IOStatus(Code::kIOError, SubCode::kPathNotFound);
+  }
   static IOStatus PathNotFound(const Slice& msg, const Slice& msg2 = Slice()) {
     return IOStatus(Code::kIOError, SubCode::kPathNotFound, msg, msg2);
   }
 
-  static IOStatus IOFenced() { return IOStatus(Code::kIOError, SubCode::kIOFenced); }
+  static IOStatus IOFenced() {
+    return IOStatus(Code::kIOError, SubCode::kIOFenced);
+  }
   static IOStatus IOFenced(const Slice& msg, const Slice& msg2 = Slice()) {
     return IOStatus(Code::kIOError, SubCode::kIOFenced, msg, msg2);
   }
@@ -160,12 +170,13 @@ class IOStatus {
   // std::string ToString() const;
 
  private:
-    Status status_;
+  Status status_;
 
   friend IOStatus status_to_io_status(Status&&);
 
   explicit IOStatus(Code _code, SubCode _subcode = SubCode::kNone) {
-      status_ = Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem);
+    status_ =
+        Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem);
   }
 
   IOStatus(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
@@ -175,31 +186,28 @@ class IOStatus {
 
 inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
                           const Slice& msg2) {
-    status_ = Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem);
-    assert(status_.code_ != Code::kOk);
-    assert(status_.subcode_ != SubCode::kMaxSubCode);
-    const size_t len1 = msg.size();
-    const size_t len2 = msg2.size();
-    const size_t size = len1 + (len2 ? (2 + len2) : 0);
-    char* const result = new char[size + 1];  // +1 for null terminator
-    memcpy(result, msg.data(), len1);
-    if (len2) {
-        result[len1] = ':';
-        result[len1 + 1] = ' ';
-        memcpy(result + len1 + 2, msg2.data(), len2);
-    }
-    result[size] = '\0';  // null terminator for C style string
-    status_.state = std::make_unique<std::string>(result);
+  status_ = Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem);
+  assert(status_.code_ != Code::kOk);
+  assert(status_.subcode_ != SubCode::kMaxSubCode);
+  const size_t len1 = msg.size();
+  const size_t len2 = msg2.size();
+  const size_t size = len1 + (len2 ? (2 + len2) : 0);
+  char* const result = new char[size + 1];  // +1 for null terminator
+  memcpy(result, msg.data(), len1);
+  if (len2) {
+    result[len1] = ':';
+    result[len1 + 1] = ' ';
+    memcpy(result + len1 + 2, msg2.data(), len2);
+  }
+  result[size] = '\0';  // null terminator for C style string
+  status_.state = std::make_unique<std::string>(result);
 }
 
 inline IOStatus::IOStatus(const IOStatus& s) {
-    status_ = Status_new(
-        s.status_.code_,
-        s.status_.subcode_,
-        s.status_.retryable,
-        s.status_.data_loss,
-        s.status_.scope);
-    status_.state = s.status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.state);
+  status_ = Status_new(s.status_.code_, s.status_.subcode_, s.status_.retryable,
+                       s.status_.data_loss, s.status_.scope);
+  status_.state =
+      s.status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.state);
 }
 
 inline IOStatus& IOStatus::operator=(const IOStatus& s) {
@@ -211,7 +219,9 @@ inline IOStatus& IOStatus::operator=(const IOStatus& s) {
     status_.retryable = s.status_.retryable;
     status_.data_loss = s.status_.data_loss;
     status_.scope = s.status_.scope;
-      status_.state = s.status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.state);
+    status_.state = s.status_.state == nullptr
+                        ? nullptr
+                        : Status_CopyState(*s.status_.state);
   }
   return *this;
 }

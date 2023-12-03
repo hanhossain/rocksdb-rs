@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include <string>
 
 #include "db/compaction/compaction.h"
@@ -14,9 +13,9 @@
 #include "rocksdb/sst_file_manager.h"
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/lib.h"
+#include "rocksdb-rs-cxx/status.h"
 #else
-#include "rocksdb-rs/src/lib.rs.h"
+#include "rocksdb-rs/src/status.rs.h"
 #endif
 
 namespace ROCKSDB_NAMESPACE {
@@ -149,9 +148,7 @@ class SstFileManagerImpl : public SstFileManager {
   void OnDeleteFileImpl(const std::string& file_path);
 
   void ClearError();
-  bool CheckFreeSpace() {
-    return bg_err_.severity() == Severity::kSoftError;
-  }
+  bool CheckFreeSpace() { return bg_err_.severity() == Severity::kSoftError; }
 
   std::shared_ptr<SystemClock> clock_;
   std::shared_ptr<FileSystem> fs_;
@@ -196,4 +193,3 @@ class SstFileManagerImpl : public SstFileManager {
 };
 
 }  // namespace ROCKSDB_NAMESPACE
-

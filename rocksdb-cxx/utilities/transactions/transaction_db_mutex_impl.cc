@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/transaction_db_mutex_impl.h"
 
 #include <chrono>
@@ -136,4 +135,3 @@ Status TransactionDBCondVarImpl::WaitFor(
 }
 
 }  // namespace ROCKSDB_NAMESPACE
-
