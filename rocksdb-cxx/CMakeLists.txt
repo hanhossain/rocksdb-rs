@@ -71,6 +71,13 @@ if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
+find_program(SCCACHE sccache)
+if(SCCACHE)
+  set(CMAKE_C_COMPILER_LAUNCHER ${SCCACHE})
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${SCCACHE})
+  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded)
+endif()
+
 option(WITH_JEMALLOC "build with JeMalloc" OFF)
 option(WITH_LIBURING "build with liburing" ON)
 option(WITH_SNAPPY "build with SNAPPY" OFF)
@@ -1103,7 +1110,7 @@ configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
 corrosion_set_env_vars(rocksdb-rs SKIP_BUILD_SCRIPT=1)
-corrosion_add_cxxbridge(rocksdb-rs-cxx CRATE rocksdb-rs FILES lib.rs slice.rs status.rs)
+corrosion_add_cxxbridge(rocksdb-rs-cxx CRATE rocksdb-rs FILES env.rs lib.rs slice.rs status.rs)
 target_include_directories(rocksdb-rs-cxx PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})
