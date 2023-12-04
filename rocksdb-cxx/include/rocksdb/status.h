@@ -21,11 +21,13 @@
 
 #include "rocksdb/slice.h"
 
-namespace ROCKSDB_NAMESPACE {
-enum class Code : unsigned char;
-enum class SubCode : unsigned char;
-enum class Severity : unsigned char;
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
+namespace ROCKSDB_NAMESPACE {
 class Status {
  public:
   // Create a success status.
@@ -40,7 +42,6 @@ class Status {
   bool operator!=(const Status& rhs) const;
 
   Code code() const;
-
   SubCode subcode() const;
 
   Status(const Status& s, Severity sev);
@@ -146,21 +147,16 @@ class Status {
     Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
     Status(Code _code, const Slice& msg, const Slice& msg2);
 
-  Code code_;
-  SubCode subcode_;
-  Severity sev_;
-  bool retryable_;
-  bool data_loss_;
-  unsigned char scope_;
-  // A nullptr state_ (which is at least the case for OK) means the extra
-  // message is empty.
-  std::unique_ptr<const char[]> state_;
+  RsStatus rs_status_;
 
   explicit Status(Code _code);
   explicit Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
                   unsigned char scope);
 
   Status(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2, Severity sev);
+
+    // Only used to migrate Status to rust
+    Status(RsStatus _rs_status);
 };
 
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
@@ -175,84 +171,104 @@ class Status {
     Status Status_OkOverwritten();
 
     // Return error status of an appropriate type.
-    Status Status_NotFound(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_NotFound(const Slice& msg, const Slice& msg2);
+    Status Status_NotFound(const Slice& msg);
 
     // Fast path for not found without malloc;
     Status Status_NotFound(SubCode msg);
     Status Status_NotFound();
 
-    Status Status_NotFound(SubCode sc, const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_NotFound(SubCode sc, const Slice& msg, const Slice& msg2);
+    Status Status_NotFound(SubCode sc, const Slice& msg);
 
     Status Status_Corruption(const Slice& msg, const Slice& msg2 = Slice());
     Status Status_Corruption(SubCode msg);
     Status Status_Corruption();
 
-    Status Status_NotSupported(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_NotSupported(const Slice& msg, const Slice& msg2);
+    Status Status_NotSupported(const Slice& msg);
     Status Status_NotSupported(SubCode msg);
     Status Status_NotSupported();
 
-    Status Status_InvalidArgument(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_InvalidArgument(const Slice& msg, const Slice& msg2);
+    Status Status_InvalidArgument(const Slice& msg);
     Status Status_InvalidArgument(SubCode msg);
     Status Status_InvalidArgument();
 
-    Status Status_IOError(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_IOError(const Slice& msg, const Slice& msg2);
+    Status Status_IOError(const Slice& msg);
     Status Status_IOError(SubCode msg);
     Status Status_IOError();
 
-    Status Status_MergeInProgress(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_MergeInProgress(const Slice& msg, const Slice& msg2);
+    Status Status_MergeInProgress(const Slice& msg);
     Status Status_MergeInProgress(SubCode msg);
     Status Status_MergeInProgress();
 
-    Status Status_Incomplete(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_Incomplete(const Slice& msg, const Slice& msg2);
+    Status Status_Incomplete(const Slice& msg);
     Status Status_Incomplete(SubCode msg);
     Status Status_Incomplete();
 
     Status Status_ShutdownInProgress(SubCode msg);
     Status Status_ShutdownInProgress();
-    Status Status_ShutdownInProgress(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_ShutdownInProgress(const Slice& msg, const Slice& msg2);
+    Status Status_ShutdownInProgress(const Slice& msg);
+
     Status Status_Aborted(SubCode msg);
     Status Status_Aborted();
-    Status Status_Aborted(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_Aborted(const Slice& msg, const Slice& msg2);
+    Status Status_Aborted(const Slice& msg);
 
     Status Status_Busy(SubCode msg);
     Status Status_Busy();
-    Status Status_Busy(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_Busy(const Slice& msg, const Slice& msg2);
+    Status Status_Busy(const Slice& msg);
 
     Status Status_TimedOut(SubCode msg);
     Status Status_TimedOut();
-    Status Status_TimedOut(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_TimedOut(const Slice& msg, const Slice& msg2);
+    Status Status_TimedOut(const Slice& msg);
 
     Status Status_Expired(SubCode msg);
     Status Status_Expired();
-    Status Status_Expired(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_Expired(const Slice& msg, const Slice& msg2);
+    Status Status_Expired(const Slice& msg);
 
     Status Status_TryAgain(SubCode msg);
     Status Status_TryAgain();
-    Status Status_TryAgain(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_TryAgain(const Slice& msg, const Slice& msg2);
+    Status Status_TryAgain(const Slice& msg);
 
     Status Status_CompactionTooLarge(SubCode msg);
     Status Status_CompactionTooLarge();
-    Status Status_CompactionTooLarge(const Slice& msg,
-                                   const Slice& msg2 = Slice());
+    Status Status_CompactionTooLarge(const Slice& msg, const Slice& msg2);
+    Status Status_CompactionTooLarge(const Slice& msg);
 
     Status Status_ColumnFamilyDropped(SubCode msg);
     Status Status_ColumnFamilyDropped();
-    Status Status_ColumnFamilyDropped(const Slice& msg,
-                                    const Slice& msg2 = Slice());
+    Status Status_ColumnFamilyDropped(const Slice& msg, const Slice& msg2);
+    Status Status_ColumnFamilyDropped(const Slice& msg);
 
     Status Status_NoSpace();
-    Status Status_NoSpace(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_NoSpace(const Slice& msg, const Slice& msg2);
+    Status Status_NoSpace(const Slice& msg);
 
     Status Status_MemoryLimit();
-    Status Status_MemoryLimit(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_MemoryLimit(const Slice& msg, const Slice& msg2);
+    Status Status_MemoryLimit(const Slice& msg);
 
     Status Status_SpaceLimit();
-    Status Status_SpaceLimit(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_SpaceLimit(const Slice& msg, const Slice& msg2);
+    Status Status_SpaceLimit(const Slice& msg);
 
     Status Status_PathNotFound();
-    Status Status_PathNotFound(const Slice& msg, const Slice& msg2 = Slice());
+    Status Status_PathNotFound(const Slice& msg, const Slice& msg2);
+    Status Status_PathNotFound(const Slice& msg);
 
     Status Status_TxnNotPrepared();
-    Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2 = Slice());
-    std::unique_ptr<const char[]> Status_CopyState(const char* s);
+    Status Status_TxnNotPrepared(const Slice& msg, const Slice& msg2);
+    Status Status_TxnNotPrepared(const Slice& msg);
+
+    std::unique_ptr<std::string> Status_CopyState(const std::string& s);
 }  // namespace ROCKSDB_NAMESPACE

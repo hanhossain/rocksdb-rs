@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <string_view>  // RocksDB now requires C++17 support
 
@@ -94,6 +95,10 @@ class Slice {
   // Return a string_view that references the same data as this slice.
   std::string_view ToStringView() const {
     return std::string_view(data_, size_);
+  }
+
+  std::unique_ptr<std::string> ToUniquePtrString() const {
+      return std::make_unique<std::string>(data_, size_);
   }
 
   // Decodes the current slice interpreted as an hexadecimal string into result,

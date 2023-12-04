@@ -223,6 +223,7 @@ const SOURCES: &[&str] = &[
     "util/async_file_reader.cc",
     "util/cleanable.cc",
     "util/coding.cc",
+    "util/common_ffi.cc",
     "util/compaction_job_stats_impl.cc",
     "util/comparator.cc",
     "util/compression.cc",
@@ -335,7 +336,7 @@ fn main() {
     // This will be set when building rocksdb-rs from cmake.
     let skip_build_script = std::env::var("SKIP_BUILD_SCRIPT").map_or(false, |x| x == "1");
 
-    let bridges = vec!["src/env.rs"];
+    let bridges = vec!["src/env.rs", "src/lib.rs", "src/slice.rs", "src/status.rs"];
 
     if !skip_build_script {
         let target = std::env::var("TARGET").unwrap();
@@ -387,6 +388,6 @@ fn main() {
     println!("cargo:rerun-if-changed=build_version.cc");
 
     for bridge in bridges {
-        println!("cargo:rerun-if-changed=src/{bridge}");
+        println!("cargo:rerun-if-changed={bridge}");
     }
 }
