@@ -12,6 +12,7 @@ env:
   CC: clang
   CXX: clang++
   CTEST_OUTPUT_ON_FAILURE: ON
+  SCCACHE_GHA_ENABLED: "true"
 
 jobs:
   basic-test:
@@ -29,10 +30,14 @@ jobs:
           cpus: 3
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
 
     - name: Install dependencies
       run: ${{ matrix.deps }}
+
+    - name: Run sccache-cache
+      uses: mozilla-actions/sccache-action@v0.0.3
 
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
@@ -64,10 +69,14 @@ jobs:
           cpus: 3
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
 
     - name: Install dependencies
       run: ${{ matrix.deps }}
+
+    - name: Run sccache-cache
+      uses: mozilla-actions/sccache-action@v0.0.3
 
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
@@ -95,9 +104,12 @@ jobs:
         - os: macos-latest
           deps: brew install ninja gflags
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
     - name: Install dependencies
       run: ${{ matrix.deps }}
+    - name: Run sccache-cache
+      uses: mozilla-actions/sccache-action@v0.0.3
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
     - name: Configure CMake
