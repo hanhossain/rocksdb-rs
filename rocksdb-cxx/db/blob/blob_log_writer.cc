@@ -68,7 +68,7 @@ Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
   std::string str;
   footer.EncodeTo(&str);
 
-  Status s;
+  Status s = Status_new();
   if (dest_->seen_error()) {
     return Status_IOError("Seen Error. Skip closing.");
   } else {

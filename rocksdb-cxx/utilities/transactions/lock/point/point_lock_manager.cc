@@ -254,7 +254,7 @@ Status PointLockManager::AcquireWithTimeout(
     PessimisticTransaction* txn, LockMap* lock_map, LockMapStripe* stripe,
     ColumnFamilyId column_family_id, const std::string& key, Env* env,
     int64_t timeout, const LockInfo& lock_info) {
-  Status result;
+  Status result = Status_new();
   uint64_t end_time = 0;
 
   if (timeout > 0) {
@@ -479,7 +479,7 @@ Status PointLockManager::AcquireLocked(LockMap* lock_map, LockMapStripe* stripe,
                                        autovector<TransactionID>* txn_ids) {
   assert(txn_lock_info.txn_ids.size() == 1);
 
-  Status result;
+  Status result = Status_new();
   // Check if this key is already locked
   auto stripe_iter = stripe->keys.find(key);
   if (stripe_iter != stripe->keys.end()) {

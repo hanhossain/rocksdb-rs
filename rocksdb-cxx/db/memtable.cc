@@ -1588,7 +1588,7 @@ Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
           }
           return Status_OK();
         } else if (status == UpdateStatus::UPDATED) {
-          Status s;
+          Status s = Status_new();
           if (kv_prot_info != nullptr) {
             ProtectionInfoKVOS64 updated_kv_prot_info(*kv_prot_info);
             updated_kv_prot_info.UpdateV(delta, str_value);

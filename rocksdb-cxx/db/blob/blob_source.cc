@@ -163,7 +163,7 @@ Status BlobSource::GetBlob(const ReadOptions& read_options,
                            PinnableSlice* value, uint64_t* bytes_read) {
   assert(value);
 
-  Status s;
+  Status s = Status_new();
 
   const CacheKey cache_key = GetCacheKey(file_number, file_size, offset);
 

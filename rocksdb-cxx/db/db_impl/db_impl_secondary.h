@@ -24,7 +24,8 @@ class LogReaderContainer {
                      std::unique_ptr<SequentialFileReader>&& file_reader,
                      uint64_t log_number) {
     LogReporter* reporter = new LogReporter();
-    status_ = new Status();
+    // TODO: This will probably cause issues when moving Status to pure rust. Try using a unique_ptr instead.
+    status_ = new Status(RsStatus_new());
     reporter->env = env;
     reporter->info_log = info_log.get();
     reporter->fname = std::move(fname);

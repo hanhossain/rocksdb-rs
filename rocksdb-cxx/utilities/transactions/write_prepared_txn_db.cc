@@ -320,7 +320,7 @@ std::vector<Status> WritePreparedTxnDB::MultiGet(
   size_t num_keys = keys.size();
   values->resize(num_keys);
 
-  std::vector<Status> stat_list(num_keys);
+  std::vector<Status> stat_list(num_keys, Status_new());
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = this->Get(options, column_family[i], keys[i], &(*values)[i]);
   }

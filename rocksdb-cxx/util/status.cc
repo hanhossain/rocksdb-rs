@@ -25,17 +25,6 @@
 #endif
 
 namespace ROCKSDB_NAMESPACE {
-// Create a success status.
-Status::Status()
-    : rs_status_(RsStatus_new(
-              Code::kOk,
-              SubCode::kNone,
-              Severity::kNoError,
-              false,
-              false,
-              0,
-              nullptr)) {}
-
 Status::Status(RsStatus _rs_status) : rs_status_(std::move(_rs_status)) {}
 
 
@@ -57,6 +46,8 @@ Severity Status::severity() const {
 const char* Status::getState() const {
     return rs_status_.getState() == nullptr ? nullptr : rs_status_.getState()->c_str();
 }
+
+Status Status_new() { return Status(RsStatus_new()); }
 
 Status Status_OK() { return Status(RsStatus_OK()); }
 

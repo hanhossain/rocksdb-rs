@@ -1054,7 +1054,7 @@ Status CTREncryptionProvider::CreateNewPrefix(const std::string& /*fname*/,
   // Encrypt the prefix, starting from block 2 (leave block 0, 1 with initial
   // counter & IV unencrypted)
   CTRCipherStream cipherStream(cipher_, prefixIV.data(), initialCounter);
-  Status status;
+  Status status = Status_new();
   {
     PERF_TIMER_GUARD(encrypt_data_nanos);
     status = cipherStream.Encrypt(0, prefix + (2 * blockSize),
@@ -1097,7 +1097,7 @@ Status CTREncryptionProvider::CreateCipherStream(
   // Decrypt the encrypted part of the prefix, starting from block 2 (block 0, 1
   // with initial counter & IV are unencrypted)
   CTRCipherStream cipherStream(cipher_, iv.data(), initialCounter);
-  Status status;
+  Status status = Status_new();
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
     status = cipherStream.Decrypt(0, (char*)prefix.data() + (2 * blockSize),

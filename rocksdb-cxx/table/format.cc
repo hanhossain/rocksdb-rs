@@ -363,7 +363,7 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
   uint64_t read_offset = (file_size > Footer::kMaxEncodedLength)
                              ? file_size - Footer::kMaxEncodedLength
                              : 0;
-  Status s;
+  Status s = Status_new();
   // TODO: Need to pass appropriate deadline to TryReadFromCache(). Right now,
   // there is no readahead for point lookups, so TryReadFromCache will fail if
   // the required data is not in the prefetch buffer. Once deadline is enabled

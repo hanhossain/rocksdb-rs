@@ -74,7 +74,7 @@ Status OptimisticTransactionDB::Open(
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles,
     OptimisticTransactionDB** dbptr) {
-  Status s;
+  Status s = Status_new();
   DB* db;
 
   std::vector<ColumnFamilyDescriptor> column_families_copy = column_families;

@@ -223,7 +223,7 @@ Status TransactionDB::Open(
     const std::string& dbname,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles, TransactionDB** dbptr) {
-  Status s;
+  Status s = Status_new();
   DB* db = nullptr;
   if (txn_db_options.write_policy == WRITE_COMMITTED &&
       db_options.unordered_write) {

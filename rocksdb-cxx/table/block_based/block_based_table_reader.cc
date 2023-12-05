@@ -151,7 +151,7 @@ Status ReadAndParseBlockFromFile(
       /*do_uncompress*/ maybe_compressed, maybe_compressed,
       TBlocklike::kBlockType, uncompression_dict, cache_options,
       memory_allocator, nullptr, for_compaction);
-  Status s;
+  Status s = Status_new();
   // If prefetch_buffer is not allocated, it will fallback to synchronous
   // reading of block contents.
   if (async_read && prefetch_buffer != nullptr) {
@@ -574,7 +574,7 @@ Status BlockBasedTable::Open(
     const bool user_defined_timestamps_persisted) {
   table_reader->reset();
 
-  Status s;
+  Status s = Status_new();
   Footer footer;
   std::unique_ptr<FilePrefetchBuffer> prefetch_buffer;
 
@@ -891,9 +891,8 @@ Status BlockBasedTable::PrefetchTail(
 Status BlockBasedTable::ReadPropertiesBlock(
     const ReadOptions& ro, FilePrefetchBuffer* prefetch_buffer,
     InternalIterator* meta_iter, const SequenceNumber largest_seqno) {
-  Status s;
   BlockHandle handle;
-  s = FindOptionalMetaBlock(meta_iter, kPropertiesBlockName, &handle);
+  Status s = FindOptionalMetaBlock(meta_iter, kPropertiesBlockName, &handle);
 
   if (!s.ok()) {
     ROCKS_LOG_WARN(rep_->ioptions.logger,
@@ -976,16 +975,15 @@ Status BlockBasedTable::ReadRangeDelBlock(
     InternalIterator* meta_iter,
     const InternalKeyComparator& internal_comparator,
     BlockCacheLookupContext* lookup_context) {
-  Status s;
   BlockHandle range_del_handle;
-  s = FindOptionalMetaBlock(meta_iter, kRangeDelBlockName, &range_del_handle);
+  Status s = FindOptionalMetaBlock(meta_iter, kRangeDelBlockName, &range_del_handle);
   if (!s.ok()) {
     ROCKS_LOG_WARN(
         rep_->ioptions.logger,
         "Error when seeking to range delete tombstones block from file: %s",
         s.ToString().c_str());
   } else if (!range_del_handle.IsNull()) {
-    Status tmp_status;
+    Status tmp_status = Status_new();
     std::unique_ptr<InternalIterator> iter(NewDataBlockIterator<DataBlockIter>(
         read_options, range_del_handle,
         /*input_iter=*/nullptr, BlockType::kRangeDeletion,
@@ -1318,7 +1316,7 @@ WithBlocklikeCheck<Status, TBlocklike> BlockBasedTable::GetDataBlockFromCache(
   assert(out_parsed_block);
   assert(out_parsed_block->IsEmpty());
 
-  Status s;
+  Status s = Status_new();
   Statistics* statistics = rep_->ioptions.statistics.get();
 
   // Lookup uncompressed cache first
@@ -1362,7 +1360,7 @@ WithBlocklikeCheck<Status, TBlocklike> BlockBasedTable::PutDataBlockToCache(
   assert(out_parsed_block);
   assert(out_parsed_block->IsEmpty());
 
-  Status s;
+  Status s = Status_new();
   Statistics* statistics = ioptions.stats;
 
   std::unique_ptr<TBlocklike> block_holder;
@@ -1498,7 +1496,7 @@ BlockBasedTable::MaybeReadBlockAndLoadToCache(
   // First, try to get the block from the cache
   //
   // If either block cache is enabled, we'll try to read from it.
-  Status s;
+  Status s = Status_new();
   CacheKey key_data;
   Slice key;
   bool is_cache_hit = false;
@@ -1708,7 +1706,7 @@ WithBlocklikeCheck<Status, TBlocklike> BlockBasedTable::RetrieveBlock(
   assert(out_parsed_block);
   assert(out_parsed_block->IsEmpty());
 
-  Status s;
+  Status s = Status_new();
   if (use_cache) {
     s = MaybeReadBlockAndLoadToCache(
         prefetch_buffer, ro, handle, uncompression_dict, for_compaction,
@@ -2099,7 +2097,7 @@ Status BlockBasedTable::Get(const ReadOptions& read_options, const Slice& key,
   }
   assert(key.size() >= 8);  // key must be internal key
   assert(get_context != nullptr);
-  Status s;
+  Status s = Status_new();
   const bool no_io = read_options.read_tier == kBlockCacheTier;
 
   FilterBlockReader* const filter =
@@ -2162,7 +2160,7 @@ Status BlockBasedTable::Get(const ReadOptions& read_options, const Slice& key,
       bool does_referenced_key_exist = false;
       DataBlockIter biter;
       uint64_t referenced_data_size = 0;
-      Status tmp_status;
+      Status tmp_status = Status_new();
       NewDataBlockIterator<DataBlockIter>(
           read_options, v.handle, &biter, BlockType::kData, get_context,
           &lookup_data_block_context, /*prefetch_buffer=*/nullptr,
@@ -2331,7 +2329,7 @@ Status BlockBasedTable::Prefetch(const ReadOptions& read_options,
 
     // Load the block specified by the block_handle into the block cache
     DataBlockIter biter;
-    Status tmp_status;
+    Status tmp_status = Status_new();
     NewDataBlockIterator<DataBlockIter>(
         read_options, block_handle, &biter, /*type=*/BlockType::kData,
         /*get_context=*/nullptr, &lookup_context,
@@ -2349,7 +2347,7 @@ Status BlockBasedTable::Prefetch(const ReadOptions& read_options,
 
 Status BlockBasedTable::VerifyChecksum(const ReadOptions& read_options,
                                        TableReaderCaller caller) {
-  Status s;
+  Status s = Status_new();
   // Check Meta blocks
   std::unique_ptr<Block> metaindex;
   std::unique_ptr<InternalIterator> metaindex_iter;
@@ -2384,7 +2382,7 @@ Status BlockBasedTable::VerifyChecksum(const ReadOptions& read_options,
 Status BlockBasedTable::VerifyChecksumInBlocks(
     const ReadOptions& read_options,
     InternalIteratorBase<IndexValue>* index_iter) {
-  Status s;
+  Status s = Status_new();
   // We are scanning the whole file, so no need to do exponential
   // increasing of the buffer size.
   size_t readahead_size = (read_options.readahead_size != 0)
@@ -2464,7 +2462,7 @@ BlockType BlockBasedTable::GetBlockTypeForMetaBlockByName(
 
 Status BlockBasedTable::VerifyChecksumInMetaBlocks(
     const ReadOptions& read_options, InternalIteratorBase<Slice>* index_iter) {
-  Status s;
+  Status s = Status_new();
   for (index_iter->SeekToFirst(); index_iter->Valid(); index_iter->Next()) {
     s = index_iter->status();
     if (!s.ok()) {
@@ -2733,7 +2731,7 @@ Status BlockBasedTable::GetKVPairsFromDataBlocks(
     }
 
     std::unique_ptr<InternalIterator> datablock_iter;
-    Status tmp_status;
+    Status tmp_status = Status_new();
     datablock_iter.reset(NewDataBlockIterator<DataBlockIter>(
         read_options, blockhandles_iter->value().handle,
         /*input_iter=*/nullptr, /*type=*/BlockType::kData,
@@ -2972,7 +2970,7 @@ Status BlockBasedTable::DumpDataBlocks(std::ostream& out_stream) {
     out_stream << "--------------------------------------\n";
 
     std::unique_ptr<InternalIterator> datablock_iter;
-    Status tmp_status;
+    Status tmp_status = Status_new();
     datablock_iter.reset(NewDataBlockIterator<DataBlockIter>(
         read_options, blockhandles_iter->value().handle,
         /*input_iter=*/nullptr, /*type=*/BlockType::kData,

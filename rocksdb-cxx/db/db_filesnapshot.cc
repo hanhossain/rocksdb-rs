@@ -173,7 +173,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
   // NOTE: This implementation was largely migrated from Checkpoint.
 
-  Status s;
+  Status s = Status_new();
   VectorLogPtr live_wal_files;
   bool flush_memtable = true;
   if (!immutable_db_options_.allow_2pc) {

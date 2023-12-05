@@ -359,7 +359,7 @@ TraceAnalyzer::~TraceAnalyzer() {}
 // Prepare the processing
 // Initiate the global trace reader and writer here
 Status TraceAnalyzer::PrepareProcessing() {
-  Status s;
+  Status s = Status_new();
   // Prepare the trace reader
   if (trace_reader_ == nullptr) {
     s = NewFileTraceReader(env_, env_options_, trace_name_, &trace_reader_);
@@ -449,7 +449,7 @@ Status TraceAnalyzer::ReadTraceRecord(Trace* trace) {
 // to different operation type handler. With different race
 // format, this function can be changed
 Status TraceAnalyzer::StartProcessing() {
-  Status s;
+  Status s = Status_new();
   Trace header;
   s = ReadTraceHeader(&header);
   if (!s.ok()) {
@@ -509,7 +509,7 @@ Status TraceAnalyzer::StartProcessing() {
 // distribution, these data structures are re-processed here.
 Status TraceAnalyzer::MakeStatistics() {
   int ret;
-  Status s;
+  Status s = Status_new();
   for (int type = 0; type < kTaTypeNum; type++) {
     if (!ta_[type].enabled) {
       continue;
@@ -649,7 +649,7 @@ Status TraceAnalyzer::MakeStatistics() {
 // prefix of the accessed keys if required
 Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceStats& stats) {
   int ret;
-  Status s;
+  Status s = Status_new();
   std::string prefix = "0";
   uint64_t prefix_access = 0;
   uint64_t prefix_count = 0;
@@ -779,7 +779,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
   uint32_t duration =
       static_cast<uint32_t>((end_time_ - begin_time_) / 1000000);
   int ret;
-  Status s;
+  Status s = Status_new();
   std::vector<std::vector<uint32_t>> type_qps(
       duration, std::vector<uint32_t>(kTaTypeNum + 1, 0));
   std::vector<uint64_t> qps_sum(kTaTypeNum + 1, 0);
@@ -991,7 +991,7 @@ Status TraceAnalyzer::MakeStatisticQPS() {
 // also, we output the top k accessed keys here
 Status TraceAnalyzer::ReProcessing() {
   int ret;
-  Status s;
+  Status s = Status_new();
   for (auto& cf_it : cfs_) {
     uint32_t cf_id = cf_it.first;
 
@@ -1149,7 +1149,7 @@ Status TraceAnalyzer::ReProcessing() {
 
 // End the processing, print the requested results
 Status TraceAnalyzer::EndProcessing() {
-  Status s;
+  Status s = Status_new();
   if (trace_sequence_f_) {
     s = trace_sequence_f_->Close();
   }
@@ -1170,7 +1170,7 @@ Status TraceAnalyzer::KeyStatsInsertion(const uint32_t& type,
                                         const std::string& key,
                                         const size_t value_size,
                                         const uint64_t ts) {
-  Status s;
+  Status s = Status_new();
   StatsUnit unit;
   unit.key_id = 0;
   unit.cf_id = cf_id;
@@ -1364,7 +1364,7 @@ Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& unit,
 // the trace analyzer options
 Status TraceAnalyzer::OpenStatsOutputFiles(const std::string& type,
                                            TraceStats& new_stats) {
-  Status s;
+  Status s = Status_new();
   if (FLAGS_output_key_stats) {
     s = CreateOutputFile(type, new_stats.cf_name, "accessed_key_stats.txt",
                          &new_stats.a_key_f);
@@ -1431,7 +1431,7 @@ Status TraceAnalyzer::CreateOutputFile(
   std::string path;
   path = output_path_ + "/" + FLAGS_output_prefix + "-" + type + "-" + cf_name +
          "-" + ending;
-  Status s;
+  Status s = Status_new();
   s = env_->NewWritableFile(path, f_ptr, env_options_);
   if (!s.ok()) {
     fprintf(stderr, "Cannot open file: %s\n", path.c_str());
@@ -1442,7 +1442,7 @@ Status TraceAnalyzer::CreateOutputFile(
 
 // Close the output files in the TraceStats if they are opened
 Status TraceAnalyzer::CloseOutputFiles() {
-  Status s;
+  Status s = Status_new();
   for (int type = 0; type < kTaTypeNum; type++) {
     if (!ta_[type].enabled) {
       continue;
@@ -1625,7 +1625,7 @@ Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,
   assert(cf_ids.size() == keys.size());
   assert(cf_ids.size() == value_sizes.size());
 
-  Status s;
+  Status s = Status_new();
 
   if (FLAGS_convert_to_human_readable_trace && trace_sequence_f_) {
     // DeleteRane only writes the begin_key.

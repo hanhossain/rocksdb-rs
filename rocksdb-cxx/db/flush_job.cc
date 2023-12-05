@@ -277,7 +277,7 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
       }
     }
   }
-  Status s;
+  Status s = Status_new();
   if (mempurge_s.ok()) {
     base_->Unref();
     s = Status_OK();
@@ -365,7 +365,7 @@ void FlushJob::Cancel() {
 }
 
 Status FlushJob::MemPurge() {
-  Status s;
+  Status s = Status_new();
   db_mutex_->AssertHeld();
   db_mutex_->Unlock();
   assert(!mems_.empty());
@@ -660,7 +660,8 @@ bool FlushJob::MemPurgeDecider(double threshold) {
   ParsedInternalKey res;
   SnapshotImpl min_snapshot;
   std::string vget;
-  Status mget_s, parse_s;
+  Status mget_s = Status_new();
+  Status parse_s = Status_new();
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0, sqno = 0,
                  min_seqno_snapshot = 0;
@@ -819,7 +820,7 @@ Status FlushJob::WriteLevel0Table() {
   db_mutex_->AssertHeld();
   const uint64_t start_micros = clock_->NowMicros();
   const uint64_t start_cpu_micros = clock_->CPUMicros();
-  Status s;
+  Status s = Status_new();
 
   SequenceNumber smallest_seqno = mems_.front()->GetEarliestSequenceNumber();
   if (!db_impl_seqno_time_mapping_.Empty()) {

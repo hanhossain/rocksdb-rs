@@ -60,7 +60,7 @@ std::unique_ptr<SecondaryCacheResultHandle> CompressedSecondaryCache::Lookup(
   }
   MemoryAllocator* allocator = cache_options_.memory_allocator.get();
 
-  Status s;
+  Status s = Status_new();
   Cache::ObjectPtr value{nullptr};
   size_t charge{0};
   if (cache_options_.compression_type == kNoCompression ||

@@ -31,7 +31,7 @@ namespace ROCKSDB_NAMESPACE {
 class Status {
  public:
   // Create a success status.
-  Status();
+  Status() = delete;
 
   // Copy the specified status.
   Status(const Status& s);
@@ -161,6 +161,7 @@ class Status {
 
     Status Status_CopyAppendMessage(const Status& s, const Slice& delim, const Slice& msg);
 
+    Status Status_new();
     // Return a success status.
     Status Status_OK();
 

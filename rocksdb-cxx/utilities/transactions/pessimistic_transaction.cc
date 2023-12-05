@@ -389,7 +389,7 @@ Status WriteCommittedTxn::Operate(ColumnFamilyHandle* column_family,
                                   const TKey& key, const bool do_validate,
                                   const bool assume_tracked,
                                   TOperation&& operation) {
-  Status s;
+  Status s = Status_new();
   if constexpr (std::is_same_v<Slice, TKey>) {
     s = TryLock(column_family, key, /*read_only=*/false, /*exclusive=*/true,
                 do_validate, assume_tracked);
@@ -495,7 +495,7 @@ Status PessimisticTransaction::Prepare() {
     return Status_Expired();
   }
 
-  Status s;
+  Status s = Status_new();
   bool can_prepare = false;
 
   if (expiration_time_ > 0) {
@@ -607,7 +607,7 @@ Status PessimisticTransaction::Commit() {
     }
   }
 
-  Status s;
+  Status s = Status_new();
   if (commit_without_prepare) {
     assert(!commit_prepared);
     if (WriteBatchInternal::Count(GetCommitTimeWriteBatch()) > 0) {
@@ -744,7 +744,7 @@ Status WriteCommittedTxn::CommitInternal() {
   // The Memtable will ignore the Commit marker in non-recovery mode
   WriteBatch* working_batch = GetCommitTimeWriteBatch();
 
-  Status s;
+  Status s = Status_new();
   if (!needs_ts) {
     s = WriteBatchInternal::MarkCommit(working_batch, name_);
   } else {
@@ -806,7 +806,7 @@ Status WriteCommittedTxn::CommitInternal() {
 }
 
 Status PessimisticTransaction::Rollback() {
-  Status s;
+  Status s = Status_new();
   if (txn_state_ == PREPARED) {
     txn_state_.store(AWAITING_ROLLBACK);
 
@@ -964,7 +964,7 @@ Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
                                        bool exclusive, const bool do_validate,
                                        const bool assume_tracked) {
   assert(!assume_tracked || !do_validate);
-  Status s;
+  Status s = Status_new();
   if (UNLIKELY(skip_concurrency_control_)) {
     return s;
   }
@@ -1155,7 +1155,7 @@ void PessimisticTransaction::UnlockGetForUpdate(
 }
 
 Status PessimisticTransaction::SetName(const TransactionName& name) {
-  Status s;
+  Status s = Status_new();
   if (txn_state_ == STARTED) {
     if (name_.length()) {
       s = Status_InvalidArgument("Transaction has already been named.");

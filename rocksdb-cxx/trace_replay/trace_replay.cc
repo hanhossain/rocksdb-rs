@@ -71,8 +71,7 @@ Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
   assert(s_vec[2].find("RocksDB Version: ") != std::string::npos);
   db_v_str = s_vec[2].substr(17);
 
-  Status s;
-  s = ParseVersionStr(t_v_str, trace_version);
+  Status s = ParseVersionStr(t_v_str, trace_version);
   if (s != Status_OK()) {
     return s;
   }

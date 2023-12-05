@@ -1152,7 +1152,7 @@ Status ColumnFamilyData::RangesOverlapWithMemtables(
       read_opts, read_seq, false /* immutable_memtable */);
   range_del_agg.AddTombstones(
       std::unique_ptr<FragmentedRangeTombstoneIterator>(active_range_del_iter));
-  Status status;
+  Status status = Status_new();
   status = super_version->imm->AddRangeTombstoneIterators(
       read_opts, nullptr /* arena */, &range_del_agg);
   // AddRangeTombstoneIterators always return Status_OK.
@@ -1340,7 +1340,7 @@ void ColumnFamilyData::ResetThreadLocalSuperVersions() {
 
 Status ColumnFamilyData::ValidateOptions(
     const DBOptions& db_options, const ColumnFamilyOptions& cf_options) {
-  Status s;
+  Status s = Status_new();
   s = CheckCompressionSupported(cf_options);
   if (s.ok() && db_options.allow_concurrent_memtable_write) {
     s = CheckConcurrentWritesSupported(cf_options);
@@ -1481,7 +1481,7 @@ Env::WriteLifeTimeHint ColumnFamilyData::CalculateSSTWriteHint(int level) {
 
 Status ColumnFamilyData::AddDirectories(
     std::map<std::string, std::shared_ptr<FSDirectory>>* created_dirs) {
-  Status s;
+  Status s = Status_new();
   assert(created_dirs != nullptr);
   assert(data_dirs_.empty());
   for (auto& p : ioptions_.cf_paths) {

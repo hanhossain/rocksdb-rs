@@ -20,7 +20,7 @@ namespace ROCKSDB_NAMESPACE {
 // BlockCacheImpl
 //
 Status BlockCacheTier::Open() {
-  Status status;
+  Status status = Status_new();
 
   WriteLock _(&lock_);
 
@@ -194,7 +194,7 @@ void BlockCacheTier::InsertMain() {
     }
 
     size_t retry = 0;
-    Status s;
+    Status s = Status_new();
     while ((s = InsertImpl(Slice(op.key_), Slice(op.data_))).IsTryAgain()) {
       if (retry > kMaxRetry) {
         break;

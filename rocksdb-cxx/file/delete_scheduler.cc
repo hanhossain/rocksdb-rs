@@ -135,7 +135,7 @@ bool DeleteScheduler::IsTrashFile(const std::string& file_path) {
 
 Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
                                          const std::string& path) {
-  Status s;
+  Status s = Status_new();
   // Check if there are any files marked as trash in this path
   std::vector<std::string> files_in_path;
   const auto& fs = env->GetFileSystem();
@@ -152,7 +152,7 @@ Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
       continue;
     }
 
-    Status file_delete;
+    Status file_delete = Status_new();
     std::string trash_file = path + "/" + current_file;
     if (sfm) {
       // We have an SstFileManager that will schedule the file delete
@@ -189,7 +189,7 @@ Status DeleteScheduler::MarkAsTrash(const std::string& file_path,
   // TODO(tec) : Implement Env::RenameFileIfNotExist and remove
   //             file_move_mu mutex.
   int cnt = 0;
-  Status s;
+  Status s = Status_new();
   InstrumentedMutexLock l(&file_move_mu_);
   while (true) {
     s = fs_->FileExists(*trash_file, IOOptions(), nullptr);
@@ -258,7 +258,7 @@ void DeleteScheduler::BackgroundEmptyTrash() {
       }
 
       if (!s.ok()) {
-        bg_errors_[path_in_trash] = s;
+        bg_errors_.insert_or_assign(path_in_trash, s);
       }
 
       // Apply penalty if necessary

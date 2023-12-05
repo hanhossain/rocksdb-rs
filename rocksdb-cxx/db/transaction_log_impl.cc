@@ -31,6 +31,7 @@ TransactionLogIteratorImpl::TransactionLogIteratorImpl(
       io_tracer_(io_tracer),
       started_(false),
       is_valid_(false),
+      current_status_(Status_new()),
       current_file_index_(0),
       current_batch_seq_(0),
       current_last_seq_(0) {
@@ -48,7 +49,7 @@ Status TransactionLogIteratorImpl::OpenLogFile(
   FileSystemPtr fs(options_->fs, io_tracer_);
   std::unique_ptr<FSSequentialFile> file;
   std::string fname;
-  Status s;
+  Status s = Status_new();
   EnvOptions optimized_env_options = fs->OptimizeForLogRead(soptions_);
   if (log_file->Type() == kArchivedLogFile) {
     fname = ArchivedLogFileName(dir_, log_file->LogNumber());

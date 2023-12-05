@@ -491,7 +491,7 @@ Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file,
                                 Footer* footer_out) {
   Footer footer;
   IOOptions opts;
-  Status s;
+  Status s = Status_new();
   s = file->PrepareIOOptions(read_options, opts);
   if (!s.ok()) {
     return s;

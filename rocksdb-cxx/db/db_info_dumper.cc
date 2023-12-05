@@ -36,9 +36,8 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
   Header(options.info_log, "DB SUMMARY\n");
   Header(options.info_log, "DB Session ID:  %s\n", session_id.c_str());
 
-  Status s;
   // Get files in dbname dir
-  s = env->GetChildren(dbname, &files);
+  Status s = env->GetChildren(dbname, &files);
   if (!s.ok()) {
     Error(options.info_log, "Error when reading %s dir %s\n", dbname.c_str(),
           s.ToString().c_str());

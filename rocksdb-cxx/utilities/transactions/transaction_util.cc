@@ -22,7 +22,7 @@ Status TransactionUtil::CheckKeyForConflicts(
     DBImpl* db_impl, ColumnFamilyHandle* column_family, const std::string& key,
     SequenceNumber snap_seq, const std::string* const read_ts, bool cache_only,
     ReadCallback* snap_checker, SequenceNumber min_uncommitted) {
-  Status result;
+  Status result = Status_new();
 
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
@@ -59,7 +59,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
   // So `snap_checker` must be provided.
   assert(min_uncommitted == kMaxSequenceNumber || snap_checker != nullptr);
 
-  Status result;
+  Status result = Status_new();
   bool need_to_read_sst = false;
 
   // Since it would be too slow to check the SST files, we will only use
@@ -152,7 +152,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
 Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_impl,
                                               const LockTracker& tracker,
                                               bool cache_only) {
-  Status result;
+  Status result = Status_new();
 
   std::unique_ptr<LockTracker::ColumnFamilyIterator> cf_it(
       tracker.GetColumnFamilyIterator());

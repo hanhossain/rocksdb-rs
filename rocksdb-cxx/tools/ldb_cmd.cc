@@ -435,7 +435,7 @@ void LDBCommand::OpenDB() {
     options_.merge_operator = MergeOperators::CreateStringAppendOperator(':');
   }
   // Open the DB.
-  Status st;
+  Status st = Status_new();
   std::vector<ColumnFamilyHandle*> handles_opened;
   if (is_db_ttl_) {
     // ldb doesn't yet support TTL DB with multiple column families
@@ -1270,7 +1270,7 @@ void DBLoaderCommand::DoCommand() {
   // prefer ifstream getline performance vs that from std::cin istream
   std::ifstream ifs_stdin("/dev/stdin");
   std::istream* istream_p = ifs_stdin.is_open() ? &ifs_stdin : &std::cin;
-  Status s;
+  Status s = Status_new();
   while (s.ok() && getline(*istream_p, line, '\n')) {
     std::string key;
     std::string value;
@@ -1453,7 +1453,7 @@ Status GetLiveFilesChecksumInfoFromVersionSet(Options options,
                                               const std::string& db_path,
                                               FileChecksumList* checksum_list) {
   EnvOptions sopt;
-  Status s;
+  Status s = Status_new();
   std::string dbname(db_path);
   std::shared_ptr<Cache> tc(NewLRUCache(options.max_open_files - 10,
                                         options.table_cache_numshardbits));
@@ -2300,7 +2300,7 @@ void ReduceDBLevelsCommand::DoCommand() {
     return;
   }
 
-  Status st;
+  Status st = Status_new();
   PrepareOptions();
   int old_level_num = -1;
   st = GetOldNumOfLevels(options_, &old_level_num);
@@ -2878,7 +2878,7 @@ void BatchPutCommand::DoCommand() {
   }
   WriteBatch batch;
 
-  Status st;
+  Status st = Status_new();
   std::stringstream oss;
   for (std::vector<std::pair<std::string, std::string>>::const_iterator itr =
            key_values_.begin();
@@ -3263,7 +3263,7 @@ void DBQuerierCommand::DoCommand() {
   std::string line;
   std::string key;
   std::string value;
-  Status s;
+  Status s = Status_new();
   std::stringstream oss;
   while (s.ok() && getline(std::cin, line, '\n')) {
     // Parse line into std::vector<std::string>
@@ -3503,7 +3503,7 @@ void BackupCommand::Help(std::string& ret) {
 
 void BackupCommand::DoCommand() {
   BackupEngine* backup_engine;
-  Status status;
+  Status status = Status_new();
   if (!db_) {
     assert(GetExecuteState().IsFailed());
     return;
@@ -3568,7 +3568,7 @@ void RestoreCommand::DoCommand() {
   assert(custom_env != nullptr);
 
   std::unique_ptr<BackupEngineReadOnly> restore_engine;
-  Status status;
+  Status status = Status_new();
   {
     BackupEngineOptions opts(backup_dir_, custom_env);
     opts.info_log = logger_.get();
@@ -3684,7 +3684,7 @@ void DBFileDumperCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status s;
+  Status s = Status_new();
 
   // TODO: Use --hex, --key_hex, --value_hex flags consistently for
   // dumping manifest file, sst files and blob files.
@@ -3798,7 +3798,7 @@ void DBLiveFilesMetadataDumperCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status s;
+  Status s = Status_new();
 
   std::vector<ColumnFamilyMetaData> metadata;
   db_->GetAllColumnFamilyMetaData(&metadata);

@@ -137,7 +137,7 @@ void DBImpl::SetRecoverableStatePreReleaseCallback(
 }
 
 Status DBImpl::Write(const WriteOptions& write_options, WriteBatch* my_batch) {
-  Status s;
+  Status s = Status_new();
   if (write_options.protection_bytes_per_key > 0) {
     s = WriteBatchInternal::UpdateProtectionInfo(
         my_batch, write_options.protection_bytes_per_key);
@@ -152,7 +152,7 @@ Status DBImpl::Write(const WriteOptions& write_options, WriteBatch* my_batch) {
 Status DBImpl::WriteWithCallback(const WriteOptions& write_options,
                                  WriteBatch* my_batch,
                                  WriteCallback* callback) {
-  Status s;
+  Status s = Status_new();
   if (write_options.protection_bytes_per_key > 0) {
     s = WriteBatchInternal::UpdateProtectionInfo(
         my_batch, write_options.protection_bytes_per_key);
@@ -361,7 +361,7 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
   }
   // else we are the leader of the write batch group
   assert(w.state == WriteThread::STATE_GROUP_LEADER);
-  Status status;
+  Status status = Status_new();
   // Once reaches this point, the current writer "w" will try to do its write
   // job.  It may also pick up some of the remaining writers in the "writers_"
   // when it finds suitable, and finish them in the same write batch.
@@ -401,7 +401,7 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
       write_thread_.EnterAsBatchGroupLeader(&w, &write_group);
 
   IOStatus io_s;
-  Status pre_release_cb_status;
+  Status pre_release_cb_status = Status_new();
   if (status.ok()) {
     // TODO: this use of operator bool on `tracer_` can avoid unnecessary lock
     // grabs but does not seem thread-safe.
@@ -903,7 +903,7 @@ Status DBImpl::WriteImplWALOnly(
   assert(w.state == WriteThread::STATE_GROUP_LEADER);
 
   if (publish_last_seq == PublishLastSeq::kDoPublishLastSeq) {
-    Status status;
+    Status status = Status_new();
 
     // Currently we only use kDoPublishLastSeq in unordered_write
     assert(immutable_db_options_.unordered_write);
@@ -1002,7 +1002,7 @@ Status DBImpl::WriteImplWALOnly(
     }
     seq_inc = total_batch_cnt;
   }
-  Status status;
+  Status status = Status_new();
   if (!write_options.disableWAL) {
     IOStatus io_s =
         ConcurrentWriteToWAL(write_group, log_used, &last_sequence, seq_inc);
@@ -1144,7 +1144,7 @@ Status DBImpl::PreprocessWrite(const WriteOptions& write_options,
                                LogContext* log_context,
                                WriteContext* write_context) {
   assert(write_context != nullptr && log_context != nullptr);
-  Status status;
+  Status status = Status_new();
 
   if (error_handler_.IsDBStopped()) {
     InstrumentedMutexLock l(&mutex_);
@@ -1603,7 +1603,7 @@ void DBImpl::AssignAtomicFlushSeq(const autovector<ColumnFamilyData*>& cfds) {
 Status DBImpl::SwitchWAL(WriteContext* write_context) {
   mutex_.AssertHeld();
   assert(write_context != nullptr);
-  Status status;
+  Status status = Status_new();
 
   if (alive_log_files_.begin()->getting_flushed) {
     return status;
@@ -1705,7 +1705,7 @@ Status DBImpl::SwitchWAL(WriteContext* write_context) {
 Status DBImpl::HandleWriteBufferManagerFlush(WriteContext* write_context) {
   mutex_.AssertHeld();
   assert(write_context != nullptr);
-  Status status;
+  Status status = Status_new();
 
   // Before a new memtable is added in SwitchMemtable(),
   // write_buffer_manager_->ShouldFlush() will keep returning true. If another
@@ -1889,7 +1889,7 @@ Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
   // If DB is not in read-only mode and write_controller is not stopping
   // writes, we can ignore any background errors and allow the write to
   // proceed
-  Status s;
+  Status s = Status_new();
   if (write_controller_.IsStopped()) {
     if (!shutting_down_.load(std::memory_order_relaxed)) {
       // If writes are still stopped and db not shutdown, it means we bailed
@@ -2031,7 +2031,7 @@ Status DBImpl::ScheduleFlushes(WriteContext* context) {
     }
     MaybeFlushStatsCF(&cfds);
   }
-  Status status;
+  Status status = Status_new();
   WriteThread::Writer nonmem_w;
   if (two_write_queues_) {
     nonmem_write_thread_.EnterUnbatched(&nonmem_w, &mutex_);

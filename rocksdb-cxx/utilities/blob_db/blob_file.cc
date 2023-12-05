@@ -110,7 +110,7 @@ Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   Slice result;
   std::string buf;
   AlignedBuf aligned_buf;
-  Status s;
+  Status s = Status_new();
   // TODO: rate limit reading footers from blob files.
   if (ra_file_reader_->use_direct_io()) {
     s = ra_file_reader_->Read(IOOptions(), footer_offset, BlobLogFooter::kSize,
@@ -140,7 +140,7 @@ Status BlobFile::SetFromFooterLocked(const BlobLogFooter& footer) {
 }
 
 Status BlobFile::Fsync() {
-  Status s;
+  Status s = Status_new();
   if (log_writer_.get()) {
     s = log_writer_->Sync();
   }
@@ -162,7 +162,7 @@ Status BlobFile::GetReader(Env* env, const FileOptions& file_options,
   if (env->GetCurrentTime(&current_time).ok()) {
     last_access_.store(current_time);
   }
-  Status s;
+  Status s = Status_new();
 
   {
     ReadLock lockbfile_r(&mutex_);

@@ -42,6 +42,7 @@ CuckooTableReader::CuckooTableReader(
       is_last_level_(false),
       identity_as_first_hash_(false),
       use_module_hash_(false),
+      status_(Status_new()),
       num_hash_func_(0),
       unused_key_(""),
       key_length_(0),

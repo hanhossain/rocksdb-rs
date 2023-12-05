@@ -516,7 +516,7 @@ class VersionBuilder::Rep {
       }
     }
 
-    Status ret_s;
+    Status ret_s = Status_new();
     TEST_SYNC_POINT_CALLBACK("VersionBuilder::CheckConsistencyBeforeReturn",
                              &ret_s);
     return ret_s;
@@ -1227,7 +1227,7 @@ class VersionBuilder::Rep {
 
   // Save the current state in *vstorage.
   Status SaveTo(VersionStorageInfo* vstorage) const {
-    Status s;
+    Status s = Status_new();
 
 #ifndef NDEBUG
     // The same check is done within Apply() so we skip it in release mode.
@@ -1346,7 +1346,7 @@ class VersionBuilder::Rep {
     for (auto& t : threads) {
       t.join();
     }
-    Status ret;
+    Status ret = Status_new();
     for (const auto& s : statuses) {
       if (!s.ok()) {
         if (ret.ok()) {
