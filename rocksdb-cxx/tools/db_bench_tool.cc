@@ -1747,7 +1747,7 @@ namespace {
 static Status CreateMemTableRepFactory(
     const ConfigOptions& config_options,
     std::shared_ptr<MemTableRepFactory>* factory) {
-  Status s;
+  Status s = Status_new();
   if (!strcasecmp(FLAGS_memtablerep.c_str(), SkipListFactory::kNickName())) {
     factory->reset(new SkipListFactory(FLAGS_skip_list_lookahead));
   } else if (!strcasecmp(FLAGS_memtablerep.c_str(), "prefix_hash")) {
@@ -4367,7 +4367,7 @@ class Benchmark {
       block_based_options.data_block_hash_table_util_ratio =
           FLAGS_data_block_hash_table_util_ratio;
       if (FLAGS_read_cache_path != "") {
-        Status rc_status;
+        Status rc_status = Status_new();
 
         // Read cache need to be provided with a the Logger, we will put all
         // reac cache logs in the read cache path in a file named rc_LOG
@@ -4747,7 +4747,7 @@ class Benchmark {
   void OpenDb(Options options, const std::string& db_name,
               DBWithColumnFamilies* db) {
     uint64_t open_start = FLAGS_report_open_timing ? FLAGS_env->NowNanos() : 0;
-    Status s;
+    Status s = Status_new();
     // Open with column families if necessary.
     if (FLAGS_num_column_families > 1) {
       size_t num_hot = FLAGS_num_column_families;
@@ -5011,7 +5011,7 @@ class Benchmark {
     WriteBatch batch(/*reserved_bytes=*/0, /*max_bytes=*/0,
                      FLAGS_write_batch_protection_bytes_per_key,
                      user_timestamp_size_);
-    Status s;
+    Status s = Status_new();
     int64_t bytes = 0;
 
     std::unique_ptr<const char[]> key_guard;
@@ -5780,7 +5780,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       key_rand++;
       read++;
-      Status s;
+      Status s = Status_new();
       if (FLAGS_num_column_families > 1) {
         s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
                                  key, &pinnable_val);
@@ -5981,7 +5981,7 @@ class Benchmark {
         options.timestamp = &ts;
         ts_ptr = &ts_ret;
       }
-      Status s;
+      Status s = Status_new();
       pinnable_val.Reset();
       for (size_t i = 0; i < pinnable_vals.size(); ++i) {
         pinnable_vals[i].Reset();
@@ -6058,7 +6058,7 @@ class Benchmark {
     std::vector<std::string> values(entries_per_batch_);
     PinnableSlice* pin_values = new PinnableSlice[entries_per_batch_];
     std::unique_ptr<PinnableSlice[]> pin_values_guard(pin_values);
-    std::vector<Status> stat_list(entries_per_batch_);
+    std::vector<Status> stat_list(entries_per_batch_, Status_new());
     while (static_cast<int64_t>(keys.size()) < entries_per_batch_) {
       key_guards.push_back(std::unique_ptr<const char[]>());
       keys.push_back(AllocateKey(&key_guards.back()));
@@ -6430,7 +6430,7 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
     RandomGenerator gen;
-    Status s;
+    Status s = Status_new();
     if (value_max > FLAGS_mix_max_value_size) {
       value_max = FLAGS_mix_max_value_size;
     }
@@ -6793,7 +6793,7 @@ class Benchmark {
         GenerateKeyFromInt(k, FLAGS_num, &key);
         batch.Delete(key);
       }
-      Status s;
+      Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = batch.UpdateTimestamps(
@@ -6902,7 +6902,7 @@ class Benchmark {
       }
 
       GenerateKeyFromInt(thread->rand.Next() % FLAGS_num, FLAGS_num, &key);
-      Status s;
+      Status s = Status_new();
 
       Slice val = gen.Generate();
       Slice ts;
@@ -7034,7 +7034,7 @@ class Benchmark {
     WriteBatch batch(/*reserved_bytes=*/0, /*max_bytes=*/0,
                      FLAGS_write_batch_protection_bytes_per_key,
                      user_timestamp_size_);
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < 3; i++) {
       keys[i] = key.ToString() + suffixes[i];
       batch.Put(keys[i], value);
@@ -7066,7 +7066,7 @@ class Benchmark {
 
     WriteBatch batch(0, 0, FLAGS_write_batch_protection_bytes_per_key,
                      user_timestamp_size_);
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < 3; i++) {
       keys[i] = key.ToString() + suffixes[i];
       batch.Delete(keys[i]);
@@ -7108,7 +7108,7 @@ class Benchmark {
     }
 
     readoptionscopy.snapshot = db->GetSnapshot();
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < 3; i++) {
       keys[i] = key.ToString() + suffixes[i];
       key_slices[i] = keys[i];
@@ -7264,7 +7264,7 @@ class Benchmark {
       } else if (put_weight > 0) {
         // then do all the corresponding number of puts
         // for all the gets we have done earlier
-        Status s;
+        Status s = Status_new();
         if (user_timestamp_size_ > 0) {
           Slice ts = mock_app_clock_->Allocate(ts_guard.get());
           s = db->Put(write_options_, key, ts, gen.Generate());
@@ -7332,7 +7332,7 @@ class Benchmark {
       }
 
       Slice val = gen.Generate();
-      Status s;
+      Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = db->Put(write_options_, key, ts, val);
@@ -7402,7 +7402,7 @@ class Benchmark {
         xor_operator.XOR(nullptr, value, &new_value);
       }
 
-      Status s;
+      Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = db->Put(write_options_, key, ts, Slice(new_value));
@@ -7469,7 +7469,7 @@ class Benchmark {
       }
       value.append(operand.data(), operand.size());
 
-      Status s;
+      Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = db->Put(write_options_, key, ts, value);
@@ -7514,7 +7514,7 @@ class Benchmark {
       int64_t key_rand = thread->rand.Next() % merge_keys_;
       GenerateKeyFromInt(key_rand, merge_keys_, &key);
 
-      Status s;
+      Status s = Status_new();
       Slice val = gen.Generate();
       if (FLAGS_num_column_families > 1) {
         s = db_with_cfh->db->Merge(write_options_,
@@ -7868,7 +7868,7 @@ class Benchmark {
     size_t max_counter = 50;
     RandomGenerator gen;
 
-    Status s;
+    Status s = Status_new();
     DB* db = SelectDB(thread);
     for (int64_t i = 0; i < FLAGS_numdistinct; i++) {
       GenerateKeyFromInt(i * max_counter, FLAGS_num, &key);
@@ -8049,7 +8049,7 @@ class Benchmark {
 
       timestamp_emulator_->Inc();
 
-      Status s;
+      Status s = Status_new();
       Slice val = gen.Generate();
       s = db->Put(write_options_, key, val);
 
@@ -8243,7 +8243,7 @@ class Benchmark {
     flush_opt.wait = true;
 
     if (db_.db != nullptr) {
-      Status s;
+      Status s = Status_new();
       if (FLAGS_num_column_families > 1) {
         s = db_.db->Flush(flush_opt, db_.cfh);
       } else {
@@ -8256,7 +8256,7 @@ class Benchmark {
       }
     } else {
       for (const auto& db_with_cfh : multi_dbs_) {
-        Status s;
+        Status s = Status_new();
         if (FLAGS_num_column_families > 1) {
           s = db_with_cfh.db->Flush(flush_opt, db_with_cfh.cfh);
         } else {
@@ -8368,7 +8368,7 @@ class Benchmark {
   }
 
   void Replay(ThreadState* /*thread*/, DBWithColumnFamilies* db_with_cfh) {
-    Status s;
+    Status s = Status_new();
     std::unique_ptr<TraceReader> trace_reader;
     s = NewFileTraceReader(FLAGS_env, EnvOptions(), FLAGS_trace_file,
                            &trace_reader);
@@ -8412,7 +8412,7 @@ class Benchmark {
     DB* db = SelectDB(thread);
     std::unique_ptr<BackupEngineOptions> engine_options(
         new BackupEngineOptions(FLAGS_backup_dir));
-    Status s;
+    Status s = Status_new();
     BackupEngine* backup_engine;
     if (FLAGS_backup_rate_limit > 0) {
       engine_options->backup_rate_limiter.reset(NewGenericRateLimiter(

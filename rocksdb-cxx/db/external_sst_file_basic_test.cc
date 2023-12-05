@@ -249,7 +249,7 @@ class ChecksumVerifyHelper {
   Status GetSingleFileChecksumAndFuncName(
       const std::string& file_path, std::string* file_checksum,
       std::string* file_checksum_func_name) {
-    Status s;
+    Status s = Status_new();
     EnvOptions soptions;
     std::unique_ptr<SequentialFile> file_reader;
     s = options_.env->NewSequentialFile(file_path, &file_reader, soptions);

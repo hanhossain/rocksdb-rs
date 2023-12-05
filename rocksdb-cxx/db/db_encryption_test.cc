@@ -95,7 +95,7 @@ TEST_F(DBEncryptionTest, ReadEmptyFile) {
   auto envOptions = EnvOptions(CurrentOptions());
   auto filePath = dbname_ + "/empty.empty";
 
-  Status status;
+  Status status = Status_new();
   {
     std::unique_ptr<WritableFile> writableFile;
     status = defaultEnv->NewWritableFile(filePath, &writableFile, envOptions);

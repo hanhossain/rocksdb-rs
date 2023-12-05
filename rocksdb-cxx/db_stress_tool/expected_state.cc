@@ -132,7 +132,7 @@ Status FileExpectedState::Open(bool create) {
 
   Env* default_env = Env::Default();
 
-  Status status;
+  Status status = Status_new();
   if (create) {
     std::unique_ptr<WritableFile> wfile;
     const EnvOptions soptions;

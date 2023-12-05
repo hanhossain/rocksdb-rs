@@ -198,7 +198,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     bytes_read = 0;
     size_t total_size = 0;
 
-    std::array<Status, num_blobs> statuses_buf;
+    std::vector<Status> statuses_buf(num_blobs, Status_new());
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -312,7 +312,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
         blob_offsets[1] - (keys[1].size() - key_refs[1].get().size()),
         blob_offsets[2]};
 
-    std::array<Status, num_blobs> statuses_buf;
+    std::vector<Status> statuses_buf(num_blobs, Status_new());
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -357,7 +357,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     Slice wrong_key_slice(incorrect_key, sizeof(incorrect_key) - 1);
     key_refs[2] = std::cref(wrong_key_slice);
 
-    std::array<Status, num_blobs> statuses_buf;
+    std::vector<Status> statuses_buf(num_blobs, Status_new());
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -399,7 +399,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
       key_refs.emplace_back(std::cref(key_ref));
     }
 
-    std::array<Status, num_blobs> statuses_buf;
+    std::vector<Status> statuses_buf(num_blobs, Status_new());
     std::array<BlobReadRequest, num_blobs> requests_buf;
 
     requests_buf[0] =

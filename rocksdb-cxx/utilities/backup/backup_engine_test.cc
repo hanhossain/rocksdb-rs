@@ -1337,7 +1337,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
 TEST_F(BackupEngineTest, CorruptionsTest) {
   const int keys_iteration = 5000;
   Random rnd(6);
-  Status s;
+  Status s = Status_new();
 
   OpenDBAndBackupEngine(true);
   // create five backups
@@ -3615,7 +3615,7 @@ TEST_F(BackupEngineTest, Concurrency) {
       restore_verify_threads[i] =
           std::thread([this, &db_opts, restore_db_dir, to_restore] {
             DB* restored;
-            Status s;
+            Status s = Status_new();
             for (;;) {
               s = DB::Open(db_opts, restore_db_dir, &restored);
               if (s.IsInvalidArgument()) {
@@ -3990,7 +3990,7 @@ Status GetSizeOfBackupFiles(FileSystem* backup_fs,
                             const std::string& backup_dir, size_t* total_size) {
   *total_size = 0;
   std::vector<std::string> dir_stack = {backup_dir};
-  Status s;
+  Status s = Status_new();
   while (s.ok() && !dir_stack.empty()) {
     std::string dir = std::move(dir_stack.back());
     dir_stack.pop_back();

@@ -148,7 +148,7 @@ TEST_P(DBRateLimiterOnReadTest, NewMultiGet) {
       key_bufs.emplace_back(Key(i));
       keys.emplace_back(key_bufs[i]);
     }
-    std::vector<Status> statuses(kNumKeys);
+    std::vector<Status> statuses(kNumKeys, Status_new());
     std::vector<PinnableSlice> values(kNumKeys);
     const int64_t prev_total_rl_req = options_.rate_limiter->GetTotalRequests();
     db_->MultiGet(GetReadOptions(), dbfull()->DefaultColumnFamily(), kNumKeys,

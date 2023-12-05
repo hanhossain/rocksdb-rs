@@ -85,7 +85,7 @@ class BatchedOpsStressTest : public StressTest {
     WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                      FLAGS_batch_protection_bytes_per_key,
                      FLAGS_user_timestamp_size);
-    Status s;
+    Status s = Status_new();
     auto cfh = column_families_[rand_column_families[0]];
     std::string key_str = Key(rand_keys[0]);
     for (int i = 0; i < 10; i++) {
@@ -142,7 +142,7 @@ class BatchedOpsStressTest : public StressTest {
     Slice key = key_str;
     auto cfh = column_families_[rand_column_families[0]];
     std::string from_db;
-    Status s;
+    Status s = Status_new();
     for (int i = 0; i < 10; i++) {
       keys[i] += key.ToString();
       key_slices[i] = keys[i];
@@ -196,14 +196,14 @@ class BatchedOpsStressTest : public StressTest {
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
     size_t num_keys = rand_keys.size();
-    std::vector<Status> ret_status(num_keys);
+    std::vector<Status> ret_status(num_keys, Status_new());
     std::array<std::string, 10> keys = {
         {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}};
     size_t num_prefixes = keys.size();
     for (size_t rand_key = 0; rand_key < num_keys; ++rand_key) {
       std::vector<Slice> key_slices;
       std::vector<PinnableSlice> values(num_prefixes);
-      std::vector<Status> statuses(num_prefixes);
+      std::vector<Status> statuses(num_prefixes, Status_new());
       ReadOptions readoptionscopy = readoptions;
       readoptionscopy.snapshot = db_->GetSnapshot();
       readoptionscopy.rate_limiter_priority =
@@ -376,7 +376,7 @@ class BatchedOpsStressTest : public StressTest {
       std::array<std::string, num_prefixes> keys;
       std::array<Slice, num_prefixes> key_slices;
       std::array<PinnableWideColumns, num_prefixes> results;
-      std::array<Status, num_prefixes> statuses;
+      std::vector<Status> statuses(num_prefixes, Status_new());
 
       for (size_t j = 0; j < num_prefixes; ++j) {
         keys[j] = std::to_string(j) + key_suffix;

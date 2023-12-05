@@ -243,7 +243,7 @@ class KeyConvertingIterator : public InternalIterator {
  public:
   explicit KeyConvertingIterator(InternalIterator* iter,
                                  bool arena_mode = false)
-      : iter_(iter), arena_mode_(arena_mode) {}
+      : status_(Status_new()), iter_(iter), arena_mode_(arena_mode) {}
   ~KeyConvertingIterator() override {
     if (arena_mode_) {
       iter_->~InternalIterator();
@@ -1328,7 +1328,7 @@ class FileChecksumTestHelper {
     std::unique_ptr<char[]> scratch(new char[2048]);
     Slice result;
     uint64_t offset = 0;
-    Status s;
+    Status s = Status_new();
     s = file_reader_->Read(IOOptions(), offset, 2048, &result, scratch.get(),
                            nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
     if (!s.ok()) {
@@ -1964,7 +1964,7 @@ void PrefetchRange(TableConstructor* c, Options* opt,
 
   // prefetch
   auto* table_reader = dynamic_cast<BlockBasedTable*>(c->GetTableReader());
-  Status s;
+  Status s = Status_new();
   std::unique_ptr<Slice> begin, end;
   std::unique_ptr<InternalKey> i_begin, i_end;
   if (key_begin != nullptr) {
@@ -3256,7 +3256,7 @@ TEST_P(BlockBasedTableTest, TracingMultiGetTest) {
     std::array<std::string, 2> encoded_keys;
     encoded_keys[0] = InternalKey(ukeys[0], 0, kTypeValue).Encode().ToString();
     encoded_keys[1] = InternalKey(ukeys[1], 0, kTypeValue).Encode().ToString();
-    std::array<Status, 2> statuses;
+    std::array<Status, 2> statuses { Status_new(), Status_new() };
     autovector<KeyContext, MultiGetContext::MAX_BATCH_SIZE> key_context;
     key_context.emplace_back(/*ColumnFamilyHandle omitted*/ nullptr, ukeys[0],
                              &values[0],
