@@ -990,8 +990,8 @@ std::string DBTestBase::AllEntriesFor(const Slice& user_key, int cf) {
     bool first = true;
     while (iter->Valid()) {
       ParsedInternalKey ikey(Slice(), 0, kTypeValue);
-      if (ParseInternalKey(iter->key(), &ikey, true /* log_err_key */) !=
-          Status_OK()) {
+      if (!ParseInternalKey(iter->key(), &ikey, true /* log_err_key */)
+          .eq(Status_OK())) {
         result += "CORRUPTED";
       } else {
         if (!last_options_.comparator->Equal(ikey.user_key, user_key)) {

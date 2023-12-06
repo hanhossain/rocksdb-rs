@@ -39,7 +39,8 @@ class Status {
   Status(Status&& s) noexcept;
   Status& operator=(Status&& s) noexcept;
   bool operator==(const Status& rhs) const;
-  bool operator!=(const Status& rhs) const;
+
+  bool eq(const Status& s) const;
 
   Code code() const;
   SubCode subcode() const;

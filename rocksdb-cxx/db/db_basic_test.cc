@@ -1268,15 +1268,15 @@ TEST_F(DBBasicTest, DBCloseFlushError) {
   ASSERT_OK(Put("key3", "value3"));
   fault_injection_env->SetFilesystemActive(false);
   Status s = dbfull()->Close();
-  ASSERT_NE(s, Status_OK());
+  ASSERT_FALSE(s.eq(Status_OK()));
   // retry should return the same error
   s = dbfull()->Close();
-  ASSERT_NE(s, Status_OK());
+  ASSERT_FALSE(s.eq(Status_OK()));
   fault_injection_env->SetFilesystemActive(true);
   // retry close() is no-op even the system is back. Could be improved if
   // Close() is retry-able: #9029
   s = dbfull()->Close();
-  ASSERT_NE(s, Status_OK());
+  ASSERT_FALSE(s.eq(Status_OK()));
   Destroy(options);
 }
 
@@ -4223,7 +4223,7 @@ class DBBasicTestMultiGetDeadline : public DBBasicTestMultiGet,
       if (i < num_ok) {
         EXPECT_OK(statuses[i]);
       } else {
-        if (statuses[i] != Status_TimedOut()) {
+        if (!statuses[i].eq(Status_TimedOut())) {
           EXPECT_EQ(statuses[i], Status_TimedOut());
         }
       }

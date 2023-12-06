@@ -1911,7 +1911,7 @@ TEST_F(DBFlushTest, FlushError) {
   Status s = dbfull()->TEST_SwitchMemtable();
   fault_injection_env->SetFilesystemActive(true);
   Destroy(options);
-  ASSERT_NE(s, Status_OK());
+  ASSERT_FALSE(s.eq(Status_OK()));
 }
 
 TEST_F(DBFlushTest, ManualFlushFailsInReadOnlyMode) {

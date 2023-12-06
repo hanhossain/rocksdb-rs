@@ -2568,7 +2568,7 @@ TEST_F(BackupEngineTest, DeleteTmpFiles) {
       }
       CloseDBAndBackupEngine();
       for (std::string file_or_dir : tmp_files_and_dirs) {
-        if (file_manager_->FileExists(file_or_dir) != Status_NotFound()) {
+        if (!file_manager_->FileExists(file_or_dir).eq(Status_NotFound())) {
           FAIL() << file_or_dir << " was expected to be deleted." << cleanup_fn;
         }
       }

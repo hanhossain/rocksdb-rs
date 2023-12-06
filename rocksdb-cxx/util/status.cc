@@ -406,8 +406,8 @@ bool Status::operator==(const Status& rhs) const {
     return rs_status_.eq(rhs.rs_status_);
 }
 
-bool Status::operator!=(const Status& rhs) const {
-    return !rs_status_.eq(rhs.rs_status_);
+bool Status::eq(const Status& s) const {
+    return rs_status_.eq(s.rs_status_);
 }
 
 std::unique_ptr<std::string> Status_CopyState(const std::string& s) {
