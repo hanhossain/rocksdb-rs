@@ -1550,8 +1550,9 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
 
   for (auto& kv : true_data) {
     Status s = Status_new();
-    if (status.contains(kv.first)) {
-      s = status.at(kv.first);
+    std::map<std::string, Status>::iterator it = status.find(kv.first);
+    if (it != status.end()) {
+      s = it->second;
     } else {
       status.insert({ kv.first, s });
     }
@@ -1577,8 +1578,9 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     for (iter->SeekToFirst(); iter->Valid(); iter->Next(), data_iter++) {
       ASSERT_EQ(iter->key().ToString(), data_iter->first);
       Status current_status = Status_new();
-      if (status.contains(data_iter->first)) {
-        current_status = status.at(data_iter->first);
+      std::map<std::string, Status>::iterator it = status.find(data_iter->first);
+      if (it != status.end()) {
+        current_status = it->second;
       } else {
         status.insert({ data_iter->first, current_status });
       }
@@ -1605,8 +1607,9 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     for (iter->SeekToLast(); iter->Valid(); iter->Prev(), data_rev++) {
       ASSERT_EQ(iter->key().ToString(), data_rev->first);
       Status current_status = Status_new();
-      if (status.contains(data_rev->first)) {
-        current_status = status.at(data_rev->first);
+      std::map<std::string, Status>::iterator it = status.find(data_rev->first);
+      if (it != status.end()) {
+        current_status = it->second;
       } else {
         status.insert({ data_rev->first, current_status });
       }
