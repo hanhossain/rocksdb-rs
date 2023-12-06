@@ -48,7 +48,7 @@ Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
   // First get sorted files in db dir, then get sorted files from archived
   // dir, to avoid a race condition where a log file is moved to archived
   // dir in between.
-  Status s;
+  Status s = Status_new();
   // list wal files in main db dir.
   VectorLogPtr logs;
   s = GetSortedWalsOfType(wal_dir_, logs, kAliveLogFile);
@@ -390,7 +390,7 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
       return Status_OK();
     }
   }
-  Status s;
+  Status s = Status_new();
   if (type == kAliveLogFile) {
     std::string fname = LogFileName(wal_dir_, number);
     s = ReadFirstLine(fname, number, sequence);
@@ -429,10 +429,8 @@ Status WalManager::GetLiveWalFile(uint64_t number,
     return Status_PathNotFound("log file not available");
   }
 
-  Status s;
-
   uint64_t size_bytes;
-  s = env_->GetFileSize(LogFileName(wal_dir_, number), &size_bytes);
+  Status s = env_->GetFileSize(LogFileName(wal_dir_, number), &size_bytes);
 
   if (!s.ok()) {
     return s;

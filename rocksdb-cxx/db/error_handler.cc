@@ -286,7 +286,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
 
   bool paranoid = db_options_.paranoid_checks;
   Severity sev = Severity::kFatalError;
-  Status new_bg_err;
+  Status new_bg_err = Status_new();
   DBRecoverContext context;
   bool found = false;
 

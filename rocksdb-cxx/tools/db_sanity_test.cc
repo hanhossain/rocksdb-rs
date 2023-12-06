@@ -251,7 +251,7 @@ bool RunSanityTests(const std::string& command, const std::string& path) {
     fprintf(stderr, "Verifying...\n");
   }
   for (auto sanity_test : sanity_tests) {
-    Status s;
+    Status s = Status_new();
     fprintf(stderr, "%s -- ", sanity_test->Name().c_str());
     if (command == "create") {
       s = sanity_test->Create();

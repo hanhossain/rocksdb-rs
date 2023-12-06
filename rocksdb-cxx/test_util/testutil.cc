@@ -431,7 +431,7 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
   env_options.use_mmap_writes = false;
   env_options.use_direct_writes = true;
   std::string tmp = TempFileName(dir, 999);
-  Status s;
+  Status s = Status_new();
   {
     std::unique_ptr<WritableFile> file;
     s = env->NewWritableFile(tmp, &file, env_options);

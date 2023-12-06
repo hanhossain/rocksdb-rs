@@ -418,7 +418,7 @@ TEST_F(CorruptionTest, NewFileErrorDuringWrite) {
   const int num =
       static_cast<int>(3 + (Options().write_buffer_size / kValueSize));
   std::string value_storage;
-  Status s;
+  Status s = Status_new();
   bool failed = false;
   for (int i = 0; i < num; i++) {
     WriteBatch batch;
@@ -714,7 +714,7 @@ TEST_F(CorruptionTest, CompactionInputErrorParanoid) {
   ASSERT_NOK(dbi->VerifyChecksum());
 
   // Write must eventually fail because of corrupted table
-  Status s;
+  Status s = Status_new();
   std::string tmp1, tmp2;
   bool failed = false;
   for (int i = 0; i < 10000; i++) {
@@ -825,7 +825,7 @@ TEST_F(CorruptionTest, ParanoidFileChecksOnFlush) {
   options.check_flush_compaction_key_order = false;
   options.paranoid_file_checks = true;
   options.create_if_missing = true;
-  Status s;
+  Status s = Status_new();
   for (const auto& mode : corruption_modes) {
     delete db_;
     db_ = nullptr;
@@ -854,7 +854,7 @@ TEST_F(CorruptionTest, ParanoidFileChecksOnCompact) {
   options.paranoid_file_checks = true;
   options.create_if_missing = true;
   options.check_flush_compaction_key_order = false;
-  Status s;
+  Status s = Status_new();
   for (const auto& mode : corruption_modes) {
     delete db_;
     db_ = nullptr;
@@ -1206,7 +1206,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
   options.max_write_buffer_number = 8;
 
   Reopen(&options);
-  Status s;
+  Status s = Status_new();
   const std::string test_cf_name = "test_cf";
   ColumnFamilyHandle* cfh = nullptr;
   s = db_->CreateColumnFamily(options, test_cf_name, &cfh);

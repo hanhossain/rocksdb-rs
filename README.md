@@ -29,3 +29,7 @@ Use this to include the bridging header.
 #include "rocksdb-rs/src/lib.rs.h"
 #endif
 ```
+
+## Potential issues with the migration
+- LogReaderContainer (in [db_impl_secondary.h](rocksdb-cxx/db/db_impl/db_impl_secondary.h)) may need to be refactored to use unique_ptr<Status> instead of a raw pointer.
+- manifest_reader_status (in [version_set.cc](rocksdb-cxx/db/version_set.cc)) may need to a std::unique_ptr instead of a raw pointer.

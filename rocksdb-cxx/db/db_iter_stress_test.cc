@@ -83,7 +83,7 @@ struct StressTestIterator : public InternalIterator {
   Status status_;
 
   StressTestIterator(Data* _data, Random64* _rnd, const Comparator* _cmp)
-      : data(_data), rnd(_rnd), cmp(_cmp) {}
+      : data(_data), rnd(_rnd), cmp(_cmp), status_(Status_new()) {}
 
   bool Valid() const override {
     if (iter >= 0 && iter < (int)data->entries.size()) {

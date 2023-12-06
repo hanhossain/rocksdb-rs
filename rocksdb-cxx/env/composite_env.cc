@@ -65,7 +65,7 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
     IOOptions io_opts;
     IODebugContext dbg;
     std::vector<FSReadRequest> fs_reqs;
-    Status status;
+    Status status = Status_new();
 
     fs_reqs.resize(num_reqs);
     for (size_t i = 0; i < num_reqs; ++i) {
@@ -297,7 +297,7 @@ Status CompositeEnv::NewSequentialFile(const std::string& f,
                                        const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSSequentialFile> file;
-  Status status;
+  Status status = Status_new();
   status =
       file_system_->NewSequentialFile(f, FileOptions(options), &file, &dbg);
   if (status.ok()) {
@@ -311,7 +311,7 @@ Status CompositeEnv::NewRandomAccessFile(const std::string& f,
                                          const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSRandomAccessFile> file;
-  Status status;
+  Status status = Status_new();
   status =
       file_system_->NewRandomAccessFile(f, FileOptions(options), &file, &dbg);
   if (status.ok()) {
@@ -325,7 +325,7 @@ Status CompositeEnv::NewWritableFile(const std::string& f,
                                      const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSWritableFile> file;
-  Status status;
+  Status status = Status_new();
   status = file_system_->NewWritableFile(f, FileOptions(options), &file, &dbg);
   if (status.ok()) {
     r->reset(new CompositeWritableFileWrapper(file));
@@ -337,7 +337,7 @@ Status CompositeEnv::ReopenWritableFile(const std::string& fname,
                                         std::unique_ptr<WritableFile>* result,
                                         const EnvOptions& options) {
   IODebugContext dbg;
-  Status status;
+  Status status = Status_new();
   std::unique_ptr<FSWritableFile> file;
   status = file_system_->ReopenWritableFile(fname, FileOptions(options), &file,
                                             &dbg);
@@ -352,7 +352,7 @@ Status CompositeEnv::ReuseWritableFile(const std::string& fname,
                                        std::unique_ptr<WritableFile>* r,
                                        const EnvOptions& options) {
   IODebugContext dbg;
-  Status status;
+  Status status = Status_new();
   std::unique_ptr<FSWritableFile> file;
   status = file_system_->ReuseWritableFile(fname, old_fname,
                                            FileOptions(options), &file, &dbg);
@@ -367,7 +367,7 @@ Status CompositeEnv::NewRandomRWFile(const std::string& fname,
                                      const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSRandomRWFile> file;
-  Status status;
+  Status status = Status_new();
   status =
       file_system_->NewRandomRWFile(fname, FileOptions(options), &file, &dbg);
   if (status.ok()) {
@@ -381,7 +381,7 @@ Status CompositeEnv::NewDirectory(const std::string& name,
   IOOptions io_opts;
   IODebugContext dbg;
   std::unique_ptr<FSDirectory> dir;
-  Status status;
+  Status status = Status_new();
   status = file_system_->NewDirectory(name, io_opts, &dir, &dbg);
   if (status.ok()) {
     result->reset(new CompositeDirectoryWrapper(dir));

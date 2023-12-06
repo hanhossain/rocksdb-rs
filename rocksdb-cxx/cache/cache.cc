@@ -72,7 +72,7 @@ Status SecondaryCache::CreateFromString(
   if (value.find("compressed_secondary_cache://") == 0) {
     std::string args = value;
     args.erase(0, std::strlen("compressed_secondary_cache://"));
-    Status status;
+    Status status = Status_new();
     std::shared_ptr<SecondaryCache> sec_cache;
 
     CompressedSecondaryCacheOptions sec_cache_opts;
@@ -96,7 +96,7 @@ Status SecondaryCache::CreateFromString(
 Status Cache::CreateFromString(const ConfigOptions& config_options,
                                const std::string& value,
                                std::shared_ptr<Cache>* result) {
-  Status status;
+  Status status = Status_new();
   std::shared_ptr<Cache> cache;
   if (value.find('=') == std::string::npos) {
     cache = NewLRUCache(ParseSizeT(value));

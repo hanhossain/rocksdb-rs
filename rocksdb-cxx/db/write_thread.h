@@ -84,6 +84,8 @@ class WriteThread {
     std::atomic<size_t> running;
     size_t size = 0;
 
+    WriteGroup() : status(Status_new()) {}
+
     struct Iterator {
       Writer* writer;
       Writer* last_writer;
@@ -157,6 +159,8 @@ class WriteThread {
           state(STATE_INIT),
           write_group(nullptr),
           sequence(kMaxSequenceNumber),
+          status(Status_new()),
+          callback_status(Status_new()),
           link_older(nullptr),
           link_newer(nullptr) {}
 
@@ -182,6 +186,8 @@ class WriteThread {
           state(STATE_INIT),
           write_group(nullptr),
           sequence(kMaxSequenceNumber),
+          status(Status_new()),
+          callback_status(Status_new()),
           link_older(nullptr),
           link_newer(nullptr) {}
 

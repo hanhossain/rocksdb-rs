@@ -120,7 +120,7 @@ Status DBImpl::TEST_SwitchMemtable(ColumnFamilyData* cfd) {
     cfd = default_cf_handle_->cfd();
   }
 
-  Status s;
+  Status s = Status_new();
   void* writer = TEST_BeginWrite();
   if (two_write_queues_) {
     WriteThread::Writer nonmem_w;

@@ -132,7 +132,7 @@ class CfConsistencyStressTest : public StressTest {
                  const std::vector<int64_t>& rand_keys) override {
     std::string key_str = Key(rand_keys[0]);
     Slice key = key_str;
-    Status s;
+    Status s = Status_new();
     bool is_consistent = true;
 
     if (thread->rand.OneIn(2)) {
@@ -223,7 +223,7 @@ class CfConsistencyStressTest : public StressTest {
     keys.reserve(num_keys);
     key_str.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    std::vector<Status> statuses(num_keys);
+    std::vector<Status> statuses(num_keys, Status_new());
     ColumnFamilyHandle* cfh = column_families_[rand_column_families[0]];
     ReadOptions readoptionscopy = read_opts;
     readoptionscopy.rate_limiter_priority =
@@ -260,7 +260,7 @@ class CfConsistencyStressTest : public StressTest {
 
     const std::string key = Key(rand_keys[0]);
 
-    Status s;
+    Status s = Status_new();
     bool is_consistent = true;
 
     if (thread->rand.OneIn(2)) {
@@ -427,7 +427,7 @@ class CfConsistencyStressTest : public StressTest {
 
       std::vector<Slice> key_slices(num_cfs, key);
       std::vector<PinnableWideColumns> results(num_cfs);
-      std::vector<Status> statuses(num_cfs);
+      std::vector<Status> statuses(num_cfs, Status_new());
 
       db_->MultiGetEntity(read_opts_copy, num_cfs, cfhs.data(),
                           key_slices.data(), results.data(), statuses.data());
@@ -547,7 +547,7 @@ class CfConsistencyStressTest : public StressTest {
     std::unique_ptr<Iterator> iter(db_->NewIterator(ro_copy, cfh));
 
     uint64_t count = 0;
-    Status s;
+    Status s = Status_new();
 
     for (iter->Seek(prefix); iter->Valid() && iter->key().starts_with(prefix);
          iter->Next()) {
@@ -782,7 +782,7 @@ class CfConsistencyStressTest : public StressTest {
 
   void ContinuouslyVerifyDb(ThreadState* thread) const override {
     assert(thread);
-    Status status;
+    Status status = Status_new();
 
     DB* db_ptr = cmp_db_ ? cmp_db_ : db_;
     const auto& cfhs = cmp_db_ ? cmp_cfhs_ : column_families_;

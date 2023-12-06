@@ -801,7 +801,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
     msg = "invalid tag";
   }
 
-  Status result;
+  Status result = Status_new();
   if (msg != nullptr) {
     result = Status_Corruption("VersionEdit", msg);
   }

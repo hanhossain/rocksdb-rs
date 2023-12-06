@@ -156,7 +156,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
                bool read_only)
     : dbname_(dbname),
       own_info_log_(options.info_log == nullptr),
-      init_logger_creation_s_(),
+      init_logger_creation_s_(Status_new()),
       initial_db_options_(SanitizeOptions(dbname, options, read_only,
                                           &init_logger_creation_s_)),
       env_(initial_db_options_.env),
@@ -240,6 +240,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
       shutdown_initiated_(false),
       own_sfm_(options.sst_file_manager == nullptr),
       closed_(false),
+      closing_status_(Status_new()),
       atomic_flush_install_cv_(&mutex_),
       blob_callback_(immutable_db_options_.sst_file_manager.get(), &mutex_,
                      &error_handler_, &event_logger_,
@@ -335,7 +336,7 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
   const ReadOptions read_options;
   WaitForBackgroundWork();
 
-  Status s;
+  Status s = Status_new();
   if (shutdown_initiated_) {
     // Returning shutdown status to SFM during auto recovery will cause it
     // to abort the recovery and allow the shutdown to progress
@@ -852,7 +853,7 @@ Status DBImpl::RegisterRecordSeqnoTimeWorker() {
         SeqnoToTimeMapping::kMaxSeqnoTimePairsPerCF;
   }
 
-  Status s;
+  Status s = Status_new();
   if (seqno_time_cadence == 0) {
     s = periodic_task_scheduler_.Unregister(PeriodicTaskType::kRecordSeqnoTime);
   } else {
@@ -1158,8 +1159,8 @@ Status DBImpl::SetOptions(
   }
 
   MutableCFOptions new_options;
-  Status s;
-  Status persist_options_status;
+  Status s = Status_new();
+  Status persist_options_status = Status_new();
   SuperVersionContext sv_context(/* create_superversion */ true);
   {
     auto db_options = GetDBOptions();
@@ -1215,7 +1216,7 @@ Status DBImpl::SetDBOptions(
   }
 
   MutableDBOptions new_options;
-  Status s;
+  Status s = Status_new();
   Status persist_options_status = Status_OK();
   bool wal_changed = false;
   WriteContext write_context;
@@ -1470,7 +1471,7 @@ Status DBImpl::SyncWAL() {
 
   TEST_SYNC_POINT("DBWALTest::SyncWALNotWaitWrite:1");
   RecordTick(stats_, WAL_FILE_SYNCED);
-  Status status;
+  Status status = Status_new();
   IOStatus io_s;
   for (log::Writer* log : logs_to_sync) {
     io_s = log->file()->SyncWithoutFlush(immutable_db_options_.use_fsync);
@@ -1851,7 +1852,7 @@ InternalIterator* DBImpl::NewInternalIterator(
       read_options.iterate_upper_bound);
   // Collect iterator for mutable memtable
   auto mem_iter = super_version->mem->NewIterator(read_options, arena);
-  Status s;
+  Status s = Status_new();
   if (!read_options.ignore_range_deletions) {
     TruncatedRangeDelIterator* mem_tombstone_iter = nullptr;
     auto range_del_iter = super_version->mem->NewRangeTombstoneIterator(
@@ -2103,7 +2104,7 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0;
 
-  Status s;
+  Status s = Status_new();
   // First look in the memtable, then in the immutable memtable (if any).
   // s is both in/out. When in, s could either be OK or MergeInProgress.
   // merge_operands will contain the sequence of merges in the latter case.
@@ -2297,7 +2298,7 @@ std::vector<Status> DBImpl::MultiGet(
 
   size_t num_keys = keys.size();
   assert(column_family.size() == num_keys);
-  std::vector<Status> stat_list(num_keys);
+  std::vector<Status> stat_list(num_keys, Status_new());
 
   bool should_fail = false;
   for (size_t i = 0; i < num_keys; ++i) {
@@ -2737,7 +2738,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
     read_callback = &timestamp_read_callback;
   }
 
-  Status s;
+  Status s = Status_new();
   auto cf_iter = multiget_cf_data.begin();
   for (; cf_iter != multiget_cf_data.end(); ++cf_iter) {
     s = MultiGetImpl(read_options, cf_iter->start, cf_iter->num_keys,
@@ -2967,7 +2968,7 @@ Status DBImpl::MultiGetImpl(
   // s is both in/out. When in, s could either be OK or MergeInProgress.
   // merge_operands will contain the sequence of merges in the latter case.
   size_t keys_left = num_keys;
-  Status s;
+  Status s = Status_new();
   uint64_t curr_value_size = 0;
   while (keys_left) {
     if (read_options.deadline.count() &&
@@ -3095,7 +3096,7 @@ Status DBImpl::CreateColumnFamilies(
   assert(handles != nullptr);
   handles->clear();
   size_t num_cf = column_family_names.size();
-  Status s;
+  Status s = Status_new();
   bool success_once = false;
   for (size_t i = 0; i < num_cf; i++) {
     ColumnFamilyHandle* handle;
@@ -3122,7 +3123,7 @@ Status DBImpl::CreateColumnFamilies(
   assert(handles != nullptr);
   handles->clear();
   size_t num_cf = column_families.size();
-  Status s;
+  Status s = Status_new();
   bool success_once = false;
   for (size_t i = 0; i < num_cf; i++) {
     ColumnFamilyHandle* handle;
@@ -3149,7 +3150,7 @@ Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
                                       ColumnFamilyHandle** handle) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status s;
+  Status s = Status_new();
   *handle = nullptr;
 
   DBOptions db_options =
@@ -3250,7 +3251,7 @@ Status DBImpl::DropColumnFamily(ColumnFamilyHandle* column_family) {
 
 Status DBImpl::DropColumnFamilies(
     const std::vector<ColumnFamilyHandle*>& column_families) {
-  Status s;
+  Status s = Status_new();
   bool success_once = false;
   for (auto* handle : column_families) {
     s = DropColumnFamilyImpl(handle);
@@ -3284,7 +3285,7 @@ Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
   edit.DropColumnFamily();
   edit.SetColumnFamily(cfd->GetID());
 
-  Status s;
+  Status s = Status_new();
   {
     InstrumentedMutexLock l(&mutex_);
     if (cfd->IsDropped()) {
@@ -3697,7 +3698,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
     SequenceNumber latest_snap_seq = latest->GetSequenceNumber();
     assert(latest_snap_seq <= snapshot_seq);
     bool needs_create_snap = true;
-    Status status;
+    Status status = Status_new();
     std::shared_ptr<const SnapshotImpl> ret;
     if (latest_snap_ts > ts) {
       // A snapshot created later cannot have smaller timestamp than a previous
@@ -4299,7 +4300,7 @@ Status DBImpl::DeleteFile(std::string name) {
     return status;
   }
 
-  Status status;
+  Status status = Status_new();
   int level;
   FileMetaData* metadata;
   ColumnFamilyData* cfd;
@@ -4736,7 +4737,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     for (const auto& fname : filenames) {
       if (ParseFileName(fname, &number, info_log_prefix.prefix, &type) &&
           type != kDBLockFile) {  // Lock file will be deleted at end
-        Status del;
+        Status del = Status_new();
         std::string path_to_delete = dbname + "/" + fname;
         if (type == kMetaDatabase) {
           del = DestroyDB(path_to_delete, options);
@@ -4947,7 +4948,7 @@ Status DBImpl::DeleteObsoleteOptionsFiles() {
   // use ordered map to store keep the filenames sorted from the newest
   // to the oldest.
   std::map<uint64_t, std::string> options_filenames;
-  Status s;
+  Status s = Status_new();
   IOOptions io_opts;
   io_opts.do_not_recurse = true;
   s = fs_->GetChildren(GetName(), io_opts, &filenames,
@@ -4973,7 +4974,7 @@ Status DBImpl::DeleteObsoleteOptionsFiles() {
 }
 
 Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
-  Status s;
+  Status s = Status_new();
 
   uint64_t options_file_number = versions_->NewFileNumber();
   std::string options_file_name =
@@ -5079,7 +5080,7 @@ Status DBImpl::GetLatestSequenceForKey(
     SuperVersion* sv, const Slice& key, bool cache_only,
     SequenceNumber lower_bound_seq, SequenceNumber* seq, std::string* timestamp,
     bool* found_record_for_key, bool* is_blob_index) {
-  Status s;
+  Status s = Status_new();
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0;
 
@@ -5700,7 +5701,7 @@ Status DBImpl::CreateColumnFamilyWithImport(
 Status DBImpl::ClipColumnFamily(ColumnFamilyHandle* column_family,
                                 const Slice& begin_key, const Slice& end_key) {
   assert(column_family);
-  Status status;
+  Status status = Status_new();
   // Flush memtable
   FlushOptions flush_opts;
   flush_opts.allow_write_stall = true;
@@ -5787,7 +5788,7 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
   // here, unlike many other `IOStatsContext` / `PerfContext` stats.
   uint64_t prev_bytes_read = IOSTATS(bytes_read);
 
-  Status s;
+  Status s = Status_new();
 
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
     s = Status_InvalidArgument(
@@ -5914,7 +5915,7 @@ Status DBImpl::VerifyFullFileChecksum(const std::string& file_checksum_expected,
         "`Env::IOActivity::kUnknown`");
   }
 
-  Status s;
+  Status s = Status_new();
   if (file_checksum_expected == kUnknownFileChecksum) {
     return s;
   }
@@ -5970,7 +5971,7 @@ Status DBImpl::StartTrace(const TraceOptions& trace_options,
 
 Status DBImpl::EndTrace() {
   InstrumentedMutexLock lock(&trace_mutex_);
-  Status s;
+  Status s = Status_new();
   if (tracer_ != nullptr) {
     s = tracer_->Close();
     tracer_.reset();
@@ -6019,7 +6020,7 @@ Status DBImpl::EndBlockCacheTrace() {
 Status DBImpl::TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
                                  const Slice& lower_bound,
                                  const Slice upper_bound) {
-  Status s;
+  Status s = Status_new();
   if (tracer_) {
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
@@ -6032,7 +6033,7 @@ Status DBImpl::TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
 Status DBImpl::TraceIteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
                                         const Slice& lower_bound,
                                         const Slice upper_bound) {
-  Status s;
+  Status s = Status_new();
   if (tracer_) {
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
@@ -6048,7 +6049,7 @@ Status DBImpl::ReserveFileNumbersBeforeIngestion(
     uint64_t* next_file_number) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status s;
+  Status s = Status_new();
   SuperVersionContext dummy_sv_ctx(true /* create_superversion */);
   assert(nullptr != next_file_number);
   InstrumentedMutexLock l(&mutex_);

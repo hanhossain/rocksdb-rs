@@ -1585,7 +1585,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSimpleUnsorted) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k2", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s(keys.size());
+    std::vector<Status> s(keys.size(), Status_new());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1643,7 +1643,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSortedMultiFile) {
     std::vector<Slice> keys({"k1", "k2", "k3", "k4", "k5", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s(keys.size());
+    std::vector<Status> s(keys.size(), Status_new());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1709,7 +1709,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedDuplicateKeys) {
   std::vector<Slice> keys({"k8", "k8", "k8", "k4", "k4", "k1", "k3"});
   std::vector<PinnableSlice> values(keys.size());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-  std::vector<Status> s(keys.size());
+  std::vector<Status> s(keys.size(), Status_new());
 
   ReadOptions ro;
   ro.async_io = std::get<1>(GetParam());
@@ -1938,7 +1938,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeInMemory) {
   ASSERT_OK(Put(1, "k6", "v_6"));
   std::vector<Slice> keys = {"k1", "k2", "k3", "k4", "k5", "k6"};
   std::vector<PinnableSlice> values(keys.size());
-  std::vector<Status> s(keys.size());
+  std::vector<Status> s(keys.size(), Status_new());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
 
   get_perf_context()->Reset();
@@ -2008,7 +2008,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSize) {
                              "k8", "k9", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s(keys.size());
+    std::vector<Status> s(keys.size(), Status_new());
 
     ReadOptions ro;
     ro.value_size_soft_limit = 20;
@@ -2125,7 +2125,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeMultiLevelMerge) {
   }
 
   std::vector<PinnableSlice> values(keys_str.size());
-  std::vector<Status> statuses(keys_str.size());
+  std::vector<Status> statuses(keys_str.size(), Status_new());
   ReadOptions read_options;
   read_options.verify_checksums = true;
   read_options.value_size_soft_limit = 380;
@@ -2666,7 +2666,7 @@ TEST_F(DBBasicTest, MultiGetStats) {
   std::vector<Slice> keys(total_keys);
   static size_t kMultiGetBatchSize = 100;
   std::vector<PinnableSlice> values(kMultiGetBatchSize);
-  std::vector<Status> s(kMultiGetBatchSize);
+  std::vector<Status> s(kMultiGetBatchSize, Status_new());
   ReadOptions read_opts;
 
   Random rnd(309);
@@ -2834,7 +2834,7 @@ TEST_P(DBMultiGetRowCacheTest, MultiGetBatched) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s(keys.size());
+    std::vector<Status> s(keys.size(), Status_new());
 
     ReadOptions ro;
     bool use_snapshots = GetParam();
@@ -2996,7 +2996,7 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3687,7 +3687,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3719,7 +3719,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(10);
-  statuses.resize(10);
+  statuses.resize(10, Status_new());
   std::vector<int> key_ints{1, 2, 15, 16, 55, 81, 82, 83, 84, 85};
   for (size_t i = 0; i < key_ints.size(); ++i) {
     key_data[i] = Key(key_ints[i]);
@@ -3741,7 +3741,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(10);
-  statuses.resize(10);
+  statuses.resize(10, Status_new());
   std::vector<int> key_uncmp{1, 2, 15, 16, 55, 81, 82, 83, 84, 85};
   for (size_t i = 0; i < key_uncmp.size(); ++i) {
     key_data[i] = "a" + Key(key_uncmp[i]);
@@ -3763,7 +3763,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(5);
-  statuses.resize(5);
+  statuses.resize(5, Status_new());
   std::vector<int> key_tr{1, 2, 15, 16, 55};
   for (size_t i = 0; i < key_tr.size(); ++i) {
     key_data[i] = "a" + Key(key_tr[i]);
@@ -3868,7 +3868,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetDirectIO) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3938,7 +3938,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3986,7 +3986,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -4307,7 +4307,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 0);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4322,7 +4322,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 2);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4336,7 +4336,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 3);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4362,7 +4362,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
     keys[i] = Slice(key_str[i].data(), key_str[i].size());
   }
   statuses.clear();
-  statuses.resize(keys.size());
+  statuses.resize(keys.size(), Status_new());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 1);
   dbfull()->MultiGet(ro, handles_[0], keys.size(), keys.data(),

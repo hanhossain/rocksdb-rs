@@ -370,7 +370,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE> block_handles;
     std::array<CachableEntry<Block_kData>, MultiGetContext::MAX_BATCH_SIZE>
         results;
-    std::array<Status, MultiGetContext::MAX_BATCH_SIZE> statuses;
+    std::vector<Status> statuses(MultiGetContext::MAX_BATCH_SIZE, Status_new());
     // Empty data_lookup_contexts means "unused," when block cache tracing is
     // disabled. (Limited options as element type is not default contructible.)
     std::vector<BlockCacheLookupContext> data_lookup_contexts;
@@ -388,7 +388,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
       MultiGetRange data_block_range(sst_file_range, sst_file_range.begin(),
                                      sst_file_range.end());
       CachableEntry<UncompressionDict> uncompression_dict;
-      Status uncompression_dict_status;
+      Status uncompression_dict_status = Status_new();
       bool uncompression_dict_inited = false;
       size_t total_len = 0;
 
@@ -573,7 +573,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     SharedCleanablePtr shared_cleanable;
     for (auto miter = sst_file_range.begin(); miter != sst_file_range.end();
          ++miter) {
-      Status s;
+      Status s = Status_new();
       GetContext* get_context = miter->get_context;
       const Slice& key = miter->ikey;
       bool matched = false;  // if such user key matched a key in SST
@@ -622,7 +622,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
           }
 
           next_biter.Invalidate(Status_OK());
-          Status tmp_s;
+          Status tmp_s = Status_new();
           NewDataBlockIterator<DataBlockIter>(
               read_options, iiter->value().handle, &next_biter,
               BlockType::kData, get_context, lookup_data_block_context,

@@ -57,9 +57,9 @@ struct TableFileCreationBriefInfo : public FileCreationBriefInfo {
 };
 
 struct TableFileCreationInfo : public TableFileCreationBriefInfo {
-  TableFileCreationInfo() = default;
+  TableFileCreationInfo() : status(Status_new()) {}
   explicit TableFileCreationInfo(TableProperties&& prop)
-      : table_properties(prop) {}
+      : table_properties(prop), status(Status_new()) {}
   // the size of the file.
   uint64_t file_size;
   // Detailed properties of the created file.
@@ -206,7 +206,7 @@ struct WriteStallInfo {
 
 
 struct FileDeletionInfo {
-  FileDeletionInfo() = default;
+  FileDeletionInfo() : status(Status_new()) {}
 
   FileDeletionInfo(const std::string& _db_name, const std::string& _file_path,
                    int _job_id, Status _status)
@@ -405,9 +405,12 @@ struct SubcompactionJobInfo {
 
   // Compression algorithm used for blob output files.
   CompressionType blob_compression_type;
+
+  SubcompactionJobInfo() : status(Status_new()) {}
 };
 
 struct CompactionJobInfo {
+    CompactionJobInfo() : status(Status_new()) {}
   // the id of the column family where the compaction happened.
   uint32_t cf_id;
   // the name of the column family where the compaction happened.
@@ -505,6 +508,8 @@ struct BackgroundErrorRecoveryInfo {
   // The final bg_error after all recovery attempts. Status_OK() means
   // the recovery was successful and the database is fully operational.
   Status new_bg_error;
+
+  BackgroundErrorRecoveryInfo() : old_bg_error(Status_new()), new_bg_error(Status_new()) {}
 };
 
 struct IOErrorInfo {

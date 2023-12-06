@@ -165,7 +165,7 @@ Status BlockPrefixIndex::Create(const SliceTransform* prefix_extractor,
                                 BlockPrefixIndex** prefix_index) {
   uint64_t pos = 0;
   auto meta_pos = prefix_meta;
-  Status s;
+  Status s = Status_new();
   Builder builder;
 
   while (!meta_pos.empty()) {

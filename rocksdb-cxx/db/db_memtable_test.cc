@@ -258,7 +258,7 @@ TEST_F(DBMemTableTest, ConcurrentMergeWrite) {
   write_thread1.join();
   write_thread2.join();
 
-  Status status;
+  Status status = Status_new();
   ReadOptions roptions;
   SequenceNumber max_covering_tombstone_seq = 0;
   LookupKey lkey("key", kMaxSequenceNumber);

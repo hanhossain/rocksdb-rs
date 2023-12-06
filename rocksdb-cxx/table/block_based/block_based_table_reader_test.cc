@@ -272,7 +272,7 @@ TEST_P(BlockBasedTableReaderTest, MultiGet) {
   autovector<Slice, MultiGetContext::MAX_BATCH_SIZE> keys;
   autovector<Slice, MultiGetContext::MAX_BATCH_SIZE> keys_without_timestamps;
   autovector<PinnableSlice, MultiGetContext::MAX_BATCH_SIZE> values;
-  autovector<Status, MultiGetContext::MAX_BATCH_SIZE> statuses;
+  std::vector<Status> statuses;
   {
     const int step =
         static_cast<int>(kv.size()) / MultiGetContext::MAX_BATCH_SIZE;
@@ -286,7 +286,7 @@ TEST_P(BlockBasedTableReaderTest, MultiGet) {
         keys_without_timestamps.emplace_back(it->first);
       }
       values.emplace_back();
-      statuses.emplace_back();
+      statuses.push_back(Status_new());
       std::advance(it, step);
     }
   }
@@ -516,7 +516,7 @@ class ChargeTableReaderTest
     CreateTable(table_name, ioptions, compression_type_, kv_);
 
     std::unique_ptr<BlockBasedTable> table;
-    Status s;
+    Status s = Status_new();
     NewBlockBasedTableReader(
         FileOptions(), ImmutableOptions(options_),
         InternalKeyComparator(options_.comparator), table_name, &table,

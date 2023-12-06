@@ -166,18 +166,16 @@ class IOStatus {
 
   friend IOStatus status_to_io_status(Status&&);
 
-  explicit IOStatus(Code _code, SubCode _subcode = SubCode::kNone) {
-      status_ = Status(_code, _subcode, false, false, kIOErrorScopeFileSystem);
-  }
+  explicit IOStatus(Code _code, SubCode _subcode = SubCode::kNone)
+    : status_(Status(_code, _subcode, false, false, kIOErrorScopeFileSystem)) {}
 
   IOStatus(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2);
   IOStatus(Code _code, const Slice& msg, const Slice& msg2)
       : IOStatus(_code, SubCode::kNone, msg, msg2) {}
 };
 
-inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
-                          const Slice& msg2) {
-    status_ = Status(_code, _subcode, false, false, kIOErrorScopeFileSystem);
+inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg, const Slice& msg2)
+    : status_(Status(_code, _subcode, false, false, kIOErrorScopeFileSystem)) {
     assert(status_.rs_status_.code_ != Code::kOk);
     assert(status_.rs_status_.subcode_ != SubCode::kMaxSubCode);
     const size_t len1 = msg.size();
@@ -194,13 +192,13 @@ inline IOStatus::IOStatus(Code _code, SubCode _subcode, const Slice& msg,
     status_.rs_status_.state = std::make_unique<std::string>(result);
 }
 
-inline IOStatus::IOStatus(const IOStatus& s) {
-    status_ = Status(
+inline IOStatus::IOStatus(const IOStatus& s)
+    : status_(Status(
         s.status_.rs_status_.code_,
         s.status_.rs_status_.subcode_,
         s.status_.rs_status_.retryable,
         s.status_.rs_status_.data_loss,
-        s.status_.rs_status_.scope);
+        s.status_.rs_status_.scope)) {
     status_.rs_status_.state = s.status_.rs_status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.rs_status_.state);
 }
 

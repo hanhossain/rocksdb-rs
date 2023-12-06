@@ -842,7 +842,7 @@ std::vector<std::string> DBTestBase::MultiGet(std::vector<int> cfs,
   } else {
     std::vector<PinnableSlice> pin_values(cfs.size());
     result.resize(cfs.size());
-    s.resize(cfs.size());
+    s.resize(cfs.size(), Status_new());
     db_->MultiGet(options, cfs.size(), handles.data(), keys.data(),
                   pin_values.data(), s.data());
     for (size_t i = 0; i < s.size(); ++i) {
@@ -870,7 +870,7 @@ std::vector<std::string> DBTestBase::MultiGet(const std::vector<std::string>& k,
   options.async_io = async;
   std::vector<Slice> keys;
   std::vector<std::string> result(k.size());
-  std::vector<Status> statuses(k.size());
+  std::vector<Status> statuses(k.size(), Status_new());
   std::vector<PinnableSlice> pin_values(k.size());
 
   for (size_t i = 0; i < k.size(); ++i) {
@@ -1549,7 +1549,13 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
   size_t total_reads = 0;
 
   for (auto& kv : true_data) {
-    Status s = status[kv.first];
+    Status s = Status_new();
+    std::map<std::string, Status>::iterator it = status.find(kv.first);
+    if (it != status.end()) {
+      s = it->second;
+    } else {
+      status.insert({ kv.first, s });
+    }
     if (s.ok()) {
       ASSERT_EQ(Get(kv.first), kv.second);
     } else {
@@ -1568,10 +1574,16 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     // Verify Iterator::Next()
     iter_cnt = 0;
     auto data_iter = true_data.begin();
-    Status s;
+    Status s = Status_new();
     for (iter->SeekToFirst(); iter->Valid(); iter->Next(), data_iter++) {
       ASSERT_EQ(iter->key().ToString(), data_iter->first);
-      Status current_status = status[data_iter->first];
+      Status current_status = Status_new();
+      std::map<std::string, Status>::iterator it = status.find(data_iter->first);
+      if (it != status.end()) {
+        current_status = it->second;
+      } else {
+        status.insert({ data_iter->first, current_status });
+      }
       if (!current_status.ok()) {
         s = current_status;
       }
@@ -1594,7 +1606,13 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     auto data_rev = true_data.rbegin();
     for (iter->SeekToLast(); iter->Valid(); iter->Prev(), data_rev++) {
       ASSERT_EQ(iter->key().ToString(), data_rev->first);
-      Status current_status = status[data_rev->first];
+      Status current_status = Status_new();
+      std::map<std::string, Status>::iterator it = status.find(data_rev->first);
+      if (it != status.end()) {
+        current_status = it->second;
+      } else {
+        status.insert({ data_rev->first, current_status });
+      }
       if (!current_status.ok()) {
         s = current_status;
       }

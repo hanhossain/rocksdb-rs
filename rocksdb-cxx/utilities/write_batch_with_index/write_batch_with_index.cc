@@ -182,7 +182,7 @@ void WriteBatchWithIndex::Rep::ClearIndex() {
 }
 
 Status WriteBatchWithIndex::Rep::ReBuildIndex() {
-  Status s;
+  Status s = Status_new();
 
   ClearIndex();
 
@@ -429,7 +429,7 @@ void WriteBatchWithIndex::Clear() { rep->Clear(); }
 Status WriteBatchWithIndex::GetFromBatch(ColumnFamilyHandle* column_family,
                                          const DBOptions& options,
                                          const Slice& key, std::string* value) {
-  Status s;
+  Status s = Status_new();
   WriteBatchWithIndexInternal wbwii(&options, column_family);
   auto result = wbwii.GetFromBatch(this, key, value, &s);
 
@@ -509,7 +509,7 @@ Status WriteBatchWithIndex::GetFromBatchAndDB(
     return Status_InvalidArgument("Must specify timestamp");
   }
 
-  Status s;
+  Status s = Status_new();
   WriteBatchWithIndexInternal wbwii(db, column_family);
 
   // Since the lifetime of the WriteBatch is the same as that of the transaction

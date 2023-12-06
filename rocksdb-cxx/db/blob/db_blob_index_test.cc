@@ -574,7 +574,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
 
   std::string expected_value = get_value(1, 0) + "," + get_value(1, 1) + "," +
                                get_value(1, 2) + "," + get_value(1, 3);
-  Status expected_status;
+  Status expected_status = Status_new();
   verify(1, expected_status, expected_value);
 
   // Test DBIter::FindValueForCurrentKeyUsingSeek flow.

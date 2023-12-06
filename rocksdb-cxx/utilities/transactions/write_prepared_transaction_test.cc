@@ -930,7 +930,7 @@ TEST_P(WritePreparedTransactionTest, CheckKeySkipOldMemtable) {
 // snapshot
 TEST_P(WritePreparedTransactionTest, DoubleSnapshot) {
   TransactionOptions txn_options;
-  Status s;
+  Status s = Status_new();
 
   // Insert initial value
   ASSERT_OK(db->Put(WriteOptions(), "key", "value1"));
@@ -2188,7 +2188,7 @@ TEST_P(WritePreparedTransactionTest, IsInSnapshot) {
 
 void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, Status exp_s,
                  PinnableSlice& exp_v, Slice key) {
-  Status s;
+  Status s = Status_new();
   PinnableSlice v;
   s = db->Get(roptions, db->DefaultColumnFamily(), key, &v);
   ASSERT_EQ(exp_s, s);

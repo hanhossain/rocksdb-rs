@@ -32,7 +32,7 @@ Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
                          DisplayType show_uncompressed_blob,
                          bool show_summary) {
   constexpr size_t kReadaheadSize = 2 * 1024 * 1024;
-  Status s;
+  Status s = Status_new();
   const auto fs = FileSystem::Default();
   IOOptions io_opts;
   s = fs->FileExists(filename, io_opts, nullptr);

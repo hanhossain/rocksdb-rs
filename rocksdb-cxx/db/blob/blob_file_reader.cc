@@ -252,7 +252,7 @@ Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
 
   RecordTick(statistics, BLOB_DB_BLOB_FILE_BYTES_READ, read_size);
 
-  Status s;
+  Status s = Status_new();
 
   IOOptions io_options;
   s = file_reader->PrepareIOOptions(read_options, io_options);
@@ -335,11 +335,10 @@ Status BlobFileReader::GetBlob(
   bool prefetched = false;
 
   if (prefetch_buffer) {
-    Status s;
     constexpr bool for_compaction = true;
 
     IOOptions io_options;
-    s = file_reader_->PrepareIOOptions(read_options, io_options);
+    Status s = file_reader_->PrepareIOOptions(read_options, io_options);
     if (!s.ok()) {
       return s;
     }
@@ -451,7 +450,7 @@ void BlobFileReader::MultiGetBlob(
   Buffer buf;
   AlignedBuf aligned_buf;
 
-  Status s;
+  Status s = Status_new();
   bool direct_io = file_reader_->use_direct_io();
   if (direct_io) {
     for (size_t i = 0; i < read_reqs.size(); ++i) {

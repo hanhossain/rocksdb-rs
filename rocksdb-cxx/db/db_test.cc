@@ -2762,7 +2762,7 @@ static void MTThreadBody(void* arg) {
                                 &values);
       } else {
         std::vector<PinnableSlice> pin_values(keys.size());
-        statuses.resize(keys.size());
+        statuses.resize(keys.size(), Status_new());
         const Snapshot* snapshot = db->GetSnapshot();
         ReadOptions ro;
         ro.snapshot = snapshot;
@@ -3118,13 +3118,13 @@ class ModelDB : public DB {
   Status GetPropertiesOfAllTables(
       ColumnFamilyHandle* /*column_family*/,
       TablePropertiesCollection* /*props*/) override {
-    return Status();
+    return Status_new();
   }
 
   Status GetPropertiesOfTablesInRange(
       ColumnFamilyHandle* /*column_family*/, const Range* /*range*/,
       std::size_t /*n*/, TablePropertiesCollection* /*props*/) override {
-    return Status();
+    return Status_new();
   }
 
   using DB::KeyMayExist;
@@ -3297,7 +3297,7 @@ class ModelDB : public DB {
   using DB::Flush;
   Status Flush(const ROCKSDB_NAMESPACE::FlushOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/) override {
-    Status ret;
+    Status ret = Status_new();
     return ret;
   }
   Status Flush(
@@ -6256,7 +6256,7 @@ TEST_F(DBTest, PromoteL0Failure) {
   ASSERT_OK(Put(Key(1), ""));
   ASSERT_OK(Flush());
 
-  Status status;
+  Status status = Status_new();
   // Fails because L0 has overlapping files.
   status = experimental::PromoteL0(db_, db_->DefaultColumnFamily());
   ASSERT_TRUE(status.IsInvalidArgument());

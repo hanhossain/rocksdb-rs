@@ -311,7 +311,7 @@ Status WritePreparedTxn::RollbackInternal() {
           roptions_(_roptions) {}
 
     Status Rollback(uint32_t cf, const Slice& key) {
-      Status s;
+      Status s = Status_new();
       CFKeys& cf_keys = keys_[cf];
       if (cf_keys.size() == 0) {  // just inserted
         auto cmp = comparators_[cf];

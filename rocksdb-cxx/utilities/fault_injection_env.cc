@@ -311,7 +311,8 @@ Status FaultInjectionTestEnv::ReopenWritableFile(
   }
 
   bool exists;
-  Status s, exists_s = target()->FileExists(fname);
+  Status s = Status_new();
+  Status exists_s = target()->FileExists(fname);
   if (exists_s.IsNotFound()) {
     exists = false;
   } else if (exists_s.ok()) {
@@ -493,7 +494,7 @@ void FaultInjectionTestEnv::WritableFileAppended(const FileState& state) {
 // FileState of the file as the parameter.
 Status FaultInjectionTestEnv::DropFileData(
     std::function<Status(Env*, FileState)> func) {
-  Status s;
+  Status s = Status_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FileState>::const_iterator it =
            db_file_state_.begin();

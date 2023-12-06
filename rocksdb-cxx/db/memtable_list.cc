@@ -481,7 +481,7 @@ Status MemTableList::TryInstallMemtableFlushResults(
   }
 
   // if some other thread is already committing, then return
-  Status s;
+  Status s = Status_new();
   if (commit_in_progress_) {
     TEST_SYNC_POINT("MemTableList::TryInstallMemtableFlushResults:InProgress");
     return s;
@@ -834,7 +834,7 @@ Status InstallMemtableAtomicFlushResults(
     }
   }
 
-  Status s;
+  Status s = Status_new();
 
   autovector<autovector<VersionEdit*>> edit_lists;
   uint32_t num_entries = 0;

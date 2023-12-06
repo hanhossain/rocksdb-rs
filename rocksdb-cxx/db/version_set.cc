@@ -1593,7 +1593,7 @@ Status Version::GetTableProperties(const ReadOptions& read_options,
 
 Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
                                          TablePropertiesCollection* props) {
-  Status s;
+  Status s = Status_new();
   for (int level = 0; level < storage_info_.num_levels_; level++) {
     s = GetPropertiesOfAllTables(read_options, props, level);
     if (!s.ok()) {
@@ -1722,7 +1722,7 @@ Status Version::GetAggregatedTableProperties(
     const ReadOptions& read_options, std::shared_ptr<const TableProperties>* tp,
     int level) {
   TablePropertiesCollection props;
-  Status s;
+  Status s = Status_new();
   if (level < 0) {
     s = GetPropertiesOfAllTables(read_options, &props);
   } else {
@@ -2052,7 +2052,7 @@ Status Version::OverlapWithLevelIterator(const ReadOptions& read_options,
   auto ucmp = icmp.user_comparator();
 
   Arena arena;
-  Status status;
+  Status status = Status_new();
   ReadRangeDelAggregator range_del_agg(&icmp,
                                        kMaxSequenceNumber /* upper_bound */);
 
@@ -2575,7 +2575,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
     iter->get_context = &(get_ctx[get_ctx_index]);
   }
 
-  Status s;
+  Status s = Status_new();
   // blob_file => [[blob_idx, it], ...]
   std::unordered_map<uint64_t, BlobReadContexts> blob_ctxs;
   MultiGetRange keys_with_blobs_range(*range, range->begin(), range->end());
@@ -4930,7 +4930,8 @@ struct VersionSet::ManifestWriter {
       InstrumentedMutex* mu, ColumnFamilyData* _cfd,
       const MutableCFOptions& cf_options, const autovector<VersionEdit*>& e,
       const std::function<void(const Status&)>& manifest_wcb)
-      : done(false),
+      : status(Status_new()),
+        done(false),
         cv(mu),
         cfd(_cfd),
         mutable_cf_options(cf_options),
@@ -5328,7 +5329,7 @@ Status VersionSet::ProcessManifestWrites(
   }
 
   uint64_t new_manifest_file_size = 0;
-  Status s;
+  Status s = Status_new();
   IOStatus io_s;
   IOStatus manifest_io_status;
   {
@@ -5872,7 +5873,7 @@ Status VersionSet::Recover(
   uint64_t log_number = 0;
   {
     VersionSet::LogReporter reporter;
-    Status log_read_status;
+    Status log_read_status = Status_new();
     reporter.status = &log_read_status;
     log::Reader reader(nullptr, std::move(manifest_file_reader), &reporter,
                        true /* checksum */, 0 /* log_number */);
@@ -6007,7 +6008,7 @@ Status VersionSet::TryRecover(
   if (!manifest_picker.Valid()) {
     return Status_Corruption("Cannot locate MANIFEST file in " + dbname_);
   }
-  Status s;
+  Status s = Status_new();
   std::string manifest_path =
       manifest_picker.GetNextManifest(&manifest_file_number_, nullptr);
   while (!manifest_path.empty()) {
@@ -6031,7 +6032,7 @@ Status VersionSet::TryRecoverFromOneManifest(
   ROCKS_LOG_INFO(db_options_->info_log, "Trying to recover from manifest: %s\n",
                  manifest_path.c_str());
   std::unique_ptr<SequentialFileReader> manifest_file_reader;
-  Status s;
+  Status s = Status_new();
   {
     std::unique_ptr<FSSequentialFile> manifest_file;
     s = fs_->NewSequentialFile(manifest_path,
@@ -6098,7 +6099,7 @@ Status VersionSet::ListColumnFamiliesFromManifest(
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   std::unique_ptr<SequentialFileReader> file_reader;
-  Status s;
+  Status s = Status_new();
   {
     std::unique_ptr<FSSequentialFile> file;
     // these are just for performance reasons, not correctness,
@@ -6152,7 +6153,7 @@ Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
                       nullptr /*BlockCacheTracer*/, nullptr /*IOTracer*/,
                       /*db_id*/ "",
                       /*db_session_id*/ "");
-  Status status;
+  Status status = Status_new();
 
   std::vector<ColumnFamilyDescriptor> dummy;
   ColumnFamilyDescriptor dummy_descriptor(kDefaultColumnFamilyName,
@@ -6240,7 +6241,7 @@ Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
 // metadata from Manifest to VersionSet before calling this function.
 Status VersionSet::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
   // Clean the previously stored checksum information if any.
-  Status s;
+  Status s = Status_new();
   if (checksum_list == nullptr) {
     s = Status_InvalidArgument("checksum_list is nullptr");
     return s;
@@ -7202,7 +7203,8 @@ Status ReactiveVersionSet::Recover(
   assert(manifest_reporter != nullptr);
   assert(manifest_reader_status != nullptr);
 
-  manifest_reader_status->reset(new Status());
+  // TODO: this might cause issues when moving Status to rust
+  manifest_reader_status->reset(new Status(RsStatus_new()));
   manifest_reporter->reset(new LogReporter());
   static_cast_with_check<LogReporter>(manifest_reporter->get())->status =
       manifest_reader_status->get();
@@ -7235,7 +7237,7 @@ Status ReactiveVersionSet::ReadAndApply(
   assert(cfds_changed != nullptr);
   mu->AssertHeld();
 
-  Status s;
+  Status s = Status_new();
   log::Reader* reader = manifest_reader->get();
   assert(reader);
   s = MaybeSwitchManifest(reader->GetReporter(), manifest_reader);
@@ -7255,7 +7257,7 @@ Status ReactiveVersionSet::MaybeSwitchManifest(
     log::Reader::Reporter* reporter,
     std::unique_ptr<log::FragmentBufferedReader>* manifest_reader) {
   assert(manifest_reader != nullptr);
-  Status s;
+  Status s = Status_new();
   std::string manifest_path;
   s = GetCurrentManifestPath(dbname_, fs_.get(), &manifest_path,
                              &manifest_file_number_);

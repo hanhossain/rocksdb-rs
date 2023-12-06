@@ -730,7 +730,7 @@ class TableFileCreationListener : public EventListener {
     IOStatus status_;
   };
 
-  TableFileCreationListener() {
+  TableFileCreationListener() : last_failure_(Status_new()) {
     for (int i = 0; i < 2; i++) {
       started_[i] = finished_[i] = failure_[i] = 0;
     }

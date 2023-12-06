@@ -41,7 +41,7 @@ ConfigOptions::ConfigOptions(const DBOptions& db_opts) : env(db_opts.env) {
 
 Status ValidateOptions(const DBOptions& db_opts,
                        const ColumnFamilyOptions& cf_opts) {
-  Status s;
+  Status s = Status_new();
   auto db_cfg = DBOptionsAsConfigurable(db_opts);
   auto cf_cfg = CFOptionsAsConfigurable(cf_opts);
   s = db_cfg->ValidateOptions(db_opts, cf_opts);
@@ -955,7 +955,7 @@ Status OptionTypeInfo::ParseStruct(
     const std::unordered_map<std::string, OptionTypeInfo>* struct_map,
     const std::string& opt_name, const std::string& opt_value, void* opt_addr) {
   assert(struct_map);
-  Status status;
+  Status status = Status_new();
   if (opt_name == struct_name || EndsWith(opt_name, "." + struct_name)) {
     // This option represents the entire struct
     std::unordered_map<std::string, std::string> unused;
@@ -1060,7 +1060,7 @@ Status OptionTypeInfo::SerializeType(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, OptionTypeInfo>& type_map,
     const void* opt_addr, std::string* result) {
-  Status status;
+  Status status = Status_new();
   for (const auto& iter : type_map) {
     std::string single;
     const auto& opt_info = iter.second;
@@ -1082,7 +1082,7 @@ Status OptionTypeInfo::SerializeStruct(
     const std::unordered_map<std::string, OptionTypeInfo>* struct_map,
     const std::string& opt_name, const void* opt_addr, std::string* value) {
   assert(struct_map);
-  Status status;
+  Status status = Status_new();
   if (EndsWith(opt_name, struct_name)) {
     // We are going to write the struct as "{ prop1=value1; prop2=value2;}.
     // Set the delimiter to ";" so that the everything will be on one line.

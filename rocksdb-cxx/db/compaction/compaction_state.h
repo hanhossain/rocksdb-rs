@@ -32,7 +32,7 @@ class CompactionState {
       InternalStats::CompactionStatsFull& compaction_stats,
       CompactionJobStats& compaction_job_stats);
 
-  explicit CompactionState(Compaction* c) : compaction(c) {}
+  explicit CompactionState(Compaction* c) : compaction(c), status(Status_new()) {}
 
   Slice SmallestUserKey();
 

@@ -966,7 +966,7 @@ Status ParseArray(const ConfigOptions& config_options,
                   const OptionTypeInfo& elem_info, char separator,
                   const std::string& name, const std::string& value,
                   std::array<T, kSize>* result) {
-  Status status;
+  Status status = Status_new();
 
   ConfigOptions copy = config_options;
   copy.ignore_unsupported_options = false;
@@ -1106,7 +1106,7 @@ Status ParseVector(const ConfigOptions& config_options,
                    const std::string& name, const std::string& value,
                    std::vector<T>* result) {
   result->clear();
-  Status status;
+  Status status = Status_new();
 
   // Turn off ignore_unknown_objects so we can tell if the returned
   // object is valid or not.
