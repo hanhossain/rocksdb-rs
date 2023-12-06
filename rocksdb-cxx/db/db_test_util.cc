@@ -1549,7 +1549,12 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
   size_t total_reads = 0;
 
   for (auto& kv : true_data) {
-    Status s = status.at(kv.first);
+    Status s = Status_new();
+    if (status.contains(kv.first)) {
+      s = status.at(kv.first);
+    } else {
+      status.insert({ kv.first, s });
+    }
     if (s.ok()) {
       ASSERT_EQ(Get(kv.first), kv.second);
     } else {
@@ -1571,7 +1576,12 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     Status s = Status_new();
     for (iter->SeekToFirst(); iter->Valid(); iter->Next(), data_iter++) {
       ASSERT_EQ(iter->key().ToString(), data_iter->first);
-      Status current_status = status.at(data_iter->first);
+      Status current_status = Status_new();
+      if (status.contains(data_iter->first)) {
+        current_status = status.at(data_iter->first);
+      } else {
+        status.insert({ data_iter->first, current_status });
+      }
       if (!current_status.ok()) {
         s = current_status;
       }
@@ -1594,7 +1604,12 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     auto data_rev = true_data.rbegin();
     for (iter->SeekToLast(); iter->Valid(); iter->Prev(), data_rev++) {
       ASSERT_EQ(iter->key().ToString(), data_rev->first);
-      Status current_status = status.at(data_rev->first);
+      Status current_status = Status_new();
+      if (status.contains(data_rev->first)) {
+        current_status = status.at(data_rev->first);
+      } else {
+        status.insert({ data_rev->first, current_status });
+      }
       if (!current_status.ok()) {
         s = current_status;
       }

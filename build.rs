@@ -380,7 +380,7 @@ fn main() {
         let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
         config.files(sources);
         config.file("build_version.cc");
-        config.flag_if_supported("-std=c++17");
+        config.flag_if_supported("-std=c++20");
         config.compile("rocksdb-cxx");
     }
 
