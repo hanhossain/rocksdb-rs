@@ -274,7 +274,7 @@ TEST_F(DBSSTTest, DeleteObsoleteFilesPendingOutputs) {
   ASSERT_EQ(metadata.size(), 2U);
 
   // This file should have been deleted during last compaction
-  ASSERT_EQ(Status_NotFound(), env_->FileExists(dbname_ + file_on_L2));
+  ASSERT_TRUE(Status_NotFound().eq(env_->FileExists(dbname_ + file_on_L2)));
   listener->VerifyMatchedCount(1);
 }
 

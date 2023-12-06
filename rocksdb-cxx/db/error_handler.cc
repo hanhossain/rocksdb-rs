@@ -528,7 +528,7 @@ Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
   {
     uint64_t free_space;
     if (db_options_.env->GetFreeSpace(db_options_.db_paths[0].path,
-                                      &free_space) == Status_NotSupported()) {
+                                      &free_space).eq(Status_NotSupported())) {
       *auto_recovery = false;
     }
   }

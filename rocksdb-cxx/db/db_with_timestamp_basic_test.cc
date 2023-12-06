@@ -367,30 +367,30 @@ TEST_F(DBBasicTestWithTimestamp, UpdateFullHistoryTsLowWithPublicAPI) {
   std::string ts_low_str_back = Timestamp(8, 0);
   auto s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                          ts_low_str_back);
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
   // test IncreaseFullHistoryTsLow with a timestamp whose length is longger
   // than the cf's timestamp size
   std::string ts_low_str_long(Timestamp(0, 0).size() + 1, 'a');
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                     ts_low_str_long);
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
   // test IncreaseFullHistoryTsLow with a timestamp which is null
   std::string ts_low_str_null = "";
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                     ts_low_str_null);
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
   // test IncreaseFullHistoryTsLow for a column family that does not enable
   // timestamp
   options.comparator = BytewiseComparator();
   DestroyAndReopen(options);
   ts_low_str = Timestamp(10, 0);
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(), ts_low_str);
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
   // test GetFullHistoryTsLow for a column family that does not enable
   // timestamp
   std::string current_ts_low;
   s = db_->GetFullHistoryTsLow(db_->DefaultColumnFamily(), &current_ts_low);
-  ASSERT_EQ(s, Status_InvalidArgument());
+  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
   Close();
 }
 
@@ -568,7 +568,7 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
     std::string value;
     std::string key_ts;
     Status s = db->Get(ropts, key, &value, &key_ts);
-    ASSERT_TRUE(s == status);
+    ASSERT_TRUE(s.eq(status));
     if (s.ok()) {
       ASSERT_EQ(checkValue, value);
     }
@@ -3674,8 +3674,8 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
     Status s = Status_new();
     for (int i = 0; i < kNum; ++i) {
       s = db_->Get(read_opts, Key1(i), &value, &timestamp);
-      ASSERT_EQ(s, expected_status[i]);
-      ASSERT_EQ(statuses[i], expected_status[i]);
+      ASSERT_TRUE(s.eq(expected_status[i]));
+      ASSERT_TRUE(statuses[i].eq(expected_status[i]));
       if (s.ok()) {
         ASSERT_EQ(value, expected_values[i]);
         ASSERT_EQ(values[i], expected_values[i]);
