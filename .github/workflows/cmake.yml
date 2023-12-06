@@ -27,7 +27,7 @@ jobs:
           cpus: 2
         - os: macos-13
           deps: brew install ninja gflags
-          cpus: 3
+          cpus: 4
 
     steps:
     - uses: actions/checkout@v4
@@ -66,7 +66,7 @@ jobs:
           cpus: 2
         - os: macos-13
           deps: brew install ninja gflags
-          cpus: 3
+          cpus: 4
 
     steps:
     - uses: actions/checkout@v4
