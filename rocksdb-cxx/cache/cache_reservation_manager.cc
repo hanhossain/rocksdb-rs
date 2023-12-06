@@ -115,7 +115,7 @@ Status CacheReservationManagerImpl<R>::IncreaseCacheReservation(
     Cache::Handle* handle = nullptr;
     return_status = cache_.Insert(GetNextCacheKey(), kSizeDummyEntry, &handle);
 
-    if (return_status != Status_OK()) {
+    if (!return_status.eq(Status_OK())) {
       return return_status;
     }
 

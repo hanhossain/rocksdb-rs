@@ -1229,7 +1229,7 @@ void LevelIterator::Seek(const Slice& target) {
     // blocks has been submitted. So it should return at this point and Seek
     // should be called again to retrieve the requested block and execute the
     // remaining code.
-    if (file_iter_.status() == Status_TryAgain()) {
+    if (file_iter_.status().eq(Status_TryAgain())) {
       return;
     }
     if (!file_iter_.Valid() && file_iter_.status().ok() &&

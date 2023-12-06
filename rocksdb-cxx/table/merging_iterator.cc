@@ -1301,7 +1301,7 @@ void MergingIterator::SwitchToForward() {
       // request for retrieval of data blocks has been submitted. So it should
       // return at this point and Seek should be called again to retrieve the
       // requested block and add the child to min heap.
-      if (child.iter.status() == Status_TryAgain()) {
+      if (child.iter.status().eq(Status_TryAgain())) {
         continue;
       }
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
@@ -1313,7 +1313,7 @@ void MergingIterator::SwitchToForward() {
   }
 
   for (auto& child : children_) {
-    if (child.iter.status() == Status_TryAgain()) {
+    if (child.iter.status().eq(Status_TryAgain())) {
       child.iter.Seek(target);
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
         assert(child.iter.status().ok());

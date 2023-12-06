@@ -224,7 +224,7 @@ TEST_F(AutoRollLoggerTest, RollLogFileByTime) {
 
   InitTestDb();
   // -- Test the existence of file during the server restart.
-  ASSERT_EQ(Status_NotFound(), default_env->FileExists(kLogFile));
+  ASSERT_TRUE(Status_NotFound().eq(default_env->FileExists(kLogFile)));
   AutoRollLogger logger(default_env->GetFileSystem(), nsc, kTestDir, "",
                         log_size, time, keep_log_file_num);
   ASSERT_OK(default_env->FileExists(kLogFile));
@@ -560,7 +560,7 @@ TEST_F(AutoRollLoggerTest, Close) {
     ROCKS_LOG_FATAL(&logger, "%s", kSampleMessage.c_str());
     log_lines += InfoLogLevel::HEADER_LEVEL - log_level + 1;
   }
-  ASSERT_EQ(logger.Close(), Status_OK());
+  ASSERT_TRUE(logger.Close().eq(Status_OK()));
 
   std::ifstream inFile(AutoRollLoggerTest::kLogFile.c_str());
   size_t lines = std::count(std::istreambuf_iterator<char>(inFile),

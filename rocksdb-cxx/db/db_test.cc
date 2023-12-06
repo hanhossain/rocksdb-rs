@@ -6945,7 +6945,7 @@ TEST_F(DBTest, PinnableSliceAndRowCache) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
     ASSERT_EQ(pin_slice.ToString(), "bar");
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -6974,8 +6974,8 @@ TEST_F(DBTest, ReusePinnableSlice) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
-    ASSERT_EQ(Get("foo", &pin_slice), Status_OK());
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
     ASSERT_EQ(pin_slice.ToString(), "bar");
 
     // Entry is already in cache, lookup will remove the element from lru
@@ -6997,11 +6997,11 @@ TEST_F(DBTest, ReusePinnableSlice) {
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7024,11 +7024,11 @@ TEST_F(DBTest, ReusePinnableSlice) {
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_EQ(Status_OK(), statuses[0]);
+    ASSERT_TRUE(Status_OK().eq(statuses[0]));
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7237,7 +7237,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t creation_time;
   Status s1 = dbfull()->GetCreationTimeOfOldestFile(&creation_time);
   ASSERT_EQ(0, creation_time);
-  ASSERT_EQ(s1, Status_OK());
+  ASSERT_TRUE(s1.eq(Status_OK()));
 
   // Testing with non-zero file creation time.
   set_file_creation_time_to_zero = false;
@@ -7262,14 +7262,14 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t ctime;
   Status s2 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
   ASSERT_EQ(uint_time_1, ctime);
-  ASSERT_EQ(s2, Status_OK());
+  ASSERT_TRUE(s2.eq(Status_OK()));
 
   // Testing with max_open_files != -1
   options = CurrentOptions();
   options.max_open_files = 10;
   DestroyAndReopen(options);
   Status s3 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
-  ASSERT_EQ(s3, Status_NotSupported());
+  ASSERT_TRUE(s3.eq(Status_NotSupported()));
 
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
 }
