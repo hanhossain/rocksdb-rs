@@ -37,6 +37,7 @@ jobs:
       run: ${{ matrix.deps }}
 
     - name: Run sccache-cache
+      if: false
       uses: mozilla-actions/sccache-action@v0.0.3
 
     - name: Create build directory
