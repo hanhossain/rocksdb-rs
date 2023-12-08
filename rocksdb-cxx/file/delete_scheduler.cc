@@ -121,7 +121,7 @@ Status DeleteScheduler::DeleteFile(const std::string& file_path,
   return s;
 }
 
-std::map<std::string, Status> DeleteScheduler::GetBackgroundErrors() {
+const std::map<std::string, Status>& DeleteScheduler::GetBackgroundErrors() {
   InstrumentedMutexLock l(&mu_);
   return bg_errors_;
 }
@@ -258,7 +258,7 @@ void DeleteScheduler::BackgroundEmptyTrash() {
       }
 
       if (!s.ok()) {
-        bg_errors_.insert_or_assign(path_in_trash, s);
+        bg_errors_.insert_or_assign(path_in_trash, s.Clone());
       }
 
       // Apply penalty if necessary

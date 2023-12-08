@@ -289,7 +289,7 @@ Status PartitionedIndexBuilder::Finish(
     auto s = entry.value->Finish(index_blocks);
     index_size_ += index_blocks->index_block_contents.size();
     finishing_indexes = true;
-    return s.ok() ? Status_Incomplete() : s;
+    return s.ok() ? Status_Incomplete() : s.Clone();
   }
 }
 

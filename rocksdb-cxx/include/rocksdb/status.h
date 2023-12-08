@@ -34,11 +34,12 @@ class Status {
   Status() = delete;
 
   // Copy the specified status.
-  Status(const Status& s);
+  Status(const Status& s) = delete;
   Status& operator=(const Status& s);
   Status(Status&& s) noexcept;
   Status& operator=(Status&& s) noexcept;
 
+  Status Clone() const;
   bool eq(const Status& s) const;
 
   Code code() const;
@@ -272,4 +273,5 @@ class Status {
     Status Status_TxnNotPrepared(const Slice& msg);
 
     std::unique_ptr<std::string> Status_CopyState(const std::string& s);
+    std::vector<Status> Status_CreateVec(size_t n, const Status& s);
 }  // namespace ROCKSDB_NAMESPACE

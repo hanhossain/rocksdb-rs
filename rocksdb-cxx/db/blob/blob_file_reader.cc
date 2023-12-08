@@ -42,7 +42,7 @@ Status BlobFileReader::Create(
         OpenFile(immutable_options, file_options, blob_file_read_hist,
                  blob_file_number, io_tracer, &file_size, &file_reader);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -57,7 +57,7 @@ Status BlobFileReader::Create(
         ReadHeader(file_reader.get(), read_options, column_family_id,
                    statistics, &compression_type);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -65,7 +65,7 @@ Status BlobFileReader::Create(
     const Status s =
         ReadFooter(file_reader.get(), read_options, file_size, statistics);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -101,7 +101,7 @@ Status BlobFileReader::OpenFile(
     const Status s =
         fs->GetFileSize(blob_file_path, IOOptions(), file_size, dbg);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -117,7 +117,7 @@ Status BlobFileReader::OpenFile(
     const Status s =
         fs->NewRandomAccessFile(blob_file_path, file_opts, &file, dbg);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -160,7 +160,7 @@ Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
                      statistics, &header_slice, &buf, &aligned_buf,
                      Env::IO_TOTAL /* rate_limiter_priority */);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
 
     TEST_SYNC_POINT_CALLBACK("BlobFileReader::ReadHeader:TamperWithResult",
@@ -172,7 +172,7 @@ Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
   {
     const Status s = header.DecodeFrom(header_slice);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -213,7 +213,7 @@ Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
                      statistics, &footer_slice, &buf, &aligned_buf,
                      Env::IO_TOTAL /* rate_limiter_priority */);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
 
     TEST_SYNC_POINT_CALLBACK("BlobFileReader::ReadFooter:TamperWithResult",
@@ -225,7 +225,7 @@ Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
   {
     const Status s = footer.DecodeFrom(footer_slice);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -361,7 +361,7 @@ Status BlobFileReader::GetBlob(
         static_cast<size_t>(record_size), statistics_, &record_slice, &buf,
         &aligned_buf, read_options.rate_limiter_priority);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -371,7 +371,7 @@ Status BlobFileReader::GetBlob(
   if (read_options.verify_checksums) {
     const Status s = VerifyBlob(record_slice, user_key, value_size);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -381,7 +381,7 @@ Status BlobFileReader::GetBlob(
     const Status s = UncompressBlobIfNeeded(
         value_slice, compression_type, allocator, clock_, statistics_, result);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -544,7 +544,7 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
   {
     const Status s = record.DecodeHeaderFrom(header_slice);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -570,7 +570,7 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
 
     const Status s = record.CheckBlobCRC();
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 

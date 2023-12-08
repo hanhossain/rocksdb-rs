@@ -137,7 +137,7 @@ class MergingIterator : public InternalIterator {
 
   bool Valid() const override { return current_ != nullptr && status_.ok(); }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   // Add range_tombstone_iters_[level] into min heap.
   // Updates active_ if the end key of a range tombstone is inserted.

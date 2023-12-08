@@ -488,7 +488,7 @@ class MemTableIterator : public InternalIterator {
     return GetLengthPrefixedSlice(key_slice.data() + key_slice.size());
   }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   bool IsKeyPinned() const override {
     // memtable data is always pinned

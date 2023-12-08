@@ -29,7 +29,7 @@ Status UncompressionDictReader::Create(
         table, prefetch_buffer, ro, use_cache, nullptr /* get_context */,
         lookup_context, &uncompression_dict);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
 
     if (use_cache && !pin) {
@@ -73,7 +73,7 @@ Status UncompressionDictReader::ReadUncompressionDictionary(
         s.ToString().c_str());
   }
 
-  return s;
+  return s.Clone();
 }
 
 Status UncompressionDictReader::GetOrReadUncompressionDictionary(

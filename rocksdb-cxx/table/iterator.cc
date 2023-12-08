@@ -29,7 +29,7 @@ Status Iterator::GetProperty(std::string prop_name, std::string* prop) {
 namespace {
 class EmptyIterator : public Iterator {
  public:
-  explicit EmptyIterator(const Status& s) : status_(s) {}
+  explicit EmptyIterator(const Status& s) : status_(s.Clone()) {}
   bool Valid() const override { return false; }
   void Seek(const Slice& /*target*/) override {}
   void SeekForPrev(const Slice& /*target*/) override {}
@@ -45,7 +45,7 @@ class EmptyIterator : public Iterator {
     assert(false);
     return Slice();
   }
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
  private:
   Status status_;
@@ -54,7 +54,7 @@ class EmptyIterator : public Iterator {
 template <class TValue = Slice>
 class EmptyInternalIterator : public InternalIteratorBase<TValue> {
  public:
-  explicit EmptyInternalIterator(const Status& s) : status_(s) {}
+  explicit EmptyInternalIterator(const Status& s) : status_(s.Clone()) {}
   bool Valid() const override { return false; }
   void Seek(const Slice& /*target*/) override {}
   void SeekForPrev(const Slice& /*target*/) override {}
@@ -70,7 +70,7 @@ class EmptyInternalIterator : public InternalIteratorBase<TValue> {
     assert(false);
     return TValue();
   }
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
  private:
   Status status_;

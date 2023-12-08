@@ -76,7 +76,7 @@ class IOStatus {
     bool IsAborted() const { return status_.IsAborted(); }
     bool IsPathNotFound() const { return status_.IsPathNotFound(); }
     bool IsInvalidArgument() const { return status_.IsInvalidArgument(); }
-    operator Status() const { return status_; }
+    operator Status() const { return status_.Clone(); }
 
     SubCode subcode() const { return status_.subcode(); }
     std::string ToString() const { return status_.ToString(); }

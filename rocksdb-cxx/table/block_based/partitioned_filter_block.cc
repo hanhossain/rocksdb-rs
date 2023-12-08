@@ -324,7 +324,7 @@ Status PartitionedFilterBlockReader::GetFilterPartitionBlock(
                              /* for_compaction */ false, /* use_cache */ true,
                              /* async_read */ false);
 
-  return s;
+  return s.Clone();
 }
 
 bool PartitionedFilterBlockReader::MayMatch(

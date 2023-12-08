@@ -25,7 +25,7 @@ Status BinarySearchIndexReader::Create(
         ReadIndexBlock(table, prefetch_buffer, ro, use_cache,
                        /*get_context=*/nullptr, lookup_context, &index_block);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
 
     if (use_cache && !pin) {

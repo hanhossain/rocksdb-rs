@@ -107,7 +107,7 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
   {
     const Status s = OpenBlobFileIfNeeded();
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -117,7 +117,7 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
   {
     const Status s = CompressBlobIfNeeded(&blob, &compressed_blob);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -128,14 +128,14 @@ Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
     const Status s =
         WriteBlobToFile(key, blob, &blob_file_number, &blob_offset);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
   {
     const Status s = CloseBlobFileIfNeeded();
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 

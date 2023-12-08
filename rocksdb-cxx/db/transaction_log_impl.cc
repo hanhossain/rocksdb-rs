@@ -80,7 +80,7 @@ BatchResult TransactionLogIteratorImpl::GetBatch() {
   return result;
 }
 
-Status TransactionLogIteratorImpl::status() { return current_status_; }
+Status TransactionLogIteratorImpl::status() { return current_status_.Clone(); }
 
 bool TransactionLogIteratorImpl::Valid() { return started_ && is_valid_; }
 

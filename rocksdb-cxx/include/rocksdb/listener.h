@@ -94,7 +94,7 @@ struct BlobFileCreationInfo : public BlobFileCreationBriefInfo {
                                   _reason),
         total_blob_count(_total_blob_count),
         total_blob_bytes(_total_blob_bytes),
-        status(_status),
+        status(_status.Clone()),
         file_checksum(_file_checksum),
         file_checksum_func_name(_file_checksum_func_name) {}
 
@@ -213,7 +213,7 @@ struct FileDeletionInfo {
       : db_name(_db_name),
         file_path(_file_path),
         job_id(_job_id),
-        status(_status) {}
+        status(_status.Clone()) {}
   // The name of the database where the file was deleted.
   std::string db_name;
   // The path to the deleted file.
@@ -230,7 +230,7 @@ struct BlobFileDeletionInfo : public FileDeletionInfo {
   BlobFileDeletionInfo(const std::string& _db_name,
                        const std::string& _file_path, int _job_id,
                        Status _status)
-      : FileDeletionInfo(_db_name, _file_path, _job_id, _status) {}
+      : FileDeletionInfo(_db_name, _file_path, _job_id, _status.Clone()) {}
 };
 
 enum class FileOperationType {
@@ -277,7 +277,7 @@ struct FileOperationInfo {
         duration(std::chrono::duration_cast<std::chrono::nanoseconds>(
             _finish_ts - _start_ts.second)),
         start_ts(_start_ts.first),
-        status(_status) {}
+        status(_status.Clone()) {}
   static StartTimePoint StartNow() {
     return std::make_pair<SystemTimePoint, SteadyTimePoint>(
         std::chrono::system_clock::now(), std::chrono::steady_clock::now());

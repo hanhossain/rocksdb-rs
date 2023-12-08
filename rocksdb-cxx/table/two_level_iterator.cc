@@ -60,7 +60,7 @@ class TwoLevelIndexIterator : public InternalIteratorBase<IndexValue> {
                !second_level_iter_.status().ok()) {
       return second_level_iter_.status();
     } else {
-      return status_;
+      return status_.Clone();
     }
   }
   void SetPinnedItersMgr(

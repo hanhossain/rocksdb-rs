@@ -100,7 +100,7 @@ Status BlobSource::PutBlobIntoCache(
     RecordTick(statistics_, BLOB_DB_CACHE_ADD_FAILURES);
   }
 
-  return s;
+  return s.Clone();
 }
 
 BlobSource::TypedHandle* BlobSource::GetEntryFromCache(const Slice& key) const {

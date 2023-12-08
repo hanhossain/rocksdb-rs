@@ -328,7 +328,7 @@ Status DBImpl::FlushMemTableToOutputFile(
       }
     } else {
       assert(s.eq(log_io_s));
-      Status new_bg_error = s;
+      Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
   }
@@ -801,7 +801,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
       }
     } else {
       assert(s.eq(log_io_s));
-      Status new_bg_error = s;
+      Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
   }
@@ -1492,7 +1492,7 @@ Status DBImpl::CompactFilesImpl(
                                        &job_context->superversion_contexts[0],
                                        *c->mutable_cf_options());
   }
-  c->ReleaseCompactionFiles(s);
+  c->ReleaseCompactionFiles(s.Clone());
   // Need to make sure SstFileManager does its bookkeeping
   auto sfm = static_cast<SstFileManagerImpl*>(
       immutable_db_options_.sst_file_manager.get());
@@ -1964,7 +1964,7 @@ Status DBImpl::RunManualCompaction(
     manual.status =
         Status_Incomplete(SubCode::kManualCompactionPaused);
     manual.done = true;
-    return manual.status;
+    return manual.status.Clone();
   }
 
   // When a manual compaction arrives, temporarily disable scheduling of
@@ -2129,7 +2129,7 @@ Status DBImpl::RunManualCompaction(
     MaybeScheduleFlushOrCompaction();
   }
   bg_cv_.SignalAll();
-  return manual.status;
+  return manual.status.Clone();
 }
 
 void DBImpl::GenerateFlushRequest(const autovector<ColumnFamilyData*>& cfds,
@@ -3285,7 +3285,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       manual_compaction = nullptr;
     }
     if (c) {
-      c->ReleaseCompactionFiles(status);
+      c->ReleaseCompactionFiles(status.Clone());
       c.reset();
     }
     return status;
@@ -3323,7 +3323,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
       if (!enough_room) {
         // Then don't do the compaction
-        c->ReleaseCompactionFiles(status);
+        c->ReleaseCompactionFiles(status.Clone());
         c.reset();
         // m's vars will get set properly at the end of this function,
         // as long as status == CompactionTooLarge
@@ -3392,7 +3392,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
         if (!enough_room) {
           // Then don't do the compaction
-          c->ReleaseCompactionFiles(status);
+          c->ReleaseCompactionFiles(status.Clone());
           c->column_family_data()
               ->current()
               ->storage_info()
@@ -3636,7 +3636,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   }
 
   if (c != nullptr) {
-    c->ReleaseCompactionFiles(status);
+    c->ReleaseCompactionFiles(status.Clone());
     *made_progress = true;
 
     // Need to make sure SstFileManager does its bookkeeping

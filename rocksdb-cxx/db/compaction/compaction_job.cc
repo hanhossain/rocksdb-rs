@@ -818,7 +818,7 @@ Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
   AutoThreadOperationStageUpdater stage_updater(
       ThreadStatus::STAGE_COMPACTION_INSTALL);
   db_mutex_->AssertHeld();
-  Status status = compact_->status;
+  Status status = compact_->status.Clone();
 
   ColumnFamilyData* cfd = compact_->compaction->column_family_data();
   assert(cfd);
@@ -1470,7 +1470,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   std::string file_checksum_func_name = kUnknownFileChecksumFuncName;
 
   // Check for iterator errors
-  Status s = input_status;
+  Status s = input_status.Clone();
 
   // Add range tombstones
   auto earliest_snapshot = kMaxSequenceNumber;
@@ -1580,7 +1580,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   std::string fname;
   FileDescriptor output_fd;
   uint64_t oldest_blob_file_number = kInvalidBlobFileNumber;
-  Status status_for_listener = s;
+  Status status_for_listener = s.Clone();
   if (meta != nullptr) {
     fname = GetTableFileName(meta->fd.GetNumber());
     output_fd = meta->fd;

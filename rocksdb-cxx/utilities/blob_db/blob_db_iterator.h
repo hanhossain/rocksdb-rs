@@ -43,7 +43,7 @@ class BlobDBIterator : public Iterator {
     if (!iter_->status().ok()) {
       return iter_->status();
     }
-    return status_;
+    return status_.Clone();
   }
 
   void SeekToFirst() override {

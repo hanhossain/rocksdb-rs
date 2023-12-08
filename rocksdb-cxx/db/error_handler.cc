@@ -335,7 +335,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
   }
 
   if (!new_bg_err.ok()) {
-    Status s = new_bg_err;
+    Status s = new_bg_err.Clone();
     EventHelpers::NotifyOnBackgroundError(db_options_.listeners, reason, &s,
                                           db_mutex_, &auto_recovery);
     if (!s.ok() && (s.severity() > bg_error_.severity())) {
@@ -387,7 +387,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
 const Status& ErrorHandler::SetBGError(const Status& bg_status,
                                        BackgroundErrorReason reason) {
   db_mutex_->AssertHeld();
-  Status tmp_status = bg_status;
+  Status tmp_status = bg_status.Clone();
   IOStatus bg_io_err = status_to_io_status(std::move(tmp_status));
 
   if (bg_io_err.ok()) {
@@ -507,13 +507,13 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
 Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
                                           bool* auto_recovery) {
   if (bg_error.severity() >= Severity::kFatalError) {
-    return bg_error;
+    return bg_error.Clone();
   }
 
   if (db_options_.sst_file_manager.get() == nullptr) {
     // We rely on SFM to poll for enough disk space and recover
     *auto_recovery = false;
-    return bg_error;
+    return bg_error.Clone();
   }
 
   if (db_options_.allow_2pc &&
@@ -533,7 +533,7 @@ Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
     }
   }
 
-  return bg_error;
+  return bg_error.Clone();
 }
 
 void ErrorHandler::RecoverFromNoSpace() {
@@ -542,7 +542,7 @@ void ErrorHandler::RecoverFromNoSpace() {
 
   // Inform SFM of the error, so it can kick-off the recovery
   if (sfm) {
-    sfm->StartErrorRecovery(this, bg_error_);
+    sfm->StartErrorRecovery(this, bg_error_.Clone());
   }
 }
 
@@ -551,7 +551,7 @@ Status ErrorHandler::ClearBGError() {
 
   // Signal that recovery succeeded
   if (recovery_error_.ok()) {
-    Status old_bg_error = bg_error_;
+    Status old_bg_error = bg_error_.Clone();
     // Clear and check the recovery IO and BG error
     bg_error_ = Status_OK();
     recovery_io_error_ = IOStatus::OK();
@@ -560,7 +560,7 @@ Status ErrorHandler::ClearBGError() {
     EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, old_bg_error,
                                            bg_error_, db_mutex_);
   }
-  return recovery_error_;
+  return recovery_error_.Clone();
 }
 
 Status ErrorHandler::RecoverFromBGError(bool is_manual) {
@@ -718,7 +718,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
         // recover from the retryable IO error and no other BG errors. Clean
         // the bg_error and notify user.
         TEST_SYNC_POINT("RecoverFromRetryableBGIOError:RecoverSuccess");
-        Status old_bg_error = bg_error_;
+        Status old_bg_error = bg_error_.Clone();
         is_db_stopped_.store(false, std::memory_order_release);
         bg_error_ = Status_OK();
         EventHelpers::NotifyOnErrorRecoveryEnd(
@@ -746,7 +746,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
             db_options_.listeners, bg_error_,
             !recovery_io_error_.ok()
                 ? recovery_io_error_
-                : (!recovery_error_.ok() ? recovery_error_ : s),
+                : (!recovery_error_.ok() ? recovery_error_ : s).Clone(),
             db_mutex_);
         return;
       }

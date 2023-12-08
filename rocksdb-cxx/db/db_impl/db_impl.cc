@@ -2001,12 +2001,12 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
                                         *(read_options.timestamp),
                                         /*ts_for_read=*/true);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   } else {
     const Status s = FailIfCfHasTs(get_impl_options.column_family);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -2298,7 +2298,7 @@ std::vector<Status> DBImpl::MultiGet(
 
   size_t num_keys = keys.size();
   assert(column_family.size() == num_keys);
-  std::vector<Status> stat_list(num_keys, Status_new());
+  std::vector<Status> stat_list = Status_CreateVec(num_keys, Status_new());
 
   bool should_fail = false;
   for (size_t i = 0; i < num_keys; ++i) {
@@ -3535,7 +3535,7 @@ Status DBImpl::NewIterators(
       const Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
                                           /*ts_for_read=*/true);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   } else {
@@ -3543,7 +3543,7 @@ Status DBImpl::NewIterators(
       assert(cf);
       const Status s = FailIfCfHasTs(cf);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   }
@@ -3732,7 +3732,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
         mutex_.Unlock();
       }
       delete s;
-      return std::make_pair(status, ret);
+      return std::make_pair(status.Clone(), ret);
     }
   }
 
@@ -4687,19 +4687,19 @@ DB::~DB() {}
 Status DBImpl::Close() {
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
   if (closed_) {
-    return closing_status_;
+    return closing_status_.Clone();
   }
 
   {
     const Status s = MaybeReleaseTimestampedSnapshotsAndCheck();
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
   closing_status_ = CloseImpl();
   closed_ = true;
-  return closing_status_;
+  return closing_status_.Clone();
 }
 
 Status DB::ListColumnFamilies(const DBOptions& db_options,

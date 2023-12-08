@@ -44,7 +44,7 @@ Status TraceExecutionHandler::Handle(
   uint64_t end = clock_->NowMicros();
 
   if (s.ok() && result != nullptr) {
-    result->reset(new StatusOnlyTraceExecutionResult(s, start, end,
+    result->reset(new StatusOnlyTraceExecutionResult(s.Clone(), start, end,
                                                      record.GetTraceType()));
   }
 
@@ -127,11 +127,11 @@ Status TraceExecutionHandler::Handle(
       PinnableSlice ps_value;
       ps_value.PinSelf(single_iter->value());
       result->reset(new IteratorTraceExecutionResult(
-          true, s, std::move(ps_key), std::move(ps_value), start, end,
+          true, s.Clone(), std::move(ps_key), std::move(ps_value), start, end,
           record.GetTraceType()));
     } else {
       result->reset(new IteratorTraceExecutionResult(
-          false, s, "", "", start, end, record.GetTraceType()));
+          false, s.Clone(), "", "", start, end, record.GetTraceType()));
     }
   }
   delete single_iter;
@@ -174,7 +174,7 @@ Status TraceExecutionHandler::Handle(
   // Treat not found as ok, return other errors.
   for (const Status& s : ss) {
     if (!s.ok() && !s.IsNotFound()) {
-      return s;
+      return s.Clone();
     }
   }
 

@@ -77,7 +77,7 @@ Status BlobFileCache::GetBlobFileReader(
         blob_file_read_hist_, blob_file_number, io_tracer_, &reader);
     if (!s.ok()) {
       RecordTick(statistics, NO_FILE_ERRORS);
-      return s;
+      return s.Clone();
     }
   }
 
@@ -87,7 +87,7 @@ Status BlobFileCache::GetBlobFileReader(
     const Status s = cache_.Insert(key, reader.get(), charge, &handle);
     if (!s.ok()) {
       RecordTick(statistics, NO_FILE_ERRORS);
-      return s;
+      return s.Clone();
     }
   }
 

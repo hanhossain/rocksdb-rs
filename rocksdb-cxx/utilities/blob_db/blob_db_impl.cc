@@ -878,13 +878,13 @@ Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
       /* has_ttl */ false, ExpirationRange(),
       /* reason */ "SelectBlobFile", blob_file, &writer);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   RegisterBlobFile(*blob_file);
   open_non_ttl_file_ = *blob_file;
 
-  return s;
+  return s.Clone();
 }
 
 Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
@@ -924,13 +924,13 @@ Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
       CreateBlobFileAndWriter(/* has_ttl */ true, expiration_range,
                               /* reason */ oss.str(), blob_file, &writer);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   RegisterBlobFile(*blob_file);
   open_ttl_files_.insert(*blob_file);
 
-  return s;
+  return s.Clone();
 }
 
 class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
@@ -1190,7 +1190,7 @@ Status BlobDBImpl::CompactFiles(
       db_->CompactFiles(compact_options, input_file_names, output_level,
                         output_path_id, output_file_names, compaction_job_info);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   if (bdb_options_.enable_garbage_collection) {
@@ -1198,7 +1198,7 @@ Status BlobDBImpl::CompactFiles(
     ProcessCompactionJobInfo(*compaction_job_info);
   }
 
-  return s;
+  return s.Clone();
 }
 
 void BlobDBImpl::GetCompactionContextCommon(BlobCompactionContext* context) {
@@ -1769,7 +1769,7 @@ Status BlobDBImpl::CloseBlobFile(std::shared_ptr<BlobFile> bfile) {
                 blob_file_number, bfile));
   }
 
-  return s;
+  return s.Clone();
 }
 
 Status BlobDBImpl::CloseBlobFileIfNeeded(std::shared_ptr<BlobFile>& bfile) {

@@ -381,7 +381,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
     UpdateKey();
   }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   Slice key() const override {
     assert(Valid());
