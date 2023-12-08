@@ -2762,7 +2762,7 @@ static void MTThreadBody(void* arg) {
                                 &values);
       } else {
         std::vector<PinnableSlice> pin_values(keys.size());
-        statuses.resize(keys.size(), Status_new());
+        Status_VecResize(keys.size(), statuses, Status_new());
         const Snapshot* snapshot = db->GetSnapshot();
         ReadOptions ro;
         ro.snapshot = snapshot;
@@ -2778,7 +2778,7 @@ static void MTThreadBody(void* arg) {
           }
         }
       }
-      Status s = statuses[0];
+      Status s = statuses[0].Clone();
       // all statuses have to be the same
       for (size_t i = 1; i < statuses.size(); ++i) {
         // they are either both ok or both not-found
@@ -3073,7 +3073,7 @@ class ModelDB : public DB {
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys,
       std::vector<std::string>* /*values*/) override {
-    std::vector<Status> s(keys.size(),
+    std::vector<Status> s = Status_CreateVec(keys.size(),
                           Status_NotSupported("Not implemented."));
     return s;
   }
@@ -6992,7 +6992,8 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses({Status_NotFound()});
+    std::vector<Status> statuses;
+    statuses.push_back(Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
@@ -7019,7 +7020,8 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses({Status_NotFound()});
+    std::vector<Status> statuses;
+    statuses.push_back(Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),

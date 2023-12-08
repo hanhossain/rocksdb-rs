@@ -132,7 +132,7 @@ class ErrorHandlerFSListener : public EventListener {
     file_creation_error_ = io_s;
   }
 
-  Status new_bg_error() { return new_bg_error_; }
+  Status new_bg_error() { return new_bg_error_.Clone(); }
 
  private:
   InstrumentedMutex mutex_;

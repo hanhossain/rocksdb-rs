@@ -72,7 +72,7 @@ class BatchedOpsStressTest : public StressTest {
       thread->stats.AddBytesForWrites(10, (sz + 1) * 10);
     }
 
-    return s;
+    return s.Clone();
   }
 
   // Given a key K, this deletes ("0"+K), ("1"+K), ..., ("9"+K)
@@ -196,14 +196,14 @@ class BatchedOpsStressTest : public StressTest {
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
     size_t num_keys = rand_keys.size();
-    std::vector<Status> ret_status(num_keys, Status_new());
+    std::vector<Status> ret_status = Status_CreateVec(num_keys, Status_new());
     std::array<std::string, 10> keys = {
         {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}};
     size_t num_prefixes = keys.size();
     for (size_t rand_key = 0; rand_key < num_keys; ++rand_key) {
       std::vector<Slice> key_slices;
       std::vector<PinnableSlice> values(num_prefixes);
-      std::vector<Status> statuses(num_prefixes, Status_new());
+      std::vector<Status> statuses = Status_CreateVec(num_prefixes, Status_new());
       ReadOptions readoptionscopy = readoptions;
       readoptionscopy.snapshot = db_->GetSnapshot();
       readoptionscopy.rate_limiter_priority =
@@ -221,7 +221,7 @@ class BatchedOpsStressTest : public StressTest {
       db_->MultiGet(readoptionscopy, cfh, num_prefixes, key_slices.data(),
                     values.data(), statuses.data());
       for (size_t i = 0; i < num_prefixes; i++) {
-        Status s = statuses[i];
+        Status s = statuses[i].Clone();
         if (!s.ok() && !s.IsNotFound()) {
           fprintf(stderr, "multiget error: %s\n", s.ToString().c_str());
           thread->stats.AddErrors(1);
@@ -376,7 +376,7 @@ class BatchedOpsStressTest : public StressTest {
       std::array<std::string, num_prefixes> keys;
       std::array<Slice, num_prefixes> key_slices;
       std::array<PinnableWideColumns, num_prefixes> results;
-      std::vector<Status> statuses(num_prefixes, Status_new());
+      std::vector<Status> statuses = Status_CreateVec(num_prefixes, Status_new());
 
       for (size_t j = 0; j < num_prefixes; ++j) {
         keys[j] = std::to_string(j) + key_suffix;

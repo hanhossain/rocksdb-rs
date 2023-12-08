@@ -384,7 +384,9 @@ std::vector<Status> MultiOpsTxnsStressTest::TestMultiGet(
     ThreadState* /*thread*/, const ReadOptions& /*read_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  return std::vector<Status>{Status_NotSupported()};
+  std::vector<Status> vec;
+  vec.push_back(Status_NotSupported());
+  return vec;
 }
 
 // Wide columns are currently not supported by transactions.

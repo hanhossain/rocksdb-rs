@@ -2186,7 +2186,7 @@ TEST_P(WritePreparedTransactionTest, IsInSnapshot) {
   }
 }
 
-void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, Status exp_s,
+void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const Status& exp_s,
                  PinnableSlice& exp_v, Slice key) {
   Status s = Status_new();
   PinnableSlice v;
@@ -2211,7 +2211,7 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, Status exp_s,
   }
 }
 
-void ASSERT_SAME(TransactionDB* db, Status exp_s, PinnableSlice& exp_v,
+void ASSERT_SAME(TransactionDB* db, const Status& exp_s, PinnableSlice& exp_v,
                  Slice key) {
   ASSERT_SAME(ReadOptions(), db, exp_s, exp_v, key);
 }

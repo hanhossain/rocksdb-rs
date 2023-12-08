@@ -223,7 +223,7 @@ class CfConsistencyStressTest : public StressTest {
     keys.reserve(num_keys);
     key_str.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    std::vector<Status> statuses(num_keys, Status_new());
+    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
     ColumnFamilyHandle* cfh = column_families_[rand_column_families[0]];
     ReadOptions readoptionscopy = read_opts;
     readoptionscopy.rate_limiter_priority =
@@ -235,7 +235,7 @@ class CfConsistencyStressTest : public StressTest {
     }
     db_->MultiGet(readoptionscopy, cfh, num_keys, keys.data(), values.data(),
                   statuses.data());
-    for (auto s : statuses) {
+    for (auto& s : statuses) {
       if (s.ok()) {
         // found case
         thread->stats.AddGets(1, 1);
@@ -427,7 +427,7 @@ class CfConsistencyStressTest : public StressTest {
 
       std::vector<Slice> key_slices(num_cfs, key);
       std::vector<PinnableWideColumns> results(num_cfs);
-      std::vector<Status> statuses(num_cfs, Status_new());
+      std::vector<Status> statuses = Status_CreateVec(num_cfs, Status_new());
 
       db_->MultiGetEntity(read_opts_copy, num_cfs, cfhs.data(),
                           key_slices.data(), results.data(), statuses.data());
@@ -613,7 +613,7 @@ class CfConsistencyStressTest : public StressTest {
       iters.back()->SeekToFirst();
     }
 
-    std::vector<Status> statuses(num, Status_OK());
+    std::vector<Status> statuses = Status_CreateVec(num, Status_OK());
 
     assert(thread);
 

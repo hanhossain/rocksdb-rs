@@ -197,7 +197,7 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableSlice> values(batch_size);
-          std::vector<Status> statuses(batch_size, Status_new());
+          std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -235,7 +235,7 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableWideColumns> results(batch_size);
-          std::vector<Status> statuses(batch_size, Status_new());
+          std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -569,7 +569,7 @@ class NonBatchedOpsStressTest : public StressTest {
     key_str.reserve(num_keys);
     keys.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    std::vector<Status> statuses(num_keys, Status_new());
+    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
     // When Flags_use_txn is enabled, we also do a read your write check.
     std::vector<std::optional<ExpectedValue>> ryw_expected_values;
     ryw_expected_values.reserve(num_keys);
@@ -999,7 +999,7 @@ class NonBatchedOpsStressTest : public StressTest {
     }
 
     std::vector<PinnableWideColumns> results(num_keys);
-    std::vector<Status> statuses(num_keys, Status_new());
+    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
 
     if (fault_fs_guard) {
       fault_fs_guard->EnableErrorInjection();

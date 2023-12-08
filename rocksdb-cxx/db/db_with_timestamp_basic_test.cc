@@ -1430,7 +1430,7 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetWithFastLocalBloom) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  std::vector<Status> statuses(batch_size, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
   std::vector<std::string> timestamps(batch_size);
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
@@ -1486,7 +1486,7 @@ TEST_P(DBBasicTestWithTimestampTableOptions, MultiGetWithPrefix) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  std::vector<Status> statuses(batch_size, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
   std::vector<std::string> timestamps(batch_size);
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
@@ -1546,7 +1546,7 @@ TEST_P(DBBasicTestWithTimestampTableOptions, MultiGetWithMemBloomFilter) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  std::vector<Status> statuses(batch_size, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
   db_->MultiGet(read_opts, cfh, batch_size, keys.data(), values.data(),
@@ -1600,7 +1600,7 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetRangeFiltering) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  std::vector<Status> statuses(batch_size, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
   db_->MultiGet(read_opts, cfh, batch_size, keys.data(), values.data(),
@@ -1844,7 +1844,7 @@ TEST_P(DBBasicTestWithTimestampFilterPrefixSettings, GetAndMultiGet) {
     size_t batch_size = 4;
     std::vector<std::string> keys_str(batch_size);
     std::vector<PinnableSlice> values(batch_size);
-    std::vector<Status> statuses(batch_size, Status_new());
+    std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
     ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
 
     keys_str[0] = Key1(idx);
@@ -1950,7 +1950,7 @@ class DataVisibilityTest : public DBBasicTestWithTimestampBase {
   }
 
   void AssertVisibility(int ts, SequenceNumber seq,
-                        std::vector<Status> statuses) {
+                        const std::vector<Status>& statuses) {
     ASSERT_EQ(kTestDataSize, statuses.size());
     for (int i = 0; i < kTestDataSize; i++) {
       if (test_data_[i].seq_num <= seq && test_data_[i].ts <= ts) {
@@ -1999,26 +1999,26 @@ class DataVisibilityTest : public DBBasicTestWithTimestampBase {
     AssertVisibility(ts, seq, s4);
 
     std::vector<PinnableSlice> values_ps5(kTestDataSize);
-    std::vector<Status> s5(kTestDataSize, Status_new());
+    std::vector<Status> s5 = Status_CreateVec(kTestDataSize, Status_new());
     db_->MultiGet(read_opts, cfh, kTestDataSize, keys.data(), values_ps5.data(),
                   s5.data());
     AssertVisibility(ts, seq, s5);
 
     std::vector<PinnableSlice> values_ps6(kTestDataSize);
-    std::vector<Status> s6(kTestDataSize, Status_new());
+    std::vector<Status> s6 = Status_CreateVec(kTestDataSize, Status_new());
     std::vector<std::string> timestamps_array(kTestDataSize);
     db_->MultiGet(read_opts, cfh, kTestDataSize, keys.data(), values_ps6.data(),
                   timestamps_array.data(), s6.data());
     AssertVisibility(ts, seq, s6);
 
     std::vector<PinnableSlice> values_ps7(kTestDataSize);
-    std::vector<Status> s7(kTestDataSize, Status_new());
+    std::vector<Status> s7 = Status_CreateVec(kTestDataSize, Status_new());
     db_->MultiGet(read_opts, kTestDataSize, cfs.data(), keys.data(),
                   values_ps7.data(), s7.data());
     AssertVisibility(ts, seq, s7);
 
     std::vector<PinnableSlice> values_ps8(kTestDataSize);
-    std::vector<Status> s8(kTestDataSize, Status_new());
+    std::vector<Status> s8 = Status_CreateVec(kTestDataSize, Status_new());
     db_->MultiGet(read_opts, kTestDataSize, cfs.data(), keys.data(),
                   values_ps8.data(), timestamps_array.data(), s8.data());
     AssertVisibility(ts, seq, s8);
@@ -2406,7 +2406,7 @@ TEST_F(DataVisibilityTest, MultiGetWithoutSnapshot) {
   auto ss = db_->MultiGet(read_opts, keys, &values);
 
   writer_thread.join();
-  for (auto s : ss) {
+  for (auto& s : ss) {
     ASSERT_TRUE(s.IsNotFound());
   }
   VerifyDefaultCF();
@@ -3386,7 +3386,7 @@ TEST_F(DBBasicTestWithTimestamp,
     std::vector<std::string> key_strs = {"k1", "k2", "k3"};
     std::vector<Slice> keys{key_strs.begin(), key_strs.end()};
     std::vector<PinnableSlice> values(batch_size);
-    std::vector<Status> statuses(batch_size, Status_new());
+    std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
     db_->MultiGet(ropts, db_->DefaultColumnFamily(), batch_size, keys.data(),
                   values.data(), statuses.data(), true /* sorted_input */);
     ASSERT_TRUE(statuses[0].IsNotFound());
@@ -3437,7 +3437,7 @@ TEST_F(DBBasicTestWithTimestamp,
   std::vector<std::string> key_strs = {"k1", "k2", "k3"};
   std::vector<Slice> keys = {key_strs.begin(), key_strs.end()};
   std::vector<PinnableSlice> values(batch_size);
-  std::vector<Status> statuses(batch_size, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
   std::vector<std::string> timestamps(batch_size);
   db_->MultiGet(ropts, db_->DefaultColumnFamily(), batch_size, keys.data(),
                 values.data(), timestamps.data(), statuses.data(),
@@ -3590,7 +3590,7 @@ TEST_P(DBBasicTestWithTimestampTableOptions, DeleteRangeBaiscReadAndIterate) {
   std::vector<std::string> key_strs(batch_size);
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  std::vector<Status> statuses(batch_size, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
   std::vector<std::string> timestamps(batch_size);
   for (int i = 0; i < kNum; ++i) {
     key_strs[i] = Key1(i);
@@ -3648,8 +3648,11 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   ReadOptions read_opts;
   read_opts.timestamp = &read_ts;
   read_opts.snapshot = before_tombstone;
-  std::vector<Status> expected_status = {
-      Status_OK(), Status_NotFound(), Status_NotFound(), Status_NotFound()};
+  std::vector<Status> expected_status;
+  expected_status.push_back(Status_OK());
+  expected_status.push_back(Status_NotFound());
+  expected_status.push_back(Status_NotFound());
+  expected_status.push_back(Status_NotFound());
   std::vector<std::string> expected_values(kNum);
   expected_values[0] = "val" + std::to_string(0);
   std::vector<std::string> expected_timestamps(kNum);
@@ -3659,7 +3662,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   std::vector<std::string> key_strs(batch_size);
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  std::vector<Status> statuses(batch_size, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(batch_size, Status_new());
   std::vector<std::string> timestamps(batch_size);
   for (int i = 0; i < kNum; ++i) {
     key_strs[i] = Key1(i);

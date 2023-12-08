@@ -286,7 +286,7 @@ class KeyConvertingIterator : public InternalIterator {
 
   Slice value() const override { return iter_->value(); }
   Status status() const override {
-    return status_.ok() ? iter_->status() : status_;
+    return status_.ok() ? iter_->status() : status_.Clone();
   }
 
  private:

@@ -221,7 +221,7 @@ class StressTest {
     return Status_NotSupported("TestCustomOperations() must be overridden");
   }
 
-  void VerificationAbort(SharedState* shared, std::string msg, Status s) const;
+  void VerificationAbort(SharedState* shared, std::string msg, const Status& s) const;
 
   void VerificationAbort(SharedState* shared, std::string msg, int cf,
                          int64_t key) const;

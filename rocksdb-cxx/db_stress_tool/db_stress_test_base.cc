@@ -399,7 +399,7 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
 }
 
 void StressTest::VerificationAbort(SharedState* shared, std::string msg,
-                                   Status s) const {
+                                   const Status& s) const {
   fprintf(stderr, "Verification failed: %s. Status is %s\n", msg.c_str(),
           s.ToString().c_str());
   shared->SetVerificationFailure();
@@ -672,7 +672,7 @@ Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
 
         Status a = Status_new();
         std::shared_ptr<const Snapshot> b;
-        std::pair<Status, std::shared_ptr<const Snapshot>> res(a,b);
+        std::pair<Status, std::shared_ptr<const Snapshot>> res(a.Clone(),b);
         if (thread->tid == 0) {
           uint64_t now = db_stress_env->NowNanos();
           res = txn_db_->CreateTimestampedSnapshot(now);
@@ -2160,7 +2160,7 @@ void StressTest::TestAcquireSnapshot(ThreadState* thread,
                                            rand_column_family,
                                            column_family->GetName(),
                                            keystr,
-                                           status_at,
+                                           status_at.Clone(),
                                            value_at,
                                            key_vec,
                                            ts_str};
@@ -2184,7 +2184,7 @@ void StressTest::TestAcquireSnapshot(ThreadState* thread,
 Status StressTest::MaybeReleaseSnapshots(ThreadState* thread, uint64_t i) {
   while (!thread->snapshot_queue.empty() &&
          i >= thread->snapshot_queue.front().first) {
-    auto snap_state = thread->snapshot_queue.front().second;
+    auto& snap_state = thread->snapshot_queue.front().second;
     assert(snap_state.snapshot);
     // Note: this is unsafe as the cf might be dropped concurrently. But
     // it is ok since unclean cf drop is cunnrently not supported by write

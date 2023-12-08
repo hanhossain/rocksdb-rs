@@ -5389,7 +5389,7 @@ class Benchmark {
         }
       }
       if (!s.ok()) {
-        s = listener_->WaitForRecovery(600000000) ? Status_OK() : s;
+        s = listener_->WaitForRecovery(600000000) ? Status_OK() : s.Clone();
       }
 
       if (!s.ok()) {
@@ -6058,7 +6058,7 @@ class Benchmark {
     std::vector<std::string> values(entries_per_batch_);
     PinnableSlice* pin_values = new PinnableSlice[entries_per_batch_];
     std::unique_ptr<PinnableSlice[]> pin_values_guard(pin_values);
-    std::vector<Status> stat_list(entries_per_batch_, Status_new());
+    std::vector<Status> stat_list = Status_CreateVec(entries_per_batch_, Status_new());
     while (static_cast<int64_t>(keys.size()) < entries_per_batch_) {
       key_guards.push_back(std::unique_ptr<const char[]>());
       keys.push_back(AllocateKey(&key_guards.back()));

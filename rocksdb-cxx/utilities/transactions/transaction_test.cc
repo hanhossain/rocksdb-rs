@@ -2886,7 +2886,7 @@ TEST_P(TransactionTest, MultiGetBatchedTest) {
 
   std::vector<Slice> keys = {"aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg"};
   std::vector<PinnableSlice> values(keys.size());
-  std::vector<Status> statuses(keys.size(), Status_new());
+  std::vector<Status> statuses = Status_CreateVec(keys.size(), Status_new());
 
   txn->MultiGet(snapshot_read_options, handles[1], keys.size(), keys.data(),
                 values.data(), statuses.data());
@@ -2981,7 +2981,7 @@ TEST_P(TransactionTest, MultiGetLargeBatchedTest) {
     keys.emplace_back(key_str[i]);
   }
   std::vector<PinnableSlice> values(keys.size());
-  std::vector<Status> statuses(keys.size(), Status_new());
+  std::vector<Status> statuses = Status_CreateVec(keys.size(), Status_new());
 
   wb.MultiGetFromBatchAndDB(db, snapshot_read_options, handles[1], keys.size(),
                             keys.data(), values.data(), statuses.data(), false);
@@ -3037,7 +3037,7 @@ TEST_P(TransactionTest, MultiGetSnapshot) {
 
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values(1);
-  std::vector<Status> statuses(1, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(1, Status_new());
   keys.push_back(key);
   auto cfd = db->DefaultColumnFamily();
   txn2->MultiGet(read_options, cfd, 1, keys.data(), values.data(),
