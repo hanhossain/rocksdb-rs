@@ -438,4 +438,18 @@ std::vector<Status> Status_CreateVec(size_t n, const Status& s) {
     return vec;
 }
 
+void Status_VecResize(size_t n, std::vector<Status>& vec, const Status& s) {
+    if (vec.size() < n) {
+        size_t diff = n - vec.size();
+        for (size_t i = 0; i < diff; i++) {
+            vec.push_back(s.Clone());
+        }
+    } else if (vec.size() > n) {
+        size_t diff = vec.size() - n;
+        for (size_t i = 0; i < diff; i++) {
+            vec.pop_back();
+        }
+    }
+}
+
 }  // namespace ROCKSDB_NAMESPACE
