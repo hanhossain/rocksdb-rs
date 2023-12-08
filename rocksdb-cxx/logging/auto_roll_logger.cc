@@ -64,7 +64,7 @@ Status AutoRollLogger::ResetLogger() {
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:AfterNewLogger");
 
   if (!status_.ok()) {
-    return status_;
+    return status_.Clone();
   }
   assert(logger_);
   logger_->SetInfoLogLevel(Logger::GetInfoLogLevel());
@@ -79,7 +79,7 @@ Status AutoRollLogger::ResetLogger() {
     cached_now_access_count = 0;
   }
 
-  return status_;
+  return status_.Clone();
 }
 
 void AutoRollLogger::RollLogFile() {

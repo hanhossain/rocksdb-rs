@@ -152,7 +152,7 @@ Status TestRandomAccessFile::MultiRead(ReadRequest* reqs, size_t num_reqs) {
       reqs[i].status = s;
     }
 
-    return s;
+    return s.Clone();
   }
 
   assert(target_);
@@ -388,7 +388,7 @@ Status FaultInjectionTestEnv::NewRandomAccessFile(
   assert(target());
   const Status s = target()->NewRandomAccessFile(fname, result, soptions);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   assert(result);

@@ -641,8 +641,7 @@ class DB {
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys, std::vector<std::string>* /*values*/,
       std::vector<std::string>* /*timestamps*/) {
-    return std::vector<Status>(
-        keys.size(), Status_NotSupported(
+    return Status_CreateVec(keys.size(), Status_NotSupported(
                          "MultiGet() returning timestamps not implemented."));
   }
   virtual std::vector<Status> MultiGet(const ReadOptions& options,

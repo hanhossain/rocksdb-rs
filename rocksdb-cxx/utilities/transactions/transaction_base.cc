@@ -33,7 +33,7 @@ Status Transaction::CommitAndTryCreateSnapshot(
     } else {
       const Status s = SetCommitTimestamp(ts);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   } else if (ts != kMaxTxnTimestamp) {
@@ -319,12 +319,12 @@ std::vector<Status> TransactionBaseImpl::MultiGet(
     Status s = Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
-    return std::vector<Status>(num_keys, s);
+    return Status_CreateVec(num_keys, s);
   }
 
   values->resize(num_keys);
 
-  std::vector<Status> stat_list(num_keys, Status_new());
+  std::vector<Status> stat_list = Status_CreateVec(num_keys, Status_new());
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }
@@ -353,7 +353,7 @@ std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
     Status s = Status_InvalidArgument(
         "Cannot call MultiGetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
-    return std::vector<Status>(num_keys, s);
+    return Status_CreateVec(num_keys, s);
   }
   values->resize(num_keys);
 
@@ -363,12 +363,12 @@ std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
                        true /* exclusive */);
     if (!s.ok()) {
       // Fail entire multiget if we cannot lock all keys
-      return std::vector<Status>(num_keys, s);
+      return Status_CreateVec(num_keys, s);
     }
   }
 
   // TODO(agiardullo): optimize multiget?
-  std::vector<Status> stat_list(num_keys, Status_new());
+  std::vector<Status> stat_list = Status_CreateVec(num_keys, Status_new());
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }

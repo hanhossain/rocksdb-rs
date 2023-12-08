@@ -88,7 +88,7 @@ class BlobCountingIterator : public InternalIterator {
     return iter_->value();
   }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   bool PrepareValue() override {
     assert(Valid());

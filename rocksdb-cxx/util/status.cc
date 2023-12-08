@@ -383,8 +383,9 @@ Status::Status(Code _code, SubCode _subcode, bool retryable, bool data_loss,
 Status::Status(Code _code, const Slice& msg, const Slice& msg2)
     : rs_status_(RsStatus_new(_code, msg, msg2)) {}
 
-Status::Status(const Status& s)
-        : rs_status_(s.rs_status_.Clone()) {}
+Status Status::Clone() const {
+    return Status(rs_status_.Clone());
+}
 
 Status::Status(const Status& s, Severity sev)
         : rs_status_(RsStatus_new(s.rs_status_, sev)) {}
@@ -427,6 +428,28 @@ Status Status_CopyAppendMessage(const Status& s, const Slice& delim,
 std::string Status::ToString() const {
     auto rs_string = rs_status_.ToString();
     return rs_string == nullptr ? "" : rs_string->c_str();
+}
+
+std::vector<Status> Status_CreateVec(size_t n, const Status& s) {
+    std::vector<Status> vec;
+    for (size_t i = 0; i < n; i++) {
+        vec.push_back(s.Clone());
+    }
+    return vec;
+}
+
+void Status_VecResize(size_t n, std::vector<Status>& vec, const Status& s) {
+    if (vec.size() < n) {
+        size_t diff = n - vec.size();
+        for (size_t i = 0; i < diff; i++) {
+            vec.push_back(s.Clone());
+        }
+    } else if (vec.size() > n) {
+        size_t diff = vec.size() - n;
+        for (size_t i = 0; i < diff; i++) {
+            vec.pop_back();
+        }
+    }
 }
 
 }  // namespace ROCKSDB_NAMESPACE

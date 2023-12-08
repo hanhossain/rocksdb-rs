@@ -60,7 +60,7 @@ class CompactionMergingIterator : public InternalIterator {
 
   bool Valid() const override { return current_ != nullptr && status_.ok(); }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   void SeekToFirst() override;
 

@@ -179,7 +179,7 @@ Slice BaseDeltaIterator::value() const {
 
 Status BaseDeltaIterator::status() const {
   if (!status_.ok()) {
-    return status_;
+    return status_.Clone();
   }
   if (!base_iterator_->status().ok()) {
     return base_iterator_->status();

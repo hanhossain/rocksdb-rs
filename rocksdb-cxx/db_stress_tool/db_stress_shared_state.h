@@ -412,6 +412,18 @@ struct ThreadState {
   SharedState* shared;
   Stats stats;
   struct SnapshotState {
+    SnapshotState(const Snapshot* snapshot, int cf_at, std::string cf_at_name,
+                  std::string key, const Status& status, std::string value,
+                  std::vector<bool>* key_vec, std::string timestamp)
+        : snapshot(snapshot),
+          cf_at(cf_at),
+          cf_at_name(cf_at_name),
+          key(key),
+          status(status.Clone()),
+          value(value),
+          key_vec(key_vec),
+          timestamp(timestamp) {}
+    SnapshotState(const SnapshotState& s) : status(s.status.Clone()) {}
     const Snapshot* snapshot;
     // The cf from which we did a Get at this snapshot
     int cf_at;

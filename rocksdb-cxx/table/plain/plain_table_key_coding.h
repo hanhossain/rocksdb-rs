@@ -109,7 +109,7 @@ class PlainTableFileReader {
   bool ReadVarint32NonMmap(uint32_t offset, uint32_t* output,
                            uint32_t* bytes_read);
 
-  Status status() const { return status_; }
+  Status status() const { return status_.Clone(); }
 
   const PlainTableReaderFileInfo* file_info() { return file_info_; }
 

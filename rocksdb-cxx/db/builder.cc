@@ -445,7 +445,7 @@ Status BuildTable(
     }
   }
 
-  Status status_for_listener = s;
+  Status status_for_listener = s.Clone();
   if (meta->fd.GetFileSize() == 0) {
     fname = "(nil)";
     if (s.ok()) {

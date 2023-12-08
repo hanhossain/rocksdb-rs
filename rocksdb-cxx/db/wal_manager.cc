@@ -292,7 +292,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
   std::vector<std::string> all_files;
   const Status status = env_->GetChildren(path, &all_files);
   if (!status.ok()) {
-    return status;
+    return status.Clone();
   }
   log_files.reserve(all_files.size());
   for (const auto& f : all_files) {
@@ -344,7 +344,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
         LogFileImpl* b_impl = static_cast_with_check<LogFileImpl>(b.get());
         return *a_impl < *b_impl;
       });
-  return status;
+  return status.Clone();
 }
 
 Status WalManager::RetainProbableWalFiles(VectorLogPtr& all_logs,

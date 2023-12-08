@@ -317,7 +317,7 @@ class SimCacheImpl : public SimCache {
   void StopActivityLogging() override { cache_activity_logger_.StopLogging(); }
 
   Status GetActivityLoggingStatus() override {
-    return cache_activity_logger_.bg_status();
+    return cache_activity_logger_.bg_status().Clone();
   }
 
  private:

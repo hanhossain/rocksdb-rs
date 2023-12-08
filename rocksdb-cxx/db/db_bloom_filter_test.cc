@@ -2041,7 +2041,7 @@ TEST_P(DBBloomFilterTestVaryPrefixAndFormatVer, PartitionedMultiGet) {
   std::array<Slice, Q> key_slices;
   std::array<ColumnFamilyHandle*, Q> column_families;
   // MultiGet Out
-  std::vector<Status> statuses(Q, Status_new());
+  std::vector<Status> statuses = Status_CreateVec(Q, Status_new());
   std::array<PinnableSlice, Q> values;
 
   PopTicker(options, BLOCK_CACHE_FILTER_HIT);

@@ -163,7 +163,7 @@ class BlobDB : public StackableDB {
       std::vector<std::string>* values) override {
     for (auto column_family : column_families) {
       if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-        return std::vector<Status>(
+        return Status_CreateVec(
             column_families.size(),
             Status_NotSupported(
                 "Blob DB doesn't support non-default column family."));

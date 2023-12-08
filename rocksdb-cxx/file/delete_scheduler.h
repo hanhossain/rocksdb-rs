@@ -60,7 +60,7 @@ class DeleteScheduler {
 
   // Return a map containing errors that happened in BackgroundEmptyTrash
   // file_path => error status
-  std::map<std::string, Status> GetBackgroundErrors();
+  const std::map<std::string, Status> GetBackgroundErrors();
 
   uint64_t GetTotalTrashSize() { return total_trash_size_.load(); }
 

@@ -93,7 +93,7 @@ struct StressTestIterator : public InternalIterator {
     return false;
   }
 
-  Status status() const override { return status_; }
+  Status status() const override { return status_.Clone(); }
 
   bool MaybeFail() {
     if (rnd->Next() >=

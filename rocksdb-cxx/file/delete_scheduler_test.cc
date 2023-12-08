@@ -168,7 +168,7 @@ TEST_F(DeleteSchedulerTest, BasicRateLimiting) {
     delete_scheduler_->WaitForEmptyTrash();
     uint64_t time_spent_deleting = env_->NowMicros() - delete_start_time;
 
-    auto bg_errors = delete_scheduler_->GetBackgroundErrors();
+    auto& bg_errors = delete_scheduler_->GetBackgroundErrors();
     ASSERT_EQ(bg_errors.size(), 0);
 
     uint64_t total_files_size = 0;
@@ -297,7 +297,7 @@ TEST_F(DeleteSchedulerTest, RateLimitingMultiThreaded) {
     delete_scheduler_->WaitForEmptyTrash();
     uint64_t time_spent_deleting = env_->NowMicros() - delete_start_time;
 
-    auto bg_errors = delete_scheduler_->GetBackgroundErrors();
+    auto& bg_errors = delete_scheduler_->GetBackgroundErrors();
     ASSERT_EQ(bg_errors.size(), 0);
 
     uint64_t total_files_size = 0;
@@ -386,7 +386,7 @@ TEST_F(DeleteSchedulerTest, ConflictNames) {
   delete_scheduler_->WaitForEmptyTrash();
   ASSERT_EQ(CountTrashFiles(), 0);
 
-  auto bg_errors = delete_scheduler_->GetBackgroundErrors();
+  auto& bg_errors = delete_scheduler_->GetBackgroundErrors();
   ASSERT_EQ(bg_errors.size(), 0);
   ASSERT_EQ(10, stats_->getAndResetTickerCount(FILES_MARKED_TRASH));
   ASSERT_EQ(10, stats_->getAndResetTickerCount(FILES_DELETED_FROM_TRASH_QUEUE));
@@ -430,7 +430,7 @@ TEST_F(DeleteSchedulerTest, BackgroundError) {
   // Hold BackgroundEmptyTrash
   TEST_SYNC_POINT("DeleteSchedulerTest::BackgroundError:1");
   delete_scheduler_->WaitForEmptyTrash();
-  auto bg_errors = delete_scheduler_->GetBackgroundErrors();
+  auto& bg_errors = delete_scheduler_->GetBackgroundErrors();
   ASSERT_EQ(bg_errors.size(), 10);
   for (const auto& it : bg_errors) {
     ASSERT_TRUE(it.second.IsPathNotFound());
@@ -471,7 +471,7 @@ TEST_F(DeleteSchedulerTest, StartBGEmptyTrashMultipleTimes) {
     ASSERT_EQ(bg_delete_file, kTestFileNum * run);
     ASSERT_EQ(CountTrashFiles(), 0);
 
-    auto bg_errors = delete_scheduler_->GetBackgroundErrors();
+    auto& bg_errors = delete_scheduler_->GetBackgroundErrors();
     ASSERT_EQ(bg_errors.size(), 0);
     ASSERT_EQ(kTestFileNum, stats_->getAndResetTickerCount(FILES_MARKED_TRASH));
     ASSERT_EQ(kTestFileNum,
@@ -508,7 +508,7 @@ TEST_F(DeleteSchedulerTest, DeletePartialFile) {
 
   delete_scheduler_->WaitForEmptyTrash();
 
-  auto bg_errors = delete_scheduler_->GetBackgroundErrors();
+  auto& bg_errors = delete_scheduler_->GetBackgroundErrors();
   ASSERT_EQ(bg_errors.size(), 0);
   ASSERT_EQ(7, bg_delete_file);
   ASSERT_EQ(4, bg_fsync);
@@ -635,7 +635,7 @@ TEST_F(DeleteSchedulerTest, DISABLED_DynamicRateLimiting1) {
       delete_scheduler_->WaitForEmptyTrash();
       uint64_t time_spent_deleting = env_->NowMicros() - delete_start_time;
 
-      auto bg_errors = delete_scheduler_->GetBackgroundErrors();
+      auto& bg_errors = delete_scheduler_->GetBackgroundErrors();
       ASSERT_EQ(bg_errors.size(), 0);
 
       uint64_t total_files_size = 0;

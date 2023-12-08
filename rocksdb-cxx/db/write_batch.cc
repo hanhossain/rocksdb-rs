@@ -763,7 +763,7 @@ WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(
   } else if (b->default_cf_ts_sz_ > 0) {
     ts_sz = b->default_cf_ts_sz_;
   }
-  return std::make_tuple(s, cf_id, ts_sz);
+  return std::make_tuple(s.Clone(), cf_id, ts_sz);
 }
 
 namespace {
@@ -851,7 +851,7 @@ Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& ts, const Slice& value) {
   const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   has_key_with_ts_ = true;
   assert(column_family);
@@ -951,7 +951,7 @@ Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
   std::string entity;
   const Status s = WideColumnSerialization::Serialize(sorted_columns, entity);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   if (entity.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
@@ -1135,7 +1135,7 @@ Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key,
                           const Slice& ts) {
   const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   assert(column_family);
   has_key_with_ts_ = true;
@@ -1250,7 +1250,7 @@ Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
                                 const Slice& key, const Slice& ts) {
   const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   has_key_with_ts_ = true;
   assert(column_family);
@@ -1372,7 +1372,7 @@ Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
                                const Slice& ts) {
   const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   assert(column_family);
   has_key_with_ts_ = true;
@@ -1498,7 +1498,7 @@ Status WriteBatch::Merge(ColumnFamilyHandle* column_family, const Slice& key,
                          const Slice& ts, const Slice& value) {
   const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
   has_key_with_ts_ = true;
   assert(column_family);
@@ -1652,7 +1652,7 @@ Status WriteBatch::UpdateTimestamps(
   if (s.ok()) {
     needs_in_place_update_ts_ = false;
   }
-  return s;
+  return s.Clone();
 }
 
 Status WriteBatch::VerifyChecksum() const {
@@ -2902,7 +2902,7 @@ Status WriteBatchInternal::InsertInto(
     inserter.set_prot_info(w->batch->prot_info_.get());
     w->status = w->batch->Iterate(&inserter);
     if (!w->status.ok()) {
-      return w->status;
+      return w->status.Clone();
     }
     assert(!seq_per_batch || w->batch_cnt != 0);
     assert(!seq_per_batch || inserter.sequence() - w->sequence == w->batch_cnt);

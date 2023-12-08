@@ -56,12 +56,12 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
     const Status s = FailIfTsMismatchCf(
         DefaultColumnFamily(), *(options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   } else {
     const Status s = FailIfCfHasTs(DefaultColumnFamily());
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -116,12 +116,12 @@ std::vector<Status> CompactedDBImpl::MultiGet(
     Status s = FailIfTsMismatchCf(DefaultColumnFamily(), *(options.timestamp),
                                   /*ts_for_read=*/true);
     if (!s.ok()) {
-      return std::vector<Status>(num_keys, s);
+      return Status_CreateVec(num_keys, s);
     }
   } else {
     Status s = FailIfCfHasTs(DefaultColumnFamily());
     if (!s.ok()) {
-      return std::vector<Status>(num_keys, s);
+      return Status_CreateVec(num_keys, s);
     }
   }
 
@@ -149,7 +149,7 @@ std::vector<Status> CompactedDBImpl::MultiGet(
       reader_list.push_back(f.fd.table_reader);
     }
   }
-  std::vector<Status> statuses(num_keys, Status_NotFound());
+  std::vector<Status> statuses = Status_CreateVec(num_keys, Status_NotFound());
   values->resize(num_keys);
   if (timestamps) {
     timestamps->resize(num_keys);

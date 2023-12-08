@@ -370,7 +370,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE> block_handles;
     std::array<CachableEntry<Block_kData>, MultiGetContext::MAX_BATCH_SIZE>
         results;
-    std::vector<Status> statuses(MultiGetContext::MAX_BATCH_SIZE, Status_new());
+    std::vector<Status> statuses = Status_CreateVec(MultiGetContext::MAX_BATCH_SIZE, Status_new());
     // Empty data_lookup_contexts means "unused," when block cache tracing is
     // disabled. (Limited options as element type is not default contructible.)
     std::vector<BlockCacheLookupContext> data_lookup_contexts;
@@ -597,7 +597,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
             first_biter.Invalidate(Status_OK());
             NewDataBlockIterator<DataBlockIter>(
                 read_options, results[idx_in_batch].As<Block>(), &first_biter,
-                statuses[idx_in_batch]);
+                statuses[idx_in_batch].Clone());
             reusing_prev_block = false;
           } else {
             // If handle is null and result is empty, then the status is never

@@ -238,7 +238,7 @@ Status PlainTableBuilder::Finish() {
 
       if (!io_status_.ok()) {
         status_ = io_status_;
-        return status_;
+        return status_.Clone();
       }
       meta_index_builer.Add(BloomBlockBuilder::kBloomBlock, bloom_block_handle);
     }
@@ -251,7 +251,7 @@ Status PlainTableBuilder::Finish() {
 
     if (!io_status_.ok()) {
       status_ = io_status_;
-      return status_;
+      return status_.Clone();
     }
 
     meta_index_builer.Add(PlainTableIndexBuilder::kPlainTableIndexBlock,
@@ -284,7 +284,7 @@ Status PlainTableBuilder::Finish() {
                           &metaindex_block_handle);
   if (!io_status_.ok()) {
     status_ = io_status_;
-    return status_;
+    return status_.Clone();
   }
 
   // Write Footer
@@ -297,7 +297,7 @@ Status PlainTableBuilder::Finish() {
     offset_ += footer.GetSlice().size();
   }
   status_ = io_status_;
-  return status_;
+  return status_.Clone();
 }
 
 void PlainTableBuilder::Abandon() { closed_ = true; }

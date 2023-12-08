@@ -99,7 +99,7 @@ class RandomTransactionInserter {
                        uint64_t delay_ms = 0);
 
   // Returns the status of the previous Insert operation
-  Status GetLastStatus() { return last_status_; }
+  Status GetLastStatus() { return last_status_.Clone(); }
 
   // Returns the number of successfully written calls to
   // TransactionDBInsert/OptimisticTransactionDBInsert/DBInsert

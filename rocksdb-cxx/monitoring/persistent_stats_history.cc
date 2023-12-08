@@ -78,7 +78,7 @@ PersistentStatsHistoryIterator::~PersistentStatsHistoryIterator() {}
 
 bool PersistentStatsHistoryIterator::Valid() const { return valid_; }
 
-Status PersistentStatsHistoryIterator::status() const { return status_; }
+Status PersistentStatsHistoryIterator::status() const { return status_.Clone(); }
 
 void PersistentStatsHistoryIterator::Next() {
   // increment start_time by 1 to avoid infinite loop

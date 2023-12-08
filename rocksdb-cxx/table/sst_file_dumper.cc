@@ -451,7 +451,7 @@ Status SstFileDumper::ReadSequential(bool print_kv, uint64_t read_num,
                                      bool has_to, const std::string& to_key,
                                      bool use_from_as_prefix) {
   if (!table_reader_) {
-    return init_result_;
+    return init_result_.Clone();
   }
 
   InternalIterator* iter = table_reader_->NewIterator(
@@ -522,10 +522,10 @@ Status SstFileDumper::ReadSequential(bool print_kv, uint64_t read_num,
 Status SstFileDumper::ReadTableProperties(
     std::shared_ptr<const TableProperties>* table_properties) {
   if (!table_reader_) {
-    return init_result_;
+    return init_result_.Clone();
   }
 
   *table_properties = table_reader_->GetTableProperties();
-  return init_result_;
+  return init_result_.Clone();
 }
 }  // namespace ROCKSDB_NAMESPACE

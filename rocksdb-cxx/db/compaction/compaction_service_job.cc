@@ -288,7 +288,7 @@ Status CompactionServiceCompactionJob::Run() {
   RecordTimeToHistogram(stats_, COMPACTION_CPU_TIME,
                         compaction_stats_.stats.cpu_micros);
 
-  Status status = sub_compact->status;
+  Status status = sub_compact->status.Clone();
   IOStatus io_s = sub_compact->io_status;
 
   if (io_status_.ok()) {

@@ -31,7 +31,7 @@ Status BlockBasedTable::IndexReaderCommon::ReadIndexBlock(
       get_context, lookup_context, /* for_compaction */ false, use_cache,
       /* async_read */ false);
 
-  return s;
+  return s.Clone();
 }
 
 Status BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlock(

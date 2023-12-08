@@ -369,12 +369,12 @@ Status DBImplSecondary::GetImpl(const ReadOptions& read_options,
     const Status s = FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   } else {
     const Status s = FailIfCfHasTs(column_family);
     if (!s.ok()) {
-      return s;
+      return s.Clone();
     }
   }
 
@@ -546,7 +546,7 @@ Status DBImplSecondary::NewIterators(
       const Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
                                           /*ts_for_read=*/true);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   } else {
@@ -554,7 +554,7 @@ Status DBImplSecondary::NewIterators(
       assert(cf);
       const Status s = FailIfCfHasTs(cf);
       if (!s.ok()) {
-        return s;
+        return s.Clone();
       }
     }
   }
@@ -873,7 +873,7 @@ Status DBImplSecondary::CompactWithoutInstallation(
 
   // clean up
   compaction_job.CleanupCompaction();
-  c->ReleaseCompactionFiles(s);
+  c->ReleaseCompactionFiles(s.Clone());
   c.reset();
 
   TEST_SYNC_POINT_CALLBACK("DBImplSecondary::CompactWithoutInstallation::End",

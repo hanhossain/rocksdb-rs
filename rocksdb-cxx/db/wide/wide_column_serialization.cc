@@ -166,7 +166,7 @@ Status WideColumnSerialization::GetValueOfDefaultColumn(Slice& input,
 
   const Status s = Deserialize(input, columns);
   if (!s.ok()) {
-    return s;
+    return s.Clone();
   }
 
   if (columns.empty() || columns[0].name() != kDefaultWideColumnName) {

@@ -57,9 +57,9 @@ class ErrorHandler {
 
   const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
 
-  Status GetBGError() const { return bg_error_; }
+  Status GetBGError() const { return bg_error_.Clone(); }
 
-  Status GetRecoveryError() const { return recovery_error_; }
+  Status GetRecoveryError() const { return recovery_error_.Clone(); }
 
   Status ClearBGError();
 

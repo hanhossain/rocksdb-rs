@@ -2239,7 +2239,7 @@ Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
       blob_file_meta->GetBlobFileSize(), blob_index.size(),
       blob_index.compression(), prefetch_buffer, value, bytes_read);
 
-  return s;
+  return s.Clone();
 }
 
 void Version::MultiGetBlob(
@@ -5737,7 +5737,7 @@ Status VersionSet::LogAndApply(
     }
     TEST_SYNC_POINT_CALLBACK("VersionSet::LogAndApply:WakeUpAndDone", mu);
 #endif /* !NDEBUG */
-    return first_writer.status;
+    return first_writer.status.Clone();
   }
 
   int num_undropped_cfds = 0;
@@ -6128,7 +6128,7 @@ Status VersionSet::ListColumnFamiliesFromManifest(
     }
   }
 
-  return handler.status();
+  return handler.status().Clone();
 }
 
 Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
@@ -6353,7 +6353,7 @@ Status VersionSet::DumpManifest(
     handler.Iterate(reader, &s);
   }
 
-  return handler.status();
+  return handler.status().Clone();
 }
 
 void VersionSet::MarkFileNumberUsed(uint64_t number) {

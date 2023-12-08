@@ -381,7 +381,7 @@ struct BlockBasedTableBuilder::Rep {
 
   Status CopyStatus() {
     std::lock_guard<std::mutex> lock(status_mutex);
-    return status;
+    return status.Clone();
   }
 
   IOStatus GetIOStatus() {
@@ -1120,7 +1120,7 @@ void BlockBasedTableBuilder::WriteBlock(const Slice& uncompressed_block_data,
                          *(r->compression_ctxs[0]), r->verify_ctxs[0].get(),
                          &(r->compressed_output), &(block_contents), &type,
                          &compress_status);
-  r->SetStatus(compress_status);
+  r->SetStatus(compress_status.Clone());
   if (!ok()) {
     return;
   }
@@ -1313,7 +1313,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
   if (block_type == BlockType::kFilter) {
     Status s = r->filter_builder->MaybePostVerifyFilter(block_contents);
     if (!s.ok()) {
-      r->SetStatus(s);
+      r->SetStatus(s.Clone());
       return;
     }
   }
@@ -1348,7 +1348,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
       Status s = InsertBlockInCacheHelper(*uncompressed_block_data, handle,
                                           block_type);
       if (!s.ok()) {
-        r->SetStatus(s);
+        r->SetStatus(s.Clone());
         return;
       }
     }
@@ -1388,7 +1388,7 @@ void BlockBasedTableBuilder::BGWorkWriteMaybeCompressedBlock() {
     slot->Take(block_rep);
     assert(block_rep != nullptr);
     if (!block_rep->status.ok()) {
-      r->SetStatus(block_rep->status);
+      r->SetStatus(block_rep->status.Clone());
       // Reap block so that blocked Flush() can finish
       // if there is one, and Flush() will notice !ok() next time.
       block_rep->status = Status_OK();
@@ -1514,7 +1514,7 @@ void BlockBasedTableBuilder::WriteFilterBlock(
 
       assert(s.ok() || s.IsIncomplete() || s.IsCorruption());
       if (s.IsCorruption()) {
-        rep_->SetStatus(s);
+        rep_->SetStatus(s.Clone());
         break;
       }
 
@@ -1552,7 +1552,7 @@ void BlockBasedTableBuilder::WriteIndexBlock(
     // HashIndexBuilder which is not multi-partition.
     assert(index_blocks.meta_blocks.empty());
   } else if (ok() && !index_builder_status.ok()) {
-    rep_->SetStatus(index_builder_status);
+    rep_->SetStatus(index_builder_status.Clone());
   }
   if (ok()) {
     for (const auto& item : index_blocks.meta_blocks) {
@@ -1587,7 +1587,7 @@ void BlockBasedTableBuilder::WriteIndexBlock(
         assert(!index_building_finished);
       } else {
         // Error
-        rep_->SetStatus(s);
+        rep_->SetStatus(s.Clone());
         return;
       }
 

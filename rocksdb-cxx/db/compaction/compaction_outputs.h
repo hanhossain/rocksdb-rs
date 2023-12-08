@@ -256,7 +256,7 @@ class CompactionOutputs {
   Status CloseOutput(const Status& curr_status,
                      const CompactionFileOpenFunc& open_file_func,
                      const CompactionFileCloseFunc& close_file_func) {
-    Status status = curr_status;
+    Status status = curr_status.Clone();
     // handle subcompaction containing only range deletions
     if (status.ok() && !HasBuilder() && !HasOutput() && HasRangeDel()) {
       status = open_file_func(*this);
