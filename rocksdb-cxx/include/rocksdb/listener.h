@@ -66,6 +66,7 @@ struct TableFileCreationInfo : public TableFileCreationBriefInfo {
   explicit TableFileCreationInfo(TableProperties&& prop)
       : table_properties(prop), status(Status_new()) {}
   TableFileCreationInfo& operator=(const TableFileCreationInfo& t) {
+    TableFileCreationBriefInfo::operator=(t);
     file_size = t.file_size;
     table_properties = t.table_properties;
     status.copy_from(t.status);
