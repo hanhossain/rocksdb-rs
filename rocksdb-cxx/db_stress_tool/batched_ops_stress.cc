@@ -225,12 +225,12 @@ class BatchedOpsStressTest : public StressTest {
         if (!s.ok() && !s.IsNotFound()) {
           fprintf(stderr, "multiget error: %s\n", s.ToString().c_str());
           thread->stats.AddErrors(1);
-          ret_status[rand_key] = s;
+          ret_status[rand_key].copy_from(s);
           // we continue after error rather than exiting so that we can
           // find more errors if any
         } else if (s.IsNotFound()) {
           thread->stats.AddGets(1, 0);
-          ret_status[rand_key] = s;
+          ret_status[rand_key].copy_from(s);
         } else {
           assert(!keys[i].empty());
           assert(!values[i].empty());

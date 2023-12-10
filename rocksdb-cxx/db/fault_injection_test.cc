@@ -596,7 +596,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
       explicit LogReporter(Status* _s) : status_(_s) {}
       void Corruption(size_t /*bytes*/, const Status& _s) override {
         if (status_->ok()) {
-          *status_ = _s;
+          status_->copy_from(_s);
         }
       }
     } reporter(&log_read_s);

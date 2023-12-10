@@ -495,7 +495,7 @@ class WritePreparedTransactionTestBase : public TransactionTestBase {
                                 {kv.first}, &values);
       ASSERT_EQ(1, values.size());
       ASSERT_EQ(1, s_vec.size());
-      s = s_vec[0];
+      s.copy_from(s_vec[0]);
       ASSERT_TRUE(s.ok() || s.IsNotFound());
       if (s.ok()) {
         ASSERT_TRUE(kv.second == values[0]);
@@ -1440,7 +1440,7 @@ TEST_P(WritePreparedTransactionTest, MaxCatchupWithUnbackedSnapshot) {
           txn->MultiGet(ropt, {db->DefaultColumnFamily()}, {"key"}, &values);
       ASSERT_EQ(1, values.size());
       ASSERT_EQ(1, s_vec.size());
-      s = s_vec[0];
+      s.copy_from(s_vec[0]);
       ASSERT_TRUE(s.ok() || s.IsTryAgain());
       Slice key("key");
       txn->MultiGet(ropt, db->DefaultColumnFamily(), 1, &key, &pinnable_val, &s,
@@ -2203,7 +2203,7 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const Status& exp_s,
       db->MultiGet(roptions, {db->DefaultColumnFamily()}, {key}, &values);
   ASSERT_EQ(1, values.size());
   ASSERT_EQ(1, s_vec.size());
-  s = s_vec[0];
+  s.copy_from(s_vec[0]);
   ASSERT_TRUE(exp_s.eq(s));
   ASSERT_TRUE(s.ok() || s.IsNotFound());
   if (s.ok()) {

@@ -1648,8 +1648,8 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   status_list.push_back(Status_InvalidArgument("invalid option"));
   status_list.push_back(Status_Aborted("failed to run"));
   status_list.push_back(Status_NotSupported("not supported option"));
-  result.status =
-      status_list.at(rnd.Uniform(static_cast<int>(status_list.size())));
+  result.status.copy_from(
+      status_list.at(rnd.Uniform(static_cast<int>(status_list.size()))));
   while (!rnd.OneIn(10)) {
     UniqueId64x2 id{rnd64.Uniform(UINT64_MAX), rnd64.Uniform(UINT64_MAX)};
     result.output_files.emplace_back(
