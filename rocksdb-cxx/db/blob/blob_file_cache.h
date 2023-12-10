@@ -18,7 +18,7 @@ class Cache;
 struct ImmutableOptions;
 struct FileOptions;
 class HistogramImpl;
-class Status;
+struct Status;
 class Slice;
 class IOTracer;
 

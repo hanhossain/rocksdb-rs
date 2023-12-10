@@ -14,7 +14,6 @@
 #include "rocksdb/db.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/snapshot.h"
-#include "rocksdb/status.h"
 #include "rocksdb/types.h"
 #include "rocksdb/utilities/transaction.h"
 #include "rocksdb/utilities/transaction_db.h"
@@ -22,6 +21,12 @@
 #include "util/autovector.h"
 #include "utilities/transactions/lock/lock_tracker.h"
 #include "utilities/transactions/transaction_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -83,13 +88,13 @@ class TransactionBaseImpl : public Transaction {
   }
 
   using Transaction::MultiGet;
-  std::vector<Status> MultiGet(
+  rust::Vec<Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
-  std::vector<Status> MultiGet(const ReadOptions& options,
+  rust::Vec<Status> MultiGet(const ReadOptions& options,
                                const std::vector<Slice>& keys,
                                std::vector<std::string>* values) override {
     return MultiGet(options,
@@ -103,13 +108,13 @@ class TransactionBaseImpl : public Transaction {
                 Status* statuses, const bool sorted_input = false) override;
 
   using Transaction::MultiGetForUpdate;
-  std::vector<Status> MultiGetForUpdate(
+  rust::Vec<Status> MultiGetForUpdate(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
-  std::vector<Status> MultiGetForUpdate(
+  rust::Vec<Status> MultiGetForUpdate(
       const ReadOptions& options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) override {
     return MultiGetForUpdate(options,

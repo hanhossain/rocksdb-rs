@@ -25,11 +25,11 @@ class LogReaderContainer {
                      uint64_t log_number) {
     LogReporter* reporter = new LogReporter();
     // TODO: This will probably cause issues when moving Status to pure rust. Try using a unique_ptr instead.
-    status_ = new Status(RsStatus_new());
+    status_ = std::make_unique<Status>(Status_new());
     reporter->env = env;
     reporter->info_log = info_log.get();
     reporter->fname = std::move(fname);
-    reporter->status = status_;
+    reporter->status->copy_from(*status_);
     reporter_ = reporter;
     // We intentially make log::Reader do checksumming even if
     // paranoid_checks==false so that corruptions cause entire commits
@@ -41,11 +41,10 @@ class LogReaderContainer {
   }
   log::FragmentBufferedReader* reader_;
   log::Reader::Reporter* reporter_;
-  Status* status_;
+  std::unique_ptr<Status> status_;
   ~LogReaderContainer() {
     delete reader_;
     delete reporter_;
-    delete status_;
   }
 
  private:
@@ -53,12 +52,12 @@ class LogReaderContainer {
     Env* env;
     Logger* info_log;
     std::string fname;
-    Status* status;  // nullptr if immutable_db_options_.paranoid_checks==false
+    std::unique_ptr<Status> status;  // nullptr if immutable_db_options_.paranoid_checks==false
     void Corruption(size_t bytes, const Status& s) override {
       ROCKS_LOG_WARN(info_log, "%s%s: dropping %d bytes; %s",
                      (this->status == nullptr ? "(ignoring error) " : ""),
                      fname.c_str(), static_cast<int>(bytes),
-                     s.ToString().c_str());
+                     s.ToString()->c_str());
       if (this->status != nullptr && this->status->ok()) {
         this->status->copy_from(s);
       }

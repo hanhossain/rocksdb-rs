@@ -42,6 +42,8 @@ class Slice {
   /* implicit */
   Slice(const std::string& s) : data_(s.data()), size_(s.size()) {}
 
+  Slice(const std::unique_ptr<std::string>& s) : Slice(*s) {}
+
   // Create a slice that refers to the same contents as "sv"
   /* implicit */
   Slice(const std::string_view& sv) : data_(sv.data()), size_(sv.size()) {}

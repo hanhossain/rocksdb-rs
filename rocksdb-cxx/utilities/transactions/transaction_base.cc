@@ -13,10 +13,15 @@
 #include "logging/logging.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
-#include "rocksdb/status.h"
 #include "util/cast_util.h"
 #include "util/string_util.h"
 #include "utilities/transactions/lock/lock_tracker.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -310,7 +315,7 @@ Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
   return s;
 }
 
-std::vector<Status> TransactionBaseImpl::MultiGet(
+rust::Vec<Status> TransactionBaseImpl::MultiGet(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
@@ -319,12 +324,12 @@ std::vector<Status> TransactionBaseImpl::MultiGet(
     Status s = Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
-    return Status_CreateVec(num_keys, s);
+    return s.create_vec(num_keys);
   }
 
   values->resize(num_keys);
 
-  std::vector<Status> stat_list = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }
@@ -343,7 +348,7 @@ void TransactionBaseImpl::MultiGet(const ReadOptions& read_options,
                                       sorted_input);
 }
 
-std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
+rust::Vec<Status> TransactionBaseImpl::MultiGetForUpdate(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
@@ -353,7 +358,7 @@ std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
     Status s = Status_InvalidArgument(
         "Cannot call MultiGetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
-    return Status_CreateVec(num_keys, s);
+    return s.create_vec(num_keys);
   }
   values->resize(num_keys);
 
@@ -363,12 +368,12 @@ std::vector<Status> TransactionBaseImpl::MultiGetForUpdate(
                        true /* exclusive */);
     if (!s.ok()) {
       // Fail entire multiget if we cannot lock all keys
-      return Status_CreateVec(num_keys, s);
+      return s.create_vec(num_keys);
     }
   }
 
   // TODO(agiardullo): optimize multiget?
-  std::vector<Status> stat_list = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }

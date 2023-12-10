@@ -137,6 +137,8 @@ pub mod ffi {
         fn status_corruption2(subcode: SubCode) -> Status;
         #[cxx_name = "Status_Corruption"]
         fn status_corruption3() -> Status;
+        #[cxx_name = "Status_Corruption"]
+        fn status_corruption4(msg: &Slice) -> Status;
 
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported(msg: &Slice, msg2: &Slice) -> Status;
@@ -360,6 +362,7 @@ pub mod ffi {
         fn eq(self: &Status, other: &Status) -> bool;
         fn copy_from(self: &mut Status, other: &Status);
         fn move_from(self: &mut Status, other: Status);
+        fn create_vec(self: &Status, n: usize) -> Vec<Status>;
     }
 
     unsafe extern "C++" {
@@ -646,6 +649,14 @@ impl Status {
             status_copy_state(&self.state)
         }
     }
+
+    fn create_vec(&self, n: usize) -> Vec<Status> {
+        let mut v = Vec::new();
+        for _ in 0..n {
+            v.push(self.clone());
+        }
+        v
+    }
 }
 
 impl Default for Status {
@@ -868,6 +879,16 @@ pub fn status_corruption3() -> Status {
         code: Code::kCorruption,
         ..Status::default()
     }
+}
+
+pub fn status_corruption4(msg: &Slice) -> Status {
+    Status::new_with_messages(
+        Code::kCorruption,
+        SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        Severity::kNoError,
+    )
 }
 
 pub fn status_not_supported(msg: &Slice, msg2: &Slice) -> Status {

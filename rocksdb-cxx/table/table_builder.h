@@ -28,7 +28,7 @@
 namespace ROCKSDB_NAMESPACE {
 
 class Slice;
-class Status;
+struct Status;
 
 struct TableReaderOptions {
   // @param skip_filters Disables loading/accessing the filter block

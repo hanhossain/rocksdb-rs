@@ -315,7 +315,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
     }
   }
 
-  new_bg_err = Status(bg_err, sev);
+  new_bg_err = Status_new(bg_err, sev);
 
   // Check if recovery is currently in progress. If it is, we will save this
   // error so we can check it at the end to see if recovery succeeded or not
@@ -413,7 +413,7 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
     // First, data loss (non file scope) is treated as unrecoverable error. So
     // it can directly overwrite any existing bg_error_.
     bool auto_recovery = false;
-    Status bg_err(new_bg_io_err, Severity::kUnrecoverableError);
+    Status bg_err = Status_new(new_bg_io_err, Severity::kUnrecoverableError);
     CheckAndSetRecoveryAndBGError(bg_err);
     if (bg_error_stats_ != nullptr) {
       RecordTick(bg_error_stats_.get(), ERROR_HANDLER_BG_ERROR_COUNT);
@@ -482,14 +482,14 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
       // continues to receive writes when BG error is soft error, to avoid
       // to many small memtable being generated during auto resume, the flush
       // reason is set to kErrorRecoveryRetryFlush.
-      Status bg_err(new_bg_io_err, Severity::kSoftError);
+      Status bg_err = Status_new(new_bg_io_err, Severity::kSoftError);
       CheckAndSetRecoveryAndBGError(bg_err);
       soft_error_no_bg_work_ = true;
       context.flush_reason = FlushReason::kErrorRecoveryRetryFlush;
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
     } else {
-      Status bg_err(new_bg_io_err, Severity::kHardError);
+      Status bg_err = Status_new(new_bg_io_err, Severity::kHardError);
       CheckAndSetRecoveryAndBGError(bg_err);
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
@@ -522,7 +522,7 @@ Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
     // be inconsistent, and it may be needed for 2PC. If 2PC is not enabled,
     // we can just flush the memtable and discard the log
     *auto_recovery = false;
-    return Status(bg_error, Severity::kFatalError);
+    return Status_new(bg_error, Severity::kFatalError);
   }
 
   {

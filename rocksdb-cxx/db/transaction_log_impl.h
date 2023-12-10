@@ -100,7 +100,7 @@ class TransactionLogIteratorImpl : public TransactionLogIterator {
     Logger* info_log;
     virtual void Corruption(size_t bytes, const Status& s) override {
       ROCKS_LOG_ERROR(info_log, "dropping %" ROCKSDB_PRIszt " bytes; %s", bytes,
-                      s.ToString().c_str());
+                      s.ToString()->c_str());
     }
     virtual void Info(const char* s) { ROCKS_LOG_INFO(info_log, "%s", s); }
   } reporter_;

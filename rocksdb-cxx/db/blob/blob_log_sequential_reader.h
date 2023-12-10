@@ -17,7 +17,7 @@ namespace ROCKSDB_NAMESPACE {
 class RandomAccessFileReader;
 class Env;
 class Statistics;
-class Status;
+struct Status;
 class SystemClock;
 
 /**

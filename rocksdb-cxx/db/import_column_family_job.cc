@@ -122,7 +122,7 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
           ROCKS_LOG_INFO(db_options_.info_log,
                          "Try to link file %s but it's not supported : %s",
                          f.internal_file_path.c_str(),
-                         status.ToString().c_str());
+                         status.ToString()->c_str());
         }
       }
       if (!hardlink_files) {

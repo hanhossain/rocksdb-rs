@@ -66,7 +66,7 @@ WriteUnpreparedTxn::~WriteUnpreparedTxn() {
         ROCKS_LOG_FATAL(
             wupt_db_->info_log_,
             "Rollback of WriteUnprepared transaction failed in destructor: %s",
-            s.ToString().c_str());
+            s.ToString()->c_str());
       }
       dbimpl_->logs_with_prep_tracker()->MarkLogAsHavingPrepSectionFlushed(
           log_number_);

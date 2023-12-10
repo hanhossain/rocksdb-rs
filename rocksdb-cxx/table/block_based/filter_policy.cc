@@ -694,7 +694,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
         MaybeVerifyHashEntriesChecksum();
     if (!verify_hash_entries_checksum_status.ok()) {
       ROCKS_LOG_WARN(info_log_, "Verify hash entries checksum error: %s",
-                     verify_hash_entries_checksum_status.getState());
+                     verify_hash_entries_checksum_status.getState()->c_str());
       if (status) {
         status->copy_from(verify_hash_entries_checksum_status);
       }

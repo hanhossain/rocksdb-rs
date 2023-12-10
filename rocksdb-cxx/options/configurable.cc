@@ -9,11 +9,16 @@
 #include "options/configurable_helper.h"
 #include "options/options_helper.h"
 #include "rocksdb/customizable.h"
-#include "rocksdb/status.h"
 #include "rocksdb/utilities/object_registry.h"
 #include "rocksdb/utilities/options_type.h"
 #include "util/coding.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

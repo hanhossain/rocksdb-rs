@@ -80,7 +80,6 @@
 #include "rocksdb/merge_operator.h"
 #include "rocksdb/statistics.h"
 #include "rocksdb/stats_history.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table.h"
 #include "rocksdb/version.h"
 #include "rocksdb/write_buffer_manager.h"
@@ -107,6 +106,12 @@
 #include "util/stop_watch.h"
 #include "util/string_util.h"
 #include "utilities/trace/replayer_impl.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -412,7 +417,7 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
     if (!s.ok()) {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "DB resume requested but failed due to Flush failure [%s]",
-                     s.ToString().c_str());
+                     s.ToString()->c_str());
     }
   }
 
@@ -437,7 +442,7 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
         ROCKS_LOG_INFO(
             immutable_db_options_.info_log,
             "DB resume requested but could not enable file deletions [%s]",
-            s.ToString().c_str());
+            s.ToString()->c_str());
         assert(false);
       }
     }
@@ -460,7 +465,7 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log, "Successfully resumed DB");
   } else {
     ROCKS_LOG_INFO(immutable_db_options_.info_log, "Failed to resume DB [%s]",
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
   }
 
   // Check for shutdown again before scheduling further compactions,
@@ -503,7 +508,7 @@ void DBImpl::CancelAllBackgroundWork(bool wait) {
     if (!s.ok()) {
       ROCKS_LOG_WARN(immutable_db_options_.info_log,
                      "Failed to unregister periodic task %d, status: %s",
-                     task_type, s.ToString().c_str());
+                     task_type, s.ToString()->c_str());
     }
   }
 
@@ -656,7 +661,7 @@ Status DBImpl::CloseHelper() {
             immutable_db_options_.info_log,
             "Unable to Sync WAL file %s with error -- %s",
             LogFileName(immutable_db_options_.GetWalDir(), log_number).c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
         // Retain the first error
         if (ret.ok()) {
           ret.copy_from(s);
@@ -725,7 +730,7 @@ Status DBImpl::CloseHelper() {
     // Reserve IsAborted() error for those where users didn't release
     // certain resource and they can release them and come back and
     // retry. In this case, we wrap this exception to something else.
-    return Status_Incomplete(ret.ToString());
+    return Status_Incomplete(*ret.ToString());
   }
 
   return ret;
@@ -753,7 +758,7 @@ void DBImpl::MaybeIgnoreError(Status* s) const {
     // No change needed
   } else {
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "Ignoring error %s",
-                   s->ToString().c_str());
+                   s->ToString()->c_str());
     *s = Status_OK();
   }
 }
@@ -942,7 +947,7 @@ void DBImpl::PersistStats() {
     if (!s.ok()) {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "Writing to persistent stats CF failed -- %s",
-                     s.ToString().c_str());
+                     s.ToString()->c_str());
     } else {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "Writing %" ROCKSDB_PRIszt " stats with timestamp %" PRIu64
@@ -1337,7 +1342,7 @@ Status DBImpl::SetDBOptions(
         if (!purge_wal_status.ok()) {
           ROCKS_LOG_WARN(immutable_db_options_.info_log,
                          "Unable to purge WAL files in SetDBOptions() -- %s",
-                         purge_wal_status.ToString().c_str());
+                         purge_wal_status.ToString()->c_str());
         }
       }
       persist_options_status = WriteOptionsFile(
@@ -1360,11 +1365,11 @@ Status DBImpl::SetDBOptions(
       if (immutable_db_options_.fail_if_options_file_error) {
         s = Status_IOError(
             "SetDBOptions() succeeded, but unable to persist options",
-            persist_options_status.ToString());
+            *persist_options_status.ToString());
       }
       ROCKS_LOG_WARN(immutable_db_options_.info_log,
                      "Unable to persist options in SetDBOptions() -- %s",
-                     persist_options_status.ToString().c_str());
+                     persist_options_status.ToString()->c_str());
     }
   } else {
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "SetDBOptions failed");
@@ -2279,7 +2284,7 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
   return s;
 }
 
-std::vector<Status> DBImpl::MultiGet(
+rust::Vec<Status> DBImpl::MultiGet(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
@@ -2287,7 +2292,7 @@ std::vector<Status> DBImpl::MultiGet(
                   /*timestamps=*/nullptr);
 }
 
-std::vector<Status> DBImpl::MultiGet(
+rust::Vec<Status> DBImpl::MultiGet(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values,
@@ -2298,7 +2303,7 @@ std::vector<Status> DBImpl::MultiGet(
 
   size_t num_keys = keys.size();
   assert(column_family.size() == num_keys);
-  std::vector<Status> stat_list = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
 
   bool should_fail = false;
   for (size_t i = 0; i < num_keys; ++i) {
@@ -3222,7 +3227,7 @@ Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
     } else {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "Creating column family [%s] FAILED -- %s",
-                      column_family_name.c_str(), s.ToString().c_str());
+                      column_family_name.c_str(), s.ToString()->c_str());
     }
   }  // InstrumentedMutexLock l(&mutex_)
 
@@ -3337,7 +3342,7 @@ Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
   } else {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                     "Dropping column family with id %u FAILED -- %s\n",
-                    cfd->GetID(), s.ToString().c_str());
+                    cfd->GetID(), s.ToString()->c_str());
   }
 
   return s;
@@ -4295,7 +4300,7 @@ Status DBImpl::DeleteFile(std::string name) {
     if (!status.ok()) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DeleteFile %s failed -- %s.\n", name.c_str(),
-                      status.ToString().c_str());
+                      status.ToString()->c_str());
     }
     return status;
   }
@@ -4542,7 +4547,7 @@ Status DBImpl::CheckConsistency() {
                                   /*IODebugContext*=*/nullptr);
       if (!s.ok()) {
         corruption_messages +=
-            "Can't list files in " + directory + ": " + s.ToString() + "\n";
+            "Can't list files in " + directory + ": " + *s.ToString() + "\n";
         continue;
       }
       std::sort(existing_files.begin(), existing_files.end());
@@ -4571,7 +4576,7 @@ Status DBImpl::CheckConsistency() {
       }
       if (!s.ok()) {
         corruption_messages +=
-            "Can't access " + md.name + ": " + s.ToString() + "\n";
+            "Can't access " + md.name + ": " + *s.ToString() + "\n";
       } else if (fsize != md.size) {
         corruption_messages += "Sst file size mismatch: " + file_path +
                                ". Size recorded in manifest " +
@@ -4916,10 +4921,10 @@ Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
   }
   if (!s.ok()) {
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
-                   "Unnable to persist options -- %s", s.ToString().c_str());
+                   "Unnable to persist options -- %s", s.ToString()->c_str());
     if (immutable_db_options_.fail_if_options_file_error) {
       return Status_IOError("Unable to persist options.",
-                             s.ToString().c_str());
+                             s.ToString()->c_str());
     }
   }
   return Status_OK();
@@ -5117,7 +5122,7 @@ Status DBImpl::GetLatestSequenceForKey(
     // unexpected error reading memtable.
     ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                     "Unexpected status returned from MemTable::Get: %s\n",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
 
     return s;
   }
@@ -5150,7 +5155,7 @@ Status DBImpl::GetLatestSequenceForKey(
     // unexpected error reading memtable.
     ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                     "Unexpected status returned from MemTableList::Get: %s\n",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
 
     return s;
   }
@@ -5184,7 +5189,7 @@ Status DBImpl::GetLatestSequenceForKey(
     ROCKS_LOG_ERROR(
         immutable_db_options_.info_log,
         "Unexpected status returned from MemTableList::GetFromHistory: %s\n",
-        s.ToString().c_str());
+        s.ToString()->c_str());
 
     return s;
   }
@@ -5220,7 +5225,7 @@ Status DBImpl::GetLatestSequenceForKey(
       // unexpected error reading SST files
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "Unexpected status returned from Version::Get: %s\n",
-                      s.ToString().c_str());
+                      s.ToString()->c_str());
     }
   }
 
@@ -5688,7 +5693,7 @@ Status DBImpl::CreateColumnFamilyWithImport(
     if (!temp_s.ok()) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DropColumnFamily failed with error %s",
-                      temp_s.ToString().c_str());
+                      temp_s.ToString()->c_str());
     }
     // Always returns Status_OK()
     temp_s = DestroyColumnFamilyHandle(*handle);

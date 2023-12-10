@@ -82,11 +82,11 @@ Status DeleteScheduler::DeleteFile(const std::string& file_path,
   std::string trash_file;
   Status s = MarkAsTrash(file_path, &trash_file);
   ROCKS_LOG_INFO(info_log_, "Mark file: %s as trash -- %s", trash_file.c_str(),
-                 s.ToString().c_str());
+                 s.ToString()->c_str());
 
   if (!s.ok()) {
     ROCKS_LOG_ERROR(info_log_, "Failed to mark %s as trash -- %s",
-                    file_path.c_str(), s.ToString().c_str());
+                    file_path.c_str(), s.ToString()->c_str());
     s = fs_->DeleteFile(file_path, IOOptions(), nullptr);
     if (s.ok()) {
       s = sst_file_manager_->OnDeleteFile(file_path);
@@ -337,7 +337,7 @@ Status DeleteScheduler::DeleteTrashFile(const std::string& path_in_trash,
           } else {
             ROCKS_LOG_WARN(info_log_,
                            "Failed to partially delete %s from trash -- %s",
-                           path_in_trash.c_str(), my_status.ToString().c_str());
+                           path_in_trash.c_str(), my_status.ToString()->c_str());
           }
         } else {
           ROCKS_LOG_INFO(info_log_,
@@ -350,7 +350,7 @@ Status DeleteScheduler::DeleteTrashFile(const std::string& path_in_trash,
             info_log_,
             "Cannot delete files slowly through ftruncate from trash "
             "as Env::NumFileLinks() returns error: %s",
-            my_status.ToString().c_str());
+            my_status.ToString()->c_str());
         num_link_error_printed_ = true;
       }
     }
@@ -380,7 +380,7 @@ Status DeleteScheduler::DeleteTrashFile(const std::string& path_in_trash,
   if (!s.ok()) {
     // Error while getting file size or while deleting
     ROCKS_LOG_ERROR(info_log_, "Failed to delete %s from trash -- %s",
-                    path_in_trash.c_str(), s.ToString().c_str());
+                    path_in_trash.c_str(), s.ToString()->c_str());
     *deleted_bytes = 0;
   } else {
     total_trash_size_.fetch_sub(*deleted_bytes);

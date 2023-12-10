@@ -373,7 +373,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
     Status s = Env::CreateFromUri(config_options, env_uri, fs_uri, &options.env,
                                   &env_guard);
     if (!s.ok()) {
-      fprintf(stderr, "CreateEnvFromUri: %s\n", s.ToString().c_str());
+      fprintf(stderr, "CreateEnvFromUri: %s\n", s.ToString()->c_str());
       exit(1);
     } else {
       fprintf(stdout, "options.env is %p\n", options.env);
@@ -390,7 +390,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
     Status s = env->FileExists(dir_or_file);
     // dir_or_file does not exist
     if (!s.ok()) {
-      fprintf(stderr, "%s%s: No such file or directory\n", s.ToString().c_str(),
+      fprintf(stderr, "%s%s: No such file or directory\n", s.ToString()->c_str(),
               dir_or_file);
       return 1;
     }
@@ -429,7 +429,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
     // Not a valid SST
     if (!dumper.getStatus().ok()) {
       fprintf(stderr, "%s: %s\n", filename.c_str(),
-              dumper.getStatus().ToString().c_str());
+              dumper.getStatus().ToString()->c_str());
       continue;
     } else {
       valid_sst_files.push_back(filename);
@@ -453,7 +453,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
           compression_zstd_max_train_bytes, compression_max_dict_buffer_bytes,
           !compression_use_zstd_finalize_dict);
       if (!st.ok()) {
-        fprintf(stderr, "Failed to recompress: %s\n", st.ToString().c_str());
+        fprintf(stderr, "Failed to recompress: %s\n", st.ToString()->c_str());
         exit(1);
       }
       return 0;
@@ -465,7 +465,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
 
       st = dumper.DumpTable(out_filename);
       if (!st.ok()) {
-        fprintf(stderr, "%s: %s\n", filename.c_str(), st.ToString().c_str());
+        fprintf(stderr, "%s: %s\n", filename.c_str(), st.ToString()->c_str());
         exit(1);
       } else {
         fprintf(stdout, "raw dump written to file %s\n", &out_filename[0]);
@@ -480,7 +480,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
           has_from || use_from_as_prefix, from_key, has_to, to_key,
           use_from_as_prefix);
       if (!st.ok()) {
-        fprintf(stderr, "%s: %s\n", filename.c_str(), st.ToString().c_str());
+        fprintf(stderr, "%s: %s\n", filename.c_str(), st.ToString()->c_str());
       }
       total_read += dumper.GetReadNumber();
       if (read_num > 0 && total_read > read_num) {
@@ -492,7 +492,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
       st = dumper.VerifyChecksum();
       if (!st.ok()) {
         fprintf(stderr, "%s is corrupted: %s\n", filename.c_str(),
-                st.ToString().c_str());
+                st.ToString()->c_str());
       } else {
         fprintf(stdout, "The file is ok\n");
       }
@@ -506,7 +506,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
           table_properties_from_reader;
       st = dumper.ReadTableProperties(&table_properties_from_reader);
       if (!st.ok()) {
-        fprintf(stderr, "%s: %s\n", filename.c_str(), st.ToString().c_str());
+        fprintf(stderr, "%s: %s\n", filename.c_str(), st.ToString()->c_str());
         fprintf(stderr, "Try to use initial table properties\n");
         table_properties = dumper.GetInitTableProperties();
       } else {

@@ -12,7 +12,12 @@
 
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
-#include "rocksdb/status.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -316,12 +321,12 @@ class Transaction {
     return s;
   }
 
-  virtual std::vector<Status> MultiGet(
+  virtual rust::Vec<Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values) = 0;
 
-  virtual std::vector<Status> MultiGet(const ReadOptions& options,
+  virtual rust::Vec<Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
                                        std::vector<std::string>* values) = 0;
 
@@ -401,12 +406,12 @@ class Transaction {
                               std::string* value, bool exclusive = true,
                               const bool do_validate = true) = 0;
 
-  virtual std::vector<Status> MultiGetForUpdate(
+  virtual rust::Vec<Status> MultiGetForUpdate(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values) = 0;
 
-  virtual std::vector<Status> MultiGetForUpdate(
+  virtual rust::Vec<Status> MultiGetForUpdate(
       const ReadOptions& options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) = 0;
 

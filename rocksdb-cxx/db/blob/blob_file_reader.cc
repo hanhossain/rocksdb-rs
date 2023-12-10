@@ -16,12 +16,17 @@
 #include "options/cf_options.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/slice.h"
-#include "rocksdb/status.h"
 #include "table/multiget_context.h"
 #include "test_util/sync_point.h"
 #include "util/compression.h"
 #include "util/crc32c.h"
 #include "util/stop_watch.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

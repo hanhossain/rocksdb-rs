@@ -48,7 +48,6 @@
 #include "rocksdb/env.h"
 #include "rocksdb/options.h"
 #include "rocksdb/statistics.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table.h"
 #include "rocksdb/utilities/options_type.h"
 #include "table/merging_iterator.h"
@@ -56,6 +55,12 @@
 #include "table/unique_id_impl.h"
 #include "test_util/sync_point.h"
 #include "util/stop_watch.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -307,14 +312,14 @@ void CompactionJob::Prepare() {
     if (!status.ok()) {
       ROCKS_LOG_WARN(db_options_.info_log,
                      "Invalid sequence number to time mapping: Status: %s",
-                     status.ToString().c_str());
+                     status.ToString()->c_str());
     }
     int64_t _current_time = 0;
     status = db_options_.clock->GetCurrentTime(&_current_time);
     if (!status.ok()) {
       ROCKS_LOG_WARN(db_options_.info_log,
                      "Failed to get current time in compaction: Status: %s",
-                     status.ToString().c_str());
+                     status.ToString()->c_str());
       // preserve all time information
       preserve_time_min_seqno_ = 0;
       preclude_last_level_min_seqno_ = 0;
@@ -881,7 +886,7 @@ Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
       stats.num_output_files_blob, stats.bytes_read_non_output_levels / kMB,
       stats.bytes_read_output_level / kMB, stats.bytes_read_blob / kMB,
       stats.bytes_written / kMB, stats.bytes_written_blob / kMB, read_write_amp,
-      write_amp, status.ToString().c_str(), stats.num_input_records,
+      write_amp, status.ToString()->c_str(), stats.num_input_records,
       stats.num_dropped_records,
       CompressionTypeToString(compact_->compaction->output_compression())
           .c_str());
@@ -1776,7 +1781,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
         "[%s] [JOB %d] OpenCompactionOutputFiles for table #%" PRIu64
         " fails at NewWritableFile with status %s",
         sub_compact->compaction->column_family_data()->GetName().c_str(),
-        job_id_, file_number, s.ToString().c_str());
+        job_id_, file_number, s.ToString()->c_str());
     LogFlush(db_options_.info_log);
     EventHelpers::LogAndNotifyTableFileCreationFinished(
         event_logger_, cfd->ioptions()->listeners, dbname_, cfd->GetName(),
@@ -1793,7 +1798,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
   if (!get_time_status.ok()) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Failed to get current time. Status: %s",
-                   get_time_status.ToString().c_str());
+                   get_time_status.ToString()->c_str());
   }
   uint64_t current_time = static_cast<uint64_t>(temp_current_time);
   InternalKey tmp_start, tmp_end;
@@ -1830,7 +1835,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
                       "[%s] [JOB %d] file #%" PRIu64
                       " failed to generate unique id: %s.",
                       cfd->GetName().c_str(), job_id_, meta.fd.GetNumber(),
-                      s.ToString().c_str());
+                      s.ToString()->c_str());
       return s;
     }
 

@@ -202,7 +202,7 @@ Status DBImplSecondary::RecoverLogFiles(
     auto it = log_readers_.find(log_number);
     assert(it != log_readers_.end());
     log::FragmentBufferedReader* reader = it->second->reader_;
-    Status* wal_read_status = it->second->status_;
+    const std::unique_ptr<Status>& wal_read_status = it->second->status_;
     assert(wal_read_status);
     // Manually update the file number allocation counter in VersionSet.
     versions_->MarkFileNumberUsed(log_number);
@@ -613,7 +613,7 @@ Status DBImplSecondary::CheckConsistency() {
     }
     if (!s.ok()) {
       corruption_messages +=
-          "Can't access " + md.name + ": " + s.ToString() + "\n";
+          "Can't access " + md.name + ": " + *s.ToString() + "\n";
     }
   }
   return corruption_messages.empty() ? Status_OK()

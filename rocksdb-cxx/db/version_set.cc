@@ -3085,7 +3085,7 @@ bool Version::MaybeInitializeFileMetaData(const ReadOptions& read_options,
     ROCKS_LOG_ERROR(vset_->db_options_->info_log,
                     "Unable to load table properties for file %" PRIu64
                     " --- %s\n",
-                    file_meta->fd.GetNumber(), s.ToString().c_str());
+                    file_meta->fd.GetNumber(), s.ToString()->c_str());
     return false;
   }
   if (tp.get() == nullptr) return false;
@@ -3688,7 +3688,7 @@ void VersionStorageInfo::ComputeFilesMarkedForPeriodicCompaction(
           if (!status.ok()) {
             ROCKS_LOG_WARN(ioptions.logger,
                            "Can't get file modification time: %s: %s",
-                           file_path.c_str(), status.ToString().c_str());
+                           file_path.c_str(), status.ToString()->c_str());
             continue;
           }
         }
@@ -5442,7 +5442,7 @@ Status VersionSet::ProcessManifestWrites(
       if (!io_s.ok()) {
         s = io_s;
         ROCKS_LOG_ERROR(db_options_->info_log, "MANIFEST write %s\n",
-                        s.ToString().c_str());
+                        s.ToString()->c_str());
       }
     }
 
@@ -5614,7 +5614,7 @@ Status VersionSet::ProcessManifestWrites(
         ROCKS_LOG_WARN(db_options_->info_log,
                        "Failed to delete manifest %" PRIu64 ": %s",
                        pending_manifest_file_number_,
-                       manifest_del_status.ToString().c_str());
+                       manifest_del_status.ToString()->c_str());
       }
     }
   }
@@ -7204,7 +7204,7 @@ Status ReactiveVersionSet::Recover(
   assert(manifest_reader_status != nullptr);
 
   // TODO: this might cause issues when moving Status to rust
-  manifest_reader_status->reset(new Status(RsStatus_new()));
+  *manifest_reader_status = std::make_unique<Status>(Status_new());
   manifest_reporter->reset(new LogReporter());
   static_cast_with_check<LogReporter>(manifest_reporter->get())->status =
       manifest_reader_status->get();

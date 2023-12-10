@@ -80,7 +80,7 @@ void VersionEditHandlerBase::Iterate(log::Reader& reader,
       // build a new error message
       std::stringstream message;
       // append previous dynamic state message
-      const char* state = s.getState();
+      const std::unique_ptr<std::string>& state = s.getState();
       if (state != nullptr) {
         message << state;
         message << ' ';
@@ -89,7 +89,7 @@ void VersionEditHandlerBase::Iterate(log::Reader& reader,
       message << " The file " << reader.file()->file_name()
               << " may be corrupted.";
       // overwrite the status with the extended status
-      s = Status(s.code(), s.subcode(), s.severity(), message.str());
+      s = Status_new(s.code(), s.subcode(), s.severity(), message.str());
     }
     status_.copy_from(s);
   }
@@ -440,7 +440,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       if (!s->ok()) {
         // If s is IOError::PathNotFound, then we mark the db as corrupted.
         if (s->IsPathNotFound()) {
-          *s = Status_Corruption("Corruption: " + s->ToString());
+          *s = Status_Corruption("Corruption: " + *s->ToString());
         }
         break;
       }
@@ -1033,7 +1033,7 @@ void DumpManifestHandler::CheckIterationResult(const log::Reader& reader,
                                                Status* s) {
   VersionEditHandler::CheckIterationResult(reader, s);
   if (!s->ok()) {
-    fprintf(stdout, "%s\n", s->ToString().c_str());
+    fprintf(stdout, "%s\n", s->ToString()->c_str());
     return;
   }
   assert(cf_to_cmp_names_);

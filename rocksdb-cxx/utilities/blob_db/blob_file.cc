@@ -186,8 +186,8 @@ Status BlobFile::GetReader(Env* env, const FileOptions& file_options,
     ROCKS_LOG_ERROR(info_log_,
                     "Failed to open blob file for random-read: %s status: '%s'"
                     " exists: '%s'",
-                    PathName().c_str(), s.ToString().c_str(),
-                    env->FileExists(PathName()).ToString().c_str());
+                    PathName().c_str(), s.ToString()->c_str(),
+                    env->FileExists(PathName()).ToString()->c_str());
     return s;
   }
 
@@ -210,7 +210,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
   } else {
     ROCKS_LOG_ERROR(info_log_,
                     "Failed to get size of blob file %" PRIu64 ", status: %s",
-                    file_number_, s.ToString().c_str());
+                    file_number_, s.ToString()->c_str());
     return s;
   }
   if (file_size < BlobLogHeader::kSize) {
@@ -227,7 +227,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
   if (!s.ok()) {
     ROCKS_LOG_ERROR(info_log_,
                     "Failed to open blob file %" PRIu64 ", status: %s",
-                    file_number_, s.ToString().c_str());
+                    file_number_, s.ToString()->c_str());
     return s;
   }
 
@@ -249,7 +249,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
   if (!s.ok()) {
     ROCKS_LOG_ERROR(
         info_log_, "Failed to read header of blob file %" PRIu64 ", status: %s",
-        file_number_, s.ToString().c_str());
+        file_number_, s.ToString()->c_str());
     return s;
   }
   BlobLogHeader header;
@@ -258,7 +258,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
     ROCKS_LOG_ERROR(info_log_,
                     "Failed to decode header of blob file %" PRIu64
                     ", status: %s",
-                    file_number_, s.ToString().c_str());
+                    file_number_, s.ToString()->c_str());
     return s;
   }
   column_family_id_ = header.column_family_id;
@@ -292,7 +292,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
   if (!s.ok()) {
     ROCKS_LOG_ERROR(
         info_log_, "Failed to read footer of blob file %" PRIu64 ", status: %s",
-        file_number_, s.ToString().c_str());
+        file_number_, s.ToString()->c_str());
     return s;
   }
   BlobLogFooter footer;

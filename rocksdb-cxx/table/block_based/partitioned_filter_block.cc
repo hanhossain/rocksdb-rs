@@ -464,7 +464,7 @@ Status PartitionedFilterBlockReader::CacheDependencies(
     ROCKS_LOG_ERROR(rep->ioptions.logger,
                     "Error retrieving top-level filter block while trying to "
                     "cache filter partitions: %s",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
     return s;
   }
 

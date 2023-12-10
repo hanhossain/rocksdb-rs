@@ -17,9 +17,14 @@
 #include "rocksdb/compression_type.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/io_status.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table_properties.h"
 #include "rocksdb/types.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -28,7 +33,7 @@ using TablePropertiesCollection =
 
 class DB;
 class ColumnFamilyHandle;
-class Status;
+struct Status;
 struct CompactionJobStats;
 
 struct FileCreationBriefInfo {

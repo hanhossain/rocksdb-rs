@@ -88,7 +88,7 @@ IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key,
   Status pik_status =
       ParseInternalKey(key, &parsed_key, false /* log_err_key */);  // TODO
   if (!pik_status.ok()) {
-    return IOStatus::Corruption(pik_status.getState());
+    return IOStatus::Corruption(*pik_status.getState());
   }
 
   Slice key_to_write = key;  // Portion of internal key to write out.
@@ -288,7 +288,7 @@ Status PlainTableKeyDecoder::ReadInternalKey(
     if (!pik_status.ok()) {
       return Status_Corruption(
           Slice("Corrupted key found during next key read. "),
-          pik_status.getState());
+          *pik_status.getState());
     }
     *bytes_read += user_key_size + 8;
   }

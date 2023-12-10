@@ -312,7 +312,7 @@ void WritePreparedTxnDB::UpdateCFComparatorMap(ColumnFamilyHandle* h) {
   handle_map_.reset(handle_map);
 }
 
-std::vector<Status> WritePreparedTxnDB::MultiGet(
+rust::Vec<Status> WritePreparedTxnDB::MultiGet(
     const ReadOptions& options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
@@ -320,7 +320,7 @@ std::vector<Status> WritePreparedTxnDB::MultiGet(
   size_t num_keys = keys.size();
   values->resize(num_keys);
 
-  std::vector<Status> stat_list = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = this->Get(options, column_family[i], keys[i], &(*values)[i]);
   }

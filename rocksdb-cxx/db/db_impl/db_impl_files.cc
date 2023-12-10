@@ -371,19 +371,19 @@ void DBImpl::DeleteObsoleteFileImpl(int job_id, const std::string& fname,
     ROCKS_LOG_DEBUG(immutable_db_options_.info_log,
                     "[JOB %d] Delete %s type=%d #%" PRIu64 " -- %s\n", job_id,
                     fname.c_str(), type, number,
-                    file_deletion_status.ToString().c_str());
+                    file_deletion_status.ToString()->c_str());
   } else if (env_->FileExists(fname).IsNotFound()) {
     ROCKS_LOG_INFO(
         immutable_db_options_.info_log,
         "[JOB %d] Tried to delete a non-existing file %s type=%d #%" PRIu64
         " -- %s\n",
         job_id, fname.c_str(), type, number,
-        file_deletion_status.ToString().c_str());
+        file_deletion_status.ToString()->c_str());
   } else {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                     "[JOB %d] Failed to delete %s type=%d #%" PRIu64 " -- %s\n",
                     job_id, fname.c_str(), type, number,
-                    file_deletion_status.ToString().c_str());
+                    file_deletion_status.ToString()->c_str());
   }
   if (type == kTableFile) {
     EventHelpers::LogAndNotifyTableFileDeletion(
@@ -660,12 +660,12 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
               immutable_db_options_.info_log,
               "[JOB %d] Tried to delete non-existing info log file %s FAILED "
               "-- %s\n",
-              state.job_id, to_delete.c_str(), s.ToString().c_str());
+              state.job_id, to_delete.c_str(), s.ToString()->c_str());
         } else {
           ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                           "[JOB %d] Delete info log file %s FAILED -- %s\n",
                           state.job_id, to_delete.c_str(),
-                          s.ToString().c_str());
+                          s.ToString()->c_str());
         }
       }
     }

@@ -36,7 +36,7 @@ Status Truncate(Env* env, const std::string& filename, uint64_t length) {
   Status s = env->NewSequentialFile(filename, &orig_file, options);
   if (!s.ok()) {
     fprintf(stderr, "Cannot open file %s for truncation: %s\n",
-            filename.c_str(), s.ToString().c_str());
+            filename.c_str(), s.ToString()->c_str());
     return s;
   }
 
@@ -56,14 +56,14 @@ Status Truncate(Env* env, const std::string& filename, uint64_t length) {
         s = env->RenameFile(tmp_name, filename);
       } else {
         fprintf(stderr, "Cannot rename file %s to %s: %s\n", tmp_name.c_str(),
-                filename.c_str(), s.ToString().c_str());
+                filename.c_str(), s.ToString()->c_str());
         env->DeleteFile(tmp_name);
       }
     }
   }
   if (!s.ok()) {
     fprintf(stderr, "Cannot truncate file %s: %s\n", filename.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
   }
 
   return s;

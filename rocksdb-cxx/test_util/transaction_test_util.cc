@@ -154,7 +154,7 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
       // Non-optimistic transactions may return write-coflict/timeout errors.
       if (is_optimistic || !(s.IsBusy() || s.IsTimedOut() || s.IsTryAgain())) {
         fprintf(stderr, "Get returned an unexpected error: %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         unexpected_error = true;
       }
       break;
@@ -176,14 +176,14 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
         } else if (!s.ok()) {
           // Since we did a GetForUpdate, SingleDelete should not fail.
           fprintf(stderr, "SingleDelete returned an unexpected error: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           unexpected_error = true;
         }
         s = txn->Put(key, sum);
         if (!s.ok()) {
           // Since we did a GetForUpdate, Put should not fail.
           fprintf(stderr, "Put returned an unexpected error: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           unexpected_error = true;
         }
       } else {
@@ -195,7 +195,7 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
       ROCKS_LOG_DEBUG(db->GetDBOptions().info_log,
                       "Insert (%s) %s snap: %" PRIu64 " key:%s value: %" PRIu64
                       "+%" PRIu64 "=%" PRIu64,
-                      txn->GetName().c_str(), s.ToString().c_str(),
+                      txn->GetName().c_str(), s.ToString()->c_str(),
                       txn->GetSnapshot()->GetSequenceNumber(), full_key.c_str(),
                       int_value, incr, int_value + incr);
     }
@@ -209,12 +209,12 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
         s = txn->Prepare();
         if (!s.ok()) {
           fprintf(stderr, "Prepare returned an unexpected error: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
         }
         assert(s.ok());
         ROCKS_LOG_DEBUG(db->GetDBOptions().info_log,
                         "Prepare of %" PRIu64 " %s (%s)", txn->GetId(),
-                        s.ToString().c_str(), txn->GetName().c_str());
+                        s.ToString()->c_str(), txn->GetName().c_str());
         if (rand_->OneIn(20)) {
           // This currently only tests the mechanics of writing commit time
           // write batch so the exact values would not matter.
@@ -229,13 +229,13 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
         assert(!with_prepare || s.ok());
         ROCKS_LOG_DEBUG(db->GetDBOptions().info_log,
                         "Commit of %" PRIu64 " %s (%s)", txn->GetId(),
-                        s.ToString().c_str(), txn->GetName().c_str());
+                        s.ToString()->c_str(), txn->GetName().c_str());
       } else {
         // Also try 5% rollback
         s = txn->Rollback();
         ROCKS_LOG_DEBUG(db->GetDBOptions().info_log,
                         "Rollback %" PRIu64 " %s %s", txn->GetId(),
-                        txn->GetName().c_str(), s.ToString().c_str());
+                        txn->GetName().c_str(), s.ToString()->c_str());
         assert(s.ok());
       }
       assert(is_optimistic || s.ok());
@@ -258,7 +258,7 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
 
         if (unexpected_error) {
           fprintf(stderr, "Commit returned an unexpected error: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
         }
       }
     } else {
@@ -266,14 +266,14 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
       if (!s.ok()) {
         unexpected_error = true;
         fprintf(stderr, "Write returned an unexpected error: %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
       }
     }
   } else {
     if (txn != nullptr) {
       assert(txn->Rollback().ok());
       ROCKS_LOG_DEBUG(db->GetDBOptions().info_log, "Error %s for txn %s",
-                      s.ToString().c_str(), txn->GetName().c_str());
+                      s.ToString()->c_str(), txn->GetName().c_str());
     }
   }
 

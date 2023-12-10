@@ -48,7 +48,7 @@ static int RegisterBuiltinFileSystems(ObjectLibrary& library,
          std::string* errmsg) {
         Status s = NewEncryptedFileSystemImpl(nullptr, nullptr, guard);
         if (!s.ok()) {
-          *errmsg = s.ToString();
+          *errmsg = *s.ToString();
         }
         return guard->get();
       });

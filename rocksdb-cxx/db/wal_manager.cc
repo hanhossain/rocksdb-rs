@@ -148,7 +148,7 @@ void WalManager::PurgeObsoleteWALFiles() {
   Status s = db_options_.clock->GetCurrentTime(&current_time);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log, "Can't get current time: %s",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
     assert(false);
     return;
   }
@@ -168,7 +168,7 @@ void WalManager::PurgeObsoleteWALFiles() {
   s = env_->GetChildren(archival_dir, &files);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log, "Can't get archive files: %s",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
     assert(false);
     return;
   }
@@ -186,7 +186,7 @@ void WalManager::PurgeObsoleteWALFiles() {
         if (!s.ok()) {
           ROCKS_LOG_WARN(db_options_.info_log,
                          "Can't get file mod time: %s: %s", file_path.c_str(),
-                         s.ToString().c_str());
+                         s.ToString()->c_str());
           continue;
         }
         if (now_seconds - file_m_time > db_options_.WAL_ttl_seconds) {
@@ -194,7 +194,7 @@ void WalManager::PurgeObsoleteWALFiles() {
                            /*force_fg=*/!wal_in_db_path_);
           if (!s.ok()) {
             ROCKS_LOG_WARN(db_options_.info_log, "Can't delete file: %s: %s",
-                           file_path.c_str(), s.ToString().c_str());
+                           file_path.c_str(), s.ToString()->c_str());
             continue;
           } else {
             MutexLock l(&read_first_record_cache_mutex_);
@@ -210,7 +210,7 @@ void WalManager::PurgeObsoleteWALFiles() {
         if (!s.ok()) {
           ROCKS_LOG_ERROR(db_options_.info_log,
                           "Unable to get file size: %s: %s", file_path.c_str(),
-                          s.ToString().c_str());
+                          s.ToString()->c_str());
           return;
         } else {
           if (file_size > 0) {
@@ -222,7 +222,7 @@ void WalManager::PurgeObsoleteWALFiles() {
             if (!s.ok()) {
               ROCKS_LOG_WARN(db_options_.info_log,
                              "Unable to delete file: %s: %s", file_path.c_str(),
-                             s.ToString().c_str());
+                             s.ToString()->c_str());
               continue;
             } else {
               MutexLock l(&read_first_record_cache_mutex_);
@@ -250,7 +250,7 @@ void WalManager::PurgeObsoleteWALFiles() {
   if (!s.ok()) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Unable to get archived WALs from: %s: %s",
-                   archival_dir.c_str(), s.ToString().c_str());
+                   archival_dir.c_str(), s.ToString()->c_str());
     files_del_num = 0;
   } else if (files_del_num > archived_logs.size()) {
     ROCKS_LOG_WARN(db_options_.info_log,
@@ -265,7 +265,7 @@ void WalManager::PurgeObsoleteWALFiles() {
                      /*force_fg=*/!wal_in_db_path_);
     if (!s.ok()) {
       ROCKS_LOG_WARN(db_options_.info_log, "Unable to delete file: %s: %s",
-                     file_path.c_str(), s.ToString().c_str());
+                     file_path.c_str(), s.ToString()->c_str());
       continue;
     } else {
       MutexLock l(&read_first_record_cache_mutex_);
@@ -283,7 +283,7 @@ void WalManager::ArchiveWALFile(const std::string& fname, uint64_t number) {
   TEST_SYNC_POINT("WalManager::PurgeObsoleteFiles:2");
   ROCKS_LOG_INFO(db_options_.info_log, "Move log file %s to %s -- %s\n",
                  fname.c_str(), archived_log_name.c_str(),
-                 s.ToString().c_str());
+                 s.ToString()->c_str());
 }
 
 Status WalManager::GetSortedWalsOfType(const std::string& path,
@@ -458,7 +458,7 @@ Status WalManager::ReadFirstLine(const std::string& fname,
     void Corruption(size_t bytes, const Status& s) override {
       ROCKS_LOG_WARN(info_log, "[WalManager] %s%s: dropping %d bytes; %s",
                      (this->ignore_error ? "(ignoring error) " : ""), fname,
-                     static_cast<int>(bytes), s.ToString().c_str());
+                     static_cast<int>(bytes), s.ToString()->c_str());
       if (this->status->ok()) {
         // only keep the first error
         this->status->copy_from(s);

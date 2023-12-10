@@ -167,7 +167,7 @@ Status TraceExecutionHandler::Handle(
   uint64_t start = clock_->NowMicros();
 
   std::vector<std::string> values;
-  std::vector<Status> ss = db_->MultiGet(read_opts_, handles, keys, &values);
+  rust::Vec<Status> ss = db_->MultiGet(read_opts_, handles, keys, &values);
 
   uint64_t end = clock_->NowMicros();
 

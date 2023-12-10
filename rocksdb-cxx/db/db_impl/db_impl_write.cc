@@ -1895,7 +1895,7 @@ Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
     if (!shutting_down_.load(std::memory_order_relaxed)) {
       // If writes are still stopped and db not shutdown, it means we bailed
       // due to a background error
-      s = Status_Incomplete(error_handler_.GetBGError().ToString());
+      s = Status_Incomplete(*error_handler_.GetBGError().ToString());
     } else {
       s = Status_ShutdownInProgress("stalled writes");
     }

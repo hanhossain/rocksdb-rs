@@ -38,12 +38,12 @@ class CompactedDBImpl : public DBImpl {
   // Note that CompactedDBImpl::MultiGet is not the optimized version of
   // MultiGet to use.
   // TODO: optimize CompactedDBImpl::MultiGet, see DBImpl::MultiGet for details.
-  virtual std::vector<Status> MultiGet(
+  virtual rust::Vec<Status> MultiGet(
       const ReadOptions& options, const std::vector<ColumnFamilyHandle*>&,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
-  std::vector<Status> MultiGet(const ReadOptions& options,
+  rust::Vec<Status> MultiGet(const ReadOptions& options,
                                const std::vector<ColumnFamilyHandle*>&,
                                const std::vector<Slice>& keys,
                                std::vector<std::string>* values,

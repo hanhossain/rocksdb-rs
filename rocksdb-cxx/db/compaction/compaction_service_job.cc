@@ -639,14 +639,15 @@ struct StatusSerializationAdapter {
     code = s.code();
     subcode = s.subcode();
     severity = s.severity();
-    auto msg = s.getState();
-    message = msg ? msg : "";
+    auto& msg = s.getState();
+    message = msg ? *msg : "";
   }
 
   Status GetStatus() const {
-    return Status{static_cast<Code>(code),
+    return Status_new(static_cast<Code>(code),
                   static_cast<SubCode>(subcode),
-                  static_cast<Severity>(severity), message};
+                  static_cast<Severity>(severity),
+                  message);
   }
 };
 }  // namespace
