@@ -1552,7 +1552,7 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     Status s = Status_new();
     std::map<std::string, Status>::iterator it = status.find(kv.first);
     if (it != status.end()) {
-      s = it->second;
+      s.copy_from(it->second);
     } else {
       status.insert({ kv.first, s.Clone() });
     }
@@ -1580,12 +1580,12 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
       Status current_status = Status_new();
       std::map<std::string, Status>::iterator it = status.find(data_iter->first);
       if (it != status.end()) {
-        current_status = it->second;
+        current_status.copy_from(it->second);
       } else {
         status.insert({ data_iter->first, current_status.Clone() });
       }
       if (!current_status.ok()) {
-        s = current_status;
+        s.copy_from(current_status);
       }
       ASSERT_TRUE(iter->status().eq(s));
       if (current_status.ok()) {
@@ -1609,12 +1609,12 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
       Status current_status = Status_new();
       std::map<std::string, Status>::iterator it = status.find(data_rev->first);
       if (it != status.end()) {
-        current_status = it->second;
+        current_status.copy_from(it->second);
       } else {
         status.insert({ data_rev->first, current_status.Clone() });
       }
       if (!current_status.ok()) {
-        s = current_status;
+        s.copy_from(current_status);
       }
       ASSERT_TRUE(iter->status().eq(s));
       if (current_status.ok()) {
