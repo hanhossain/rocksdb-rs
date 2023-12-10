@@ -407,7 +407,7 @@ struct BlockBasedTableBuilder::Rep {
       // case but since it's unlikely that s is not OK, we take this cost
       // to be simplicity.
       std::lock_guard<std::mutex> lock(status_mutex);
-      status = s;
+      status.copy_from(s);
       status_ok.store(false, std::memory_order_relaxed);
     }
   }

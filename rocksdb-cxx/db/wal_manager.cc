@@ -461,7 +461,7 @@ Status WalManager::ReadFirstLine(const std::string& fname,
                      static_cast<int>(bytes), s.ToString().c_str());
       if (this->status->ok()) {
         // only keep the first error
-        *this->status = s;
+        this->status->copy_from(s);
       }
     }
   };

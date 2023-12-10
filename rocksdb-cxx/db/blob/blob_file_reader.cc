@@ -478,7 +478,7 @@ void BlobFileReader::MultiGetBlob(
 
       if (!req->status->IsCorruption()) {
         // Avoid overwriting corruption status.
-        *req->status = s;
+        req->status->copy_from(s);
       }
     }
     return;

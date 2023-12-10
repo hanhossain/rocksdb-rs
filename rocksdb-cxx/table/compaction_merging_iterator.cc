@@ -43,7 +43,7 @@ class CompactionMergingIterator : public InternalIterator {
 
   void considerStatus(const Status& s) {
     if (!s.ok() && status_.ok()) {
-      status_ = s;
+      status_.copy_from(s);
     }
   }
 

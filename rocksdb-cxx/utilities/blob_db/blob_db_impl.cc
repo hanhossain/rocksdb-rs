@@ -2078,7 +2078,7 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
         Status del = DeleteDBFile(&soptions, blobdir + "/" + f, blobdir, true,
                                   /*force_fg=*/false);
         if (status.ok() && !del.ok()) {
-          status = del;
+          status.copy_from(del);
         }
       }
     }
@@ -2087,7 +2087,7 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
   }
   Status destroy = DestroyDB(dbname, options);
   if (status.ok() && !destroy.ok()) {
-    status = destroy;
+    status.copy_from(destroy);
   }
 
   return status;

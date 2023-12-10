@@ -73,7 +73,7 @@ class MergingIterator : public InternalIterator {
 
   void considerStatus(Status s) {
     if (!s.ok() && status_.ok()) {
-      status_ = s;
+      status_.copy_from(s);
     }
   }
 

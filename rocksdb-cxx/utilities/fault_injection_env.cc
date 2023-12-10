@@ -149,7 +149,7 @@ Status TestRandomAccessFile::MultiRead(ReadRequest* reqs, size_t num_reqs) {
 
     assert(reqs);
     for (size_t i = 0; i < num_reqs; ++i) {
-      reqs[i].status = s;
+      reqs[i].status.copy_from(s);
     }
 
     return s.Clone();
@@ -318,7 +318,7 @@ Status FaultInjectionTestEnv::ReopenWritableFile(
   } else if (exists_s.ok()) {
     exists = true;
   } else {
-    s = exists_s;
+    s.copy_from(exists_s);
     exists = false;
   }
 

@@ -123,7 +123,7 @@ Status ExternalSstFileIngestionJob::Prepare(
         // reopening a file for writing and don't require reopening and
         // syncing the file. Ignore the NotSupported error in that case.
         if (!s.IsNotSupported()) {
-          status = s;
+          status.copy_from(s);
           if (status.ok()) {
             TEST_SYNC_POINT(
                 "ExternalSstFileIngestionJob::BeforeSyncIngestedFile");

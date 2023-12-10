@@ -680,15 +680,14 @@ class DB {
                         const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
-    std::vector<Status> status;
     std::vector<std::string> vals;
 
     for (size_t i = 0; i < num_keys; ++i) {
       cf.emplace_back(column_family);
       user_keys.emplace_back(keys[i]);
     }
-    status = MultiGet(options, cf, user_keys, &vals);
-    std::copy(status.begin(), status.end(), statuses);
+    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals);
+    Status_CopyVec(status, statuses);
     for (auto& value : vals) {
       values->PinSelf(value);
       values++;
@@ -702,7 +701,6 @@ class DB {
                         Status* statuses, const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
-    std::vector<Status> status;
     std::vector<std::string> vals;
     std::vector<std::string> tss;
 
@@ -710,8 +708,8 @@ class DB {
       cf.emplace_back(column_family);
       user_keys.emplace_back(keys[i]);
     }
-    status = MultiGet(options, cf, user_keys, &vals, &tss);
-    std::copy(status.begin(), status.end(), statuses);
+    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
+    Status_CopyVec(status, statuses);
     std::copy(tss.begin(), tss.end(), timestamps);
     for (auto& value : vals) {
       values->PinSelf(value);
@@ -744,15 +742,14 @@ class DB {
                         const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
-    std::vector<Status> status;
     std::vector<std::string> vals;
 
     for (size_t i = 0; i < num_keys; ++i) {
       cf.emplace_back(column_families[i]);
       user_keys.emplace_back(keys[i]);
     }
-    status = MultiGet(options, cf, user_keys, &vals);
-    std::copy(status.begin(), status.end(), statuses);
+    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals);
+    Status_CopyVec(status, statuses);
     for (auto& value : vals) {
       values->PinSelf(value);
       values++;
@@ -764,7 +761,6 @@ class DB {
                         Status* statuses, const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
-    std::vector<Status> status;
     std::vector<std::string> vals;
     std::vector<std::string> tss;
 
@@ -772,8 +768,8 @@ class DB {
       cf.emplace_back(column_families[i]);
       user_keys.emplace_back(keys[i]);
     }
-    status = MultiGet(options, cf, user_keys, &vals, &tss);
-    std::copy(status.begin(), status.end(), statuses);
+    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
+    Status_CopyVec(status, statuses);
     std::copy(tss.begin(), tss.end(), timestamps);
     for (auto& value : vals) {
       values->PinSelf(value);

@@ -305,7 +305,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
             std::move(contents), read_amp_bytes_per_bit, ioptions.stats));
       }
     }
-    statuses[idx_in_batch] = s;
+    statuses[idx_in_batch].copy_from(s);
   }
 
   if (use_fs_scratch) {
@@ -442,7 +442,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
 
           if (!uncompression_dict_status.ok()) {
             assert(!uncompression_dict_status.IsNotFound());
-            *(miter->s) = uncompression_dict_status;
+            miter->s->copy_from(uncompression_dict_status);
             data_block_range.SkipKey(miter);
             sst_file_range.SkipKey(miter);
             continue;
@@ -703,7 +703,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
           Status pik_status = ParseInternalKey(
               biter->key(), &parsed_key, false /* log_err_key */);  // TODO
           if (!pik_status.ok()) {
-            s = pik_status;
+            s.copy_from(pik_status);
           }
           if (!get_context->SaveValue(parsed_key, biter->value(), &matched,
                                       value_pinner)) {
@@ -766,7 +766,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
       if (s.ok() && !iiter->status().IsNotFound()) {
         s = iiter->status();
       }
-      *(miter->s) = s;
+      miter->s->copy_from(s);
     }
   }
 }

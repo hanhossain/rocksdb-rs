@@ -175,7 +175,7 @@ Status ReplayerImpl::Replay(
       std::lock_guard<std::mutex> gd(mtx);
       // Only record the first error.
       if (!err.ok() && !err.IsNotSupported() && err_ts < last_err_ts) {
-        bg_s = err;
+        bg_s.copy_from(err);
         last_err_ts = err_ts;
       }
     };
@@ -233,7 +233,7 @@ Status ReplayerImpl::Replay(
 
     thread_pool.WaitForJobsAndJoinAllThreads();
     if (!bg_s.ok()) {
-      s = bg_s;
+      s.copy_from(bg_s);
     }
   }
 

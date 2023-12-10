@@ -116,7 +116,7 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
   Status s =
       OpenLogReader(files_->at(static_cast<size_t>(start_file_index)).get());
   if (!s.ok()) {
-    current_status_ = s;
+    current_status_.copy_from(s);
     reporter_.Info(current_status_.ToString().c_str());
     return;
   }
@@ -210,7 +210,7 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
       Status s = OpenLogReader(files_->at(current_file_index_).get());
       if (!s.ok()) {
         is_valid_ = false;
-        current_status_ = s;
+        current_status_.copy_from(s);
         return;
       }
     } else {

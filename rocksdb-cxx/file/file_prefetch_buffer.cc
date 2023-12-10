@@ -659,7 +659,7 @@ bool FilePrefetchBuffer::TryReadFromCacheUntracked(
       }
       if (!s.ok()) {
         if (status) {
-          *status = s;
+          status->copy_from(s);
         }
 #ifndef NDEBUG
         IGNORE_STATUS_IF_ERROR(s);
@@ -754,7 +754,7 @@ bool FilePrefetchBuffer::TryReadFromCacheAsyncUntracked(
       explicit_prefetch_submitted_ = false;
       if (!s.ok()) {
         if (status) {
-          *status = s;
+          status->copy_from(s);
         }
 #ifndef NDEBUG
         IGNORE_STATUS_IF_ERROR(s);

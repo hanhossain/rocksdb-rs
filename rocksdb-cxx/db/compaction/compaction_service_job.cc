@@ -56,7 +56,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
   std::string compaction_input_binary;
   Status s = compaction_input.Write(&compaction_input_binary);
   if (!s.ok()) {
-    sub_compact->status = s;
+    sub_compact->status.copy_from(s);
     return CompactionServiceJobStatus::kFailure;
   }
 
@@ -125,7 +125,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
       } else {
         // set the current sub compaction status with the status returned from
         // remote
-        sub_compact->status = compaction_result.status;
+        sub_compact->status.copy_from(compaction_result.status);
       }
     } else {
       sub_compact->status = Status_Incomplete(
@@ -139,10 +139,10 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
   }
 
   if (!s.ok()) {
-    sub_compact->status = s;
+    sub_compact->status.copy_from(s);
     return CompactionServiceJobStatus::kFailure;
   }
-  sub_compact->status = compaction_result.status;
+  sub_compact->status.copy_from(compaction_result.status);
 
   std::ostringstream output_files_oss;
   is_first_one = true;
@@ -159,7 +159,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
                  output_files_oss.str().c_str());
 
   if (!s.ok()) {
-    sub_compact->status = s;
+    sub_compact->status.copy_from(s);
     return CompactionServiceJobStatus::kFailure;
   }
 
@@ -170,7 +170,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
                                   file_num, compaction->output_path_id());
     s = fs_->RenameFile(src_file, tgt_file, IOOptions(), nullptr);
     if (!s.ok()) {
-      sub_compact->status = s;
+      sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;
     }
 
@@ -178,7 +178,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
     uint64_t file_size;
     s = fs_->GetFileSize(tgt_file, IOOptions(), &file_size, nullptr);
     if (!s.ok()) {
-      sub_compact->status = s;
+      sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;
     }
     meta.fd = FileDescriptor(file_num, compaction->output_path_id(), file_size,
@@ -319,7 +319,7 @@ Status CompactionServiceCompactionJob::Run() {
   RecordCompactionIOStats();
 
   LogFlush(db_options_.info_log);
-  compact_->status = status;
+  compact_->status.copy_from(status);
 
   // Build compaction result
   compaction_result_->output_level = compact_->compaction->output_level();

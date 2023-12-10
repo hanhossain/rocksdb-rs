@@ -529,7 +529,8 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
               writer->sequence, disable_memtable, writer->log_used, index++,
               pre_release_callback_cnt);
           if (!ws.ok()) {
-            status = pre_release_cb_status = ws;
+            pre_release_cb_status.copy_from(ws);
+            status.copy_from(pre_release_cb_status);
             break;
           }
         }
@@ -1060,7 +1061,7 @@ Status DBImpl::WriteImplWALOnly(
             writer->sequence, disable_memtable, writer->log_used, index++,
             pre_release_callback_cnt);
         if (!ws.ok()) {
-          status = ws;
+          status.copy_from(ws);
           break;
         }
       }
@@ -2249,8 +2250,8 @@ Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context) {
       s = versions_->LogAndApplyToDefaultColumnFamily(
           read_options, &wal_deletion, &mutex_, directories_.GetDbDir());
       if (!s.ok() && versions_->io_status().IsIOError()) {
-        s = error_handler_.SetBGError(versions_->io_status(),
-                                      BackgroundErrorReason::kManifestWrite);
+        s.copy_from(error_handler_.SetBGError(versions_->io_status(),
+                                      BackgroundErrorReason::kManifestWrite));
       }
       if (!s.ok()) {
         return s;

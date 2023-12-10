@@ -128,7 +128,7 @@ class BlobDBIterator : public Iterator {
         return true;
       } else {
         if (!s.ok()) {
-          status_ = s;
+          status_.copy_from(s);
         }
         return false;
       }

@@ -1350,7 +1350,7 @@ class VersionBuilder::Rep {
     for (const auto& s : statuses) {
       if (!s.ok()) {
         if (ret.ok()) {
-          ret = s;
+          ret.copy_from(s);
         }
       }
     }

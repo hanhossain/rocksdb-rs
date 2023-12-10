@@ -337,7 +337,7 @@ Status CheckpointImpl::ExportColumnFamily(
 
       const auto enable_status = db_->EnableFileDeletions(false /*force*/);
       if (s.ok()) {
-        s = enable_status;
+        s.copy_from(enable_status);
       }
     }
   }

@@ -320,7 +320,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
   // Check if recovery is currently in progress. If it is, we will save this
   // error so we can check it at the end to see if recovery succeeded or not
   if (recovery_in_prog_ && recovery_error_.ok()) {
-    recovery_error_ = new_bg_err;
+    recovery_error_.copy_from(new_bg_err);
   }
 
   bool auto_recovery = auto_recovery_;
@@ -339,7 +339,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
     EventHelpers::NotifyOnBackgroundError(db_options_.listeners, reason, &s,
                                           db_mutex_, &auto_recovery);
     if (!s.ok() && (s.severity() > bg_error_.severity())) {
-      bg_error_ = s;
+      bg_error_.copy_from(s);
     } else {
       // This error is less severe than previously encountered error. Don't
       // take any further action
@@ -767,10 +767,10 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
 
 void ErrorHandler::CheckAndSetRecoveryAndBGError(const Status& bg_err) {
   if (recovery_in_prog_ && recovery_error_.ok()) {
-    recovery_error_ = bg_err;
+    recovery_error_.copy_from(bg_err);
   }
   if (bg_err.severity() > bg_error_.severity()) {
-    bg_error_ = bg_err;
+    bg_error_.copy_from(bg_err);
   }
   if (bg_error_.severity() >= Severity::kHardError) {
     is_db_stopped_.store(true, std::memory_order_release);

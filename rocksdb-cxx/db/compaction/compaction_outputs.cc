@@ -36,7 +36,7 @@ Status CompactionOutputs::Finish(const Status& intput_status,
   }
   Status io_s = builder_->io_status();
   if (s.ok()) {
-    s = io_s;
+    s.copy_from(io_s);
   }
   const uint64_t current_bytes = builder_->FileSize();
   if (s.ok()) {

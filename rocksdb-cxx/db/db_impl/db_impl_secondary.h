@@ -60,7 +60,7 @@ class LogReaderContainer {
                      fname.c_str(), static_cast<int>(bytes),
                      s.ToString().c_str());
       if (this->status != nullptr && this->status->ok()) {
-        *this->status = s;
+        this->status->copy_from(s);
       }
     }
   };

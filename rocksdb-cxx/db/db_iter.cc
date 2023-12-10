@@ -209,7 +209,7 @@ bool DBIter::SetBlobValueIfNeeded(const Slice& user_key,
                                      prefetch_buffer, &blob_value_, bytes_read);
 
   if (!s.ok()) {
-    status_ = s;
+    status_.copy_from(s);
     valid_ = false;
     return false;
   }
@@ -225,7 +225,7 @@ bool DBIter::SetValueAndColumnsFromEntity(Slice slice) {
   const Status s = WideColumnSerialization::Deserialize(slice, wide_columns_);
 
   if (!s.ok()) {
-    status_ = s;
+    status_.copy_from(s);
     valid_ = false;
     return false;
   }
@@ -1260,7 +1260,7 @@ bool DBIter::Merge(const Slice* val, const Slice& user_key) {
       /* op_failure_scope */ nullptr);
   if (!s.ok()) {
     valid_ = false;
-    status_ = s;
+    status_.copy_from(s);
     return false;
   }
 
@@ -1281,7 +1281,7 @@ bool DBIter::MergeEntity(const Slice& entity, const Slice& user_key) {
       /* op_failure_scope */ nullptr);
   if (!s.ok()) {
     valid_ = false;
-    status_ = s;
+    status_.copy_from(s);
     return false;
   }
 

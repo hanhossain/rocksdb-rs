@@ -229,7 +229,7 @@ class FaultInjectionTestEnv : public EnvWrapper {
       bool active, Status error = Status_Corruption("Not active")) {
     filesystem_active_ = active;
     if (!active) {
-      error_ = error;
+      error_.copy_from(error);
     }
   }
   void SetFilesystemActive(bool active,

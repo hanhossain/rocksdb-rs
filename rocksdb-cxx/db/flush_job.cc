@@ -533,7 +533,7 @@ Status FlushJob::MemPurge() {
     // Check status and propagate
     // potential error status from c_iter
     if (s.ok() && !c_iter.status().ok()) {
-      s = c_iter.status();
+      s.copy_from(c_iter.status());
     }
 
     // Range tombstone transfer.
