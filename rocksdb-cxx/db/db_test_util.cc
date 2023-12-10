@@ -792,7 +792,7 @@ std::string DBTestBase::Get(const std::string& k, const Snapshot* snapshot) {
   if (s.IsNotFound()) {
     result = "NOT_FOUND";
   } else if (!s.ok()) {
-    result = s.ToString();
+    result = *s.ToString();
   }
   return result;
 }
@@ -807,7 +807,7 @@ std::string DBTestBase::Get(int cf, const std::string& k,
   if (s.IsNotFound()) {
     result = "NOT_FOUND";
   } else if (!s.ok()) {
-    result = s.ToString();
+    result = *s.ToString();
   }
   return result;
 }
@@ -829,27 +829,27 @@ std::vector<std::string> DBTestBase::MultiGet(std::vector<int> cfs,
     handles.push_back(handles_[cfs[i]]);
     keys.push_back(k[i]);
   }
-  std::vector<Status> s;
+
   if (!batched) {
-    s = db_->MultiGet(options, handles, keys, &result);
+    rust::Vec<Status> s = db_->MultiGet(options, handles, keys, &result);
     for (size_t i = 0; i < s.size(); ++i) {
       if (s[i].IsNotFound()) {
         result[i] = "NOT_FOUND";
       } else if (!s[i].ok()) {
-        result[i] = s[i].ToString();
+        result[i] = *s[i].ToString();
       }
     }
   } else {
     std::vector<PinnableSlice> pin_values(cfs.size());
     result.resize(cfs.size());
-    Status_VecResize(cfs.size(), s, Status_new());
+    rust::Vec<Status> s = Status_new().create_vec(cfs.size());
     db_->MultiGet(options, cfs.size(), handles.data(), keys.data(),
                   pin_values.data(), s.data());
     for (size_t i = 0; i < s.size(); ++i) {
       if (s[i].IsNotFound()) {
         result[i] = "NOT_FOUND";
       } else if (!s[i].ok()) {
-        result[i] = s[i].ToString();
+        result[i] = *s[i].ToString();
       } else {
         result[i].assign(pin_values[i].data(), pin_values[i].size());
         // Increase likelihood of detecting potential use-after-free bugs with
@@ -870,7 +870,7 @@ std::vector<std::string> DBTestBase::MultiGet(const std::vector<std::string>& k,
   options.async_io = async;
   std::vector<Slice> keys;
   std::vector<std::string> result(k.size());
-  std::vector<Status> statuses = Status_CreateVec(k.size(), Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(k.size());
   std::vector<PinnableSlice> pin_values(k.size());
 
   for (size_t i = 0; i < k.size(); ++i) {
@@ -882,7 +882,7 @@ std::vector<std::string> DBTestBase::MultiGet(const std::vector<std::string>& k,
     if (statuses[i].IsNotFound()) {
       result[i] = "NOT_FOUND";
     } else if (!statuses[i].ok()) {
-      result[i] = statuses[i].ToString();
+      result[i] = *statuses[i].ToString();
     } else {
       result[i].assign(pin_values[i].data(), pin_values[i].size());
       // Increase likelihood of detecting potential use-after-free bugs with
@@ -984,7 +984,7 @@ std::string DBTestBase::AllEntriesFor(const Slice& user_key, int cf) {
   iter->Seek(target.Encode());
   std::string result;
   if (!iter->status().ok()) {
-    result = iter->status().ToString();
+    result = *iter->status().ToString();
   } else {
     result = "[ ";
     bool first = true;

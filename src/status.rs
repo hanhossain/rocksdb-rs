@@ -363,6 +363,7 @@ pub mod ffi {
         fn copy_from(self: &mut Status, other: &Status);
         fn move_from(self: &mut Status, other: Status);
         fn create_vec(self: &Status, n: usize) -> Vec<Status>;
+        fn resize_vec(self: &Status, v: &mut Vec<Status>, n: usize);
     }
 
     unsafe extern "C++" {
@@ -656,6 +657,16 @@ impl Status {
             v.push(self.clone());
         }
         v
+    }
+
+    fn resize_vec(&self, v: &mut Vec<Status>, n: usize) {
+        if n > v.len() {
+            for _ in v.len()..n {
+                v.push(self.clone());
+            }
+        } else {
+            v.truncate(n);
+        }
     }
 }
 
