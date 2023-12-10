@@ -480,7 +480,7 @@ TEST_F(DeleteFileTest, DeleteFileWithIterator) {
 
   Status status = db_->DeleteFile(level2file);
   fprintf(stdout, "Deletion status %s: %s\n", level2file.c_str(),
-          status.ToString().c_str());
+          status.ToString()->c_str());
   ASSERT_OK(status);
   it->SeekToFirst();
   int numKeysIterated = 0;

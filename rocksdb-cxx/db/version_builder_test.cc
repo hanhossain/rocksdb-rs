@@ -469,7 +469,7 @@ TEST_F(VersionBuilderTest, ApplyFileDeletionIncorrectLevel) {
 
   const Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(),
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot delete table file #2345 from level 3 since "
                           "it is on level 1"));
 }
@@ -493,7 +493,7 @@ TEST_F(VersionBuilderTest, ApplyFileDeletionNotInLSMTree) {
 
   const Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(),
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot delete table file #1234 from level 3 since "
                           "it is not in the LSM tree"));
 }
@@ -597,7 +597,7 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAlreadyInBase) {
 
   const Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(),
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot add table file #2345 to level 2 since it is "
                           "already in the LSM tree on level 1"));
 }
@@ -648,7 +648,7 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAlreadyApplied) {
 
   const Status s = builder.Apply(&other_edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(),
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot add table file #2345 to level 2 since it is "
                           "already in the LSM tree on level 3"));
 }
@@ -796,7 +796,7 @@ TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyInBase) {
 
   const Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "Blob file #1234 already added"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
 }
 
 TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyApplied) {
@@ -828,7 +828,7 @@ TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyApplied) {
 
   const Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "Blob file #1234 already added"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
 }
 
 TEST_F(VersionBuilderTest, ApplyBlobFileGarbageFileInBase) {
@@ -999,7 +999,7 @@ TEST_F(VersionBuilderTest, ApplyBlobFileGarbageFileNotFound) {
 
   const Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "Blob file #1234 not found"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 not found"));
 }
 
 TEST_F(VersionBuilderTest, BlobFileGarbageOverflow) {
@@ -1048,7 +1048,7 @@ TEST_F(VersionBuilderTest, BlobFileGarbageOverflow) {
     const Status s = builder.Apply(&garbage);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(
-        std::strstr(s.getState(), "Garbage overflow for blob file #1234"));
+        std::strstr(s.getState()->c_str(), "Garbage overflow for blob file #1234"));
   }
 
   {
@@ -1064,7 +1064,7 @@ TEST_F(VersionBuilderTest, BlobFileGarbageOverflow) {
     const Status s = builder.Apply(&garbage);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(
-        std::strstr(s.getState(), "Garbage overflow for blob file #1234"));
+        std::strstr(s.getState()->c_str(), "Garbage overflow for blob file #1234"));
   }
 }
 
@@ -1411,7 +1411,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesInconsistentLinks) {
   const Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(
-      s.getState(),
+      s.getState()->c_str(),
       "Links are inconsistent between table files and blob file #16"));
 
   UnrefFilesInVersion(&new_vstorage);
@@ -1452,7 +1452,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesAllGarbage) {
   const Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(
-      std::strstr(s.getState(), "Blob file #16 consists entirely of garbage"));
+      std::strstr(s.getState()->c_str(), "Blob file #16 consists entirely of garbage"));
 
   UnrefFilesInVersion(&new_vstorage);
 }
@@ -1501,7 +1501,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesAllGarbageLinkedSsts) {
   const Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(
-      std::strstr(s.getState(), "Blob file #16 consists entirely of garbage"));
+      std::strstr(s.getState()->c_str(), "Blob file #16 consists entirely of garbage"));
 
   UnrefFilesInVersion(&new_vstorage);
 }
@@ -1764,7 +1764,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
   s = version_builder_1.SaveTo(&new_vstorage_1);
   EXPECT_TRUE(s.IsCorruption());
   EXPECT_TRUE(std::strstr(
-      s.getState(), "L0 files of same epoch number but overlapping range"));
+      s.getState()->c_str(), "L0 files of same epoch number but overlapping range"));
   UnrefFilesInVersion(&new_vstorage_1);
 
   // To verify L0 files not sorted by epoch_number are caught as corrupted
@@ -1815,7 +1815,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
   ASSERT_OK(dummy_version_builder.Apply(&dummy_version_edit));
   s = dummy_version_builder.SaveTo(&new_vstorage_2);
   EXPECT_TRUE(s.IsCorruption());
-  EXPECT_TRUE(std::strstr(s.getState(), "L0 files are not sorted properly"));
+  EXPECT_TRUE(std::strstr(s.getState()->c_str(), "L0 files are not sorted properly"));
 
   UnrefFilesInVersion(&new_vstorage_2);
 }

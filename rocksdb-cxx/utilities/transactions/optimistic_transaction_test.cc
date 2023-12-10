@@ -716,7 +716,7 @@ TEST_P(OptimisticTransactionTest, ColumnFamiliesTest) {
   std::vector<Slice> multiget_keys = {"AAA", "AAAZZZ", "foo", "foo"};
   std::vector<std::string> values(4);
 
-  std::vector<Status> results = txn->MultiGetForUpdate(
+  rust::Vec<Status> results = txn->MultiGetForUpdate(
       snapshot_read_options, multiget_cfh, multiget_keys, &values);
   ASSERT_OK(results[0]);
   ASSERT_OK(results[1]);
@@ -970,7 +970,7 @@ TEST_P(OptimisticTransactionTest, PredicateManyPreceders) {
   std::vector<Slice> multiget_keys = {"1", "2", "3"};
   std::vector<std::string> multiget_values;
 
-  std::vector<Status> results =
+  rust::Vec<Status> results =
       txn1->MultiGetForUpdate(read_options1, multiget_keys, &multiget_values);
   ASSERT_TRUE(results[0].IsNotFound());
   ASSERT_TRUE(results[1].IsNotFound());

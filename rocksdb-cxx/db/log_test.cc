@@ -132,7 +132,7 @@ class LogTest
     ReportCollector() : dropped_bytes_(0) {}
     void Corruption(size_t bytes, const Status& status) override {
       dropped_bytes_ += bytes;
-      message_.append(status.ToString());
+      message_.append(*status.ToString());
     }
   };
 
@@ -789,7 +789,7 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     ReportCollector() : dropped_bytes_(0) {}
     void Corruption(size_t bytes, const Status& status) override {
       dropped_bytes_ += bytes;
-      message_.append(status.ToString());
+      message_.append(*status.ToString());
     }
   };
 

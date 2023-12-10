@@ -2208,7 +2208,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
           wo, handles_[1], Key(2),
           DummyString(options.write_buffer_manager->buffer_size()));
       ASSERT_TRUE(s.IsIncomplete());
-      ASSERT_TRUE(s.ToString().find("Write stall") != std::string::npos);
+      ASSERT_TRUE(s.ToString()->find("Write stall") != std::string::npos);
     } else if (test_cause == WriteStallCause::kMemtableLimit) {
       FlushOptions fo;
       fo.allow_write_stall = true;
@@ -2273,7 +2273,7 @@ namespace {
 std::string PopMetaIndexKey(InternalIterator* meta_iter) {
   Status s = meta_iter->status();
   if (!s.ok()) {
-    return s.ToString();
+    return *s.ToString();
   } else if (meta_iter->Valid()) {
     std::string rv = meta_iter->key().ToString();
     meta_iter->Next();

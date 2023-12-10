@@ -179,7 +179,7 @@ TEST(WideColumnSerializationTest, DeserializeVersionError) {
 
   const Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "version"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "version"));
 }
 
 TEST(WideColumnSerializationTest, DeserializeUnsupportedVersion) {
@@ -194,7 +194,7 @@ TEST(WideColumnSerializationTest, DeserializeUnsupportedVersion) {
 
   const Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsNotSupported());
-  ASSERT_TRUE(std::strstr(s.getState(), "version"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "version"));
 }
 
 TEST(WideColumnSerializationTest, DeserializeNumberOfColumnsError) {
@@ -208,7 +208,7 @@ TEST(WideColumnSerializationTest, DeserializeNumberOfColumnsError) {
 
   const Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "number"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "number"));
 }
 
 TEST(WideColumnSerializationTest, DeserializeColumnsError) {
@@ -226,7 +226,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
 
     const Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "name"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "name"));
   }
 
   constexpr char first_column_name[] = "foo";
@@ -239,7 +239,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
 
     const Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "value size"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "value size"));
   }
 
   constexpr uint32_t first_value_size = 16;
@@ -252,7 +252,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
 
     const Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "name"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "name"));
   }
 
   constexpr char second_column_name[] = "hello";
@@ -265,7 +265,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
 
     const Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "value size"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "value size"));
   }
 
   constexpr uint32_t second_value_size = 64;
@@ -278,7 +278,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
 
     const Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "payload"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "payload"));
   }
 
   buf.append(first_value_size, '0');
@@ -290,7 +290,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
 
     const Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "payload"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "payload"));
   }
 
   buf.append(second_value_size, 'x');
@@ -326,7 +326,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsOutOfOrder) {
 
   const Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "order"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "order"));
 }
 
 }  // namespace ROCKSDB_NAMESPACE

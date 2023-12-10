@@ -1887,7 +1887,7 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest) {
     key_slices.emplace_back(keys[i]);
   }
   std::vector<PinnableSlice> values(keys.size());
-  std::vector<Status> statuses = Status_CreateVec(keys.size(), Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   batch_->MultiGetFromBatchAndDB(db_, read_opts_, cf0, key_slices.size(),
                                  key_slices.data(), values.data(),
@@ -1961,7 +1961,7 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest2) {
 
   Random rnd(301);
   std::vector<PinnableSlice> values(keys_per_pass);
-  std::vector<Status> statuses = Status_CreateVec(keys_per_pass, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys_per_pass);
   for (int pass = 0; pass < 40; pass++) {
     std::vector<Slice> key_slices;
     for (size_t i = 0; i < keys_per_pass; i++) {

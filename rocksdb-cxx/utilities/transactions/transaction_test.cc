@@ -407,7 +407,7 @@ TEST_P(TransactionTest, WaitingTxn) {
 
   s = txn2->GetForUpdate(read_options, "foo", &value);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
   ASSERT_EQ(get_perf_context()->key_lock_wait_count, 1);
   ASSERT_GE(get_perf_context()->key_lock_wait_time, 0);
 
@@ -474,12 +474,12 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn3->GetForUpdate(read_options, "foo", nullptr);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn1->UndoGetForUpdate("foo");
   s = txn3->GetForUpdate(read_options, "foo", nullptr);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn2->UndoGetForUpdate("foo");
   s = txn3->GetForUpdate(read_options, "foo", nullptr);
@@ -498,7 +498,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn1->UndoGetForUpdate("foo");
   s = txn2->GetForUpdate(read_options, "foo", nullptr);
@@ -513,7 +513,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   // Should still fail after "downgrading".
   s = txn1->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
@@ -521,7 +521,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   ASSERT_OK(txn1->Rollback());
   ASSERT_OK(txn2->Rollback());
@@ -533,7 +533,7 @@ TEST_P(TransactionTest, SharedLocks) {
 
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   txn1->UndoGetForUpdate("foo");
   s = txn2->GetForUpdate(read_options, "foo", nullptr, false /* exclusive */);
@@ -2765,7 +2765,7 @@ TEST_P(TransactionTest, ColumnFamiliesTest) {
                                                    handles[0], handles[2]};
   std::vector<Slice> multiget_keys = {"AAA", "AAAZZZ", "foo", "foo"};
   std::vector<std::string> values(4);
-  std::vector<Status> results = txn->MultiGetForUpdate(
+  rust::Vec<Status> results = txn->MultiGetForUpdate(
       snapshot_read_options, multiget_cfh, multiget_keys, &values);
   ASSERT_OK(results[0]);
   ASSERT_OK(results[1]);
@@ -2886,7 +2886,7 @@ TEST_P(TransactionTest, MultiGetBatchedTest) {
 
   std::vector<Slice> keys = {"aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg"};
   std::vector<PinnableSlice> values(keys.size());
-  std::vector<Status> statuses = Status_CreateVec(keys.size(), Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   txn->MultiGet(snapshot_read_options, handles[1], keys.size(), keys.data(),
                 values.data(), statuses.data());
@@ -2981,7 +2981,7 @@ TEST_P(TransactionTest, MultiGetLargeBatchedTest) {
     keys.emplace_back(key_str[i]);
   }
   std::vector<PinnableSlice> values(keys.size());
-  std::vector<Status> statuses = Status_CreateVec(keys.size(), Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   wb.MultiGetFromBatchAndDB(db, snapshot_read_options, handles[1], keys.size(),
                             keys.data(), values.data(), statuses.data(), false);
@@ -3037,7 +3037,7 @@ TEST_P(TransactionTest, MultiGetSnapshot) {
 
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values(1);
-  std::vector<Status> statuses = Status_CreateVec(1, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(1);
   keys.push_back(key);
   auto cfd = db->DefaultColumnFamily();
   txn2->MultiGet(read_options, cfd, 1, keys.data(), values.data(),
@@ -3184,7 +3184,7 @@ TEST_P(TransactionTest, PredicateManyPreceders) {
   std::vector<Slice> multiget_keys = {"1", "2", "3"};
   std::vector<std::string> multiget_values;
 
-  std::vector<Status> results =
+  rust::Vec<Status> results =
       txn1->MultiGetForUpdate(read_options1, multiget_keys, &multiget_values);
   ASSERT_EQ(results.size(), 3);
   ASSERT_TRUE(results[0].IsNotFound());
@@ -4785,7 +4785,7 @@ TEST_P(TransactionTest, TimeoutTest) {
   // txn2 has a smaller lock timeout than txn1's expiration, so it will time out
   s = txn2->Delete("asdf");
   ASSERT_TRUE(s.IsTimedOut());
-  ASSERT_EQ(s.ToString(), "Operation timed out: Timeout waiting to lock key");
+  ASSERT_EQ(*s.ToString(), "Operation timed out: Timeout waiting to lock key");
 
   s = txn1->Commit();
   ASSERT_OK(s);

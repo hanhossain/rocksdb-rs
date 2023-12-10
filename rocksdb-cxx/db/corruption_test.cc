@@ -537,9 +537,9 @@ TEST_F(CorruptionTest, TableFileFooterMagic) {
   ASSERT_TRUE(s.IsCorruption());
   // Contains useful message, and magic number should be the first thing
   // reported as corrupt.
-  ASSERT_TRUE(s.ToString().find("magic number") != std::string::npos);
+  ASSERT_TRUE(s.ToString()->find("magic number") != std::string::npos);
   // with file name
-  ASSERT_TRUE(s.ToString().find(".sst") != std::string::npos);
+  ASSERT_TRUE(s.ToString()->find(".sst") != std::string::npos);
 }
 
 TEST_F(CorruptionTest, TableFileFooterNotMagic) {
@@ -552,9 +552,9 @@ TEST_F(CorruptionTest, TableFileFooterNotMagic) {
   Status s = TryReopen();
   ASSERT_TRUE(s.IsCorruption());
   // The next thing checked after magic number is format_version
-  ASSERT_TRUE(s.ToString().find("format_version") != std::string::npos);
+  ASSERT_TRUE(s.ToString()->find("format_version") != std::string::npos);
   // with file name
-  ASSERT_TRUE(s.ToString().find(".sst") != std::string::npos);
+  ASSERT_TRUE(s.ToString()->find(".sst") != std::string::npos);
 }
 
 TEST_F(CorruptionTest, TableFileWrongSize) {
@@ -588,7 +588,7 @@ TEST_F(CorruptionTest, TableFileWrongSize) {
   options_.paranoid_checks = true;
   Status s = TryReopen();
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(s.ToString().find("file size mismatch") != std::string::npos);
+  ASSERT_TRUE(s.ToString()->find("file size mismatch") != std::string::npos);
 
   // ********************************************
   // Make the file smaller with truncation.
@@ -601,7 +601,7 @@ TEST_F(CorruptionTest, TableFileWrongSize) {
     options_.paranoid_checks = true;
     s = TryReopen();
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(s.ToString().find("file size mismatch") != std::string::npos);
+    ASSERT_TRUE(s.ToString()->find("file size mismatch") != std::string::npos);
 
     // Without paranoid checks, not reported until read
     options_.paranoid_checks = false;
@@ -1287,7 +1287,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
     options.avoid_flush_during_recovery = true;
     s = DB::Open(options, dbname_, cf_descs, &handles, &db_);
     ASSERT_TRUE(s.IsIOError());
-    ASSERT_EQ("IO error: Injected", s.ToString());
+    ASSERT_EQ("IO error: Injected", *s.ToString());
     for (auto* h : handles) {
       delete h;
     }
@@ -1469,7 +1469,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
     s = TransactionDB::Open(options, txn_db_opts, dbname_, cf_descs, &handles,
                             &txn_db);
     ASSERT_TRUE(s.IsIOError());
-    ASSERT_EQ("IO error: Injected", s.ToString());
+    ASSERT_EQ("IO error: Injected", *s.ToString());
     for (auto* h : handles) {
       delete h;
     }
@@ -1637,7 +1637,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
     options.avoid_flush_during_recovery = true;
     s = DB::Open(options, dbname_, cf_descs, &handles, &db_);
     ASSERT_TRUE(s.IsIOError());
-    ASSERT_EQ("IO error: Injected", s.ToString());
+    ASSERT_EQ("IO error: Injected", *s.ToString());
     for (auto* h : handles) {
       delete h;
     }

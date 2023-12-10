@@ -33,7 +33,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   Status st = fs->CreateDirIfMissing(db_name, opts, nullptr);
   if (!st.ok()) {
     fprintf(stderr, "Failed to create directory %s: %s\n", db_name.c_str(),
-            st.ToString().c_str());
+            st.ToString()->c_str());
     exit(1);
   }
 
@@ -70,7 +70,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
         s = reader->Read(id.size(), opts, &result, &id[0], /*dbg*/ nullptr);
         if (!s.ok()) {
           fprintf(stderr, "Error reading unique id file: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           assert(false);
         }
         if (result.size() < id.size()) {
@@ -97,7 +97,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
       Status s2 = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr);
       if (!s2.IsNotFound()) {
         fprintf(stderr, "Error opening unique id file: %s\n",
-                s.ToString().c_str());
+                s.ToString()->c_str());
         assert(false);
       }
       size = 0;
@@ -109,7 +109,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   st = fs->NewWritableFile(path_, FileOptions(), &file_writer, /*dbg*/ nullptr);
   if (!st.ok()) {
     fprintf(stderr, "Error creating the unique ids file: %s\n",
-            st.ToString().c_str());
+            st.ToString()->c_str());
     assert(false);
   }
   data_file_writer_.reset(
@@ -121,7 +121,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
                   /*temparature*/ Temperature::kHot);
     if (!st.ok()) {
       fprintf(stderr, "Error copying contents of old unique id file: %s\n",
-              st.ToString().c_str());
+              st.ToString()->c_str());
       assert(false);
     }
   }
@@ -178,7 +178,7 @@ void DbStressListener::VerifyTableFileUniqueId(
   Status s = GetExtendedUniqueIdFromTableProperties(new_file_properties, &id);
   if (!s.ok()) {
     fprintf(stderr, "Error getting SST unique id for %s: %s\n",
-            file_path.c_str(), s.ToString().c_str());
+            file_path.c_str(), s.ToString()->c_str());
     assert(false);
   }
   unique_ids_.Verify(id);

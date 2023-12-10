@@ -15,9 +15,14 @@
 #include <string>
 
 #include "rocksdb/file_system.h"
-#include "rocksdb/status.h"
 #include "util/aligned_buffer.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 namespace port {

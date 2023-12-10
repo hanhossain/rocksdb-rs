@@ -646,7 +646,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "koko",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
-    ASSERT_TRUE(std::strstr(s.getState(), "Column family already exists"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Column family already exists"));
     ASSERT_EQ(import_cfh_, nullptr);
   }
 
@@ -657,7 +657,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
-    ASSERT_TRUE(std::strstr(s.getState(), "The list of files is empty"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "The list of files is empty"));
     ASSERT_EQ(import_cfh_, nullptr);
   }
 
@@ -710,7 +710,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "coco",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
-    ASSERT_TRUE(std::strstr(s.getState(), "Comparator name mismatch"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Comparator name mismatch"));
     ASSERT_EQ(import_cfh_, nullptr);
   }
 
@@ -735,7 +735,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
-    ASSERT_TRUE(std::strstr(s.getState(), "No such file or directory"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "No such file or directory"));
     ASSERT_EQ(import_cfh_, nullptr);
 
     // Test successful import after a failure with the same CF name. Ensures

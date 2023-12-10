@@ -38,7 +38,7 @@ class ReduceLevelTest : public testing::Test {
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
-      result = s.ToString();
+      result = *s.ToString();
     }
     return result;
   }
@@ -87,7 +87,7 @@ Status ReduceLevelTest::OpenDB(bool create_if_missing, int num_levels) {
   ROCKSDB_NAMESPACE::Status st =
       ROCKSDB_NAMESPACE::DB::Open(opt, dbname_, &db_);
   if (!st.ok()) {
-    fprintf(stderr, "Can't open the db:%s\n", st.ToString().c_str());
+    fprintf(stderr, "Can't open the db:%s\n", st.ToString()->c_str());
   }
   return st;
 }

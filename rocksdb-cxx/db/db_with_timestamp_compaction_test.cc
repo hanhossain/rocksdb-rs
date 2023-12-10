@@ -44,7 +44,7 @@ class TimestampCompatibleCompactionTest : public DBTestBase {
     if (s.IsNotFound()) {
       value.assign("NOT_FOUND");
     } else if (!s.ok()) {
-      value.assign(s.ToString());
+      value.assign(*s.ToString());
     }
     return value;
   }

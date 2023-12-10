@@ -133,7 +133,7 @@ static std::string PrintContents(WriteBatch* b,
       state.append("CountMismatch()");
     }
   } else {
-    state.append(s.ToString());
+    state.append(*s.ToString());
   }
   delete mem->Unref();
   return state;

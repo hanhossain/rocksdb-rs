@@ -416,7 +416,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadLogNumber) {
     VersionEdit edit;
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(s.ToString().find("Error decoding WAL log number") !=
+    ASSERT_TRUE(s.ToString()->find("Error decoding WAL log number") !=
                 std::string::npos)
         << s.ToString();
   }
@@ -433,7 +433,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadLogNumber) {
     VersionEdit edit;
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(s.ToString().find("Error decoding WAL log number") !=
+    ASSERT_TRUE(s.ToString()->find("Error decoding WAL log number") !=
                 std::string::npos)
         << s.ToString();
   }
@@ -452,7 +452,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadTag) {
     VersionEdit edit;
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(s.ToString().find("Error decoding tag") != std::string::npos)
+    ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
         << s.ToString();
   }
 
@@ -468,7 +468,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadTag) {
     VersionEdit edit;
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(s.ToString().find("Error decoding tag") != std::string::npos)
+    ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
         << s.ToString();
   }
 
@@ -502,7 +502,7 @@ TEST_F(VersionEditTest, AddWalDecodeNoSize) {
     VersionEdit edit;
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(s.ToString().find("Error decoding WAL file size") !=
+    ASSERT_TRUE(s.ToString()->find("Error decoding WAL file size") !=
                 std::string::npos)
         << s.ToString();
   }
@@ -516,7 +516,7 @@ TEST_F(VersionEditTest, AddWalDecodeNoSize) {
     Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     // The terminate tag is misunderstood as the size.
-    ASSERT_TRUE(s.ToString().find("Error decoding tag") != std::string::npos)
+    ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
         << s.ToString();
   }
 }

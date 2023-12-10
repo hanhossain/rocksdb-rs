@@ -54,7 +54,7 @@ class DBMergeOperatorTest : public DBTestBase {
     get_impl_options.callback = &read_callback;
     Status s = dbfull()->GetImpl(read_opt, key, get_impl_options);
     if (!s.ok()) {
-      return s.ToString();
+      return *s.ToString();
     }
     return value.ToString();
   }

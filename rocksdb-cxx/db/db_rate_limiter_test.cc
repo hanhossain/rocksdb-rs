@@ -148,7 +148,7 @@ TEST_P(DBRateLimiterOnReadTest, NewMultiGet) {
       key_bufs.emplace_back(Key(i));
       keys.emplace_back(key_bufs[i]);
     }
-    std::vector<Status> statuses = Status_CreateVec(kNumKeys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(kNumKeys);
     std::vector<PinnableSlice> values(kNumKeys);
     const int64_t prev_total_rl_req = options_.rate_limiter->GetTotalRequests();
     db_->MultiGet(GetReadOptions(), dbfull()->DefaultColumnFamily(), kNumKeys,
@@ -187,7 +187,7 @@ TEST_P(DBRateLimiterOnReadTest, OldMultiGet) {
       keys.emplace_back(key_bufs[i]);
     }
     std::vector<std::string> values;
-    std::vector<Status> statuses =
+    rust::Vec<Status> statuses =
         db_->MultiGet(GetReadOptions(), keys, &values);
     for (int i = 0; i < kNumKeys; ++i) {
       ASSERT_OK(statuses[i]);
@@ -415,7 +415,7 @@ TEST_P(DBRateLimiterOnWriteWALTest, AutoWalFlush) {
     EXPECT_TRUE(s.ok());
   } else {
     EXPECT_TRUE(s.IsInvalidArgument());
-    EXPECT_TRUE(s.ToString().find("WriteOptions::rate_limiter_priority") !=
+    EXPECT_TRUE(s.ToString()->find("WriteOptions::rate_limiter_priority") !=
                 std::string::npos);
   }
 

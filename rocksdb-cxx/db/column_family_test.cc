@@ -336,7 +336,7 @@ class ColumnFamilyTestBase : public testing::Test {
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
-      result = s.ToString();
+      result = *s.ToString();
     }
     return result;
   }

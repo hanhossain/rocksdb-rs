@@ -63,7 +63,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   {
     const Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "blob file number"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "blob file number"));
   }
 
   constexpr uint64_t blob_file_number = 123;
@@ -73,7 +73,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   {
     const Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "garbage blob count"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "garbage blob count"));
   }
 
   constexpr uint64_t garbage_blob_count = 4567;
@@ -83,7 +83,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   {
     const Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "garbage blob bytes"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "garbage blob bytes"));
   }
 
   constexpr uint64_t garbage_blob_bytes = 12345678;
@@ -93,7 +93,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   {
     const Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "custom field tag"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field tag"));
   }
 
   constexpr uint32_t custom_tag = 2;
@@ -103,7 +103,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   {
     const Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(std::strstr(s.getState(), "custom field value"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field value"));
   }
 }
 
@@ -159,7 +159,7 @@ TEST_F(BlobFileGarbageTest, ForwardIncompatibleCustomField) {
   const Status s = decoded_blob_file_addition.DecodeFrom(&input);
 
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState(), "Forward incompatible"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Forward incompatible"));
 
   SyncPoint::GetInstance()->DisableProcessing();
   SyncPoint::GetInstance()->ClearAllCallBacks();

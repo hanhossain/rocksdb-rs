@@ -1046,7 +1046,7 @@ TEST_F(PerfContextTest, MergeOperandCount) {
       // MultiGet
       {
         std::vector<PinnableSlice> results(num_keys);
-        std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+        rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
         db->MultiGet(ReadOptions(), db->DefaultColumnFamily(), num_keys,
                      &key_slices[0], &results[0], &statuses[0]);
@@ -1064,7 +1064,7 @@ TEST_F(PerfContextTest, MergeOperandCount) {
       // MultiGetEntity
       {
         std::vector<PinnableWideColumns> results(num_keys);
-        std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+        rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
         db->MultiGetEntity(ReadOptions(), db->DefaultColumnFamily(), num_keys,
                            &key_slices[0], &results[0], &statuses[0]);

@@ -67,7 +67,7 @@ TEST(WalSet, CreateTwice) {
   ASSERT_OK(wals.AddWal(WalAddition(kNumber)));
   Status s = wals.AddWal(WalAddition(kNumber));
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(s.ToString().find("WAL 100 is created more than once") !=
+  ASSERT_TRUE(s.ToString()->find("WAL 100 is created more than once") !=
               std::string::npos);
 }
 
@@ -180,7 +180,7 @@ TEST_F(WalSetTest, CheckMissingWals) {
   // The first log with even number is missing.
   std::stringstream expected_err;
   expected_err << "Missing WAL with log number: " << 2;
-  ASSERT_TRUE(s.ToString().find(expected_err.str()) != std::string::npos)
+  ASSERT_TRUE(s.ToString()->find(expected_err.str()) != std::string::npos)
       << s.ToString();
 }
 
@@ -200,7 +200,7 @@ TEST_F(WalSetTest, CheckWalsWithShrinkedSize) {
   // The first log with even number has wrong size.
   std::stringstream expected_err;
   expected_err << "Size mismatch: WAL (log number: " << 2 << ")";
-  ASSERT_TRUE(s.ToString().find(expected_err.str()) != std::string::npos)
+  ASSERT_TRUE(s.ToString()->find(expected_err.str()) != std::string::npos)
       << s.ToString();
 }
 

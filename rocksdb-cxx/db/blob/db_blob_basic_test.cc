@@ -413,7 +413,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobs) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), num_keys, &keys[0],
                   &values[0], &statuses[0]);
@@ -436,7 +436,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobs) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), num_keys, &keys[0],
                   &values[0], &statuses[0]);
@@ -507,7 +507,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), num_keys, &keys[0],
                   &values[0], &statuses[0]);
@@ -529,7 +529,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), num_keys, &keys[0],
                   &values[0], &statuses[0]);
@@ -548,7 +548,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), num_keys, &keys[0],
                   &values[0], &statuses[0]);
@@ -569,7 +569,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), num_keys, &keys[0],
                   &values[0], &statuses[0]);
@@ -730,7 +730,7 @@ TEST_F(DBBlobBasicTest, MultiGetWithDirectIO) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     // The MultiGet(), when constructing the KeyContexts, will process the keys
     // in such order: a, d, b. The reason is that ["a"] and ["d"] are in L1,
@@ -825,7 +825,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromMultipleFiles) {
 
   {
     std::array<PinnableSlice, kNumKeys> values;
-    std::vector<Status> statuses = Status_CreateVec(kNumKeys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(kNumKeys);
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), kNumKeys, &keys[0],
                   &values[0], &statuses[0]);
 
@@ -839,7 +839,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromMultipleFiles) {
 
   {
     std::array<PinnableSlice, kNumKeys> values;
-    std::vector<Status> statuses = Status_CreateVec(kNumKeys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(kNumKeys);
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), kNumKeys, &keys[0],
                   &values[0], &statuses[0]);
 
@@ -854,7 +854,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromMultipleFiles) {
 
   {
     std::array<PinnableSlice, kNumKeys> values;
-    std::vector<Status> statuses = Status_CreateVec(kNumKeys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(kNumKeys);
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), kNumKeys, &keys[0],
                   &values[0], &statuses[0]);
 
@@ -868,7 +868,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromMultipleFiles) {
 
   {
     std::array<PinnableSlice, kNumKeys> values;
-    std::vector<Status> statuses = Status_CreateVec(kNumKeys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(kNumKeys);
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), kNumKeys, &keys[0],
                   &values[0], &statuses[0]);
 
@@ -951,7 +951,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlob_CorruptIndex) {
   SyncPoint::GetInstance()->EnableProcessing();
 
   std::array<PinnableSlice, kNumOfKeys + 1> values;
-  std::vector<Status> statuses = Status_CreateVec(kNumOfKeys + 1, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(kNumOfKeys + 1);
   db_->MultiGet(ReadOptions(), dbfull()->DefaultColumnFamily(), kNumOfKeys + 1,
                 keys.data(), values.data(), statuses.data(),
                 /*sorted_input=*/false);
@@ -988,7 +988,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlob_ExceedSoftLimit) {
   ASSERT_OK(Flush());
 
   std::array<PinnableSlice, kNumOfKeys> values;
-  std::vector<Status> statuses = Status_CreateVec(kNumOfKeys, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(kNumOfKeys);
   ReadOptions read_opts;
   read_opts.value_size_soft_limit = 1;
   db_->MultiGet(read_opts, dbfull()->DefaultColumnFamily(), kNumOfKeys,
@@ -1201,7 +1201,7 @@ TEST_F(DBBlobBasicTest, MultiGetMergeBlobWithPut) {
 
   std::array<Slice, num_keys> keys{{"Key0", "Key1", "Key2"}};
   std::array<PinnableSlice, num_keys> values;
-  std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
   db_->MultiGet(ReadOptions(), db_->DefaultColumnFamily(), num_keys, &keys[0],
                 &values[0], &statuses[0]);
@@ -1459,7 +1459,7 @@ TEST_P(DBBlobBasicIOErrorMultiGetTest, MultiGetBlobs_IOError) {
 
   std::array<Slice, num_keys> keys{{first_key, second_key}};
   std::array<PinnableSlice, num_keys> values;
-  std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* /* arg */) {
     fault_injection_env_->SetFilesystemActive(false,
@@ -1501,7 +1501,7 @@ TEST_P(DBBlobBasicIOErrorMultiGetTest, MultipleBlobFiles) {
 
   std::array<Slice, num_keys> keys{{key1, key2}};
   std::array<PinnableSlice, num_keys> values;
-  std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
   bool first_blob_file = true;
   SyncPoint::GetInstance()->SetCallBack(
@@ -1814,7 +1814,7 @@ TEST_F(DBBlobBasicTest, GetEntityBlob) {
 
     std::array<Slice, num_keys> keys{{key, other_key}};
     std::array<PinnableWideColumns, num_keys> results;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGetEntity(ReadOptions(), db_->DefaultColumnFamily(), num_keys,
                         &keys[0], &results[0], &statuses[0]);
@@ -1912,7 +1912,7 @@ TEST_F(DBBlobWithTimestampTest, MultiGetBlobs) {
 
   {
     std::array<PinnableSlice, num_keys> values;
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
     db_->MultiGet(read_options, db_->DefaultColumnFamily(), num_keys, &keys[0],
                   &values[0], &statuses[0]);
@@ -1996,7 +1996,7 @@ TEST_F(DBBlobWithTimestampTest, MultiGetMergeBlobWithPut) {
   read_opts.timestamp = &read_ts_slice;
   std::array<Slice, num_keys> keys{{"Key0", "Key1", "Key2"}};
   std::array<PinnableSlice, num_keys> values;
-  std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
 
   db_->MultiGet(read_opts, db_->DefaultColumnFamily(), num_keys, &keys[0],
                 &values[0], &statuses[0]);

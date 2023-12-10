@@ -225,12 +225,12 @@ class FaultInjectionTest
       if (expected == ExpectedVerifResult::kValExpectFound) {
         if (!s.ok()) {
           fprintf(stderr, "Error when read %dth record (expect found): %s\n", i,
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           return s;
         }
       } else if (!s.ok() && !s.IsNotFound()) {
         fprintf(stderr, "Error when read %dth record: %s\n", i,
-                s.ToString().c_str());
+                s.ToString()->c_str());
         return s;
       }
     }

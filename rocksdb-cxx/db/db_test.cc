@@ -466,7 +466,7 @@ TEST_F(DBTest, LevelLimitReopen) {
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
   Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
 
   options.num_levels = 10;
@@ -2252,7 +2252,7 @@ TEST_F(DBTest, ComparatorCheck) {
     Status s = TryReopenWithColumnFamilies(
         {"default", "pikachu"}, std::vector<Options>({options, new_options}));
     ASSERT_TRUE(!s.ok());
-    ASSERT_TRUE(s.ToString().find("comparator") != std::string::npos)
+    ASSERT_TRUE(s.ToString()->find("comparator") != std::string::npos)
         << s.ToString();
   } while (ChangeCompactOptions());
 }
@@ -2327,7 +2327,7 @@ TEST_F(DBTest, DBOpen_Options) {
   DB* db = nullptr;
   options.create_if_missing = false;
   Status s = DB::Open(options, dbname, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "does not exist") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "does not exist") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does not exist, and create_if_missing == true: OK
@@ -2343,7 +2343,7 @@ TEST_F(DBTest, DBOpen_Options) {
   options.create_if_missing = false;
   options.error_if_exists = true;
   s = DB::Open(options, dbname, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "exists") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "exists") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does exist, and error_if_exists == false: OK
@@ -2373,7 +2373,7 @@ TEST_F(DBTest, DBOpen_Change_NumLevels) {
   options.create_if_missing = false;
   options.num_levels = 2;
   Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "Invalid argument") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "Invalid argument") != nullptr);
   ASSERT_TRUE(db_ == nullptr);
 }
 
@@ -2756,13 +2756,13 @@ static void MTThreadBody(void* arg) {
       // same)
       std::vector<Slice> keys(kColumnFamilies, Slice(keybuf));
       std::vector<std::string> values;
-      std::vector<Status> statuses;
+      rust::Vec<Status> statuses;
       if (!t->multiget_batched) {
         statuses = db->MultiGet(ReadOptions(), t->state->test->handles_, keys,
                                 &values);
       } else {
         std::vector<PinnableSlice> pin_values(keys.size());
-        Status_VecResize(keys.size(), statuses, Status_new());
+        statuses = Status_new().create_vec(keys.size());
         const Snapshot* snapshot = db->GetSnapshot();
         ReadOptions ro;
         ro.snapshot = snapshot;
@@ -3068,13 +3068,12 @@ class ModelDB : public DB {
   }
 
   using DB::MultiGet;
-  std::vector<Status> MultiGet(
+  rust::Vec<Status> MultiGet(
       const ReadOptions& /*options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys,
       std::vector<std::string>* /*values*/) override {
-    std::vector<Status> s = Status_CreateVec(keys.size(),
-                          Status_NotSupported("Not implemented."));
+    rust::Vec<Status> s = Status_NotSupported("Not implemented.").create_vec(keys.size());
     return s;
   }
 

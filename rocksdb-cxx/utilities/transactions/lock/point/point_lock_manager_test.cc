@@ -16,7 +16,7 @@ TEST_F(PointLockManagerTest, LockNonExistingColumnFamily) {
   auto txn = NewTxn();
   auto s = locker_->TryLock(txn, 1024, "k", env_, true);
   ASSERT_TRUE(s.IsInvalidArgument());
-  ASSERT_STREQ(s.getState(), "Column family id not found: 1024");
+  ASSERT_STREQ(s.getState()->c_str(), "Column family id not found: 1024");
   delete txn;
 }
 

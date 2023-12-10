@@ -949,7 +949,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -1014,7 +1014,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   ASSERT_OK(s);
 
   listener->OverrideBGError(
-      Status(Status_NoSpace(), Severity::kHardError));
+      Status_new(Status_NoSpace(), Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1059,7 +1059,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1109,7 +1109,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2110,7 +2110,7 @@ TEST_F(DBErrorHandlingFSTest,
   ASSERT_OK(Put(Key(2), "val"));
   ASSERT_OK(Flush());
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -2197,7 +2197,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2639,7 +2639,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status(error_msg, Severity::kHardError));
+  listener->OverrideBGError(Status_new(error_msg, Severity::kHardError));
   listener->EnableAutoRecovery(false);
   ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",

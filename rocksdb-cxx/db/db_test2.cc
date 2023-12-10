@@ -624,7 +624,7 @@ void ValidateKeyExistence(DB* db, const std::vector<Slice>& keys_must_exist,
   // Ensure that expected keys exist
   std::vector<std::string> values;
   if (keys_must_exist.size() > 0) {
-    std::vector<Status> status_list =
+    rust::Vec<Status> status_list =
         db->MultiGet(ReadOptions(), keys_must_exist, &values);
     for (size_t i = 0; i < keys_must_exist.size(); i++) {
       ASSERT_OK(status_list[i]);
@@ -633,7 +633,7 @@ void ValidateKeyExistence(DB* db, const std::vector<Slice>& keys_must_exist,
 
   // Ensure that given keys don't exist
   if (keys_must_not_exist.size() > 0) {
-    std::vector<Status> status_list =
+    rust::Vec<Status> status_list =
         db->MultiGet(ReadOptions(), keys_must_not_exist, &values);
     for (size_t i = 0; i < keys_must_not_exist.size(); i++) {
       ASSERT_TRUE(status_list[i].IsNotFound());
@@ -1807,10 +1807,10 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
     }
     ASSERT_EQ(0, key_value_written.size());
   } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionFail) {
-    ASSERT_EQ(std::string(s.getState()),
+    ASSERT_EQ(std::string(*s.getState()),
               "Could not decompress: kTestDecompressionFail");
   } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionCorruption) {
-    ASSERT_EQ(std::string(s.getState()),
+    ASSERT_EQ(std::string(*s.getState()),
               "Decompressed block did not match pre-compression block");
   }
 }

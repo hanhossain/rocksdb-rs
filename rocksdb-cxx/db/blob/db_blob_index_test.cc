@@ -77,7 +77,7 @@ class DBBlobIndexTest : public DBTestBase {
       return "NOT_SUPPORTED";
     }
     if (!s.ok()) {
-      return s.ToString();
+      return *s.ToString();
     }
     return value.ToString();
   }
