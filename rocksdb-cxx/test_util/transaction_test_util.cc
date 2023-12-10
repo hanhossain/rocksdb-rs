@@ -283,7 +283,7 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
     failure_count_++;
   }
 
-  last_status_ = s;
+  last_status_.copy_from(s);
 
   // return success if we didn't get any unexpected errors
   return !unexpected_error;

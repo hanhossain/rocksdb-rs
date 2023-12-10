@@ -2195,7 +2195,7 @@ Status BlockBasedTable::Get(const ReadOptions& read_options, const Slice& key,
           Status pik_status = ParseInternalKey(
               biter.key(), &parsed_key, false /* log_err_key */);  // TODO
           if (!pik_status.ok()) {
-            s = pik_status;
+            s.copy_from(pik_status);
           }
 
           if (!get_context->SaveValue(

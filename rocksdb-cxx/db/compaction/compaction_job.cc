@@ -661,7 +661,7 @@ Status CompactionJob::Run() {
 
   for (const auto& state : compact_->sub_compact_states) {
     if (!state.status.ok()) {
-      status = state.status;
+      status.copy_from(state.status);
       io_s = state.io_status;
       break;
     }
@@ -763,7 +763,7 @@ Status CompactionJob::Run() {
         delete iter;
 
         if (!s.ok()) {
-          output_status = s;
+          output_status.copy_from(s);
           break;
         }
       }
@@ -779,7 +779,7 @@ Status CompactionJob::Run() {
 
     for (const auto& state : compact_->sub_compact_states) {
       if (!state.status.ok()) {
-        status = state.status;
+        status.copy_from(state.status);
         break;
       }
     }
@@ -807,7 +807,7 @@ Status CompactionJob::Run() {
   RecordCompactionIOStats();
   LogFlush(db_options_.info_log);
   TEST_SYNC_POINT("CompactionJob::Run():End");
-  compact_->status = status;
+  compact_->status.copy_from(status);
   TEST_SYNC_POINT_CALLBACK("CompactionJob::Run():EndStatusSet", &status);
   return status;
 }
@@ -1363,7 +1363,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     status = input->status();
   }
   if (status.ok()) {
-    status = c_iter->status();
+    status.copy_from(c_iter->status());
   }
 
   // Call FinishCompactionOutputFile() even if status is not ok: it needs to
@@ -1407,7 +1407,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
   blob_counter.reset();
   clip.reset();
   raw_input.reset();
-  sub_compact->status = status;
+  sub_compact->status.copy_from(status);
   NotifyOnSubcompactionCompleted(sub_compact);
 }
 
@@ -1603,7 +1603,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   if (sfm && meta != nullptr && meta->fd.GetPathId() == 0) {
     Status add_s = sfm->OnAddFile(fname);
     if (!add_s.ok() && s.ok()) {
-      s = add_s;
+      s.copy_from(add_s);
     }
     if (sfm->IsMaxAllowedSpaceReached()) {
       // TODO(ajkr): should we return OK() if max space was reached by the final

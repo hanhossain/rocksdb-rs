@@ -278,7 +278,7 @@ class KeyConvertingIterator : public InternalIterator {
     Status pik_status =
         ParseInternalKey(iter_->key(), &parsed_key, true /* log_err_key */);
     if (!pik_status.ok()) {
-      status_ = pik_status;
+      status_.copy_from(pik_status);
       return Slice(status_.getState());
     }
     return parsed_key.user_key;

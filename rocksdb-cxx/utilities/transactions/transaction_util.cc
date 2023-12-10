@@ -124,7 +124,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
         /*is_blob_index=*/nullptr);
 
     if (!(s.ok() || s.IsNotFound() || s.IsMergeInProgress())) {
-      result = s;
+      result.copy_from(s);
     } else if (found_record_for_key) {
       bool write_conflict = snap_checker == nullptr
                                 ? snap_seq < seq

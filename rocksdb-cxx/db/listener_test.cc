@@ -799,7 +799,7 @@ class TableFileCreationListener : public EventListener {
     } else {
       if (idx >= 0) {
         failure_[idx]++;
-        last_failure_ = info.status;
+        last_failure_.copy_from(info.status);
       }
     }
   }

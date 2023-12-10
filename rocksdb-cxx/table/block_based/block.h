@@ -330,7 +330,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
 
     data_ = nullptr;
     current_ = restarts_;
-    status_ = s;
+    status_.copy_from(s);
 
     // Call cleanup callbacks.
     Cleanable::Reset();

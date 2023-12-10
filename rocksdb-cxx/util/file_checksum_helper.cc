@@ -120,7 +120,7 @@ Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
     Status* status_ptr;
     virtual void Corruption(size_t /*bytes*/, const Status& st) override {
       if (status_ptr->ok()) {
-        *status_ptr = st;
+        status_ptr->copy_from(st);
       }
     }
   } reporter;

@@ -265,7 +265,7 @@ class CompactionOutputs {
       const Slice empty_key{};
       Status s = close_file_func(*this, status, empty_key);
       if (!s.ok() && status.ok()) {
-        status = s;
+        status.copy_from(s);
       }
     }
 

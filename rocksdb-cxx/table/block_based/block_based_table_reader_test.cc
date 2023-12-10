@@ -158,7 +158,7 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
     }
 
     if (status) {
-      *status = s;
+      status->copy_from(s);
     }
   }
 

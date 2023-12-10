@@ -2791,7 +2791,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
 
   for (auto iter = range->begin(); iter != range->end(); ++iter) {
     range->MarkKeyDone(iter);
-    *(iter->s) = s;
+    iter->s->copy_from(s);
   }
 }
 
@@ -5649,7 +5649,7 @@ Status VersionSet::ProcessManifestWrites(
         break;
       }
     }
-    ready->status = s;
+    ready->status.copy_from(s);
     ready->done = true;
     if (ready->manifest_write_callback) {
       (ready->manifest_write_callback)(s);
@@ -5882,7 +5882,7 @@ Status VersionSet::Recover(
         /*track_missing_files=*/false, no_error_if_files_missing, io_tracer_,
         read_options, EpochNumberRequirement::kMightMissing);
     handler.Iterate(reader, &log_read_status);
-    s = handler.status();
+    s.copy_from(handler.status());
     if (s.ok()) {
       log_number = handler.GetVersionEditParams().log_number_;
       current_manifest_file_size = reader.GetReadOffset();
@@ -6062,7 +6062,7 @@ Status VersionSet::TryRecoverFromOneManifest(
   assert(nullptr != has_missing_table_file);
   *has_missing_table_file = handler_pit.HasMissingFiles();
 
-  s = handler_pit.status();
+  s.copy_from(handler_pit.status());
   if (s.ok()) {
     RecoverEpochNumbers();
   }
@@ -7221,7 +7221,7 @@ Status ReactiveVersionSet::Recover(
 
   manifest_tailer_->Iterate(*reader, manifest_reader_status->get());
 
-  s = manifest_tailer_->status();
+  s.copy_from(manifest_tailer_->status());
   if (s.ok()) {
     RecoverEpochNumbers();
   }
@@ -7245,7 +7245,7 @@ Status ReactiveVersionSet::ReadAndApply(
     return s;
   }
   manifest_tailer_->Iterate(*(manifest_reader->get()), manifest_read_status);
-  s = manifest_tailer_->status();
+  s.copy_from(manifest_tailer_->status());
   if (s.ok()) {
     *cfds_changed = std::move(manifest_tailer_->GetUpdatedColumnFamilies());
   }

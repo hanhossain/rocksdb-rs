@@ -2063,7 +2063,7 @@ class MemTableInserter : public WriteBatch::Handler {
         }
         // Intentionally overwrites the `NotFound` in `ret_status`.
         if (!get_status.ok() && !get_status.IsNotFound()) {
-          ret_status = get_status;
+          ret_status.copy_from(get_status);
         } else {
           ret_status = Status_OK();
         }

@@ -551,18 +551,18 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
     Status error_status = Status_new();
     for (const auto& e : exec_status) {
       if (!e.second.ok()) {
-        s = e.second;
+        s.copy_from(e.second);
         if (!e.second.IsShutdownInProgress() &&
             !e.second.IsColumnFamilyDropped()) {
           // If a flush job did not return OK, and the CF is not dropped, and
           // the DB is not shutting down, then we have to return this result to
           // caller later.
-          error_status = e.second;
+          error_status.copy_from(e.second);
         }
       }
     }
 
-    s = error_status.ok() ? s : error_status;
+    s.copy_from(error_status.ok() ? s : error_status);
   }
 
   if (s.IsColumnFamilyDropped()) {
@@ -577,7 +577,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
             IOOptions(), nullptr,
             DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced));
         if (!error_status.ok()) {
-          s = error_status;
+          s.copy_from(error_status);
           break;
         }
       }
@@ -649,7 +649,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
           "DBImpl::AtomicFlushMemTablesToOutputFiles:WaitToCommit", &res);
 
       if (!res.first.ok()) {
-        s = res.first;
+        s.copy_from(res.first);
         break;
       } else if (!res.second) {
         break;
@@ -2589,7 +2589,7 @@ Status DBImpl::EnableAutoCompaction(
     Status status =
         this->SetOptions(cf_ptr, {{"disable_auto_compactions", "false"}});
     if (!status.ok()) {
-      s = status;
+      s.copy_from(status);
     }
   }
 
@@ -3279,7 +3279,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
 
   if (!status.ok()) {
     if (is_manual) {
-      manual_compaction->status = status;
+      manual_compaction->status.copy_from(status);
       manual_compaction->done = true;
       manual_compaction->in_progress = false;
       manual_compaction = nullptr;
@@ -3695,7 +3695,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
   if (is_manual) {
     ManualCompactionState* m = manual_compaction;
     if (!status.ok()) {
-      m->status = status;
+      m->status.copy_from(status);
       m->done = true;
     }
     // For universal compaction:
@@ -3828,7 +3828,7 @@ void DBImpl::BuildCompactionJobInfo(
   assert(compaction_job_info != nullptr);
   compaction_job_info->cf_id = cfd->GetID();
   compaction_job_info->cf_name = cfd->GetName();
-  compaction_job_info->status = st;
+  compaction_job_info->status.copy_from(st);
   compaction_job_info->thread_id = env_->GetThreadID();
   compaction_job_info->job_id = job_id;
   compaction_job_info->base_input_level = c->start_level();

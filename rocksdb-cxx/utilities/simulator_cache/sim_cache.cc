@@ -74,7 +74,7 @@ class CacheActivityLogger {
     MutexLock l(&mutex_);
     Status s = file_writer_->Append(oss.str());
     if (!s.ok() && bg_status_.ok()) {
-      bg_status_ = s;
+      bg_status_.copy_from(s);
     }
     if (MaxLoggingSizeReached() || !bg_status_.ok()) {
       // Stop logging if we have reached the max file size or
@@ -94,7 +94,7 @@ class CacheActivityLogger {
     MutexLock l(&mutex_);
     Status s = file_writer_->Append(oss.str());
     if (!s.ok() && bg_status_.ok()) {
-      bg_status_ = s;
+      bg_status_.copy_from(s);
     }
 
     if (MaxLoggingSizeReached() || !bg_status_.ok()) {
@@ -127,7 +127,7 @@ class CacheActivityLogger {
     activity_logging_enabled_.store(false);
     Status s = file_writer_->Close();
     if (!s.ok() && bg_status_.ok()) {
-      bg_status_ = s;
+      bg_status_.copy_from(s);
     }
   }
 

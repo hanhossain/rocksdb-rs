@@ -218,7 +218,7 @@ bool PlainTableFileReader::ReadNonMmap(uint32_t file_offset, uint32_t len,
                              &read_result, new_buffer->buf.get(), nullptr,
                              Env::IO_TOTAL /* rate_limiter_priority */);
   if (!s.ok()) {
-    status_ = s;
+    status_.copy_from(s);
     return false;
   }
   new_buffer->buf_start_offset = file_offset;

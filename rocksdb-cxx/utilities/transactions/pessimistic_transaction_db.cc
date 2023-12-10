@@ -764,7 +764,7 @@ Status SnapshotCreationCallback::operator()(SequenceNumber seq,
 
   // Create a snapshot which can also be used for write conflict checking.
   auto ret = db_impl_->CreateTimestampedSnapshot(seq, commit_ts_);
-  snapshot_creation_status_ = ret.first;
+  snapshot_creation_status_.copy_from(ret.first);
   snapshot_ = ret.second;
   if (snapshot_creation_status_.ok()) {
     assert(snapshot_);

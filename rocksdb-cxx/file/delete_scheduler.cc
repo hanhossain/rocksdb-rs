@@ -168,7 +168,7 @@ Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
     }
 
     if (s.ok() && !file_delete.ok()) {
-      s = file_delete;
+      s.copy_from(file_delete);
     }
   }
 

@@ -63,7 +63,7 @@ DBOptions SanitizeOptions(const std::string& dbname, const DBOptions& src,
       // No place suitable for logging
       result.info_log = nullptr;
       if (logger_creation_s) {
-        *logger_creation_s = s;
+        logger_creation_s->copy_from(s);
       }
     }
   }
@@ -439,7 +439,7 @@ Status DBImpl::Recover(
       Status io_s = immutable_db_options_.fs->GetChildren(
           dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr);
       if (!io_s.ok()) {
-        s = io_s;
+        s.copy_from(io_s);
         files_in_dbname.clear();
       }
       for (const std::string& file : files_in_dbname) {
@@ -1069,7 +1069,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
                      (status == nullptr ? "(ignoring error) " : ""), fname,
                      static_cast<int>(bytes), s.ToString().c_str());
       if (status != nullptr && status->ok()) {
-        *status = s;
+        status->copy_from(s);
       }
     }
   };
@@ -1917,7 +1917,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
 
   DBImpl* impl = new DBImpl(db_options, dbname, seq_per_batch, batch_per_txn);
   if (!impl->immutable_db_options_.info_log) {
-    s = impl->init_logger_creation_s_;
+    s.copy_from(impl->init_logger_creation_s_);
     delete impl;
     return s;
   } else {
@@ -1948,7 +1948,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
     }
   }
   if (s.ok()) {
-    s = impl->CreateArchivalDirectory();
+    s.copy_from(impl->CreateArchivalDirectory());
   }
   if (!s.ok()) {
     delete impl;

@@ -390,9 +390,8 @@ Status Status::Clone() const {
 Status::Status(const Status& s, Severity sev)
         : rs_status_(RsStatus_new(s.rs_status_, sev)) {}
 
-Status& Status::operator=(const Status& s) {
+void Status::copy_from(const Status& s) {
     rs_status_.copy_from(s.rs_status_);
-    return *this;
 }
 
 Status::Status(Status&& s) noexcept
@@ -449,6 +448,13 @@ void Status_VecResize(size_t n, std::vector<Status>& vec, const Status& s) {
         for (size_t i = 0; i < diff; i++) {
             vec.pop_back();
         }
+    }
+}
+
+void Status_CopyVec(const std::vector<Status>& src, Status* dst) {
+    for (auto& s : src) {
+        dst->copy_from(s);
+        dst++;
     }
 }
 

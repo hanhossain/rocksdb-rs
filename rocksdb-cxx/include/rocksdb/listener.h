@@ -60,6 +60,15 @@ struct TableFileCreationInfo : public TableFileCreationBriefInfo {
   TableFileCreationInfo() : status(Status_new()) {}
   explicit TableFileCreationInfo(TableProperties&& prop)
       : table_properties(prop), status(Status_new()) {}
+  TableFileCreationInfo& operator=(const TableFileCreationInfo& t) {
+    TableFileCreationBriefInfo::operator=(t);
+    file_size = t.file_size;
+    table_properties = t.table_properties;
+    status.copy_from(t.status);
+    file_checksum = t.file_checksum;
+    file_checksum_func_name = t.file_checksum_func_name;
+    return *this;
+  }
   // the size of the file.
   uint64_t file_size;
   // Detailed properties of the created file.

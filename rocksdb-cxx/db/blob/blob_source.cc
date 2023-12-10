@@ -317,7 +317,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
 
       if (s.ok()) {
         assert(req.status);
-        *req.status = s;
+        req.status->copy_from(s);
 
         PinCachedBlob(&blob_handle, req.result);
 
@@ -381,7 +381,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
         assert(req);
         assert(req->status);
 
-        *req->status = s;
+        req->status->copy_from(s);
       }
       return;
     }
@@ -408,7 +408,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
           const Slice key = cache_key.AsSlice();
           s = PutBlobIntoCache(key, &blob_contents, &blob_handle);
           if (!s.ok()) {
-            *req->status = s;
+            req->status->copy_from(s);
           } else {
             PinCachedBlob(&blob_handle, req->result);
           }

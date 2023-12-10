@@ -1739,7 +1739,7 @@ Status StressTest::TestBackupRestore(
         s = Status_Corruption(oss.str());
       }
     } else {
-      s = get_status;
+      s.copy_from(get_status);
       if (!s.ok()) {
         from = "DB::Get in backup/restore";
       }
@@ -1933,7 +1933,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
           s = Status_Corruption(oss.str());
         }
       } else {
-        s = get_status;
+        s.copy_from(get_status);
       }
     }
     for (auto cfh : cf_handles) {

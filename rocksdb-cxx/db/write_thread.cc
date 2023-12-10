@@ -601,7 +601,7 @@ void WriteThread::ExitAsMemTableWriter(Writer* /*self*/,
   Writer* w = leader;
   while (true) {
     if (!write_group.status.ok()) {
-      w->status = write_group.status;
+      w->status.copy_from(write_group.status);
     }
     Writer* next = w->link_newer;
     if (w != leader) {
@@ -632,7 +632,7 @@ bool WriteThread::CompleteParallelMemTableWriter(Writer* w) {
   auto* write_group = w->write_group;
   if (!w->status.ok()) {
     std::lock_guard<std::mutex> guard(write_group->leader->StateMutex());
-    write_group->status = w->status;
+    write_group->status.copy_from(w->status);
   }
 
   if (write_group->running-- > 1) {
@@ -641,7 +641,7 @@ bool WriteThread::CompleteParallelMemTableWriter(Writer* w) {
     return false;
   }
   // else we're the last parallel worker and should perform exit duties.
-  w->status = write_group->status;
+  w->status.copy_from(write_group->status);
   return true;
 }
 
@@ -668,7 +668,7 @@ void WriteThread::ExitAsBatchGroupLeader(WriteGroup& write_group,
 
   // Propagate memtable write error to the whole group.
   if (status.ok() && !write_group.status.ok()) {
-    status = write_group.status;
+    status.copy_from(write_group.status);
   }
 
   if (enable_pipelined_write_) {
@@ -704,7 +704,7 @@ void WriteThread::ExitAsBatchGroupLeader(WriteGroup& write_group,
     // Complete writers that don't write to memtable
     for (Writer* w = last_writer; w != leader;) {
       Writer* next = w->link_older;
-      w->status = status;
+      w->status.copy_from(status);
       if (!w->ShouldWriteToMemtable()) {
         CompleteFollower(w, write_group);
       }
@@ -780,7 +780,7 @@ void WriteThread::ExitAsBatchGroupLeader(WriteGroup& write_group,
 
     while (last_writer != leader) {
       assert(last_writer);
-      last_writer->status = status;
+      last_writer->status.copy_from(status);
       // we need to read link_older before calling SetState, because as soon
       // as it is marked committed the other thread's Await may return and
       // deallocate the Writer.

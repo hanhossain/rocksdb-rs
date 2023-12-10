@@ -87,7 +87,7 @@ class ErrorHandlerFSListener : public EventListener {
     InstrumentedMutexLock l(&mutex_);
     recovery_complete_ = true;
     cv_.SignalAll();
-    new_bg_error_ = info.new_bg_error;
+    new_bg_error_.copy_from(info.new_bg_error);
   }
 
   bool WaitForRecovery(uint64_t /*abs_time_us*/) {
@@ -113,7 +113,7 @@ class ErrorHandlerFSListener : public EventListener {
   void OnBackgroundError(BackgroundErrorReason /*reason*/,
                          Status* bg_error) override {
     if (override_bg_error_) {
-      *bg_error = bg_error_;
+      bg_error->copy_from(bg_error_);
       override_bg_error_ = false;
     }
   }
@@ -121,7 +121,7 @@ class ErrorHandlerFSListener : public EventListener {
   void EnableAutoRecovery(bool enable = true) { no_auto_recovery_ = !enable; }
 
   void OverrideBGError(Status bg_err) {
-    bg_error_ = bg_err;
+    bg_error_.copy_from(bg_err);
     override_bg_error_ = true;
   }
 

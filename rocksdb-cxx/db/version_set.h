@@ -1536,7 +1536,7 @@ class VersionSet {
     Status* status;
     virtual void Corruption(size_t /*bytes*/, const Status& s) override {
       if (status->ok()) {
-        *status = s;
+        status->copy_from(s);
       }
     }
   };

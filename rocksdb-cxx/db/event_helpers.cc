@@ -177,7 +177,7 @@ void EventHelpers::LogAndNotifyTableFileCreationFinished(
   info.job_id = job_id;
   info.table_properties = table_properties;
   info.reason = reason;
-  info.status = s;
+  info.status.copy_from(s);
   info.file_checksum = file_checksum;
   info.file_checksum_func_name = file_checksum_func_name;
   for (auto& listener : listeners) {
@@ -211,7 +211,7 @@ void EventHelpers::LogAndNotifyTableFileDeletion(
   info.db_name = dbname;
   info.job_id = job_id;
   info.file_path = file_path;
-  info.status = status;
+  info.status.copy_from(status);
   for (auto& listener : listeners) {
     listener->OnTableFileDeleted(info);
   }
@@ -227,8 +227,8 @@ void EventHelpers::NotifyOnErrorRecoveryEnd(
     db_mutex->Unlock();
     for (auto& listener : listeners) {
       BackgroundErrorRecoveryInfo info;
-      info.old_bg_error = old_bg_error;
-      info.new_bg_error = new_bg_error;
+      info.old_bg_error.copy_from(old_bg_error);
+      info.new_bg_error.copy_from(new_bg_error);
       listener->OnErrorRecoveryCompleted(old_bg_error.Clone());
       listener->OnErrorRecoveryEnd(info);
     }

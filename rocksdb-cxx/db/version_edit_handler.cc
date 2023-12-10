@@ -64,7 +64,7 @@ void VersionEditHandlerBase::Iterate(log::Reader& reader,
     }
   }
   if (!log_read_status->ok()) {
-    s = *log_read_status;
+    s.copy_from(*log_read_status);
   }
 
   CheckIterationResult(reader, &s);
@@ -91,7 +91,7 @@ void VersionEditHandlerBase::Iterate(log::Reader& reader,
       // overwrite the status with the extended status
       s = Status(s.code(), s.subcode(), s.severity(), message.str());
     }
-    status_ = s;
+    status_.copy_from(s);
   }
   TEST_SYNC_POINT_CALLBACK("VersionEditHandlerBase::Iterate:Finish",
                            &recovered_edits);

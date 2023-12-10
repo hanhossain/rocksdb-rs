@@ -109,7 +109,7 @@ void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(
   filters.push_back({index_key, std::move(filter_data), filter});
   if (!filter_construction_status.ok() &&
       partitioned_filters_construction_status_.ok()) {
-    partitioned_filters_construction_status_ = filter_construction_status;
+    partitioned_filters_construction_status_.copy_from(filter_construction_status);
   }
   keys_added_to_partition_ = 0;
   Reset();
@@ -154,7 +154,7 @@ Slice PartitionedFilterBlockBuilder::Finish(
   }
 
   if (!partitioned_filters_construction_status_.ok()) {
-    *status = partitioned_filters_construction_status_;
+    status->copy_from(partitioned_filters_construction_status_);
     return Slice();
   }
 

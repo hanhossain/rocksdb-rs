@@ -169,7 +169,7 @@ std::vector<Status> CompactedDBImpl::MultiGet(
       Status s = r->Get(options, lkey.internal_key(), &get_context, nullptr);
       assert(static_cast<size_t>(idx) < statuses.size());
       if (!s.ok() && !s.IsNotFound()) {
-        statuses[idx] = s;
+        statuses[idx].copy_from(s);
       } else {
         value.assign(pinnable_val.data(), pinnable_val.size());
         if (get_context.State() == GetContext::kFound) {

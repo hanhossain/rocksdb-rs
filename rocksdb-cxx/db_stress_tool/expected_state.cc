@@ -233,7 +233,7 @@ Status FileExpectedStateManager::Open() {
       } else if (exists_status.IsNotFound()) {
         found_trace = false;
       } else {
-        s = exists_status;
+        s.copy_from(exists_status);
       }
     }
   }
@@ -262,7 +262,7 @@ Status FileExpectedStateManager::Open() {
     } else if (exists_status.IsNotFound()) {
       found = false;
     } else {
-      s = exists_status;
+      s.copy_from(exists_status);
     }
   }
 

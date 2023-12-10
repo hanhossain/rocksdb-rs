@@ -303,14 +303,14 @@ Status ConfigurableHelper::ConfigureSomeOptions(
         if (s.IsNotFound()) {
           ++it;
         } else if (s.IsNotSupported()) {
-          notsup = s;
+          notsup.copy_from(s);
           unsupported.insert(it->first);
           ++it;  // Skip it for now
         } else {
           found++;
           it = options->erase(it);
           if (!s.ok()) {
-            result = s;
+            result.copy_from(s);
           }
         }
       }

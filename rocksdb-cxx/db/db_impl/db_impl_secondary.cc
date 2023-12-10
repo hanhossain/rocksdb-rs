@@ -321,7 +321,7 @@ Status DBImplSecondary::RecoverLogFiles(
       }
     }
     if (status.ok() && !wal_read_status->ok()) {
-      status = *wal_read_status;
+      status.copy_from(*wal_read_status);
     }
     if (!status.ok()) {
       return status;
@@ -878,7 +878,7 @@ Status DBImplSecondary::CompactWithoutInstallation(
 
   TEST_SYNC_POINT_CALLBACK("DBImplSecondary::CompactWithoutInstallation::End",
                            &s);
-  result->status = s;
+  result->status.copy_from(s);
   return s;
 }
 
