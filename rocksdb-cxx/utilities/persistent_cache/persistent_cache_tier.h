@@ -15,8 +15,13 @@
 #include "monitoring/histogram.h"
 #include "rocksdb/env.h"
 #include "rocksdb/persistent_cache.h"
-#include "rocksdb/status.h"
 #include "rocksdb/system_clock.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 // Persistent Cache
 //

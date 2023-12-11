@@ -65,7 +65,7 @@ class BatchedOpsStressTest : public StressTest {
     const Status s = db_->Write(write_opts, &batch);
 
     if (!s.ok()) {
-      fprintf(stderr, "multiput error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "multiput error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     } else {
       // we did 10 writes each of size sz + 1
@@ -95,7 +95,7 @@ class BatchedOpsStressTest : public StressTest {
 
     s = db_->Write(writeoptions, &batch);
     if (!s.ok()) {
-      fprintf(stderr, "multidelete error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "multidelete error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     } else {
       thread->stats.AddDeletes(10);
@@ -148,7 +148,7 @@ class BatchedOpsStressTest : public StressTest {
       key_slices[i] = keys[i];
       s = db_->Get(readoptionscopy, cfh, key_slices[i], &from_db);
       if (!s.ok() && !s.IsNotFound()) {
-        fprintf(stderr, "get error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "get error: %s\n", s.ToString()->c_str());
         values[i] = "";
         thread->stats.AddErrors(1);
         // we continue after error rather than exiting so that we can
@@ -191,19 +191,19 @@ class BatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  std::vector<Status> TestMultiGet(
+  rust::Vec<Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& readoptions,
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
     size_t num_keys = rand_keys.size();
-    std::vector<Status> ret_status = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> ret_status = Status_new().create_vec(num_keys);
     std::array<std::string, 10> keys = {
         {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}};
     size_t num_prefixes = keys.size();
     for (size_t rand_key = 0; rand_key < num_keys; ++rand_key) {
       std::vector<Slice> key_slices;
       std::vector<PinnableSlice> values(num_prefixes);
-      std::vector<Status> statuses = Status_CreateVec(num_prefixes, Status_new());
+      rust::Vec<Status> statuses = Status_new().create_vec(num_prefixes);
       ReadOptions readoptionscopy = readoptions;
       readoptionscopy.snapshot = db_->GetSnapshot();
       readoptionscopy.rate_limiter_priority =
@@ -223,7 +223,7 @@ class BatchedOpsStressTest : public StressTest {
       for (size_t i = 0; i < num_prefixes; i++) {
         Status s = statuses[i].Clone();
         if (!s.ok() && !s.IsNotFound()) {
-          fprintf(stderr, "multiget error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "multiget error: %s\n", s.ToString()->c_str());
           thread->stats.AddErrors(1);
           ret_status[rand_key].copy_from(s);
           // we continue after error rather than exiting so that we can
@@ -298,7 +298,7 @@ class BatchedOpsStressTest : public StressTest {
       const Status s = db_->GetEntity(read_opts_copy, cfh, key, &results[i]);
 
       if (!s.ok() && !s.IsNotFound()) {
-        fprintf(stderr, "GetEntity error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "GetEntity error: %s\n", s.ToString()->c_str());
         thread->stats.AddErrors(1);
       } else if (s.IsNotFound()) {
         thread->stats.AddGets(1, 0);
@@ -376,7 +376,7 @@ class BatchedOpsStressTest : public StressTest {
       std::array<std::string, num_prefixes> keys;
       std::array<Slice, num_prefixes> key_slices;
       std::array<PinnableWideColumns, num_prefixes> results;
-      std::vector<Status> statuses = Status_CreateVec(num_prefixes, Status_new());
+      rust::Vec<Status> statuses = Status_new().create_vec(num_prefixes);
 
       for (size_t j = 0; j < num_prefixes; ++j) {
         keys[j] = std::to_string(j) + key_suffix;
@@ -390,7 +390,7 @@ class BatchedOpsStressTest : public StressTest {
         const Status& s = statuses[j];
 
         if (!s.ok() && !s.IsNotFound()) {
-          fprintf(stderr, "MultiGetEntity error: %s\n", s.ToString().c_str());
+          fprintf(stderr, "MultiGetEntity error: %s\n", s.ToString()->c_str());
           thread->stats.AddErrors(1);
         } else if (s.IsNotFound()) {
           thread->stats.AddGets(1, 0);

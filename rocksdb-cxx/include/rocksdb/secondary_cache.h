@@ -13,7 +13,12 @@
 #include "rocksdb/customizable.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/statistics.h"
-#include "rocksdb/status.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

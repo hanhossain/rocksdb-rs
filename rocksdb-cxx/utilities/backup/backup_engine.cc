@@ -2595,7 +2595,7 @@ Status BackupEngineImpl::GetFileDbIdentities(
     }
   } else {
     ROCKS_LOG_INFO(options_.info_log, "Failed to read %s: %s",
-                   file_path.c_str(), s.ToString().c_str());
+                   file_path.c_str(), s.ToString()->c_str());
     return s;
   }
 
@@ -2607,14 +2607,14 @@ Status BackupEngineImpl::GetFileDbIdentities(
       db_session_id->assign(table_properties->db_session_id);
       if (db_session_id->empty()) {
         s = Status_NotFound("DB session identity not found in " + file_path);
-        ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString().c_str());
+        ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString()->c_str());
         return s;
       }
     }
     return Status_OK();
   } else {
     s = Status_Corruption("Table properties missing in " + file_path);
-    ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString().c_str());
+    ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString()->c_str());
     return s;
   }
 }

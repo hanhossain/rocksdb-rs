@@ -16,7 +16,7 @@
 namespace ROCKSDB_NAMESPACE {
 
 class Slice;
-class Status;
+struct Status;
 class ColumnFamilyHandle;
 class WriteBatch;
 struct SliceParts;

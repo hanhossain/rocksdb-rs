@@ -3965,7 +3965,7 @@ TEST_P(OptionsSanityCheckTest, MergeOperatorErrorMessage) {
   Status s =
       SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelLooselyCompatible);
   ASSERT_TRUE(s.IsInvalidArgument());
-  std::string err_msg = s.ToString();
+  std::string err_msg = *s.ToString();
   std::string specified = "The specified one is " + kNullptrString;
   std::string persisted = "the persisted one is " + merge_op_name;
   ASSERT_TRUE(err_msg.find(specified) != std::string::npos);
@@ -3975,7 +3975,7 @@ TEST_P(OptionsSanityCheckTest, MergeOperatorErrorMessage) {
   opts.merge_operator.reset(test::RandomMergeOperator(&rnd));
   s = SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelLooselyCompatible);
   ASSERT_TRUE(s.IsInvalidArgument());
-  err_msg = s.ToString();
+  err_msg = *s.ToString();
   specified =
       "The specified one is " + std::string(opts.merge_operator->Name());
   persisted = "the persisted one is " + merge_op_name;

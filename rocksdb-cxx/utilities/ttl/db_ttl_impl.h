@@ -58,7 +58,7 @@ class DBWithTTLImpl : public DBWithTTL {
                      PinnableSlice* value) override;
 
   using StackableDB::MultiGet;
-  virtual std::vector<Status> MultiGet(
+  virtual rust::Vec<Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys,

@@ -15,13 +15,18 @@
 #include "rocksdb/db.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/snapshot.h"
-#include "rocksdb/status.h"
 #include "rocksdb/types.h"
 #include "rocksdb/utilities/optimistic_transaction_db.h"
 #include "rocksdb/utilities/transaction.h"
 #include "rocksdb/utilities/write_batch_with_index.h"
 #include "utilities/transactions/transaction_base.h"
 #include "utilities/transactions/transaction_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

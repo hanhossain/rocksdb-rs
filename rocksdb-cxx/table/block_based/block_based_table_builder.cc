@@ -1234,7 +1234,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
       } else {
         // Decompression reported an error. abort.
         *out_status = Status_Corruption(std::string("Could not decompress: ") +
-                                         uncompress_status.getState());
+                                         *uncompress_status.getState());
         *type = kNoCompression;
       }
     }

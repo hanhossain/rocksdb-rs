@@ -2132,7 +2132,7 @@ int block_cache_trace_analyzer_tool(int argc, char** argv) {
     Status s = cache_simulator->InitializeCaches();
     if (!s.ok()) {
       fprintf(stderr, "Cannot initialize cache simulators %s\n",
-              s.ToString().c_str());
+              s.ToString()->c_str());
       exit(1);
     }
   }
@@ -2144,10 +2144,10 @@ int block_cache_trace_analyzer_tool(int argc, char** argv) {
   Status s = analyzer.Analyze();
   if (!s.IsIncomplete() && !s.ok()) {
     // Read all traces.
-    fprintf(stderr, "Cannot process the trace %s\n", s.ToString().c_str());
+    fprintf(stderr, "Cannot process the trace %s\n", s.ToString()->c_str());
     exit(1);
   }
-  fprintf(stdout, "Status: %s\n", s.ToString().c_str());
+  fprintf(stdout, "Status: %s\n", s.ToString()->c_str());
   analyzer.WriteMissRatioCurves();
   analyzer.WriteMissRatioTimeline(1);
   analyzer.WriteMissRatioTimeline(kSecondInMinute);

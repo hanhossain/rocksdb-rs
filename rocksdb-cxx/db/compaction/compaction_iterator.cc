@@ -168,7 +168,7 @@ void CompactionIterator::Next() {
         ROCKS_LOG_FATAL(
             info_log_, "Invalid ikey %s in compaction. %s",
             allow_data_in_errors_ ? key_.ToString(true).c_str() : "hidden",
-            s.getState());
+            s.getState()->c_str());
         assert(false);
       }
 
@@ -1005,7 +1005,7 @@ void CompactionIterator::NextFromInput() {
           ROCKS_LOG_FATAL(
               info_log_, "Invalid key %s in compaction. %s",
               allow_data_in_errors_ ? key_.ToString(true).c_str() : "hidden",
-              pik_status.getState());
+              pik_status.getState()->c_str());
           assert(false);
         }
         // Keep current_key_ in sync.

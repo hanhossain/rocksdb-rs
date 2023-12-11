@@ -76,7 +76,7 @@ int db_stress_tool(int argc, char** argv) {
                                 &raw_env, &env_guard);
   if (!s.ok()) {
     fprintf(stderr, "Error Creating Env URI: %s: %s\n", FLAGS_env_uri.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
     exit(1);
   }
   dbsl_env_wrapper_guard = std::make_shared<CompositeEnvWrapper>(raw_env);
@@ -234,7 +234,7 @@ int db_stress_tool(int argc, char** argv) {
     s = db_stress_env->CreateDirIfMissing(default_secondaries_path);
     if (!s.ok()) {
       fprintf(stderr, "Failed to create directory %s: %s\n",
-              default_secondaries_path.c_str(), s.ToString().c_str());
+              default_secondaries_path.c_str(), s.ToString()->c_str());
       exit(1);
     }
     FLAGS_secondaries_base = default_secondaries_path;

@@ -44,7 +44,7 @@ Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
     if (!status.ok()) {
       mutex_.Unlock();
       ROCKS_LOG_ERROR(immutable_db_options_.info_log, "Cannot Flush data %s\n",
-                      status.ToString().c_str());
+                      status.ToString()->c_str());
       return status;
     }
   }
@@ -209,7 +209,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     if (!status.ok()) {
       mutex_.Unlock();
       ROCKS_LOG_ERROR(immutable_db_options_.info_log, "Cannot Flush data %s\n",
-                      status.ToString().c_str());
+                      status.ToString()->c_str());
       return status;
     }
   }

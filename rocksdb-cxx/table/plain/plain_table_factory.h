@@ -16,7 +16,7 @@ namespace ROCKSDB_NAMESPACE {
 
 struct EnvOptions;
 
-class Status;
+struct Status;
 class RandomAccessFile;
 class WritableFile;
 class Table;

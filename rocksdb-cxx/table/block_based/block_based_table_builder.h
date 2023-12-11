@@ -20,11 +20,16 @@
 #include "rocksdb/flush_block_policy.h"
 #include "rocksdb/listener.h"
 #include "rocksdb/options.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table.h"
 #include "table/meta_blocks.h"
 #include "table/table_builder.h"
 #include "util/compression.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

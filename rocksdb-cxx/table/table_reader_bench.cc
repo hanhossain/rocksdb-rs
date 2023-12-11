@@ -135,7 +135,7 @@ void TableReaderBenchmark(Options& opts, EnvOptions& env_options,
     std::unique_ptr<FSRandomAccessFile> raf;
     s = fs->NewRandomAccessFile(file_name, fopts, &raf, nullptr);
     if (!s.ok()) {
-      fprintf(stderr, "Create File Error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "Create File Error: %s\n", s.ToString()->c_str());
       exit(1);
     }
     uint64_t file_size;
@@ -147,7 +147,7 @@ void TableReaderBenchmark(Options& opts, EnvOptions& env_options,
                            ikc, 0 /* block_protection_bytes_per_key */),
         std::move(file_reader), file_size, &table_reader);
     if (!s.ok()) {
-      fprintf(stderr, "Open Table Error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "Open Table Error: %s\n", s.ToString()->c_str());
       exit(1);
     }
   }

@@ -77,7 +77,7 @@ Status SingleValueTraceExecutionResult::Accept(Handler* handler) {
 
 // MultiValuesTraceExecutionResult
 MultiValuesTraceExecutionResult::MultiValuesTraceExecutionResult(
-    std::vector<Status> multi_status, std::vector<std::string> values,
+    rust::Vec<Status> multi_status, std::vector<std::string> values,
     uint64_t start_timestamp, uint64_t end_timestamp, TraceType trace_type)
     : TraceExecutionResult(start_timestamp, end_timestamp, trace_type),
       multi_status_(std::move(multi_status)),
@@ -88,7 +88,7 @@ MultiValuesTraceExecutionResult::~MultiValuesTraceExecutionResult() {
   values_.clear();
 }
 
-const std::vector<Status>& MultiValuesTraceExecutionResult::GetMultiStatus()
+const rust::Vec<Status>& MultiValuesTraceExecutionResult::GetMultiStatus()
     const {
   return multi_status_;
 }

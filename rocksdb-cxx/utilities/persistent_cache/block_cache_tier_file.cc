@@ -215,7 +215,7 @@ bool RandomAccessCacheFile::OpenImpl(const bool enable_direct_reads) {
                                            enable_direct_reads);
   if (!status.ok()) {
     Error(log_, "Error opening random access file %s. %s", Path().c_str(),
-          status.ToString().c_str());
+          status.ToString()->c_str());
     return false;
   }
   freader_.reset(new RandomAccessFileReader(std::move(file), Path(),
@@ -239,7 +239,7 @@ bool RandomAccessCacheFile::Read(const LBA& lba, Slice* key, Slice* val,
                             nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
   if (!s.ok()) {
     Error(log_, "Error reading from file %s. %s", Path().c_str(),
-          s.ToString().c_str());
+          s.ToString()->c_str());
     return false;
   }
 
@@ -299,13 +299,13 @@ bool WriteableCacheFile::Create(const bool /*enable_direct_writes*/,
   Status s = env_->FileExists(Path());
   if (s.ok()) {
     ROCKS_LOG_WARN(log_, "File %s already exists. %s", Path().c_str(),
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
   }
 
   s = NewWritableCacheFile(env_, Path(), &file_);
   if (!s.ok()) {
     ROCKS_LOG_WARN(log_, "Unable to create file %s. %s", Path().c_str(),
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
     return false;
   }
 
@@ -598,7 +598,7 @@ void ThreadedWriter::DispatchIO(const IO& io) {
       // That is definite IO error to device. There is not much we can
       // do but ignore the failure. This can lead to corruption of data on
       // disk, but the cache will skip while reading
-      fprintf(stderr, "Error writing data to file. %s\n", s.ToString().c_str());
+      fprintf(stderr, "Error writing data to file. %s\n", s.ToString()->c_str());
     }
     written += io_size_;
   }

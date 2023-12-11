@@ -13,10 +13,15 @@
 
 #include "db/write_batch_internal.h"
 #include "rocksdb/slice.h"
-#include "rocksdb/status.h"
 #include "rocksdb/write_batch.h"
 #include "util/coding.h"
 #include "util/hash_containers.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

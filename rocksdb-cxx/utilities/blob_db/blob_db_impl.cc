@@ -171,14 +171,14 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to create blob_dir %s, status: %s",
-                    blob_dir_.c_str(), s.ToString().c_str());
+                    blob_dir_.c_str(), s.ToString()->c_str());
   }
   s = env_->GetFileSystem()->NewDirectory(blob_dir_, IOOptions(), &dir_ent_,
                                           nullptr);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to open blob_dir %s, status: %s", blob_dir_.c_str(),
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
     return s;
   }
 
@@ -229,7 +229,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
     if (!s.ok()) {
       ROCKS_LOG_ERROR(db_options_.info_log,
                       "Error while sanitizing blob_dir %s, status: %s",
-                      blob_dir_.c_str(), s.ToString().c_str());
+                      blob_dir_.c_str(), s.ToString()->c_str());
       return s;
     }
 
@@ -256,7 +256,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
         ROCKS_LOG_ERROR(
             db_options_.info_log,
             "Failed to enable automatic compactions during open, status: %s",
-            s.ToString().c_str());
+            s.ToString()->c_str());
         return s;
       }
     }
@@ -302,7 +302,7 @@ Status BlobDBImpl::GetAllBlobFiles(std::set<uint64_t>* file_numbers) {
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to get list of blob files, status: %s",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
     return s;
   }
 
@@ -357,7 +357,7 @@ Status BlobDBImpl::OpenAllBlobFiles() {
       ROCKS_LOG_ERROR(db_options_.info_log,
                       "Unable to read metadata of blob file %" PRIu64
                       ", status: '%s'",
-                      file_number, read_metadata_status.ToString().c_str());
+                      file_number, read_metadata_status.ToString()->c_str());
       return read_metadata_status;
     }
 
@@ -725,7 +725,7 @@ Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<BlobFile>& bfile) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to open blob file for write: %s status: '%s'"
                     " exists: '%s'",
-                    fpath.c_str(), s.ToString().c_str(),
+                    fpath.c_str(), s.ToString()->c_str(),
                     fs->FileExists(fpath, file_options_.io_options, nullptr)
                         .ToString()
                         .c_str());
@@ -830,7 +830,7 @@ Status BlobDBImpl::CreateBlobFileAndWriter(
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to get writer for blob file: %s, error: %s",
-                    (*blob_file)->PathName().c_str(), s.ToString().c_str());
+                    (*blob_file)->PathName().c_str(), s.ToString()->c_str());
     return s;
   }
 
@@ -841,7 +841,7 @@ Status BlobDBImpl::CreateBlobFileAndWriter(
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to write header to new blob file: %s"
                     " status: '%s'",
-                    (*blob_file)->PathName().c_str(), s.ToString().c_str());
+                    (*blob_file)->PathName().c_str(), s.ToString()->c_str());
     return s;
   }
 
@@ -1118,7 +1118,7 @@ Status BlobDBImpl::PutBlobValue(const WriteOptions& /*options*/,
           "Failed to append blob to FILE: %s: KEY: %s VALSZ: %" ROCKSDB_PRIszt
           " status: '%s' blob_file: '%s'",
           blob_file->PathName().c_str(), key.ToString().c_str(), value.size(),
-          s.ToString().c_str(), blob_file->DumpState().c_str());
+          s.ToString()->c_str(), blob_file->DumpState().c_str());
     }
   }
 
@@ -1360,7 +1360,7 @@ Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile>& bfile,
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Invalid status in AppendBlob: %s status: '%s'",
-                    bfile->PathName().c_str(), s.ToString().c_str());
+                    bfile->PathName().c_str(), s.ToString()->c_str());
     return s;
   }
 
@@ -1380,7 +1380,7 @@ Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile>& bfile,
   return s;
 }
 
-std::vector<Status> BlobDBImpl::MultiGet(const ReadOptions& read_options,
+rust::Vec<Status> BlobDBImpl::MultiGet(const ReadOptions& read_options,
                                          const std::vector<Slice>& keys,
                                          std::vector<std::string>* values) {
   StopWatch multiget_sw(clock_, statistics_, BLOB_DB_MULTIGET_MICROS);
@@ -1390,7 +1390,7 @@ std::vector<Status> BlobDBImpl::MultiGet(const ReadOptions& read_options,
   ReadOptions ro(read_options);
   bool snapshot_created = SetSnapshotIfNeeded(&ro);
 
-  std::vector<Status> statuses;
+  rust::Vec<Status> statuses;
   statuses.reserve(keys.size());
   values->clear();
   values->reserve(keys.size());
@@ -1461,7 +1461,7 @@ Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
             " blob_offset: %" PRIu64 " blob_size: %" PRIu64
             " key: %s status: '%s'",
             blob_index.file_number(), blob_index.offset(), blob_index.size(),
-            key.ToString(/* output_hex */ true).c_str(), s.ToString().c_str());
+            key.ToString(/* output_hex */ true).c_str(), s.ToString()->c_str());
       }
       return s;
     }
@@ -1555,7 +1555,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
         db_options_.info_log,
         "Failed to read blob from blob file %" PRIu64 ", blob_offset: %" PRIu64
         ", blob_size: %" PRIu64 ", key_size: %" ROCKSDB_PRIszt ", status: '%s'",
-        file_number, offset, size, key.size(), s.ToString().c_str());
+        file_number, offset, size, key.size(), s.ToString()->c_str());
     return s;
   }
 
@@ -1580,7 +1580,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
         db_options_.info_log,
         "Unable to decode CRC from blob file %" PRIu64 ", blob_offset: %" PRIu64
         ", blob_size: %" PRIu64 ", key size: %" ROCKSDB_PRIszt ", status: '%s'",
-        file_number, offset, size, key.size(), s.ToString().c_str());
+        file_number, offset, size, key.size(), s.ToString()->c_str());
     return Status_Corruption("Unable to decode checksum.");
   }
 
@@ -1594,7 +1594,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
           "Blob crc mismatch file: %" PRIu64 " blob_offset: %" PRIu64
           " blob_size: %" PRIu64 " key: %s status: '%s'",
           file_number, offset, size,
-          key.ToString(/* output_hex */ true).c_str(), s.ToString().c_str());
+          key.ToString(/* output_hex */ true).c_str(), s.ToString()->c_str());
     }
 
     return Status_Corruption("Corruption. Blob CRC mismatch");
@@ -1749,7 +1749,7 @@ Status BlobDBImpl::CloseBlobFile(std::shared_ptr<BlobFile> bfile) {
 
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to close blob file %" PRIu64 "with error: %s",
-                    bfile->BlobFileNumber(), s.ToString().c_str());
+                    bfile->BlobFileNumber(), s.ToString()->c_str());
   }
 
   if (bfile->HasTTL()) {
@@ -1910,7 +1910,7 @@ Status BlobDBImpl::SyncBlobFiles() {
     if (!s.ok()) {
       ROCKS_LOG_ERROR(db_options_.info_log,
                       "Failed to sync blob file %" PRIu64 ", status: %s",
-                      blob_file->BlobFileNumber(), s.ToString().c_str());
+                      blob_file->BlobFileNumber(), s.ToString()->c_str());
       return s;
     }
   }
@@ -1919,7 +1919,7 @@ Status BlobDBImpl::SyncBlobFiles() {
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to sync blob directory, status: %s",
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
   }
   return s;
 }
@@ -2012,7 +2012,7 @@ std::pair<bool, int64_t> BlobDBImpl::DeleteObsoleteFiles(bool aborted) {
         DirFsyncOptions(DirFsyncOptions::FsyncReason::kFileDeleted));
     if (!s.ok()) {
       ROCKS_LOG_ERROR(db_options_.info_log, "Failed to sync dir %s: %s",
-                      blob_dir_.c_str(), s.ToString().c_str());
+                      blob_dir_.c_str(), s.ToString()->c_str());
     }
   }
 

@@ -101,7 +101,7 @@ class SharedState {
     }
     if (!status.ok()) {
       fprintf(stderr, "Failed setting up expected state with error: %s\n",
-              status.ToString().c_str());
+              status.ToString()->c_str());
       exit(1);
     }
 

@@ -1983,9 +1983,9 @@ TEST_F(VersionSetTest, WalCreateTwice) {
 
   Status s = LogAndApplyToDefaultCF(edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(s.ToString().find("WAL 10 is created more than once") !=
+  ASSERT_TRUE(s.ToString()->find("WAL 10 is created more than once") !=
               std::string::npos)
-      << s.ToString();
+      << *s.ToString();
 }
 
 TEST_F(VersionSetTest, WalCreateAfterClose) {
@@ -2011,9 +2011,9 @@ TEST_F(VersionSetTest, WalCreateAfterClose) {
 
     Status s = LogAndApplyToDefaultCF(edit);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(s.ToString().find("WAL 10 is created more than once") !=
+    ASSERT_TRUE(s.ToString()->find("WAL 10 is created more than once") !=
                 std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   }
 }
 
@@ -2917,7 +2917,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest0) {
   if (iter == cf_names.end()) {
     ASSERT_TRUE(s.IsInvalidArgument());
   } else {
-    ASSERT_NE(s.ToString().find(manifest_path), std::string::npos);
+    ASSERT_NE(s.ToString()->find(manifest_path), std::string::npos);
     ASSERT_TRUE(s.IsCorruption());
   }
 }
@@ -2959,7 +2959,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest1) {
   if (iter == cf_names.end()) {
     ASSERT_TRUE(s.IsInvalidArgument());
   } else {
-    ASSERT_NE(s.ToString().find(manifest_path), std::string::npos);
+    ASSERT_NE(s.ToString()->find(manifest_path), std::string::npos);
     ASSERT_TRUE(s.IsCorruption());
   }
 }
@@ -3006,7 +3006,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromInCompleteManifest2) {
   if (iter == cf_names.end()) {
     ASSERT_TRUE(s.IsInvalidArgument());
   } else {
-    ASSERT_NE(s.ToString().find(manifest_path), std::string::npos);
+    ASSERT_NE(s.ToString()->find(manifest_path), std::string::npos);
     ASSERT_TRUE(s.IsCorruption());
   }
 }
@@ -3064,7 +3064,7 @@ TEST_P(VersionSetTestEmptyDb, OpenManifestWithUnknownCF) {
   if (iter == cf_names.end()) {
     ASSERT_TRUE(s.IsInvalidArgument());
   } else {
-    ASSERT_NE(s.ToString().find(manifest_path), std::string::npos);
+    ASSERT_NE(s.ToString()->find(manifest_path), std::string::npos);
     ASSERT_TRUE(s.IsCorruption());
   }
 }
@@ -3646,10 +3646,10 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   Status s = Flush();
   if (charge_file_metadata == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_TRUE(s.IsMemoryLimit());
-    EXPECT_TRUE(s.ToString().find(
+    EXPECT_TRUE(s.ToString()->find(
                     kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
                         CacheEntryRole::kFileMetadata)]) != std::string::npos);
-    EXPECT_TRUE(s.ToString().find("memory limit based on cache capacity") !=
+    EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                 std::string::npos);
   } else {
     EXPECT_TRUE(s.ok());

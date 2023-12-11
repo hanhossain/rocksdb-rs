@@ -1521,7 +1521,7 @@ Status DBImpl::CompactFilesImpl(
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "[%s] [JOB %d] Compaction error: %s",
                    c->column_family_data()->GetName().c_str(),
-                   job_context->job_id, status.ToString().c_str());
+                   job_context->job_id, status.ToString()->c_str());
     IOStatus io_s = compaction_job.io_status();
     if (!io_s.ok()) {
       error_handler_.SetBGError(io_s, BackgroundErrorReason::kCompaction);
@@ -1786,7 +1786,7 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
     InstallSuperVersionAndScheduleWork(cfd, &sv_context, mutable_cf_options);
 
     ROCKS_LOG_DEBUG(immutable_db_options_.info_log, "[%s] LogAndApply: %s\n",
-                    cfd->GetName().c_str(), status.ToString().data());
+                    cfd->GetName().c_str(), status.ToString()->data());
 
     if (status.ok()) {
       ROCKS_LOG_DEBUG(immutable_db_options_.info_log,
@@ -1866,7 +1866,7 @@ Status DBImpl::Flush(const FlushOptions& flush_options,
 
   ROCKS_LOG_INFO(immutable_db_options_.info_log,
                  "[%s] Manual flush finished, status: %s\n",
-                 cfh->GetName().c_str(), s.ToString().c_str());
+                 cfh->GetName().c_str(), s.ToString()->c_str());
   return s;
 }
 
@@ -1901,7 +1901,7 @@ Status DBImpl::Flush(const FlushOptions& flush_options,
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Manual atomic flush finished, status: %s\n"
                    "=====Column families:=====",
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
     for (auto cfh : column_families) {
       auto cfhi = static_cast<ColumnFamilyHandleImpl*>(cfh);
       ROCKS_LOG_INFO(immutable_db_options_.info_log, "%s",
@@ -3062,7 +3062,7 @@ void DBImpl::BackgroundCallFlush(Env::Priority thread_pri) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "Waiting after background flush error: %s"
                       "Accumulated background error counts: %" PRIu64,
-                      s.ToString().c_str(), error_cnt);
+                      s.ToString()->c_str(), error_cnt);
       log_buffer.FlushBufferToLog();
       LogFlush(immutable_db_options_.info_log);
       immutable_db_options_.clock->SleepForMicroseconds(1000000);
@@ -3151,7 +3151,7 @@ void DBImpl::BackgroundCallCompaction(PrepickedCompaction* prepicked_compaction,
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "Waiting after background compaction error: %s, "
                       "Accumulated background error counts: %" PRIu64,
-                      s.ToString().c_str(), error_cnt);
+                      s.ToString()->c_str(), error_cnt);
       LogFlush(immutable_db_options_.info_log);
       immutable_db_options_.clock->SleepForMicroseconds(1000000);
       mutex_.Lock();
@@ -3546,7 +3546,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         log_buffer,
         "[%s] Moved #%d files to level-%d %" PRIu64 " bytes %s: %s\n",
         c->column_family_data()->GetName().c_str(), moved_files,
-        c->output_level(), moved_bytes, status.ToString().c_str(),
+        c->output_level(), moved_bytes, status.ToString()->c_str(),
         c->column_family_data()->current()->storage_info()->LevelSummary(&tmp));
     *made_progress = true;
 
@@ -3657,7 +3657,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     // Ignore compaction errors found during shutting down
   } else {
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "Compaction error: %s",
-                   status.ToString().c_str());
+                   status.ToString()->c_str());
     if (!io_s.ok()) {
       // Error while writing to MANIFEST.
       // In fact, versions_->io_status() can also be the result of renaming

@@ -214,7 +214,7 @@ TEST_F(CuckooReaderTest, FileNotMmaped) {
   ImmutableOptions ioptions(options);
   CuckooTableReader reader(ioptions, nullptr, 0, nullptr, nullptr);
   ASSERT_TRUE(reader.status().IsInvalidArgument());
-  ASSERT_STREQ("File is not mmaped", reader.status().getState());
+  ASSERT_STREQ("File is not mmaped", reader.status().getState()->c_str());
 }
 
 TEST_F(CuckooReaderTest, WhenKeyExists) {

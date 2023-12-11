@@ -40,7 +40,7 @@ class CassandraStore {
     if (s.ok()) {
       return true;
     } else {
-      std::cerr << "ERROR " << s.ToString() << std::endl;
+      std::cerr << "ERROR " << *s.ToString() << std::endl;
       return false;
     }
   }
@@ -53,7 +53,7 @@ class CassandraStore {
     if (s.ok()) {
       return true;
     } else {
-      std::cerr << "ERROR " << s.ToString() << std::endl;
+      std::cerr << "ERROR " << *s.ToString() << std::endl;
       return false;
     }
   }
@@ -81,7 +81,7 @@ class CassandraStore {
     }
 
     if (!s.IsNotFound()) {
-      std::cerr << "ERROR " << s.ToString() << std::endl;
+      std::cerr << "ERROR " << *s.ToString() << std::endl;
     }
 
     return std::make_tuple(false, RowValue(0, 0));

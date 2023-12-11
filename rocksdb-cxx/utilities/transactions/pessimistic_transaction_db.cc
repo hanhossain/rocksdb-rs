@@ -330,7 +330,7 @@ Status WrapAnotherDBInternal(
     // txn_db still owns db, and ~StackableDB() will be called when txn_db goes
     // out of scope, deleting the input db pointer.
     ROCKS_LOG_FATAL(db->GetDBOptions().info_log,
-                    "Failed to initialize txn_db: %s", s.ToString().c_str());
+                    "Failed to initialize txn_db: %s", s.ToString()->c_str());
   }
   return s;
 }

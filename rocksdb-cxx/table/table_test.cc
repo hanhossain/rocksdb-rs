@@ -209,7 +209,7 @@ class Constructor {
     data_.clear();
     Status s = FinishImpl(options, ioptions, moptions, table_options,
                           internal_comparator, *kvmap);
-    ASSERT_TRUE(s.ok()) << s.ToString();
+    ASSERT_TRUE(s.ok()) << *s.ToString();
   }
 
   // Construct the data structure from the data in "data"
@@ -402,7 +402,7 @@ class TableConstructor : public Constructor {
     }
     Status s = builder->Finish();
     EXPECT_OK(file_writer_->Flush());
-    EXPECT_TRUE(s.ok()) << s.ToString();
+    EXPECT_TRUE(s.ok()) << *s.ToString();
 
     EXPECT_EQ(TEST_GetSink()->contents().size(), builder->FileSize());
 
@@ -608,13 +608,13 @@ class DBConstructor : public Constructor {
     Options options;
     options.comparator = comparator_;
     Status status = DestroyDB(name, options);
-    ASSERT_TRUE(status.ok()) << status.ToString();
+    ASSERT_TRUE(status.ok()) << *status.ToString();
 
     options.create_if_missing = true;
     options.error_if_exists = true;
     options.write_buffer_size = 10000;  // Something small to force merging
     status = DB::Open(options, name, &db_);
-    ASSERT_TRUE(status.ok()) << status.ToString();
+    ASSERT_TRUE(status.ok()) << *status.ToString();
   }
 
   const Comparator* comparator_;
@@ -2265,7 +2265,7 @@ TEST_P(BlockBasedTableTest, BadChecksumType) {
   Status s = c.Reopen(new_ioptions, new_moptions);
   ASSERT_NOK(s);
   // "test" is file name
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Corruption: Corrupt or unsupported checksum type: 123 in test");
 }
 
@@ -5847,10 +5847,10 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
   s = TryReopen(options);
   EXPECT_TRUE(s.IsNotSupported());
   EXPECT_TRUE(
-      s.ToString().find("Enable/Disable CacheEntryRoleOptions::charged") !=
+      s.ToString()->find("Enable/Disable CacheEntryRoleOptions::charged") !=
       std::string::npos);
   EXPECT_TRUE(
-      s.ToString().find(kCacheEntryRoleToCamelString[static_cast<uint32_t>(
+      s.ToString()->find(kCacheEntryRoleToCamelString[static_cast<uint32_t>(
           CacheEntryRole::kDataBlock)]) != std::string::npos);
   Destroy(options);
 
@@ -5864,12 +5864,12 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
   Destroy(options);
   s = TryReopen(options);
   EXPECT_TRUE(s.IsInvalidArgument());
-  EXPECT_TRUE(s.ToString().find("Enable CacheEntryRoleOptions::charged") !=
+  EXPECT_TRUE(s.ToString()->find("Enable CacheEntryRoleOptions::charged") !=
               std::string::npos);
   EXPECT_TRUE(
-      s.ToString().find(kCacheEntryRoleToCamelString[static_cast<std::size_t>(
+      s.ToString()->find(kCacheEntryRoleToCamelString[static_cast<std::size_t>(
           CacheEntryRole::kFilterConstruction)]) != std::string::npos);
-  EXPECT_TRUE(s.ToString().find("block cache is disabled") !=
+  EXPECT_TRUE(s.ToString()->find("block cache is disabled") !=
               std::string::npos);
   Destroy(options);
 }

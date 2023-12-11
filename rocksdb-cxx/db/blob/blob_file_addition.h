@@ -17,7 +17,7 @@ namespace ROCKSDB_NAMESPACE {
 
 class JSONWriter;
 class Slice;
-class Status;
+struct Status;
 
 class BlobFileAddition {
  public:

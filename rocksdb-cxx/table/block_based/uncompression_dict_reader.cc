@@ -70,7 +70,7 @@ Status UncompressionDictReader::ReadUncompressionDictionary(
         rep->ioptions.logger,
         "Encountered error while reading data from compression dictionary "
         "block %s",
-        s.ToString().c_str());
+        s.ToString()->c_str());
   }
 
   return s.Clone();

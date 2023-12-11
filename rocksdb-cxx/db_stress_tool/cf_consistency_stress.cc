@@ -56,7 +56,7 @@ class CfConsistencyStressTest : public StressTest {
     Status s = db_->Write(write_opts, &batch);
 
     if (!s.ok()) {
-      fprintf(stderr, "multi put or merge error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "multi put or merge error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     } else {
       auto num = static_cast<long>(rand_column_families.size());
@@ -78,7 +78,7 @@ class CfConsistencyStressTest : public StressTest {
     }
     Status s = db_->Write(write_opts, &batch);
     if (!s.ok()) {
-      fprintf(stderr, "multidel error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "multidel error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     } else {
       thread->stats.AddDeletes(static_cast<long>(rand_column_families.size()));
@@ -107,7 +107,7 @@ class CfConsistencyStressTest : public StressTest {
     }
     Status s = db_->Write(write_opts, &batch);
     if (!s.ok()) {
-      fprintf(stderr, "multi del range error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "multi del range error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     } else {
       thread->stats.AddRangeDeletions(
@@ -207,13 +207,13 @@ class CfConsistencyStressTest : public StressTest {
     } else if (s.IsNotFound()) {
       thread->stats.AddGets(1, 0);
     } else {
-      fprintf(stderr, "TestGet error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "TestGet error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     }
     return s;
   }
 
-  std::vector<Status> TestMultiGet(
+  rust::Vec<Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& read_opts,
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
@@ -223,7 +223,7 @@ class CfConsistencyStressTest : public StressTest {
     keys.reserve(num_keys);
     key_str.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    std::vector<Status> statuses = Status_CreateVec(num_keys, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
     ColumnFamilyHandle* cfh = column_families_[rand_column_families[0]];
     ReadOptions readoptionscopy = read_opts;
     readoptionscopy.rate_limiter_priority =
@@ -244,7 +244,7 @@ class CfConsistencyStressTest : public StressTest {
         thread->stats.AddGets(1, 0);
       } else {
         // errors case
-        fprintf(stderr, "MultiGet error: %s\n", s.ToString().c_str());
+        fprintf(stderr, "MultiGet error: %s\n", s.ToString()->c_str());
         thread->stats.AddErrors(1);
       }
     }
@@ -386,7 +386,7 @@ class CfConsistencyStressTest : public StressTest {
     } else if (s.IsNotFound()) {
       thread->stats.AddGets(1, 0);
     } else {
-      fprintf(stderr, "TestGetEntity error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "TestGetEntity error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
     }
   }
@@ -427,7 +427,7 @@ class CfConsistencyStressTest : public StressTest {
 
       std::vector<Slice> key_slices(num_cfs, key);
       std::vector<PinnableWideColumns> results(num_cfs);
-      std::vector<Status> statuses = Status_CreateVec(num_cfs, Status_new());
+      rust::Vec<Status> statuses = Status_new().create_vec(num_cfs);
 
       db_->MultiGetEntity(read_opts_copy, num_cfs, cfhs.data(),
                           key_slices.data(), results.data(), statuses.data());
@@ -442,7 +442,7 @@ class CfConsistencyStressTest : public StressTest {
 
         if (!s.ok() && !s.IsNotFound()) {
           fprintf(stderr, "TestMultiGetEntity error: %s\n",
-                  s.ToString().c_str());
+                  s.ToString()->c_str());
           thread->stats.AddErrors(1);
           break;
         }
@@ -568,7 +568,7 @@ class CfConsistencyStressTest : public StressTest {
     }
 
     if (!s.ok()) {
-      fprintf(stderr, "TestPrefixScan error: %s\n", s.ToString().c_str());
+      fprintf(stderr, "TestPrefixScan error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
 
       return s;
@@ -613,7 +613,7 @@ class CfConsistencyStressTest : public StressTest {
       iters.back()->SeekToFirst();
     }
 
-    std::vector<Status> statuses = Status_CreateVec(num, Status_OK());
+    rust::Vec<Status> statuses = Status_OK().create_vec(num);
 
     assert(thread);
 
@@ -650,7 +650,7 @@ class CfConsistencyStressTest : public StressTest {
           if (!s.ok()) {
             fprintf(stderr, "Iterator on cf %s has error: %s\n",
                     column_families_[i]->GetName().c_str(),
-                    s.ToString().c_str());
+                    s.ToString()->c_str());
             shared->SetVerificationFailure();
           }
         }
@@ -671,7 +671,7 @@ class CfConsistencyStressTest : public StressTest {
             } else {
               fprintf(stderr, "Iterator on cf %s has error: %s\n",
                       column_families_[i]->GetName().c_str(),
-                      statuses[i].ToString().c_str());
+                      statuses[i].ToString()->c_str());
             }
           } else {
             fprintf(stderr, "cf %s has remaining data to scan\n",
@@ -741,7 +741,7 @@ class CfConsistencyStressTest : public StressTest {
             const Status s = GetAllKeyVersions(db_, cfh, begin_key, end_key,
                                                kMaxNumIKeys, &versions);
             if (!s.ok()) {
-              fprintf(stderr, "%s\n", s.ToString().c_str());
+              fprintf(stderr, "%s\n", s.ToString()->c_str());
               return;
             }
 
@@ -797,7 +797,7 @@ class CfConsistencyStressTest : public StressTest {
       status = cmp_db_->TryCatchUpWithPrimary();
       if (!status.ok()) {
         fprintf(stderr, "TryCatchUpWithPrimary: %s\n",
-                status.ToString().c_str());
+                status.ToString()->c_str());
         shared->SetShouldStopTest();
         assert(false);
         return;
@@ -837,7 +837,7 @@ class CfConsistencyStressTest : public StressTest {
       status = checksum_column_family(it.get(), &crc);
       if (!status.ok()) {
         fprintf(stderr, "Computing checksum of default cf: %s\n",
-                status.ToString().c_str());
+                status.ToString()->c_str());
         assert(false);
       }
     }
@@ -859,7 +859,7 @@ class CfConsistencyStressTest : public StressTest {
         }
       }
       if (!status.ok()) {
-        fprintf(stderr, "status: %s\n", status.ToString().c_str());
+        fprintf(stderr, "status: %s\n", status.ToString()->c_str());
         shared->SetShouldStopTest();
         assert(false);
       } else if (tmp_crc != crc) {

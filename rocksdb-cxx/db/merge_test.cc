@@ -161,7 +161,7 @@ class Counters {
     if (s.ok()) {
       return true;
     } else {
-      std::cerr << s.ToString() << std::endl;
+      std::cerr << *s.ToString() << std::endl;
       return false;
     }
   }
@@ -173,7 +173,7 @@ class Counters {
     if (s.ok()) {
       return true;
     } else {
-      std::cerr << s.ToString() << std::endl;
+      std::cerr << *s.ToString() << std::endl;
       return false;
     }
   }
@@ -196,7 +196,7 @@ class Counters {
       *value = DecodeFixed64(&str[0]);
       return true;
     } else {
-      std::cerr << s.ToString() << std::endl;
+      std::cerr << *s.ToString() << std::endl;
       return false;
     }
   }
@@ -249,7 +249,7 @@ class MergeBasedCounters : public Counters {
     if (s.ok()) {
       return true;
     } else {
-      std::cerr << s.ToString() << std::endl;
+      std::cerr << *s.ToString() << std::endl;
       return false;
     }
   }

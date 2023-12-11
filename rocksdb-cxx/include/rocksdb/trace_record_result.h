@@ -10,8 +10,13 @@
 
 #include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
-#include "rocksdb/status.h"
 #include "rocksdb/trace_record.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -128,7 +133,7 @@ class SingleValueTraceExecutionResult : public TraceExecutionResult {
 // Example operation: DB::MultiGet()
 class MultiValuesTraceExecutionResult : public TraceExecutionResult {
  public:
-  MultiValuesTraceExecutionResult(std::vector<Status> multi_status,
+  MultiValuesTraceExecutionResult(rust::Vec<Status> multi_status,
                                   std::vector<std::string> values,
                                   uint64_t start_timestamp,
                                   uint64_t end_timestamp, TraceType trace_type);
@@ -136,7 +141,7 @@ class MultiValuesTraceExecutionResult : public TraceExecutionResult {
   virtual ~MultiValuesTraceExecutionResult() override;
 
   // Returned Status(es) of DB::MultiGet().
-  virtual const std::vector<Status>& GetMultiStatus() const;
+  virtual const rust::Vec<Status>& GetMultiStatus() const;
 
   // Returned values for the searched keys.
   virtual const std::vector<std::string>& GetValues() const;
@@ -144,7 +149,7 @@ class MultiValuesTraceExecutionResult : public TraceExecutionResult {
   virtual Status Accept(Handler* handler) override;
 
  private:
-  std::vector<Status> multi_status_;
+  rust::Vec<Status> multi_status_;
   std::vector<std::string> values_;
 };
 

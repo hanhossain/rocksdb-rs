@@ -488,7 +488,7 @@ Status DBImpl::Recover(
           manifest_path.empty() ? current_fname : manifest_path;
       s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
       if (!s.ok()) {
-        std::string error_str = s.ToString();
+        std::string error_str = *s.ToString();
         // Check if unsupported Direct I/O is the root cause
         customized_fs.use_direct_reads = false;
         s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
@@ -844,7 +844,7 @@ Status DBImpl::PersistentStatsProcessFormatVersion() {
             "Recreating persistent stats column family since reading "
             "persistent stats version key failed. Format key: %s, compatible "
             "key: %s",
-            s_format.ToString().c_str(), s_compatible.ToString().c_str());
+            s_format.ToString()->c_str(), s_compatible.ToString()->c_str());
       } else {
         ROCKS_LOG_WARN(
             immutable_db_options_.info_log,
@@ -1067,7 +1067,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
     void Corruption(size_t bytes, const Status& s) override {
       ROCKS_LOG_WARN(info_log, "%s%s: dropping %d bytes; %s",
                      (status == nullptr ? "(ignoring error) " : ""), fname,
-                     static_cast<int>(bytes), s.ToString().c_str());
+                     static_cast<int>(bytes), s.ToString()->c_str());
       if (status != nullptr && status->ok()) {
         status->copy_from(s);
       }
@@ -1323,7 +1323,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
                           ". %s. This likely mean loss of synced WAL, "
                           "thus recovery fails.",
                           wal_number, *next_sequence,
-                          status.ToString().c_str());
+                          status.ToString()->c_str());
           return status;
         }
         // We should ignore the error but not continue replaying
@@ -1529,7 +1529,7 @@ Status DBImpl::GetLogSizeAndMaybeTruncate(uint64_t wal_number, bool truncate,
     if (!truncate_status.ok() && !truncate_status.IsNotSupported()) {
       ROCKS_LOG_WARN(immutable_db_options_.info_log,
                      "Failed to truncate log #%" PRIu64 ": %s", wal_number,
-                     truncate_status.ToString().c_str());
+                     truncate_status.ToString()->c_str());
     }
   }
   if (log_ptr) {
@@ -1669,7 +1669,7 @@ Status DBImpl::WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
                       "[%s] [WriteLevel0TableForRecovery]"
                       " Level-0 table #%" PRIu64 ": %" PRIu64 " bytes %s",
                       cfd->GetName().c_str(), meta.fd.GetNumber(),
-                      meta.fd.GetFileSize(), s.ToString().c_str());
+                      meta.fd.GetFileSize(), s.ToString()->c_str());
       mutex_.Lock();
 
       // TODO(AR) is this ok?
@@ -2203,7 +2203,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
   }
   if (!s.ok()) {
     ROCKS_LOG_WARN(impl->immutable_db_options_.info_log,
-                   "DB::Open() failed: %s", s.ToString().c_str());
+                   "DB::Open() failed: %s", s.ToString()->c_str());
   }
   if (s.ok()) {
     s = impl->StartPeriodicTaskScheduler();

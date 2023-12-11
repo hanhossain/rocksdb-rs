@@ -54,20 +54,20 @@ void CheckpointImpl::CleanStagingDirectory(const std::string& full_private_path,
     return;
   }
   ROCKS_LOG_INFO(info_log, "File exists %s -- %s", full_private_path.c_str(),
-                 s.ToString().c_str());
+                 s.ToString()->c_str());
   s = db_->GetEnv()->GetChildren(full_private_path, &subchildren);
   if (s.ok()) {
     for (auto& subchild : subchildren) {
       std::string subchild_path = full_private_path + "/" + subchild;
       s = db_->GetEnv()->DeleteFile(subchild_path);
       ROCKS_LOG_INFO(info_log, "Delete file %s -- %s", subchild_path.c_str(),
-                     s.ToString().c_str());
+                     s.ToString()->c_str());
     }
   }
   // finally delete the private dir
   s = db_->GetEnv()->DeleteDir(full_private_path);
   ROCKS_LOG_INFO(info_log, "Delete dir %s -- %s", full_private_path.c_str(),
-                 s.ToString().c_str());
+                 s.ToString()->c_str());
 }
 
 Status Checkpoint::ExportColumnFamily(
@@ -180,7 +180,7 @@ Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
   } else {
     // clean all the files we might have created
     ROCKS_LOG_INFO(db_options.info_log, "Snapshot failed -- %s",
-                   s.ToString().c_str());
+                   s.ToString()->c_str());
     CleanStagingDirectory(full_private_path, db_options.info_log.get());
   }
   return s;
@@ -392,7 +392,7 @@ Status CheckpointImpl::ExportColumnFamily(
   } else {
     // Failure: Clean up all the files/directories created.
     ROCKS_LOG_INFO(db_options.info_log, "[%s] Export failed. %s",
-                   cf_name.c_str(), s.ToString().c_str());
+                   cf_name.c_str(), s.ToString()->c_str());
     std::vector<std::string> subchildren;
     const auto cleanup_dir =
         moved_to_user_specified_dir ? export_dir : tmp_export_dir;
@@ -402,13 +402,13 @@ Status CheckpointImpl::ExportColumnFamily(
       const auto status = db_->GetEnv()->DeleteFile(subchild_path);
       if (!status.ok()) {
         ROCKS_LOG_WARN(db_options.info_log, "Failed to cleanup file %s: %s",
-                       subchild_path.c_str(), status.ToString().c_str());
+                       subchild_path.c_str(), status.ToString()->c_str());
       }
     }
     const auto status = db_->GetEnv()->DeleteDir(cleanup_dir);
     if (!status.ok()) {
       ROCKS_LOG_WARN(db_options.info_log, "Failed to cleanup dir %s: %s",
-                     cleanup_dir.c_str(), status.ToString().c_str());
+                     cleanup_dir.c_str(), status.ToString()->c_str());
     }
   }
   return s;

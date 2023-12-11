@@ -12,8 +12,13 @@
 #include <vector>
 
 #include "rocksdb/db.h"
-#include "rocksdb/status.h"
 #include "rocksdb/utilities/stackable_db.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -153,20 +158,18 @@ class BlobDB : public StackableDB {
   }
 
   using ROCKSDB_NAMESPACE::StackableDB::MultiGet;
-  virtual std::vector<Status> MultiGet(
+  virtual rust::Vec<Status> MultiGet(
       const ReadOptions& options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) override = 0;
-  virtual std::vector<Status> MultiGet(
+  virtual rust::Vec<Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override {
     for (auto column_family : column_families) {
       if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-        return Status_CreateVec(
-            column_families.size(),
-            Status_NotSupported(
-                "Blob DB doesn't support non-default column family."));
+        return Status_NotSupported("Blob DB doesn't support non-default column family.")
+            .create_vec(column_families.size());
       }
     }
     return MultiGet(options, keys, values);

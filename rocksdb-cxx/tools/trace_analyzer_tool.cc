@@ -32,7 +32,6 @@
 #include "rocksdb/iterator.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/slice_transform.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table_properties.h"
 #include "rocksdb/utilities/ldb_cmd.h"
 #include "rocksdb/write_batch.h"
@@ -45,6 +44,12 @@
 #include "util/gflags_compat.h"
 #include "util/random.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 using GFLAGS_NAMESPACE::ParseCommandLineFlags;
 
@@ -1886,21 +1891,21 @@ int trace_analyzer_tool(int argc, char** argv) {
 
   ROCKSDB_NAMESPACE::Status s = analyzer->PrepareProcessing();
   if (!s.ok()) {
-    fprintf(stderr, "%s\n", s.getState());
+    fprintf(stderr, "%s\n", s.getState()->c_str());
     fprintf(stderr, "Cannot initiate the trace reader\n");
     exit(1);
   }
 
   s = analyzer->StartProcessing();
   if (!s.ok() && !FLAGS_try_process_corrupted_trace) {
-    fprintf(stderr, "%s\n", s.getState());
+    fprintf(stderr, "%s\n", s.getState()->c_str());
     fprintf(stderr, "Cannot process the trace\n");
     exit(1);
   }
 
   s = analyzer->MakeStatistics();
   if (!s.ok()) {
-    fprintf(stderr, "%s\n", s.getState());
+    fprintf(stderr, "%s\n", s.getState()->c_str());
     analyzer->EndProcessing();
     fprintf(stderr, "Cannot make the statistics\n");
     exit(1);
@@ -1908,7 +1913,7 @@ int trace_analyzer_tool(int argc, char** argv) {
 
   s = analyzer->ReProcessing();
   if (!s.ok()) {
-    fprintf(stderr, "%s\n", s.getState());
+    fprintf(stderr, "%s\n", s.getState()->c_str());
     fprintf(stderr, "Cannot re-process the trace for more statistics\n");
     analyzer->EndProcessing();
     exit(1);
@@ -1916,7 +1921,7 @@ int trace_analyzer_tool(int argc, char** argv) {
 
   s = analyzer->EndProcessing();
   if (!s.ok()) {
-    fprintf(stderr, "%s\n", s.getState());
+    fprintf(stderr, "%s\n", s.getState()->c_str());
     fprintf(stderr, "Cannot close the trace analyzer\n");
     exit(1);
   }

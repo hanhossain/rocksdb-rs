@@ -623,11 +623,11 @@ class DB {
   // Similarly, the number of returned statuses will be the number of keys.
   // Note: keys will not be "de-duplicated". Duplicate keys will return
   // duplicate values in order.
-  virtual std::vector<Status> MultiGet(
+  virtual rust::Vec<Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values) = 0;
-  virtual std::vector<Status> MultiGet(const ReadOptions& options,
+  virtual rust::Vec<Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
                                        std::vector<std::string>* values) {
     return MultiGet(
@@ -636,15 +636,14 @@ class DB {
         keys, values);
   }
 
-  virtual std::vector<Status> MultiGet(
+  virtual rust::Vec<Status> MultiGet(
       const ReadOptions& /*options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys, std::vector<std::string>* /*values*/,
       std::vector<std::string>* /*timestamps*/) {
-    return Status_CreateVec(keys.size(), Status_NotSupported(
-                         "MultiGet() returning timestamps not implemented."));
+    return Status_NotSupported("MultiGet() returning timestamps not implemented.").create_vec(keys.size());
   }
-  virtual std::vector<Status> MultiGet(const ReadOptions& options,
+  virtual rust::Vec<Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
                                        std::vector<std::string>* values,
                                        std::vector<std::string>* timestamps) {
@@ -686,8 +685,11 @@ class DB {
       cf.emplace_back(column_family);
       user_keys.emplace_back(keys[i]);
     }
-    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals);
-    Status_CopyVec(status, statuses);
+    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals);
+    for (auto& s : status) {
+      statuses->copy_from(s);
+      statuses++;
+    }
     for (auto& value : vals) {
       values->PinSelf(value);
       values++;
@@ -708,8 +710,11 @@ class DB {
       cf.emplace_back(column_family);
       user_keys.emplace_back(keys[i]);
     }
-    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
-    Status_CopyVec(status, statuses);
+    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
+    for (auto& s : status) {
+      statuses->copy_from(s);
+      statuses++;
+    }
     std::copy(tss.begin(), tss.end(), timestamps);
     for (auto& value : vals) {
       values->PinSelf(value);
@@ -748,8 +753,11 @@ class DB {
       cf.emplace_back(column_families[i]);
       user_keys.emplace_back(keys[i]);
     }
-    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals);
-    Status_CopyVec(status, statuses);
+    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals);
+    for (auto& s : status) {
+      statuses->copy_from(s);
+      statuses++;
+    }
     for (auto& value : vals) {
       values->PinSelf(value);
       values++;
@@ -768,8 +776,11 @@ class DB {
       cf.emplace_back(column_families[i]);
       user_keys.emplace_back(keys[i]);
     }
-    std::vector<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
-    Status_CopyVec(status, statuses);
+    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
+    for (auto& s : status) {
+      statuses->copy_from(s);
+      statuses++;
+    }
     std::copy(tss.begin(), tss.end(), timestamps);
     for (auto& value : vals) {
       values->PinSelf(value);

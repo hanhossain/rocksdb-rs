@@ -6726,7 +6726,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       // `DBImpl::CompactRange:PostRefitLevel` in sync point dependency with
       // `DBImpl::ReFitLevel:PostRegisterCompaction`
       EXPECT_TRUE(s.IsNotSupported());
-      EXPECT_TRUE(s.ToString().find("some ongoing compaction's output") !=
+      EXPECT_TRUE(s.ToString()->find("some ongoing compaction's output") !=
                   std::string::npos);
     } else if (compaction_path_to_test_ == "CompactFiles") {
       ColumnFamilyMetaData cf_meta_data;
@@ -6742,7 +6742,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       // this would have been `Status_Corruption` about overlapping ranges
       EXPECT_TRUE(s.IsAborted());
       EXPECT_TRUE(
-          s.ToString().find(
+          s.ToString()->find(
               "A running compaction is writing to the same output level") !=
           std::string::npos);
     } else {

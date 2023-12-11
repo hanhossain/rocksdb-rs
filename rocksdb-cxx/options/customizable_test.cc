@@ -1615,7 +1615,7 @@ class LoadCustomizableTest : public testing::Test {
               result.copy_from(s);
             }
             printf("%s: Failed creating plugin[%s]: %s\n", T::Type(),
-                   name.c_str(), s.ToString().c_str());
+                   name.c_str(), s.ToString()->c_str());
           } else if (object->get() == nullptr ||
                      !object->get()->IsInstanceOf(name)) {
             failed->push_back(name);
@@ -1685,7 +1685,7 @@ class LoadCustomizableTest : public testing::Test {
               result.copy_from(s);
             }
             printf("%s: Failed creating plugin[%s]: %s\n", T::Type(),
-                   name.c_str(), s.ToString().c_str());
+                   name.c_str(), s.ToString()->c_str());
           }
           if (delete_objects) {
             delete *object;
@@ -1987,7 +1987,7 @@ TEST_F(LoadCustomizableTest, LoadMemoryAllocatorTest) {
       } else if (failure == MemkindKmemAllocator::kClassName()) {
         ASSERT_FALSE(MemkindKmemAllocator::IsSupported());
       } else {
-        printf("BYPASSED: %s -- %s\n", failure.c_str(), s.ToString().c_str());
+        printf("BYPASSED: %s -- %s\n", failure.c_str(), s.ToString()->c_str());
       }
     }
   }

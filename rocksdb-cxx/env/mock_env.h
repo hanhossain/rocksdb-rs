@@ -16,8 +16,13 @@
 #include "env/composite_env_wrapper.h"
 #include "port/port.h"
 #include "rocksdb/env.h"
-#include "rocksdb/status.h"
 #include "rocksdb/system_clock.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 class MemFile;

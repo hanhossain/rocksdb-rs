@@ -453,7 +453,7 @@ void FilterBench::Go() {
             builder->MaybePostVerify(info.filter_);
       }
       if (!info.filter_construction_status.ok()) {
-        PrintError(info.filter_construction_status.ToString().c_str());
+        PrintError(info.filter_construction_status.ToString()->c_str());
       }
 #ifdef PREDICT_FP_RATE
       weighted_predicted_fp_rate +=

@@ -657,7 +657,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromMultiFiles) {
     autovector<BlobFileReadRequests> blob_reqs;
     std::array<autovector<BlobReadRequest>, blob_files> blob_reqs_in_file;
     std::array<PinnableSlice, num_blobs * blob_files> value_buf;
-    std::vector<Status> statuses_buf = Status_CreateVec(num_blobs * blob_files, Status_new());
+    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs * blob_files);
 
     for (size_t i = 0; i < blob_files; ++i) {
       const uint64_t file_number = i + 1;
@@ -711,7 +711,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromMultiFiles) {
 
     autovector<BlobReadRequest> fake_blob_reqs_in_file;
     std::array<PinnableSlice, num_blobs> fake_value_buf;
-    std::vector<Status> fake_statuses_buf = Status_CreateVec(num_blobs, Status_new());
+    rust::Vec<Status> fake_statuses_buf = Status_new().create_vec(num_blobs);
 
     const uint64_t fake_file_number = 100;
     for (size_t i = 0; i < num_blobs; ++i) {
@@ -835,7 +835,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
   {
     // MultiGetBlobFromOneFile
     uint64_t bytes_read = 0;
-    std::vector<Status> statuses_buf = Status_CreateVec(num_blobs, Status_new());
+    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs);
     std::array<PinnableSlice, num_blobs> value_buf;
     autovector<BlobReadRequest> blob_reqs;
 
@@ -957,7 +957,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     uint64_t bytes_read = 0;
     read_options.read_tier = ReadTier::kBlockCacheTier;
 
-    std::vector<Status> statuses_buf = Status_CreateVec(num_blobs, Status_new());
+    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs);
     std::array<PinnableSlice, num_blobs> value_buf;
     autovector<BlobReadRequest> blob_reqs;
 
@@ -1001,7 +1001,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     uint64_t non_existing_file_number = 100;
     read_options.read_tier = ReadTier::kReadAllTier;
 
-    std::vector<Status> statuses_buf = Status_CreateVec(num_blobs, Status_new());
+    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs);
     std::array<PinnableSlice, num_blobs> value_buf;
     autovector<BlobReadRequest> blob_reqs;
 

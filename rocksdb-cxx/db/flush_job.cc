@@ -37,7 +37,6 @@
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/statistics.h"
-#include "rocksdb/status.h"
 #include "rocksdb/table.h"
 #include "table/merging_iterator.h"
 #include "table/table_builder.h"
@@ -46,6 +45,12 @@
 #include "util/coding.h"
 #include "util/mutexlock.h"
 #include "util/stop_watch.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -258,12 +263,12 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
       // bytes cannot be contained onto a single output memtable.
       if (mempurge_s.IsAborted()) {
         ROCKS_LOG_INFO(db_options_.info_log, "Mempurge process aborted: %s\n",
-                       mempurge_s.ToString().c_str());
+                       mempurge_s.ToString()->c_str());
       } else {
         // However the mempurge process can also fail for
         // other reasons (eg: new_mem->Add() fails).
         ROCKS_LOG_WARN(db_options_.info_log, "Mempurge process failed: %s\n",
-                       mempurge_s.ToString().c_str());
+                       mempurge_s.ToString()->c_str());
       }
     } else {
       if (switched_to_mempurge) {
@@ -903,7 +908,7 @@ Status FlushJob::WriteLevel0Table() {
             db_options_.info_log,
             "Failed to get current time to populate creation_time property. "
             "Status: %s",
-            status.ToString().c_str());
+            status.ToString()->c_str());
       }
       const uint64_t current_time = static_cast<uint64_t>(_current_time);
 
@@ -977,7 +982,7 @@ Status FlushJob::WriteLevel0Table() {
                      "%s",
                      cfd_->GetName().c_str(), job_context_->job_id,
                      meta_.fd.GetNumber(), meta_.fd.GetFileSize(),
-                     s.ToString().c_str(),
+                     s.ToString()->c_str(),
                      meta_.marked_for_compaction ? " (needs compaction)" : "");
 
     if (s.ok() && output_file_directory_ != nullptr && sync_output_directory_) {

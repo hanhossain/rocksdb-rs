@@ -21,7 +21,7 @@
 namespace ROCKSDB_NAMESPACE {
 
 struct ImmutableOptions;
-class Status;
+struct Status;
 class FilePrefetchBuffer;
 class Slice;
 

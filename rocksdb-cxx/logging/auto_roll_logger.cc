@@ -215,7 +215,7 @@ void AutoRollLogger::Logv(const char* format, va_list ap) {
 
       if (!s2.ok()) {
         ROCKS_LOG_WARN(logger.get(), "Fail to trim old info log file: %s",
-                       s2.ToString().c_str());
+                       s2.ToString()->c_str());
       }
     }
 

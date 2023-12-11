@@ -6,7 +6,13 @@
 #include <fcntl.h>
 
 #include "rocksdb/env.h"
-#include "rocksdb/status.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
+
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -128,7 +134,7 @@ TEST_F(LockTest, LockBySameThread) {
   ASSERT_TRUE(s.IsIOError());
 #ifndef OS_WIN
   // Validate that error message contains current thread ID.
-  ASSERT_TRUE(s.ToString().find(std::to_string(
+  ASSERT_TRUE(s.ToString()->find(std::to_string(
                   Env::Default()->GetThreadID())) != std::string::npos);
 #endif
 

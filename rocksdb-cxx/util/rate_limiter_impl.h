@@ -17,10 +17,15 @@
 #include "port/port.h"
 #include "rocksdb/env.h"
 #include "rocksdb/rate_limiter.h"
-#include "rocksdb/status.h"
 #include "rocksdb/system_clock.h"
 #include "util/mutexlock.h"
 #include "util/random.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/status.h"
+#else
+#include "rocksdb-rs/src/status.rs.h"
+#endif
 
 namespace ROCKSDB_NAMESPACE {
 

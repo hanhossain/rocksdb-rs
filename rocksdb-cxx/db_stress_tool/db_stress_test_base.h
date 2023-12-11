@@ -90,7 +90,7 @@ class StressTest {
                          const std::vector<int>& rand_column_families,
                          const std::vector<int64_t>& rand_keys) = 0;
 
-  virtual std::vector<Status> TestMultiGet(
+  virtual rust::Vec<Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& read_opts,
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) = 0;

@@ -49,7 +49,7 @@ TEST_F(DBBasicTest, OpenWhenOpen) {
   }();
   ASSERT_EQ(Code::kIOError, s.code());
   ASSERT_EQ(SubCode::kNone, s.subcode());
-  ASSERT_TRUE(strstr(s.getState(), "lock ") != nullptr);
+  ASSERT_TRUE(strstr(s.getState()->c_str(), "lock ") != nullptr);
 
   delete db2;
 }
@@ -231,14 +231,14 @@ TEST_F(DBBasicTest, CompactedDB) {
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
   Status s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported operation in read only mode.");
   ASSERT_EQ(DummyString(kFileSize / 2, '1'), Get("aaa"));
   Close();
   options.max_open_files = -1;
   ASSERT_OK(ReadOnlyReopen(options));
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported in compacted db mode.");
   ASSERT_EQ(DummyString(kFileSize / 2, '1'), Get("aaa"));
   Close();
@@ -257,7 +257,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   ASSERT_OK(ReadOnlyReopen(options));
   // Fallback to read-only DB
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported operation in read only mode.");
 
   // TODO: validate that other write ops return NotImplemented
@@ -289,7 +289,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   // CompactedDB
   ASSERT_OK(ReadOnlyReopen(options));
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported in compacted db mode.");
   ASSERT_EQ("NOT_FOUND", Get("abc"));
   ASSERT_EQ(DummyString(kFileSize / 2, 'a'), Get("aaa"));
@@ -312,7 +312,7 @@ TEST_F(DBBasicTest, CompactedDB) {
 
   // MultiGet
   std::vector<std::string> values;
-  std::vector<Status> status_list = dbfull()->MultiGet(
+  rust::Vec<Status> status_list = dbfull()->MultiGet(
       ReadOptions(),
       std::vector<Slice>({Slice("aaa"), Slice("ccc"), Slice("eee"),
                           Slice("ggg"), Slice("iii"), Slice("kkk")}),
@@ -335,7 +335,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
   s = Put("new", "value");
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported operation in read only mode.");
 }
 
@@ -355,7 +355,7 @@ TEST_F(DBBasicTest, LevelLimitReopen) {
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
   Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
-  ASSERT_EQ(s.ToString(),
+  ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
 
   options.num_levels = 10;
@@ -457,7 +457,7 @@ TEST_F(DBBasicTest, CheckLock) {
       return "localdb open: ok";
     }();
 #ifdef OS_LINUX
-    ASSERT_TRUE(s.ToString().find("lock ") != std::string::npos);
+    ASSERT_TRUE(s.ToString()->find("lock ") != std::string::npos);
 #endif  // OS_LINUX
   } while (ChangeCompactOptions());
 }
@@ -849,7 +849,7 @@ TEST_F(DBBasicTest, DBOpen_Options) {
   DB* db = nullptr;
   options.create_if_missing = false;
   Status s = DB::Open(options, dbname_, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "does not exist") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "does not exist") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does not exist, and create_if_missing == true: OK
@@ -865,7 +865,7 @@ TEST_F(DBBasicTest, DBOpen_Options) {
   options.create_if_missing = false;
   options.error_if_exists = true;
   s = DB::Open(options, dbname_, &db);
-  ASSERT_TRUE(strstr(s.ToString().c_str(), "exists") != nullptr);
+  ASSERT_TRUE(strstr(s.ToString()->c_str(), "exists") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
   // Does exist, and error_if_exists == false: OK
@@ -1012,7 +1012,7 @@ TEST_F(DBBasicTest, MultiGetSimple) {
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
 
     get_perf_context()->Reset();
-    std::vector<Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
+    rust::Vec<Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
     ASSERT_EQ(values.size(), keys.size());
     ASSERT_EQ(values[0], "v1");
     ASSERT_EQ(values[1], "v2");
@@ -1038,7 +1038,7 @@ TEST_F(DBBasicTest, MultiGetEmpty) {
     std::vector<Slice> keys;
     std::vector<std::string> values;
     std::vector<ColumnFamilyHandle*> cfs;
-    std::vector<Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
+    rust::Vec<Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
     ASSERT_EQ(s.size(), 0U);
 
     // Empty Database, Empty Key Set
@@ -1585,7 +1585,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSimpleUnsorted) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k2", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s = Status_CreateVec(keys.size(), Status_new());
+    rust::Vec<Status> s = Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1643,7 +1643,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSortedMultiFile) {
     std::vector<Slice> keys({"k1", "k2", "k3", "k4", "k5", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s = Status_CreateVec(keys.size(), Status_new());
+    rust::Vec<Status> s = Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1709,7 +1709,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedDuplicateKeys) {
   std::vector<Slice> keys({"k8", "k8", "k8", "k4", "k4", "k1", "k3"});
   std::vector<PinnableSlice> values(keys.size());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-  std::vector<Status> s = Status_CreateVec(keys.size(), Status_new());
+  rust::Vec<Status> s = Status_new().create_vec(keys.size());
 
   ReadOptions ro;
   ro.async_io = std::get<1>(GetParam());
@@ -1938,7 +1938,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeInMemory) {
   ASSERT_OK(Put(1, "k6", "v_6"));
   std::vector<Slice> keys = {"k1", "k2", "k3", "k4", "k5", "k6"};
   std::vector<PinnableSlice> values(keys.size());
-  std::vector<Status> s = Status_CreateVec(keys.size(), Status_new());
+  rust::Vec<Status> s = Status_new().create_vec(keys.size());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
 
   get_perf_context()->Reset();
@@ -2008,7 +2008,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSize) {
                              "k8", "k9", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s = Status_CreateVec(keys.size(), Status_new());
+    rust::Vec<Status> s = Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.value_size_soft_limit = 20;
@@ -2125,7 +2125,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeMultiLevelMerge) {
   }
 
   std::vector<PinnableSlice> values(keys_str.size());
-  std::vector<Status> statuses = Status_CreateVec(keys_str.size(), Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys_str.size());
   ReadOptions read_options;
   read_options.verify_checksums = true;
   read_options.value_size_soft_limit = 380;
@@ -2666,7 +2666,7 @@ TEST_F(DBBasicTest, MultiGetStats) {
   std::vector<Slice> keys(total_keys);
   static size_t kMultiGetBatchSize = 100;
   std::vector<PinnableSlice> values(kMultiGetBatchSize);
-  std::vector<Status> s = Status_CreateVec(kMultiGetBatchSize, Status_new());
+  rust::Vec<Status> s = Status_new().create_vec(kMultiGetBatchSize);
   ReadOptions read_opts;
 
   Random rnd(309);
@@ -2834,7 +2834,7 @@ TEST_P(DBMultiGetRowCacheTest, MultiGetBatched) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    std::vector<Status> s = Status_CreateVec(keys.size(), Status_new());
+    rust::Vec<Status> s = Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     bool use_snapshots = GetParam();
@@ -2988,7 +2988,6 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
   // We cannot resize a PinnableSlice vector, so just set initial size to
   // largest we think we will need
   std::vector<PinnableSlice> values(10);
-  std::vector<Status> statuses;
   ReadOptions ro;
 
   // Warm up the cache first
@@ -2996,7 +2995,7 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  Status_VecResize(keys.size(), statuses, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3677,7 +3676,6 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   // We cannot resize a PinnableSlice vector, so just set initial size to
   // largest we think we will need
   std::vector<PinnableSlice> values(10);
-  std::vector<Status> statuses;
   ReadOptions ro;
   ro.fill_cache = fill_cache();
 
@@ -3686,8 +3684,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  // statuses.resize(keys.size(), Status_new());
-  Status_VecResize(keys.size(), statuses, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3719,7 +3716,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(10);
-  Status_VecResize(10, statuses, Status_new());
+  Status_new().resize_vec(statuses, 10);
   std::vector<int> key_ints{1, 2, 15, 16, 55, 81, 82, 83, 84, 85};
   for (size_t i = 0; i < key_ints.size(); ++i) {
     key_data[i] = Key(key_ints[i]);
@@ -3741,7 +3738,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(10);
-  Status_VecResize(10, statuses, Status_new());
+  Status_new().resize_vec(statuses, 10);
   std::vector<int> key_uncmp{1, 2, 15, 16, 55, 81, 82, 83, 84, 85};
   for (size_t i = 0; i < key_uncmp.size(); ++i) {
     key_data[i] = "a" + Key(key_uncmp[i]);
@@ -3763,7 +3760,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(5);
-  Status_VecResize(5, statuses, Status_new());
+  Status_new().resize_vec(statuses, 5);
   std::vector<int> key_tr{1, 2, 15, 16, 55};
   for (size_t i = 0; i < key_tr.size(); ++i) {
     key_data[i] = "a" + Key(key_tr[i]);
@@ -3859,7 +3856,6 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetDirectIO) {
   // We cannot resize a PinnableSlice vector, so just set initial size to
   // largest we think we will need
   std::vector<PinnableSlice> values(10);
-  std::vector<Status> statuses;
   ReadOptions ro;
   ro.fill_cache = fill_cache();
 
@@ -3868,7 +3864,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetDirectIO) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  Status_VecResize(keys.size(), statuses, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3918,7 +3914,6 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
   // We cannot resize a PinnableSlice vector, so just set initial size to
   // largest we think we will need
   std::vector<PinnableSlice> values(10);
-  std::vector<Status> statuses;
   int read_count = 0;
   ReadOptions ro;
   ro.fill_cache = fill_cache();
@@ -3938,7 +3933,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  Status_VecResize(keys.size(), statuses, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3956,7 +3951,6 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
   // We cannot resize a PinnableSlice vector, so just set initial size to
   // largest we think we will need
   std::vector<PinnableSlice> values(10);
-  std::vector<Status> statuses;
   ReadOptions ro;
   ro.fill_cache = fill_cache();
 
@@ -3986,7 +3980,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  Status_VecResize(keys.size(), statuses, Status_new());
+  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -4218,7 +4212,7 @@ class DBBasicTestMultiGetDeadline : public DBBasicTestMultiGet,
             true /*compression enabled*/, true /*ReadOptions.fill_cache*/,
             1 /*# of parallel compression threads*/) {}
 
-  inline void CheckStatus(std::vector<Status>& statuses, size_t num_ok) {
+  inline void CheckStatus(const rust::Vec<Status>& statuses, size_t num_ok) {
     for (size_t i = 0; i < statuses.size(); ++i) {
       if (i < num_ok) {
         EXPECT_OK(statuses[i]);
@@ -4272,7 +4266,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   // Delay the first IO
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 0);
 
-  std::vector<Status> statuses = dbfull()->MultiGet(ro, cfs, keys, &values);
+  rust::Vec<Status> statuses = dbfull()->MultiGet(ro, cfs, keys, &values);
   // The first key is successful because we check after the lookup, but
   // subsequent keys fail due to deadline exceeded
   CheckStatus(statuses, 1);
@@ -4307,7 +4301,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  Status_VecResize(keys.size(), statuses, Status_new());
+  Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 0);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4322,7 +4316,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  Status_VecResize(keys.size(), statuses, Status_new());
+  Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 2);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4336,8 +4330,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  //statuses.resize(keys.size(), Status_new());
-  Status_VecResize(keys.size(), statuses, Status_new());
+  Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 3);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4363,7 +4356,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
     keys[i] = Slice(key_str[i].data(), key_str[i].size());
   }
   statuses.clear();
-  Status_VecResize(keys.size(), statuses, Status_new());
+  Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 1);
   dbfull()->MultiGet(ro, handles_[0], keys.size(), keys.data(),

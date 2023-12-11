@@ -867,7 +867,6 @@ set(SOURCES
         util/ribbon_config.cc
         util/slice.cc
         util/file_checksum_helper.cc
-        util/status.cc
         util/stderr_logger.cc
         util/string_util.cc
         util/thread_local.cc

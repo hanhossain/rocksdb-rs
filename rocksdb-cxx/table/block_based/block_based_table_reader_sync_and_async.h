@@ -370,7 +370,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE> block_handles;
     std::array<CachableEntry<Block_kData>, MultiGetContext::MAX_BATCH_SIZE>
         results;
-    std::vector<Status> statuses = Status_CreateVec(MultiGetContext::MAX_BATCH_SIZE, Status_new());
+    rust::Vec<Status> statuses = Status_new().create_vec(MultiGetContext::MAX_BATCH_SIZE);
     // Empty data_lookup_contexts means "unused," when block cache tracing is
     // disabled. (Limited options as element type is not default contructible.)
     std::vector<BlockCacheLookupContext> data_lookup_contexts;

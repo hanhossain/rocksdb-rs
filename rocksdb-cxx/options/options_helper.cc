@@ -679,7 +679,7 @@ Status GetColumnFamilyOptionsFromMap(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(s.getState());
+    return Status_InvalidArgument(*s.getState());
   }
 }
 
@@ -711,7 +711,7 @@ Status GetDBOptionsFromMap(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(s.getState());
+    return Status_InvalidArgument(*s.getState());
   }
 }
 
@@ -772,7 +772,7 @@ Status GetOptionsFromString(const ConfigOptions& config_options,
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(s.getState());
+    return Status_InvalidArgument(*s.getState());
   }
 }
 
