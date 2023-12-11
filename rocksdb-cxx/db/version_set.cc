@@ -7203,7 +7203,6 @@ Status ReactiveVersionSet::Recover(
   assert(manifest_reporter != nullptr);
   assert(manifest_reader_status != nullptr);
 
-  // TODO: this might cause issues when moving Status to rust
   *manifest_reader_status = std::make_unique<Status>(Status_new());
   manifest_reporter->reset(new LogReporter());
   static_cast_with_check<LogReporter>(manifest_reporter->get())->status =

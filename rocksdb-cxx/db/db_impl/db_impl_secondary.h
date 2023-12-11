@@ -23,13 +23,11 @@ class LogReaderContainer {
                      std::string fname,
                      std::unique_ptr<SequentialFileReader>&& file_reader,
                      uint64_t log_number) {
-    LogReporter* reporter = new LogReporter();
-    // TODO: This will probably cause issues when moving Status to pure rust. Try using a unique_ptr instead.
     status_ = std::make_unique<Status>(Status_new());
+    LogReporter* reporter = new LogReporter(status_);
     reporter->env = env;
     reporter->info_log = info_log.get();
     reporter->fname = std::move(fname);
-    reporter->status->copy_from(*status_);
     reporter_ = reporter;
     // We intentially make log::Reader do checksumming even if
     // paranoid_checks==false so that corruptions cause entire commits
@@ -53,6 +51,10 @@ class LogReaderContainer {
     Logger* info_log;
     std::string fname;
     std::unique_ptr<Status> status;  // nullptr if immutable_db_options_.paranoid_checks==false
+
+    LogReporter() : env(nullptr), info_log(nullptr), status(nullptr) {}
+    LogReporter(const std::unique_ptr<Status>& _status) : status(std::make_unique<Status>(_status->Clone())) {}
+
     void Corruption(size_t bytes, const Status& s) override {
       ROCKS_LOG_WARN(info_log, "%s%s: dropping %d bytes; %s",
                      (this->status == nullptr ? "(ignoring error) " : ""),
