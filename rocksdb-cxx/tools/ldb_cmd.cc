@@ -1203,7 +1203,7 @@ void CompactorCommand::DoCommand() {
   Status s = db_->CompactRange(cro, GetCfHandle(), begin, end);
   if (!s.ok()) {
     std::stringstream oss;
-    oss << "Compaction failed: " << s.ToString();
+    oss << "Compaction failed: " << *s.ToString();
     exec_state_ = LDBCommandExecuteResult::Failed(oss.str());
   } else {
     exec_state_ = LDBCommandExecuteResult::Succeed("");
@@ -1290,7 +1290,7 @@ void DBLoaderCommand::DoCommand() {
   }
   if (!s.ok()) {
     std::stringstream oss;
-    oss << "Load failed: " << s.ToString();
+    oss << "Load failed: " << *s.ToString();
     exec_state_ = LDBCommandExecuteResult::Failed(oss.str());
   }
   if (compact_ && s.ok()) {
@@ -1299,7 +1299,7 @@ void DBLoaderCommand::DoCommand() {
   }
   if (!s.ok()) {
     std::stringstream oss;
-    oss << "Compaction failed: " << s.ToString();
+    oss << "Compaction failed: " << *s.ToString();
     exec_state_ = LDBCommandExecuteResult::Failed(oss.str());
   }
 }
@@ -2446,7 +2446,7 @@ void ChangeCompactionStyleCommand::DoCommand() {
       db_->CompactRange(compact_options, GetCfHandle(), nullptr, nullptr);
   if (!s.ok()) {
     std::stringstream oss;
-    oss << "Compaction failed: " << s.ToString();
+    oss << "Compaction failed: " << *s.ToString();
     exec_state_ = LDBCommandExecuteResult::Failed(oss.str());
     return;
   }
@@ -2495,7 +2495,7 @@ namespace {
 
 struct StdErrReporter : public log::Reader::Reporter {
   void Corruption(size_t /*bytes*/, const Status& s) override {
-    std::cerr << "Corruption detected in log file " << s.ToString() << "\n";
+    std::cerr << "Corruption detected in log file " << *s.ToString() << "\n";
   }
 };
 
@@ -2616,7 +2616,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
       *exec_state = LDBCommandExecuteResult::Failed("Failed to open WAL file " +
                                                     *status.ToString());
     } else {
-      std::cerr << "Error: Failed to open WAL file " << status.ToString()
+      std::cerr << "Error: Failed to open WAL file " << *status.ToString()
                 << std::endl;
     }
   } else {
@@ -2655,7 +2655,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
         status = WriteBatchInternal::SetContents(&batch, record);
         if (!status.ok()) {
           std::stringstream oss;
-          oss << "Parsing write batch failed: " << status.ToString();
+          oss << "Parsing write batch failed: " << *status.ToString();
           if (exec_state) {
             *exec_state = LDBCommandExecuteResult::Failed(oss.str());
           } else {
@@ -2672,10 +2672,10 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
         if (!status.ok()) {
           if (exec_state) {
             std::stringstream oss;
-            oss << "Print write batch error: " << status.ToString();
+            oss << "Print write batch error: " << *status.ToString();
             *exec_state = LDBCommandExecuteResult::Failed(oss.str());
           }
-          row << "error: " << status.ToString();
+          row << "error: " << *status.ToString();
           break;
         }
         row << "\n";
@@ -2774,7 +2774,7 @@ void GetCommand::DoCommand() {
             (is_value_hex_ ? StringToHex(value) : value).c_str());
   } else {
     std::stringstream oss;
-    oss << "Get failed: " << st.ToString();
+    oss << "Get failed: " << *st.ToString();
     exec_state_ = LDBCommandExecuteResult::Failed(oss.str());
   }
 }
@@ -2828,7 +2828,7 @@ void ApproxSizeCommand::DoCommand() {
   Status s = db_->GetApproximateSizes(GetCfHandle(), ranges, 1, sizes);
   if (!s.ok()) {
     std::stringstream oss;
-    oss << "ApproximateSize failed: " << s.ToString();
+    oss << "ApproximateSize failed: " << *s.ToString();
     exec_state_ = LDBCommandExecuteResult::Failed(oss.str());
   } else {
     fprintf(stdout, "%lu\n", (unsigned long)sizes[0]);
@@ -2886,14 +2886,14 @@ void BatchPutCommand::DoCommand() {
     st = batch.Put(GetCfHandle(), itr->first, itr->second);
     if (!st.ok()) {
       oss << "Put to write batch failed: " << itr->first << "=>" << itr->second
-          << " error: " << st.ToString();
+          << " error: " << *st.ToString();
       break;
     }
   }
   if (st.ok()) {
     st = db_->Write(WriteOptions(), &batch);
     if (!st.ok()) {
-      oss << "Write failed: " << st.ToString();
+      oss << "Write failed: " << *st.ToString();
     }
   }
   if (st.ok()) {
@@ -3292,7 +3292,7 @@ void DBQuerierCommand::DoCommand() {
       if (s.ok()) {
         fprintf(stdout, "Successfully deleted %s\n", tokens[1].c_str());
       } else {
-        oss << "delete " << key << " failed: " << s.ToString();
+        oss << "delete " << key << " failed: " << *s.ToString();
       }
     } else if (cmd == PUT_CMD && tokens.size() == 3) {
       key = (is_key_hex_ ? HexToString(tokens[1]) : tokens[1]);
@@ -3302,7 +3302,7 @@ void DBQuerierCommand::DoCommand() {
         fprintf(stdout, "Successfully put %s %s\n", tokens[1].c_str(),
                 tokens[2].c_str());
       } else {
-        oss << "put " << key << "=>" << value << " failed: " << s.ToString();
+        oss << "put " << key << "=>" << value << " failed: " << *s.ToString();
       }
     } else if (cmd == GET_CMD && tokens.size() == 2) {
       key = (is_key_hex_ ? HexToString(tokens[1]) : tokens[1]);
@@ -3314,7 +3314,7 @@ void DBQuerierCommand::DoCommand() {
         if (s.IsNotFound()) {
           fprintf(stdout, "Not found %s\n", tokens[1].c_str());
         } else {
-          oss << "get " << key << " error: " << s.ToString();
+          oss << "get " << key << " error: " << *s.ToString();
         }
       }
     } else {
@@ -3612,7 +3612,7 @@ void DumpSstFile(Options options, std::string filename, bool output_hex,
                                     !from_key.empty(), from_key,
                                     !to_key.empty(), to_key);
   if (!st.ok()) {
-    std::cerr << "Error in reading SST file " << filename << st.ToString()
+    std::cerr << "Error in reading SST file " << filename << *st.ToString()
               << std::endl;
     return;
   }
@@ -3624,7 +3624,7 @@ void DumpSstFile(Options options, std::string filename, bool output_hex,
         table_properties_from_reader;
     st = dumper.ReadTableProperties(&table_properties_from_reader);
     if (!st.ok()) {
-      std::cerr << filename << ": " << st.ToString()
+      std::cerr << filename << ": " << *st.ToString()
                 << ". Try to use initial table properties" << std::endl;
       table_properties = dumper.GetInitTableProperties();
     } else {

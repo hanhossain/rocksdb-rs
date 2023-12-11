@@ -36,7 +36,7 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
                                                   &dbptr);
   if (!status.ok()) {
     std::cerr << "Unable to open database '" << dump_options.db_path
-              << "' for reading: " << status.ToString() << std::endl;
+              << "' for reading: " << *status.ToString() << std::endl;
     return false;
   }
 
@@ -46,21 +46,21 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
                                 ROCKSDB_NAMESPACE::EnvOptions());
   if (!status.ok()) {
     std::cerr << "Unable to open dump file '" << dump_options.dump_location
-              << "' for writing: " << status.ToString() << std::endl;
+              << "' for writing: " << *status.ToString() << std::endl;
     return false;
   }
 
   ROCKSDB_NAMESPACE::Slice magicslice(magicstr, 8);
   status = dumpfile->Append(magicslice);
   if (!status.ok()) {
-    std::cerr << "Append failed: " << status.ToString() << std::endl;
+    std::cerr << "Append failed: " << *status.ToString() << std::endl;
     return false;
   }
 
   ROCKSDB_NAMESPACE::Slice versionslice(versionstr, 8);
   status = dumpfile->Append(versionslice);
   if (!status.ok()) {
-    std::cerr << "Append failed: " << status.ToString() << std::endl;
+    std::cerr << "Append failed: " << *status.ToString() << std::endl;
     return false;
   }
 
@@ -82,12 +82,12 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
   ROCKSDB_NAMESPACE::Slice infosizeslice(infosize, 4);
   status = dumpfile->Append(infosizeslice);
   if (!status.ok()) {
-    std::cerr << "Append failed: " << status.ToString() << std::endl;
+    std::cerr << "Append failed: " << *status.ToString() << std::endl;
     return false;
   }
   status = dumpfile->Append(infoslice);
   if (!status.ok()) {
-    std::cerr << "Append failed: " << status.ToString() << std::endl;
+    std::cerr << "Append failed: " << *status.ToString() << std::endl;
     return false;
   }
 
@@ -99,12 +99,12 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
     ROCKSDB_NAMESPACE::Slice keysizeslice(keysize, 4);
     status = dumpfile->Append(keysizeslice);
     if (!status.ok()) {
-      std::cerr << "Append failed: " << status.ToString() << std::endl;
+      std::cerr << "Append failed: " << *status.ToString() << std::endl;
       return false;
     }
     status = dumpfile->Append(it->key());
     if (!status.ok()) {
-      std::cerr << "Append failed: " << status.ToString() << std::endl;
+      std::cerr << "Append failed: " << *status.ToString() << std::endl;
       return false;
     }
 
@@ -113,17 +113,17 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
     ROCKSDB_NAMESPACE::Slice valsizeslice(valsize, 4);
     status = dumpfile->Append(valsizeslice);
     if (!status.ok()) {
-      std::cerr << "Append failed: " << status.ToString() << std::endl;
+      std::cerr << "Append failed: " << *status.ToString() << std::endl;
       return false;
     }
     status = dumpfile->Append(it->value());
     if (!status.ok()) {
-      std::cerr << "Append failed: " << status.ToString() << std::endl;
+      std::cerr << "Append failed: " << *status.ToString() << std::endl;
       return false;
     }
   }
   if (!it->status().ok()) {
-    std::cerr << "Database iteration failed: " << status.ToString()
+    std::cerr << "Database iteration failed: " << *status.ToString()
               << std::endl;
     return false;
   }
@@ -148,7 +148,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
                                   ROCKSDB_NAMESPACE::EnvOptions());
   if (!status.ok()) {
     std::cerr << "Unable to open dump file '" << undump_options.dump_location
-              << "' for reading: " << status.ToString() << std::endl;
+              << "' for reading: " << *status.ToString() << std::endl;
     return false;
   }
 
@@ -176,7 +176,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
   uint32_t infosize = ROCKSDB_NAMESPACE::DecodeFixed32(slice.data());
   status = dumpfile->Skip(infosize);
   if (!status.ok()) {
-    std::cerr << "Unable to skip info blob: " << status.ToString() << std::endl;
+    std::cerr << "Unable to skip info blob: " << *status.ToString() << std::endl;
     return false;
   }
 
@@ -184,7 +184,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
   status = ROCKSDB_NAMESPACE::DB::Open(options, undump_options.db_path, &dbptr);
   if (!status.ok()) {
     std::cerr << "Unable to open database '" << undump_options.db_path
-              << "' for writing: " << status.ToString() << std::endl;
+              << "' for writing: " << *status.ToString() << std::endl;
     return false;
   }
 

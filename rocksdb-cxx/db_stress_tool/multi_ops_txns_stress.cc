@@ -796,7 +796,7 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
       assert(dbimpl);
       oss << "snap " << read_opts.snapshot->GetSequenceNumber()
           << " (published " << dbimpl->GetLastPublishedSequence() << "), "
-          << s.ToString();
+          << *s.ToString();
       fprintf(stderr, "%s\n", oss.str().c_str());
       assert(false);
       break;
@@ -1181,7 +1181,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
       s = db_->Get(ropts, pk, &value);
       if (!s.ok()) {
         oss << "Error searching pk " << Slice(pk).ToString(true) << ". "
-            << s.ToString() << ". sk " << it->key().ToString(true);
+            << *s.ToString() << ". sk " << it->key().ToString(true);
         VerificationAbort(thread->shared, oss.str(), s);
         assert(false);
         return;
@@ -1190,7 +1190,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
       s.copy_from(std::get<0>(result));
       if (!s.ok()) {
         oss << "Error decoding primary index value "
-            << Slice(value).ToString(true) << ". " << s.ToString();
+            << Slice(value).ToString(true) << ". " << *s.ToString();
         VerificationAbort(thread->shared, oss.str(), s);
         assert(false);
         return;
@@ -1274,7 +1274,7 @@ void MultiOpsTxnsStressTest::VerifyPkSkFast(const ReadOptions& read_options,
     s = db_->Get(ropts, pk, &value);
     if (!s.ok()) {
       oss << "Error searching pk " << Slice(pk).ToString(true) << ". "
-          << s.ToString() << ". sk " << it->key().ToString(true);
+          << *s.ToString() << ". sk " << it->key().ToString(true);
       fprintf(stderr, "%s\n", oss.str().c_str());
       fflush(stderr);
       assert(false);
@@ -1283,7 +1283,7 @@ void MultiOpsTxnsStressTest::VerifyPkSkFast(const ReadOptions& read_options,
     s.copy_from(std::get<0>(result));
     if (!s.ok()) {
       oss << "Error decoding primary index value "
-          << Slice(value).ToString(true) << ". " << s.ToString();
+          << Slice(value).ToString(true) << ". " << *s.ToString();
       fprintf(stderr, "%s\n", oss.str().c_str());
       fflush(stderr);
       assert(false);

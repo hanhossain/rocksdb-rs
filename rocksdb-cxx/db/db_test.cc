@@ -2253,7 +2253,7 @@ TEST_F(DBTest, ComparatorCheck) {
         {"default", "pikachu"}, std::vector<Options>({options, new_options}));
     ASSERT_TRUE(!s.ok());
     ASSERT_TRUE(s.ToString()->find("comparator") != std::string::npos)
-        << s.ToString();
+        << *s.ToString();
   } while (ChangeCompactOptions());
 }
 

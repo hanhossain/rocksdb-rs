@@ -197,7 +197,7 @@ void EventHelpers::LogAndNotifyTableFileDeletion(
           << "table_file_deletion"
           << "file_number" << file_number;
   if (!status.ok()) {
-    jwriter << "status" << status.ToString();
+    jwriter << "status" << *status.ToString();
   }
 
   jwriter.EndObject();
@@ -268,7 +268,7 @@ void EventHelpers::LogAndNotifyBlobFileCreationFinished(
             << "file_number" << file_number << "total_blob_count"
             << total_blob_count << "total_blob_bytes" << total_blob_bytes
             << "file_checksum" << file_checksum << "file_checksum_func_name"
-            << file_checksum_func_name << "status" << s.ToString();
+            << file_checksum_func_name << "status" << *s.ToString();
 
     jwriter.EndObject();
     event_logger->Log(jwriter);
@@ -298,7 +298,7 @@ void EventHelpers::LogAndNotifyBlobFileDeletion(
             << "blob_file_deletion"
             << "file_number" << file_number;
     if (!status.ok()) {
-      jwriter << "status" << status.ToString();
+      jwriter << "status" << *status.ToString();
     }
 
     jwriter.EndObject();

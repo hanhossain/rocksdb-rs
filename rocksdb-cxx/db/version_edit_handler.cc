@@ -82,7 +82,7 @@ void VersionEditHandlerBase::Iterate(log::Reader& reader,
       // append previous dynamic state message
       const std::unique_ptr<std::string>& state = s.getState();
       if (state != nullptr) {
-        message << state;
+        message << *state;
         message << ' ';
       }
       // append the filename to the corruption message

@@ -2271,7 +2271,7 @@ class RandomRWFileWithMirrorString {
 
     // Write to file
     Status s = file_->Write(offset, data);
-    ASSERT_OK(s) << s.ToString();
+    ASSERT_OK(s) << *s.ToString();
   }
 
   void Read(size_t offset = 0, size_t n = 1000000) {
@@ -2284,7 +2284,7 @@ class RandomRWFileWithMirrorString {
 
     Slice file_res;
     Status s = file_->Read(offset, n, &file_res, buf_);
-    ASSERT_OK(s) << s.ToString();
+    ASSERT_OK(s) << *s.ToString();
     StopSliceAtNull(&file_res);
 
     ASSERT_EQ(str_res.ToString(), file_res.ToString()) << offset << " " << n;

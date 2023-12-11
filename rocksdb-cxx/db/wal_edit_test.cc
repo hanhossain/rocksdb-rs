@@ -176,12 +176,12 @@ TEST_F(WalSetTest, CheckMissingWals) {
   }
 
   Status s = CheckWals();
-  ASSERT_TRUE(s.IsCorruption()) << s.ToString();
+  ASSERT_TRUE(s.IsCorruption()) << *s.ToString();
   // The first log with even number is missing.
   std::stringstream expected_err;
   expected_err << "Missing WAL with log number: " << 2;
   ASSERT_TRUE(s.ToString()->find(expected_err.str()) != std::string::npos)
-      << s.ToString();
+      << *s.ToString();
 }
 
 TEST_F(WalSetTest, CheckWalsWithShrinkedSize) {
@@ -196,12 +196,12 @@ TEST_F(WalSetTest, CheckWalsWithShrinkedSize) {
   }
 
   Status s = CheckWals();
-  ASSERT_TRUE(s.IsCorruption()) << s.ToString();
+  ASSERT_TRUE(s.IsCorruption()) << *s.ToString();
   // The first log with even number has wrong size.
   std::stringstream expected_err;
   expected_err << "Size mismatch: WAL (log number: " << 2 << ")";
   ASSERT_TRUE(s.ToString()->find(expected_err.str()) != std::string::npos)
-      << s.ToString();
+      << *s.ToString();
 }
 
 }  // namespace ROCKSDB_NAMESPACE
