@@ -46,6 +46,13 @@ WORKDIR /src/build
 RUN cmake -G Ninja -DWITH_TESTS=OFF ../rocksdb-cxx
 RUN ninja rocksdb
 
+FROM dev AS build-examples-cxx
+WORKDIR /src/build
+
+RUN cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_COLOR_DIAGNOSTICS=ON \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_TESTS=OFF -DWITH_EXAMPLES=ON ../rocksdb-cxx \
+RUN ninja
+
 FROM dev AS build
 WORKDIR /src
 
