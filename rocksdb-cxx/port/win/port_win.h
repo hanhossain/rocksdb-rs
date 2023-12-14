@@ -32,7 +32,12 @@
 #include <thread>
 
 #include "port/win/win_thread.h"
-#include "rocksdb/port_defs.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/port_defs.h"
+#else
+#include "rocksdb-rs/src/port_defs.rs.h"
+#endif
 
 #undef min
 #undef max
