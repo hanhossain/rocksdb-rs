@@ -13,8 +13,13 @@
 
 #include <thread>
 
-#include "rocksdb/port_defs.h"
 #include "rocksdb/rocksdb_namespace.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/port_defs.h"
+#else
+#include "rocksdb-rs/src/port_defs.rs.h"
+#endif
 
 // size_t printf formatting named in the manner of C99 standard formatting
 // strings such as PRIu64
