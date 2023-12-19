@@ -11,9 +11,9 @@
 
 #include <memory>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_reservation_manager.h"
 #include "db/db_impl/db_impl.h"
+#include "rocksdb/cache.h"
 #include "util/coding.h"
 
 #ifndef ROCKSDB_RS

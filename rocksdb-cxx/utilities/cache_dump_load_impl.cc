@@ -6,9 +6,9 @@
 #include "cache/cache_key.h"
 #include "table/block_based/block_based_table_reader.h"
 
-#include "cache/cache_entry_roles.h"
 #include "file/writable_file_writer.h"
 #include "port/lang.h"
+#include "rocksdb/cache.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/utilities/ldb_cmd.h"

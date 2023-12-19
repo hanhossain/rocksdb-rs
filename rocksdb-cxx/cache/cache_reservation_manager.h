@@ -16,7 +16,6 @@
 #include <mutex>
 #include <vector>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_key.h"
 #include "cache/typed_cache.h"
 #include "rocksdb/slice.h"

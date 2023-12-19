@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "block_cache.h"
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_key.h"
 #include "db/compaction/compaction_picker.h"
 #include "db/dbformat.h"

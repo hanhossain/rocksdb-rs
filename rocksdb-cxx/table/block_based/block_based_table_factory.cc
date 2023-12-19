@@ -15,7 +15,6 @@
 #include <memory>
 #include <string>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_reservation_manager.h"
 #include "logging/logging.h"
 #include "options/options_helper.h"

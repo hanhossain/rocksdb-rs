@@ -11,7 +11,6 @@
 #include <memory>
 #include <unordered_set>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_key.h"
 #include "cache/lru_cache.h"
 #include "cache/typed_cache.h"
@@ -20,6 +19,7 @@
 #include "db/db_test_util.h"
 #include "env/unique_id_gen.h"
 #include "port/stack_trace.h"
+#include "rocksdb/cache.h"
 #include "rocksdb/persistent_cache.h"
 #include "rocksdb/statistics.h"
 #include "rocksdb/table.h"

@@ -1,6 +1,5 @@
 const SOURCES: &[&str] = &[
     "cache/cache.cc",
-    "cache/cache_entry_roles.cc",
     "cache/cache_key.cc",
     "cache/cache_helpers.cc",
     "cache/cache_reservation_manager.cc",

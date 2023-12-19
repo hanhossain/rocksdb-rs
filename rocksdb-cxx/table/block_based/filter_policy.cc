@@ -16,10 +16,10 @@
 #include <limits>
 #include <memory>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_reservation_manager.h"
 #include "logging/logging.h"
 #include "port/lang.h"
+#include "rocksdb/cache.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
