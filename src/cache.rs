@@ -45,9 +45,6 @@ pub mod ffi {
 
     #[namespace = "rocksdb::rs"]
     extern "Rust" {
-        #[cxx_name = "GetCacheEntryRoleName"]
-        fn get_cache_entry_role_name(role: CacheEntryRole) -> &'static str;
-
         #[cxx_name = "BlockCacheEntryStatsMapKeys_CacheId"]
         fn block_cache_entry_stats_map_keys_cache_id() -> &'static str;
 
@@ -59,6 +56,15 @@ pub mod ffi {
 
         #[cxx_name = "BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds"]
         fn block_cache_entry_stats_map_keys_last_collection_age_seconds() -> &'static str;
+
+        #[cxx_name = "BlockCacheEntryStatsMapKeys_EntryCount"]
+        fn block_cache_entry_stats_map_keys_entry_count(role: CacheEntryRole) -> String;
+
+        #[cxx_name = "BlockCacheEntryStatsMapKeys_UsedBytes"]
+        fn block_cache_entry_stats_map_keys_used_bytes(role: CacheEntryRole) -> String;
+
+        #[cxx_name = "BlockCacheEntryStatsMapKeys_UsedPercent"]
+        fn block_cache_entry_stats_map_keys_used_percent(role: CacheEntryRole) -> String;
     }
 }
 
@@ -87,22 +93,65 @@ impl CacheEntryRole {
     }
 }
 
-fn get_cache_entry_role_name(role: CacheEntryRole) -> &'static str {
-    role.to_hyphen_str()
+/// For use with `GetMapProperty()` for property
+/// `DB::Properties::kBlockCacheEntryStats`. On success, the map will
+/// be populated with all keys that can be obtained from these functions.
+struct BlockCacheEntryStatsMapKeys;
+
+impl BlockCacheEntryStatsMapKeys {
+    fn cache_id() -> &'static str {
+        "id"
+    }
+
+    fn cache_capacity_bytes() -> &'static str {
+        "capacity"
+    }
+
+    fn last_collection_duration_seconds() -> &'static str {
+        "secs_for_last_collection"
+    }
+
+    fn last_collection_age_seconds() -> &'static str {
+        "secs_since_last_collection"
+    }
+
+    fn entry_count(role: CacheEntryRole) -> String {
+        format!("count.{}", role.to_hyphen_str())
+    }
+
+    fn used_bytes(role: CacheEntryRole) -> String {
+        format!("bytes.{}", role.to_hyphen_str())
+    }
+
+    fn used_percent(role: CacheEntryRole) -> String {
+        format!("percent.{}", role.to_hyphen_str())
+    }
 }
 
 fn block_cache_entry_stats_map_keys_cache_id() -> &'static str {
-    "id"
+    BlockCacheEntryStatsMapKeys::cache_id()
 }
 
 fn block_cache_entry_stats_map_keys_cache_capacity_bytes() -> &'static str {
-    "capacity"
+    BlockCacheEntryStatsMapKeys::cache_capacity_bytes()
 }
 
 fn block_cache_entry_stats_map_keys_last_collection_duration_seconds() -> &'static str {
-    "secs_for_last_collection"
+    BlockCacheEntryStatsMapKeys::last_collection_duration_seconds()
 }
 
 fn block_cache_entry_stats_map_keys_last_collection_age_seconds() -> &'static str {
-    "secs_since_last_collection"
+    BlockCacheEntryStatsMapKeys::last_collection_age_seconds()
+}
+
+fn block_cache_entry_stats_map_keys_entry_count(role: CacheEntryRole) -> String {
+    BlockCacheEntryStatsMapKeys::entry_count(role)
+}
+
+fn block_cache_entry_stats_map_keys_used_bytes(role: CacheEntryRole) -> String {
+    BlockCacheEntryStatsMapKeys::used_bytes(role)
+}
+
+fn block_cache_entry_stats_map_keys_used_percent(role: CacheEntryRole) -> String {
+    BlockCacheEntryStatsMapKeys::used_percent(role)
 }

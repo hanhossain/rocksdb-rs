@@ -2082,11 +2082,11 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
       values.end());
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     CacheEntryRole role = static_cast<CacheEntryRole>(i);
-    ASSERT_TRUE(values.find(BlockCacheEntryStatsMapKeys::EntryCount(role)) !=
+    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))) !=
                 values.end());
-    ASSERT_TRUE(values.find(BlockCacheEntryStatsMapKeys::UsedBytes(role)) !=
+    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedBytes(role))) !=
                 values.end());
-    ASSERT_TRUE(values.find(BlockCacheEntryStatsMapKeys::UsedPercent(role)) !=
+    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedPercent(role))) !=
                 values.end());
   }
 

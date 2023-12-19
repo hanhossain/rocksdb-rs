@@ -44,33 +44,16 @@ rust::Str BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds() {
   return rs::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds();
 }
 
-namespace {
-
-std::string GetPrefixedCacheEntryRoleName(const std::string& prefix,
-                                          CacheEntryRole role) {
-  rust::Str role_name = rs::GetCacheEntryRoleName(role);
-  std::string prefixed_role_name;
-  prefixed_role_name.reserve(prefix.size() + role_name.size());
-  prefixed_role_name.append(prefix);
-  prefixed_role_name.append(std::string(role_name));
-  return prefixed_role_name;
+rust::String BlockCacheEntryStatsMapKeys_EntryCount(CacheEntryRole role) {
+  return rs::BlockCacheEntryStatsMapKeys_EntryCount(role);
 }
 
-}  // namespace
-
-std::string BlockCacheEntryStatsMapKeys::EntryCount(CacheEntryRole role) {
-  const static std::string kPrefix = "count.";
-  return GetPrefixedCacheEntryRoleName(kPrefix, role);
+rust::String BlockCacheEntryStatsMapKeys_UsedBytes(CacheEntryRole role) {
+  return rs::BlockCacheEntryStatsMapKeys_UsedBytes(role);
 }
 
-std::string BlockCacheEntryStatsMapKeys::UsedBytes(CacheEntryRole role) {
-  const static std::string kPrefix = "bytes.";
-  return GetPrefixedCacheEntryRoleName(kPrefix, role);
-}
-
-std::string BlockCacheEntryStatsMapKeys::UsedPercent(CacheEntryRole role) {
-  const static std::string kPrefix = "percent.";
-  return GetPrefixedCacheEntryRoleName(kPrefix, role);
+rust::String BlockCacheEntryStatsMapKeys_UsedPercent(CacheEntryRole role) {
+  return rs::BlockCacheEntryStatsMapKeys_UsedPercent(role);
 }
 
 }  // namespace ROCKSDB_NAMESPACE

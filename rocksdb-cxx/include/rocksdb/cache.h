@@ -57,19 +57,13 @@ constexpr uint32_t kNumCacheEntryRoles =
 // A fast bit set for CacheEntryRoles
 using CacheEntryRoleSet = SmallEnumSet<CacheEntryRole, CacheEntryRole::kMisc>;
 
-// For use with `GetMapProperty()` for property
-// `DB::Properties::kBlockCacheEntryStats`. On success, the map will
-// be populated with all keys that can be obtained from these functions.
-struct BlockCacheEntryStatsMapKeys {
-  static std::string EntryCount(CacheEntryRole);
-  static std::string UsedBytes(CacheEntryRole);
-  static std::string UsedPercent(CacheEntryRole);
-};
-
 rust::Str BlockCacheEntryStatsMapKeys_CacheId();
 rust::Str BlockCacheEntryStatsMapKeys_CacheCapacityBytes();
 rust::Str BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds();
 rust::Str BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds();
+rust::String BlockCacheEntryStatsMapKeys_EntryCount(CacheEntryRole role);
+rust::String BlockCacheEntryStatsMapKeys_UsedBytes(CacheEntryRole role);
+rust::String BlockCacheEntryStatsMapKeys_UsedPercent(CacheEntryRole role);
 
 extern const bool kDefaultToAdaptiveMutex;
 
