@@ -55,7 +55,7 @@ constexpr uint32_t kNumCacheEntryRoles =
     static_cast<uint32_t>(CacheEntryRole::kMisc) + 1;
 
 // Obtain a hyphen-separated, lowercase name of a `CacheEntryRole`.
-const std::string& GetCacheEntryRoleName(CacheEntryRole);
+rust::Str GetCacheEntryRoleName(CacheEntryRole);
 
 // A fast bit set for CacheEntryRoles
 using CacheEntryRoleSet = SmallEnumSet<CacheEntryRole, CacheEntryRole::kMisc>;

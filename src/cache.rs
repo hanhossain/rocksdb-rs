@@ -1,3 +1,5 @@
+use crate::cache::ffi::CacheEntryRole;
+
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
     /// Classifications of block cache entries.
@@ -40,4 +42,38 @@ pub mod ffi {
         /// entries that could potentially add up to large usage.
         kMisc,
     }
+
+    #[namespace = "rocksdb::rs"]
+    extern "Rust" {
+        #[cxx_name = "GetCacheEntryRoleName"]
+        fn get_cache_entry_role_name(role: CacheEntryRole) -> &'static str;
+    }
+}
+
+impl CacheEntryRole {
+    fn to_hyphen_str(self) -> &'static str {
+        match self {
+            CacheEntryRole::kDataBlock => "data-block",
+            CacheEntryRole::kFilterBlock => "filter-block",
+            CacheEntryRole::kFilterMetaBlock => "filter-meta-block",
+            CacheEntryRole::kDeprecatedFilterBlock => "deprecated-filter-block",
+            CacheEntryRole::kIndexBlock => "index-block",
+            CacheEntryRole::kOtherBlock => "other-block",
+            CacheEntryRole::kWriteBuffer => "write-buffer",
+            CacheEntryRole::kCompressionDictionaryBuildingBuffer => {
+                "compression-dictionary-building-buffer"
+            }
+            CacheEntryRole::kFilterConstruction => "filter-construction",
+            CacheEntryRole::kBlockBasedTableReader => "block-based-table-reader",
+            CacheEntryRole::kFileMetadata => "file-metadata",
+            CacheEntryRole::kBlobValue => "blob-value",
+            CacheEntryRole::kBlobCache => "blob-cache",
+            CacheEntryRole::kMisc => "misc",
+            _ => unreachable!(),
+        }
+    }
+}
+
+fn get_cache_entry_role_name(role: CacheEntryRole) -> &'static str {
+    role.to_hyphen_str()
 }

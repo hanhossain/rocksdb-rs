@@ -28,25 +28,8 @@ std::array<std::string, kNumCacheEntryRoles> kCacheEntryRoleToCamelString{{
     "Misc",
 }};
 
-std::array<std::string, kNumCacheEntryRoles> kCacheEntryRoleToHyphenString{{
-    "data-block",
-    "filter-block",
-    "filter-meta-block",
-    "deprecated-filter-block",
-    "index-block",
-    "other-block",
-    "write-buffer",
-    "compression-dictionary-building-buffer",
-    "filter-construction",
-    "block-based-table-reader",
-    "file-metadata",
-    "blob-value",
-    "blob-cache",
-    "misc",
-}};
-
-const std::string& GetCacheEntryRoleName(CacheEntryRole role) {
-  return kCacheEntryRoleToHyphenString[static_cast<size_t>(role)];
+rust::Str GetCacheEntryRoleName(const CacheEntryRole role) {
+  return rs::GetCacheEntryRoleName(role);
 }
 
 const std::string& BlockCacheEntryStatsMapKeys::CacheId() {
@@ -76,11 +59,11 @@ namespace {
 
 std::string GetPrefixedCacheEntryRoleName(const std::string& prefix,
                                           CacheEntryRole role) {
-  const std::string& role_name = GetCacheEntryRoleName(role);
+  rust::Str role_name = GetCacheEntryRoleName(role);
   std::string prefixed_role_name;
   prefixed_role_name.reserve(prefix.size() + role_name.size());
   prefixed_role_name.append(prefix);
-  prefixed_role_name.append(role_name);
+  prefixed_role_name.append(std::string(role_name));
   return prefixed_role_name;
 }
 
