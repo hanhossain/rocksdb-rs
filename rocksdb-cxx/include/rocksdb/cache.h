@@ -64,7 +64,6 @@ using CacheEntryRoleSet = SmallEnumSet<CacheEntryRole, CacheEntryRole::kMisc>;
 // `DB::Properties::kBlockCacheEntryStats`. On success, the map will
 // be populated with all keys that can be obtained from these functions.
 struct BlockCacheEntryStatsMapKeys {
-  static const std::string& CacheId();
   static const std::string& CacheCapacityBytes();
   static const std::string& LastCollectionDurationSeconds();
   static const std::string& LastCollectionAgeSeconds();
@@ -73,6 +72,8 @@ struct BlockCacheEntryStatsMapKeys {
   static std::string UsedBytes(CacheEntryRole);
   static std::string UsedPercent(CacheEntryRole);
 };
+
+rust::Str BlockCacheEntryStatsMapKeys_CacheId();
 
 extern const bool kDefaultToAdaptiveMutex;
 

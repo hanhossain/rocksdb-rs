@@ -47,6 +47,9 @@ pub mod ffi {
     extern "Rust" {
         #[cxx_name = "GetCacheEntryRoleName"]
         fn get_cache_entry_role_name(role: CacheEntryRole) -> &'static str;
+
+        #[cxx_name = "BlockCacheEntryStatsMapKeys_CacheId"]
+        fn block_cache_entry_stats_map_keys_cache_id() -> &'static str;
     }
 }
 
@@ -76,4 +79,8 @@ impl CacheEntryRole {
 
 fn get_cache_entry_role_name(role: CacheEntryRole) -> &'static str {
     role.to_hyphen_str()
+}
+
+fn block_cache_entry_stats_map_keys_cache_id() -> &'static str {
+    "id"
 }

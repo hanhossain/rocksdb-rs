@@ -32,9 +32,8 @@ rust::Str GetCacheEntryRoleName(const CacheEntryRole role) {
   return rs::GetCacheEntryRoleName(role);
 }
 
-const std::string& BlockCacheEntryStatsMapKeys::CacheId() {
-  static const std::string kCacheId = "id";
-  return kCacheId;
+rust::Str BlockCacheEntryStatsMapKeys_CacheId() {
+  return rs::BlockCacheEntryStatsMapKeys_CacheId();
 }
 
 const std::string& BlockCacheEntryStatsMapKeys::CacheCapacityBytes() {

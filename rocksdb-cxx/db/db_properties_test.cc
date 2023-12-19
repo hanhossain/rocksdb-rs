@@ -2069,7 +2069,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
   ASSERT_TRUE(
       db_->GetMapProperty(DB::Properties::kBlockCacheEntryStats, &values));
 
-  ASSERT_TRUE(values.find(BlockCacheEntryStatsMapKeys::CacheId()) !=
+  ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheId())) !=
               values.end());
   ASSERT_TRUE(values.find(BlockCacheEntryStatsMapKeys::CacheCapacityBytes()) !=
               values.end());
