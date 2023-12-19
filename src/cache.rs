@@ -64,6 +64,9 @@ pub mod ffi {
 
         #[cxx_name = "BlockCacheEntryStatsMapKeys_UsedPercent"]
         fn block_cache_entry_stats_map_keys_used_percent(role: CacheEntryRole) -> String;
+
+        #[cxx_name = "CacheEntryRole_ToCamelString"]
+        fn cache_entry_role_to_camel_str(role: CacheEntryRole) -> &'static str;
     }
 }
 
@@ -90,6 +93,32 @@ impl CacheEntryRole {
             _ => unreachable!(),
         }
     }
+
+    fn to_camel_str(self) -> &'static str {
+        match self {
+            CacheEntryRole::kDataBlock => "DataBlock",
+            CacheEntryRole::kFilterBlock => "FilterBlock",
+            CacheEntryRole::kFilterMetaBlock => "FilterMetaBlock",
+            CacheEntryRole::kDeprecatedFilterBlock => "DeprecatedFilterBlock",
+            CacheEntryRole::kIndexBlock => "IndexBlock",
+            CacheEntryRole::kOtherBlock => "OtherBlock",
+            CacheEntryRole::kWriteBuffer => "WriteBuffer",
+            CacheEntryRole::kCompressionDictionaryBuildingBuffer => {
+                "CompressionDictionaryBuildingBuffer"
+            }
+            CacheEntryRole::kFilterConstruction => "FilterConstruction",
+            CacheEntryRole::kBlockBasedTableReader => "BlockBasedTableReader",
+            CacheEntryRole::kFileMetadata => "FileMetadata",
+            CacheEntryRole::kBlobValue => "BlobValue",
+            CacheEntryRole::kBlobCache => "BlobCache",
+            CacheEntryRole::kMisc => "Misc",
+            _ => unreachable!(),
+        }
+    }
+}
+
+fn cache_entry_role_to_camel_str(role: CacheEntryRole) -> &'static str {
+    role.to_camel_str()
 }
 
 /// For use with `GetMapProperty()` for property

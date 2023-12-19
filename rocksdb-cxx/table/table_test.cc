@@ -5850,8 +5850,8 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
       s.ToString()->find("Enable/Disable CacheEntryRoleOptions::charged") !=
       std::string::npos);
   EXPECT_TRUE(
-      s.ToString()->find(kCacheEntryRoleToCamelString[static_cast<uint32_t>(
-          CacheEntryRole::kDataBlock)]) != std::string::npos);
+      s.ToString()->find(static_cast<std::string>(CacheEntryRole_ToCamelString(
+          CacheEntryRole::kDataBlock))) != std::string::npos);
   Destroy(options);
 
   // To test option validation on existence of block cache
@@ -5867,8 +5867,8 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
   EXPECT_TRUE(s.ToString()->find("Enable CacheEntryRoleOptions::charged") !=
               std::string::npos);
   EXPECT_TRUE(
-      s.ToString()->find(kCacheEntryRoleToCamelString[static_cast<std::size_t>(
-          CacheEntryRole::kFilterConstruction)]) != std::string::npos);
+      s.ToString()->find(static_cast<std::string>(CacheEntryRole_ToCamelString(
+          CacheEntryRole::kFilterConstruction))) != std::string::npos);
   EXPECT_TRUE(s.ToString()->find("block cache is disabled") !=
               std::string::npos);
   Destroy(options);

@@ -793,8 +793,7 @@ Status BlockBasedTable::Open(
     if (s.IsMemoryLimit()) {
       s = Status_MemoryLimit(
           "Can't allocate " +
-          kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
-              CacheEntryRole::kBlockBasedTableReader)] +
+          static_cast<std::string>(CacheEntryRole_ToCamelString(CacheEntryRole::kBlockBasedTableReader)) +
           " due to memory limit based on "
           "cache capacity for memory allocation");
     }

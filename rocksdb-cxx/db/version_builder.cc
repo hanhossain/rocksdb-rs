@@ -798,8 +798,8 @@ class VersionBuilder::Rep {
         delete f;
         s = Status_MemoryLimit(
             "Can't allocate " +
-            kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
-                CacheEntryRole::kFileMetadata)] +
+            static_cast<std::string>(CacheEntryRole_ToCamelString(
+                CacheEntryRole::kFileMetadata)) +
             " due to exceeding the memory limit "
             "based on "
             "cache capacity");

@@ -3647,8 +3647,7 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   if (charge_file_metadata == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_TRUE(s.IsMemoryLimit());
     EXPECT_TRUE(s.ToString()->find(
-                    kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
-                        CacheEntryRole::kFileMetadata)]) != std::string::npos);
+      static_cast<std::string>(CacheEntryRole_ToCamelString(CacheEntryRole::kFileMetadata))) != std::string::npos);
     EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                 std::string::npos);
   } else {

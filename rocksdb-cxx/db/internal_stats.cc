@@ -741,7 +741,7 @@ std::string InternalStats::CacheEntryRoleStats::ToString(
   str << "Block cache entry stats(count,size,portion):";
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     if (entry_counts[i] > 0) {
-      str << " " << kCacheEntryRoleToCamelString[i] << "(" << entry_counts[i]
+      str << " " << CacheEntryRole_ToCamelString(static_cast<CacheEntryRole>(i)) << "(" << entry_counts[i]
           << "," << BytesToHumanString(total_charges[i]) << ","
           << (100.0 * total_charges[i] / cache_capacity) << "%)";
     }
