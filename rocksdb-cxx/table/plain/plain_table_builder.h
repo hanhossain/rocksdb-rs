@@ -25,7 +25,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class BlockBuilder;
 class BlockHandle;
@@ -162,5 +162,5 @@ class PlainTableBuilder : public TableBuilder {
   bool IsTotalOrderMode() const { return (prefix_extractor_ == nullptr); }
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 

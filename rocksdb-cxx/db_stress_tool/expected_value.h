@@ -13,9 +13,7 @@
 #include <cassert>
 #include <memory>
 
-#include "rocksdb/rocksdb_namespace.h"
-
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 // `ExpectedValue` represents the expected value of a key used in db stress,
 // which provides APIs to obtain various information e.g, value base, existence,
 // pending operation status and APIs to edit expected value.
@@ -203,6 +201,6 @@ class ExpectedValueHelper {
                                        ExpectedValue pre_read_expected_value,
                                        ExpectedValue post_read_expected_value);
 };
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif  // GFLAGS

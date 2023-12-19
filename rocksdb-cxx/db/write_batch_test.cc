@@ -24,7 +24,7 @@
 #include "test_util/testutil.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 static std::string PrintContents(WriteBatch* b,
                                  bool merge_operator_supported = true) {
@@ -1119,10 +1119,10 @@ TEST_F(WriteBatchTest, CommitWithTimestamp) {
             handler.seen);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

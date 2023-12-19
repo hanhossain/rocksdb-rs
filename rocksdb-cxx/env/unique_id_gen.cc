@@ -28,7 +28,7 @@
 #include "rocksdb/system_clock.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 
@@ -238,4 +238,4 @@ UnpredictableUniqueIdGen::UnpredictableUniqueIdGen(TEST_ZeroInitialized) {
 }
 #endif
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -30,7 +30,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class WriteThread {
  public:
@@ -470,4 +470,4 @@ class WriteThread {
   void CompleteFollower(Writer* w, WriteGroup& write_group);
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

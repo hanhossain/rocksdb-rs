@@ -12,9 +12,8 @@
 
 #pragma once
 
-#include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace log {
 
 enum RecordType {
@@ -52,4 +51,4 @@ constexpr int kHeaderSize = 4 + 2 + 1;
 constexpr int kRecyclableHeaderSize = 4 + 2 + 1 + 4;
 
 }  // namespace log
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

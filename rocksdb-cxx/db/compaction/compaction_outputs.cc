@@ -12,7 +12,7 @@
 
 #include "db/builder.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 void CompactionOutputs::NewBuilder(const TableBuilderOptions& tboptions) {
   builder_.reset(NewTableBuilder(tboptions, file_writer_.get()));
@@ -785,4 +785,4 @@ CompactionOutputs::CompactionOutputs(const Compaction* compaction,
   level_ptrs_ = std::vector<size_t>(compaction_->number_levels(), 0);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

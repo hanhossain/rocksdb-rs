@@ -27,7 +27,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class GenericRateLimiter : public RateLimiter {
  public:
@@ -148,4 +148,4 @@ class GenericRateLimiter : public RateLimiter {
   std::chrono::microseconds tuned_time_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -13,7 +13,7 @@
 #include "rocksdb/db.h"
 #include "rocksdb/utilities/stackable_db.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Transaction;
 
@@ -126,4 +126,4 @@ class OptimisticTransactionDB : public StackableDB {
   explicit OptimisticTransactionDB(DB* db) : StackableDB(db) {}
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -6,7 +6,7 @@
 
 #include "utilities/transactions/lock/point/point_lock_manager_test.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // This test is not applicable for Range Lock manager as Range Lock Manager
 // operates on Column Families, not their ids.
@@ -160,10 +160,10 @@ TEST_F(PointLockManagerTest, DeadlockDepthExceeded) {
 INSTANTIATE_TEST_CASE_P(PointLockManager, AnyLockManagerTest,
                         ::testing::Values(nullptr));
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

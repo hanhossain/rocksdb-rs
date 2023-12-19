@@ -33,7 +33,7 @@
 #include "util/random.h"
 #include "utilities/fault_injection_fs.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBBlockCacheTest : public DBTestBase {
  private:
@@ -64,7 +64,7 @@ class DBBlockCacheTest : public DBTestBase {
     options.create_if_missing = true;
     options.avoid_flush_during_recovery = false;
     // options.compression = kNoCompression;
-    options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    options.statistics = rocksdb::CreateDBStatistics();
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
     return options;
   }
@@ -308,7 +308,7 @@ class ReadOnlyCacheWrapper : public CacheWrapper {
 TEST_F(DBBlockCacheTest, IndexAndFilterBlocksOfNewTableAddedToCache) {
   Options options = CurrentOptions();
   options.create_if_missing = true;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
   BlockBasedTableOptions table_options;
   table_options.cache_index_and_filter_blocks = true;
   table_options.filter_policy.reset(NewBloomFilterPolicy(20));
@@ -394,7 +394,7 @@ TEST_F(DBBlockCacheTest, FillCacheAndIterateDB) {
 TEST_F(DBBlockCacheTest, IndexAndFilterBlocksStats) {
   Options options = CurrentOptions();
   options.create_if_missing = true;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
   BlockBasedTableOptions table_options;
   table_options.cache_index_and_filter_blocks = true;
   LRUCacheOptions co;
@@ -437,7 +437,7 @@ TEST_F(DBBlockCacheTest, IndexAndFilterBlocksStats) {
 TEST_F(DBBlockCacheTest, WarmCacheWithDataBlocksDuringFlush) {
   Options options = CurrentOptions();
   options.create_if_missing = true;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
 
   BlockBasedTableOptions table_options;
   table_options.block_cache = NewLRUCache(1 << 25, 0, false);
@@ -479,7 +479,7 @@ TEST_P(DBBlockCacheTest1, WarmCacheWithBlocksDuringFlush) {
   Options options = CurrentOptions();
   options.create_if_missing = true;
   options.disable_auto_compactions = true;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
 
   BlockBasedTableOptions table_options;
   table_options.block_cache = NewLRUCache(1 << 25, 0, false);
@@ -562,7 +562,7 @@ TEST_P(DBBlockCacheTest1, WarmCacheWithBlocksDuringFlush) {
 TEST_F(DBBlockCacheTest, DynamicallyWarmCacheDuringFlush) {
   Options options = CurrentOptions();
   options.create_if_missing = true;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
 
   BlockBasedTableOptions table_options;
   table_options.block_cache = NewLRUCache(1 << 25, 0, false);
@@ -647,7 +647,7 @@ TEST_F(DBBlockCacheTest, IndexAndFilterBlocksCachePriority) {
   for (auto priority : {Cache::Priority::LOW, Cache::Priority::HIGH}) {
     Options options = CurrentOptions();
     options.create_if_missing = true;
-    options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    options.statistics = rocksdb::CreateDBStatistics();
     BlockBasedTableOptions table_options;
     table_options.cache_index_and_filter_blocks = true;
     table_options.block_cache.reset(new MockCache());
@@ -753,7 +753,7 @@ TEST_F(DBBlockCacheTest, AddRedundantStats) {
     ++iterations_tested;
     Options options = CurrentOptions();
     options.create_if_missing = true;
-    options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    options.statistics = rocksdb::CreateDBStatistics();
 
     std::shared_ptr<LookupLiarCache> cache =
         std::make_shared<LookupLiarCache>(base_cache);
@@ -845,7 +845,7 @@ TEST_F(DBBlockCacheTest, AddRedundantStats) {
 TEST_F(DBBlockCacheTest, ParanoidFileChecks) {
   Options options = CurrentOptions();
   options.create_if_missing = true;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
   options.level0_file_num_compaction_trigger = 2;
   options.paranoid_file_checks = true;
   BlockBasedTableOptions table_options;
@@ -913,7 +913,7 @@ TEST_F(DBBlockCacheTest, CacheCompressionDict) {
     options.bottommost_compression_opts.enabled = true;
     options.create_if_missing = true;
     options.num_levels = 2;
-    options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    options.statistics = rocksdb::CreateDBStatistics();
     options.target_file_size_base = kNumEntriesPerFile * kNumBytesPerEntry;
     BlockBasedTableOptions table_options;
     table_options.cache_index_and_filter_blocks = true;
@@ -992,7 +992,7 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
       Options options = CurrentOptions();
       SetTimeElapseOnlySleepOnReopen(&options);
       options.create_if_missing = true;
-      options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+      options.statistics = rocksdb::CreateDBStatistics();
       options.max_open_files = 13;
       options.table_cache_numshardbits = 0;
       // If this wakes up, it could interfere with test
@@ -1379,7 +1379,7 @@ TEST_P(DBBlockCacheKeyTest, StableCacheKeys) {
 
   Options options = CurrentOptions();
   options.create_if_missing = true;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
   options.env = test_env.get();
 
   // Corrupting the table properties corrupts the unique id.
@@ -1411,13 +1411,13 @@ TEST_P(DBBlockCacheKeyTest, StableCacheKeys) {
     // Simulate something like old behavior without file numbers in properties.
     // This is a "control" side of the test that also ensures safely degraded
     // behavior on old files.
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+    rocksdb::SyncPoint::GetInstance()->SetCallBack(
         "BlockBasedTableBuilder::BlockBasedTableBuilder:PreSetupBaseCacheKey",
         [&](void* arg) {
           TableProperties* props = reinterpret_cast<TableProperties*>(arg);
           props->orig_file_number = 0;
         });
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+    rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   }
 
   std::function<void()> perform_gets = [&key_count, &expected_stat, this]() {
@@ -1524,7 +1524,7 @@ TEST_P(DBBlockCacheKeyTest, StableCacheKeys) {
 
   Close();
   Destroy(options);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 }
 
 class CacheKeyTest : public testing::Test {
@@ -1840,7 +1840,7 @@ TEST_P(DBBlockCachePinningTest, TwoLevelDB) {
   // (de)compression happening, which seems fairly likely to change over time.
   options.compression = kNoCompression;
   options.compression_opts.max_dict_bytes = 4 << 10;
-  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  options.statistics = rocksdb::CreateDBStatistics();
   BlockBasedTableOptions table_options;
   table_options.block_cache = NewLRUCache(1 << 20 /* capacity */);
   table_options.block_size = kBlockSize;
@@ -1963,10 +1963,10 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(PinningTier::kNone, PinningTier::kFlushedAndSimilar,
                           PinningTier::kAll)));
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -12,7 +12,7 @@
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 static const std::string kTestKeyWithoutTs = "key";
 static const std::string kValuePlaceHolder = "value";
@@ -321,10 +321,10 @@ TEST_F(HandleTimestampSizeDifferenceTest, UnrecoverableInconsistency) {
                   TimestampSizeConsistencyMode::kReconcileInconsistency)
                   .IsInvalidArgument());
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

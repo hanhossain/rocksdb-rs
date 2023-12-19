@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 #include "db/blob/blob_constants.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"
@@ -18,7 +17,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Slice;
 
@@ -104,4 +103,4 @@ class BlobGarbageMeter {
   std::unordered_map<uint64_t, BlobInOutFlow> flows_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

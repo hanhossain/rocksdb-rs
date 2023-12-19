@@ -20,11 +20,11 @@
 
 #include "rocksdb/env.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class SystemClock;
 
 namespace port {
-class WinLogger : public ROCKSDB_NAMESPACE::Logger {
+class WinLogger : public rocksdb::Logger {
  public:
   WinLogger(uint64_t (*gettid)(), SystemClock* clock, HANDLE file,
             const InfoLogLevel log_level = InfoLogLevel::ERROR_LEVEL);
@@ -37,7 +37,7 @@ class WinLogger : public ROCKSDB_NAMESPACE::Logger {
 
   void Flush() override;
 
-  using ROCKSDB_NAMESPACE::Logger::Logv;
+  using rocksdb::Logger::Logv;
   void Logv(const char* format, va_list ap) override;
 
   size_t GetLogFileSize() const override;
@@ -61,4 +61,4 @@ class WinLogger : public ROCKSDB_NAMESPACE::Logger {
 };
 }  // namespace port
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

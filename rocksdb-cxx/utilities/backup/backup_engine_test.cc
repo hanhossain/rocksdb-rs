@@ -51,7 +51,7 @@
 #include "util/string_util.h"
 #include "utilities/backup/backup_engine_impl.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 using ShareFilesNaming = BackupEngineOptions::ShareFilesNaming;
@@ -1785,7 +1785,7 @@ TEST_F(BackupEngineTest, FlushCompactDuringBackupCheckpoint) {
          {"BackupEngineTest::FlushCompactDuringBackupCheckpoint:After",
           "CheckpointImpl::CreateCustomCheckpoint:AfterGetLive2"}});
     SyncPoint::GetInstance()->EnableProcessing();
-    ROCKSDB_NAMESPACE::port::Thread flush_thread{[this]() {
+    rocksdb::port::Thread flush_thread{[this]() {
       TEST_SYNC_POINT(
           "BackupEngineTest::FlushCompactDuringBackupCheckpoint:Before");
       FillDB(db_.get(), keys_iteration, 2 * keys_iteration);
@@ -1842,7 +1842,7 @@ TEST_F(BackupEngineTest, BackupOptions) {
     db_.reset();
     db_.reset(OpenDB());
     ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), true));
-    ASSERT_OK(ROCKSDB_NAMESPACE::GetLatestOptionsFileName(db_->GetName(),
+    ASSERT_OK(rocksdb::GetLatestOptionsFileName(db_->GetName(),
                                                           options_.env, &name));
     ASSERT_OK(file_manager_->FileExists(OptionsPath(backupdir_, i) + name));
     ASSERT_OK(backup_chroot_env_->GetChildren(OptionsPath(backupdir_, i),
@@ -1865,7 +1865,7 @@ TEST_F(BackupEngineTest, SetOptionsBackupRaceCondition) {
        {"BackupEngineTest::SetOptionsBackupRaceCondition:AfterSetOptions",
         "CheckpointImpl::CreateCheckpoint:SavedLiveFiles2"}});
   SyncPoint::GetInstance()->EnableProcessing();
-  ROCKSDB_NAMESPACE::port::Thread setoptions_thread{[this]() {
+  rocksdb::port::Thread setoptions_thread{[this]() {
     TEST_SYNC_POINT(
         "BackupEngineTest::SetOptionsBackupRaceCondition:BeforeSetOptions");
     DBImpl* dbi = static_cast<DBImpl*>(db_.get());
@@ -2078,13 +2078,13 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsOldFileNaming) {
   const int keys_iteration = 5000;
 
   // Pre-6.12 release did not include db id and db session id properties.
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "PropertyBlockBuilder::AddTableProperty:Start", [&](void* props_vs) {
         auto props = static_cast<TableProperties*>(props_vs);
         props->db_id = "";
         props->db_session_id = "";
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   // Corrupting the table properties corrupts the unique id.
   // Ignore the unique id recorded in the manifest.
@@ -2114,8 +2114,8 @@ TEST_F(BackupEngineTest, ShareTableFilesWithChecksumsOldFileNaming) {
                                    1 /* minimum_count */);
   }
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
 }
 
 // Test how naming options interact with detecting DB corruption
@@ -2291,12 +2291,12 @@ TEST_F(BackupEngineTest, FileSizeForIncremental) {
     CloseDBAndBackupEngine();
 
     // Forge session id
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+    rocksdb::SyncPoint::GetInstance()->SetCallBack(
         "DBImpl::SetDbSessionId", [](void* sid_void_star) {
           std::string* sid = static_cast<std::string*>(sid_void_star);
           *sid = "01234567890123456789";
         });
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+    rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
     // Create another SST file
     OpenDBAndBackupEngine(false, false, share);
@@ -2346,8 +2346,8 @@ TEST_F(BackupEngineTest, FileSizeForIncremental) {
     }
     CloseDBAndBackupEngine();
     DestroyDBWithoutCheck(dbname_, options_);
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
+    rocksdb::SyncPoint::GetInstance()->DisableProcessing();
+    rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
   }
 }
 
@@ -2648,12 +2648,12 @@ TEST_P(BackupEngineRateLimitingTestWithParam, RateLimiting) {
   // Rate limiter uses `CondVar::TimedWait()`, which does not have access to the
   // `Env` to advance its time according to the fake wait duration. The
   // workaround is to install a callback that advance the `Env`'s mock time.
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "GenericRateLimiter::Request:PostTimedWait", [&](void* arg) {
         int64_t time_waited_us = *static_cast<int64_t*>(arg);
         special_env->SleepForMicroseconds(static_cast<int>(time_waited_us));
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   OpenDBAndBackupEngine(true);
   TEST_SetDefaultRateLimitersClock(backup_engine_.get(),
@@ -2684,8 +2684,8 @@ TEST_P(BackupEngineRateLimitingTestWithParam, RateLimiting) {
 
   AssertBackupConsistency(0, 0, 10000, 10100);
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearCallBack(
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->ClearCallBack(
       "GenericRateLimiter::Request:PostTimedWait");
 }
 
@@ -2716,12 +2716,12 @@ TEST_P(BackupEngineRateLimitingTestWithParam, RateLimitingVerifyBackup) {
   // Rate limiter uses `CondVar::TimedWait()`, which does not have access to the
   // `Env` to advance its time according to the fake wait duration. The
   // workaround is to install a callback that advance the `Env`'s mock time.
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "GenericRateLimiter::Request:PostTimedWait", [&](void* arg) {
         int64_t time_waited_us = *static_cast<int64_t*>(arg);
         special_env->SleepForMicroseconds(static_cast<int>(time_waited_us));
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   OpenDBAndBackupEngine(true /* destroy_old_data */);
   TEST_SetDefaultRateLimitersClock(backup_engine_.get(),
                                    special_env->GetSystemClock(), nullptr);
@@ -2758,8 +2758,8 @@ TEST_P(BackupEngineRateLimitingTestWithParam, RateLimitingVerifyBackup) {
   AssertBackupConsistency(backup_id, 0, 10000, 10010);
   DestroyDBWithoutCheck(dbname_, options);
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearCallBack(
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->ClearCallBack(
       "GenericRateLimiter::Request:PostTimedWait");
 }
 
@@ -2914,12 +2914,12 @@ TEST_P(BackupEngineRateLimitingTestWithParam2,
   // Rate limiter uses `CondVar::TimedWait()`, which does not have access to the
   // `Env` to advance its time according to the fake wait duration. The
   // workaround is to install a callback that advance the `Env`'s mock time.
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "GenericRateLimiter::Request:PostTimedWait", [&](void* arg) {
         int64_t time_waited_us = *static_cast<int64_t*>(arg);
         special_env.SleepForMicroseconds(static_cast<int>(time_waited_us));
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   DestroyDBWithoutCheck(dbname_, Options());
   OpenDBAndBackupEngine(true /* destroy_old_data */, false /* dummy */,
@@ -2980,8 +2980,8 @@ TEST_P(BackupEngineRateLimitingTestWithParam2,
 
   DestroyDBWithoutCheck(dbname_, Options());
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearCallBack(
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->ClearCallBack(
       "GenericRateLimiter::Request:PostTimedWait");
 }
 
@@ -3212,21 +3212,21 @@ TEST_F(BackupEngineTest, ChangeManifestDuringBackupCreation) {
   OpenDBAndBackupEngine(true);
   FillDB(db_.get(), 0, 100, FillDBFlushAction::kAutoFlushOnly);
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency({
+  rocksdb::SyncPoint::GetInstance()->LoadDependency({
       {"CheckpointImpl::CreateCheckpoint:SavedLiveFiles1",
        "VersionSet::LogAndApply:WriteManifest"},
       {"VersionSet::LogAndApply:WriteManifestDone",
        "CheckpointImpl::CreateCheckpoint:SavedLiveFiles2"},
   });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  ROCKSDB_NAMESPACE::port::Thread flush_thread{
+  rocksdb::port::Thread flush_thread{
       [this]() { ASSERT_OK(db_->Flush(FlushOptions())); }};
 
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get(), false));
 
   flush_thread.join();
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   // The last manifest roll would've already been cleaned up by the full scan
   // that happens when CreateNewBackup invokes EnableFileDeletions. We need to
@@ -3892,11 +3892,11 @@ TEST_P(BackupEngineTestWithParam, BackupUsingDirectIO) {
 
 TEST_F(BackupEngineTest, BackgroundThreadCpuPriority) {
   std::atomic<CpuPriority> priority(CpuPriority::kNormal);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "BackupEngineImpl::Initialize:SetCpuPriority", [&](void* new_priority) {
         priority.store(*reinterpret_cast<CpuPriority*>(new_priority));
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   // 1 thread is easier to test, otherwise, we may not be sure which thread
   // actually does the work during CreateNewBackup.
@@ -3969,8 +3969,8 @@ TEST_F(BackupEngineTest, BackgroundThreadCpuPriority) {
     ASSERT_EQ(priority, CpuPriority::kNormal);
   }
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
   CloseDBAndBackupEngine();
   DestroyDBWithoutCheck(dbname_, options_);
 }
@@ -4386,10 +4386,10 @@ TEST_F(BackupEngineTest, ExcludeFiles) {
 
 }  // namespace
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

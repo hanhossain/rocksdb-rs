@@ -12,7 +12,7 @@
 #include "test_util/testutil.h"
 #include "util/random.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBIOFailureTest : public DBTestBase {
  public:
@@ -277,14 +277,14 @@ TEST_F(DBIOFailureTest, FlushSstRangeSyncError) {
 
   const char* io_error_msg = "range sync dummy error";
   std::atomic<int> range_sync_called(0);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::RangeSync", [&](void* arg) {
         if (range_sync_called.fetch_add(1) == 0) {
           Status* st = static_cast<Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   Random rnd(301);
   std::string rnd_str =
@@ -311,7 +311,7 @@ TEST_F(DBIOFailureTest, FlushSstRangeSyncError) {
   ASSERT_NOK(Put(1, "foo2", "bar3"));
   ASSERT_EQ("bar", Get(1, "foo"));
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   ASSERT_GE(1, range_sync_called.load());
 
   ReopenWithColumnFamilies({"default", "pikachu"}, options);
@@ -359,14 +359,14 @@ TEST_F(DBIOFailureTest, CompactSstRangeSyncError) {
 
   const char* io_error_msg = "range sync dummy error";
   std::atomic<int> range_sync_called(0);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::RangeSync", [&](void* arg) {
         if (range_sync_called.fetch_add(1) == 0) {
           Status* st = static_cast<Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   ASSERT_OK(dbfull()->SetOptions(handles_[1],
                                  {
@@ -380,7 +380,7 @@ TEST_F(DBIOFailureTest, CompactSstRangeSyncError) {
   ASSERT_NOK(Put(1, "foo2", "bar3"));
   ASSERT_EQ("bar", Get(1, "foo"));
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   ASSERT_GE(1, range_sync_called.load());
 
   ReopenWithColumnFamilies({"default", "pikachu"}, options);
@@ -401,7 +401,7 @@ TEST_F(DBIOFailureTest, FlushSstCloseError) {
 
   const char* io_error_msg = "close dummy error";
   std::atomic<int> close_called(0);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Close", [&](void* arg) {
         if (close_called.fetch_add(1) == 0) {
           Status* st = static_cast<Status*>(arg);
@@ -409,7 +409,7 @@ TEST_F(DBIOFailureTest, FlushSstCloseError) {
         }
       });
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   ASSERT_OK(Put(1, "foo", "bar"));
   ASSERT_OK(Put(1, "foo1", "bar1"));
@@ -423,7 +423,7 @@ TEST_F(DBIOFailureTest, FlushSstCloseError) {
   ASSERT_EQ("bar2", Get(1, "foo"));
   ASSERT_EQ("bar1", Get(1, "foo1"));
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   ReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ("bar2", Get(1, "foo"));
@@ -455,7 +455,7 @@ TEST_F(DBIOFailureTest, CompactionSstCloseError) {
 
   const char* io_error_msg = "close dummy error";
   std::atomic<int> close_called(0);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Close", [&](void* arg) {
         if (close_called.fetch_add(1) == 0) {
           Status* st = static_cast<Status*>(arg);
@@ -463,7 +463,7 @@ TEST_F(DBIOFailureTest, CompactionSstCloseError) {
         }
       });
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(dbfull()->SetOptions(handles_[1],
                                  {
                                      {"disable_auto_compactions", "false"},
@@ -476,7 +476,7 @@ TEST_F(DBIOFailureTest, CompactionSstCloseError) {
   ASSERT_NOK(Put(1, "foo2", "bar3"));
   ASSERT_EQ("bar3", Get(1, "foo"));
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   ReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ("bar3", Get(1, "foo"));
@@ -497,7 +497,7 @@ TEST_F(DBIOFailureTest, FlushSstSyncError) {
 
   const char* io_error_msg = "sync dummy error";
   std::atomic<int> sync_called(0);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Sync", [&](void* arg) {
         if (sync_called.fetch_add(1) == 0) {
           Status* st = static_cast<Status*>(arg);
@@ -505,7 +505,7 @@ TEST_F(DBIOFailureTest, FlushSstSyncError) {
         }
       });
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   ASSERT_OK(Put(1, "foo", "bar"));
   ASSERT_OK(Put(1, "foo1", "bar1"));
@@ -519,7 +519,7 @@ TEST_F(DBIOFailureTest, FlushSstSyncError) {
   ASSERT_EQ("bar2", Get(1, "foo"));
   ASSERT_EQ("bar1", Get(1, "foo1"));
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   ReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ("bar2", Get(1, "foo"));
@@ -552,7 +552,7 @@ TEST_F(DBIOFailureTest, CompactionSstSyncError) {
 
   const char* io_error_msg = "sync dummy error";
   std::atomic<int> sync_called(0);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Sync", [&](void* arg) {
         if (sync_called.fetch_add(1) == 0) {
           Status* st = static_cast<Status*>(arg);
@@ -560,7 +560,7 @@ TEST_F(DBIOFailureTest, CompactionSstSyncError) {
         }
       });
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(dbfull()->SetOptions(handles_[1],
                                  {
                                      {"disable_auto_compactions", "false"},
@@ -573,16 +573,16 @@ TEST_F(DBIOFailureTest, CompactionSstSyncError) {
   ASSERT_NOK(Put(1, "foo2", "bar3"));
   ASSERT_EQ("bar3", Get(1, "foo"));
 
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   ReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ("bar3", Get(1, "foo"));
 }
 #endif  // !(defined NDEBUG) || !defined(OS_WIN)
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();

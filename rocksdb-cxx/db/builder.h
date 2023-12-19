@@ -30,7 +30,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 struct FileMetaData;
 
@@ -80,4 +80,4 @@ extern Status BuildTable(
     uint64_t* memtable_payload_bytes = nullptr,
     uint64_t* memtable_garbage_bytes = nullptr);
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

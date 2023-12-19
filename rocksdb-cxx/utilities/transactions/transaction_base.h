@@ -28,7 +28,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class TransactionBaseImpl : public Transaction {
  public:
@@ -383,5 +383,5 @@ class TransactionBaseImpl : public Transaction {
   void SetSnapshotInternal(const Snapshot* snapshot);
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 

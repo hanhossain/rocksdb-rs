@@ -14,7 +14,7 @@
 #include "util/compression.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 CompressedSecondaryCache::CompressedSecondaryCache(
     const CompressedSecondaryCacheOptions& opts)
@@ -314,4 +314,4 @@ Status CompressedSecondaryCache::Inflate(size_t increase) {
   return cache_res_mgr_->UpdateCacheReservation(increase, /*increase=*/false);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

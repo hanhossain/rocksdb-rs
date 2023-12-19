@@ -5,9 +5,7 @@
 //
 #pragma once
 
-#include "rocksdb/rocksdb_namespace.h"
-
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace port {
 
 // Install a signal handler to print callstack on the following signals:
@@ -28,4 +26,4 @@ void PrintAndFreeStack(void* callstack, int num_frames);
 void* SaveStack(int* num_frame, int first_frames_to_skip = 0);
 
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

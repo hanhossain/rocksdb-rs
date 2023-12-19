@@ -18,7 +18,7 @@
 #include "util/coding.h"
 #include "util/hash.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 std::map<uint64_t, std::string> blooms;
 
@@ -371,7 +371,7 @@ TEST_P(PartitionedFilterBlockTest, SamePrefixInMultipleBlocks) {
   // some small number to cause partition cuts
   table_options_.metadata_block_size = 1;
   std::unique_ptr<const SliceTransform> prefix_extractor(
-      ROCKSDB_NAMESPACE::NewFixedPrefixTransform(1));
+      rocksdb::NewFixedPrefixTransform(1));
   std::unique_ptr<PartitionedIndexBuilder> pib(NewIndexBuilder());
   std::unique_ptr<PartitionedFilterBlockBuilder> builder(
       NewBuilder(pib.get(), prefix_extractor.get()));
@@ -417,7 +417,7 @@ TEST_P(PartitionedFilterBlockTest, PrefixInWrongPartitionBug) {
   // some small number to cause partition cuts
   table_options_.metadata_block_size = 1;
   std::unique_ptr<const SliceTransform> prefix_extractor(
-      ROCKSDB_NAMESPACE::NewFixedPrefixTransform(2));
+      rocksdb::NewFixedPrefixTransform(2));
   std::unique_ptr<PartitionedIndexBuilder> pib(NewIndexBuilder());
   std::unique_ptr<PartitionedFilterBlockBuilder> builder(
       NewBuilder(pib.get(), prefix_extractor.get()));
@@ -471,10 +471,10 @@ TEST_P(PartitionedFilterBlockTest, PartitionCount) {
   ASSERT_EQ(partitions, kKeyNum - 1 /* last two keys make one flush */);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

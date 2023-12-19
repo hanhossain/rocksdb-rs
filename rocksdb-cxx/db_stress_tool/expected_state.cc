@@ -14,7 +14,7 @@
 #include "rocksdb/trace_reader_writer.h"
 #include "rocksdb/trace_record_result.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 ExpectedState::ExpectedState(size_t max_key, size_t num_column_families)
     : max_key_(max_key),
       num_column_families_(num_column_families),
@@ -775,6 +775,6 @@ Status AnonExpectedStateManager::Open() {
   return latest_->Open(true /* create */);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif  // GFLAGS

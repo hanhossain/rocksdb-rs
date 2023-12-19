@@ -18,7 +18,7 @@
 #include "rocksdb/flush_block_policy.h"
 #include "rocksdb/table.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 struct ColumnFamilyOptions;
 struct ConfigOptions;
 struct DBOptions;
@@ -99,4 +99,4 @@ extern const std::string kHashIndexPrefixesBlock;
 extern const std::string kHashIndexPrefixesMetadataBlock;
 extern const std::string kPropTrue;
 extern const std::string kPropFalse;
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

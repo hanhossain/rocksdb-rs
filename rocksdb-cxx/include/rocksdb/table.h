@@ -33,7 +33,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // -- Block-based Table
 class Cache;
@@ -929,4 +929,4 @@ extern TableFactory* NewAdaptiveTableFactory(
     std::shared_ptr<TableFactory> cuckoo_table_factory = nullptr);
 
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

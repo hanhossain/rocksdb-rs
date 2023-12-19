@@ -9,7 +9,7 @@
 
 #include "rocksdb/slice.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Define all public custom types here.
 
@@ -91,4 +91,4 @@ enum class WriteStallCondition {
   kNormal,
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

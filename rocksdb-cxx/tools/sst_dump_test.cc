@@ -19,7 +19,7 @@
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 const uint32_t kOptLength = 1024;
 
@@ -100,7 +100,7 @@ class SSTDumpToolTest : public testing::Test {
     ReadOptions read_options;
     const ImmutableOptions imoptions(opts);
     const MutableCFOptions moptions(opts);
-    ROCKSDB_NAMESPACE::InternalKeyComparator ikc(opts.comparator);
+    rocksdb::InternalKeyComparator ikc(opts.comparator);
     std::unique_ptr<TableBuilder> tb;
 
     IntTblPropCollectorFactories int_tbl_prop_collector_factories;
@@ -150,7 +150,7 @@ TEST_F(SSTDumpToolTest, HelpAndVersion) {
   Options opts;
   opts.env = env();
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
 
   static const char* help[] = {"./sst_dump", "--help"};
   ASSERT_TRUE(!tool.Run(2, help, opts));
@@ -169,7 +169,7 @@ TEST_F(SSTDumpToolTest, EmptyFilter) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=raw", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -184,7 +184,7 @@ TEST_F(SSTDumpToolTest, SstDumpReverseBytewiseComparator) {
   opts.comparator = ReverseBytewiseComparator();
   BlockBasedTableOptions table_opts;
   table_opts.filter_policy.reset(
-      ROCKSDB_NAMESPACE::NewBloomFilterPolicy(10, false));
+      rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path =
       MakeFilePath("rocksdb_sst_reverse_bytewise_comparator.sst");
@@ -193,7 +193,7 @@ TEST_F(SSTDumpToolTest, SstDumpReverseBytewiseComparator) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=raw", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -208,7 +208,7 @@ TEST_F(SSTDumpToolTest, SstDumpComparatorWithU64Ts) {
   opts.comparator = test::BytewiseComparatorWithU64TsWrapper();
   BlockBasedTableOptions table_opts;
   table_opts.filter_policy.reset(
-      ROCKSDB_NAMESPACE::NewBloomFilterPolicy(10, false));
+      rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path =
       MakeFilePath("rocksdb_sst_comparator_with_u64_ts.sst");
@@ -217,7 +217,7 @@ TEST_F(SSTDumpToolTest, SstDumpComparatorWithU64Ts) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=raw", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -231,7 +231,7 @@ TEST_F(SSTDumpToolTest, FilterBlock) {
   opts.env = env();
   BlockBasedTableOptions table_opts;
   table_opts.filter_policy.reset(
-      ROCKSDB_NAMESPACE::NewBloomFilterPolicy(10, true));
+      rocksdb::NewBloomFilterPolicy(10, true));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -239,7 +239,7 @@ TEST_F(SSTDumpToolTest, FilterBlock) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=raw", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -253,7 +253,7 @@ TEST_F(SSTDumpToolTest, FullFilterBlock) {
   opts.env = env();
   BlockBasedTableOptions table_opts;
   table_opts.filter_policy.reset(
-      ROCKSDB_NAMESPACE::NewBloomFilterPolicy(10, false));
+      rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -261,7 +261,7 @@ TEST_F(SSTDumpToolTest, FullFilterBlock) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=raw", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -275,7 +275,7 @@ TEST_F(SSTDumpToolTest, GetProperties) {
   opts.env = env();
   BlockBasedTableOptions table_opts;
   table_opts.filter_policy.reset(
-      ROCKSDB_NAMESPACE::NewBloomFilterPolicy(10, false));
+      rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -283,7 +283,7 @@ TEST_F(SSTDumpToolTest, GetProperties) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--show_properties", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -297,7 +297,7 @@ TEST_F(SSTDumpToolTest, CompressedSizes) {
   opts.env = env();
   BlockBasedTableOptions table_opts;
   table_opts.filter_policy.reset(
-      ROCKSDB_NAMESPACE::NewBloomFilterPolicy(10, false));
+      rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -305,7 +305,7 @@ TEST_F(SSTDumpToolTest, CompressedSizes) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=recompress", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -324,7 +324,7 @@ TEST_F(SSTDumpToolTest, MemEnv) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=verify_checksum", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   cleanup(opts, file_path);
@@ -371,7 +371,7 @@ TEST_F(SSTDumpToolTest, NoSstFile) {
   std::string file_path = MakeFilePath("no_such_file.sst");
   char* usage[3];
   PopulateCommandArgs(file_path, "", usage);
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   for (const auto& command :
        {"--command=check", "--command=dump", "--command=raw",
         "--command=verify", "--command=recompress", "--command=verify_checksum",
@@ -431,7 +431,7 @@ TEST_F(SSTDumpToolTest, RawOutput) {
   char* usage[3];
   PopulateCommandArgs(file_path, "--command=raw", usage);
 
-  ROCKSDB_NAMESPACE::SSTDumpTool tool;
+  rocksdb::SSTDumpTool tool;
   ASSERT_TRUE(!tool.Run(3, usage, opts));
 
   const std::string raw_path = MakeFilePath("rocksdb_sst_test_dump.txt");
@@ -460,10 +460,10 @@ TEST_F(SSTDumpToolTest, RawOutput) {
   }
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();

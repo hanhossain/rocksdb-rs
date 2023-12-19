@@ -13,7 +13,7 @@
 #include "rocksdb/utilities/transaction_db.h"
 #include "utilities/fault_injection_fs.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class NonBatchedOpsStressTest : public StressTest {
  public:
   NonBatchedOpsStressTest() {}
@@ -2014,5 +2014,5 @@ StressTest* CreateNonBatchedOpsStressTest() {
   return new NonBatchedOpsStressTest();
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 #endif  // GFLAGS

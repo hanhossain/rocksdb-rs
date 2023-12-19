@@ -16,7 +16,7 @@
 #include "util/aligned_buffer.h"
 #include "util/rate_limiter_impl.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 size_t RateLimiter::RequestToken(size_t bytes, size_t alignment,
                                  Env::IOPriority io_priority, Statistics* stats,
                                  RateLimiter::OpType op_type) {
@@ -372,4 +372,4 @@ RateLimiter* NewGenericRateLimiter(
   return limiter.release();
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -24,7 +24,7 @@
 // can still build
 #include <compressapi.h>
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace port {
 namespace xpress {
 
@@ -203,7 +203,7 @@ char* Decompress(const char* input_data, size_t input_length,
 }
 }  // namespace xpress
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif
 

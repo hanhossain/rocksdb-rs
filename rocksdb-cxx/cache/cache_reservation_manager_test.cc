@@ -17,7 +17,7 @@
 #include "test_util/testharness.h"
 #include "util/coding.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class CacheReservationManagerTest : public ::testing::Test {
  protected:
   static constexpr std::size_t kSizeDummyEntry =
@@ -459,10 +459,10 @@ TEST(CacheReservationHandleTest, HandleTest) {
   EXPECT_EQ(mem_used, 0);
   EXPECT_EQ(cache->GetPinnedUsage(), mem_used);
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

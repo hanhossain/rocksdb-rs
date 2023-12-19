@@ -19,7 +19,7 @@
 #include "util/math.h"
 #include "util/mutexlock.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 // The generated seeds must fit in 31 bits so that
 // ShardedCacheOptions::hash_seed can be set to it explicitly, for
@@ -134,4 +134,4 @@ int ShardedCacheBase::GetNumShardBits() const {
 
 uint32_t ShardedCacheBase::GetNumShards() const { return shard_mask_ + 1; }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

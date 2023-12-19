@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/trace_record.h"
 
@@ -18,7 +17,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class IteratorTraceExecutionResult;
 class MultiValuesTraceExecutionResult;
@@ -189,4 +188,4 @@ class IteratorTraceExecutionResult : public TraceExecutionResult {
   PinnableSlice value_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

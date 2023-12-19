@@ -6,7 +6,7 @@
 #include "rocksdb/secondary_cache.h"
 #include "rocksdb/cache.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 
@@ -40,4 +40,4 @@ Status SecondaryCache::InsertSaved(const Slice& key, const Slice& saved) {
   return Insert(key, const_cast<Slice*>(&saved), &helper);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

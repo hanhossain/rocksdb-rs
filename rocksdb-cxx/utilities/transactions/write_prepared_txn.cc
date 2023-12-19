@@ -24,7 +24,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 struct WriteOptions;
 
@@ -517,4 +517,4 @@ Status WritePreparedTxn::RebuildFromWriteBatch(WriteBatch* src_batch) {
   return ret;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

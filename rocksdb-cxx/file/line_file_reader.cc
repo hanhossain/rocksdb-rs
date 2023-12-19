@@ -9,7 +9,7 @@
 
 #include "monitoring/iostats_context_imp.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 IOStatus LineFileReader::Create(const std::shared_ptr<FileSystem>& fs,
                                 const std::string& fname,
@@ -66,4 +66,4 @@ bool LineFileReader::ReadLine(std::string* out,
   }
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

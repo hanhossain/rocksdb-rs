@@ -24,7 +24,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class TestFilterBitsBuilder : public FilterBitsBuilder {
  public:
@@ -318,10 +318,10 @@ TEST_F(FullFilterBlockTest, SingleChunk) {
                                   /*lookup_context=*/nullptr, ReadOptions()));
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

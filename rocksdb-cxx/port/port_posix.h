@@ -13,8 +13,6 @@
 
 #include <thread>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/port_defs.h"
 #else
@@ -88,7 +86,7 @@
 #define fdatasync fsync
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 extern const bool kDefaultToAdaptiveMutex;
 
@@ -245,4 +243,4 @@ int64_t GetProcessID();
 bool GenerateRfcUuid(std::string* output);
 
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

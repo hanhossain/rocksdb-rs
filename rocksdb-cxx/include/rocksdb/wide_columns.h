@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
 
 #ifndef ROCKSDB_RS
@@ -19,7 +18,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Class representing a wide column, which is defined as a pair of column name
 // and column value.
@@ -212,4 +211,4 @@ inline bool operator!=(const PinnableWideColumns& lhs,
   return !(lhs == rhs);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

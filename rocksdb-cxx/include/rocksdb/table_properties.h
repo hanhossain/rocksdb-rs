@@ -19,7 +19,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // -- Table Properties
 // Other than basic table properties, each table may also have the user
@@ -222,7 +222,7 @@ struct TableProperties {
   uint64_t fixed_key_len = 0;
   // ID of column family for this SST file, corresponding to the CF identified
   // by column_family_name.
-  uint64_t column_family_id = ROCKSDB_NAMESPACE::
+  uint64_t column_family_id = rocksdb::
       TablePropertiesCollectorFactory::Context::kUnknownColumnFamily;
   // Timestamp of the latest key. 0 means unknown.
   // TODO(sagar0): Should be changed to latest_key_time ... but don't know the
@@ -340,4 +340,4 @@ extern uint64_t GetDeletedKeys(const UserCollectedProperties& props);
 extern uint64_t GetMergeOperands(const UserCollectedProperties& props,
                                  bool* property_present);
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

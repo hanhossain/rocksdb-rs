@@ -17,7 +17,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 // ColumnFamilyCollector is a write batch handler which does nothing
 // except recording unique column family IDs
 class ColumnFamilyCollector : public WriteBatch::Handler {
@@ -82,4 +82,4 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
 Status CollectColumnFamilyIdsFromWriteBatch(
     const WriteBatch& batch, std::vector<uint32_t>* column_family_ids);
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

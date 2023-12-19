@@ -12,7 +12,7 @@
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 const std::string kBlockKeyPrefix = "test-block-";
 const std::string kRefKeyPrefix = "test-get-";
@@ -29,7 +29,7 @@ class CacheSimulatorTest : public testing::Test {
   const size_t kNumBlocks = 5;
   const size_t kValueSize = 1000;
 
-  CacheSimulatorTest() { env_ = ROCKSDB_NAMESPACE::Env::Default(); }
+  CacheSimulatorTest() { env_ = rocksdb::Env::Default(); }
 
   BlockCacheTraceRecord GenerateGetRecord(uint64_t getid) {
     BlockCacheTraceRecord record;
@@ -488,10 +488,10 @@ TEST_F(CacheSimulatorTest, GhostHybridRowBlockCacheSimulator) {
                     cache_simulator->miss_ratio_stats().user_miss_ratio()));
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

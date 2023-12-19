@@ -42,7 +42,7 @@
 #include "test_util/sync_point.h"
 #include "util/stop_watch.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class TableFactory;
 
@@ -462,4 +462,4 @@ Status BuildTable(
   return s;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

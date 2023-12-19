@@ -27,7 +27,7 @@
 #include "util/compression.h"
 #include "util/stop_watch.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 inline void BlockFetcher::ProcessTrailerIfPresent() {
   if (footer_.GetBlockTrailerSize() > 0) {
@@ -402,4 +402,4 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
   return io_status_;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

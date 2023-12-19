@@ -31,7 +31,7 @@
 #include "util/string_util.h"
 #include "util/xxhash.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 const std::string kNewFileNoOverwrite = "";
 
@@ -1068,4 +1068,4 @@ void FaultInjectionTestFS::PrintFaultBacktrace() {
 #endif
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

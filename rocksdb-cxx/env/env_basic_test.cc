@@ -22,7 +22,7 @@
 #include "rocksdb-rs/src/env.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 using CreateEnvFunc = Env*();
 
@@ -403,9 +403,9 @@ TEST_P(EnvMoreTestWithParam, GetChildrenIgnoresDotAndDotDot) {
   ASSERT_EQ(result.at(0), "test_file");
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

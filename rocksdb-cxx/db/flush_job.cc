@@ -52,7 +52,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 const char* GetFlushReasonString(FlushReason flush_reason) {
   switch (flush_reason) {
@@ -1100,4 +1100,4 @@ std::unique_ptr<FlushJobInfo> FlushJob::GetFlushJobInfo() const {
   return info;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

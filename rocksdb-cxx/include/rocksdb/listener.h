@@ -26,7 +26,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 using TablePropertiesCollection =
     std::unordered_map<std::string, std::shared_ptr<const TableProperties>>;
@@ -853,4 +853,4 @@ class EventListener : public Customizable {
 };
 
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

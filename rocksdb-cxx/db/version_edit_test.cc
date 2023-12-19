@@ -18,7 +18,7 @@
 #include "util/coding.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 static void TestEncodeDecode(const VersionEdit& edit) {
   // Encoding one `VersionEdit` and decoding it again should result in the
@@ -203,7 +203,7 @@ TEST_F(VersionEditTest, ForwardCompatibleNewFile4) {
 
   // Call back function to add extra customized builds.
   bool first = true;
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "VersionEdit::EncodeTo:NewFile4:CustomizeFields", [&](void* arg) {
         std::string* str = reinterpret_cast<std::string*>(arg);
         PutVarint32(str, 33);
@@ -216,9 +216,9 @@ TEST_F(VersionEditTest, ForwardCompatibleNewFile4) {
           PutLengthPrefixedSlice(str, str2);
         }
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   edit.EncodeTo(&encoded, 0 /* ts_sz */);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   VersionEdit parsed;
   Status s = parsed.DecodeFrom(encoded);
@@ -250,15 +250,15 @@ TEST_F(VersionEditTest, NewFile4NotSupportedField) {
   std::string encoded;
 
   // Call back function to add extra customized builds.
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "VersionEdit::EncodeTo:NewFile4:CustomizeFields", [&](void* arg) {
         std::string* str = reinterpret_cast<std::string*>(arg);
         const std::string str1 = "s";
         PutLengthPrefixedSlice(str, str1);
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   edit.EncodeTo(&encoded, 0 /* ts_sz */);
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   VersionEdit parsed;
   Status s = parsed.DecodeFrom(encoded);
@@ -786,10 +786,10 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
   }
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -14,7 +14,7 @@
 
 #include "test_util/testharness.h"
 
-using ROCKSDB_NAMESPACE::Random;
+using rocksdb::Random;
 
 TEST(RandomTest, Uniform) {
   const int average = 20;
@@ -100,7 +100,7 @@ TEST(RandomTest, PercentTrue) {
 }
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();

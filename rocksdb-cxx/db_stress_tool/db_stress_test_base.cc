@@ -30,7 +30,7 @@
 #include "utilities/fault_injection_fs.h"
 #include "utilities/fault_injection_secondary_cache.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 
@@ -2008,7 +2008,7 @@ void StressTest::TestGetProperty(ThreadState* thread) const {
     }
   }
 
-  ROCKSDB_NAMESPACE::ColumnFamilyMetaData cf_meta_data;
+  rocksdb::ColumnFamilyMetaData cf_meta_data;
   db_->GetColumnFamilyMetaData(&cf_meta_data);
   int level_size = static_cast<int>(cf_meta_data.levels.size());
   for (int level = 0; level < level_size; level++) {
@@ -2033,7 +2033,7 @@ void StressTest::TestGetProperty(ThreadState* thread) const {
 
 void StressTest::TestCompactFiles(ThreadState* thread,
                                   ColumnFamilyHandle* column_family) {
-  ROCKSDB_NAMESPACE::ColumnFamilyMetaData cf_meta_data;
+  rocksdb::ColumnFamilyMetaData cf_meta_data;
   db_->GetColumnFamilyMetaData(column_family, &cf_meta_data);
 
   if (cf_meta_data.levels.empty()) {
@@ -3096,14 +3096,14 @@ void InitializeOptionsFromFlags(
   options.max_background_compactions = FLAGS_max_background_compactions;
   options.max_background_flushes = FLAGS_max_background_flushes;
   options.compaction_style =
-      static_cast<ROCKSDB_NAMESPACE::CompactionStyle>(FLAGS_compaction_style);
+      static_cast<rocksdb::CompactionStyle>(FLAGS_compaction_style);
   if (options.compaction_style ==
-      ROCKSDB_NAMESPACE::CompactionStyle::kCompactionStyleFIFO) {
+      rocksdb::CompactionStyle::kCompactionStyleFIFO) {
     options.compaction_options_fifo.allow_compaction =
         FLAGS_fifo_allow_compaction;
   }
   options.compaction_pri =
-      static_cast<ROCKSDB_NAMESPACE::CompactionPri>(FLAGS_compaction_pri);
+      static_cast<rocksdb::CompactionPri>(FLAGS_compaction_pri);
   options.num_levels = FLAGS_num_levels;
   if (FLAGS_prefix_size >= 0) {
     options.prefix_extractor.reset(NewFixedPrefixTransform(FLAGS_prefix_size));
@@ -3350,5 +3350,5 @@ void InitializeOptionsGeneral(
       std::make_shared<DbStressTablePropertiesCollectorFactory>());
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 #endif  // GFLAGS

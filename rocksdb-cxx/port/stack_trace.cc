@@ -10,7 +10,7 @@
 
 // noop
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace port {
 void InstallStackTraceHandler() {}
 void PrintStack(int /*first_frames_to_skip*/) {}
@@ -19,7 +19,7 @@ void* SaveStack(int* /*num_frames*/, int /*first_frames_to_skip*/) {
   return nullptr;
 }
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #else
 
@@ -50,7 +50,7 @@ void* SaveStack(int* /*num_frames*/, int /*first_frames_to_skip*/) {
 
 #include "port/lang.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace port {
 
 namespace {
@@ -346,6 +346,6 @@ void InstallStackTraceHandler() {
 }
 
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif

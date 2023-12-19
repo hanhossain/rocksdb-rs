@@ -26,17 +26,17 @@
 #include "util/coding.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class LockTest : public testing::Test {
  public:
   static LockTest* current_;
   std::string file_;
-  ROCKSDB_NAMESPACE::Env* env_;
+  rocksdb::Env* env_;
 
   LockTest()
       : file_(test::PerThreadDBPath("db_testlock_file")),
-        env_(ROCKSDB_NAMESPACE::Env::Default()) {
+        env_(rocksdb::Env::Default()) {
     current_ = this;
   }
 
@@ -148,10 +148,10 @@ TEST_F(LockTest, LockBySameThread) {
   ASSERT_TRUE(AssertFileIsNotLocked());
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

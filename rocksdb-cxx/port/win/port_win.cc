@@ -34,7 +34,7 @@
 
 #include "logging/logging.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 extern const bool kDefaultToAdaptiveMutex = false;
 
@@ -217,7 +217,7 @@ int truncate(const char* path, int64_t length) {
     errno = EFAULT;
     return -1;
   }
-  return ROCKSDB_NAMESPACE::port::Truncate(path, length);
+  return rocksdb::port::Truncate(path, length);
 }
 
 int Truncate(std::string path, int64_t len) {
@@ -298,6 +298,6 @@ bool GenerateRfcUuid(std::string* output) {
 }
 
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif

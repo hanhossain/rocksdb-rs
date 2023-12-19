@@ -20,7 +20,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // A handle for lookup result. Immediately after SecondaryCache::Lookup() with
 // wait=false (and depending on the implementation), the handle could be in any
@@ -152,4 +152,4 @@ class SecondaryCache : public Customizable {
   virtual Status Inflate(size_t /*increase*/) { return Status_NotSupported(); }
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

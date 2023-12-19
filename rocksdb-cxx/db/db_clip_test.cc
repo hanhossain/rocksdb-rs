@@ -7,7 +7,7 @@
 #include "port/port.h"
 #include "util/random.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBClipTest : public DBTestBase {
  public:
@@ -133,10 +133,10 @@ TEST_F(DBClipTest, TestClipRange) {
     ASSERT_TRUE(in_range);
   }
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -18,7 +18,7 @@
 #include "util/random.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 #ifdef ROCKSDB_JEMALLOC_NODUMP_ALLOCATOR
 std::atomic<extent_alloc_t*> JemallocNodumpAllocator::original_alloc_{nullptr};
@@ -299,4 +299,4 @@ Status NewJemallocNodumpAllocator(
   return s;
 #endif
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

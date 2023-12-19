@@ -29,7 +29,7 @@ bool FLAGS_verbose = false;
 
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBIteratorStressTest : public testing::Test {
  public:
@@ -648,10 +648,10 @@ TEST_F(DBIteratorStressTest, StressTest) {
             << "\n  mutated on the fly: " << num_recently_removed << std::endl;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   ParseCommandLineFlags(&argc, &argv, true);
   return RUN_ALL_TESTS();

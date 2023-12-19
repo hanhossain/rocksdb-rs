@@ -15,7 +15,7 @@
 #include "test_util/testutil.h"
 #include "util/vector_iterator.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class RangeDelAggregatorTest : public testing::Test {};
 
@@ -704,10 +704,10 @@ TEST_F(RangeDelAggregatorTest,
                                                               {"f", "g", 8}});
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -42,7 +42,7 @@
 #include "table/block_based/data_block_footer.h"
 #include "util/coding.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 BlockBuilder::BlockBuilder(
     int block_restart_interval, bool use_delta_encoding,
@@ -264,4 +264,4 @@ const Slice BlockBuilder::MaybeStripTimestampFromKey(std::string* key_buf,
   }
   return stripped_key;
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -19,7 +19,6 @@
 #include <unordered_map>
 
 #include "rocksdb/convenience.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"
@@ -27,7 +26,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class OptionTypeInfo;
 struct ColumnFamilyOptions;
 struct DBOptions;
@@ -1223,4 +1222,4 @@ bool VectorsAreEqual(const ConfigOptions& config_options,
     return true;
   }
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

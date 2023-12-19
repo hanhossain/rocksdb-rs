@@ -23,7 +23,7 @@
 
 #include "port/stack_trace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Unit test for work_queue.h.
 //
@@ -263,10 +263,10 @@ TEST(WorkQueue, FailedPop) {
   EXPECT_EQ(5, x);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

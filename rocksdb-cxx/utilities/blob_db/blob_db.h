@@ -20,7 +20,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace blob_db {
 
@@ -92,7 +92,7 @@ struct BlobDBOptions {
 
 class BlobDB : public StackableDB {
  public:
-  using ROCKSDB_NAMESPACE::StackableDB::Put;
+  using rocksdb::StackableDB::Put;
   virtual Status Put(const WriteOptions& options, const Slice& key,
                      const Slice& value) override = 0;
   virtual Status Put(const WriteOptions& options,
@@ -105,7 +105,7 @@ class BlobDB : public StackableDB {
     return Put(options, key, value);
   }
 
-  using ROCKSDB_NAMESPACE::StackableDB::Delete;
+  using rocksdb::StackableDB::Delete;
   virtual Status Delete(const WriteOptions& options,
                         ColumnFamilyHandle* column_family,
                         const Slice& key) override {
@@ -143,7 +143,7 @@ class BlobDB : public StackableDB {
     return PutUntil(options, key, value, expiration);
   }
 
-  using ROCKSDB_NAMESPACE::StackableDB::Get;
+  using rocksdb::StackableDB::Get;
   virtual Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) override = 0;
@@ -157,7 +157,7 @@ class BlobDB : public StackableDB {
     return Get(options, DefaultColumnFamily(), key, value, expiration);
   }
 
-  using ROCKSDB_NAMESPACE::StackableDB::MultiGet;
+  using rocksdb::StackableDB::MultiGet;
   virtual rust::Vec<Status> MultiGet(
       const ReadOptions& options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) override = 0;
@@ -185,14 +185,14 @@ class BlobDB : public StackableDB {
     }
   }
 
-  using ROCKSDB_NAMESPACE::StackableDB::SingleDelete;
+  using rocksdb::StackableDB::SingleDelete;
   virtual Status SingleDelete(const WriteOptions& /*wopts*/,
                               ColumnFamilyHandle* /*column_family*/,
                               const Slice& /*key*/) override {
     return Status_NotSupported("Not supported operation in blob db.");
   }
 
-  using ROCKSDB_NAMESPACE::StackableDB::Merge;
+  using rocksdb::StackableDB::Merge;
   virtual Status Merge(const WriteOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/,
                        const Slice& /*key*/, const Slice& /*value*/) override {
@@ -202,7 +202,7 @@ class BlobDB : public StackableDB {
   virtual Status Write(const WriteOptions& opts,
                        WriteBatch* updates) override = 0;
 
-  using ROCKSDB_NAMESPACE::StackableDB::NewIterator;
+  using rocksdb::StackableDB::NewIterator;
   virtual Iterator* NewIterator(const ReadOptions& options) override = 0;
   virtual Iterator* NewIterator(const ReadOptions& options,
                                 ColumnFamilyHandle* column_family) override {
@@ -235,7 +235,7 @@ class BlobDB : public StackableDB {
                         output_path_id, output_file_names, compaction_job_info);
   }
 
-  using ROCKSDB_NAMESPACE::StackableDB::Close;
+  using rocksdb::StackableDB::Close;
   virtual Status Close() override = 0;
 
   // Opening blob db.
@@ -264,4 +264,4 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
                      const BlobDBOptions& bdb_options);
 
 }  // namespace blob_db
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

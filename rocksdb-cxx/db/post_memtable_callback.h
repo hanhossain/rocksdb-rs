@@ -13,7 +13,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Callback invoked after finishing writing to the memtable but before
 // publishing the sequence number to readers.
@@ -27,4 +27,4 @@ class PostMemTableCallback {
   virtual Status operator()(SequenceNumber seq, bool disable_memtable) = 0;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

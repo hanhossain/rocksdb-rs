@@ -25,9 +25,9 @@ extern "C"
 {
 } // extern "C"
 
-std::unordered_map<std::string, ROCKSDB_NAMESPACE::RegistrarFunc> ROCKSDB_NAMESPACE::ObjectRegistry::builtins_ = {};
+std::unordered_map<std::string, rocksdb::RegistrarFunc> rocksdb::ObjectRegistry::builtins_ = {};
 
-namespace ROCKSDB_NAMESPACE
+namespace rocksdb
 {
     static void AddProperty(std::unordered_map<std::string, std::string> *props, const std::string &name)
     {
@@ -87,4 +87,4 @@ namespace ROCKSDB_NAMESPACE
         }
         return info;
     }
-} // namespace ROCKSDB_NAMESPACE
+} // namespace rocksdb

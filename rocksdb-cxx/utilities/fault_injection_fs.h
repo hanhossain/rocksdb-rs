@@ -27,7 +27,7 @@
 #include "util/random.h"
 #include "util/thread_local.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class TestFSWritableFile;
 class FaultInjectionTestFS;
@@ -585,4 +585,4 @@ class FaultInjectionTestFS : public FileSystemWrapper {
                         FileType* type);
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -21,7 +21,7 @@
 #include "util/autovector.h"
 #include "util/hash_containers.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class InternalKeyComparator;
 
 class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
@@ -181,4 +181,4 @@ class PartitionedFilterBlockReader
   UnorderedMap<uint64_t, CachableEntry<ParsedFullFilterBlock>> filter_map_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

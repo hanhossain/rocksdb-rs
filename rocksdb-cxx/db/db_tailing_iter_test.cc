@@ -20,7 +20,7 @@ static bool enable_io_uring = true;
 extern "C" bool RocksDbIOUringEnable() { return enable_io_uring; }
 }  // namespace
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBTestTailingIterator : public DBTestBase,
                               public ::testing::WithParamInterface<bool> {
@@ -140,8 +140,8 @@ TEST_P(DBTestTailingIterator, TailingIteratorSeekToNext) {
       ASSERT_TRUE(itern->Valid());
       ASSERT_EQ(itern->key().compare(key), 0);
     }
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+    rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
+    rocksdb::SyncPoint::GetInstance()->DisableProcessing();
     for (int i = 2 * num_records; i > 0; --i) {
       char buf1[32];
       char buf2[32];
@@ -200,25 +200,25 @@ TEST_P(DBTestTailingIterator, TailingIteratorTrimSeekToNext) {
   bool file_iters_deleted = false;
   bool file_iters_renewed_null = false;
   bool file_iters_renewed_copy = false;
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ForwardIterator::SeekInternal:Return", [&](void* arg) {
         ForwardIterator* fiter = reinterpret_cast<ForwardIterator*>(arg);
         ASSERT_TRUE(!file_iters_deleted ||
                     fiter->TEST_CheckDeletedIters(&deleted_iters, &num_iters));
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ForwardIterator::Next:Return", [&](void* arg) {
         ForwardIterator* fiter = reinterpret_cast<ForwardIterator*>(arg);
         ASSERT_TRUE(!file_iters_deleted ||
                     fiter->TEST_CheckDeletedIters(&deleted_iters, &num_iters));
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ForwardIterator::RenewIterators:Null",
       [&](void* /*arg*/) { file_iters_renewed_null = true; });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ForwardIterator::RenewIterators:Copy",
       [&](void* /*arg*/) { file_iters_renewed_copy = true; });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   const int num_records = 1000;
   for (int i = 1; i < num_records; ++i) {
     char buf1[32];
@@ -532,7 +532,7 @@ TEST_P(DBTestTailingIterator, TailingIteratorUpperBound) {
     SyncPoint::GetInstance()->SetCallBack(
         "UpdateResults::io_uring_result",
         [&](void* /*arg*/) { read_async_called = true; });
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+    rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
     auto it =
         std::unique_ptr<Iterator>(db_->NewIterator(read_options, handles_[1]));
@@ -547,20 +547,20 @@ TEST_P(DBTestTailingIterator, TailingIteratorUpperBound) {
     ASSERT_OK(it->status());
     // This keeps track of the number of times NeedToSeekImmutable() was true.
     int immutable_seeks = 0;
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+    rocksdb::SyncPoint::GetInstance()->SetCallBack(
         "ForwardIterator::SeekInternal:Immutable",
         [&](void* /*arg*/) { ++immutable_seeks; });
 
     // Seek to 13. This should not require any immutable seeks.
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+    rocksdb::SyncPoint::GetInstance()->EnableProcessing();
     it->Seek("13");
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->ClearAllCallBacks();
+    rocksdb::SyncPoint::GetInstance()->DisableProcessing();
+    rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
 
     SyncPoint::GetInstance()->SetCallBack(
         "UpdateResults::io_uring_result",
         [&](void* /*arg*/) { read_async_called = true; });
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+    rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
     ASSERT_FALSE(it->Valid());
     ASSERT_OK(it->status());
@@ -698,11 +698,11 @@ TEST_P(DBTestTailingIterator, SeekToFirstWithUpperBoundBug) {
   ASSERT_EQ(iter->key().ToString(), "aa");
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

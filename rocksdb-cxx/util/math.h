@@ -14,11 +14,10 @@
 #include <type_traits>
 
 #include "port/lang.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 ASSERT_FEATURE_COMPAT_HEADER();
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Fast implementation of floor(log2(v)). Undefined for 0 or negative
 // numbers (in case of signed type).
@@ -296,4 +295,4 @@ inline T DownwardInvolution(T v) {
   return static_cast<T>(r);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

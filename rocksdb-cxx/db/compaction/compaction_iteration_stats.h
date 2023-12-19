@@ -7,9 +7,7 @@
 
 #include <cstdint>
 
-#include "rocksdb/rocksdb_namespace.h"
-
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 struct CompactionIterationStats {
   // Compaction statistics
@@ -46,4 +44,4 @@ struct CompactionIterationStats {
   uint64_t total_blob_bytes_relocated = 0;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

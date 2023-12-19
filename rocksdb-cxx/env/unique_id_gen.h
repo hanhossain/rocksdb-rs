@@ -18,9 +18,8 @@
 #include <type_traits>
 
 #include "port/port.h"
-#include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Generates a new 128-bit identifier that is universally unique
 // (with high probability) for each call. The result is split into
@@ -116,4 +115,4 @@ class ALIGN_AS(CACHE_LINE_SIZE) UnpredictableUniqueIdGen {
   std::atomic<uint64_t> counter_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

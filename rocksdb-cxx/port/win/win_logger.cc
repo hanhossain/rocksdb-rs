@@ -28,7 +28,7 @@
 #include "rocksdb/env.h"
 #include "rocksdb/system_clock.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace port {
 
@@ -187,6 +187,6 @@ size_t WinLogger::GetLogFileSize() const { return log_size_; }
 
 }  // namespace port
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif

@@ -24,7 +24,7 @@
 #include <system_error>
 #include <thread>
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace port {
 
 struct WindowsThread::Data {
@@ -164,7 +164,7 @@ unsigned int __stdcall WindowsThread::Data::ThreadProc(void* arg) {
   return 0;
 }
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif  // !_POSIX_THREADS
 #endif  // OS_WIN

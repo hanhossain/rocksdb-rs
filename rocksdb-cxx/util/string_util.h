@@ -12,9 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
-
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Slice;
 
@@ -172,4 +170,4 @@ extern const std::string kNullptrString;
 // the argument err
 extern std::string errnoStr(int err);
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

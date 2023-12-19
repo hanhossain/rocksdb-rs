@@ -9,7 +9,7 @@
 
 #include <atomic>
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 void ExpectedValue::Put(bool pending) {
   if (pending) {
     SetPendingWrite();
@@ -118,5 +118,5 @@ bool ExpectedValueHelper::InExpectedValueBaseRange(
            (lower_bound_2 <= value_base && value_base <= upper_bound_2);
   }
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 #endif  // GFLAGS

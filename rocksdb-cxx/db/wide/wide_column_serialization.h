@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <string>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/wide_columns.h"
 
 #ifndef ROCKSDB_RS
@@ -17,7 +16,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Slice;
 
@@ -79,4 +78,4 @@ inline Status WideColumnSerialization::Serialize(
   return SerializeImpl(&value_of_default, other_columns, output);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

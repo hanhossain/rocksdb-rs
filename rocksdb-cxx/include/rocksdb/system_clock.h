@@ -12,7 +12,6 @@
 #include <memory>
 
 #include "rocksdb/customizable.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"
@@ -25,7 +24,7 @@
 #undef GetCurrentTime
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 struct ConfigOptions;
 
 // A SystemClock is an interface used by the rocksdb implementation to access
@@ -116,4 +115,4 @@ class SystemClockWrapper : public SystemClock {
   std::shared_ptr<SystemClock> target_;
 };
 
-}  // end namespace ROCKSDB_NAMESPACE
+}  // end namespace rocksdb

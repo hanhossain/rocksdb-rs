@@ -17,7 +17,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBImpl;
 
@@ -126,4 +126,4 @@ class ErrorHandler {
   void CheckAndSetRecoveryAndBGError(const Status& bg_err);
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

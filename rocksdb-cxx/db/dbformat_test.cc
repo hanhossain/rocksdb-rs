@@ -13,7 +13,7 @@
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 static std::string IKey(const std::string& user_key, uint64_t seq,
                         ValueType vt) {
@@ -333,10 +333,10 @@ TEST_F(FormatTest, ReplaceInternalKeyWithMinTimestamp) {
   ASSERT_EQ(kTypeValue, new_key.type);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();

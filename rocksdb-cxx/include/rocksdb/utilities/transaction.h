@@ -19,7 +19,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Iterator;
 class TransactionDB;
@@ -685,4 +685,4 @@ class Transaction {
   friend class TransactionTest_TwoPhaseLogRollingTest2_Test;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

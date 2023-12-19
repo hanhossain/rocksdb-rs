@@ -83,7 +83,7 @@ DEFINE_bool(early_exit, false,
 
 DEFINE_string(secondary_cache_uri, "",
               "Full URI for creating a custom secondary cache object");
-static class std::shared_ptr<ROCKSDB_NAMESPACE::SecondaryCache> secondary_cache;
+static class std::shared_ptr<rocksdb::SecondaryCache> secondary_cache;
 
 DEFINE_string(cache_type, "lru_cache", "Type of block cache.");
 
@@ -140,7 +140,7 @@ DEFINE_bool(sck_footer_unique_id, false,
             "(-stress_cache_key) Simulate using proposed footer unique id");
 // ## END stress_cache_key sub-tool options ##
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class CacheBench;
 namespace {
@@ -960,7 +960,7 @@ int cache_bench_tool(int argc, char** argv) {
     exit(1);
   }
 
-  ROCKSDB_NAMESPACE::CacheBench bench;
+  rocksdb::CacheBench bench;
   if (FLAGS_populate_cache) {
     bench.PopulateCache();
     printf("Population complete\n");
@@ -971,7 +971,7 @@ int cache_bench_tool(int argc, char** argv) {
   } else {
     return 1;
   }
-}  // namespace ROCKSDB_NAMESPACE
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
+}  // namespace rocksdb
 
 #endif  // GFLAGS

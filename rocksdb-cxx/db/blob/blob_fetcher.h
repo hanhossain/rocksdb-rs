@@ -13,7 +13,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Version;
 class Slice;
@@ -39,4 +39,4 @@ class BlobFetcher {
   const Version* version_;
   ReadOptions read_options_;
 };
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

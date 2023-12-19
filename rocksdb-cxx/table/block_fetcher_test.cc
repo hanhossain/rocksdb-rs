@@ -20,7 +20,7 @@
 #include "test_util/testharness.h"
 #include "utilities/memory_allocators.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 struct MemcpyStats {
   int num_stack_buf_memcpy;
@@ -511,10 +511,10 @@ TEST_F(BlockFetcherTest, FetchAndUncompressCompressedDataBlock) {
 
 
 }  // namespace
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

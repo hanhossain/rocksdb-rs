@@ -9,7 +9,7 @@
 #include "port/stack_trace.h"
 #include "test_util/sync_point.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBBlobCompactionTest : public DBTestBase {
  public:
@@ -889,10 +889,10 @@ TEST_F(DBBlobCompactionTest, CompactionDoNotFillCache) {
   Close();
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();

@@ -31,7 +31,7 @@
 #include "test_util/testutil.h"
 #include "util/random.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 std::string GenerateInternalKey(int primary_key, int secondary_key,
                                 int padding_size, Random *rnd,
@@ -379,7 +379,7 @@ TEST_F(BlockTest, BlockReadAmpBitmap) {
 
   Random rnd(301);
   for (size_t block_size : block_sizes) {
-    std::shared_ptr<Statistics> stats = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    std::shared_ptr<Statistics> stats = rocksdb::CreateDBStatistics();
     BlockReadAmpBitmap read_amp_bitmap(block_size, kBytesPerBit, stats.get());
     BlockReadAmpBitmapSlowAndAccurate read_amp_slow_and_accurate;
 
@@ -457,7 +457,7 @@ TEST_F(BlockTest, BlockWithReadAmpBitmap) {
 
   // Read the block sequentially using Next()
   {
-    std::shared_ptr<Statistics> stats = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    std::shared_ptr<Statistics> stats = rocksdb::CreateDBStatistics();
 
     // create block reader
     BlockContents contents;
@@ -489,7 +489,7 @@ TEST_F(BlockTest, BlockWithReadAmpBitmap) {
 
   // Read the block sequentially using Seek()
   {
-    std::shared_ptr<Statistics> stats = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    std::shared_ptr<Statistics> stats = rocksdb::CreateDBStatistics();
 
     // create block reader
     BlockContents contents;
@@ -523,7 +523,7 @@ TEST_F(BlockTest, BlockWithReadAmpBitmap) {
 
   // Read the block randomly
   {
-    std::shared_ptr<Statistics> stats = ROCKSDB_NAMESPACE::CreateDBStatistics();
+    std::shared_ptr<Statistics> stats = rocksdb::CreateDBStatistics();
 
     // create block reader
     BlockContents contents;
@@ -561,7 +561,7 @@ TEST_F(BlockTest, BlockWithReadAmpBitmap) {
 }
 
 TEST_F(BlockTest, ReadAmpBitmapPow2) {
-  std::shared_ptr<Statistics> stats = ROCKSDB_NAMESPACE::CreateDBStatistics();
+  std::shared_ptr<Statistics> stats = rocksdb::CreateDBStatistics();
   ASSERT_EQ(BlockReadAmpBitmap(100, 1, stats.get()).GetBytesPerBit(), 1u);
   ASSERT_EQ(BlockReadAmpBitmap(100, 2, stats.get()).GetBytesPerBit(), 2u);
   ASSERT_EQ(BlockReadAmpBitmap(100, 4, stats.get()).GetBytesPerBit(), 4u);
@@ -1674,10 +1674,10 @@ TEST_P(MetaIndexBlockKVChecksumCorruptionTest, CorruptEntry) {
     }
   }
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char **argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

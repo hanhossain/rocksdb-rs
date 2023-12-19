@@ -62,7 +62,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 const char* GetCompactionReasonString(CompactionReason compaction_reason) {
   switch (compaction_reason) {
@@ -2036,4 +2036,4 @@ Env::IOPriority CompactionJob::GetRateLimiterPriority() {
   return Env::IO_LOW;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

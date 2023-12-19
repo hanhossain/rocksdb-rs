@@ -11,7 +11,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DB;
 
@@ -28,4 +28,4 @@ class WriteCallback {
   virtual bool AllowWriteBatching() = 0;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

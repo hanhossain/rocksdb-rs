@@ -19,7 +19,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Env;
 class Logger;
@@ -139,4 +139,4 @@ extern SstFileManager* NewSstFileManager(
     double max_trash_db_ratio = 0.25,
     uint64_t bytes_max_delete_chunk = 64 * 1024 * 1024);
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
