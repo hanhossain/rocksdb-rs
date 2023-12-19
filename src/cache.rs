@@ -63,6 +63,7 @@ pub mod ffi {
 }
 
 impl CacheEntryRole {
+    /// Obtain a hyphen-separated, lowercase name of a `CacheEntryRole`.
     fn to_hyphen_str(self) -> &'static str {
         match self {
             CacheEntryRole::kDataBlock => "data-block",

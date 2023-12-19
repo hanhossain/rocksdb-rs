@@ -28,10 +28,6 @@ std::array<std::string, kNumCacheEntryRoles> kCacheEntryRoleToCamelString{{
     "Misc",
 }};
 
-rust::Str GetCacheEntryRoleName(const CacheEntryRole role) {
-  return rs::GetCacheEntryRoleName(role);
-}
-
 rust::Str BlockCacheEntryStatsMapKeys_CacheId() {
   return rs::BlockCacheEntryStatsMapKeys_CacheId();
 }
@@ -52,7 +48,7 @@ namespace {
 
 std::string GetPrefixedCacheEntryRoleName(const std::string& prefix,
                                           CacheEntryRole role) {
-  rust::Str role_name = GetCacheEntryRoleName(role);
+  rust::Str role_name = rs::GetCacheEntryRoleName(role);
   std::string prefixed_role_name;
   prefixed_role_name.reserve(prefix.size() + role_name.size());
   prefixed_role_name.append(prefix);
