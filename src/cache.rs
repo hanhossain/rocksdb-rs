@@ -53,6 +53,9 @@ pub mod ffi {
 
         #[cxx_name = "BlockCacheEntryStatsMapKeys_CacheCapacityBytes"]
         fn block_cache_entry_stats_map_keys_cache_capacity_bytes() -> &'static str;
+
+        #[cxx_name = "BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds"]
+        fn block_cache_entry_stats_map_keys_last_collection_duration_seconds() -> &'static str;
     }
 }
 
@@ -90,4 +93,8 @@ fn block_cache_entry_stats_map_keys_cache_id() -> &'static str {
 
 fn block_cache_entry_stats_map_keys_cache_capacity_bytes() -> &'static str {
     "capacity"
+}
+
+fn block_cache_entry_stats_map_keys_last_collection_duration_seconds() -> &'static str {
+    "secs_for_last_collection"
 }

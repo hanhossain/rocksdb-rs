@@ -2075,7 +2075,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
               values.end());
   ASSERT_TRUE(
       values.find(
-          BlockCacheEntryStatsMapKeys::LastCollectionDurationSeconds()) !=
+          static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
       values.end());
   ASSERT_TRUE(
       values.find(BlockCacheEntryStatsMapKeys::LastCollectionAgeSeconds()) !=

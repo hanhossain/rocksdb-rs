@@ -74,6 +74,7 @@ struct BlockCacheEntryStatsMapKeys {
 
 rust::Str BlockCacheEntryStatsMapKeys_CacheId();
 rust::Str BlockCacheEntryStatsMapKeys_CacheCapacityBytes();
+rust::Str BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds();
 
 extern const bool kDefaultToAdaptiveMutex;
 

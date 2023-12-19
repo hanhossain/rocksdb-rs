@@ -757,7 +757,7 @@ void InternalStats::CacheEntryRoleStats::ToMap(
   v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheId())] = cache_id;
   v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheCapacityBytes())] =
       std::to_string(cache_capacity);
-  v[BlockCacheEntryStatsMapKeys::LastCollectionDurationSeconds()] =
+  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())] =
       std::to_string(GetLastDurationMicros() / 1000000.0);
   v[BlockCacheEntryStatsMapKeys::LastCollectionAgeSeconds()] =
       std::to_string((clock->NowMicros() - last_end_time_micros_) / 1000000U);

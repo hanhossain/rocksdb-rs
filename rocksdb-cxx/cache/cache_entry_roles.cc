@@ -40,11 +40,8 @@ rust::Str BlockCacheEntryStatsMapKeys_CacheCapacityBytes() {
   return rs::BlockCacheEntryStatsMapKeys_CacheCapacityBytes();
 }
 
-const std::string&
-BlockCacheEntryStatsMapKeys::LastCollectionDurationSeconds() {
-  static const std::string kLastCollectionDurationSeconds =
-      "secs_for_last_collection";
-  return kLastCollectionDurationSeconds;
+rust::Str BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds() {
+  return rs::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds();
 }
 
 const std::string& BlockCacheEntryStatsMapKeys::LastCollectionAgeSeconds() {
