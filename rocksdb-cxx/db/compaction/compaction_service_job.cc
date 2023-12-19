@@ -16,7 +16,7 @@
 #include "options/options_helper.h"
 #include "rocksdb/utilities/options_type.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class SubcompactionState;
 
 CompactionServiceJobStatus
@@ -827,5 +827,5 @@ bool CompactionServiceInput::TEST_Equals(CompactionServiceInput* other,
                                        mismatch);
 }
 #endif  // NDEBUG
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 

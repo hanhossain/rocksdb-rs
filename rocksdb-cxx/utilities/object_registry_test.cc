@@ -10,7 +10,7 @@
 #include "rocksdb/customizable.h"
 #include "test_util/testharness.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class ObjRegistryTest : public testing::Test {
  public:
@@ -852,10 +852,10 @@ TEST_F(PatternEntryTest, TestTwoNamesAndPattern) {
   ASSERT_TRUE(entry.Matches("BBB::2"));
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

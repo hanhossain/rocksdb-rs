@@ -11,7 +11,7 @@
 
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 //
 // Algorithm used to make a compaction request stop picking new files
@@ -93,4 +93,4 @@ class CompactionOptionsUniversal {
         incremental(false) {}
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

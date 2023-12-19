@@ -14,7 +14,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Comparator;
 class Iterator;
@@ -72,4 +72,4 @@ class BlockPrefixIndex {
   uint32_t* block_array_buffer_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -19,7 +19,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Tags for custom fields. Note that these get persisted in the manifest,
 // so existing tags should not be modified.
@@ -158,4 +158,4 @@ JSONWriter& operator<<(JSONWriter& jw,
   return jw;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

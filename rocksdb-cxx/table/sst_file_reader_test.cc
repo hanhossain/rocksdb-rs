@@ -17,7 +17,7 @@
 #include "test_util/testutil.h"
 #include "utilities/merge_operators.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 std::string EncodeAsString(uint64_t v) {
   char buf[16];
@@ -412,10 +412,10 @@ TEST_F(SstFileReaderTimestampTest, TimestampSizeMismatch) {
                                 "end_key_with_a_complete_lack_of_timestamps"));
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();

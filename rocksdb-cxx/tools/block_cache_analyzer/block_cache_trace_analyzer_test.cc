@@ -32,7 +32,7 @@ int main() {
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 const uint64_t kBlockSize = 1024;
@@ -51,7 +51,7 @@ class BlockCacheTracerTest : public testing::Test {
  public:
   BlockCacheTracerTest() {
     test_path_ = test::PerThreadDBPath("block_cache_trace_analyzer_test");
-    env_ = ROCKSDB_NAMESPACE::Env::Default();
+    env_ = rocksdb::Env::Default();
     EXPECT_OK(env_->CreateDir(test_path_));
     trace_file_path_ = test_path_ + "/block_cache_trace";
     block_cache_sim_config_path_ = test_path_ + "/block_cache_sim_config";
@@ -209,7 +209,7 @@ class BlockCacheTracerTest : public testing::Test {
       cursor += static_cast<int>(arg.size()) + 1;
     }
     ASSERT_EQ(0,
-              ROCKSDB_NAMESPACE::block_cache_trace_analyzer_tool(argc, argv));
+              rocksdb::block_cache_trace_analyzer_tool(argc, argv));
   }
 
   Env* env_;
@@ -786,10 +786,10 @@ TEST_F(BlockCacheTracerTest, MultiGetWithNullReferenceKey) {
   }
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

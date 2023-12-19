@@ -10,7 +10,7 @@
 
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Cleanable {
  public:
@@ -125,4 +125,4 @@ class SharedCleanablePtr {
   Impl* ptr_ = nullptr;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

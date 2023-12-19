@@ -13,7 +13,7 @@
 #include "db/dbformat.h"
 #include "test_util/testharness.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 TEST(BlobGarbageMeterTest, MeasureGarbage) {
   BlobGarbageMeter blob_garbage_meter;
@@ -188,10 +188,10 @@ TEST(BlobGarbageMeterTest, InlinedTTLBlobIndex) {
   ASSERT_NOK(blob_garbage_meter.ProcessOutFlow(key_slice, value_slice));
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

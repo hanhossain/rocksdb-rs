@@ -29,7 +29,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class Logger;
 
 namespace log {
@@ -244,4 +244,4 @@ class FragmentBufferedReader : public Reader {
 };
 
 }  // namespace log
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

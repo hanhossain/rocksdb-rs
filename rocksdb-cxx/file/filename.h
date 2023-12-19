@@ -29,7 +29,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Env;
 class Directory;
@@ -190,4 +190,4 @@ extern Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
                               std::vector<std::string>* file_names);
 
 extern std::string NormalizePath(const std::string& path);
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

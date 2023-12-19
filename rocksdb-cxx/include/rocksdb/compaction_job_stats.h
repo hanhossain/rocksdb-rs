@@ -11,7 +11,7 @@
 
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 struct CompactionJobStats {
   CompactionJobStats() { Reset(); }
   void Reset();
@@ -106,4 +106,4 @@ struct CompactionJobStats {
 
   // TODO: Add output_to_penultimate_level output information
 };
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -23,7 +23,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Dummy record in WAL logs signaling user-defined timestamp sizes for
 // subsequent records.
@@ -220,4 +220,4 @@ Status HandleWriteBatchTimestampSizeDifference(
     const UnorderedMap<uint32_t, size_t>& record_ts_sz,
     TimestampSizeConsistencyMode check_mode,
     std::unique_ptr<WriteBatch>* new_batch = nullptr);
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

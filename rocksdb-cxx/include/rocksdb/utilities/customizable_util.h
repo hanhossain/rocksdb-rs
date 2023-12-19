@@ -27,7 +27,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 // Creates a new shared customizable instance object based on the
 // input parameters using the object registry.
 //
@@ -323,4 +323,4 @@ static Status LoadStaticObject(const ConfigOptions& config_options,
     return NewStaticObject(config_options, id, opt_map, result);
   }
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

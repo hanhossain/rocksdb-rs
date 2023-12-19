@@ -23,7 +23,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class CompressedSecondaryCacheResultHandle : public SecondaryCacheResultHandle {
  public:
@@ -142,4 +142,4 @@ class CompressedSecondaryCache : public SecondaryCache {
   std::shared_ptr<ConcurrentCacheReservationManager> cache_res_mgr_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

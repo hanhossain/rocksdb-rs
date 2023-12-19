@@ -22,7 +22,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // This file contains Tracer and Replayer classes that enable capturing and
 // replaying RocksDB traces.
@@ -185,4 +185,4 @@ class Tracer {
   uint64_t trace_request_count_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -22,7 +22,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class Logger;
 class ObjectRegistry;
 class OptionTypeInfo;
@@ -392,4 +392,4 @@ class Configurable {
   // Configurable option via
   std::vector<RegisteredOptions> options_;
 };
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

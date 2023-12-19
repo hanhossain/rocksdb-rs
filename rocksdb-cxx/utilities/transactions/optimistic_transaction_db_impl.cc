@@ -15,7 +15,7 @@
 #include "rocksdb/utilities/optimistic_transaction_db.h"
 #include "utilities/transactions/optimistic_transaction.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 std::shared_ptr<OccLockBuckets> MakeSharedOccLockBuckets(size_t bucket_count,
                                                          bool cache_aligned) {
@@ -109,4 +109,4 @@ void OptimisticTransactionDBImpl::ReinitializeTransaction(
   txn_impl->Reinitialize(this, write_options, txn_options);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

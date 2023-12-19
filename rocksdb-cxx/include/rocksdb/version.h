@@ -22,7 +22,7 @@
 #define __ROCKSDB_MINOR__ ROCKSDB_MINOR
 #define __ROCKSDB_PATCH__ ROCKSDB_PATCH
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 // Returns a set of properties indicating how/when/where this version of RocksDB
 // was created.
 const std::unordered_map<std::string, std::string>& GetRocksBuildProperties();
@@ -40,4 +40,4 @@ std::string GetRocksVersionAsString(bool with_patch = true);
 // GetRocksVersionString) is printed.
 std::string GetRocksBuildInfoAsString(const std::string& program,
                                       bool verbose = false);
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

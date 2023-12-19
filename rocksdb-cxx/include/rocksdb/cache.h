@@ -25,7 +25,7 @@
 #include "rocksdb-rs/src/cache.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Cache;  // defined in advanced_cache.h
 struct ConfigOptions;
@@ -410,4 +410,4 @@ struct TieredVolatileCacheOptions {
 
 extern std::shared_ptr<Cache> NewTieredVolatileCache(
     TieredVolatileCacheOptions& cache_opts);
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

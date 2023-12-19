@@ -14,7 +14,7 @@
 #include "rocksdb/compression_type.h"
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Cache;
 class Comparator;
@@ -142,4 +142,4 @@ struct LevelDBOptions {
 // Converts a LevelDBOptions object into a RocksDB Options object.
 Options ConvertOptions(const LevelDBOptions& leveldb_options);
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

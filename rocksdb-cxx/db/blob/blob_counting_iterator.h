@@ -18,7 +18,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // An internal iterator that passes each key-value encountered to
 // BlobGarbageMeter as inflow in order to measure the total number and size of
@@ -152,4 +152,4 @@ class BlobCountingIterator : public InternalIterator {
   Status status_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

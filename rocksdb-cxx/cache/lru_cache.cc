@@ -20,7 +20,7 @@
 #include "port/lang.h"
 #include "util/distributed_mutex.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace lru_cache {
 
 LRUHandleTable::LRUHandleTable(int max_upper_hash_bits,
@@ -720,4 +720,4 @@ std::shared_ptr<RowCache> LRUCacheOptions::MakeSharedRowCache() const {
   // Works while RowCache is an alias for Cache
   return MakeSharedCache();
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

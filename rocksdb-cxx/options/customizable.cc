@@ -19,7 +19,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 std::string Customizable::GetOptionName(const std::string& long_name) const {
   const std::string& name = Name();
@@ -135,4 +135,4 @@ Status Customizable::ConfigureNewObject(
   }
   return status;
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

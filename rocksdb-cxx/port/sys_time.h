@@ -18,7 +18,7 @@
 
 #include <time.h>
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace port {
 
@@ -36,13 +36,13 @@ inline struct tm* LocalTimeR(const time_t* timep, struct tm* result) {
 
 }  // namespace port
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #else
 #include <sys/time.h>
 #include <time.h>
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace port {
 
@@ -58,6 +58,6 @@ inline struct tm* LocalTimeR(const time_t* timep, struct tm* result) {
 
 }  // namespace port
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif

@@ -57,7 +57,7 @@ using GFLAGS_NAMESPACE::ParseCommandLineFlags;
 DEFINE_bool(enable_print, false, "Print options generated to console.");
 #endif  // GFLAGS
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 class StringLogger : public Logger {
  public:
@@ -2105,10 +2105,10 @@ TEST_F(LoadCustomizableTest, LoadFlushBlockPolicyFactoryTest) {
   }
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
 #ifdef GFLAGS
   ParseCommandLineFlags(&argc, &argv, true);
 #endif  // GFLAGS

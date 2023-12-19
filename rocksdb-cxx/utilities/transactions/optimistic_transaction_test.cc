@@ -22,7 +22,7 @@
 #include "util/crc32c.h"
 #include "util/random.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class OptimisticTransactionTest
     : public testing::Test,
@@ -415,10 +415,10 @@ TEST_P(OptimisticTransactionTest, CheckKeySkipOldMemtable) {
       // For the second attempt, hold flush from beginning. The memtable
       // will be switched to immutable after calling TEST_SwitchMemtable()
       // while CheckKey() is called.
-      ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->LoadDependency(
+      rocksdb::SyncPoint::GetInstance()->LoadDependency(
           {{"OptimisticTransactionTest.CheckKeySkipOldMemtable",
             "FlushJob::Start"}});
-      ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+      rocksdb::SyncPoint::GetInstance()->EnableProcessing();
     }
 
     // force a memtable flush. The memtable should still be kept
@@ -475,7 +475,7 @@ TEST_P(OptimisticTransactionTest, CheckKeySkipOldMemtable) {
     ASSERT_TRUE(s.ok());
 
     TEST_SYNC_POINT("OptimisticTransactionTest.CheckKeySkipOldMemtable");
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+    rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
     SetPerfLevel(PerfLevel::kDisable);
 
@@ -767,7 +767,7 @@ TEST_P(OptimisticTransactionTest, ColumnFamiliesTest) {
       uintptr_t max = 0;
     };
     SeenStat cur_seen;
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+    rocksdb::SyncPoint::GetInstance()->SetCallBack(
         "OptimisticTransaction::CommitWithParallelValidate::lock_bucket_ptr",
         [&](void* arg) {
           // Hash the pointer
@@ -781,7 +781,7 @@ TEST_P(OptimisticTransactionTest, ColumnFamiliesTest) {
             cur_seen.max = val;
           }
         });
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+    rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
     // Another db sharing lock buckets
     auto shared_dbname =
@@ -894,7 +894,7 @@ TEST_P(OptimisticTransactionTest, ColumnFamiliesTest) {
     ASSERT_GT(cur_seen.max - cur_seen.min, min_span_bytes);
 
     delete txn;
-    ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+    rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   }
 
   // ** Test dropping column family before committing, or even creating txn **
@@ -1644,10 +1644,10 @@ TEST(OccLockBucketsTest, CacheAligned) {
             buckets_aligned->ApproximateMemoryUsage());
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

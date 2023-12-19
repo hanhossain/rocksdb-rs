@@ -17,7 +17,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Slice;
 
@@ -79,4 +79,4 @@ inline Status WideColumnSerialization::Serialize(
   return SerializeImpl(&value_of_default, other_columns, output);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

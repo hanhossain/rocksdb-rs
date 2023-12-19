@@ -17,7 +17,7 @@
 
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // An RAII wrapper for mmaped memory
 class MemMapping {
@@ -67,4 +67,4 @@ class MemMapping {
   static MemMapping AllocateAnonymous(size_t length, bool huge);
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -13,7 +13,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 int cache_bench_tool(int argc, char** argv);
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

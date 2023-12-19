@@ -35,7 +35,7 @@
 #include "util/stop_watch.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 
@@ -765,4 +765,4 @@ Slice PlainTableIterator::value() const {
 
 Status PlainTableIterator::status() const { return status_.Clone(); }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

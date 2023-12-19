@@ -18,7 +18,7 @@
 #include "test_util/testutil.h"
 #include "util/cast_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 using secondary_cache_test_util::GetTestingCacheTypes;
 using secondary_cache_test_util::WithCacheType;
@@ -1067,10 +1067,10 @@ TEST_F(CompressedSecCacheTestWithTiered,
   EXPECT_EQ(sec_cache->TEST_GetUsage(), 0);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

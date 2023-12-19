@@ -34,7 +34,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class WritePreparedTxnDB;
 
@@ -118,5 +118,5 @@ class WritePreparedTxn : public PessimisticTransaction {
   size_t prepare_batch_cnt_ = 0;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 

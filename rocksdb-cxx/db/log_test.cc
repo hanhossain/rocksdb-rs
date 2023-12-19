@@ -19,7 +19,7 @@
 #include "util/random.h"
 #include "utilities/memory_allocators.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace log {
 
 // Construct a string of the specified length made out of the supplied
@@ -1203,10 +1203,10 @@ INSTANTIATE_TEST_CASE_P(
                        ::testing::Values(CompressionType::kZSTD)));
 
 }  // namespace log
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

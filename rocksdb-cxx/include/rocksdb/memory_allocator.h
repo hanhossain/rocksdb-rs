@@ -15,7 +15,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // MemoryAllocator is an interface that a client can implement to supply custom
 // memory allocation and deallocation methods. See rocksdb/cache.h for more
@@ -89,4 +89,4 @@ extern Status NewJemallocNodumpAllocator(
     JemallocAllocatorOptions& options,
     std::shared_ptr<MemoryAllocator>* memory_allocator);
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

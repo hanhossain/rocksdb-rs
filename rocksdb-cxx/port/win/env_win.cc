@@ -43,7 +43,7 @@
 #undef DeleteFile
 #undef LoadLibrary
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 ThreadStatusUpdater* CreateThreadStatusUpdater() {
   return new ThreadStatusUpdater();
@@ -221,7 +221,7 @@ IOStatus WinFileSystem::Truncate(const std::string& fname, size_t size,
                                  const IOOptions& /*options*/,
                                  IODebugContext* /*dbg*/) {
   IOStatus s;
-  int result = ROCKSDB_NAMESPACE::port::Truncate(fname, size);
+  int result = rocksdb::port::Truncate(fname, size);
   if (result != 0) {
     s = IOError("Failed to truncate: " + fname, errno);
   }
@@ -1432,6 +1432,6 @@ const std::shared_ptr<SystemClock>& SystemClock::Default() {
   (std::make_shared<port::WinClock>());
   return clock;
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif

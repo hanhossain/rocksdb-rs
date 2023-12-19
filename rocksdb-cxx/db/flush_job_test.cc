@@ -24,7 +24,7 @@
 #include "util/random.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // TODO(icanadi) Mock out everything else:
 // 1. VersionSet
@@ -795,10 +795,10 @@ INSTANTIATE_TEST_CASE_P(
             test::UserDefinedTimestampTestMode::kStripUserDefinedTimestamp,
             test::UserDefinedTimestampTestMode::kNormal)));
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

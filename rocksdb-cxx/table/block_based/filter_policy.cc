@@ -35,7 +35,7 @@
 #include "util/ribbon_impl.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 
@@ -568,7 +568,7 @@ struct Standard128RibbonRehasherTypesAndSettings {
   static constexpr bool kHomogeneous = false;
   static constexpr bool kFirstCoeffAlwaysOne = true;
   static constexpr bool kUseSmash = false;
-  using CoeffRow = ROCKSDB_NAMESPACE::Unsigned128;
+  using CoeffRow = rocksdb::Unsigned128;
   using Hash = uint64_t;
   using Seed = uint32_t;
   // Changing these doesn't necessarily change underlying data,
@@ -1960,4 +1960,4 @@ const std::vector<std::string>& BloomLikeFilterPolicy::GetAllFixedImpls() {
   return impls;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

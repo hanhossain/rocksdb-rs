@@ -16,7 +16,7 @@
 #include "util/cast_util.h"
 #include "util/mutexlock.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class OccLockBucketsImplBase : public OccLockBuckets {
  public:
@@ -108,4 +108,4 @@ class OptimisticTransactionDBImpl : public OptimisticTransactionDB {
                                    OptimisticTransactionOptions());
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

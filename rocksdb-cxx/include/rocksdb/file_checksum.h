@@ -22,7 +22,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // The unknown file checksum.
 constexpr char kUnknownFileChecksum[] = "";
@@ -148,4 +148,4 @@ extern FileChecksumList* NewFileChecksumList();
 extern std::shared_ptr<FileChecksumGenFactory>
 GetFileChecksumGenCrc32cFactory();
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

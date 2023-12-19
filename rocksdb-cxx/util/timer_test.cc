@@ -9,7 +9,7 @@
 #include "rocksdb/file_system.h"
 #include "test_util/mock_time_env.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class TimerTest : public testing::Test {
  public:
@@ -392,10 +392,10 @@ TEST_F(TimerTest, DestroyTimerWithRunningFunc) {
   control_thr.join();
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
 
   return RUN_ALL_TESTS();

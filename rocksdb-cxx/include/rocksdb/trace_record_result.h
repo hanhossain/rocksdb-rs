@@ -18,7 +18,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class IteratorTraceExecutionResult;
 class MultiValuesTraceExecutionResult;
@@ -189,4 +189,4 @@ class IteratorTraceExecutionResult : public TraceExecutionResult {
   PinnableSlice value_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

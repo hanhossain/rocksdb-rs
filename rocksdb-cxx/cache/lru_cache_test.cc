@@ -28,7 +28,7 @@
 #include "utilities/cache_dump_load_impl.h"
 #include "utilities/fault_injection_fs.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class LRUCacheTest : public testing::Test {
  public:
@@ -1943,17 +1943,17 @@ TEST_P(DBSecondaryCacheTest, TestSecondaryCacheMultiGet) {
   cache->SetCapacity(1 << 20);
 
   std::vector<std::string> cache_keys;
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->SetCallBack(
+  rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "TestSecondaryCache::Lookup", [&cache_keys](void* key) -> void {
         cache_keys.emplace_back(*(static_cast<std::string*>(key)));
       });
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->EnableProcessing();
+  rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   for (int i = 0; i < N; ++i) {
     std::string v = Get(Key(i));
     ASSERT_EQ(4000, v.size());
     ASSERT_EQ(v, keys[i]);
   }
-  ROCKSDB_NAMESPACE::SyncPoint::GetInstance()->DisableProcessing();
+  rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   ASSERT_EQ(secondary_cache->num_lookups(), 16u);
   cache->SetCapacity(0);
   cache->SetCapacity(1 << 20);
@@ -2606,10 +2606,10 @@ TEST_P(DBSecondaryCacheTest, TestSecondaryCacheOptionTwoDB) {
   ASSERT_OK(DestroyDB(dbname2, options));
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

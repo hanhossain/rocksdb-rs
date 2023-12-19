@@ -18,7 +18,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class ColumnFamilyHandle;
 class DB;
@@ -250,4 +250,4 @@ class MultiGetQueryTraceRecord : public QueryTraceRecord {
   std::vector<PinnableSlice> keys_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

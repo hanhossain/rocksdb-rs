@@ -22,7 +22,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DBImpl;
 struct SuperVersion;
@@ -84,5 +84,5 @@ class TransactionUtil {
                          SequenceNumber min_uncommitted = kMaxSequenceNumber);
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 

@@ -6,6 +6,6 @@
 
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 int db_stress_tool(int argc, char** argv);
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

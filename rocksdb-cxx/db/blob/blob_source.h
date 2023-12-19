@@ -18,7 +18,7 @@
 #include "table/block_based/cachable_entry.h"
 #include "util/autovector.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 struct ImmutableOptions;
 struct Status;
@@ -158,4 +158,4 @@ class BlobSource {
   const CacheTier lowest_used_cache_tier_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

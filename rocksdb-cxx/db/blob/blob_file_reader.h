@@ -14,7 +14,7 @@
 #include "rocksdb/rocksdb_namespace.h"
 #include "util/autovector.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 struct Status;
 struct ImmutableOptions;
@@ -109,4 +109,4 @@ class BlobFileReader {
   Statistics* statistics_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

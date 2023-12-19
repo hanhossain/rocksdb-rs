@@ -67,7 +67,7 @@ using ssize_t = SSIZE_T;
 
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 #define PREFETCH(addr, rw, locality)
 
@@ -324,8 +324,8 @@ bool GenerateRfcUuid(std::string* output);
 #ifdef ROCKSDB_WINDOWS_UTF8_FILENAMES
 
 #define RX_FILESTRING std::wstring
-#define RX_FN(a) ROCKSDB_NAMESPACE::port::utf8_to_utf16(a)
-#define FN_TO_RX(a) ROCKSDB_NAMESPACE::port::utf16_to_utf8(a)
+#define RX_FN(a) rocksdb::port::utf8_to_utf16(a)
+#define FN_TO_RX(a) rocksdb::port::utf16_to_utf8(a)
 #define RX_FNCMP(a, b) ::wcscmp(a, RX_FN(b).c_str())
 #define RX_FNLEN(a) ::wcslen(a)
 
@@ -381,4 +381,4 @@ using port::pthread_key_t;
 using port::pthread_setspecific;
 using port::truncate;
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

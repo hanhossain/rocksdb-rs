@@ -48,7 +48,7 @@
 #include "utilities/merge_operators.h"
 #include "utilities/ttl/db_ttl_impl.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class FileChecksumGenCrc32c;
 class FileChecksumGenCrc32cFactory;
@@ -3604,7 +3604,7 @@ void DumpSstFile(Options options, std::string filename, bool output_hex,
     return;
   }
   // no verification
-  ROCKSDB_NAMESPACE::SstFileDumper dumper(
+  rocksdb::SstFileDumper dumper(
       options, filename, Temperature::kUnknown,
       2 * 1024 * 1024 /* readahead_size */,
       /* verify_checksum */ false, output_hex, decode_blob_index);
@@ -3618,9 +3618,9 @@ void DumpSstFile(Options options, std::string filename, bool output_hex,
   }
 
   if (show_properties) {
-    const ROCKSDB_NAMESPACE::TableProperties* table_properties;
+    const rocksdb::TableProperties* table_properties;
 
-    std::shared_ptr<const ROCKSDB_NAMESPACE::TableProperties>
+    std::shared_ptr<const rocksdb::TableProperties>
         table_properties_from_reader;
     st = dumper.ReadTableProperties(&table_properties_from_reader);
     if (!st.ok()) {
@@ -3639,7 +3639,7 @@ void DumpSstFile(Options options, std::string filename, bool output_hex,
 
 void DumpBlobFile(const std::string& filename, bool is_key_hex,
                   bool is_value_hex, bool dump_uncompressed_blobs) {
-  using ROCKSDB_NAMESPACE::blob_db::BlobDumpTool;
+  using rocksdb::blob_db::BlobDumpTool;
   BlobDumpTool tool;
   BlobDumpTool::DisplayType blob_type = is_value_hex
                                             ? BlobDumpTool::DisplayType::kHex
@@ -3752,7 +3752,7 @@ void DBFileDumperCommand::DoCommand() {
 
   std::cout << "Write Ahead Log Files" << std::endl;
   std::cout << "==============================" << std::endl;
-  ROCKSDB_NAMESPACE::VectorLogPtr wal_files;
+  rocksdb::VectorLogPtr wal_files;
   s = db_->GetSortedWalFiles(wal_files);
   if (!s.ok()) {
     std::cerr << "Error when getting WAL files" << std::endl;
@@ -4262,4 +4262,4 @@ void UpdateManifestCommand::DoCommand() {
   }
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

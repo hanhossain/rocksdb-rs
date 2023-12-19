@@ -34,7 +34,7 @@
 #include "rocksdb-rs/src/env.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 static int RegisterBuiltinEnvs(ObjectLibrary& library,
                                const std::string& /*arg*/) {
@@ -1243,4 +1243,4 @@ rust::String HelloCommonFromCpp() {
   return hello_common(rust_data);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

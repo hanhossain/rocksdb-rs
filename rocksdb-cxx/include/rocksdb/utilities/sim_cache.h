@@ -21,7 +21,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class SimCache;
 
@@ -95,4 +95,4 @@ class SimCache : public CacheWrapper {
   SimCache& operator=(const SimCache&);
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

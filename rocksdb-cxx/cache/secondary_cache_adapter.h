@@ -8,7 +8,7 @@
 #include "cache/cache_reservation_manager.h"
 #include "rocksdb/secondary_cache.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class CacheWithSecondaryAdapter : public CacheWrapper {
  public:
@@ -73,4 +73,4 @@ class CacheWithSecondaryAdapter : public CacheWrapper {
   double sec_cache_res_ratio_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

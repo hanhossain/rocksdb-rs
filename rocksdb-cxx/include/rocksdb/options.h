@@ -35,7 +35,7 @@
 #undef max
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class Cache;
 class CompactionFilter;
@@ -2095,4 +2095,4 @@ struct WaitForCompactOptions {
   bool flush = false;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -13,7 +13,7 @@
 #include "port/stack_trace.h"
 #include "test_util/testutil.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class DBBasicTestWithTimestampBase : public DBTestBase {
  public:
   explicit DBBasicTestWithTimestampBase(const std::string& dbname)
@@ -123,4 +123,4 @@ class DBBasicTestWithTimestampBase : public DBTestBase {
                       ValueType expected_val_type, const Slice& expected_value,
                       const Slice& expected_ts) const;
 };
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

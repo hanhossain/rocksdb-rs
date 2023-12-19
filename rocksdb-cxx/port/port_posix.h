@@ -88,7 +88,7 @@
 #define fdatasync fsync
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 extern const bool kDefaultToAdaptiveMutex;
 
@@ -245,4 +245,4 @@ int64_t GetProcessID();
 bool GenerateRfcUuid(std::string* output);
 
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

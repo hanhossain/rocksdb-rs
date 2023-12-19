@@ -13,7 +13,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 // A class that validates key/value that is inserted to an SST file.
 // Pass every key/value of the file using OutputValidator::Add()
 // and the class validates key order and optionally calculate a hash
@@ -50,4 +50,4 @@ class OutputValidator {
   bool enable_order_check_;
   bool enable_hash_;
 };
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

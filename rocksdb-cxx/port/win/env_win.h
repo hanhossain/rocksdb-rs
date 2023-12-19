@@ -33,7 +33,7 @@
 #undef DeleteFile
 #undef LoadLibrary
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace port {
 
 // Currently not designed for inheritance but rather a replacement
@@ -302,4 +302,4 @@ class WinEnv : public CompositeEnv {
 };
 
 }  // namespace port
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

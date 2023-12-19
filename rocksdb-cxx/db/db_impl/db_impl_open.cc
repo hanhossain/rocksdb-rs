@@ -27,7 +27,7 @@
 #include "util/rate_limiter_impl.h"
 #include "util/udt_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 Options SanitizeOptions(const std::string& dbname, const Options& src,
                         bool read_only, Status* logger_creation_s) {
   auto db_options =
@@ -2222,4 +2222,4 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
   }
   return s;
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

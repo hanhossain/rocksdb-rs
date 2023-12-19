@@ -18,7 +18,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // A class representing a single uncompressed value read from a blob file.
 class BlobContents {
@@ -61,4 +61,4 @@ class BlobContentsCreator : public Cache::CreateContext {
   }
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -33,7 +33,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 BlobFileBuilder::BlobFileBuilder(
     VersionSet* versions, FileSystem* fs,
@@ -427,4 +427,4 @@ Status BlobFileBuilder::PutBlobIntoCacheIfNeeded(const Slice& blob,
   return s;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

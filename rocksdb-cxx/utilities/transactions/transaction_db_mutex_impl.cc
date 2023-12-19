@@ -19,7 +19,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class TransactionDBMutexImpl : public TransactionDBMutex {
  public:
@@ -135,5 +135,5 @@ Status TransactionDBCondVarImpl::WaitFor(
   return s;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 

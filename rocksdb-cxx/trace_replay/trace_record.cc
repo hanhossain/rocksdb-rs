@@ -19,7 +19,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // TraceRecord
 TraceRecord::TraceRecord(uint64_t timestamp) : timestamp_(timestamp) {}
@@ -208,4 +208,4 @@ Status MultiGetQueryTraceRecord::Accept(
   return handler->Handle(*this, result);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

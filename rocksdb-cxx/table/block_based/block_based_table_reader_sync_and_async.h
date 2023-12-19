@@ -10,7 +10,7 @@
 #if defined(WITHOUT_COROUTINES) || \
     (defined(USE_COROUTINES) && defined(WITH_COROUTINES))
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // This function reads multiple data blocks from disk using Env::MultiRead()
 // and optionally inserts them into the block cache. It uses the scratch
@@ -770,5 +770,5 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     }
   }
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 #endif

@@ -10,7 +10,7 @@
 #include "rocksdb/rocksdb_namespace.h"
 
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace blob_db {
 
@@ -51,4 +51,4 @@ class BlobDBGarbageCollectionStats {
 };
 
 }  // namespace blob_db
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

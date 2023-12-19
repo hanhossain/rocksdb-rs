@@ -27,7 +27,7 @@
 #include "utilities/merge_operators.h"
 #include "utilities/merge_operators/string_append/stringappend2.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 // Path to the database on file system
 const std::string kDbName = test::PerThreadDBPath("stringappend_test");
@@ -165,7 +165,7 @@ TEST_P(StringAppendOperatorTest, IteratorTest) {
   slists.Append("k2", "a3");
 
   std::string res;
-  std::unique_ptr<ROCKSDB_NAMESPACE::Iterator> it(
+  std::unique_ptr<rocksdb::Iterator> it(
       db_->NewIterator(ReadOptions()));
   std::string k1("k1");
   std::string k2("k2");
@@ -522,14 +522,14 @@ TEST_P(StringAppendOperatorTest, PersistentFlushAndCompaction) {
 
     // Append, Flush, Get
     slists.Append("c", "asdasd");
-    ASSERT_OK(db->Flush(ROCKSDB_NAMESPACE::FlushOptions()));
+    ASSERT_OK(db->Flush(rocksdb::FlushOptions()));
     ASSERT_TRUE(slists.Get("c", &c));
     ASSERT_EQ(c, "asdasd");
 
     // Append, Flush, Append, Get
     slists.Append("a", "x");
     slists.Append("b", "y");
-    ASSERT_OK(db->Flush(ROCKSDB_NAMESPACE::FlushOptions()));
+    ASSERT_OK(db->Flush(rocksdb::FlushOptions()));
     slists.Append("a", "t");
     slists.Append("a", "r");
     slists.Append("b", "2");
@@ -595,7 +595,7 @@ TEST_P(StringAppendOperatorTest, PersistentFlushAndCompaction) {
 
     // Append, Flush, Compact, Get
     slists.Append("b", "afcg");
-    ASSERT_OK(db->Flush(ROCKSDB_NAMESPACE::FlushOptions()));
+    ASSERT_OK(db->Flush(rocksdb::FlushOptions()));
     ASSERT_OK(db->CompactRange(CompactRangeOptions(), nullptr, nullptr));
     ASSERT_TRUE(slists.Get("b", &b));
     ASSERT_EQ(b, "y\n2\nmonkey\ndf\nl;\nafcg");
@@ -627,10 +627,10 @@ TEST_P(StringAppendOperatorTest, SimpleTestNullDelimiter) {
 INSTANTIATE_TEST_CASE_P(StringAppendOperatorTest, StringAppendOperatorTest,
                         testing::Bool());
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

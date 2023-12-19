@@ -13,7 +13,7 @@
 #include "test_util/mock_time_env.h"
 
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class SeqnoTimeTest : public DBTestBase {
  public:
@@ -985,11 +985,11 @@ TEST_F(SeqnoTimeTest, EncodeDecodePerferNewTime) {
   ASSERT_EQ(expected, seqs);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

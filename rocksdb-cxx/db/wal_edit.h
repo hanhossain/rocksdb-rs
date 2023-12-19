@@ -19,7 +19,7 @@
 #include "port/port.h"
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class JSONWriter;
 class Slice;
@@ -174,4 +174,4 @@ class WalSet {
   WalNumber min_wal_number_to_keep_ = 0;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

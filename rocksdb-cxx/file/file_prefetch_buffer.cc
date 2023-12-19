@@ -20,7 +20,7 @@
 #include "util/random.h"
 #include "util/rate_limiter_impl.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 void FilePrefetchBuffer::CalculateOffsetAndLen(size_t alignment,
                                                uint64_t offset,
@@ -948,4 +948,4 @@ Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
   return (data_found ? Status_OK() : Status_TryAgain());
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

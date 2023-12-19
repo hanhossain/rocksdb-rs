@@ -21,7 +21,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 /**
  * Keep adding tickers here. Note that the C++ enum values, unlike the values in
@@ -685,7 +685,7 @@ enum StatsLevel : uint8_t {
 // Analyze the performance of a db by providing cumulative stats over time.
 // Usage:
 //  Options options;
-//  options.statistics = ROCKSDB_NAMESPACE::CreateDBStatistics();
+//  options.statistics = rocksdb::CreateDBStatistics();
 //  Status s = DB::Open(options, kDBPath, &db);
 //  ...
 //  options.statistics->getTickerCount(NUMBER_BLOCK_COMPRESSED);
@@ -767,4 +767,4 @@ class Statistics : public Customizable {
 // Create a concrete DBStatistics object
 std::shared_ptr<Statistics> CreateDBStatistics();
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

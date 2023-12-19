@@ -19,7 +19,7 @@
 
 #include <folly/synchronization/DistributedMutex.h>
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class DMutex : public folly::DistributedMutex {
  public:
@@ -32,7 +32,7 @@ class DMutex : public folly::DistributedMutex {
 };
 using DMutexLock = std::lock_guard<folly::DistributedMutex>;
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #else
 
@@ -40,11 +40,11 @@ using DMutexLock = std::lock_guard<folly::DistributedMutex>;
 
 #include "port/port.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 using DMutex = port::Mutex;
 using DMutexLock = std::lock_guard<DMutex>;
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 #endif

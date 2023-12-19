@@ -13,7 +13,7 @@
 #include "port/lang.h"  // for FALLTHROUGH_INTENDED
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace ribbon {
 
@@ -179,4 +179,4 @@ struct BandingConfigHelper {
 
 }  // namespace ribbon
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

@@ -6,7 +6,7 @@
 
 #include "util/write_batch_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 Status CollectColumnFamilyIdsFromWriteBatch(
     const WriteBatch& batch, std::vector<uint32_t>* column_family_ids) {
@@ -22,4 +22,4 @@ Status CollectColumnFamilyIdsFromWriteBatch(
   return s;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

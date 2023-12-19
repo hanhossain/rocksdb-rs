@@ -12,7 +12,7 @@
 
 #ifdef ROCKSDB_USING_THREAD_STATUS
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class SimulatedBackgroundTask {
  public:
@@ -344,10 +344,10 @@ TEST_F(ThreadListTest, SimpleEventTest) {
                        ThreadStatus::NUM_OP_TYPES);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  rocksdb::port::InstallStackTraceHandler();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

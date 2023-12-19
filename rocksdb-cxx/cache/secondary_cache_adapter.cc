@@ -8,7 +8,7 @@
 #include "monitoring/perf_context_imp.h"
 #include "util/cast_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 // A distinct pointer value for marking "dummy" cache entries
@@ -429,4 +429,4 @@ std::shared_ptr<Cache> NewTieredVolatileCache(
 
   return std::make_shared<CacheWithSecondaryAdapter>(cache, sec_cache, true);
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

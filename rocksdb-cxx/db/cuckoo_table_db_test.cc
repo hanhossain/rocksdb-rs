@@ -16,7 +16,7 @@
 #include "util/cast_util.h"
 #include "util/string_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 class CuckooTableDBTest : public testing::Test {
  private:
@@ -337,11 +337,11 @@ TEST_F(CuckooTableDBTest, AdaptiveTable) {
   ASSERT_EQ("v4", Get("key4"));
   ASSERT_EQ("v6", Get("key5"));
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
 
 int main(int argc, char** argv) {
-  if (ROCKSDB_NAMESPACE::port::kLittleEndian) {
-    ROCKSDB_NAMESPACE::port::InstallStackTraceHandler();
+  if (rocksdb::port::kLittleEndian) {
+    rocksdb::port::InstallStackTraceHandler();
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
   } else {

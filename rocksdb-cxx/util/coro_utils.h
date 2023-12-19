@@ -13,7 +13,7 @@
 // This file has two sctions. The first section applies to all instances of
 // header file inclusion and has an include guard. The second section is
 // meant for multiple inclusions in the same source file, and is idempotent.
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 #ifndef UTIL_CORO_UTILS_H_
 #define UTIL_CORO_UTILS_H_
@@ -109,4 +109,4 @@ constexpr bool using_coroutines() { return false; }
 #define CO_RETURN return
 
 #endif  // DO_NOT_USE_COROUTINES
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

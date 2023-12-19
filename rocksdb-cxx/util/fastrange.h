@@ -28,7 +28,7 @@
 #undef HAVE_UINT128_EXTENSION
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace detail {
 
@@ -111,4 +111,4 @@ inline uint32_t FastRange32(uint32_t hash, uint32_t range) {
   return FastRangeGeneric(hash, range);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

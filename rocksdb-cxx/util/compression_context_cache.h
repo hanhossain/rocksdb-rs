@@ -21,7 +21,7 @@
 
 #include "rocksdb/rocksdb_namespace.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 class ZSTDUncompressCachedData;
 
 class CompressionContextCache {
@@ -44,4 +44,4 @@ class CompressionContextCache {
   Rep* rep_;
 };
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

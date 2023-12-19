@@ -29,7 +29,7 @@
 #include "util/crc32c.h"
 #include "util/stop_watch.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 
 namespace {
 
@@ -329,4 +329,4 @@ void PlainTableBuilder::SetSeqnoTimeTableProperties(const std::string& string,
   TableBuilder::SetSeqnoTimeTableProperties(string, uint_64);
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

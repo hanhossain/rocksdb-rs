@@ -10,7 +10,7 @@
 #include "rocksdb/types.h"
 #include "util/write_batch_util.h"
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 namespace {
 enum class RecoveryType {
   kNoop,
@@ -261,4 +261,4 @@ Status HandleWriteBatchTimestampSizeDifference(
   }
   return Status_OK();
 }
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

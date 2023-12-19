@@ -21,7 +21,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 // use_fsync maps to options.use_fsync, which determines the way that
 // the file is synced after copying.
 extern IOStatus CopyFile(FileSystem* fs, const std::string& source,
@@ -103,4 +103,4 @@ inline bool CheckFSFeatureSupport(FileSystem* fs, FSSupportedOps feat) {
   return false;
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb

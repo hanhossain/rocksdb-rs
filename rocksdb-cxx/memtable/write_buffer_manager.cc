@@ -22,7 +22,7 @@
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
-namespace ROCKSDB_NAMESPACE {
+namespace rocksdb {
 WriteBufferManager::WriteBufferManager(size_t _buffer_size,
                                        std::shared_ptr<Cache> cache,
                                        bool allow_stall)
@@ -180,4 +180,4 @@ void WriteBufferManager::RemoveDBFromQueue(StallInterface* wbm_stall) {
   wbm_stall->Signal();
 }
 
-}  // namespace ROCKSDB_NAMESPACE
+}  // namespace rocksdb
