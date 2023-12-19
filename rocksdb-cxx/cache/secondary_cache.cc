@@ -4,8 +4,7 @@
 //  (found in the LICENSE.Apache file in the root directory).
 
 #include "rocksdb/secondary_cache.h"
-
-#include "cache/cache_entry_roles.h"
+#include "rocksdb/cache.h"
 
 namespace ROCKSDB_NAMESPACE {
 

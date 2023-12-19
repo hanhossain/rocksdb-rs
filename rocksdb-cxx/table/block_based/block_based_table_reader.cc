@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "block_cache.h"
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_key.h"
 #include "db/compaction/compaction_picker.h"
 #include "db/dbformat.h"
@@ -793,8 +792,7 @@ Status BlockBasedTable::Open(
     if (s.IsMemoryLimit()) {
       s = Status_MemoryLimit(
           "Can't allocate " +
-          kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
-              CacheEntryRole::kBlockBasedTableReader)] +
+          static_cast<std::string>(CacheEntryRole_ToCamelString(CacheEntryRole::kBlockBasedTableReader)) +
           " due to memory limit based on "
           "cache capacity for memory allocation");
     }

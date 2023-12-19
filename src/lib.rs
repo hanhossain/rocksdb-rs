@@ -1,3 +1,4 @@
+pub mod cache;
 pub mod env;
 pub mod port_defs;
 pub mod slice;

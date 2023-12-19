@@ -19,6 +19,12 @@
 #include "rocksdb/data_structure.h"
 #include "rocksdb/memory_allocator.h"
 
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/cache.h"
+#else
+#include "rocksdb-rs/src/cache.rs.h"
+#endif
+
 namespace ROCKSDB_NAMESPACE {
 
 class Cache;  // defined in advanced_cache.h
@@ -45,68 +51,11 @@ class SecondaryCache;
 using BlockCache = Cache;
 using RowCache = Cache;
 
-// Classifications of block cache entries.
-//
-// Developer notes: Adding a new enum to this class requires corresponding
-// updates to `kCacheEntryRoleToCamelString` and
-// `kCacheEntryRoleToHyphenString`. Do not add to this enum after `kMisc` since
-// `kNumCacheEntryRoles` assumes `kMisc` comes last.
-enum class CacheEntryRole {
-  // Block-based table data block
-  kDataBlock,
-  // Block-based table filter block (full or partitioned)
-  kFilterBlock,
-  // Block-based table metadata block for partitioned filter
-  kFilterMetaBlock,
-  // OBSOLETE / DEPRECATED: old/removed block-based filter
-  kDeprecatedFilterBlock,
-  // Block-based table index block
-  kIndexBlock,
-  // Other kinds of block-based table block
-  kOtherBlock,
-  // WriteBufferManager's charge to account for its memtable usage
-  kWriteBuffer,
-  // Compression dictionary building buffer's charge to account for
-  // its memory usage
-  kCompressionDictionaryBuildingBuffer,
-  // Filter's charge to account for
-  // (new) bloom and ribbon filter construction's memory usage
-  kFilterConstruction,
-  // BlockBasedTableReader's charge to account for its memory usage
-  kBlockBasedTableReader,
-  // FileMetadata's charge to account for its memory usage
-  kFileMetadata,
-  // Blob value (when using the same cache as block cache and blob cache)
-  kBlobValue,
-  // Blob cache's charge to account for its memory usage (when using a
-  // separate block cache and blob cache)
-  kBlobCache,
-  // Default bucket, for miscellaneous cache entries. Do not use for
-  // entries that could potentially add up to large usage.
-  kMisc,
-};
 constexpr uint32_t kNumCacheEntryRoles =
     static_cast<uint32_t>(CacheEntryRole::kMisc) + 1;
 
-// Obtain a hyphen-separated, lowercase name of a `CacheEntryRole`.
-const std::string& GetCacheEntryRoleName(CacheEntryRole);
-
 // A fast bit set for CacheEntryRoles
 using CacheEntryRoleSet = SmallEnumSet<CacheEntryRole, CacheEntryRole::kMisc>;
-
-// For use with `GetMapProperty()` for property
-// `DB::Properties::kBlockCacheEntryStats`. On success, the map will
-// be populated with all keys that can be obtained from these functions.
-struct BlockCacheEntryStatsMapKeys {
-  static const std::string& CacheId();
-  static const std::string& CacheCapacityBytes();
-  static const std::string& LastCollectionDurationSeconds();
-  static const std::string& LastCollectionAgeSeconds();
-
-  static std::string EntryCount(CacheEntryRole);
-  static std::string UsedBytes(CacheEntryRole);
-  static std::string UsedPercent(CacheEntryRole);
-};
 
 extern const bool kDefaultToAdaptiveMutex;
 

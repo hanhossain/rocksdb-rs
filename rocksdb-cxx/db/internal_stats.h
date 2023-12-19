@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 
-#include "cache/cache_entry_roles.h"
 #include "db/version_set.h"
+#include "rocksdb/cache.h"
 #include "rocksdb/system_clock.h"
 #include "util/hash_containers.h"
 

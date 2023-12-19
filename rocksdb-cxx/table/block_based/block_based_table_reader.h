@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_key.h"
 #include "cache/cache_reservation_manager.h"
 #include "db/range_tombstone_fragmenter.h"

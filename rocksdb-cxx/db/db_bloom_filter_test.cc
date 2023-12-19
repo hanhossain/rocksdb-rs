@@ -12,12 +12,12 @@
 #include <sstream>
 #include <string>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_reservation_manager.h"
 #include "db/db_test_util.h"
 #include "options/options_helper.h"
 #include "port/stack_trace.h"
 #include "rocksdb/advanced_options.h"
+#include "rocksdb/cache.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/filter_policy.h"
 #include "rocksdb/perf_context.h"

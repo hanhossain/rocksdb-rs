@@ -15,7 +15,6 @@
 #include <memory>
 #include <string>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_reservation_manager.h"
 #include "logging/logging.h"
 #include "options/options_helper.h"
@@ -653,7 +652,7 @@ Status BlockBasedTableFactory::ValidateOptions(
       return Status_NotSupported(
           "Enable/Disable CacheEntryRoleOptions::charged"
           " for CacheEntryRole " +
-          kCacheEntryRoleToCamelString[static_cast<uint32_t>(role)] +
+          static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
           " is not supported");
     }
     if (table_options_.no_block_cache &&
@@ -661,7 +660,7 @@ Status BlockBasedTableFactory::ValidateOptions(
       return Status_InvalidArgument(
           "Enable CacheEntryRoleOptions::charged"
           " for CacheEntryRole " +
-          kCacheEntryRoleToCamelString[static_cast<uint32_t>(role)] +
+          static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
           " but block cache is disabled");
     }
     if (role == CacheEntryRole::kBlobCache &&
@@ -670,21 +669,21 @@ Status BlockBasedTableFactory::ValidateOptions(
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for CacheEntryRole " +
-            kCacheEntryRoleToCamelString[static_cast<uint32_t>(role)] +
+            static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but blob cache is not configured");
       }
       if (table_options_.no_block_cache) {
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for CacheEntryRole " +
-            kCacheEntryRoleToCamelString[static_cast<uint32_t>(role)] +
+            static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but block cache is disabled");
       }
       if (table_options_.block_cache == cf_opts.blob_cache) {
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for CacheEntryRole " +
-            kCacheEntryRoleToCamelString[static_cast<uint32_t>(role)] +
+            static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but blob cache is the same as block cache");
       }
       if (cf_opts.blob_cache->GetCapacity() >
@@ -692,7 +691,7 @@ Status BlockBasedTableFactory::ValidateOptions(
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for CacheEntryRole " +
-            kCacheEntryRoleToCamelString[static_cast<uint32_t>(role)] +
+            static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but blob cache capacity is larger than block cache capacity");
       }
     }

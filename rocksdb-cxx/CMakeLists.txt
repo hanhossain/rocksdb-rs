@@ -628,7 +628,6 @@ find_package(Threads REQUIRED)
 
 set(SOURCES
         cache/cache.cc
-        cache/cache_entry_roles.cc
         cache/cache_key.cc
         cache/cache_helpers.cc
         cache/cache_reservation_manager.cc
@@ -1110,7 +1109,7 @@ configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
 corrosion_set_env_vars(rocksdb-rs SKIP_BUILD_SCRIPT=1)
-corrosion_add_cxxbridge(rocksdb-rs-cxx CRATE rocksdb-rs FILES env.rs lib.rs port_defs.rs slice.rs status.rs)
+corrosion_add_cxxbridge(rocksdb-rs-cxx CRATE rocksdb-rs FILES cache.rs env.rs lib.rs port_defs.rs slice.rs status.rs)
 target_include_directories(rocksdb-rs-cxx PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})

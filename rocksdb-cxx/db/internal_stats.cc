@@ -19,12 +19,12 @@
 #include <utility>
 #include <vector>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_entry_stats.h"
 #include "db/column_family.h"
 #include "db/db_impl/db_impl.h"
 #include "db/write_stall_stats.h"
 #include "port/port.h"
+#include "rocksdb/cache.h"
 #include "rocksdb/system_clock.h"
 #include "rocksdb/table.h"
 #include "table/block_based/cachable_entry.h"
@@ -741,7 +741,7 @@ std::string InternalStats::CacheEntryRoleStats::ToString(
   str << "Block cache entry stats(count,size,portion):";
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     if (entry_counts[i] > 0) {
-      str << " " << kCacheEntryRoleToCamelString[i] << "(" << entry_counts[i]
+      str << " " << CacheEntryRole_ToCamelString(static_cast<CacheEntryRole>(i)) << "(" << entry_counts[i]
           << "," << BytesToHumanString(total_charges[i]) << ","
           << (100.0 * total_charges[i] / cache_capacity) << "%)";
     }
@@ -754,20 +754,20 @@ void InternalStats::CacheEntryRoleStats::ToMap(
     std::map<std::string, std::string>* values, SystemClock* clock) const {
   values->clear();
   auto& v = *values;
-  v[BlockCacheEntryStatsMapKeys::CacheId()] = cache_id;
-  v[BlockCacheEntryStatsMapKeys::CacheCapacityBytes()] =
+  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheId())] = cache_id;
+  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheCapacityBytes())] =
       std::to_string(cache_capacity);
-  v[BlockCacheEntryStatsMapKeys::LastCollectionDurationSeconds()] =
+  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())] =
       std::to_string(GetLastDurationMicros() / 1000000.0);
-  v[BlockCacheEntryStatsMapKeys::LastCollectionAgeSeconds()] =
+  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())] =
       std::to_string((clock->NowMicros() - last_end_time_micros_) / 1000000U);
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     auto role = static_cast<CacheEntryRole>(i);
-    v[BlockCacheEntryStatsMapKeys::EntryCount(role)] =
+    v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))] =
         std::to_string(entry_counts[i]);
-    v[BlockCacheEntryStatsMapKeys::UsedBytes(role)] =
+    v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedBytes(role))] =
         std::to_string(total_charges[i]);
-    v[BlockCacheEntryStatsMapKeys::UsedPercent(role)] =
+    v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedPercent(role))] =
         std::to_string(100.0 * total_charges[i] / cache_capacity);
   }
 }

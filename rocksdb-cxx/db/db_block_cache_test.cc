@@ -11,7 +11,6 @@
 #include <memory>
 #include <unordered_set>
 
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_key.h"
 #include "cache/lru_cache.h"
 #include "cache/typed_cache.h"
@@ -20,6 +19,7 @@
 #include "db/db_test_util.h"
 #include "env/unique_id_gen.h"
 #include "port/stack_trace.h"
+#include "rocksdb/cache.h"
 #include "rocksdb/persistent_cache.h"
 #include "rocksdb/statistics.h"
 #include "rocksdb/table.h"
@@ -141,7 +141,7 @@ class DBBlockCacheTest : public DBTestBase {
     for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
       auto role = static_cast<CacheEntryRole>(i);
       cache_entry_role_counts[i] =
-          ParseSizeT(values[BlockCacheEntryStatsMapKeys::EntryCount(role)]);
+          ParseSizeT(values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))]);
     }
     return cache_entry_role_counts;
   }
@@ -1101,7 +1101,7 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
       for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
         auto role = static_cast<CacheEntryRole>(i);
         EXPECT_EQ(std::to_string(expected[i]),
-                  values[BlockCacheEntryStatsMapKeys::EntryCount(role)]);
+                  values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))]);
       }
 
       // Add one for kWriteBuffer
@@ -1115,8 +1115,8 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
         env_->MockSleepForSeconds(1);
         EXPECT_EQ(std::to_string(prev_expected[static_cast<size_t>(
                       CacheEntryRole::kWriteBuffer)]),
-                  values[BlockCacheEntryStatsMapKeys::EntryCount(
-                      CacheEntryRole::kWriteBuffer)]);
+                  values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(
+                      CacheEntryRole::kWriteBuffer))]);
         // Not enough for a "background" miss but enough for a "foreground" miss
         env_->MockSleepForSeconds(45);
 
@@ -1125,8 +1125,8 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
         EXPECT_EQ(
             std::to_string(
                 expected[static_cast<size_t>(CacheEntryRole::kWriteBuffer)]),
-            values[BlockCacheEntryStatsMapKeys::EntryCount(
-                CacheEntryRole::kWriteBuffer)]);
+            values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(
+                CacheEntryRole::kWriteBuffer))]);
       }
       prev_expected = expected;
 

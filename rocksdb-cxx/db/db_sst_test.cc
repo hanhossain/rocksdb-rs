@@ -1504,10 +1504,8 @@ TEST_F(DBSSTTest, OpenDBWithInfiniteMaxOpenFilesSubjectToMemoryLimit) {
 
       if (charge_table_reader == CacheEntryRoleOptions::Decision::kEnabled) {
         EXPECT_TRUE(s.IsMemoryLimit());
-        EXPECT_TRUE(s.ToString()->find(
-                        kCacheEntryRoleToCamelString[static_cast<std::uint32_t>(
-                            CacheEntryRole::kBlockBasedTableReader)]) !=
-                    std::string::npos);
+        EXPECT_TRUE(s.ToString()->find(static_cast<std::string>(
+          CacheEntryRole_ToCamelString(CacheEntryRole::kBlockBasedTableReader))) != std::string::npos);
         EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                     std::string::npos);
 

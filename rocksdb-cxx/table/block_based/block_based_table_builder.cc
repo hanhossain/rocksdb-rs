@@ -22,7 +22,6 @@
 #include <utility>
 
 #include "block_cache.h"
-#include "cache/cache_entry_roles.h"
 #include "cache/cache_helpers.h"
 #include "cache/cache_key.h"
 #include "cache/cache_reservation_manager.h"
