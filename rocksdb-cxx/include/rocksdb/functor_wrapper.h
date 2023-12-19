@@ -9,8 +9,6 @@
 #include <memory>
 #include <utility>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 namespace detail {

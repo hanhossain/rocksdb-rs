@@ -11,8 +11,6 @@
 
 #include <string>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 namespace port {
 namespace xpress {

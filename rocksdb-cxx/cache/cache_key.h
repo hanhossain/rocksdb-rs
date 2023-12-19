@@ -7,7 +7,6 @@
 
 #include <cstdint>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
 #include "table/unique_id_impl.h"
 

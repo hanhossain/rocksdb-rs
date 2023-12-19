@@ -23,7 +23,6 @@
 #include "rocksdb/convenience.h"
 #include "rocksdb/filter_policy.h"
 #include "rocksdb/flush_block_policy.h"
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/table.h"
 #include "rocksdb/utilities/options_type.h"
 #include "table/block_based/block_based_table_builder.h"

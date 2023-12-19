@@ -20,8 +20,6 @@
 #include <utility>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 #if !defined(NROCKSDB_THREAD_STATUS)
 #define ROCKSDB_USING_THREAD_STATUS
 #endif

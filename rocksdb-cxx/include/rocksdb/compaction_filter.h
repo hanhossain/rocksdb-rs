@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "rocksdb/customizable.h"
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/types.h"
 #include "rocksdb/wide_columns.h"
 

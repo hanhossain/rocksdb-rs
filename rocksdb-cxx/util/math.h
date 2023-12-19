@@ -14,7 +14,6 @@
 #include <type_traits>
 
 #include "port/lang.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 ASSERT_FEATURE_COMPAT_HEADER();
 

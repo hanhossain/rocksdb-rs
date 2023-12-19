@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 class Cleanable {

@@ -11,8 +11,6 @@
 #include <string>
 #include <unordered_set>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // SharedBlobFileMetaData represents the immutable part of blob files' metadata,

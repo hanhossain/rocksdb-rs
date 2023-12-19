@@ -17,7 +17,6 @@
 
 #include "logging/event_logger.h"
 #include "port/port.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 namespace rocksdb {
 

@@ -13,7 +13,6 @@
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/compression_type.h"
 #include "rocksdb/env.h"
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/types.h"
 
 namespace rocksdb {

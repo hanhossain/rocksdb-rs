@@ -7,8 +7,6 @@
 
 #include <cstdint>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 constexpr uint64_t kInvalidBlobFileNumber = 0;

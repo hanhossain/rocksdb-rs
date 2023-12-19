@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
 
 #ifndef ROCKSDB_RS

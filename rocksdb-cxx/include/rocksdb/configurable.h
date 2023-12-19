@@ -14,8 +14,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"
 #else

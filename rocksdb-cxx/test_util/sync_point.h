@@ -12,7 +12,6 @@
 #include <thread>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
 
 #ifdef NDEBUG

@@ -7,8 +7,6 @@
 
 #include <cstdint>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // Represents the types of blocks used in the block based table format.

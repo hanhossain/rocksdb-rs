@@ -7,11 +7,7 @@
 
 #include <cstdint>
 
-#include "rocksdb/rocksdb_namespace.h"
-
-
 namespace rocksdb {
-
 namespace blob_db {
 
 /**

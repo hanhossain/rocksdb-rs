@@ -12,7 +12,6 @@
 #include <stddef.h>
 
 #include "rocksdb/compression_type.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 namespace rocksdb {
 

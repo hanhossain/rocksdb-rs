@@ -9,8 +9,6 @@
 
 #include <string>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // How much perf stats to collect. Affects perf_context and iostats_context.

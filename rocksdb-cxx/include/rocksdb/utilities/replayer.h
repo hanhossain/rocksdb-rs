@@ -8,8 +8,6 @@
 #include <functional>
 #include <memory>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"
 #else

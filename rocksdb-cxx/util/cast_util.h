@@ -8,8 +8,6 @@
 #include <memory>
 #include <type_traits>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 // The helper function to assert the move from dynamic_cast<> to
 // static_cast<> is correct. This function is to deal with legacy code.

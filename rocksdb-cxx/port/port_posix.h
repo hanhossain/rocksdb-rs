@@ -13,8 +13,6 @@
 
 #include <thread>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/port_defs.h"
 #else

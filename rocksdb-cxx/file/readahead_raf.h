@@ -10,8 +10,6 @@
 #pragma once
 #include <memory>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 class FSRandomAccessFile;
 // This file provides the following main abstractions:

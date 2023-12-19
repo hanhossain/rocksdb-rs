@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <string>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/wide_columns.h"
 
 #ifndef ROCKSDB_RS

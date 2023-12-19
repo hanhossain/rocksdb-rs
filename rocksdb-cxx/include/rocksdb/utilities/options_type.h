@@ -19,7 +19,6 @@
 #include <unordered_map>
 
 #include "rocksdb/convenience.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"

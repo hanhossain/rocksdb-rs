@@ -13,8 +13,6 @@
 
 #include <string>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // This is NOT an extensible interface but a public interface for result of

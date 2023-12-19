@@ -8,7 +8,6 @@
 #include <array>
 #include <memory>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "util/math128.h"
 
 namespace rocksdb {

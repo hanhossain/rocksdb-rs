@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/types.h"
 #include "rocksdb/utilities/transaction_db.h"
 

@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "rocksdb/options.h"
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/trace_record.h"
 #include "rocksdb/utilities/replayer.h"
 

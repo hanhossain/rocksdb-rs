@@ -8,8 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // struct ReadaheadFileInfo contains readahead information that is passed from

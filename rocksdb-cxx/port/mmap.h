@@ -15,8 +15,6 @@
 
 #include <cstdint>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // An RAII wrapper for mmaped memory

@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "rocksdb/rocksdb_namespace.h"
-
 #ifdef USE_FOLLY
 
 #include <folly/container/F14Map.h>

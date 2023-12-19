@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 #include "db/blob/blob_constants.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/status.h"

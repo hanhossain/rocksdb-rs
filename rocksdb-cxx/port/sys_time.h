@@ -12,8 +12,6 @@
 
 #pragma once
 
-#include "rocksdb/rocksdb_namespace.h"
-
 #if defined(OS_WIN) && (defined(_MSC_VER) || defined(__MINGW32__))
 
 #include <time.h>

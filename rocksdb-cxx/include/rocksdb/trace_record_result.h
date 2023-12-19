@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/trace_record.h"
 

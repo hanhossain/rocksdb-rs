@@ -10,7 +10,6 @@
 #include <string>
 
 #include "db/blob/blob_constants.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 namespace rocksdb {
 

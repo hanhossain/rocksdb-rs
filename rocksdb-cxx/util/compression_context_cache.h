@@ -19,8 +19,6 @@
 
 #include <stdint.h>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 class ZSTDUncompressCachedData;
 

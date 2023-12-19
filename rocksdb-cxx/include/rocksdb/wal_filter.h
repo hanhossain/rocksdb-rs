@@ -9,7 +9,6 @@
 #include <string>
 
 #include "rocksdb/customizable.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 namespace rocksdb {
 

@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "port/lang.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 namespace rocksdb {
 

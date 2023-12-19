@@ -21,7 +21,6 @@
 #include "port/lang.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/convenience.h"
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/utilities/object_registry.h"
 #include "table/block_based/block_based_table_reader.h"

@@ -10,7 +10,6 @@
 
 #include <cstddef>
 
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/wide_columns.h"
 
 namespace rocksdb {

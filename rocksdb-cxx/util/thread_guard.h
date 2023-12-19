@@ -6,7 +6,6 @@
 #pragma once
 
 #include "port/port.h"
-#include "rocksdb/rocksdb_namespace.h"
 
 namespace rocksdb {
 

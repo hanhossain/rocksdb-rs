@@ -11,8 +11,6 @@
 #include <folly/container/F14Map.h>
 #endif
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // Helper methods to estimate memroy usage by std containers.

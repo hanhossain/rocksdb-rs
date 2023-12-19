@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // DB contents are stored in a set of blocks, each of which holds a

@@ -10,8 +10,6 @@
 
 #include <functional>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 /*

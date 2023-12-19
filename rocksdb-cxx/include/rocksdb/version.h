@@ -7,8 +7,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 // NOTE: in 'main' development branch, this should be the *next*
 // minor or major version number planned for release.
 #define ROCKSDB_MAJOR 8

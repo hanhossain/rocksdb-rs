@@ -12,8 +12,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 class Slice;

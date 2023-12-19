@@ -18,7 +18,6 @@
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb/rocksdb_namespace.h"
 #include "rocksdb/types.h"
 #include "util/string_util.h"
 

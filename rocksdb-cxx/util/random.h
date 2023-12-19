@@ -13,8 +13,6 @@
 #include <algorithm>
 #include <random>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 // A very simple random number generator.  Not especially good at

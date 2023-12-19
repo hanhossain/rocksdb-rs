@@ -15,8 +15,6 @@
 #include <memory>
 #include <type_traits>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 namespace port {
 

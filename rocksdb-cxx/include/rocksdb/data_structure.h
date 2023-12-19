@@ -11,8 +11,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "rocksdb/rocksdb_namespace.h"
-
 namespace rocksdb {
 
 namespace detail {
