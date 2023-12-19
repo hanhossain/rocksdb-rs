@@ -57,14 +57,6 @@ constexpr uint32_t kNumCacheEntryRoles =
 // A fast bit set for CacheEntryRoles
 using CacheEntryRoleSet = SmallEnumSet<CacheEntryRole, CacheEntryRole::kMisc>;
 
-rust::Str BlockCacheEntryStatsMapKeys_CacheId();
-rust::Str BlockCacheEntryStatsMapKeys_CacheCapacityBytes();
-rust::Str BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds();
-rust::Str BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds();
-rust::String BlockCacheEntryStatsMapKeys_EntryCount(CacheEntryRole role);
-rust::String BlockCacheEntryStatsMapKeys_UsedBytes(CacheEntryRole role);
-rust::String BlockCacheEntryStatsMapKeys_UsedPercent(CacheEntryRole role);
-
 extern const bool kDefaultToAdaptiveMutex;
 
 enum CacheMetadataChargePolicy {

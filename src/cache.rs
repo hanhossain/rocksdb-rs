@@ -43,7 +43,6 @@ pub mod ffi {
         kMisc,
     }
 
-    #[namespace = "rocksdb::rs"]
     extern "Rust" {
         #[cxx_name = "BlockCacheEntryStatsMapKeys_CacheId"]
         fn block_cache_entry_stats_map_keys_cache_id() -> &'static str;

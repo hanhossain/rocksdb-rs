@@ -28,32 +28,4 @@ std::array<std::string, kNumCacheEntryRoles> kCacheEntryRoleToCamelString{{
     "Misc",
 }};
 
-rust::Str BlockCacheEntryStatsMapKeys_CacheId() {
-  return rs::BlockCacheEntryStatsMapKeys_CacheId();
-}
-
-rust::Str BlockCacheEntryStatsMapKeys_CacheCapacityBytes() {
-  return rs::BlockCacheEntryStatsMapKeys_CacheCapacityBytes();
-}
-
-rust::Str BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds() {
-  return rs::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds();
-}
-
-rust::Str BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds() {
-  return rs::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds();
-}
-
-rust::String BlockCacheEntryStatsMapKeys_EntryCount(CacheEntryRole role) {
-  return rs::BlockCacheEntryStatsMapKeys_EntryCount(role);
-}
-
-rust::String BlockCacheEntryStatsMapKeys_UsedBytes(CacheEntryRole role) {
-  return rs::BlockCacheEntryStatsMapKeys_UsedBytes(role);
-}
-
-rust::String BlockCacheEntryStatsMapKeys_UsedPercent(CacheEntryRole role) {
-  return rs::BlockCacheEntryStatsMapKeys_UsedPercent(role);
-}
-
 }  // namespace ROCKSDB_NAMESPACE
