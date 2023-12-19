@@ -44,10 +44,8 @@ rust::Str BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds() {
   return rs::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds();
 }
 
-const std::string& BlockCacheEntryStatsMapKeys::LastCollectionAgeSeconds() {
-  static const std::string kLastCollectionAgeSeconds =
-      "secs_since_last_collection";
-  return kLastCollectionAgeSeconds;
+rust::Str BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds() {
+  return rs::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds();
 }
 
 namespace {

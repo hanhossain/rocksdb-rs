@@ -2078,7 +2078,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
           static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
       values.end());
   ASSERT_TRUE(
-      values.find(BlockCacheEntryStatsMapKeys::LastCollectionAgeSeconds()) !=
+      values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())) !=
       values.end());
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     CacheEntryRole role = static_cast<CacheEntryRole>(i);
