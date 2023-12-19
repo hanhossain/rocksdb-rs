@@ -50,6 +50,9 @@ pub mod ffi {
 
         #[cxx_name = "BlockCacheEntryStatsMapKeys_CacheId"]
         fn block_cache_entry_stats_map_keys_cache_id() -> &'static str;
+
+        #[cxx_name = "BlockCacheEntryStatsMapKeys_CacheCapacityBytes"]
+        fn block_cache_entry_stats_map_keys_cache_capacity_bytes() -> &'static str;
     }
 }
 
@@ -83,4 +86,8 @@ fn get_cache_entry_role_name(role: CacheEntryRole) -> &'static str {
 
 fn block_cache_entry_stats_map_keys_cache_id() -> &'static str {
     "id"
+}
+
+fn block_cache_entry_stats_map_keys_cache_capacity_bytes() -> &'static str {
+    "capacity"
 }

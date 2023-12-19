@@ -36,9 +36,8 @@ rust::Str BlockCacheEntryStatsMapKeys_CacheId() {
   return rs::BlockCacheEntryStatsMapKeys_CacheId();
 }
 
-const std::string& BlockCacheEntryStatsMapKeys::CacheCapacityBytes() {
-  static const std::string kCacheCapacityBytes = "capacity";
-  return kCacheCapacityBytes;
+rust::Str BlockCacheEntryStatsMapKeys_CacheCapacityBytes() {
+  return rs::BlockCacheEntryStatsMapKeys_CacheCapacityBytes();
 }
 
 const std::string&
