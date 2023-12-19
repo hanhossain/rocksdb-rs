@@ -336,6 +336,7 @@ fn main() {
     let skip_build_script = std::env::var("SKIP_BUILD_SCRIPT").map_or(false, |x| x == "1");
 
     let bridges = vec![
+        "src/cache.rs",
         "src/env.rs",
         "src/lib.rs",
         "src/port_defs.rs",
