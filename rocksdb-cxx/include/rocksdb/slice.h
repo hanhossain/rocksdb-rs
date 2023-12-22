@@ -240,6 +240,10 @@ class PinnableSlice : public Cleanable {
     slice_.clear();
   }
 
+  std::string ToString(bool hex = false) const {
+    return slice_.ToString(hex);
+  }
+
  private:
   friend class PinnableSlice4Test;
   std::string self_space_;
