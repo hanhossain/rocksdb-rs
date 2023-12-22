@@ -134,7 +134,7 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k0", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "PutARock");
+  ASSERT_EQ(values[0].ToString(), "PutARock");
 
   // k0.1 value in SST
   ASSERT_OK(Put("k0.1", "RockInSST"));
@@ -142,7 +142,7 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k0.1", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "RockInSST");
+  ASSERT_EQ(values[0].ToString(), "RockInSST");
 
   // All k1 values are in memtable.
   ASSERT_OK(Merge("k1", "a"));
@@ -153,10 +153,10 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k1", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "x");
-  ASSERT_EQ(values[1], "b");
-  ASSERT_EQ(values[2], "c");
-  ASSERT_EQ(values[3], "d");
+  ASSERT_EQ(values[0].ToString(), "x");
+  ASSERT_EQ(values[1].ToString(), "b");
+  ASSERT_EQ(values[2].ToString(), "c");
+  ASSERT_EQ(values[3].ToString(), "d");
 
   // expected_max_number_of_operands is less than number of merge operands so
   // status should be Incomplete.
@@ -176,9 +176,9 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k1.1", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "c");
-  ASSERT_EQ(values[1], "k");
-  ASSERT_EQ(values[2], "s");
+  ASSERT_EQ(values[0].ToString(), "c");
+  ASSERT_EQ(values[1].ToString(), "k");
+  ASSERT_EQ(values[2].ToString(), "s");
 
   // All k2 values are flushed to L0 into a single file.
   ASSERT_OK(Merge("k2", "q"));
@@ -189,10 +189,9 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k2", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "q");
-  ASSERT_EQ(values[1], "w");
-  ASSERT_EQ(values[2], "e");
-  ASSERT_EQ(values[3], "r");
+  ASSERT_EQ(values[1].ToString(), "w");
+  ASSERT_EQ(values[2].ToString(), "e");
+  ASSERT_EQ(values[3].ToString(), "r");
 
   // All k2.1 values are flushed to L0 into a single file.
   ASSERT_OK(Merge("k2.1", "m"));
@@ -203,7 +202,7 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k2.1", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "l,n,o");
+  ASSERT_EQ(values[0].ToString(), "l,n,o");
 
   // All k2.2 values are flushed to L0 into a single file.
   ASSERT_OK(Merge("k2.2", "g"));
@@ -214,7 +213,7 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k2.2", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "o,t");
+  ASSERT_EQ(values[0].ToString(), "o,t");
 
   // Do some compaction that will make the following tests more predictable
   //  Slice start("PutARock");
@@ -232,10 +231,10 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k3", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "ab");
-  ASSERT_EQ(values[1], "bc");
-  ASSERT_EQ(values[2], "cd");
-  ASSERT_EQ(values[3], "de");
+  ASSERT_EQ(values[0].ToString(), "ab");
+  ASSERT_EQ(values[1].ToString(), "bc");
+  ASSERT_EQ(values[2].ToString(), "cd");
+  ASSERT_EQ(values[3].ToString(), "de");
 
   // All k3.1 values are flushed and are in different files.
   ASSERT_OK(Merge("k3.1", "ab"));
@@ -248,9 +247,9 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k3.1", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "bc");
-  ASSERT_EQ(values[1], "cd");
-  ASSERT_EQ(values[2], "de");
+  ASSERT_EQ(values[0].ToString(), "bc");
+  ASSERT_EQ(values[1].ToString(), "cd");
+  ASSERT_EQ(values[2].ToString(), "de");
 
   // All k3.2 values are flushed and are in different files.
   ASSERT_OK(Merge("k3.2", "ab"));
@@ -263,8 +262,8 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k3.2", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "cd");
-  ASSERT_EQ(values[1], "de");
+  ASSERT_EQ(values[0].ToString(), "cd");
+  ASSERT_EQ(values[1].ToString(), "de");
 
   // All K4 values are in different levels
   ASSERT_OK(Merge("k4", "ba"));
@@ -280,10 +279,10 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k4", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "ba");
-  ASSERT_EQ(values[1], "cb");
-  ASSERT_EQ(values[2], "dc");
-  ASSERT_EQ(values[3], "ed");
+  ASSERT_EQ(values[0].ToString(), "ba");
+  ASSERT_EQ(values[1].ToString(), "cb");
+  ASSERT_EQ(values[2].ToString(), "dc");
+  ASSERT_EQ(values[3].ToString(), "ed");
 
   // First 3 k5 values are in SST and next 4 k5 values are in Immutable
   // Memtable
@@ -299,9 +298,9 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k5", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "remember");
-  ASSERT_EQ(values[1], "i");
-  ASSERT_EQ(values[2], "am");
+  ASSERT_EQ(values[0].ToString(), "remember");
+  ASSERT_EQ(values[1].ToString(), "i");
+  ASSERT_EQ(values[2].ToString(), "am");
 }
 
 TEST_F(DBMergeOperandTest, BlobDBGetMergeOperandsBasic) {
@@ -325,10 +324,10 @@ TEST_F(DBMergeOperandTest, BlobDBGetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k1", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "x");
-  ASSERT_EQ(values[1], "b");
-  ASSERT_EQ(values[2], "c");
-  ASSERT_EQ(values[3], "d");
+  ASSERT_EQ(values[0].ToString(), "x");
+  ASSERT_EQ(values[1].ToString(), "b");
+  ASSERT_EQ(values[2].ToString(), "c");
+  ASSERT_EQ(values[3].ToString(), "d");
 
   // expected_max_number_of_operands is less than number of merge operands so
   // status should be Incomplete.
@@ -348,7 +347,7 @@ TEST_F(DBMergeOperandTest, BlobDBGetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k2", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "q,w,e,r");
+  ASSERT_EQ(values[0].ToString(), "q,w,e,r");
 
   // Do some compaction that will make the following tests more predictable
   ASSERT_OK(db_->CompactRange(CompactRangeOptions(), nullptr, nullptr));
@@ -364,10 +363,10 @@ TEST_F(DBMergeOperandTest, BlobDBGetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k3", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "ab");
-  ASSERT_EQ(values[1], "bc");
-  ASSERT_EQ(values[2], "cd");
-  ASSERT_EQ(values[3], "de");
+  ASSERT_EQ(values[0].ToString(), "ab");
+  ASSERT_EQ(values[1].ToString(), "bc");
+  ASSERT_EQ(values[2].ToString(), "cd");
+  ASSERT_EQ(values[3].ToString(), "de");
 
   // All K4 values are in different levels
   ASSERT_OK(Put("k4", "ba"));
@@ -383,10 +382,10 @@ TEST_F(DBMergeOperandTest, BlobDBGetMergeOperandsBasic) {
   ASSERT_OK(db_->GetMergeOperands(ReadOptions(), db_->DefaultColumnFamily(),
                                   "k4", values.data(), &merge_operands_info,
                                   &number_of_operands));
-  ASSERT_EQ(values[0], "ba");
-  ASSERT_EQ(values[1], "cb");
-  ASSERT_EQ(values[2], "dc");
-  ASSERT_EQ(values[3], "ed");
+  ASSERT_EQ(values[0].ToString(), "ba");
+  ASSERT_EQ(values[1].ToString(), "cb");
+  ASSERT_EQ(values[2].ToString(), "dc");
+  ASSERT_EQ(values[3].ToString(), "ed");
 }
 
 TEST_F(DBMergeOperandTest, GetMergeOperandsLargeResultOptimization) {
@@ -426,7 +425,7 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsLargeResultOptimization) {
   ASSERT_OK(Flush());
 
   for (int i = 0; i < kNumOperands; ++i) {
-    ASSERT_EQ(expected_merge_operands[i], merge_operands[i]);
+    ASSERT_EQ(expected_merge_operands[i], merge_operands[i].ToString());
   }
 }
 

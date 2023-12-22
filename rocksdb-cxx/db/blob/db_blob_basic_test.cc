@@ -87,7 +87,7 @@ TEST_F(DBBlobBasicTest, GetBlobFromCache) {
 
     read_options.read_tier = kReadAllTier;
     ASSERT_OK(db_->Get(read_options, db_->DefaultColumnFamily(), key, &result));
-    ASSERT_EQ(result, blob_value);
+    ASSERT_EQ(result.ToString(), blob_value);
 
     result.Reset();
     read_options.read_tier = kBlockCacheTier;
@@ -107,7 +107,7 @@ TEST_F(DBBlobBasicTest, GetBlobFromCache) {
 
     read_options.read_tier = kReadAllTier;
     ASSERT_OK(db_->Get(read_options, db_->DefaultColumnFamily(), key, &result));
-    ASSERT_EQ(result, blob_value);
+    ASSERT_EQ(result.ToString(), blob_value);
 
     result.Reset();
     read_options.read_tier = kBlockCacheTier;
@@ -115,7 +115,7 @@ TEST_F(DBBlobBasicTest, GetBlobFromCache) {
     // Try again with no I/O allowed. The table and the necessary blocks/blobs
     // should already be in their respective caches.
     ASSERT_OK(db_->Get(read_options, db_->DefaultColumnFamily(), key, &result));
-    ASSERT_EQ(result, blob_value);
+    ASSERT_EQ(result.ToString(), blob_value);
   }
 }
 
@@ -419,13 +419,13 @@ TEST_F(DBBlobBasicTest, MultiGetBlobs) {
                   &values[0], &statuses[0]);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_value);
+    ASSERT_EQ(values[0].ToString(), first_value);
 
     ASSERT_OK(statuses[1]);
-    ASSERT_EQ(values[1], second_value);
+    ASSERT_EQ(values[1].ToString(), second_value);
 
     ASSERT_OK(statuses[2]);
-    ASSERT_EQ(values[2], third_value);
+    ASSERT_EQ(values[2].ToString(), third_value);
   }
 
   // Try again with no I/O allowed. The table and the necessary blocks should
@@ -442,7 +442,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobs) {
                   &values[0], &statuses[0]);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_value);
+    ASSERT_EQ(values[0].ToString(), first_value);
 
     ASSERT_TRUE(statuses[1].IsIncomplete());
 
@@ -513,13 +513,13 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
                   &values[0], &statuses[0]);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_value);
+    ASSERT_EQ(values[0].ToString(), first_value);
 
     ASSERT_OK(statuses[1]);
-    ASSERT_EQ(values[1], second_value);
+    ASSERT_EQ(values[1].ToString(), second_value);
 
     ASSERT_OK(statuses[2]);
-    ASSERT_EQ(values[2], third_value);
+    ASSERT_EQ(values[2].ToString(), third_value);
   }
 
   // Try again with no I/O allowed. The first (inlined) value should be
@@ -535,7 +535,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
                   &values[0], &statuses[0]);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_value);
+    ASSERT_EQ(values[0].ToString(), first_value);
 
     ASSERT_TRUE(statuses[1].IsIncomplete());
 
@@ -554,13 +554,13 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
                   &values[0], &statuses[0]);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_value);
+    ASSERT_EQ(values[0].ToString(), first_value);
 
     ASSERT_OK(statuses[1]);
-    ASSERT_EQ(values[1], second_value);
+    ASSERT_EQ(values[1].ToString(), second_value);
 
     ASSERT_OK(statuses[2]);
-    ASSERT_EQ(values[2], third_value);
+    ASSERT_EQ(values[2].ToString(), third_value);
   }
 
   // Try again with no I/O allowed. All blobs should be successfully read from
@@ -575,13 +575,13 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromCache) {
                   &values[0], &statuses[0]);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_value);
+    ASSERT_EQ(values[0].ToString(), first_value);
 
     ASSERT_OK(statuses[1]);
-    ASSERT_EQ(values[1], second_value);
+    ASSERT_EQ(values[1].ToString(), second_value);
 
     ASSERT_OK(statuses[2]);
-    ASSERT_EQ(values[2], third_value);
+    ASSERT_EQ(values[2].ToString(), third_value);
   }
 }
 
@@ -764,13 +764,13 @@ TEST_F(DBBlobBasicTest, MultiGetWithDirectIO) {
     ASSERT_TRUE(called);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_blob);
+    ASSERT_EQ(values[0].ToString(), first_blob);
 
     ASSERT_OK(statuses[1]);
-    ASSERT_EQ(values[1], third_blob);
+    ASSERT_EQ(values[1].ToString(), third_blob);
 
     ASSERT_OK(statuses[2]);
-    ASSERT_EQ(values[2], second_blob);
+    ASSERT_EQ(values[2].ToString(), second_blob);
   }
 }
 
@@ -831,7 +831,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromMultipleFiles) {
 
     for (size_t i = 0; i < kNumKeys; ++i) {
       ASSERT_OK(statuses[i]);
-      ASSERT_EQ(value_strs[i], values[i]);
+      ASSERT_EQ(value_strs[i], values[i].ToString());
     }
   }
 
@@ -860,7 +860,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromMultipleFiles) {
 
     for (size_t i = 0; i < kNumKeys; ++i) {
       ASSERT_OK(statuses[i]);
-      ASSERT_EQ(value_strs[i], values[i]);
+      ASSERT_EQ(value_strs[i], values[i].ToString());
     }
   }
 
@@ -874,7 +874,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlobsFromMultipleFiles) {
 
     for (size_t i = 0; i < kNumKeys; ++i) {
       ASSERT_OK(statuses[i]);
-      ASSERT_EQ(value_strs[i], values[i]);
+      ASSERT_EQ(value_strs[i], values[i].ToString());
     }
   }
 }
@@ -942,7 +942,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlob_CorruptIndex) {
         assert(key_context->key);
 
         if (*(key_context->key) == key) {
-          Slice* const blob_index = key_context->value;
+          Slice* blob_index = key_context->value->as_slice_ptr_mut();
           assert(blob_index);
           assert(!blob_index->empty());
           blob_index->remove_prefix(1);
@@ -958,7 +958,7 @@ TEST_F(DBBlobBasicTest, MultiGetBlob_CorruptIndex) {
   for (size_t i = 0; i < kNumOfKeys + 1; ++i) {
     if (i != kNumOfKeys) {
       ASSERT_OK(statuses[i]);
-      ASSERT_EQ("blob_value" + std::to_string(i), values[i]);
+      ASSERT_EQ("blob_value" + std::to_string(i), values[i].ToString());
     } else {
       ASSERT_TRUE(statuses[i].IsCorruption());
     }
@@ -1207,13 +1207,13 @@ TEST_F(DBBlobBasicTest, MultiGetMergeBlobWithPut) {
                 &values[0], &statuses[0]);
 
   ASSERT_OK(statuses[0]);
-  ASSERT_EQ(values[0], "v0_0,v0_1,v0_2");
+  ASSERT_EQ(values[0].ToString(), "v0_0,v0_1,v0_2");
 
   ASSERT_OK(statuses[1]);
-  ASSERT_EQ(values[1], "v1_0,v1_1");
+  ASSERT_EQ(values[1].ToString(), "v1_0,v1_1");
 
   ASSERT_OK(statuses[2]);
-  ASSERT_EQ(values[2], "v2_0");
+  ASSERT_EQ(values[2].ToString(), "v2_0");
 }
 
 TEST_F(DBBlobBasicTest, Properties) {
@@ -1520,7 +1520,7 @@ TEST_P(DBBlobBasicIOErrorMultiGetTest, MultipleBlobFiles) {
   SyncPoint::GetInstance()->DisableProcessing();
   SyncPoint::GetInstance()->ClearAllCallBacks();
   ASSERT_OK(statuses[0]);
-  ASSERT_EQ(value1, values[0]);
+  ASSERT_EQ(value1, values[0].ToString());
   ASSERT_TRUE(statuses[1].IsIOError());
 }
 
@@ -1918,13 +1918,13 @@ TEST_F(DBBlobWithTimestampTest, MultiGetBlobs) {
                   &values[0], &statuses[0]);
 
     ASSERT_OK(statuses[0]);
-    ASSERT_EQ(values[0], first_value);
+    ASSERT_EQ(values[0].ToString(), first_value);
 
     ASSERT_OK(statuses[1]);
-    ASSERT_EQ(values[1], second_value);
+    ASSERT_EQ(values[1].ToString(), second_value);
 
     ASSERT_OK(statuses[2]);
-    ASSERT_EQ(values[2], third_value);
+    ASSERT_EQ(values[2].ToString(), third_value);
   }
 }
 
@@ -2002,13 +2002,13 @@ TEST_F(DBBlobWithTimestampTest, MultiGetMergeBlobWithPut) {
                 &values[0], &statuses[0]);
 
   ASSERT_OK(statuses[0]);
-  ASSERT_EQ(values[0], "v0_0,v0_1,v0_2");
+  ASSERT_EQ(values[0].ToString(), "v0_0,v0_1,v0_2");
 
   ASSERT_OK(statuses[1]);
-  ASSERT_EQ(values[1], "v1_0,v1_1");
+  ASSERT_EQ(values[1].ToString(), "v1_0,v1_1");
 
   ASSERT_OK(statuses[2]);
-  ASSERT_EQ(values[2], "v2_0");
+  ASSERT_EQ(values[2].ToString(), "v2_0");
 }
 
 TEST_F(DBBlobWithTimestampTest, IterateBlobs) {

@@ -236,7 +236,7 @@ class BatchedOpsStressTest : public StressTest {
           assert(!values[i].empty());
 
           const char expected = keys[i][0];
-          const char actual = values[i][values[i].size() - 1];
+          const char actual = static_cast<const Slice&>(values[i])[values[i].size() - 1];
 
           if (expected != actual) {
             fprintf(stderr, "multiget error expected = %c actual = %c\n",
@@ -252,7 +252,7 @@ class BatchedOpsStressTest : public StressTest {
 
       // Now that we retrieved all values, check that they all match
       for (size_t i = 1; i < num_prefixes; i++) {
-        if (values[i] != values[0]) {
+        if (values[i].as_slice() != values[0].as_slice()) {
           fprintf(stderr,
                   "multiget error: inconsistent values for key %s: %s, %s\n",
                   StringToHex(key_str[i]).c_str(),

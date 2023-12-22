@@ -371,7 +371,7 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
         ") vs. (" + *s.ToString() + ")");
   }
   if (s.ok()) {
-    if (exp_v != v) {
+    if (exp_v.as_slice() != v.as_slice()) {
       return Status_Corruption("The snapshot gave inconsistent values: (" +
                                 exp_v.ToString() + ") vs. (" + v.ToString() +
                                 ")");

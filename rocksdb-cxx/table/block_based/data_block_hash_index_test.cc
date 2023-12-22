@@ -630,7 +630,7 @@ TEST(DataBlockHashIndex, BlockBoundary) {
 
     TestBoundary(ik1, v1, ik2, v2, seek_ikey, get_context, options);
     ASSERT_EQ(get_context.State(), GetContext::kFound);
-    ASSERT_EQ(value, v2);
+    ASSERT_EQ(value.ToString(), v2);
     value.Reset();
   }
 
@@ -655,7 +655,7 @@ TEST(DataBlockHashIndex, BlockBoundary) {
 
     TestBoundary(ik1, v1, ik2, v2, seek_ikey, get_context, options);
     ASSERT_EQ(get_context.State(), GetContext::kFound);
-    ASSERT_EQ(value, v2);
+    ASSERT_EQ(value.ToString(), v2);
     value.Reset();
   }
 
@@ -680,7 +680,7 @@ TEST(DataBlockHashIndex, BlockBoundary) {
 
     TestBoundary(ik1, v1, ik2, v2, seek_ikey, get_context, options);
     ASSERT_EQ(get_context.State(), GetContext::kFound);
-    ASSERT_EQ(value, v1);
+    ASSERT_EQ(value.ToString(), v1);
     value.Reset();
   }
 

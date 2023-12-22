@@ -7688,7 +7688,7 @@ class Benchmark {
     PinnableSlice p_slice;
     uint64_t st = FLAGS_env->NowNanos();
     db->Get(ReadOptions(), db->DefaultColumnFamily(), key, &p_slice);
-    s.MakeVector(data, p_slice);
+    s.MakeVector(data, static_cast<const Slice&>(p_slice));
     bool found =
         binary_search(data, 0, static_cast<int>(data.size() - 1), lookup_key);
     std::cout << "Found key? " << std::to_string(found) << "\n";
@@ -7711,7 +7711,7 @@ class Benchmark {
                          a_slice.data(), &get_merge_operands_options,
                          &number_of_operands);
     for (PinnableSlice& psl : a_slice) {
-      s.MakeVector(data, psl);
+      s.MakeVector(data, static_cast<const Slice&>(psl));
       found =
           binary_search(data, 0, static_cast<int>(data.size() - 1), lookup_key);
       data.clear();

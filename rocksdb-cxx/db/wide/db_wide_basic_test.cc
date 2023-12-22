@@ -46,7 +46,7 @@ TEST_F(DBWideBasicTest, PutEntity) {
       PinnableSlice result;
       ASSERT_OK(db_->Get(ReadOptions(), db_->DefaultColumnFamily(), first_key,
                          &result));
-      ASSERT_EQ(result, first_value_of_default_column);
+      ASSERT_EQ(result.ToString(), first_value_of_default_column);
     }
 
     {
@@ -74,7 +74,7 @@ TEST_F(DBWideBasicTest, PutEntity) {
       PinnableSlice result;
       ASSERT_OK(db_->Get(ReadOptions(), db_->DefaultColumnFamily(), third_key,
                          &result));
-      ASSERT_EQ(result, third_value);
+      ASSERT_EQ(result.ToString(), third_value);
     }
 
     {
@@ -96,13 +96,13 @@ TEST_F(DBWideBasicTest, PutEntity) {
                     &keys[0], &values[0], &statuses[0]);
 
       ASSERT_OK(statuses[0]);
-      ASSERT_EQ(values[0], first_value_of_default_column);
+      ASSERT_EQ(values[0].ToString(), first_value_of_default_column);
 
       ASSERT_OK(statuses[1]);
       ASSERT_TRUE(values[1].empty());
 
       ASSERT_OK(statuses[2]);
-      ASSERT_EQ(values[2], third_value);
+      ASSERT_EQ(values[2].ToString(), third_value);
     }
 
     {
@@ -490,7 +490,7 @@ TEST_F(DBWideBasicTest, MergeEntity) {
       PinnableSlice result;
       ASSERT_OK(db_->Get(ReadOptions(), db_->DefaultColumnFamily(), first_key,
                          &result));
-      ASSERT_EQ(result, first_expected_default);
+      ASSERT_EQ(result.ToString(), first_expected_default);
     }
 
     {
@@ -504,7 +504,7 @@ TEST_F(DBWideBasicTest, MergeEntity) {
       PinnableSlice result;
       ASSERT_OK(db_->Get(ReadOptions(), db_->DefaultColumnFamily(), second_key,
                          &result));
-      ASSERT_EQ(result, second_expected_default);
+      ASSERT_EQ(result.ToString(), second_expected_default);
     }
 
     {
@@ -524,10 +524,10 @@ TEST_F(DBWideBasicTest, MergeEntity) {
       db_->MultiGet(ReadOptions(), db_->DefaultColumnFamily(), num_keys,
                     &keys[0], &values[0], &statuses[0]);
 
-      ASSERT_EQ(values[0], first_expected_default);
+      ASSERT_EQ(values[0].ToString(), first_expected_default);
       ASSERT_OK(statuses[0]);
 
-      ASSERT_EQ(values[1], second_expected_default);
+      ASSERT_EQ(values[1].ToString(), second_expected_default);
       ASSERT_OK(statuses[1]);
     }
 
@@ -604,8 +604,8 @@ TEST_F(DBWideBasicTest, MergeEntity) {
                                       &get_merge_opts, &number_of_operands));
 
       ASSERT_EQ(number_of_operands, num_merge_operands);
-      ASSERT_EQ(merge_operands[0], first_columns[0].value());
-      ASSERT_EQ(merge_operands[1], first_merge_operand);
+      ASSERT_EQ(merge_operands[0].as_slice(), first_columns[0].value());
+      ASSERT_EQ(merge_operands[1].ToString(), first_merge_operand);
     }
 
     {
@@ -618,7 +618,7 @@ TEST_F(DBWideBasicTest, MergeEntity) {
 
       ASSERT_EQ(number_of_operands, num_merge_operands);
       ASSERT_TRUE(merge_operands[0].empty());
-      ASSERT_EQ(merge_operands[1], second_merge_operand);
+      ASSERT_EQ(merge_operands[1].ToString(), second_merge_operand);
     }
   };
 
@@ -637,7 +637,7 @@ TEST_F(DBWideBasicTest, MergeEntity) {
                                       &get_merge_opts, &number_of_operands));
 
       ASSERT_EQ(number_of_operands, num_merge_operands);
-      ASSERT_EQ(merge_operands[0], first_expected_default);
+      ASSERT_EQ(merge_operands[0].ToString(), first_expected_default);
     }
 
     {
@@ -649,7 +649,7 @@ TEST_F(DBWideBasicTest, MergeEntity) {
                                       &get_merge_opts, &number_of_operands));
 
       ASSERT_EQ(number_of_operands, num_merge_operands);
-      ASSERT_EQ(merge_operands[0], second_expected_default);
+      ASSERT_EQ(merge_operands[0].ToString(), second_expected_default);
     }
   };
 

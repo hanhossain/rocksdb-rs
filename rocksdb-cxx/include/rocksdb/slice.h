@@ -244,6 +244,14 @@ class PinnableSlice : public Cleanable {
     return slice_.ToString(hex);
   }
 
+  Slice* as_slice_ptr_mut() {
+    return &slice_;
+  }
+
+  const Slice& as_slice() const {
+    return slice_;
+  }
+
  private:
   friend class PinnableSlice4Test;
   std::string self_space_;

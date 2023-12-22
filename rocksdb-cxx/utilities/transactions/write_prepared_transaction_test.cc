@@ -963,7 +963,7 @@ TEST_P(WritePreparedTransactionTest, DoubleSnapshot) {
   PinnableSlice pinnable_val;
   s = wp_db->Get(ropt, wp_db->DefaultColumnFamily(), "key", &pinnable_val);
   ASSERT_OK(s);
-  ASSERT_TRUE(pinnable_val == "value1");
+  ASSERT_TRUE(pinnable_val.ToString() == "value1");
   pinnable_val.Reset();
 
   wp_db->ReleaseSnapshot(snapshot1);
@@ -971,7 +971,7 @@ TEST_P(WritePreparedTransactionTest, DoubleSnapshot) {
   // It should still see the value before commit
   s = wp_db->Get(ropt, wp_db->DefaultColumnFamily(), "key", &pinnable_val);
   ASSERT_OK(s);
-  ASSERT_TRUE(pinnable_val == "value1");
+  ASSERT_TRUE(pinnable_val.ToString() == "value1");
   pinnable_val.Reset();
 
   // Cause an eviction to advance max evicted seq number and trigger updating
@@ -982,7 +982,7 @@ TEST_P(WritePreparedTransactionTest, DoubleSnapshot) {
   // It should still see the value before commit
   s = wp_db->Get(ropt, wp_db->DefaultColumnFamily(), "key", &pinnable_val);
   ASSERT_OK(s);
-  ASSERT_TRUE(pinnable_val == "value1");
+  ASSERT_TRUE(pinnable_val.ToString() == "value1");
   pinnable_val.Reset();
 
   wp_db->ReleaseSnapshot(snapshot0);
@@ -1909,7 +1909,7 @@ TEST_P(WritePreparedTransactionTest, BasicRecovery) {
   // Check the value is committed after commit
   s = db->Get(ropt, db->DefaultColumnFamily(), "foo0" + istr0, &pinnable_val);
   ASSERT_TRUE(s.ok());
-  ASSERT_TRUE(pinnable_val == ("bar0" + istr0));
+  ASSERT_TRUE(pinnable_val.ToString() == ("bar0" + istr0));
   pinnable_val.Reset();
 
   delete txn0;
@@ -1924,7 +1924,7 @@ TEST_P(WritePreparedTransactionTest, BasicRecovery) {
   // Check the value is still committed after recovery
   s = db->Get(ropt, db->DefaultColumnFamily(), "foo0" + istr0, &pinnable_val);
   ASSERT_TRUE(s.ok());
-  ASSERT_TRUE(pinnable_val == ("bar0" + istr0));
+  ASSERT_TRUE(pinnable_val.ToString() == ("bar0" + istr0));
   pinnable_val.Reset();
 }
 
@@ -2194,7 +2194,7 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const Status& exp_s,
   ASSERT_TRUE(exp_s.eq(s));
   ASSERT_TRUE(s.ok() || s.IsNotFound());
   if (s.ok()) {
-    ASSERT_TRUE(exp_v == v);
+    ASSERT_TRUE(exp_v.as_slice() == v.as_slice());
   }
 
   // Try with MultiGet API too
@@ -2207,7 +2207,7 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const Status& exp_s,
   ASSERT_TRUE(exp_s.eq(s));
   ASSERT_TRUE(s.ok() || s.IsNotFound());
   if (s.ok()) {
-    ASSERT_TRUE(exp_v == values[0]);
+    ASSERT_TRUE(exp_v.ToString() == values[0]);
   }
 }
 
@@ -3584,7 +3584,7 @@ TEST_P(WritePreparedTransactionTest, NonAtomicCommitOfDelayedPrepared) {
         auto s = db->Get(roptions, db->DefaultColumnFamily(), "key1", &value);
         ASSERT_OK(s);
         // It should not see the commit of delayed prepared
-        ASSERT_TRUE(value == init_value);
+        ASSERT_TRUE(value.ToString() == init_value);
         TEST_SYNC_POINT("AtomicCommitOfDelayedPrepared:Read:after");
         db->ReleaseSnapshot(snap);
       });
@@ -3656,7 +3656,7 @@ TEST_P(WritePreparedTransactionTest, NonAtomicUpdateOfDelayedPrepared) {
     auto s = db->Get(roptions, db->DefaultColumnFamily(), "key1", &value);
     ASSERT_OK(s);
     // It should not see the uncommitted value of delayed prepared
-    ASSERT_TRUE(value == init_value);
+    ASSERT_TRUE(value.ToString() == init_value);
     db->ReleaseSnapshot(snap);
   });
 
@@ -3733,7 +3733,7 @@ TEST_P(WritePreparedTransactionTest, NonAtomicUpdateOfMaxEvictedSeq) {
     auto s = db->Get(roptions, db->DefaultColumnFamily(), "key1", &value);
     ASSERT_OK(s);
     // It should see the committed value of the evicted entry
-    ASSERT_TRUE(value == last_value);
+    ASSERT_TRUE(value.ToString() == last_value);
     db->ReleaseSnapshot(snap);
   });
 
@@ -3909,7 +3909,7 @@ TEST_P(WritePreparedTransactionTest, CommitOfDelayedPrepared) {
               db->Get(roptions, db->DefaultColumnFamily(), "key2", &value2);
           ASSERT_OK(s);
           // It should see its own write
-          ASSERT_TRUE(val_str == value2);
+          ASSERT_TRUE(val_str == value2.ToString());
           // The value read by snapshot should not change
           ASSERT_STREQ(value2.ToString().c_str(), value.ToString().c_str());
 

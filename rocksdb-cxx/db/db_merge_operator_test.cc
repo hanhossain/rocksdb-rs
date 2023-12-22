@@ -269,9 +269,9 @@ TEST_F(DBMergeOperatorTest, MergeOperatorFailsWithMustMerge) {
       ASSERT_EQ(kNumOperands, num_operands_found);
       for (int j = 0; j < num_operands_found; ++j) {
         if (i == j) {
-          ASSERT_EQ(values[j], "corrupted_must_merge");
+          ASSERT_EQ(values[j].ToString(), "corrupted_must_merge");
         } else {
-          ASSERT_EQ(values[j], "ok");
+          ASSERT_EQ(values[j].ToString(), "ok");
         }
       }
     };

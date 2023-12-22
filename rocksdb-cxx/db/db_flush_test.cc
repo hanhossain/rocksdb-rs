@@ -643,7 +643,7 @@ TEST_F(DBFlushTest, StatisticsGarbageRangeDeletes) {
   ASSERT_NOK(Get(KEY2, &value));
   // And that KEY3's value is correct.
   ASSERT_OK(Get(KEY3, &value));
-  ASSERT_EQ(value, VALUE3);
+  ASSERT_EQ(value.ToString(), VALUE3);
 
   // Force flush to SST. Increments the statistics counter.
   ASSERT_OK(Flush());

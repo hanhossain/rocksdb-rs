@@ -3393,7 +3393,7 @@ TEST_F(DBBasicTestWithTimestamp,
     ASSERT_TRUE(statuses[1].IsNotFound());
     ASSERT_OK(statuses[2]);
     ;
-    ASSERT_EQ(values[2], "v3");
+    ASSERT_EQ(values[2].ToString(), "v3");
   };
   verify();
   ASSERT_OK(db_->CompactRange(cro, nullptr, nullptr));
@@ -3448,7 +3448,7 @@ TEST_F(DBBasicTestWithTimestamp,
   // DeleteRange has a higher timestamp than Delete for "k2"
   ASSERT_EQ(timestamps[1], Timestamp(3, 0));
   ASSERT_OK(statuses[2]);
-  ASSERT_EQ(values[2], "v3");
+  ASSERT_EQ(values[2].ToString(), "v3");
   ASSERT_EQ(timestamps[2], Timestamp(4, 0));
 
   CompactRangeOptions cro;
@@ -3484,7 +3484,7 @@ TEST_F(DBBasicTestWithTimestamp,
   ASSERT_TRUE(statuses[1].IsNotFound());
   ASSERT_TRUE(timestamps[1].empty());
   ASSERT_OK(statuses[2]);
-  ASSERT_EQ(values[2], "v3");
+  ASSERT_EQ(values[2].ToString(), "v3");
   ASSERT_EQ(timestamps[2], Timestamp(4, 0));
 
   Close();
@@ -3605,7 +3605,7 @@ TEST_P(DBBasicTestWithTimestampTableOptions, DeleteRangeBaiscReadAndIterate) {
       ASSERT_EQ(timestamps[i], Timestamp(kNum / 2, 0));
     } else {
       ASSERT_OK(statuses[i]);
-      ASSERT_EQ(values[i], "val" + std::to_string(i));
+      ASSERT_EQ(values[i].ToString(), "val" + std::to_string(i));
       ASSERT_EQ(timestamps[i], Timestamp(i, 0));
     }
   }
@@ -3681,7 +3681,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
       ASSERT_TRUE(statuses[i].eq(expected_status[i]));
       if (s.ok()) {
         ASSERT_EQ(value, expected_values[i]);
-        ASSERT_EQ(values[i], expected_values[i]);
+        ASSERT_EQ(values[i].ToString(), expected_values[i]);
       }
       if (!timestamp.empty()) {
         ASSERT_EQ(timestamp, expected_timestamps[i]);

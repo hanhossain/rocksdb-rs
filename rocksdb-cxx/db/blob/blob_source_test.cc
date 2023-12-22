@@ -216,7 +216,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
                                     blob_offsets[i], file_size, blob_sizes[i],
                                     kNoCompression, prefetch_buffer, &values[i],
                                     &bytes_read));
-      ASSERT_EQ(values[i], blobs[i]);
+      ASSERT_EQ(values[i].ToString(), blobs[i]);
       ASSERT_TRUE(values[i].IsPinned());
       ASSERT_EQ(bytes_read,
                 BlobLogRecord::kHeaderSize + keys[i].size() + blob_sizes[i]);
@@ -254,7 +254,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
                                     blob_offsets[i], file_size, blob_sizes[i],
                                     kNoCompression, prefetch_buffer, &values[i],
                                     &bytes_read));
-      ASSERT_EQ(values[i], blobs[i]);
+      ASSERT_EQ(static_cast<const Slice&>(values[i]), blobs[i].ToString());
       ASSERT_TRUE(values[i].IsPinned());
       ASSERT_EQ(bytes_read,
                 BlobLogRecord::kHeaderSize + keys[i].size() + blob_sizes[i]);
@@ -298,7 +298,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
                                     blob_offsets[i], file_size, blob_sizes[i],
                                     kNoCompression, prefetch_buffer, &values[i],
                                     &bytes_read));
-      ASSERT_EQ(values[i], blobs[i]);
+      ASSERT_EQ(static_cast<const Slice&>(values[i]), blobs[i]);
       ASSERT_TRUE(values[i].IsPinned());
       ASSERT_EQ(bytes_read,
                 BlobLogRecord::kHeaderSize + keys[i].size() + blob_sizes[i]);
@@ -337,7 +337,7 @@ TEST_F(BlobSourceTest, GetBlobsFromCache) {
                                     blob_offsets[i], file_size, blob_sizes[i],
                                     kNoCompression, prefetch_buffer, &values[i],
                                     &bytes_read));
-      ASSERT_EQ(values[i], blobs[i]);
+      ASSERT_EQ(values[i].as_slice(), blobs[i]);
       ASSERT_TRUE(values[i].IsPinned());
       ASSERT_EQ(bytes_read,
                 BlobLogRecord::kHeaderSize + keys[i].size() + blob_sizes[i]);
@@ -538,7 +538,7 @@ TEST_F(BlobSourceTest, GetCompressedBlobs) {
                                     blob_offsets[i], file_size, blob_sizes[i],
                                     compression, nullptr /*prefetch_buffer*/,
                                     &values[i], &bytes_read));
-      ASSERT_EQ(values[i], blobs[i] /*uncompressed blob*/);
+      ASSERT_EQ(values[i].as_slice(), blobs[i] /*uncompressed blob*/);
       ASSERT_NE(values[i].size(), blob_sizes[i] /*compressed size*/);
       ASSERT_EQ(bytes_read,
                 BlobLogRecord::kHeaderSize + keys[i].size() + blob_sizes[i]);
@@ -561,7 +561,7 @@ TEST_F(BlobSourceTest, GetCompressedBlobs) {
                                     blob_offsets[i], file_size, blob_sizes[i],
                                     compression, nullptr /*prefetch_buffer*/,
                                     &values[i], &bytes_read));
-      ASSERT_EQ(values[i], blobs[i] /*uncompressed blob*/);
+      ASSERT_EQ(values[i].as_slice(), blobs[i] /*uncompressed blob*/);
       ASSERT_NE(values[i].size(), blob_sizes[i] /*compressed size*/);
       ASSERT_EQ(bytes_read,
                 BlobLogRecord::kHeaderSize + keys[i].size() + blob_sizes[i]);
@@ -678,7 +678,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromMultiFiles) {
       const uint64_t file_number = i + 1;
       for (size_t j = 0; j < num_blobs; ++j) {
         ASSERT_OK(statuses_buf[i * num_blobs + j]);
-        ASSERT_EQ(value_buf[i * num_blobs + j], blobs[j]);
+        ASSERT_EQ(value_buf[i * num_blobs + j].as_slice(), blobs[j]);
         ASSERT_TRUE(blob_source.TEST_BlobInCache(file_number, file_size,
                                                  blob_offsets[j]));
       }
@@ -730,7 +730,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromMultiFiles) {
       const uint64_t file_number = i + 1;
       for (size_t j = 0; j < num_blobs; ++j) {
         ASSERT_OK(statuses_buf[i * num_blobs + j]);
-        ASSERT_EQ(value_buf[i * num_blobs + j], blobs[j]);
+        ASSERT_EQ(value_buf[i * num_blobs + j].as_slice(), blobs[j]);
         ASSERT_TRUE(blob_source.TEST_BlobInCache(file_number, file_size,
                                                  blob_offsets[j]));
       }
@@ -860,7 +860,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     for (size_t i = 0; i < num_blobs; ++i) {
       if (i % 2 == 0) {
         ASSERT_OK(statuses_buf[i]);
-        ASSERT_EQ(value_buf[i], blobs[i]);
+        ASSERT_EQ(value_buf[i].as_slice(), blobs[i]);
         ASSERT_TRUE(value_buf[i].IsPinned());
         fs_read_bytes +=
             blob_sizes[i] + keys[i].size() + BlobLogRecord::kHeaderSize;
@@ -901,7 +901,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
                                     blob_offsets[i], file_size, blob_sizes[i],
                                     kNoCompression, prefetch_buffer,
                                     &value_buf[i], &bytes_read));
-      ASSERT_EQ(value_buf[i], blobs[i]);
+      ASSERT_EQ(value_buf[i].as_slice(), blobs[i]);
       ASSERT_TRUE(value_buf[i].IsPinned());
       ASSERT_EQ(bytes_read,
                 BlobLogRecord::kHeaderSize + keys[i].size() + blob_sizes[i]);
@@ -927,7 +927,7 @@ TEST_F(BlobSourceTest, MultiGetBlobsFromCache) {
     uint64_t blob_bytes = 0;
     for (size_t i = 0; i < num_blobs; ++i) {
       ASSERT_OK(statuses_buf[i]);
-      ASSERT_EQ(value_buf[i], blobs[i]);
+      ASSERT_EQ(value_buf[i].as_slice(), blobs[i]);
       ASSERT_TRUE(value_buf[i].IsPinned());
       ASSERT_TRUE(blob_source.TEST_BlobInCache(blob_file_number, file_size,
                                                blob_offsets[i]));
@@ -1180,7 +1180,7 @@ TEST_F(BlobSecondaryCacheTest, GetBlobsFromSecondaryCache) {
                                   blob_offsets[0], file_size, blob_sizes[0],
                                   kNoCompression, nullptr /* prefetch_buffer */,
                                   &values[0], nullptr /* bytes_read */));
-    ASSERT_EQ(values[0], blobs[0]);
+    ASSERT_EQ(values[0].as_slice(), blobs[0]);
     ASSERT_TRUE(
         blob_source.TEST_BlobInCache(file_number, file_size, blob_offsets[0]));
 
@@ -1193,7 +1193,7 @@ TEST_F(BlobSecondaryCacheTest, GetBlobsFromSecondaryCache) {
                                   blob_offsets[1], file_size, blob_sizes[1],
                                   kNoCompression, nullptr /* prefetch_buffer */,
                                   &values[1], nullptr /* bytes_read */));
-    ASSERT_EQ(values[1], blobs[1]);
+    ASSERT_EQ(values[1].as_slice(), blobs[1]);
     ASSERT_TRUE(
         blob_source.TEST_BlobInCache(file_number, file_size, blob_offsets[1]));
 
@@ -1260,7 +1260,7 @@ TEST_F(BlobSecondaryCacheTest, GetBlobsFromSecondaryCache) {
           read_options, keys[0], file_number, blob_offsets[0], file_size,
           blob_sizes[0], kNoCompression, nullptr /* prefetch_buffer */,
           &values[0], nullptr /* bytes_read */));
-      ASSERT_EQ(values[0], blobs[0]);
+      ASSERT_EQ(values[0].as_slice(), blobs[0]);
 
       // Release cache handle
       values[0].Reset();
