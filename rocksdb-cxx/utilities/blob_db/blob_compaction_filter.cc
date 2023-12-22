@@ -103,7 +103,7 @@ CompactionFilter::Decision BlobIndexCompactionFilterBase::FilterV2(
       return Decision::kIOError;
     }
     CompactionFilter::Decision decision = ucf->FilterV2(
-        level, ikey.user_key, kValue, blob, new_value, skip_until);
+        level, ikey.user_key, kValue, static_cast<const Slice&>(blob), new_value, skip_until);
     if (decision == Decision::kChangeValue) {
       return HandleValueChange(ikey.user_key, new_value);
     }
@@ -222,7 +222,7 @@ bool BlobIndexCompactionFilterBase::ReadBlobFromOldFile(
   }
 
   if (need_decompress && *compression_type != kNoCompression) {
-    s = blob_db_impl->DecompressSlice(*blob, *compression_type, blob);
+    s = blob_db_impl->DecompressSlice(static_cast<const Slice&>(*blob), *compression_type, blob);
     if (!s.ok()) {
       ROCKS_LOG_ERROR(
           blob_db_impl->db_options_.info_log,
@@ -378,14 +378,14 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
   if (compression_type != blob_db_impl->bdb_options_.compression) {
     if (compression_type != kNoCompression) {
       const Status status =
-          blob_db_impl->DecompressSlice(blob, compression_type, &blob);
+          blob_db_impl->DecompressSlice(static_cast<const Slice&>(blob), compression_type, &blob);
       if (!status.ok()) {
         gc_stats_.SetError();
         return BlobDecision::kCorruption;
       }
     }
     if (blob_db_impl->bdb_options_.compression != kNoCompression) {
-      blob_db_impl->GetCompressedSlice(blob, &compression_output);
+      blob_db_impl->GetCompressedSlice(static_cast<const Slice&>(blob), &compression_output);
       blob = PinnableSlice(&compression_output);
       blob.PinSelf();
     }
@@ -393,7 +393,7 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
 
   uint64_t new_blob_file_number = 0;
   uint64_t new_blob_offset = 0;
-  if (!WriteBlobToNewFile(key, blob, &new_blob_file_number, &new_blob_offset)) {
+  if (!WriteBlobToNewFile(key, static_cast<const Slice&>(blob), &new_blob_file_number, &new_blob_offset)) {
     gc_stats_.SetError();
     return BlobDecision::kIOError;
   }

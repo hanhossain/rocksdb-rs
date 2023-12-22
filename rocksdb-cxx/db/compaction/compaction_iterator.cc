@@ -318,7 +318,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
 
       if (ikey_.type != kTypeWideColumnEntity) {
         if (!blob_value_.empty()) {
-          existing_val = &blob_value_;
+          existing_val = &static_cast<const Slice&>(blob_value_);
         } else {
           existing_val = &value_;
         }
@@ -1159,7 +1159,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
     ++iter_stats_.num_blobs_relocated;
     iter_stats_.total_blob_bytes_relocated += blob_index.size();
 
-    value_ = blob_value_;
+    value_ = static_cast<const Slice&>(blob_value_);
 
     if (ExtractLargeValueIfNeededImpl()) {
       return;

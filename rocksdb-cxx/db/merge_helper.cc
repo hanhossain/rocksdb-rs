@@ -347,7 +347,7 @@ Status MergeHelper::MergeUntil(InternalIterator* iter,
           c_iter_stats->total_blob_bytes_read += bytes_read;
         }
 
-        s = TimedFullMerge(user_merge_operator_, ikey.user_key, &blob_value,
+        s = TimedFullMerge(user_merge_operator_, ikey.user_key, &static_cast<const Slice&>(blob_value),
                            merge_context_.GetOperands(), &merge_result, logger_,
                            stats_, clock_,
                            /* result_operand */ nullptr,

@@ -1397,7 +1397,7 @@ rust::Vec<Status> BlobDBImpl::MultiGet(const ReadOptions& read_options,
   PinnableSlice value;
   for (size_t i = 0; i < keys.size(); i++) {
     statuses.push_back(Get(ro, DefaultColumnFamily(), keys[i], &value));
-    values->push_back(value.ToString());
+    values->push_back(static_cast<const Slice&>(value).ToString());
     value.Reset();
   }
   if (snapshot_created) {
@@ -1452,7 +1452,7 @@ Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
   }
 
   if (compression_type != kNoCompression) {
-    s = DecompressSlice(*value, compression_type, value);
+    s = DecompressSlice(static_cast<const Slice&>(*value), compression_type, value);
     if (!s.ok()) {
       if (debug_level_ >= 2) {
         ROCKS_LOG_ERROR(
@@ -1652,10 +1652,10 @@ Status BlobDBImpl::GetImpl(const ReadOptions& read_options,
   RecordTick(statistics_, BLOB_DB_NUM_KEYS_READ);
   if (s.ok()) {
     if (is_blob_index) {
-      s = GetBlobValue(key, index_entry, value, expiration);
+      s = GetBlobValue(key, static_cast<const Slice&>(index_entry), value, expiration);
     } else {
       // The index entry is the value itself in this case.
-      value->PinSelf(index_entry);
+      value->PinSelf(static_cast<const Slice&>(index_entry));
     }
     RecordTick(statistics_, BLOB_DB_BYTES_READ, value->size());
   }

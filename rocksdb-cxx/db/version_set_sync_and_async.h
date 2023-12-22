@@ -109,7 +109,7 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
             TEST_SYNC_POINT_CALLBACK("Version::MultiGet::TamperWithBlobIndex",
                                      &(*iter));
 
-            tmp_s = blob_index.DecodeFrom(*(iter->value));
+            tmp_s = blob_index.DecodeFrom(static_cast<const Slice&>(*(iter->value)));
 
           } else {
             assert(iter->columns);

@@ -385,7 +385,7 @@ bool DBIter::FindNextUserEntryInternal(bool skipping_saved_key,
               }
 
               SetValueAndColumnsFromPlain(expose_blob_index_ ? iter_.value()
-                                                             : blob_value_);
+                                                             : static_cast<const Slice&>(blob_value_));
             } else if (ikey_.type == kTypeWideColumnEntity) {
               if (!SetValueAndColumnsFromEntity(iter_.value())) {
                 return false;
@@ -584,7 +584,7 @@ bool DBIter::MergeValuesNewToOld() {
         return false;
       }
       valid_ = true;
-      if (!Merge(&blob_value_, ikey.user_key)) {
+      if (!Merge(&static_cast<const Slice&>(blob_value_), ikey.user_key)) {
         return false;
       }
 
@@ -994,7 +994,7 @@ bool DBIter::FindValueForCurrentKey() {
           return false;
         }
         valid_ = true;
-        if (!Merge(&blob_value_, saved_key_.GetUserKey())) {
+        if (!Merge(&static_cast<const Slice &>(blob_value_), saved_key_.GetUserKey())) {
           return false;
         }
 
@@ -1025,7 +1025,7 @@ bool DBIter::FindValueForCurrentKey() {
       }
 
       SetValueAndColumnsFromPlain(expose_blob_index_ ? pinned_value_
-                                                     : blob_value_);
+                                                     : static_cast<const Slice&>(blob_value_));
 
       break;
     case kTypeWideColumnEntity:
@@ -1131,7 +1131,7 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
       }
 
       SetValueAndColumnsFromPlain(expose_blob_index_ ? pinned_value_
-                                                     : blob_value_);
+                                                     : static_cast<const Slice&>(blob_value_));
     } else if (ikey.type == kTypeWideColumnEntity) {
       if (!SetValueAndColumnsFromEntity(pinned_value_)) {
         return false;
@@ -1205,7 +1205,7 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
         return false;
       }
       valid_ = true;
-      if (!Merge(&blob_value_, saved_key_.GetUserKey())) {
+      if (!Merge(&static_cast<const Slice&>(blob_value_), saved_key_.GetUserKey())) {
         return false;
       }
 

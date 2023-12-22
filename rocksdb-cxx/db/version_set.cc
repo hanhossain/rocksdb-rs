@@ -2444,7 +2444,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
                   columns->columns().front().name() == kDefaultWideColumnName));
 
           Slice blob_index =
-              value ? *value : columns->columns().front().value();
+              value ? static_cast<const Slice&>(*value) : columns->columns().front().value();
 
           TEST_SYNC_POINT_CALLBACK("Version::Get::TamperWithBlobIndex",
                                    &blob_index);
