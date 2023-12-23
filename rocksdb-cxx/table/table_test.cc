@@ -5441,7 +5441,7 @@ TEST_P(BlockBasedTableTest, DataBlockHashIndex) {
         ASSERT_OK(reader->Get(ro, kv.first, &get_context,
                               moptions.prefix_extractor.get()));
         ASSERT_EQ(get_context.State(), GetContext::kFound);
-        ASSERT_EQ(value, Slice(kv.second));
+        ASSERT_EQ(value.as_slice(), Slice(kv.second));
         value.Reset();
       }
     }

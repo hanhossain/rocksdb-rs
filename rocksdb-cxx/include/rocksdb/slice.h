@@ -30,7 +30,7 @@
 
 namespace rocksdb {
 
-class Slice {
+class Slice final {
  public:
   // Create an empty slice.
   Slice() : data_(""), size_(0) {}
@@ -142,13 +142,22 @@ class Slice {
  * to avoid memcpy by having the PinnableSlice object referring to the data
  * that is locked in the memory and release them after the data is consumed.
  */
-class PinnableSlice : public Slice, public Cleanable {
+class PinnableSlice : public Cleanable {
  public:
-  PinnableSlice() { buf_ = &self_space_; }
-  explicit PinnableSlice(std::string* buf) { buf_ = buf; }
+  PinnableSlice() : slice_(Slice()) { buf_ = &self_space_; }
+  explicit PinnableSlice(std::string* buf) : slice_(Slice()) { buf_ = buf; }
 
   PinnableSlice(PinnableSlice&& other);
   PinnableSlice& operator=(PinnableSlice&& other);
+
+  // cast to Slice
+  explicit operator const Slice&() const {
+    return slice_;
+  }
+
+  explicit operator Slice() const {
+    return slice_;
+  }
 
   // No copy constructor and copy assignment allowed.
   PinnableSlice(PinnableSlice&) = delete;
@@ -158,8 +167,8 @@ class PinnableSlice : public Slice, public Cleanable {
                        void* arg2) {
     assert(!pinned_);
     pinned_ = true;
-    data_ = s.data();
-    size_ = s.size();
+    slice_.data_ = s.data();
+    slice_.size_ = s.size();
     RegisterCleanup(f, arg1, arg2);
     assert(pinned_);
   }
@@ -167,8 +176,8 @@ class PinnableSlice : public Slice, public Cleanable {
   inline void PinSlice(const Slice& s, Cleanable* cleanable) {
     assert(!pinned_);
     pinned_ = true;
-    data_ = s.data();
-    size_ = s.size();
+    slice_.data_ = s.data();
+    slice_.size_ = s.size();
     if (cleanable != nullptr) {
       cleanable->DelegateCleanupsTo(this);
     }
@@ -178,24 +187,24 @@ class PinnableSlice : public Slice, public Cleanable {
   inline void PinSelf(const Slice& slice) {
     assert(!pinned_);
     buf_->assign(slice.data(), slice.size());
-    data_ = buf_->data();
-    size_ = buf_->size();
+    slice_.data_ = buf_->data();
+    slice_.size_ = buf_->size();
     assert(!pinned_);
   }
 
   inline void PinSelf() {
     assert(!pinned_);
-    data_ = buf_->data();
-    size_ = buf_->size();
+    slice_.data_ = buf_->data();
+    slice_.size_ = buf_->size();
     assert(!pinned_);
   }
 
   void remove_suffix(size_t n) {
     assert(n <= size());
     if (pinned_) {
-      size_ -= n;
+      slice_.size_ -= n;
     } else {
-      buf_->erase(size() - n, n);
+      buf_->erase(slice_.size() - n, n);
       PinSelf();
     }
   }
@@ -203,8 +212,8 @@ class PinnableSlice : public Slice, public Cleanable {
   void remove_prefix(size_t n) {
     assert(n <= size());
     if (pinned_) {
-      data_ += n;
-      size_ -= n;
+      slice_.data_ += n;
+      slice_.size_ -= n;
     } else {
       buf_->erase(0, n);
       PinSelf();
@@ -214,18 +223,41 @@ class PinnableSlice : public Slice, public Cleanable {
   void Reset() {
     Cleanable::Reset();
     pinned_ = false;
-    size_ = 0;
+    slice_.size_ = 0;
   }
 
   inline std::string* GetSelf() { return buf_; }
 
   inline bool IsPinned() const { return pinned_; }
 
+  size_t size() const { return slice_.size_; }
+
+  const char* data() const { return slice_.data_; }
+
+  bool empty() const { return slice_.size_ == 0; }
+
+  void clear() {
+    slice_.clear();
+  }
+
+  std::string ToString(bool hex = false) const {
+    return slice_.ToString(hex);
+  }
+
+  Slice* as_slice_ptr_mut() {
+    return &slice_;
+  }
+
+  const Slice& as_slice() const {
+    return slice_;
+  }
+
  private:
   friend class PinnableSlice4Test;
   std::string self_space_;
   std::string* buf_;
   bool pinned_ = false;
+  Slice slice_;
 };
 
 // A set of Slices that are virtually concatenated together.  'parts' points

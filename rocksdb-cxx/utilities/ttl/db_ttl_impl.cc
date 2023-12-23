@@ -498,7 +498,7 @@ Status DBWithTTLImpl::Get(const ReadOptions& options,
   if (!st.ok()) {
     return st;
   }
-  st = SanityCheckTimestamp(*value);
+  st = SanityCheckTimestamp(static_cast<const Slice&>(*value));
   if (!st.ok()) {
     return st;
   }

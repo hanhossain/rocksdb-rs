@@ -546,7 +546,7 @@ Status WriteBatchWithIndex::GetFromBatchAndDB(
       // Merge result from DB with merges in Batch
       std::string merge_result;
       if (s.ok()) {
-        s = wbwii.MergeKey(key, pinnable_val, &merge_result);
+        s = wbwii.MergeKey(key, &static_cast<const Slice&>(*pinnable_val), &merge_result);
       } else {  // Key not present in db (s.IsNotFound())
         s = wbwii.MergeKey(key, nullptr, &merge_result);
       }
@@ -643,7 +643,7 @@ void WriteBatchWithIndex::MultiGetFromBatchAndDB(
         std::string merged_value;
         // Merge result from DB with merges in Batch
         if (key.s->ok()) {
-          *key.s = wbwii.MergeKey(*key.key, iter->value, merge_result.second,
+          *key.s = wbwii.MergeKey(*key.key, &static_cast<const Slice&>(*iter->value), merge_result.second,
                                   &merged_value);
         } else {  // Key not present in db (s.IsNotFound())
           *key.s = wbwii.MergeKey(*key.key, nullptr, merge_result.second,

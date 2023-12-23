@@ -2891,18 +2891,18 @@ TEST_P(TransactionTest, MultiGetBatchedTest) {
   txn->MultiGet(snapshot_read_options, handles[1], keys.size(), keys.data(),
                 values.data(), statuses.data());
   ASSERT_TRUE(statuses[0].ok());
-  ASSERT_EQ(values[0], "val1");
+  ASSERT_EQ(values[0].ToString(), "val1");
   ASSERT_TRUE(statuses[1].IsNotFound());
   ASSERT_TRUE(statuses[2].ok());
-  ASSERT_EQ(values[2], "val3_new");
+  ASSERT_EQ(values[2].ToString(), "val3_new");
   ASSERT_TRUE(statuses[3].ok());
-  ASSERT_EQ(values[3], "foo,bar");
+  ASSERT_EQ(values[3].ToString(), "foo,bar");
   ASSERT_TRUE(statuses[4].ok());
-  ASSERT_EQ(values[4], "val5");
+  ASSERT_EQ(values[4].ToString(), "val5");
   ASSERT_TRUE(statuses[5].ok());
-  ASSERT_EQ(values[5], "val6");
+  ASSERT_EQ(values[5].ToString(), "val6");
   ASSERT_TRUE(statuses[6].ok());
-  ASSERT_EQ(values[6], "foo");
+  ASSERT_EQ(values[6].ToString(), "foo");
   delete txn;
   for (auto handle : handles) {
     delete handle;
@@ -2990,14 +2990,14 @@ TEST_P(TransactionTest, MultiGetLargeBatchedTest) {
       ASSERT_TRUE(statuses[1].IsNotFound());
     } else if (i == 2) {
       ASSERT_TRUE(statuses[2].ok());
-      ASSERT_EQ(values[2], "new_val" + std::to_string(2));
+      ASSERT_EQ(values[2].ToString(), "new_val" + std::to_string(2));
     } else if (i >= 8 && i < 56) {
       ASSERT_TRUE(statuses[i].ok());
-      ASSERT_EQ(values[i], "val" + std::to_string(i) + ",merge");
+      ASSERT_EQ(values[i].ToString(), "val" + std::to_string(i) + ",merge");
     } else {
       ASSERT_TRUE(statuses[i].ok());
-      if (values[i] != "val" + std::to_string(i)) {
-        ASSERT_EQ(values[i], "val" + std::to_string(i));
+      if (values[i].ToString() != "val" + std::to_string(i)) {
+        ASSERT_EQ(values[i].ToString(), "val" + std::to_string(i));
       }
     }
   }
@@ -5747,7 +5747,7 @@ TEST_P(TransactionTest, Optimizations) {
     ReadOptions ropt;
     PinnableSlice pinnable_val;
     ASSERT_OK(db->Get(ropt, db->DefaultColumnFamily(), "k", &pinnable_val));
-    ASSERT_TRUE(pinnable_val == ("v1"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("v1"));
   }
 }
 
@@ -5802,7 +5802,7 @@ TEST_P(TransactionTest, GetWithoutSnapshot) {
       ReadOptions ropt;
       PinnableSlice pinnable_val;
       ASSERT_OK(db->Get(ropt, db->DefaultColumnFamily(), "key", &pinnable_val));
-      ASSERT_TRUE(pinnable_val == ("value"));
+      ASSERT_TRUE(pinnable_val.ToString() == ("value"));
     }
   });
   commit_thread.join();
@@ -5836,13 +5836,13 @@ TEST_P(TransactionTest, DuplicateKeys) {
     PinnableSlice pinnable_val;
     auto s = db->Get(ropt, db->DefaultColumnFamily(), "key", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("value3"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("value3"));
     s = db->Get(ropt, db->DefaultColumnFamily(), "key2", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("value4"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("value4"));
     s = db->Get(ropt, cf_handle, "key", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("value5"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("value5"));
 
     delete cf_handle;
   }
@@ -5867,7 +5867,7 @@ TEST_P(TransactionTest, DuplicateKeys) {
     ReadOptions ropt;
     PinnableSlice pinnable_val;
     ASSERT_OK(db->Get(ropt, cf_handle, "key", &pinnable_val));
-    ASSERT_TRUE(pinnable_val == ("value2b"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("value2b"));
 
     // Test duplicate keys with rollback
     TransactionOptions txn_options;
@@ -5877,7 +5877,7 @@ TEST_P(TransactionTest, DuplicateKeys) {
     ASSERT_OK(txn0->Merge(cf_handle, Slice("key4"), Slice("value4")));
     ASSERT_OK(txn0->Rollback());
     ASSERT_OK(db->Get(ropt, cf_handle, "key5", &pinnable_val));
-    ASSERT_TRUE(pinnable_val == ("value2b"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("value2b"));
     delete txn0;
 
     delete cf_handle;
@@ -5983,19 +5983,19 @@ TEST_P(TransactionTest, DuplicateKeys) {
         } else {
           s = db->Get(ropt, db->DefaultColumnFamily(), "foo0", &pinnable_val);
           ASSERT_OK(s);
-          ASSERT_TRUE(pinnable_val == ("bar0c"));
+          ASSERT_TRUE(pinnable_val.ToString() == ("bar0c"));
           s = db->Get(ropt, cf_handle, "foo0", &pinnable_val);
           ASSERT_OK(s);
-          ASSERT_TRUE(pinnable_val == ("bar0-cf1"));
+          ASSERT_TRUE(pinnable_val.ToString() == ("bar0-cf1"));
           s = db->Get(ropt, db->DefaultColumnFamily(), "foo1", &pinnable_val);
           ASSERT_OK(s);
-          ASSERT_TRUE(pinnable_val == ("bar1"));
+          ASSERT_TRUE(pinnable_val.ToString() == ("bar1"));
           s = db->Get(ropt, db->DefaultColumnFamily(), "foo2", &pinnable_val);
           ASSERT_OK(s);
-          ASSERT_TRUE(pinnable_val == ("bar2a,bar2b"));
+          ASSERT_TRUE(pinnable_val.ToString() == ("bar2a,bar2b"));
           s = db->Get(ropt, db->DefaultColumnFamily(), "foo3", &pinnable_val);
           ASSERT_OK(s);
-          ASSERT_TRUE(pinnable_val == ("bar3,bar3"));
+          ASSERT_TRUE(pinnable_val.ToString() == ("bar3,bar3"));
           s = db->Get(ropt, db->DefaultColumnFamily(), "foo4", &pinnable_val);
           ASSERT_TRUE(s.IsNotFound());
           if (with_commit_batch) {
@@ -6003,7 +6003,7 @@ TEST_P(TransactionTest, DuplicateKeys) {
             if (txn_db_options.write_policy ==
                 TxnDBWritePolicy::WRITE_COMMITTED) {
               ASSERT_OK(s);
-              ASSERT_TRUE(pinnable_val == ("bar6b"));
+              ASSERT_TRUE(pinnable_val.ToString() == ("bar6b"));
             } else {
               ASSERT_TRUE(s.IsNotFound());
             }
@@ -6100,7 +6100,7 @@ TEST_P(TransactionTest, DuplicateKeys) {
     delete txn0;
     s = db->Get(ropt, db->DefaultColumnFamily(), "foo0", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar0a"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar0a"));
 
     // two entries, no duplicate
     txn0 = db->BeginTransaction(write_options, txn_options);
@@ -6125,19 +6125,19 @@ TEST_P(TransactionTest, DuplicateKeys) {
     pinnable_val.Reset();
     s = db->Get(ropt, db->DefaultColumnFamily(), "foo0", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar0b"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar0b"));
     pinnable_val.Reset();
     s = db->Get(ropt, db->DefaultColumnFamily(), "foo1", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar1b"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar1b"));
     pinnable_val.Reset();
     s = db->Get(ropt, handles[1], "foo0", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar0b"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar0b"));
     pinnable_val.Reset();
     s = db->Get(ropt, handles[1], "fol1", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar1b"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar1b"));
 
     // one duplicate with ::Put
     txn0 = db->BeginTransaction(write_options, txn_options);
@@ -6163,15 +6163,15 @@ TEST_P(TransactionTest, DuplicateKeys) {
     pinnable_val.Reset();
     s = db->Get(ropt, db->DefaultColumnFamily(), "foo0", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar0d"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar0d"));
     pinnable_val.Reset();
     s = db->Get(ropt, db->DefaultColumnFamily(), "foo1", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar1c"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar1c"));
     pinnable_val.Reset();
     s = db->Get(ropt, handles[1], "key-nonkey2", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar1d"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar1d"));
 
     // Duplicate with ::Put, ::Delete
     txn0 = db->BeginTransaction(write_options, txn_options);
@@ -6250,11 +6250,11 @@ TEST_P(TransactionTest, DuplicateKeys) {
     pinnable_val.Reset();
     s = db->Get(ropt, db->DefaultColumnFamily(), "foo0", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar0f,bar0g"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar0f,bar0g"));
     pinnable_val.Reset();
     s = db->Get(ropt, handles[1], "key-nonkey2", &pinnable_val);
     ASSERT_OK(s);
-    ASSERT_TRUE(pinnable_val == ("bar1i,bar1j"));
+    ASSERT_TRUE(pinnable_val.ToString() == ("bar1i,bar1j"));
 
     for (auto h : handles) {
       delete h;

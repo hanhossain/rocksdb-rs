@@ -671,7 +671,7 @@ Status WriteUnpreparedTxn::WriteRollbackKeys(
     auto s = db_impl_->GetImpl(roptions, key, get_impl_options);
 
     if (s.ok()) {
-      s = rollback_batch->Put(cf_handle, key, pinnable_val);
+      s = rollback_batch->Put(cf_handle, key, static_cast<const Slice&>(pinnable_val));
       assert(s.ok());
     } else if (s.IsNotFound()) {
       if (wupt_db_->ShouldRollbackWithSingleDelete(cf_handle, key)) {

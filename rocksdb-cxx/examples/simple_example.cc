@@ -63,7 +63,7 @@ int main() {
   {
     PinnableSlice pinnable_val;
     db->Get(ReadOptions(), db->DefaultColumnFamily(), "key2", &pinnable_val);
-    assert(pinnable_val == "value");
+    assert(pinnable_val.ToString() == "value");
   }
 
   {
@@ -72,7 +72,7 @@ int main() {
     // The intenral buffer could be set during construction.
     PinnableSlice pinnable_val(&string_val);
     db->Get(ReadOptions(), db->DefaultColumnFamily(), "key2", &pinnable_val);
-    assert(pinnable_val == "value");
+    assert(pinnable_val.ToString() == "value");
     // If the value is not pinned, the internal buffer must have the value.
     assert(pinnable_val.IsPinned() || string_val == "value");
   }
@@ -83,7 +83,7 @@ int main() {
   // Reset PinnableSlice after each use and before each reuse
   pinnable_val.Reset();
   db->Get(ReadOptions(), db->DefaultColumnFamily(), "key2", &pinnable_val);
-  assert(pinnable_val == "value");
+  assert(pinnable_val.ToString() == "value");
   pinnable_val.Reset();
   // The Slice pointed by pinnable_val is not valid after this point
 

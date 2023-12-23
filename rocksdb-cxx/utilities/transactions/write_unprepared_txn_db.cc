@@ -110,7 +110,7 @@ Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
         s = db_->GetImpl(roptions, key, get_impl_options);
         assert(s.ok() || s.IsNotFound());
         if (s.ok()) {
-          s = rollback_batch_->Put(cf_handle, key, pinnable_val);
+          s = rollback_batch_->Put(cf_handle, key, static_cast<const Slice&>(pinnable_val));
           assert(s.ok());
         } else if (s.IsNotFound()) {
           // There has been no readable value before txn. By adding a delete we

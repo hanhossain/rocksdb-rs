@@ -359,7 +359,7 @@ TEST_F(CheckpointTest, CheckpointWithBlob) {
   ASSERT_OK(checkpoint_db->Get(
       ReadOptions(), checkpoint_db->DefaultColumnFamily(), key, &value));
 
-  ASSERT_EQ(value, blob);
+  ASSERT_EQ(value.ToString(), blob);
 }
 
 TEST_F(CheckpointTest, ExportColumnFamilyWithLinks) {

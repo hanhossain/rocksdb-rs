@@ -180,7 +180,7 @@ class GetContext {
 
   const Slice& ukey_to_get_blob_value() const {
     if (!ukey_with_ts_found_.empty()) {
-      return ukey_with_ts_found_;
+      return static_cast<const Slice&>(ukey_with_ts_found_);
     } else {
       return user_key_;
     }

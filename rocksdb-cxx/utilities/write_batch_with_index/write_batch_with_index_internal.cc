@@ -173,7 +173,7 @@ Slice BaseDeltaIterator::value() const {
       }
     }
     merge_result_.PinSelf();
-    return merge_result_;
+    return static_cast<const Slice&>(merge_result_);
   }
 }
 

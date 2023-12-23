@@ -4408,7 +4408,7 @@ TEST_F(DBTest, ConcurrentFlushWAL) {
         auto istr = std::to_string(i);
         ASSERT_OK(
             db_->Get(ropt, db_->DefaultColumnFamily(), "a" + istr, &pval));
-        ASSERT_TRUE(pval == ("b" + istr));
+        ASSERT_TRUE(pval.ToString() == ("b" + istr));
       }
     }
   }

@@ -2151,7 +2151,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeMultiLevelMerge) {
       value.append(",");
       value.append("val_mem_" + std::to_string(key));
     }
-    ASSERT_EQ(values[j], value);
+    ASSERT_EQ(values[j].ToString(), value);
     ASSERT_OK(statuses[j]);
   }
 

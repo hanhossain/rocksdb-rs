@@ -1898,24 +1898,24 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest) {
     } else if ((i % 3) == 0) {
       ASSERT_OK(statuses[i]);
       if ((i % 5) == 0) {  // Merge after Delete
-        ASSERT_EQ(values[i], "merge");
+        ASSERT_EQ(values[i].ToString(), "merge");
       } else if ((i % 7) == 0) {  // Merge after Put
         std::string val = "new" + std::to_string(i);
-        ASSERT_EQ(values[i], val + ",merge");
+        ASSERT_EQ(values[i].ToString(), val + ",merge");
       } else if ((i % 2) == 0) {
         std::string val = "val" + std::to_string(i);
-        ASSERT_EQ(values[i], val + ",merge");
+        ASSERT_EQ(values[i].ToString(), val + ",merge");
       } else {
-        ASSERT_EQ(values[i], "merge");
+        ASSERT_EQ(values[i].ToString(), "merge");
       }
     } else if ((i % 5) == 0) {
       ASSERT_TRUE(statuses[i].IsNotFound());
     } else if ((i % 7) == 0) {
       ASSERT_OK(statuses[i]);
-      ASSERT_EQ(values[i], "new" + std::to_string(i));
+      ASSERT_EQ(values[i].ToString(), "new" + std::to_string(i));
     } else if ((i % 2) == 0) {
       ASSERT_OK(statuses[i]);
-      ASSERT_EQ(values[i], "val" + std::to_string(i));
+      ASSERT_EQ(values[i].ToString(), "val" + std::to_string(i));
     } else {
       ASSERT_TRUE(statuses[i].IsNotFound());
     }
@@ -1976,27 +1976,27 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest2) {
       switch (key / 100) {
         case 0:  // 0-99 PUT only
           ASSERT_OK(statuses[i]);
-          ASSERT_EQ(values[i], key_slices[i].ToString());
+          ASSERT_EQ(values[i].ToString(), key_slices[i].ToString());
           break;
         case 1:  // 100-199 PUT only
           ASSERT_OK(statuses[i]);
-          ASSERT_EQ(values[i], key_slices[i].ToString());
+          ASSERT_EQ(values[i].ToString(), key_slices[i].ToString());
           break;
         case 2:  // 200-299 Deleted
           ASSERT_TRUE(statuses[i].IsNotFound());
           break;
         case 3:  // 300-399 Delete+Merge
           ASSERT_OK(statuses[i]);
-          ASSERT_EQ(values[i], key_slices[i].ToString() + "m");
+          ASSERT_EQ(values[i].ToString(), key_slices[i].ToString() + "m");
           break;
         case 4:  // 400-400 Put+ Merge
           ASSERT_OK(statuses[i]);
-          ASSERT_EQ(values[i], key_slices[i].ToString() + "," +
+          ASSERT_EQ(values[i].ToString(), key_slices[i].ToString() + "," +
                                    key_slices[i].ToString() + "m");
           break;
         case 5:  // Merge only
           ASSERT_OK(statuses[i]);
-          ASSERT_EQ(values[i], key_slices[i].ToString() + "m");
+          ASSERT_EQ(values[i].ToString(), key_slices[i].ToString() + "m");
           break;
         case 6:  // Never written
           ASSERT_TRUE(statuses[i].IsNotFound());

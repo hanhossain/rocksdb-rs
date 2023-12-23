@@ -112,7 +112,7 @@ class BlobDBIterator : public Iterator {
     if (!iter_->IsBlob()) {
       return iter_->value();
     }
-    return value_;
+    return static_cast<Slice>(value_);
   }
 
   // Iterator::Refresh() not supported.
