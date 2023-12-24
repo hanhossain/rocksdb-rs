@@ -32,7 +32,7 @@ struct BlobReadRequest {
   size_t len = 0;
 
   // Blob compression type
-  CompressionType compression = kNoCompression;
+  CompressionType compression = CompressionType::kNoCompression;
 
   // Output parameter set by MultiGetBlob() to point to the data buffer, and
   // the number of valid bytes

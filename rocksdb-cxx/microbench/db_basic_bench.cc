@@ -556,7 +556,7 @@ static void DBGet(benchmark::State& state) {
   }
   if (mmap) {
     options.allow_mmap_reads = true;
-    options.compression = kNoCompression;
+    options.compression = CompressionType::kNoCompression;
   }
   options.compaction_style = compaction_style;
 
@@ -878,7 +878,7 @@ static void DBGetMergeOperandsInSstFile(benchmark::State& state) {
   if (kMmap) {
     options.allow_mmap_reads = true;
   }
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.merge_operator = MergeOperators::CreateStringAppendOperator();
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   // Make memtable large enough that automatic flush will not be triggered.

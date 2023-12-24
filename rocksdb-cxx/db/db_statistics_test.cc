@@ -21,14 +21,14 @@ class DBStatisticsTest : public DBTestBase {
 
 TEST_F(DBStatisticsTest, CompressionStatsTest) {
   for (CompressionType type : GetSupportedCompressions()) {
-    if (type == kNoCompression) {
+    if (type == CompressionType::kNoCompression) {
       continue;
     }
-    if (type == kBZip2Compression) {
+    if (type == CompressionType::kBZip2Compression) {
       // Weird behavior in this test
       continue;
     }
-    SCOPED_TRACE("Compression type: " + std::to_string(type));
+    SCOPED_TRACE("Compression type: " + std::to_string(static_cast<uint8_t>(type)));
 
     Options options = CurrentOptions();
     options.compression = type;
@@ -106,7 +106,7 @@ TEST_F(DBStatisticsTest, CompressionStatsTest) {
     EXPECT_EQ(0, PopStat(BYTES_DECOMPRESSED_TO));
 
     // Check when compression is disabled.
-    options.compression = kNoCompression;
+    options.compression = CompressionType::kNoCompression;
     DestroyAndReopen(options);
 
     for (int i = 0; i < kNumKeysWritten; ++i) {

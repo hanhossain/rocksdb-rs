@@ -1011,7 +1011,7 @@ struct AdvancedColumnFamilyOptions {
   // Default: no compression
   //
   // Dynamically changeable through the SetOptions() API
-  CompressionType blob_compression_type = kNoCompression;
+  CompressionType blob_compression_type = CompressionType::kNoCompression;
 
   // Enables garbage collection of blobs. Blob GC is performed as part of
   // compaction. Valid blobs residing in blob files older than a cutoff get

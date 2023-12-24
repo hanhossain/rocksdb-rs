@@ -637,7 +637,7 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     std::string str = rnd.RandomString(static_cast<int>(str_size));
     size_t charge{0};
     CacheValueChunk* chunks_head =
-        sec_cache->SplitValueIntoChunks(str, kLZ4Compression, charge);
+        sec_cache->SplitValueIntoChunks(str, CompressionType::kLZ4Compression, charge);
     ASSERT_EQ(charge, str_size + 3 * (sizeof(CacheValueChunk) - 1));
 
     CacheValueChunk* current_chunk = chunks_head;
@@ -721,7 +721,7 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     std::string str = rnd.RandomString(static_cast<int>(str_size));
     size_t charge{0};
     CacheValueChunk* chunks_head =
-        sec_cache->SplitValueIntoChunks(str, kLZ4Compression, charge);
+        sec_cache->SplitValueIntoChunks(str, CompressionType::kLZ4Compression, charge);
     ASSERT_EQ(charge, str_size + 3 * (sizeof(CacheValueChunk) - 1));
 
     CacheAllocationPtr value =

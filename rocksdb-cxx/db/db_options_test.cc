@@ -333,7 +333,7 @@ TEST_F(DBOptionsTest, SetBytesPerSync) {
   options.use_direct_reads = false;
   options.write_buffer_size = 400 * kValueSize;
   options.disable_auto_compactions = true;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.env = env_;
   Reopen(options);
   int counter = 0;
@@ -382,7 +382,7 @@ TEST_F(DBOptionsTest, SetWalBytesPerSync) {
   options.wal_bytes_per_sync = 512;
   options.write_buffer_size = 100 * kValueSize;
   options.disable_auto_compactions = true;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.env = env_;
   Reopen(options);
   ASSERT_EQ(512, dbfull()->GetDBOptions().wal_bytes_per_sync);
@@ -910,7 +910,7 @@ TEST_F(DBOptionsTest, SetFIFOCompactionOptions) {
   options.compaction_style = kCompactionStyleFIFO;
   options.write_buffer_size = 10 << 10;  // 10KB
   options.arena_block_size = 4096;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.compaction_options_fifo.allow_compaction = false;
   options.num_levels = 1;

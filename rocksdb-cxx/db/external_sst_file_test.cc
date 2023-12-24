@@ -2301,7 +2301,7 @@ TEST_F(ExternalSSTFileTest, IngestFileWrittenWithCompressionDictionary) {
   const int kNumEntries = 1 << 10;
   const int kNumBytesPerEntry = 1 << 10;
   Options options = CurrentOptions();
-  options.compression = kZSTD;
+  options.compression = CompressionType::kZSTD;
   options.compression_opts.max_dict_bytes = 1 << 14;        // 16KB
   options.compression_opts.zstd_max_train_bytes = 1 << 18;  // 256KB
   DestroyAndReopen(options);

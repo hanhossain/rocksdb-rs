@@ -130,7 +130,7 @@ class BlockFetcherTest : public testing::Test {
       const std::string& table_name_prefix, bool compressed, bool do_uncompress,
       std::array<TestStats, NumModes> expected_stats_by_mode) {
     for (CompressionType compression_type : GetSupportedCompressions()) {
-      bool do_compress = compression_type != kNoCompression;
+      bool do_compress = compression_type != CompressionType::kNoCompression;
       if (compressed != do_compress) continue;
       std::string compression_type_str =
           CompressionTypeToString(compression_type);
@@ -139,7 +139,7 @@ class BlockFetcherTest : public testing::Test {
       CreateTable(table_name, compression_type);
 
       CompressionType expected_compression_type_after_fetch =
-          (compressed && !do_uncompress) ? compression_type : kNoCompression;
+          (compressed && !do_uncompress) ? compression_type : CompressionType::kNoCompression;
 
       BlockContents blocks[NumModes];
       std::string block_datas[NumModes];
@@ -170,7 +170,7 @@ class BlockFetcherTest : public testing::Test {
         ASSERT_EQ(memcpy_stats[i].num_compressed_buf_memcpy,
                   expected_stats.memcpy_stats.num_compressed_buf_memcpy);
 
-        if (kXpressCompression == compression_type) {
+        if (CompressionType::kXpressCompression == compression_type) {
           // XPRESS allocates memory internally, thus does not support for
           // custom allocator verification
           continue;

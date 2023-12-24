@@ -12,7 +12,7 @@ namespace rocksdb {
 // being stored in a file.  The following enum describes which
 // compression method (if any) is used to compress a block.
 
-enum CompressionType : unsigned char {
+enum class CompressionType : unsigned char {
   // NOTE: do not change the values of existing entries, as these are
   // part of the persistent format on disk.
   kNoCompression = 0x0,

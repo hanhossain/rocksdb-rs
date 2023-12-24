@@ -266,7 +266,7 @@ class CompactionJobTestBase : public testing::Test {
                              uint64_t size) {
     std::string blob_index;
     BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                          kNoCompression);
+                          CompressionType::kNoCompression);
     return blob_index;
   }
 
@@ -274,7 +274,7 @@ class CompactionJobTestBase : public testing::Test {
                                 uint64_t size, uint64_t expiration) {
     std::string blob_index;
     BlobIndex::EncodeBlobTTL(&blob_index, expiration, blob_file_number, offset,
-                             size, kNoCompression);
+                             size, CompressionType::kNoCompression);
     return blob_index;
   }
 
@@ -640,7 +640,7 @@ class CompactionJobTestBase : public testing::Test {
         *cfd->GetLatestMutableCFOptions(), mutable_db_options_,
         compaction_input_files, output_level,
         mutable_cf_options_.target_file_size_base,
-        mutable_cf_options_.max_compaction_bytes, 0, kNoCompression,
+        mutable_cf_options_.max_compaction_bytes, 0, CompressionType::kNoCompression,
         cfd->GetLatestMutableCFOptions()->compression_opts,
         Temperature::kUnknown, max_subcompactions, grandparents, true);
     compaction.SetInputVersion(cfd->current());
@@ -1559,7 +1559,7 @@ TEST_F(CompactionJobTest, InputSerialization) {
   input.column_family.options.max_bytes_for_level_base =
       rnd64.Uniform(UINT64_MAX);
   input.column_family.options.disable_auto_compactions = rnd.OneIn(2);
-  input.column_family.options.compression = kZSTD;
+  input.column_family.options.compression = CompressionType::kZSTD;
   input.column_family.options.compression_opts.level = 4;
   input.db_options.max_background_flushes = 10;
   input.db_options.paranoid_checks = rnd.OneIn(2);
