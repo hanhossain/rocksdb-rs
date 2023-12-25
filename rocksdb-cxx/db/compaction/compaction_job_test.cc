@@ -384,7 +384,7 @@ class CompactionJobTestBase : public testing::Test {
         oldest_blob_file_number, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime,
         versions_->GetColumnFamilySet()->GetDefault()->NewEpochNumber(),
-        kUnknownFileChecksum, kUnknownFileChecksumFuncName, kNullUniqueId64x2,
+        kUnknownFileChecksum, kUnknownFileChecksumFuncName, UniqueId64x2_null(),
         /*compensated_range_deletion_size=*/0, /*tail_size=*/0,
         /*user_defined_timestamps_persisted=*/true);
 

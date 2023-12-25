@@ -3,14 +3,14 @@ use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
     /// Standard size unique ID, good enough for almost all practical purposes
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
+    #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
     struct UniqueId64x2 {
         data: [u64; 2],
     }
 
     /// Extended size unique ID, for extra certainty of uniqueness among SST files
     /// spanning many hosts over a long time (rarely if ever needed)
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
+    #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
     struct UniqueId64x3 {
         data: [u64; 3],
     }
@@ -27,6 +27,11 @@ pub mod ffi {
     extern "Rust" {
         fn as_unique_id_ptr(self: &mut UniqueId64x2) -> UniqueIdPtr;
         fn as_unique_id_ptr(self: &mut UniqueId64x3) -> UniqueIdPtr;
+
+        #[cxx_name = "UniqueId64x2_null"]
+        fn unique_id_64_x2_null() -> UniqueId64x2;
+        #[cxx_name = "UniqueId64x3_null"]
+        fn unique_id_64_x3_null() -> UniqueId64x3;
     }
 }
 
@@ -46,4 +51,14 @@ impl UniqueId64x3 {
             extended: true,
         }
     }
+}
+
+// Value never used as an actual unique ID so can be used for "null"
+fn unique_id_64_x2_null() -> UniqueId64x2 {
+    UniqueId64x2::default()
+}
+
+// Value never used as an actual unique ID so can be used for "null"
+fn unique_id_64_x3_null() -> UniqueId64x3 {
+    UniqueId64x3::default()
 }

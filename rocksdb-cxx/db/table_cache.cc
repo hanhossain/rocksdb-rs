@@ -140,7 +140,7 @@ Status TableCache::GetTableReader(
     if (ioptions_.verify_sst_unique_id_in_manifest) {
       expected_unique_id = file_meta.unique_id;
     } else {
-      expected_unique_id = kNullUniqueId64x2;  // null ID == no verification
+      expected_unique_id = UniqueId64x2_null();  // null ID == no verification
     }
     s = ioptions_.table_factory->NewTableReader(
         ro,

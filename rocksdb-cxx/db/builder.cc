@@ -361,7 +361,7 @@ Status BuildTable(
                                     meta->fd.GetNumber(), meta->unique_id.as_unique_id_ptr())
                  .ok()) {
           // if failed to get unique id, just set it Null
-          meta->unique_id = kNullUniqueId64x2;
+          meta->unique_id = UniqueId64x2_null();
         }
       }
     }

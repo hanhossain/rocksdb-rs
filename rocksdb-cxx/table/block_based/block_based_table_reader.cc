@@ -681,7 +681,7 @@ Status BlockBasedTable::Open(
       rep->index_has_first_key);
 
   // Check expected unique id if provided
-  if (expected_unique_id != kNullUniqueId64x2) {
+  if (expected_unique_id != UniqueId64x2_null()) {
     auto props = rep->table_properties;
     if (!props) {
       return Status_Corruption("Missing table properties on file " +

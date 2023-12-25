@@ -454,7 +454,7 @@ class TableConstructor : public Constructor {
                            /*skip_filters*/ false,
                            /*immortal*/ false, false, level_,
                            &block_cache_tracer_, moptions.write_buffer_size, "",
-                           file_num_, kNullUniqueId64x2, largest_seqno_),
+                           file_num_, UniqueId64x2_null(), largest_seqno_),
         std::move(file_reader_), TEST_GetSink()->contents().size(),
         &table_reader_);
   }
@@ -1462,7 +1462,7 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   // Get internal with internal API
   EXPECT_OK(GetSstInternalUniqueId(db_id, db_session_id, file_number,
                                    t.internal_id.as_unique_id_ptr()));
-  EXPECT_NE(t.internal_id, kNullUniqueId64x3);
+  EXPECT_NE(t.internal_id, UniqueId64x3_null());
 
   // Verify relationship
   UniqueId64x3 tmp = t.internal_id;
@@ -1474,7 +1474,7 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   // And 128-bit internal version
   UniqueId64x2 tmp2{};
   EXPECT_OK(GetSstInternalUniqueId(db_id, db_session_id, file_number, tmp2.as_unique_id_ptr()));
-  EXPECT_NE(tmp2, kNullUniqueId64x2);
+  EXPECT_NE(tmp2, UniqueId64x2_null());
 
   EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
   EXPECT_EQ(tmp2.data[1], t.internal_id.data[1]);

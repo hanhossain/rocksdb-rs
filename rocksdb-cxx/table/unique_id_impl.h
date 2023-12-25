@@ -16,12 +16,6 @@
 #endif
 
 namespace rocksdb {
-// Value never used as an actual unique ID so can be used for "null"
-constexpr UniqueId64x2 kNullUniqueId64x2 = {};
-
-// Value never used as an actual unique ID so can be used for "null"
-constexpr UniqueId64x3 kNullUniqueId64x3 = {};
-
 // Helper for GetUniqueIdFromTableProperties. This function can also be used
 // for temporary ids for files without sufficient information in table
 // properties. The internal unique id is more structured than the public

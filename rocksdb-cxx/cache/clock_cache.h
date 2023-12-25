@@ -309,7 +309,7 @@ struct ClockHandleBasicData {
   const Cache::CacheItemHelper* helper = nullptr;
   // A lossless, reversible hash of the fixed-size (16 byte) cache key. This
   // eliminates the need to store a hash separately.
-  UniqueId64x2 hashed_key = kNullUniqueId64x2;
+  UniqueId64x2 hashed_key = UniqueId64x2_null();
   size_t total_charge = 0;
 
   inline size_t GetTotalCharge() const { return total_charge; }

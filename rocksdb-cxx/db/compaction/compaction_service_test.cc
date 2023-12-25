@@ -319,7 +319,7 @@ TEST_F(CompactionServiceTest, BasicCompactions) {
       "BlockBasedTable::Open::PassedVerifyUniqueId", [&](void* arg) {
         // override job status
         auto id = static_cast<UniqueId64x2*>(arg);
-        assert(*id != kNullUniqueId64x2);
+        assert(*id != UniqueId64x2_null());
         verify_passed++;
       });
   Reopen(options);
