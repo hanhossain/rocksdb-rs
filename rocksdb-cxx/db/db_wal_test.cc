@@ -2572,7 +2572,7 @@ TEST_F(DBWALTest, WalTermTest) {
 }
 
 TEST_F(DBWALTest, GetCompressedWalsAfterSync) {
-  if (db_->GetOptions().wal_compression == kNoCompression) {
+  if (db_->GetOptions().wal_compression == CompressionType::kNoCompression) {
     ROCKSDB_GTEST_BYPASS("stream compression not present");
     return;
   }
@@ -2585,7 +2585,7 @@ TEST_F(DBWALTest, GetCompressedWalsAfterSync) {
   // Enable WAL compression so that the newly-created WAL will be non-empty
   // after DB open, even if point-in-time WAL recovery encounters no
   // corruption.
-  options.wal_compression = kZSTD;
+  options.wal_compression = CompressionType::kZSTD;
   DestroyAndReopen(options);
 
   // Write something to memtable and WAL so that log_empty_ will be false after

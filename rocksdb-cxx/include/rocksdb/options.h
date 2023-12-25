@@ -19,7 +19,6 @@
 
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/comparator.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/data_structure.h"
 #include "rocksdb/env.h"
@@ -30,6 +29,12 @@
 #include "rocksdb/universal_compaction.h"
 #include "rocksdb/version.h"
 #include "rocksdb/write_buffer_manager.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 #ifdef max
 #undef max
@@ -218,7 +223,7 @@ struct ColumnFamilyOptions : public AdvancedColumnFamilyOptions {
   // but the behavior is subject to change.
   //
   // Default: kDisableCompressionOption (Disabled)
-  CompressionType bottommost_compression = kDisableCompressionOption;
+  CompressionType bottommost_compression = CompressionType::kDisableCompressionOption;
 
   // different options for compression algorithms used by bottommost_compression
   // if it is enabled. To enable it, please see the definition of
@@ -1226,7 +1231,7 @@ struct DBOptions {
   // If enabled WAL records will be compressed before they are written.
   // Only zstd is supported. Compressed WAL records will be read in supported
   // versions regardless of the wal_compression settings.
-  CompressionType wal_compression = kNoCompression;
+  CompressionType wal_compression = CompressionType::kNoCompression;
 
   // If true, RocksDB supports flushing multiple column families and committing
   // their results atomically to MANIFEST. Note that it is not
@@ -1809,7 +1814,7 @@ struct CompactionOptions {
   uint32_t max_subcompactions;
 
   CompactionOptions()
-      : compression(kSnappyCompression),
+      : compression(CompressionType::kSnappyCompression),
         output_file_size_limit(std::numeric_limits<uint64_t>::max()),
         max_subcompactions(0) {}
 };

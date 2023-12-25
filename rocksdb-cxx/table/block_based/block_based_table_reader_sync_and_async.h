@@ -247,7 +247,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
       CompressionType compression_type =
           GetBlockCompressionType(serialized_block);
       if ((use_fs_scratch || use_shared_buffer) &&
-          compression_type == kNoCompression) {
+          compression_type == CompressionType::kNoCompression) {
         Slice serialized =
             Slice(req.result.data() + req_offset, BlockSizeWithTrailer(handle));
         serialized_block = BlockContents(
@@ -284,7 +284,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
       CompressionType compression_type =
           GetBlockCompressionType(serialized_block);
       BlockContents contents;
-      if (compression_type != kNoCompression) {
+      if (compression_type != CompressionType::kNoCompression) {
         UncompressionContext context(compression_type);
         UncompressionInfo info(context, uncompression_dict, compression_type);
         s = UncompressSerializedBlock(

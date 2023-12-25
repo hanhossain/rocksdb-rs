@@ -585,7 +585,7 @@ TEST_F(BlobDBTest, EnableDisableCompressionGC) {
   ASSERT_EQ(kSnappyCompression, blob_files[0]->GetCompressionType());
 
   // disable compression
-  bdb_options.compression = kNoCompression;
+  bdb_options.compression = CompressionType::kNoCompression;
   Reopen(bdb_options);
 
   // Add more data with new compression type
@@ -1251,7 +1251,7 @@ TEST_F(BlobDBTest, FIFOEviction_TriggerOnSSTSizeChange) {
   options.env = mock_env_.get();
   auto statistics = CreateDBStatistics();
   options.statistics = statistics;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   Open(bdb_options, options);
 
   SyncPoint::GetInstance()->LoadDependency(
@@ -1946,7 +1946,7 @@ TEST_F(BlobDBTest, GarbageCollectionFailure) {
   // blob file.
   std::string blob_index;
   BlobIndex::EncodeBlob(&blob_index, /* file_number */ 1000, /* offset */ 1234,
-                        /* size */ 5678, kNoCompression);
+                        /* size */ 5678, CompressionType::kNoCompression);
 
   WriteBatch batch;
   ASSERT_OK(WriteBatchInternal::PutBlobIndex(

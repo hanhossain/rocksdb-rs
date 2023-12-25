@@ -580,18 +580,18 @@ CompactionJobStats NewManualCompactionJobStats(
 
 CompressionType GetAnyCompression() {
   if (Snappy_Supported()) {
-    return kSnappyCompression;
+    return CompressionType::kSnappyCompression;
   } else if (Zlib_Supported()) {
-    return kZlibCompression;
+    return CompressionType::kZlibCompression;
   } else if (BZip2_Supported()) {
-    return kBZip2Compression;
+    return CompressionType::kBZip2Compression;
   } else if (LZ4_Supported()) {
-    return kLZ4Compression;
+    return CompressionType::kLZ4Compression;
   } else if (XPRESS_Supported()) {
-    return kXpressCompression;
+    return CompressionType::kXpressCompression;
   }
 
-  return kNoCompression;
+  return CompressionType::kNoCompression;
 }
 
 }  // namespace
@@ -622,7 +622,7 @@ TEST_P(CompactionJobStatsTest, CompactionJobStatsTest) {
   // just enough setting to hold off auto-compaction.
   options.level0_file_num_compaction_trigger = kTestScale + 1;
   options.num_levels = 3;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.max_subcompactions = max_subcompactions_;
   options.bytes_per_sync = 512 * 1024;
 
@@ -732,7 +732,7 @@ TEST_P(CompactionJobStatsTest, CompactionJobStatsTest) {
     std::string L1_files(L1_buf);
     ASSERT_EQ(L1_files, FilesPerLevel(1));
     options.compression = GetAnyCompression();
-    if (options.compression == kNoCompression) {
+    if (options.compression == CompressionType::kNoCompression) {
       break;
     }
     stats_checker->EnableCompression(true);
@@ -821,7 +821,7 @@ TEST_P(CompactionJobStatsTest, DeletionStatsTest) {
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = kTestScale + 1;
   options.num_levels = 3;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.max_bytes_for_level_multiplier = 2;
   options.max_subcompactions = max_subcompactions_;
 
@@ -902,7 +902,7 @@ TEST_P(CompactionJobStatsTest, UniversalCompactionTest) {
   options.listeners.emplace_back(stats_checker);
   options.create_if_missing = true;
   options.num_levels = 3;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 2;
   options.target_file_size_base = num_keys_per_table * 1000;
   options.compaction_style = kCompactionStyleUniversal;

@@ -247,7 +247,7 @@ TEST_P(DBIteratorTest, IterReseekNewUpperBound) {
   table_options.block_size = 1024;
   table_options.block_size_deviation = 50;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   Reopen(options);
 
   ASSERT_OK(Put("a", rnd.RandomString(400)));

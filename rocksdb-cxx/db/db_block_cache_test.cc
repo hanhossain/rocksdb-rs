@@ -894,16 +894,16 @@ TEST_F(DBBlockCacheTest, CacheCompressionDict) {
   // Try all the available libraries that support dictionary compression
   std::vector<CompressionType> compression_types;
   if (Zlib_Supported()) {
-    compression_types.push_back(kZlibCompression);
+    compression_types.push_back(CompressionType::kZlibCompression);
   }
   if (LZ4_Supported()) {
-    compression_types.push_back(kLZ4Compression);
-    compression_types.push_back(kLZ4HCCompression);
+    compression_types.push_back(CompressionType::kLZ4Compression);
+    compression_types.push_back(CompressionType::kLZ4HCCompression);
   }
   if (ZSTD_Supported()) {
-    compression_types.push_back(kZSTD);
+    compression_types.push_back(CompressionType::kZSTD);
   } else if (ZSTDNotFinal_Supported()) {
-    compression_types.push_back(kZSTDNotFinalCompression);
+    compression_types.push_back(CompressionType::kZSTDNotFinalCompression);
   }
   Random rnd(301);
   for (auto compression_type : compression_types) {
@@ -1835,10 +1835,10 @@ TEST_P(DBBlockCachePinningTest, TwoLevelDB) {
   const int kNumKeysPerFile = kBlockSize * kNumBlocksPerFile / kKeySize;
 
   Options options = CurrentOptions();
-  // `kNoCompression` makes the unit test more portable. But it relies on the
+  // `CompressionType::kNoCompression` makes the unit test more portable. But it relies on the
   // current behavior of persisting/accessing dictionary even when there's no
   // (de)compression happening, which seems fairly likely to change over time.
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.compression_opts.max_dict_bytes = 4 << 10;
   options.statistics = rocksdb::CreateDBStatistics();
   BlockBasedTableOptions table_options;

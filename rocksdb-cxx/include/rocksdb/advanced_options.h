@@ -11,9 +11,14 @@
 #include <memory>
 
 #include "rocksdb/cache.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/memtablerep.h"
 #include "rocksdb/universal_compaction.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 namespace rocksdb {
 
@@ -1011,7 +1016,7 @@ struct AdvancedColumnFamilyOptions {
   // Default: no compression
   //
   // Dynamically changeable through the SetOptions() API
-  CompressionType blob_compression_type = kNoCompression;
+  CompressionType blob_compression_type = CompressionType::kNoCompression;
 
   // Enables garbage collection of blobs. Blob GC is performed as part of
   // compaction. Valid blobs residing in blob files older than a cutoff get

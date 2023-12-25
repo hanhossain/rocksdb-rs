@@ -10,8 +10,13 @@
 
 #include "db/blob/blob_read_request.h"
 #include "file/random_access_file_reader.h"
-#include "rocksdb/compression_type.h"
 #include "util/autovector.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 namespace rocksdb {
 

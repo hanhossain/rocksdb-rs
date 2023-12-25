@@ -20,7 +20,7 @@ void BlobLogHeader::EncodeTo(std::string* dst) {
   PutFixed32(dst, column_family_id);
   unsigned char flags = (has_ttl ? 1 : 0);
   dst->push_back(flags);
-  dst->push_back(compression);
+  dst->push_back(static_cast<uint8_t>(compression));
   PutFixed64(dst, expiration_range.first);
   PutFixed64(dst, expiration_range.second);
 }

@@ -74,7 +74,7 @@ TEST_F(CompactFilesTest, L0ConflictsFiles) {
   options.level0_stop_writes_trigger = 20;
   options.write_buffer_size = kWriteBufferSize;
   options.level0_file_num_compaction_trigger = kLevel0Trigger;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
@@ -205,7 +205,7 @@ TEST_F(CompactFilesTest, ObsoleteFiles) {
   options.level0_stop_writes_trigger = (1 << 30);
   options.write_buffer_size = kWriteBufferSize;
   options.max_write_buffer_number = 2;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
 
   // Add listener
   FlushedFileCollector* collector = new FlushedFileCollector();
@@ -243,7 +243,7 @@ TEST_F(CompactFilesTest, NotCutOutputOnLevel0) {
   options.level0_stop_writes_trigger = 1000;
   options.write_buffer_size = 65536;
   options.max_write_buffer_number = 2;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.max_compaction_bytes = 5000;
 
   // Add listener
@@ -448,7 +448,7 @@ TEST_F(CompactFilesTest, GetCompactionJobInfo) {
   options.level0_stop_writes_trigger = 1000;
   options.write_buffer_size = 65536;
   options.max_write_buffer_number = 2;
-  options.compression = kNoCompression;
+  options.compression = CompressionType::kNoCompression;
   options.max_compaction_bytes = 5000;
 
   // Add listener

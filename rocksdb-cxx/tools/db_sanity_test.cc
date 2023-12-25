@@ -135,7 +135,7 @@ class SanityTestZlibCompression : public SanityTest {
  public:
   explicit SanityTestZlibCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = kZlibCompression;
+    options_.compression = CompressionType::kZlibCompression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "ZlibCompression"; }
@@ -148,7 +148,7 @@ class SanityTestZlibCompressionVersion2 : public SanityTest {
  public:
   explicit SanityTestZlibCompressionVersion2(const std::string& path)
       : SanityTest(path) {
-    options_.compression = kZlibCompression;
+    options_.compression = CompressionType::kZlibCompression;
     BlockBasedTableOptions table_options;
 #if ROCKSDB_MAJOR > 3 || (ROCKSDB_MAJOR == 3 && ROCKSDB_MINOR >= 10)
     table_options.format_version = 2;
@@ -168,7 +168,7 @@ class SanityTestLZ4Compression : public SanityTest {
  public:
   explicit SanityTestLZ4Compression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = kLZ4Compression;
+    options_.compression = CompressionType::kLZ4Compression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "LZ4Compression"; }
@@ -181,7 +181,7 @@ class SanityTestLZ4HCCompression : public SanityTest {
  public:
   explicit SanityTestLZ4HCCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = kLZ4HCCompression;
+    options_.compression = CompressionType::kLZ4HCCompression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "LZ4HCCompression"; }
@@ -194,7 +194,7 @@ class SanityTestZSTDCompression : public SanityTest {
  public:
   explicit SanityTestZSTDCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = kZSTD;
+    options_.compression = CompressionType::kZSTD;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "ZSTDCompression"; }

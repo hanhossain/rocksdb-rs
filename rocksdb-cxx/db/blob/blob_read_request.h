@@ -7,13 +7,14 @@
 
 #include <cinttypes>
 
-#include "rocksdb/compression_type.h"
 #include "rocksdb/slice.h"
 #include "util/autovector.h"
 
 #ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
 #include "rocksdb-rs-cxx/status.h"
 #else
+#include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
@@ -32,7 +33,7 @@ struct BlobReadRequest {
   size_t len = 0;
 
   // Blob compression type
-  CompressionType compression = kNoCompression;
+  CompressionType compression = CompressionType::kNoCompression;
 
   // Output parameter set by MultiGetBlob() to point to the data buffer, and
   // the number of valid bytes

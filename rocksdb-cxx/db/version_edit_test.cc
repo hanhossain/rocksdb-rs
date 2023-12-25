@@ -699,7 +699,7 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
 
     std::string blob_index;
     BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                          kNoCompression);
+                          CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 201;
 
@@ -715,7 +715,7 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
 
     std::string blob_index;
     BlobIndex::EncodeBlob(&blob_index, expected_oldest_blob_file_number, offset,
-                          size, kNoCompression);
+                          size, CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 202;
 
@@ -750,7 +750,7 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
 
     std::string blob_index;
     BlobIndex::EncodeBlobTTL(&blob_index, expiration, blob_file_number, offset,
-                             size, kNoCompression);
+                             size, CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 204;
 
@@ -776,7 +776,7 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
 
     std::string blob_index;
     BlobIndex::EncodeBlob(&blob_index, kInvalidBlobFileNumber, offset, size,
-                          kNoCompression);
+                          CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 206;
 

@@ -1,4 +1,5 @@
 pub mod cache;
+pub mod compression_type;
 pub mod env;
 pub mod port_defs;
 pub mod slice;

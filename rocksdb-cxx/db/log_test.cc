@@ -1002,7 +1002,7 @@ TEST_P(CompressionLogTest, Empty) {
   }
   ASSERT_OK(SetupTestEnv());
   const bool compression_enabled =
-      std::get<2>(GetParam()) == kNoCompression ? false : true;
+      std::get<2>(GetParam()) == CompressionType::kNoCompression ? false : true;
   // If WAL compression is enabled, a record is added for the compression type
   const int compression_record_size = compression_enabled ? kHeaderSize + 4 : 0;
   ASSERT_EQ(compression_record_size, WrittenBytes());

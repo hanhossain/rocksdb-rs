@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "db/log_format.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/env.h"
 #include "rocksdb/io_status.h"
 #include "rocksdb/slice.h"
@@ -22,8 +21,10 @@
 #include "util/hash_containers.h"
 
 #ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
 #include "rocksdb-rs-cxx/status.h"
 #else
+#include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 
@@ -84,7 +85,7 @@ class Writer {
   explicit Writer(std::unique_ptr<WritableFileWriter>&& dest,
                   uint64_t log_number, bool recycle_log_files,
                   bool manual_flush = false,
-                  CompressionType compressionType = kNoCompression);
+                  CompressionType compressionType = CompressionType::kNoCompression);
   // No copying allowed
   Writer(const Writer&) = delete;
   void operator=(const Writer&) = delete;

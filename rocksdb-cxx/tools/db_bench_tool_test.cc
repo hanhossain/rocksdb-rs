@@ -69,7 +69,7 @@ class DBBenchTest : public testing::Test {
     opt.dump_malloc_stats = true;  // db_bench uses a different default
     opt.compaction_style = style;
     opt.num_levels = levels;
-    opt.compression = kNoCompression;
+    opt.compression = CompressionType::kNoCompression;
     opt.arena_block_size = 8388608;
 
     return SanitizeOptions(db_path_, opt);
