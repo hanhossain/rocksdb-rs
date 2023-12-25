@@ -419,7 +419,7 @@ Status ImportColumnFamilyJob::GetIngestedFileInfo(
 
   auto s = GetSstInternalUniqueId(props->db_id, props->db_session_id,
                                   props->orig_file_number,
-                                  &(file_to_import->unique_id));
+                                  file_to_import->unique_id.as_unique_id_ptr());
   if (!s.ok()) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Failed to get SST unique id for file %s",

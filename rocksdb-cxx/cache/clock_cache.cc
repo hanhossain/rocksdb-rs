@@ -1015,13 +1015,13 @@ inline HyperClockTable::HandleImpl* HyperClockTable::FindSlot(
   // pseudorandom integer, computed as a linear function of two random hashes,
   // which we call base and increment. Specifically, the i-th probe is base + i
   // * increment modulo the table size.
-  size_t base = static_cast<size_t>(hashed_key[1]);
+  size_t base = static_cast<size_t>(hashed_key.data[1]);
   // We use an odd increment, which is relatively prime with the power-of-two
   // table size. This implies that we cycle back to the first probe only
   // after probing every slot exactly once.
   // TODO: we could also reconsider linear probing, though locality benefits
   // are limited because each slot is a full cache line
-  size_t increment = static_cast<size_t>(hashed_key[0]) | 1U;
+  size_t increment = static_cast<size_t>(hashed_key.data[0]) | 1U;
   size_t first = ModTableSize(base);
   size_t current = first;
   bool is_last;
@@ -1043,8 +1043,8 @@ inline HyperClockTable::HandleImpl* HyperClockTable::FindSlot(
 
 inline void HyperClockTable::Rollback(const UniqueId64x2& hashed_key,
                                       const HandleImpl* h) {
-  size_t current = ModTableSize(hashed_key[1]);
-  size_t increment = static_cast<size_t>(hashed_key[0]) | 1U;
+  size_t current = ModTableSize(hashed_key.data[1]);
+  size_t increment = static_cast<size_t>(hashed_key.data[0]) | 1U;
   while (&array_[current] != h) {
     array_[current].displacements.fetch_sub(1, std::memory_order_relaxed);
     current = ModTableSize(current + increment);

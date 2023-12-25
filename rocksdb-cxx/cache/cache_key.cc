@@ -302,9 +302,9 @@ OffsetableCacheKey::OffsetableCacheKey(const std::string &db_id,
                                        uint64_t file_number) {
   UniqueId64x2 internal_id;
   Status s = GetSstInternalUniqueId(db_id, db_session_id, file_number,
-                                    &internal_id, /*force=*/true);
+                                    internal_id.as_unique_id_ptr(), /*force=*/true);
   assert(s.ok());
-  *this = FromInternalUniqueId(&internal_id);
+  *this = FromInternalUniqueId(internal_id.as_unique_id_ptr());
 }
 
 OffsetableCacheKey OffsetableCacheKey::FromInternalUniqueId(UniqueIdPtr id) {
@@ -356,8 +356,8 @@ UniqueId64x2 OffsetableCacheKey::ToInternalUniqueId() {
     std::swap(a, b);
   }
   UniqueId64x2 rv;
-  rv[0] = ReverseBits(b);
-  rv[1] = ReverseBits(a ^ DownwardInvolution(rv[0]));
+  rv.data[0] = ReverseBits(b);
+  rv.data[1] = ReverseBits(a ^ DownwardInvolution(rv.data[0]));
   return rv;
 }
 

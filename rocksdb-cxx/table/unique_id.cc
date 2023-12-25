@@ -178,10 +178,10 @@ Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
                                             std::string *out_id) {
   ID tmp{};
   Status s = GetSstInternalUniqueId(props.db_id, props.db_session_id,
-                                    props.orig_file_number, &tmp);
+                                    props.orig_file_number, tmp.as_unique_id_ptr());
   if (s.ok()) {
-    InternalUniqueIdToExternal(&tmp);
-    *out_id = EncodeUniqueIdBytes(&tmp);
+    InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
+    *out_id = EncodeUniqueIdBytes(tmp.as_unique_id_ptr());
   } else {
     out_id->clear();
   }

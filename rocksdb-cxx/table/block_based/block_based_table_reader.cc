@@ -690,15 +690,15 @@ Status BlockBasedTable::Open(
     }
     UniqueId64x2 actual_unique_id{};
     s = GetSstInternalUniqueId(props->db_id, props->db_session_id,
-                               props->orig_file_number, &actual_unique_id,
+                               props->orig_file_number, actual_unique_id.as_unique_id_ptr(),
                                /*force*/ true);
     assert(s.ok());  // because force=true
     if (expected_unique_id != actual_unique_id) {
       return Status_Corruption(
           "Mismatch in unique ID on table file " +
           std::to_string(cur_file_num) +
-          ". Expected: " + InternalUniqueIdToHumanString(&expected_unique_id) +
-          " Actual: " + InternalUniqueIdToHumanString(&actual_unique_id));
+          ". Expected: " + InternalUniqueIdToHumanString(expected_unique_id.as_unique_id_ptr()) +
+          " Actual: " + InternalUniqueIdToHumanString(actual_unique_id.as_unique_id_ptr()));
     }
     TEST_SYNC_POINT_CALLBACK("BlockBasedTable::Open::PassedVerifyUniqueId",
                              &actual_unique_id);
