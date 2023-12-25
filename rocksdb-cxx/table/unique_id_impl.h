@@ -9,35 +9,18 @@
 
 #include "rocksdb/unique_id.h"
 
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/unique_id.h"
+#else
+#include "rocksdb-rs/src/unique_id.rs.h"
+#endif
+
 namespace rocksdb {
-
-// Standard size unique ID, good enough for almost all practical purposes
-using UniqueId64x2 = std::array<uint64_t, 2>;
-
 // Value never used as an actual unique ID so can be used for "null"
 constexpr UniqueId64x2 kNullUniqueId64x2 = {};
 
-// Extended size unique ID, for extra certainty of uniqueness among SST files
-// spanning many hosts over a long time (rarely if ever needed)
-using UniqueId64x3 = std::array<uint64_t, 3>;
-
 // Value never used as an actual unique ID so can be used for "null"
 constexpr UniqueId64x3 kNullUniqueId64x3 = {};
-
-// Dynamic pointer wrapper for one of the two above
-struct UniqueIdPtr {
-  uint64_t *ptr = nullptr;
-  bool extended = false;
-
-  /*implicit*/ UniqueIdPtr(UniqueId64x2 *id) {
-    ptr = (*id).data();
-    extended = false;
-  }
-  /*implicit*/ UniqueIdPtr(UniqueId64x3 *id) {
-    ptr = (*id).data();
-    extended = true;
-  }
-};
 
 // Helper for GetUniqueIdFromTableProperties. This function can also be used
 // for temporary ids for files without sufficient information in table

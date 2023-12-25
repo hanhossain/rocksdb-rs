@@ -4,6 +4,7 @@ pub mod env;
 pub mod port_defs;
 pub mod slice;
 pub mod status;
+pub mod unique_id;
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
