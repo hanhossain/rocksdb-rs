@@ -11,9 +11,14 @@
 #include <memory>
 
 #include "rocksdb/cache.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/memtablerep.h"
 #include "rocksdb/universal_compaction.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 namespace rocksdb {
 

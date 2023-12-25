@@ -15,14 +15,15 @@
 #include <memory>
 #include <string>
 
-#include "rocksdb/compression_type.h"
 #include "rocksdb/data_structure.h"
 #include "rocksdb/memory_allocator.h"
 
 #ifndef ROCKSDB_RS
 #include "rocksdb-rs-cxx/cache.h"
+#include "rocksdb-rs-cxx/compression_type.h"
 #else
 #include "rocksdb-rs/src/cache.rs.h"
+#include "rocksdb-rs/src/compression_type.rs.h"
 #endif
 
 namespace rocksdb {

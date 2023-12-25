@@ -14,15 +14,16 @@
 
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/compaction_job_stats.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/io_status.h"
 #include "rocksdb/table_properties.h"
 #include "rocksdb/types.h"
 
 #ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
 #include "rocksdb-rs-cxx/status.h"
 #else
+#include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/status.rs.h"
 #endif
 

@@ -32,7 +32,6 @@
 #include "port/port.h"
 #include "port/stack_trace.h"
 #include "rocksdb/cache.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
@@ -75,6 +74,12 @@
 #include "util/string_util.h"
 #include "utilities/memory_allocators.h"
 #include "utilities/merge_operators.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 namespace rocksdb {
 

@@ -7,10 +7,15 @@
 #include <sstream>
 #include <string>
 
-#include "rocksdb/compression_type.h"
 #include "util/coding.h"
 #include "util/compression.h"
 #include "util/string_util.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 namespace rocksdb {
 

@@ -19,7 +19,6 @@
 
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/comparator.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/data_structure.h"
 #include "rocksdb/env.h"
@@ -30,6 +29,12 @@
 #include "rocksdb/universal_compaction.h"
 #include "rocksdb/version.h"
 #include "rocksdb/write_buffer_manager.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 #ifdef max
 #undef max

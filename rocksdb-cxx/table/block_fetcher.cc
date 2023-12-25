@@ -16,7 +16,6 @@
 #include "logging/logging.h"
 #include "memory/memory_allocator_impl.h"
 #include "monitoring/perf_context_imp.h"
-#include "rocksdb/compression_type.h"
 #include "rocksdb/env.h"
 #include "table/block_based/block.h"
 #include "table/block_based/block_based_table_reader.h"
@@ -26,6 +25,12 @@
 #include "table/persistent_cache_helper.h"
 #include "util/compression.h"
 #include "util/stop_watch.h"
+
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/compression_type.h"
+#else
+#include "rocksdb-rs/src/compression_type.rs.h"
+#endif
 
 namespace rocksdb {
 
