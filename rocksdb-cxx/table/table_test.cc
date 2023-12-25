@@ -1417,10 +1417,10 @@ inline bool operator==(const TestIds& lhs, const TestIds& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& os, const TestIds& ids) {
-  return os << std::hex << "{{{ 0x" << ids.internal_id[0] << "U, 0x"
-            << ids.internal_id[1] << "U, 0x" << ids.internal_id[2]
-            << "U }}, {{ 0x" << ids.external_id[0] << "U, 0x"
-            << ids.external_id[1] << "U, 0x" << ids.external_id[2] << "U }}}";
+  return os << std::hex << "{{{ 0x" << ids.internal_id.data[0] << "U, 0x"
+            << ids.internal_id.data[1] << "U, 0x" << ids.internal_id.data[2]
+            << "U }}, {{ 0x" << ids.external_id.data[0] << "U, 0x"
+            << ids.external_id.data[1] << "U, 0x" << ids.external_id.data[2] << "U }}}";
 }
 
 TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
@@ -1443,47 +1443,47 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
     std::string euid;
     EXPECT_OK(GetExtendedUniqueIdFromTableProperties(*tp, &euid));
     EXPECT_EQ(euid.size(), 24U);
-    t.external_id[0] = DecodeFixed64(&euid[0]);
-    t.external_id[1] = DecodeFixed64(&euid[8]);
-    t.external_id[2] = DecodeFixed64(&euid[16]);
+    t.external_id.data[0] = DecodeFixed64(&euid[0]);
+    t.external_id.data[1] = DecodeFixed64(&euid[8]);
+    t.external_id.data[2] = DecodeFixed64(&euid[16]);
 
     std::string uid;
     EXPECT_OK(GetUniqueIdFromTableProperties(*tp, &uid));
     EXPECT_EQ(uid.size(), 16U);
     EXPECT_EQ(uid, euid.substr(0, 16));
-    EXPECT_EQ(t.external_id[0], DecodeFixed64(&uid[0]));
-    EXPECT_EQ(t.external_id[1], DecodeFixed64(&uid[8]));
+    EXPECT_EQ(t.external_id.data[0], DecodeFixed64(&uid[0]));
+    EXPECT_EQ(t.external_id.data[1], DecodeFixed64(&uid[8]));
   }
   // All these should be effectively random
-  EXPECT_TRUE(seen->insert(t.external_id[0]).second);
-  EXPECT_TRUE(seen->insert(t.external_id[1]).second);
-  EXPECT_TRUE(seen->insert(t.external_id[2]).second);
+  EXPECT_TRUE(seen->insert(t.external_id.data[0]).second);
+  EXPECT_TRUE(seen->insert(t.external_id.data[1]).second);
+  EXPECT_TRUE(seen->insert(t.external_id.data[2]).second);
 
   // Get internal with internal API
   EXPECT_OK(GetSstInternalUniqueId(db_id, db_session_id, file_number,
-                                   &t.internal_id));
+                                   t.internal_id.as_unique_id_ptr()));
   EXPECT_NE(t.internal_id, kNullUniqueId64x3);
 
   // Verify relationship
   UniqueId64x3 tmp = t.internal_id;
-  InternalUniqueIdToExternal(&tmp);
+  InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
   EXPECT_EQ(tmp, t.external_id);
-  ExternalUniqueIdToInternal(&tmp);
+  ExternalUniqueIdToInternal(tmp.as_unique_id_ptr());
   EXPECT_EQ(tmp, t.internal_id);
 
   // And 128-bit internal version
   UniqueId64x2 tmp2{};
-  EXPECT_OK(GetSstInternalUniqueId(db_id, db_session_id, file_number, &tmp2));
+  EXPECT_OK(GetSstInternalUniqueId(db_id, db_session_id, file_number, tmp2.as_unique_id_ptr()));
   EXPECT_NE(tmp2, kNullUniqueId64x2);
 
-  EXPECT_EQ(tmp2[0], t.internal_id[0]);
-  EXPECT_EQ(tmp2[1], t.internal_id[1]);
-  InternalUniqueIdToExternal(&tmp2);
-  EXPECT_EQ(tmp2[0], t.external_id[0]);
-  EXPECT_EQ(tmp2[1], t.external_id[1]);
-  ExternalUniqueIdToInternal(&tmp2);
-  EXPECT_EQ(tmp2[0], t.internal_id[0]);
-  EXPECT_EQ(tmp2[1], t.internal_id[1]);
+  EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
+  EXPECT_EQ(tmp2.data[1], t.internal_id.data[1]);
+  InternalUniqueIdToExternal(tmp2.as_unique_id_ptr());
+  EXPECT_EQ(tmp2.data[0], t.external_id.data[0]);
+  EXPECT_EQ(tmp2.data[1], t.external_id.data[1]);
+  ExternalUniqueIdToInternal(tmp2.as_unique_id_ptr());
+  EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
+  EXPECT_EQ(tmp2.data[1], t.internal_id.data[1]);
 
   return t;
 }
@@ -1602,9 +1602,9 @@ TEST_F(TablePropertyTest, UniqueIdsSchemaAndQuality) {
   {
     UniqueId64x3 id1{{0, 0, Random::GetTLSInstance()->Next64()}};
     UniqueId64x3 id2 = id1;
-    InternalUniqueIdToExternal(&id1);
+    InternalUniqueIdToExternal(id1.as_unique_id_ptr());
     EXPECT_EQ(id1, id2);
-    ExternalUniqueIdToInternal(&id2);
+    ExternalUniqueIdToInternal(id2.as_unique_id_ptr());
     EXPECT_EQ(id1, id2);
   }
 }
@@ -1663,10 +1663,10 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
 
   // Also internal IDs to human string
   UniqueId64x3 euid = {12345, 678, 9};
-  EXPECT_EQ(InternalUniqueIdToHumanString(&euid), "{12345,678,9}");
+  EXPECT_EQ(InternalUniqueIdToHumanString(euid.as_unique_id_ptr()), "{12345,678,9}");
 
   UniqueId64x2 uid = {1234, 567890};
-  EXPECT_EQ(InternalUniqueIdToHumanString(&uid), "{1234,567890}");
+  EXPECT_EQ(InternalUniqueIdToHumanString(uid.as_unique_id_ptr()), "{1234,567890}");
 }
 
 TEST_F(TablePropertyTest, UniqueIdsFailure) {

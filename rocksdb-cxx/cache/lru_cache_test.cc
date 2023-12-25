@@ -528,7 +528,7 @@ TEST_F(ClockCacheTest, Limits) {
       std::unique_ptr<HandleImpl* []> ha { new HandleImpl* [n] {} };
       Status s = Status_new();
       for (size_t i = 0; i < n && s.ok(); ++i) {
-        hkey[1] = i;
+        hkey.data[1] = i;
         s = shard_->Insert(TestKey(hkey), hkey, nullptr /*value*/,
                            &kNoopCacheItemHelper,
                            (i + kCapacity < n) ? 0 : 1 /*charge*/, &ha[i],

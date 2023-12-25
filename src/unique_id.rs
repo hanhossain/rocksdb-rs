@@ -15,7 +15,8 @@ pub mod ffi {
         data: [u64; 3],
     }
 
-    // TODO: should find a way to let this have a lifetime annotation
+    // TODO: Should find a way to let this have a lifetime annotation.
+    // TODO: This should not be copy/clone but the original C++ depends on copy semantics.
     /// Dynamic pointer wrapper for UniqueId64x2 and UniqueId64x3
     #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     struct UniqueIdPtr {

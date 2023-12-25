@@ -7416,8 +7416,8 @@ TEST_F(DBTest2, SstUniqueIdVerifyBackwardCompatible) {
       "VersionEdit::EncodeTo:UniqueId", [&](void* arg) {
         auto unique_id = static_cast<UniqueId64x2*>(arg);
         // remove id before writing it to manifest
-        (*unique_id)[0] = 0;
-        (*unique_id)[1] = 0;
+        unique_id->data[0] = 0;
+        unique_id->data[1] = 0;
       });
 
   // test compaction generated Sst

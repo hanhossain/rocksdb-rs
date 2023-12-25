@@ -1690,7 +1690,7 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   if (!result.output_files.empty()) {
     CompactionServiceResult deserialized_tmp;
     ASSERT_OK(CompactionServiceResult::Read(output, &deserialized_tmp));
-    deserialized_tmp.output_files[0].unique_id[0] += 1;
+    deserialized_tmp.output_files[0].unique_id.data[0] += 1;
     ASSERT_FALSE(deserialized_tmp.TEST_Equals(&result, &mismatch));
     ASSERT_EQ(mismatch, "output_files.unique_id");
   }
