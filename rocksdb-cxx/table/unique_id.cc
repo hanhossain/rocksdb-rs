@@ -200,11 +200,7 @@ Status GetUniqueIdFromTableProperties(const TableProperties &props,
 
 std::string UniqueIdToHumanString(const std::string &id) {
   // Not so efficient, but that's OK
-  std::string str = Slice(id).ToString(/*hex*/ true);
-  for (size_t i = 16; i < str.size(); i += 17) {
-    str.insert(i, "-");
-  }
-  return str;
+  return std::string(unique_id_to_human_string(id));
 }
 
 }  // namespace rocksdb
