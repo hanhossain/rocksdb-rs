@@ -1565,7 +1565,7 @@ class CacheKeyTest : public testing::Test {
     EXPECT_TRUE(!rv.IsEmpty());
     // BEGIN some assertions in relation to SST unique IDs
     std::string external_unique_id_str;
-    EXPECT_OK(GetUniqueIdFromTableProperties(tp_, &external_unique_id_str));
+    EXPECT_OK(GetUniqueIdFromTableProperties(tp_, external_unique_id_str));
     UniqueId64x2 sst_unique_id = {};
     EXPECT_OK(DecodeUniqueIdBytes(external_unique_id_str, sst_unique_id.as_unique_id_ptr()));
     ExternalUniqueIdToInternal(sst_unique_id.as_unique_id_ptr());

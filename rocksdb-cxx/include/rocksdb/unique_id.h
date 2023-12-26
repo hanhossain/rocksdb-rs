@@ -40,7 +40,7 @@ namespace rocksdb {
 // the probability of ID collisions is much "better than random"; see
 // https://github.com/pdillinger/unique_id
 Status GetUniqueIdFromTableProperties(const TableProperties &props,
-                                      std::string *out_id);
+                                      std::string& out_id);
 
 // Computes a 192-bit (24 binary char) stable, universally unique ID
 // with an extra 64 bits of uniqueness compared to the standard ID. It is only
@@ -51,6 +51,6 @@ Status GetUniqueIdFromTableProperties(const TableProperties &props,
 // 128-bit IDs (using some worst-case assumptions about process lifetime).
 // It's 10^17 years with 192-bit IDs.
 Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
-                                              std::string *out_id);
+                                              std::string& out_id);
 
 }  // namespace rocksdb

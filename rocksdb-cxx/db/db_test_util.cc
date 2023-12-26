@@ -1718,7 +1718,7 @@ void VerifySstUniqueIds(const TablePropertiesCollection& props) {
   std::unordered_set<std::string> seen;
   for (auto& pair : props) {
     std::string id;
-    ASSERT_OK(GetUniqueIdFromTableProperties(*pair.second, &id));
+    ASSERT_OK(GetUniqueIdFromTableProperties(*pair.second, id));
     ASSERT_TRUE(seen.insert(id).second);
   }
 }

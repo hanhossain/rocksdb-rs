@@ -175,26 +175,26 @@ Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out) {
 
 template <typename ID>
 Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
-                                            std::string *out_id) {
+                                            std::string& out_id) {
   ID tmp{};
   Status s = GetSstInternalUniqueId(props.db_id, props.db_session_id,
                                     props.orig_file_number, tmp.as_unique_id_ptr());
   if (s.ok()) {
     InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
-    *out_id = EncodeUniqueIdBytes(tmp.as_unique_id_ptr());
+    out_id = EncodeUniqueIdBytes(tmp.as_unique_id_ptr());
   } else {
-    out_id->clear();
+    out_id.clear();
   }
   return s;
 }
 
 Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
-                                              std::string *out_id) {
+                                              std::string& out_id) {
   return GetUniqueIdFromTablePropertiesHelper<UniqueId64x3>(props, out_id);
 }
 
 Status GetUniqueIdFromTableProperties(const TableProperties &props,
-                                      std::string *out_id) {
+                                      std::string& out_id) {
   return GetUniqueIdFromTablePropertiesHelper<UniqueId64x2>(props, out_id);
 }
 
