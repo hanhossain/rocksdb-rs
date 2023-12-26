@@ -45,18 +45,6 @@ std::string EncodeUniqueIdBytes(UniqueIdPtr in);
 // Reverse of EncodeUniqueIdBytes.
 Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out);
 
-// Reformat a random value down to our "DB session id" format,
-// which is intended to be compact and friendly for use in file names.
-// `lower` is fully preserved and data is lost from `upper`.
-//
-// Detail: Encoded into 20 chars in base-36 ([0-9A-Z]), which is ~103 bits of
-// entropy, which is enough to expect no collisions across a billion servers
-// each opening DBs a million times (~2^50). Benefits vs. RFC-4122 unique id:
-// * Save ~ dozen bytes per SST file
-// * Shorter shared backup file names (some platforms have low limits)
-// * Visually distinct from DB id format (usually RFC-4122)
-std::string EncodeSessionId(uint64_t upper, uint64_t lower);
-
 // Reverse of EncodeSessionId. Returns NotSupported on error rather than
 // Corruption because non-standard session IDs should be allowed with degraded
 // functionality.

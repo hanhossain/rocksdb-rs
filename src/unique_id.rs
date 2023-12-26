@@ -41,6 +41,7 @@ pub mod ffi {
         #[cxx_name = "UniqueIdToHumanString"]
         fn unique_id_to_human_string(id: &CxxString) -> String;
 
+        #[cxx_name = "EncodeSessionId"]
         fn encode_session_id(upper: u64, lower: u64) -> String;
     }
 }
@@ -102,6 +103,16 @@ fn unique_id_to_human_string(id: &CxxString) -> String {
     hex
 }
 
+/// Reformat a random value down to our "DB session id" format,
+/// which is intended to be compact and friendly for use in file names.
+/// `lower` is fully preserved and data is lost from `upper`.
+///
+/// Detail: Encoded into 20 chars in base-36 ([0-9A-Z]), which is ~103 bits of
+/// entropy, which is enough to expect no collisions across a billion servers
+/// each opening DBs a million times (~2^50). Benefits vs. RFC-4122 unique id:
+/// * Save ~ dozen bytes per SST file
+/// * Shorter shared backup file names (some platforms have low limits)
+/// * Visually distinct from DB id format (usually RFC-4122)
 fn encode_session_id(upper: u64, lower: u64) -> String {
     let mut db_session_id = String::with_capacity(20);
     // Preserving `lower` is slightly tricky. 36^12 is slightly more than

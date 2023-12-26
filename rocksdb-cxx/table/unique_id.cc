@@ -12,10 +12,6 @@
 
 namespace rocksdb {
 
-std::string EncodeSessionId(uint64_t upper, uint64_t lower) {
-  return std::string(encode_session_id(upper, lower));
-}
-
 Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
                        uint64_t& lower) {
   const size_t len = db_session_id.size();

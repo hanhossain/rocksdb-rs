@@ -1551,8 +1551,9 @@ class CacheKeyTest : public testing::Test {
   OffsetableCacheKey GetOffsetableCacheKey(uint64_t session_counter,
                                            uint64_t file_number) {
     // Like SemiStructuredUniqueIdGen::GenerateNext
-    tp_.db_session_id = EncodeSessionId(base_session_upper_,
-                                        base_session_lower_ ^ session_counter);
+    // TODO: make db_session_id be a rust::String
+    tp_.db_session_id = std::string(EncodeSessionId(base_session_upper_,
+                                        base_session_lower_ ^ session_counter));
     tp_.db_id = std::to_string(db_id_);
     tp_.orig_file_number = file_number;
     bool is_stable;

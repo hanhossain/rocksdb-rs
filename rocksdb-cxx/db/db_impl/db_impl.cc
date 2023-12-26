@@ -4629,6 +4629,7 @@ SemiStructuredUniqueIdGen* DbSessionIdGen() {
 
 void DBImpl::TEST_ResetDbSessionIdGen() { DbSessionIdGen()->Reset(); }
 
+// TODO: make this return rust::String
 std::string DBImpl::GenerateDbSessionId(Env*) {
   // See SemiStructuredUniqueIdGen for its desirable properties.
   auto gen = DbSessionIdGen();
@@ -4641,7 +4642,7 @@ std::string DBImpl::GenerateDbSessionId(Env*) {
     gen->GenerateNext(&hi, &lo);
     assert(lo != 0);
   }
-  return EncodeSessionId(hi, lo);
+  return std::string(EncodeSessionId(hi, lo));
 }
 
 void DBImpl::SetDbSessionId() {
