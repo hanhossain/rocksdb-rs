@@ -20,8 +20,8 @@ std::string EncodeSessionId(uint64_t upper, uint64_t lower) {
   // (A tiny fraction of 20 digit strings go unused.)
   uint64_t a = (upper << 2) | (lower >> 62);
   uint64_t b = lower & (UINT64_MAX >> 2);
-  PutBaseChars<36>(&buf, 8, a, /*uppercase*/ true);
-  PutBaseChars<36>(&buf, 12, b, /*uppercase*/ true);
+  ParseBaseChars_36(&buf, 8, a, /*uppercase*/ true);
+  ParseBaseChars_36(&buf, 12, b, /*uppercase*/ true);
   assert(buf == &db_session_id.back() + 1);
   return db_session_id;
 }
@@ -42,11 +42,11 @@ Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
   }
   uint64_t a = 0, b = 0;
   const char *buf = &db_session_id.front();
-  bool success = ParseBaseChars<36>(&buf, len - 12U, &a);
+  bool success = ParseBaseChars_36(&buf, len - 12U, &a);
   if (!success) {
     return Status_NotSupported("Bad digit in db_session_id");
   }
-  success = ParseBaseChars<36>(&buf, 12U, &b);
+  success = ParseBaseChars_36(&buf, 12U, &b);
   if (!success) {
     return Status_NotSupported("Bad digit in db_session_id");
   }
