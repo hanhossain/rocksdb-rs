@@ -26,8 +26,8 @@ std::string EncodeSessionId(uint64_t upper, uint64_t lower) {
   return db_session_id;
 }
 
-Status DecodeSessionId(const std::string &db_session_id, uint64_t *upper,
-                       uint64_t *lower) {
+Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
+                       uint64_t& lower) {
   const size_t len = db_session_id.size();
   if (len == 0) {
     return Status_NotSupported("Missing db_session_id");
@@ -51,8 +51,8 @@ Status DecodeSessionId(const std::string &db_session_id, uint64_t *upper,
     return Status_NotSupported("Bad digit in db_session_id");
   }
   assert(buf == &db_session_id.back() + 1);
-  *upper = a >> 2;
-  *lower = (b & (UINT64_MAX >> 2)) | (a << 62);
+  upper = a >> 2;
+  lower = (b & (UINT64_MAX >> 2)) | (a << 62);
   return Status_OK();
 }
 
@@ -74,7 +74,7 @@ Status GetSstInternalUniqueId(const std::string &db_id,
   uint64_t session_upper = 0;  // Assignment to appease clang-analyze
   uint64_t session_lower = 0;  // Assignment to appease clang-analyze
   {
-    Status s = DecodeSessionId(db_session_id, &session_upper, &session_lower);
+    Status s = DecodeSessionId(db_session_id, session_upper, session_lower);
     if (!s.ok()) {
       if (!force) {
         return s;

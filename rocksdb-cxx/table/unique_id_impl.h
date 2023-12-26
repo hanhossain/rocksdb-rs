@@ -60,7 +60,7 @@ std::string EncodeSessionId(uint64_t upper, uint64_t lower);
 // Reverse of EncodeSessionId. Returns NotSupported on error rather than
 // Corruption because non-standard session IDs should be allowed with degraded
 // functionality.
-Status DecodeSessionId(const std::string &db_session_id, uint64_t *upper,
-                       uint64_t *lower);
+Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
+                       uint64_t& lower);
 
 }  // namespace rocksdb

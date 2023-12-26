@@ -1591,8 +1591,8 @@ TEST_F(CacheKeyTest, DBImplSessionIdStructure) {
   std::string session_id1 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   std::string session_id2 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   uint64_t upper1, upper2, lower1, lower2;
-  ASSERT_OK(DecodeSessionId(session_id1, &upper1, &lower1));
-  ASSERT_OK(DecodeSessionId(session_id2, &upper2, &lower2));
+  ASSERT_OK(DecodeSessionId(session_id1, upper1, lower1));
+  ASSERT_OK(DecodeSessionId(session_id2, upper2, lower2));
   // Because generated in same process
   ASSERT_EQ(upper1, upper2);
   // Unless we generate > 4 billion session IDs in this process...

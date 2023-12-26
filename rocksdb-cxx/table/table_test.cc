@@ -1430,7 +1430,7 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   if (db_session_id.size() == 20) {
     uint64_t upper;
     uint64_t lower;
-    EXPECT_OK(DecodeSessionId(db_session_id, &upper, &lower));
+    EXPECT_OK(DecodeSessionId(db_session_id, upper, lower));
     EXPECT_EQ(EncodeSessionId(upper, lower), db_session_id);
   }
 
