@@ -7,6 +7,12 @@
 
 #include "rocksdb/table_properties.h"
 
+#ifndef ROCKSDB_RS
+#include "rocksdb-rs-cxx/unique_id.h"
+#else
+#include "rocksdb-rs/src/unique_id.rs.h"
+#endif
+
 namespace rocksdb {
 
 // Computes a stable, universally unique 128-bit (16 binary char) identifier
