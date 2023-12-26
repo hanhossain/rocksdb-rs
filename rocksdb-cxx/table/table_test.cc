@@ -1663,10 +1663,10 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
 
   // Also internal IDs to human string
   UniqueId64x3 euid = {12345, 678, 9};
-  EXPECT_EQ(InternalUniqueIdToHumanString(euid.as_unique_id_ptr()), "{12345,678,9}");
+  EXPECT_EQ(euid.to_internal_human_string(), "{12345,678,9}");
 
   UniqueId64x2 uid = {1234, 567890};
-  EXPECT_EQ(InternalUniqueIdToHumanString(uid.as_unique_id_ptr()), "{1234,567890}");
+  EXPECT_EQ(uid.to_internal_human_string(), "{1234,567890}");
 }
 
 TEST_F(TablePropertyTest, UniqueIdsFailure) {

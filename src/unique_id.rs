@@ -32,6 +32,9 @@ pub mod ffi {
         fn unique_id_64_x2_null() -> UniqueId64x2;
         #[cxx_name = "UniqueId64x3_null"]
         fn unique_id_64_x3_null() -> UniqueId64x3;
+
+        fn to_internal_human_string(self: &UniqueId64x2) -> String;
+        fn to_internal_human_string(self: &UniqueId64x3) -> String;
     }
 }
 
@@ -42,6 +45,12 @@ impl UniqueId64x2 {
             extended: false,
         }
     }
+
+    /// For presenting internal IDs for debugging purposes. Visually distinct from
+    /// UniqueIdToHumanString for external IDs.
+    fn to_internal_human_string(&self) -> String {
+        format!("{{{},{}}}", self.data[0], self.data[1])
+    }
 }
 
 impl UniqueId64x3 {
@@ -50,6 +59,12 @@ impl UniqueId64x3 {
             ptr: self.data.as_mut_ptr(),
             extended: true,
         }
+    }
+
+    /// For presenting internal IDs for debugging purposes. Visually distinct from
+    /// UniqueIdToHumanString for external IDs.
+    fn to_internal_human_string(&self) -> String {
+        format!("{{{},{},{}}}", self.data[0], self.data[1], self.data[2])
     }
 }
 

@@ -45,10 +45,6 @@ std::string EncodeUniqueIdBytes(UniqueIdPtr in);
 // Reverse of EncodeUniqueIdBytes.
 Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out);
 
-// For presenting internal IDs for debugging purposes. Visually distinct from
-// UniqueIdToHumanString for external IDs.
-std::string InternalUniqueIdToHumanString(UniqueIdPtr in);
-
 // Reformat a random value down to our "DB session id" format,
 // which is intended to be compact and friendly for use in file names.
 // `lower` is fully preserved and data is lost from `upper`.

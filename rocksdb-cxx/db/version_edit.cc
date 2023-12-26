@@ -890,7 +890,7 @@ std::string VersionEdit::DebugString(bool hex_key) const {
     if (f.unique_id != UniqueId64x2_null()) {
       r.append(" unique_id(internal): ");
       UniqueId64x2 id = f.unique_id;
-      r.append(InternalUniqueIdToHumanString(id.as_unique_id_ptr()));
+      r.append(std::string(id.to_internal_human_string()));
       r.append(" public_unique_id: ");
       InternalUniqueIdToExternal(id.as_unique_id_ptr());
       r.append(UniqueIdToHumanString(EncodeUniqueIdBytes(id.as_unique_id_ptr())));

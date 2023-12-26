@@ -207,17 +207,4 @@ std::string UniqueIdToHumanString(const std::string &id) {
   return str;
 }
 
-std::string InternalUniqueIdToHumanString(UniqueIdPtr in) {
-  std::string str = "{";
-  str += std::to_string(in.ptr[0]);
-  str += ",";
-  str += std::to_string(in.ptr[1]);
-  if (in.extended) {
-    str += ",";
-    str += std::to_string(in.ptr[2]);
-  }
-  str += "}";
-  return str;
-}
-
 }  // namespace rocksdb

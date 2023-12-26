@@ -697,8 +697,8 @@ Status BlockBasedTable::Open(
       return Status_Corruption(
           "Mismatch in unique ID on table file " +
           std::to_string(cur_file_num) +
-          ". Expected: " + InternalUniqueIdToHumanString(expected_unique_id.as_unique_id_ptr()) +
-          " Actual: " + InternalUniqueIdToHumanString(actual_unique_id.as_unique_id_ptr()));
+          ". Expected: " + std::string(expected_unique_id.to_internal_human_string()) +
+          " Actual: " + std::string(actual_unique_id.to_internal_human_string()));
     }
     TEST_SYNC_POINT_CALLBACK("BlockBasedTable::Open::PassedVerifyUniqueId",
                              &actual_unique_id);
