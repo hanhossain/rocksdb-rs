@@ -67,7 +67,7 @@ bool ParseBaseChars(const char** buf, size_t n, uint64_t* v) {
   return true;
 }
 
-inline void ParseBaseChars_36(char** buf, size_t n, uint64_t v, bool uppercase) {
+inline void PutBaseChars_36(char** buf, size_t n, uint64_t v, bool uppercase) {
   PutBaseChars<36>(buf, n, v, uppercase);
 }
 

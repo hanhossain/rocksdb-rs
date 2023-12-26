@@ -20,8 +20,8 @@ std::string EncodeSessionId(uint64_t upper, uint64_t lower) {
   // (A tiny fraction of 20 digit strings go unused.)
   uint64_t a = (upper << 2) | (lower >> 62);
   uint64_t b = lower & (UINT64_MAX >> 2);
-  ParseBaseChars_36(&buf, 8, a, /*uppercase*/ true);
-  ParseBaseChars_36(&buf, 12, b, /*uppercase*/ true);
+  PutBaseChars_36(&buf, 8, a, /*uppercase*/ true);
+  PutBaseChars_36(&buf, 12, b, /*uppercase*/ true);
   assert(buf == &db_session_id.back() + 1);
   return db_session_id;
 }
