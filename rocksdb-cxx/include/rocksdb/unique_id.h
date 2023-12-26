@@ -47,9 +47,4 @@ Status GetUniqueIdFromTableProperties(const TableProperties &props,
 Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
                                               std::string *out_id);
 
-// Converts a binary string (unique id) to hexadecimal, with each 64 bits
-// separated by '-', e.g. 6474DF650323BDF0-B48E64F3039308CA-17284B32E7F7444B
-// Also works on unique id prefix.
-std::string UniqueIdToHumanString(const std::string &id);
-
 }  // namespace rocksdb

@@ -893,7 +893,7 @@ std::string VersionEdit::DebugString(bool hex_key) const {
       r.append(std::string(id.to_internal_human_string()));
       r.append(" public_unique_id: ");
       InternalUniqueIdToExternal(id.as_unique_id_ptr());
-      r.append(UniqueIdToHumanString(EncodeUniqueIdBytes(id.as_unique_id_ptr())));
+      r.append(std::string(UniqueIdToHumanString(EncodeUniqueIdBytes(id.as_unique_id_ptr()))));
     }
     r.append(" tail size: ");
     AppendNumberTo(&r, f.tail_size);

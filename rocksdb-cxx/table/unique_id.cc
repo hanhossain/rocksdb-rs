@@ -198,9 +198,4 @@ Status GetUniqueIdFromTableProperties(const TableProperties &props,
   return GetUniqueIdFromTablePropertiesHelper<UniqueId64x2>(props, out_id);
 }
 
-std::string UniqueIdToHumanString(const std::string &id) {
-  // Not so efficient, but that's OK
-  return std::string(unique_id_to_human_string(id));
-}
-
 }  // namespace rocksdb

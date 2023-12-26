@@ -37,6 +37,7 @@ pub mod ffi {
         fn to_internal_human_string(self: &UniqueId64x2) -> String;
         fn to_internal_human_string(self: &UniqueId64x3) -> String;
 
+        #[cxx_name = "UniqueIdToHumanString"]
         fn unique_id_to_human_string(id: &CxxString) -> String;
     }
 }
