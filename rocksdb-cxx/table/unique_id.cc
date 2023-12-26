@@ -13,17 +13,7 @@
 namespace rocksdb {
 
 std::string EncodeSessionId(uint64_t upper, uint64_t lower) {
-  std::string db_session_id(20U, '\0');
-  char *buf = &db_session_id[0];
-  // Preserving `lower` is slightly tricky. 36^12 is slightly more than
-  // 62 bits, so we use 12 chars plus the bottom two bits of one more.
-  // (A tiny fraction of 20 digit strings go unused.)
-  uint64_t a = (upper << 2) | (lower >> 62);
-  uint64_t b = lower & (UINT64_MAX >> 2);
-  PutBaseChars_36(&buf, 8, a, /*uppercase*/ true);
-  PutBaseChars_36(&buf, 12, b, /*uppercase*/ true);
-  assert(buf == &db_session_id.back() + 1);
-  return db_session_id;
+  return std::string(encode_session_id(upper, lower));
 }
 
 Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,

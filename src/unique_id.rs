@@ -1,3 +1,4 @@
+use crate::string_util::put_base_chars;
 use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
 use cxx::CxxString;
 
@@ -39,6 +40,8 @@ pub mod ffi {
 
         #[cxx_name = "UniqueIdToHumanString"]
         fn unique_id_to_human_string(id: &CxxString) -> String;
+
+        fn encode_session_id(upper: u64, lower: u64) -> String;
     }
 }
 
@@ -97,4 +100,16 @@ fn unique_id_to_human_string(id: &CxxString) -> String {
         counter += 1;
     }
     hex
+}
+
+fn encode_session_id(upper: u64, lower: u64) -> String {
+    let mut db_session_id = String::with_capacity(20);
+    // Preserving `lower` is slightly tricky. 36^12 is slightly more than
+    // 62 bits, so we use 12 chars plus the bottom two bits of one more.
+    // (A tiny fraction of 20 digit strings go unused.)
+    let a = (upper << 2) | (lower >> 62);
+    let b = lower & (u64::MAX >> 2);
+    put_base_chars(&mut db_session_id, 8, a, true);
+    put_base_chars(&mut db_session_id, 12, b, true);
+    db_session_id
 }
