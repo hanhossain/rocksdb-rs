@@ -48,7 +48,7 @@ inline void PutBaseChars(char** buf, size_t n, uint64_t v, bool uppercase) {
 // is equivalent to n calls to
 //   ParseBaseChars(&b, 1, &v);
 template <int kBase>
-inline bool ParseBaseChars(const char** buf, size_t n, uint64_t* v) {
+bool ParseBaseChars(const char** buf, size_t n, uint64_t* v) {
   while (n) {
     char c = **buf;
     *v *= static_cast<uint64_t>(kBase);
@@ -65,6 +65,14 @@ inline bool ParseBaseChars(const char** buf, size_t n, uint64_t* v) {
     ++*buf;
   }
   return true;
+}
+
+inline void PutBaseChars_36(char** buf, size_t n, uint64_t v, bool uppercase) {
+  PutBaseChars<36>(buf, n, v, uppercase);
+}
+
+inline bool ParseBaseChars_36(const char** buf, size_t n, uint64_t* v) {
+  return ParseBaseChars<36>(buf, n, v);
 }
 
 // Return a human-readable version of num.

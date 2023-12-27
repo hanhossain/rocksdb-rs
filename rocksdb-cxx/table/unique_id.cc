@@ -12,22 +12,8 @@
 
 namespace rocksdb {
 
-std::string EncodeSessionId(uint64_t upper, uint64_t lower) {
-  std::string db_session_id(20U, '\0');
-  char *buf = &db_session_id[0];
-  // Preserving `lower` is slightly tricky. 36^12 is slightly more than
-  // 62 bits, so we use 12 chars plus the bottom two bits of one more.
-  // (A tiny fraction of 20 digit strings go unused.)
-  uint64_t a = (upper << 2) | (lower >> 62);
-  uint64_t b = lower & (UINT64_MAX >> 2);
-  PutBaseChars<36>(&buf, 8, a, /*uppercase*/ true);
-  PutBaseChars<36>(&buf, 12, b, /*uppercase*/ true);
-  assert(buf == &db_session_id.back() + 1);
-  return db_session_id;
-}
-
-Status DecodeSessionId(const std::string &db_session_id, uint64_t *upper,
-                       uint64_t *lower) {
+Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
+                       uint64_t& lower) {
   const size_t len = db_session_id.size();
   if (len == 0) {
     return Status_NotSupported("Missing db_session_id");
@@ -42,17 +28,17 @@ Status DecodeSessionId(const std::string &db_session_id, uint64_t *upper,
   }
   uint64_t a = 0, b = 0;
   const char *buf = &db_session_id.front();
-  bool success = ParseBaseChars<36>(&buf, len - 12U, &a);
+  bool success = ParseBaseChars_36(&buf, len - 12U, &a);
   if (!success) {
     return Status_NotSupported("Bad digit in db_session_id");
   }
-  success = ParseBaseChars<36>(&buf, 12U, &b);
+  success = ParseBaseChars_36(&buf, 12U, &b);
   if (!success) {
     return Status_NotSupported("Bad digit in db_session_id");
   }
   assert(buf == &db_session_id.back() + 1);
-  *upper = a >> 2;
-  *lower = (b & (UINT64_MAX >> 2)) | (a << 62);
+  upper = a >> 2;
+  lower = (b & (UINT64_MAX >> 2)) | (a << 62);
   return Status_OK();
 }
 
@@ -74,7 +60,7 @@ Status GetSstInternalUniqueId(const std::string &db_id,
   uint64_t session_upper = 0;  // Assignment to appease clang-analyze
   uint64_t session_lower = 0;  // Assignment to appease clang-analyze
   {
-    Status s = DecodeSessionId(db_session_id, &session_upper, &session_lower);
+    Status s = DecodeSessionId(db_session_id, session_upper, session_lower);
     if (!s.ok()) {
       if (!force) {
         return s;
@@ -175,49 +161,27 @@ Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out) {
 
 template <typename ID>
 Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
-                                            std::string *out_id) {
+                                            std::string& out_id) {
   ID tmp{};
   Status s = GetSstInternalUniqueId(props.db_id, props.db_session_id,
-                                    props.orig_file_number, &tmp);
+                                    props.orig_file_number, tmp.as_unique_id_ptr());
   if (s.ok()) {
-    InternalUniqueIdToExternal(&tmp);
-    *out_id = EncodeUniqueIdBytes(&tmp);
+    InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
+    out_id = EncodeUniqueIdBytes(tmp.as_unique_id_ptr());
   } else {
-    out_id->clear();
+    out_id.clear();
   }
   return s;
 }
 
 Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
-                                              std::string *out_id) {
+                                              std::string& out_id) {
   return GetUniqueIdFromTablePropertiesHelper<UniqueId64x3>(props, out_id);
 }
 
 Status GetUniqueIdFromTableProperties(const TableProperties &props,
-                                      std::string *out_id) {
+                                      std::string& out_id) {
   return GetUniqueIdFromTablePropertiesHelper<UniqueId64x2>(props, out_id);
-}
-
-std::string UniqueIdToHumanString(const std::string &id) {
-  // Not so efficient, but that's OK
-  std::string str = Slice(id).ToString(/*hex*/ true);
-  for (size_t i = 16; i < str.size(); i += 17) {
-    str.insert(i, "-");
-  }
-  return str;
-}
-
-std::string InternalUniqueIdToHumanString(UniqueIdPtr in) {
-  std::string str = "{";
-  str += std::to_string(in.ptr[0]);
-  str += ",";
-  str += std::to_string(in.ptr[1]);
-  if (in.extended) {
-    str += ",";
-    str += std::to_string(in.ptr[2]);
-  }
-  str += "}";
-  return str;
 }
 
 }  // namespace rocksdb

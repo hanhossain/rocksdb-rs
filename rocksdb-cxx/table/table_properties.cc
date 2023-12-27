@@ -30,6 +30,15 @@ void AppendProperty(std::string& props, const std::string& key,
   props.append(prop_delim);
 }
 
+void AppendProperty(std::string& props, const std::string& key,
+                const rust::String& value, const std::string& prop_delim,
+                const std::string& kv_delim) {
+    props.append(key);
+    props.append(kv_delim);
+    props.append(std::string(value));
+    props.append(prop_delim);
+}
+
 template <class TValue>
 void AppendProperty(std::string& props, const std::string& key,
                     const TValue& value, const std::string& prop_delim,
@@ -153,7 +162,7 @@ std::string TableProperties::ToString(const std::string& prop_delim,
 
   // Unique ID, when available
   std::string id;
-  Status s = GetUniqueIdFromTableProperties(*this, &id);
+  Status s = GetUniqueIdFromTableProperties(*this, id);
   AppendProperty(result, "unique ID",
                  s.ok() ? UniqueIdToHumanString(id) : "N/A", prop_delim,
                  kv_delim);

@@ -88,7 +88,7 @@ struct TableReaderOptions {
 
   uint64_t cur_file_num;
 
-  // Known unique_id or {}, kNullUniqueId64x2 means unknown
+  // Known unique_id or {}, UniqueId64x2_null() means unknown
   UniqueId64x2 unique_id;
 
   uint8_t block_protection_bytes_per_key;

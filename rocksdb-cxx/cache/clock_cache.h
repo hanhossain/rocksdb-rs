@@ -309,7 +309,7 @@ struct ClockHandleBasicData {
   const Cache::CacheItemHelper* helper = nullptr;
   // A lossless, reversible hash of the fixed-size (16 byte) cache key. This
   // eliminates the need to store a hash separately.
-  UniqueId64x2 hashed_key = kNullUniqueId64x2;
+  UniqueId64x2 hashed_key = UniqueId64x2_null();
   size_t total_charge = 0;
 
   inline size_t GetTotalCharge() const { return total_charge; }
@@ -622,7 +622,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
   using HashVal = UniqueId64x2;
   using HashCref = const HashVal&;
   static inline uint32_t HashPieceForSharding(HashCref hash) {
-    return Upper32of64(hash[0]);
+    return Upper32of64(hash.data[0]);
   }
   static inline HashVal ComputeHash(const Slice& key, uint32_t seed) {
     assert(key.size() == kCacheKeySize);
@@ -631,7 +631,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
     // NOTE: endian dependence
     // TODO: use GetUnaligned?
     std::memcpy(&in, key.data(), kCacheKeySize);
-    BijectiveHash2x64(in[1], in[0] ^ seed, &out[1], &out[0]);
+    BijectiveHash2x64(in.data[1], in.data[0] ^ seed, &out.data[1], &out.data[0]);
     return out;
   }
 
@@ -639,8 +639,8 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
   // backing storage for the Slice in `unhashed`
   static inline Slice ReverseHash(const UniqueId64x2& hashed,
                                   UniqueId64x2* unhashed, uint32_t seed) {
-    BijectiveUnhash2x64(hashed[1], hashed[0], &(*unhashed)[1], &(*unhashed)[0]);
-    (*unhashed)[0] ^= seed;
+    BijectiveUnhash2x64(hashed.data[1], hashed.data[0], &unhashed->data[1], &unhashed->data[0]);
+    unhashed->data[0] ^= seed;
     // NOTE: endian dependence
     return Slice(reinterpret_cast<const char*>(unhashed), kCacheKeySize);
   }

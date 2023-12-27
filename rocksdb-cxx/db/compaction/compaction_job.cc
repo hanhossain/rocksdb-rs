@@ -1829,7 +1829,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
     assert(!db_id_.empty());
     assert(!db_session_id_.empty());
     s = GetSstInternalUniqueId(db_id_, db_session_id_, meta.fd.GetNumber(),
-                               &meta.unique_id);
+                               meta.unique_id.as_unique_id_ptr());
     if (!s.ok()) {
       ROCKS_LOG_ERROR(db_options_.info_log,
                       "[%s] [JOB %d] file #%" PRIu64

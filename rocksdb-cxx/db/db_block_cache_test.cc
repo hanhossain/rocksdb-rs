@@ -1551,8 +1551,9 @@ class CacheKeyTest : public testing::Test {
   OffsetableCacheKey GetOffsetableCacheKey(uint64_t session_counter,
                                            uint64_t file_number) {
     // Like SemiStructuredUniqueIdGen::GenerateNext
-    tp_.db_session_id = EncodeSessionId(base_session_upper_,
-                                        base_session_lower_ ^ session_counter);
+    // TODO: make db_session_id be a rust::String
+    tp_.db_session_id = std::string(EncodeSessionId(base_session_upper_,
+                                        base_session_lower_ ^ session_counter));
     tp_.db_id = std::to_string(db_id_);
     tp_.orig_file_number = file_number;
     bool is_stable;
@@ -1565,12 +1566,12 @@ class CacheKeyTest : public testing::Test {
     EXPECT_TRUE(!rv.IsEmpty());
     // BEGIN some assertions in relation to SST unique IDs
     std::string external_unique_id_str;
-    EXPECT_OK(GetUniqueIdFromTableProperties(tp_, &external_unique_id_str));
+    EXPECT_OK(GetUniqueIdFromTableProperties(tp_, external_unique_id_str));
     UniqueId64x2 sst_unique_id = {};
-    EXPECT_OK(DecodeUniqueIdBytes(external_unique_id_str, &sst_unique_id));
-    ExternalUniqueIdToInternal(&sst_unique_id);
+    EXPECT_OK(DecodeUniqueIdBytes(external_unique_id_str, sst_unique_id.as_unique_id_ptr()));
+    ExternalUniqueIdToInternal(sst_unique_id.as_unique_id_ptr());
     OffsetableCacheKey ock =
-        OffsetableCacheKey::FromInternalUniqueId(&sst_unique_id);
+        OffsetableCacheKey::FromInternalUniqueId(sst_unique_id.as_unique_id_ptr());
     EXPECT_EQ(rv.WithOffset(0).AsSlice(), ock.WithOffset(0).AsSlice());
     EXPECT_EQ(ock.ToInternalUniqueId(), sst_unique_id);
     // END some assertions in relation to SST unique IDs
@@ -1591,8 +1592,8 @@ TEST_F(CacheKeyTest, DBImplSessionIdStructure) {
   std::string session_id1 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   std::string session_id2 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   uint64_t upper1, upper2, lower1, lower2;
-  ASSERT_OK(DecodeSessionId(session_id1, &upper1, &lower1));
-  ASSERT_OK(DecodeSessionId(session_id2, &upper2, &lower2));
+  ASSERT_OK(DecodeSessionId(session_id1, upper1, lower1));
+  ASSERT_OK(DecodeSessionId(session_id2, upper2, lower2));
   // Because generated in same process
   ASSERT_EQ(upper1, upper2);
   // Unless we generate > 4 billion session IDs in this process...

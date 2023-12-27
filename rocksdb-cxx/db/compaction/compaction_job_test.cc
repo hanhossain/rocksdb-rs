@@ -384,7 +384,7 @@ class CompactionJobTestBase : public testing::Test {
         oldest_blob_file_number, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime,
         versions_->GetColumnFamilySet()->GetDefault()->NewEpochNumber(),
-        kUnknownFileChecksum, kUnknownFileChecksumFuncName, kNullUniqueId64x2,
+        kUnknownFileChecksum, kUnknownFileChecksumFuncName, UniqueId64x2_null(),
         /*compensated_range_deletion_size=*/0, /*tail_size=*/0,
         /*user_defined_timestamps_persisted=*/true);
 
@@ -1690,7 +1690,7 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   if (!result.output_files.empty()) {
     CompactionServiceResult deserialized_tmp;
     ASSERT_OK(CompactionServiceResult::Read(output, &deserialized_tmp));
-    deserialized_tmp.output_files[0].unique_id[0] += 1;
+    deserialized_tmp.output_files[0].unique_id.data[0] += 1;
     ASSERT_FALSE(deserialized_tmp.TEST_Equals(&result, &mismatch));
     ASSERT_EQ(mismatch, "output_files.unique_id");
   }
