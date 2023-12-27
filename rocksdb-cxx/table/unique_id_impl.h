@@ -45,10 +45,4 @@ std::string EncodeUniqueIdBytes(UniqueIdPtr in);
 // Reverse of EncodeUniqueIdBytes.
 Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out);
 
-// Reverse of EncodeSessionId. Returns NotSupported on error rather than
-// Corruption because non-standard session IDs should be allowed with degraded
-// functionality.
-Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
-                       uint64_t& lower);
-
 }  // namespace rocksdb

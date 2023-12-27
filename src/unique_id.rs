@@ -51,6 +51,7 @@ pub mod ffi {
         #[cxx_name = "EncodeSessionId"]
         fn encode_session_id(upper: u64, lower: u64) -> String;
 
+        #[cxx_name = "DecodeSessionId"]
         fn decode_session_id(db_session_id: &str, upper: &mut u64, lower: &mut u64) -> Status;
     }
 }
@@ -134,6 +135,9 @@ fn encode_session_id(upper: u64, lower: u64) -> String {
     db_session_id
 }
 
+/// Reverse of EncodeSessionId. Returns NotSupported on error rather than
+/// Corruption because non-standard session IDs should be allowed with degraded
+/// functionality.
 fn decode_session_id(
     db_session_id: &str,
     upper: &mut u64,

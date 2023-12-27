@@ -12,11 +12,6 @@
 
 namespace rocksdb {
 
-Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
-                       uint64_t& lower) {
-  return decode_session_id(db_session_id, upper, lower);
-}
-
 Status GetSstInternalUniqueId(const std::string &db_id,
                               const std::string &db_session_id,
                               uint64_t file_number, UniqueIdPtr out,
