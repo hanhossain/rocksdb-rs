@@ -2,10 +2,10 @@
 ** EXPERIMENTAL **: This function is currently still considered experimental
   and is not officially released yet. Feedback and Suggestions are welcome.
 
-ANCHOR: corrosion_add_cxxbridge
+ANCHOR: corrosion_add_cxxbridge_custom
 
 ```cmake
-corrosion_add_cxxbridge(cxx_target
+corrosion_add_cxxbridge_custom(cxx_target
         CRATE <imported_target_name>
         [FILES <file1.rs> <file2.rs>]
 )
@@ -50,9 +50,9 @@ welcome.
 
 [cxx]: https://github.com/dtolnay/cxx
 
-ANCHOR_END: corrosion_add_cxxbridge
+ANCHOR_END: corrosion_add_cxxbridge_custom
 #]=======================================================================]
-function(corrosion_add_cxxbridge cxx_target)
+function(corrosion_add_cxxbridge_custom cxx_target)
     set(OPTIONS)
     set(ONE_VALUE_KEYWORDS CRATE)
     set(MULTI_VALUE_KEYWORDS FILES)
