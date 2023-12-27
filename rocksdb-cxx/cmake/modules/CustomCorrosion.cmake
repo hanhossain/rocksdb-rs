@@ -147,8 +147,9 @@ function(corrosion_add_cxxbridge_custom cxx_target)
     #            cxxbridge
     #                <cxx_target>
     #                    include
-    #                        <cxx_target>
-    #                            <headers>
+    #                        rocksdb-rs
+    #                            src
+    #                                <headers>
     #                        rust
     #                            cxx.h
     #                    src
@@ -160,7 +161,7 @@ function(corrosion_add_cxxbridge_custom cxx_target)
 
     set(corrosion_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/corrosion_generated")
     set(generated_dir "${corrosion_generated_dir}/cxxbridge/${cxx_target}")
-    set(header_placement_dir "${generated_dir}/include/${cxx_target}")
+    set(header_placement_dir "${generated_dir}/include/rocksdb-rs/src")
     set(source_placement_dir "${generated_dir}/src")
 
     add_library(${cxx_target} STATIC)
@@ -200,7 +201,7 @@ function(corrosion_add_cxxbridge_custom cxx_target)
             set(directory_component "${directory}/")
         endif()
         # todo: convert potentially absolute paths to relative paths..
-        set(cxx_header ${directory_component}${filename}.h)
+        set(cxx_header ${directory_component}${filename}.rs.h)
         set(cxx_source ${directory_component}${filename}.cpp)
 
         # todo: not all projects may use the `src` directory.
@@ -217,7 +218,7 @@ function(corrosion_add_cxxbridge_custom cxx_target)
                 COMMAND
                 ${cxxbridge} ${rust_source_path}
                 --output "${source_placement_dir}/${cxx_source}"
-                --include "${cxx_target}/${cxx_header}"
+                --include "rocksdb-rs/src/${cxx_header}"
                 DEPENDS "cxxbridge_v${cxx_required_version}" "${rust_source_path}"
                 COMMENT "Generating cxx bindings for crate ${_arg_CRATE}"
         )

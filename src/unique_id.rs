@@ -28,11 +28,7 @@ pub mod ffi {
     }
 
     extern "C++" {
-        // TODO: build from rust
-        // include!("rocksdb-rs/src/status.rs.h");
-
-        // build from c++
-        include!("rocksdb-rs-cxx/status.h");
+        include!("rocksdb-rs/src/status.rs.h");
 
         type Status = crate::status::ffi::Status;
     }
