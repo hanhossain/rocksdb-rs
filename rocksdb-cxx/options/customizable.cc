@@ -13,11 +13,7 @@
 #include "rocksdb/utilities/options_type.h"
 #include "util/string_util.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

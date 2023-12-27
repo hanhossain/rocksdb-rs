@@ -17,11 +17,7 @@
 #include "rocksdb/persistent_cache.h"
 #include "rocksdb/system_clock.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 // Persistent Cache
 //

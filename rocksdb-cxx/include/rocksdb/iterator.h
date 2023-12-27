@@ -24,11 +24,7 @@
 #include "rocksdb/slice.h"
 #include "rocksdb/wide_columns.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

@@ -13,11 +13,7 @@
 
 #include "rocksdb/system_clock.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 // A SystemClock that can "mock" sleep and counts its operations.

@@ -26,11 +26,7 @@
 #include "util/compression.h"
 #include "util/stop_watch.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/compression_type.rs.h"
-#else
-#include "rocksdb-rs/src/compression_type.rs.h"
-#endif
 
 namespace rocksdb {
 

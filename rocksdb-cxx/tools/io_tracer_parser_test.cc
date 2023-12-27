@@ -22,11 +22,7 @@ int main() {
 #include "test_util/testutil.h"
 #include "tools/io_tracer_parser_tool.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

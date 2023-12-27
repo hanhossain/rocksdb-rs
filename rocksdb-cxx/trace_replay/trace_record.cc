@@ -13,11 +13,7 @@
 #include "rocksdb/trace_record_result.h"
 #include "trace_replay/trace_record_handler.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

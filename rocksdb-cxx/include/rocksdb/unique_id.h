@@ -7,11 +7,7 @@
 
 #include "rocksdb/table_properties.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/unique_id.rs.h"
-#else
-#include "rocksdb-rs/src/unique_id.rs.h"
-#endif
 
 namespace rocksdb {
 

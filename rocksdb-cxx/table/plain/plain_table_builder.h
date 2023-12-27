@@ -19,11 +19,7 @@
 #include "table/plain/plain_table_key_coding.h"
 #include "table/table_builder.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

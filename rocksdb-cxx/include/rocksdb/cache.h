@@ -18,13 +18,8 @@
 #include "rocksdb/data_structure.h"
 #include "rocksdb/memory_allocator.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/cache.rs.h"
 #include "rocksdb-rs/src/compression_type.rs.h"
-#else
-#include "rocksdb-rs/src/cache.rs.h"
-#include "rocksdb-rs/src/compression_type.rs.h"
-#endif
 
 namespace rocksdb {
 

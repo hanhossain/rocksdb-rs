@@ -15,11 +15,7 @@
 #include "rocksdb/env.h"
 #include "rocksdb/options.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 struct ConfigOptions;

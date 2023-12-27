@@ -12,13 +12,8 @@
 #include "rocksdb/db.h"
 #include "rocksdb/table.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/compression_type.rs.h"
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 class Env;

@@ -16,11 +16,7 @@
 #include "rocksdb/cache.h"
 #include "util/coding.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/status.rs.h"
-#else
-#include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 WriteBufferManager::WriteBufferManager(size_t _buffer_size,

@@ -9,11 +9,7 @@
 
 #include "rocksdb/unique_id.h"
 
-#ifndef ROCKSDB_RS
 #include "rocksdb-rs/src/unique_id.rs.h"
-#else
-#include "rocksdb-rs/src/unique_id.rs.h"
-#endif
 
 namespace rocksdb {
 // Helper for GetUniqueIdFromTableProperties. This function can also be used
