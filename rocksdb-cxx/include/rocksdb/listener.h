@@ -20,8 +20,8 @@
 #include "rocksdb/types.h"
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/compression_type.h"
-#include "rocksdb-rs-cxx/status.h"
+#include "rocksdb-rs/src/compression_type.rs.h"
+#include "rocksdb-rs/src/status.rs.h"
 #else
 #include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/status.rs.h"

@@ -14,7 +14,7 @@
 #include <thread>
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/port_defs.h"
+#include "rocksdb-rs/src/port_defs.rs.h"
 #else
 #include "rocksdb-rs/src/port_defs.rs.h"
 #endif

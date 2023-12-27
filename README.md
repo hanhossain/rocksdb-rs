@@ -24,7 +24,7 @@ Regex to find enums which need to be convered to enum class: `(?<!(static )|\w)e
 Use this to include the bridging header.
 ```c++
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/lib.h"
+#include "rocksdb-rs/src/lib.rs.h"
 #else
 #include "rocksdb-rs/src/lib.rs.h"
 #endif

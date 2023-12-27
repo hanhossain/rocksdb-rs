@@ -15,7 +15,7 @@
 #include "rocksdb/types.h"
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/compression_type.h"
+#include "rocksdb-rs/src/compression_type.rs.h"
 #else
 #include "rocksdb-rs/src/compression_type.rs.h"
 #endif

@@ -10,7 +10,7 @@
 #include "rocksdb/unique_id.h"
 
 #ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/unique_id.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #else
 #include "rocksdb-rs/src/unique_id.rs.h"
 #endif
