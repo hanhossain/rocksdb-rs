@@ -23,3 +23,20 @@ pub(crate) fn put_base_chars(s: &mut String, n: usize, mut v: u64, uppercase: bo
         s.push(c);
     }
 }
+
+// TODO: this could probably use the alphanumeric methods
+pub(crate) fn parse_base_chars(s: &str, base: u64, v: &mut u64) -> bool {
+    for c in s.chars() {
+        *v = *v * base;
+        if c >= '0' && ((base >= 10 && c <= '9') || base < 10 && c < '0') {
+            *v += (c as u64) - ('0' as u64);
+        } else if base > 10 && c >= 'A' && c < ('A' as u8 + base as u8 - 10) as char {
+            *v += (c as u64) - 'A' as u64 + 10;
+        } else if base > 10 && c >= 'a' && c < ('a' as u8 + base as u8 - 10) as char {
+            *v += (c as u64) - 'a' as u64 + 10;
+        } else {
+            return false;
+        }
+    }
+    true
+}

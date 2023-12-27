@@ -1,7 +1,7 @@
 use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb")]
-mod ffi {
+pub(crate) mod ffi {
     #[derive(Debug)]
     enum Code {
         kOk = 0,
@@ -1554,6 +1554,34 @@ fn status_move(status: ffi::Status) -> ffi::Status {
         data_loss: status.data_loss,
         scope: status.scope,
         state: status.state,
+    }
+}
+
+pub(crate) enum Status {
+    Ok,
+    NotSupported(NotSupported),
+}
+
+pub(crate) struct NotSupported {
+    pub(crate) msg: String,
+}
+
+impl From<Status> for ffi::Status {
+    fn from(value: Status) -> Self {
+        match value {
+            Status::Ok => Self::default(),
+            Status::NotSupported(s) => {
+                let mut msg = crate::ffi::make_string();
+                msg.pin_mut().push_str(&s.msg);
+                Self::new_with_messages(
+                    ffi::Code::kNotSupported,
+                    ffi::SubCode::kNone,
+                    msg,
+                    UniquePtr::null(),
+                    ffi::Severity::kNoError,
+                )
+            }
+        }
     }
 }
 
