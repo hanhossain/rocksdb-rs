@@ -50,6 +50,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
 )
 FetchContent_MakeAvailable(Corrosion)
+include(CustomCorrosion)
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
@@ -1109,7 +1110,7 @@ configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
 corrosion_set_env_vars(rocksdb-rs SKIP_BUILD_SCRIPT=1)
-corrosion_add_cxxbridge(rocksdb-rs-cxx CRATE rocksdb-rs
+corrosion_add_cxxbridge_custom(rocksdb-rs-cxx CRATE rocksdb-rs
         FILES cache.rs compression_type.rs env.rs lib.rs port_defs.rs slice.rs status.rs unique_id.rs)
 target_include_directories(rocksdb-rs-cxx PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
 

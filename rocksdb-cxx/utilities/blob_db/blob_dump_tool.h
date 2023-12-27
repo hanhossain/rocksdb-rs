@@ -12,11 +12,7 @@
 #include "file/random_access_file_reader.h"
 #include "rocksdb/slice.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/status.h"
-#else
 #include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 namespace blob_db {

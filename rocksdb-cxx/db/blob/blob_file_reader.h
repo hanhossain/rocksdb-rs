@@ -12,11 +12,7 @@
 #include "file/random_access_file_reader.h"
 #include "util/autovector.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/compression_type.h"
-#else
 #include "rocksdb-rs/src/compression_type.rs.h"
-#endif
 
 namespace rocksdb {
 

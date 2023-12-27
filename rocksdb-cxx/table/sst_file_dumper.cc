@@ -36,11 +36,7 @@
 #include "util/compression.h"
 #include "util/random.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/status.h"
-#else
 #include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

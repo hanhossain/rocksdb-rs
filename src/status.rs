@@ -1,9 +1,7 @@
-use crate::slice::ffi::Slice;
-use crate::status::ffi::{Code, Severity, Status, SubCode};
 use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb")]
-pub mod ffi {
+pub(crate) mod ffi {
     #[derive(Debug)]
     enum Code {
         kOk = 0,
@@ -373,29 +371,29 @@ pub mod ffi {
     }
 }
 
-impl Status {
-    pub fn new_with_slices(
-        code: Code,
-        subcode: SubCode,
-        msg: &Slice,
-        msg2: &Slice,
-        sev: Severity,
-    ) -> Status {
-        assert_ne!(subcode, SubCode::kMaxSubCode);
+impl ffi::Status {
+    fn new_with_slices(
+        code: ffi::Code,
+        subcode: ffi::SubCode,
+        msg: &ffi::Slice,
+        msg2: &ffi::Slice,
+        sev: ffi::Severity,
+    ) -> ffi::Status {
+        assert_ne!(subcode, ffi::SubCode::kMaxSubCode);
         let msg = msg.to_unique_ptr_string();
         let msg2 = msg2.to_unique_ptr_string();
 
-        Status::new_with_messages(code, subcode, msg, msg2, sev)
+        ffi::Status::new_with_messages(code, subcode, msg, msg2, sev)
     }
 
     fn new_with_messages(
-        code: Code,
-        subcode: SubCode,
+        code: ffi::Code,
+        subcode: ffi::SubCode,
         mut msg: UniquePtr<CxxString>,
         msg2: UniquePtr<CxxString>,
-        severity: Severity,
-    ) -> Status {
-        assert_ne!(subcode, SubCode::kMaxSubCode);
+        severity: ffi::Severity,
+    ) -> ffi::Status {
+        assert_ne!(subcode, ffi::SubCode::kMaxSubCode);
 
         if !msg2.is_null() && msg2.len() > 0 {
             msg.pin_mut().push_str(": ");
@@ -404,209 +402,209 @@ impl Status {
             msg.pin_mut().push_bytes(msg2.as_bytes());
         }
 
-        Status {
+        ffi::Status {
             code,
             subcode,
             severity,
             state: msg,
-            ..Status::default()
+            ..ffi::Status::default()
         }
     }
 
-    pub fn code(&self) -> Code {
+    fn code(&self) -> ffi::Code {
         self.code
     }
 
-    pub fn subcode(&self) -> SubCode {
+    fn subcode(&self) -> ffi::SubCode {
         self.subcode
     }
 
-    pub fn severity(&self) -> Severity {
+    fn severity(&self) -> ffi::Severity {
         self.severity
     }
 
-    pub fn get_state(&self) -> &UniquePtr<CxxString> {
+    fn get_state(&self) -> &UniquePtr<CxxString> {
         &self.state
     }
 
     /// Returns true iff the status indicates success.
-    pub fn ok(&self) -> bool {
-        self.code == Code::kOk
+    fn ok(&self) -> bool {
+        self.code == ffi::Code::kOk
     }
 
     /// Returns true iff the status indicates success *with* something overwritten
-    pub fn is_ok_overwritten(&self) -> bool {
-        self.code == Code::kOk && self.subcode == SubCode::kOverwritten
+    fn is_ok_overwritten(&self) -> bool {
+        self.code == ffi::Code::kOk && self.subcode == ffi::SubCode::kOverwritten
     }
 
     /// Returns true iff the status indicates a NotFound error.
-    pub fn is_not_found(&self) -> bool {
-        self.code == Code::kNotFound
+    fn is_not_found(&self) -> bool {
+        self.code == ffi::Code::kNotFound
     }
 
     /// Returns true iff the status indicates a Corruption error.
-    pub fn is_corruption(&self) -> bool {
-        self.code == Code::kCorruption
+    fn is_corruption(&self) -> bool {
+        self.code == ffi::Code::kCorruption
     }
 
     /// Returns true iff the status indicates a NotSupported error.
-    pub fn is_not_supported(&self) -> bool {
-        self.code == Code::kNotSupported
+    fn is_not_supported(&self) -> bool {
+        self.code == ffi::Code::kNotSupported
     }
 
     /// Returns true iff the status indicates an InvalidArgument error.
-    pub fn is_invalid_argument(&self) -> bool {
-        self.code == Code::kInvalidArgument
+    fn is_invalid_argument(&self) -> bool {
+        self.code == ffi::Code::kInvalidArgument
     }
 
     /// Returns true iff the status indicates an IOError.
-    pub fn is_io_error(&self) -> bool {
-        self.code == Code::kIOError
+    fn is_io_error(&self) -> bool {
+        self.code == ffi::Code::kIOError
     }
 
     /// Returns true iff the status indicates an MergeInProgress.
-    pub fn is_merge_in_progress(&self) -> bool {
-        self.code == Code::kMergeInProgress
+    fn is_merge_in_progress(&self) -> bool {
+        self.code == ffi::Code::kMergeInProgress
     }
 
     /// Returns true iff the status indicates Incomplete
-    pub fn is_incomplete(&self) -> bool {
-        self.code == Code::kIncomplete
+    fn is_incomplete(&self) -> bool {
+        self.code == ffi::Code::kIncomplete
     }
 
     /// Returns true iff the status indicates Shutdown In progress
-    pub fn is_shutdown_in_progress(&self) -> bool {
-        self.code == Code::kShutdownInProgress
+    fn is_shutdown_in_progress(&self) -> bool {
+        self.code == ffi::Code::kShutdownInProgress
     }
 
-    pub fn is_timed_out(&self) -> bool {
-        self.code == Code::kTimedOut
+    fn is_timed_out(&self) -> bool {
+        self.code == ffi::Code::kTimedOut
     }
 
-    pub fn is_aborted(&self) -> bool {
-        self.code == Code::kAborted
+    fn is_aborted(&self) -> bool {
+        self.code == ffi::Code::kAborted
     }
 
-    pub fn is_lock_limit(&self) -> bool {
-        self.code == Code::kAborted && self.subcode == SubCode::kLockLimit
+    fn is_lock_limit(&self) -> bool {
+        self.code == ffi::Code::kAborted && self.subcode == ffi::SubCode::kLockLimit
     }
 
     /// Returns true iff the status indicates that a resource is Busy and temporarily could not be
     /// acquired.
-    pub fn is_busy(&self) -> bool {
-        self.code == Code::kBusy
+    fn is_busy(&self) -> bool {
+        self.code == ffi::Code::kBusy
     }
 
-    pub fn is_deadlock(&self) -> bool {
-        self.code == Code::kBusy && self.subcode == SubCode::kDeadlock
+    fn is_deadlock(&self) -> bool {
+        self.code == ffi::Code::kBusy && self.subcode == ffi::SubCode::kDeadlock
     }
 
     /// Returns true iff the status indicated that the operation has Expired.
-    pub fn is_expired(&self) -> bool {
-        self.code == Code::kExpired
+    fn is_expired(&self) -> bool {
+        self.code == ffi::Code::kExpired
     }
 
     /// Returns true iff the status indicates a TryAgain error. This usually means that the
     /// operation failed, but may succeed if re-attempted.
-    pub fn is_try_again(&self) -> bool {
-        self.code == Code::kTryAgain
+    fn is_try_again(&self) -> bool {
+        self.code == ffi::Code::kTryAgain
     }
 
     /// Returns true iff the status indicates the proposed compaction is too large
-    pub fn is_compaction_too_large(&self) -> bool {
-        self.code == Code::kCompactionTooLarge
+    fn is_compaction_too_large(&self) -> bool {
+        self.code == ffi::Code::kCompactionTooLarge
     }
 
     /// Returns true iff the status indicates Column Family Dropped
-    pub fn is_column_family_dropped(&self) -> bool {
-        self.code == Code::kColumnFamilyDropped
+    fn is_column_family_dropped(&self) -> bool {
+        self.code == ffi::Code::kColumnFamilyDropped
     }
 
     /// Returns true iff the status indicates a NoSpace error. This is caused by an I/O error
     /// returning the specific "out of space" error condition. Stricto sensu, an NoSpace error is an
     /// I/O error with a specific subcode, enabling users to take the appropriate action if needed
-    pub fn is_no_space(&self) -> bool {
-        self.code == Code::kIOError && self.subcode == SubCode::kNoSpace
+    fn is_no_space(&self) -> bool {
+        self.code == ffi::Code::kIOError && self.subcode == ffi::SubCode::kNoSpace
     }
 
     /// Returns true iff the status indicates a memory limit error. There may be cases where we
     /// limit the memory used in certain operations (eg. the size of a write batch) in order to
     /// avoid out of memory exceptions.
-    pub fn is_memory_limit(&self) -> bool {
-        self.code == Code::kAborted && self.subcode == SubCode::kMemoryLimit
+    fn is_memory_limit(&self) -> bool {
+        self.code == ffi::Code::kAborted && self.subcode == ffi::SubCode::kMemoryLimit
     }
 
     /// Returns true iff the status indicates a PathNotFound error. This is caused by an I/O error
     /// returning the specific "no such file or directory" error condition. A PathNotFound error is
     /// an I/O error with a specific subcode, enabling users to take appropriate action if necessary
-    pub fn is_path_not_found(&self) -> bool {
-        (self.code == Code::kIOError || self.code == Code::kNotFound)
-            && self.subcode == SubCode::kPathNotFound
+    fn is_path_not_found(&self) -> bool {
+        (self.code == ffi::Code::kIOError || self.code == ffi::Code::kNotFound)
+            && self.subcode == ffi::SubCode::kPathNotFound
     }
 
     /// Returns true iff the status indicates manual compaction paused. This is caused by a call to
     /// PauseManualCompaction
-    pub fn is_manual_compaction_paused(&self) -> bool {
-        self.code == Code::kIncomplete && self.subcode == SubCode::kManualCompactionPaused
+    fn is_manual_compaction_paused(&self) -> bool {
+        self.code == ffi::Code::kIncomplete && self.subcode == ffi::SubCode::kManualCompactionPaused
     }
 
     /// Returns true iff the status indicates a TxnNotPrepared error.
-    pub fn is_txn_not_prepared(&self) -> bool {
-        self.code == Code::kInvalidArgument && self.subcode == SubCode::kTxnNotPrepared
+    fn is_txn_not_prepared(&self) -> bool {
+        self.code == ffi::Code::kInvalidArgument && self.subcode == ffi::SubCode::kTxnNotPrepared
     }
 
     /// Returns true iff the status indicates a IOFenced error.
-    pub fn is_io_fenced(&self) -> bool {
-        self.code == Code::kIOError && self.subcode == SubCode::kIOFenced
+    fn is_io_fenced(&self) -> bool {
+        self.code == ffi::Code::kIOError && self.subcode == ffi::SubCode::kIOFenced
     }
 
-    pub fn to_string(&self) -> UniquePtr<CxxString> {
+    fn to_string(&self) -> UniquePtr<CxxString> {
         let msg = match self.code {
-            Code::kOk => {
+            ffi::Code::kOk => {
                 let mut s = crate::ffi::make_string();
                 s.pin_mut().push_str("OK");
                 return s;
             }
-            Code::kNotFound => "NotFound: ",
-            Code::kCorruption => "Corruption: ",
-            Code::kNotSupported => "Not implemented: ",
-            Code::kInvalidArgument => "Invalid argument: ",
-            Code::kIOError => "IO error: ",
-            Code::kMergeInProgress => "Merge in progress: ",
-            Code::kIncomplete => "Result incomplete: ",
-            Code::kShutdownInProgress => "Shutdown in progress: ",
-            Code::kTimedOut => "Operation timed out: ",
-            Code::kAborted => "Operation aborted: ",
-            Code::kBusy => "Resource busy: ",
-            Code::kExpired => "Operation expired: ",
-            Code::kTryAgain => "Operation failed. Try again.: ",
-            Code::kCompactionTooLarge => "Compaction too large: ",
-            Code::kColumnFamilyDropped => "Column family dropped: ",
+            ffi::Code::kNotFound => "NotFound: ",
+            ffi::Code::kCorruption => "Corruption: ",
+            ffi::Code::kNotSupported => "Not implemented: ",
+            ffi::Code::kInvalidArgument => "Invalid argument: ",
+            ffi::Code::kIOError => "IO error: ",
+            ffi::Code::kMergeInProgress => "Merge in progress: ",
+            ffi::Code::kIncomplete => "Result incomplete: ",
+            ffi::Code::kShutdownInProgress => "Shutdown in progress: ",
+            ffi::Code::kTimedOut => "Operation timed out: ",
+            ffi::Code::kAborted => "Operation aborted: ",
+            ffi::Code::kBusy => "Resource busy: ",
+            ffi::Code::kExpired => "Operation expired: ",
+            ffi::Code::kTryAgain => "Operation failed. Try again.: ",
+            ffi::Code::kCompactionTooLarge => "Compaction too large: ",
+            ffi::Code::kColumnFamilyDropped => "Column family dropped: ",
             x => unreachable!("{:?} is not a valid status code", x),
         };
 
         let mut res = crate::ffi::make_string();
         res.pin_mut().push_str(msg);
 
-        if self.subcode != SubCode::kNone {
+        if self.subcode != ffi::SubCode::kNone {
             let subcode_msg = match self.subcode {
-                SubCode::kMutexTimeout => "Timeout Acquiring Mutex",
-                SubCode::kLockTimeout => "Timeout waiting to lock key",
-                SubCode::kLockLimit => "Failed to acquire lock due to max_num_locks limit",
-                SubCode::kNoSpace => "No space left on device",
-                SubCode::kDeadlock => "Deadlock",
-                SubCode::kStaleFile => "Stale file handle",
-                SubCode::kMemoryLimit => "Memory limit reached",
-                SubCode::kSpaceLimit => "Space limit reached",
-                SubCode::kPathNotFound => "No such file or directory",
-                SubCode::KMergeOperandsInsufficientCapacity => {
+                ffi::SubCode::kMutexTimeout => "Timeout Acquiring Mutex",
+                ffi::SubCode::kLockTimeout => "Timeout waiting to lock key",
+                ffi::SubCode::kLockLimit => "Failed to acquire lock due to max_num_locks limit",
+                ffi::SubCode::kNoSpace => "No space left on device",
+                ffi::SubCode::kDeadlock => "Deadlock",
+                ffi::SubCode::kStaleFile => "Stale file handle",
+                ffi::SubCode::kMemoryLimit => "Memory limit reached",
+                ffi::SubCode::kSpaceLimit => "Space limit reached",
+                ffi::SubCode::kPathNotFound => "No such file or directory",
+                ffi::SubCode::KMergeOperandsInsufficientCapacity => {
                     "Insufficient capacity for merge operands"
                 }
-                SubCode::kManualCompactionPaused => "Manual compaction paused",
-                SubCode::kOverwritten => " (overwritten)",
-                SubCode::kTxnNotPrepared => "Txn not prepared",
-                SubCode::kIOFenced => "IO fenced off",
-                SubCode::kMergeOperatorFailed => "Merge operator failed",
+                ffi::SubCode::kManualCompactionPaused => "Manual compaction paused",
+                ffi::SubCode::kOverwritten => " (overwritten)",
+                ffi::SubCode::kTxnNotPrepared => "Txn not prepared",
+                ffi::SubCode::kIOFenced => "IO fenced off",
+                ffi::SubCode::kMergeOperatorFailed => "Merge operator failed",
                 x => unreachable!("{:?} is not a valid status subcode", x),
             };
 
@@ -614,7 +612,7 @@ impl Status {
         }
 
         if !self.state.is_null() {
-            if self.subcode != SubCode::kNone {
+            if self.subcode != ffi::SubCode::kNone {
                 res.pin_mut().push_str(": ");
             }
             res.pin_mut().push_bytes(self.state.as_bytes());
@@ -623,7 +621,7 @@ impl Status {
         res
     }
 
-    pub fn copy_from(&mut self, other: &Status) {
+    fn copy_from(&mut self, other: &ffi::Status) {
         self.code = other.code;
         self.subcode = other.subcode;
         self.severity = other.severity;
@@ -633,7 +631,7 @@ impl Status {
         self.state = other.copy_state();
     }
 
-    pub fn move_from(&mut self, other: Status) {
+    fn move_from(&mut self, other: ffi::Status) {
         self.code = other.code;
         self.subcode = other.subcode;
         self.severity = other.severity;
@@ -651,7 +649,7 @@ impl Status {
         }
     }
 
-    fn create_vec(&self, n: usize) -> Vec<Status> {
+    fn create_vec(&self, n: usize) -> Vec<ffi::Status> {
         let mut v = Vec::new();
         for _ in 0..n {
             v.push(self.clone());
@@ -659,7 +657,7 @@ impl Status {
         v
     }
 
-    fn resize_vec(&self, v: &mut Vec<Status>, n: usize) {
+    fn resize_vec(&self, v: &mut Vec<ffi::Status>, n: usize) {
         if n > v.len() {
             for _ in v.len()..n {
                 v.push(self.clone());
@@ -670,12 +668,12 @@ impl Status {
     }
 }
 
-impl Default for Status {
+impl Default for ffi::Status {
     fn default() -> Self {
         Self {
-            code: Code::kOk,
-            subcode: SubCode::kNone,
-            severity: Severity::kNoError,
+            code: ffi::Code::kOk,
+            subcode: ffi::SubCode::kNone,
+            severity: ffi::Severity::kNoError,
             retryable: false,
             data_loss: false,
             scope: 0,
@@ -684,7 +682,7 @@ impl Default for Status {
     }
 }
 
-impl Clone for Status {
+impl Clone for ffi::Status {
     fn clone(&self) -> Self {
         let state = self.copy_state();
         Self {
@@ -699,25 +697,25 @@ impl Clone for Status {
     }
 }
 
-impl PartialEq<Self> for Status {
+impl PartialEq<Self> for ffi::Status {
     fn eq(&self, other: &Self) -> bool {
         // Original implementation only checks whether code == code.
         self.code == other.code
     }
 }
 
-impl Eq for Status {}
+impl Eq for ffi::Status {}
 
-pub fn status_new(
-    code: Code,
-    subcode: SubCode,
-    severity: Severity,
+fn status_new(
+    code: ffi::Code,
+    subcode: ffi::SubCode,
+    severity: ffi::Severity,
     retryable: bool,
     data_loss: bool,
     scope: u8,
     state: UniquePtr<CxxString>,
-) -> Status {
-    Status {
+) -> ffi::Status {
+    ffi::Status {
         code,
         subcode,
         severity,
@@ -729,62 +727,78 @@ pub fn status_new(
 }
 
 /// Create a success status.
-pub fn status_new1() -> Status {
-    Status::default()
+fn status_new1() -> ffi::Status {
+    ffi::Status::default()
 }
 
-pub fn status_new2(code: Code) -> Status {
-    Status {
+fn status_new2(code: ffi::Code) -> ffi::Status {
+    ffi::Status {
         code,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_new3(code: Code, subcode: SubCode) -> Status {
-    Status {
+fn status_new3(code: ffi::Code, subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
         code,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_new4(
-    code: Code,
-    subcode: SubCode,
+fn status_new4(
+    code: ffi::Code,
+    subcode: ffi::SubCode,
     retryable: bool,
     data_loss: bool,
     scope: u8,
-) -> Status {
-    Status {
+) -> ffi::Status {
+    ffi::Status {
         code,
         subcode,
         retryable,
         data_loss,
         scope,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_new5(
-    code: Code,
-    subcode: SubCode,
-    msg: &Slice,
-    msg2: &Slice,
-    sev: Severity,
-) -> Status {
-    Status::new_with_slices(code, subcode, msg, msg2, sev)
+fn status_new5(
+    code: ffi::Code,
+    subcode: ffi::SubCode,
+    msg: &ffi::Slice,
+    msg2: &ffi::Slice,
+    sev: ffi::Severity,
+) -> ffi::Status {
+    ffi::Status::new_with_slices(code, subcode, msg, msg2, sev)
 }
 
-pub fn status_new6(code: Code, msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(code, SubCode::kNone, msg, msg2, Severity::kNoError)
+fn status_new6(code: ffi::Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        code,
+        ffi::SubCode::kNone,
+        msg,
+        msg2,
+        ffi::Severity::kNoError,
+    )
 }
 
-pub fn status_new7(code: Code, subcode: SubCode, msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(code, subcode, msg, msg2, Severity::kNoError)
+fn status_new7(
+    code: ffi::Code,
+    subcode: ffi::SubCode,
+    msg: &ffi::Slice,
+    msg2: &ffi::Slice,
+) -> ffi::Status {
+    ffi::Status::new_with_slices(code, subcode, msg, msg2, ffi::Severity::kNoError)
 }
 
-pub fn status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> Status {
-    Status::new_with_messages(
+fn status_new8(
+    code: ffi::Code,
+    subcode: ffi::SubCode,
+    sev: ffi::Severity,
+    msg: &ffi::Slice,
+) -> ffi::Status {
+    ffi::Status::new_with_messages(
         code,
         subcode,
         msg.to_unique_ptr_string(),
@@ -793,9 +807,9 @@ pub fn status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> 
     )
 }
 
-pub fn status_new9(status: &Status, severity: Severity) -> Status {
+fn status_new9(status: &ffi::Status, severity: ffi::Severity) -> ffi::Status {
     let state = status.copy_state();
-    Status {
+    ffi::Status {
         code: status.code,
         subcode: status.subcode,
         severity,
@@ -806,695 +820,711 @@ pub fn status_new9(status: &Status, severity: Severity) -> Status {
     }
 }
 
-pub fn status_ok() -> Status {
-    Status::default()
+fn status_ok() -> ffi::Status {
+    ffi::Status::default()
 }
 
-pub fn status_ok_overwritten() -> Status {
-    Status {
-        code: Code::kOk,
-        subcode: SubCode::kOverwritten,
-        ..Status::default()
+fn status_ok_overwritten() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kOk,
+        subcode: ffi::SubCode::kOverwritten,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_not_found() -> Status {
-    Status {
-        code: Code::kNotFound,
-        ..Status::default()
+fn status_not_found() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kNotFound,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_not_found1(msg: SubCode) -> Status {
-    Status {
-        code: Code::kNotFound,
+fn status_not_found1(msg: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kNotFound,
         subcode: msg,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_not_found2(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kNotFound,
-        SubCode::kNone,
+fn status_not_found2(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kNotFound,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_not_found3(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kNotFound,
-        SubCode::kNone,
+fn status_not_found3(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kNotFound,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_not_found4(subcode: SubCode, msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(Code::kNotFound, subcode, msg, msg2, Severity::kNoError)
+fn status_not_found4(subcode: ffi::SubCode, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kNotFound,
+        subcode,
+        msg,
+        msg2,
+        ffi::Severity::kNoError,
+    )
 }
 
-pub fn status_not_found5(subcode: SubCode, msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kNotFound,
+fn status_not_found5(subcode: ffi::SubCode, msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kNotFound,
         subcode,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_corruption(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kCorruption,
-        SubCode::kNone,
+fn status_corruption(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kCorruption,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_corruption2(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kCorruption,
+fn status_corruption2(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kCorruption,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_corruption3() -> Status {
-    Status {
-        code: Code::kCorruption,
-        ..Status::default()
+fn status_corruption3() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kCorruption,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_corruption4(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kCorruption,
-        SubCode::kNone,
+fn status_corruption4(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kCorruption,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_not_supported(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kNotSupported,
-        SubCode::kNone,
+fn status_not_supported(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kNotSupported,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_not_supported2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kNotSupported,
-        SubCode::kNone,
+fn status_not_supported2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kNotSupported,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_not_supported3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kNotSupported,
+fn status_not_supported3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kNotSupported,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_not_supported4() -> Status {
-    Status {
-        code: Code::kNotSupported,
-        ..Status::default()
+fn status_not_supported4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kNotSupported,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_invalid_argument(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kInvalidArgument,
-        SubCode::kNone,
+fn status_invalid_argument(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kInvalidArgument,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_invalid_argument2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kInvalidArgument,
-        SubCode::kNone,
+fn status_invalid_argument2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kInvalidArgument,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_invalid_argument3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kInvalidArgument,
+fn status_invalid_argument3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kInvalidArgument,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_invalid_argument4() -> Status {
-    Status {
-        code: Code::kInvalidArgument,
-        ..Status::default()
+fn status_invalid_argument4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kInvalidArgument,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_io_error(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kIOError,
-        SubCode::kNone,
+fn status_io_error(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kIOError,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
-pub fn status_io_error2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kIOError,
-        SubCode::kNone,
+fn status_io_error2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kIOError,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
-pub fn status_io_error3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kIOError,
+fn status_io_error3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kIOError,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
-pub fn status_io_error4() -> Status {
-    Status {
-        code: Code::kIOError,
-        ..Status::default()
+fn status_io_error4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kIOError,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_merge_in_progress(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kMergeInProgress,
-        SubCode::kNone,
+fn status_merge_in_progress(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kMergeInProgress,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_merge_in_progress2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kMergeInProgress,
-        SubCode::kNone,
+fn status_merge_in_progress2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kMergeInProgress,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_merge_in_progress3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kMergeInProgress,
+fn status_merge_in_progress3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kMergeInProgress,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_merge_in_progress4() -> Status {
-    Status {
-        code: Code::kMergeInProgress,
-        ..Status::default()
+fn status_merge_in_progress4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kMergeInProgress,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_incomplete(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kIncomplete,
-        SubCode::kNone,
+fn status_incomplete(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kIncomplete,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_incomplete2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kIncomplete,
-        SubCode::kNone,
+fn status_incomplete2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kIncomplete,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_incomplete3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kIncomplete,
+fn status_incomplete3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kIncomplete,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_incomplete4() -> Status {
-    Status {
-        code: Code::kIncomplete,
-        ..Status::default()
+fn status_incomplete4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kIncomplete,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_shutdown_in_progress(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kShutdownInProgress,
-        SubCode::kNone,
+fn status_shutdown_in_progress(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kShutdownInProgress,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_shutdown_in_progress2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kShutdownInProgress,
-        SubCode::kNone,
+fn status_shutdown_in_progress2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kShutdownInProgress,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_shutdown_in_progress3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kShutdownInProgress,
+fn status_shutdown_in_progress3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kShutdownInProgress,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_shutdown_in_progress4() -> Status {
-    Status {
-        code: Code::kShutdownInProgress,
-        ..Status::default()
+fn status_shutdown_in_progress4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kShutdownInProgress,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_aborted(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kAborted,
-        SubCode::kNone,
+fn status_aborted(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kAborted,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_aborted2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kAborted,
-        SubCode::kNone,
+fn status_aborted2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kAborted,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_aborted3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kAborted,
+fn status_aborted3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kAborted,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_aborted4() -> Status {
-    Status {
-        code: Code::kAborted,
-        ..Status::default()
+fn status_aborted4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kAborted,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_busy(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(Code::kBusy, SubCode::kNone, msg, msg2, Severity::kNoError)
-}
-
-pub fn status_busy2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kBusy,
-        SubCode::kNone,
-        msg.to_unique_ptr_string(),
-        UniquePtr::null(),
-        Severity::kNoError,
+fn status_busy(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kBusy,
+        ffi::SubCode::kNone,
+        msg,
+        msg2,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_busy3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kBusy,
+fn status_busy2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kBusy,
+        ffi::SubCode::kNone,
+        msg.to_unique_ptr_string(),
+        UniquePtr::null(),
+        ffi::Severity::kNoError,
+    )
+}
+
+fn status_busy3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kBusy,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_busy4() -> Status {
-    Status {
-        code: Code::kBusy,
-        ..Status::default()
+fn status_busy4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kBusy,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_timed_out(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kTimedOut,
-        SubCode::kNone,
+fn status_timed_out(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kTimedOut,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_timed_out2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kTimedOut,
-        SubCode::kNone,
+fn status_timed_out2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kTimedOut,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_timed_out3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kTimedOut,
+fn status_timed_out3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kTimedOut,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_timed_out4() -> Status {
-    Status {
-        code: Code::kTimedOut,
-        ..Status::default()
+fn status_timed_out4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kTimedOut,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_expired(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kTimedOut,
-        SubCode::kNone,
+fn status_expired(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kTimedOut,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_expired2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kExpired,
-        SubCode::kNone,
+fn status_expired2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kExpired,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_expired3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kExpired,
+fn status_expired3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kExpired,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_expired4() -> Status {
-    Status {
-        code: Code::kExpired,
-        ..Status::default()
+fn status_expired4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kExpired,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_try_again(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kTryAgain,
-        SubCode::kNone,
+fn status_try_again(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kTryAgain,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_try_again2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kTryAgain,
-        SubCode::kNone,
+fn status_try_again2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kTryAgain,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_try_again3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kTryAgain,
+fn status_try_again3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kTryAgain,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_try_again4() -> Status {
-    Status {
-        code: Code::kTryAgain,
-        ..Status::default()
+fn status_try_again4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kTryAgain,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_compaction_too_large(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kCompactionTooLarge,
-        SubCode::kNone,
+fn status_compaction_too_large(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kCompactionTooLarge,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_compaction_too_large2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kCompactionTooLarge,
-        SubCode::kNone,
+fn status_compaction_too_large2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kCompactionTooLarge,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_compaction_too_large3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kCompactionTooLarge,
+fn status_compaction_too_large3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kCompactionTooLarge,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_compaction_too_large4() -> Status {
-    Status {
-        code: Code::kCompactionTooLarge,
-        ..Status::default()
+fn status_compaction_too_large4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kCompactionTooLarge,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_column_family_dropped(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kColumnFamilyDropped,
-        SubCode::kNone,
+fn status_column_family_dropped(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kColumnFamilyDropped,
+        ffi::SubCode::kNone,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_column_family_dropped2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kColumnFamilyDropped,
-        SubCode::kNone,
+fn status_column_family_dropped2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kColumnFamilyDropped,
+        ffi::SubCode::kNone,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_column_family_dropped3(subcode: SubCode) -> Status {
-    Status {
-        code: Code::kColumnFamilyDropped,
+fn status_column_family_dropped3(subcode: ffi::SubCode) -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kColumnFamilyDropped,
         subcode,
-        ..Status::default()
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_column_family_dropped4() -> Status {
-    Status {
-        code: Code::kColumnFamilyDropped,
-        ..Status::default()
+fn status_column_family_dropped4() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kColumnFamilyDropped,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_no_space(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kIOError,
-        SubCode::kNoSpace,
+fn status_no_space(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kIOError,
+        ffi::SubCode::kNoSpace,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_no_space2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kIOError,
-        SubCode::kNoSpace,
+fn status_no_space2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kIOError,
+        ffi::SubCode::kNoSpace,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_no_space3() -> Status {
-    Status {
-        code: Code::kIOError,
-        subcode: SubCode::kNoSpace,
-        ..Status::default()
+fn status_no_space3() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kIOError,
+        subcode: ffi::SubCode::kNoSpace,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_memory_limit(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kAborted,
-        SubCode::kMemoryLimit,
+fn status_memory_limit(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kAborted,
+        ffi::SubCode::kMemoryLimit,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_memory_limit2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kAborted,
-        SubCode::kMemoryLimit,
+fn status_memory_limit2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kAborted,
+        ffi::SubCode::kMemoryLimit,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_memory_limit3() -> Status {
-    Status {
-        code: Code::kAborted,
-        subcode: SubCode::kMemoryLimit,
-        ..Status::default()
+fn status_memory_limit3() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kAborted,
+        subcode: ffi::SubCode::kMemoryLimit,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_space_limit(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kIOError,
-        SubCode::kSpaceLimit,
+fn status_space_limit(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kIOError,
+        ffi::SubCode::kSpaceLimit,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_space_limit2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kIOError,
-        SubCode::kSpaceLimit,
+fn status_space_limit2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kIOError,
+        ffi::SubCode::kSpaceLimit,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_space_limit3() -> Status {
-    Status {
-        code: Code::kIOError,
-        subcode: SubCode::kSpaceLimit,
-        ..Status::default()
+fn status_space_limit3() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kIOError,
+        subcode: ffi::SubCode::kSpaceLimit,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_path_not_found(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kIOError,
-        SubCode::kPathNotFound,
+fn status_path_not_found(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kIOError,
+        ffi::SubCode::kPathNotFound,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_path_not_found2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kIOError,
-        SubCode::kPathNotFound,
+fn status_path_not_found2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kIOError,
+        ffi::SubCode::kPathNotFound,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_path_not_found3() -> Status {
-    Status {
-        code: Code::kIOError,
-        subcode: SubCode::kPathNotFound,
-        ..Status::default()
+fn status_path_not_found3() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kIOError,
+        subcode: ffi::SubCode::kPathNotFound,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_txn_not_prepared(msg: &Slice, msg2: &Slice) -> Status {
-    Status::new_with_slices(
-        Code::kInvalidArgument,
-        SubCode::kTxnNotPrepared,
+fn status_txn_not_prepared(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_slices(
+        ffi::Code::kInvalidArgument,
+        ffi::SubCode::kTxnNotPrepared,
         msg,
         msg2,
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_txn_not_prepared2(msg: &Slice) -> Status {
-    Status::new_with_messages(
-        Code::kInvalidArgument,
-        SubCode::kTxnNotPrepared,
+fn status_txn_not_prepared2(msg: &ffi::Slice) -> ffi::Status {
+    ffi::Status::new_with_messages(
+        ffi::Code::kInvalidArgument,
+        ffi::SubCode::kTxnNotPrepared,
         msg.to_unique_ptr_string(),
         UniquePtr::null(),
-        Severity::kNoError,
+        ffi::Severity::kNoError,
     )
 }
 
-pub fn status_txn_not_prepared3() -> Status {
-    Status {
-        code: Code::kInvalidArgument,
-        subcode: SubCode::kTxnNotPrepared,
-        ..Status::default()
+fn status_txn_not_prepared3() -> ffi::Status {
+    ffi::Status {
+        code: ffi::Code::kInvalidArgument,
+        subcode: ffi::SubCode::kTxnNotPrepared,
+        ..ffi::Status::default()
     }
 }
 
-pub fn status_copy_state(s: &CxxString) -> UniquePtr<CxxString> {
+fn status_copy_state(s: &CxxString) -> UniquePtr<CxxString> {
     let mut res = crate::ffi::make_string();
     res.pin_mut().push_bytes(s.as_bytes());
     res
 }
 
-pub fn status_copy_append_message(status: &Status, delim: &Slice, msg: &Slice) -> Status {
+fn status_copy_append_message(
+    status: &ffi::Status,
+    delim: &ffi::Slice,
+    msg: &ffi::Slice,
+) -> ffi::Status {
     let mut new_msg = crate::ffi::make_string();
     new_msg.pin_mut().push_bytes(status.state.as_bytes());
     new_msg
@@ -1504,7 +1534,7 @@ pub fn status_copy_append_message(status: &Status, delim: &Slice, msg: &Slice) -
         .pin_mut()
         .push_bytes(msg.to_unique_ptr_string().as_bytes());
 
-    Status {
+    ffi::Status {
         code: status.code,
         subcode: status.subcode,
         severity: status.severity,
@@ -1515,8 +1545,8 @@ pub fn status_copy_append_message(status: &Status, delim: &Slice, msg: &Slice) -
     }
 }
 
-pub fn status_move(status: Status) -> Status {
-    Status {
+fn status_move(status: ffi::Status) -> ffi::Status {
+    ffi::Status {
         code: status.code,
         subcode: status.subcode,
         severity: status.severity,
@@ -1527,23 +1557,51 @@ pub fn status_move(status: Status) -> Status {
     }
 }
 
+pub(crate) enum Status {
+    Ok,
+    NotSupported(NotSupported),
+}
+
+pub(crate) struct NotSupported {
+    pub(crate) msg: String,
+}
+
+impl From<Status> for ffi::Status {
+    fn from(value: Status) -> Self {
+        match value {
+            Status::Ok => Self::default(),
+            Status::NotSupported(s) => {
+                let mut msg = crate::ffi::make_string();
+                msg.pin_mut().push_str(&s.msg);
+                Self::new_with_messages(
+                    ffi::Code::kNotSupported,
+                    ffi::SubCode::kNone,
+                    msg,
+                    UniquePtr::null(),
+                    ffi::Severity::kNoError,
+                )
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn to_string_ok() {
-        let status = Status::default();
+        let status = ffi::Status::default();
         let s = status.to_string();
         assert_eq!(s.to_str().unwrap(), "OK");
     }
 
     #[test]
     fn to_string_memory_limit() {
-        let status = Status {
-            code: Code::kAborted,
-            subcode: SubCode::kMemoryLimit,
-            ..Status::default()
+        let status = ffi::Status {
+            code: ffi::Code::kAborted,
+            subcode: ffi::SubCode::kMemoryLimit,
+            ..ffi::Status::default()
         };
         let s = status.to_string();
         assert_eq!(

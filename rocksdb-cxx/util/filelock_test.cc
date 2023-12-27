@@ -7,11 +7,7 @@
 
 #include "rocksdb/env.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/status.h"
-#else
 #include "rocksdb-rs/src/status.rs.h"
-#endif
 
 #ifdef __FreeBSD__
 #include <sys/types.h>

@@ -22,11 +22,7 @@
 #include "utilities/transactions/optimistic_transaction_db_impl.h"
 #include "utilities/transactions/transaction_util.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/status.h"
-#else
 #include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

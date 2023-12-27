@@ -26,11 +26,7 @@
 #include "test_util/testutil.h"
 #include "util/random.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/compression_type.h"
-#else
 #include "rocksdb-rs/src/compression_type.rs.h"
-#endif
 
 namespace rocksdb {
 

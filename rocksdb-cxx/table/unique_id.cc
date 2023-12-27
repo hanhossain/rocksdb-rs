@@ -12,36 +12,6 @@
 
 namespace rocksdb {
 
-Status DecodeSessionId(const std::string &db_session_id, uint64_t& upper,
-                       uint64_t& lower) {
-  const size_t len = db_session_id.size();
-  if (len == 0) {
-    return Status_NotSupported("Missing db_session_id");
-  }
-  // Anything from 13 to 24 chars is reasonable. We don't have to limit to
-  // exactly 20.
-  if (len < 13) {
-    return Status_NotSupported("Too short db_session_id");
-  }
-  if (len > 24) {
-    return Status_NotSupported("Too long db_session_id");
-  }
-  uint64_t a = 0, b = 0;
-  const char *buf = &db_session_id.front();
-  bool success = ParseBaseChars_36(&buf, len - 12U, &a);
-  if (!success) {
-    return Status_NotSupported("Bad digit in db_session_id");
-  }
-  success = ParseBaseChars_36(&buf, 12U, &b);
-  if (!success) {
-    return Status_NotSupported("Bad digit in db_session_id");
-  }
-  assert(buf == &db_session_id.back() + 1);
-  upper = a >> 2;
-  lower = (b & (UINT64_MAX >> 2)) | (a << 62);
-  return Status_OK();
-}
-
 Status GetSstInternalUniqueId(const std::string &db_id,
                               const std::string &db_session_id,
                               uint64_t file_number, UniqueIdPtr out,

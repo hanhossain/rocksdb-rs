@@ -9,11 +9,7 @@
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/status.h"
-#else
 #include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 

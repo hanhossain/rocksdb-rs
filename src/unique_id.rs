@@ -1,4 +1,5 @@
-use crate::string_util::put_base_chars;
+use crate::status::{NotSupported, Status};
+use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
 use cxx::CxxString;
 
@@ -26,6 +27,12 @@ pub mod ffi {
         extended: bool,
     }
 
+    extern "C++" {
+        include!("rocksdb-rs/src/status.rs.h");
+
+        type Status = crate::status::ffi::Status;
+    }
+
     extern "Rust" {
         fn as_unique_id_ptr(self: &mut UniqueId64x2) -> UniqueIdPtr;
         fn as_unique_id_ptr(self: &mut UniqueId64x3) -> UniqueIdPtr;
@@ -43,6 +50,9 @@ pub mod ffi {
 
         #[cxx_name = "EncodeSessionId"]
         fn encode_session_id(upper: u64, lower: u64) -> String;
+
+        #[cxx_name = "DecodeSessionId"]
+        fn decode_session_id(db_session_id: &str, upper: &mut u64, lower: &mut u64) -> Status;
     }
 }
 
@@ -123,4 +133,58 @@ fn encode_session_id(upper: u64, lower: u64) -> String {
     put_base_chars(&mut db_session_id, 8, a, true);
     put_base_chars(&mut db_session_id, 12, b, true);
     db_session_id
+}
+
+/// Reverse of EncodeSessionId. Returns NotSupported on error rather than
+/// Corruption because non-standard session IDs should be allowed with degraded
+/// functionality.
+fn decode_session_id(
+    db_session_id: &str,
+    upper: &mut u64,
+    lower: &mut u64,
+) -> crate::status::ffi::Status {
+    let len = db_session_id.len();
+    if len == 0 {
+        return Status::NotSupported(NotSupported {
+            msg: "Missing db_session_id".to_owned(),
+        })
+        .into();
+    }
+
+    // Anything from 13 to 24 chars is reasonable. We don't have to limit to exactly 20.
+    if len < 13 {
+        return Status::NotSupported(NotSupported {
+            msg: "Too short db_session_id".to_owned(),
+        })
+        .into();
+    }
+
+    if len > 24 {
+        return Status::NotSupported(NotSupported {
+            msg: "Too long db_session_id".to_owned(),
+        })
+        .into();
+    }
+
+    let mut a = 0;
+    let mut b = 0;
+
+    if !parse_base_chars(&db_session_id[..len - 12], 36, &mut a) {
+        return Status::NotSupported(NotSupported {
+            msg: "Bad digit in db_session_id".to_owned(),
+        })
+        .into();
+    }
+
+    if !parse_base_chars(&db_session_id[len - 12..], 36, &mut b) {
+        return Status::NotSupported(NotSupported {
+            msg: "Bad digit in db_session_id".to_owned(),
+        })
+        .into();
+    }
+
+    *upper = a >> 2;
+    *lower = (b & (u64::MAX >> 2)) | (a << 62);
+
+    Status::Ok.into()
 }

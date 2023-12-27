@@ -26,11 +26,7 @@
 #include "utilities/transactions/transaction_base.h"
 #include "utilities/transactions/transaction_util.h"
 
-#ifndef ROCKSDB_RS
-#include "rocksdb-rs-cxx/status.h"
-#else
 #include "rocksdb-rs/src/status.rs.h"
-#endif
 
 namespace rocksdb {
 
