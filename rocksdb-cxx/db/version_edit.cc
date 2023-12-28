@@ -422,7 +422,7 @@ const char* VersionEdit::DecodeNewFile4From(Slice* input) {
           }
           break;
         case kUniqueId:
-          if (!DecodeUniqueIdBytes(field.ToString(), f.unique_id.as_unique_id_ptr()).ok()) {
+          if (!f.unique_id.decode_bytes(field.ToString()).ok()) {
             f.unique_id = UniqueId64x2_null();
             return "invalid unique id";
           }

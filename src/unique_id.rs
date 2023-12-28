@@ -1,4 +1,4 @@
-use crate::coding_lean::encode_fixed_64;
+use crate::coding_lean::{decode_fixed_64, encode_fixed_64};
 use crate::status::{NotSupported, Status};
 use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
@@ -57,6 +57,9 @@ pub mod ffi {
 
         fn encode_bytes(self: &UniqueId64x2) -> UniquePtr<CxxString>;
         fn encode_bytes(self: &UniqueId64x3) -> UniquePtr<CxxString>;
+
+        fn decode_bytes(self: &mut UniqueId64x2, unique_id: &CxxString) -> Status;
+        fn decode_bytes(self: &mut UniqueId64x3, unique_id: &CxxString) -> Status;
     }
 }
 
@@ -81,6 +84,20 @@ impl UniqueId64x2 {
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
         res
     }
+
+    /// Reverse of encode_bytes.
+    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffi::Status {
+        if unique_id.len() != 16 {
+            return Status::NotSupported(NotSupported {
+                msg: "Not a valid unique_id".to_owned(),
+            })
+            .into();
+        }
+
+        self.data[0] = decode_fixed_64(&unique_id.as_bytes()[0..8]);
+        self.data[1] = decode_fixed_64(&unique_id.as_bytes()[8..16]);
+        Status::Ok.into()
+    }
 }
 
 impl UniqueId64x3 {
@@ -104,6 +121,21 @@ impl UniqueId64x3 {
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[2]));
         res
+    }
+
+    /// Reverse of encode_bytes.
+    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffi::Status {
+        if unique_id.len() != 24 {
+            return Status::NotSupported(NotSupported {
+                msg: "Not a valid unique_id".to_owned(),
+            })
+            .into();
+        }
+
+        self.data[0] = decode_fixed_64(&unique_id.as_bytes()[0..8]);
+        self.data[1] = decode_fixed_64(&unique_id.as_bytes()[8..16]);
+        self.data[2] = decode_fixed_64(&unique_id.as_bytes()[16..24]);
+        Status::Ok.into()
     }
 }
 

@@ -6,7 +6,6 @@
 #include <cstdint>
 
 #include "table/unique_id_impl.h"
-#include "util/coding_lean.h"
 #include "util/hash.h"
 #include "util/string_util.h"
 
@@ -104,19 +103,6 @@ void ExternalUniqueIdToInternal(UniqueIdPtr in_out) {
   BijectiveUnhash2x64(hi, lo, &hi, &lo);
   in_out.ptr[0] = lo - kLoOffsetForZero;
   in_out.ptr[1] = hi - kHiOffsetForZero;
-}
-
-Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out) {
-  if (unique_id.size() != (out.extended ? 24 : 16)) {
-    return Status_NotSupported("Not a valid unique_id");
-  }
-  const char *buf = &unique_id.front();
-  out.ptr[0] = DecodeFixed64(&buf[0]);
-  out.ptr[1] = DecodeFixed64(&buf[8]);
-  if (out.extended) {
-    out.ptr[2] = DecodeFixed64(&buf[16]);
-  }
-  return Status_OK();
 }
 
 template <typename ID>

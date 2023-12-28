@@ -1568,7 +1568,7 @@ class CacheKeyTest : public testing::Test {
     std::string external_unique_id_str;
     EXPECT_OK(GetUniqueIdFromTableProperties(tp_, external_unique_id_str));
     UniqueId64x2 sst_unique_id = {};
-    EXPECT_OK(DecodeUniqueIdBytes(external_unique_id_str, sst_unique_id.as_unique_id_ptr()));
+    EXPECT_OK(sst_unique_id.decode_bytes(external_unique_id_str));
     ExternalUniqueIdToInternal(sst_unique_id.as_unique_id_ptr());
     OffsetableCacheKey ock =
         OffsetableCacheKey::FromInternalUniqueId(sst_unique_id.as_unique_id_ptr());

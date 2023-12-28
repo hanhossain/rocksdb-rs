@@ -35,7 +35,4 @@ void InternalUniqueIdToExternal(UniqueIdPtr in_out);
 // (demonstrably 1-to-1 on the first 128 bits and on the full 192 bits).
 void ExternalUniqueIdToInternal(UniqueIdPtr in_out);
 
-// Reverse of EncodeUniqueIdBytes.
-Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out);
-
 }  // namespace rocksdb
