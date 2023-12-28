@@ -1,4 +1,5 @@
 pub mod cache;
+mod coding_lean;
 pub mod compression_type;
 pub mod env;
 pub mod port_defs;

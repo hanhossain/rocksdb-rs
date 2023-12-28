@@ -35,9 +35,6 @@ void InternalUniqueIdToExternal(UniqueIdPtr in_out);
 // (demonstrably 1-to-1 on the first 128 bits and on the full 192 bits).
 void ExternalUniqueIdToInternal(UniqueIdPtr in_out);
 
-// Convert numerical format to byte format for public API
-std::string EncodeUniqueIdBytes(UniqueIdPtr in);
-
 // Reverse of EncodeUniqueIdBytes.
 Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out);
 

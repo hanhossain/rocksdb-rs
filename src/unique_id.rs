@@ -1,7 +1,8 @@
+use crate::coding_lean::encode_fixed_64;
 use crate::status::{NotSupported, Status};
 use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
-use cxx::CxxString;
+use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
@@ -53,6 +54,9 @@ pub mod ffi {
 
         #[cxx_name = "DecodeSessionId"]
         fn decode_session_id(db_session_id: &str, upper: &mut u64, lower: &mut u64) -> Status;
+
+        fn encode_bytes(self: &UniqueId64x2) -> UniquePtr<CxxString>;
+        fn encode_bytes(self: &UniqueId64x3) -> UniquePtr<CxxString>;
     }
 }
 
@@ -69,6 +73,14 @@ impl UniqueId64x2 {
     fn to_internal_human_string(&self) -> String {
         format!("{{{},{}}}", self.data[0], self.data[1])
     }
+
+    /// Convert numerical format to byte format for public API
+    fn encode_bytes(&self) -> UniquePtr<CxxString> {
+        let mut res = crate::ffi::make_string();
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
+        res
+    }
 }
 
 impl UniqueId64x3 {
@@ -83,6 +95,15 @@ impl UniqueId64x3 {
     /// UniqueIdToHumanString for external IDs.
     fn to_internal_human_string(&self) -> String {
         format!("{{{},{},{}}}", self.data[0], self.data[1], self.data[2])
+    }
+
+    /// Convert numerical format to byte format for public API
+    fn encode_bytes(&self) -> UniquePtr<CxxString> {
+        let mut res = crate::ffi::make_string();
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[2]));
+        res
     }
 }
 
