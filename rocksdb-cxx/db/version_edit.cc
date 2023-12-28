@@ -230,7 +230,7 @@ bool VersionEdit::EncodeTo(std::string* dst,
     TEST_SYNC_POINT_CALLBACK("VersionEdit::EncodeTo:UniqueId", &unique_id);
     if (unique_id != UniqueId64x2_null()) {
       PutVarint32(dst, NewFileCustomTag::kUniqueId);
-      std::string unique_id_str = EncodeUniqueIdBytes(unique_id.as_unique_id_ptr());
+      std::unique_ptr<std::string> unique_id_str = unique_id.encode_bytes();
       PutLengthPrefixedSlice(dst, Slice(unique_id_str));
     }
     if (f.compensated_range_deletion_size) {
@@ -422,7 +422,7 @@ const char* VersionEdit::DecodeNewFile4From(Slice* input) {
           }
           break;
         case kUniqueId:
-          if (!DecodeUniqueIdBytes(field.ToString(), f.unique_id.as_unique_id_ptr()).ok()) {
+          if (!f.unique_id.decode_bytes(field.ToString()).ok()) {
             f.unique_id = UniqueId64x2_null();
             return "invalid unique id";
           }
@@ -893,7 +893,7 @@ std::string VersionEdit::DebugString(bool hex_key) const {
       r.append(std::string(id.to_internal_human_string()));
       r.append(" public_unique_id: ");
       InternalUniqueIdToExternal(id.as_unique_id_ptr());
-      r.append(std::string(UniqueIdToHumanString(EncodeUniqueIdBytes(id.as_unique_id_ptr()))));
+      r.append(std::string(UniqueIdToHumanString(*id.encode_bytes())));
     }
     r.append(" tail size: ");
     AppendNumberTo(&r, f.tail_size);

@@ -1,7 +1,8 @@
+use crate::coding_lean::{decode_fixed_64, encode_fixed_64};
 use crate::status::{NotSupported, Status};
 use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
-use cxx::CxxString;
+use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {
@@ -53,6 +54,12 @@ pub mod ffi {
 
         #[cxx_name = "DecodeSessionId"]
         fn decode_session_id(db_session_id: &str, upper: &mut u64, lower: &mut u64) -> Status;
+
+        fn encode_bytes(self: &UniqueId64x2) -> UniquePtr<CxxString>;
+        fn encode_bytes(self: &UniqueId64x3) -> UniquePtr<CxxString>;
+
+        fn decode_bytes(self: &mut UniqueId64x2, unique_id: &CxxString) -> Status;
+        fn decode_bytes(self: &mut UniqueId64x3, unique_id: &CxxString) -> Status;
     }
 }
 
@@ -69,6 +76,28 @@ impl UniqueId64x2 {
     fn to_internal_human_string(&self) -> String {
         format!("{{{},{}}}", self.data[0], self.data[1])
     }
+
+    /// Convert numerical format to byte format for public API
+    fn encode_bytes(&self) -> UniquePtr<CxxString> {
+        let mut res = crate::ffi::make_string();
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
+        res
+    }
+
+    /// Reverse of encode_bytes.
+    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffi::Status {
+        if unique_id.len() != 16 {
+            return Status::NotSupported(NotSupported {
+                msg: "Not a valid unique_id".to_owned(),
+            })
+            .into();
+        }
+
+        self.data[0] = decode_fixed_64(&unique_id.as_bytes()[0..8]);
+        self.data[1] = decode_fixed_64(&unique_id.as_bytes()[8..16]);
+        Status::Ok.into()
+    }
 }
 
 impl UniqueId64x3 {
@@ -83,6 +112,30 @@ impl UniqueId64x3 {
     /// UniqueIdToHumanString for external IDs.
     fn to_internal_human_string(&self) -> String {
         format!("{{{},{},{}}}", self.data[0], self.data[1], self.data[2])
+    }
+
+    /// Convert numerical format to byte format for public API
+    fn encode_bytes(&self) -> UniquePtr<CxxString> {
+        let mut res = crate::ffi::make_string();
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
+        res.pin_mut().push_bytes(&encode_fixed_64(self.data[2]));
+        res
+    }
+
+    /// Reverse of encode_bytes.
+    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffi::Status {
+        if unique_id.len() != 24 {
+            return Status::NotSupported(NotSupported {
+                msg: "Not a valid unique_id".to_owned(),
+            })
+            .into();
+        }
+
+        self.data[0] = decode_fixed_64(&unique_id.as_bytes()[0..8]);
+        self.data[1] = decode_fixed_64(&unique_id.as_bytes()[8..16]);
+        self.data[2] = decode_fixed_64(&unique_id.as_bytes()[16..24]);
+        Status::Ok.into()
     }
 }
 

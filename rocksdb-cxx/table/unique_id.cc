@@ -6,7 +6,6 @@
 #include <cstdint>
 
 #include "table/unique_id_impl.h"
-#include "util/coding_lean.h"
 #include "util/hash.h"
 #include "util/string_util.h"
 
@@ -106,29 +105,6 @@ void ExternalUniqueIdToInternal(UniqueIdPtr in_out) {
   in_out.ptr[1] = hi - kHiOffsetForZero;
 }
 
-std::string EncodeUniqueIdBytes(UniqueIdPtr in) {
-  std::string ret(in.extended ? 24U : 16U, '\0');
-  EncodeFixed64(&ret[0], in.ptr[0]);
-  EncodeFixed64(&ret[8], in.ptr[1]);
-  if (in.extended) {
-    EncodeFixed64(&ret[16], in.ptr[2]);
-  }
-  return ret;
-}
-
-Status DecodeUniqueIdBytes(const std::string &unique_id, UniqueIdPtr out) {
-  if (unique_id.size() != (out.extended ? 24 : 16)) {
-    return Status_NotSupported("Not a valid unique_id");
-  }
-  const char *buf = &unique_id.front();
-  out.ptr[0] = DecodeFixed64(&buf[0]);
-  out.ptr[1] = DecodeFixed64(&buf[8]);
-  if (out.extended) {
-    out.ptr[2] = DecodeFixed64(&buf[16]);
-  }
-  return Status_OK();
-}
-
 template <typename ID>
 Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
                                             std::string& out_id) {
@@ -137,7 +113,7 @@ Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
                                     props.orig_file_number, tmp.as_unique_id_ptr());
   if (s.ok()) {
     InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
-    out_id = EncodeUniqueIdBytes(tmp.as_unique_id_ptr());
+    out_id = *tmp.encode_bytes();
   } else {
     out_id.clear();
   }
