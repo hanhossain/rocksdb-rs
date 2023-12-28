@@ -2,6 +2,7 @@ pub mod cache;
 mod coding_lean;
 pub mod compression_type;
 pub mod env;
+mod hash;
 pub mod port_defs;
 pub mod slice;
 pub mod status;

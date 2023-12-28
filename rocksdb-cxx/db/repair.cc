@@ -533,8 +533,8 @@ class Repairer {
     }
     if (status.ok()) {
       auto s =
-          GetSstInternalUniqueId(props->db_id, props->db_session_id,
-                                 props->orig_file_number, t->meta.unique_id.as_unique_id_ptr());
+          t->meta.unique_id.get_sst_internal_unique_id(props->db_id, props->db_session_id,
+                                 props->orig_file_number, false);
       if (!s.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
                        "Table #%" PRIu64

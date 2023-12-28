@@ -1,4 +1,5 @@
 use crate::coding_lean::{decode_fixed_64, encode_fixed_64};
+use crate::hash::{hash2x64, hash2x64_with_seed};
 use crate::status::{NotSupported, Status};
 use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
@@ -60,6 +61,21 @@ pub mod ffi {
 
         fn decode_bytes(self: &mut UniqueId64x2, unique_id: &CxxString) -> Status;
         fn decode_bytes(self: &mut UniqueId64x3, unique_id: &CxxString) -> Status;
+
+        fn get_sst_internal_unique_id(
+            self: &mut UniqueId64x2,
+            db_id: &CxxString,
+            db_session_id: &str,
+            file_number: u64,
+            force: bool,
+        ) -> Status;
+        fn get_sst_internal_unique_id(
+            self: &mut UniqueId64x3,
+            db_id: &CxxString,
+            db_session_id: &str,
+            file_number: u64,
+            force: bool,
+        ) -> Status;
     }
 }
 
@@ -98,6 +114,29 @@ impl UniqueId64x2 {
         self.data[1] = decode_fixed_64(&unique_id.as_bytes()[8..16]);
         Status::Ok.into()
     }
+
+    /// Helper for GetUniqueIdFromTableProperties. This function can also be used
+    /// for temporary ids for files without sufficient information in table
+    /// properties. The internal unique id is more structured than the public
+    /// unique id, so can be manipulated in more ways but very carefully.
+    /// These must be long term stable to ensure GetUniqueIdFromTableProperties
+    /// is long term stable.
+    fn get_sst_internal_unique_id(
+        &mut self,
+        db_id: &CxxString,
+        db_session_id: &str,
+        file_number: u64,
+        force: bool,
+    ) -> crate::status::ffi::Status {
+        let mut x3 = UniqueId64x3::default();
+        let status = x3.get_sst_internal_unique_id(db_id, db_session_id, file_number, force);
+
+        if status.ok() {
+            self.data.copy_from_slice(&x3.data[..2]);
+        }
+
+        status
+    }
 }
 
 impl UniqueId64x3 {
@@ -135,6 +174,85 @@ impl UniqueId64x3 {
         self.data[0] = decode_fixed_64(&unique_id.as_bytes()[0..8]);
         self.data[1] = decode_fixed_64(&unique_id.as_bytes()[8..16]);
         self.data[2] = decode_fixed_64(&unique_id.as_bytes()[16..24]);
+        Status::Ok.into()
+    }
+
+    /// Helper for GetUniqueIdFromTableProperties. This function can also be used
+    /// for temporary ids for files without sufficient information in table
+    /// properties. The internal unique id is more structured than the public
+    /// unique id, so can be manipulated in more ways but very carefully.
+    /// These must be long term stable to ensure GetUniqueIdFromTableProperties
+    /// is long term stable.
+    fn get_sst_internal_unique_id(
+        &mut self,
+        db_id: &CxxString,
+        db_session_id: &str,
+        file_number: u64,
+        force: bool,
+    ) -> crate::status::ffi::Status {
+        if !force {
+            if db_id.is_empty() {
+                return Status::NotSupported(NotSupported {
+                    msg: "Missing db_id".to_owned(),
+                })
+                .into();
+            }
+
+            if file_number == 0 {
+                return Status::NotSupported(NotSupported {
+                    msg: "Missing or bad file number".to_owned(),
+                })
+                .into();
+            }
+
+            if db_session_id.is_empty() {
+                return Status::NotSupported(NotSupported {
+                    msg: "Missing db_session_id".to_owned(),
+                })
+                .into();
+            }
+        }
+
+        let mut session_upper = 0;
+        let mut session_lower = 0;
+
+        let status = decode_session_id(db_session_id, &mut session_upper, &mut session_lower);
+        if !status.ok() {
+            if !force {
+                return status;
+            }
+
+            // A reasonable fallback in case malformed
+            (session_upper, session_lower) = hash2x64(db_session_id.as_bytes());
+            if session_lower == 0 {
+                session_lower = session_upper | 1;
+            }
+        }
+
+        // Exactly preserve session lower to ensure that session ids generated
+        // during the same process lifetime are guaranteed unique.
+        // DBImpl also guarantees (in recent versions) that this is not zero,
+        // so that we can guarantee unique ID is never all zeros. (Can't assert
+        // that here because of testing and old versions.)
+        // We put this first in anticipation of matching a small-ish set of cache
+        // key prefixes to cover entries relevant to any DB.
+        self.data[0] = session_lower;
+
+        // Hash the session upper (~39 bits entropy) and DB id (120+ bits entropy)
+        // for very high global uniqueness entropy.
+        // (It is possible that many DBs descended from one common DB id are copied
+        // around and proliferate, in which case session id is critical, but it is
+        // more common for different DBs to have different DB ids.)
+        let (db_a, db_b) = hash2x64_with_seed(db_id.as_bytes(), session_upper);
+
+        // Xor in file number for guaranteed uniqueness by file number for a given
+        // session and DB id. (Xor slightly better than + here. See
+        // https://github.com/pdillinger/unique_id )
+        self.data[1] = db_a ^ file_number;
+
+        // Extra global uniqueness
+        self.data[2] = db_b;
+
         Status::Ok.into()
     }
 }

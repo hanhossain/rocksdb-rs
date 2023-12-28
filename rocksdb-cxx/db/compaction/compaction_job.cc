@@ -1824,8 +1824,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
     meta.temperature = temperature;
     assert(!db_id_.empty());
     assert(!db_session_id_.empty());
-    s = GetSstInternalUniqueId(db_id_, db_session_id_, meta.fd.GetNumber(),
-                               meta.unique_id.as_unique_id_ptr());
+    s = meta.unique_id.get_sst_internal_unique_id(db_id_, db_session_id_, meta.fd.GetNumber(), false);
     if (!s.ok()) {
       ROCKS_LOG_ERROR(db_options_.info_log,
                       "[%s] [JOB %d] file #%" PRIu64

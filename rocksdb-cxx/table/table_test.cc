@@ -1456,8 +1456,7 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   EXPECT_TRUE(seen->insert(t.external_id.data[2]).second);
 
   // Get internal with internal API
-  EXPECT_OK(GetSstInternalUniqueId(db_id, db_session_id, file_number,
-                                   t.internal_id.as_unique_id_ptr()));
+  EXPECT_OK(t.internal_id.get_sst_internal_unique_id(db_id, db_session_id, file_number, false));
   EXPECT_NE(t.internal_id, UniqueId64x3_null());
 
   // Verify relationship
@@ -1469,7 +1468,7 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
 
   // And 128-bit internal version
   UniqueId64x2 tmp2{};
-  EXPECT_OK(GetSstInternalUniqueId(db_id, db_session_id, file_number, tmp2.as_unique_id_ptr()));
+  EXPECT_OK(tmp2.get_sst_internal_unique_id(db_id, db_session_id, file_number, false));
   EXPECT_NE(tmp2, UniqueId64x2_null());
 
   EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
