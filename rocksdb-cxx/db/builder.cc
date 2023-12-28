@@ -357,9 +357,8 @@ Status BuildTable(
       file_checksum_func_name = meta->file_checksum_func_name;
       // Set unique_id only if db_id and db_session_id exist
       if (!tboptions.db_id.empty() && !tboptions.db_session_id.empty()) {
-        if (!GetSstInternalUniqueId(tboptions.db_id, tboptions.db_session_id,
-                                    meta->fd.GetNumber(), meta->unique_id.as_unique_id_ptr())
-                 .ok()) {
+        if (!meta->unique_id.get_sst_internal_unique_id(tboptions.db_id, tboptions.db_session_id,
+                                    meta->fd.GetNumber(), false).ok()) {
           // if failed to get unique id, just set it Null
           meta->unique_id = UniqueId64x2_null();
         }

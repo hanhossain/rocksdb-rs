@@ -689,9 +689,7 @@ Status BlockBasedTable::Open(
                                 " with known unique ID");
     }
     UniqueId64x2 actual_unique_id{};
-    s = GetSstInternalUniqueId(props->db_id, props->db_session_id,
-                               props->orig_file_number, actual_unique_id.as_unique_id_ptr(),
-                               /*force*/ true);
+    s = actual_unique_id.get_sst_internal_unique_id(props->db_id, props->db_session_id, props->orig_file_number, true);
     assert(s.ok());  // because force=true
     if (expected_unique_id != actual_unique_id) {
       return Status_Corruption(

@@ -428,7 +428,7 @@ impl ffi::Status {
     }
 
     /// Returns true iff the status indicates success.
-    fn ok(&self) -> bool {
+    pub(crate) fn ok(&self) -> bool {
         self.code == ffi::Code::kOk
     }
 
