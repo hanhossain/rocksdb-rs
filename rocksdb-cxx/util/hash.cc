@@ -140,10 +140,6 @@ void Hash2x64(const char* data, size_t n, uint64_t seed, uint64_t* high64,
 
 namespace {
 
-inline uint64_t XXH3_avalanche(uint64_t h64) {
-  return xxh3_avalanche(h64);
-}
-
 inline uint64_t XXH3_unavalanche(uint64_t h64) {
   return xxh3_unavalanche(h64);
 }

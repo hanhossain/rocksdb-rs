@@ -9,7 +9,6 @@ mod ffi {
         #[cxx_name = "hash2x64_with_seed"]
         fn hash2x64_with_seed_ext(key: &[u8], seed: u64, upper: &mut u64, lower: &mut u64);
 
-        fn xxh3_avalanche(mut h: u64) -> u64;
         fn xxh3_unavalanche(mut h: u64) -> u64;
 
         #[cxx_name = "bijective_hash2x64_with_seed"]
