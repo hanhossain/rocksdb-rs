@@ -18,6 +18,7 @@ const PRIME64_3: u64 = 0x165667B19E3779F9;
 mod ffi {
     extern "Rust" {
         fn xxph3_avalanche(h: u64) -> u64;
+        fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
     }
 }
 

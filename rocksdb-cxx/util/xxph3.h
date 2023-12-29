@@ -1052,25 +1052,6 @@ XXPH_mult64to128(xxh_u64 lhs, xxh_u64 rhs)
 #endif
 }
 
-/*
- * We want to keep the attribute here because a target switch
- * disables inlining.
- *
- * Does a 64-bit to 128-bit multiply, then XOR folds it.
- * The reason for the separate function is to prevent passing
- * too many structs around by value. This will hopefully inline
- * the multiply, but we don't force it.
- */
-#if defined(__GNUC__) && !defined(__clang__) && defined(__i386__)
-__attribute__((__target__("no-sse")))
-#endif
-static xxh_u64
-XXPH3_mul128_fold64(xxh_u64 lhs, xxh_u64 rhs)
-{
-    XXPH128_hash_t product = XXPH_mult64to128(lhs, rhs);
-    return product.low64 ^ product.high64;
-}
-
 /* ==========================================
  * Short keys
  * ========================================== */
@@ -1114,7 +1095,7 @@ XXPH3_len_9to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH6
     XXPH_ASSERT(9 <= len && len <= 16);
     {   xxh_u64 const input_lo = XXPH_readLE64(input)           ^ (XXPH_readLE64(secret)     + seed);
         xxh_u64 const input_hi = XXPH_readLE64(input + len - 8) ^ (XXPH_readLE64(secret + 8) - seed);
-        xxh_u64 const acc = len + (input_lo + input_hi) + XXPH3_mul128_fold64(input_lo, input_hi);
+        xxh_u64 const acc = len + (input_lo + input_hi) + xxph::xxph3_mul128_fold64(input_lo, input_hi);
         return xxph::xxph3_avalanche(acc);
     }
 }
@@ -1131,7 +1112,7 @@ XXPH3_len_0to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH6
          * string can be problematic for multiplication-based algorithms.
          * Return a hash of the seed instead.
          */
-        return XXPH3_mul128_fold64(seed + XXPH_readLE64(secret), PRIME64_2);
+        return xxph::xxph3_mul128_fold64(seed + XXPH_readLE64(secret), PRIME64_2);
     }
 }
 
@@ -1542,7 +1523,7 @@ XXPH3_hashLong_internal_loop( xxh_u64* XXPH_RESTRICT acc,
 XXPH_FORCE_INLINE xxh_u64
 XXPH3_mix2Accs(const xxh_u64* XXPH_RESTRICT acc, const xxh_u8* XXPH_RESTRICT secret)
 {
-    return XXPH3_mul128_fold64(
+    return xxph::xxph3_mul128_fold64(
                acc[0] ^ XXPH_readLE64(secret),
                acc[1] ^ XXPH_readLE64(secret+8) );
 }
@@ -1638,7 +1619,7 @@ XXPH_FORCE_INLINE xxh_u64 XXPH3_mix16B(const xxh_u8* XXPH_RESTRICT input,
 {
     xxh_u64 const input_lo = XXPH_readLE64(input);
     xxh_u64 const input_hi = XXPH_readLE64(input+8);
-    return XXPH3_mul128_fold64(
+    return xxph::xxph3_mul128_fold64(
                input_lo ^ (XXPH_readLE64(secret)   + seed64),
                input_hi ^ (XXPH_readLE64(secret+8) - seed64) );
 }
