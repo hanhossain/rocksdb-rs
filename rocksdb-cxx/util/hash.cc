@@ -137,22 +137,4 @@ void Hash2x64(const char* data, size_t n, uint64_t seed, uint64_t* high64,
   *high64 = h;
   *low64 = l;
 }
-
-void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
-                       uint64_t* out_high64, uint64_t* out_low64) {
-  uint64_t high;
-  uint64_t low;
-  bijective_hash2x64_with_seed(in_high64, in_low64, seed, high, low);
-  *out_high64 = high;
-  *out_low64 = low;
-}
-
-void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64,
-                       uint64_t* out_high64, uint64_t* out_low64) {
-  uint64_t h;
-  uint64_t l;
-  bijective_hash2x64(in_high64, in_low64, h, l);
-  *out_high64 = h;
-  *out_low64 = l;
-}
 }  // namespace rocksdb

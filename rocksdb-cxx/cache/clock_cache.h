@@ -632,7 +632,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
     // NOTE: endian dependence
     // TODO: use GetUnaligned?
     std::memcpy(&in, key.data(), kCacheKeySize);
-    BijectiveHash2x64(in.data[1], in.data[0] ^ seed, &out.data[1], &out.data[0]);
+    bijective_hash2x64(in.data[1], in.data[0] ^ seed, out.data[1], out.data[0]);
     return out;
   }
 

@@ -74,6 +74,8 @@ fn xxh3_unavalanche(mut h: u64) -> u64 {
     h
 }
 
+/// Hash 128 bits to 128 bits, guaranteed not to lose data (equivalent to
+/// Hash2x64 on 16 bytes little endian)
 fn bijective_hash2x64_with_seed(mut high: u64, low: u64, seed: u64) -> (u64, u64) {
     // Adapted from XXH3_len_9to16_128b
     let bitflipl = 0x59973f0033362349u64.wrapping_sub(seed);

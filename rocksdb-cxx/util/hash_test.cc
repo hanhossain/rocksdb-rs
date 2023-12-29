@@ -21,7 +21,6 @@
 #include "util/math.h"
 #include "util/math128.h"
 
-using rocksdb::BijectiveHash2x64;
 using rocksdb::DecodeFixed64;
 using rocksdb::EncodeFixed32;
 using rocksdb::EndianSwapValue;
@@ -312,7 +311,7 @@ TEST(HashTest, Hash128Misc) {
         const uint64_t in_hi = DecodeFixed64(str.data() + 8);
         const uint64_t in_lo = DecodeFixed64(str.data());
         uint64_t hi, lo;
-        BijectiveHash2x64(in_hi, in_lo, &hi, &lo);
+        rocksdb::bijective_hash2x64(in_hi, in_lo, hi, lo);
         EXPECT_EQ(Lower64of128(here), lo);
         EXPECT_EQ(Upper64of128(here), hi);
         uint64_t un_hi, un_lo;
@@ -342,7 +341,7 @@ TEST(HashTest, Hash128Misc) {
           const uint64_t in_hi = DecodeFixed64(str.data() + 8);
           const uint64_t in_lo = DecodeFixed64(str.data());
           uint64_t hi, lo;
-          BijectiveHash2x64(in_hi, in_lo, var_seed, &hi, &lo);
+          rocksdb::bijective_hash2x64_with_seed(in_hi, in_lo, var_seed, hi, lo);
           EXPECT_EQ(Lower64of128(seeded), lo);
           EXPECT_EQ(Upper64of128(seeded), hi);
           uint64_t un_hi, un_lo;
