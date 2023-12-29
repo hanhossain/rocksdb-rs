@@ -76,12 +76,6 @@ void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64,
 void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
                        uint64_t* out_high64, uint64_t* out_low64);
 
-// Inverse of above (mostly for testing)
-void BijectiveUnhash2x64(uint64_t in_high64, uint64_t in_low64,
-                         uint64_t* out_high64, uint64_t* out_low64);
-void BijectiveUnhash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
-                         uint64_t* out_high64, uint64_t* out_low64);
-
 // Stable/persistent 32-bit hash. Moderate quality and high speed on
 // small inputs.
 // TODO: consider rename to Hash32

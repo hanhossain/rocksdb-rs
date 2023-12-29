@@ -12,6 +12,7 @@
 #include <cstring>
 #include <type_traits>
 #include <vector>
+#include <rocksdb-rs/src/hash.rs.h>
 
 #include "test_util/testharness.h"
 #include "util/coding.h"
@@ -21,7 +22,6 @@
 #include "util/math128.h"
 
 using rocksdb::BijectiveHash2x64;
-using rocksdb::BijectiveUnhash2x64;
 using rocksdb::DecodeFixed64;
 using rocksdb::EncodeFixed32;
 using rocksdb::EndianSwapValue;
@@ -316,7 +316,7 @@ TEST(HashTest, Hash128Misc) {
         EXPECT_EQ(Lower64of128(here), lo);
         EXPECT_EQ(Upper64of128(here), hi);
         uint64_t un_hi, un_lo;
-        BijectiveUnhash2x64(hi, lo, &un_hi, &un_lo);
+        rocksdb::bijective_unhash2x64(hi, lo, un_hi, un_lo);
         EXPECT_EQ(in_lo, un_lo);
         EXPECT_EQ(in_hi, un_hi);
       }
@@ -346,7 +346,7 @@ TEST(HashTest, Hash128Misc) {
           EXPECT_EQ(Lower64of128(seeded), lo);
           EXPECT_EQ(Upper64of128(seeded), hi);
           uint64_t un_hi, un_lo;
-          BijectiveUnhash2x64(hi, lo, var_seed, &un_hi, &un_lo);
+          rocksdb::bijective_unhash2x64_with_seed(hi, lo, var_seed, un_hi, un_lo);
           EXPECT_EQ(in_lo, un_lo);
           EXPECT_EQ(in_hi, un_hi);
         }

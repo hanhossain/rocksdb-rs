@@ -4,6 +4,7 @@
 //  (found in the LICENSE.Apache file in the root directory).
 
 #include <cstdint>
+#include <rocksdb-rs/src/hash.rs.h>
 
 #include "table/unique_id_impl.h"
 #include "util/hash.h"
@@ -37,7 +38,7 @@ void ExternalUniqueIdToInternal(UniqueIdPtr in_out) {
   if (in_out.extended) {
     in_out.ptr[2] -= lo + hi;
   }
-  BijectiveUnhash2x64(hi, lo, &hi, &lo);
+  bijective_unhash2x64(hi, lo, hi, lo);
   in_out.ptr[0] = lo - kLoOffsetForZero;
   in_out.ptr[1] = hi - kHiOffsetForZero;
 }

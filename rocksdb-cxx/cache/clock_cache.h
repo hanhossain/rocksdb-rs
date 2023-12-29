@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <rocksdb-rs/src/hash.rs.h>
 
 #include "cache/cache_key.h"
 #include "cache/sharded_cache.h"
@@ -639,7 +640,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
   // backing storage for the Slice in `unhashed`
   static inline Slice ReverseHash(const UniqueId64x2& hashed,
                                   UniqueId64x2* unhashed, uint32_t seed) {
-    BijectiveUnhash2x64(hashed.data[1], hashed.data[0], &unhashed->data[1], &unhashed->data[0]);
+    bijective_unhash2x64(hashed.data[1], hashed.data[0], unhashed->data[1], unhashed->data[0]);
     unhashed->data[0] ^= seed;
     // NOTE: endian dependence
     return Slice(reinterpret_cast<const char*>(unhashed), kCacheKeySize);

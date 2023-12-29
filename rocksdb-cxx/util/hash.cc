@@ -147,29 +147,11 @@ void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
   *out_low64 = low;
 }
 
-void BijectiveUnhash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
-                         uint64_t* out_high64, uint64_t* out_low64) {
-  uint64_t h;
-  uint64_t l;
-  bijective_unhash2x64_with_seed(in_high64, in_low64, seed, h, l);
-  *out_high64 = h;
-  *out_low64 = l;
-}
-
 void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64,
                        uint64_t* out_high64, uint64_t* out_low64) {
   uint64_t h;
   uint64_t l;
   bijective_hash2x64(in_high64, in_low64, h, l);
-  *out_high64 = h;
-  *out_low64 = l;
-}
-
-void BijectiveUnhash2x64(uint64_t in_high64, uint64_t in_low64,
-                         uint64_t* out_high64, uint64_t* out_low64) {
-  uint64_t h;
-  uint64_t l;
-  bijective_unhash2x64(in_high64, in_low64, h, l);
   *out_high64 = h;
   *out_low64 = l;
 }
