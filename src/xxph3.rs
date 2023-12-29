@@ -21,6 +21,7 @@ mod ffi {
         fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
         fn xxph_read_le64(data: &[u8]) -> u64;
         fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
+        fn xxph_read_le32(data: &[u8]) -> u32;
     }
 }
 
@@ -61,6 +62,10 @@ fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64 {
 
 fn xxph_read_le64(data: &[u8]) -> u64 {
     u64::from_le_bytes(data[..std::mem::size_of::<u64>()].try_into().unwrap())
+}
+
+fn xxph_read_le32(data: &[u8]) -> u32 {
+    u32::from_le_bytes(data[..std::mem::size_of::<u32>()].try_into().unwrap())
 }
 
 fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64 {

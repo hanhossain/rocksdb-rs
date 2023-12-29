@@ -545,16 +545,11 @@ static xxh_u32 XXPH_swap32 (xxh_u32 x)
 *****************************/
 typedef enum { XXPH_aligned, XXPH_unaligned } XXPH_alignment;
 
-XXPH_FORCE_INLINE xxh_u32 XXPH_readLE32(const void* ptr)
-{
-    return XXPH_CPU_LITTLE_ENDIAN ? XXPH_read32(ptr) : XXPH_swap32(XXPH_read32(ptr));
-}
-
 XXPH_FORCE_INLINE xxh_u32
 XXPH_readLE32_align(const void* ptr, XXPH_alignment align)
 {
     if (align==XXPH_unaligned) {
-        return XXPH_readLE32(ptr);
+        return xxph::xxph_read_le32(rust::Slice(static_cast<const uint8_t*>(ptr), 4));
     } else {
         return XXPH_CPU_LITTLE_ENDIAN ? *(const xxh_u32*)ptr : XXPH_swap32(*(const xxh_u32*)ptr);
     }
@@ -1061,7 +1056,7 @@ XXPH3_len_1to3_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64
         xxh_u8 const c2 = input[len >> 1];
         xxh_u8 const c3 = input[len - 1];
         xxh_u32  const combined = ((xxh_u32)c1) | (((xxh_u32)c2) << 8) | (((xxh_u32)c3) << 16) | (((xxh_u32)len) << 24);
-        xxh_u64  const keyed = (xxh_u64)combined ^ (XXPH_readLE32(secret) + seed);
+        xxh_u64  const keyed = (xxh_u64)combined ^ (xxph::xxph_read_le32(rust::Slice(secret, 4)) + seed);
         xxh_u64  const mixed = keyed * PRIME64_1;
         return xxph::xxph3_avalanche(mixed);
     }
@@ -1073,8 +1068,8 @@ XXPH3_len_4to8_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64
     XXPH_ASSERT(input != NULL);
     XXPH_ASSERT(secret != NULL);
     XXPH_ASSERT(4 <= len && len <= 8);
-    {   xxh_u32 const input_lo = XXPH_readLE32(input);
-        xxh_u32 const input_hi = XXPH_readLE32(input + len - 4);
+    {   xxh_u32 const input_lo = xxph::xxph_read_le32(rust::Slice(input, 4));
+        xxh_u32 const input_hi = xxph::xxph_read_le32(rust::Slice(input + len - 4, 4));
         xxh_u64 const input_64 = input_lo | ((xxh_u64)input_hi << 32);
         xxh_u64 const keyed = input_64 ^ (xxph::xxph_read_le64(rust::Slice(secret, 8)) + seed);
         xxh_u64 const mix64 = len + ((keyed ^ (keyed >> 51)) * PRIME32_1);
