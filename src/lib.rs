@@ -8,6 +8,7 @@ pub mod slice;
 pub mod status;
 mod string_util;
 pub mod unique_id;
+mod xxph3;
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub mod ffi {

@@ -55,6 +55,8 @@
 #include <cstring>
 /* END RocksDB customizations */
 
+#include "rocksdb-rs/src/xxph3.rs.h"
+
 // clang-format off
 #if defined (__cplusplus)
 extern "C" {
@@ -1069,16 +1071,6 @@ XXPH3_mul128_fold64(xxh_u64 lhs, xxh_u64 rhs)
     return product.low64 ^ product.high64;
 }
 
-
-static XXPH64_hash_t XXPH3_avalanche(xxh_u64 h64)
-{
-    h64 ^= h64 >> 37;
-    h64 *= PRIME64_3;
-    h64 ^= h64 >> 32;
-    return h64;
-}
-
-
 /* ==========================================
  * Short keys
  * ========================================== */
@@ -1095,7 +1087,7 @@ XXPH3_len_1to3_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64
         xxh_u32  const combined = ((xxh_u32)c1) | (((xxh_u32)c2) << 8) | (((xxh_u32)c3) << 16) | (((xxh_u32)len) << 24);
         xxh_u64  const keyed = (xxh_u64)combined ^ (XXPH_readLE32(secret) + seed);
         xxh_u64  const mixed = keyed * PRIME64_1;
-        return XXPH3_avalanche(mixed);
+        return xxph::xxph3_avalanche(mixed);
     }
 }
 
@@ -1110,7 +1102,7 @@ XXPH3_len_4to8_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64
         xxh_u64 const input_64 = input_lo | ((xxh_u64)input_hi << 32);
         xxh_u64 const keyed = input_64 ^ (XXPH_readLE64(secret) + seed);
         xxh_u64 const mix64 = len + ((keyed ^ (keyed >> 51)) * PRIME32_1);
-        return XXPH3_avalanche((mix64 ^ (mix64 >> 47)) * PRIME64_2);
+        return xxph::xxph3_avalanche((mix64 ^ (mix64 >> 47)) * PRIME64_2);
     }
 }
 
@@ -1123,7 +1115,7 @@ XXPH3_len_9to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH6
     {   xxh_u64 const input_lo = XXPH_readLE64(input)           ^ (XXPH_readLE64(secret)     + seed);
         xxh_u64 const input_hi = XXPH_readLE64(input + len - 8) ^ (XXPH_readLE64(secret + 8) - seed);
         xxh_u64 const acc = len + (input_lo + input_hi) + XXPH3_mul128_fold64(input_lo, input_hi);
-        return XXPH3_avalanche(acc);
+        return xxph::xxph3_avalanche(acc);
     }
 }
 
@@ -1565,7 +1557,7 @@ XXPH3_mergeAccs(const xxh_u64* XXPH_RESTRICT acc, const xxh_u8* XXPH_RESTRICT se
     result64 += XXPH3_mix2Accs(acc+4, secret + 32);
     result64 += XXPH3_mix2Accs(acc+6, secret + 48);
 
-    return XXPH3_avalanche(result64);
+    return xxph::xxph3_avalanche(result64);
 }
 
 #define XXPH3_INIT_ACC { PRIME32_3, PRIME64_1, PRIME64_2, PRIME64_3, \
@@ -1676,7 +1668,7 @@ XXPH3_len_17to128_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
         acc += XXPH3_mix16B(input+0, secret+0, seed);
         acc += XXPH3_mix16B(input+len-16, secret+16, seed);
 
-        return XXPH3_avalanche(acc);
+        return xxph::xxph3_avalanche(acc);
     }
 }
 
@@ -1699,14 +1691,14 @@ XXPH3_len_129to240_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
         for (i=0; i<8; i++) {
             acc += XXPH3_mix16B(input+(16*i), secret+(16*i), seed);
         }
-        acc = XXPH3_avalanche(acc);
+        acc = xxph::xxph3_avalanche(acc);
         XXPH_ASSERT(nbRounds >= 8);
         for (i=8 ; i < nbRounds; i++) {
             acc += XXPH3_mix16B(input+(16*i), secret+(16*(i-8)) + XXPH3_MIDSIZE_STARTOFFSET, seed);
         }
         /* last bytes */
         acc += XXPH3_mix16B(input + len - 16, secret + XXPH3_SECRET_SIZE_MIN - XXPH3_MIDSIZE_LASTOFFSET, seed);
-        return XXPH3_avalanche(acc);
+        return xxph::xxph3_avalanche(acc);
     }
 }
 
