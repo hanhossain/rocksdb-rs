@@ -9,8 +9,6 @@ mod ffi {
         #[cxx_name = "hash2x64_with_seed"]
         fn hash2x64_with_seed_ext(key: &[u8], seed: u64, upper: &mut u64, lower: &mut u64);
 
-        fn xxh3_unavalanche(mut h: u64) -> u64;
-
         #[cxx_name = "bijective_hash2x64_with_seed"]
         fn bijective_hash2x64_with_seed_ext(
             high: u64,
@@ -22,6 +20,18 @@ mod ffi {
 
         #[cxx_name = "bijective_hash2x64"]
         fn bijective_hash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut u64);
+
+        #[cxx_name = "bijective_unhash2x64_with_seed"]
+        fn bijective_unhash2x64_with_seed_ext(
+            high: u64,
+            low: u64,
+            seed: u64,
+            high_res: &mut u64,
+            low_res: &mut u64,
+        );
+
+        #[cxx_name = "bijective_unhash2x64"]
+        fn bijective_unhash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut u64);
     }
 }
 
@@ -100,6 +110,46 @@ fn bijective_hash2x64(high: u64, low: u64) -> (u64, u64) {
 
 fn bijective_hash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut u64) {
     (*high_res, *low_res) = bijective_hash2x64(high, low);
+}
+
+fn bijective_unhash2x64_with_seed(high: u64, low: u64, seed: u64) -> (u64, u64) {
+    let bitflipl = 0x59973f0033362349u64.wrapping_sub(seed);
+    let bitfliph = 0xc202797692d63d58u64.wrapping_add(seed);
+    let mut lo = xxh3_unavalanche(low);
+    let mut hi = xxh3_unavalanche(high);
+    lo = lo.wrapping_mul(0xba79078168d4baf); // inverse of 0xC2B2AE3D27D4EB4F
+    hi = hi.wrapping_sub(upper_64_of_128(multiply_64_to_128(lo, 0xC2B2AE3D27D4EB4F)));
+    hi = hi.wrapping_mul(0xba79078168d4baf); // inverse of 0xC2B2AE3D27D4EB4F
+    lo = lo ^ hi.swap_bytes();
+    lo = lo.wrapping_sub(0x3c0000000000000);
+    lo = lo.wrapping_mul(0x887493432badb37); // inverse of 0x9E3779B185EBCA87
+    hi = hi.wrapping_sub(upper_64_of_128(multiply_64_to_128(lo, 0x9E3779B185EBCA87)));
+    let tmp32 = lower_32_of_64(hi).wrapping_mul(0xb6c92f47); // inverse of 0x85EBCA77
+    hi = hi.wrapping_sub(tmp32 as u64);
+    hi = (hi & 0xFFFFFFFF00000000)
+        .wrapping_sub((tmp32 as u64).wrapping_mul(0x85EBCA76) & 0xFFFFFFFF00000000)
+        .wrapping_add(tmp32 as u64);
+    hi = hi ^ bitfliph;
+    lo = lo ^ hi ^ bitflipl;
+    (hi, lo)
+}
+
+fn bijective_unhash2x64_with_seed_ext(
+    high: u64,
+    low: u64,
+    seed: u64,
+    high_res: &mut u64,
+    low_res: &mut u64,
+) {
+    (*high_res, *low_res) = bijective_unhash2x64_with_seed(high, low, seed);
+}
+
+fn bijective_unhash2x64(high: u64, low: u64) -> (u64, u64) {
+    bijective_unhash2x64_with_seed(high, low, 0)
+}
+
+fn bijective_unhash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut u64) {
+    (*high_res, *low_res) = bijective_unhash2x64(high, low);
 }
 
 fn lower_64_of_128(v: u128) -> u64 {

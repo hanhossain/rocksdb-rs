@@ -138,14 +138,6 @@ void Hash2x64(const char* data, size_t n, uint64_t seed, uint64_t* high64,
   *low64 = l;
 }
 
-namespace {
-
-inline uint64_t XXH3_unavalanche(uint64_t h64) {
-  return xxh3_unavalanche(h64);
-}
-
-}  // namespace
-
 void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
                        uint64_t* out_high64, uint64_t* out_low64) {
   uint64_t high;
@@ -157,26 +149,11 @@ void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
 
 void BijectiveUnhash2x64(uint64_t in_high64, uint64_t in_low64, uint64_t seed,
                          uint64_t* out_high64, uint64_t* out_low64) {
-  // Inverted above (also consulting XXH3_len_9to16_128b)
-  const uint64_t bitflipl = /*secret part*/ 0x59973f0033362349U - seed;
-  const uint64_t bitfliph = /*secret part*/ 0xc202797692d63d58U + seed;
-  uint64_t lo = XXH3_unavalanche(in_low64);
-  uint64_t hi = XXH3_unavalanche(in_high64);
-  lo *= 0xba79078168d4baf;  // inverse of 0xC2B2AE3D27D4EB4FU
-  hi -= Upper64of128(Multiply64to128(lo, 0xC2B2AE3D27D4EB4FU));
-  hi *= 0xba79078168d4baf;  // inverse of 0xC2B2AE3D27D4EB4FU
-  lo ^= EndianSwapValue(hi);
-  lo -= 0x3c0000000000000U;
-  lo *= 0x887493432badb37U;  // inverse of 0x9E3779B185EBCA87U
-  hi -= Upper64of128(Multiply64to128(lo, 0x9E3779B185EBCA87U));
-  uint32_t tmp32 = Lower32of64(hi) * 0xb6c92f47;  // inverse of 0x85EBCA77
-  hi -= tmp32;
-  hi = (hi & 0xFFFFFFFF00000000U) -
-       ((tmp32 * uint64_t{0x85EBCA76}) & 0xFFFFFFFF00000000U) + tmp32;
-  hi ^= bitfliph;
-  lo ^= hi ^ bitflipl;
-  *out_high64 = hi;
-  *out_low64 = lo;
+  uint64_t h;
+  uint64_t l;
+  bijective_unhash2x64_with_seed(in_high64, in_low64, seed, h, l);
+  *out_high64 = h;
+  *out_low64 = l;
 }
 
 void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64,
@@ -190,6 +167,10 @@ void BijectiveHash2x64(uint64_t in_high64, uint64_t in_low64,
 
 void BijectiveUnhash2x64(uint64_t in_high64, uint64_t in_low64,
                          uint64_t* out_high64, uint64_t* out_low64) {
-  BijectiveUnhash2x64(in_high64, in_low64, /*seed*/ 0, out_high64, out_low64);
+  uint64_t h;
+  uint64_t l;
+  bijective_unhash2x64(in_high64, in_low64, h, l);
+  *out_high64 = h;
+  *out_low64 = l;
 }
 }  // namespace rocksdb
