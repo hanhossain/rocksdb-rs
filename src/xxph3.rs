@@ -13,6 +13,7 @@ const SECRET: &[u8] = &[
     0x45, 0xcb, 0x3a, 0x8f, 0x95, 0x16, 0x04, 0x28, 0xaf, 0xd7, 0xfb, 0xca, 0xbb, 0x4b, 0x40, 0x7e,
 ];
 const PRIME32_1: u32 = 0x9E3779B1;
+const PRIME64_1: u64 = 0x9E3779B185EBCA87;
 const PRIME64_2: u64 = 0xC2B2AE3D27D4EB4F;
 const PRIME64_3: u64 = 0x165667B19E3779F9;
 
@@ -22,6 +23,7 @@ mod ffi {
         fn xxph3_avalanche(h: u64) -> u64;
         fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
         fn xxph_read_le64(data: &[u8]) -> u64;
+        fn xxph3_len_1to3(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_4to8(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
         fn xxph_read_le32(data: &[u8]) -> u32;
@@ -49,6 +51,18 @@ fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64 {
     }
 
     todo!()
+}
+
+fn xxph3_len_1to3(data: &[u8], seed: u64) -> u64 {
+    assert!(1 <= data.len() && data.len() <= 3);
+    let c1 = data[0];
+    let c2 = data[data.len() >> 1];
+    let c3 = data[data.len() - 1];
+    let combined =
+        c1 as u32 | ((c2 as u32) << 8) | ((c3 as u32) << 16) | ((data.len() as u32) << 24);
+    let keyed = (combined as u64) ^ (xxph_read_le32(SECRET) as u64).wrapping_add(seed);
+    let mixed = keyed.wrapping_mul(PRIME64_1);
+    xxph3_avalanche(mixed)
 }
 
 fn xxph3_len_4to8(data: &[u8], seed: u64) -> u64 {

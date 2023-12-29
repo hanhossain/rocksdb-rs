@@ -1047,28 +1047,12 @@ XXPH_mult64to128(xxh_u64 lhs, xxh_u64 rhs)
  * ========================================== */
 
 XXPH_FORCE_INLINE XXPH64_hash_t
-XXPH3_len_1to3_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64_hash_t seed)
-{
-    XXPH_ASSERT(input != NULL);
-    XXPH_ASSERT(1 <= len && len <= 3);
-    XXPH_ASSERT(secret != NULL);
-    {   xxh_u8 const c1 = input[0];
-        xxh_u8 const c2 = input[len >> 1];
-        xxh_u8 const c3 = input[len - 1];
-        xxh_u32  const combined = ((xxh_u32)c1) | (((xxh_u32)c2) << 8) | (((xxh_u32)c3) << 16) | (((xxh_u32)len) << 24);
-        xxh_u64  const keyed = (xxh_u64)combined ^ (xxph::xxph_read_le32(rust::Slice(secret, 4)) + seed);
-        xxh_u64  const mixed = keyed * PRIME64_1;
-        return xxph::xxph3_avalanche(mixed);
-    }
-}
-
-XXPH_FORCE_INLINE XXPH64_hash_t
 XXPH3_len_0to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64_hash_t seed)
 {
     XXPH_ASSERT(len <= 16);
     {   if (len > 8) return xxph::xxph3_len_9to16(rust::Slice(input, len), seed);
         if (len >= 4) return xxph::xxph3_len_4to8(rust::Slice(input, len), seed);
-        if (len) return XXPH3_len_1to3_64b(input, len, secret, seed);
+        if (len) return xxph::xxph3_len_1to3(rust::Slice(input, len), seed);
         /*
          * RocksDB modification from XXPH3 preview: zero result for empty
          * string can be problematic for multiplication-based algorithms.
