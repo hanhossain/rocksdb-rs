@@ -20,6 +20,9 @@ mod ffi {
             high_res: &mut u64,
             low_res: &mut u64,
         );
+
+        #[cxx_name = "bijective_hash2x64"]
+        fn bijective_hash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut u64);
     }
 }
 
@@ -90,6 +93,14 @@ fn bijective_hash2x64_with_seed_ext(
     low_res: &mut u64,
 ) {
     (*high_res, *low_res) = bijective_hash2x64_with_seed(high, low, seed);
+}
+
+fn bijective_hash2x64(high: u64, low: u64) -> (u64, u64) {
+    bijective_hash2x64_with_seed(high, low, 0)
+}
+
+fn bijective_hash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut u64) {
+    (*high_res, *low_res) = bijective_hash2x64(high, low);
 }
 
 fn lower_64_of_128(v: u128) -> u64 {
