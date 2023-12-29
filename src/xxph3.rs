@@ -23,6 +23,7 @@ mod ffi {
         fn xxph3_avalanche(h: u64) -> u64;
         fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
         fn xxph_read_le64(data: &[u8]) -> u64;
+        fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_1to3(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_4to8(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
@@ -39,18 +40,21 @@ fn xxph3_64_with_seed(data: &[u8], seed: u64) -> u64 {
 }
 
 fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64 {
-    assert!(!data.is_empty());
     assert!(data.len() <= 16);
 
     if data.len() > 8 {
         return xxph3_len_9to16(data, seed);
-    } else if data.len() >= 4 {
-        todo!()
-    } else if data.len() > 0 {
-        todo!()
     }
 
-    todo!()
+    if data.len() >= 4 {
+        return xxph3_len_4to8(data, seed);
+    }
+
+    if data.len() > 0 {
+        return xxph3_len_1to3(data, seed);
+    }
+
+    xxph3_mul128_fold64(seed.wrapping_add(xxph_read_le64(SECRET)), PRIME64_2)
 }
 
 fn xxph3_len_1to3(data: &[u8], seed: u64) -> u64 {

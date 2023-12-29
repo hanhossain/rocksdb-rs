@@ -1046,23 +1046,6 @@ XXPH_mult64to128(xxh_u64 lhs, xxh_u64 rhs)
  * Short keys
  * ========================================== */
 
-XXPH_FORCE_INLINE XXPH64_hash_t
-XXPH3_len_0to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64_hash_t seed)
-{
-    XXPH_ASSERT(len <= 16);
-    {   if (len > 8) return xxph::xxph3_len_9to16(rust::Slice(input, len), seed);
-        if (len >= 4) return xxph::xxph3_len_4to8(rust::Slice(input, len), seed);
-        if (len) return xxph::xxph3_len_1to3(rust::Slice(input, len), seed);
-        /*
-         * RocksDB modification from XXPH3 preview: zero result for empty
-         * string can be problematic for multiplication-based algorithms.
-         * Return a hash of the seed instead.
-         */
-        return xxph::xxph3_mul128_fold64(seed + xxph::xxph_read_le64(rust::Slice(secret, 8)), PRIME64_2);
-    }
-}
-
-
 /* ===    Long Keys    === */
 
 #define STRIPE_LEN 64
@@ -1633,7 +1616,7 @@ XXPH3_len_129to240_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
 
 XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(const void* input, size_t len)
 {
-    if (len <= 16) return XXPH3_len_0to16_64b((const xxh_u8*)input, len, kSecret, 0);
+    if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), 0);
     if (len <= 128) return XXPH3_len_17to128_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), 0);
     if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), 0);
     return XXPH3_hashLong_64b_defaultSecret((const xxh_u8*)input, len);
@@ -1647,7 +1630,7 @@ XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_
      * it should be done here.
      * For now, it's a contract pre-condition.
      * Adding a check and a branch here would cost performance at every hash */
-     if (len <= 16) return XXPH3_len_0to16_64b((const xxh_u8*)input, len, (const xxh_u8*)secret, 0);
+     if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), 0);
      if (len <= 128) return XXPH3_len_17to128_64b((const xxh_u8*)input, len, (const xxh_u8*)secret, secretSize, 0);
      if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b((const xxh_u8*)input, len, (const xxh_u8*)secret, secretSize, 0);
      return XXPH3_hashLong_64b_withSecret((const xxh_u8*)input, len, (const xxh_u8*)secret, secretSize);
@@ -1656,7 +1639,7 @@ XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_
 XXPH_PUBLIC_API XXPH64_hash_t
 XXPH3_64bits_withSeed(const void* input, size_t len, XXPH64_hash_t seed)
 {
-    if (len <= 16) return XXPH3_len_0to16_64b((const xxh_u8*)input, len, kSecret, seed);
+    if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), seed);
     if (len <= 128) return XXPH3_len_17to128_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), seed);
     if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), seed);
     return XXPH3_hashLong_64b_withSeed((const xxh_u8*)input, len, seed);
