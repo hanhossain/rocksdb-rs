@@ -551,7 +551,7 @@ XXPH_readLE32_align(const void* ptr, XXPH_alignment align)
     if (align==XXPH_unaligned) {
         return xxph::xxph_read_le32(rust::Slice(static_cast<const uint8_t*>(ptr), 4));
     } else {
-        return XXPH_CPU_LITTLE_ENDIAN ? *(const xxh_u32*)ptr : XXPH_swap32(*(const xxh_u32*)ptr);
+        return XXPH_CPU_LITTLE_ENDIAN ? *static_cast<const xxh_u32 *>(ptr) : XXPH_swap32(*static_cast<const xxh_u32 *>(ptr));
     }
 }
 
@@ -629,7 +629,7 @@ XXPH_readLE64_align(const void* ptr, XXPH_alignment align)
     if (align==XXPH_unaligned)
         return xxph::xxph_read_le64(rust::Slice(static_cast<const uint8_t*>(ptr), 8));
     else
-        return XXPH_CPU_LITTLE_ENDIAN ? *(const xxh_u64*)ptr : XXPH_swap64(*(const xxh_u64*)ptr);
+        return XXPH_CPU_LITTLE_ENDIAN ? *static_cast<const xxh_u64 *>(ptr) : XXPH_swap64(*static_cast<const xxh_u64 *>(ptr));
 }
 
 
@@ -962,8 +962,8 @@ XXPH_mult64to128(xxh_u64 lhs, xxh_u64 rhs)
     && defined(__SIZEOF_INT128__) \
     || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
 
-    __uint128_t product = (__uint128_t)lhs * (__uint128_t)rhs;
-    XXPH128_hash_t const r128 = { (xxh_u64)(product), (xxh_u64)(product >> 64) };
+    __uint128_t product = static_cast<__uint128_t>(lhs) * static_cast<__uint128_t>(rhs);
+    XXPH128_hash_t const r128 = { static_cast<xxh_u64>(product), static_cast<xxh_u64>(product >> 64) };
     return r128;
 
     /*
@@ -1110,10 +1110,10 @@ XXPH3_accumulate_512(      void* XXPH_RESTRICT acc,
 
     XXPH_ASSERT((((size_t)acc) & 15) == 0);
     {
-        XXPH_ALIGN(16) uint64x2_t* const xacc = (uint64x2_t *) acc;
+        XXPH_ALIGN(16) uint64x2_t* const xacc = static_cast<uint64x2_t *>(acc);
         /* We don't use a uint32x4_t pointer because it causes bus errors on ARMv7. */
-        uint8_t const* const xinput = (const uint8_t *) input;
-        uint8_t const* const xsecret  = (const uint8_t *) secret;
+        uint8_t const* const xinput = static_cast<const uint8_t *>(input);
+        uint8_t const* const xsecret  = static_cast<const uint8_t *>(secret);
 
         size_t i;
         for (i=0; i < STRIPE_LEN / sizeof(uint64x2_t); i++) {
@@ -1303,8 +1303,8 @@ XXPH3_scrambleAcc(void* XXPH_RESTRICT acc, const void* XXPH_RESTRICT secret)
 
     XXPH_ASSERT((((size_t)acc) & 15) == 0);
 
-    {   uint64x2_t* const xacc =     (uint64x2_t*) acc;
-        uint8_t const* const xsecret = (uint8_t const*) secret;
+    {   uint64x2_t* const xacc =     static_cast<uint64x2_t *>(acc);
+        uint8_t const* const xsecret = static_cast<uint8_t const *>(secret);
         uint32x2_t const prime     = vdup_n_u32 (PRIME32_1);
 
         size_t i;
@@ -1485,7 +1485,7 @@ XXPH3_hashLong_internal(const xxh_u8* XXPH_RESTRICT input, size_t len,
     XXPH_STATIC_ASSERT(sizeof(acc) == 64);
 #define XXPH_SECRET_MERGEACCS_START 11  /* do not align on 8, so that secret is different from accumulator */
     XXPH_ASSERT(secretSize >= sizeof(acc) + XXPH_SECRET_MERGEACCS_START);
-    return XXPH3_mergeAccs(acc, secret + XXPH_SECRET_MERGEACCS_START, (xxh_u64)len * PRIME64_1);
+    return XXPH3_mergeAccs(acc, secret + XXPH_SECRET_MERGEACCS_START, static_cast<xxh_u64>(len) * PRIME64_1);
 }
 
 
@@ -1596,7 +1596,7 @@ XXPH3_len_129to240_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
     #define XXPH3_MIDSIZE_LASTOFFSET  17
 
     {   xxh_u64 acc = len * PRIME64_1;
-        int const nbRounds = (int)len / 16;
+        int const nbRounds = static_cast<int>(len) / 16;
         int i;
         for (i=0; i<8; i++) {
             acc += XXPH3_mix16B(input+(16*i), secret+(16*i), seed);
@@ -1617,9 +1617,9 @@ XXPH3_len_129to240_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
 XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(const void* input, size_t len)
 {
     if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), 0);
-    if (len <= 128) return XXPH3_len_17to128_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), 0);
-    if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), 0);
-    return XXPH3_hashLong_64b_defaultSecret((const xxh_u8*)input, len);
+    if (len <= 128) return XXPH3_len_17to128_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), 0);
+    if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), 0);
+    return XXPH3_hashLong_64b_defaultSecret(static_cast<const xxh_u8 *>(input), len);
 }
 
 XXPH_PUBLIC_API XXPH64_hash_t
@@ -1631,18 +1631,18 @@ XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_
      * For now, it's a contract pre-condition.
      * Adding a check and a branch here would cost performance at every hash */
      if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), 0);
-     if (len <= 128) return XXPH3_len_17to128_64b((const xxh_u8*)input, len, (const xxh_u8*)secret, secretSize, 0);
-     if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b((const xxh_u8*)input, len, (const xxh_u8*)secret, secretSize, 0);
-     return XXPH3_hashLong_64b_withSecret((const xxh_u8*)input, len, (const xxh_u8*)secret, secretSize);
+     if (len <= 128) return XXPH3_len_17to128_64b(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize, 0);
+     if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize, 0);
+     return XXPH3_hashLong_64b_withSecret(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize);
 }
 
 XXPH_PUBLIC_API XXPH64_hash_t
 XXPH3_64bits_withSeed(const void* input, size_t len, XXPH64_hash_t seed)
 {
     if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), seed);
-    if (len <= 128) return XXPH3_len_17to128_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), seed);
-    if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b((const xxh_u8*)input, len, kSecret, sizeof(kSecret), seed);
-    return XXPH3_hashLong_64b_withSeed((const xxh_u8*)input, len, seed);
+    if (len <= 128) return XXPH3_len_17to128_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), seed);
+    if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), seed);
+    return XXPH3_hashLong_64b_withSeed(static_cast<const xxh_u8 *>(input), len, seed);
 }
 
 /* ===   XXPH3 streaming   === */
