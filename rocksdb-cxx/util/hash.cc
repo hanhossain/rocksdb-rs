@@ -107,7 +107,7 @@ uint64_t GetSlicePartsNPHash64(const SliceParts& data, uint64_t seed) {
 Unsigned128 Hash128(const char* data, size_t n, uint64_t seed) {
   uint64_t h;
   uint64_t l;
-  Hash2x64(data, n, seed, &h, &l);
+  hash2x64_with_seed(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), seed, h, l);
   return Unsigned128(l, h);
 }
 
@@ -124,16 +124,6 @@ void Hash2x64(const char* data, size_t n, uint64_t* high64, uint64_t* low64) {
   uint64_t h;
   uint64_t l;
   hash2x64(slice, h, l);
-  *high64 = h;
-  *low64 = l;
-}
-
-void Hash2x64(const char* data, size_t n, uint64_t seed, uint64_t* high64,
-              uint64_t* low64) {
-  auto slice = rust::Slice(reinterpret_cast<const uint8_t*>(data), n);
-  uint64_t h;
-  uint64_t l;
-  hash2x64_with_seed(slice, seed, h, l);
   *high64 = h;
   *low64 = l;
 }

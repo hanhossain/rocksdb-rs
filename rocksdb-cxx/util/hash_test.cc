@@ -333,7 +333,8 @@ TEST(HashTest, Hash128Misc) {
         // Must match seeded Hash2x64
         {
           uint64_t hi, lo;
-          Hash2x64(str.data(), size, var_seed, &hi, &lo);
+          auto slice = rust::Slice(reinterpret_cast<const uint8_t*>(str.data()), size);
+          rocksdb::hash2x64_with_seed(slice, var_seed, hi, lo);
           EXPECT_EQ(Lower64of128(seeded), lo);
           EXPECT_EQ(Upper64of128(seeded), hi);
         }
