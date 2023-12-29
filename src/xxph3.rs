@@ -31,14 +31,6 @@ mod ffi {
     }
 }
 
-fn xxph3_64_with_seed(data: &[u8], seed: u64) -> u64 {
-    if data.len() <= 16 {
-        return xxph3_len_0to16(data, seed);
-    }
-
-    todo!()
-}
-
 fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64 {
     assert!(data.len() <= 16);
 
