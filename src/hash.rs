@@ -75,6 +75,7 @@ fn xxh3_unavalanche(mut h: u64) -> u64 {
 }
 
 fn bijective_hash2x64_with_seed(mut high: u64, low: u64, seed: u64) -> (u64, u64) {
+    // Adapted from XXH3_len_9to16_128b
     let bitflipl = 0x59973f0033362349u64.wrapping_sub(seed);
     let bitfliph = 0xc202797692d63d58u64.wrapping_add(seed);
     let mut tmp128 = multiply_64_to_128(low ^ high ^ bitflipl, 0x9E3779B185EBCA87);
@@ -113,6 +114,7 @@ fn bijective_hash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut
 }
 
 fn bijective_unhash2x64_with_seed(high: u64, low: u64, seed: u64) -> (u64, u64) {
+    // Inverted above (also consulting XXH3_len_9to16_128b)
     let bitflipl = 0x59973f0033362349u64.wrapping_sub(seed);
     let bitfliph = 0xc202797692d63d58u64.wrapping_add(seed);
     let mut lo = xxh3_unavalanche(low);
