@@ -19,7 +19,7 @@ mod ffi {
     extern "Rust" {
         fn xxph3_avalanche(h: u64) -> u64;
         fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
-        fn xxph_read_le(data: &[u8]) -> u64;
+        fn xxph_read_le64(data: &[u8]) -> u64;
         fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
     }
 }
@@ -50,8 +50,8 @@ fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64 {
 fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64 {
     assert!(9 <= data.len() && data.len() <= 16);
 
-    let input_lo = xxph_read_le(data) ^ (xxph_read_le(SECRET).wrapping_add(seed));
-    let input_hi = xxph_read_le(&data[data.len() - 8..]) ^ (xxph_read_le(&SECRET[8..]));
+    let input_lo = xxph_read_le64(data) ^ (xxph_read_le64(SECRET).wrapping_add(seed));
+    let input_hi = xxph_read_le64(&data[data.len() - 8..]) ^ (xxph_read_le64(&SECRET[8..]));
     let acc = (data.len() as u64)
         .wrapping_add(input_lo)
         .wrapping_add(input_hi)
@@ -59,7 +59,7 @@ fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64 {
     xxph3_avalanche(acc)
 }
 
-fn xxph_read_le(data: &[u8]) -> u64 {
+fn xxph_read_le64(data: &[u8]) -> u64 {
     u64::from_le_bytes(data[..std::mem::size_of::<u64>()].try_into().unwrap())
 }
 
