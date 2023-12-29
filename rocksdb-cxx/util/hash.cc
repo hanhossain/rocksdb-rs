@@ -115,16 +115,7 @@ Unsigned128 Hash128(const char* data, size_t n) {
   // Same as seed = 0
   uint64_t h;
   uint64_t l;
-  Hash2x64(data, n, &h, &l);
+  hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), h, l);
   return Unsigned128(l, h);
-}
-
-void Hash2x64(const char* data, size_t n, uint64_t* high64, uint64_t* low64) {
-  auto slice = rust::Slice(reinterpret_cast<const uint8_t*>(data), n);
-  uint64_t h;
-  uint64_t l;
-  hash2x64(slice, h, l);
-  *high64 = h;
-  *low64 = l;
 }
 }  // namespace rocksdb

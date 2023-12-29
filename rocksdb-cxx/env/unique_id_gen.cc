@@ -129,7 +129,11 @@ void GenerateRawUniqueIdImpl(uint64_t* a, uint64_t* b,
   Entropy e;
   std::memset(&e, 0, sizeof(e));
   e.Populate(opts);
-  Hash2x64(reinterpret_cast<const char*>(&e), sizeof(e), a, b);
+  uint64_t upper;
+  uint64_t lower;
+  hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(&e), sizeof(e)), upper, lower);
+  *a = upper;
+  *b = lower;
 }
 
 }  // namespace

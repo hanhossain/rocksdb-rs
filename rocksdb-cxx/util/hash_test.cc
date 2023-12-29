@@ -27,7 +27,6 @@ using rocksdb::EndianSwapValue;
 using rocksdb::GetSliceHash64;
 using rocksdb::Hash;
 using rocksdb::Hash128;
-using rocksdb::Hash2x64;
 using rocksdb::Hash64;
 using rocksdb::Lower32of64;
 using rocksdb::Lower64of128;
@@ -303,7 +302,7 @@ TEST(HashTest, Hash128Misc) {
       EXPECT_EQ(here, GetSliceHash128(Slice(str.data(), size)));
       {
         uint64_t hi, lo;
-        Hash2x64(str.data(), size, &hi, &lo);
+        rocksdb::hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(str.data()), size), hi, lo);
         EXPECT_EQ(Lower64of128(here), lo);
         EXPECT_EQ(Upper64of128(here), hi);
       }
