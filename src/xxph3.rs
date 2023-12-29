@@ -20,6 +20,7 @@ mod ffi {
         fn xxph3_avalanche(h: u64) -> u64;
         fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
         fn xxph_read_le(data: &[u8]) -> u64;
+        fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
     }
 }
 
@@ -49,9 +50,12 @@ fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64 {
 fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64 {
     assert!(9 <= data.len() && data.len() <= 16);
 
-    let input_lo = xxph_read_le(data) ^ (xxph_read_le(SECRET) + seed);
+    let input_lo = xxph_read_le(data) ^ (xxph_read_le(SECRET).wrapping_add(seed));
     let input_hi = xxph_read_le(&data[data.len() - 8..]) ^ (xxph_read_le(&SECRET[8..]));
-    let acc = data.len() as u64 + (input_lo + input_hi) + xxph3_mul128_fold64(input_lo, input_hi);
+    let acc = (data.len() as u64)
+        .wrapping_add(input_lo)
+        .wrapping_add(input_hi)
+        .wrapping_add(xxph3_mul128_fold64(input_lo, input_hi));
     xxph3_avalanche(acc)
 }
 

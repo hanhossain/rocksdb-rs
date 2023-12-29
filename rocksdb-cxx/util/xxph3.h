@@ -1083,23 +1083,10 @@ XXPH3_len_4to8_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64
 }
 
 XXPH_FORCE_INLINE XXPH64_hash_t
-XXPH3_len_9to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64_hash_t seed)
-{
-    XXPH_ASSERT(input != NULL);
-    XXPH_ASSERT(secret != NULL);
-    XXPH_ASSERT(9 <= len && len <= 16);
-    {   xxh_u64 const input_lo = xxph::xxph_read_le(rust::Slice(input, 8))           ^ (xxph::xxph_read_le(rust::Slice(secret, 8))     + seed);
-        xxh_u64 const input_hi = xxph::xxph_read_le(rust::Slice(input + len - 8, 8)) ^ (xxph::xxph_read_le(rust::Slice(secret + 8, 8)) - seed);
-        xxh_u64 const acc = len + (input_lo + input_hi) + xxph::xxph3_mul128_fold64(input_lo, input_hi);
-        return xxph::xxph3_avalanche(acc);
-    }
-}
-
-XXPH_FORCE_INLINE XXPH64_hash_t
 XXPH3_len_0to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64_hash_t seed)
 {
     XXPH_ASSERT(len <= 16);
-    {   if (len > 8) return XXPH3_len_9to16_64b(input, len, secret, seed);
+    {   if (len > 8) return xxph::xxph3_len_9to16(rust::Slice(input, len), seed);
         if (len >= 4) return XXPH3_len_4to8_64b(input, len, secret, seed);
         if (len) return XXPH3_len_1to3_64b(input, len, secret, seed);
         /*
