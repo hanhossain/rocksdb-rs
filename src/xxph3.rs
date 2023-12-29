@@ -12,6 +12,8 @@ const SECRET: &[u8] = &[
     0x2b, 0x16, 0xbe, 0x58, 0x7d, 0x47, 0xa1, 0xfc, 0x8f, 0xf8, 0xb8, 0xd1, 0x7a, 0xd0, 0x31, 0xce,
     0x45, 0xcb, 0x3a, 0x8f, 0x95, 0x16, 0x04, 0x28, 0xaf, 0xd7, 0xfb, 0xca, 0xbb, 0x4b, 0x40, 0x7e,
 ];
+const PRIME32_1: u32 = 0x9E3779B1;
+const PRIME64_2: u64 = 0xC2B2AE3D27D4EB4F;
 const PRIME64_3: u64 = 0x165667B19E3779F9;
 
 #[cxx::bridge(namespace = "xxph")]
@@ -20,6 +22,7 @@ mod ffi {
         fn xxph3_avalanche(h: u64) -> u64;
         fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
         fn xxph_read_le64(data: &[u8]) -> u64;
+        fn xxph3_len_4to8(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
         fn xxph_read_le32(data: &[u8]) -> u32;
     }
@@ -46,6 +49,18 @@ fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64 {
     }
 
     todo!()
+}
+
+fn xxph3_len_4to8(data: &[u8], seed: u64) -> u64 {
+    assert!(4 <= data.len() && data.len() <= 8);
+
+    let input_lo = xxph_read_le32(data);
+    let input_hi = xxph_read_le32(&data[data.len() - 4..]);
+    let input_64 = input_lo as u64 ^ ((input_hi as u64) << 32);
+    let keyed = input_64 ^ xxph_read_le64(SECRET).wrapping_add(seed);
+    let mix64 =
+        (data.len() as u64).wrapping_add((keyed ^ (keyed >> 51)).wrapping_mul(PRIME32_1 as u64));
+    xxph3_avalanche((mix64 ^ (mix64 >> 47)).wrapping_mul(PRIME64_2))
 }
 
 fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64 {
