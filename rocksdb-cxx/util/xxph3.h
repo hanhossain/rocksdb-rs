@@ -628,16 +628,11 @@ static xxh_u64 XXPH_swap64 (xxh_u64 x)
 }
 #endif
 
-XXPH_FORCE_INLINE xxh_u64 XXPH_readLE64(const void* ptr)
-{
-    return XXPH_CPU_LITTLE_ENDIAN ? XXPH_read64(ptr) : XXPH_swap64(XXPH_read64(ptr));
-}
-
 XXPH_FORCE_INLINE xxh_u64
 XXPH_readLE64_align(const void* ptr, XXPH_alignment align)
 {
     if (align==XXPH_unaligned)
-        return XXPH_readLE64(ptr);
+        return xxph::xxph_read_le(rust::Slice(static_cast<const uint8_t*>(ptr), 8));
     else
         return XXPH_CPU_LITTLE_ENDIAN ? *(const xxh_u64*)ptr : XXPH_swap64(*(const xxh_u64*)ptr);
 }
@@ -1081,7 +1076,7 @@ XXPH3_len_4to8_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH64
     {   xxh_u32 const input_lo = XXPH_readLE32(input);
         xxh_u32 const input_hi = XXPH_readLE32(input + len - 4);
         xxh_u64 const input_64 = input_lo | ((xxh_u64)input_hi << 32);
-        xxh_u64 const keyed = input_64 ^ (XXPH_readLE64(secret) + seed);
+        xxh_u64 const keyed = input_64 ^ (xxph::xxph_read_le(rust::Slice(secret, 8)) + seed);
         xxh_u64 const mix64 = len + ((keyed ^ (keyed >> 51)) * PRIME32_1);
         return xxph::xxph3_avalanche((mix64 ^ (mix64 >> 47)) * PRIME64_2);
     }
@@ -1093,8 +1088,8 @@ XXPH3_len_9to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH6
     XXPH_ASSERT(input != NULL);
     XXPH_ASSERT(secret != NULL);
     XXPH_ASSERT(9 <= len && len <= 16);
-    {   xxh_u64 const input_lo = XXPH_readLE64(input)           ^ (XXPH_readLE64(secret)     + seed);
-        xxh_u64 const input_hi = XXPH_readLE64(input + len - 8) ^ (XXPH_readLE64(secret + 8) - seed);
+    {   xxh_u64 const input_lo = xxph::xxph_read_le(rust::Slice(input, 8))           ^ (xxph::xxph_read_le(rust::Slice(secret, 8))     + seed);
+        xxh_u64 const input_hi = xxph::xxph_read_le(rust::Slice(input + len - 8, 8)) ^ (xxph::xxph_read_le(rust::Slice(secret + 8, 8)) - seed);
         xxh_u64 const acc = len + (input_lo + input_hi) + xxph::xxph3_mul128_fold64(input_lo, input_hi);
         return xxph::xxph3_avalanche(acc);
     }
@@ -1112,7 +1107,7 @@ XXPH3_len_0to16_64b(const xxh_u8* input, size_t len, const xxh_u8* secret, XXPH6
          * string can be problematic for multiplication-based algorithms.
          * Return a hash of the seed instead.
          */
-        return xxph::xxph3_mul128_fold64(seed + XXPH_readLE64(secret), PRIME64_2);
+        return xxph::xxph3_mul128_fold64(seed + xxph::xxph_read_le(rust::Slice(secret, 8)), PRIME64_2);
     }
 }
 
@@ -1304,8 +1299,8 @@ XXPH3_accumulate_512(      void* XXPH_RESTRICT acc,
     size_t i;
     XXPH_ASSERT(((size_t)acc & (XXPH_ACC_ALIGN-1)) == 0);
     for (i=0; i < ACC_NB; i++) {
-        xxh_u64 const data_val = XXPH_readLE64(xinput + 8*i);
-        xxh_u64 const data_key = data_val ^ XXPH_readLE64(xsecret + i*8);
+        xxh_u64 const data_val = xxph::xxph_read_le(rust::Slice(xinput + 8*i, 8));
+        xxh_u64 const data_key = data_val ^ xxph::xxph_read_le(rust::Slice(xsecret + i*8, 8));
 
         if (accWidth == XXPH3_acc_64bits) {
             xacc[i] += data_val;
@@ -1445,7 +1440,7 @@ XXPH3_scrambleAcc(void* XXPH_RESTRICT acc, const void* XXPH_RESTRICT secret)
     size_t i;
     XXPH_ASSERT((((size_t)acc) & (XXPH_ACC_ALIGN-1)) == 0);
     for (i=0; i < ACC_NB; i++) {
-        xxh_u64 const key64 = XXPH_readLE64(xsecret + 8*i);
+        xxh_u64 const key64 = xxph::xxph_read_le(rust::Slice(xsecret + 8*i, 8));
         xxh_u64 acc64 = xacc[i];
         acc64 ^= acc64 >> 47;
         acc64 ^= key64;
@@ -1524,8 +1519,8 @@ XXPH_FORCE_INLINE xxh_u64
 XXPH3_mix2Accs(const xxh_u64* XXPH_RESTRICT acc, const xxh_u8* XXPH_RESTRICT secret)
 {
     return xxph::xxph3_mul128_fold64(
-               acc[0] ^ XXPH_readLE64(secret),
-               acc[1] ^ XXPH_readLE64(secret+8) );
+               acc[0] ^ xxph::xxph_read_le(rust::Slice(secret, 8)),
+               acc[1] ^ xxph::xxph_read_le(rust::Slice(secret+8, 8)));
 }
 
 static XXPH64_hash_t
@@ -1591,8 +1586,8 @@ XXPH_FORCE_INLINE void XXPH3_initCustomSecret(xxh_u8* customSecret, xxh_u64 seed
     XXPH_STATIC_ASSERT((XXPH_SECRET_DEFAULT_SIZE & 15) == 0);
 
     for (i=0; i < nbRounds; i++) {
-        XXPH_writeLE64(customSecret + 16*i,     XXPH_readLE64(kSecret + 16*i)     + seed64);
-        XXPH_writeLE64(customSecret + 16*i + 8, XXPH_readLE64(kSecret + 16*i + 8) - seed64);
+        XXPH_writeLE64(customSecret + 16*i,     xxph::xxph_read_le(rust::Slice(kSecret + 16*i, 8))     + seed64);
+        XXPH_writeLE64(customSecret + 16*i + 8, xxph::xxph_read_le(rust::Slice(kSecret + 16*i + 8, 8)) - seed64);
     }
 }
 
@@ -1617,11 +1612,11 @@ XXPH3_hashLong_64b_withSeed(const xxh_u8* input, size_t len, XXPH64_hash_t seed)
 XXPH_FORCE_INLINE xxh_u64 XXPH3_mix16B(const xxh_u8* XXPH_RESTRICT input,
                                  const xxh_u8* XXPH_RESTRICT secret, xxh_u64 seed64)
 {
-    xxh_u64 const input_lo = XXPH_readLE64(input);
-    xxh_u64 const input_hi = XXPH_readLE64(input+8);
+    xxh_u64 const input_lo = xxph::xxph_read_le(rust::Slice(input, 8));
+    xxh_u64 const input_hi = xxph::xxph_read_le(rust::Slice(input+8, 8));
     return xxph::xxph3_mul128_fold64(
-               input_lo ^ (XXPH_readLE64(secret)   + seed64),
-               input_hi ^ (XXPH_readLE64(secret+8) - seed64) );
+               input_lo ^ (xxph::xxph_read_le(rust::Slice(secret, 8))   + seed64),
+               input_hi ^ (xxph::xxph_read_le(rust::Slice(secret+8, 8)) - seed64) );
 }
 
 

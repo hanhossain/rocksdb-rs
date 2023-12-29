@@ -19,6 +19,7 @@ mod ffi {
     extern "Rust" {
         fn xxph3_avalanche(h: u64) -> u64;
         fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
+        fn xxph_read_le(data: &[u8]) -> u64;
     }
 }
 
