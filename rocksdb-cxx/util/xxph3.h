@@ -876,19 +876,13 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
 
 XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(rust::Slice<const uint8_t> input)
 {
-    if (input.length() <= 16) return xxph::xxph3_len_0to16(input, 0);
-    if (input.length() <= 128) return xxph::xxph3_len_17to128(input, 0);
-    if (input.length() <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(input, 0);
-    return xxph::xxph3_hash_long_default_secret(input);
+    return xxph::xxph3_64(input);
 }
 
 XXPH_PUBLIC_API XXPH64_hash_t
 XXPH3_64bits_withSeed(rust::Slice<const uint8_t> input, XXPH64_hash_t seed)
 {
-    if (input.length() <= 16) return xxph::xxph3_len_0to16(input, seed);
-    if (input.length() <= 128) return xxph::xxph3_len_17to128(input, seed);
-    if (input.length() <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(input, seed);
-    return xxph::xxph3_hash_long_with_seed(input, seed);
+    return xxph::xxph3_64_with_seed(input, seed);
 }
 
 /* ===   XXPH3 streaming   === */
