@@ -19,6 +19,8 @@ const PRIME64_3: u64 = 0x165667B19E3779F9;
 const XXPH3_MIDSIZE_MAX: usize = 240;
 const STRIPE_LEN: usize = 64;
 const ACC_NB: usize = STRIPE_LEN / std::mem::size_of::<u64>();
+/// Number of secret bytes consumed at each accumulation
+const XXPH_SECRET_CONSUME_RATE: usize = 8;
 
 #[cxx::bridge(namespace = "xxph")]
 mod ffi {
@@ -35,6 +37,7 @@ mod ffi {
         fn xxph3_len_17to128(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_129to240(data: &[u8], seed: u64) -> u64;
         fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]);
+        fn xxph3_accumulate(acc: &mut [u64], input: &[u8], secret: &[u8], nb_stripes: usize);
     }
 }
 
@@ -186,5 +189,15 @@ fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]) {
 
         acc[i] = acc[i].wrapping_add(data_val);
         acc[i] = acc[i].wrapping_add((data_key & 0xFFFF_FFFF).wrapping_mul(data_key >> 32));
+    }
+}
+
+fn xxph3_accumulate(acc: &mut [u64], input: &[u8], secret: &[u8], nb_stripes: usize) {
+    for n in 0..nb_stripes {
+        xxph3_accumulate_512(
+            acc,
+            &input[n * STRIPE_LEN..],
+            &secret[n * XXPH_SECRET_CONSUME_RATE..],
+        )
     }
 }

@@ -892,22 +892,6 @@ XXPH3_scrambleAcc(rust::Slice<uint64_t> XXPH_RESTRICT acc, rust::Slice<const uin
 
 #define XXPH_PREFETCH_DIST 384
 
-/* assumption : nbStripes will not overflow secret size */
-XXPH_FORCE_INLINE void
-XXPH3_accumulate(rust::Slice<uint64_t> XXPH_RESTRICT acc,
-                rust::Slice<const uint8_t> XXPH_RESTRICT input,
-                rust::Slice<const uint8_t> XXPH_RESTRICT secret,
-                      size_t nbStripes,
-                      XXPH3_accWidth_e accWidth)
-{
-    size_t n;
-    for (n = 0; n < nbStripes; n++ ) {
-        xxph::xxph3_accumulate_512(acc,
-                            rust::Slice(input.data() + n*STRIPE_LEN, input.length() - n*STRIPE_LEN),
-                            rust::Slice(secret.data() + n*XXPH_SECRET_CONSUME_RATE, secret.length() - n*XXPH_SECRET_CONSUME_RATE));
-    }
-}
-
 /* note : clang auto-vectorizes well in SS2 mode _if_ this function is `static`,
  *        and doesn't auto-vectorize it at all if it is `FORCE_INLINE`.
  *        However, it auto-vectorizes better AVX2 if it is `FORCE_INLINE`
@@ -933,7 +917,7 @@ XXPH3_hashLong_internal_loop(rust::Slice<uint64_t> XXPH_RESTRICT acc,
     XXPH_ASSERT(secretSize >= XXPH3_SECRET_SIZE_MIN);
 
     for (n = 0; n < nb_blocks; n++) {
-        XXPH3_accumulate(acc, rust::Slice(input.data() + n*block_len, input.length() - n*block_len), secret, nb_rounds, accWidth);
+        xxph::xxph3_accumulate(acc, rust::Slice(input.data() + n*block_len, input.length() - n*block_len), secret, nb_rounds);
         XXPH3_scrambleAcc(acc, rust::Slice(secret.data() + secret.length() - STRIPE_LEN, STRIPE_LEN));
     }
 
@@ -941,7 +925,7 @@ XXPH3_hashLong_internal_loop(rust::Slice<uint64_t> XXPH_RESTRICT acc,
     XXPH_ASSERT(len > STRIPE_LEN);
     {   size_t const nbStripes = (input.length() - (block_len * nb_blocks)) / STRIPE_LEN;
         XXPH_ASSERT(nbStripes <= (secretSize / XXPH_SECRET_CONSUME_RATE));
-        XXPH3_accumulate(acc, rust::Slice(input.data() + nb_blocks*block_len, input.length() - nb_blocks*block_len), secret, nbStripes, accWidth);
+        xxph::xxph3_accumulate(acc, rust::Slice(input.data() + nb_blocks*block_len, input.length() - nb_blocks*block_len), secret, nbStripes);
 
         /* last stripe */
         if (input.length() & (STRIPE_LEN - 1)) {
