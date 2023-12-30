@@ -17,6 +17,8 @@ const PRIME64_1: u64 = 0x9E3779B185EBCA87;
 const PRIME64_2: u64 = 0xC2B2AE3D27D4EB4F;
 const PRIME64_3: u64 = 0x165667B19E3779F9;
 const XXPH3_MIDSIZE_MAX: usize = 240;
+const STRIPE_LEN: usize = 64;
+const ACC_NB: usize = STRIPE_LEN / std::mem::size_of::<u64>();
 
 #[cxx::bridge(namespace = "xxph")]
 mod ffi {
@@ -32,6 +34,7 @@ mod ffi {
         fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64;
         fn xxph3_len_17to128(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_129to240(data: &[u8], seed: u64) -> u64;
+        fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]);
     }
 }
 
@@ -173,4 +176,14 @@ fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64 {
         input_lo ^ xxph_read_le64(secret).wrapping_add(seed),
         input_hi ^ xxph_read_le64(&secret[8..]).wrapping_sub(seed),
     )
+}
+
+fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]) {
+    for i in 0..ACC_NB {
+        let data_val = xxph_read_le64(input);
+        let data_key = data_val ^ xxph_read_le64(secret);
+
+        acc[i ^ 1] = acc[i ^ 1].wrapping_add(data_val);
+        acc[i] = acc[i].wrapping_add((data_key & 0xFFFF_FFFF).wrapping_mul(data_key >> 32));
+    }
 }
