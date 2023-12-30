@@ -1542,34 +1542,6 @@ XXPH3_hashLong_64b_withSeed(const xxh_u8* input, size_t len, XXPH64_hash_t seed)
     return XXPH3_hashLong_internal(input, len, secret, sizeof(secret));
 }
 
-XXPH_FORCE_INLINE XXPH64_hash_t
-XXPH3_len_17to128_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
-                     const xxh_u8* XXPH_RESTRICT secret, size_t secretSize,
-                     XXPH64_hash_t seed)
-{
-    XXPH_ASSERT(secretSize >= XXPH3_SECRET_SIZE_MIN); (void)secretSize;
-    XXPH_ASSERT(16 < len && len <= 128);
-
-    {   xxh_u64 acc = len * PRIME64_1;
-        if (len > 32) {
-            if (len > 64) {
-                if (len > 96) {
-                    acc += xxph::xxph3_mix128b(rust::Slice(input+48, 16), rust::Slice(secret+96, 16), seed);
-                    acc += xxph::xxph3_mix128b(rust::Slice(input+len-64, 16), rust::Slice(secret+112, 16), seed);
-                }
-                acc += xxph::xxph3_mix128b(rust::Slice(input+32, 16), rust::Slice(secret+64, 16), seed);
-                acc += xxph::xxph3_mix128b(rust::Slice(input+len-48, 16), rust::Slice(secret+80, 16), seed);
-            }
-            acc += xxph::xxph3_mix128b(rust::Slice(input+16, 16), rust::Slice(secret+32, 16), seed);
-            acc += xxph::xxph3_mix128b(rust::Slice(input+len-32, 16), rust::Slice(secret+48, 16), seed);
-        }
-        acc += xxph::xxph3_mix128b(rust::Slice(input+0, 16), rust::Slice(secret+0, 16), seed);
-        acc += xxph::xxph3_mix128b(rust::Slice(input+len-16, 16), rust::Slice(secret+16, 16), seed);
-
-        return xxph::xxph3_avalanche(acc);
-    }
-}
-
 #define XXPH3_MIDSIZE_MAX 240
 
 XXPH_NO_INLINE XXPH64_hash_t
@@ -1604,8 +1576,9 @@ XXPH3_len_129to240_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
 
 XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(const void* input, size_t len)
 {
-    if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), 0);
-    if (len <= 128) return XXPH3_len_17to128_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), 0);
+    auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
+    if (len <= 16) return xxph::xxph3_len_0to16(slice, 0);
+    if (len <= 128) return xxph::xxph3_len_17to128(slice, 0);
     if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), 0);
     return XXPH3_hashLong_64b_defaultSecret(static_cast<const xxh_u8 *>(input), len);
 }
@@ -1618,8 +1591,9 @@ XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_
      * it should be done here.
      * For now, it's a contract pre-condition.
      * Adding a check and a branch here would cost performance at every hash */
-     if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), 0);
-     if (len <= 128) return XXPH3_len_17to128_64b(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize, 0);
+     auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
+     if (len <= 16) return xxph::xxph3_len_0to16(slice, 0);
+     if (len <= 128) return xxph::xxph3_len_17to128(slice, 0);
      if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize, 0);
      return XXPH3_hashLong_64b_withSecret(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize);
 }
@@ -1627,8 +1601,9 @@ XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_
 XXPH_PUBLIC_API XXPH64_hash_t
 XXPH3_64bits_withSeed(const void* input, size_t len, XXPH64_hash_t seed)
 {
-    if (len <= 16) return xxph::xxph3_len_0to16(rust::Slice(static_cast<const uint8_t*>(input), len), seed);
-    if (len <= 128) return XXPH3_len_17to128_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), seed);
+    auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
+    if (len <= 16) return xxph::xxph3_len_0to16(slice, seed);
+    if (len <= 128) return xxph::xxph3_len_17to128(slice, seed);
     if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), seed);
     return XXPH3_hashLong_64b_withSeed(static_cast<const xxh_u8 *>(input), len, seed);
 }

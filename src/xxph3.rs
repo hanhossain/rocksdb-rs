@@ -29,6 +29,7 @@ mod ffi {
         fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
         fn xxph_read_le32(data: &[u8]) -> u32;
         fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64;
+        fn xxph3_len_17to128(data: &[u8], seed: u64) -> u64;
     }
 }
 
@@ -83,6 +84,31 @@ fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64 {
         .wrapping_add(input_lo)
         .wrapping_add(input_hi)
         .wrapping_add(xxph3_mul128_fold64(input_lo, input_hi));
+    xxph3_avalanche(acc)
+}
+
+fn xxph3_len_17to128(data: &[u8], seed: u64) -> u64 {
+    assert!(17 <= data.len() && data.len() <= 128);
+
+    let mut acc = (data.len() as u64).wrapping_mul(PRIME64_1);
+    if data.len() > 32 {
+        if data.len() > 64 {
+            if data.len() > 96 {
+                acc = acc.wrapping_add(xxph3_mix128b(&data[48..], &SECRET[96..], seed));
+                acc = acc.wrapping_add(xxph3_mix128b(
+                    &data[data.len() - 64..],
+                    &SECRET[112..],
+                    seed,
+                ))
+            }
+            acc = acc.wrapping_add(xxph3_mix128b(&data[32..], &SECRET[64..], seed));
+            acc = acc.wrapping_add(xxph3_mix128b(&data[data.len() - 48..], &SECRET[80..], seed));
+        }
+        acc = acc.wrapping_add(xxph3_mix128b(&data[16..], &SECRET[32..], seed));
+        acc = acc.wrapping_add(xxph3_mix128b(&data[data.len() - 32..], &SECRET[48..], seed));
+    }
+    acc = acc.wrapping_add(xxph3_mix128b(data, SECRET, seed));
+    acc = acc.wrapping_add(xxph3_mix128b(&data[data.len() - 16..], &SECRET[16..], seed));
     xxph3_avalanche(acc)
 }
 
