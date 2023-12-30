@@ -874,50 +874,6 @@ typedef enum { XXPH3_acc_64bits, XXPH3_acc_128bits } XXPH3_accWidth_e;
 
 #define XXPH_PREFETCH_DIST 384
 
-/* note : clang auto-vectorizes well in SS2 mode _if_ this function is `static`,
- *        and doesn't auto-vectorize it at all if it is `FORCE_INLINE`.
- *        However, it auto-vectorizes better AVX2 if it is `FORCE_INLINE`
- *        Pretty much every other modes and compilers prefer `FORCE_INLINE`.
- */
-
-#if defined(__clang__) && (XXPH_VECTOR==0) && !defined(__AVX2__) && !defined(__arm__) && !defined(__thumb__)
-static void
-#else
-XXPH_FORCE_INLINE void
-#endif
-XXPH3_hashLong_internal_loop(rust::Slice<uint64_t> XXPH_RESTRICT acc,
-                      rust::Slice<const uint8_t> XXPH_RESTRICT input,
-                      rust::Slice<const uint8_t> XXPH_RESTRICT secret,
-                            XXPH3_accWidth_e accWidth)
-{
-    size_t const nb_rounds = (secret.length() - STRIPE_LEN) / XXPH_SECRET_CONSUME_RATE;
-    size_t const block_len = STRIPE_LEN * nb_rounds;
-    size_t const nb_blocks = input.length() / block_len;
-
-    size_t n;
-
-    XXPH_ASSERT(secretSize >= XXPH3_SECRET_SIZE_MIN);
-
-    for (n = 0; n < nb_blocks; n++) {
-        xxph::xxph3_accumulate(acc, rust::Slice(input.data() + n*block_len, input.length() - n*block_len), secret, nb_rounds);
-        xxph::xxph3_scramble_acc(acc, rust::Slice(secret.data() + secret.length() - STRIPE_LEN, STRIPE_LEN));
-    }
-
-    /* last partial block */
-    XXPH_ASSERT(len > STRIPE_LEN);
-    {   size_t const nbStripes = (input.length() - (block_len * nb_blocks)) / STRIPE_LEN;
-        XXPH_ASSERT(nbStripes <= (secretSize / XXPH_SECRET_CONSUME_RATE));
-        xxph::xxph3_accumulate(acc, rust::Slice(input.data() + nb_blocks*block_len, input.length() - nb_blocks*block_len), secret, nbStripes);
-
-        /* last stripe */
-        if (input.length() & (STRIPE_LEN - 1)) {
-#define XXPH_SECRET_LASTACC_START 7  /* do not align on 8, so that secret is different from scrambler */
-            xxph::xxph3_accumulate_512(acc,
-                rust::Slice(input.data() + input.length() - STRIPE_LEN, STRIPE_LEN),
-                rust::Slice(secret.data() + secret.length()- STRIPE_LEN - XXPH_SECRET_LASTACC_START, STRIPE_LEN + XXPH_SECRET_LASTACC_START));
-    }   }
-}
-
 XXPH_FORCE_INLINE xxh_u64
 XXPH3_mix2Accs(rust::Slice<const uint64_t> XXPH_RESTRICT acc, rust::Slice<const uint8_t> XXPH_RESTRICT secret)
 {
@@ -954,7 +910,7 @@ XXPH3_hashLong_internal(rust::Slice<const uint8_t> XXPH_RESTRICT input,
 {
     XXPH_ALIGN(XXPH_ACC_ALIGN) xxh_u64 acc[ACC_NB] = XXPH3_INIT_ACC;
 
-    XXPH3_hashLong_internal_loop(rust::Slice(acc, sizeof(acc)), input, secret, XXPH3_acc_64bits);
+    xxph::xxph3_hash_long_internal_loop(rust::Slice(acc, sizeof(acc)), input, secret);
 
     /* converge into final hash */
     XXPH_STATIC_ASSERT(sizeof(acc) == 64);

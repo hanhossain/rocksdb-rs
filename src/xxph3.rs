@@ -39,6 +39,7 @@ mod ffi {
         fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]);
         fn xxph3_accumulate(acc: &mut [u64], input: &[u8], secret: &[u8], nb_stripes: usize);
         fn xxph3_scramble_acc(acc: &mut [u64], secret: &[u8]);
+        fn xxph3_hash_long_internal_loop(acc: &mut [u64], input: &[u8], secret: &[u8]);
     }
 }
 
@@ -212,5 +213,30 @@ fn xxph3_scramble_acc(acc: &mut [u64], secret: &[u8]) {
         acc64 = acc64 ^ key64;
         acc64 = acc64.wrapping_mul(PRIME32_1 as u64);
         acc[i] = acc64;
+    }
+}
+
+fn xxph3_hash_long_internal_loop(acc: &mut [u64], input: &[u8], secret: &[u8]) {
+    let nb_rounds = (secret.len() - STRIPE_LEN) / XXPH_SECRET_CONSUME_RATE;
+    let block_len = STRIPE_LEN * nb_rounds;
+    let nb_blocks = input.len() / block_len;
+
+    for n in 0..nb_blocks {
+        xxph3_accumulate(acc, &input[n * block_len..], secret, nb_rounds);
+        xxph3_scramble_acc(acc, &secret[secret.len() - STRIPE_LEN..]);
+    }
+
+    // last partial block
+    let nb_stripes = (input.len() - (block_len * nb_blocks)) / STRIPE_LEN;
+    xxph3_accumulate(acc, &input[nb_blocks * block_len..], secret, nb_stripes);
+
+    // last stripe
+    if (input.len() & (STRIPE_LEN - 1)) != 0 {
+        let secret_last_acc_start = 7;
+        xxph3_accumulate_512(
+            acc,
+            &input[input.len() - STRIPE_LEN..],
+            &secret[secret.len() - STRIPE_LEN - secret_last_acc_start..],
+        );
     }
 }
