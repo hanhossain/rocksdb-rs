@@ -1,3 +1,6 @@
+mod xxph3;
+
+use crate::hash::xxph3::{xxph3_64, xxph3_64_with_seed};
 use xxhash_rust::xxh3::{xxh3_128, xxh3_128_with_seed};
 
 #[cxx::bridge(namespace = "rocksdb")]
@@ -32,6 +35,9 @@ mod ffi {
 
         #[cxx_name = "bijective_unhash2x64"]
         fn bijective_unhash2x64_ext(high: u64, low: u64, high_res: &mut u64, low_res: &mut u64);
+
+        fn hash64_with_seed(data: &[u8], seed: u64) -> u64;
+        fn hash64(data: &[u8]) -> u64;
     }
 }
 
@@ -170,4 +176,12 @@ fn lower_32_of_64(v: u64) -> u32 {
 
 fn multiply_64_to_128(a: u64, b: u64) -> u128 {
     (a as u128) * (b as u128)
+}
+
+fn hash64_with_seed(data: &[u8], seed: u64) -> u64 {
+    xxph3_64_with_seed(data, seed)
+}
+
+fn hash64(data: &[u8]) -> u64 {
+    xxph3_64(data)
 }

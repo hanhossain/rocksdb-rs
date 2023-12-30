@@ -16,7 +16,6 @@
 #include "util/hash128.h"
 #include "util/math128.h"
 #include "util/xxhash.h"
-#include "util/xxph3.h"
 
 #include "rocksdb-rs/src/hash.rs.h"
 
@@ -81,12 +80,12 @@ uint32_t Hash(const char* data, size_t n, uint32_t seed) {
 // bundling hash functions specialized for particular lengths with
 // the prefix extractors.
 uint64_t Hash64(const char* data, size_t n, uint64_t seed) {
-  return XXPH3_64bits_withSeed(data, n, seed);
+  return hash64_with_seed(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), seed);
 }
 
 uint64_t Hash64(const char* data, size_t n) {
   // Same as seed = 0
-  return XXPH3_64bits(data, n);
+  return hash64(rust::Slice(reinterpret_cast<const uint8_t*>(data), n));
 }
 
 uint64_t GetSlicePartsNPHash64(const SliceParts& data, uint64_t seed) {
