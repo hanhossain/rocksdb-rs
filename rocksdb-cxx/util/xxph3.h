@@ -1544,34 +1544,6 @@ XXPH3_hashLong_64b_withSeed(const xxh_u8* input, size_t len, XXPH64_hash_t seed)
 
 #define XXPH3_MIDSIZE_MAX 240
 
-XXPH_NO_INLINE XXPH64_hash_t
-XXPH3_len_129to240_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
-                      const xxh_u8* XXPH_RESTRICT secret, size_t secretSize,
-                      XXPH64_hash_t seed)
-{
-    XXPH_ASSERT(secretSize >= XXPH3_SECRET_SIZE_MIN); (void)secretSize;
-    XXPH_ASSERT(128 < len && len <= XXPH3_MIDSIZE_MAX);
-
-    #define XXPH3_MIDSIZE_STARTOFFSET 3
-    #define XXPH3_MIDSIZE_LASTOFFSET  17
-
-    {   xxh_u64 acc = len * PRIME64_1;
-        int const nbRounds = static_cast<int>(len) / 16;
-        int i;
-        for (i=0; i<8; i++) {
-            acc += xxph::xxph3_mix128b(rust::Slice(input+(16*i), 16), rust::Slice(secret+(16*i), 16), seed);
-        }
-        acc = xxph::xxph3_avalanche(acc);
-        XXPH_ASSERT(nbRounds >= 8);
-        for (i=8 ; i < nbRounds; i++) {
-            acc += xxph::xxph3_mix128b(rust::Slice(input+(16*i), 16), rust::Slice(secret+(16*(i-8)) + XXPH3_MIDSIZE_STARTOFFSET, 16), seed);
-        }
-        /* last bytes */
-        acc += xxph::xxph3_mix128b(rust::Slice(input + len - 16, 16), rust::Slice(secret + XXPH3_SECRET_SIZE_MIN - XXPH3_MIDSIZE_LASTOFFSET, 16), seed);
-        return xxph::xxph3_avalanche(acc);
-    }
-}
-
 /* ===   Public entry point   === */
 
 XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(const void* input, size_t len)
@@ -1579,7 +1551,7 @@ XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(const void* input, size_t len)
     auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
     if (len <= 16) return xxph::xxph3_len_0to16(slice, 0);
     if (len <= 128) return xxph::xxph3_len_17to128(slice, 0);
-    if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), 0);
+    if (len <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(slice, 0);
     return XXPH3_hashLong_64b_defaultSecret(static_cast<const xxh_u8 *>(input), len);
 }
 
@@ -1594,7 +1566,7 @@ XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_
      auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
      if (len <= 16) return xxph::xxph3_len_0to16(slice, 0);
      if (len <= 128) return xxph::xxph3_len_17to128(slice, 0);
-     if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize, 0);
+     if (len <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(slice, 0);
      return XXPH3_hashLong_64b_withSecret(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize);
 }
 
@@ -1604,7 +1576,7 @@ XXPH3_64bits_withSeed(const void* input, size_t len, XXPH64_hash_t seed)
     auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
     if (len <= 16) return xxph::xxph3_len_0to16(slice, seed);
     if (len <= 128) return xxph::xxph3_len_17to128(slice, seed);
-    if (len <= XXPH3_MIDSIZE_MAX) return XXPH3_len_129to240_64b(static_cast<const xxh_u8 *>(input), len, kSecret, sizeof(kSecret), seed);
+    if (len <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(slice, seed);
     return XXPH3_hashLong_64b_withSeed(static_cast<const xxh_u8 *>(input), len, seed);
 }
 

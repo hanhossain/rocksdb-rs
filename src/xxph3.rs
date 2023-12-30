@@ -16,6 +16,7 @@ const PRIME32_1: u32 = 0x9E3779B1;
 const PRIME64_1: u64 = 0x9E3779B185EBCA87;
 const PRIME64_2: u64 = 0xC2B2AE3D27D4EB4F;
 const PRIME64_3: u64 = 0x165667B19E3779F9;
+const XXPH3_MIDSIZE_MAX: usize = 240;
 
 #[cxx::bridge(namespace = "xxph")]
 mod ffi {
@@ -30,6 +31,7 @@ mod ffi {
         fn xxph_read_le32(data: &[u8]) -> u32;
         fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64;
         fn xxph3_len_17to128(data: &[u8], seed: u64) -> u64;
+        fn xxph3_len_129to240(data: &[u8], seed: u64) -> u64;
     }
 }
 
@@ -109,6 +111,36 @@ fn xxph3_len_17to128(data: &[u8], seed: u64) -> u64 {
     }
     acc = acc.wrapping_add(xxph3_mix128b(data, SECRET, seed));
     acc = acc.wrapping_add(xxph3_mix128b(&data[data.len() - 16..], &SECRET[16..], seed));
+    xxph3_avalanche(acc)
+}
+
+fn xxph3_len_129to240(data: &[u8], seed: u64) -> u64 {
+    assert!(129 <= data.len() && data.len() <= XXPH3_MIDSIZE_MAX);
+    let midsize_start_offset = 3;
+    let midsize_last_offset = 17;
+
+    let mut acc = (data.len() as u64).wrapping_mul(PRIME64_1);
+    let nb_rounds = data.len() / 16;
+    for i in 0..8 {
+        acc = acc.wrapping_add(xxph3_mix128b(&data[16 * i..], &SECRET[16 * i..], seed));
+    }
+    acc = xxph3_avalanche(acc);
+    assert!(nb_rounds >= 8);
+    for i in 8..nb_rounds {
+        acc = acc.wrapping_add(xxph3_mix128b(
+            &data[16 * i..],
+            &SECRET[16 * (i - 8) + midsize_start_offset..],
+            seed,
+        ));
+    }
+    // last bytes
+    let secret_size_min = 136;
+
+    acc = acc.wrapping_add(xxph3_mix128b(
+        &data[data.len() - 16..],
+        &SECRET[secret_size_min - midsize_last_offset..],
+        seed,
+    ));
     xxph3_avalanche(acc)
 }
 
