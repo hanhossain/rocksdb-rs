@@ -13,9 +13,13 @@ const SECRET: &[u8] = &[
     0x45, 0xcb, 0x3a, 0x8f, 0x95, 0x16, 0x04, 0x28, 0xaf, 0xd7, 0xfb, 0xca, 0xbb, 0x4b, 0x40, 0x7e,
 ];
 const PRIME32_1: u32 = 0x9E3779B1;
+const PRIME32_2: u32 = 0x85EBCA77;
+const PRIME32_3: u32 = 0xC2B2AE3D;
 const PRIME64_1: u64 = 0x9E3779B185EBCA87;
 const PRIME64_2: u64 = 0xC2B2AE3D27D4EB4F;
 const PRIME64_3: u64 = 0x165667B19E3779F9;
+const PRIME64_4: u64 = 0x85EBCA77C2B2AE63;
+const PRIME64_5: u64 = 0x27D4EB2F165667C5;
 const XXPH3_MIDSIZE_MAX: usize = 240;
 const STRIPE_LEN: usize = 64;
 const ACC_NB: usize = STRIPE_LEN / std::mem::size_of::<u64>();
@@ -42,6 +46,7 @@ mod ffi {
         fn xxph3_hash_long_internal_loop(acc: &mut [u64], input: &[u8], secret: &[u8]);
         fn xxph3_mix2_accs(acc: &[u64], secret: &[u8]) -> u64;
         fn xxph3_merge_accs(acc: &[u64], secret: &[u8], start: u64) -> u64;
+        fn xxph3_hash_long_internal(input: &[u8], secret: &[u8]) -> u64;
     }
 }
 
@@ -257,4 +262,27 @@ fn xxph3_merge_accs(acc: &[u64], secret: &[u8], start: u64) -> u64 {
     result64 = result64.wrapping_add(xxph3_mix2_accs(&acc[4..], &secret[32..]));
     result64 = result64.wrapping_add(xxph3_mix2_accs(&acc[6..], &secret[48..]));
     xxph3_avalanche(result64)
+}
+
+fn xxph3_hash_long_internal(input: &[u8], secret: &[u8]) -> u64 {
+    let mut acc = [
+        PRIME32_3 as u64,
+        PRIME64_1,
+        PRIME64_2,
+        PRIME64_3,
+        PRIME64_4,
+        PRIME32_2 as u64,
+        PRIME64_5,
+        PRIME32_1 as u64,
+    ];
+
+    xxph3_hash_long_internal_loop(&mut acc, input, secret);
+    let secret_merge_accs_start = 11;
+
+    // converge into final hash
+    xxph3_merge_accs(
+        &acc,
+        &secret[secret_merge_accs_start..],
+        (input.len() as u64).wrapping_mul(PRIME64_1),
+    )
 }

@@ -870,36 +870,10 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
 #define XXPH_SECRET_CONSUME_RATE 8   /* nb of secret bytes consumed at each accumulation */
 #define ACC_NB (STRIPE_LEN / sizeof(xxh_u64))
 
-typedef enum { XXPH3_acc_64bits, XXPH3_acc_128bits } XXPH3_accWidth_e;
-
-#define XXPH_PREFETCH_DIST 384
-
-#define XXPH3_INIT_ACC { PRIME32_3, PRIME64_1, PRIME64_2, PRIME64_3, \
-                        PRIME64_4, PRIME32_2, PRIME64_5, PRIME32_1 };
-
-XXPH_FORCE_INLINE XXPH64_hash_t
-XXPH3_hashLong_internal(rust::Slice<const uint8_t> XXPH_RESTRICT input,
-                       rust::Slice<const uint8_t> XXPH_RESTRICT secret)
-{
-    XXPH_ALIGN(XXPH_ACC_ALIGN) xxh_u64 acc[ACC_NB] = XXPH3_INIT_ACC;
-
-    xxph::xxph3_hash_long_internal_loop(rust::Slice(acc, sizeof(acc)), input, secret);
-
-    /* converge into final hash */
-    XXPH_STATIC_ASSERT(sizeof(acc) == 64);
-#define XXPH_SECRET_MERGEACCS_START 11  /* do not align on 8, so that secret is different from accumulator */
-    XXPH_ASSERT(secretSize >= sizeof(acc) + XXPH_SECRET_MERGEACCS_START);
-    return xxph::xxph3_merge_accs(
-        rust::Slice(static_cast<const uint64_t*>(acc), sizeof(acc)),
-        rust::Slice(secret.data() + XXPH_SECRET_MERGEACCS_START, secret.length() - XXPH_SECRET_MERGEACCS_START),
-        static_cast<xxh_u64>(input.length()) * PRIME64_1);
-}
-
-
 XXPH_NO_INLINE XXPH64_hash_t    /* It's important for performance that XXPH3_hashLong is not inlined. Not sure why (uop cache maybe ?), but difference is large and easily measurable */
 XXPH3_hashLong_64b_defaultSecret(rust::Slice<const uint8_t> XXPH_RESTRICT input)
 {
-    return XXPH3_hashLong_internal(input, rust::Slice(kSecret, sizeof(kSecret)));
+    return xxph::xxph3_hash_long_internal(input, rust::Slice(kSecret, sizeof(kSecret)));
 }
 
 XXPH_FORCE_INLINE void XXPH_writeLE64(rust::Slice<uint8_t> dst, xxh_u64 v64)
@@ -938,7 +912,7 @@ XXPH3_hashLong_64b_withSeed(rust::Slice<const uint8_t> input, XXPH64_hash_t seed
     XXPH_ALIGN(8) xxh_u8 secret[XXPH_SECRET_DEFAULT_SIZE];
     if (seed==0) return XXPH3_hashLong_64b_defaultSecret(input);
     XXPH3_initCustomSecret(rust::Slice(secret, sizeof(secret)), seed);
-    return XXPH3_hashLong_internal(input, rust::Slice(static_cast<const xxh_u8*>(secret), sizeof(secret)));
+    return xxph::xxph3_hash_long_internal(input, rust::Slice(static_cast<const xxh_u8*>(secret), sizeof(secret)));
 }
 
 #define XXPH3_MIDSIZE_MAX 240
