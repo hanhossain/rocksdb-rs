@@ -873,30 +873,6 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
 typedef enum { XXPH3_acc_64bits, XXPH3_acc_128bits } XXPH3_accWidth_e;
 
 XXPH_FORCE_INLINE void
-XXPH3_accumulate_512(rust::Slice<uint64_t> XXPH_RESTRICT acc,
-                    rust::Slice<const uint8_t> XXPH_RESTRICT input,
-                    rust::Slice<const uint8_t> XXPH_RESTRICT secret,
-                    XXPH3_accWidth_e accWidth)
-{
-    XXPH_ALIGN(XXPH_ACC_ALIGN) xxh_u64* const xacc = (xxh_u64*) acc.data();    /* presumed aligned on 32-bytes boundaries, little hint for the auto-vectorizer */
-    const xxh_u8* const xinput = (const xxh_u8*) input.data();  /* no alignment restriction */
-    const xxh_u8* const xsecret  = (const xxh_u8*) secret.data();   /* no alignment restriction */
-    size_t i;
-    XXPH_ASSERT(((size_t)acc & (XXPH_ACC_ALIGN-1)) == 0);
-    for (i=0; i < ACC_NB; i++) {
-        xxh_u64 const data_val = xxph::xxph_read_le64(rust::Slice(xinput + 8*i, 8));
-        xxh_u64 const data_key = data_val ^ xxph::xxph_read_le64(rust::Slice(xsecret + i*8, 8));
-
-        if (accWidth == XXPH3_acc_64bits) {
-            xacc[i] += data_val;
-        } else {
-            xacc[i ^ 1] += data_val; /* swap adjacent lanes */
-        }
-        xacc[i] += XXPH_mult32to64(data_key & 0xFFFFFFFF, data_key >> 32);
-    }
-}
-
-XXPH_FORCE_INLINE void
 XXPH3_scrambleAcc(rust::Slice<uint64_t> XXPH_RESTRICT acc, rust::Slice<const uint8_t> XXPH_RESTRICT secret)
 {
     // TODO: use SIMD
@@ -926,10 +902,9 @@ XXPH3_accumulate(rust::Slice<uint64_t> XXPH_RESTRICT acc,
 {
     size_t n;
     for (n = 0; n < nbStripes; n++ ) {
-        XXPH3_accumulate_512(acc,
+        xxph::xxph3_accumulate_512(acc,
                             rust::Slice(input.data() + n*STRIPE_LEN, input.length() - n*STRIPE_LEN),
-                            rust::Slice(secret.data() + n*XXPH_SECRET_CONSUME_RATE, secret.length() - n*XXPH_SECRET_CONSUME_RATE),
-                            accWidth);
+                            rust::Slice(secret.data() + n*XXPH_SECRET_CONSUME_RATE, secret.length() - n*XXPH_SECRET_CONSUME_RATE));
     }
 }
 
@@ -971,10 +946,9 @@ XXPH3_hashLong_internal_loop(rust::Slice<uint64_t> XXPH_RESTRICT acc,
         /* last stripe */
         if (input.length() & (STRIPE_LEN - 1)) {
 #define XXPH_SECRET_LASTACC_START 7  /* do not align on 8, so that secret is different from scrambler */
-            XXPH3_accumulate_512(acc,
+            xxph::xxph3_accumulate_512(acc,
                 rust::Slice(input.data() + input.length() - STRIPE_LEN, STRIPE_LEN),
-                rust::Slice(secret.data() + secret.length()- STRIPE_LEN - XXPH_SECRET_LASTACC_START, STRIPE_LEN + XXPH_SECRET_LASTACC_START),
-                accWidth);
+                rust::Slice(secret.data() + secret.length()- STRIPE_LEN - XXPH_SECRET_LASTACC_START, STRIPE_LEN + XXPH_SECRET_LASTACC_START));
     }   }
 }
 
