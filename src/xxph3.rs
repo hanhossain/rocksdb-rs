@@ -327,7 +327,7 @@ fn xxph3_hash_long_with_seed(input: &[u8], seed: u64) -> u64 {
     xxph3_hash_long_internal(input, &secret)
 }
 
-fn xxph3_64_with_seed(input: &[u8], seed: u64) -> u64 {
+pub(crate) fn xxph3_64_with_seed(input: &[u8], seed: u64) -> u64 {
     if input.len() <= 16 {
         return xxph3_len_0to16(input, seed);
     }
@@ -343,6 +343,6 @@ fn xxph3_64_with_seed(input: &[u8], seed: u64) -> u64 {
     xxph3_hash_long_with_seed(input, seed)
 }
 
-fn xxph3_64(input: &[u8]) -> u64 {
+pub(crate) fn xxph3_64(input: &[u8]) -> u64 {
     xxph3_64_with_seed(input, 0)
 }
