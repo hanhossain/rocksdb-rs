@@ -40,6 +40,7 @@ mod ffi {
         fn xxph3_accumulate(acc: &mut [u64], input: &[u8], secret: &[u8], nb_stripes: usize);
         fn xxph3_scramble_acc(acc: &mut [u64], secret: &[u8]);
         fn xxph3_hash_long_internal_loop(acc: &mut [u64], input: &[u8], secret: &[u8]);
+        fn xxph3_mix2_accs(acc: &[u64], secret: &[u8]) -> u64;
     }
 }
 
@@ -239,4 +240,11 @@ fn xxph3_hash_long_internal_loop(acc: &mut [u64], input: &[u8], secret: &[u8]) {
             &secret[secret.len() - STRIPE_LEN - secret_last_acc_start..],
         );
     }
+}
+
+fn xxph3_mix2_accs(acc: &[u64], secret: &[u8]) -> u64 {
+    xxph3_mul128_fold64(
+        acc[0] ^ xxph_read_le64(secret),
+        acc[1] ^ xxph_read_le64(&secret[8..]),
+    )
 }

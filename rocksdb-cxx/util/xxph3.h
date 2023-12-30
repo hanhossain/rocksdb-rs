@@ -874,27 +874,19 @@ typedef enum { XXPH3_acc_64bits, XXPH3_acc_128bits } XXPH3_accWidth_e;
 
 #define XXPH_PREFETCH_DIST 384
 
-XXPH_FORCE_INLINE xxh_u64
-XXPH3_mix2Accs(rust::Slice<const uint64_t> XXPH_RESTRICT acc, rust::Slice<const uint8_t> XXPH_RESTRICT secret)
-{
-    return xxph::xxph3_mul128_fold64(
-               acc[0] ^ xxph::xxph_read_le64(secret),
-               acc[1] ^ xxph::xxph_read_le64(rust::Slice(secret.data()+8, secret.length() - 8)));
-}
-
 static XXPH64_hash_t
 XXPH3_mergeAccs(rust::Slice<const uint64_t> XXPH_RESTRICT acc, rust::Slice<const uint8_t> XXPH_RESTRICT secret, xxh_u64 start)
 {
     xxh_u64 result64 = start;
 
-    result64 += XXPH3_mix2Accs(acc, secret);
-    result64 += XXPH3_mix2Accs(
+    result64 += xxph::xxph3_mix2_accs(acc, secret);
+    result64 += xxph::xxph3_mix2_accs(
         rust::Slice(acc.data()+2, acc.length() - 2),
         rust::Slice(secret.data() + 16, secret.length() - 16));
-    result64 += XXPH3_mix2Accs(
+    result64 += xxph::xxph3_mix2_accs(
         rust::Slice(acc.data()+4, acc.length() - 4),
         rust::Slice(secret.data() + 32, secret.length() - 32));
-    result64 += XXPH3_mix2Accs(
+    result64 += xxph::xxph3_mix2_accs(
         rust::Slice(acc.data()+6, acc.length() - 6),
         rust::Slice(secret.data() + 48, secret.length() - 48));
 
