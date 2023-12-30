@@ -27,36 +27,6 @@ const ACC_NB: usize = STRIPE_LEN / std::mem::size_of::<u64>();
 const XXPH_SECRET_CONSUME_RATE: usize = 8;
 const XXPH_SECRET_DEFAULT_SIZE: usize = 192;
 
-#[cxx::bridge(namespace = "xxph")]
-mod ffi {
-    extern "Rust" {
-        fn xxph3_avalanche(h: u64) -> u64;
-        fn xxph3_mul128_fold64(lhs: u64, rhs: u64) -> u64;
-        fn xxph_read_le64(data: &[u8]) -> u64;
-        fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64;
-        fn xxph3_len_1to3(data: &[u8], seed: u64) -> u64;
-        fn xxph3_len_4to8(data: &[u8], seed: u64) -> u64;
-        fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
-        fn xxph_read_le32(data: &[u8]) -> u32;
-        fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64;
-        fn xxph3_len_17to128(data: &[u8], seed: u64) -> u64;
-        fn xxph3_len_129to240(data: &[u8], seed: u64) -> u64;
-        fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]);
-        fn xxph3_accumulate(acc: &mut [u64], input: &[u8], secret: &[u8], nb_stripes: usize);
-        fn xxph3_scramble_acc(acc: &mut [u64], secret: &[u8]);
-        fn xxph3_hash_long_internal_loop(acc: &mut [u64], input: &[u8], secret: &[u8]);
-        fn xxph3_mix2_accs(acc: &[u64], secret: &[u8]) -> u64;
-        fn xxph3_merge_accs(acc: &[u64], secret: &[u8], start: u64) -> u64;
-        fn xxph3_hash_long_internal(input: &[u8], secret: &[u8]) -> u64;
-        fn xxph3_hash_long_default_secret(input: &[u8]) -> u64;
-        fn xxph_write_le64(dst: &mut [u8], value: u64);
-        fn xxph3_init_custom_secret(custom_secret: &mut [u8], seed: u64);
-        fn xxph3_hash_long_with_seed(input: &[u8], seed: u64) -> u64;
-        fn xxph3_64_with_seed(input: &[u8], seed: u64) -> u64;
-        fn xxph3_64(input: &[u8]) -> u64;
-    }
-}
-
 fn xxph3_len_0to16(data: &[u8], seed: u64) -> u64 {
     assert!(data.len() <= 16);
 

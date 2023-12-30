@@ -16,7 +16,6 @@
 #include "util/hash128.h"
 #include "util/math128.h"
 #include "util/xxhash.h"
-#include "util/xxph3.h"
 
 #include "rocksdb-rs/src/hash.rs.h"
 

@@ -344,7 +344,6 @@ fn main() {
         "src/slice.rs",
         "src/status.rs",
         "src/unique_id.rs",
-        "src/xxph3.rs",
     ];
 
     if !skip_build_script {
