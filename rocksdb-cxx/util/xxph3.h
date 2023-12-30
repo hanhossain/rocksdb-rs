@@ -899,126 +899,7 @@ XXPH3_accumulate_512(      void* XXPH_RESTRICT acc,
 XXPH_FORCE_INLINE void
 XXPH3_scrambleAcc(void* XXPH_RESTRICT acc, const void* XXPH_RESTRICT secret)
 {
-#if (XXPH_VECTOR == XXPH_AVX2)
-
-    XXPH_ASSERT((((size_t)acc) & 31) == 0);
-    {   XXPH_ALIGN(32) __m256i* const xacc = (__m256i*) acc;
-        const         __m256i* const xsecret = (const __m256i *) secret;   /* not really aligned, just for ptr arithmetic, and because _mm256_loadu_si256() requires this argument type */
-        const __m256i prime32 = _mm256_set1_epi32((int)PRIME32_1);
-
-        size_t i;
-        for (i=0; i < STRIPE_LEN/sizeof(__m256i); i++) {
-            /* xacc[i] ^= (xacc[i] >> 47) */
-            __m256i const acc_vec     = xacc[i];
-            __m256i const shifted     = _mm256_srli_epi64    (acc_vec, 47);
-            __m256i const data_vec    = _mm256_xor_si256     (acc_vec, shifted);
-            /* xacc[i] ^= xsecret; */
-            __m256i const key_vec     = _mm256_loadu_si256   (xsecret+i);
-            __m256i const data_key    = _mm256_xor_si256     (data_vec, key_vec);
-
-            /* xacc[i] *= PRIME32_1; */
-            __m256i const data_key_hi = _mm256_shuffle_epi32 (data_key, 0x31);
-            __m256i const prod_lo     = _mm256_mul_epu32     (data_key, prime32);
-            __m256i const prod_hi     = _mm256_mul_epu32     (data_key_hi, prime32);
-            xacc[i] = _mm256_add_epi64(prod_lo, _mm256_slli_epi64(prod_hi, 32));
-        }
-    }
-
-#elif (XXPH_VECTOR == XXPH_SSE2)
-
-    XXPH_ASSERT((((size_t)acc) & 15) == 0);
-    {   XXPH_ALIGN(16) __m128i* const xacc = (__m128i*) acc;
-        const         __m128i* const xsecret = (const __m128i *) secret;   /* not really aligned, just for ptr arithmetic, and because _mm_loadu_si128() requires this argument type */
-        const __m128i prime32 = _mm_set1_epi32((int)PRIME32_1);
-
-        size_t i;
-        for (i=0; i < STRIPE_LEN/sizeof(__m128i); i++) {
-            /* xacc[i] ^= (xacc[i] >> 47) */
-            __m128i const acc_vec     = xacc[i];
-            __m128i const shifted     = _mm_srli_epi64    (acc_vec, 47);
-            __m128i const data_vec    = _mm_xor_si128     (acc_vec, shifted);
-            /* xacc[i] ^= xsecret; */
-            __m128i const key_vec     = _mm_loadu_si128   (xsecret+i);
-            __m128i const data_key    = _mm_xor_si128     (data_vec, key_vec);
-
-            /* xacc[i] *= PRIME32_1; */
-            __m128i const data_key_hi = _mm_shuffle_epi32 (data_key, 0x31);
-            __m128i const prod_lo     = _mm_mul_epu32     (data_key, prime32);
-            __m128i const prod_hi     = _mm_mul_epu32     (data_key_hi, prime32);
-            xacc[i] = _mm_add_epi64(prod_lo, _mm_slli_epi64(prod_hi, 32));
-        }
-    }
-
-#elif (XXPH_VECTOR == XXPH_NEON)
-
-    XXPH_ASSERT((((size_t)acc) & 15) == 0);
-
-    {   uint64x2_t* const xacc =     static_cast<uint64x2_t *>(acc);
-        uint8_t const* const xsecret = static_cast<uint8_t const *>(secret);
-        uint32x2_t const prime     = vdup_n_u32 (PRIME32_1);
-
-        size_t i;
-        for (i=0; i < STRIPE_LEN/sizeof(uint64x2_t); i++) {
-            /* data_vec = xacc[i] ^ (xacc[i] >> 47); */
-            uint64x2_t const   acc_vec  = xacc[i];
-            uint64x2_t const   shifted  = vshrq_n_u64 (acc_vec, 47);
-            uint64x2_t const   data_vec = veorq_u64   (acc_vec, shifted);
-
-            /* key_vec  = xsecret[i]; */
-            uint32x4_t const   key_vec  = vreinterpretq_u32_u8(vld1q_u8(xsecret + (i * 16)));
-            /* data_key = data_vec ^ key_vec; */
-            uint32x4_t const   data_key = veorq_u32   (vreinterpretq_u32_u64(data_vec), key_vec);
-            /* shuffled = { data_key[0, 2], data_key[1, 3] }; */
-            uint32x2x2_t const shuffled = vzip_u32    (vget_low_u32(data_key), vget_high_u32(data_key));
-
-            /* data_key *= PRIME32_1 */
-
-            /* prod_hi = (data_key >> 32) * PRIME32_1; */
-            uint64x2_t const   prod_hi = vmull_u32    (shuffled.val[1], prime);
-            /* xacc[i] = prod_hi << 32; */
-            xacc[i] = vshlq_n_u64(prod_hi, 32);
-            /* xacc[i] += (prod_hi & 0xFFFFFFFF) * PRIME32_1; */
-            xacc[i] = vmlal_u32(xacc[i], shuffled.val[0], prime);
-    }   }
-
-#elif (XXPH_VECTOR == XXPH_VSX) && /* work around a compiler bug */ (__GNUC__ > 5)
-
-          U64x2* const xacc =       (U64x2*) acc;
-    const U64x2* const xsecret = (const U64x2*) secret;
-    /* constants */
-    U64x2 const v32  = { 32, 32 };
-    U64x2 const v47 = { 47, 47 };
-    U32x4 const prime = { PRIME32_1, PRIME32_1, PRIME32_1, PRIME32_1 };
-    size_t i;
-#if XXPH_VSX_BE
-    /* endian swap */
-    U8x16 const vXorSwap  = { 0x07, 0x16, 0x25, 0x34, 0x43, 0x52, 0x61, 0x70,
-                              0x8F, 0x9E, 0xAD, 0xBC, 0xCB, 0xDA, 0xE9, 0xF8 };
-#endif
-    for (i = 0; i < STRIPE_LEN / sizeof(U64x2); i++) {
-        U64x2 const acc_vec  = xacc[i];
-        U64x2 const data_vec = acc_vec ^ (acc_vec >> v47);
-        /* key_vec = xsecret[i]; */
-#if XXPH_VSX_BE
-        /* swap bytes words */
-        U64x2 const key_raw  = vec_vsx_ld(0, xsecret + i);
-        U64x2 const data_key = (U64x2)XXPH_vec_permxor((U8x16)data_vec, (U8x16)key_raw, vXorSwap);
-#else
-        U64x2 const key_vec  = vec_vsx_ld(0, xsecret + i);
-        U64x2 const data_key = data_vec ^ key_vec;
-#endif
-
-        /* data_key *= PRIME32_1 */
-
-        /* prod_lo = ((U64x2)data_key & 0xFFFFFFFF) * ((U64x2)prime & 0xFFFFFFFF);  */
-        U64x2 const prod_even  = XXPH_vec_mule((U32x4)data_key, prime);
-        /* prod_hi = ((U64x2)data_key >> 32) * ((U64x2)prime >> 32);  */
-        U64x2 const prod_odd  = XXPH_vec_mulo((U32x4)data_key, prime);
-        xacc[i] = prod_odd + (prod_even << v32);
-    }
-
-#else   /* scalar variant of Scrambler - universal */
-
+    // TODO: use SIMD
     XXPH_ALIGN(XXPH_ACC_ALIGN) xxh_u64* const xacc = (xxh_u64*) acc;   /* presumed aligned on 32-bytes boundaries, little hint for the auto-vectorizer */
     const xxh_u8* const xsecret = (const xxh_u8*) secret;   /* no alignment restriction */
     size_t i;
@@ -1031,8 +912,6 @@ XXPH3_scrambleAcc(void* XXPH_RESTRICT acc, const void* XXPH_RESTRICT secret)
         acc64 *= PRIME32_1;
         xacc[i] = acc64;
     }
-
-#endif
 }
 
 #define XXPH_PREFETCH_DIST 384
