@@ -51,6 +51,7 @@ mod ffi {
         fn xxph3_hash_long_default_secret(input: &[u8]) -> u64;
         fn xxph_write_le64(dst: &mut [u8], value: u64);
         fn xxph3_init_custom_secret(custom_secret: &mut [u8], seed: u64);
+        fn xxph3_hash_long_with_seed(input: &[u8], seed: u64) -> u64;
     }
 }
 
@@ -312,4 +313,14 @@ fn xxph3_init_custom_secret(custom_secret: &mut [u8], seed: u64) {
             xxph_read_le64(&SECRET[16 * i + 8..]).wrapping_sub(seed),
         );
     }
+}
+
+fn xxph3_hash_long_with_seed(input: &[u8], seed: u64) -> u64 {
+    let mut secret = [0; XXPH_SECRET_DEFAULT_SIZE];
+    if seed == 0 {
+        return xxph3_hash_long_default_secret(input);
+    }
+
+    xxph3_init_custom_secret(&mut secret[..], seed);
+    xxph3_hash_long_internal(input, &secret)
 }

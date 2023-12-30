@@ -870,22 +870,6 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
 #define XXPH_SECRET_CONSUME_RATE 8   /* nb of secret bytes consumed at each accumulation */
 #define ACC_NB (STRIPE_LEN / sizeof(xxh_u64))
 
-/* XXPH3_hashLong_64b_withSeed() :
- * Generate a custom key,
- * based on alteration of default kSecret with the seed,
- * and then use this key for long mode hashing.
- * This operation is decently fast but nonetheless costs a little bit of time.
- * Try to avoid it whenever possible (typically when seed==0).
- */
-XXPH_NO_INLINE XXPH64_hash_t    /* It's important for performance that XXPH3_hashLong is not inlined. Not sure why (uop cache maybe ?), but difference is large and easily measurable */
-XXPH3_hashLong_64b_withSeed(rust::Slice<const uint8_t> input, XXPH64_hash_t seed)
-{
-    XXPH_ALIGN(8) xxh_u8 secret[XXPH_SECRET_DEFAULT_SIZE];
-    if (seed==0) return xxph::xxph3_hash_long_default_secret(input);
-    xxph::xxph3_init_custom_secret(rust::Slice(secret, sizeof(secret)), seed);
-    return xxph::xxph3_hash_long_internal(input, rust::Slice(static_cast<const xxh_u8*>(secret), sizeof(secret)));
-}
-
 #define XXPH3_MIDSIZE_MAX 240
 
 /* ===   Public entry point   === */
@@ -904,7 +888,7 @@ XXPH3_64bits_withSeed(rust::Slice<const uint8_t> input, XXPH64_hash_t seed)
     if (input.length() <= 16) return xxph::xxph3_len_0to16(input, seed);
     if (input.length() <= 128) return xxph::xxph3_len_17to128(input, seed);
     if (input.length() <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(input, seed);
-    return XXPH3_hashLong_64b_withSeed(input, seed);
+    return xxph::xxph3_hash_long_with_seed(input, seed);
 }
 
 /* ===   XXPH3 streaming   === */
