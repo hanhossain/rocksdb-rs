@@ -874,25 +874,6 @@ typedef enum { XXPH3_acc_64bits, XXPH3_acc_128bits } XXPH3_accWidth_e;
 
 #define XXPH_PREFETCH_DIST 384
 
-static XXPH64_hash_t
-XXPH3_mergeAccs(rust::Slice<const uint64_t> XXPH_RESTRICT acc, rust::Slice<const uint8_t> XXPH_RESTRICT secret, xxh_u64 start)
-{
-    xxh_u64 result64 = start;
-
-    result64 += xxph::xxph3_mix2_accs(acc, secret);
-    result64 += xxph::xxph3_mix2_accs(
-        rust::Slice(acc.data()+2, acc.length() - 2),
-        rust::Slice(secret.data() + 16, secret.length() - 16));
-    result64 += xxph::xxph3_mix2_accs(
-        rust::Slice(acc.data()+4, acc.length() - 4),
-        rust::Slice(secret.data() + 32, secret.length() - 32));
-    result64 += xxph::xxph3_mix2_accs(
-        rust::Slice(acc.data()+6, acc.length() - 6),
-        rust::Slice(secret.data() + 48, secret.length() - 48));
-
-    return xxph::xxph3_avalanche(result64);
-}
-
 #define XXPH3_INIT_ACC { PRIME32_3, PRIME64_1, PRIME64_2, PRIME64_3, \
                         PRIME64_4, PRIME32_2, PRIME64_5, PRIME32_1 };
 
@@ -908,7 +889,7 @@ XXPH3_hashLong_internal(rust::Slice<const uint8_t> XXPH_RESTRICT input,
     XXPH_STATIC_ASSERT(sizeof(acc) == 64);
 #define XXPH_SECRET_MERGEACCS_START 11  /* do not align on 8, so that secret is different from accumulator */
     XXPH_ASSERT(secretSize >= sizeof(acc) + XXPH_SECRET_MERGEACCS_START);
-    return XXPH3_mergeAccs(
+    return xxph::xxph3_merge_accs(
         rust::Slice(static_cast<const uint64_t*>(acc), sizeof(acc)),
         rust::Slice(secret.data() + XXPH_SECRET_MERGEACCS_START, secret.length() - XXPH_SECRET_MERGEACCS_START),
         static_cast<xxh_u64>(input.length()) * PRIME64_1);

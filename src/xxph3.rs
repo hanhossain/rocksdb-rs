@@ -41,6 +41,7 @@ mod ffi {
         fn xxph3_scramble_acc(acc: &mut [u64], secret: &[u8]);
         fn xxph3_hash_long_internal_loop(acc: &mut [u64], input: &[u8], secret: &[u8]);
         fn xxph3_mix2_accs(acc: &[u64], secret: &[u8]) -> u64;
+        fn xxph3_merge_accs(acc: &[u64], secret: &[u8], start: u64) -> u64;
     }
 }
 
@@ -247,4 +248,13 @@ fn xxph3_mix2_accs(acc: &[u64], secret: &[u8]) -> u64 {
         acc[0] ^ xxph_read_le64(secret),
         acc[1] ^ xxph_read_le64(&secret[8..]),
     )
+}
+
+fn xxph3_merge_accs(acc: &[u64], secret: &[u8], start: u64) -> u64 {
+    let mut result64 = start;
+    result64 = result64.wrapping_add(xxph3_mix2_accs(acc, secret));
+    result64 = result64.wrapping_add(xxph3_mix2_accs(&acc[2..], &secret[16..]));
+    result64 = result64.wrapping_add(xxph3_mix2_accs(&acc[4..], &secret[32..]));
+    result64 = result64.wrapping_add(xxph3_mix2_accs(&acc[6..], &secret[48..]));
+    xxph3_avalanche(result64)
 }
