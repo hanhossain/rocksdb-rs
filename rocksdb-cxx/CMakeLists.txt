@@ -48,7 +48,6 @@ project(rocksdb
 FetchContent_Declare(
   Corrosion
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-  FETCHCONTENT_FULLY_DISCONNECTED ON
 )
 FetchContent_MakeAvailable(Corrosion)
 include(CustomCorrosion)
