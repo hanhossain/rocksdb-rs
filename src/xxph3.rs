@@ -179,11 +179,12 @@ fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64 {
 }
 
 fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]) {
+    // TODO: use SIMD for SSE2 and AVX2
     for i in 0..ACC_NB {
-        let data_val = xxph_read_le64(input);
-        let data_key = data_val ^ xxph_read_le64(secret);
+        let data_val = xxph_read_le64(&input[8 * i..]);
+        let data_key = data_val ^ xxph_read_le64(&secret[8 * i..]);
 
-        acc[i ^ 1] = acc[i ^ 1].wrapping_add(data_val);
+        acc[i] = acc[i].wrapping_add(data_val);
         acc[i] = acc[i].wrapping_add((data_key & 0xFFFF_FFFF).wrapping_mul(data_key >> 32));
     }
 }
