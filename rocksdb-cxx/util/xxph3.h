@@ -870,12 +870,6 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
 #define XXPH_SECRET_CONSUME_RATE 8   /* nb of secret bytes consumed at each accumulation */
 #define ACC_NB (STRIPE_LEN / sizeof(xxh_u64))
 
-XXPH_FORCE_INLINE void XXPH_writeLE64(rust::Slice<uint8_t> dst, xxh_u64 v64)
-{
-    if (!XXPH_CPU_LITTLE_ENDIAN) v64 = XXPH_swap64(v64);
-    memcpy(dst.data(), &v64, sizeof(v64));
-}
-
 /* XXPH3_initCustomSecret() :
  * destination `customSecret` is presumed allocated and same size as `kSecret`.
  */
@@ -887,8 +881,8 @@ XXPH_FORCE_INLINE void XXPH3_initCustomSecret(rust::Slice<uint8_t> customSecret,
     XXPH_STATIC_ASSERT((XXPH_SECRET_DEFAULT_SIZE & 15) == 0);
 
     for (i=0; i < nbRounds; i++) {
-        XXPH_writeLE64(rust::Slice(customSecret.data() + 16*i, customSecret.length() - 16*i),     xxph::xxph_read_le64(rust::Slice(kSecret + 16*i, 8))     + seed64);
-        XXPH_writeLE64(rust::Slice(customSecret.data() + 16*i + 8, customSecret.length() - 16*i - 8), xxph::xxph_read_le64(rust::Slice(kSecret + 16*i + 8, 8)) - seed64);
+        xxph::xxph_write_le64(rust::Slice(customSecret.data() + 16*i, customSecret.length() - 16*i),     xxph::xxph_read_le64(rust::Slice(kSecret + 16*i, 8))     + seed64);
+        xxph::xxph_write_le64(rust::Slice(customSecret.data() + 16*i + 8, customSecret.length() - 16*i - 8), xxph::xxph_read_le64(rust::Slice(kSecret + 16*i + 8, 8)) - seed64);
     }
 }
 

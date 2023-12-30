@@ -48,6 +48,7 @@ mod ffi {
         fn xxph3_merge_accs(acc: &[u64], secret: &[u8], start: u64) -> u64;
         fn xxph3_hash_long_internal(input: &[u8], secret: &[u8]) -> u64;
         fn xxph3_hash_long_default_secret(input: &[u8]) -> u64;
+        fn xxph_write_le64(dst: &mut [u8], value: u64);
     }
 }
 
@@ -290,4 +291,9 @@ fn xxph3_hash_long_internal(input: &[u8], secret: &[u8]) -> u64 {
 
 fn xxph3_hash_long_default_secret(input: &[u8]) -> u64 {
     xxph3_hash_long_internal(input, SECRET)
+}
+
+fn xxph_write_le64(dst: &mut [u8], value: u64) {
+    let bytes = value.to_le_bytes();
+    dst[..std::mem::size_of::<u64>()].copy_from_slice(&bytes);
 }
