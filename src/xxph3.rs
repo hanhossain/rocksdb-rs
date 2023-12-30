@@ -28,6 +28,7 @@ mod ffi {
         fn xxph3_len_4to8(data: &[u8], seed: u64) -> u64;
         fn xxph3_len_9to16(data: &[u8], seed: u64) -> u64;
         fn xxph_read_le32(data: &[u8]) -> u32;
+        fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64;
     }
 }
 
@@ -105,4 +106,13 @@ fn xxph3_avalanche(mut h: u64) -> u64 {
     h = h.wrapping_mul(PRIME64_3);
     h = h ^ (h >> 32);
     h
+}
+
+fn xxph3_mix128b(input: &[u8], secret: &[u8], seed: u64) -> u64 {
+    let input_lo = xxph_read_le64(input);
+    let input_hi = xxph_read_le64(&input[8..]);
+    xxph3_mul128_fold64(
+        input_lo ^ xxph_read_le64(secret).wrapping_add(seed),
+        input_hi ^ xxph_read_le64(&secret[8..]).wrapping_sub(seed),
+    )
 }

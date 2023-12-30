@@ -1542,18 +1542,6 @@ XXPH3_hashLong_64b_withSeed(const xxh_u8* input, size_t len, XXPH64_hash_t seed)
     return XXPH3_hashLong_internal(input, len, secret, sizeof(secret));
 }
 
-
-XXPH_FORCE_INLINE xxh_u64 XXPH3_mix16B(const xxh_u8* XXPH_RESTRICT input,
-                                 const xxh_u8* XXPH_RESTRICT secret, xxh_u64 seed64)
-{
-    xxh_u64 const input_lo = xxph::xxph_read_le64(rust::Slice(input, 8));
-    xxh_u64 const input_hi = xxph::xxph_read_le64(rust::Slice(input+8, 8));
-    return xxph::xxph3_mul128_fold64(
-               input_lo ^ (xxph::xxph_read_le64(rust::Slice(secret, 8))   + seed64),
-               input_hi ^ (xxph::xxph_read_le64(rust::Slice(secret+8, 8)) - seed64) );
-}
-
-
 XXPH_FORCE_INLINE XXPH64_hash_t
 XXPH3_len_17to128_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
                      const xxh_u8* XXPH_RESTRICT secret, size_t secretSize,
@@ -1566,17 +1554,17 @@ XXPH3_len_17to128_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
         if (len > 32) {
             if (len > 64) {
                 if (len > 96) {
-                    acc += XXPH3_mix16B(input+48, secret+96, seed);
-                    acc += XXPH3_mix16B(input+len-64, secret+112, seed);
+                    acc += xxph::xxph3_mix128b(rust::Slice(input+48, 16), rust::Slice(secret+96, 16), seed);
+                    acc += xxph::xxph3_mix128b(rust::Slice(input+len-64, 16), rust::Slice(secret+112, 16), seed);
                 }
-                acc += XXPH3_mix16B(input+32, secret+64, seed);
-                acc += XXPH3_mix16B(input+len-48, secret+80, seed);
+                acc += xxph::xxph3_mix128b(rust::Slice(input+32, 16), rust::Slice(secret+64, 16), seed);
+                acc += xxph::xxph3_mix128b(rust::Slice(input+len-48, 16), rust::Slice(secret+80, 16), seed);
             }
-            acc += XXPH3_mix16B(input+16, secret+32, seed);
-            acc += XXPH3_mix16B(input+len-32, secret+48, seed);
+            acc += xxph::xxph3_mix128b(rust::Slice(input+16, 16), rust::Slice(secret+32, 16), seed);
+            acc += xxph::xxph3_mix128b(rust::Slice(input+len-32, 16), rust::Slice(secret+48, 16), seed);
         }
-        acc += XXPH3_mix16B(input+0, secret+0, seed);
-        acc += XXPH3_mix16B(input+len-16, secret+16, seed);
+        acc += xxph::xxph3_mix128b(rust::Slice(input+0, 16), rust::Slice(secret+0, 16), seed);
+        acc += xxph::xxph3_mix128b(rust::Slice(input+len-16, 16), rust::Slice(secret+16, 16), seed);
 
         return xxph::xxph3_avalanche(acc);
     }
@@ -1599,15 +1587,15 @@ XXPH3_len_129to240_64b(const xxh_u8* XXPH_RESTRICT input, size_t len,
         int const nbRounds = static_cast<int>(len) / 16;
         int i;
         for (i=0; i<8; i++) {
-            acc += XXPH3_mix16B(input+(16*i), secret+(16*i), seed);
+            acc += xxph::xxph3_mix128b(rust::Slice(input+(16*i), 16), rust::Slice(secret+(16*i), 16), seed);
         }
         acc = xxph::xxph3_avalanche(acc);
         XXPH_ASSERT(nbRounds >= 8);
         for (i=8 ; i < nbRounds; i++) {
-            acc += XXPH3_mix16B(input+(16*i), secret+(16*(i-8)) + XXPH3_MIDSIZE_STARTOFFSET, seed);
+            acc += xxph::xxph3_mix128b(rust::Slice(input+(16*i), 16), rust::Slice(secret+(16*(i-8)) + XXPH3_MIDSIZE_STARTOFFSET, 16), seed);
         }
         /* last bytes */
-        acc += XXPH3_mix16B(input + len - 16, secret + XXPH3_SECRET_SIZE_MIN - XXPH3_MIDSIZE_LASTOFFSET, seed);
+        acc += xxph::xxph3_mix128b(rust::Slice(input + len - 16, 16), rust::Slice(secret + XXPH3_SECRET_SIZE_MIN - XXPH3_MIDSIZE_LASTOFFSET, 16), seed);
         return xxph::xxph3_avalanche(acc);
     }
 }
