@@ -451,35 +451,6 @@ typedef struct {
 typedef XXPH32_hash_t xxh_u32;
 
 
-/* ===   Memory access   === */
-
-#if (defined(XXPH_FORCE_MEMORY_ACCESS) && (XXPH_FORCE_MEMORY_ACCESS==2))
-
-/* Force direct memory access. Only works on CPU which support unaligned memory access in hardware */
-static xxh_u32 XXPH_read32(const void* memPtr) { return *(const xxh_u32*) memPtr; }
-
-#elif (defined(XXPH_FORCE_MEMORY_ACCESS) && (XXPH_FORCE_MEMORY_ACCESS==1))
-
-/* __pack instructions are safer, but compiler specific, hence potentially problematic for some compilers */
-/* currently only defined for gcc and icc */
-typedef union { xxh_u32 u32; } __attribute__((packed)) unalign;
-static xxh_u32 XXPH_read32(const void* ptr) { return ((const unalign*)ptr)->u32; }
-
-#else
-
-/* portable and safe solution. Generally efficient.
- * see : http://stackoverflow.com/a/32095106/646947
- */
-static xxh_u32 XXPH_read32(const void* memPtr)
-{
-    xxh_u32 val;
-    memcpy(&val, memPtr, sizeof(val));
-    return val;
-}
-
-#endif   /* XXPH_FORCE_DIRECT_MEMORY_ACCESS */
-
-
 /* ===   Endianess   === */
 
 /* XXPH_CPU_LITTLE_ENDIAN can be defined externally, for example on the compiler command line */
@@ -577,33 +548,6 @@ static const xxh_u32 PRIME32_5 = 0x165667B1U;   /* 0b000101100101011001100111101
 /*======   Memory access   ======*/
 
 typedef XXPH64_hash_t xxh_u64;
-
-#if (defined(XXPH_FORCE_MEMORY_ACCESS) && (XXPH_FORCE_MEMORY_ACCESS==2))
-
-/* Force direct memory access. Only works on CPU which support unaligned memory access in hardware */
-static xxh_u64 XXPH_read64(const void* memPtr) { return *(const xxh_u64*) memPtr; }
-
-#elif (defined(XXPH_FORCE_MEMORY_ACCESS) && (XXPH_FORCE_MEMORY_ACCESS==1))
-
-/* __pack instructions are safer, but compiler specific, hence potentially problematic for some compilers */
-/* currently only defined for gcc and icc */
-typedef union { xxh_u32 u32; xxh_u64 u64; } __attribute__((packed)) unalign64;
-static xxh_u64 XXPH_read64(const void* ptr) { return ((const unalign64*)ptr)->u64; }
-
-#else
-
-/* portable and safe solution. Generally efficient.
- * see : http://stackoverflow.com/a/32095106/646947
- */
-
-static xxh_u64 XXPH_read64(const void* memPtr)
-{
-    xxh_u64 val;
-    memcpy(&val, memPtr, sizeof(val));
-    return val;
-}
-
-#endif   /* XXPH_FORCE_DIRECT_MEMORY_ACCESS */
 
 #if defined(_MSC_VER)     /* Visual Studio */
 #  define XXPH_swap64 _byteswap_uint64
@@ -928,119 +872,6 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
     0x2b, 0x16, 0xbe, 0x58, 0x7d, 0x47, 0xa1, 0xfc, 0x8f, 0xf8, 0xb8, 0xd1, 0x7a, 0xd0, 0x31, 0xce,
     0x45, 0xcb, 0x3a, 0x8f, 0x95, 0x16, 0x04, 0x28, 0xaf, 0xd7, 0xfb, 0xca, 0xbb, 0x4b, 0x40, 0x7e,
 };
-
-/*
- * GCC for x86 has a tendency to use SSE in this loop. While it
- * successfully avoids swapping (as MUL overwrites EAX and EDX), it
- * slows it down because instead of free register swap shifts, it
- * must use pshufd and punpckl/hd.
- *
- * To prevent this, we use this attribute to shut off SSE.
- */
-#if defined(__GNUC__) && !defined(__clang__) && defined(__i386__)
-__attribute__((__target__("no-sse")))
-#endif
-static XXPH128_hash_t
-XXPH_mult64to128(xxh_u64 lhs, xxh_u64 rhs)
-{
-    /*
-     * GCC/Clang __uint128_t method.
-     *
-     * On most 64-bit targets, GCC and Clang define a __uint128_t type.
-     * This is usually the best way as it usually uses a native long 64-bit
-     * multiply, such as MULQ on x86_64 or MUL + UMULH on aarch64.
-     *
-     * Usually.
-     *
-     * Despite being a 32-bit platform, Clang (and emscripten) define this
-     * type despite not having the arithmetic for it. This results in a
-     * laggy compiler builtin call which calculates a full 128-bit multiply.
-     * In that case it is best to use the portable one.
-     * https://github.com/Cyan4973/xxHash/issues/211#issuecomment-515575677
-     */
-#if defined(__GNUC__) && !defined(__wasm__) \
-    && defined(__SIZEOF_INT128__) \
-    || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-
-    __uint128_t product = static_cast<__uint128_t>(lhs) * static_cast<__uint128_t>(rhs);
-    XXPH128_hash_t const r128 = { static_cast<xxh_u64>(product), static_cast<xxh_u64>(product >> 64) };
-    return r128;
-
-    /*
-     * MSVC for x64's _umul128 method.
-     *
-     * xxh_u64 _umul128(xxh_u64 Multiplier, xxh_u64 Multiplicand, xxh_u64 *HighProduct);
-     *
-     * This compiles to single operand MUL on x64.
-     */
-#elif defined(_M_X64) || defined(_M_IA64)
-
-#ifndef _MSC_VER
-#   pragma intrinsic(_umul128)
-#endif
-    xxh_u64 product_high;
-    xxh_u64 const product_low = _umul128(lhs, rhs, &product_high);
-    XXPH128_hash_t const r128 = { product_low, product_high };
-    return r128;
-
-#else
-    /*
-     * Portable scalar method. Optimized for 32-bit and 64-bit ALUs.
-     *
-     * This is a fast and simple grade school multiply, which is shown
-     * below with base 10 arithmetic instead of base 0x100000000.
-     *
-     *           9 3 // D2 lhs = 93
-     *         x 7 5 // D2 rhs = 75
-     *     ----------
-     *           1 5 // D2 lo_lo = (93 % 10) * (75 % 10)
-     *         4 5 | // D2 hi_lo = (93 / 10) * (75 % 10)
-     *         2 1 | // D2 lo_hi = (93 % 10) * (75 / 10)
-     *     + 6 3 | | // D2 hi_hi = (93 / 10) * (75 / 10)
-     *     ---------
-     *         2 7 | // D2 cross  = (15 / 10) + (45 % 10) + 21
-     *     + 6 7 | | // D2 upper  = (27 / 10) + (45 / 10) + 63
-     *     ---------
-     *       6 9 7 5
-     *
-     * The reasons for adding the products like this are:
-     *  1. It avoids manual carry tracking. Just like how
-     *     (9 * 9) + 9 + 9 = 99, the same applies with this for
-     *     UINT64_MAX. This avoids a lot of complexity.
-     *
-     *  2. It hints for, and on Clang, compiles to, the powerful UMAAL
-     *     instruction available in ARMv6+ A32/T32, which is shown below:
-     *
-     *         void UMAAL(xxh_u32 *RdLo, xxh_u32 *RdHi, xxh_u32 Rn, xxh_u32 Rm)
-     *         {
-     *             xxh_u64 product = (xxh_u64)*RdLo * (xxh_u64)*RdHi + Rn + Rm;
-     *             *RdLo = (xxh_u32)(product & 0xFFFFFFFF);
-     *             *RdHi = (xxh_u32)(product >> 32);
-     *         }
-     *
-     *     This instruction was designed for efficient long multiplication,
-     *     and allows this to be calculated in only 4 instructions which
-     *     is comparable to some 64-bit ALUs.
-     *
-     *  3. It isn't terrible on other platforms. Usually this will be
-     *     a couple of 32-bit ADD/ADCs.
-     */
-
-    /* First calculate all of the cross products. */
-    xxh_u64 const lo_lo = XXPH_mult32to64(lhs & 0xFFFFFFFF, rhs & 0xFFFFFFFF);
-    xxh_u64 const hi_lo = XXPH_mult32to64(lhs >> 32,        rhs & 0xFFFFFFFF);
-    xxh_u64 const lo_hi = XXPH_mult32to64(lhs & 0xFFFFFFFF, rhs >> 32);
-    xxh_u64 const hi_hi = XXPH_mult32to64(lhs >> 32,        rhs >> 32);
-
-    /* Now add the products together. These will never overflow. */
-    xxh_u64 const cross = (lo_lo >> 32) + (hi_lo & 0xFFFFFFFF) + lo_hi;
-    xxh_u64 const upper = (hi_lo >> 32) + (cross >> 32)        + hi_hi;
-    xxh_u64 const lower = (cross << 32) | (lo_lo & 0xFFFFFFFF);
-
-    XXPH128_hash_t r128 = { lower, upper };
-    return r128;
-#endif
-}
 
 /* ==========================================
  * Short keys
