@@ -271,7 +271,7 @@ XXPH_PUBLIC_API unsigned XXPH_versionNumber (void);
 /* XXPH3_64bits() :
  * default 64-bit variant, using default secret and default seed of 0.
  * It's the fastest variant. */
-XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(const void* data, size_t len);
+XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(rust::Slice<const uint8_t> data);
 
 /* XXPH3_64bits_withSecret() :
  * It's possible to provide any blob of bytes as a "secret" to generate the hash.
@@ -290,7 +290,7 @@ XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits_withSecret(const void* data, size_t l
  * based on the default secret, altered using the `seed` value.
  * While this operation is decently fast, note that it's not completely free.
  * note : seed==0 produces same results as XXPH3_64bits() */
-XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits_withSeed(const void* data, size_t len, XXPH64_hash_t seed);
+XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits_withSeed(rust::Slice<const uint8_t> data, XXPH64_hash_t seed);
 
 #if defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)   /* C11+ */
 #  include <stdalign.h>
@@ -1209,13 +1209,12 @@ XXPH3_hashLong_64b_withSeed(const xxh_u8* input, size_t len, XXPH64_hash_t seed)
 
 /* ===   Public entry point   === */
 
-XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(const void* input, size_t len)
+XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(rust::Slice<const uint8_t> input)
 {
-    auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
-    if (len <= 16) return xxph::xxph3_len_0to16(slice, 0);
-    if (len <= 128) return xxph::xxph3_len_17to128(slice, 0);
-    if (len <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(slice, 0);
-    return XXPH3_hashLong_64b_defaultSecret(static_cast<const xxh_u8 *>(input), len);
+    if (input.length() <= 16) return xxph::xxph3_len_0to16(input, 0);
+    if (input.length() <= 128) return xxph::xxph3_len_17to128(input, 0);
+    if (input.length() <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(input, 0);
+    return XXPH3_hashLong_64b_defaultSecret(input.data(), input.length());
 }
 
 XXPH_PUBLIC_API XXPH64_hash_t
@@ -1234,13 +1233,12 @@ XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_
 }
 
 XXPH_PUBLIC_API XXPH64_hash_t
-XXPH3_64bits_withSeed(const void* input, size_t len, XXPH64_hash_t seed)
+XXPH3_64bits_withSeed(rust::Slice<const uint8_t> input, XXPH64_hash_t seed)
 {
-    auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
-    if (len <= 16) return xxph::xxph3_len_0to16(slice, seed);
-    if (len <= 128) return xxph::xxph3_len_17to128(slice, seed);
-    if (len <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(slice, seed);
-    return XXPH3_hashLong_64b_withSeed(static_cast<const xxh_u8 *>(input), len, seed);
+    if (input.length() <= 16) return xxph::xxph3_len_0to16(input, seed);
+    if (input.length() <= 128) return xxph::xxph3_len_17to128(input, seed);
+    if (input.length() <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(input, seed);
+    return XXPH3_hashLong_64b_withSeed(input.data(), input.length(), seed);
 }
 
 /* ===   XXPH3 streaming   === */
