@@ -872,24 +872,6 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
 
 typedef enum { XXPH3_acc_64bits, XXPH3_acc_128bits } XXPH3_accWidth_e;
 
-XXPH_FORCE_INLINE void
-XXPH3_scrambleAcc(rust::Slice<uint64_t> XXPH_RESTRICT acc, rust::Slice<const uint8_t> XXPH_RESTRICT secret)
-{
-    // TODO: use SIMD
-    XXPH_ALIGN(XXPH_ACC_ALIGN) xxh_u64* const xacc = (xxh_u64*) acc.data();   /* presumed aligned on 32-bytes boundaries, little hint for the auto-vectorizer */
-    const xxh_u8* const xsecret = (const xxh_u8*) secret.data();   /* no alignment restriction */
-    size_t i;
-    XXPH_ASSERT((((size_t)acc) & (XXPH_ACC_ALIGN-1)) == 0);
-    for (i=0; i < ACC_NB; i++) {
-        xxh_u64 const key64 = xxph::xxph_read_le64(rust::Slice(xsecret + 8*i, 8));
-        xxh_u64 acc64 = xacc[i];
-        acc64 ^= acc64 >> 47;
-        acc64 ^= key64;
-        acc64 *= PRIME32_1;
-        xacc[i] = acc64;
-    }
-}
-
 #define XXPH_PREFETCH_DIST 384
 
 /* note : clang auto-vectorizes well in SS2 mode _if_ this function is `static`,
@@ -918,7 +900,7 @@ XXPH3_hashLong_internal_loop(rust::Slice<uint64_t> XXPH_RESTRICT acc,
 
     for (n = 0; n < nb_blocks; n++) {
         xxph::xxph3_accumulate(acc, rust::Slice(input.data() + n*block_len, input.length() - n*block_len), secret, nb_rounds);
-        XXPH3_scrambleAcc(acc, rust::Slice(secret.data() + secret.length() - STRIPE_LEN, STRIPE_LEN));
+        xxph::xxph3_scramble_acc(acc, rust::Slice(secret.data() + secret.length() - STRIPE_LEN, STRIPE_LEN));
     }
 
     /* last partial block */

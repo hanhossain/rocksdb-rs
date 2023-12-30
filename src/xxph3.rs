@@ -38,6 +38,7 @@ mod ffi {
         fn xxph3_len_129to240(data: &[u8], seed: u64) -> u64;
         fn xxph3_accumulate_512(acc: &mut [u64], input: &[u8], secret: &[u8]);
         fn xxph3_accumulate(acc: &mut [u64], input: &[u8], secret: &[u8], nb_stripes: usize);
+        fn xxph3_scramble_acc(acc: &mut [u64], secret: &[u8]);
     }
 }
 
@@ -199,5 +200,17 @@ fn xxph3_accumulate(acc: &mut [u64], input: &[u8], secret: &[u8], nb_stripes: us
             &input[n * STRIPE_LEN..],
             &secret[n * XXPH_SECRET_CONSUME_RATE..],
         )
+    }
+}
+
+fn xxph3_scramble_acc(acc: &mut [u64], secret: &[u8]) {
+    // TODO: use SIMD
+    for i in 0..ACC_NB {
+        let key64 = xxph_read_le64(&secret[8 * i..]);
+        let mut acc64 = acc[i];
+        acc64 = acc64 ^ (acc64 >> 47);
+        acc64 = acc64 ^ key64;
+        acc64 = acc64.wrapping_mul(PRIME32_1 as u64);
+        acc[i] = acc64;
     }
 }
