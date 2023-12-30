@@ -25,6 +25,7 @@ const STRIPE_LEN: usize = 64;
 const ACC_NB: usize = STRIPE_LEN / std::mem::size_of::<u64>();
 /// Number of secret bytes consumed at each accumulation
 const XXPH_SECRET_CONSUME_RATE: usize = 8;
+const XXPH_SECRET_DEFAULT_SIZE: usize = 192;
 
 #[cxx::bridge(namespace = "xxph")]
 mod ffi {
@@ -49,6 +50,7 @@ mod ffi {
         fn xxph3_hash_long_internal(input: &[u8], secret: &[u8]) -> u64;
         fn xxph3_hash_long_default_secret(input: &[u8]) -> u64;
         fn xxph_write_le64(dst: &mut [u8], value: u64);
+        fn xxph3_init_custom_secret(custom_secret: &mut [u8], seed: u64);
     }
 }
 
@@ -296,4 +298,18 @@ fn xxph3_hash_long_default_secret(input: &[u8]) -> u64 {
 fn xxph_write_le64(dst: &mut [u8], value: u64) {
     let bytes = value.to_le_bytes();
     dst[..std::mem::size_of::<u64>()].copy_from_slice(&bytes);
+}
+
+fn xxph3_init_custom_secret(custom_secret: &mut [u8], seed: u64) {
+    let nb_rounds = XXPH_SECRET_DEFAULT_SIZE / 16;
+    for i in 0..nb_rounds {
+        xxph_write_le64(
+            &mut custom_secret[16 * i..],
+            xxph_read_le64(&SECRET[16 * i..]).wrapping_add(seed),
+        );
+        xxph_write_le64(
+            &mut custom_secret[16 * i + 8..],
+            xxph_read_le64(&SECRET[16 * i + 8..]).wrapping_sub(seed),
+        );
+    }
 }

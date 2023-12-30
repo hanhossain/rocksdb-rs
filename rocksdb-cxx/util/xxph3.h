@@ -870,23 +870,6 @@ XXPH_ALIGN(64) static const xxh_u8 kSecret[XXPH_SECRET_DEFAULT_SIZE] = {
 #define XXPH_SECRET_CONSUME_RATE 8   /* nb of secret bytes consumed at each accumulation */
 #define ACC_NB (STRIPE_LEN / sizeof(xxh_u64))
 
-/* XXPH3_initCustomSecret() :
- * destination `customSecret` is presumed allocated and same size as `kSecret`.
- */
-XXPH_FORCE_INLINE void XXPH3_initCustomSecret(rust::Slice<uint8_t> customSecret, xxh_u64 seed64)
-{
-    int const nbRounds = XXPH_SECRET_DEFAULT_SIZE / 16;
-    int i;
-
-    XXPH_STATIC_ASSERT((XXPH_SECRET_DEFAULT_SIZE & 15) == 0);
-
-    for (i=0; i < nbRounds; i++) {
-        xxph::xxph_write_le64(rust::Slice(customSecret.data() + 16*i, customSecret.length() - 16*i),     xxph::xxph_read_le64(rust::Slice(kSecret + 16*i, 8))     + seed64);
-        xxph::xxph_write_le64(rust::Slice(customSecret.data() + 16*i + 8, customSecret.length() - 16*i - 8), xxph::xxph_read_le64(rust::Slice(kSecret + 16*i + 8, 8)) - seed64);
-    }
-}
-
-
 /* XXPH3_hashLong_64b_withSeed() :
  * Generate a custom key,
  * based on alteration of default kSecret with the seed,
@@ -899,7 +882,7 @@ XXPH3_hashLong_64b_withSeed(rust::Slice<const uint8_t> input, XXPH64_hash_t seed
 {
     XXPH_ALIGN(8) xxh_u8 secret[XXPH_SECRET_DEFAULT_SIZE];
     if (seed==0) return xxph::xxph3_hash_long_default_secret(input);
-    XXPH3_initCustomSecret(rust::Slice(secret, sizeof(secret)), seed);
+    xxph::xxph3_init_custom_secret(rust::Slice(secret, sizeof(secret)), seed);
     return xxph::xxph3_hash_long_internal(input, rust::Slice(static_cast<const xxh_u8*>(secret), sizeof(secret)));
 }
 
