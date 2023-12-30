@@ -264,7 +264,6 @@ XXPH_PUBLIC_API unsigned XXPH_versionNumber (void);
 
 #ifdef XXPH_NAMESPACE
 #  define XXPH3_64bits XXPH_NAME2(XXPH_NAMESPACE, XXPH3_64bits)
-#  define XXPH3_64bits_withSecret XXPH_NAME2(XXPH_NAMESPACE, XXPH3_64bits_withSecret)
 #  define XXPH3_64bits_withSeed XXPH_NAME2(XXPH_NAMESPACE, XXPH3_64bits_withSeed)
 #endif
 
@@ -272,18 +271,6 @@ XXPH_PUBLIC_API unsigned XXPH_versionNumber (void);
  * default 64-bit variant, using default secret and default seed of 0.
  * It's the fastest variant. */
 XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(rust::Slice<const uint8_t> data);
-
-/* XXPH3_64bits_withSecret() :
- * It's possible to provide any blob of bytes as a "secret" to generate the hash.
- * This makes it more difficult for an external actor to prepare an intentional collision.
- * The secret *must* be large enough (>= XXPH3_SECRET_SIZE_MIN).
- * It should consist of random bytes.
- * Avoid repeating same character, or sequences of bytes,
- * and especially avoid swathes of \0.
- * Failure to respect these conditions will result in a poor quality hash.
- */
-#define XXPH3_SECRET_SIZE_MIN 136
-XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits_withSecret(const void* data, size_t len, const void* secret, size_t secretSize);
 
 /* XXPH3_64bits_withSeed() :
  * This variant generates on the fly a custom secret,
@@ -1215,21 +1202,6 @@ XXPH_PUBLIC_API XXPH64_hash_t XXPH3_64bits(rust::Slice<const uint8_t> input)
     if (input.length() <= 128) return xxph::xxph3_len_17to128(input, 0);
     if (input.length() <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(input, 0);
     return XXPH3_hashLong_64b_defaultSecret(input.data(), input.length());
-}
-
-XXPH_PUBLIC_API XXPH64_hash_t
-XXPH3_64bits_withSecret(const void* input, size_t len, const void* secret, size_t secretSize)
-{
-    XXPH_ASSERT(secretSize >= XXPH3_SECRET_SIZE_MIN);
-    /* if an action must be taken should `secret` conditions not be respected,
-     * it should be done here.
-     * For now, it's a contract pre-condition.
-     * Adding a check and a branch here would cost performance at every hash */
-     auto slice = rust::Slice(static_cast<const uint8_t*>(input), len);
-     if (len <= 16) return xxph::xxph3_len_0to16(slice, 0);
-     if (len <= 128) return xxph::xxph3_len_17to128(slice, 0);
-     if (len <= XXPH3_MIDSIZE_MAX) return xxph::xxph3_len_129to240(slice, 0);
-     return XXPH3_hashLong_64b_withSecret(static_cast<const xxh_u8 *>(input), len, static_cast<const xxh_u8 *>(secret), secretSize);
 }
 
 XXPH_PUBLIC_API XXPH64_hash_t
