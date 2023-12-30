@@ -1,4 +1,6 @@
-use crate::xxph3::{xxph3_64, xxph3_64_with_seed};
+mod xxph3;
+
+use crate::hash::xxph3::{xxph3_64, xxph3_64_with_seed};
 use xxhash_rust::xxh3::{xxh3_128, xxh3_128_with_seed};
 
 #[cxx::bridge(namespace = "rocksdb")]
