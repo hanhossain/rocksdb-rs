@@ -9,8 +9,8 @@ edition = "2021"
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]
-cxx = { version = "1.0.110", features = ["c++17"] }
+cxx = { version = "1.0.113", features = ["c++17"] }
 xxhash-rust = { version = "0.8.8", features = ["xxh3"] }
 
 [build-dependencies]
-cxx-build = { version = "1.0.110", features = ["parallel"] }
+cxx-build = { version = "1.0.113", features = ["parallel"] }
