@@ -20,6 +20,8 @@
 #include "util/stop_watch.h"
 #include "util/string_util.h"
 
+#include "rocksdb-rs/src/filename.rs.h"
+
 namespace rocksdb {
 
 const std::string kCurrentFileName = "CURRENT";
@@ -62,15 +64,14 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
 }
 
 static std::string MakeFileName(uint64_t number, const char* suffix) {
-  char buf[100];
-  snprintf(buf, sizeof(buf), "%06llu.%s",
-           static_cast<unsigned long long>(number), suffix);
-  return buf;
+  rust::String str = rs::make_file_name(number, suffix);
+  return static_cast<std::string>(str);
 }
 
 static std::string MakeFileName(const std::string& name, uint64_t number,
                                 const char* suffix) {
-  return name + "/" + MakeFileName(number, suffix);
+  rust::String str = rs::make_file_name_full_path(name, number, suffix);
+  return static_cast<std::string>(str);
 }
 
 std::string LogFileName(const std::string& name, uint64_t number) {
