@@ -4,6 +4,14 @@
         "dockerfile": "Dockerfile"
     },
     "customizations": {
+        "codespaces": {
+            "extensions": [
+                "rust-lang.rust-analyzer",
+                "tamasfe.even-better-toml",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.cmake-tools"
+            ]
+        },
         "vscode": {
             "extensions": [
                 "rust-lang.rust-analyzer",
