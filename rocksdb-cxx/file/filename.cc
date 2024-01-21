@@ -63,14 +63,14 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string LogFileName(const std::string& name, uint64_t number) {
-  assert(number > 0);
-  return static_cast<std::string>(rs::make_file_name_full_path(name, number, "log"));
+rust::String LogFileName(const std::string& name, uint64_t number) {
+  rust::String res = rs::LogFileName(name, number);
+  return res;
 }
 
-std::string LogFileName(uint64_t number) {
-  assert(number > 0);
-  return static_cast<std::string>(rs::make_file_name(number, "log"));
+rust::String LogFileName(uint64_t number) {
+  rust::String res = rs::LogFileName(number);
+  return res;
 }
 
 std::string BlobFileName(uint64_t number) {
