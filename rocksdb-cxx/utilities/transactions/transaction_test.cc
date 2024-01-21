@@ -6356,7 +6356,7 @@ TEST_P(TransactionTest, DoubleCrashInRecovery) {
       ASSERT_OK(db->FlushWAL(true));
       DBImpl* db_impl = static_cast_with_check<DBImpl>(db->GetRootDB());
       uint64_t wal_file_id = db_impl->TEST_LogfileNumber();
-      std::string fname = LogFileName(dbname, wal_file_id);
+      std::string fname = std::string(LogFileName(dbname, wal_file_id));
       reinterpret_cast<PessimisticTransactionDB*>(db)->TEST_Crash();
       delete txn;
       delete cf_handle;

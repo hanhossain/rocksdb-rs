@@ -4830,7 +4830,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
       for (const auto& file : walDirFiles) {
         if (ParseFileName(file, &number, &type) && type == kWalFile) {
           Status del =
-              DeleteDBFile(&soptions, LogFileName(soptions.wal_dir, number),
+              DeleteDBFile(&soptions, static_cast<std::string>(LogFileName(soptions.wal_dir, number)),
                            soptions.wal_dir, /*force_bg=*/false,
                            /*force_fg=*/!wal_in_db_path);
           if (!del.ok() && result.ok()) {

@@ -55,7 +55,7 @@ Status TransactionLogIteratorImpl::OpenLogFile(
     fname = ArchivedLogFileName(dir_, log_file->LogNumber());
     s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr);
   } else {
-    fname = LogFileName(dir_, log_file->LogNumber());
+    fname = static_cast<std::string>(LogFileName(dir_, log_file->LogNumber()));
     s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr);
     if (!s.ok()) {
       //  If cannot open file in DB directory.

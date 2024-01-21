@@ -24,6 +24,7 @@
 #include "rocksdb/transaction_log.h"
 
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb-rs/src/filename.rs.h"
 
 namespace rocksdb {
 
@@ -37,13 +38,6 @@ constexpr char kFilePathSeparator = '\\';
 #else
 constexpr char kFilePathSeparator = '/';
 #endif
-
-// Return the name of the log file with the specified number
-// in the db named by "dbname".  The result will be prefixed with
-// "dbname".
-extern std::string LogFileName(const std::string& dbname, uint64_t number);
-
-extern std::string LogFileName(uint64_t number);
 
 extern std::string BlobFileName(uint64_t number);
 

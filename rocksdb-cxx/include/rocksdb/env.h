@@ -347,6 +347,9 @@ class Env : public Customizable {
 
   // Delete the named file.
   virtual Status DeleteFile(const std::string& fname) = 0;
+  virtual Status DeleteFile(const rust::String& fname) {
+    return DeleteFile(static_cast<std::string>(fname));
+  }
 
   // Truncate the named file to the specified size.
   virtual Status Truncate(const std::string& /*fname*/, size_t /*size*/) {
@@ -367,6 +370,9 @@ class Env : public Customizable {
 
   // Store the size of fname in *file_size.
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
+  virtual Status GetFileSize(const rust::String& fname, uint64_t* file_size) {
+    return GetFileSize(static_cast<std::string>(fname), file_size);
+  }
 
   // Store the last modification time of fname in *file_mtime.
   virtual Status GetFileModificationTime(const std::string& fname,
@@ -1481,6 +1487,9 @@ class EnvWrapper : public Env {
   Status FileExists(const std::string& f) override {
     return target_.env->FileExists(f);
   }
+  Status FileExists(const rust::string& f) {
+    return target_.env->FileExists(static_cast<std::string>(f));
+  }
   Status GetChildren(const std::string& dir,
                      std::vector<std::string>* r) override {
     return target_.env->GetChildren(dir, r);
@@ -1490,6 +1499,9 @@ class EnvWrapper : public Env {
     return target_.env->GetChildrenFileAttributes(dir, result);
   }
   Status DeleteFile(const std::string& f) override {
+    return target_.env->DeleteFile(f);
+  }
+  Status DeleteFile(const rust::String& f) override {
     return target_.env->DeleteFile(f);
   }
   Status Truncate(const std::string& fname, size_t size) override {

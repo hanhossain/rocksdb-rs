@@ -135,7 +135,7 @@ TEST_F(FileNameTest, Construction) {
   ASSERT_EQ(0U, number);
   ASSERT_EQ(kDBLockFile, type);
 
-  fname = LogFileName("foo", 192);
+  fname = static_cast<std::string>(LogFileName("foo", 192));
   ASSERT_EQ("foo/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(192U, number);

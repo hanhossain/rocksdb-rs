@@ -535,6 +535,10 @@ Status TruncateFile(Env* env, const std::string& fname, uint64_t new_length) {
   return s;
 }
 
+Status TruncateFile(Env* env, const rust::String& fname, uint64_t new_length) {
+  return TruncateFile(env, static_cast<std::string>(fname), new_length);
+}
+
 // Try and delete a directory if it exists
 Status TryDeleteDir(Env* env, const std::string& dirname) {
   bool is_dir = false;

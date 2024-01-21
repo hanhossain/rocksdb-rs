@@ -392,7 +392,7 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
   }
   Status s = Status_new();
   if (type == kAliveLogFile) {
-    std::string fname = LogFileName(wal_dir_, number);
+    std::string fname = static_cast<std::string>(LogFileName(wal_dir_, number));
     s = ReadFirstLine(fname, number, sequence);
     if (!s.ok() && env_->FileExists(fname).ok()) {
       // return any error that is not caused by non-existing file

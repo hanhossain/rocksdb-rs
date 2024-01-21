@@ -253,7 +253,7 @@ Status SstFileDumper::CalculateCompressedTableSize(
   *compressed_table_size = table_builder->FileSize();
   assert(num_data_blocks != nullptr);
   *num_data_blocks = table_builder->GetTableProperties().num_data_blocks;
-  return env->DeleteFile(testFileName);
+  return env->DeleteFile(rust::String(testFileName));
 }
 
 Status SstFileDumper::ShowAllCompressionSizes(

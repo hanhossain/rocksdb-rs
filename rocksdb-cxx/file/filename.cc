@@ -61,43 +61,21 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-static std::string MakeFileName(uint64_t number, const char* suffix) {
-  char buf[100];
-  snprintf(buf, sizeof(buf), "%06llu.%s",
-           static_cast<unsigned long long>(number), suffix);
-  return buf;
-}
-
-static std::string MakeFileName(const std::string& name, uint64_t number,
-                                const char* suffix) {
-  return name + "/" + MakeFileName(number, suffix);
-}
-
-std::string LogFileName(const std::string& name, uint64_t number) {
-  assert(number > 0);
-  return MakeFileName(name, number, "log");
-}
-
-std::string LogFileName(uint64_t number) {
-  assert(number > 0);
-  return MakeFileName(number, "log");
-}
-
 std::string BlobFileName(uint64_t number) {
   assert(number > 0);
-  return MakeFileName(number, kRocksDBBlobFileExt.c_str());
+  return static_cast<std::string>(rs::make_file_name(number, kRocksDBBlobFileExt.c_str()));
 }
 
 std::string BlobFileName(const std::string& blobdirname, uint64_t number) {
   assert(number > 0);
-  return MakeFileName(blobdirname, number, kRocksDBBlobFileExt.c_str());
+  return static_cast<std::string>(rs::make_file_name_full_path(blobdirname, number, kRocksDBBlobFileExt.c_str()));
 }
 
 std::string BlobFileName(const std::string& dbname, const std::string& blob_dir,
                          uint64_t number) {
   assert(number > 0);
-  return MakeFileName(dbname + "/" + blob_dir, number,
-                      kRocksDBBlobFileExt.c_str());
+  return static_cast<std::string>(rs::make_file_name_full_path(dbname + "/" + blob_dir, number,
+                      kRocksDBBlobFileExt.c_str()));
 }
 
 std::string ArchivalDirectory(const std::string& dir) {
@@ -105,15 +83,15 @@ std::string ArchivalDirectory(const std::string& dir) {
 }
 std::string ArchivedLogFileName(const std::string& name, uint64_t number) {
   assert(number > 0);
-  return MakeFileName(name + "/" + kArchivalDirName, number, "log");
+  return static_cast<std::string>(rs::make_file_name_full_path(name + "/" + kArchivalDirName, number, "log"));
 }
 
 std::string MakeTableFileName(const std::string& path, uint64_t number) {
-  return MakeFileName(path, number, kRocksDbTFileExt.c_str());
+  return static_cast<std::string>(rs::make_file_name_full_path(path, number, kRocksDbTFileExt.c_str()));
 }
 
 std::string MakeTableFileName(uint64_t number) {
-  return MakeFileName(number, kRocksDbTFileExt.c_str());
+  return static_cast<std::string>(rs::make_file_name(number, kRocksDbTFileExt.c_str()));
 }
 
 std::string Rocks2LevelTableFileName(const std::string& fullname) {
@@ -180,7 +158,7 @@ std::string CurrentFileName(const std::string& dbname) {
 std::string LockFileName(const std::string& dbname) { return dbname + "/LOCK"; }
 
 std::string TempFileName(const std::string& dbname, uint64_t number) {
-  return MakeFileName(dbname, number, kTempFileNameSuffix.c_str());
+  return static_cast<std::string>(rs::make_file_name_full_path(dbname, number, kTempFileNameSuffix.c_str()));
 }
 
 InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
