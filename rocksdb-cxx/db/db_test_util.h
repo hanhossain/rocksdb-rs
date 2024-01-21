@@ -582,6 +582,11 @@ class SpecialEnv : public EnvWrapper {
     return target()->DeleteFile(fname);
   }
 
+  virtual Status DeleteFile(const rust::String& fname) override {
+    delete_count_.fetch_add(1);
+    return target()->DeleteFile(fname);
+  }
+
   void SetMockSleep(bool enabled = true) { no_slowdown_ = enabled; }
 
   Status NewDirectory(const std::string& name,

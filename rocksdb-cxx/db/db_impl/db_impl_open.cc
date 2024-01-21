@@ -698,7 +698,7 @@ Status DBImpl::Recover(
               "existing log file: ",
               file);
         } else {
-          wal_files[number] = LogFileName(wal_dir, number);
+          wal_files[number] = static_cast<std::string>(LogFileName(wal_dir, number));
         }
       }
     }
@@ -1123,7 +1123,7 @@ Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& wal_numbers,
     versions_->MarkFileNumberUsed(wal_number);
     // Open the log file
     std::string fname =
-        LogFileName(immutable_db_options_.GetWalDir(), wal_number);
+        static_cast<std::string>(LogFileName(immutable_db_options_.GetWalDir(), wal_number));
 
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Recovering log #%" PRIu64 " mode %d", wal_number,
@@ -1506,7 +1506,7 @@ Status DBImpl::GetLogSizeAndMaybeTruncate(uint64_t wal_number, bool truncate,
                                           LogFileNumberSize* log_ptr) {
   LogFileNumberSize log(wal_number);
   std::string fname =
-      LogFileName(immutable_db_options_.GetWalDir(), wal_number);
+      static_cast<std::string>(LogFileName(immutable_db_options_.GetWalDir(), wal_number));
   Status s = Status_new();
   // This gets the appear size of the wals, not including preallocated space.
   s = env_->GetFileSize(fname, &log.size);
@@ -1856,13 +1856,13 @@ IOStatus DBImpl::CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
   FileOptions opt_file_options =
       fs_->OptimizeForLogWrite(file_options_, db_options);
   std::string wal_dir = immutable_db_options_.GetWalDir();
-  std::string log_fname = LogFileName(wal_dir, log_file_num);
+  std::string log_fname = static_cast<std::string>(LogFileName(wal_dir, log_file_num));
 
   if (recycle_log_number) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "reusing log %" PRIu64 " from recycle list\n",
                    recycle_log_number);
-    std::string old_log_fname = LogFileName(wal_dir, recycle_log_number);
+    std::string old_log_fname = static_cast<std::string>(LogFileName(wal_dir, recycle_log_number));
     TEST_SYNC_POINT("DBImpl::CreateWAL:BeforeReuseWritableFile1");
     TEST_SYNC_POINT("DBImpl::CreateWAL:BeforeReuseWritableFile2");
     io_s = fs_->ReuseWritableFile(log_fname, old_log_fname, opt_file_options,

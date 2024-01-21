@@ -337,7 +337,7 @@ class Repairer {
     for (size_t i = 0; i < logs_.size(); i++) {
       // we should use LogFileName(wal_dir, logs_[i]) here. user might uses
       // wal_dir option.
-      std::string logname = LogFileName(wal_dir, logs_[i]);
+      rust::String logname = LogFileName(wal_dir, logs_[i]);
       Status status = ConvertLogToTable(wal_dir, logs_[i]);
       if (!status.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
@@ -364,7 +364,7 @@ class Repairer {
     const ReadOptions read_options;
 
     // Open the log file
-    std::string logname = LogFileName(wal_dir, log);
+    std::string logname = static_cast<std::string>(LogFileName(wal_dir, log));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<SequentialFileReader> lfile_reader;
     Status status = SequentialFileReader::Create(
@@ -777,6 +777,10 @@ class Repairer {
     Status s = env_->RenameFile(fname, new_file);
     ROCKS_LOG_INFO(db_options_.info_log, "Archiving %s: %s\n", fname.c_str(),
                    s.ToString()->c_str());
+  }
+
+  void ArchiveFile(const rust::String& fname) {
+    ArchiveFile(static_cast<std::string>(fname));
   }
 };
 

@@ -32,7 +32,7 @@ class LogFileImpl : public LogFile {
     if (type_ == kArchivedLogFile) {
       return ArchivedLogFileName("", logNumber_);
     }
-    return LogFileName("", logNumber_);
+    return static_cast<std::string>(LogFileName("", logNumber_));
   }
 
   uint64_t LogNumber() const override { return logNumber_; }

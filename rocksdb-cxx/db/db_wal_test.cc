@@ -1512,7 +1512,7 @@ class RecoveryTestHelper {
 
     for (size_t j = kWALFileOffset; j < wal_count + kWALFileOffset; j++) {
       uint64_t current_log_number = j;
-      std::string fname = LogFileName(test->dbname_, current_log_number);
+      std::string fname = static_cast<std::string>(LogFileName(test->dbname_, current_log_number));
       std::unique_ptr<WritableFileWriter> file_writer;
       ASSERT_OK(WritableFileWriter::Create(db_options.env->GetFileSystem(),
                                            fname, file_options, &file_writer,
@@ -1569,7 +1569,7 @@ class RecoveryTestHelper {
                          const double off, const double len,
                          const int wal_file_id, const bool trunc = false) {
     Env* env = options.env;
-    std::string fname = LogFileName(test->dbname_, wal_file_id);
+    std::string fname = static_cast<std::string>(LogFileName(test->dbname_, wal_file_id));
     uint64_t size;
     ASSERT_OK(env->GetFileSize(fname, &size));
     ASSERT_GT(size, 0);
@@ -1710,7 +1710,7 @@ TEST_F(DBWALTest, kPointInTimeRecoveryCFConsistency) {
   // Record the offset at this point
   Env* env = options.env;
   uint64_t wal_file_id = dbfull()->TEST_LogfileNumber();
-  std::string fname = LogFileName(dbname_, wal_file_id);
+  std::string fname = static_cast<std::string>(LogFileName(dbname_, wal_file_id));
   uint64_t offset_to_corrupt;
   ASSERT_OK(env->GetFileSize(fname, &offset_to_corrupt));
   ASSERT_GT(offset_to_corrupt, 0);

@@ -295,7 +295,7 @@ class CorruptionTest : public testing::Test {
 
   void CorruptFileWithTruncation(FileType file, uint64_t number,
                                  uint64_t bytes_to_truncate = 0) {
-    std::string path;
+    rust::String path;
     switch (file) {
       case FileType::kWalFile:
         path = LogFileName(dbname_, number);

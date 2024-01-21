@@ -145,7 +145,7 @@ Status DBImplSecondary::MaybeInitLogReader(
     // TODO: min_log_number_to_keep_2pc check needed?
     // Open the log file
     std::string fname =
-        LogFileName(immutable_db_options_.GetWalDir(), log_number);
+        static_cast<std::string>(LogFileName(immutable_db_options_.GetWalDir(), log_number));
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Recovering log #%" PRIu64 " mode %d", log_number,
                    static_cast<int>(immutable_db_options_.wal_recovery_mode));
