@@ -20,8 +20,6 @@
 #include "util/stop_watch.h"
 #include "util/string_util.h"
 
-#include "rocksdb-rs/src/filename.rs.h"
-
 namespace rocksdb {
 
 const std::string kCurrentFileName = "CURRENT";
@@ -61,16 +59,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   snprintf(dest + write_idx, len - write_idx, suffix);
   write_idx += sizeof(suffix) - 1;
   return write_idx;
-}
-
-rust::String LogFileName(const std::string& name, uint64_t number) {
-  rust::String res = rs::LogFileName(name, number);
-  return res;
-}
-
-rust::String LogFileName(uint64_t number) {
-  rust::String res = rs::LogFileName(number);
-  return res;
 }
 
 std::string BlobFileName(uint64_t number) {

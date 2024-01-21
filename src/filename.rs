@@ -1,14 +1,16 @@
-#[cxx::bridge(namespace = "rocksdb::rs")]
+#[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
     extern "Rust" {
         // TODO: remove export
+        #[namespace = "rocksdb::rs"]
         fn make_file_name(number: u64, suffix: &str) -> String;
         // TODO: remove export
+        #[namespace = "rocksdb::rs"]
         fn make_file_name_full_path(name: &str, number: u64, suffix: &str) -> String;
         #[cxx_name = "LogFileName"]
         fn log_file_name(number: u64) -> String;
         #[cxx_name = "LogFileName"]
-        fn log_file_name_full_path(name: &str, number: u64) -> String;
+        fn log_file_name_full_path(dbname: &str, number: u64) -> String;
     }
 }
 
@@ -25,9 +27,11 @@ fn log_file_name(number: u64) -> String {
     make_file_name(number, "log")
 }
 
-fn log_file_name_full_path(name: &str, number: u64) -> String {
+/// Return the name of the log file with the specified number in the db named by "dbname". The result will be prefixed
+/// with "dbname".
+fn log_file_name_full_path(dbname: &str, number: u64) -> String {
     assert!(number > 0);
-    make_file_name_full_path(name, number, "log")
+    make_file_name_full_path(dbname, number, "log")
 }
 
 #[cfg(test)]
