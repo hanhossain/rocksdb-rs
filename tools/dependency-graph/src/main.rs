@@ -1,5 +1,4 @@
 use clang::{Clang, Index};
-use std::path::Path;
 
 fn main() {
     let clang_context = Clang::new().unwrap();
@@ -23,7 +22,8 @@ fn main() {
     }
 
     // we're currently at tools/dependency-graph
-    let repo_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let repo_root = std::fs::canonicalize(format!("{manifest_dir}/../..")).unwrap();
 
     let include_dirs: Vec<_> = ["rocksdb-cxx/include", "rocksdb-cxx"]
         .into_iter()
