@@ -1,4 +1,4 @@
-use build_common::{get_files, BUILD_VERSION_FILE};
+use build_common::{get_clang_flags, get_files, BUILD_VERSION_FILE};
 
 fn main() {
     // This will be set when building rocksdb-rs from cmake.
@@ -22,16 +22,9 @@ fn main() {
         let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
         let mut config = cxx_build::bridges(&bridges);
 
-        config.flag("-pthread");
-        config.flag("-Wsign-compare");
-        config.flag("-Wshadow");
-        config.flag("-Wno-unused-parameter");
-        config.flag("-Wno-unused-variable");
-        config.flag("-Woverloaded-virtual");
-        config.flag("-Wnon-virtual-dtor");
-        config.flag("-Wno-missing-field-initializers");
-        config.flag("-Wno-strict-aliasing");
-        config.flag("-Wno-invalid-offsetof");
+        for flag in get_clang_flags() {
+            config.flag(flag);
+        }
 
         // Let c++ know it's being built from rust.
         config.define("ROCKSDB_RS", None);
@@ -49,12 +42,7 @@ fn main() {
 
         config.includes(&includes);
 
-        if target.contains("aarch64") || target.contains("arm64") {
-            config.flag_if_supported("-march=armv8-a+crc+crypto");
-        }
-
         config.files(get_files());
-        config.flag_if_supported("-std=c++17");
         config.compile("rocksdb-cxx");
     }
 

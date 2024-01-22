@@ -331,11 +331,11 @@ const SOURCES: &[&str] = &[
 ];
 
 pub const BUILD_VERSION_FILE: &str = "build_version.cc";
+pub const TARGET: &str = env!("TARGET");
 
 pub fn get_files() -> Vec<String> {
     // we're currently at tools/build-common
     let repo_root = std::fs::canonicalize(format!("{}/../..", env!("CARGO_MANIFEST_DIR"))).unwrap();
-    let target = env!("TARGET");
 
     let mut files = vec![format!("{}/{}", repo_root.display(), BUILD_VERSION_FILE)];
 
@@ -343,7 +343,7 @@ pub fn get_files() -> Vec<String> {
         files.push(format!("{}/rocksdb-cxx/{}", repo_root.display(), file));
     }
 
-    if target.contains("aarch64") || target.contains("arm64") {
+    if TARGET.contains("aarch64") || TARGET.contains("arm64") {
         files.push(format!(
             "{}/rocksdb-cxx/util/crc32c_arm64.cc",
             repo_root.display()
@@ -351,4 +351,26 @@ pub fn get_files() -> Vec<String> {
     }
 
     files
+}
+
+pub fn get_clang_flags() -> Vec<&'static str> {
+    let mut args = vec![
+        "-std=c++17",
+        "-pthread",
+        "-Wsign-compare",
+        "-Wshadow",
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+        "-Woverloaded-virtual",
+        "-Wnon-virtual-dtor",
+        "-Wno-missing-field-initializers",
+        "-Wno-strict-aliasing",
+        "-Wno-invalid-offsetof",
+    ];
+
+    if TARGET.contains("aarch64") || TARGET.contains("arm64") {
+        args.push("-march=armv8-a+crc+crypto");
+    }
+
+    args
 }
