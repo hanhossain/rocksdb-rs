@@ -1,4 +1,4 @@
-use build_common::{get_clang_defines, get_clang_flags};
+use build_common::{get_clang_defines, get_clang_flags, get_files};
 use clang::{Clang, Index};
 
 fn main() {
@@ -41,10 +41,18 @@ fn main() {
         arguments.push(format!("-I{}", include_dir.display()));
     }
 
-    let res = index
-        .parser(repo_root.join("rocksdb-cxx/util/common_ffi.cc"))
-        .keep_going(true)
-        .arguments(&arguments)
-        .parse();
-    println!("{:?}", res);
+    for file_path in get_files() {
+        println!("parsing {}", file_path);
+        let tu = index
+            .parser(&file_path)
+            .keep_going(true)
+            .arguments(&arguments)
+            .skip_function_bodies(true)
+            .parse()
+            .unwrap();
+
+        if tu.get_diagnostics().len() > 0 {
+            break;
+        }
+    }
 }
