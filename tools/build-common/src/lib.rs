@@ -374,3 +374,19 @@ pub fn get_clang_flags() -> Vec<&'static str> {
 
     args
 }
+
+pub fn get_clang_defines() -> Vec<&'static str> {
+    let mut res = Vec::new();
+
+    if TARGET.contains("darwin") {
+        res.push("OS_MACOSX");
+    } else if TARGET.contains("linux") {
+        res.push("OS_LINUX");
+    } else {
+        panic!("Unsupported target: {}", TARGET);
+    }
+
+    res.push("ROCKSDB_PLATFORM_POSIX");
+    res.push("ROCKSDB_LIB_IO_POSIX");
+    res
+}

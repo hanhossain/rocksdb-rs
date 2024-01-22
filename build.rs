@@ -1,4 +1,4 @@
-use build_common::{get_clang_flags, get_files, BUILD_VERSION_FILE};
+use build_common::{get_clang_defines, get_clang_flags, get_files, BUILD_VERSION_FILE};
 
 fn main() {
     // This will be set when building rocksdb-rs from cmake.
@@ -18,7 +18,6 @@ fn main() {
     ];
 
     if !skip_build_script {
-        let target = std::env::var("TARGET").unwrap();
         let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
         let mut config = cxx_build::bridges(&bridges);
 
@@ -26,19 +25,9 @@ fn main() {
             config.flag(flag);
         }
 
-        // Let c++ know it's being built from rust.
-        config.define("ROCKSDB_RS", None);
-
-        if target.contains("darwin") {
-            config.define("OS_MACOSX", None);
-        } else if target.contains("linux") {
-            config.define("OS_LINUX", None);
-        } else {
-            panic!("Unsupported target: {}", target);
+        for def in get_clang_defines() {
+            config.define(def, None);
         }
-
-        config.define("ROCKSDB_PLATFORM_POSIX", None);
-        config.define("ROCKSDB_LIB_IO_POSIX", None);
 
         config.includes(&includes);
 
