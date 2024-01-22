@@ -1,3 +1,4 @@
+use build_common::{get_clang_defines, get_clang_flags};
 use clang::{Clang, Index};
 
 fn main() {
@@ -8,7 +9,14 @@ fn main() {
 
     // use c++
     arguments.push("-xc++".to_string());
-    arguments.push("-std=c++17".to_string());
+
+    for flag in get_clang_flags() {
+        arguments.push(flag.to_string());
+    }
+
+    for def in get_clang_defines() {
+        arguments.push(format!("-D{}", def));
+    }
 
     // verbose
     arguments.push("-v".to_string());
@@ -18,7 +26,7 @@ fn main() {
         .cpp_search_paths
         .unwrap();
     for path in system_paths {
-        arguments.push(format!("-isystem{}", path.to_str().unwrap()));
+        arguments.push(format!("-isystem{}", path.display()));
     }
 
     // we're currently at tools/dependency-graph
@@ -30,7 +38,7 @@ fn main() {
         .map(|p| repo_root.join(p))
         .collect();
     for include_dir in &include_dirs {
-        arguments.push(format!("-I{}", include_dir.to_str().unwrap()));
+        arguments.push(format!("-I{}", include_dir.display()));
     }
 
     let res = index

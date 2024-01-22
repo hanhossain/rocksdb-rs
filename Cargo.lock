@@ -101,6 +101,7 @@ dependencies = [
 name = "dependency-graph"
 version = "0.1.0"
 dependencies = [
+ "build-common",
  "clang",
  "clang-sys",
 ]
