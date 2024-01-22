@@ -9,11 +9,15 @@ edition = "2021"
 crate-type = ["staticlib", "rlib"]
 
 [workspace]
-members = ["tools/dependency-graph"]
+members = [
+    "tools/build-common",
+    "tools/dependency-graph"
+]
 
 [dependencies]
 cxx = { version = "1.0.113", features = ["c++17"] }
 xxhash-rust = { version = "0.8.8", features = ["xxh3"] }
 
 [build-dependencies]
+build-common = { path = "tools/build-common" }
 cxx-build = { version = "1.0.113", features = ["parallel"] }

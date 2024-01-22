@@ -3,6 +3,10 @@
 version = 3
 
 [[package]]
+name = "build-common"
+version = "0.1.0"
+
+[[package]]
 name = "cc"
 version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -169,6 +173,7 @@ dependencies = [
 name = "rocksdb-rs"
 version = "0.1.0"
 dependencies = [
+ "build-common",
  "cxx",
  "cxx-build",
  "xxhash-rust",
