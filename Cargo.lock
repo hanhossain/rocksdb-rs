@@ -67,6 +67,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "dependency-graph"
+version = "0.1.0"
+
+[[package]]
 name = "jobserver"
 version = "0.1.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
