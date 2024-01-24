@@ -104,6 +104,7 @@ dependencies = [
  "build-common",
  "clang",
  "clang-sys",
+ "rocksdb-rs",
 ]
 
 [[package]]

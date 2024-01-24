@@ -2,6 +2,7 @@
 name = "rocksdb-rs"
 version = "0.1.0"
 edition = "2021"
+links = "rocksdb"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -9,10 +10,7 @@ edition = "2021"
 crate-type = ["staticlib", "rlib"]
 
 [workspace]
-members = [
-    "tools/build-common",
-    "tools/dependency-graph"
-]
+members = ["tools/build-common", "tools/dependency-graph"]
 
 [dependencies]
 cxx = { version = "1.0.113", features = ["c++17"] }

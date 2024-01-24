@@ -9,3 +9,4 @@ edition = "2021"
 build-common = { path = "../build-common" }
 clang = { version = "2.0.0", features = ["runtime", "clang_10_0"] }
 clang-sys = { version = "1.7.0", features = ["runtime", "clang_10_0"] }
+rocksdb-rs = { path = "../.." }

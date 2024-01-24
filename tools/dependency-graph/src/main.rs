@@ -1,5 +1,6 @@
 use build_common::{get_clang_defines, get_clang_flags, get_files};
 use clang::{Clang, Index};
+use rocksdb_rs as _;
 
 fn main() {
     let clang_context = Clang::new().unwrap();
@@ -17,9 +18,6 @@ fn main() {
     for def in get_clang_defines() {
         arguments.push(format!("-D{}", def));
     }
-
-    // verbose
-    arguments.push("-v".to_string());
 
     let system_paths = clang_sys::support::Clang::find(None, &[])
         .unwrap()
@@ -41,11 +39,17 @@ fn main() {
         arguments.push(format!("-I{}", include_dir.display()));
     }
 
-    for file_path in get_files() {
-        println!("parsing {}", file_path);
+    // include the generated headers
+    let generated_include = env!("ROCKSDB_GENERATED_INCLUDE");
+    arguments.push(format!("-I{}", generated_include));
+
+    let files = get_files();
+    let count = files.len();
+
+    for (i, file_path) in files.iter().enumerate() {
+        println!("parsing {i} of {count} - {file_path}");
         let tu = index
             .parser(&file_path)
-            .keep_going(true)
             .arguments(&arguments)
             .skip_function_bodies(true)
             .parse()
