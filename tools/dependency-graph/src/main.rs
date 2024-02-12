@@ -9,15 +9,6 @@ struct IncludeMapping {
     path: Option<PathBuf>,
 }
 
-impl IncludeMapping {
-    fn new(include: String) -> Self {
-        Self {
-            include,
-            path: None,
-        }
-    }
-}
-
 fn main() -> anyhow::Result<()> {
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let repo_root = std::fs::canonicalize(format!("{manifest_dir}/../.."))?;
