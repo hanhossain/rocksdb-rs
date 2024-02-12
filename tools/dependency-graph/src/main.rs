@@ -46,8 +46,8 @@ fn main() {
     let files = get_files();
     let count = files.len();
 
-    for (i, file_path) in files.iter().enumerate() {
-        println!("parsing {i} of {count} - {file_path}");
+    for (i, file_path) in files.iter().take(5).enumerate() {
+        println!("parsing {} of {} - {}", i + 1, count, file_path);
         let tu = index
             .parser(&file_path)
             .arguments(&arguments)
@@ -58,5 +58,7 @@ fn main() {
         if tu.get_diagnostics().len() > 0 {
             break;
         }
+
+        // can't get the #include as it's part of the preprocessor.
     }
 }
