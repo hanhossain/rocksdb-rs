@@ -1,7 +1,10 @@
 use regex::RegexBuilder;
+use rocksdb_rs as _;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use walkdir::WalkDir;
+
+const GENERATED_INCLUDE_DIR: &str = env!("ROCKSDB_GENERATED_INCLUDE");
 
 #[derive(Debug)]
 struct IncludeMapping {
@@ -14,7 +17,7 @@ fn main() -> anyhow::Result<()> {
     let repo_root = std::fs::canonicalize(format!("{manifest_dir}/../.."))?;
     let cxx_root = repo_root.join("rocksdb-cxx");
 
-    let paths = WalkDir::new(&cxx_root)
+    let mut paths = WalkDir::new(&cxx_root)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| {
@@ -24,6 +27,13 @@ fn main() -> anyhow::Result<()> {
         })
         .map(|e| e.into_path())
         .collect::<HashSet<_>>();
+
+    for path in WalkDir::new(GENERATED_INCLUDE_DIR) {
+        let path = path?;
+        if path.path().extension().map_or(false, |e| e == "h") {
+            paths.insert(path.path().to_path_buf());
+        }
+    }
 
     let re = RegexBuilder::new("^#include \"(\\S+)\"")
         .multi_line(true)
@@ -71,6 +81,12 @@ fn find_path(
 
     // find relative to include folder
     let needle = cxx_root.join("include").join(include);
+    if paths.contains(&needle) {
+        return Some(needle);
+    }
+
+    // find relative to generated include folder
+    let needle = PathBuf::from(GENERATED_INCLUDE_DIR).join(include);
     if paths.contains(&needle) {
         return Some(needle);
     }

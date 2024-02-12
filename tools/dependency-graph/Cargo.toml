@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.79"
 regex = "1.10.3"
+rocksdb-rs = { path = "../.." }
 walkdir = "2.4.0"
