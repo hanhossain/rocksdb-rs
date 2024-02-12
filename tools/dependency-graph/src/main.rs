@@ -46,7 +46,7 @@ fn main() -> anyhow::Result<()> {
         let mut include_mappings = HashMap::new();
         for (_, [include]) in re.captures_iter(&content).map(|c| c.extract()) {
             if !include_mappings.contains_key(include) {
-                let path = find_path(&cxx_root, include, path, &paths);
+                let path = find_path(&cxx_root, include, path);
                 let include_mapping = IncludeMapping {
                     include: include.to_string(),
                     path,
@@ -57,37 +57,35 @@ fn main() -> anyhow::Result<()> {
         path_mappings.insert(path.clone(), include_mappings);
     }
 
+    let mut counter = 0;
     for (path, mappings) in path_mappings {
         if mappings.values().any(|m| m.path.is_none()) {
-            println!("{}: {:#?}", path.display(), mappings);
-            break;
+            counter += 1;
+            println!("{counter} - {:?}", path);
+            // println!("{}: {:#?}", path.display(), mappings);
+            // break;
         }
     }
 
     Ok(())
 }
 
-fn find_path(
-    cxx_root: &PathBuf,
-    include: &str,
-    current_path: &PathBuf,
-    paths: &HashSet<PathBuf>,
-) -> Option<PathBuf> {
+fn find_path(cxx_root: &PathBuf, include: &str, current_path: &PathBuf) -> Option<PathBuf> {
     // find relative to cxx_root
     let needle = cxx_root.join(include);
-    if paths.contains(&needle) {
+    if needle.exists() {
         return Some(needle);
     }
 
     // find relative to include folder
     let needle = cxx_root.join("include").join(include);
-    if paths.contains(&needle) {
+    if needle.exists() {
         return Some(needle);
     }
 
     // find relative to generated include folder
     let needle = PathBuf::from(GENERATED_INCLUDE_DIR).join(include);
-    if paths.contains(&needle) {
+    if needle.exists() {
         return Some(needle);
     }
 
@@ -96,7 +94,7 @@ fn find_path(
         .parent()
         .expect("file will always have a parent directory")
         .join(include);
-    if paths.contains(&needle) {
+    if needle.exists() {
         return Some(needle);
     }
 
