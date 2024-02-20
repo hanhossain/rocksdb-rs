@@ -61,11 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string BlobFileName(uint64_t number) {
-  assert(number > 0);
-  return static_cast<std::string>(rs::make_file_name(number, kRocksDBBlobFileExt.c_str()));
-}
-
 std::string BlobFileName(const std::string& blobdirname, uint64_t number) {
   assert(number > 0);
   return static_cast<std::string>(rs::make_file_name_full_path(blobdirname, number, kRocksDBBlobFileExt.c_str()));

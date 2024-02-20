@@ -1,3 +1,5 @@
+const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
+
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
     extern "Rust" {
@@ -11,6 +13,8 @@ mod ffi {
         fn log_file_name(number: u64) -> String;
         #[cxx_name = "LogFileName"]
         fn log_file_name_full_path(dbname: &str, number: u64) -> String;
+        #[cxx_name = "BlobFileName"]
+        fn blob_file_name(number: u64) -> String;
     }
 }
 
@@ -32,6 +36,11 @@ fn log_file_name(number: u64) -> String {
 fn log_file_name_full_path(dbname: &str, number: u64) -> String {
     assert!(number > 0);
     make_file_name_full_path(dbname, number, "log")
+}
+
+fn blob_file_name(number: u64) -> String {
+    assert!(number > 0);
+    make_file_name(number, ROCKSDB_BLOB_FILE_EXT)
 }
 
 #[cfg(test)]

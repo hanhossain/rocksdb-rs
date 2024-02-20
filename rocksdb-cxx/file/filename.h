@@ -39,8 +39,6 @@ constexpr char kFilePathSeparator = '\\';
 constexpr char kFilePathSeparator = '/';
 #endif
 
-extern std::string BlobFileName(uint64_t number);
-
 extern std::string BlobFileName(const std::string& bdirname, uint64_t number);
 
 extern std::string BlobFileName(const std::string& dbname,
