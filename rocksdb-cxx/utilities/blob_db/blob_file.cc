@@ -56,7 +56,7 @@ BlobFile::~BlobFile() {
 uint32_t BlobFile::GetColumnFamilyId() const { return column_family_id_; }
 
 std::string BlobFile::PathName() const {
-  return BlobFileName(path_to_dir_, file_number_);
+  return static_cast<std::string>(BlobFileName(path_to_dir_, file_number_));
 }
 
 std::string BlobFile::DumpState() const {

@@ -5864,8 +5864,8 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
 
         const uint64_t blob_file_number = meta->GetBlobFileNumber();
 
-        const std::string blob_file_name = BlobFileName(
-            cfd->ioptions()->cf_paths.front().path, blob_file_number);
+        const std::string blob_file_name = static_cast<std::string>(BlobFileName(
+            cfd->ioptions()->cf_paths.front().path, blob_file_number));
         s = VerifyFullFileChecksum(meta->GetChecksumValue(),
                                    meta->GetChecksumMethod(), blob_file_name,
                                    read_options);

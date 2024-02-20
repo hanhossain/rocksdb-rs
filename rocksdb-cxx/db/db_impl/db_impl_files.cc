@@ -590,7 +590,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
       fname = MakeTableFileName(candidate_file.file_path, number);
       dir_to_sync = candidate_file.file_path;
     } else if (type == kBlobFile) {
-      fname = BlobFileName(candidate_file.file_path, number);
+      fname = static_cast<std::string>(BlobFileName(candidate_file.file_path, number));
       dir_to_sync = candidate_file.file_path;
     } else {
       dir_to_sync = (type == kWalFile) ? wal_dir : dbname_;

@@ -1282,7 +1282,7 @@ static void CheckBlobMetaData(
     const std::string& checksum_method, const std::string& checksum_value,
     uint64_t garbage_blob_count = 0, uint64_t garbage_blob_bytes = 0) {
   ASSERT_EQ(bmd.blob_file_number, blob_file_number);
-  ASSERT_EQ(bmd.blob_file_name, BlobFileName("", blob_file_number));
+  ASSERT_EQ(bmd.blob_file_name, static_cast<std::string>(BlobFileName("", blob_file_number)));
   ASSERT_EQ(bmd.blob_file_size,
             total_blob_bytes + BlobLogHeader::kSize + BlobLogFooter::kSize);
 
@@ -2624,7 +2624,7 @@ TEST_F(DBTest, GetLiveBlobFiles) {
   ASSERT_OK(dbfull()->GetLiveFiles(files, &manifest_size));
 
   ASSERT_FALSE(files.empty());
-  ASSERT_EQ(files[0], BlobFileName("", blob_file_number));
+  ASSERT_EQ(files[0], static_cast<std::string>(BlobFileName("", blob_file_number)));
 
   ColumnFamilyMetaData cfmd;
 
