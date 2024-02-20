@@ -39,10 +39,6 @@ constexpr char kFilePathSeparator = '\\';
 constexpr char kFilePathSeparator = '/';
 #endif
 
-//  Return the name of the archived log file with the specified number
-//  in the db named by "dbname". The result will be prefixed with "dbname".
-extern std::string ArchivedLogFileName(const std::string& dbname, uint64_t num);
-
 extern std::string MakeTableFileName(const std::string& name, uint64_t number);
 
 extern std::string MakeTableFileName(uint64_t number);

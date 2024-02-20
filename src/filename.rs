@@ -22,6 +22,10 @@ mod ffi {
         fn blob_file_name_full_path(dbname: &str, blob_dir: &str, number: u64) -> String;
         #[cxx_name = "ArchivalDirectory"]
         fn archival_directory(dir: &str) -> String;
+        ///  Return the name of the archived log file with the specified number
+        ///  in the db named by `dbname`. The result will be prefixed with `dbname`.
+        #[cxx_name = "ArchivedLogFileName"]
+        fn archived_log_file_name(name: &str, number: u64) -> String;
     }
 }
 
@@ -66,6 +70,13 @@ fn blob_file_name_full_path(dbname: &str, blob_dir: &str, number: u64) -> String
 
 fn archival_directory(dir: &str) -> String {
     format!("{}/{}", dir, ARCHIVAL_DIR_NAME)
+}
+
+///  Return the name of the archived log file with the specified number
+///  in the db named by `dbname`. The result will be prefixed with `dbname`.
+fn archived_log_file_name(dbname: &str, number: u64) -> String {
+    assert!(number > 0);
+    make_file_name_full_path(&format!("{}/{}", dbname, ARCHIVAL_DIR_NAME), number, "log")
 }
 
 #[cfg(test)]
