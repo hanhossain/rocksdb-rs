@@ -3270,7 +3270,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     assert(file_metas != nullptr);
     for (const auto& info : file_infos) {
       uint64_t file_num = info.file_number;
-      std::string fname = MakeTableFileName(dbname_, file_num);
+      std::string fname = static_cast<std::string>(MakeTableFileName(dbname_, file_num));
       std::unique_ptr<FSWritableFile> file;
       Status s = fs_->NewWritableFile(fname, FileOptions(), &file, nullptr);
       ASSERT_OK(s);

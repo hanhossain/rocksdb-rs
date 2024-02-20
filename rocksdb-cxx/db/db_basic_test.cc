@@ -3090,7 +3090,7 @@ TEST_F(DBBasicTest, LastSstFileNotInManifest) {
 
   // Manually add a sst file.
   constexpr uint64_t kSstFileNumber = 100;
-  const std::string kSstFile = MakeTableFileName(dbname_, kSstFileNumber);
+  const std::string kSstFile = static_cast<std::string>(MakeTableFileName(dbname_, kSstFileNumber));
   ASSERT_OK(WriteStringToFile(env_, /* data = */ "bad sst file content",
                               /* fname = */ kSstFile,
                               /* should_sync = */ true));

@@ -1,4 +1,5 @@
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
+const ROCKSDB_TFILE_EXT: &str = "sst";
 const ARCHIVAL_DIR_NAME: &str = "archive";
 
 #[cxx::bridge(namespace = "rocksdb")]
@@ -26,6 +27,10 @@ mod ffi {
         ///  in the db named by `dbname`. The result will be prefixed with `dbname`.
         #[cxx_name = "ArchivedLogFileName"]
         fn archived_log_file_name(name: &str, number: u64) -> String;
+        #[cxx_name = "MakeTableFileName"]
+        fn make_table_file_name(number: u64) -> String;
+        #[cxx_name = "MakeTableFileName"]
+        fn make_table_file_name_full_path(path: &str, number: u64) -> String;
     }
 }
 
@@ -77,6 +82,14 @@ fn archival_directory(dir: &str) -> String {
 fn archived_log_file_name(dbname: &str, number: u64) -> String {
     assert!(number > 0);
     make_file_name_full_path(&format!("{}/{}", dbname, ARCHIVAL_DIR_NAME), number, "log")
+}
+
+fn make_table_file_name(number: u64) -> String {
+    make_file_name(number, ROCKSDB_TFILE_EXT)
+}
+
+fn make_table_file_name_full_path(path: &str, number: u64) -> String {
+    make_file_name_full_path(path, number, ROCKSDB_TFILE_EXT)
 }
 
 #[cfg(test)]

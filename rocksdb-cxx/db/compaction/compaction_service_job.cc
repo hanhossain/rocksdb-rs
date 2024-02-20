@@ -208,7 +208,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
 
 std::string CompactionServiceCompactionJob::GetTableFileName(
     uint64_t file_number) {
-  return MakeTableFileName(output_path_, file_number);
+  return static_cast<std::string>(MakeTableFileName(output_path_, file_number));
 }
 
 void CompactionServiceCompactionJob::RecordCompactionIOStats() {
@@ -327,7 +327,7 @@ Status CompactionServiceCompactionJob::Run() {
   for (const auto& output_file : sub_compact->GetOutputs()) {
     auto& meta = output_file.meta;
     compaction_result_->output_files.emplace_back(
-        MakeTableFileName(meta.fd.GetNumber()), meta.fd.smallest_seqno,
+        static_cast<std::string>(MakeTableFileName(meta.fd.GetNumber())), meta.fd.smallest_seqno,
         meta.fd.largest_seqno, meta.smallest.Encode().ToString(),
         meta.largest.Encode().ToString(), meta.oldest_ancester_time,
         meta.file_creation_time, meta.epoch_number,

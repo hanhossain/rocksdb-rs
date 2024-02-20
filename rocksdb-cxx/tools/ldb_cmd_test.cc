@@ -1037,7 +1037,7 @@ TEST_F(LdbCmdTest, UnsafeRemoveSstFile) {
 
   // This time physically delete the file before unsafe_remove
   {
-    std::string f = dbname + "/" + MakeTableFileName(to_remove);
+    std::string f = dbname + "/" + static_cast<std::string>(MakeTableFileName(to_remove));
     ASSERT_OK(Env::Default()->DeleteFile(f));
   }
 

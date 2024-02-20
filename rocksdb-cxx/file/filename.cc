@@ -61,14 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string MakeTableFileName(const std::string& path, uint64_t number) {
-  return static_cast<std::string>(rs::make_file_name_full_path(path, number, kRocksDbTFileExt.c_str()));
-}
-
-std::string MakeTableFileName(uint64_t number) {
-  return static_cast<std::string>(rs::make_file_name(number, kRocksDbTFileExt.c_str()));
-}
-
 std::string Rocks2LevelTableFileName(const std::string& fullname) {
   assert(fullname.size() > kRocksDbTFileExt.size() + 1);
   if (fullname.size() <= kRocksDbTFileExt.size() + 1) {
@@ -98,7 +90,7 @@ std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
   } else {
     path = db_paths[path_id].path;
   }
-  return MakeTableFileName(path, number);
+  return static_cast<std::string>(MakeTableFileName(path, number));
 }
 
 void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,

@@ -240,7 +240,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
         results.emplace_back();
         LiveFileStorageInfo& info = results.back();
 
-        info.relative_filename = MakeTableFileName(meta->fd.GetNumber());
+        info.relative_filename = static_cast<std::string>(MakeTableFileName(meta->fd.GetNumber()));
         info.directory = GetDir(meta->fd.GetPathId());
         info.file_number = meta->fd.GetNumber();
         info.file_type = kTableFile;

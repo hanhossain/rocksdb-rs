@@ -1785,7 +1785,7 @@ void Version::GetColumnFamilyMetaData(ColumnFamilyMetaData* cf_meta) {
       }
       const uint64_t file_number = file->fd.GetNumber();
       files.emplace_back(
-          MakeTableFileName("", file_number), file_number, file_path,
+          static_cast<std::string>(MakeTableFileName("", file_number)), file_number, file_path,
           file->fd.GetFileSize(), file->fd.smallest_seqno,
           file->fd.largest_seqno, file->smallest.user_key().ToString(),
           file->largest.user_key().ToString(),
@@ -6978,7 +6978,7 @@ void VersionSet::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
         }
         filemetadata.directory = filemetadata.db_path;
         const uint64_t file_number = file->fd.GetNumber();
-        filemetadata.name = MakeTableFileName("", file_number);
+        filemetadata.name = static_cast<std::string>(MakeTableFileName("", file_number));
         filemetadata.relative_filename = filemetadata.name.substr(1);
         filemetadata.file_number = file_number;
         filemetadata.level = level;
