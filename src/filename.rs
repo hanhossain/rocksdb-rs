@@ -35,6 +35,9 @@ mod ffi {
         /// Return the name of sstable with LevelDB suffix created from RocksDB sstable suffixed name
         #[cxx_name = "Rocks2LevelTableFileName"]
         fn rocks_to_level_table_file_name(fullname: &str) -> String;
+        /// The reverse function of MakeTableFileName
+        #[cxx_name = "TableFileNameToNumber"]
+        fn table_file_name_to_number(name: &str) -> u64;
     }
 }
 
@@ -107,6 +110,20 @@ fn rocks_to_level_table_file_name(fullname: &str) -> String {
     res
 }
 
+/// The reverse function of MakeTableFileName
+// TODO(yhchiang): could merge this function with ParseFileName()
+fn table_file_name_to_number(name: &str) -> u64 {
+    let mut number = 0;
+    let mut base = 1;
+    let mut pos = name.rfind('.').unwrap();
+    while pos > 0 && name.chars().nth(pos - 1).unwrap().is_ascii_digit() {
+        number += (name.chars().nth(pos - 1).unwrap() as u64 - '0' as u64) * base;
+        base *= 10;
+        pos -= 1;
+    }
+    number
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -122,5 +139,12 @@ mod tests {
             make_file_name_full_path("test", 1, "simple"),
             "test/000001.simple"
         );
+    }
+
+    #[test]
+    fn make_table_file_name_simple() {
+        let table_file_name = make_table_file_name(987654);
+        assert_eq!(table_file_name, "987654.sst");
+        assert_eq!(table_file_name_to_number(&table_file_name), 987654);
     }
 }

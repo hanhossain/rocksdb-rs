@@ -61,17 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-uint64_t TableFileNameToNumber(const std::string& name) {
-  uint64_t number = 0;
-  uint64_t base = 1;
-  int pos = static_cast<int>(name.find_last_of('.'));
-  while (--pos >= 0 && name[pos] >= '0' && name[pos] <= '9') {
-    number += (name[pos] - '0') * base;
-    base *= 10;
-  }
-  return number;
-}
-
 std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
                           uint32_t path_id) {
   assert(number > 0);

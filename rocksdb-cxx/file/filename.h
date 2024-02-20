@@ -39,10 +39,6 @@ constexpr char kFilePathSeparator = '\\';
 constexpr char kFilePathSeparator = '/';
 #endif
 
-// the reverse function of MakeTableFileName
-// TODO(yhchiang): could merge this function with ParseFileName()
-extern uint64_t TableFileNameToNumber(const std::string& name);
-
 // Return the name of the sstable with the specified number
 // in the db named by "dbname".  The result will be prefixed with
 // "dbname".
