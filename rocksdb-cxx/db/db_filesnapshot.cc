@@ -289,7 +289,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
   mutex_.Unlock();
 
-  std::string manifest_fname = DescriptorFileName(manifest_number);
+  std::string manifest_fname = static_cast<std::string>(DescriptorFileName(manifest_number));
   {  // MANIFEST
     results.emplace_back();
     LiveFileStorageInfo& info = results.back();

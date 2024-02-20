@@ -3233,7 +3233,7 @@ TEST_F(BackupEngineTest, ChangeManifestDuringBackupCreation) {
   // trigger another roll to verify non-full scan purges stale manifests.
   DBImpl* db_impl = static_cast_with_check<DBImpl>(db_.get());
   std::string prev_manifest_path =
-      DescriptorFileName(dbname_, db_impl->TEST_Current_Manifest_FileNo());
+      static_cast<std::string>(DescriptorFileName(dbname_, db_impl->TEST_Current_Manifest_FileNo()));
   FillDB(db_.get(), 0, 100, FillDBFlushAction::kAutoFlushOnly);
   ASSERT_OK(db_chroot_env_->FileExists(prev_manifest_path));
   ASSERT_OK(db_->Flush(FlushOptions()));

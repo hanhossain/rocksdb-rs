@@ -313,7 +313,7 @@ Status DBImpl::NewDB(std::vector<std::string>* new_filenames) {
   new_db.SetLastSequence(0);
 
   ROCKS_LOG_INFO(immutable_db_options_.info_log, "Creating manifest 1 \n");
-  const std::string manifest = DescriptorFileName(dbname_, 1);
+  const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
   {
     if (fs_->FileExists(manifest, IOOptions(), nullptr).ok()) {
       fs_->DeleteFile(manifest, IOOptions(), nullptr);

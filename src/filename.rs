@@ -38,6 +38,12 @@ mod ffi {
         /// The reverse function of MakeTableFileName
         #[cxx_name = "TableFileNameToNumber"]
         fn table_file_name_to_number(name: &str) -> u64;
+        #[cxx_name = "DescriptorFileName"]
+        fn descriptor_file_name(number: u64) -> String;
+        /// Return the name of the descriptor file for the db named by `dbname` and the specified
+        /// incarnation number. The result will be prefixed with `dbname`.
+        #[cxx_name = "DescriptorFileName"]
+        fn descriptor_file_name_full_path(dbname: &str, number: u64) -> String;
     }
 }
 
@@ -122,6 +128,17 @@ fn table_file_name_to_number(name: &str) -> u64 {
         pos -= 1;
     }
     number
+}
+
+fn descriptor_file_name(number: u64) -> String {
+    assert!(number > 0);
+    format!("MANIFEST-{:06}", number)
+}
+
+/// Return the name of the descriptor file for the db named by `dbname` and the specified
+/// incarnation number. The result will be prefixed with `dbname`.
+fn descriptor_file_name_full_path(dbname: &str, number: u64) -> String {
+    format!("{}/{}", dbname, descriptor_file_name(number))
 }
 
 #[cfg(test)]

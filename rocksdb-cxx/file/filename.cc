@@ -86,18 +86,6 @@ void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,
   }
 }
 
-std::string DescriptorFileName(uint64_t number) {
-  assert(number > 0);
-  char buf[100];
-  snprintf(buf, sizeof(buf), "MANIFEST-%06llu",
-           static_cast<unsigned long long>(number));
-  return buf;
-}
-
-std::string DescriptorFileName(const std::string& dbname, uint64_t number) {
-  return dbname + "/" + DescriptorFileName(number);
-}
-
 std::string CurrentFileName(const std::string& dbname) {
   return dbname + "/" + kCurrentFileName;
 }
@@ -314,7 +302,7 @@ IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
                         uint64_t descriptor_number,
                         FSDirectory* dir_contains_current_file) {
   // Remove leading "dbname/" and add newline to manifest file name
-  std::string manifest = DescriptorFileName(dbname, descriptor_number);
+  std::string manifest = static_cast<std::string>(DescriptorFileName(dbname, descriptor_number));
   Slice contents = manifest;
   assert(contents.starts_with(dbname + "/"));
   contents.remove_prefix(dbname.size() + 1);

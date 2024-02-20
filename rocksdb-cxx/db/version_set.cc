@@ -5367,7 +5367,7 @@ Status VersionSet::ProcessManifestWrites(
       ROCKS_LOG_INFO(db_options_->info_log, "Creating manifest %" PRIu64 "\n",
                      pending_manifest_file_number_);
       std::string descriptor_fname =
-          DescriptorFileName(dbname_, pending_manifest_file_number_);
+          static_cast<std::string>(DescriptorFileName(dbname_, pending_manifest_file_number_));
       std::unique_ptr<FSWritableFile> descriptor_file;
       io_s = NewWritableFile(fs_.get(), descriptor_fname, &descriptor_file,
                              opt_file_opts);

@@ -150,7 +150,7 @@ TEST_F(FileNameTest, Construction) {
   ASSERT_EQ(200U, number);
   ASSERT_EQ(kTableFile, type);
 
-  fname = DescriptorFileName("bar", 100);
+  fname = static_cast<std::string>(DescriptorFileName("bar", 100));
   ASSERT_EQ("bar/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(100U, number);
