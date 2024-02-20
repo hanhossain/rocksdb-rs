@@ -1807,7 +1807,7 @@ void Version::GetColumnFamilyMetaData(ColumnFamilyMetaData* cf_meta) {
     assert(meta);
 
     cf_meta->blob_files.emplace_back(
-        meta->GetBlobFileNumber(), BlobFileName("", meta->GetBlobFileNumber()),
+        meta->GetBlobFileNumber(), static_cast<std::string>(BlobFileName("", meta->GetBlobFileNumber())),
         ioptions->cf_paths.front().path, meta->GetBlobFileSize(),
         meta->GetTotalBlobCount(), meta->GetTotalBlobBytes(),
         meta->GetGarbageBlobCount(), meta->GetGarbageBlobBytes(),

@@ -763,7 +763,7 @@ const Status DBImpl::CreateArchivalDirectory() {
   if (immutable_db_options_.WAL_ttl_seconds > 0 ||
       immutable_db_options_.WAL_size_limit_MB > 0) {
     std::string archivalPath =
-        ArchivalDirectory(immutable_db_options_.GetWalDir());
+        static_cast<std::string>(ArchivalDirectory(immutable_db_options_.GetWalDir()));
     return env_->CreateDirIfMissing(archivalPath);
   }
   return Status_OK();
@@ -4791,7 +4791,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     }
 
     std::vector<std::string> walDirFiles;
-    std::string archivedir = ArchivalDirectory(dbname);
+    std::string archivedir = static_cast<std::string>(ArchivalDirectory(dbname));
     bool wal_dir_exists = false;
     if (!soptions.IsWalDirSameAsDBPath(dbname)) {
       wal_dir_exists =
@@ -4799,7 +4799,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
               ->GetChildren(soptions.wal_dir, io_opts, &walDirFiles,
                             /*IODebugContext*=*/nullptr)
               .ok();
-      archivedir = ArchivalDirectory(soptions.wal_dir);
+      archivedir = static_cast<std::string>(ArchivalDirectory(soptions.wal_dir));
     }
 
     // Archive dir may be inside wal dir or dbname and should be
@@ -5864,8 +5864,8 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
 
         const uint64_t blob_file_number = meta->GetBlobFileNumber();
 
-        const std::string blob_file_name = BlobFileName(
-            cfd->ioptions()->cf_paths.front().path, blob_file_number);
+        const std::string blob_file_name = static_cast<std::string>(BlobFileName(
+            cfd->ioptions()->cf_paths.front().path, blob_file_number));
         s = VerifyFullFileChecksum(meta->GetChecksumValue(),
                                    meta->GetChecksumMethod(), blob_file_name,
                                    read_options);

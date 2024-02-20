@@ -300,8 +300,8 @@ TEST_F(ObsoleteFilesTest, BlobFiles) {
 
   std::sort(deleted_files.begin(), deleted_files.end());
   const std::vector<std::string> expected_deleted_files{
-      BlobFileName(path, old_blob_file_number),
-      BlobFileName(path, first_blob_file_number)};
+      static_cast<std::string>(BlobFileName(path, old_blob_file_number)),
+      static_cast<std::string>(BlobFileName(path, first_blob_file_number))};
 
   ASSERT_EQ(deleted_files, expected_deleted_files);
 }

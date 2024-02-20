@@ -181,7 +181,7 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckOneFile) {
 
   ASSERT_EQ(
       blob_file_path,
-      BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
+      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_EQ(blob_file_additions.size(), 1);
 
@@ -265,8 +265,8 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckMultipleFiles) {
     const uint64_t blob_file_number = i + 2;
 
     ASSERT_EQ(blob_file_paths[i],
-              BlobFileName(immutable_options.cf_paths.front().path,
-                           blob_file_number));
+              static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path,
+                           blob_file_number)));
 
     const auto& blob_file_addition = blob_file_additions[i];
 
@@ -396,7 +396,7 @@ TEST_F(BlobFileBuilderTest, Compression) {
 
   ASSERT_EQ(
       blob_file_path,
-      BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
+      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_EQ(blob_file_additions.size(), 1);
 
@@ -483,7 +483,7 @@ TEST_F(BlobFileBuilderTest, CompressionError) {
   ASSERT_EQ(blob_file_paths.size(), 1);
   ASSERT_EQ(
       blob_file_paths[0],
-      BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
+      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_TRUE(blob_file_additions.empty());
 }
@@ -560,7 +560,7 @@ TEST_F(BlobFileBuilderTest, Checksum) {
 
   ASSERT_EQ(
       blob_file_path,
-      BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
+      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_EQ(blob_file_additions.size(), 1);
 
@@ -664,8 +664,8 @@ TEST_P(BlobFileBuilderIOErrorTest, IOError) {
 
     ASSERT_EQ(blob_file_paths.size(), 1);
     ASSERT_EQ(blob_file_paths[0],
-              BlobFileName(immutable_options.cf_paths.front().path,
-                           blob_file_number));
+              static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path,
+                           blob_file_number)));
   }
 
   ASSERT_TRUE(blob_file_additions.empty());

@@ -34,7 +34,7 @@ void WriteBlobFile(uint32_t column_family_id,
   assert(!immutable_options.cf_paths.empty());
 
   const std::string blob_file_path =
-      BlobFileName(immutable_options.cf_paths.front().path, blob_file_number);
+      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
 
   std::unique_ptr<FSWritableFile> file;
   ASSERT_OK(NewWritableFile(immutable_options.fs.get(), blob_file_path, &file,

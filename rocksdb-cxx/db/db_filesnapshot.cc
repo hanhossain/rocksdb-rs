@@ -263,7 +263,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
       results.emplace_back();
       LiveFileStorageInfo& info = results.back();
 
-      info.relative_filename = BlobFileName(meta->GetBlobFileNumber());
+      info.relative_filename = static_cast<std::string>(BlobFileName(meta->GetBlobFileNumber()));
       info.directory = GetDir(/* path_id */ 0);
       info.file_number = meta->GetBlobFileNumber();
       info.file_type = kBlobFile;

@@ -314,6 +314,13 @@ struct BlobFileAdditionInfo : public BlobFileInfo {
       : BlobFileInfo(_blob_file_path, _blob_file_number),
         total_blob_count(_total_blob_count),
         total_blob_bytes(_total_blob_bytes) {}
+  BlobFileAdditionInfo(const rust::String& _blob_file_path,
+                       const uint64_t _blob_file_number,
+                       const uint64_t _total_blob_count,
+                       const uint64_t _total_blob_bytes)
+      : BlobFileInfo(static_cast<std::string>(_blob_file_path), _blob_file_number),
+        total_blob_count(_total_blob_count),
+        total_blob_bytes(_total_blob_bytes) {}
   uint64_t total_blob_count;
   uint64_t total_blob_bytes;
 };
@@ -324,6 +331,13 @@ struct BlobFileGarbageInfo : public BlobFileInfo {
                       const uint64_t _garbage_blob_count,
                       const uint64_t _garbage_blob_bytes)
       : BlobFileInfo(_blob_file_path, _blob_file_number),
+        garbage_blob_count(_garbage_blob_count),
+        garbage_blob_bytes(_garbage_blob_bytes) {}
+  BlobFileGarbageInfo(const rust::String& _blob_file_path,
+                      const uint64_t _blob_file_number,
+                      const uint64_t _garbage_blob_count,
+                      const uint64_t _garbage_blob_bytes)
+      : BlobFileInfo(static_cast<std::string>(_blob_file_path), _blob_file_number),
         garbage_blob_count(_garbage_blob_count),
         garbage_blob_bytes(_garbage_blob_bytes) {}
   uint64_t garbage_blob_count;

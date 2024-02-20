@@ -1539,8 +1539,8 @@ Status DBImpl::CompactFilesImpl(
 
     for (const auto& blob_file : c->edit()->GetBlobFileAdditions()) {
       output_file_names->push_back(
-          BlobFileName(c->immutable_options()->cf_paths.front().path,
-                       blob_file.GetBlobFileNumber()));
+          static_cast<std::string>(BlobFileName(c->immutable_options()->cf_paths.front().path,
+                       blob_file.GetBlobFileNumber())));
     }
   }
 
