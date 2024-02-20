@@ -61,9 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string ArchivalDirectory(const std::string& dir) {
-  return dir + "/" + kArchivalDirName;
-}
 std::string ArchivedLogFileName(const std::string& name, uint64_t number) {
   assert(number > 0);
   return static_cast<std::string>(rs::make_file_name_full_path(name + "/" + kArchivalDirName, number, "log"));

@@ -1,4 +1,5 @@
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
+const ARCHIVAL_DIR_NAME: &str = "archive";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
@@ -19,6 +20,8 @@ mod ffi {
         fn blob_file_name_dir_name(blob_dir_name: &str, number: u64) -> String;
         #[cxx_name = "BlobFileName"]
         fn blob_file_name_full_path(dbname: &str, blob_dir: &str, number: u64) -> String;
+        #[cxx_name = "ArchivalDirectory"]
+        fn archival_directory(dir: &str) -> String;
     }
 }
 
@@ -59,6 +62,10 @@ fn blob_file_name_full_path(dbname: &str, blob_dir: &str, number: u64) -> String
         number,
         ROCKSDB_BLOB_FILE_EXT,
     )
+}
+
+fn archival_directory(dir: &str) -> String {
+    format!("{}/{}", dir, ARCHIVAL_DIR_NAME)
 }
 
 #[cfg(test)]

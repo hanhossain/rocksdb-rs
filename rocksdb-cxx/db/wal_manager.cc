@@ -64,7 +64,7 @@ Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
 
   files.clear();
   // list wal files in archive dir.
-  std::string archivedir = ArchivalDirectory(wal_dir_);
+  std::string archivedir = static_cast<std::string>(ArchivalDirectory(wal_dir_));
   Status exists = env_->FileExists(archivedir);
   if (exists.ok()) {
     s = GetSortedWalsOfType(archivedir, files, kArchivedLogFile);
@@ -163,7 +163,7 @@ void WalManager::PurgeObsoleteWALFiles() {
 
   purge_wal_files_last_run_ = now_seconds;
 
-  std::string archival_dir = ArchivalDirectory(wal_dir_);
+  std::string archival_dir = static_cast<std::string>(ArchivalDirectory(wal_dir_));
   std::vector<std::string> files;
   s = env_->GetChildren(archival_dir, &files);
   if (!s.ok()) {

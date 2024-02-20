@@ -42,7 +42,7 @@ class WalManagerTest : public testing::Test {
 
   void Init() {
     ASSERT_OK(env_->CreateDirIfMissing(dbname_));
-    ASSERT_OK(env_->CreateDirIfMissing(ArchivalDirectory(dbname_)));
+    ASSERT_OK(env_->CreateDirIfMissing(static_cast<std::string>(ArchivalDirectory(dbname_))));
     db_options_.db_paths.emplace_back(dbname_,
                                       std::numeric_limits<uint64_t>::max());
     db_options_.wal_dir = dbname_;
@@ -232,7 +232,7 @@ TEST_F(WalManagerTest, WALArchivalSizeLimit) {
   // Set ttl and time_to_check_ to small values. Re-open db.
   // Assert that there are no archived logs left.
 
-  std::string archive_dir = ArchivalDirectory(dbname_);
+  std::string archive_dir = static_cast<std::string>(ArchivalDirectory(dbname_));
   CreateArchiveLogs(20, 5000);
 
   std::vector<std::uint64_t> log_files =
@@ -265,7 +265,7 @@ TEST_F(WalManagerTest, WALArchivalTtl) {
   // Reopen db with small ttl.
   // Assert that all archived logs was removed.
 
-  std::string archive_dir = ArchivalDirectory(dbname_);
+  std::string archive_dir = static_cast<std::string>(ArchivalDirectory(dbname_));
   CreateArchiveLogs(20, 5000);
 
   std::vector<uint64_t> log_files =

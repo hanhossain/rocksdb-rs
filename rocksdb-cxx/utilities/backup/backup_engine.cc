@@ -1879,7 +1879,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     // delete files in db_dir, but keep all the log files
     DeleteChildren(db_dir, 1 << kWalFile);
     // move all the files from archive dir to wal_dir
-    std::string archive_dir = ArchivalDirectory(wal_dir);
+    std::string archive_dir = static_cast<std::string>(ArchivalDirectory(wal_dir));
     std::vector<std::string> archive_files;
     db_fs_->GetChildren(archive_dir, io_options_, &archive_files, nullptr);
     for (const auto& f : archive_files) {
@@ -1901,7 +1901,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     }
   } else {
     DeleteChildren(wal_dir);
-    DeleteChildren(ArchivalDirectory(wal_dir));
+    DeleteChildren(static_cast<std::string>(ArchivalDirectory(wal_dir)));
     DeleteChildren(db_dir);
   }
 
