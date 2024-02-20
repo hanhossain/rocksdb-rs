@@ -168,7 +168,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
     auto src_file = compaction_result.output_path + "/" + file.file_name;
     auto tgt_file = TableFileName(compaction->immutable_options()->cf_paths,
                                   file_num, compaction->output_path_id());
-    s = fs_->RenameFile(src_file, tgt_file, IOOptions(), nullptr);
+    s = fs_->RenameFile(src_file, static_cast<std::string>(tgt_file), IOOptions(), nullptr);
     if (!s.ok()) {
       sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;
@@ -176,7 +176,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
 
     FileMetaData meta;
     uint64_t file_size;
-    s = fs_->GetFileSize(tgt_file, IOOptions(), &file_size, nullptr);
+    s = fs_->GetFileSize(static_cast<std::string>(tgt_file), IOOptions(), &file_size, nullptr);
     if (!s.ok()) {
       sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;

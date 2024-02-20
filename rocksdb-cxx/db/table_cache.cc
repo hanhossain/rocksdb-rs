@@ -96,8 +96,8 @@ Status TableCache::GetTableReader(
     const std::shared_ptr<const SliceTransform>& prefix_extractor,
     bool skip_filters, int level, bool prefetch_index_and_filter_in_cache,
     size_t max_file_size_for_l0_meta_pin, Temperature file_temperature) {
-  std::string fname = TableFileName(
-      ioptions_.cf_paths, file_meta.fd.GetNumber(), file_meta.fd.GetPathId());
+  std::string fname = static_cast<std::string>(TableFileName(
+      ioptions_.cf_paths, file_meta.fd.GetNumber(), file_meta.fd.GetPathId()));
   std::unique_ptr<FSRandomAccessFile> file;
   FileOptions fopts = file_options;
   fopts.temperature = file_temperature;

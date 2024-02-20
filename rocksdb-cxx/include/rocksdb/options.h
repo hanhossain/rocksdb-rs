@@ -385,6 +385,8 @@ struct DbPath {
 
   DbPath() : target_size(0) {}
   DbPath(const std::string& p, uint64_t t) : path(p), target_size(t) {}
+
+  const std::string& Path() const { return path; }
 };
 
 extern const char* kHostnameForDbHostId;

@@ -113,7 +113,7 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
           cfd_->ioptions()->cf_paths, f.fd.GetNumber(), f.fd.GetPathId());
 
       if (hardlink_files) {
-        status = fs_->LinkFile(path_outside_db, path_inside_db, IOOptions(),
+        status = fs_->LinkFile(path_outside_db, static_cast<std::string>(path_inside_db), IOOptions(),
                                nullptr);
         if (status.IsNotSupported()) {
           // Original file is on a different FS, use copy instead of hard
@@ -127,14 +127,14 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
       }
       if (!hardlink_files) {
         status =
-            CopyFile(fs_.get(), path_outside_db, path_inside_db, 0,
+            CopyFile(fs_.get(), path_outside_db, static_cast<std::string>(path_inside_db), 0,
                      db_options_.use_fsync, io_tracer_, Temperature::kUnknown);
       }
       if (!status.ok()) {
         break;
       }
       f.copy_file = !hardlink_files;
-      f.internal_file_path = path_inside_db;
+      f.internal_file_path = static_cast<std::string>(path_inside_db);
     }
     if (!status.ok()) {
       break;

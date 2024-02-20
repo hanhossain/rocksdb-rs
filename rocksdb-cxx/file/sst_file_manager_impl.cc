@@ -176,7 +176,7 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
         TableFileName(cfd->ioptions()->cf_paths, inputs[0][0]->fd.GetNumber(),
                       inputs[0][0]->fd.GetPathId());
     uint64_t free_space = 0;
-    Status s = fs_->GetFreeSpace(fn, IOOptions(), &free_space, nullptr);
+    Status s = fs_->GetFreeSpace(static_cast<std::string>(fn), IOOptions(), &free_space, nullptr);
     // needed_headroom is based on current size reserved by compactions,
     // minus any files created by running compactions as they would count
     // against the reserved size. If user didn't specify any compaction

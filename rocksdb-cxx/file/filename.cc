@@ -61,18 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
-                          uint32_t path_id) {
-  assert(number > 0);
-  std::string path;
-  if (path_id >= db_paths.size()) {
-    path = db_paths.back().path;
-  } else {
-    path = db_paths[path_id].path;
-  }
-  return static_cast<std::string>(MakeTableFileName(path, number));
-}
-
 void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,
                       size_t out_buf_size) {
   if (path_id == 0) {

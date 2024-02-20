@@ -501,8 +501,8 @@ class Repairer {
       t.meta.fd = table_fds_[i];
       Status status = ScanTable(&t);
       if (!status.ok()) {
-        std::string fname = TableFileName(
-            db_options_.db_paths, t.meta.fd.GetNumber(), t.meta.fd.GetPathId());
+        std::string fname = static_cast<std::string>(TableFileName(
+            db_options_.db_paths, t.meta.fd.GetNumber(), t.meta.fd.GetPathId()));
         char file_num_buf[kFormatFileNumberBufSize];
         FormatFileNumber(t.meta.fd.GetNumber(), t.meta.fd.GetPathId(),
                          file_num_buf, sizeof(file_num_buf));
@@ -516,8 +516,8 @@ class Repairer {
   }
 
   Status ScanTable(TableInfo* t) {
-    std::string fname = TableFileName(
-        db_options_.db_paths, t->meta.fd.GetNumber(), t->meta.fd.GetPathId());
+    std::string fname = static_cast<std::string>(TableFileName(
+        db_options_.db_paths, t->meta.fd.GetNumber(), t->meta.fd.GetPathId()));
     int counter = 0;
     uint64_t file_size;
     Status status = env_->GetFileSize(fname, &file_size);

@@ -1532,9 +1532,9 @@ Status DBImpl::CompactFilesImpl(
 
   if (output_file_names != nullptr) {
     for (const auto& newf : c->edit()->GetNewFiles()) {
-      output_file_names->push_back(TableFileName(
+      output_file_names->push_back(static_cast<std::string>(TableFileName(
           c->immutable_options()->cf_paths, newf.second.fd.GetNumber(),
-          newf.second.fd.GetPathId()));
+          newf.second.fd.GetPathId())));
     }
 
     for (const auto& blob_file : c->edit()->GetBlobFileAdditions()) {
@@ -3843,8 +3843,8 @@ void DBImpl::BuildCompactionJobInfo(
     for (const auto fmd : *c->inputs(i)) {
       const FileDescriptor& desc = fmd->fd;
       const uint64_t file_number = desc.GetNumber();
-      auto fn = TableFileName(c->immutable_options()->cf_paths, file_number,
-                              desc.GetPathId());
+      auto fn = static_cast<std::string>(TableFileName(c->immutable_options()->cf_paths, file_number,
+                              desc.GetPathId()));
       compaction_job_info->input_files.push_back(fn);
       compaction_job_info->input_file_infos.push_back(CompactionFileInfo{
           static_cast<int>(i), file_number, fmd->oldest_blob_file_number});
@@ -3861,8 +3861,8 @@ void DBImpl::BuildCompactionJobInfo(
     const FileMetaData& meta = newf.second;
     const FileDescriptor& desc = meta.fd;
     const uint64_t file_number = desc.GetNumber();
-    compaction_job_info->output_files.push_back(TableFileName(
-        c->immutable_options()->cf_paths, file_number, desc.GetPathId()));
+    compaction_job_info->output_files.push_back(static_cast<std::string>(TableFileName(
+        c->immutable_options()->cf_paths, file_number, desc.GetPathId())));
     compaction_job_info->output_file_infos.push_back(CompactionFileInfo{
         newf.first, file_number, meta.oldest_blob_file_number});
   }

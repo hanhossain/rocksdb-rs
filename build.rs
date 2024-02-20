@@ -341,6 +341,7 @@ fn main() {
         "src/filename.rs",
         "src/hash.rs",
         "src/lib.rs",
+        "src/options.rs",
         "src/port_defs.rs",
         "src/slice.rs",
         "src/status.rs",

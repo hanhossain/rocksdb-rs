@@ -1,3 +1,5 @@
+use cxx::CxxVector;
+
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
 const ROCKSDB_TFILE_EXT: &str = "sst";
 const ARCHIVAL_DIR_NAME: &str = "archive";
@@ -44,6 +46,16 @@ mod ffi {
         /// incarnation number. The result will be prefixed with `dbname`.
         #[cxx_name = "DescriptorFileName"]
         fn descriptor_file_name_full_path(dbname: &str, number: u64) -> String;
+        /// Return the name of the sstable with the specified number in the db named by `dbname`.
+        /// The result will be prefixed with `dbname`.
+        #[cxx_name = "TableFileName"]
+        fn table_file_name(db_paths: &CxxVector<DbPath>, number: u64, path_id: u32) -> String;
+    }
+
+    unsafe extern "C++" {
+        include!("rocksdb/options.h");
+
+        type DbPath = crate::options::ffi::DbPath;
     }
 }
 
@@ -139,6 +151,18 @@ fn descriptor_file_name(number: u64) -> String {
 /// incarnation number. The result will be prefixed with `dbname`.
 fn descriptor_file_name_full_path(dbname: &str, number: u64) -> String {
     format!("{}/{}", dbname, descriptor_file_name(number))
+}
+
+/// Return the name of the sstable with the specified number in the db named by `dbname`.
+/// The result will be prefixed with `dbname`.
+fn table_file_name(db_paths: &CxxVector<ffi::DbPath>, number: u64, path_id: u32) -> String {
+    assert!(number > 0);
+    let mut idx = path_id as usize;
+    if idx >= db_paths.len() {
+        idx = db_paths.len() - 1;
+    }
+    let path = db_paths.get(idx).unwrap().path();
+    make_table_file_name_full_path(path.to_str().unwrap(), number)
 }
 
 #[cfg(test)]

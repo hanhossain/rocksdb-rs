@@ -39,11 +39,6 @@ constexpr char kFilePathSeparator = '\\';
 constexpr char kFilePathSeparator = '/';
 #endif
 
-// Return the name of the sstable with the specified number
-// in the db named by "dbname".  The result will be prefixed with
-// "dbname".
-extern std::string TableFileName(const std::vector<DbPath>& db_paths,
-                                 uint64_t number, uint32_t path_id);
 
 // Sufficient buffer size for FormatFileNumber.
 const size_t kFormatFileNumberBufSize = 38;

@@ -5841,8 +5841,8 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
         const auto& fd = fd_with_krange.fd;
         const FileMetaData* fmeta = fd_with_krange.file_metadata;
         assert(fmeta);
-        std::string fname = TableFileName(cfd->ioptions()->cf_paths,
-                                          fd.GetNumber(), fd.GetPathId());
+        std::string fname = static_cast<std::string>(TableFileName(cfd->ioptions()->cf_paths,
+                                          fd.GetNumber(), fd.GetPathId()));
         if (use_file_checksum) {
           s = VerifyFullFileChecksum(fmeta->file_checksum,
                                      fmeta->file_checksum_func_name, fname,
