@@ -61,15 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string Rocks2LevelTableFileName(const std::string& fullname) {
-  assert(fullname.size() > kRocksDbTFileExt.size() + 1);
-  if (fullname.size() <= kRocksDbTFileExt.size() + 1) {
-    return "";
-  }
-  return fullname.substr(0, fullname.size() - kRocksDbTFileExt.size()) +
-         kLevelDbTFileExt;
-}
-
 uint64_t TableFileNameToNumber(const std::string& name) {
   uint64_t number = 0;
   uint64_t base = 1;

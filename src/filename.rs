@@ -1,6 +1,7 @@
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
 const ROCKSDB_TFILE_EXT: &str = "sst";
 const ARCHIVAL_DIR_NAME: &str = "archive";
+const LEVELDB_TFILE_EXT: &str = "ldb";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
@@ -31,6 +32,9 @@ mod ffi {
         fn make_table_file_name(number: u64) -> String;
         #[cxx_name = "MakeTableFileName"]
         fn make_table_file_name_full_path(path: &str, number: u64) -> String;
+        /// Return the name of sstable with LevelDB suffix created from RocksDB sstable suffixed name
+        #[cxx_name = "Rocks2LevelTableFileName"]
+        fn rocks_to_level_table_file_name(fullname: &str) -> String;
     }
 }
 
@@ -90,6 +94,17 @@ fn make_table_file_name(number: u64) -> String {
 
 fn make_table_file_name_full_path(path: &str, number: u64) -> String {
     make_file_name_full_path(path, number, ROCKSDB_TFILE_EXT)
+}
+
+/// Return the name of sstable with LevelDB suffix created from RocksDB sstable suffixed name
+fn rocks_to_level_table_file_name(fullname: &str) -> String {
+    assert!(fullname.len() > ROCKSDB_TFILE_EXT.len() + 1);
+    if fullname.len() <= ROCKSDB_TFILE_EXT.len() + 1 {
+        return "".to_string();
+    }
+    let mut res = fullname[0..fullname.len() - ROCKSDB_TFILE_EXT.len()].to_string();
+    res.push_str(LEVELDB_TFILE_EXT);
+    res
 }
 
 #[cfg(test)]

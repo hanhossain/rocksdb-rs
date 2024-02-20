@@ -4552,7 +4552,7 @@ Status DBImpl::CheckConsistency() {
         if (!std::binary_search(existing_files.begin(), existing_files.end(),
                                 fname) &&
             !std::binary_search(existing_files.begin(), existing_files.end(),
-                                Rocks2LevelTableFileName(fname))) {
+                                static_cast<std::string>(Rocks2LevelTableFileName(fname)))) {
           corruption_messages +=
               "Missing sst file " + fname + " in " + directory + "\n";
         }

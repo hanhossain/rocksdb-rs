@@ -110,7 +110,7 @@ Status TableCache::GetTableReader(
   if (s.ok()) {
     RecordTick(ioptions_.stats, NO_FILE_OPENS);
   } else if (s.IsPathNotFound()) {
-    fname = Rocks2LevelTableFileName(fname);
+    fname = static_cast<std::string>(Rocks2LevelTableFileName(fname));
     // If this file is also not found, we want to use the error message
     // that contains the table file name which is less confusing.
     Status temp_s =
