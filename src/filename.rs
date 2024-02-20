@@ -17,6 +17,8 @@ mod ffi {
         fn blob_file_name(number: u64) -> String;
         #[cxx_name = "BlobFileName"]
         fn blob_file_name_dir_name(blob_dir_name: &str, number: u64) -> String;
+        #[cxx_name = "BlobFileName"]
+        fn blob_file_name_full_path(dbname: &str, blob_dir: &str, number: u64) -> String;
     }
 }
 
@@ -48,6 +50,15 @@ fn blob_file_name(number: u64) -> String {
 fn blob_file_name_dir_name(blob_dir_name: &str, number: u64) -> String {
     assert!(number > 0);
     make_file_name_full_path(blob_dir_name, number, ROCKSDB_BLOB_FILE_EXT)
+}
+
+fn blob_file_name_full_path(dbname: &str, blob_dir: &str, number: u64) -> String {
+    assert!(number > 0);
+    make_file_name_full_path(
+        &format!("{}/{}", dbname, blob_dir),
+        number,
+        ROCKSDB_BLOB_FILE_EXT,
+    )
 }
 
 #[cfg(test)]

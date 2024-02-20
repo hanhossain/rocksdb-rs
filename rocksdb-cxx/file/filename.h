@@ -39,9 +39,6 @@ constexpr char kFilePathSeparator = '\\';
 constexpr char kFilePathSeparator = '/';
 #endif
 
-extern std::string BlobFileName(const std::string& dbname,
-                                const std::string& blob_dir, uint64_t number);
-
 extern std::string ArchivalDirectory(const std::string& dbname);
 
 //  Return the name of the archived log file with the specified number
