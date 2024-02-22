@@ -131,15 +131,10 @@ fn rocks_to_level_table_file_name(fullname: &str) -> String {
 /// The reverse function of MakeTableFileName
 // TODO(yhchiang): could merge this function with ParseFileName()
 fn table_file_name_to_number(name: &str) -> u64 {
-    let mut number = 0;
-    let mut base = 1;
-    let mut pos = name.rfind('.').unwrap();
-    while pos > 0 && name.chars().nth(pos - 1).unwrap().is_ascii_digit() {
-        number += (name.chars().nth(pos - 1).unwrap() as u64 - '0' as u64) * base;
-        base *= 10;
-        pos -= 1;
-    }
-    number
+    let re = regex::Regex::new(r"(\d+)\.[^.]*$").unwrap();
+    re.captures(name)
+        .map(|cap| cap[1].parse().unwrap())
+        .unwrap_or(0)
 }
 
 fn descriptor_file_name(number: u64) -> String {
@@ -187,5 +182,13 @@ mod tests {
         let table_file_name = make_table_file_name(987654);
         assert_eq!(table_file_name, "987654.sst");
         assert_eq!(table_file_name_to_number(&table_file_name), 987654);
+    }
+
+    #[test]
+    fn test_table_file_name_to_number() {
+        assert_eq!(table_file_name_to_number("123.sst"), 123);
+        assert_eq!(table_file_name_to_number("1.sst"), 1);
+        assert_eq!(table_file_name_to_number(".sst"), 0);
+        assert_eq!(table_file_name_to_number("sst"), 0);
     }
 }
