@@ -61,19 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,
-                      size_t out_buf_size) {
-  if (path_id == 0) {
-    snprintf(out_buf, out_buf_size, "%" PRIu64, number);
-  } else {
-    snprintf(out_buf, out_buf_size,
-             "%" PRIu64
-             "(path "
-             "%" PRIu32 ")",
-             number, path_id);
-  }
-}
-
 std::string CurrentFileName(const std::string& dbname) {
   return dbname + "/" + kCurrentFileName;
 }

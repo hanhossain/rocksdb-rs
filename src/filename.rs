@@ -50,6 +50,8 @@ mod ffi {
         /// The result will be prefixed with `dbname`.
         #[cxx_name = "TableFileName"]
         fn table_file_name(db_paths: &CxxVector<DbPath>, number: u64, path_id: u32) -> String;
+        #[cxx_name = "FormatFileNumber"]
+        fn format_file_number(number: u64, path_id: u32) -> String;
     }
 
     unsafe extern "C++" {
@@ -158,6 +160,14 @@ fn table_file_name(db_paths: &CxxVector<ffi::DbPath>, number: u64, path_id: u32)
     }
     let path = db_paths.get(idx).unwrap().path();
     make_table_file_name_full_path(path.to_str().unwrap(), number)
+}
+
+fn format_file_number(number: u64, path_id: u32) -> String {
+    if path_id == 0 {
+        number.to_string()
+    } else {
+        format!("{}(path {})", number, path_id)
+    }
 }
 
 #[cfg(test)]

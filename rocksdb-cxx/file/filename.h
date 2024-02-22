@@ -39,13 +39,6 @@ constexpr char kFilePathSeparator = '\\';
 constexpr char kFilePathSeparator = '/';
 #endif
 
-
-// Sufficient buffer size for FormatFileNumber.
-const size_t kFormatFileNumberBufSize = 38;
-
-extern void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,
-                             size_t out_buf_size);
-
 extern const std::string kCurrentFileName;  // = "CURRENT"
 
 // Return the name of the current file.  This file contains the name
