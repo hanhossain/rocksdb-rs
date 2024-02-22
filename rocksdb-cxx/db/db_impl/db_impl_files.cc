@@ -587,7 +587,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
     if (type == kTableFile) {
       // evict from cache
       TableCache::Evict(table_cache_.get(), number);
-      fname = MakeTableFileName(candidate_file.file_path, number);
+      fname = static_cast<std::string>(MakeTableFileName(candidate_file.file_path, number));
       dir_to_sync = candidate_file.file_path;
     } else if (type == kBlobFile) {
       fname = static_cast<std::string>(BlobFileName(candidate_file.file_path, number));

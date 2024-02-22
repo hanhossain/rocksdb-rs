@@ -141,16 +141,16 @@ TEST_F(FileNameTest, Construction) {
   ASSERT_EQ(192U, number);
   ASSERT_EQ(kWalFile, type);
 
-  fname = TableFileName({DbPath("bar", 0)}, 200, 0);
+  fname = static_cast<std::string>(TableFileName({DbPath("bar", 0)}, 200, 0));
   std::string fname1 =
-      TableFileName({DbPath("foo", 0), DbPath("bar", 0)}, 200, 1);
+      static_cast<std::string>(TableFileName({DbPath("foo", 0), DbPath("bar", 0)}, 200, 1));
   ASSERT_EQ(fname, fname1);
   ASSERT_EQ("bar/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(200U, number);
   ASSERT_EQ(kTableFile, type);
 
-  fname = DescriptorFileName("bar", 100);
+  fname = static_cast<std::string>(DescriptorFileName("bar", 100));
   ASSERT_EQ("bar/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(100U, number);

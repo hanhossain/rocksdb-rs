@@ -794,8 +794,8 @@ Status CompactionJob::Run() {
   for (const auto& state : compact_->sub_compact_states) {
     for (const auto& output : state.GetOutputs()) {
       auto fn =
-          TableFileName(state.compaction->immutable_options()->cf_paths,
-                        output.meta.fd.GetNumber(), output.meta.fd.GetPathId());
+          static_cast<std::string>(TableFileName(state.compaction->immutable_options()->cf_paths,
+                        output.meta.fd.GetNumber(), output.meta.fd.GetPathId()));
       tp[fn] = output.table_properties;
     }
   }
@@ -1546,8 +1546,8 @@ Status CompactionJob::FinishCompactionOutputFile(
     // This happens when the output level is bottom level, at the same time
     // the sub_compact output nothing.
     std::string fname =
-        TableFileName(sub_compact->compaction->immutable_options()->cf_paths,
-                      meta->fd.GetNumber(), meta->fd.GetPathId());
+        static_cast<std::string>(TableFileName(sub_compact->compaction->immutable_options()->cf_paths,
+                      meta->fd.GetNumber(), meta->fd.GetPathId()));
 
     // TODO(AR) it is not clear if there are any larger implications if
     // DeleteFile fails here
@@ -2014,8 +2014,8 @@ void CompactionJob::LogCompaction() {
 }
 
 std::string CompactionJob::GetTableFileName(uint64_t file_number) {
-  return TableFileName(compact_->compaction->immutable_options()->cf_paths,
-                       file_number, compact_->compaction->output_path_id());
+  return static_cast<std::string>(TableFileName(compact_->compaction->immutable_options()->cf_paths,
+                       file_number, compact_->compaction->output_path_id()));
 }
 
 Env::IOPriority CompactionJob::GetRateLimiterPriority() {

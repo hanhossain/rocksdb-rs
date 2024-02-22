@@ -1247,7 +1247,7 @@ class VersionSetTestBase {
     *last_seqno = last_seq;
     num_initial_edits_ = static_cast<int>(new_cfs.size() + 1);
     std::unique_ptr<WritableFileWriter> file_writer;
-    const std::string manifest = DescriptorFileName(dbname_, 1);
+    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     Status s = WritableFileWriter::Create(
         fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
@@ -2794,7 +2794,7 @@ class EmptyDefaultCfNewManifest : public VersionSetTestBase,
     assert(log_writer != nullptr);
     VersionEdit new_db;
     new_db.SetLogNumber(0);
-    const std::string manifest_path = DescriptorFileName(dbname_, 1);
+    const std::string manifest_path = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
     Status s = WritableFileWriter::Create(
@@ -2867,7 +2867,7 @@ class VersionSetTestEmptyDb
       impl->GetDbIdentityFromIdentityFile(&db_id);
       new_db.SetDBId(db_id);
     }
-    const std::string manifest_path = DescriptorFileName(dbname_, 1);
+    const std::string manifest_path = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
     Status s = WritableFileWriter::Create(
@@ -3180,7 +3180,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     assert(column_families != nullptr);
     assert(last_seqno != nullptr);
     assert(log_writer != nullptr);
-    const std::string manifest = DescriptorFileName(dbname_, 1);
+    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
     Status s = WritableFileWriter::Create(
@@ -3270,7 +3270,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     assert(file_metas != nullptr);
     for (const auto& info : file_infos) {
       uint64_t file_num = info.file_number;
-      std::string fname = MakeTableFileName(dbname_, file_num);
+      std::string fname = static_cast<std::string>(MakeTableFileName(dbname_, file_num));
       std::unique_ptr<FSWritableFile> file;
       Status s = fs_->NewWritableFile(fname, FileOptions(), &file, nullptr);
       ASSERT_OK(s);

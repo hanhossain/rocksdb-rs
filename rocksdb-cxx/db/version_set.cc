@@ -1560,8 +1560,8 @@ Status Version::GetTableProperties(const ReadOptions& read_options,
   if (fname != nullptr) {
     file_name = *fname;
   } else {
-    file_name = TableFileName(ioptions->cf_paths, file_meta->fd.GetNumber(),
-                              file_meta->fd.GetPathId());
+    file_name = static_cast<std::string>(TableFileName(ioptions->cf_paths, file_meta->fd.GetNumber(),
+                              file_meta->fd.GetPathId()));
   }
   s = ioptions->fs->NewRandomAccessFile(file_name, file_options_, &file,
                                         nullptr);
@@ -1667,8 +1667,8 @@ Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
                                          int level) {
   for (const auto& file_meta : storage_info_.files_[level]) {
     auto fname =
-        TableFileName(cfd_->ioptions()->cf_paths, file_meta->fd.GetNumber(),
-                      file_meta->fd.GetPathId());
+        static_cast<std::string>(TableFileName(cfd_->ioptions()->cf_paths, file_meta->fd.GetNumber(),
+                      file_meta->fd.GetPathId()));
     // 1. If the table is already present in table cache, load table
     // properties from there.
     std::shared_ptr<const TableProperties> table_properties;
@@ -1697,8 +1697,8 @@ Status Version::GetPropertiesOfTablesInRange(
                                          false);
       for (const auto& file_meta : files) {
         auto fname =
-            TableFileName(cfd_->ioptions()->cf_paths, file_meta->fd.GetNumber(),
-                          file_meta->fd.GetPathId());
+            static_cast<std::string>(TableFileName(cfd_->ioptions()->cf_paths, file_meta->fd.GetNumber(),
+                          file_meta->fd.GetPathId()));
         if (props->count(fname) == 0) {
           // 1. If the table is already present in table cache, load table
           // properties from there.
@@ -1785,7 +1785,7 @@ void Version::GetColumnFamilyMetaData(ColumnFamilyMetaData* cf_meta) {
       }
       const uint64_t file_number = file->fd.GetNumber();
       files.emplace_back(
-          MakeTableFileName("", file_number), file_number, file_path,
+          static_cast<std::string>(MakeTableFileName("", file_number)), file_number, file_path,
           file->fd.GetFileSize(), file->fd.smallest_seqno,
           file->fd.largest_seqno, file->smallest.user_key().ToString(),
           file->largest.user_key().ToString(),
@@ -3681,8 +3681,8 @@ void VersionStorageInfo::ComputeFilesMarkedForPeriodicCompaction(
           file_modification_time = f->TryGetOldestAncesterTime();
         }
         if (file_modification_time == kUnknownOldestAncesterTime) {
-          auto file_path = TableFileName(ioptions.cf_paths, f->fd.GetNumber(),
-                                         f->fd.GetPathId());
+          auto file_path = static_cast<std::string>(TableFileName(ioptions.cf_paths, f->fd.GetNumber(),
+                                         f->fd.GetPathId()));
           status = ioptions.env->GetFileModificationTime(
               file_path, &file_modification_time);
           if (!status.ok()) {
@@ -5367,7 +5367,7 @@ Status VersionSet::ProcessManifestWrites(
       ROCKS_LOG_INFO(db_options_->info_log, "Creating manifest %" PRIu64 "\n",
                      pending_manifest_file_number_);
       std::string descriptor_fname =
-          DescriptorFileName(dbname_, pending_manifest_file_number_);
+          static_cast<std::string>(DescriptorFileName(dbname_, pending_manifest_file_number_));
       std::unique_ptr<FSWritableFile> descriptor_file;
       io_s = NewWritableFile(fs_.get(), descriptor_fname, &descriptor_file,
                              opt_file_opts);
@@ -6978,7 +6978,7 @@ void VersionSet::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
         }
         filemetadata.directory = filemetadata.db_path;
         const uint64_t file_number = file->fd.GetNumber();
-        filemetadata.name = MakeTableFileName("", file_number);
+        filemetadata.name = static_cast<std::string>(MakeTableFileName("", file_number));
         filemetadata.relative_filename = filemetadata.name.substr(1);
         filemetadata.file_number = file_number;
         filemetadata.level = level;

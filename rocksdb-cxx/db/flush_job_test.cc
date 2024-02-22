@@ -76,7 +76,7 @@ class FlushJobTestBase : public testing::Test {
       new_cfs.emplace_back(new_cf);
     }
 
-    const std::string manifest = DescriptorFileName(dbname_, 1);
+    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
     Status s = WritableFileWriter::Create(

@@ -78,7 +78,7 @@ Status UpdateManifestForFilesState(
 
         uint64_t number = lf->fd.GetNumber();
         std::string fname =
-            TableFileName(w.IOptions().db_paths, number, lf->fd.GetPathId());
+            static_cast<std::string>(TableFileName(w.IOptions().db_paths, number, lf->fd.GetPathId()));
 
         std::unique_ptr<FSSequentialFile> f;
         FileOptions fopts;

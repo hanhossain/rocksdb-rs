@@ -501,13 +501,11 @@ class Repairer {
       t.meta.fd = table_fds_[i];
       Status status = ScanTable(&t);
       if (!status.ok()) {
-        std::string fname = TableFileName(
-            db_options_.db_paths, t.meta.fd.GetNumber(), t.meta.fd.GetPathId());
-        char file_num_buf[kFormatFileNumberBufSize];
-        FormatFileNumber(t.meta.fd.GetNumber(), t.meta.fd.GetPathId(),
-                         file_num_buf, sizeof(file_num_buf));
+        std::string fname = static_cast<std::string>(TableFileName(
+            db_options_.db_paths, t.meta.fd.GetNumber(), t.meta.fd.GetPathId()));
+        rust::String file_num = FormatFileNumber(t.meta.fd.GetNumber(), t.meta.fd.GetPathId());
         ROCKS_LOG_WARN(db_options_.info_log, "Table #%s: ignoring %s",
-                       file_num_buf, status.ToString()->c_str());
+                       file_num.c_str(), status.ToString()->c_str());
         ArchiveFile(fname);
       } else {
         tables_.push_back(t);
@@ -516,8 +514,8 @@ class Repairer {
   }
 
   Status ScanTable(TableInfo* t) {
-    std::string fname = TableFileName(
-        db_options_.db_paths, t->meta.fd.GetNumber(), t->meta.fd.GetPathId());
+    std::string fname = static_cast<std::string>(TableFileName(
+        db_options_.db_paths, t->meta.fd.GetNumber(), t->meta.fd.GetPathId()));
     int counter = 0;
     uint64_t file_size;
     Status status = env_->GetFileSize(fname, &file_size);

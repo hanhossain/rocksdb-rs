@@ -26,6 +26,9 @@
 
 namespace rocksdb {
 namespace {
+
+const size_t kFormatFileNumberBufSize = 38;
+
 // A helper class that form universal compactions. The class is used by
 // UniversalCompactionPicker::PickCompaction().
 // The usage is to create the class, and get the compaction object by calling

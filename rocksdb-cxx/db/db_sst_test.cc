@@ -120,7 +120,7 @@ TEST_F(DBSSTTest, SSTsWithLdbSuffixHandling) {
       continue;
     }
     std::string const rdb_name = dbname_ + "/" + filenames[i];
-    std::string const ldb_name = Rocks2LevelTableFileName(rdb_name);
+    std::string const ldb_name = static_cast<std::string>(Rocks2LevelTableFileName(rdb_name));
     ASSERT_TRUE(env_->RenameFile(rdb_name, ldb_name).ok());
     ++num_ldb_files;
   }

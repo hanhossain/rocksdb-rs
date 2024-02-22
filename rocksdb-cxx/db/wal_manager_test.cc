@@ -82,7 +82,7 @@ class WalManagerTest : public testing::Test {
   // NOT thread safe
   void RollTheLog(bool /*archived*/) {
     current_log_number_++;
-    std::string fname = ArchivedLogFileName(dbname_, current_log_number_);
+    std::string fname = static_cast<std::string>(ArchivedLogFileName(dbname_, current_log_number_));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
     ASSERT_OK(WritableFileWriter::Create(fs, fname, env_options_, &file_writer,

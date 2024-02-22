@@ -802,7 +802,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     const FileDescriptor& fd = meta.fd;
     uint64_t file_num = fd.GetNumber();
     const std::string fpath =
-        MakeTableFileName(cfd->ioptions()->cf_paths[0].path, file_num);
+        static_cast<std::string>(MakeTableFileName(cfd->ioptions()->cf_paths[0].path, file_num));
     s = VerifyFile(cfd, fpath, level, meta);
     if (s.IsPathNotFound() || s.IsNotFound() || s.IsCorruption()) {
       missing_files.insert(file_num);

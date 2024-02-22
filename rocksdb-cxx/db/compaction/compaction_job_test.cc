@@ -253,7 +253,7 @@ class CompactionJobTestBase : public testing::Test {
     std::vector<DbPath> db_paths;
     db_paths.emplace_back(dbname_, std::numeric_limits<uint64_t>::max());
     meta.fd = FileDescriptor(file_number, 0, 0);
-    return TableFileName(db_paths, meta.fd.GetNumber(), meta.fd.GetPathId());
+    return static_cast<std::string>(TableFileName(db_paths, meta.fd.GetNumber(), meta.fd.GetPathId()));
   }
 
   std::string KeyStr(const std::string& user_key, const SequenceNumber seq_num,
@@ -552,7 +552,7 @@ class CompactionJobTestBase : public testing::Test {
     new_db.SetNextFile(2);
     new_db.SetLastSequence(0);
 
-    const std::string manifest = DescriptorFileName(dbname_, 1);
+    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     std::unique_ptr<WritableFileWriter> file_writer;
     const auto& fs = env_->GetFileSystem();
     s = WritableFileWriter::Create(fs, manifest,

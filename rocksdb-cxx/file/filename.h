@@ -39,42 +39,6 @@ constexpr char kFilePathSeparator = '\\';
 constexpr char kFilePathSeparator = '/';
 #endif
 
-//  Return the name of the archived log file with the specified number
-//  in the db named by "dbname". The result will be prefixed with "dbname".
-extern std::string ArchivedLogFileName(const std::string& dbname, uint64_t num);
-
-extern std::string MakeTableFileName(const std::string& name, uint64_t number);
-
-extern std::string MakeTableFileName(uint64_t number);
-
-// Return the name of sstable with LevelDB suffix
-// created from RocksDB sstable suffixed name
-extern std::string Rocks2LevelTableFileName(const std::string& fullname);
-
-// the reverse function of MakeTableFileName
-// TODO(yhchiang): could merge this function with ParseFileName()
-extern uint64_t TableFileNameToNumber(const std::string& name);
-
-// Return the name of the sstable with the specified number
-// in the db named by "dbname".  The result will be prefixed with
-// "dbname".
-extern std::string TableFileName(const std::vector<DbPath>& db_paths,
-                                 uint64_t number, uint32_t path_id);
-
-// Sufficient buffer size for FormatFileNumber.
-const size_t kFormatFileNumberBufSize = 38;
-
-extern void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,
-                             size_t out_buf_size);
-
-// Return the name of the descriptor file for the db named by
-// "dbname" and the specified incarnation number.  The result will be
-// prefixed with "dbname".
-extern std::string DescriptorFileName(const std::string& dbname,
-                                      uint64_t number);
-
-extern std::string DescriptorFileName(uint64_t number);
-
 extern const std::string kCurrentFileName;  // = "CURRENT"
 
 // Return the name of the current file.  This file contains the name

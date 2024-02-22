@@ -61,76 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string ArchivedLogFileName(const std::string& name, uint64_t number) {
-  assert(number > 0);
-  return static_cast<std::string>(rs::make_file_name_full_path(name + "/" + kArchivalDirName, number, "log"));
-}
-
-std::string MakeTableFileName(const std::string& path, uint64_t number) {
-  return static_cast<std::string>(rs::make_file_name_full_path(path, number, kRocksDbTFileExt.c_str()));
-}
-
-std::string MakeTableFileName(uint64_t number) {
-  return static_cast<std::string>(rs::make_file_name(number, kRocksDbTFileExt.c_str()));
-}
-
-std::string Rocks2LevelTableFileName(const std::string& fullname) {
-  assert(fullname.size() > kRocksDbTFileExt.size() + 1);
-  if (fullname.size() <= kRocksDbTFileExt.size() + 1) {
-    return "";
-  }
-  return fullname.substr(0, fullname.size() - kRocksDbTFileExt.size()) +
-         kLevelDbTFileExt;
-}
-
-uint64_t TableFileNameToNumber(const std::string& name) {
-  uint64_t number = 0;
-  uint64_t base = 1;
-  int pos = static_cast<int>(name.find_last_of('.'));
-  while (--pos >= 0 && name[pos] >= '0' && name[pos] <= '9') {
-    number += (name[pos] - '0') * base;
-    base *= 10;
-  }
-  return number;
-}
-
-std::string TableFileName(const std::vector<DbPath>& db_paths, uint64_t number,
-                          uint32_t path_id) {
-  assert(number > 0);
-  std::string path;
-  if (path_id >= db_paths.size()) {
-    path = db_paths.back().path;
-  } else {
-    path = db_paths[path_id].path;
-  }
-  return MakeTableFileName(path, number);
-}
-
-void FormatFileNumber(uint64_t number, uint32_t path_id, char* out_buf,
-                      size_t out_buf_size) {
-  if (path_id == 0) {
-    snprintf(out_buf, out_buf_size, "%" PRIu64, number);
-  } else {
-    snprintf(out_buf, out_buf_size,
-             "%" PRIu64
-             "(path "
-             "%" PRIu32 ")",
-             number, path_id);
-  }
-}
-
-std::string DescriptorFileName(uint64_t number) {
-  assert(number > 0);
-  char buf[100];
-  snprintf(buf, sizeof(buf), "MANIFEST-%06llu",
-           static_cast<unsigned long long>(number));
-  return buf;
-}
-
-std::string DescriptorFileName(const std::string& dbname, uint64_t number) {
-  return dbname + "/" + DescriptorFileName(number);
-}
-
 std::string CurrentFileName(const std::string& dbname) {
   return dbname + "/" + kCurrentFileName;
 }
@@ -347,7 +277,7 @@ IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
                         uint64_t descriptor_number,
                         FSDirectory* dir_contains_current_file) {
   // Remove leading "dbname/" and add newline to manifest file name
-  std::string manifest = DescriptorFileName(dbname, descriptor_number);
+  std::string manifest = static_cast<std::string>(DescriptorFileName(dbname, descriptor_number));
   Slice contents = manifest;
   assert(contents.starts_with(dbname + "/"));
   contents.remove_prefix(dbname.size() + 1);

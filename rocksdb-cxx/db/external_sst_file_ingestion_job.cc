@@ -105,8 +105,8 @@ Status ExternalSstFileIngestionJob::Prepare(
   for (IngestedFileInfo& f : files_to_ingest_) {
     f.copy_file = false;
     const std::string path_outside_db = f.external_file_path;
-    const std::string path_inside_db = TableFileName(
-        cfd_->ioptions()->cf_paths, f.fd.GetNumber(), f.fd.GetPathId());
+    const std::string path_inside_db = static_cast<std::string>(TableFileName(
+        cfd_->ioptions()->cf_paths, f.fd.GetNumber(), f.fd.GetPathId()));
     if (ingestion_options_.move_files) {
       status =
           fs_->LinkFile(path_outside_db, path_inside_db, IOOptions(), nullptr);

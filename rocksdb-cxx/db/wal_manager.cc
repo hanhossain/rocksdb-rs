@@ -275,7 +275,7 @@ void WalManager::PurgeObsoleteWALFiles() {
 }
 
 void WalManager::ArchiveWALFile(const std::string& fname, uint64_t number) {
-  auto archived_log_name = ArchivedLogFileName(wal_dir_, number);
+  auto archived_log_name = static_cast<std::string>(ArchivedLogFileName(wal_dir_, number));
   // The sync point below is used in (DBTest,TransactionLogIteratorRace)
   TEST_SYNC_POINT("WalManager::PurgeObsoleteFiles:1");
   Status s = env_->RenameFile(fname, archived_log_name);
@@ -319,7 +319,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
       s = env_->GetFileSize(LogFileName(path, number), &size_bytes);
       // re-try in case the alive log file has been moved to archive.
       if (!s.ok() && log_type == kAliveLogFile) {
-        std::string archived_file = ArchivedLogFileName(path, number);
+        std::string archived_file = static_cast<std::string>(ArchivedLogFileName(path, number));
         if (env_->FileExists(archived_file).ok()) {
           s = env_->GetFileSize(archived_file, &size_bytes);
           if (!s.ok() && env_->FileExists(archived_file).IsNotFound()) {
@@ -402,7 +402,7 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
 
   if (type == kArchivedLogFile || !s.ok()) {
     //  check if the file got moved to archive.
-    std::string archived_file = ArchivedLogFileName(wal_dir_, number);
+    std::string archived_file = static_cast<std::string>(ArchivedLogFileName(wal_dir_, number));
     s = ReadFirstLine(archived_file, number, sequence);
     // maybe the file was deleted from archive dir. If that's the case, return
     // Status_OK(). The caller with identify this as empty file because

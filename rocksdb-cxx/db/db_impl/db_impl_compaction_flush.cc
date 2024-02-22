@@ -342,8 +342,8 @@ Status DBImpl::FlushMemTableToOutputFile(
         immutable_db_options_.sst_file_manager.get());
     if (sfm) {
       // Notify sst_file_manager that a new file was added
-      std::string file_path = MakeTableFileName(
-          cfd->ioptions()->cf_paths[0].path, file_meta.fd.GetNumber());
+      std::string file_path = static_cast<std::string>(MakeTableFileName(
+          cfd->ioptions()->cf_paths[0].path, file_meta.fd.GetNumber()));
       // TODO (PR7798).  We should only add the file to the FileManager if it
       // exists. Otherwise, some tests may fail.  Ignore the error in the
       // interim.
@@ -760,8 +760,8 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
       NotifyOnFlushCompleted(cfds[i], all_mutable_cf_options[i],
                              jobs[i]->GetCommittedFlushJobsInfo());
       if (sfm) {
-        std::string file_path = MakeTableFileName(
-            cfds[i]->ioptions()->cf_paths[0].path, file_meta[i].fd.GetNumber());
+        std::string file_path = static_cast<std::string>(MakeTableFileName(
+            cfds[i]->ioptions()->cf_paths[0].path, file_meta[i].fd.GetNumber()));
         // TODO (PR7798).  We should only add the file to the FileManager if it
         // exists. Otherwise, some tests may fail.  Ignore the error in the
         // interim.
@@ -835,7 +835,7 @@ void DBImpl::NotifyOnFlushBegin(ColumnFamilyData* cfd, FileMetaData* file_meta,
     //                 go to L0 in the future.
     const uint64_t file_number = file_meta->fd.GetNumber();
     info.file_path =
-        MakeTableFileName(cfd->ioptions()->cf_paths[0].path, file_number);
+        static_cast<std::string>(MakeTableFileName(cfd->ioptions()->cf_paths[0].path, file_number));
     info.file_number = file_number;
     info.thread_id = env_->GetThreadID();
     info.job_id = job_id;
@@ -1532,9 +1532,9 @@ Status DBImpl::CompactFilesImpl(
 
   if (output_file_names != nullptr) {
     for (const auto& newf : c->edit()->GetNewFiles()) {
-      output_file_names->push_back(TableFileName(
+      output_file_names->push_back(static_cast<std::string>(TableFileName(
           c->immutable_options()->cf_paths, newf.second.fd.GetNumber(),
-          newf.second.fd.GetPathId()));
+          newf.second.fd.GetPathId())));
     }
 
     for (const auto& blob_file : c->edit()->GetBlobFileAdditions()) {
@@ -3843,8 +3843,8 @@ void DBImpl::BuildCompactionJobInfo(
     for (const auto fmd : *c->inputs(i)) {
       const FileDescriptor& desc = fmd->fd;
       const uint64_t file_number = desc.GetNumber();
-      auto fn = TableFileName(c->immutable_options()->cf_paths, file_number,
-                              desc.GetPathId());
+      auto fn = static_cast<std::string>(TableFileName(c->immutable_options()->cf_paths, file_number,
+                              desc.GetPathId()));
       compaction_job_info->input_files.push_back(fn);
       compaction_job_info->input_file_infos.push_back(CompactionFileInfo{
           static_cast<int>(i), file_number, fmd->oldest_blob_file_number});
@@ -3861,8 +3861,8 @@ void DBImpl::BuildCompactionJobInfo(
     const FileMetaData& meta = newf.second;
     const FileDescriptor& desc = meta.fd;
     const uint64_t file_number = desc.GetNumber();
-    compaction_job_info->output_files.push_back(TableFileName(
-        c->immutable_options()->cf_paths, file_number, desc.GetPathId()));
+    compaction_job_info->output_files.push_back(static_cast<std::string>(TableFileName(
+        c->immutable_options()->cf_paths, file_number, desc.GetPathId())));
     compaction_job_info->output_file_infos.push_back(CompactionFileInfo{
         newf.first, file_number, meta.oldest_blob_file_number});
   }

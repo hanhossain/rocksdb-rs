@@ -30,7 +30,7 @@ class LogFileImpl : public LogFile {
 
   std::string PathName() const override {
     if (type_ == kArchivedLogFile) {
-      return ArchivedLogFileName("", logNumber_);
+      return static_cast<std::string>(ArchivedLogFileName("", logNumber_));
     }
     return static_cast<std::string>(LogFileName("", logNumber_));
   }
