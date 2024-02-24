@@ -173,8 +173,8 @@ TEST_F(FileNameTest, NormalizePath) {
   // No leading slash
   const std::string sep = std::string(1, kFilePathSeparator);
 
-  std::string expected = "FOLDER" + sep + "filename.ext";
-  std::string given = "FOLDER" + sep + "filename.ext";
+  rust::String expected = "FOLDER" + sep + "filename.ext";
+  rust::String given = "FOLDER" + sep + "filename.ext";
 
   ASSERT_EQ(expected, NormalizePath(given));
 

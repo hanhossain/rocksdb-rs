@@ -779,9 +779,9 @@ Status DBImpl::Recover(
     // updated to versions_->NewFileNumber() in RenameTempFileToOptionsFile.
     std::vector<std::string> filenames;
     if (s.ok()) {
-      const std::string normalized_dbname = NormalizePath(dbname_);
+      const std::string normalized_dbname = static_cast<std::string>(NormalizePath(dbname_));
       const std::string normalized_wal_dir =
-          NormalizePath(immutable_db_options_.GetWalDir());
+          static_cast<std::string>(NormalizePath(immutable_db_options_.GetWalDir()));
       if (immutable_db_options_.best_efforts_recovery) {
         filenames = std::move(files_in_dbname);
       } else if (normalized_dbname == normalized_wal_dir) {

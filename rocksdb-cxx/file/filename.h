@@ -100,6 +100,4 @@ extern Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
                               const std::string& dbname,
                               std::string* parent_dir,
                               std::vector<std::string>* file_names);
-
-extern std::string NormalizePath(const std::string& path);
 }  // namespace rocksdb

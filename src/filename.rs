@@ -84,6 +84,8 @@ mod ffi {
         /// empty
         #[cxx_name = "IdentityFileName"]
         fn identity_file_name(dbname: &str) -> String;
+        #[cxx_name = "NormalizePath"]
+        fn normalize_path(path: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -249,6 +251,22 @@ fn identity_file_name(dbname: &str) -> String {
     format!("{}/IDENTITY", dbname)
 }
 
+fn normalize_path(path: &str) -> String {
+    let mut normalized = String::new();
+
+    let path = if path.len() > 2 && &path[..1] == "/" {
+        normalized.push('/');
+        &path[1..]
+    } else {
+        path
+    };
+
+    let replaced = regex::Regex::new("/+").unwrap().replace_all(path, "/");
+    normalized.push_str(&replaced);
+
+    normalized
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -279,5 +297,15 @@ mod tests {
         assert_eq!(table_file_name_to_number("1.sst"), 1);
         assert_eq!(table_file_name_to_number(".sst"), 0);
         assert_eq!(table_file_name_to_number("sst"), 0);
+    }
+
+    #[test]
+    fn test_normalize_path() {
+        assert_eq!(normalize_path("a/b/c"), "a/b/c");
+        assert_eq!(normalize_path("a//b/c"), "a/b/c");
+        assert_eq!(normalize_path("//a/b/c"), "//a/b/c");
+        assert_eq!(normalize_path("//a//b/c"), "//a/b/c");
+        assert_eq!(normalize_path("///////a/////b/c"), "//a/b/c");
+        assert_eq!(normalize_path("//"), "/");
     }
 }

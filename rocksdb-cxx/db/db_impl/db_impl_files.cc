@@ -955,15 +955,15 @@ Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
 Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
   mutex_.AssertHeld();
   std::vector<std::string> paths;
-  paths.push_back(NormalizePath(dbname_ + std::string(1, kFilePathSeparator)));
+  paths.push_back(static_cast<std::string>(NormalizePath(dbname_ + std::string(1, kFilePathSeparator))));
   for (const auto& db_path : immutable_db_options_.db_paths) {
     paths.push_back(
-        NormalizePath(db_path.path + std::string(1, kFilePathSeparator)));
+        static_cast<std::string>(NormalizePath(db_path.path + std::string(1, kFilePathSeparator))));
   }
   for (const auto* cfd : *versions_->GetColumnFamilySet()) {
     for (const auto& cf_path : cfd->ioptions()->cf_paths) {
       paths.push_back(
-          NormalizePath(cf_path.path + std::string(1, kFilePathSeparator)));
+          static_cast<std::string>(NormalizePath(cf_path.path + std::string(1, kFilePathSeparator))));
     }
   }
   // Dedup paths

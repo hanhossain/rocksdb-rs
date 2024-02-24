@@ -70,7 +70,7 @@ InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
     prefix = Slice(buf, sizeof(kInfoLogPrefix) - 1);
   } else {
     size_t len =
-        GetInfoLogPrefix(NormalizePath(db_absolute_path), buf, sizeof(buf));
+        GetInfoLogPrefix(static_cast<std::string>(NormalizePath(db_absolute_path)), buf, sizeof(buf));
     prefix = Slice(buf, len);
   }
 }
@@ -344,23 +344,4 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   }
   return Status_OK();
 }
-
-std::string NormalizePath(const std::string& path) {
-  std::string dst;
-
-  if (path.length() > 2 && path[0] == kFilePathSeparator &&
-      path[1] == kFilePathSeparator) {  // Handle UNC names
-    dst.append(2, kFilePathSeparator);
-  }
-
-  for (auto c : path) {
-    if (!dst.empty() && (c == kFilePathSeparator || c == '/') &&
-        (dst.back() == kFilePathSeparator || dst.back() == '/')) {
-      continue;
-    }
-    dst.push_back(c);
-  }
-  return dst;
-}
-
 }  // namespace rocksdb

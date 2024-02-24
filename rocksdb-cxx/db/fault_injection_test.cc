@@ -549,7 +549,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   auto fault_fs = std::make_shared<FaultInjectionTestFS>(FileSystem::Default());
   fault_fs->EnableWriteErrorInjection();
   fault_fs->SetFilesystemDirectWritable(false);
-  const std::string file_name = NormalizePath(dbname_ + "/test_file");
+  const std::string file_name = static_cast<std::string>(NormalizePath(dbname_ + "/test_file"));
   std::unique_ptr<log::Writer> log_writer = nullptr;
   constexpr uint64_t log_number = 0;
   {

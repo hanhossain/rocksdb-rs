@@ -608,7 +608,7 @@ IOStatus MockFileSystem::GetAbsolutePath(const std::string& db_path,
 }
 
 std::string MockFileSystem::NormalizeMockPath(const std::string& path) {
-  std::string p = NormalizePath(path);
+  std::string p = static_cast<std::string>(NormalizePath(path));
   if (p.back() == kFilePathSeparator && p.size() > 1) {
     p.pop_back();
   }
