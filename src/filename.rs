@@ -6,6 +6,7 @@ const ARCHIVAL_DIR_NAME: &str = "archive";
 const LEVELDB_TFILE_EXT: &str = "ldb";
 const CURRENT_FILE_NAME: &str = "CURRENT";
 const TEMP_FILE_NAME_SUFFIX: &str = "dbtmp";
+const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
@@ -66,6 +67,11 @@ mod ffi {
         /// with `dbname`.
         #[cxx_name = "TempFileName"]
         fn temp_file_name(dbname: &str, number: u64) -> String;
+        #[cxx_name = "OptionsFileName"]
+        fn options_file_name(file_num: u64) -> String;
+        /// Return a options file name given the `dbname` and file number. Format: OPTIONS-{number}.dbtmp
+        #[cxx_name = "OptionsFileName"]
+        fn options_file_name_full_path(dbname: &str, file_num: u64) -> String;
     }
 
     unsafe extern "C++" {
@@ -200,6 +206,15 @@ fn lock_file_name(dbname: &str) -> String {
 /// with `dbname`.
 fn temp_file_name(dbname: &str, number: u64) -> String {
     make_file_name_full_path(dbname, number, TEMP_FILE_NAME_SUFFIX)
+}
+
+fn options_file_name(file_num: u64) -> String {
+    format!("{}{:06}", OPTIONS_FILE_NAME_PREFIX, file_num)
+}
+
+/// Return a options file name given the `dbname` and file number. Format: OPTIONS-{number}.dbtmp
+fn options_file_name_full_path(dbname: &str, file_num: u64) -> String {
+    format!("{}/{}", dbname, options_file_name(file_num))
 }
 
 #[cfg(test)]

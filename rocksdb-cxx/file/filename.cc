@@ -101,16 +101,6 @@ std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
   return log_dir + "/" + info_log_prefix.buf + ".old." + buf;
 }
 
-std::string OptionsFileName(uint64_t file_num) {
-  char buffer[256];
-  snprintf(buffer, sizeof(buffer), "%s%06" PRIu64,
-           kOptionsFileNamePrefix.c_str(), file_num);
-  return buffer;
-}
-std::string OptionsFileName(const std::string& dbname, uint64_t file_num) {
-  return dbname + "/" + OptionsFileName(file_num);
-}
-
 std::string TempOptionsFileName(const std::string& dbname, uint64_t file_num) {
   char buffer[256];
   snprintf(buffer, sizeof(buffer), "%s%06" PRIu64 ".%s",

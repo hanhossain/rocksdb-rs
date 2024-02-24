@@ -64,12 +64,6 @@ extern std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
 extern const std::string kOptionsFileNamePrefix;  // = "OPTIONS-"
 extern const std::string kTempFileNameSuffix;     // = "dbtmp"
 
-// Return a options file name given the "dbname" and file number.
-// Format:  OPTIONS-[number].dbtmp
-extern std::string OptionsFileName(const std::string& dbname,
-                                   uint64_t file_num);
-extern std::string OptionsFileName(uint64_t file_num);
-
 // Return a temp options file name given the "dbname" and file number.
 // Format:  OPTIONS-[number]
 extern std::string TempOptionsFileName(const std::string& dbname,

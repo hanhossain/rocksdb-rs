@@ -331,7 +331,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     results.emplace_back();
     LiveFileStorageInfo& info = results.back();
 
-    info.relative_filename = OptionsFileName(options_number);
+    info.relative_filename = static_cast<std::string>(OptionsFileName(options_number));
     info.directory = GetName();
     info.file_number = options_number;
     info.file_type = kOptionsFile;

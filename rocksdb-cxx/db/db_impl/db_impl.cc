@@ -4980,7 +4980,7 @@ Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
 
   uint64_t options_file_number = versions_->NewFileNumber();
   std::string options_file_name =
-      OptionsFileName(GetName(), options_file_number);
+      static_cast<std::string>(OptionsFileName(GetName(), options_file_number));
   uint64_t options_file_size = 0;
   s = GetEnv()->GetFileSize(file_name, &options_file_size);
   if (s.ok()) {

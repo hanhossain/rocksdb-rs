@@ -84,7 +84,7 @@ TEST_F(OptionsFileTest, OptionsFileName) {
   uint64_t number;
   FileType type;
 
-  auto options_file_name = OptionsFileName("", kOptionsFileNum);
+  auto options_file_name = static_cast<std::string>(OptionsFileName("", kOptionsFileNum));
   ASSERT_TRUE(ParseFileName(options_file_name, &number, &type, nullptr));
   ASSERT_EQ(type, kOptionsFile);
   ASSERT_EQ(number, kOptionsFileNum);
