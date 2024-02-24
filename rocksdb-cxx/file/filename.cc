@@ -61,10 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string CurrentFileName(const std::string& dbname) {
-  return dbname + "/" + kCurrentFileName;
-}
-
 std::string LockFileName(const std::string& dbname) { return dbname + "/LOCK"; }
 
 std::string TempFileName(const std::string& dbname, uint64_t number) {
@@ -286,14 +282,14 @@ IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
   TEST_SYNC_POINT_CALLBACK("SetCurrentFile:BeforeRename", &s);
   if (s.ok()) {
     TEST_KILL_RANDOM_WITH_WEIGHT("SetCurrentFile:0", REDUCE_ODDS2);
-    s = fs->RenameFile(tmp, CurrentFileName(dbname), IOOptions(), nullptr);
+    s = fs->RenameFile(tmp, static_cast<std::string>(CurrentFileName(dbname)), IOOptions(), nullptr);
     TEST_KILL_RANDOM_WITH_WEIGHT("SetCurrentFile:1", REDUCE_ODDS2);
     TEST_SYNC_POINT_CALLBACK("SetCurrentFile:AfterRename", &s);
   }
   if (s.ok()) {
     if (dir_contains_current_file != nullptr) {
       s = dir_contains_current_file->FsyncWithDirOptions(
-          IOOptions(), nullptr, DirFsyncOptions(CurrentFileName(dbname)));
+          IOOptions(), nullptr, DirFsyncOptions(static_cast<std::string>(CurrentFileName(dbname))));
     }
   } else {
     fs->DeleteFile(tmp, IOOptions(), nullptr);

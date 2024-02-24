@@ -3691,7 +3691,7 @@ void DBFileDumperCommand::DoCommand() {
   std::cout << "Manifest File" << std::endl;
   std::cout << "==============================" << std::endl;
   std::string manifest_filename;
-  s = ReadFileToString(db_->GetEnv(), CurrentFileName(db_->GetName()),
+  s = ReadFileToString(db_->GetEnv(), static_cast<std::string>(CurrentFileName(db_->GetName())),
                        &manifest_filename);
   if (!s.ok() || manifest_filename.empty() ||
       manifest_filename.back() != '\n') {

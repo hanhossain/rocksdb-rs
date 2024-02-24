@@ -41,11 +41,6 @@ constexpr char kFilePathSeparator = '/';
 
 extern const std::string kCurrentFileName;  // = "CURRENT"
 
-// Return the name of the current file.  This file contains the name
-// of the current manifest file.  The result will be prefixed with
-// "dbname".
-extern std::string CurrentFileName(const std::string& dbname);
-
 // Return the name of the lock file for the db named by
 // "dbname".  The result will be prefixed with "dbname".
 extern std::string LockFileName(const std::string& dbname);

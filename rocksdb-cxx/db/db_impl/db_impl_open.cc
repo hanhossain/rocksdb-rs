@@ -424,7 +424,7 @@ Status DBImpl::Recover(
       return s;
     }
 
-    std::string current_fname = CurrentFileName(dbname_);
+    std::string current_fname = static_cast<std::string>(CurrentFileName(dbname_));
     // Path to any MANIFEST file in the db dir. It does not matter which one.
     // Since best-efforts recovery ignores CURRENT file, existence of a
     // MANIFEST indicates the recovery to recover existing db. If no MANIFEST

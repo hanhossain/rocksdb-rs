@@ -4,6 +4,7 @@ const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
 const ROCKSDB_TFILE_EXT: &str = "sst";
 const ARCHIVAL_DIR_NAME: &str = "archive";
 const LEVELDB_TFILE_EXT: &str = "ldb";
+const CURRENT_FILE_NAME: &str = "CURRENT";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
@@ -52,6 +53,10 @@ mod ffi {
         fn table_file_name(db_paths: &CxxVector<DbPath>, number: u64, path_id: u32) -> String;
         #[cxx_name = "FormatFileNumber"]
         fn format_file_number(number: u64, path_id: u32) -> String;
+        /// Return the name of the current file. This file contains the name of the current manifest
+        /// file. The result will be prefixed with `dbname`.
+        #[cxx_name = "CurrentFileName"]
+        fn current_file_name(dbname: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -168,6 +173,12 @@ fn format_file_number(number: u64, path_id: u32) -> String {
     } else {
         format!("{}(path {})", number, path_id)
     }
+}
+
+/// Return the name of the current file. This file contains the name of the current manifest file.
+/// The result will be prefixed with `dbname`.
+fn current_file_name(dbname: &str) -> String {
+    format!("{}/{}", dbname, CURRENT_FILE_NAME)
 }
 
 #[cfg(test)]
