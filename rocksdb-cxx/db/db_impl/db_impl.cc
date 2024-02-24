@@ -4595,7 +4595,7 @@ Status DBImpl::GetDbIdentity(std::string& identity) const {
 }
 
 Status DBImpl::GetDbIdentityFromIdentityFile(std::string* identity) const {
-  std::string idfilename = IdentityFileName(dbname_);
+  std::string idfilename = static_cast<std::string>(IdentityFileName(dbname_));
   const FileOptions soptions;
 
   Status s = ReadFileToString(fs_.get(), idfilename, identity);
@@ -4893,7 +4893,7 @@ Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
                            &db_options);
 
   std::string file_name =
-      TempOptionsFileName(GetName(), versions_->NewFileNumber());
+      static_cast<std::string>(TempOptionsFileName(GetName(), versions_->NewFileNumber()));
   Status s = PersistRocksDBOptions(db_options, cf_names, cf_opts, file_name,
                                    fs_.get());
 

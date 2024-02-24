@@ -600,7 +600,7 @@ TEST_F(DBBasicTest, IdentityAcrossRestarts) {
   constexpr size_t kMinIdSize = 10;
   do {
     for (bool with_manifest : {false, true}) {
-      std::string idfilename = IdentityFileName(dbname_);
+      std::string idfilename = static_cast<std::string>(IdentityFileName(dbname_));
       std::string id1, tmp;
       ASSERT_OK(db_->GetDbIdentity(id1));
       ASSERT_GE(id1.size(), kMinIdSize);

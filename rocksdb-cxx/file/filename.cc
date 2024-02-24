@@ -101,25 +101,6 @@ std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
   return log_dir + "/" + info_log_prefix.buf + ".old." + buf;
 }
 
-std::string TempOptionsFileName(const std::string& dbname, uint64_t file_num) {
-  char buffer[256];
-  snprintf(buffer, sizeof(buffer), "%s%06" PRIu64 ".%s",
-           kOptionsFileNamePrefix.c_str(), file_num,
-           kTempFileNameSuffix.c_str());
-  return dbname + "/" + buffer;
-}
-
-std::string MetaDatabaseName(const std::string& dbname, uint64_t number) {
-  char buf[100];
-  snprintf(buf, sizeof(buf), "/METADB-%llu",
-           static_cast<unsigned long long>(number));
-  return dbname + buf;
-}
-
-std::string IdentityFileName(const std::string& dbname) {
-  return dbname + "/IDENTITY";
-}
-
 // Owned filenames have the form:
 //    dbname/IDENTITY
 //    dbname/CURRENT
@@ -292,7 +273,7 @@ Status SetIdentityFile(Env* env, const std::string& dbname,
   assert(!id.empty());
   // Reserve the filename dbname/000000.dbtmp for the temporary identity file
   std::string tmp = static_cast<std::string>(TempFileName(dbname, 0));
-  std::string identify_file_name = IdentityFileName(dbname);
+  std::string identify_file_name = static_cast<std::string>(IdentityFileName(dbname));
   Status s = WriteStringToFile(env, id, tmp, true);
   if (s.ok()) {
     s = env->RenameFile(tmp, identify_file_name);

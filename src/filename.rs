@@ -72,6 +72,18 @@ mod ffi {
         /// Return a options file name given the `dbname` and file number. Format: OPTIONS-{number}.dbtmp
         #[cxx_name = "OptionsFileName"]
         fn options_file_name_full_path(dbname: &str, file_num: u64) -> String;
+        #[cxx_name = "TempOptionsFileName"]
+        /// Return a temp options file name given the "dbname" and file number.
+        /// Format: OPTIONS-{number}
+        fn temp_options_file_name(dbname: &str, file_num: u64) -> String;
+        /// Return the name to use for a metadatabase. The result will be prefixed with `dbname`.
+        #[cxx_name = "MetaDatabaseName"]
+        fn meta_database_name(dbname: &str, number: u64) -> String;
+        /// Return the name of the Identity file which stores a unique number for the db that will get
+        /// regenerated if the db loses all its data and is recreated fresh either from a backup-image or
+        /// empty
+        #[cxx_name = "IdentityFileName"]
+        fn identity_file_name(dbname: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -215,6 +227,26 @@ fn options_file_name(file_num: u64) -> String {
 /// Return a options file name given the `dbname` and file number. Format: OPTIONS-{number}.dbtmp
 fn options_file_name_full_path(dbname: &str, file_num: u64) -> String {
     format!("{}/{}", dbname, options_file_name(file_num))
+}
+
+/// Return a temp options file name given the "dbname" and file number. Format: OPTIONS-{number}
+fn temp_options_file_name(dbname: &str, file_num: u64) -> String {
+    format!(
+        "{}/{}{:06}.{}",
+        dbname, OPTIONS_FILE_NAME_PREFIX, file_num, TEMP_FILE_NAME_SUFFIX
+    )
+}
+
+/// Return the name to use for a metadatabase. The result will be prefixed with `dbname`.
+fn meta_database_name(dbname: &str, number: u64) -> String {
+    format!("{}/METADB-{}", dbname, number)
+}
+
+/// Return the name of the Identity file which stores a unique number for the db that will get
+/// regenerated if the db loses all its data and is recreated fresh either from a backup-image or
+/// empty
+fn identity_file_name(dbname: &str) -> String {
+    format!("{}/IDENTITY", dbname)
 }
 
 #[cfg(test)]

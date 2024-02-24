@@ -64,20 +64,6 @@ extern std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
 extern const std::string kOptionsFileNamePrefix;  // = "OPTIONS-"
 extern const std::string kTempFileNameSuffix;     // = "dbtmp"
 
-// Return a temp options file name given the "dbname" and file number.
-// Format:  OPTIONS-[number]
-extern std::string TempOptionsFileName(const std::string& dbname,
-                                       uint64_t file_num);
-
-// Return the name to use for a metadatabase. The result will be prefixed with
-// "dbname".
-extern std::string MetaDatabaseName(const std::string& dbname, uint64_t number);
-
-// Return the name of the Identity file which stores a unique number for the db
-// that will get regenerated if the db loses all its data and is recreated fresh
-// either from a backup-image or empty
-extern std::string IdentityFileName(const std::string& dbname);
-
 // If filename is a rocksdb file, store the type of the file in *type.
 // The number encoded in the filename is stored in *number.  If the
 // filename was successfully parsed, returns true.  Else return false.

@@ -162,7 +162,7 @@ TEST_F(FileNameTest, Construction) {
   ASSERT_EQ(999U, number);
   ASSERT_EQ(kTempFile, type);
 
-  fname = MetaDatabaseName("met", 100);
+  fname = static_cast<std::string>(MetaDatabaseName("met", 100));
   ASSERT_EQ("met/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(100U, number);
