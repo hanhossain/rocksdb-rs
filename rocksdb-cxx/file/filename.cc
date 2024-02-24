@@ -61,8 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string LockFileName(const std::string& dbname) { return dbname + "/LOCK"; }
-
 std::string TempFileName(const std::string& dbname, uint64_t number) {
   return static_cast<std::string>(rs::make_file_name_full_path(dbname, number, kTempFileNameSuffix.c_str()));
 }

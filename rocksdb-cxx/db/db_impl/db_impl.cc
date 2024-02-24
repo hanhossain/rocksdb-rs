@@ -4730,7 +4730,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
                     /*IODebugContext*=*/nullptr);
 
   FileLock* lock;
-  const std::string lockname = LockFileName(dbname);
+  const std::string lockname = static_cast<std::string>(LockFileName(dbname));
   Status result = env->LockFile(lockname, &lock);
   if (result.ok()) {
     uint64_t number;

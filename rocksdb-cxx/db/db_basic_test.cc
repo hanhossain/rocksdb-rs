@@ -685,7 +685,7 @@ TEST_F(DBBasicTest, LockFileRecovery) {
     Close();
 
     // Should be OK to re-open DB after lock file deleted
-    std::string lockfilename = LockFileName(dbname_);
+    std::string lockfilename = static_cast<std::string>(LockFileName(dbname_));
     ASSERT_OK(env_->DeleteFile(lockfilename));
     Reopen(options);
 

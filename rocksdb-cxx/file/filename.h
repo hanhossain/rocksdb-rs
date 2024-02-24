@@ -41,10 +41,6 @@ constexpr char kFilePathSeparator = '/';
 
 extern const std::string kCurrentFileName;  // = "CURRENT"
 
-// Return the name of the lock file for the db named by
-// "dbname".  The result will be prefixed with "dbname".
-extern std::string LockFileName(const std::string& dbname);
-
 // Return the name of a temporary file owned by the db named "dbname".
 // The result will be prefixed with "dbname".
 extern std::string TempFileName(const std::string& dbname, uint64_t number);

@@ -57,6 +57,10 @@ mod ffi {
         /// file. The result will be prefixed with `dbname`.
         #[cxx_name = "CurrentFileName"]
         fn current_file_name(dbname: &str) -> String;
+        /// Return the name of the lock file for the db named by `dbname`. The result will be prefixed with
+        /// `dbname`.
+        #[cxx_name = "LockFileName"]
+        fn lock_file_name(dbname: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -179,6 +183,12 @@ fn format_file_number(number: u64, path_id: u32) -> String {
 /// The result will be prefixed with `dbname`.
 fn current_file_name(dbname: &str) -> String {
     format!("{}/{}", dbname, CURRENT_FILE_NAME)
+}
+
+/// Return the name of the lock file for the db named by `dbname`. The result will be prefixed with
+/// `dbname`.
+fn lock_file_name(dbname: &str) -> String {
+    format!("{}/LOCK", dbname)
 }
 
 #[cfg(test)]

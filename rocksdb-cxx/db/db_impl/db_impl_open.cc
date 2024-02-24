@@ -419,7 +419,7 @@ Status DBImpl::Recover(
       return s;
     }
 
-    s = env_->LockFile(LockFileName(dbname_), &db_lock_);
+    s = env_->LockFile(static_cast<std::string>(LockFileName(dbname_)), &db_lock_);
     if (!s.ok()) {
       return s;
     }

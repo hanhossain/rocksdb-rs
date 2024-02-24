@@ -129,7 +129,7 @@ TEST_F(FileNameTest, Construction) {
   ASSERT_EQ(0U, number);
   ASSERT_EQ(kCurrentFile, type);
 
-  fname = LockFileName("foo");
+  fname = static_cast<std::string>(LockFileName("foo"));
   ASSERT_EQ("foo/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(0U, number);

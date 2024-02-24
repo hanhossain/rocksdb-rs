@@ -191,7 +191,7 @@ class Repairer {
   ~Repairer() { Close(); }
 
   Status Run() {
-    Status status = env_->LockFile(LockFileName(dbname_), &db_lock_);
+    Status status = env_->LockFile(static_cast<std::string>(LockFileName(dbname_)), &db_lock_);
     if (!status.ok()) {
       return status;
     }
