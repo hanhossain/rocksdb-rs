@@ -5,6 +5,7 @@ const ROCKSDB_TFILE_EXT: &str = "sst";
 const ARCHIVAL_DIR_NAME: &str = "archive";
 const LEVELDB_TFILE_EXT: &str = "ldb";
 const CURRENT_FILE_NAME: &str = "CURRENT";
+const TEMP_FILE_NAME_SUFFIX: &str = "dbtmp";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
@@ -61,6 +62,10 @@ mod ffi {
         /// `dbname`.
         #[cxx_name = "LockFileName"]
         fn lock_file_name(dbname: &str) -> String;
+        /// Return the name of a temporary file owned by the db named `dbname`. The result will be prefixed
+        /// with `dbname`.
+        #[cxx_name = "TempFileName"]
+        fn temp_file_name(dbname: &str, number: u64) -> String;
     }
 
     unsafe extern "C++" {
@@ -189,6 +194,12 @@ fn current_file_name(dbname: &str) -> String {
 /// `dbname`.
 fn lock_file_name(dbname: &str) -> String {
     format!("{}/LOCK", dbname)
+}
+
+/// Return the name of a temporary file owned by the db named `dbname`. The result will be prefixed
+/// with `dbname`.
+fn temp_file_name(dbname: &str, number: u64) -> String {
+    make_file_name_full_path(dbname, number, TEMP_FILE_NAME_SUFFIX)
 }
 
 #[cfg(test)]

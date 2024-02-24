@@ -61,10 +61,6 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
   return write_idx;
 }
 
-std::string TempFileName(const std::string& dbname, uint64_t number) {
-  return static_cast<std::string>(rs::make_file_name_full_path(dbname, number, kTempFileNameSuffix.c_str()));
-}
-
 InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
                              const std::string& db_absolute_path) {
   if (!has_log_dir) {
@@ -275,7 +271,7 @@ IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
   Slice contents = manifest;
   assert(contents.starts_with(dbname + "/"));
   contents.remove_prefix(dbname.size() + 1);
-  std::string tmp = TempFileName(dbname, descriptor_number);
+  std::string tmp = static_cast<std::string>(TempFileName(dbname, descriptor_number));
   IOStatus s = WriteStringToFile(fs, contents.ToString() + "\n", tmp, true);
   TEST_SYNC_POINT_CALLBACK("SetCurrentFile:BeforeRename", &s);
   if (s.ok()) {
@@ -305,7 +301,7 @@ Status SetIdentityFile(Env* env, const std::string& dbname,
   }
   assert(!id.empty());
   // Reserve the filename dbname/000000.dbtmp for the temporary identity file
-  std::string tmp = TempFileName(dbname, 0);
+  std::string tmp = static_cast<std::string>(TempFileName(dbname, 0));
   std::string identify_file_name = IdentityFileName(dbname);
   Status s = WriteStringToFile(env, id, tmp, true);
   if (s.ok()) {

@@ -41,10 +41,6 @@ constexpr char kFilePathSeparator = '/';
 
 extern const std::string kCurrentFileName;  // = "CURRENT"
 
-// Return the name of a temporary file owned by the db named "dbname".
-// The result will be prefixed with "dbname".
-extern std::string TempFileName(const std::string& dbname, uint64_t number);
-
 // A helper structure for prefix of info log names.
 struct InfoLogPrefix {
   char buf[260];
