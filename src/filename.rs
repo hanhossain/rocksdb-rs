@@ -4,6 +4,9 @@ const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
 const ROCKSDB_TFILE_EXT: &str = "sst";
 const ARCHIVAL_DIR_NAME: &str = "archive";
 const LEVELDB_TFILE_EXT: &str = "ldb";
+const CURRENT_FILE_NAME: &str = "CURRENT";
+const TEMP_FILE_NAME_SUFFIX: &str = "dbtmp";
+const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
@@ -52,6 +55,37 @@ mod ffi {
         fn table_file_name(db_paths: &CxxVector<DbPath>, number: u64, path_id: u32) -> String;
         #[cxx_name = "FormatFileNumber"]
         fn format_file_number(number: u64, path_id: u32) -> String;
+        /// Return the name of the current file. This file contains the name of the current manifest
+        /// file. The result will be prefixed with `dbname`.
+        #[cxx_name = "CurrentFileName"]
+        fn current_file_name(dbname: &str) -> String;
+        /// Return the name of the lock file for the db named by `dbname`. The result will be prefixed with
+        /// `dbname`.
+        #[cxx_name = "LockFileName"]
+        fn lock_file_name(dbname: &str) -> String;
+        /// Return the name of a temporary file owned by the db named `dbname`. The result will be prefixed
+        /// with `dbname`.
+        #[cxx_name = "TempFileName"]
+        fn temp_file_name(dbname: &str, number: u64) -> String;
+        #[cxx_name = "OptionsFileName"]
+        fn options_file_name(file_num: u64) -> String;
+        /// Return a options file name given the `dbname` and file number. Format: OPTIONS-{number}.dbtmp
+        #[cxx_name = "OptionsFileName"]
+        fn options_file_name_full_path(dbname: &str, file_num: u64) -> String;
+        #[cxx_name = "TempOptionsFileName"]
+        /// Return a temp options file name given the "dbname" and file number.
+        /// Format: OPTIONS-{number}
+        fn temp_options_file_name(dbname: &str, file_num: u64) -> String;
+        /// Return the name to use for a metadatabase. The result will be prefixed with `dbname`.
+        #[cxx_name = "MetaDatabaseName"]
+        fn meta_database_name(dbname: &str, number: u64) -> String;
+        /// Return the name of the Identity file which stores a unique number for the db that will get
+        /// regenerated if the db loses all its data and is recreated fresh either from a backup-image or
+        /// empty
+        #[cxx_name = "IdentityFileName"]
+        fn identity_file_name(dbname: &str) -> String;
+        #[cxx_name = "NormalizePath"]
+        fn normalize_path(path: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -170,6 +204,69 @@ fn format_file_number(number: u64, path_id: u32) -> String {
     }
 }
 
+/// Return the name of the current file. This file contains the name of the current manifest file.
+/// The result will be prefixed with `dbname`.
+fn current_file_name(dbname: &str) -> String {
+    format!("{}/{}", dbname, CURRENT_FILE_NAME)
+}
+
+/// Return the name of the lock file for the db named by `dbname`. The result will be prefixed with
+/// `dbname`.
+fn lock_file_name(dbname: &str) -> String {
+    format!("{}/LOCK", dbname)
+}
+
+/// Return the name of a temporary file owned by the db named `dbname`. The result will be prefixed
+/// with `dbname`.
+fn temp_file_name(dbname: &str, number: u64) -> String {
+    make_file_name_full_path(dbname, number, TEMP_FILE_NAME_SUFFIX)
+}
+
+fn options_file_name(file_num: u64) -> String {
+    format!("{}{:06}", OPTIONS_FILE_NAME_PREFIX, file_num)
+}
+
+/// Return a options file name given the `dbname` and file number. Format: OPTIONS-{number}.dbtmp
+fn options_file_name_full_path(dbname: &str, file_num: u64) -> String {
+    format!("{}/{}", dbname, options_file_name(file_num))
+}
+
+/// Return a temp options file name given the "dbname" and file number. Format: OPTIONS-{number}
+fn temp_options_file_name(dbname: &str, file_num: u64) -> String {
+    format!(
+        "{}/{}{:06}.{}",
+        dbname, OPTIONS_FILE_NAME_PREFIX, file_num, TEMP_FILE_NAME_SUFFIX
+    )
+}
+
+/// Return the name to use for a metadatabase. The result will be prefixed with `dbname`.
+fn meta_database_name(dbname: &str, number: u64) -> String {
+    format!("{}/METADB-{}", dbname, number)
+}
+
+/// Return the name of the Identity file which stores a unique number for the db that will get
+/// regenerated if the db loses all its data and is recreated fresh either from a backup-image or
+/// empty
+fn identity_file_name(dbname: &str) -> String {
+    format!("{}/IDENTITY", dbname)
+}
+
+fn normalize_path(path: &str) -> String {
+    let mut normalized = String::new();
+
+    let path = if path.len() > 2 && &path[..1] == "/" {
+        normalized.push('/');
+        &path[1..]
+    } else {
+        path
+    };
+
+    let replaced = regex::Regex::new("/+").unwrap().replace_all(path, "/");
+    normalized.push_str(&replaced);
+
+    normalized
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -200,5 +297,15 @@ mod tests {
         assert_eq!(table_file_name_to_number("1.sst"), 1);
         assert_eq!(table_file_name_to_number(".sst"), 0);
         assert_eq!(table_file_name_to_number("sst"), 0);
+    }
+
+    #[test]
+    fn test_normalize_path() {
+        assert_eq!(normalize_path("a/b/c"), "a/b/c");
+        assert_eq!(normalize_path("a//b/c"), "a/b/c");
+        assert_eq!(normalize_path("//a/b/c"), "//a/b/c");
+        assert_eq!(normalize_path("//a//b/c"), "//a/b/c");
+        assert_eq!(normalize_path("///////a/////b/c"), "//a/b/c");
+        assert_eq!(normalize_path("//"), "/");
     }
 }

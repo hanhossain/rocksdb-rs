@@ -123,13 +123,13 @@ TEST_F(FileNameTest, Construction) {
   FileType type;
   std::string fname;
 
-  fname = CurrentFileName("foo");
+  fname = static_cast<std::string>(CurrentFileName("foo"));
   ASSERT_EQ("foo/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(0U, number);
   ASSERT_EQ(kCurrentFile, type);
 
-  fname = LockFileName("foo");
+  fname = static_cast<std::string>(LockFileName("foo"));
   ASSERT_EQ("foo/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(0U, number);
@@ -156,13 +156,13 @@ TEST_F(FileNameTest, Construction) {
   ASSERT_EQ(100U, number);
   ASSERT_EQ(kDescriptorFile, type);
 
-  fname = TempFileName("tmp", 999);
+  fname = static_cast<std::string>(TempFileName("tmp", 999));
   ASSERT_EQ("tmp/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(999U, number);
   ASSERT_EQ(kTempFile, type);
 
-  fname = MetaDatabaseName("met", 100);
+  fname = static_cast<std::string>(MetaDatabaseName("met", 100));
   ASSERT_EQ("met/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(100U, number);
@@ -173,8 +173,8 @@ TEST_F(FileNameTest, NormalizePath) {
   // No leading slash
   const std::string sep = std::string(1, kFilePathSeparator);
 
-  std::string expected = "FOLDER" + sep + "filename.ext";
-  std::string given = "FOLDER" + sep + "filename.ext";
+  rust::String expected = "FOLDER" + sep + "filename.ext";
+  rust::String given = "FOLDER" + sep + "filename.ext";
 
   ASSERT_EQ(expected, NormalizePath(given));
 

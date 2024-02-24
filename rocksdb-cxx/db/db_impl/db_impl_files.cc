@@ -919,7 +919,7 @@ Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
   // Check for the IDENTITY file and create it if not there or
   // broken or not matching manifest
   std::string db_id_in_file;
-  s = fs_->FileExists(IdentityFileName(dbname_), IOOptions(), nullptr);
+  s = fs_->FileExists(static_cast<std::string>(IdentityFileName(dbname_)), IOOptions(), nullptr);
   if (s.ok()) {
     s = GetDbIdentityFromIdentityFile(&db_id_in_file);
     if (s.ok() && !db_id_in_file.empty()) {
@@ -955,15 +955,15 @@ Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
 Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
   mutex_.AssertHeld();
   std::vector<std::string> paths;
-  paths.push_back(NormalizePath(dbname_ + std::string(1, kFilePathSeparator)));
+  paths.push_back(static_cast<std::string>(NormalizePath(dbname_ + std::string(1, kFilePathSeparator))));
   for (const auto& db_path : immutable_db_options_.db_paths) {
     paths.push_back(
-        NormalizePath(db_path.path + std::string(1, kFilePathSeparator)));
+        static_cast<std::string>(NormalizePath(db_path.path + std::string(1, kFilePathSeparator))));
   }
   for (const auto* cfd : *versions_->GetColumnFamilySet()) {
     for (const auto& cf_path : cfd->ioptions()->cf_paths) {
       paths.push_back(
-          NormalizePath(cf_path.path + std::string(1, kFilePathSeparator)));
+          static_cast<std::string>(NormalizePath(cf_path.path + std::string(1, kFilePathSeparator))));
     }
   }
   // Dedup paths

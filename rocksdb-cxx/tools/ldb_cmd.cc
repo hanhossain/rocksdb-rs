@@ -3691,7 +3691,7 @@ void DBFileDumperCommand::DoCommand() {
   std::cout << "Manifest File" << std::endl;
   std::cout << "==============================" << std::endl;
   std::string manifest_filename;
-  s = ReadFileToString(db_->GetEnv(), CurrentFileName(db_->GetName()),
+  s = ReadFileToString(db_->GetEnv(), static_cast<std::string>(CurrentFileName(db_->GetName())),
                        &manifest_filename);
   if (!s.ok() || manifest_filename.empty() ||
       manifest_filename.back() != '\n') {
@@ -3704,7 +3704,7 @@ void DBFileDumperCommand::DoCommand() {
   // Correct concatenation of filepath and filename:
   // Check that there is no double slashes (or more!) when concatenation
   // happens.
-  manifest_filepath = NormalizePath(manifest_filepath);
+  manifest_filepath = static_cast<std::string>(NormalizePath(manifest_filepath));
 
   std::cout << manifest_filepath << std::endl;
   DumpManifestFile(options_, manifest_filepath, false, false, false,
@@ -3725,7 +3725,7 @@ void DBFileDumperCommand::DoCommand() {
         // Correct concatenation of filepath and filename:
         // Check that there is no double slashes (or more!) when concatenation
         // happens.
-        filename = NormalizePath(filename);
+        filename = static_cast<std::string>(NormalizePath(filename));
         std::cout << filename << " level:" << level.level << std::endl;
         std::cout << "------------------------------" << std::endl;
         DumpSstFile(options_, filename, false, true, decode_blob_index_);
@@ -3740,7 +3740,7 @@ void DBFileDumperCommand::DoCommand() {
       // Correct concatenation of filepath and filename:
       // Check that there is no double slashes (or more!) when concatenation
       // happens.
-      filename = NormalizePath(filename);
+      filename = static_cast<std::string>(NormalizePath(filename));
       std::cout << filename << std::endl;
       std::cout << "------------------------------" << std::endl;
       DumpBlobFile(filename, /* is_key_hex */ false, /* is_value_hex */ false,
@@ -3761,7 +3761,7 @@ void DBFileDumperCommand::DoCommand() {
     if (options_.wal_dir.empty()) {
       wal_dir = db_->GetName();
     } else {
-      wal_dir = NormalizePath(options_.wal_dir + "/");
+      wal_dir = static_cast<std::string>(NormalizePath(options_.wal_dir + "/"));
     }
     for (auto& wal : wal_files) {
       // TODO(qyang): option.wal_dir should be passed into ldb command
@@ -3822,7 +3822,7 @@ void DBLiveFilesMetadataDumperCommand::DoCommand() {
           // concantenate the two strings directly or if we need to
           // drop a possible extra "/" at the end of SstFileMetaData.db_path.
           std::string filename =
-              NormalizePath(sst_metadata.db_path + "/" + sst_metadata.name);
+              static_cast<std::string>(NormalizePath(sst_metadata.db_path + "/" + sst_metadata.name));
           all_files.emplace_back(filename, level, cf);
         }  // End of for-loop over sst files
       }    // End of for-loop over levels
@@ -3834,8 +3834,8 @@ void DBLiveFilesMetadataDumperCommand::DoCommand() {
         // the user as an input. Therefore we check if we can
         // concantenate the two strings directly or if we need to
         // drop a possible extra "/" at the end of BlobMetaData.blob_file_path.
-        std::string filename = NormalizePath(
-            blob_metadata.blob_file_path + "/" + blob_metadata.blob_file_name);
+        std::string filename = static_cast<std::string>(NormalizePath(
+            blob_metadata.blob_file_path + "/" + blob_metadata.blob_file_name));
         // Level for blob files is encoded as -1
         all_files.emplace_back(filename, -1, cf);
       }  // End of for-loop over blob files
@@ -3875,7 +3875,7 @@ void DBLiveFilesMetadataDumperCommand::DoCommand() {
           // concantenate the two strings directly or if we need to
           // drop a possible extra "/" at the end of SstFileMetaData.db_path.
           std::string filename =
-              NormalizePath(sst_metadata.db_path + "/" + sst_metadata.name);
+              static_cast<std::string>(NormalizePath(sst_metadata.db_path + "/" + sst_metadata.name));
           std::cout << filename << std::endl;
         }  // End of for-loop over sst files
       }    // End of for-loop over levels
@@ -3888,8 +3888,8 @@ void DBLiveFilesMetadataDumperCommand::DoCommand() {
         // the user as an input. Therefore we check if we can
         // concantenate the two strings directly or if we need to
         // drop a possible extra "/" at the end of BlobMetaData.blob_file_path.
-        std::string filename = NormalizePath(
-            blob_metadata.blob_file_path + "/" + blob_metadata.blob_file_name);
+        std::string filename = static_cast<std::string>(NormalizePath(
+            blob_metadata.blob_file_path + "/" + blob_metadata.blob_file_name));
         std::cout << filename << std::endl;
       }  // End of for-loop over blob files
     }    // End of for-loop over column metadata
