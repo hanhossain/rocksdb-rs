@@ -109,13 +109,13 @@ TEST_F(FileNameTest, InfoLogFileName) {
 
   ASSERT_EQ("/data/rocksdb/LOG", static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "")));
   ASSERT_EQ("/data/rocksdb/LOG.old.666",
-            OldInfoLogFileName(dbname, 666u, db_absolute_path, ""));
+            static_cast<std::string>(OldInfoLogFileName(dbname, 666u, db_absolute_path, "")));
 
   ASSERT_EQ("/data/rocksdb_log/data_rocksdb_LOG",
             static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "/data/rocksdb_log")));
   ASSERT_EQ(
       "/data/rocksdb_log/data_rocksdb_LOG.old.666",
-      OldInfoLogFileName(dbname, 666u, db_absolute_path, "/data/rocksdb_log"));
+      static_cast<std::string>(OldInfoLogFileName(dbname, 666u, db_absolute_path, "/data/rocksdb_log")));
 }
 
 TEST_F(FileNameTest, Construction) {

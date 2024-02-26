@@ -90,7 +90,7 @@ void AutoRollLogger::RollLogFile() {
   std::string old_fname;
   do {
     old_fname =
-        OldInfoLogFileName(dbname_, now, db_absolute_path_, db_log_dir_);
+        static_cast<std::string>(OldInfoLogFileName(dbname_, now, db_absolute_path_, db_log_dir_));
     now++;
   } while (fs_->FileExists(old_fname, io_options_, &io_context_).ok());
   // Wait for logger_ reference count to turn to 1 as it might be pinned by
@@ -328,8 +328,8 @@ Status CreateLoggerFromOptions(const std::string& dbname,
   s = env->FileExists(fname);
   if (s.ok()) {
     s = env->RenameFile(
-        fname, OldInfoLogFileName(dbname, clock->NowMicros(), db_absolute_path,
-                                  options.db_log_dir));
+        fname, static_cast<std::string>(OldInfoLogFileName(dbname, clock->NowMicros(), db_absolute_path,
+                                  options.db_log_dir)));
 
     // The operation sequence of "FileExists -> Rename" is not atomic. It's
     // possible that FileExists returns OK but file gets deleted before Rename.

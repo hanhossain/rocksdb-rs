@@ -41,12 +41,6 @@ constexpr char kFilePathSeparator = '/';
 
 extern const std::string kCurrentFileName;  // = "CURRENT"
 
-
-// Return the name of the old info log file for "dbname".
-extern std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
-                                      const std::string& db_path = "",
-                                      const std::string& log_dir = "");
-
 extern const std::string kOptionsFileNamePrefix;  // = "OPTIONS-"
 extern const std::string kTempFileNameSuffix;     // = "dbtmp"
 

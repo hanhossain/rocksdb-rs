@@ -98,6 +98,9 @@ mod ffi {
         /// Return the name of the info log file for `dbname`.
         #[cxx_name = "InfoLogFileName"]
         fn info_log_file_name(dbname: &str, db_path: &str, log_dir: &str) -> String;
+        /// Return the name of the old info log file for `dbname`.
+        #[cxx_name = "OldInfoLogFileName"]
+        fn old_info_log_file_name(dbname: &str, ts: u64, db_path: &str, log_dir: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -319,6 +322,16 @@ fn info_log_file_name(dbname: &str, db_path: &str, log_dir: &str) -> String {
 
     let info_log_prefix = InfoLogPrefix::new(true, db_path);
     format!("{}/{}", log_dir, info_log_prefix.prefix)
+}
+
+/// Return the name of the old info log file for `dbname`.
+fn old_info_log_file_name(dbname: &str, ts: u64, db_path: &str, log_dir: &str) -> String {
+    if log_dir.is_empty() {
+        return format!("{}/LOG.old.{}", dbname, ts);
+    }
+
+    let info_log_prefix = InfoLogPrefix::new(true, db_path);
+    format!("{}/{}.old.{}", log_dir, info_log_prefix.prefix, ts)
 }
 
 #[cfg(test)]

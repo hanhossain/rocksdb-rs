@@ -31,21 +31,6 @@ static const std::string kLevelDbTFileExt = "ldb";
 static const std::string kRocksDBBlobFileExt = "blob";
 static const std::string kArchivalDirName = "archive";
 
-// Return the name of the old info log file for "dbname".
-std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
-                               const std::string& db_path,
-                               const std::string& log_dir) {
-  char buf[50];
-  snprintf(buf, sizeof(buf), "%llu", static_cast<unsigned long long>(ts));
-
-  if (log_dir.empty()) {
-    return dbname + "/LOG.old." + buf;
-  }
-
-  InfoLogPrefix info_log_prefix = InfoLogPrefix_new(true, db_path);
-  return log_dir + "/" + static_cast<std::string>(info_log_prefix.prefix) + ".old." + buf;
-}
-
 // Owned filenames have the form:
 //    dbname/IDENTITY
 //    dbname/CURRENT
