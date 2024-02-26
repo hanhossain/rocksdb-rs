@@ -47,7 +47,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
   } else {
     status_.copy_from(s);
   }
-  log_fname_ = InfoLogFileName(dbname_, db_absolute_path_, db_log_dir_);
+  log_fname_ = static_cast<std::string>(InfoLogFileName(dbname_, db_absolute_path_, db_log_dir_));
   if (fs_->FileExists(log_fname_, io_options_, &io_context_).ok()) {
     RollLogFile();
   }
@@ -285,7 +285,7 @@ Status CreateLoggerFromOptions(const std::string& dbname,
     return s;
   }
   std::string fname =
-      InfoLogFileName(dbname, db_absolute_path, options.db_log_dir);
+      static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, options.db_log_dir));
 
   const auto& clock = env->GetSystemClock();
   // In case it does not exist.

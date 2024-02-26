@@ -95,6 +95,9 @@ mod ffi {
         /// Prefix with DB absolute path encoded
         #[cxx_name = "InfoLogPrefix_new"]
         fn info_log_prefix_new(has_log_dir: bool, db_absolute_path: &str) -> InfoLogPrefix;
+        /// Return the name of the info log file for `dbname`.
+        #[cxx_name = "InfoLogFileName"]
+        fn info_log_file_name(dbname: &str, db_path: &str, log_dir: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -306,6 +309,16 @@ impl InfoLogPrefix {
 /// Prefix with DB absolute path encoded
 fn info_log_prefix_new(has_log_dir: bool, db_absolute_path: &str) -> InfoLogPrefix {
     InfoLogPrefix::new(has_log_dir, db_absolute_path)
+}
+
+/// Return the name of the info log file for `dbname`.
+fn info_log_file_name(dbname: &str, db_path: &str, log_dir: &str) -> String {
+    if log_dir.is_empty() {
+        return format!("{}/LOG", dbname);
+    }
+
+    let info_log_prefix = InfoLogPrefix::new(true, db_path);
+    format!("{}/{}", log_dir, info_log_prefix.prefix)
 }
 
 #[cfg(test)]

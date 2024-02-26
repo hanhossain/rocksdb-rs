@@ -107,12 +107,12 @@ TEST_F(FileNameTest, InfoLogFileName) {
   std::string db_absolute_path;
   ASSERT_OK(Env::Default()->GetAbsolutePath(dbname, &db_absolute_path));
 
-  ASSERT_EQ("/data/rocksdb/LOG", InfoLogFileName(dbname, db_absolute_path, ""));
+  ASSERT_EQ("/data/rocksdb/LOG", static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "")));
   ASSERT_EQ("/data/rocksdb/LOG.old.666",
             OldInfoLogFileName(dbname, 666u, db_absolute_path, ""));
 
   ASSERT_EQ("/data/rocksdb_log/data_rocksdb_LOG",
-            InfoLogFileName(dbname, db_absolute_path, "/data/rocksdb_log"));
+            static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "/data/rocksdb_log")));
   ASSERT_EQ(
       "/data/rocksdb_log/data_rocksdb_LOG.old.666",
       OldInfoLogFileName(dbname, 666u, db_absolute_path, "/data/rocksdb_log"));
