@@ -36,7 +36,7 @@ InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
   if (!has_log_dir) {
     prefix = "LOG";
   } else {
-    prefix = static_cast<std::string>(get_info_log_prefix(NormalizePath(db_absolute_path)));
+    prefix = get_info_log_prefix(NormalizePath(db_absolute_path));
   }
 }
 
@@ -48,7 +48,7 @@ std::string InfoLogFileName(const std::string& dbname,
   }
 
   InfoLogPrefix info_log_prefix(true, db_path);
-  return log_dir + "/" + info_log_prefix.prefix;
+  return log_dir + "/" + static_cast<std::string>(info_log_prefix.prefix);
 }
 
 // Return the name of the old info log file for "dbname".
@@ -63,7 +63,7 @@ std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
   }
 
   InfoLogPrefix info_log_prefix(true, db_path);
-  return log_dir + "/" + info_log_prefix.prefix + ".old." + buf;
+  return log_dir + "/" + static_cast<std::string>(info_log_prefix.prefix) + ".old." + buf;
 }
 
 // Owned filenames have the form:
@@ -302,7 +302,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   }
 
   for (auto& f : file_names) {
-    if (ParseFileName(f, &number, info_log_prefix.prefix, &type) &&
+    if (ParseFileName(f, &number, static_cast<std::string>(info_log_prefix.prefix), &type) &&
         (type == kInfoLogFile)) {
       info_log_list->push_back(f);
     }
