@@ -31,36 +31,12 @@ static const std::string kLevelDbTFileExt = "ldb";
 static const std::string kRocksDBBlobFileExt = "blob";
 static const std::string kArchivalDirName = "archive";
 
-// Given a path, flatten the path name by replacing all chars not in
-// {[0-9,a-z,A-Z,-,_,.]} with _. And append '_LOG\0' at the end.
-// Return the number of chars stored in dest not including the trailing '\0'.
-static std::string GetInfoLogPrefix(const std::string& path) {
-  std::string result;
-  size_t i = 0;
-
-  while (i < path.size()) {
-    if ((path[i] >= 'a' && path[i] <= 'z') ||
-        (path[i] >= '0' && path[i] <= '9') ||
-        (path[i] >= 'A' && path[i] <= 'Z') || path[i] == '-' ||
-        path[i] == '.' || path[i] == '_') {
-      result.push_back(path[i]);
-    } else {
-      if (i > 0) {
-        result.push_back('_');
-      }
-    }
-    i++;
-  }
-  result.append("_LOG");
-  return result;
-}
-
 InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
                              const std::string& db_absolute_path) {
   if (!has_log_dir) {
     prefix = "LOG";
   } else {
-    prefix = GetInfoLogPrefix(static_cast<std::string>(NormalizePath(db_absolute_path)));
+    prefix = static_cast<std::string>(get_info_log_prefix(NormalizePath(db_absolute_path)));
   }
 }
 

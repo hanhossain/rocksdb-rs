@@ -86,6 +86,9 @@ mod ffi {
         fn identity_file_name(dbname: &str) -> String;
         #[cxx_name = "NormalizePath"]
         fn normalize_path(path: &str) -> String;
+
+        // TODO: remove
+        fn get_info_log_prefix(path: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -265,6 +268,21 @@ fn normalize_path(path: &str) -> String {
     normalized.push_str(&replaced);
 
     normalized
+}
+
+/// Given a path, flatten the path name by replacing all chars not in {[0-9,a-z,A-Z,-,_,.]} with _.
+fn get_info_log_prefix(path: &str) -> String {
+    if path.is_empty() {
+        return "".to_string();
+    }
+
+    let re = regex::Regex::new("[^a-zA-Z0-9-._]").unwrap();
+    let replaced = if re.is_match(&path[..1]) && path.len() > 1 {
+        re.replace_all(&path[1..], "_")
+    } else {
+        re.replace_all(path, "_")
+    };
+    format!("{replaced}_LOG")
 }
 
 #[cfg(test)]
