@@ -63,6 +63,7 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
 
 InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
                              const std::string& db_absolute_path) {
+  char buf[260];
   if (!has_log_dir) {
     prefix = "LOG";
   } else {
@@ -80,7 +81,7 @@ std::string InfoLogFileName(const std::string& dbname,
   }
 
   InfoLogPrefix info_log_prefix(true, db_path);
-  return log_dir + "/" + info_log_prefix.buf;
+  return log_dir + "/" + info_log_prefix.prefix;
 }
 
 // Return the name of the old info log file for "dbname".
@@ -95,7 +96,7 @@ std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
   }
 
   InfoLogPrefix info_log_prefix(true, db_path);
-  return log_dir + "/" + info_log_prefix.buf + ".old." + buf;
+  return log_dir + "/" + info_log_prefix.prefix + ".old." + buf;
 }
 
 // Owned filenames have the form:

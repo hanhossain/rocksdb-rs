@@ -43,7 +43,6 @@ extern const std::string kCurrentFileName;  // = "CURRENT"
 
 // A helper structure for prefix of info log names.
 struct InfoLogPrefix {
-  char buf[260];
   std::string prefix;
   // Prefix with DB absolute path encoded
   explicit InfoLogPrefix(bool has_log_dir, const std::string& db_absolute_path);
