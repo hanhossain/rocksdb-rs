@@ -64,14 +64,11 @@ static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
 InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
                              const std::string& db_absolute_path) {
   if (!has_log_dir) {
-    const char kInfoLogPrefix[] = "LOG";
-    // "\0" is automatically added to the end
-    snprintf(buf, sizeof(buf), kInfoLogPrefix);
-    prefix = Slice(buf, sizeof(kInfoLogPrefix) - 1);
+    prefix = "LOG";
   } else {
     size_t len =
         GetInfoLogPrefix(static_cast<std::string>(NormalizePath(db_absolute_path)), buf, sizeof(buf));
-    prefix = Slice(buf, len);
+    prefix = std::string(buf, len);
   }
 }
 
