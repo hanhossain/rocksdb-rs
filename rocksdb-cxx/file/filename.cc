@@ -34,42 +34,33 @@ static const std::string kArchivalDirName = "archive";
 // Given a path, flatten the path name by replacing all chars not in
 // {[0-9,a-z,A-Z,-,_,.]} with _. And append '_LOG\0' at the end.
 // Return the number of chars stored in dest not including the trailing '\0'.
-static size_t GetInfoLogPrefix(const std::string& path, char* dest, int len) {
-  const char suffix[] = "_LOG";
-
-  size_t write_idx = 0;
+static std::string GetInfoLogPrefix(const std::string& path) {
+  std::string result;
   size_t i = 0;
-  size_t src_len = path.size();
 
-  while (i < src_len && write_idx < len - sizeof(suffix)) {
+  while (i < path.size()) {
     if ((path[i] >= 'a' && path[i] <= 'z') ||
         (path[i] >= '0' && path[i] <= '9') ||
         (path[i] >= 'A' && path[i] <= 'Z') || path[i] == '-' ||
         path[i] == '.' || path[i] == '_') {
-      dest[write_idx++] = path[i];
+      result.push_back(path[i]);
     } else {
       if (i > 0) {
-        dest[write_idx++] = '_';
+        result.push_back('_');
       }
     }
     i++;
   }
-  assert(sizeof(suffix) <= len - write_idx);
-  // "\0" is automatically added by snprintf
-  snprintf(dest + write_idx, len - write_idx, suffix);
-  write_idx += sizeof(suffix) - 1;
-  return write_idx;
+  result.append("_LOG");
+  return result;
 }
 
 InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
                              const std::string& db_absolute_path) {
-  char buf[260];
   if (!has_log_dir) {
     prefix = "LOG";
   } else {
-    size_t len =
-        GetInfoLogPrefix(static_cast<std::string>(NormalizePath(db_absolute_path)), buf, sizeof(buf));
-    prefix = std::string(buf, len);
+    prefix = GetInfoLogPrefix(static_cast<std::string>(NormalizePath(db_absolute_path)));
   }
 }
 
