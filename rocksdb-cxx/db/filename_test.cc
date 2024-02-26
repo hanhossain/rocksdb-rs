@@ -53,13 +53,13 @@ TEST_F(FileNameTest, Parse) {
   };
   for (char mode : {kDifferentInfoLogDir, kDefautInfoLogDir, kNoCheckLogDir}) {
     for (unsigned int i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-      InfoLogPrefix info_log_prefix(mode != kDefautInfoLogDir, "/rocksdb/dir");
+      InfoLogPrefix info_log_prefix = InfoLogPrefix_new(mode != kDefautInfoLogDir, "/rocksdb/dir");
       if (cases[i].mode & mode) {
         std::string f = cases[i].fname;
         if (mode == kNoCheckLogDir) {
           ASSERT_TRUE(ParseFileName(f, &number, &type)) << f;
         } else {
-          ASSERT_TRUE(ParseFileName(f, &number, info_log_prefix.prefix, &type))
+          ASSERT_TRUE(ParseFileName(f, &number, static_cast<std::string>(info_log_prefix.prefix), &type))
               << f;
         }
         ASSERT_EQ(cases[i].type, type) << f;
@@ -107,15 +107,15 @@ TEST_F(FileNameTest, InfoLogFileName) {
   std::string db_absolute_path;
   ASSERT_OK(Env::Default()->GetAbsolutePath(dbname, &db_absolute_path));
 
-  ASSERT_EQ("/data/rocksdb/LOG", InfoLogFileName(dbname, db_absolute_path, ""));
+  ASSERT_EQ("/data/rocksdb/LOG", static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "")));
   ASSERT_EQ("/data/rocksdb/LOG.old.666",
-            OldInfoLogFileName(dbname, 666u, db_absolute_path, ""));
+            static_cast<std::string>(OldInfoLogFileName(dbname, 666u, db_absolute_path, "")));
 
   ASSERT_EQ("/data/rocksdb_log/data_rocksdb_LOG",
-            InfoLogFileName(dbname, db_absolute_path, "/data/rocksdb_log"));
+            static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "/data/rocksdb_log")));
   ASSERT_EQ(
       "/data/rocksdb_log/data_rocksdb_LOG.old.666",
-      OldInfoLogFileName(dbname, 666u, db_absolute_path, "/data/rocksdb_log"));
+      static_cast<std::string>(OldInfoLogFileName(dbname, 666u, db_absolute_path, "/data/rocksdb_log")));
 }
 
 TEST_F(FileNameTest, Construction) {

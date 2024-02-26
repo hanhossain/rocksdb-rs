@@ -1,3 +1,4 @@
+use crate::filename::ffi::InfoLogPrefix;
 use cxx::CxxVector;
 
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
@@ -10,6 +11,11 @@ const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
+    /// A helper structure for prefix of info log names.
+    struct InfoLogPrefix {
+        prefix: String,
+    }
+
     extern "Rust" {
         // TODO: remove export
         #[namespace = "rocksdb::rs"]
@@ -86,6 +92,15 @@ mod ffi {
         fn identity_file_name(dbname: &str) -> String;
         #[cxx_name = "NormalizePath"]
         fn normalize_path(path: &str) -> String;
+        /// Prefix with DB absolute path encoded
+        #[cxx_name = "InfoLogPrefix_new"]
+        fn info_log_prefix_new(has_log_dir: bool, db_absolute_path: &str) -> InfoLogPrefix;
+        /// Return the name of the info log file for `dbname`.
+        #[cxx_name = "InfoLogFileName"]
+        fn info_log_file_name(dbname: &str, db_path: &str, log_dir: &str) -> String;
+        /// Return the name of the old info log file for `dbname`.
+        #[cxx_name = "OldInfoLogFileName"]
+        fn old_info_log_file_name(dbname: &str, ts: u64, db_path: &str, log_dir: &str) -> String;
     }
 
     unsafe extern "C++" {
@@ -265,6 +280,58 @@ fn normalize_path(path: &str) -> String {
     normalized.push_str(&replaced);
 
     normalized
+}
+
+/// Given a path, flatten the path name by replacing all chars not in {[0-9,a-z,A-Z,-,_,.]} with _.
+fn get_info_log_prefix(path: &str) -> String {
+    if path.is_empty() {
+        return "".to_string();
+    }
+
+    let re = regex::Regex::new("[^a-zA-Z0-9-._]").unwrap();
+    let replaced = if re.is_match(&path[..1]) && path.len() > 1 {
+        re.replace_all(&path[1..], "_")
+    } else {
+        re.replace_all(path, "_")
+    };
+    format!("{replaced}_LOG")
+}
+
+impl InfoLogPrefix {
+    /// Prefix with DB absolute path encoded
+    fn new(has_log_dir: bool, db_absolute_path: &str) -> Self {
+        let prefix = if has_log_dir {
+            get_info_log_prefix(&normalize_path(db_absolute_path))
+        } else {
+            "LOG".to_string()
+        };
+        InfoLogPrefix { prefix }
+    }
+}
+
+/// Prefix with DB absolute path encoded
+fn info_log_prefix_new(has_log_dir: bool, db_absolute_path: &str) -> InfoLogPrefix {
+    InfoLogPrefix::new(has_log_dir, db_absolute_path)
+}
+
+/// Return the name of the info log file for `dbname`.
+fn info_log_file_name(dbname: &str, db_path: &str, log_dir: &str) -> String {
+    if log_dir.is_empty() {
+        return format!("{}/LOG", dbname);
+    }
+
+    let info_log_prefix = InfoLogPrefix::new(true, db_path);
+    format!("{}/{}", log_dir, info_log_prefix.prefix)
+}
+
+/// Return the name of the old info log file for `dbname`.
+fn old_info_log_file_name(dbname: &str, ts: u64, db_path: &str, log_dir: &str) -> String {
+    if log_dir.is_empty() {
+        return format!("{}/LOG.old.{}", dbname, ts);
+    }
+
+    let info_log_prefix = InfoLogPrefix::new(true, db_path);
+    format!("{}/{}.old.{}", log_dir, info_log_prefix.prefix, ts)
 }
 
 #[cfg(test)]

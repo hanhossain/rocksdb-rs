@@ -174,7 +174,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
 
   if (doing_the_full_scan) {
     versions_->AddLiveFiles(&job_context->sst_live, &job_context->blob_live);
-    InfoLogPrefix info_log_prefix(!immutable_db_options_.db_log_dir.empty(),
+    InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
                                   dbname_);
     std::set<std::string> paths;
     for (size_t path_id = 0; path_id < immutable_db_options_.db_paths.size();
@@ -216,7 +216,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
         // are doing full scan in order to avoid double deletion of the same
         // file under race conditions. See
         // https://github.com/facebook/rocksdb/issues/3573
-        if (!ParseFileName(file, &number, info_log_prefix.prefix, &type) ||
+        if (!ParseFileName(file, &number, static_cast<std::string>(info_log_prefix.prefix), &type) ||
             !ShouldPurge(number)) {
           continue;
         }
@@ -476,7 +476,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
   }
 
   std::vector<std::string> old_info_log_files;
-  InfoLogPrefix info_log_prefix(!immutable_db_options_.db_log_dir.empty(),
+  InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
                                 dbname_);
 
   // File numbers of most recent two OPTIONS file in candidate_files (found in
@@ -489,7 +489,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
     const std::string& fname = candidate_file.file_name;
     uint64_t number;
     FileType type;
-    if (!ParseFileName(fname, &number, info_log_prefix.prefix, &type) ||
+    if (!ParseFileName(fname, &number, static_cast<std::string>(info_log_prefix.prefix), &type) ||
         type != kOptionsFile) {
       continue;
     }
@@ -514,7 +514,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
     uint64_t number;
     FileType type;
     // Ignore file if we cannot recognize it.
-    if (!ParseFileName(to_delete, &number, info_log_prefix.prefix, &type)) {
+    if (!ParseFileName(to_delete, &number, static_cast<std::string>(info_log_prefix.prefix), &type)) {
       continue;
     }
 
