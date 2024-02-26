@@ -174,7 +174,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
 
   if (doing_the_full_scan) {
     versions_->AddLiveFiles(&job_context->sst_live, &job_context->blob_live);
-    InfoLogPrefix info_log_prefix(!immutable_db_options_.db_log_dir.empty(),
+    InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
                                   dbname_);
     std::set<std::string> paths;
     for (size_t path_id = 0; path_id < immutable_db_options_.db_paths.size();
@@ -476,7 +476,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
   }
 
   std::vector<std::string> old_info_log_files;
-  InfoLogPrefix info_log_prefix(!immutable_db_options_.db_log_dir.empty(),
+  InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
                                 dbname_);
 
   // File numbers of most recent two OPTIONS file in candidate_files (found in

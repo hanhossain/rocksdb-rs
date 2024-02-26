@@ -1,3 +1,4 @@
+use crate::filename::ffi::InfoLogPrefix;
 use cxx::CxxVector;
 
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
@@ -10,6 +11,11 @@ const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
+    /// A helper structure for prefix of info log names.
+    struct InfoLogPrefix {
+        prefix: String,
+    }
+
     extern "Rust" {
         // TODO: remove export
         #[namespace = "rocksdb::rs"]
@@ -86,9 +92,9 @@ mod ffi {
         fn identity_file_name(dbname: &str) -> String;
         #[cxx_name = "NormalizePath"]
         fn normalize_path(path: &str) -> String;
-
-        // TODO: remove
-        fn get_info_log_prefix(path: &str) -> String;
+        /// Prefix with DB absolute path encoded
+        #[cxx_name = "InfoLogPrefix_new"]
+        fn info_log_prefix_new(has_log_dir: bool, db_absolute_path: &str) -> InfoLogPrefix;
     }
 
     unsafe extern "C++" {
@@ -283,6 +289,23 @@ fn get_info_log_prefix(path: &str) -> String {
         re.replace_all(path, "_")
     };
     format!("{replaced}_LOG")
+}
+
+impl InfoLogPrefix {
+    /// Prefix with DB absolute path encoded
+    fn new(has_log_dir: bool, db_absolute_path: &str) -> Self {
+        let prefix = if has_log_dir {
+            get_info_log_prefix(&normalize_path(db_absolute_path))
+        } else {
+            "LOG".to_string()
+        };
+        InfoLogPrefix { prefix }
+    }
+}
+
+/// Prefix with DB absolute path encoded
+fn info_log_prefix_new(has_log_dir: bool, db_absolute_path: &str) -> InfoLogPrefix {
+    InfoLogPrefix::new(has_log_dir, db_absolute_path)
 }
 
 #[cfg(test)]

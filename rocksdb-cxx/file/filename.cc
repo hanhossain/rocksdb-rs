@@ -31,15 +31,6 @@ static const std::string kLevelDbTFileExt = "ldb";
 static const std::string kRocksDBBlobFileExt = "blob";
 static const std::string kArchivalDirName = "archive";
 
-InfoLogPrefix::InfoLogPrefix(bool has_log_dir,
-                             const std::string& db_absolute_path) {
-  if (!has_log_dir) {
-    prefix = "LOG";
-  } else {
-    prefix = get_info_log_prefix(NormalizePath(db_absolute_path));
-  }
-}
-
 std::string InfoLogFileName(const std::string& dbname,
                             const std::string& db_path,
                             const std::string& log_dir) {
@@ -47,7 +38,7 @@ std::string InfoLogFileName(const std::string& dbname,
     return dbname + "/LOG";
   }
 
-  InfoLogPrefix info_log_prefix(true, db_path);
+  InfoLogPrefix info_log_prefix = InfoLogPrefix_new(true, db_path);
   return log_dir + "/" + static_cast<std::string>(info_log_prefix.prefix);
 }
 
@@ -62,7 +53,7 @@ std::string OldInfoLogFileName(const std::string& dbname, uint64_t ts,
     return dbname + "/LOG.old." + buf;
   }
 
-  InfoLogPrefix info_log_prefix(true, db_path);
+  InfoLogPrefix info_log_prefix = InfoLogPrefix_new(true, db_path);
   return log_dir + "/" + static_cast<std::string>(info_log_prefix.prefix) + ".old." + buf;
 }
 
@@ -292,7 +283,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
     *parent_dir = dbname;
   }
 
-  InfoLogPrefix info_log_prefix(!db_log_dir.empty(), dbname);
+  InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!db_log_dir.empty(), dbname);
 
   std::vector<std::string> file_names;
   Status s = fs->GetChildren(*parent_dir, IOOptions(), &file_names, nullptr);

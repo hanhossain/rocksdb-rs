@@ -41,15 +41,6 @@ constexpr char kFilePathSeparator = '/';
 
 extern const std::string kCurrentFileName;  // = "CURRENT"
 
-// A helper structure for prefix of info log names.
-struct InfoLogPrefix {
-  rust::String prefix;
-  // Prefix with DB absolute path encoded
-  explicit InfoLogPrefix(bool has_log_dir, const std::string& db_absolute_path);
-  // Default Prefix
-  explicit InfoLogPrefix();
-};
-
 // Return the name of the info log file for "dbname".
 extern std::string InfoLogFileName(const std::string& dbname,
                                    const std::string& db_path = "",

@@ -53,7 +53,7 @@ TEST_F(FileNameTest, Parse) {
   };
   for (char mode : {kDifferentInfoLogDir, kDefautInfoLogDir, kNoCheckLogDir}) {
     for (unsigned int i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-      InfoLogPrefix info_log_prefix(mode != kDefautInfoLogDir, "/rocksdb/dir");
+      InfoLogPrefix info_log_prefix = InfoLogPrefix_new(mode != kDefautInfoLogDir, "/rocksdb/dir");
       if (cases[i].mode & mode) {
         std::string f = cases[i].fname;
         if (mode == kNoCheckLogDir) {
