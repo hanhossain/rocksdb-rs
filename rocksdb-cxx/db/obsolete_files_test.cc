@@ -72,9 +72,9 @@ class ObsoleteFilesTest : public DBTestBase {
       uint64_t number;
       FileType type;
       if (ParseFileName(file, &number, &type)) {
-        log_cnt += (type == kWalFile);
-        sst_cnt += (type == kTableFile);
-        manifest_cnt += (type == kDescriptorFile);
+        log_cnt += (type == FileType::kWalFile);
+        sst_cnt += (type == FileType::kTableFile);
+        manifest_cnt += (type == FileType::kDescriptorFile);
       }
     }
     ASSERT_EQ(required_log, log_cnt);
@@ -179,7 +179,7 @@ TEST_F(ObsoleteFilesTest, DeleteObsoleteOptionsFile) {
     WalFileType log_type;
     if (ParseFileName(file, &file_num, dummy_info_log_name_prefix, &type,
                       &log_type) &&
-        type == kOptionsFile) {
+        type == FileType::kOptionsFile) {
       opts_file_count++;
     }
   }

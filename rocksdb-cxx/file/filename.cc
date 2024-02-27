@@ -57,19 +57,19 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
   }
   if (rest == "IDENTITY") {
     *number = 0;
-    *type = kIdentityFile;
+    *type = FileType::kIdentityFile;
   } else if (rest == "CURRENT") {
     *number = 0;
-    *type = kCurrentFile;
+    *type = FileType::kCurrentFile;
   } else if (rest == "LOCK") {
     *number = 0;
-    *type = kDBLockFile;
+    *type = FileType::kDBLockFile;
   } else if (info_log_name_prefix.size() > 0 &&
              rest.starts_with(info_log_name_prefix)) {
     rest.remove_prefix(info_log_name_prefix.size());
     if (rest == "" || rest == ".old") {
       *number = 0;
-      *type = kInfoLogFile;
+      *type = FileType::kInfoLogFile;
     } else if (rest.starts_with(".old.")) {
       uint64_t ts_suffix;
       // sizeof also counts the trailing '\0'.
@@ -78,7 +78,7 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
         return false;
       }
       *number = ts_suffix;
-      *type = kInfoLogFile;
+      *type = FileType::kInfoLogFile;
     }
   } else if (rest.starts_with("MANIFEST-")) {
     rest.remove_prefix(strlen("MANIFEST-"));
@@ -89,7 +89,7 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
     if (!rest.empty()) {
       return false;
     }
-    *type = kDescriptorFile;
+    *type = FileType::kDescriptorFile;
     *number = num;
   } else if (rest.starts_with("METADB-")) {
     rest.remove_prefix(strlen("METADB-"));
@@ -100,7 +100,7 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
     if (!rest.empty()) {
       return false;
     }
-    *type = kMetaDatabase;
+    *type = FileType::kMetaDatabase;
     *number = num;
   } else if (rest.starts_with(kOptionsFileNamePrefix)) {
     uint64_t ts_suffix;
@@ -116,7 +116,7 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
       return false;
     }
     *number = ts_suffix;
-    *type = is_temp_file ? kTempFile : kOptionsFile;
+    *type = is_temp_file ? FileType::kTempFile : FileType::kOptionsFile;
   } else {
     // Avoid strtoull() to keep filename format independent of the
     // current locale
@@ -143,7 +143,7 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
 
     Slice suffix = rest;
     if (suffix == Slice("log")) {
-      *type = kWalFile;
+      *type = FileType::kWalFile;
       if (log_type && !archive_dir_found) {
         *log_type = kAliveLogFile;
       }
@@ -151,11 +151,11 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
       return false;  // Archive dir can contain only log files
     } else if (suffix == Slice(kRocksDbTFileExt) ||
                suffix == Slice(kLevelDbTFileExt)) {
-      *type = kTableFile;
+      *type = FileType::kTableFile;
     } else if (suffix == Slice(kRocksDBBlobFileExt)) {
-      *type = kBlobFile;
+      *type = FileType::kBlobFile;
     } else if (suffix == Slice(kTempFileNameSuffix)) {
-      *type = kTempFile;
+      *type = FileType::kTempFile;
     } else {
       return false;
     }
@@ -249,7 +249,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   assert(parent_dir != nullptr);
   assert(info_log_list != nullptr);
   uint64_t number = 0;
-  FileType type = kWalFile;
+  FileType type = FileType::kWalFile;
 
   if (!db_log_dir.empty()) {
     *parent_dir = db_log_dir;
@@ -268,7 +268,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
 
   for (auto& f : file_names) {
     if (ParseFileName(f, &number, static_cast<std::string>(info_log_prefix.prefix), &type) &&
-        (type == kInfoLogFile)) {
+        (type == FileType::kInfoLogFile)) {
       info_log_list->push_back(f);
     }
   }

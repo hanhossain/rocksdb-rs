@@ -1410,9 +1410,9 @@ void ManifestDumpCommand::DoCommand() {
         fname = file_path;
       }
       uint64_t file_num = 0;
-      FileType file_type = kWalFile;  // Just for initialization
+      FileType file_type = FileType::kWalFile;  // Just for initialization
       if (ParseFileName(fname, &file_num, &file_type) &&
-          file_type == kDescriptorFile) {
+          file_type == FileType::kDescriptorFile) {
         if (!matched_file.empty()) {
           exec_state_ = LDBCommandExecuteResult::Failed(
               "Multiple MANIFEST files found; use --path to select one");
@@ -2035,21 +2035,21 @@ void DBDumperCommand::DoCommand() {
     }
 
     switch (type) {
-      case kWalFile:
+      case FileType::kWalFile:
         // TODO(myabandeh): allow configuring is_write_commited
         DumpWalFile(options_, path_, /* print_header_ */ true,
                     /* print_values_ */ true, true /* is_write_commited */,
                     &exec_state_);
         break;
-      case kTableFile:
+      case FileType::kTableFile:
         DumpSstFile(options_, path_, is_key_hex_, /* show_properties */ true,
                     decode_blob_index_, from_, to_);
         break;
-      case kDescriptorFile:
+      case FileType::kDescriptorFile:
         DumpManifestFile(options_, path_, /* verbose_ */ false, is_key_hex_,
                          /*  json_ */ false, column_families_);
         break;
-      case kBlobFile:
+      case FileType::kBlobFile:
         DumpBlobFile(path_, is_key_hex_, is_value_hex_,
                      dump_uncompressed_blobs_);
         break;

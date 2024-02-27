@@ -2640,7 +2640,7 @@ void StressTest::Open(SharedState* shared) {
           // WAL is durable. Buffering unsynced writes will cause false
           // positive in crash tests. Before we figure out a way to
           // solve it, skip WAL from failure injection.
-          fault_fs_guard->SetSkipDirectWritableTypes({kWalFile});
+          fault_fs_guard->SetSkipDirectWritableTypes({FileType::kWalFile});
         }
         ingest_meta_error = FLAGS_open_metadata_write_fault_one_in;
         ingest_write_error = FLAGS_open_write_fault_one_in;

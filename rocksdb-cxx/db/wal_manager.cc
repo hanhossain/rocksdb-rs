@@ -178,7 +178,7 @@ void WalManager::PurgeObsoleteWALFiles() {
   for (auto& f : files) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(f, &number, &type) && type == kWalFile) {
+    if (ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
       std::string const file_path = archival_dir + "/" + f;
       if (ttl_enabled) {
         uint64_t file_m_time;
@@ -298,7 +298,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
   for (const auto& f : all_files) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(f, &number, &type) && type == kWalFile) {
+    if (ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
       SequenceNumber sequence;
       Status s = ReadFirstRecord(log_type, number, &sequence);
       if (!s.ok()) {

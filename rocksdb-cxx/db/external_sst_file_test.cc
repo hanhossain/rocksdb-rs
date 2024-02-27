@@ -1298,7 +1298,7 @@ TEST_F(ExternalSSTFileTest, IngestNonExistingFile) {
   for (auto& f : files) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(f, &number, &type) && type == kTableFile) {
+    if (ParseFileName(f, &number, &type) && type == FileType::kTableFile) {
       num_sst_files++;
     }
   }

@@ -6541,7 +6541,7 @@ TEST_F(DBTest2, LastLevelTemperature) {
       uint64_t number;
       FileType type;
       ASSERT_TRUE(ParseFileName(filename, &number, &type));
-      if (type == kTableFile) {
+      if (type == FileType::kTableFile) {
         MutexLock l(&mutex_);
         auto ret = file_temperatures.insert({number, info.temperature});
         if (!ret.second) {

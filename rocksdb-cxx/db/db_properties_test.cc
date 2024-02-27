@@ -1759,7 +1759,7 @@ TEST_F(DBPropertiesTest, MinObsoleteSstNumberToKeep) {
             info.file_path.substr(info.file_path.rfind('/') + 1);
         ASSERT_TRUE(
             ParseFileName(filename, &created_file_num, &created_file_type));
-        ASSERT_EQ(kTableFile, created_file_type);
+        ASSERT_EQ(FileType::kTableFile, created_file_type);
 
         uint64_t keep_sst_lower_bound;
         ASSERT_TRUE(

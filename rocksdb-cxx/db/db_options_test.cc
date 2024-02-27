@@ -1316,7 +1316,7 @@ TEST_F(DBOptionsTest, TempOptionsFailTest) {
   FileType type;
   bool found_temp_file = false;
   for (size_t i = 0; i < filenames.size(); i++) {
-    if (ParseFileName(filenames[i], &number, &type) && type == kTempFile) {
+    if (ParseFileName(filenames[i], &number, &type) && type == FileType::kTempFile) {
       found_temp_file = true;
     }
   }

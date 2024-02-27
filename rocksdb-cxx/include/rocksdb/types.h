@@ -35,7 +35,7 @@ enum class BlobFileCreationReason {
 
 // The types of files RocksDB uses in a DB directory. (Available for
 // advanced options.)
-enum FileType {
+enum class FileType {
   kWalFile,
   kDBLockFile,
   kTableFile,

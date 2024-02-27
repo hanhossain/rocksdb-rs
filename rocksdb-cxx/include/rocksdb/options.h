@@ -1356,7 +1356,7 @@ struct DBOptions {
   // Use this if your DB want to enable checksum handoff for specific file
   // types writes. Make sure that the File_system you use support the
   // crc32c checksum verification
-  // Currently supported file tyes: kWALFile, kTableFile, kDescriptorFile.
+  // Currently supported file tyes: kWALFile, FileType::kTableFile, FileType::kDescriptorFile.
   // NOTE: currently RocksDB only generates crc32c based checksum for the
   // handoff. If the storage layer has different checksum support, user
   // should enble this set as empty. Otherwise,it may cause unexpected

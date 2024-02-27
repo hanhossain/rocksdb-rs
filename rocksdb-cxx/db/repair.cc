@@ -308,15 +308,15 @@ class Repairer {
       FileType type;
       for (size_t i = 0; i < filenames.size(); i++) {
         if (ParseFileName(filenames[i], &number, &type)) {
-          if (type == kDescriptorFile) {
+          if (type == FileType::kDescriptorFile) {
             manifests_.push_back(filenames[i]);
           } else {
             if (number + 1 > next_file_number_) {
               next_file_number_ = number + 1;
             }
-            if (type == kWalFile) {
+            if (type == FileType::kWalFile) {
               logs_.push_back(number);
-            } else if (type == kTableFile) {
+            } else if (type == FileType::kTableFile) {
               table_fds_.emplace_back(number, static_cast<uint32_t>(path_id),
                                       0);
             } else {

@@ -254,7 +254,7 @@ class WriteStress {
       if (!ParseFileName(file.name, &number, "LOG", &type)) {
         continue;
       }
-      if (type == kTableFile) {
+      if (type == FileType::kTableFile) {
         sst_file_numbers.insert(number);
       }
     }
@@ -267,7 +267,7 @@ class WriteStress {
       if (!ParseFileName(child, &number, "LOG", &type)) {
         continue;
       }
-      if (type == kTableFile) {
+      if (type == FileType::kTableFile) {
         if (sst_file_numbers.find(number) == sst_file_numbers.end()) {
           fprintf(stderr,
                   "Found a table file in DB path that should have been "

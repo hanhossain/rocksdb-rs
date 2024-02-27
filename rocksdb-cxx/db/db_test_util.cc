@@ -1310,7 +1310,7 @@ void DBTestBase::GetSstFiles(Env* env, std::string path,
                                 uint64_t number;
                                 FileType type;
                                 return !(ParseFileName(name, &number, &type) &&
-                                         type == kTableFile);
+                                         type == FileType::kTableFile);
                               }),
                files->end());
 }
@@ -1535,7 +1535,7 @@ std::vector<std::uint64_t> DBTestBase::ListTableFiles(Env* env,
   FileType type;
   for (size_t i = 0; i < files.size(); ++i) {
     if (ParseFileName(files[i], &number, &type)) {
-      if (type == kTableFile) {
+      if (type == FileType::kTableFile) {
         file_numbers.push_back(number);
       }
     }

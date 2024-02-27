@@ -1432,13 +1432,13 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
             const std::string& checksum_func_name,
             const std::string& checksum_val,
             const Temperature src_temperature) {
-          if (type == kWalFile && !options_.backup_log_files) {
+          if (type == FileType::kWalFile && !options_.backup_log_files) {
             return IOStatus::OK();
           }
           Log(options_.info_log, "add file for backup %s", fname.c_str());
           uint64_t size_bytes = 0;
           IOStatus io_st;
-          if (type == kTableFile || type == kBlobFile) {
+          if (type == FileType::kTableFile || type == FileType::kBlobFile) {
             io_st = db_fs_->GetFileSize(src_dirname + "/" + fname, io_options_,
                                         &size_bytes, nullptr);
             if (!io_st.ok()) {
@@ -1449,19 +1449,19 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
           }
           EnvOptions src_env_options;
           switch (type) {
-            case kWalFile:
+            case FileType::kWalFile:
               src_env_options =
                   db_env_->OptimizeForLogRead(src_raw_env_options);
               break;
-            case kTableFile:
+            case FileType::kTableFile:
               src_env_options = db_env_->OptimizeForCompactionTableRead(
                   src_raw_env_options, ImmutableDBOptions(db_options));
               break;
-            case kDescriptorFile:
+            case FileType::kDescriptorFile:
               src_env_options =
                   db_env_->OptimizeForManifestRead(src_raw_env_options);
               break;
-            case kBlobFile:
+            case FileType::kBlobFile:
               src_env_options = db_env_->OptimizeForBlobFileRead(
                   src_raw_env_options, ImmutableDBOptions(db_options));
               break;
@@ -1476,11 +1476,11 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
               live_dst_paths, backup_items_to_finish,
               maybe_exclude_items ? &excludable_items : nullptr, new_backup_id,
               options_.share_table_files &&
-                  (type == kTableFile || type == kBlobFile),
+                  (type == FileType::kTableFile || type == FileType::kBlobFile),
               src_dirname, fname, src_env_options, rate_limiter, type,
               size_bytes, db_options.statistics.get(), size_limit_bytes,
               options_.share_files_with_checksum &&
-                  (type == kTableFile || type == kBlobFile),
+                  (type == FileType::kTableFile || type == FileType::kBlobFile),
               options.progress_callback, "" /* contents */, checksum_func_name,
               checksum_val, src_temperature);
           return io_st;
@@ -1877,7 +1877,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
 
   if (options.keep_log_files) {
     // delete files in db_dir, but keep all the log files
-    DeleteChildren(db_dir, 1 << kWalFile);
+    DeleteChildren(db_dir, 1 << static_cast<int>(FileType::kWalFile));
     // move all the files from archive dir to wal_dir
     std::string archive_dir = static_cast<std::string>(ArchivalDirectory(wal_dir));
     std::vector<std::string> archive_files;
@@ -1886,7 +1886,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
       uint64_t number;
       FileType type;
       bool ok = ParseFileName(f, &number, &type);
-      if (ok && type == kWalFile) {
+      if (ok && type == FileType::kWalFile) {
         ROCKS_LOG_INFO(options_.info_log,
                        "Moving log file from archive/ to wal_dir: %s",
                        f.c_str());
@@ -1962,8 +1962,8 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
                                   dst);
     }
     // 3. Construct the final path
-    // kWalFile lives in wal_dir and all the rest live in db_dir
-    if (type == kWalFile) {
+    // FileType::kWalFile lives in wal_dir and all the rest live in db_dir
+    if (type == FileType::kWalFile) {
       dst = wal_dir + "/" + dst;
       if (options_.sync && !wal_dir_for_fsync) {
         io_s = db_fs_->NewDirectory(wal_dir, io_options_, &wal_dir_for_fsync,
@@ -1985,7 +1985,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     // For atomicity, initially restore CURRENT file to a temporary name.
     // This is useful even without options_.sync e.g. in case the restore
     // process is interrupted.
-    if (type == kCurrentFile) {
+    if (type == FileType::kCurrentFile) {
       final_current_file = dst;
       dst = temporary_current_file = dst + ".tmp";
     }
@@ -2307,7 +2307,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
   // Step 1: Prepare the relative path to destination
   if (shared && shared_checksum) {
     if (GetNamingNoFlags() != BackupEngineOptions::kLegacyCrc32cAndFileSize &&
-        file_type != kBlobFile) {
+        file_type != FileType::kBlobFile) {
       // Prepare db_session_id to add to the file name
       // Ignore the returned status
       // In the failed cases, db_id and db_session_id will be empty
@@ -2644,7 +2644,7 @@ void BackupEngineImpl::DeleteChildren(const std::string& dir,
     uint64_t number;
     FileType type;
     bool ok = ParseFileName(f, &number, &type);
-    if (ok && (file_type_filter & (1 << type))) {
+    if (ok && (file_type_filter & (1 << static_cast<int>(type)))) {
       // don't delete this file
       continue;
     }

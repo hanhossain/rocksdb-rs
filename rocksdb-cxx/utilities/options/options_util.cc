@@ -59,7 +59,7 @@ Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
   for (auto& file_name : file_names) {
     uint64_t time_stamp;
     FileType type;
-    if (ParseFileName(file_name, &time_stamp, &type) && type == kOptionsFile) {
+    if (ParseFileName(file_name, &time_stamp, &type) && type == FileType::kOptionsFile) {
       if (time_stamp > latest_time_stamp) {
         latest_time_stamp = time_stamp;
         latest_file_name = file_name;

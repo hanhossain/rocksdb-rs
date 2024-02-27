@@ -893,14 +893,14 @@ TEST_P(DBRecoveryTestBlobError, RecoverWithBlobError) {
   ASSERT_OK(env_->GetChildren(dbname_, &files));
   for (const auto& file : files) {
     uint64_t number = 0;
-    FileType type = kTableFile;
+    FileType type = FileType::kTableFile;
 
     if (!ParseFileName(file, &number, &type)) {
       continue;
     }
 
-    ASSERT_NE(type, kTableFile);
-    ASSERT_NE(type, kBlobFile);
+    ASSERT_NE(type, FileType::kTableFile);
+    ASSERT_NE(type, FileType::kBlobFile);
   }
 }
 
@@ -2397,7 +2397,7 @@ TEST_F(DBWALTest, TruncateLastLogAfterRecoverWALEmpty) {
     uint64_t number;
     FileType type;
     if (ParseFileName(fname, &number, &type, nullptr)) {
-      if (type == kWalFile && number > last_log_num) {
+      if (type == FileType::kWalFile && number > last_log_num) {
         last_log = fname;
       }
     }
@@ -2620,8 +2620,8 @@ TEST_F(DBWALTest, EmptyWalReopenTest) {
     ASSERT_OK(env_->GetChildren(dbname_, &files));
     for (const auto& file : files) {
       uint64_t number = 0;
-      FileType type = kWalFile;
-      if (ParseFileName(file, &number, &type) && type == kWalFile) {
+      FileType type = FileType::kWalFile;
+      if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
         num_wal_files++;
       }
     }

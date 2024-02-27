@@ -310,7 +310,7 @@ Status BlobDBImpl::GetAllBlobFiles(std::set<uint64_t>* file_numbers) {
     uint64_t file_number;
     FileType type;
     bool success = ParseFileName(file_name, &file_number, &type);
-    if (success && type == kBlobFile) {
+    if (success && type == FileType::kBlobFile) {
       file_numbers->insert(file_number);
     } else {
       ROCKS_LOG_WARN(db_options_.info_log,
@@ -2074,7 +2074,7 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
     for (const auto& f : filenames) {
       uint64_t number;
       FileType type;
-      if (ParseFileName(f, &number, &type) && type == kBlobFile) {
+      if (ParseFileName(f, &number, &type) && type == FileType::kBlobFile) {
         Status del = DeleteDBFile(&soptions, blobdir + "/" + f, blobdir, true,
                                   /*force_fg=*/false);
         if (status.ok() && !del.ok()) {

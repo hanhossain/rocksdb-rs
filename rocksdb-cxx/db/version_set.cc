@@ -5829,7 +5829,7 @@ Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
   fname.resize(fname.size() - 1);
   FileType type;
   bool parse_ok = ParseFileName(fname, manifest_file_number, &type);
-  if (!parse_ok || type != kDescriptorFile) {
+  if (!parse_ok || type != FileType::kDescriptorFile) {
     return Status_Corruption("CURRENT file corrupted");
   }
   *manifest_path = dbname;
@@ -5946,7 +5946,7 @@ ManifestPicker::ManifestPicker(const std::string& dbname,
     uint64_t file_num = 0;
     FileType file_type;
     bool parse_ok = ParseFileName(fname, &file_num, &file_type);
-    if (parse_ok && file_type == kDescriptorFile) {
+    if (parse_ok && file_type == FileType::kDescriptorFile) {
       manifest_files_.push_back(fname);
     }
   }
@@ -5984,7 +5984,7 @@ std::string ManifestPicker::GetNextManifest(uint64_t* number,
     if (number) {
       FileType type;
       bool parse = ParseFileName(*manifest_file_iter_, number, &type);
-      assert(type == kDescriptorFile);
+      assert(type == FileType::kDescriptorFile);
 #ifndef NDEBUG
       assert(parse);
 #else
