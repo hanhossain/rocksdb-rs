@@ -506,7 +506,7 @@ TEST_F(DeleteFileTest, DeleteLogFiles) {
   // Take the last log file which is expected to be alive and try to delete it
   // Should not succeed because live logs are not allowed to be deleted
   std::unique_ptr<LogFile> alive_log = std::move(logfiles.back());
-  ASSERT_EQ(alive_log->Type(), kAliveLogFile);
+  ASSERT_EQ(alive_log->Type(), WalFileType::kAliveLogFile);
   ASSERT_OK(env_->FileExists(wal_dir_ + "/" + alive_log->PathName()));
   fprintf(stdout, "Deleting alive log file %s\n",
           alive_log->PathName().c_str());
@@ -524,7 +524,7 @@ TEST_F(DeleteFileTest, DeleteLogFiles) {
   ASSERT_OK(db_->GetSortedWalFiles(logfiles));
   ASSERT_GT(logfiles.size(), 0UL);
   std::unique_ptr<LogFile> archived_log = std::move(logfiles.front());
-  ASSERT_EQ(archived_log->Type(), kArchivedLogFile);
+  ASSERT_EQ(archived_log->Type(), WalFileType::kArchivedLogFile);
   ASSERT_OK(env_->FileExists(wal_dir_ + "/" + archived_log->PathName()));
   fprintf(stdout, "Deleting archived log file %s\n",
           archived_log->PathName().c_str());

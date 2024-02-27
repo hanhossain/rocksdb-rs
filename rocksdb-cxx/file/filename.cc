@@ -128,7 +128,7 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
       rest.remove_prefix(kArchivalDirName.size() +
                          1);  // Add 1 to remove / also
       if (log_type) {
-        *log_type = kArchivedLogFile;
+        *log_type = WalFileType::kArchivedLogFile;
       }
       archive_dir_found = true;
     }
@@ -145,7 +145,7 @@ bool ParseFileName(const std::string& fname, uint64_t* number,
     if (suffix == Slice("log")) {
       *type = FileType::kWalFile;
       if (log_type && !archive_dir_found) {
-        *log_type = kAliveLogFile;
+        *log_type = WalFileType::kAliveLogFile;
       }
     } else if (archive_dir_found) {
       return false;  // Archive dir can contain only log files

@@ -1193,7 +1193,7 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
     // nothing has been written to the log yet
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_EQ(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), kAliveLogFile);
+    ASSERT_EQ(log_file->Type(), WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
     // add some data and verify that the file size actually moves foward
@@ -1205,7 +1205,7 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
 
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_GT(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), kAliveLogFile);
+    ASSERT_EQ(log_file->Type(), WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
     // force log files to cycle and add some more data, then check if
@@ -1224,7 +1224,7 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
 
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_GT(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), kAliveLogFile);
+    ASSERT_EQ(log_file->Type(), WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
   } while (ChangeWalOptions());

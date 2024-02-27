@@ -419,7 +419,7 @@ class ColumnFamilyTestBase : public testing::Test {
     }
     EXPECT_OK(s);
     for (const auto& wal : wal_files) {
-      if (wal->Type() == kAliveLogFile) {
+      if (wal->Type() == WalFileType::kAliveLogFile) {
         ++ret;
       }
     }

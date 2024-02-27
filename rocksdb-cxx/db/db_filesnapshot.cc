@@ -378,7 +378,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
   // that has changes after the last flush.
   auto wal_dir = immutable_db_options_.GetWalDir();
   for (size_t i = 0; s.ok() && i < wal_size; ++i) {
-    if ((live_wal_files[i]->Type() == kAliveLogFile) &&
+    if ((live_wal_files[i]->Type() == WalFileType::kAliveLogFile) &&
         (!flush_memtable || live_wal_files[i]->LogNumber() >= min_log_num)) {
       results.emplace_back();
       LiveFileStorageInfo& info = results.back();
