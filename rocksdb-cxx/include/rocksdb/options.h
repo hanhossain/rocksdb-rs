@@ -31,6 +31,7 @@
 #include "rocksdb/write_buffer_manager.h"
 
 #include "rocksdb-rs/src/compression_type.rs.h"
+#include "rocksdb-rs/src/types.rs.h"
 
 #ifdef max
 #undef max

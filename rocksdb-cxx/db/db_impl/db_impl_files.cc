@@ -370,19 +370,19 @@ void DBImpl::DeleteObsoleteFileImpl(int job_id, const std::string& fname,
   if (file_deletion_status.ok()) {
     ROCKS_LOG_DEBUG(immutable_db_options_.info_log,
                     "[JOB %d] Delete %s type=%d #%" PRIu64 " -- %s\n", job_id,
-                    fname.c_str(), type, number,
+                    fname.c_str(), static_cast<int>(type), number,
                     file_deletion_status.ToString()->c_str());
   } else if (env_->FileExists(fname).IsNotFound()) {
     ROCKS_LOG_INFO(
         immutable_db_options_.info_log,
         "[JOB %d] Tried to delete a non-existing file %s type=%d #%" PRIu64
         " -- %s\n",
-        job_id, fname.c_str(), type, number,
+        job_id, fname.c_str(), static_cast<int>(type), number,
         file_deletion_status.ToString()->c_str());
   } else {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                     "[JOB %d] Failed to delete %s type=%d #%" PRIu64 " -- %s\n",
-                    job_id, fname.c_str(), type, number,
+                    job_id, fname.c_str(), static_cast<int>(type), number,
                     file_deletion_status.ToString()->c_str());
   }
   if (type == FileType::kTableFile) {
