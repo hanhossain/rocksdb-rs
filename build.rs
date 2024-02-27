@@ -345,6 +345,7 @@ fn main() {
         "src/port_defs.rs",
         "src/slice.rs",
         "src/status.rs",
+        "src/transaction_log.rs",
         "src/types.rs",
         "src/unique_id.rs",
     ];

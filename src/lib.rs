@@ -9,6 +9,7 @@ pub mod port_defs;
 pub mod slice;
 pub mod status;
 mod string_util;
+mod transaction_log;
 mod types;
 pub mod unique_id;
 
