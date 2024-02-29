@@ -40,3 +40,54 @@ pub(crate) fn parse_base_chars(s: &str, base: u64, v: &mut u64) -> bool {
     }
     true
 }
+
+pub(crate) fn consume_decimal_number(s: &mut String) -> Option<u64> {
+    let re_match = regex::Regex::new(r"^\d+").unwrap().find(s)?;
+    s.drain(..re_match.end()).as_str().parse::<u64>().ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_consume_decimal_number_valid_number() {
+        let mut s = "1234something".to_string();
+        assert_eq!(consume_decimal_number(&mut s), Some(1234));
+        assert_eq!(s, "something");
+    }
+
+    #[test]
+    fn consume_decimal_number_leading_zeros() {
+        let mut s = "0001234something".to_string();
+        assert_eq!(consume_decimal_number(&mut s), Some(1234));
+        assert_eq!(s, "something");
+    }
+
+    #[test]
+    fn consume_decimal_number_zeros() {
+        let mut s = "00000something".to_string();
+        assert_eq!(consume_decimal_number(&mut s), Some(0));
+        assert_eq!(s, "something");
+    }
+
+    #[test]
+    fn consume_decimal_number_just_number() {
+        let mut s = "5678".to_string();
+        assert_eq!(consume_decimal_number(&mut s), Some(5678));
+        assert!(s.is_empty());
+    }
+
+    #[test]
+    fn consume_decimal_number_no_number() {
+        let mut s = "something".to_string();
+        assert_eq!(consume_decimal_number(&mut s), None);
+        assert_eq!(s, "something");
+    }
+
+    #[test]
+    fn consume_decimal_number_overflow() {
+        let mut s = "18446744073709551616".to_string();
+        assert_eq!(consume_decimal_number(&mut s), None);
+    }
+}
