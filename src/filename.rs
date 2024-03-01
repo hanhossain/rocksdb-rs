@@ -1,5 +1,7 @@
 use crate::filename::ffi::{FileType, InfoLogPrefix, WalFileType};
 use cxx::CxxVector;
+use lazy_static::lazy_static;
+use regex::Regex;
 
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
 const ROCKSDB_TFILE_EXT: &str = "sst";
@@ -8,6 +10,16 @@ const LEVELDB_TFILE_EXT: &str = "ldb";
 const CURRENT_FILE_NAME: &str = "CURRENT";
 const TEMP_FILE_NAME_SUFFIX: &str = "dbtmp";
 const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
+
+lazy_static! {
+    static ref OLD_LOG_FILE_REGEX: Regex = Regex::new(r"^(\.old)?$").unwrap();
+    static ref OLD_LOG_FILE_WITH_NUM_REGEX: Regex = Regex::new(r"^\.old\.(\d+)$").unwrap();
+    static ref MANIFEST_OR_METADB_FILE_REGEX: Regex =
+        Regex::new(r"^(MANIFEST|METADB)-(\d+)$").unwrap();
+    static ref OPTIONS_FILE_REGEX: Regex = Regex::new(r"^OPTIONS-(\d+)(\.dbtmp)?$").unwrap();
+    static ref GENERAL_FILE_REGEX: Regex =
+        Regex::new(r"^(archive/)?(\d+)\.(log|sst|ldb|blob|dbtmp)$").unwrap();
+}
 
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
@@ -541,10 +553,7 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
     if !info_log_name_prefix.is_empty() && rest.starts_with(info_log_name_prefix) {
         let rest_log_name = &rest[info_log_name_prefix.len()..];
 
-        if regex::Regex::new(r"^(\.old)?$")
-            .unwrap()
-            .is_match(rest_log_name)
-        {
+        if OLD_LOG_FILE_REGEX.is_match(rest_log_name) {
             return Some(ParseResult {
                 number: 0,
                 file_type: FileType::kInfoLogFile,
@@ -552,9 +561,7 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
             });
         }
 
-        let captures = regex::Regex::new(r"^\.old\.(\d+)$")
-            .unwrap()
-            .captures(rest_log_name)?;
+        let captures = OLD_LOG_FILE_WITH_NUM_REGEX.captures(rest_log_name)?;
         let number = captures.get(1).unwrap().as_str().parse().ok()?;
         return Some(ParseResult {
             number,
@@ -563,10 +570,7 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
         });
     }
 
-    if let Some(captures) = regex::Regex::new(r"^(MANIFEST|METADB)-(\d+)$")
-        .unwrap()
-        .captures(&rest)
-    {
+    if let Some(captures) = MANIFEST_OR_METADB_FILE_REGEX.captures(&rest) {
         let number = captures.get(2).unwrap().as_str().parse().ok()?;
         let prefix = captures.get(1).unwrap().as_str();
         let file_type = match prefix {
@@ -581,10 +585,7 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
         });
     }
 
-    if let Some(captures) = regex::Regex::new(r"^OPTIONS-(\d+)(\.dbtmp)?$")
-        .unwrap()
-        .captures(&rest)
-    {
+    if let Some(captures) = OPTIONS_FILE_REGEX.captures(&rest) {
         let number = captures.get(1).unwrap().as_str().parse().ok()?;
         let file_type = match captures.get(2) {
             Some(_) => FileType::kTempFile,
@@ -597,9 +598,7 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
         });
     }
 
-    let captures = regex::Regex::new(r"^(archive/)?(\d+)\.(log|sst|ldb|blob|dbtmp)$")
-        .unwrap()
-        .captures(&rest)?;
+    let captures = GENERAL_FILE_REGEX.captures(&rest)?;
     let number = captures.get(2).unwrap().as_str().parse().ok()?;
     let archive_dir_found = captures.get(1).is_some();
     let suffix = captures.get(3).unwrap().as_str();
