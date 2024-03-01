@@ -120,7 +120,7 @@ struct CacheEntryRoleOptions {
 
 struct CacheUsageOptions {
   CacheEntryRoleOptions options;
-  std::map<CacheEntryRole, CacheEntryRoleOptions> options_overrides;
+  std::map<rocksdb_rs::cache::CacheEntryRole, CacheEntryRoleOptions> options_overrides;
 };
 
 // For advanced user only
@@ -303,10 +303,10 @@ struct BlockBasedTableOptions {
   // `cache_usage_options` allows users to specify the default
   // options (`cache_usage_options.options`) and the overriding
   // options (`cache_usage_options.options_overrides`)
-  // for different `CacheEntryRole` under various features related to cache
+  // for different `rocksdb_rs::cache::CacheEntryRole` under various features related to cache
   // usage.
   //
-  // For a certain `CacheEntryRole role` and a certain feature `f` of
+  // For a certain `rocksdb_rs::cache::CacheEntryRole role` and a certain feature `f` of
   // `CacheEntryRoleOptions`:
   // 1. If `options_overrides` has an entry for `role` and
   // `options_overrides[role].f != kFallback`, we use
@@ -320,11 +320,11 @@ struct BlockBasedTableOptions {
   //
   // 1. Memory charging to block cache (`CacheEntryRoleOptions::charged`)
   // Memory charging is a feature of accounting memory usage of specific area
-  // (represented by `CacheEntryRole`) toward usage in block cache (if
+  // (represented by `rocksdb_rs::cache::CacheEntryRole`) toward usage in block cache (if
   // available), by updating a dynamical charge to the block cache loosely based
   // on the actual memory usage of that area.
   //
-  // (a) CacheEntryRole::kCompressionDictionaryBuildingBuffer
+  // (a) rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer
   // (i) If kEnabled:
   // Charge memory usage of the buffered data used as training samples for
   // dictionary compression.
@@ -337,7 +337,7 @@ struct BlockBasedTableOptions {
   // (iii) Compatible existing behavior:
   // Same as kEnabled.
   //
-  // (b) CacheEntryRole::kFilterConstruction
+  // (b) rocksdb_rs::cache::CacheEntryRole::kFilterConstruction
   // (i) If kEnabled:
   // Charge memory usage of Bloom Filter
   // (format_version >= 5) and Ribbon Filter construction.
@@ -350,7 +350,7 @@ struct BlockBasedTableOptions {
   // (iii) Compatible existing behavior:
   // Same as kDisabled.
   //
-  // (c) CacheEntryRole::kBlockBasedTableReader
+  // (c) rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader
   // (i) If kEnabled:
   // Charge memory usage of table properties +
   // index block/filter block/uncompression dictionary (when stored in table
@@ -365,7 +365,7 @@ struct BlockBasedTableOptions {
   // (iii) Compatible existing behavior:
   // Same as kDisabled.
   //
-  // (d) CacheEntryRole::kFileMetadata
+  // (d) rocksdb_rs::cache::CacheEntryRole::kFileMetadata
   // (i) If kEnabled:
   // Charge memory usage of file metadata. RocksDB holds one file metadata
   // structure in-memory per on-disk table file.
@@ -378,7 +378,7 @@ struct BlockBasedTableOptions {
   // (iii) Compatible existing behavior:
   // Same as kDisabled.
   //
-  // (e) Other CacheEntryRole
+  // (e) Other rocksdb_rs::cache::CacheEntryRole
   // Not supported.
   // `Status::kNotSupported` will be returned if
   // `CacheEntryRoleOptions::charged` is set to {`kEnabled`, `kDisabled`}.

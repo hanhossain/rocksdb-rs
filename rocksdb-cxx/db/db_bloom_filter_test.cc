@@ -921,7 +921,7 @@ class ChargeFilterConstructionTestWithParam
       // two partitions.
       num_key_ = 18 *
                  CacheReservationManagerImpl<
-                     CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
                  sizeof(FilterConstructionReserveMemoryHash);
     } else if (policy_ == kFastLocalBloom) {
       // For Bloom Filter + FullFilter case, since we design the num_key_ to
@@ -933,7 +933,7 @@ class ChargeFilterConstructionTestWithParam
       // filter is a lot smaller than hash entries.
       num_key_ = 1 *
                  CacheReservationManagerImpl<
-                     CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
                  sizeof(FilterConstructionReserveMemoryHash);
     } else {
       // For Ribbon Filter + FullFilter case, we need a large enough number of
@@ -943,7 +943,7 @@ class ChargeFilterConstructionTestWithParam
       // reservation might not be a multiple of dummy entry.
       num_key_ = 12 *
                  CacheReservationManagerImpl<
-                     CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
                  sizeof(FilterConstructionReserveMemoryHash);
     }
   }
@@ -956,7 +956,7 @@ class ChargeFilterConstructionTestWithParam
     constexpr std::size_t kCacheCapacity = 100 * 1024 * 1024;
 
     table_options.cache_usage_options.options_overrides.insert(
-        {CacheEntryRole::kFilterConstruction,
+        {rocksdb_rs::cache::CacheEntryRole::kFilterConstruction,
          {/*.charged = */ charge_filter_construction_}});
     table_options.filter_policy = Create(10, policy_);
     table_options.partition_filters = partition_filters_;
@@ -976,7 +976,7 @@ class ChargeFilterConstructionTestWithParam
     lo.num_shard_bits = 0;  // 2^0 shard
     lo.strict_capacity_limit = true;
     cache_ = std::make_shared<
-        TargetCacheChargeTrackingCache<CacheEntryRole::kFilterConstruction>>(
+        TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
         (NewLRUCache(lo)));
     table_options.block_cache = cache_;
 
@@ -994,7 +994,7 @@ class ChargeFilterConstructionTestWithParam
   bool PartitionFilters() { return partition_filters_; }
 
   std::shared_ptr<
-      TargetCacheChargeTrackingCache<CacheEntryRole::kFilterConstruction>>
+      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
   GetCache() {
     return cache_;
   }
@@ -1005,7 +1005,7 @@ class ChargeFilterConstructionTestWithParam
   std::string policy_;
   bool partition_filters_;
   std::shared_ptr<
-      TargetCacheChargeTrackingCache<CacheEntryRole::kFilterConstruction>>
+      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
       cache_;
   bool detect_filter_construct_corruption_;
 };
@@ -1075,7 +1075,7 @@ TEST_P(ChargeFilterConstructionTestWithParam, Basic) {
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   std::shared_ptr<
-      TargetCacheChargeTrackingCache<CacheEntryRole::kFilterConstruction>>
+      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
       cache = GetCache();
   options.create_if_missing = true;
   // Disable auto compaction to prevent its unexpected side effect
@@ -1119,7 +1119,7 @@ TEST_P(ChargeFilterConstructionTestWithParam, Basic) {
   }
 
   const std::size_t kDummyEntrySize = CacheReservationManagerImpl<
-      CacheEntryRole::kFilterConstruction>::GetDummyEntrySize();
+      rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize();
 
   const std::size_t predicted_hash_entries_cache_res =
       num_key * sizeof(FilterConstructionReserveMemoryHash);
@@ -1311,7 +1311,7 @@ TEST_P(ChargeFilterConstructionTestWithParam, Basic) {
           std::floor(
               1.0 * predicted_final_filter_cache_res /
               CacheReservationManagerImpl<
-                  CacheEntryRole::kFilterConstruction>::GetDummyEntrySize()),
+                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize()),
           1)
           << "Final filter cache charging too small for this test - please "
              "increase the number of keys";

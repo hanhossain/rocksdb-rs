@@ -35,8 +35,8 @@ class ParsedFullFilterBlock {
 
   // For TypedCacheInterface
   const Slice& ContentSlice() const { return block_contents_.data; }
-  static constexpr CacheEntryRole kCacheEntryRole =
-      CacheEntryRole::kFilterBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole =
+      rocksdb_rs::cache::CacheEntryRole::kFilterBlock;
   static constexpr BlockType kBlockType = BlockType::kFilter;
 
  private:

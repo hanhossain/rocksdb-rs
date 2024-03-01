@@ -67,18 +67,18 @@ int DecodeValue(void* v) {
 }
 
 const Cache::CacheItemHelper kDumbHelper{
-    CacheEntryRole::kMisc,
+    rocksdb_rs::cache::CacheEntryRole::kMisc,
     [](Cache::ObjectPtr /*value*/, MemoryAllocator* /*alloc*/) {}};
 
 const Cache::CacheItemHelper kEraseOnDeleteHelper1{
-    CacheEntryRole::kMisc,
+    rocksdb_rs::cache::CacheEntryRole::kMisc,
     [](Cache::ObjectPtr value, MemoryAllocator* /*alloc*/) {
       Cache* cache = static_cast<Cache*>(value);
       cache->Erase("foo");
     }};
 
 const Cache::CacheItemHelper kEraseOnDeleteHelper2{
-    CacheEntryRole::kMisc,
+    rocksdb_rs::cache::CacheEntryRole::kMisc,
     [](Cache::ObjectPtr value, MemoryAllocator* /*alloc*/) {
       Cache* cache = static_cast<Cache*>(value);
       cache->Erase(EncodeKey16Bytes(1234));
@@ -173,7 +173,7 @@ class CacheTest : public testing::Test,
   void Erase2(int key) { Erase(cache2_, key); }
 };
 
-const Cache::CacheItemHelper CacheTest::kHelper{CacheEntryRole::kMisc,
+const Cache::CacheItemHelper CacheTest::kHelper{rocksdb_rs::cache::CacheEntryRole::kMisc,
                                                 &CacheTest::Deleter};
 
 CacheTest* CacheTest::current_;
@@ -670,7 +670,7 @@ class Value {
 
   int v_;
 
-  static constexpr auto kCacheEntryRole = CacheEntryRole::kMisc;
+  static constexpr auto kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kMisc;
 };
 
 using SharedCache = BasicTypedSharedCacheInterface<Value>;

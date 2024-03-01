@@ -33,7 +33,7 @@ BlobSource::BlobSource(const ImmutableOptions* immutable_options,
   auto bbto =
       immutable_options->table_factory->GetOptions<BlockBasedTableOptions>();
   if (bbto &&
-      bbto->cache_usage_options.options_overrides.at(CacheEntryRole::kBlobCache)
+      bbto->cache_usage_options.options_overrides.at(rocksdb_rs::cache::CacheEntryRole::kBlobCache)
               .charged == CacheEntryRoleOptions::Decision::kEnabled) {
     blob_cache_ = SharedCacheInterface{std::make_shared<ChargedCache>(
         immutable_options->blob_cache, bbto->block_cache)};

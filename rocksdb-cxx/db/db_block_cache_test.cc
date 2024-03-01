@@ -139,9 +139,9 @@ class DBBlockCacheTest : public DBTestBase {
     EXPECT_TRUE(db_->GetMapProperty(DB::Properties::kFastBlockCacheEntryStats,
                                     &values));
     for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
-      auto role = static_cast<CacheEntryRole>(i);
+      auto role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
       cache_entry_role_counts[i] =
-          ParseSizeT(values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))]);
+          ParseSizeT(values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))]);
     }
     return cache_entry_role_counts;
   }
@@ -282,7 +282,7 @@ class PersistentCacheFromCache : public PersistentCache {
   uint64_t NewId() override { return cache_.get()->NewId(); }
 
  private:
-  BasicTypedSharedCacheInterface<char[], CacheEntryRole::kMisc> cache_;
+  BasicTypedSharedCacheInterface<char[], rocksdb_rs::cache::CacheEntryRole::kMisc> cache_;
   bool read_only_;
 };
 
@@ -963,7 +963,7 @@ static void ClearCache(Cache* cache) {
   Cache::ApplyToAllEntriesOptions opts;
   auto callback = [&](const Slice& key, Cache::ObjectPtr, size_t /*charge*/,
                       const Cache::CacheItemHelper* helper) {
-    if (helper && helper->role == CacheEntryRole::kMisc) {
+    if (helper && helper->role == rocksdb_rs::cache::CacheEntryRole::kMisc) {
       // Keep the stats collector
       return;
     }
@@ -1031,16 +1031,16 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
 
       std::array<size_t, kNumCacheEntryRoles> expected{};
       // For CacheEntryStatsCollector
-      expected[static_cast<size_t>(CacheEntryRole::kMisc)] = 1;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)] = 1;
       EXPECT_EQ(expected, GetCacheEntryRoleCountsBg());
 
       std::array<size_t, kNumCacheEntryRoles> prev_expected = expected;
 
       // First access only filters
       ASSERT_EQ("NOT_FOUND", Get("different from any key added"));
-      expected[static_cast<size_t>(CacheEntryRole::kFilterBlock)] += 2;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kFilterBlock)] += 2;
       if (partition) {
-        expected[static_cast<size_t>(CacheEntryRole::kFilterMetaBlock)] += 2;
+        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kFilterMetaBlock)] += 2;
       }
       // Within some time window, we will get cached entry stats
       EXPECT_EQ(prev_expected, GetCacheEntryRoleCountsBg());
@@ -1053,12 +1053,12 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
 
       // Now access index and data block
       ASSERT_EQ("value", Get("foo"));
-      expected[static_cast<size_t>(CacheEntryRole::kIndexBlock)]++;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       if (partition) {
         // top-level
-        expected[static_cast<size_t>(CacheEntryRole::kIndexBlock)]++;
+        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       }
-      expected[static_cast<size_t>(CacheEntryRole::kDataBlock)]++;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kDataBlock)]++;
       // Enough to force a miss
       env_->MockSleepForSeconds(601);
       // But inject a simulated long scan so that we need a longer
@@ -1078,12 +1078,12 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
 
       // The same for other file
       ASSERT_EQ("value", Get("zfoo"));
-      expected[static_cast<size_t>(CacheEntryRole::kIndexBlock)]++;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       if (partition) {
         // top-level
-        expected[static_cast<size_t>(CacheEntryRole::kIndexBlock)]++;
+        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       }
-      expected[static_cast<size_t>(CacheEntryRole::kDataBlock)]++;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kDataBlock)]++;
       // Because of the simulated long scan, this is not enough to force
       // a miss
       env_->MockSleepForSeconds(601);
@@ -1099,24 +1099,24 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
           db_->GetMapProperty(DB::Properties::kBlockCacheEntryStats, &values));
 
       for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
-        auto role = static_cast<CacheEntryRole>(i);
+        auto role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
         EXPECT_EQ(std::to_string(expected[i]),
-                  values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))]);
+                  values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))]);
       }
 
       // Add one for kWriteBuffer
       {
         WriteBufferManager wbm(size_t{1} << 20, cache);
         wbm.ReserveMem(1024);
-        expected[static_cast<size_t>(CacheEntryRole::kWriteBuffer)]++;
+        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]++;
         // Now we check that the GetProperty interface is more agressive about
         // re-scanning stats, but not totally aggressive.
         // Within some time window, we will get cached entry stats
         env_->MockSleepForSeconds(1);
         EXPECT_EQ(std::to_string(prev_expected[static_cast<size_t>(
-                      CacheEntryRole::kWriteBuffer)]),
-                  values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(
-                      CacheEntryRole::kWriteBuffer))]);
+                      rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]),
+                  values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
+                      rocksdb_rs::cache::CacheEntryRole::kWriteBuffer))]);
         // Not enough for a "background" miss but enough for a "foreground" miss
         env_->MockSleepForSeconds(45);
 
@@ -1124,9 +1124,9 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
                                         &values));
         EXPECT_EQ(
             std::to_string(
-                expected[static_cast<size_t>(CacheEntryRole::kWriteBuffer)]),
-            values[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(
-                CacheEntryRole::kWriteBuffer))]);
+                expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]),
+            values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
+                rocksdb_rs::cache::CacheEntryRole::kWriteBuffer))]);
       }
       prev_expected = expected;
 
@@ -1146,9 +1146,9 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
       ASSERT_GT(cache->GetUsage(), cache->GetCapacity());
       expected = {};
       // For CacheEntryStatsCollector
-      expected[static_cast<size_t>(CacheEntryRole::kMisc)] = 1;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)] = 1;
       // For Fill-it-up
-      expected[static_cast<size_t>(CacheEntryRole::kMisc)]++;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)]++;
       // Still able to hit on saved stats
       EXPECT_EQ(prev_expected, GetCacheEntryRoleCountsBg());
       // Enough to force a miss

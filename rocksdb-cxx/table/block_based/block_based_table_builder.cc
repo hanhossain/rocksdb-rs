@@ -499,7 +499,7 @@ struct BlockBasedTableBuilder::Rep {
 
     const auto compress_dict_build_buffer_charged =
         table_options.cache_usage_options.options_overrides
-            .at(CacheEntryRole::kCompressionDictionaryBuildingBuffer)
+            .at(rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer)
             .charged;
     if (table_options.block_cache &&
         (compress_dict_build_buffer_charged ==
@@ -508,7 +508,7 @@ struct BlockBasedTableBuilder::Rep {
              CacheEntryRoleOptions::Decision::kFallback)) {
       compression_dict_buffer_cache_res_mgr =
           std::make_shared<CacheReservationManagerImpl<
-              CacheEntryRole::kCompressionDictionaryBuildingBuffer>>(
+              rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer>>(
               table_options.block_cache);
     } else {
       compression_dict_buffer_cache_res_mgr = nullptr;

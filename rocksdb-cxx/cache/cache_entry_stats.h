@@ -115,7 +115,7 @@ class CacheEntryStatsCollector {
   static Status GetShared(Cache *raw_cache, SystemClock *clock,
                           std::shared_ptr<CacheEntryStatsCollector> *ptr) {
     assert(raw_cache);
-    BasicTypedCacheInterface<CacheEntryStatsCollector, CacheEntryRole::kMisc>
+    BasicTypedCacheInterface<CacheEntryStatsCollector, rocksdb_rs::cache::CacheEntryRole::kMisc>
         cache{raw_cache};
 
     const Slice &cache_key = GetCacheKey();

@@ -7,6 +7,8 @@
 
 #include <array>
 
+using rocksdb_rs::cache::CacheEntryRole;
+
 namespace rocksdb {
 
 namespace secondary_cache_test_util {

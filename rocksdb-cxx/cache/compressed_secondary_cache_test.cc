@@ -885,7 +885,7 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam, EntryRoles) {
   for (uint32_t i = 0; i < kNumCacheEntryRoles; ++i) {
     // A few included on average, but decent chance of zero
     if (r.OneIn(5)) {
-      do_not_compress.Add(static_cast<CacheEntryRole>(i));
+      do_not_compress.Add(static_cast<rocksdb_rs::cache::CacheEntryRole>(i));
     }
   }
   opts.do_not_compress_roles = do_not_compress;
@@ -896,7 +896,7 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam, EntryRoles) {
   std::string junk(Random(301).RandomString(1000));
 
   for (uint32_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    CacheEntryRole role = static_cast<CacheEntryRole>(i);
+    rocksdb_rs::cache::CacheEntryRole role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
 
     // Uniquify `junk`
     junk[0] = static_cast<char>(i);
@@ -987,7 +987,7 @@ class CompressedSecCacheTestWithTiered : public ::testing::Test {
     opts.comp_cache_opts.capacity = 30 << 20;
     cache_ = NewTieredVolatileCache(opts);
     cache_res_mgr_ =
-        std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+        std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
             cache_);
   }
 

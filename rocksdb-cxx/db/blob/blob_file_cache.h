@@ -37,7 +37,7 @@ class BlobFileCache {
 
  private:
   using CacheInterface =
-      BasicTypedCacheInterface<BlobFileReader, CacheEntryRole::kMisc>;
+      BasicTypedCacheInterface<BlobFileReader, rocksdb_rs::cache::CacheEntryRole::kMisc>;
   using TypedHandle = CacheInterface::TypedHandle;
   CacheInterface cache_;
   // Note: mutex_ below is used to guard against multiple threads racing to open

@@ -2069,24 +2069,24 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
   ASSERT_TRUE(
       db_->GetMapProperty(DB::Properties::kBlockCacheEntryStats, &values));
 
-  ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheId())) !=
+  ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheId())) !=
               values.end());
-  ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheCapacityBytes())) !=
+  ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheCapacityBytes())) !=
               values.end());
   ASSERT_TRUE(
       values.find(
-          static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
+          static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
       values.end());
   ASSERT_TRUE(
-      values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())) !=
+      values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())) !=
       values.end());
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    CacheEntryRole role = static_cast<CacheEntryRole>(i);
-    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))) !=
+    rocksdb_rs::cache::CacheEntryRole role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
+    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))) !=
                 values.end());
-    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedBytes(role))) !=
+    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedBytes(role))) !=
                 values.end());
-    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedPercent(role))) !=
+    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedPercent(role))) !=
                 values.end());
   }
 

@@ -1344,7 +1344,7 @@ class BlobSourceCacheReservationTest : public DBTestBase {
     block_based_options.no_block_cache = false;
     block_based_options.block_cache = block_cache;
     block_based_options.cache_usage_options.options_overrides.insert(
-        {CacheEntryRole::kBlobCache,
+        {rocksdb_rs::cache::CacheEntryRole::kBlobCache,
          {/* charged = */ CacheEntryRoleOptions::Decision::kEnabled}});
     options_.table_factory.reset(
         NewBlockBasedTableFactory(block_based_options));
@@ -1370,7 +1370,7 @@ class BlobSourceCacheReservationTest : public DBTestBase {
   }
 
   static constexpr std::size_t kSizeDummyEntry = CacheReservationManagerImpl<
-      CacheEntryRole::kBlobCache>::GetDummyEntrySize();
+      rocksdb_rs::cache::CacheEntryRole::kBlobCache>::GetDummyEntrySize();
   static constexpr std::size_t kCacheCapacity = 2 * kSizeDummyEntry;
   static constexpr int kNumShardBits = 0;  // 2^0 shard
 

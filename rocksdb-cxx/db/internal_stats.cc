@@ -687,7 +687,7 @@ InternalStats::CacheEntryRoleStats::GetEntryCallback() {
   return [&](const Slice& /*key*/, Cache::ObjectPtr /*value*/, size_t charge,
              const Cache::CacheItemHelper* helper) -> void {
     size_t role_idx =
-        static_cast<size_t>(helper ? helper->role : CacheEntryRole::kMisc);
+        static_cast<size_t>(helper ? helper->role : rocksdb_rs::cache::CacheEntryRole::kMisc);
     entry_counts[role_idx]++;
     total_charges[role_idx] += charge;
   };
@@ -741,7 +741,7 @@ std::string InternalStats::CacheEntryRoleStats::ToString(
   str << "Block cache entry stats(count,size,portion):";
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     if (entry_counts[i] > 0) {
-      str << " " << CacheEntryRole_ToCamelString(static_cast<CacheEntryRole>(i)) << "(" << entry_counts[i]
+      str << " " << CacheEntryRole_ToCamelString(static_cast<rocksdb_rs::cache::CacheEntryRole>(i)) << "(" << entry_counts[i]
           << "," << BytesToHumanString(total_charges[i]) << ","
           << (100.0 * total_charges[i] / cache_capacity) << "%)";
     }
@@ -754,20 +754,20 @@ void InternalStats::CacheEntryRoleStats::ToMap(
     std::map<std::string, std::string>* values, SystemClock* clock) const {
   values->clear();
   auto& v = *values;
-  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheId())] = cache_id;
-  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheCapacityBytes())] =
+  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheId())] = cache_id;
+  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheCapacityBytes())] =
       std::to_string(cache_capacity);
-  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())] =
+  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())] =
       std::to_string(GetLastDurationMicros() / 1000000.0);
-  v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())] =
+  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())] =
       std::to_string((clock->NowMicros() - last_end_time_micros_) / 1000000U);
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    auto role = static_cast<CacheEntryRole>(i);
-    v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))] =
+    auto role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
+    v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))] =
         std::to_string(entry_counts[i]);
-    v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedBytes(role))] =
+    v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedBytes(role))] =
         std::to_string(total_charges[i]);
-    v[static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedPercent(role))] =
+    v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedPercent(role))] =
         std::to_string(100.0 * total_charges[i] / cache_capacity);
   }
 }

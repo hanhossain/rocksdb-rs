@@ -1723,7 +1723,7 @@ void VerifySstUniqueIds(const TablePropertiesCollection& props) {
   }
 }
 
-template <CacheEntryRole R>
+template <rocksdb_rs::cache::CacheEntryRole R>
 TargetCacheChargeTrackingCache<R>::TargetCacheChargeTrackingCache(
     std::shared_ptr<Cache> target)
     : CacheWrapper(std::move(target)),
@@ -1733,7 +1733,7 @@ TargetCacheChargeTrackingCache<R>::TargetCacheChargeTrackingCache(
       last_peak_tracked_(false),
       cache_charge_increments_sum_(0) {}
 
-template <CacheEntryRole R>
+template <rocksdb_rs::cache::CacheEntryRole R>
 Status TargetCacheChargeTrackingCache<R>::Insert(const Slice& key,
                                                  ObjectPtr value,
                                                  const CacheItemHelper* helper,
@@ -1756,7 +1756,7 @@ Status TargetCacheChargeTrackingCache<R>::Insert(const Slice& key,
   return s;
 }
 
-template <CacheEntryRole R>
+template <rocksdb_rs::cache::CacheEntryRole R>
 bool TargetCacheChargeTrackingCache<R>::Release(Handle* handle,
                                                 bool erase_if_last_ref) {
   auto helper = GetCacheItemHelper(handle);
@@ -1772,14 +1772,14 @@ bool TargetCacheChargeTrackingCache<R>::Release(Handle* handle,
   return is_successful;
 }
 
-template <CacheEntryRole R>
+template <rocksdb_rs::cache::CacheEntryRole R>
 const Cache::CacheItemHelper* TargetCacheChargeTrackingCache<R>::kCrmHelper =
     CacheReservationManagerImpl<R>::TEST_GetCacheItemHelperForRole();
 
 template class TargetCacheChargeTrackingCache<
-    CacheEntryRole::kFilterConstruction>;
+    rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>;
 template class TargetCacheChargeTrackingCache<
-    CacheEntryRole::kBlockBasedTableReader>;
-template class TargetCacheChargeTrackingCache<CacheEntryRole::kFileMetadata>;
+    rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>;
+template class TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFileMetadata>;
 
 }  // namespace rocksdb

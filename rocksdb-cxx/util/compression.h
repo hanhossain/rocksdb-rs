@@ -324,7 +324,7 @@ struct UncompressionDict {
 
   // For TypedCacheInterface
   const Slice& ContentSlice() const { return slice_; }
-  static constexpr CacheEntryRole kCacheEntryRole = CacheEntryRole::kOtherBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kOtherBlock;
   static constexpr BlockType kBlockType = BlockType::kCompressionDictionary;
 
 #ifdef ROCKSDB_ZSTD_DDICT

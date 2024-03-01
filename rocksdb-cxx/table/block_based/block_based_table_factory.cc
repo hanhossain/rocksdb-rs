@@ -421,13 +421,13 @@ BlockBasedTableFactory::BlockBasedTableFactory(
 
   const auto table_reader_charged =
       table_options_.cache_usage_options.options_overrides
-          .at(CacheEntryRole::kBlockBasedTableReader)
+          .at(rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader)
           .charged;
   if (table_options_.block_cache &&
       table_reader_charged == CacheEntryRoleOptions::Decision::kEnabled) {
     table_reader_cache_res_mgr_.reset(new ConcurrentCacheReservationManager(
         std::make_shared<CacheReservationManagerImpl<
-            CacheEntryRole::kBlockBasedTableReader>>(
+            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>>(
             table_options_.block_cache)));
   }
 }
@@ -471,7 +471,7 @@ void BlockBasedTableFactory::InitializeOptions() {
       table_options_.cache_usage_options.options_overrides;
   const auto options = table_options_.cache_usage_options.options;
   for (std::uint32_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    CacheEntryRole role = static_cast<CacheEntryRole>(i);
+    rocksdb_rs::cache::CacheEntryRole role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
     auto options_overrides_iter = options_overrides.find(role);
     if (options_overrides_iter == options_overrides.end()) {
       options_overrides.insert({role, options});
@@ -500,7 +500,7 @@ Status CheckCacheOptionCompatibility(const BlockBasedTableOptions& bbto) {
 
   // More complex test of shared key space, in case the instances are wrappers
   // for some shared underlying cache.
-  static Cache::CacheItemHelper kHelper{CacheEntryRole::kMisc};
+  static Cache::CacheItemHelper kHelper{rocksdb_rs::cache::CacheEntryRole::kMisc};
   CacheKey sentinel_key = CacheKey::CreateUniqueForProcessLifetime();
   struct SentinelValue {
     explicit SentinelValue(char _c) : c(_c) {}
@@ -639,18 +639,18 @@ Status BlockBasedTableFactory::ValidateOptions(
   for (auto options_overrides_iter = options_overrides.cbegin();
        options_overrides_iter != options_overrides.cend();
        ++options_overrides_iter) {
-    const CacheEntryRole role = options_overrides_iter->first;
+    const rocksdb_rs::cache::CacheEntryRole role = options_overrides_iter->first;
     const CacheEntryRoleOptions options = options_overrides_iter->second;
-    static const std::set<CacheEntryRole> kMemoryChargingSupported = {
-        CacheEntryRole::kCompressionDictionaryBuildingBuffer,
-        CacheEntryRole::kFilterConstruction,
-        CacheEntryRole::kBlockBasedTableReader, CacheEntryRole::kFileMetadata,
-        CacheEntryRole::kBlobCache};
+    static const std::set<rocksdb_rs::cache::CacheEntryRole> kMemoryChargingSupported = {
+        rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer,
+        rocksdb_rs::cache::CacheEntryRole::kFilterConstruction,
+        rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader, rocksdb_rs::cache::CacheEntryRole::kFileMetadata,
+        rocksdb_rs::cache::CacheEntryRole::kBlobCache};
     if (options.charged != CacheEntryRoleOptions::Decision::kFallback &&
         kMemoryChargingSupported.count(role) == 0) {
       return Status_NotSupported(
           "Enable/Disable CacheEntryRoleOptions::charged"
-          " for CacheEntryRole " +
+          " for rocksdb_rs::cache::CacheEntryRole " +
           static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
           " is not supported");
     }
@@ -658,30 +658,30 @@ Status BlockBasedTableFactory::ValidateOptions(
         options.charged == CacheEntryRoleOptions::Decision::kEnabled) {
       return Status_InvalidArgument(
           "Enable CacheEntryRoleOptions::charged"
-          " for CacheEntryRole " +
+          " for rocksdb_rs::cache::CacheEntryRole " +
           static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
           " but block cache is disabled");
     }
-    if (role == CacheEntryRole::kBlobCache &&
+    if (role == rocksdb_rs::cache::CacheEntryRole::kBlobCache &&
         options.charged == CacheEntryRoleOptions::Decision::kEnabled) {
       if (cf_opts.blob_cache == nullptr) {
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
-            " for CacheEntryRole " +
+            " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but blob cache is not configured");
       }
       if (table_options_.no_block_cache) {
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
-            " for CacheEntryRole " +
+            " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but block cache is disabled");
       }
       if (table_options_.block_cache == cf_opts.blob_cache) {
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
-            " for CacheEntryRole " +
+            " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but blob cache is the same as block cache");
       }
@@ -689,7 +689,7 @@ Status BlockBasedTableFactory::ValidateOptions(
           table_options_.block_cache->GetCapacity()) {
         return Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
-            " for CacheEntryRole " +
+            " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but blob cache capacity is larger than block cache capacity");
       }

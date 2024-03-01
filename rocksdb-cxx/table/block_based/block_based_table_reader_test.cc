@@ -434,11 +434,11 @@ class ChargeTableReaderTest
       std::size_t cache_capacity, std::size_t approx_table_reader_mem) {
     // To make calculation easier for testing
     assert(cache_capacity % CacheReservationManagerImpl<
-                                CacheEntryRole::kBlockBasedTableReader>::
+                                rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
                                 GetDummyEntrySize() ==
                0 &&
            cache_capacity >= 2 * CacheReservationManagerImpl<
-                                     CacheEntryRole::kBlockBasedTableReader>::
+                                     rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
                                      GetDummyEntrySize());
 
     // We need to subtract 1 for max_num_dummy_entry to account for dummy
@@ -448,12 +448,12 @@ class ChargeTableReaderTest
         (size_t)std::floor((
             1.0 * cache_capacity /
             CacheReservationManagerImpl<
-                CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize())) -
+                rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize())) -
         1;
     std::size_t cache_capacity_rounded_to_dummy_entry_multiples =
         max_num_dummy_entry *
         CacheReservationManagerImpl<
-            CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize();
+            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize();
     std::size_t max_table_reader_num_capped = static_cast<std::size_t>(
         std::floor(1.0 * cache_capacity_rounded_to_dummy_entry_multiples /
                    approx_table_reader_mem));
@@ -469,9 +469,9 @@ class ChargeTableReaderTest
 
     table_reader_charge_tracking_cache_ = std::make_shared<
         TargetCacheChargeTrackingCache<
-            CacheEntryRole::kBlockBasedTableReader>>((NewLRUCache(
+            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>>((NewLRUCache(
         4 * CacheReservationManagerImpl<
-                CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize(),
+                rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize(),
         0 /* num_shard_bits */, true /* strict_capacity_limit */)));
 
     // To ApproximateTableReaderMem() without being affected by
@@ -488,7 +488,7 @@ class ChargeTableReaderTest
   void ConfigureTableFactory() override {
     BlockBasedTableOptions table_options;
     table_options.cache_usage_options.options_overrides.insert(
-        {CacheEntryRole::kBlockBasedTableReader,
+        {rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader,
          {/*.charged = */ charge_table_reader_}});
     table_options.block_cache = table_reader_charge_tracking_cache_;
 
@@ -502,7 +502,7 @@ class ChargeTableReaderTest
 
   CacheEntryRoleOptions::Decision charge_table_reader_;
   std::shared_ptr<
-      TargetCacheChargeTrackingCache<CacheEntryRole::kBlockBasedTableReader>>
+      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>>
       table_reader_charge_tracking_cache_;
   std::size_t approx_table_reader_mem_;
   std::map<std::string, std::string> kv_;
@@ -586,7 +586,7 @@ TEST_P(ChargeTableReaderTest, Basic) {
     EXPECT_TRUE(s.IsMemoryLimit()) << "s: " << *s.ToString();
     EXPECT_TRUE(s.ToString()->find(
                     static_cast<std::string>(CacheEntryRole_ToCamelString(
-                        CacheEntryRole::kBlockBasedTableReader))) !=
+                        rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader))) !=
                 std::string::npos);
     EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                 std::string::npos);

@@ -16,6 +16,8 @@
 #include "util/crc32c.h"
 #include "utilities/cache_dump_load_impl.h"
 
+using rocksdb_rs::cache::CacheEntryRole;
+
 namespace rocksdb {
 
 // Set the dump filter with a list of DBs. Block cache may be shared by multipe

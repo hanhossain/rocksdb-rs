@@ -135,21 +135,21 @@ class Cache {
     SaveToCallback saveto_cb;
     CreateCallback create_cb;
     // Classification of the entry for monitoring purposes in block cache.
-    CacheEntryRole role;
+    rocksdb_rs::cache::CacheEntryRole role;
     // Another CacheItemHelper (or this one) without secondary cache support.
     // This is provided so that items promoted from secondary cache into
     // primary cache without removal from the secondary cache can be prevented
     // from attempting re-insertion into secondary cache (for efficiency).
     const CacheItemHelper* without_secondary_compat;
 
-    CacheItemHelper() : CacheItemHelper(CacheEntryRole::kMisc) {}
+    CacheItemHelper() : CacheItemHelper(rocksdb_rs::cache::CacheEntryRole::kMisc) {}
 
     // For helpers without SecondaryCache support
-    explicit CacheItemHelper(CacheEntryRole _role, DeleterFn _del_cb = nullptr)
+    explicit CacheItemHelper(rocksdb_rs::cache::CacheEntryRole _role, DeleterFn _del_cb = nullptr)
         : CacheItemHelper(_role, _del_cb, nullptr, nullptr, nullptr, this) {}
 
     // For helpers with SecondaryCache support
-    explicit CacheItemHelper(CacheEntryRole _role, DeleterFn _del_cb,
+    explicit CacheItemHelper(rocksdb_rs::cache::CacheEntryRole _role, DeleterFn _del_cb,
                              SizeCallback _size_cb, SaveToCallback _saveto_cb,
                              CreateCallback _create_cb,
                              const CacheItemHelper* _without_secondary_compat)

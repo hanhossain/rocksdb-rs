@@ -148,7 +148,7 @@ using rocksdb::BloomLikeFilterPolicy;
 using rocksdb::BuiltinFilterBitsBuilder;
 using rocksdb::CachableEntry;
 using rocksdb::Cache;
-using rocksdb::CacheEntryRole;
+using rocksdb_rs::cache::CacheEntryRole;
 using rocksdb::CacheEntryRoleOptions;
 using rocksdb::EncodeFixed32;
 using rocksdb::Env;

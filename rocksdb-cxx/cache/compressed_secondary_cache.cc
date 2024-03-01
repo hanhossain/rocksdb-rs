@@ -21,7 +21,7 @@ CompressedSecondaryCache::CompressedSecondaryCache(
     : cache_(opts.LRUCacheOptions::MakeSharedCache()),
       cache_options_(opts),
       cache_res_mgr_(std::make_shared<ConcurrentCacheReservationManager>(
-          std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+          std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
               cache_))) {}
 
 CompressedSecondaryCache::~CompressedSecondaryCache() {
@@ -279,7 +279,7 @@ const Cache::CacheItemHelper* CompressedSecondaryCache::GetHelper(
     bool enable_custom_split_merge) const {
   if (enable_custom_split_merge) {
     static const Cache::CacheItemHelper kHelper{
-        CacheEntryRole::kMisc,
+        rocksdb_rs::cache::CacheEntryRole::kMisc,
         [](Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
           CacheValueChunk* chunks_head = static_cast<CacheValueChunk*>(obj);
           while (chunks_head != nullptr) {
@@ -292,7 +292,7 @@ const Cache::CacheItemHelper* CompressedSecondaryCache::GetHelper(
     return &kHelper;
   } else {
     static const Cache::CacheItemHelper kHelper{
-        CacheEntryRole::kMisc,
+        rocksdb_rs::cache::CacheEntryRole::kMisc,
         [](Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
           delete static_cast<CacheAllocationPtr*>(obj);
           obj = nullptr;

@@ -109,7 +109,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
   // the cache when cache charging is available
   static const std::size_t kUint64tHashEntryCacheResBucketSize =
       CacheReservationManagerImpl<
-          CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
       sizeof(uint64_t);
 
   // For delegating between XXPH3FilterBitsBuilders
@@ -1403,7 +1403,7 @@ FilterBitsBuilder* BloomLikeFilterPolicy::GetFastLocalBloomBuilderWithContext(
   bool offm = context.table_options.optimize_filters_for_memory;
   const auto options_overrides_iter =
       context.table_options.cache_usage_options.options_overrides.find(
-          CacheEntryRole::kFilterConstruction);
+          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction);
   const auto filter_construction_charged =
       options_overrides_iter !=
               context.table_options.cache_usage_options.options_overrides.end()
@@ -1415,7 +1415,7 @@ FilterBitsBuilder* BloomLikeFilterPolicy::GetFastLocalBloomBuilderWithContext(
       filter_construction_charged ==
           CacheEntryRoleOptions::Decision::kEnabled) {
     cache_res_mgr = std::make_shared<
-        CacheReservationManagerImpl<CacheEntryRole::kFilterConstruction>>(
+        CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
         context.table_options.block_cache);
   }
   return new FastLocalBloomBitsBuilder(
@@ -1452,7 +1452,7 @@ BloomLikeFilterPolicy::GetStandard128RibbonBuilderWithContext(
   bool offm = context.table_options.optimize_filters_for_memory;
   const auto options_overrides_iter =
       context.table_options.cache_usage_options.options_overrides.find(
-          CacheEntryRole::kFilterConstruction);
+          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction);
   const auto filter_construction_charged =
       options_overrides_iter !=
               context.table_options.cache_usage_options.options_overrides.end()
@@ -1464,7 +1464,7 @@ BloomLikeFilterPolicy::GetStandard128RibbonBuilderWithContext(
       filter_construction_charged ==
           CacheEntryRoleOptions::Decision::kEnabled) {
     cache_res_mgr = std::make_shared<
-        CacheReservationManagerImpl<CacheEntryRole::kFilterConstruction>>(
+        CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
         context.table_options.block_cache);
   }
   return new Standard128RibbonBitsBuilder(

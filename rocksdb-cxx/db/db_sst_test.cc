@@ -1491,7 +1491,7 @@ TEST_F(DBSSTTest, OpenDBWithInfiniteMaxOpenFilesSubjectToMemoryLimit) {
       Close();
 
       table_options.cache_usage_options.options_overrides.insert(
-          {CacheEntryRole::kBlockBasedTableReader,
+          {rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader,
            {/*.charged = */ charge_table_reader}});
       table_options.block_cache =
           NewLRUCache(1024 /* capacity */, 0 /* num_shard_bits */,
@@ -1505,7 +1505,7 @@ TEST_F(DBSSTTest, OpenDBWithInfiniteMaxOpenFilesSubjectToMemoryLimit) {
       if (charge_table_reader == CacheEntryRoleOptions::Decision::kEnabled) {
         EXPECT_TRUE(s.IsMemoryLimit());
         EXPECT_TRUE(s.ToString()->find(static_cast<std::string>(
-          CacheEntryRole_ToCamelString(CacheEntryRole::kBlockBasedTableReader))) != std::string::npos);
+          CacheEntryRole_ToCamelString(rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader))) != std::string::npos);
         EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                     std::string::npos);
 

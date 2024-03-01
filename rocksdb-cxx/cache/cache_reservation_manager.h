@@ -56,7 +56,7 @@ class CacheReservationManager {
 //
 // This class is NOT thread-safe, except that GetTotalReservedCacheSize()
 // can be called without external synchronization.
-template <CacheEntryRole R>
+template <rocksdb_rs::cache::CacheEntryRole R>
 class CacheReservationManagerImpl
     : public CacheReservationManager,
       public std::enable_shared_from_this<CacheReservationManagerImpl<R>> {

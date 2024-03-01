@@ -83,7 +83,7 @@ CacheWithSecondaryAdapter::CacheWithSecondaryAdapter(
   if (distribute_cache_res_) {
     size_t sec_capacity = 0;
     pri_cache_res_ = std::make_shared<ConcurrentCacheReservationManager>(
-        std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+        std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
             target_));
     Status s = secondary_cache_->GetCapacity(sec_capacity);
     assert(s.ok());
@@ -159,13 +159,13 @@ Cache::Handle* CacheWithSecondaryAdapter::Promote(
   }
   // Found something.
   switch (helper->role) {
-    case CacheEntryRole::kFilterBlock:
+    case rocksdb_rs::cache::CacheEntryRole::kFilterBlock:
       RecordTick(stats, SECONDARY_CACHE_FILTER_HITS);
       break;
-    case CacheEntryRole::kIndexBlock:
+    case rocksdb_rs::cache::CacheEntryRole::kIndexBlock:
       RecordTick(stats, SECONDARY_CACHE_INDEX_HITS);
       break;
-    case CacheEntryRole::kDataBlock:
+    case rocksdb_rs::cache::CacheEntryRole::kDataBlock:
       RecordTick(stats, SECONDARY_CACHE_DATA_HITS);
       break;
     default:

@@ -675,7 +675,7 @@ struct DeleteCounter {
   int deleted = 0;
 };
 const Cache::CacheItemHelper kDeleteCounterHelper{
-    CacheEntryRole::kMisc,
+    rocksdb_rs::cache::CacheEntryRole::kMisc,
     [](Cache::ObjectPtr value, MemoryAllocator* /*alloc*/) {
       static_cast<DeleteCounter*>(value)->deleted += 1;
     }};
@@ -1105,7 +1105,7 @@ class TestSecondaryCache : public SecondaryCache {
   };
 
   using SharedCache =
-      BasicTypedSharedCacheInterface<char[], CacheEntryRole::kMisc>;
+      BasicTypedSharedCacheInterface<char[], rocksdb_rs::cache::CacheEntryRole::kMisc>;
   using TypedHandle = SharedCache::TypedHandle;
   SharedCache cache_;
   uint32_t num_inserts_;
@@ -1218,19 +1218,19 @@ TEST_P(BasicSecondaryCacheTest, StatsTest) {
 
   get_perf_context()->Reset();
   Cache::Handle* handle;
-  handle = cache->Lookup(k1.AsSlice(), GetHelper(CacheEntryRole::kFilterBlock),
+  handle = cache->Lookup(k1.AsSlice(), GetHelper(rocksdb_rs::cache::CacheEntryRole::kFilterBlock),
                          /*context*/ this, Cache::Priority::LOW, stats.get());
   ASSERT_NE(handle, nullptr);
   ASSERT_EQ(static_cast<TestItem*>(cache->Value(handle))->Size(), str1.size());
   cache->Release(handle);
 
-  handle = cache->Lookup(k2.AsSlice(), GetHelper(CacheEntryRole::kIndexBlock),
+  handle = cache->Lookup(k2.AsSlice(), GetHelper(rocksdb_rs::cache::CacheEntryRole::kIndexBlock),
                          /*context*/ this, Cache::Priority::LOW, stats.get());
   ASSERT_NE(handle, nullptr);
   ASSERT_EQ(static_cast<TestItem*>(cache->Value(handle))->Size(), str2.size());
   cache->Release(handle);
 
-  handle = cache->Lookup(k3.AsSlice(), GetHelper(CacheEntryRole::kDataBlock),
+  handle = cache->Lookup(k3.AsSlice(), GetHelper(rocksdb_rs::cache::CacheEntryRole::kDataBlock),
                          /*context*/ this, Cache::Priority::LOW, stats.get());
   ASSERT_NE(handle, nullptr);
   ASSERT_EQ(static_cast<TestItem*>(cache->Value(handle))->Size(), str3.size());
@@ -1400,7 +1400,7 @@ TEST_P(BasicSecondaryCacheTest, FullCapacityTest) {
     Cache::Handle* handle1;
     handle1 = cache->Lookup(
         k1.AsSlice(),
-        GetHelper(CacheEntryRole::kDataBlock, /*secondary_compatible=*/false),
+        GetHelper(rocksdb_rs::cache::CacheEntryRole::kDataBlock, /*secondary_compatible=*/false),
         /*context*/ this, Cache::Priority::LOW);
     ASSERT_EQ(handle1, nullptr);
 
@@ -1421,7 +1421,7 @@ TEST_P(BasicSecondaryCacheTest, FullCapacityTest) {
     cache->Release(handle1);
     handle2 = cache->Lookup(
         k2.AsSlice(),
-        GetHelper(CacheEntryRole::kDataBlock, /*secondary_compatible=*/false),
+        GetHelper(rocksdb_rs::cache::CacheEntryRole::kDataBlock, /*secondary_compatible=*/false),
         /*context*/ this, Cache::Priority::LOW);
     if (strict_capacity_limit || GetParam() == kHyperClock) {
       ASSERT_NE(handle2, nullptr);

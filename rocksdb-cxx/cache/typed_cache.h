@@ -74,9 +74,9 @@ class BaseCacheInterface {
 };
 
 // PlaceholderCacheInterface - Used for making cache reservations, with
-// entries that have a charge but no value. CacheEntryRole is required as
+// entries that have a charge but no value. rocksdb_rs::cache::CacheEntryRole is required as
 // a template parameter.
-template <CacheEntryRole kRole, typename CachePtr = Cache*>
+template <rocksdb_rs::cache::CacheEntryRole kRole, typename CachePtr = Cache*>
 class PlaceholderCacheInterface : public BaseCacheInterface<CachePtr> {
  public:
   CACHE_TYPE_DEFS();
@@ -93,7 +93,7 @@ class PlaceholderCacheInterface : public BaseCacheInterface<CachePtr> {
   }
 };
 
-template <CacheEntryRole kRole>
+template <rocksdb_rs::cache::CacheEntryRole kRole>
 using PlaceholderSharedCacheInterface =
     PlaceholderCacheInterface<kRole, std::shared_ptr<Cache>>;
 
@@ -128,7 +128,7 @@ class BasicTypedCacheHelperFns {
 
 // In its own class to try to minimize the number of distinct CacheItemHelper
 // instances (e.g. don't vary by CachePtr)
-template <class TValue, CacheEntryRole kRole>
+template <class TValue, rocksdb_rs::cache::CacheEntryRole kRole>
 class BasicTypedCacheHelper : public BasicTypedCacheHelperFns<TValue> {
  public:
   static const Cache::CacheItemHelper* GetBasicHelper() {
@@ -142,7 +142,7 @@ class BasicTypedCacheHelper : public BasicTypedCacheHelperFns<TValue> {
 // type TValue, which can be cleaned up with std::default_delete<TValue>. The
 // role is provided by TValue::kCacheEntryRole or given in an optional
 // template parameter.
-template <class TValue, CacheEntryRole kRole = TValue::kCacheEntryRole,
+template <class TValue, rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole,
           typename CachePtr = Cache*>
 class BasicTypedCacheInterface : public BaseCacheInterface<CachePtr>,
                                  public BasicTypedCacheHelper<TValue, kRole> {
@@ -202,7 +202,7 @@ class BasicTypedCacheInterface : public BaseCacheInterface<CachePtr>,
 
 // BasicTypedSharedCacheInterface - Like BasicTypedCacheInterface but with a
 // shared_ptr<Cache> for keeping Cache alive.
-template <class TValue, CacheEntryRole kRole = TValue::kCacheEntryRole>
+template <class TValue, rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole>
 using BasicTypedSharedCacheInterface =
     BasicTypedCacheInterface<TValue, kRole, std::shared_ptr<Cache>>;
 
@@ -251,7 +251,7 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
 
 // In its own class to try to minimize the number of distinct CacheItemHelper
 // instances (e.g. don't vary by CachePtr)
-template <class TValue, class TCreateContext, CacheEntryRole kRole>
+template <class TValue, class TCreateContext, rocksdb_rs::cache::CacheEntryRole kRole>
 class FullTypedCacheHelper
     : public FullTypedCacheHelperFns<TValue, TCreateContext> {
  public:
@@ -277,7 +277,7 @@ class FullTypedCacheHelper
 // size_t* out_charge, const Slice& data, MemoryAllocator* allocator) for
 // creating new TValue.
 template <class TValue, class TCreateContext,
-          CacheEntryRole kRole = TValue::kCacheEntryRole,
+          rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole,
           typename CachePtr = Cache*>
 class FullTypedCacheInterface
     : public BasicTypedCacheInterface<TValue, kRole, CachePtr>,
@@ -365,7 +365,7 @@ class FullTypedCacheInterface
 // FullTypedSharedCacheInterface - Like FullTypedCacheInterface but with a
 // shared_ptr<Cache> for keeping Cache alive.
 template <class TValue, class TCreateContext,
-          CacheEntryRole kRole = TValue::kCacheEntryRole>
+          rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole>
 using FullTypedSharedCacheInterface =
     FullTypedCacheInterface<TValue, TCreateContext, kRole,
                             std::shared_ptr<Cache>>;

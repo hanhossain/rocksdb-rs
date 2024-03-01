@@ -5580,7 +5580,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, Basic) {
     table_options.flush_block_policy_factory =
         std::make_shared<FlushBlockEveryKeyPolicyFactory>();
     table_options.cache_usage_options.options_overrides.insert(
-        {CacheEntryRole::kCompressionDictionaryBuildingBuffer,
+        {rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer,
          {/*.charged = */ charge_compression_dictionary_building_buffer}});
     Options options;
     options.compression = CompressionType::kSnappyCompression;
@@ -5647,7 +5647,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest,
   constexpr std::size_t kMaxDictBufferBytes = 2 * kSizeDummyEntry;
 
   // `CacheEntryRoleOptions::charged` is enabled by default for
-  // CacheEntryRole::kCompressionDictionaryBuildingBuffer
+  // rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer
   BlockBasedTableOptions table_options;
   LRUCacheOptions lo;
   lo.capacity = kCacheCapacity;
@@ -5732,7 +5732,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, BasicWithCacheFull) {
   constexpr std::size_t kMaxDictBufferBytes = 1024 * 1024 * 1024;
 
   // `CacheEntryRoleOptions::charged` is enabled by default for
-  // CacheEntryRole::kCompressionDictionaryBuildingBuffer
+  // rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer
   BlockBasedTableOptions table_options;
   LRUCacheOptions lo;
   lo.capacity = kCacheCapacity;
@@ -5837,10 +5837,10 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
   }
   Destroy(options);
 
-  // To test option validation on unsupported CacheEntryRole
+  // To test option validation on unsupported rocksdb_rs::cache::CacheEntryRole
   table_options = BlockBasedTableOptions();
   table_options.cache_usage_options.options_overrides.insert(
-      {CacheEntryRole::kDataBlock,
+      {rocksdb_rs::cache::CacheEntryRole::kDataBlock,
        {/*.charged = */ CacheEntryRoleOptions::Decision::kDisabled}});
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   Destroy(options);
@@ -5851,14 +5851,14 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
       std::string::npos);
   EXPECT_TRUE(
       s.ToString()->find(static_cast<std::string>(CacheEntryRole_ToCamelString(
-          CacheEntryRole::kDataBlock))) != std::string::npos);
+          rocksdb_rs::cache::CacheEntryRole::kDataBlock))) != std::string::npos);
   Destroy(options);
 
   // To test option validation on existence of block cache
   table_options = BlockBasedTableOptions();
   table_options.no_block_cache = true;
   table_options.cache_usage_options.options_overrides.insert(
-      {CacheEntryRole::kFilterConstruction,
+      {rocksdb_rs::cache::CacheEntryRole::kFilterConstruction,
        {/*.charged = */ CacheEntryRoleOptions::Decision::kEnabled}});
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   Destroy(options);
@@ -5868,7 +5868,7 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
               std::string::npos);
   EXPECT_TRUE(
       s.ToString()->find(static_cast<std::string>(CacheEntryRole_ToCamelString(
-          CacheEntryRole::kFilterConstruction))) != std::string::npos);
+          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction))) != std::string::npos);
   EXPECT_TRUE(s.ToString()->find("block cache is disabled") !=
               std::string::npos);
   Destroy(options);

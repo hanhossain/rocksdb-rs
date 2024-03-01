@@ -629,7 +629,7 @@ ColumnFamilyData::ColumnFamilyData(
         cf_options.table_factory->GetOptions<BlockBasedTableOptions>();
     const auto& options_overrides = bbto->cache_usage_options.options_overrides;
     const auto file_metadata_charged =
-        options_overrides.at(CacheEntryRole::kFileMetadata).charged;
+        options_overrides.at(rocksdb_rs::cache::CacheEntryRole::kFileMetadata).charged;
     if (bbto->block_cache &&
         file_metadata_charged == CacheEntryRoleOptions::Decision::kEnabled) {
       // TODO(hx235): Add a `ConcurrentCacheReservationManager` at DB scope
@@ -637,7 +637,7 @@ ColumnFamilyData::ColumnFamilyData(
       // this `file_metadata_cache_res_mgr_` nonconcurrent
       file_metadata_cache_res_mgr_.reset(new ConcurrentCacheReservationManager(
           std::make_shared<
-              CacheReservationManagerImpl<CacheEntryRole::kFileMetadata>>(
+              CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>(
               bbto->block_cache)));
     }
   }

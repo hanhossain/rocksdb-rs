@@ -417,7 +417,7 @@ class ChargeFilterConstructionTest : public testing::Test {};
 TEST_F(ChargeFilterConstructionTest, RibbonFilterFallBackOnLargeBanding) {
   constexpr std::size_t kCacheCapacity =
       8 * CacheReservationManagerImpl<
-              CacheEntryRole::kFilterConstruction>::GetDummyEntrySize();
+              rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize();
   constexpr std::size_t num_entries_for_cache_full = kCacheCapacity / 8;
 
   for (CacheEntryRoleOptions::Decision charge_filter_construction_mem :
@@ -428,7 +428,7 @@ TEST_F(ChargeFilterConstructionTest, RibbonFilterFallBackOnLargeBanding) {
 
     BlockBasedTableOptions table_options;
     table_options.cache_usage_options.options_overrides.insert(
-        {CacheEntryRole::kFilterConstruction,
+        {rocksdb_rs::cache::CacheEntryRole::kFilterConstruction,
          {/*.charged = */ charge_filter_construction_mem}});
     LRUCacheOptions lo;
     lo.capacity = kCacheCapacity;
@@ -466,17 +466,17 @@ TEST_F(ChargeFilterConstructionTest, RibbonFilterFallBackOnLargeBanding) {
       const size_t dummy_entry_num = static_cast<std::size_t>(std::ceil(
           filter.size() * 1.0 /
           CacheReservationManagerImpl<
-              CacheEntryRole::kFilterConstruction>::GetDummyEntrySize()));
+              rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize()));
       EXPECT_GE(
           cache->GetPinnedUsage(),
           dummy_entry_num *
               CacheReservationManagerImpl<
-                  CacheEntryRole::kFilterConstruction>::GetDummyEntrySize());
+                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize());
       EXPECT_LT(
           cache->GetPinnedUsage(),
           (dummy_entry_num + 1) *
               CacheReservationManagerImpl<
-                  CacheEntryRole::kFilterConstruction>::GetDummyEntrySize());
+                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize());
     } else {
       EXPECT_EQ(cache->GetPinnedUsage(), 0);
     }

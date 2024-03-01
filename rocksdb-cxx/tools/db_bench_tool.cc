@@ -103,6 +103,7 @@ using GFLAGS_NAMESPACE::ParseCommandLineFlags;
 using GFLAGS_NAMESPACE::RegisterFlagValidator;
 using GFLAGS_NAMESPACE::SetUsageMessage;
 using GFLAGS_NAMESPACE::SetVersionString;
+using rocksdb_rs::cache::CacheEntryRole;
 
 DEFINE_string(
     benchmarks,

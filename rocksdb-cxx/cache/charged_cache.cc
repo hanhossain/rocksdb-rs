@@ -14,7 +14,7 @@ ChargedCache::ChargedCache(std::shared_ptr<Cache> cache,
     : CacheWrapper(cache),
       cache_res_mgr_(std::make_shared<ConcurrentCacheReservationManager>(
           std::make_shared<
-              CacheReservationManagerImpl<CacheEntryRole::kBlobCache>>(
+              CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kBlobCache>>(
               block_cache))) {}
 
 Status ChargedCache::Insert(const Slice& key, ObjectPtr obj,
