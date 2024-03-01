@@ -204,16 +204,16 @@ std::string RandomName(Random* rnd, const size_t len) {
   return ss.str();
 }
 
-CompressionType RandomCompressionType(Random* rnd) {
-  auto ret = static_cast<CompressionType>(rnd->Uniform(6));
+rocksdb_rs::compression_type::CompressionType RandomCompressionType(Random* rnd) {
+  auto ret = static_cast<rocksdb_rs::compression_type::CompressionType>(rnd->Uniform(6));
   while (!CompressionTypeSupported(ret)) {
-    ret = static_cast<CompressionType>((static_cast<int>(ret) + 1) % 6);
+    ret = static_cast<rocksdb_rs::compression_type::CompressionType>((static_cast<int>(ret) + 1) % 6);
   }
   return ret;
 }
 
 void RandomCompressionTypeVector(const size_t count,
-                                 std::vector<CompressionType>* types,
+                                 std::vector<rocksdb_rs::compression_type::CompressionType>* types,
                                  Random* rnd) {
   types->clear();
   for (size_t i = 0; i < count; ++i) {

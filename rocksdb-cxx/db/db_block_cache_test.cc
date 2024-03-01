@@ -892,18 +892,18 @@ TEST_F(DBBlockCacheTest, CacheCompressionDict) {
   const int kNumBytesPerEntry = 1024;
 
   // Try all the available libraries that support dictionary compression
-  std::vector<CompressionType> compression_types;
+  std::vector<rocksdb_rs::compression_type::CompressionType> compression_types;
   if (Zlib_Supported()) {
-    compression_types.push_back(CompressionType::kZlibCompression);
+    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression);
   }
   if (LZ4_Supported()) {
-    compression_types.push_back(CompressionType::kLZ4Compression);
-    compression_types.push_back(CompressionType::kLZ4HCCompression);
+    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
   }
   if (ZSTD_Supported()) {
-    compression_types.push_back(CompressionType::kZSTD);
+    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kZSTD);
   } else if (ZSTDNotFinal_Supported()) {
-    compression_types.push_back(CompressionType::kZSTDNotFinalCompression);
+    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression);
   }
   Random rnd(301);
   for (auto compression_type : compression_types) {
@@ -1836,10 +1836,10 @@ TEST_P(DBBlockCachePinningTest, TwoLevelDB) {
   const int kNumKeysPerFile = kBlockSize * kNumBlocksPerFile / kKeySize;
 
   Options options = CurrentOptions();
-  // `CompressionType::kNoCompression` makes the unit test more portable. But it relies on the
+  // `rocksdb_rs::compression_type::CompressionType::kNoCompression` makes the unit test more portable. But it relies on the
   // current behavior of persisting/accessing dictionary even when there's no
   // (de)compression happening, which seems fairly likely to change over time.
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.compression_opts.max_dict_bytes = 4 << 10;
   options.statistics = rocksdb::CreateDBStatistics();
   BlockBasedTableOptions table_options;

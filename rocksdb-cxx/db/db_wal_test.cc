@@ -1593,7 +1593,7 @@ class RecoveryTestHelper {
 
 class DBWALTestWithParams : public DBWALTestBase,
                             public ::testing::WithParamInterface<
-                                std::tuple<bool, int, int, CompressionType>> {
+                                std::tuple<bool, int, int, rocksdb_rs::compression_type::CompressionType>> {
  public:
   DBWALTestWithParams() : DBWALTestBase("/db_wal_test_with_params") {}
 };
@@ -1605,13 +1605,13 @@ INSTANTIATE_TEST_CASE_P(
                                         RecoveryTestHelper::kWALFileOffset +
                                             RecoveryTestHelper::kWALFilesCount,
                                         1),
-                       ::testing::Values(CompressionType::kNoCompression,
-                                         CompressionType::kZSTD)));
+                       ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                                         rocksdb_rs::compression_type::CompressionType::kZSTD)));
 
 class DBWALTestWithParamsVaryingRecoveryMode
     : public DBWALTestBase,
       public ::testing::WithParamInterface<
-          std::tuple<bool, int, int, WALRecoveryMode, CompressionType>> {
+          std::tuple<bool, int, int, WALRecoveryMode, rocksdb_rs::compression_type::CompressionType>> {
  public:
   DBWALTestWithParamsVaryingRecoveryMode()
       : DBWALTestBase("/db_wal_test_with_params_mode") {}
@@ -1629,8 +1629,8 @@ INSTANTIATE_TEST_CASE_P(
                           WALRecoveryMode::kAbsoluteConsistency,
                           WALRecoveryMode::kPointInTimeRecovery,
                           WALRecoveryMode::kSkipAnyCorruptedRecords),
-        ::testing::Values(CompressionType::kNoCompression,
-                          CompressionType::kZSTD)));
+        ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                          rocksdb_rs::compression_type::CompressionType::kZSTD)));
 
 // Test scope:
 // - We expect to open the data store when there is incomplete trailing writes
@@ -1677,7 +1677,7 @@ TEST_P(DBWALTestWithParams, kAbsoluteConsistency) {
   int corrupt_offset = std::get<1>(GetParam());
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   // WAL compression type
-  CompressionType compression_type = std::get<3>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type = std::get<3>(GetParam());
   options.wal_compression = compression_type;
 
   if (trunc && corrupt_offset == 0) {
@@ -1914,7 +1914,7 @@ TEST_P(DBWALTestWithParams, kPointInTimeRecovery) {
   int corrupt_offset = std::get<1>(GetParam());
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   // WAL compression type
-  CompressionType compression_type = std::get<3>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type = std::get<3>(GetParam());
 
   // Fill data for testing
   Options options = CurrentOptions();
@@ -1971,7 +1971,7 @@ TEST_P(DBWALTestWithParams, kSkipAnyCorruptedRecords) {
   int corrupt_offset = std::get<1>(GetParam());
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   // WAL compression type
-  CompressionType compression_type = std::get<3>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type = std::get<3>(GetParam());
 
   // Fill data for testing
   Options options = CurrentOptions();
@@ -2200,7 +2200,7 @@ TEST_P(DBWALTestWithParamsVaryingRecoveryMode,
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   WALRecoveryMode recovery_mode = std::get<3>(GetParam());
   // WAL compression type
-  CompressionType compression_type = std::get<4>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type = std::get<4>(GetParam());
 
   options.wal_recovery_mode = recovery_mode;
   options.wal_compression = compression_type;
@@ -2572,7 +2572,7 @@ TEST_F(DBWALTest, WalTermTest) {
 }
 
 TEST_F(DBWALTest, GetCompressedWalsAfterSync) {
-  if (db_->GetOptions().wal_compression == CompressionType::kNoCompression) {
+  if (db_->GetOptions().wal_compression == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     ROCKSDB_GTEST_BYPASS("stream compression not present");
     return;
   }
@@ -2585,7 +2585,7 @@ TEST_F(DBWALTest, GetCompressedWalsAfterSync) {
   // Enable WAL compression so that the newly-created WAL will be non-empty
   // after DB open, even if point-in-time WAL recovery encounters no
   // corruption.
-  options.wal_compression = CompressionType::kZSTD;
+  options.wal_compression = rocksdb_rs::compression_type::CompressionType::kZSTD;
   DestroyAndReopen(options);
 
   // Write something to memtable and WAL so that log_empty_ will be false after

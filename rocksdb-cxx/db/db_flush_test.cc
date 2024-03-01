@@ -325,7 +325,7 @@ TEST_F(DBFlushTest, StatisticsGarbageBasic) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -466,7 +466,7 @@ TEST_F(DBFlushTest, StatisticsGarbageInsertAndDeletes) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   options.write_buffer_size = 67108864;
@@ -557,7 +557,7 @@ TEST_F(DBFlushTest, StatisticsGarbageRangeDeletes) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   options.write_buffer_size = 67108864;
@@ -898,7 +898,7 @@ TEST_F(DBFlushTest, MemPurgeBasic) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -1071,7 +1071,7 @@ TEST_F(DBFlushTest, MemPurgeBasicToggle) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -1194,7 +1194,7 @@ TEST_F(DBFlushTest, MemPurgeWithAtomicFlush) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -1285,7 +1285,7 @@ TEST_F(DBFlushTest, MemPurgeDeleteAndDeleteRange) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   TestFlushListener* listener = new TestFlushListener(options.env, this);
@@ -1484,7 +1484,7 @@ TEST_F(DBFlushTest, MemPurgeAndCompactionFilter) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   TestFlushListener* listener = new TestFlushListener(options.env, this);
@@ -1567,7 +1567,7 @@ TEST_F(DBFlushTest, DISABLED_MemPurgeWALSupport) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
 
@@ -1747,7 +1747,7 @@ TEST_F(DBFlushTest, MemPurgeCorrectLogNumberAndSSTFileCreation) {
   Options options = CurrentOptions();
 
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
 

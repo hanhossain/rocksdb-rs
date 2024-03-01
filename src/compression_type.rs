@@ -1,4 +1,4 @@
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::compression_type")]
 pub mod ffi {
     // DB contents are stored in a set of blocks, each of which holds a
     // sequence of key,value pairs.  Each block may be compressed before

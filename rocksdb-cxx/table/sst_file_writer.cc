@@ -275,10 +275,10 @@ Status SstFileWriter::Open(const std::string& file_path) {
 
   sst_file->SetIOPriority(r->io_priority);
 
-  CompressionType compression_type;
+  rocksdb_rs::compression_type::CompressionType compression_type;
   CompressionOptions compression_opts;
   if (r->mutable_cf_options.bottommost_compression !=
-      CompressionType::kDisableCompressionOption) {
+      rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption) {
     compression_type = r->mutable_cf_options.bottommost_compression;
     if (r->mutable_cf_options.bottommost_compression_opts.enabled) {
       compression_opts = r->mutable_cf_options.bottommost_compression_opts;

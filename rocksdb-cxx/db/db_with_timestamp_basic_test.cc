@@ -397,7 +397,7 @@ TEST_F(DBBasicTestWithTimestamp, UpdateFullHistoryTsLowWithPublicAPI) {
 TEST_F(DBBasicTestWithTimestamp, GetApproximateSizes) {
   Options options = CurrentOptions();
   options.write_buffer_size = 100000000;  // Large write buffer
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   const size_t kTimestampSize = Timestamp(0, 0).size();
   TestComparator test_cmp(kTimestampSize);
@@ -694,7 +694,7 @@ TEST_P(DBBasicTestWithTimestampTableOptions, GetAndMultiGet) {
   Options options = GetDefaultOptions();
   options.create_if_missing = true;
   options.prefix_extractor.reset(NewFixedPrefixTransform(3));
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions bbto;
   bbto.index_type = GetParam();
   bbto.block_size = 100;
@@ -2480,7 +2480,7 @@ TEST_F(DataVisibilityTest, MultiGetCrossCF) {
 class DBBasicTestWithTimestampCompressionSettings
     : public DBBasicTestWithTimestampBase,
       public testing::WithParamInterface<
-          std::tuple<std::shared_ptr<const FilterPolicy>, CompressionType,
+          std::tuple<std::shared_ptr<const FilterPolicy>, rocksdb_rs::compression_type::CompressionType,
                      uint32_t, uint32_t>> {
  public:
   DBBasicTestWithTimestampCompressionSettings()
@@ -2504,22 +2504,22 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutAndGet) {
   bbto.whole_key_filtering = true;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
-  const CompressionType comp_type = std::get<1>(GetParam());
+  const rocksdb_rs::compression_type::CompressionType comp_type = std::get<1>(GetParam());
 #if LZ4_VERSION_NUMBER < 10400  // r124+
-  if (comp_type == CompressionType::kLZ4Compression || comp_type == CompressionType::kLZ4HCCompression) {
+  if (comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4Compression || comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
     return;
   }
 #endif  // LZ4_VERSION_NUMBER >= 10400
-  if (!ZSTD_Supported() && comp_type == CompressionType::kZSTD) {
+  if (!ZSTD_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     return;
   }
-  if (!Zlib_Supported() && comp_type == CompressionType::kZlibCompression) {
+  if (!Zlib_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
     return;
   }
 
   options.compression = comp_type;
   options.compression_opts.max_dict_bytes = std::get<2>(GetParam());
-  if (comp_type == CompressionType::kZSTD) {
+  if (comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     options.compression_opts.zstd_max_train_bytes = std::get<2>(GetParam());
   }
   options.compression_opts.parallel_threads = std::get<3>(GetParam());
@@ -2579,22 +2579,22 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutDeleteGet) {
   bbto.whole_key_filtering = true;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
-  const CompressionType comp_type = std::get<1>(GetParam());
+  const rocksdb_rs::compression_type::CompressionType comp_type = std::get<1>(GetParam());
 #if LZ4_VERSION_NUMBER < 10400  // r124+
-  if (comp_type == CompressionType::kLZ4Compression || comp_type == CompressionType::kLZ4HCCompression) {
+  if (comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4Compression || comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
     return;
   }
 #endif  // LZ4_VERSION_NUMBER >= 10400
-  if (!ZSTD_Supported() && comp_type == CompressionType::kZSTD) {
+  if (!ZSTD_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     return;
   }
-  if (!Zlib_Supported() && comp_type == CompressionType::kZlibCompression) {
+  if (!Zlib_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
     return;
   }
 
   options.compression = comp_type;
   options.compression_opts.max_dict_bytes = std::get<2>(GetParam());
-  if (comp_type == CompressionType::kZSTD) {
+  if (comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     options.compression_opts.zstd_max_train_bytes = std::get<2>(GetParam());
   }
   options.compression_opts.parallel_threads = std::get<3>(GetParam());
@@ -2725,22 +2725,22 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutAndGetWithCompaction) {
   bbto.whole_key_filtering = true;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
-  const CompressionType comp_type = std::get<1>(GetParam());
+  const rocksdb_rs::compression_type::CompressionType comp_type = std::get<1>(GetParam());
 #if LZ4_VERSION_NUMBER < 10400  // r124+
-  if (comp_type == CompressionType::kLZ4Compression || comp_type == CompressionType::kLZ4HCCompression) {
+  if (comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4Compression || comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
     return;
   }
 #endif  // LZ4_VERSION_NUMBER >= 10400
-  if (!ZSTD_Supported() && comp_type == CompressionType::kZSTD) {
+  if (!ZSTD_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     return;
   }
-  if (!Zlib_Supported() && comp_type == CompressionType::kZlibCompression) {
+  if (!Zlib_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
     return;
   }
 
   options.compression = comp_type;
   options.compression_opts.max_dict_bytes = std::get<2>(GetParam());
-  if (comp_type == CompressionType::kZSTD) {
+  if (comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     options.compression_opts.zstd_max_train_bytes = std::get<2>(GetParam());
   }
   options.compression_opts.parallel_threads = std::get<3>(GetParam());
@@ -2796,7 +2796,7 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutAndGetWithCompaction) {
           // keys with the same timestamp is at one level, with newer versions
           // at higher levels.
           CompactionOptions compact_opt;
-          compact_opt.compression = CompressionType::kNoCompression;
+          compact_opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
           ASSERT_OK(db_->CompactFiles(compact_opt, handles_[cf],
                                       collector->GetFlushedFiles(),
                                       static_cast<int>(kNumTimestamps - i)));
@@ -2972,8 +2972,8 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(std::shared_ptr<const FilterPolicy>(nullptr),
                           std::shared_ptr<const FilterPolicy>(
                               NewBloomFilterPolicy(10, false))),
-        ::testing::Values(CompressionType::kNoCompression, CompressionType::kZlibCompression, CompressionType::kLZ4Compression,
-                          CompressionType::kLZ4HCCompression, CompressionType::kZSTD),
+        ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression, rocksdb_rs::compression_type::CompressionType::kZlibCompression, rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+                          rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, rocksdb_rs::compression_type::CompressionType::kZSTD),
         ::testing::Values(0, 1 << 14), ::testing::Values(1, 4)));
 
 class DBBasicTestWithTimestampPrefixSeek
@@ -3494,7 +3494,7 @@ TEST_P(DBBasicTestWithTimestampTableOptions, DeleteRangeBaiscReadAndIterate) {
   const int kNum = 200, kRangeBegin = 50, kRangeEnd = 150, kNumPerFile = 25;
   Options options = CurrentOptions();
   options.prefix_extractor.reset(NewFixedPrefixTransform(3));
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions bbto;
   bbto.index_type = GetParam();
   bbto.block_size = 100;

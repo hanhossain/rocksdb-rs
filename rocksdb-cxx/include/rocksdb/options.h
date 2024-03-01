@@ -211,7 +211,7 @@ struct ColumnFamilyOptions : public AdvancedColumnFamilyOptions {
   // - For all others, we do not specify a compression level
   //
   // Dynamically changeable through SetOptions() API
-  CompressionType compression;
+  rocksdb_rs::compression_type::CompressionType compression;
 
   // Compression algorithm that will be used for the bottommost level that
   // contain files. The behavior for num_levels = 1 is not well defined.
@@ -220,7 +220,7 @@ struct ColumnFamilyOptions : public AdvancedColumnFamilyOptions {
   // but the behavior is subject to change.
   //
   // Default: kDisableCompressionOption (Disabled)
-  CompressionType bottommost_compression = CompressionType::kDisableCompressionOption;
+  rocksdb_rs::compression_type::CompressionType bottommost_compression = rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
 
   // different options for compression algorithms used by bottommost_compression
   // if it is enabled. To enable it, please see the definition of
@@ -1230,7 +1230,7 @@ struct DBOptions {
   // If enabled WAL records will be compressed before they are written.
   // Only zstd is supported. Compressed WAL records will be read in supported
   // versions regardless of the wal_compression settings.
-  CompressionType wal_compression = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType wal_compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // If true, RocksDB supports flushing multiple column families and committing
   // their results atomically to MANIFEST. Note that it is not
@@ -1805,7 +1805,7 @@ struct CompactionOptions {
   // If set to `kDisableCompressionOption`, RocksDB will choose compression type
   // according to the `ColumnFamilyOptions`, taking into account the output
   // level if `compression_per_level` is specified.
-  CompressionType compression;
+  rocksdb_rs::compression_type::CompressionType compression;
   // Compaction will create files of size `output_file_size_limit`.
   // Default: MAX, which means that compaction will create a single file
   uint64_t output_file_size_limit;
@@ -1813,7 +1813,7 @@ struct CompactionOptions {
   uint32_t max_subcompactions;
 
   CompactionOptions()
-      : compression(CompressionType::kSnappyCompression),
+      : compression(rocksdb_rs::compression_type::CompressionType::kSnappyCompression),
         output_file_size_limit(std::numeric_limits<uint64_t>::max()),
         max_subcompactions(0) {}
 };

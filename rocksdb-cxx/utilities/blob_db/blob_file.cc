@@ -29,7 +29,7 @@ BlobFile::BlobFile(const BlobDBImpl* p, const std::string& bdir, uint64_t fn,
 
 BlobFile::BlobFile(const BlobDBImpl* p, const std::string& bdir, uint64_t fn,
                    Logger* info_log, uint32_t column_family_id,
-                   CompressionType compression, bool has_ttl,
+                   rocksdb_rs::compression_type::CompressionType compression, bool has_ttl,
                    const ExpirationRange& expiration_range)
     : parent_(p),
       path_to_dir_(bdir),

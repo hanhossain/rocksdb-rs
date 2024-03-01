@@ -86,7 +86,7 @@ class Compaction {
              const MutableDBOptions& mutable_db_options,
              std::vector<CompactionInputFiles> inputs, int output_level,
              uint64_t target_file_size, uint64_t max_compaction_bytes,
-             uint32_t output_path_id, CompressionType compression,
+             uint32_t output_path_id, rocksdb_rs::compression_type::CompressionType compression,
              CompressionOptions compression_opts,
              Temperature output_temperature, uint32_t max_subcompactions,
              std::vector<FileMetaData*> grandparents,
@@ -187,7 +187,7 @@ class Compaction {
   uint64_t target_output_file_size() const { return target_output_file_size_; }
 
   // What compression for output
-  CompressionType output_compression() const { return output_compression_; }
+  rocksdb_rs::compression_type::CompressionType output_compression() const { return output_compression_; }
 
   // What compression options for output
   const CompressionOptions& output_compression_opts() const {
@@ -476,7 +476,7 @@ class Compaction {
   Arena arena_;  // Arena used to allocate space for file_levels_
 
   const uint32_t output_path_id_;
-  CompressionType output_compression_;
+  rocksdb_rs::compression_type::CompressionType output_compression_;
   CompressionOptions output_compression_opts_;
   Temperature output_temperature_;
   // If true, then the compaction can be done by simply deleting input files.

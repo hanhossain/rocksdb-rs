@@ -350,8 +350,8 @@ extern rocksdb::Env* db_stress_env;
 extern rocksdb::Env* db_stress_listener_env;
 extern std::shared_ptr<rocksdb::FaultInjectionTestFS> fault_fs_guard;
 
-extern enum rocksdb::CompressionType compression_type_e;
-extern enum rocksdb::CompressionType bottommost_compression_type_e;
+extern enum rocksdb_rs::compression_type::CompressionType compression_type_e;
+extern enum rocksdb_rs::compression_type::CompressionType bottommost_compression_type_e;
 extern enum rocksdb::ChecksumType checksum_type_e;
 
 enum RepFactory { kSkipList, kHashSkipList, kVectorRep };
@@ -373,40 +373,40 @@ inline enum RepFactory StringToRepFactory(const char* ctype) {
 extern enum RepFactory FLAGS_rep_factory;
 
 namespace rocksdb {
-inline enum rocksdb::CompressionType StringToCompressionType(
+inline enum rocksdb_rs::compression_type::CompressionType StringToCompressionType(
     const char* ctype) {
   assert(ctype);
 
-  rocksdb::CompressionType ret_compression_type;
+  rocksdb_rs::compression_type::CompressionType ret_compression_type;
 
   if (!strcasecmp(ctype, "disable")) {
-    ret_compression_type = rocksdb::CompressionType::kDisableCompressionOption;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
   } else if (!strcasecmp(ctype, "none")) {
-    ret_compression_type = rocksdb::CompressionType::kNoCompression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   } else if (!strcasecmp(ctype, "snappy")) {
-    ret_compression_type = rocksdb::CompressionType::kSnappyCompression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   } else if (!strcasecmp(ctype, "zlib")) {
-    ret_compression_type = rocksdb::CompressionType::kZlibCompression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
   } else if (!strcasecmp(ctype, "bzip2")) {
-    ret_compression_type = rocksdb::CompressionType::kBZip2Compression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kBZip2Compression;
   } else if (!strcasecmp(ctype, "lz4")) {
-    ret_compression_type = rocksdb::CompressionType::kLZ4Compression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   } else if (!strcasecmp(ctype, "lz4hc")) {
-    ret_compression_type = rocksdb::CompressionType::kLZ4HCCompression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression;
   } else if (!strcasecmp(ctype, "xpress")) {
-    ret_compression_type = rocksdb::CompressionType::kXpressCompression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kXpressCompression;
   } else if (!strcasecmp(ctype, "zstd")) {
-    ret_compression_type = rocksdb::CompressionType::kZSTD;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kZSTD;
   } else {
     fprintf(stderr, "Cannot parse compression type '%s'\n", ctype);
     ret_compression_type =
-        rocksdb::CompressionType::kSnappyCompression;  // default value
+        rocksdb_rs::compression_type::CompressionType::kSnappyCompression;  // default value
   }
-  if (ret_compression_type != rocksdb::CompressionType::kDisableCompressionOption &&
+  if (ret_compression_type != rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption &&
       !CompressionTypeSupported(ret_compression_type)) {
     // Use no compression will be more portable but considering this is
     // only a stress test and snappy is widely available. Use snappy here.
-    ret_compression_type = rocksdb::CompressionType::kSnappyCompression;
+    ret_compression_type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   }
   return ret_compression_type;
 }

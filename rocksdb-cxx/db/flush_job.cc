@@ -95,7 +95,7 @@ FlushJob::FlushJob(
     SequenceNumber earliest_write_conflict_snapshot,
     SnapshotChecker* snapshot_checker, JobContext* job_context,
     FlushReason flush_reason, LogBuffer* log_buffer, FSDirectory* db_directory,
-    FSDirectory* output_file_directory, CompressionType output_compression,
+    FSDirectory* output_file_directory, rocksdb_rs::compression_type::CompressionType output_compression,
     Statistics* stats, EventLogger* event_logger, bool measure_io_stats,
     const bool sync_output_directory, const bool write_manifest,
     Env::Priority thread_pri, const std::shared_ptr<IOTracer>& io_tracer,

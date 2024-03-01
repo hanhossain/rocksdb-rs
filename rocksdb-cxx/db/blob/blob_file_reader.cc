@@ -51,7 +51,7 @@ Status BlobFileReader::Create(
 
   Statistics* const statistics = immutable_options.stats;
 
-  CompressionType compression_type = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   {
     const Status s =
@@ -141,7 +141,7 @@ Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
                                   const ReadOptions& read_options,
                                   uint32_t column_family_id,
                                   Statistics* statistics,
-                                  CompressionType* compression_type) {
+                                  rocksdb_rs::compression_type::CompressionType* compression_type) {
   assert(file_reader);
   assert(compression_type);
 
@@ -287,7 +287,7 @@ Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
 
 BlobFileReader::BlobFileReader(
     std::unique_ptr<RandomAccessFileReader>&& file_reader, uint64_t file_size,
-    CompressionType compression_type, SystemClock* clock,
+    rocksdb_rs::compression_type::CompressionType compression_type, SystemClock* clock,
     Statistics* statistics)
     : file_reader_(std::move(file_reader)),
       file_size_(file_size),
@@ -301,7 +301,7 @@ BlobFileReader::~BlobFileReader() = default;
 
 Status BlobFileReader::GetBlob(
     const ReadOptions& read_options, const Slice& user_key, uint64_t offset,
-    uint64_t value_size, CompressionType compression_type,
+    uint64_t value_size, rocksdb_rs::compression_type::CompressionType compression_type,
     FilePrefetchBuffer* prefetch_buffer, MemoryAllocator* allocator,
     std::unique_ptr<BlobContents>* result, uint64_t* bytes_read) const {
   assert(result);
@@ -579,12 +579,12 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
 }
 
 Status BlobFileReader::UncompressBlobIfNeeded(
-    const Slice& value_slice, CompressionType compression_type,
+    const Slice& value_slice, rocksdb_rs::compression_type::CompressionType compression_type,
     MemoryAllocator* allocator, SystemClock* clock, Statistics* statistics,
     std::unique_ptr<BlobContents>* result) {
   assert(result);
 
-  if (compression_type == CompressionType::kNoCompression) {
+  if (compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     BlobContentsCreator::Create(result, nullptr, value_slice, allocator);
     return Status_OK();
   }

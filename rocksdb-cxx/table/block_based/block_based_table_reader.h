@@ -261,11 +261,11 @@ class BlockBasedTable : public TableReader {
   // It is the caller's responsibility to make sure that this is called with
   // block-based table serialized block contents, which contains the compression
   // byte in the trailer after `block_size`.
-  static inline CompressionType GetBlockCompressionType(const char* block_data,
+  static inline rocksdb_rs::compression_type::CompressionType GetBlockCompressionType(const char* block_data,
                                                         size_t block_size) {
-    return static_cast<CompressionType>(block_data[block_size]);
+    return static_cast<rocksdb_rs::compression_type::CompressionType>(block_data[block_size]);
   }
-  static inline CompressionType GetBlockCompressionType(
+  static inline rocksdb_rs::compression_type::CompressionType GetBlockCompressionType(
       const BlockContents& contents) {
     assert(contents.has_trailer);
     return GetBlockCompressionType(contents.data.data(), contents.data.size());
@@ -423,7 +423,7 @@ class BlockBasedTable : public TableReader {
   WithBlocklikeCheck<Status, TBlocklike> PutDataBlockToCache(
       const Slice& cache_key, BlockCacheInterface<TBlocklike> block_cache,
       CachableEntry<TBlocklike>* cached_block, BlockContents&& block_contents,
-      CompressionType block_comp_type,
+      rocksdb_rs::compression_type::CompressionType block_comp_type,
       const UncompressionDict& uncompression_dict,
       MemoryAllocator* memory_allocator, GetContext* get_context) const;
 

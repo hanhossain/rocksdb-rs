@@ -87,7 +87,7 @@ class BlobIndex {
     return size_;
   }
 
-  CompressionType compression() const {
+  rocksdb_rs::compression_type::CompressionType compression() const {
     assert(!IsInlined());
     return compression_;
   }
@@ -112,7 +112,7 @@ class BlobIndex {
     } else {
       if (GetVarint64(&slice, &file_number_) && GetVarint64(&slice, &offset_) &&
           GetVarint64(&slice, &size_) && slice.size() == 1) {
-        compression_ = static_cast<CompressionType>(*slice.data());
+        compression_ = static_cast<rocksdb_rs::compression_type::CompressionType>(*slice.data());
       } else {
         return Status_Corruption(kErrorMessage, "Corrupted blob offset");
       }
@@ -150,7 +150,7 @@ class BlobIndex {
 
   static void EncodeBlob(std::string* dst, uint64_t file_number,
                          uint64_t offset, uint64_t size,
-                         CompressionType compression) {
+                         rocksdb_rs::compression_type::CompressionType compression) {
     assert(dst != nullptr);
     dst->clear();
     dst->reserve(kMaxVarint64Length * 3 + 2);
@@ -163,7 +163,7 @@ class BlobIndex {
 
   static void EncodeBlobTTL(std::string* dst, uint64_t expiration,
                             uint64_t file_number, uint64_t offset,
-                            uint64_t size, CompressionType compression) {
+                            uint64_t size, rocksdb_rs::compression_type::CompressionType compression) {
     assert(dst != nullptr);
     dst->clear();
     dst->reserve(kMaxVarint64Length * 4 + 2);
@@ -182,7 +182,7 @@ class BlobIndex {
   uint64_t file_number_ = 0;
   uint64_t offset_ = 0;
   uint64_t size_ = 0;
-  CompressionType compression_ = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 };
 
 }  // namespace rocksdb

@@ -208,7 +208,7 @@ struct MutableCFOptions {
         enable_blob_files(false),
         min_blob_size(0),
         blob_file_size(0),
-        blob_compression_type(CompressionType::kNoCompression),
+        blob_compression_type(rocksdb_rs::compression_type::CompressionType::kNoCompression),
         enable_blob_garbage_collection(false),
         blob_garbage_collection_age_cutoff(0.0),
         blob_garbage_collection_force_threshold(0.0),
@@ -219,8 +219,8 @@ struct MutableCFOptions {
         check_flush_compaction_key_order(true),
         paranoid_file_checks(false),
         report_bg_io_stats(false),
-        compression(Snappy_Supported() ? CompressionType::kSnappyCompression : CompressionType::kNoCompression),
-        bottommost_compression(CompressionType::kDisableCompressionOption),
+        compression(Snappy_Supported() ? rocksdb_rs::compression_type::CompressionType::kSnappyCompression : rocksdb_rs::compression_type::CompressionType::kNoCompression),
+        bottommost_compression(rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption),
         last_level_temperature(Temperature::kUnknown),
         memtable_protection_bytes_per_key(0),
         block_protection_bytes_per_key(0),
@@ -295,7 +295,7 @@ struct MutableCFOptions {
   bool enable_blob_files;
   uint64_t min_blob_size;
   uint64_t blob_file_size;
-  CompressionType blob_compression_type;
+  rocksdb_rs::compression_type::CompressionType blob_compression_type;
   bool enable_blob_garbage_collection;
   double blob_garbage_collection_age_cutoff;
   double blob_garbage_collection_force_threshold;
@@ -308,8 +308,8 @@ struct MutableCFOptions {
   bool check_flush_compaction_key_order;
   bool paranoid_file_checks;
   bool report_bg_io_stats;
-  CompressionType compression;
-  CompressionType bottommost_compression;
+  rocksdb_rs::compression_type::CompressionType compression;
+  rocksdb_rs::compression_type::CompressionType bottommost_compression;
   CompressionOptions compression_opts;
   CompressionOptions bottommost_compression_opts;
   Temperature last_level_temperature;
@@ -317,7 +317,7 @@ struct MutableCFOptions {
   uint8_t block_protection_bytes_per_key;
 
   uint64_t sample_for_compression;
-  std::vector<CompressionType> compression_per_level;
+  std::vector<rocksdb_rs::compression_type::CompressionType> compression_per_level;
 
   // Derived options
   // Per-level target file size.

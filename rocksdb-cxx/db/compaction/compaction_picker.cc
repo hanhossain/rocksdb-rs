@@ -75,18 +75,18 @@ bool FindIntraL0Compaction(const std::vector<FileMetaData*>& level_files,
 // If enable_compression is false, then compression is always disabled no
 // matter what the values of the other two parameters are.
 // Otherwise, the compression type is determined based on options and level.
-CompressionType GetCompressionType(const VersionStorageInfo* vstorage,
+rocksdb_rs::compression_type::CompressionType GetCompressionType(const VersionStorageInfo* vstorage,
                                    const MutableCFOptions& mutable_cf_options,
                                    int level, int base_level,
                                    const bool enable_compression) {
   if (!enable_compression) {
     // disable compression
-    return CompressionType::kNoCompression;
+    return rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
 
   // If bottommost_compression is set and we are compacting to the
   // bottommost level then we should use it.
-  if (mutable_cf_options.bottommost_compression != CompressionType::kDisableCompressionOption &&
+  if (mutable_cf_options.bottommost_compression != rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption &&
       level >= (vstorage->num_non_empty_levels() - 1)) {
     return mutable_cf_options.bottommost_compression;
   }
@@ -357,8 +357,8 @@ Compaction* CompactionPicker::CompactFiles(
                                                   start_level, output_level)));
 #endif /* !NDEBUG */
 
-  CompressionType compression_type;
-  if (compact_options.compression == CompressionType::kDisableCompressionOption) {
+  rocksdb_rs::compression_type::CompressionType compression_type;
+  if (compact_options.compression == rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption) {
     int base_level;
     if (ioptions_.compaction_style == kCompactionStyleLevel) {
       base_level = vstorage->base_level();
@@ -368,7 +368,7 @@ Compaction* CompactionPicker::CompactFiles(
     compression_type = GetCompressionType(vstorage, mutable_cf_options,
                                           output_level, base_level);
   } else {
-    // TODO(ajkr): `CompactionOptions` offers configurable `CompressionType`
+    // TODO(ajkr): `CompactionOptions` offers configurable `rocksdb_rs::compression_type::CompressionType`
     // without configurable `CompressionOptions`, which is inconsistent.
     compression_type = compact_options.compression;
   }

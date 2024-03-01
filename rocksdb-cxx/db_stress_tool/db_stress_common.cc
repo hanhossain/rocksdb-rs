@@ -21,10 +21,10 @@ rocksdb::Env* db_stress_env = nullptr;
 // If non-null, injects read error at a rate specified by the
 // read_fault_one_in or write_fault_one_in flag
 std::shared_ptr<rocksdb::FaultInjectionTestFS> fault_fs_guard;
-enum rocksdb::CompressionType compression_type_e =
-    rocksdb::CompressionType::kSnappyCompression;
-enum rocksdb::CompressionType bottommost_compression_type_e =
-    rocksdb::CompressionType::kSnappyCompression;
+enum rocksdb_rs::compression_type::CompressionType compression_type_e =
+    rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+enum rocksdb_rs::compression_type::CompressionType bottommost_compression_type_e =
+    rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
 enum rocksdb::ChecksumType checksum_type_e =
     rocksdb::kCRC32c;
 enum RepFactory FLAGS_rep_factory = kSkipList;

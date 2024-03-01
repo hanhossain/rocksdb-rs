@@ -271,7 +271,7 @@ uint32_t ComputeBuiltinChecksumWithLastByte(ChecksumType type, const char* data,
 // in the size.
 // * "Maybe compressed block" - like a serialized block, but without the
 // trailer (or no promise of including a trailer). Must be accompanied by a
-// CompressionType in some other variable or field.
+// rocksdb_rs::compression_type::CompressionType in some other variable or field.
 // * "Uncompressed block" - "payload" bytes that are either stored with no
 // compression, used as input to compression function, or result of
 // decompression function.
@@ -356,7 +356,7 @@ Status UncompressSerializedBlock(const UncompressionInfo& info,
                                  MemoryAllocator* allocator = nullptr);
 
 // This is a variant of UncompressSerializedBlock that does not expect a
-// block trailer beyond `size`. (CompressionType is taken from `info`.)
+// block trailer beyond `size`. (rocksdb_rs::compression_type::CompressionType is taken from `info`.)
 Status UncompressBlockData(const UncompressionInfo& info, const char* data,
                            size_t size, BlockContents* out_contents,
                            uint32_t format_version,

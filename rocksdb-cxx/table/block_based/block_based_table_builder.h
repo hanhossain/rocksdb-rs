@@ -130,7 +130,7 @@ class BlockBasedTableBuilder : public TableBuilder {
                   BlockType block_type);
   // Directly write data to the file.
   void WriteMaybeCompressedBlock(
-      const Slice& block_contents, CompressionType, BlockHandle* handle,
+      const Slice& block_contents, rocksdb_rs::compression_type::CompressionType, BlockHandle* handle,
       BlockType block_type, const Slice* uncompressed_block_data = nullptr);
 
   void SetupCacheKeyPrefix(const TableBuilderOptions& tbo);
@@ -144,7 +144,7 @@ class BlockBasedTableBuilder : public TableBuilder {
                                   BlockType block_type);
 
   Status InsertBlockInCompressedCache(const Slice& block_contents,
-                                      const CompressionType type,
+                                      const rocksdb_rs::compression_type::CompressionType type,
                                       const BlockHandle* handle);
 
   void WriteFilterBlock(MetaIndexBuilder* meta_index_builder);
@@ -187,7 +187,7 @@ class BlockBasedTableBuilder : public TableBuilder {
                               UncompressionContext* verify_ctx,
                               std::string* compressed_output,
                               Slice* result_block_contents,
-                              CompressionType* result_compression_type,
+                              rocksdb_rs::compression_type::CompressionType* result_compression_type,
                               Status* out_status);
 
   // Get compressed blocks from BGWorkCompression and write them into SST
@@ -202,7 +202,7 @@ class BlockBasedTableBuilder : public TableBuilder {
 };
 
 Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
-                    CompressionType* type, uint32_t format_version,
+                    rocksdb_rs::compression_type::CompressionType* type, uint32_t format_version,
                     bool do_sample, std::string* compressed_output,
                     std::string* sampled_output_fast,
                     std::string* sampled_output_slow);

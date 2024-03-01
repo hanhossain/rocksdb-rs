@@ -636,7 +636,7 @@ struct TestArgs {
   TestType type;
   bool reverse_compare;
   int restart_interval;
-  CompressionType compression;
+  rocksdb_rs::compression_type::CompressionType compression;
   uint32_t compression_parallel_threads;
   uint32_t format_version;
   bool use_mmap;
@@ -667,32 +667,32 @@ static std::vector<TestArgs> GenerateArgList() {
   std::vector<uint32_t> compression_parallel_threads = {1, 4};
 
   // Only add compression if it is supported
-  std::vector<std::pair<CompressionType, bool>> compression_types;
-  compression_types.emplace_back(CompressionType::kNoCompression, false);
+  std::vector<std::pair<rocksdb_rs::compression_type::CompressionType, bool>> compression_types;
+  compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kNoCompression, false);
   if (Snappy_Supported()) {
-    compression_types.emplace_back(CompressionType::kSnappyCompression, false);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kSnappyCompression, false);
   }
   if (Zlib_Supported()) {
-    compression_types.emplace_back(CompressionType::kZlibCompression, false);
-    compression_types.emplace_back(CompressionType::kZlibCompression, true);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression, false);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression, true);
   }
   if (BZip2_Supported()) {
-    compression_types.emplace_back(CompressionType::kBZip2Compression, false);
-    compression_types.emplace_back(CompressionType::kBZip2Compression, true);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kBZip2Compression, false);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kBZip2Compression, true);
   }
   if (LZ4_Supported()) {
-    compression_types.emplace_back(CompressionType::kLZ4Compression, false);
-    compression_types.emplace_back(CompressionType::kLZ4Compression, true);
-    compression_types.emplace_back(CompressionType::kLZ4HCCompression, false);
-    compression_types.emplace_back(CompressionType::kLZ4HCCompression, true);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression, false);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, false);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, true);
   }
   if (XPRESS_Supported()) {
-    compression_types.emplace_back(CompressionType::kXpressCompression, false);
-    compression_types.emplace_back(CompressionType::kXpressCompression, true);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kXpressCompression, false);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kXpressCompression, true);
   }
   if (ZSTD_Supported()) {
-    compression_types.emplace_back(CompressionType::kZSTD, false);
-    compression_types.emplace_back(CompressionType::kZSTD, true);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZSTD, false);
+    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZSTD, true);
   }
 
   for (auto test_type : test_types) {
@@ -1088,7 +1088,7 @@ class DBHarnessTest : public HarnessTest {
  public:
   DBHarnessTest()
       : HarnessTest(TestArgs{TestType::DB_TEST, /* reverse_compare */ false,
-                             /* restart_interval */ 16, CompressionType::kNoCompression,
+                             /* restart_interval */ 16, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                              /* compression_parallel_threads */ 1,
                              /* format_version */ 0, /* use_mmap */ false}) {}
 };
@@ -1709,7 +1709,7 @@ TEST_P(BlockBasedTableTest, BasicBlockBasedTableProperties) {
   std::vector<std::string> keys;
   stl_wrappers::KVMap kvmap;
   Options options;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
@@ -1788,7 +1788,7 @@ TEST_P(BlockBasedTableTest, BlockBasedTableProperties2) {
 
   {
     Options options;
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
@@ -1865,7 +1865,7 @@ TEST_P(BlockBasedTableTest, RangeDelBlock) {
   std::vector<std::string> sorted_keys;
   stl_wrappers::KVMap kvmap;
   Options options;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_restart_interval = 1;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -2000,7 +2000,7 @@ TEST_P(BlockBasedTableTest, PrefetchTest) {
   Options opt;
   std::unique_ptr<InternalKeyComparator> ikc;
   ikc.reset(new test::PlainInternalKeyComparator(opt.comparator));
-  opt.compression = CompressionType::kNoCompression;
+  opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_size = 1024;
   // big enough so we don't ever lose cached values.
@@ -2315,9 +2315,9 @@ TEST_P(BuiltinChecksumTest, ChecksumSchemas) {
 
   std::string empty;
 
-  char ct1 = static_cast<char>(CompressionType::kNoCompression);
-  char ct2 = static_cast<char>(CompressionType::kSnappyCompression);
-  char ct3 = static_cast<char>(CompressionType::kZSTD);
+  char ct1 = static_cast<char>(rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  char ct2 = static_cast<char>(rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  char ct3 = static_cast<char>(rocksdb_rs::compression_type::CompressionType::kZSTD);
 
   ChecksumType t = GetParam();
   switch (t) {
@@ -3025,7 +3025,7 @@ TEST_P(BlockBasedTableTest, IndexSizeStat) {
     std::vector<std::string> ks;
     stl_wrappers::KVMap kvmap;
     Options options;
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
     table_options.block_restart_interval = 1;
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -3045,7 +3045,7 @@ TEST_P(BlockBasedTableTest, NumBlockStat) {
   Random rnd(test::RandomSeed());
   TableConstructor c(BytewiseComparator(), true /* convert_to_internal_key_ */);
   Options options;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_restart_interval = 1;
   table_options.block_size = 1000;
@@ -3856,7 +3856,7 @@ TEST_P(BlockBasedTableTest, BlockCacheLeak) {
   Options opt;
   std::unique_ptr<InternalKeyComparator> ikc;
   ikc.reset(new test::PlainInternalKeyComparator(opt.comparator));
-  opt.compression = CompressionType::kNoCompression;
+  opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_size = 1024;
   // big enough so we don't ever lose cached values.
@@ -3920,7 +3920,7 @@ TEST_P(BlockBasedTableTest, MemoryAllocator) {
     Options opt;
     std::unique_ptr<InternalKeyComparator> ikc;
     ikc.reset(new test::PlainInternalKeyComparator(opt.comparator));
-    opt.compression = CompressionType::kNoCompression;
+    opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     BlockBasedTableOptions table_options;
     table_options.block_size = 1024;
     LRUCacheOptions lruOptions;
@@ -4063,7 +4063,7 @@ TEST_F(PlainTableTest, BasicPlainTableProperties) {
   int unknown_level = -1;
   std::unique_ptr<TableBuilder> builder(factory.NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kNoCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                           CompressionOptions(), kUnknownColumnFamily,
                           column_family_name, unknown_level),
       file_writer.get()));
@@ -4118,7 +4118,7 @@ TEST_F(PlainTableTest, NoFileChecksum) {
 
   std::unique_ptr<TableBuilder> builder(factory.NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kNoCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                           CompressionOptions(), kUnknownColumnFamily,
                           column_family_name, unknown_level),
       f.GetFileWriter()));
@@ -4158,7 +4158,7 @@ TEST_F(PlainTableTest, Crc32cFileChecksum) {
 
   std::unique_ptr<TableBuilder> builder(factory.NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kNoCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                           CompressionOptions(), kUnknownColumnFamily,
                           column_family_name, unknown_level),
       f.GetFileWriter()));
@@ -4190,7 +4190,7 @@ TEST_F(GeneralTableTest, ApproximateOffsetOfPlain) {
   Options options;
   options.db_host_id = "";
   test::PlainInternalKeyComparator internal_comparator(options.comparator);
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options;
   table_options.block_size = 1024;
   const ImmutableOptions ioptions(options);
@@ -4214,8 +4214,8 @@ TEST_F(GeneralTableTest, ApproximateOffsetOfPlain) {
   c.ResetTableReader();
 }
 
-static void DoCompressionTest(CompressionType comp) {
-  SCOPED_TRACE("CompressionType = " + CompressionTypeToString(comp));
+static void DoCompressionTest(rocksdb_rs::compression_type::CompressionType comp) {
+  SCOPED_TRACE("rocksdb_rs::compression_type::CompressionType = " + CompressionTypeToString(comp));
   Random rnd(301);
   TableConstructor c(BytewiseComparator(), true /* convert_to_internal_key_ */);
   std::string tmp;
@@ -4244,17 +4244,17 @@ static void DoCompressionTest(CompressionType comp) {
 }
 
 TEST_F(GeneralTableTest, ApproximateOffsetOfCompressed) {
-  std::vector<CompressionType> compression_state;
+  std::vector<rocksdb_rs::compression_type::CompressionType> compression_state;
   if (!Snappy_Supported()) {
     fprintf(stderr, "skipping snappy compression tests\n");
   } else {
-    compression_state.push_back(CompressionType::kSnappyCompression);
+    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
   }
 
   if (!Zlib_Supported()) {
     fprintf(stderr, "skipping zlib compression tests\n");
   } else {
-    compression_state.push_back(CompressionType::kZlibCompression);
+    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression);
   }
 
   // TODO(kailiu) DoCompressionTest() doesn't work with BZip2.
@@ -4269,14 +4269,14 @@ TEST_F(GeneralTableTest, ApproximateOffsetOfCompressed) {
   if (!LZ4_Supported()) {
     fprintf(stderr, "skipping lz4 and lz4hc compression tests\n");
   } else {
-    compression_state.push_back(CompressionType::kLZ4Compression);
-    compression_state.push_back(CompressionType::kLZ4HCCompression);
+    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
   }
 
   if (!XPRESS_Supported()) {
     fprintf(stderr, "skipping xpress and xpress compression tests\n");
   } else {
-    compression_state.push_back(CompressionType::kXpressCompression);
+    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kXpressCompression);
   }
 
   for (auto state : compression_state) {
@@ -4295,7 +4295,7 @@ TEST_F(GeneralTableTest, ApproximateKeyAnchors) {
   stl_wrappers::KVMap kvmap;
   Options options;
   InternalKeyComparator ikc(options.comparator);
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options;
   table_options.block_size = 4096;
   const ImmutableOptions ioptions(options);
@@ -4736,7 +4736,7 @@ TEST_P(BlockBasedTableTest, DISABLED_TableWithGlobalSeqno) {
   std::string column_family_name;
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kNoCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                           CompressionOptions(), kUnknownColumnFamily,
                           column_family_name, -1),
       file_writer.get()));
@@ -4909,7 +4909,7 @@ TEST_P(BlockBasedTableTest, BlockAlignTest) {
   std::unique_ptr<WritableFileWriter> file_writer(new WritableFileWriter(
       std::move(holder), "" /* don't care */, FileOptions()));
   Options options;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
   const ImmutableOptions ioptions(options);
   const MutableCFOptions moptions(options);
@@ -4918,7 +4918,7 @@ TEST_P(BlockBasedTableTest, BlockAlignTest) {
   std::string column_family_name;
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kNoCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                           CompressionOptions(), kUnknownColumnFamily,
                           column_family_name, -1),
       file_writer.get()));
@@ -5000,7 +5000,7 @@ TEST_P(BlockBasedTableTest, PropertiesBlockRestartPointTest) {
       std::move(holder), "" /* don't care */, FileOptions()));
 
   Options options;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
   const ImmutableOptions ioptions(options);
@@ -5011,7 +5011,7 @@ TEST_P(BlockBasedTableTest, PropertiesBlockRestartPointTest) {
 
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kNoCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                           CompressionOptions(), kUnknownColumnFamily,
                           column_family_name, -1),
       file_writer.get()));
@@ -5084,11 +5084,11 @@ TEST_P(BlockBasedTableTest, PropertiesBlockRestartPointTest) {
 }
 
 TEST_P(BlockBasedTableTest, CompressionRatioThreshold) {
-  for (CompressionType type : GetSupportedCompressions()) {
-    if (type == CompressionType::kNoCompression) {
+  for (rocksdb_rs::compression_type::CompressionType type : GetSupportedCompressions()) {
+    if (type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       continue;
     }
-    if (type == CompressionType::kBZip2Compression) {
+    if (type == rocksdb_rs::compression_type::CompressionType::kBZip2Compression) {
       // Weird behavior in this test
       continue;
     }
@@ -5303,7 +5303,7 @@ TEST_P(BlockBasedTableTest, SeekMetaBlocks) {
 
 TEST_P(BlockBasedTableTest, BadOptions) {
   rocksdb::Options options;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions bbto = GetBlockBasedTableOptions();
   bbto.block_size = 4000;
   bbto.block_align = true;
@@ -5316,7 +5316,7 @@ TEST_P(BlockBasedTableTest, BadOptions) {
   ASSERT_NOK(rocksdb::DB::Open(options, kDBPath, &db));
 
   bbto.block_size = 4096;
-  options.compression = CompressionType::kSnappyCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
   ASSERT_NOK(rocksdb::DB::Open(options, kDBPath, &db));
 }
@@ -5583,7 +5583,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, Basic) {
         {rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer,
          {/*.charged = */ charge_compression_dictionary_building_buffer}});
     Options options;
-    options.compression = CompressionType::kSnappyCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
     options.compression_opts.max_dict_bytes = kMaxDictBytes;
     options.compression_opts.max_dict_buffer_bytes = kMaxDictBufferBytes;
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -5602,7 +5602,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, Basic) {
         options.table_factory->NewTableBuilder(
             TableBuilderOptions(
                 ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
-                CompressionType::kSnappyCompression, options.compression_opts,
+                rocksdb_rs::compression_type::CompressionType::kSnappyCompression, options.compression_opts,
                 kUnknownColumnFamily, "test_cf", -1 /* level */),
             file_writer.get()));
 
@@ -5659,7 +5659,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest,
       std::make_shared<FlushBlockEveryKeyPolicyFactory>();
 
   Options options;
-  options.compression = CompressionType::kSnappyCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.compression_opts.max_dict_bytes = kMaxDictBytes;
   options.compression_opts.max_dict_buffer_bytes = kMaxDictBufferBytes;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -5676,7 +5676,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest,
 
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kSnappyCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
                           options.compression_opts, kUnknownColumnFamily,
                           "test_cf", -1 /* level */),
       file_writer.get()));
@@ -5744,7 +5744,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, BasicWithCacheFull) {
       std::make_shared<FlushBlockEveryKeyPolicyFactory>();
 
   Options options;
-  options.compression = CompressionType::kSnappyCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.compression_opts.max_dict_bytes = kMaxDictBytes;
   options.compression_opts.max_dict_buffer_bytes = kMaxDictBufferBytes;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -5761,7 +5761,7 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, BasicWithCacheFull) {
 
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
       TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, CompressionType::kSnappyCompression,
+                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
                           options.compression_opts, kUnknownColumnFamily,
                           "test_cf", -1 /* level */),
       file_writer.get()));

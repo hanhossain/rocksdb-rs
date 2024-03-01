@@ -532,7 +532,7 @@ TEST_F(BlobDBTest, Compression) {
   BlobDBOptions bdb_options;
   bdb_options.min_blob_size = 0;
   bdb_options.disable_background_tasks = true;
-  bdb_options.compression = CompressionType::kSnappyCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   Open(bdb_options);
   std::map<std::string, std::string> data;
   for (size_t i = 0; i < 100; i++) {
@@ -554,14 +554,14 @@ TEST_F(BlobDBTest, DecompressAfterReopen) {
   BlobDBOptions bdb_options;
   bdb_options.min_blob_size = 0;
   bdb_options.disable_background_tasks = true;
-  bdb_options.compression = CompressionType::kSnappyCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   Open(bdb_options);
   std::map<std::string, std::string> data;
   for (size_t i = 0; i < 100; i++) {
     PutRandom("put-key" + std::to_string(i), &rnd, &data);
   }
   VerifyDB(data);
-  bdb_options.compression = CompressionType::kNoCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Reopen(bdb_options);
   VerifyDB(data);
 }
@@ -585,7 +585,7 @@ TEST_F(BlobDBTest, EnableDisableCompressionGC) {
   ASSERT_EQ(kSnappyCompression, blob_files[0]->GetCompressionType());
 
   // disable compression
-  bdb_options.compression = CompressionType::kNoCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Reopen(bdb_options);
 
   // Add more data with new compression type
@@ -1251,7 +1251,7 @@ TEST_F(BlobDBTest, FIFOEviction_TriggerOnSSTSizeChange) {
   options.env = mock_env_.get();
   auto statistics = CreateDBStatistics();
   options.statistics = statistics;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Open(bdb_options, options);
 
   SyncPoint::GetInstance()->LoadDependency(
@@ -1385,7 +1385,7 @@ TEST_F(BlobDBTest, UserCompactionFilter) {
   bdb_options.blob_file_size = kMaxValueSize * 10;
   bdb_options.disable_background_tasks = true;
   if (Snappy_Supported()) {
-    bdb_options.compression = CompressionType::kSnappyCompression;
+    bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   }
   // case_num == 0: Test user defined compaction filter
   // case_num == 1: Test user defined compaction filter factory
@@ -1466,7 +1466,7 @@ TEST_F(BlobDBTest, UserCompactionFilter_BlobIOError) {
   bdb_options.min_blob_size = 0;
   bdb_options.blob_file_size = kValueSize * 10;
   bdb_options.disable_background_tasks = true;
-  bdb_options.compression = CompressionType::kNoCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   std::vector<std::string> io_failure_cases = {
       "BlobDBImpl::CreateBlobFileAndWriter",
@@ -1946,7 +1946,7 @@ TEST_F(BlobDBTest, GarbageCollectionFailure) {
   // blob file.
   std::string blob_index;
   BlobIndex::EncodeBlob(&blob_index, /* file_number */ 1000, /* offset */ 1234,
-                        /* size */ 5678, CompressionType::kNoCompression);
+                        /* size */ 5678, rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
   WriteBatch batch;
   ASSERT_OK(WriteBatchInternal::PutBlobIndex(

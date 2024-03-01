@@ -101,7 +101,7 @@ void TableReaderBenchmark(Options& opts, EnvOptions& env_options,
     tb = opts.table_factory->NewTableBuilder(
         TableBuilderOptions(
             ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
-            CompressionType::kNoCompression, CompressionOptions(),
+            rocksdb_rs::compression_type::CompressionType::kNoCompression, CompressionOptions(),
             0 /* column_family_id */, kDefaultColumnFamilyName, unknown_level),
         file_writer.get());
   } else {
@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
   rocksdb::ReadOptions ro;
   rocksdb::EnvOptions env_options;
   options.create_if_missing = true;
-  options.compression = rocksdb::CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   if (FLAGS_table_factory == "cuckoo_hash") {
     options.allow_mmap_reads = FLAGS_mmap_read;

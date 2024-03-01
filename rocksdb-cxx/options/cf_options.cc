@@ -495,7 +495,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
           OptionType::kCompressionType, OptionVerificationType::kNormal,
           OptionTypeFlags::kMutable}},
         {"compression_per_level",
-         OptionTypeInfo::Vector<CompressionType>(
+         OptionTypeInfo::Vector<rocksdb_rs::compression_type::CompressionType>(
              offsetof(struct MutableCFOptions, compression_per_level),
              OptionVerificationType::kNormal, OptionTypeFlags::kMutable,
              {0, OptionType::kCompressionType})},

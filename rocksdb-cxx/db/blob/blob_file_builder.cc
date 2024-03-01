@@ -256,7 +256,7 @@ Status BlobFileBuilder::CompressBlobIfNeeded(
   assert(compressed_blob->empty());
   assert(immutable_options_);
 
-  if (blob_compression_type_ == CompressionType::kNoCompression) {
+  if (blob_compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     return Status_OK();
   }
 

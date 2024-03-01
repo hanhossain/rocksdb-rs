@@ -349,41 +349,41 @@ std::unordered_map<std::string, ChecksumType>
                                                {"kxxHash64", kxxHash64},
                                                {"kXXH3", kXXH3}};
 
-std::unordered_map<std::string, CompressionType>
+std::unordered_map<std::string, rocksdb_rs::compression_type::CompressionType>
     OptionsHelper::compression_type_string_map = {
-        {"kNoCompression", CompressionType::kNoCompression},
-        {"kSnappyCompression", CompressionType::kSnappyCompression},
-        {"kZlibCompression", CompressionType::kZlibCompression},
-        {"kBZip2Compression", CompressionType::kBZip2Compression},
-        {"kLZ4Compression", CompressionType::kLZ4Compression},
-        {"kLZ4HCCompression", CompressionType::kLZ4HCCompression},
-        {"kXpressCompression", CompressionType::kXpressCompression},
-        {"kZSTD", CompressionType::kZSTD},
-        {"kZSTDNotFinalCompression", CompressionType::kZSTDNotFinalCompression},
-        {"kDisableCompressionOption", CompressionType::kDisableCompressionOption}};
+        {"kNoCompression", rocksdb_rs::compression_type::CompressionType::kNoCompression},
+        {"kSnappyCompression", rocksdb_rs::compression_type::CompressionType::kSnappyCompression},
+        {"kZlibCompression", rocksdb_rs::compression_type::CompressionType::kZlibCompression},
+        {"kBZip2Compression", rocksdb_rs::compression_type::CompressionType::kBZip2Compression},
+        {"kLZ4Compression", rocksdb_rs::compression_type::CompressionType::kLZ4Compression},
+        {"kLZ4HCCompression", rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression},
+        {"kXpressCompression", rocksdb_rs::compression_type::CompressionType::kXpressCompression},
+        {"kZSTD", rocksdb_rs::compression_type::CompressionType::kZSTD},
+        {"kZSTDNotFinalCompression", rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression},
+        {"kDisableCompressionOption", rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption}};
 
-std::vector<CompressionType> GetSupportedCompressions() {
+std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedCompressions() {
   // std::set internally to deduplicate potential name aliases
-  std::set<CompressionType> supported_compressions;
+  std::set<rocksdb_rs::compression_type::CompressionType> supported_compressions;
   for (const auto& comp_to_name : OptionsHelper::compression_type_string_map) {
-    CompressionType t = comp_to_name.second;
-    if (t != CompressionType::kDisableCompressionOption && CompressionTypeSupported(t)) {
+    rocksdb_rs::compression_type::CompressionType t = comp_to_name.second;
+    if (t != rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption && CompressionTypeSupported(t)) {
       supported_compressions.insert(t);
     }
   }
-  return std::vector<CompressionType>(supported_compressions.begin(),
+  return std::vector<rocksdb_rs::compression_type::CompressionType>(supported_compressions.begin(),
                                       supported_compressions.end());
 }
 
-std::vector<CompressionType> GetSupportedDictCompressions() {
-  std::set<CompressionType> dict_compression_types;
+std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedDictCompressions() {
+  std::set<rocksdb_rs::compression_type::CompressionType> dict_compression_types;
   for (const auto& comp_to_name : OptionsHelper::compression_type_string_map) {
-    CompressionType t = comp_to_name.second;
-    if (t != CompressionType::kDisableCompressionOption && DictCompressionTypeSupported(t)) {
+    rocksdb_rs::compression_type::CompressionType t = comp_to_name.second;
+    if (t != rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption && DictCompressionTypeSupported(t)) {
       dict_compression_types.insert(t);
     }
   }
-  return std::vector<CompressionType>(dict_compression_types.begin(),
+  return std::vector<rocksdb_rs::compression_type::CompressionType>(dict_compression_types.begin(),
                                       dict_compression_types.end());
 }
 
@@ -440,9 +440,9 @@ static bool ParseOptionHelper(void* opt_address, const OptionType& opt_type,
       return ParseEnum<CompactionPri>(compaction_pri_string_map, value,
                                       static_cast<CompactionPri*>(opt_address));
     case OptionType::kCompressionType:
-      return ParseEnum<CompressionType>(
+      return ParseEnum<rocksdb_rs::compression_type::CompressionType>(
           compression_type_string_map, value,
-          static_cast<CompressionType*>(opt_address));
+          static_cast<rocksdb_rs::compression_type::CompressionType*>(opt_address));
     case OptionType::kChecksumType:
       return ParseEnum<ChecksumType>(checksum_type_string_map, value,
                                      static_cast<ChecksumType*>(opt_address));
@@ -528,9 +528,9 @@ bool SerializeSingleOptionHelper(const void* opt_address,
           compaction_pri_string_map,
           *(static_cast<const CompactionPri*>(opt_address)), value);
     case OptionType::kCompressionType:
-      return SerializeEnum<CompressionType>(
+      return SerializeEnum<rocksdb_rs::compression_type::CompressionType>(
           compression_type_string_map,
-          *(static_cast<const CompressionType*>(opt_address)), value);
+          *(static_cast<const rocksdb_rs::compression_type::CompressionType*>(opt_address)), value);
       break;
     case OptionType::kChecksumType:
       return SerializeEnum<ChecksumType>(
@@ -652,8 +652,8 @@ Status GetStringFromColumnFamilyOptions(const ConfigOptions& config_options,
 }
 
 Status GetStringFromCompressionType(std::string* compression_str,
-                                    CompressionType compression_type) {
-  bool ok = SerializeEnum<CompressionType>(compression_type_string_map,
+                                    rocksdb_rs::compression_type::CompressionType compression_type) {
+  bool ok = SerializeEnum<rocksdb_rs::compression_type::CompressionType>(compression_type_string_map,
                                            compression_type, compression_str);
   if (ok) {
     return Status_OK();
@@ -1175,7 +1175,7 @@ static bool AreOptionsEqual(OptionType type, const void* this_offset,
     case OptionType::kCompactionPri:
       return IsOptionEqual<CompactionPri>(this_offset, that_offset);
     case OptionType::kCompressionType:
-      return IsOptionEqual<CompressionType>(this_offset, that_offset);
+      return IsOptionEqual<rocksdb_rs::compression_type::CompressionType>(this_offset, that_offset);
     case OptionType::kChecksumType:
       return IsOptionEqual<ChecksumType>(this_offset, that_offset);
     case OptionType::kEncodingType:

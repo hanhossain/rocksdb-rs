@@ -88,7 +88,7 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
   // Creates a table with the specificied key value pairs (kv).
   void CreateTable(const std::string& table_name,
                    const ImmutableOptions& ioptions,
-                   const CompressionType& compression_type,
+                   const rocksdb_rs::compression_type::CompressionType& compression_type,
                    const std::map<std::string, std::string>& kv,
                    uint32_t compression_parallel_threads = 1,
                    uint32_t compression_dict_bytes = 0) {
@@ -215,7 +215,7 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
 class BlockBasedTableReaderTest
     : public BlockBasedTableReaderBaseTest,
       public testing::WithParamInterface<std::tuple<
-          CompressionType, bool, BlockBasedTableOptions::IndexType, bool,
+          rocksdb_rs::compression_type::CompressionType, bool, BlockBasedTableOptions::IndexType, bool,
           test::UserDefinedTimestampTestMode, uint32_t, uint32_t>> {
  protected:
   void SetUp() override {
@@ -243,7 +243,7 @@ class BlockBasedTableReaderTest
         std::shared_ptr<const SliceTransform>(NewFixedPrefixTransform(3));
   }
 
-  CompressionType compression_type_;
+  rocksdb_rs::compression_type::CompressionType compression_type_;
   bool use_direct_reads_;
   bool udt_enabled_;
   bool persist_udt_;
@@ -465,7 +465,7 @@ class ChargeTableReaderTest
     // To cache and re-use the same kv map and compression type in the test
     // suite for elimiating variance caused by these two factors
     kv_ = BlockBasedTableReaderBaseTest::GenerateKVMap();
-    compression_type_ = CompressionType::kNoCompression;
+    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
     table_reader_charge_tracking_cache_ = std::make_shared<
         TargetCacheChargeTrackingCache<
@@ -506,7 +506,7 @@ class ChargeTableReaderTest
       table_reader_charge_tracking_cache_;
   std::size_t approx_table_reader_mem_;
   std::map<std::string, std::string> kv_;
-  CompressionType compression_type_;
+  rocksdb_rs::compression_type::CompressionType compression_type_;
 
  private:
   std::size_t ApproximateTableReaderMem() {

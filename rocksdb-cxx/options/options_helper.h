@@ -26,9 +26,9 @@ struct MutableDBOptions;
 struct MutableCFOptions;
 struct Options;
 
-std::vector<CompressionType> GetSupportedCompressions();
+std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedCompressions();
 
-std::vector<CompressionType> GetSupportedDictCompressions();
+std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedDictCompressions();
 
 std::vector<ChecksumType> GetSupportedChecksums();
 
@@ -79,7 +79,7 @@ struct OptionsHelper {
       compaction_stop_style_to_string;
   static std::map<Temperature, std::string> temperature_to_string;
   static std::unordered_map<std::string, ChecksumType> checksum_type_string_map;
-  static std::unordered_map<std::string, CompressionType>
+  static std::unordered_map<std::string, rocksdb_rs::compression_type::CompressionType>
       compression_type_string_map;
   static std::unordered_map<std::string, PrepopulateBlobCache>
       prepopulate_blob_cache_string_map;

@@ -116,7 +116,7 @@ const std::string kPersistentStatsColumnFamilyName(
     "___rocksdb_stats_history___");
 void DumpRocksDBBuildVersion(Logger* log);
 
-CompressionType GetCompressionFlush(
+rocksdb_rs::compression_type::CompressionType GetCompressionFlush(
     const ImmutableCFOptions& ioptions,
     const MutableCFOptions& mutable_cf_options) {
   // Compressing memtable flushes might not help unless the sequential load
@@ -125,7 +125,7 @@ CompressionType GetCompressionFlush(
   if (ioptions.compaction_style == kCompactionStyleUniversal &&
       mutable_cf_options.compaction_options_universal
               .compression_size_percent >= 0) {
-    return CompressionType::kNoCompression;
+    return rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   if (mutable_cf_options.compression_per_level.empty()) {
     return mutable_cf_options.compression;
@@ -139,8 +139,8 @@ namespace {
 void DumpSupportInfo(Logger* logger) {
   ROCKS_LOG_HEADER(logger, "Compression algorithms supported:");
   for (auto& compression : OptionsHelper::compression_type_string_map) {
-    if (compression.second != CompressionType::kNoCompression &&
-        compression.second != CompressionType::kDisableCompressionOption) {
+    if (compression.second != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
+        compression.second != rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption) {
       ROCKS_LOG_HEADER(logger, "\t%s supported: %d", compression.first.c_str(),
                        CompressionTypeSupported(compression.second));
     }

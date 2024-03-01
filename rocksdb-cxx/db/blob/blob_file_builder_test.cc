@@ -48,7 +48,7 @@ class BlobFileBuilderTest : public testing::Test {
   void VerifyBlobFile(uint64_t blob_file_number,
                       const std::string& blob_file_path,
                       uint32_t column_family_id,
-                      CompressionType blob_compression_type,
+                      rocksdb_rs::compression_type::CompressionType blob_compression_type,
                       const std::vector<std::pair<std::string, std::string>>&
                           expected_key_value_pairs,
                       const std::vector<std::string>& blob_indexes) {
@@ -195,7 +195,7 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckOneFile) {
 
   // Verify the contents of the new blob file as well as the blob references
   VerifyBlobFile(blob_file_number, blob_file_path, column_family_id,
-                 CompressionType::kNoCompression, expected_key_value_pairs, blob_indexes);
+                 rocksdb_rs::compression_type::CompressionType::kNoCompression, expected_key_value_pairs, blob_indexes);
 }
 
 TEST_F(BlobFileBuilderTest, BuildAndCheckMultipleFiles) {
@@ -282,7 +282,7 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckMultipleFiles) {
         expected_key_value_pairs[i]};
     std::vector<std::string> blob_index{blob_indexes[i]};
 
-    VerifyBlobFile(i + 2, blob_file_paths[i], column_family_id, CompressionType::kNoCompression,
+    VerifyBlobFile(i + 2, blob_file_paths[i], column_family_id, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                    expected_key_value_pair, blob_index);
   }
 }
@@ -355,7 +355,7 @@ TEST_F(BlobFileBuilderTest, Compression) {
       test::PerThreadDBPath(mock_env_.get(), "BlobFileBuilderTest_Compression"),
       0);
   options.enable_blob_files = true;
-  options.blob_compression_type = CompressionType::kSnappyCompression;
+  options.blob_compression_type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.env = mock_env_.get();
 
   ImmutableOptions immutable_options(options);
@@ -406,11 +406,11 @@ TEST_F(BlobFileBuilderTest, Compression) {
   ASSERT_EQ(blob_file_addition.GetTotalBlobCount(), 1);
 
   CompressionOptions opts;
-  CompressionContext context(CompressionType::kSnappyCompression);
+  CompressionContext context(rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
   constexpr uint64_t sample_for_compression = 0;
 
   CompressionInfo info(opts, context, CompressionDict::GetEmptyDict(),
-                       CompressionType::kSnappyCompression, sample_for_compression);
+                       rocksdb_rs::compression_type::CompressionType::kSnappyCompression, sample_for_compression);
 
   std::string compressed_value;
   ASSERT_TRUE(Snappy_Compress(info, uncompressed_value.data(),
@@ -425,7 +425,7 @@ TEST_F(BlobFileBuilderTest, Compression) {
   std::vector<std::string> blob_indexes{blob_index};
 
   VerifyBlobFile(blob_file_number, blob_file_path, column_family_id,
-                 CompressionType::kSnappyCompression, expected_key_value_pairs, blob_indexes);
+                 rocksdb_rs::compression_type::CompressionType::kSnappyCompression, expected_key_value_pairs, blob_indexes);
 }
 
 TEST_F(BlobFileBuilderTest, CompressionError) {
@@ -440,7 +440,7 @@ TEST_F(BlobFileBuilderTest, CompressionError) {
                             "BlobFileBuilderTest_CompressionError"),
       0);
   options.enable_blob_files = true;
-  options.blob_compression_type = CompressionType::kSnappyCompression;
+  options.blob_compression_type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.env = mock_env_.get();
   ImmutableOptions immutable_options(options);
   MutableCFOptions mutable_cf_options(options);
@@ -579,7 +579,7 @@ TEST_F(BlobFileBuilderTest, Checksum) {
   std::vector<std::string> blob_indexes{blob_index};
 
   VerifyBlobFile(blob_file_number, blob_file_path, column_family_id,
-                 CompressionType::kNoCompression, expected_key_value_pairs, blob_indexes);
+                 rocksdb_rs::compression_type::CompressionType::kNoCompression, expected_key_value_pairs, blob_indexes);
 }
 
 class BlobFileBuilderIOErrorTest

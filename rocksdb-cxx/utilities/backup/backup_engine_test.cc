@@ -2643,7 +2643,7 @@ TEST_P(BackupEngineRateLimitingTestWithParam, RateLimiting) {
   }
 
   engine_options_->max_background_operations = (iter == 0) ? 1 : 10;
-  options_.compression = CompressionType::kNoCompression;
+  options_.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Rate limiter uses `CondVar::TimedWait()`, which does not have access to the
   // `Env` to advance its time according to the fake wait duration. The

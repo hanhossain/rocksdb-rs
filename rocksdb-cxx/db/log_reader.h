@@ -152,7 +152,7 @@ class Reader {
   // Whether the first record has been read or not.
   bool first_record_read_;
   // Type of compression used
-  CompressionType compression_type_;
+  rocksdb_rs::compression_type::CompressionType compression_type_;
   // Track whether the compression type record has been read or not.
   bool compression_type_record_read_;
   StreamingUncompress* uncompress_;

@@ -659,7 +659,7 @@ TEST_F(DBTestCompactionFilter, CompactionFilterContextManual) {
   Options options = CurrentOptions();
   options.compaction_style = kCompactionStyleUniversal;
   options.compaction_filter_factory.reset(filter);
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 8;
   Reopen(options);
   int num_keys_per_file = 400;
@@ -719,7 +719,7 @@ TEST_F(DBTestCompactionFilter, CompactionFilterContextCfId) {
 
   Options options = CurrentOptions();
   options.compaction_filter_factory.reset(filter);
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 2;
   CreateAndReopenWithCF({"pikachu"}, options);
 
