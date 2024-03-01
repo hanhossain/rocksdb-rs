@@ -1,5 +1,4 @@
 use crate::filename::ffi::{FileType, InfoLogPrefix, WalFileType};
-use crate::string_util::consume_decimal_number;
 use cxx::CxxVector;
 
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
@@ -509,13 +508,12 @@ fn parse(file_name: &str) -> Option<ParseResult> {
 ///    dbname/OPTIONS-[0-9]+.dbtmp
 ///    Disregards / at the beginning
 fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Option<ParseResult> {
-    // TODO: convert to regex
-    let mut rest = file_name.to_string();
-    if file_name.len() > 1 && file_name.chars().next().unwrap() == '/' {
-        rest.remove(0);
+    let mut rest = file_name;
+    if file_name.len() > 1 && file_name.starts_with('/') {
+        rest = &file_name[1..];
     }
 
-    match rest.as_str() {
+    match rest {
         "IDENTITY" => {
             return Some(ParseResult {
                 number: 0,
@@ -541,9 +539,12 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
     };
 
     if !info_log_name_prefix.is_empty() && rest.starts_with(info_log_name_prefix) {
-        rest.drain(..info_log_name_prefix.len());
+        let rest_log_name = &rest[info_log_name_prefix.len()..];
 
-        if rest.is_empty() || rest == ".old" {
+        if regex::Regex::new(r"^(\.old)?$")
+            .unwrap()
+            .is_match(rest_log_name)
+        {
             return Some(ParseResult {
                 number: 0,
                 file_type: FileType::kInfoLogFile,
@@ -551,18 +552,15 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
             });
         }
 
-        if rest.starts_with(".old.") {
-            rest.drain(..".old.".len());
-
-            return match consume_decimal_number(&mut rest) {
-                Some(number) => Some(ParseResult {
-                    number,
-                    file_type: FileType::kInfoLogFile,
-                    log_type: None,
-                }),
-                _ => None,
-            };
-        }
+        let captures = regex::Regex::new(r"^\.old\.(\d+)$")
+            .unwrap()
+            .captures(rest_log_name)?;
+        let number = captures.get(1).unwrap().as_str().parse().ok()?;
+        return Some(ParseResult {
+            number,
+            file_type: FileType::kInfoLogFile,
+            log_type: None,
+        });
     }
 
     if let Some(captures) = regex::Regex::new(r"^(MANIFEST|METADB)-(\d+)$")
