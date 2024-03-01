@@ -134,7 +134,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   }
 
   for (auto& f : file_names) {
-    if (ParseFileName(f, &number, static_cast<std::string>(info_log_prefix.prefix), &type) &&
+    if (ParseFileName(f, &number, info_log_prefix.prefix, &type) &&
         (type == FileType::kInfoLogFile)) {
       info_log_list->push_back(f);
     }

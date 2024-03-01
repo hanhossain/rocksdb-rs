@@ -11,16 +11,6 @@ const CURRENT_FILE_NAME: &str = "CURRENT";
 const TEMP_FILE_NAME_SUFFIX: &str = "dbtmp";
 const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
 
-lazy_static! {
-    static ref OLD_LOG_FILE_REGEX: Regex = Regex::new(r"^(\.old)?$").unwrap();
-    static ref OLD_LOG_FILE_WITH_NUM_REGEX: Regex = Regex::new(r"^\.old\.(\d+)$").unwrap();
-    static ref MANIFEST_OR_METADB_FILE_REGEX: Regex =
-        Regex::new(r"^(MANIFEST|METADB)-(\d+)$").unwrap();
-    static ref OPTIONS_FILE_REGEX: Regex = Regex::new(r"^OPTIONS-(\d+)(\.dbtmp)?$").unwrap();
-    static ref GENERAL_FILE_REGEX: Regex =
-        Regex::new(r"^(archive/)?(\d+)\.(log|sst|ldb|blob|dbtmp)$").unwrap();
-}
-
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
     /// A helper structure for prefix of info log names.
@@ -245,8 +235,10 @@ fn rocks_to_level_table_file_name(fullname: &str) -> String {
 /// The reverse function of MakeTableFileName
 // TODO(yhchiang): could merge this function with ParseFileName()
 fn table_file_name_to_number(name: &str) -> u64 {
-    let re = regex::Regex::new(r"(\d+)\.[^.]*$").unwrap();
-    re.captures(name)
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"(\d+)\.[^.]*$").unwrap();
+    }
+    RE.captures(name)
         .map(|cap| cap[1].parse().unwrap())
         .unwrap_or(0)
 }
@@ -330,6 +322,10 @@ fn identity_file_name(dbname: &str) -> String {
 }
 
 fn normalize_path(path: &str) -> String {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("/+").unwrap();
+    }
+
     let mut normalized = String::new();
 
     let path = if path.len() > 2 && &path[..1] == "/" {
@@ -339,7 +335,7 @@ fn normalize_path(path: &str) -> String {
         path
     };
 
-    let replaced = regex::Regex::new("/+").unwrap().replace_all(path, "/");
+    let replaced = RE.replace_all(path, "/");
     normalized.push_str(&replaced);
 
     normalized
@@ -347,15 +343,18 @@ fn normalize_path(path: &str) -> String {
 
 /// Given a path, flatten the path name by replacing all chars not in {[0-9,a-z,A-Z,-,_,.]} with _.
 fn get_info_log_prefix(path: &str) -> String {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("[^a-zA-Z0-9-._]").unwrap();
+    }
+
     if path.is_empty() {
         return "".to_string();
     }
 
-    let re = regex::Regex::new("[^a-zA-Z0-9-._]").unwrap();
-    let replaced = if re.is_match(&path[..1]) && path.len() > 1 {
-        re.replace_all(&path[1..], "_")
+    let replaced = if RE.is_match(&path[..1]) && path.len() > 1 {
+        RE.replace_all(&path[1..], "_")
     } else {
-        re.replace_all(path, "_")
+        RE.replace_all(path, "_")
     };
     format!("{replaced}_LOG")
 }
@@ -520,6 +519,16 @@ fn parse(file_name: &str) -> Option<ParseResult> {
 ///    dbname/OPTIONS-[0-9]+.dbtmp
 ///    Disregards / at the beginning
 fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Option<ParseResult> {
+    lazy_static! {
+        static ref OLD_LOG_FILE_REGEX: Regex = Regex::new(r"^(\.old)?$").unwrap();
+        static ref OLD_LOG_FILE_WITH_NUM_REGEX: Regex = Regex::new(r"^\.old\.(\d+)$").unwrap();
+        static ref MANIFEST_OR_METADB_FILE_REGEX: Regex =
+            Regex::new(r"^(MANIFEST|METADB)-(\d+)$").unwrap();
+        static ref OPTIONS_FILE_REGEX: Regex = Regex::new(r"^OPTIONS-(\d+)(\.dbtmp)?$").unwrap();
+        static ref GENERAL_FILE_REGEX: Regex =
+            Regex::new(r"^(archive/)?(\d+)\.(log|sst|ldb|blob|dbtmp)$").unwrap();
+    }
+
     let mut rest = file_name;
     if file_name.len() > 1 && file_name.starts_with('/') {
         rest = &file_name[1..];

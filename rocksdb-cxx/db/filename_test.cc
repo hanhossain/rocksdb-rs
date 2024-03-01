@@ -59,7 +59,7 @@ TEST_F(FileNameTest, Parse) {
         if (mode == kNoCheckLogDir) {
           ASSERT_TRUE(ParseFileName(f, &number, &type)) << f;
         } else {
-          ASSERT_TRUE(ParseFileName(f, &number, static_cast<std::string>(info_log_prefix.prefix), &type))
+          ASSERT_TRUE(ParseFileName(f, &number, info_log_prefix.prefix, &type))
               << f;
         }
         ASSERT_EQ(cases[i].type, type) << f;

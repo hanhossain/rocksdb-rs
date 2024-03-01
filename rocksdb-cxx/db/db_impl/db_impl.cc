@@ -4737,7 +4737,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     FileType type;
     InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!soptions.db_log_dir.empty(), dbname);
     for (const auto& fname : filenames) {
-      if (ParseFileName(fname, &number, static_cast<std::string>(info_log_prefix.prefix), &type) &&
+      if (ParseFileName(fname, &number, info_log_prefix.prefix, &type) &&
           type != FileType::kDBLockFile) {  // Lock file will be deleted at end
         Status del = Status_new();
         std::string path_to_delete = dbname + "/" + fname;

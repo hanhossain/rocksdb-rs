@@ -216,7 +216,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
         // are doing full scan in order to avoid double deletion of the same
         // file under race conditions. See
         // https://github.com/facebook/rocksdb/issues/3573
-        if (!ParseFileName(file, &number, static_cast<std::string>(info_log_prefix.prefix), &type) ||
+        if (!ParseFileName(file, &number, info_log_prefix.prefix, &type) ||
             !ShouldPurge(number)) {
           continue;
         }
@@ -489,7 +489,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
     const std::string& fname = candidate_file.file_name;
     uint64_t number;
     FileType type;
-    if (!ParseFileName(fname, &number, static_cast<std::string>(info_log_prefix.prefix), &type) ||
+    if (!ParseFileName(fname, &number, info_log_prefix.prefix, &type) ||
         type != FileType::kOptionsFile) {
       continue;
     }
@@ -514,7 +514,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
     uint64_t number;
     FileType type;
     // Ignore file if we cannot recognize it.
-    if (!ParseFileName(to_delete, &number, static_cast<std::string>(info_log_prefix.prefix), &type)) {
+    if (!ParseFileName(to_delete, &number, info_log_prefix.prefix, &type)) {
       continue;
     }
 
