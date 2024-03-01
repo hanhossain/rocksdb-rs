@@ -44,17 +44,6 @@ extern const std::string kCurrentFileName;  // = "CURRENT"
 extern const std::string kOptionsFileNamePrefix;  // = "OPTIONS-"
 extern const std::string kTempFileNameSuffix;     // = "dbtmp"
 
-// If filename is a rocksdb file, store the type of the file in *type.
-// The number encoded in the filename is stored in *number.  If the
-// filename was successfully parsed, returns true.  Else return false.
-// info_log_name_prefix is the path of info logs.
-extern bool ParseFileName(const std::string& filename, uint64_t* number,
-                          const Slice& info_log_name_prefix, FileType* type,
-                          WalFileType* log_type = nullptr);
-// Same as previous function, but skip info log files.
-extern bool ParseFileName(const std::string& filename, uint64_t* number,
-                          FileType* type, WalFileType* log_type = nullptr);
-
 // Make the CURRENT file point to the descriptor file with the
 // specified number. On its success and when dir_contains_current_file is not
 // nullptr, the function will fsync the directory containing the CURRENT file

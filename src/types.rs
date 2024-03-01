@@ -1,5 +1,5 @@
 #[cxx::bridge(namespace = "rocksdb")]
-mod ffi {
+pub mod ffi {
     /// The types of files RocksDB uses in a DB directory. (Available for advanced options.)
     enum FileType {
         kWalFile,

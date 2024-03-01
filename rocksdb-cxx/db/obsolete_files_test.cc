@@ -177,7 +177,7 @@ TEST_F(ObsoleteFilesTest, DeleteObsoleteOptionsFile) {
     Slice dummy_info_log_name_prefix;
     FileType type;
     WalFileType log_type;
-    if (ParseFileName(file, &file_num, dummy_info_log_name_prefix, &type,
+    if (ParseFileName(file, &file_num, dummy_info_log_name_prefix.ToString(), &type,
                       &log_type) &&
         type == FileType::kOptionsFile) {
       opts_file_count++;
