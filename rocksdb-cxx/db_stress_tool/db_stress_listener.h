@@ -226,7 +226,7 @@ class DbStressListener : public EventListener {
     FileType file_type;
     bool result = ParseFileName(file_name, &file_number, &file_type);
     assert(result);
-    assert(file_type == kTableFile);
+    assert(file_type == FileType::kTableFile);
 #else
     (void)file_name;
 #endif  // !NDEBUG

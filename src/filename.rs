@@ -1,5 +1,7 @@
-use crate::filename::ffi::InfoLogPrefix;
+use crate::filename::ffi::{FileType, InfoLogPrefix, WalFileType};
 use cxx::CxxVector;
+use lazy_static::lazy_static;
+use regex::Regex;
 
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
 const ROCKSDB_TFILE_EXT: &str = "sst";
@@ -101,12 +103,63 @@ mod ffi {
         /// Return the name of the old info log file for `dbname`.
         #[cxx_name = "OldInfoLogFileName"]
         fn old_info_log_file_name(dbname: &str, ts: u64, db_path: &str, log_dir: &str) -> String;
+
+        /// If filename is a rocksdb file, store the type of the file in *type.
+        /// The number encoded in the filename is stored in *number. If the
+        /// filename was successfully parsed, returns true. Else return false.
+        /// info_log_name_prefix is the path of info logs.
+        #[cxx_name = "ParseFileName"]
+        unsafe fn parse_file_name_with_info_log_prefix_and_log_type(
+            file_name: &str,
+            number: *mut u64,
+            info_log_name_prefix: &str,
+            file_type: *mut FileType,
+            log_type: *mut WalFileType,
+        ) -> bool;
+
+        /// If filename is a rocksdb file, store the type of the file in *type.
+        /// The number encoded in the filename is stored in *number. If the
+        /// filename was successfully parsed, returns true. Else return false.
+        /// info_log_name_prefix is the path of info logs.
+        #[cxx_name = "ParseFileName"]
+        unsafe fn parse_file_name_with_info_log_prefix(
+            file_name: &str,
+            number: *mut u64,
+            info_log_name_prefix: &str,
+            file_type: *mut FileType,
+        ) -> bool;
+
+        /// If filename is a rocksdb file, store the type of the file in *type.
+        /// The number encoded in the filename is stored in *number. If the
+        /// filename was successfully parsed, returns true. Else return false.
+        /// Skips info log files.
+        #[cxx_name = "ParseFileName"]
+        unsafe fn parse_file_name_with_log_type(
+            file_name: &str,
+            number: *mut u64,
+            file_type: *mut FileType,
+            log_type: *mut WalFileType,
+        ) -> bool;
+
+        /// If filename is a rocksdb file, store the type of the file in *type.
+        /// The number encoded in the filename is stored in *number. If the
+        /// filename was successfully parsed, returns true. Else return false.
+        /// Skips info log files.
+        #[cxx_name = "ParseFileName"]
+        unsafe fn parse_file_name(
+            file_name: &str,
+            number: *mut u64,
+            file_type: *mut FileType,
+        ) -> bool;
     }
 
     unsafe extern "C++" {
         include!("rocksdb/options.h");
+        include!("rocksdb-rs/src/transaction_log.rs.h");
 
         type DbPath = crate::options::ffi::DbPath;
+        type FileType = crate::types::ffi::FileType;
+        type WalFileType = crate::transaction_log::ffi::WalFileType;
     }
 }
 
@@ -182,8 +235,10 @@ fn rocks_to_level_table_file_name(fullname: &str) -> String {
 /// The reverse function of MakeTableFileName
 // TODO(yhchiang): could merge this function with ParseFileName()
 fn table_file_name_to_number(name: &str) -> u64 {
-    let re = regex::Regex::new(r"(\d+)\.[^.]*$").unwrap();
-    re.captures(name)
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"(\d+)\.[^.]*$").unwrap();
+    }
+    RE.captures(name)
         .map(|cap| cap[1].parse().unwrap())
         .unwrap_or(0)
 }
@@ -267,6 +322,10 @@ fn identity_file_name(dbname: &str) -> String {
 }
 
 fn normalize_path(path: &str) -> String {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("/+").unwrap();
+    }
+
     let mut normalized = String::new();
 
     let path = if path.len() > 2 && &path[..1] == "/" {
@@ -276,7 +335,7 @@ fn normalize_path(path: &str) -> String {
         path
     };
 
-    let replaced = regex::Regex::new("/+").unwrap().replace_all(path, "/");
+    let replaced = RE.replace_all(path, "/");
     normalized.push_str(&replaced);
 
     normalized
@@ -284,15 +343,18 @@ fn normalize_path(path: &str) -> String {
 
 /// Given a path, flatten the path name by replacing all chars not in {[0-9,a-z,A-Z,-,_,.]} with _.
 fn get_info_log_prefix(path: &str) -> String {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("[^a-zA-Z0-9-._]").unwrap();
+    }
+
     if path.is_empty() {
         return "".to_string();
     }
 
-    let re = regex::Regex::new("[^a-zA-Z0-9-._]").unwrap();
-    let replaced = if re.is_match(&path[..1]) && path.len() > 1 {
-        re.replace_all(&path[1..], "_")
+    let replaced = if RE.is_match(&path[..1]) && path.len() > 1 {
+        RE.replace_all(&path[1..], "_")
     } else {
-        re.replace_all(path, "_")
+        RE.replace_all(path, "_")
     };
     format!("{replaced}_LOG")
 }
@@ -332,6 +394,237 @@ fn old_info_log_file_name(dbname: &str, ts: u64, db_path: &str, log_dir: &str) -
 
     let info_log_prefix = InfoLogPrefix::new(true, db_path);
     format!("{}/{}.old.{}", log_dir, info_log_prefix.prefix, ts)
+}
+
+/// If filename is a rocksdb file, store the type of the file in *type.
+/// The number encoded in the filename is stored in *number. If the
+/// filename was successfully parsed, returns true. Else return false.
+/// info_log_name_prefix is the path of info logs.
+unsafe fn parse_file_name_with_info_log_prefix_and_log_type(
+    file_name: &str,
+    number: *mut u64,
+    info_log_name_prefix: &str,
+    file_type: *mut FileType,
+    log_type: *mut WalFileType,
+) -> bool {
+    if let Some(result) = parse_with_info_log_prefix(file_name, info_log_name_prefix) {
+        *number = result.number;
+        *file_type = result.file_type;
+        if let Some(log) = result.log_type {
+            *log_type = log;
+        }
+        true
+    } else {
+        false
+    }
+}
+
+/// If filename is a rocksdb file, store the type of the file in *type.
+/// The number encoded in the filename is stored in *number. If the
+/// filename was successfully parsed, returns true. Else return false.
+/// info_log_name_prefix is the path of info logs.
+unsafe fn parse_file_name_with_info_log_prefix(
+    file_name: &str,
+    number: *mut u64,
+    info_log_name_prefix: &str,
+    file_type: *mut FileType,
+) -> bool {
+    if let Some(result) = parse_with_info_log_prefix(file_name, info_log_name_prefix) {
+        *number = result.number;
+        *file_type = result.file_type;
+        true
+    } else {
+        false
+    }
+}
+
+/// If filename is a rocksdb file, store the type of the file in *type.
+/// The number encoded in the filename is stored in *number. If the
+/// filename was successfully parsed, returns true. Else return false.
+/// Skips info log files.
+unsafe fn parse_file_name_with_log_type(
+    file_name: &str,
+    number: *mut u64,
+    file_type: *mut FileType,
+    log_type: *mut WalFileType,
+) -> bool {
+    if let Some(result) = parse(file_name) {
+        *number = result.number;
+        *file_type = result.file_type;
+        if let Some(log) = result.log_type {
+            *log_type = log;
+        }
+        true
+    } else {
+        false
+    }
+}
+
+/// If filename is a rocksdb file, store the type of the file in *type.
+/// The number encoded in the filename is stored in *number. If the
+/// filename was successfully parsed, returns true. Else return false.
+/// Skips info log files.
+unsafe fn parse_file_name(file_name: &str, number: *mut u64, file_type: *mut FileType) -> bool {
+    if let Some(result) = parse(file_name) {
+        *number = result.number;
+        *file_type = result.file_type;
+        true
+    } else {
+        false
+    }
+}
+
+struct ParseResult {
+    number: u64,
+    file_type: FileType,
+    log_type: Option<WalFileType>,
+}
+
+/// If filename is a rocksdb file, store the type of the file in *type.
+/// The number encoded in the filename is stored in *number. If the
+/// filename was successfully parsed, returns true. Else return false.
+/// Skips info log files.
+///
+/// Owned filenames have the form:
+///    dbname/IDENTITY
+///    dbname/CURRENT
+///    dbname/LOCK
+///    dbname/<info_log_name_prefix>
+///    dbname/<info_log_name_prefix>.old.[0-9]+
+///    dbname/MANIFEST-[0-9]+
+///    dbname/[0-9]+.(log|sst|blob)
+///    dbname/METADB-[0-9]+
+///    dbname/OPTIONS-[0-9]+
+///    dbname/OPTIONS-[0-9]+.dbtmp
+///    Disregards / at the beginning
+fn parse(file_name: &str) -> Option<ParseResult> {
+    parse_with_info_log_prefix(file_name, "")
+}
+
+/// If filename is a rocksdb file, store the type of the file in *type.
+/// The number encoded in the filename is stored in *number. If the
+/// filename was successfully parsed, returns true. Else return false.
+/// info_log_name_prefix is the path of info logs.
+///
+/// Owned filenames have the form:
+///    dbname/IDENTITY
+///    dbname/CURRENT
+///    dbname/LOCK
+///    dbname/<info_log_name_prefix>
+///    dbname/<info_log_name_prefix>.old.[0-9]+
+///    dbname/MANIFEST-[0-9]+
+///    dbname/[0-9]+.(log|sst|blob)
+///    dbname/METADB-[0-9]+
+///    dbname/OPTIONS-[0-9]+
+///    dbname/OPTIONS-[0-9]+.dbtmp
+///    Disregards / at the beginning
+fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Option<ParseResult> {
+    lazy_static! {
+        static ref OLD_LOG_FILE_REGEX: Regex = Regex::new(r"^(\.old)?$").unwrap();
+        static ref OLD_LOG_FILE_WITH_NUM_REGEX: Regex = Regex::new(r"^\.old\.(\d+)$").unwrap();
+        static ref MANIFEST_OR_METADB_FILE_REGEX: Regex =
+            Regex::new(r"^(MANIFEST|METADB)-(\d+)$").unwrap();
+        static ref OPTIONS_FILE_REGEX: Regex = Regex::new(r"^OPTIONS-(\d+)(\.dbtmp)?$").unwrap();
+        static ref GENERAL_FILE_REGEX: Regex =
+            Regex::new(r"^(archive/)?(\d+)\.(log|sst|ldb|blob|dbtmp)$").unwrap();
+    }
+
+    let mut rest = file_name;
+    if file_name.len() > 1 && file_name.starts_with('/') {
+        rest = &file_name[1..];
+    }
+
+    match rest {
+        "IDENTITY" => {
+            return Some(ParseResult {
+                number: 0,
+                file_type: FileType::kIdentityFile,
+                log_type: None,
+            });
+        }
+        "CURRENT" => {
+            return Some(ParseResult {
+                number: 0,
+                file_type: FileType::kCurrentFile,
+                log_type: None,
+            });
+        }
+        "LOCK" => {
+            return Some(ParseResult {
+                number: 0,
+                file_type: FileType::kDBLockFile,
+                log_type: None,
+            });
+        }
+        _ => (),
+    };
+
+    if !info_log_name_prefix.is_empty() && rest.starts_with(info_log_name_prefix) {
+        let rest_log_name = &rest[info_log_name_prefix.len()..];
+
+        if OLD_LOG_FILE_REGEX.is_match(rest_log_name) {
+            return Some(ParseResult {
+                number: 0,
+                file_type: FileType::kInfoLogFile,
+                log_type: None,
+            });
+        }
+
+        let captures = OLD_LOG_FILE_WITH_NUM_REGEX.captures(rest_log_name)?;
+        let number = captures.get(1).unwrap().as_str().parse().ok()?;
+        return Some(ParseResult {
+            number,
+            file_type: FileType::kInfoLogFile,
+            log_type: None,
+        });
+    }
+
+    if let Some(captures) = MANIFEST_OR_METADB_FILE_REGEX.captures(&rest) {
+        let number = captures.get(2).unwrap().as_str().parse().ok()?;
+        let prefix = captures.get(1).unwrap().as_str();
+        let file_type = match prefix {
+            "MANIFEST" => FileType::kDescriptorFile,
+            "METADB" => FileType::kMetaDatabase,
+            _ => unreachable!(),
+        };
+        return Some(ParseResult {
+            number,
+            file_type,
+            log_type: None,
+        });
+    }
+
+    if let Some(captures) = OPTIONS_FILE_REGEX.captures(&rest) {
+        let number = captures.get(1).unwrap().as_str().parse().ok()?;
+        let file_type = match captures.get(2) {
+            Some(_) => FileType::kTempFile,
+            _ => FileType::kOptionsFile,
+        };
+        return Some(ParseResult {
+            number,
+            file_type,
+            log_type: None,
+        });
+    }
+
+    let captures = GENERAL_FILE_REGEX.captures(&rest)?;
+    let number = captures.get(2).unwrap().as_str().parse().ok()?;
+    let archive_dir_found = captures.get(1).is_some();
+    let suffix = captures.get(3).unwrap().as_str();
+    let (file_type, log_type) = match (suffix, archive_dir_found) {
+        ("log", true) => (FileType::kWalFile, Some(WalFileType::kArchivedLogFile)),
+        ("log", false) => (FileType::kWalFile, Some(WalFileType::kAliveLogFile)),
+        ("sst" | "ldb", _) => (FileType::kTableFile, None),
+        ("blob", _) => (FileType::kBlobFile, None),
+        ("dbtmp", _) => (FileType::kTempFile, None),
+        _ => unreachable!(),
+    };
+
+    Some(ParseResult {
+        number,
+        file_type,
+        log_type,
+    })
 }
 
 #[cfg(test)]

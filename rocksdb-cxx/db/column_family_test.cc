@@ -419,7 +419,7 @@ class ColumnFamilyTestBase : public testing::Test {
     }
     EXPECT_OK(s);
     for (const auto& wal : wal_files) {
-      if (wal->Type() == kAliveLogFile) {
+      if (wal->Type() == WalFileType::kAliveLogFile) {
         ++ret;
       }
     }
@@ -3191,7 +3191,7 @@ TEST_P(ColumnFamilyTest, DISABLED_LogTruncationTest) {
     FileType type;
     if (!(ParseFileName(filenames[i], &number, &type))) continue;
 
-    if (type != kWalFile) continue;
+    if (type != FileType::kWalFile) continue;
 
     logfs.push_back(filenames[i]);
   }

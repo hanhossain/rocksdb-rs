@@ -2455,14 +2455,14 @@ TEST_P(DBFlushTestBlobError, FlushError) {
   ASSERT_OK(env_->GetChildren(dbname_, &files));
   for (const auto& file : files) {
     uint64_t number = 0;
-    FileType type = kTableFile;
+    FileType type = FileType::kTableFile;
 
     if (!ParseFileName(file, &number, &type)) {
       continue;
     }
 
-    ASSERT_NE(type, kTableFile);
-    ASSERT_NE(type, kBlobFile);
+    ASSERT_NE(type, FileType::kTableFile);
+    ASSERT_NE(type, FileType::kBlobFile);
   }
 
   const InternalStats* const internal_stats = cfd->internal_stats();

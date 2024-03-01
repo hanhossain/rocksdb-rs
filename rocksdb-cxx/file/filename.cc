@@ -31,139 +31,6 @@ static const std::string kLevelDbTFileExt = "ldb";
 static const std::string kRocksDBBlobFileExt = "blob";
 static const std::string kArchivalDirName = "archive";
 
-// Owned filenames have the form:
-//    dbname/IDENTITY
-//    dbname/CURRENT
-//    dbname/LOCK
-//    dbname/<info_log_name_prefix>
-//    dbname/<info_log_name_prefix>.old.[0-9]+
-//    dbname/MANIFEST-[0-9]+
-//    dbname/[0-9]+.(log|sst|blob)
-//    dbname/METADB-[0-9]+
-//    dbname/OPTIONS-[0-9]+
-//    dbname/OPTIONS-[0-9]+.dbtmp
-//    Disregards / at the beginning
-bool ParseFileName(const std::string& fname, uint64_t* number, FileType* type,
-                   WalFileType* log_type) {
-  return ParseFileName(fname, number, "", type, log_type);
-}
-
-bool ParseFileName(const std::string& fname, uint64_t* number,
-                   const Slice& info_log_name_prefix, FileType* type,
-                   WalFileType* log_type) {
-  Slice rest(fname);
-  if (fname.length() > 1 && fname[0] == '/') {
-    rest.remove_prefix(1);
-  }
-  if (rest == "IDENTITY") {
-    *number = 0;
-    *type = kIdentityFile;
-  } else if (rest == "CURRENT") {
-    *number = 0;
-    *type = kCurrentFile;
-  } else if (rest == "LOCK") {
-    *number = 0;
-    *type = kDBLockFile;
-  } else if (info_log_name_prefix.size() > 0 &&
-             rest.starts_with(info_log_name_prefix)) {
-    rest.remove_prefix(info_log_name_prefix.size());
-    if (rest == "" || rest == ".old") {
-      *number = 0;
-      *type = kInfoLogFile;
-    } else if (rest.starts_with(".old.")) {
-      uint64_t ts_suffix;
-      // sizeof also counts the trailing '\0'.
-      rest.remove_prefix(sizeof(".old.") - 1);
-      if (!ConsumeDecimalNumber(&rest, &ts_suffix)) {
-        return false;
-      }
-      *number = ts_suffix;
-      *type = kInfoLogFile;
-    }
-  } else if (rest.starts_with("MANIFEST-")) {
-    rest.remove_prefix(strlen("MANIFEST-"));
-    uint64_t num;
-    if (!ConsumeDecimalNumber(&rest, &num)) {
-      return false;
-    }
-    if (!rest.empty()) {
-      return false;
-    }
-    *type = kDescriptorFile;
-    *number = num;
-  } else if (rest.starts_with("METADB-")) {
-    rest.remove_prefix(strlen("METADB-"));
-    uint64_t num;
-    if (!ConsumeDecimalNumber(&rest, &num)) {
-      return false;
-    }
-    if (!rest.empty()) {
-      return false;
-    }
-    *type = kMetaDatabase;
-    *number = num;
-  } else if (rest.starts_with(kOptionsFileNamePrefix)) {
-    uint64_t ts_suffix;
-    bool is_temp_file = false;
-    rest.remove_prefix(kOptionsFileNamePrefix.size());
-    const std::string kTempFileNameSuffixWithDot =
-        std::string(".") + kTempFileNameSuffix;
-    if (rest.ends_with(kTempFileNameSuffixWithDot)) {
-      rest.remove_suffix(kTempFileNameSuffixWithDot.size());
-      is_temp_file = true;
-    }
-    if (!ConsumeDecimalNumber(&rest, &ts_suffix)) {
-      return false;
-    }
-    *number = ts_suffix;
-    *type = is_temp_file ? kTempFile : kOptionsFile;
-  } else {
-    // Avoid strtoull() to keep filename format independent of the
-    // current locale
-    bool archive_dir_found = false;
-    if (rest.starts_with(kArchivalDirName)) {
-      if (rest.size() <= kArchivalDirName.size()) {
-        return false;
-      }
-      rest.remove_prefix(kArchivalDirName.size() +
-                         1);  // Add 1 to remove / also
-      if (log_type) {
-        *log_type = kArchivedLogFile;
-      }
-      archive_dir_found = true;
-    }
-    uint64_t num;
-    if (!ConsumeDecimalNumber(&rest, &num)) {
-      return false;
-    }
-    if (rest.size() <= 1 || rest[0] != '.') {
-      return false;
-    }
-    rest.remove_prefix(1);
-
-    Slice suffix = rest;
-    if (suffix == Slice("log")) {
-      *type = kWalFile;
-      if (log_type && !archive_dir_found) {
-        *log_type = kAliveLogFile;
-      }
-    } else if (archive_dir_found) {
-      return false;  // Archive dir can contain only log files
-    } else if (suffix == Slice(kRocksDbTFileExt) ||
-               suffix == Slice(kLevelDbTFileExt)) {
-      *type = kTableFile;
-    } else if (suffix == Slice(kRocksDBBlobFileExt)) {
-      *type = kBlobFile;
-    } else if (suffix == Slice(kTempFileNameSuffix)) {
-      *type = kTempFile;
-    } else {
-      return false;
-    }
-    *number = num;
-  }
-  return true;
-}
-
 IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
                         uint64_t descriptor_number,
                         FSDirectory* dir_contains_current_file) {
@@ -249,7 +116,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   assert(parent_dir != nullptr);
   assert(info_log_list != nullptr);
   uint64_t number = 0;
-  FileType type = kWalFile;
+  FileType type = FileType::kWalFile;
 
   if (!db_log_dir.empty()) {
     *parent_dir = db_log_dir;
@@ -267,8 +134,8 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   }
 
   for (auto& f : file_names) {
-    if (ParseFileName(f, &number, static_cast<std::string>(info_log_prefix.prefix), &type) &&
-        (type == kInfoLogFile)) {
+    if (ParseFileName(f, &number, info_log_prefix.prefix, &type) &&
+        (type == FileType::kInfoLogFile)) {
       info_log_list->push_back(f);
     }
   }

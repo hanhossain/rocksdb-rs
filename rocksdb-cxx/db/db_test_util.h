@@ -721,7 +721,7 @@ class FileTemperatureTestFS : public FileSystemWrapper {
     uint64_t number;
     FileType type;
     if (ParseFileName(GetFileName(fname), &number, &type) &&
-        type == kTableFile) {
+        type == FileType::kTableFile) {
       MutexLock lock(&mu_);
       requested_sst_file_temperatures_.emplace_back(number, opts.temperature);
       if (s.ok()) {
@@ -750,7 +750,7 @@ class FileTemperatureTestFS : public FileSystemWrapper {
     uint64_t number;
     FileType type;
     if (ParseFileName(GetFileName(fname), &number, &type) &&
-        type == kTableFile) {
+        type == FileType::kTableFile) {
       MutexLock lock(&mu_);
       requested_sst_file_temperatures_.emplace_back(number, opts.temperature);
       if (s.ok()) {
@@ -788,7 +788,7 @@ class FileTemperatureTestFS : public FileSystemWrapper {
     uint64_t number;
     FileType type;
     if (ParseFileName(GetFileName(fname), &number, &type) &&
-        type == kTableFile) {
+        type == FileType::kTableFile) {
       MutexLock lock(&mu_);
       current_sst_file_temperatures_[number] = opts.temperature;
     }

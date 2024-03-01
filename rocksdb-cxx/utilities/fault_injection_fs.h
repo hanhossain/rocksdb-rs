@@ -317,7 +317,7 @@ class FaultInjectionTestFS : public FileSystemWrapper {
     if (filesystem_writable_) {
       return true;
     }
-    FileType file_type = kTempFile;
+    FileType file_type = FileType::kTempFile;
     uint64_t file_number = 0;
     if (!TryParseFileName(file_name, &file_number, &file_type)) {
       return false;

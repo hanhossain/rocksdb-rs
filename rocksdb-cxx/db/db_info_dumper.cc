@@ -26,7 +26,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
 
   auto* env = options.env;
   uint64_t number = 0;
-  FileType type = kInfoLogFile;
+  FileType type = FileType::kInfoLogFile;
 
   std::vector<std::string> files;
   uint64_t file_num = 0;
@@ -48,13 +48,13 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       continue;
     }
     switch (type) {
-      case kCurrentFile:
+      case FileType::kCurrentFile:
         Header(options.info_log, "CURRENT file:  %s\n", file.c_str());
         break;
-      case kIdentityFile:
+      case FileType::kIdentityFile:
         Header(options.info_log, "IDENTITY file:  %s\n", file.c_str());
         break;
-      case kDescriptorFile:
+      case FileType::kDescriptorFile:
         s = env->GetFileSize(dbname + "/" + file, &file_size);
         if (s.ok()) {
           Header(options.info_log,
@@ -66,7 +66,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
                 file.c_str(), s.ToString()->c_str());
         }
         break;
-      case kWalFile:
+      case FileType::kWalFile:
         s = env->GetFileSize(dbname + "/" + file, &file_size);
         if (s.ok()) {
           wal_info.append(file)
@@ -78,7 +78,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
                 dbname.c_str(), file.c_str(), s.ToString()->c_str());
         }
         break;
-      case kTableFile:
+      case FileType::kTableFile:
         if (++file_num < 10) {
           file_info.append(file).append(" ");
         }
@@ -100,7 +100,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       std::sort(files.begin(), files.end());
       for (const std::string& file : files) {
         if (ParseFileName(file, &number, &type)) {
-          if (type == kTableFile && ++file_num < 10) {
+          if (type == FileType::kTableFile && ++file_num < 10) {
             file_info.append(file).append(" ");
           }
         }
@@ -125,7 +125,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
     wal_info.clear();
     for (const std::string& file : files) {
       if (ParseFileName(file, &number, &type)) {
-        if (type == kWalFile) {
+        if (type == FileType::kWalFile) {
           s = env->GetFileSize(wal_dir + "/" + file, &file_size);
           if (s.ok()) {
             wal_info.append(file)

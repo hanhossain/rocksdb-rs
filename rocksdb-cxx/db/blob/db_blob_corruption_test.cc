@@ -29,7 +29,7 @@ class DBBlobCorruptionTest : public DBTestBase {
         picked_number = number;
       }
     }
-    ASSERT_TRUE(!fname.empty()) << filetype;
+    ASSERT_TRUE(!fname.empty()) << static_cast<int>(filetype);
     ASSERT_OK(test::CorruptFile(env_, fname, offset, bytes_to_corrupt));
   }
 };
@@ -50,7 +50,7 @@ TEST_F(DBBlobCorruptionTest, VerifyWholeBlobFileChecksum) {
   ASSERT_OK(db_->VerifyFileChecksums(ReadOptions()));
   Close();
 
-  Corrupt(kBlobFile, 0, 2);
+  Corrupt(FileType::kBlobFile, 0, 2);
 
   ASSERT_OK(TryReopen(options));
 

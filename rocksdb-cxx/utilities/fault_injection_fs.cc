@@ -1024,7 +1024,7 @@ IOStatus FaultInjectionTestFS::InjectWriteError(const std::string& file_name) {
     allowed_type = true;
   } else {
     uint64_t number;
-    FileType cur_type = kTempFile;
+    FileType cur_type = FileType::kTempFile;
     if (TryParseFileName(file_name, &number, &cur_type)) {
       for (const auto& type : write_error_allowed_types_) {
         if (cur_type == type) {

@@ -444,8 +444,8 @@ Status DBImpl::Recover(
       }
       for (const std::string& file : files_in_dbname) {
         uint64_t number = 0;
-        FileType type = kWalFile;  // initialize
-        if (ParseFileName(file, &number, &type) && type == kDescriptorFile) {
+        FileType type = FileType::kWalFile;  // initialize
+        if (ParseFileName(file, &number, &type) && type == FileType::kDescriptorFile) {
           uint64_t bytes;
           s = env_->GetFileSize(DescriptorFileName(dbname_, number), &bytes);
           if (s.ok() && bytes != 0) {
@@ -691,7 +691,7 @@ Status DBImpl::Recover(
     for (const auto& file : files_in_wal_dir) {
       uint64_t number;
       FileType type;
-      if (ParseFileName(file, &number, &type) && type == kWalFile) {
+      if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
         if (is_new_db) {
           return Status_Corruption(
               "While creating a new Db, wal_dir contains "
@@ -798,7 +798,7 @@ Status DBImpl::Recover(
       uint64_t options_file_number = 0;
       FileType type;
       for (const auto& fname : filenames) {
-        if (ParseFileName(fname, &number, &type) && type == kOptionsFile) {
+        if (ParseFileName(fname, &number, &type) && type == FileType::kOptionsFile) {
           options_file_number = std::max(number, options_file_number);
         }
       }
@@ -2159,7 +2159,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
         FileType file_type;
         std::string file_path = path + "/" + file_name;
         if (ParseFileName(file_name, &file_number, &file_type) &&
-            (file_type == kTableFile || file_type == kBlobFile)) {
+            (file_type == FileType::kTableFile || file_type == FileType::kBlobFile)) {
           // TODO: Check for errors from OnAddFile?
           if (known_file_sizes.count(file_name)) {
             // We're assuming that each sst file name exists in at most one of

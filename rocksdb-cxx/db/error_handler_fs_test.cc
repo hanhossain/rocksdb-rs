@@ -38,7 +38,7 @@ class DBErrorHandlingFSTest : public DBTestBase {
     for (auto& file : live_files) {
       uint64_t num = 0;
       FileType type;
-      if (ParseFileName(file, &num, &type) && type == kDescriptorFile) {
+      if (ParseFileName(file, &num, &type) && type == FileType::kDescriptorFile) {
         return file;
       }
     }

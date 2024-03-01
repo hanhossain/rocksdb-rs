@@ -51,7 +51,7 @@ Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
   Status s = Status_new();
   // list wal files in main db dir.
   VectorLogPtr logs;
-  s = GetSortedWalsOfType(wal_dir_, logs, kAliveLogFile);
+  s = GetSortedWalsOfType(wal_dir_, logs, WalFileType::kAliveLogFile);
   if (!s.ok()) {
     return s;
   }
@@ -67,7 +67,7 @@ Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
   std::string archivedir = static_cast<std::string>(ArchivalDirectory(wal_dir_));
   Status exists = env_->FileExists(archivedir);
   if (exists.ok()) {
-    s = GetSortedWalsOfType(archivedir, files, kArchivedLogFile);
+    s = GetSortedWalsOfType(archivedir, files, WalFileType::kArchivedLogFile);
     if (!s.ok()) {
       return s;
     }
@@ -178,7 +178,7 @@ void WalManager::PurgeObsoleteWALFiles() {
   for (auto& f : files) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(f, &number, &type) && type == kWalFile) {
+    if (ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
       std::string const file_path = archival_dir + "/" + f;
       if (ttl_enabled) {
         uint64_t file_m_time;
@@ -246,7 +246,7 @@ void WalManager::PurgeObsoleteWALFiles() {
 
   size_t files_del_num = log_files_num - files_keep_num;
   VectorLogPtr archived_logs;
-  s = GetSortedWalsOfType(archival_dir, archived_logs, kArchivedLogFile);
+  s = GetSortedWalsOfType(archival_dir, archived_logs, WalFileType::kArchivedLogFile);
   if (!s.ok()) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Unable to get archived WALs from: %s: %s",
@@ -298,7 +298,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
   for (const auto& f : all_files) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(f, &number, &type) && type == kWalFile) {
+    if (ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
       SequenceNumber sequence;
       Status s = ReadFirstRecord(log_type, number, &sequence);
       if (!s.ok()) {
@@ -318,7 +318,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
       uint64_t size_bytes;
       s = env_->GetFileSize(LogFileName(path, number), &size_bytes);
       // re-try in case the alive log file has been moved to archive.
-      if (!s.ok() && log_type == kAliveLogFile) {
+      if (!s.ok() && log_type == WalFileType::kAliveLogFile) {
         std::string archived_file = static_cast<std::string>(ArchivedLogFileName(path, number));
         if (env_->FileExists(archived_file).ok()) {
           s = env_->GetFileSize(archived_file, &size_bytes);
@@ -377,10 +377,10 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
                                    const uint64_t number,
                                    SequenceNumber* sequence) {
   *sequence = 0;
-  if (type != kAliveLogFile && type != kArchivedLogFile) {
+  if (type != WalFileType::kAliveLogFile && type != WalFileType::kArchivedLogFile) {
     ROCKS_LOG_ERROR(db_options_.info_log, "[WalManger] Unknown file type %s",
-                    std::to_string(type).c_str());
-    return Status_NotSupported("File Type Not Known " + std::to_string(type));
+                    std::to_string(static_cast<int>(type)).c_str());
+    return Status_NotSupported("File Type Not Known " + std::to_string(static_cast<int>(type)));
   }
   {
     MutexLock l(&read_first_record_cache_mutex_);
@@ -391,7 +391,7 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
     }
   }
   Status s = Status_new();
-  if (type == kAliveLogFile) {
+  if (type == WalFileType::kAliveLogFile) {
     std::string fname = static_cast<std::string>(LogFileName(wal_dir_, number));
     s = ReadFirstLine(fname, number, sequence);
     if (!s.ok() && env_->FileExists(fname).ok()) {
@@ -400,7 +400,7 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
     }
   }
 
-  if (type == kArchivedLogFile || !s.ok()) {
+  if (type == WalFileType::kArchivedLogFile || !s.ok()) {
     //  check if the file got moved to archive.
     std::string archived_file = static_cast<std::string>(ArchivedLogFileName(wal_dir_, number));
     s = ReadFirstLine(archived_file, number, sequence);
@@ -436,7 +436,7 @@ Status WalManager::GetLiveWalFile(uint64_t number,
     return s;
   }
 
-  log_file->reset(new LogFileImpl(number, kAliveLogFile,
+  log_file->reset(new LogFileImpl(number, WalFileType::kAliveLogFile,
                                   0,  // SequenceNumber
                                   size_bytes));
 

@@ -219,7 +219,7 @@ Status CheckpointImpl::CreateCustomCheckpoint(
   // (db_paths / cf_paths not supported)
   std::unordered_set<std::string> dirs;
   for (auto& info : infos) {
-    if (info.file_type != kWalFile) {
+    if (info.file_type != FileType::kWalFile) {
       dirs.insert(info.directory);
     }
   }
@@ -234,7 +234,7 @@ Status CheckpointImpl::CreateCustomCheckpoint(
     Status s = Status_new();
     if (!info.replacement_contents.empty()) {
       // Currently should only be used for CURRENT file.
-      assert(info.file_type == kCurrentFile);
+      assert(info.file_type == FileType::kCurrentFile);
 
       if (info.size != info.replacement_contents.size()) {
         s = Status_Corruption("Inconsistent size metadata for " +
@@ -438,7 +438,7 @@ Status CheckpointImpl::ExportFilesInMetaData(
       }
 
       // We should only get sst files here.
-      assert(type == kTableFile);
+      assert(type == FileType::kTableFile);
       assert(file_metadata.size > 0 && file_metadata.name[0] == '/');
       const auto src_fname = file_metadata.name;
       ++num_files;

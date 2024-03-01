@@ -117,10 +117,10 @@ class DummyDB : public StackableDB {
       info.directory = dbname_;
       info.file_number = number;
       info.file_type = type;
-      if (type == kDescriptorFile) {
+      if (type == FileType::kDescriptorFile) {
         info.size = 100;  // See TestFs::GetChildrenFileAttributes below
         info.trim_to_size = true;
-      } else if (type == kCurrentFile) {
+      } else if (type == FileType::kCurrentFile) {
         info.size = 0;
         info.trim_to_size = true;
       } else {
@@ -864,7 +864,7 @@ class BackupEngineTest : public testing::Test {
       uint64_t number;
       FileType type;
       bool ok = ParseFileName(f, &number, &type);
-      if (ok && type == kWalFile) {
+      if (ok && type == FileType::kWalFile) {
         ASSERT_OK(db_chroot_env_->DeleteFile(dbname_ + "/" + f));
       }
     }
@@ -1549,7 +1549,7 @@ TEST_F(BackupEngineTest, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
   // file_checksum_gen_factory is null, and thus table checksum is not
   // verified for creating a new backup; no correction is detected
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
@@ -1565,7 +1565,7 @@ TEST_F(BackupEngineTest, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
   // table file checksum is enabled so we should be able to detect any
   // corruption
   ASSERT_NOK(backup_engine_->CreateNewBackup(db_.get()));
@@ -1582,7 +1582,7 @@ TEST_F(BackupEngineTest, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
   // file_checksum_gen_factory is null, and thus blob checksum is not
   // verified for creating a new backup; no correction is detected
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
@@ -1598,7 +1598,7 @@ TEST_F(BackupEngineTest, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
 
   // file checksum is enabled so we should be able to detect any
   // corruption
@@ -1617,7 +1617,7 @@ TEST_P(BackupEngineTestWithParam, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
   // cannot detect corruption since DB manifest has no table checksums
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -1631,7 +1631,7 @@ TEST_P(BackupEngineTestWithParam, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
   // corruption is detected
   ASSERT_NOK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -1646,7 +1646,7 @@ TEST_P(BackupEngineTestWithParam, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
   // cannot detect corruption since DB manifest has no blob file checksums
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -1660,7 +1660,7 @@ TEST_P(BackupEngineTestWithParam, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
   // corruption is detected
   ASSERT_NOK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -2143,7 +2143,7 @@ TEST_F(BackupEngineTest, TableFileCorruptionBeforeIncremental) {
       CloseAndReopenDB(/*read_only*/ true);
 
       std::vector<FileAttributes> table_files;
-      ASSERT_OK(GetDataFilesInDB(kTableFile, &table_files));
+      ASSERT_OK(GetDataFilesInDB(FileType::kTableFile, &table_files));
       ASSERT_EQ(table_files.size(), 2);
       std::string tf0 = dbname_ + "/" + table_files[0].name;
       std::string tf1 = dbname_ + "/" + table_files[1].name;
@@ -4103,7 +4103,7 @@ TEST_F(BackupEngineTest, FileTemperatures) {
     ASSERT_OK(
         db_->GetLiveFilesStorageInfo(LiveFilesStorageInfoOptions(), &infos));
     for (auto info : infos) {
-      if (info.file_type == kTableFile) {
+      if (info.file_type == FileType::kTableFile) {
         manifest_temps.emplace(info.file_number, info.temperature);
         manifest_temp_counts[info.temperature]++;
       }

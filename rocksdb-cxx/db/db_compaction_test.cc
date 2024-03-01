@@ -2543,7 +2543,7 @@ TEST_P(DBCompactionTestWithParam, LevelCompactionCFPathUse) {
     ASSERT_OK(db_->GetLiveFilesStorageInfo(lfsio, &new_infos));
     std::unordered_map<std::string, int> live_sst_by_dir;
     for (auto& info : new_infos) {
-      if (info.file_type == kTableFile) {
+      if (info.file_type == FileType::kTableFile) {
         live_sst_by_dir[info.directory]++;
         // Verify file on disk (no directory confusion)
         uint64_t size;

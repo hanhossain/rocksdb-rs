@@ -4278,15 +4278,15 @@ Status DBImpl::DeleteFile(std::string name) {
   FileType type;
   WalFileType log_type;
   if (!ParseFileName(name, &number, &type, &log_type) ||
-      (type != kTableFile && type != kWalFile)) {
+      (type != FileType::kTableFile && type != FileType::kWalFile)) {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log, "DeleteFile %s failed.\n",
                     name.c_str());
     return Status_InvalidArgument("Invalid file name");
   }
 
-  if (type == kWalFile) {
+  if (type == FileType::kWalFile) {
     // Only allow deleting archived log files
-    if (log_type != kArchivedLogFile) {
+    if (log_type != WalFileType::kArchivedLogFile) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DeleteFile %s failed - not archived log.\n",
                       name.c_str());
@@ -4737,18 +4737,18 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     FileType type;
     InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!soptions.db_log_dir.empty(), dbname);
     for (const auto& fname : filenames) {
-      if (ParseFileName(fname, &number, static_cast<std::string>(info_log_prefix.prefix), &type) &&
-          type != kDBLockFile) {  // Lock file will be deleted at end
+      if (ParseFileName(fname, &number, info_log_prefix.prefix, &type) &&
+          type != FileType::kDBLockFile) {  // Lock file will be deleted at end
         Status del = Status_new();
         std::string path_to_delete = dbname + "/" + fname;
-        if (type == kMetaDatabase) {
+        if (type == FileType::kMetaDatabase) {
           del = DestroyDB(path_to_delete, options);
-        } else if (type == kTableFile || type == kWalFile ||
-                   type == kBlobFile) {
+        } else if (type == FileType::kTableFile || type == FileType::kWalFile ||
+                   type == FileType::kBlobFile) {
           del = DeleteDBFile(
               &soptions, path_to_delete, dbname,
               /*force_bg=*/false,
-              /*force_fg=*/(type == kWalFile) ? !wal_in_db_path : false);
+              /*force_fg=*/(type == FileType::kWalFile) ? !wal_in_db_path : false);
         } else {
           del = env->DeleteFile(path_to_delete);
         }
@@ -4775,8 +4775,8 @@ Status DestroyDB(const std::string& dbname, const Options& options,
               .ok()) {
         for (const auto& fname : filenames) {
           if (ParseFileName(fname, &number, &type) &&
-              (type == kTableFile ||
-               type == kBlobFile)) {  // Lock file will be deleted at end
+              (type == FileType::kTableFile ||
+               type == FileType::kBlobFile)) {  // Lock file will be deleted at end
             std::string file_path = path + "/" + fname;
             Status del = DeleteDBFile(&soptions, file_path, dbname,
                                       /*force_bg=*/false, /*force_fg=*/false);
@@ -4812,7 +4812,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
             .ok()) {
       // Delete archival files.
       for (const auto& file : archiveFiles) {
-        if (ParseFileName(file, &number, &type) && type == kWalFile) {
+        if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
           Status del =
               DeleteDBFile(&soptions, archivedir + "/" + file, archivedir,
                            /*force_bg=*/false, /*force_fg=*/!wal_in_db_path);
@@ -4828,7 +4828,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     // Delete log files in the WAL dir
     if (wal_dir_exists) {
       for (const auto& file : walDirFiles) {
-        if (ParseFileName(file, &number, &type) && type == kWalFile) {
+        if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
           Status del =
               DeleteDBFile(&soptions, static_cast<std::string>(LogFileName(soptions.wal_dir, number)),
                            soptions.wal_dir, /*force_bg=*/false,
@@ -4961,7 +4961,7 @@ Status DBImpl::DeleteObsoleteOptionsFiles() {
   for (auto& filename : filenames) {
     uint64_t file_number;
     FileType type;
-    if (ParseFileName(filename, &file_number, &type) && type == kOptionsFile) {
+    if (ParseFileName(filename, &file_number, &type) && type == FileType::kOptionsFile) {
       options_filenames.insert(
           {std::numeric_limits<uint64_t>::max() - file_number,
            GetName() + "/" + filename});

@@ -36,7 +36,7 @@ class RepairTest : public DBTestBase {
             uint64_t number;
             FileType type;
             bool ok = ParseFileName(file, &number, &type);
-            return ok && type == kTableFile;
+            return ok && type == FileType::kTableFile;
           });
       *first_sst_path = sst_iter == files.end() ? "" : dbname_ + *sst_iter;
     }
@@ -290,7 +290,7 @@ TEST_F(RepairTest, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(FileType::kTableFile, &sst_files, &total_ssts_size));
     ASSERT_EQ(total_ssts_size, 0);
   }
   // Need to get path before Close() deletes db_, but delete it after Close() to
@@ -309,7 +309,7 @@ TEST_F(RepairTest, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(FileType::kTableFile, &sst_files, &total_ssts_size));
     ASSERT_GT(total_ssts_size, 0);
   }
   ASSERT_EQ(Get("key"), "val");
@@ -390,7 +390,7 @@ TEST_P(RepairTestWithTimestamp, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(FileType::kTableFile, &sst_files, &total_ssts_size));
     ASSERT_EQ(total_ssts_size, 0);
   }
   // Need to get path before Close() deletes db_, but delete it after Close() to
@@ -409,7 +409,7 @@ TEST_P(RepairTestWithTimestamp, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(FileType::kTableFile, &sst_files, &total_ssts_size));
     ASSERT_GT(total_ssts_size, 0);
   }
 
@@ -465,7 +465,7 @@ TEST_F(RepairTest, SeparateWalDir) {
     {
       uint64_t total_ssts_size;
       std::unordered_map<std::string, uint64_t> sst_files;
-      ASSERT_OK(GetAllDataFiles(kTableFile, &sst_files, &total_ssts_size));
+      ASSERT_OK(GetAllDataFiles(FileType::kTableFile, &sst_files, &total_ssts_size));
       ASSERT_EQ(total_ssts_size, 0);
     }
     std::string manifest_path =
@@ -485,7 +485,7 @@ TEST_F(RepairTest, SeparateWalDir) {
     {
       uint64_t total_ssts_size;
       std::unordered_map<std::string, uint64_t> sst_files;
-      ASSERT_OK(GetAllDataFiles(kTableFile, &sst_files, &total_ssts_size));
+      ASSERT_OK(GetAllDataFiles(FileType::kTableFile, &sst_files, &total_ssts_size));
       ASSERT_GT(total_ssts_size, 0);
     }
     ASSERT_EQ(Get("key"), "val");
