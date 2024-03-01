@@ -1,7 +1,8 @@
 use crate::env::ffi::CommonRustData;
 
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::env")]
 pub mod ffi {
+    #[namespace = "rocksdb"]
     unsafe extern "C++" {
         include!("rocksdb/env.h");
 
