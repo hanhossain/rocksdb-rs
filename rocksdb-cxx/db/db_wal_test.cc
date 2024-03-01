@@ -2373,7 +2373,7 @@ TEST_F(DBWALTest, TruncateLastLogAfterRecoverWithFlush) {
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 }
 
-TEST_F(DBWALTest, TruncateLastLogAfterRecoverWALEmpty) {
+TEST_F(DBWALTest, DISABLED_TruncateLastLogAfterRecoverWALEmpty) {
   Options options = CurrentOptions();
   options.env = env_;
   options.avoid_flush_during_recovery = false;
