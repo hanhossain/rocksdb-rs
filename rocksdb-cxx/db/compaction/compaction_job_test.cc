@@ -32,6 +32,7 @@
 #include "test_util/testutil.h"
 #include "util/string_util.h"
 #include "utilities/merge_operators.h"
+using namespace rocksdb_rs::filename;
 
 namespace rocksdb {
 

@@ -119,7 +119,7 @@ Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
   for (size_t i = 0; i < filenames.size(); i++) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(filenames[i], &number, &type) && type == FileType::kWalFile &&
+    if (rocksdb_rs::filename::ParseFileName(filenames[i], &number, &type) && type == FileType::kWalFile &&
         number >= log_number_min) {
       logs->push_back(number);
     }
@@ -145,7 +145,7 @@ Status DBImplSecondary::MaybeInitLogReader(
     // TODO: min_log_number_to_keep_2pc check needed?
     // Open the log file
     std::string fname =
-        static_cast<std::string>(LogFileName(immutable_db_options_.GetWalDir(), log_number));
+        static_cast<std::string>(rocksdb_rs::filename::LogFileName(immutable_db_options_.GetWalDir(), log_number));
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Recovering log #%" PRIu64 " mode %d", log_number,
                    static_cast<int>(immutable_db_options_.wal_recovery_mode));
@@ -607,7 +607,7 @@ Status DBImplSecondary::CheckConsistency() {
     uint64_t fsize = 0;
     s = env_->GetFileSize(file_path, &fsize);
     if (!s.ok() &&
-        (env_->GetFileSize(Rocks2LevelTableFileName(file_path), &fsize).ok() ||
+        (env_->GetFileSize(rocksdb_rs::filename::Rocks2LevelTableFileName(file_path), &fsize).ok() ||
          s.IsPathNotFound())) {
       s = Status_OK();
     }
@@ -806,7 +806,7 @@ Status DBImplSecondary::CompactWithoutInstallation(
 
   std::unordered_set<uint64_t> input_set;
   for (const auto& file_name : input.input_files) {
-    input_set.insert(TableFileNameToNumber(file_name));
+    input_set.insert(rocksdb_rs::filename::TableFileNameToNumber(file_name));
   }
 
   auto* version = cfd->current();

@@ -48,6 +48,10 @@
 #include "utilities/merge_operators.h"
 #include "utilities/ttl/db_ttl_impl.h"
 
+using rocksdb_rs::filename::CurrentFileName;
+using rocksdb_rs::filename::NormalizePath;
+using rocksdb_rs::filename::ParseFileName;
+
 namespace rocksdb {
 
 class FileChecksumGenCrc32c;

@@ -22,6 +22,7 @@
 #include "rocksdb/statistics.h"
 #include "test_util/sync_point.h"
 #include "test_util/testharness.h"
+using namespace rocksdb_rs::filename;
 
 namespace rocksdb {
 

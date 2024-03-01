@@ -52,6 +52,8 @@
 // In case defined by Windows headers
 #undef small
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 class MockEnv;
 

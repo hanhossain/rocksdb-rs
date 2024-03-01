@@ -672,7 +672,7 @@ struct BlockBasedTable::Rep {
   uint32_t level_for_tracing() const { return level >= 0 ? level : UINT32_MAX; }
 
   uint64_t sst_number_for_tracing() const {
-    return file ? TableFileNameToNumber(file->file_name()) : UINT64_MAX;
+    return file ? rocksdb_rs::filename::TableFileNameToNumber(file->file_name()) : UINT64_MAX;
   }
   void CreateFilePrefetchBuffer(
       size_t readahead_size, size_t max_readahead_size,

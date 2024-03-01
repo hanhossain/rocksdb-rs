@@ -109,7 +109,7 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
   for (auto& files_to_import_per_cf : files_to_import_) {
     for (auto& f : files_to_import_per_cf) {
       const auto path_outside_db = f.external_file_path;
-      const auto path_inside_db = TableFileName(
+      const auto path_inside_db = rocksdb_rs::filename::TableFileName(
           cfd_->ioptions()->cf_paths, f.fd.GetNumber(), f.fd.GetPathId());
 
       if (hardlink_files) {

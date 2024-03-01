@@ -109,6 +109,8 @@
 
 #include "rocksdb-rs/src/status.rs.h"
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 
 const std::string kDefaultColumnFamilyName("default");
@@ -656,7 +658,7 @@ Status DBImpl::CloseHelper() {
         ROCKS_LOG_WARN(
             immutable_db_options_.info_log,
             "Unable to Sync WAL file %s with error -- %s",
-            LogFileName(immutable_db_options_.GetWalDir(), log_number).c_str(),
+            rocksdb_rs::filename::LogFileName(immutable_db_options_.GetWalDir(), log_number).c_str(),
             s.ToString()->c_str());
         // Retain the first error
         if (ret.ok()) {
@@ -763,7 +765,7 @@ const Status DBImpl::CreateArchivalDirectory() {
   if (immutable_db_options_.WAL_ttl_seconds > 0 ||
       immutable_db_options_.WAL_size_limit_MB > 0) {
     std::string archivalPath =
-        static_cast<std::string>(ArchivalDirectory(immutable_db_options_.GetWalDir()));
+        static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(immutable_db_options_.GetWalDir()));
     return env_->CreateDirIfMissing(archivalPath);
   }
   return Status_OK();

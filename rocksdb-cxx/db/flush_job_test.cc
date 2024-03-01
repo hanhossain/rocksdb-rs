@@ -24,6 +24,8 @@
 #include "util/random.h"
 #include "util/string_util.h"
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 
 // TODO(icanadi) Mock out everything else:

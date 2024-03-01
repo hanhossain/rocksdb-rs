@@ -1780,7 +1780,7 @@ void BackupEngineImpl::SetBackupInfoFromBackupMeta(
       finfo.directory = dir;
       uint64_t number;
       FileType type;
-      bool ok = ParseFileName(file_ptr->filename, &number, &type);
+      bool ok = rocksdb_rs::filename::ParseFileName(file_ptr->filename, &number, &type);
       if (ok) {
         finfo.file_number = number;
         finfo.file_type = type;
@@ -1879,13 +1879,13 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     // delete files in db_dir, but keep all the log files
     DeleteChildren(db_dir, 1 << static_cast<int>(FileType::kWalFile));
     // move all the files from archive dir to wal_dir
-    std::string archive_dir = static_cast<std::string>(ArchivalDirectory(wal_dir));
+    std::string archive_dir = static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir));
     std::vector<std::string> archive_files;
     db_fs_->GetChildren(archive_dir, io_options_, &archive_files, nullptr);
     for (const auto& f : archive_files) {
       uint64_t number;
       FileType type;
-      bool ok = ParseFileName(f, &number, &type);
+      bool ok = rocksdb_rs::filename::ParseFileName(f, &number, &type);
       if (ok && type == FileType::kWalFile) {
         ROCKS_LOG_INFO(options_.info_log,
                        "Moving log file from archive/ to wal_dir: %s",
@@ -1901,7 +1901,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     }
   } else {
     DeleteChildren(wal_dir);
-    DeleteChildren(static_cast<std::string>(ArchivalDirectory(wal_dir)));
+    DeleteChildren(static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir)));
     DeleteChildren(db_dir);
   }
 
@@ -1956,7 +1956,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     // 2. find the filetype
     uint64_t number;
     FileType type;
-    bool ok = ParseFileName(dst, &number, &type);
+    bool ok = rocksdb_rs::filename::ParseFileName(dst, &number, &type);
     if (!ok) {
       return IOStatus::Corruption("Backup corrupted: Fail to parse filename " +
                                   dst);
@@ -2643,7 +2643,7 @@ void BackupEngineImpl::DeleteChildren(const std::string& dir,
   for (const auto& f : children) {
     uint64_t number;
     FileType type;
-    bool ok = ParseFileName(f, &number, &type);
+    bool ok = rocksdb_rs::filename::ParseFileName(f, &number, &type);
     if (ok && (file_type_filter & (1 << static_cast<int>(type)))) {
       // don't delete this file
       continue;

@@ -14,6 +14,9 @@
 #include "rocksdb/system_clock.h"
 #include "util/mutexlock.h"
 
+using rocksdb_rs::filename::InfoLogFileName;
+using rocksdb_rs::filename::OldInfoLogFileName;
+
 namespace rocksdb {
 
 // -- AutoRollLogger

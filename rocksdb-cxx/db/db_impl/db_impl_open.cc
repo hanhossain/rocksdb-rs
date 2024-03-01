@@ -27,6 +27,15 @@
 #include "util/rate_limiter_impl.h"
 #include "util/udt_util.h"
 
+using rocksdb_rs::filename::CurrentFileName;
+using rocksdb_rs::filename::DescriptorFileName;
+using rocksdb_rs::filename::LockFileName;
+using rocksdb_rs::filename::LogFileName;
+using rocksdb_rs::filename::NormalizePath;
+using rocksdb_rs::filename::OptionsFileName;
+using rocksdb_rs::filename::ParseFileName;
+
+
 namespace rocksdb {
 Options SanitizeOptions(const std::string& dbname, const Options& src,
                         bool read_only, Status* logger_creation_s) {

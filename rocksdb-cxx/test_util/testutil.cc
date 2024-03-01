@@ -430,7 +430,7 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
   EnvOptions env_options;
   env_options.use_mmap_writes = false;
   env_options.use_direct_writes = true;
-  std::string tmp = static_cast<std::string>(TempFileName(dir, 999));
+  std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
   Status s = Status_new();
   {
     std::unique_ptr<WritableFile> file;
@@ -445,7 +445,7 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
 bool IsPrefetchSupported(const std::shared_ptr<FileSystem>& fs,
                          const std::string& dir) {
   bool supported = false;
-  std::string tmp = static_cast<std::string>(TempFileName(dir, 999));
+  std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
   Random rnd(301);
   std::string test_string = rnd.RandomString(4096);
   Slice data(test_string);

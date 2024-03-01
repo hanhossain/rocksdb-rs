@@ -105,7 +105,7 @@ Status ExternalSstFileIngestionJob::Prepare(
   for (IngestedFileInfo& f : files_to_ingest_) {
     f.copy_file = false;
     const std::string path_outside_db = f.external_file_path;
-    const std::string path_inside_db = static_cast<std::string>(TableFileName(
+    const std::string path_inside_db = static_cast<std::string>(rocksdb_rs::filename::TableFileName(
         cfd_->ioptions()->cf_paths, f.fd.GetNumber(), f.fd.GetPathId()));
     if (ingestion_options_.move_files) {
       status =

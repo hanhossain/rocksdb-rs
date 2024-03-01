@@ -180,7 +180,7 @@ Status BlobFileBuilder::OpenBlobFileIfNeeded() {
   assert(immutable_options_);
   assert(!immutable_options_->cf_paths.empty());
   std::string blob_file_path =
-      static_cast<std::string>(BlobFileName(immutable_options_->cf_paths.front().path, blob_file_number));
+      static_cast<std::string>(rocksdb_rs::filename::BlobFileName(immutable_options_->cf_paths.front().path, blob_file_number));
 
   if (blob_callback_) {
     blob_callback_->OnBlobFileCreationStarted(

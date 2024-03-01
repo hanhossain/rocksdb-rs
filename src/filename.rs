@@ -11,7 +11,7 @@ const CURRENT_FILE_NAME: &str = "CURRENT";
 const TEMP_FILE_NAME_SUFFIX: &str = "dbtmp";
 const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
 
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::filename")]
 mod ffi {
     /// A helper structure for prefix of info log names.
     struct InfoLogPrefix {
@@ -153,6 +153,7 @@ mod ffi {
         ) -> bool;
     }
 
+    #[namespace = "rocksdb"]
     unsafe extern "C++" {
         include!("rocksdb/options.h");
         include!("rocksdb-rs/src/transaction_log.rs.h");

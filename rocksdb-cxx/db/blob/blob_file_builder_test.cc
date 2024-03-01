@@ -26,6 +26,7 @@
 #include "test_util/testharness.h"
 #include "util/compression.h"
 #include "utilities/fault_injection_env.h"
+using namespace rocksdb_rs::filename;
 
 namespace rocksdb {
 
