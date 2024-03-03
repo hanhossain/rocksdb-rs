@@ -5,6 +5,11 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
+// TODO: list files in order of number of dependencies (direct)
+// TODO: list files in order of number of dependencies (transitive)
+// TODO: show dependency tree of files (root file -> all dependencies -> all dependencies of dependencies)
+// TODO: show dependency tree of files (root file -> all dependents -> all dependents of dependents)
+
 const GENERATED_INCLUDE_DIR: &str = env!("ROCKSDB_GENERATED_INCLUDE");
 
 /// This tool is used to interact with the dependency graph of the C++ files.
