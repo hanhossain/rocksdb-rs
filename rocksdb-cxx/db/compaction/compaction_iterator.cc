@@ -418,7 +418,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
       return false;
     }
 
-    status_ = Status_IOError("Failed to access blob during compaction filter");
+    status_ = rocksdb_rs::status::Status_IOError("Failed to access blob during compaction filter");
     validity_info_.Invalidate();
     return false;
   } else if (decision == CompactionFilter::Decision::kChangeWideColumnEntity) {
@@ -1053,11 +1053,11 @@ void CompactionIterator::NextFromInput() {
   }
 
   if (!Valid() && IsShuttingDown()) {
-    status_ = Status_ShutdownInProgress();
+    status_ = rocksdb_rs::status::Status_ShutdownInProgress();
   }
 
   if (IsPausingManualCompaction()) {
-    status_ = Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
+    status_ = rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
 
   // Propagate corruption status from memtable itereator
@@ -1186,7 +1186,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
     }
 
     if (blob_decision == CompactionFilter::BlobDecision::kIOError) {
-      status_ = Status_IOError("Could not relocate blob during GC");
+      status_ = rocksdb_rs::status::Status_IOError("Could not relocate blob during GC");
       validity_info_.Invalidate();
 
       return;

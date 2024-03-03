@@ -448,7 +448,7 @@ rocksdb_rs::status::Status BuildTable(
   if (meta->fd.GetFileSize() == 0) {
     fname = "(nil)";
     if (s.ok()) {
-      status_for_listener = Status_Aborted("Empty SST file not kept");
+      status_for_listener = rocksdb_rs::status::Status_Aborted("Empty SST file not kept");
     }
   }
   // Output to event logger and fire events.

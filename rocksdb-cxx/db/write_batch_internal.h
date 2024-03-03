@@ -270,7 +270,7 @@ class LocalSavePoint {
       }
       batch_->content_flags_.store(savepoint_.content_flags,
                                    std::memory_order_relaxed);
-      return Status_MemoryLimit();
+      return rocksdb_rs::status::Status_MemoryLimit();
     }
     return rocksdb_rs::status::Status_OK();
   }

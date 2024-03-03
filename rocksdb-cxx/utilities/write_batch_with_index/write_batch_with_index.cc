@@ -443,7 +443,7 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatch(ColumnFamilyHandle*
       s = rocksdb_rs::status::Status_NotFound();
       break;
     case WBWIIteratorImpl::kMergeInProgress:
-      s = Status_MergeInProgress();
+      s = rocksdb_rs::status::Status_MergeInProgress();
       break;
     default:
       assert(false);

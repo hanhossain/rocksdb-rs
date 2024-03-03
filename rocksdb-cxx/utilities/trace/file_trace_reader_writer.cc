@@ -33,7 +33,7 @@ rocksdb_rs::status::Status FileTraceReader::Close() {
 
 rocksdb_rs::status::Status FileTraceReader::Reset() {
   if (file_reader_ == nullptr) {
-    return Status_IOError("TraceReader is closed.");
+    return rocksdb_rs::status::Status_IOError("TraceReader is closed.");
   }
   offset_ = 0;
   return rocksdb_rs::status::Status_OK();
@@ -51,7 +51,7 @@ rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
     // No more data to read
     // Todo: Come up with a better way to indicate end of data. May be this
     // could be avoided once footer is introduced.
-    return Status_Incomplete();
+    return rocksdb_rs::status::Status_Incomplete();
   }
   if (result_.size() < kTraceMetadataSize) {
     return rocksdb_rs::status::Status_Corruption("Corrupted trace file.");

@@ -305,7 +305,7 @@ rocksdb_rs::status::Status PointLockManager::AcquireWithTimeout(
         if (txn->IsDeadlockDetect()) {
           if (IncrementWaiters(txn, wait_ids, key, column_family_id,
                                lock_info.exclusive, env)) {
-            result = Status_Busy(rocksdb_rs::status::SubCode::kDeadlock);
+            result = rocksdb_rs::status::Status_Busy(rocksdb_rs::status::SubCode::kDeadlock);
             stripe->stripe_mutex->UnLock();
             return result;
           }
@@ -505,7 +505,7 @@ rocksdb_rs::status::Status PointLockManager::AcquireLocked(LockMap* lock_map, Lo
           lock_info.expiration_time = txn_lock_info.expiration_time;
           // lock_cnt does not change
         } else {
-          result = Status_TimedOut(rocksdb_rs::status::SubCode::kLockTimeout);
+          result = rocksdb_rs::status::Status_TimedOut(rocksdb_rs::status::SubCode::kLockTimeout);
           *txn_ids = lock_info.txn_ids;
         }
       }
@@ -523,7 +523,7 @@ rocksdb_rs::status::Status PointLockManager::AcquireLocked(LockMap* lock_map, Lo
     // Check lock limit
     if (max_num_locks_ > 0 &&
         lock_map->lock_cnt.load(std::memory_order_acquire) >= max_num_locks_) {
-      result = Status_Busy(rocksdb_rs::status::SubCode::kLockLimit);
+      result = rocksdb_rs::status::Status_Busy(rocksdb_rs::status::SubCode::kLockLimit);
     } else {
       // acquire lock
       stripe->keys.emplace(key, txn_lock_info);

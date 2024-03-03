@@ -76,7 +76,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersi
     need_to_read_sst = true;
 
     if (cache_only) {
-      result = Status_TryAgain(
+      result = rocksdb_rs::status::Status_TryAgain(
           "Transaction could not check for conflicts as the MemTable does not "
           "contain a long enough history to check write at SequenceNumber: ",
           std::to_string(snap_seq));
@@ -100,7 +100,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersi
                "frequency "
                "of this error.",
                snap_seq, earliest_seq);
-      result = Status_TryAgain(msg);
+      result = rocksdb_rs::status::Status_TryAgain(msg);
     }
   }
 
@@ -142,7 +142,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersi
         write_conflict = ucmp->CompareTimestamp(*read_ts, timestamp) < 0;
       }
       if (write_conflict) {
-        result = Status_Busy();
+        result = rocksdb_rs::status::Status_Busy();
       }
     }
   }

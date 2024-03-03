@@ -92,10 +92,10 @@ rocksdb_rs::status::Status TracerHelper::DecodeTrace(const std::string& encoded_
   assert(trace != nullptr);
   Slice enc_slice = Slice(encoded_trace);
   if (!GetFixed64(&enc_slice, &trace->ts)) {
-    return Status_Incomplete("Decode trace string failed");
+    return rocksdb_rs::status::Status_Incomplete("Decode trace string failed");
   }
   if (enc_slice.size() < kTraceTypeSize + kTracePayloadLengthSize) {
-    return Status_Incomplete("Decode trace string failed");
+    return rocksdb_rs::status::Status_Incomplete("Decode trace string failed");
   }
   trace->type = static_cast<TraceType>(enc_slice[0]);
   enc_slice.remove_prefix(kTraceTypeSize + kTracePayloadLengthSize);

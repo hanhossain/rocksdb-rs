@@ -1157,7 +1157,7 @@ class TestEnv : public EnvWrapper {
     rocksdb_rs::status::Status CloseHelper() {
       env->CloseCountInc();
       ;
-      return Status_IOError();
+      return rocksdb_rs::status::Status_IOError();
     }
     TestEnv* env;
   };
@@ -1192,7 +1192,7 @@ TEST_F(DBBasicTest, DBClose) {
 
   s = db->Close();
   ASSERT_EQ(env->GetCloseCount(), 1);
-  ASSERT_TRUE(s.eq(Status_IOError()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_IOError()));
 
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 1);
@@ -2374,7 +2374,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
         // since 3 overlapping L0 files + 3 L1 files containing the keys
         if (count == 6) {
           rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
-          *s = Status_IOError();
+          *s = rocksdb_rs::status::Status_IOError();
         }
       });
   // DB open will create table readers unless we reduce the table cache
@@ -2402,7 +2402,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
   ASSERT_EQ(values.size(), 3);
   ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_IOError()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_IOError()));
 
   HistogramData multiget_io_batch_size;
 
@@ -3957,7 +3957,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
   SyncPoint::GetInstance()->SetCallBack(
       "TableCache::MultiGet:FindTable", [&](void* status) {
         rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
-        *s = Status_IOError();
+        *s = rocksdb_rs::status::Status_IOError();
       });
   // DB open will create table readers unless we reduce the table cache
   // capacity.
@@ -3984,8 +3984,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
-  ASSERT_TRUE(statuses[0].eq(Status_IOError()));
-  ASSERT_TRUE(statuses[1].eq(Status_IOError()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_IOError()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_IOError()));
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
@@ -4217,8 +4217,8 @@ class DBBasicTestMultiGetDeadline : public DBBasicTestMultiGet,
       if (i < num_ok) {
         EXPECT_OK(statuses[i]);
       } else {
-        if (!statuses[i].eq(Status_TimedOut())) {
-          EXPECT_TRUE(statuses[i].eq(Status_TimedOut()));
+        if (!statuses[i].eq(rocksdb_rs::status::Status_TimedOut())) {
+          EXPECT_TRUE(statuses[i].eq(rocksdb_rs::status::Status_TimedOut()));
         }
       }
     }
@@ -4384,7 +4384,7 @@ TEST_F(DBBasicTest, ManifestWriteFailure) {
         auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_OK(*s);
         // Manually overwrite return status
-        *s = Status_IOError();
+        *s = rocksdb_rs::status::Status_IOError();
       });
   SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put("key", "value"));
@@ -4433,7 +4433,7 @@ TEST_F(DBBasicTest, FailOpenIfLoggerCreationFail) {
       "rocksdb::CreateLoggerFromOptions:AfterGetPath", [&](void* arg) {
         auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         assert(s);
-        *s = Status_IOError("Injected");
+        *s = rocksdb_rs::status::Status_IOError("Injected");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -4653,7 +4653,7 @@ TEST_P(DBBasicTestDeadline, PointLookupDeadline) {
       std::string value;
       rocksdb_rs::status::Status s = dbfull()->Get(ro, "k50", &value);
       if (fs->TimedOut()) {
-        ASSERT_TRUE(s.eq(Status_TimedOut()));
+        ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_TimedOut()));
       } else {
         timedout = false;
         ASSERT_OK(s);
@@ -4740,7 +4740,7 @@ TEST_P(DBBasicTestDeadline, IteratorDeadline) {
       }
       if (fs->TimedOut()) {
         ASSERT_FALSE(iter->Valid());
-        ASSERT_TRUE(iter->status().eq(Status_TimedOut()));
+        ASSERT_TRUE(iter->status().eq(rocksdb_rs::status::Status_TimedOut()));
       } else {
         timedout = false;
         ASSERT_OK(iter->status());

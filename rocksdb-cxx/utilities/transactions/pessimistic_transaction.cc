@@ -459,7 +459,7 @@ rocksdb_rs::status::Status PessimisticTransaction::CommitBatch(WriteBatch* batch
   bool can_commit = false;
 
   if (IsExpired()) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else if (expiration_time_ > 0) {
     TransactionState expected = STARTED;
     can_commit = std::atomic_compare_exchange_strong(&txn_state_, &expected,
@@ -476,7 +476,7 @@ rocksdb_rs::status::Status PessimisticTransaction::CommitBatch(WriteBatch* batch
       txn_state_.store(COMMITTED);
     }
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else {
     s = rocksdb_rs::status::Status_InvalidArgument("Transaction is not in state for commit.");
   }
@@ -493,7 +493,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Prepare() {
   }
 
   if (IsExpired()) {
-    return Status_Expired();
+    return rocksdb_rs::status::Status_Expired();
   }
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
@@ -522,7 +522,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Prepare() {
       txn_state_.store(PREPARED);
     }
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else if (txn_state_ == PREPARED) {
     s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been prepared.");
   } else if (txn_state_ == COMMITTED) {
@@ -583,7 +583,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Commit() {
   bool commit_prepared = false;
 
   if (IsExpired()) {
-    return Status_Expired();
+    return rocksdb_rs::status::Status_Expired();
   }
 
   if (expiration_time_ > 0) {
@@ -651,7 +651,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Commit() {
     Clear();
     txn_state_.store(COMMITTED);
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else if (txn_state_ == COMMITTED) {
     s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been committed.");
   } else if (txn_state_ == ROLLEDBACK) {

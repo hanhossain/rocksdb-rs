@@ -978,7 +978,7 @@ rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFilesForAllL
     // include all files between the first and the last compaction input files.
     for (int f = first_included; f <= last_included; ++f) {
       if (current_files[f].being_compacted) {
-        return Status_Aborted("Necessary compaction input file " +
+        return rocksdb_rs::status::Status_Aborted("Necessary compaction input file " +
                                current_files[f].name +
                                " is currently being compacted.");
       }
@@ -1024,7 +1024,7 @@ rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFilesForAllL
         if (HaveOverlappingKeyRanges(comparator, aggregated_file_meta,
                                      next_lv_file)) {
           if (next_lv_file.being_compacted) {
-            return Status_Aborted(
+            return rocksdb_rs::status::Status_Aborted(
                 "File " + next_lv_file.name +
                 " that has overlapping key range with one of the compaction "
                 " input file is currently being compacted.");
@@ -1035,7 +1035,7 @@ rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFilesForAllL
     }
   }
   if (RangeOverlapWithCompaction(smallestkey, largestkey, output_level)) {
-    return Status_Aborted(
+    return rocksdb_rs::status::Status_Aborted(
         "A running compaction is writing to the same output level in an "
         "overlapping key range");
   }
@@ -1086,7 +1086,7 @@ rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFiles(
       for (const auto& file_meta : level_meta.files) {
         if (file_num == rocksdb_rs::filename::TableFileNameToNumber(file_meta.name)) {
           if (file_meta.being_compacted) {
-            return Status_Aborted("Specified compaction input file " +
+            return rocksdb_rs::status::Status_Aborted("Specified compaction input file " +
                                    static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName("", file_num)) +
                                    " is already being compacted.");
           }

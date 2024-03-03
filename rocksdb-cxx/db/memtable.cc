@@ -734,12 +734,12 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
       Slice prefix = insert_with_hint_prefix_extractor_->Transform(key_slice);
       bool res = table->InsertKeyWithHint(handle, &insert_hints_[prefix]);
       if (UNLIKELY(!res)) {
-        return Status_TryAgain("key+seq exists");
+        return rocksdb_rs::status::Status_TryAgain("key+seq exists");
       }
     } else {
       bool res = table->InsertKey(handle);
       if (UNLIKELY(!res)) {
-        return Status_TryAgain("key+seq exists");
+        return rocksdb_rs::status::Status_TryAgain("key+seq exists");
       }
     }
 
@@ -781,7 +781,7 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
                    ? table->InsertKeyConcurrently(handle)
                    : table->InsertKeyWithHintConcurrently(handle, hint);
     if (UNLIKELY(!res)) {
-      return Status_TryAgain("key+seq exists");
+      return rocksdb_rs::status::Status_TryAgain("key+seq exists");
     }
 
     assert(post_process_info != nullptr);
@@ -1320,7 +1320,7 @@ bool MemTable::Get(const LookupKey& key, std::string* value,
   // No change to value, since we have not yet found a Put/Delete
   // Propagate corruption error
   if (!found_final_value && merge_in_progress && !s->IsCorruption()) {
-    *s = Status_MergeInProgress();
+    *s = rocksdb_rs::status::Status_MergeInProgress();
   }
   PERF_COUNTER_ADD(get_from_memtable_count, 1);
   return found_final_value;
@@ -1430,7 +1430,7 @@ void MemTable::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
                  &found_final_value, &merge_in_progress);
 
     if (!found_final_value && merge_in_progress) {
-      *(iter->s) = Status_MergeInProgress();
+      *(iter->s) = rocksdb_rs::status::Status_MergeInProgress();
     }
 
     if (found_final_value) {
@@ -1449,7 +1449,7 @@ void MemTable::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
         for (auto range_iter = range->begin(); range_iter != range->end();
              ++range_iter) {
           range->MarkKeyDone(range_iter);
-          *(range_iter->s) = Status_Aborted();
+          *(range_iter->s) = rocksdb_rs::status::Status_Aborted();
         }
         break;
       }

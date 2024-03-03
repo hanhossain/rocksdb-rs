@@ -276,7 +276,7 @@ void SstFileManagerImpl::ClearError() {
                           "required disk buffer [%" PRIu64 " bytes]\n",
                           free_space, reserved_disk_buffer_);
           ROCKS_LOG_ERROR(logger_, "Cannot clear hard error\n");
-          s = Status_NoSpace();
+          s = rocksdb_rs::status::Status_NoSpace();
         }
       } else if (bg_err_.severity() == rocksdb_rs::status::Severity::kSoftError) {
         if (free_space < free_space_trigger_) {
@@ -287,7 +287,7 @@ void SstFileManagerImpl::ClearError() {
                          " bytes]\n",
                          free_space, free_space_trigger_);
           ROCKS_LOG_WARN(logger_, "Cannot clear soft error\n");
-          s = Status_NoSpace();
+          s = rocksdb_rs::status::Status_NoSpace();
         }
       }
     }

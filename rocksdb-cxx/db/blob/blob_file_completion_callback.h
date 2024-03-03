@@ -54,7 +54,7 @@ class BlobFileCompletionCallback {
       // Report new blob files to SstFileManagerImpl
       s = sfm->OnAddFile(file_name);
       if (sfm->IsMaxAllowedSpaceReached()) {
-        s = Status_SpaceLimit("Max allowed space was reached");
+        s = rocksdb_rs::status::Status_SpaceLimit("Max allowed space was reached");
         TEST_SYNC_POINT(
             "BlobFileCompletionCallback::CallBack::MaxAllowedSpaceReached");
         InstrumentedMutexLock l(mutex_);

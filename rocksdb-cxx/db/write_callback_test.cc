@@ -54,7 +54,7 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
 
 class WriteCallbackTestWriteCallback2 : public WriteCallback {
  public:
-  rocksdb_rs::status::Status Callback(DB* /*db*/) override { return Status_Busy(); }
+  rocksdb_rs::status::Status Callback(DB* /*db*/) override { return rocksdb_rs::status::Status_Busy(); }
   bool AllowWriteBatching() override { return true; }
 };
 
@@ -75,7 +75,7 @@ class MockWriteCallback : public WriteCallback {
   rocksdb_rs::status::Status Callback(DB* /*db*/) override {
     was_called_.store(true);
     if (should_fail_) {
-      return Status_Busy();
+      return rocksdb_rs::status::Status_Busy();
     } else {
       return rocksdb_rs::status::Status_OK();
     }

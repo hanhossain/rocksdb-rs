@@ -53,7 +53,7 @@ rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key, cons
       // latency
       assert(size_ >= size);
       size_ -= size;
-      return Status_TryAgain("Unable to evict any data");
+      return rocksdb_rs::status::Status_TryAgain("Unable to evict any data");
     }
   }
 
@@ -70,7 +70,7 @@ rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key, cons
     assert(size_ >= size);
     size_ -= size;
     // failed to insert to cache, block already in cache
-    return Status_TryAgain("key already exists in volatile cache");
+    return rocksdb_rs::status::Status_TryAgain("key already exists in volatile cache");
   }
 
   cache_data.release();

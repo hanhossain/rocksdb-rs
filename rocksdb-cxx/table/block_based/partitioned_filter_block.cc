@@ -178,7 +178,7 @@ Slice PartitionedFilterBlockBuilder::Finish(
   } else {
     // Return the next filter partition in line and set Incomplete() status to
     // indicate we expect more calls to Finish
-    *status = Status_Incomplete();
+    *status = rocksdb_rs::status::Status_Incomplete();
     finishing_filters = true;
 
     last_filter_entry_key = filters.front().key;

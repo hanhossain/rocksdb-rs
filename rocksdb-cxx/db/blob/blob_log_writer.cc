@@ -70,7 +70,7 @@ rocksdb_rs::status::Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (dest_->seen_error()) {
-    return Status_IOError("Seen Error. Skip closing.");
+    return rocksdb_rs::status::Status_IOError("Seen Error. Skip closing.");
   } else {
     s = dest_->Append(Slice(str));
     if (s.ok()) {

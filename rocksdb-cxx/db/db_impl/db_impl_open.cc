@@ -2205,7 +2205,7 @@ rocksdb_rs::status::Status DBImpl::Open(const DBOptions& db_options, const std::
       }
     }
     if (s.ok() && !persist_options_status.ok()) {
-      s = Status_IOError(
+      s = rocksdb_rs::status::Status_IOError(
           "DB::Open() failed --- Unable to persist Options file",
           persist_options_status.ToString());
     }

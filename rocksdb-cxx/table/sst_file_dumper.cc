@@ -95,7 +95,7 @@ rocksdb_rs::status::Status SstFileDumper::GetTableReader(const std::string& file
   // check empty file
   // if true, skip further processing of this file
   if (file_size == 0) {
-    return Status_Aborted(file_path, "Empty file");
+    return rocksdb_rs::status::Status_Aborted(file_path, "Empty file");
   }
 
   file_.reset(new RandomAccessFileReader(std::move(file), file_path));

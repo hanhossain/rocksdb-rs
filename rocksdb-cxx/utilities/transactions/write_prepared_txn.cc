@@ -58,7 +58,7 @@ void WritePreparedTxn::MultiGet(const ReadOptions& options,
                !wpt_db_->ValidateSnapshot(snap_seq, backed_by_snapshot))) {
     wpt_db_->WPRecordTick(TXN_GET_TRY_AGAIN);
     for (size_t i = 0; i < num_keys; i++) {
-      statuses[i] = Status_TryAgain();
+      statuses[i] = rocksdb_rs::status::Status_TryAgain();
     }
   }
 }
@@ -86,7 +86,7 @@ rocksdb_rs::status::Status WritePreparedTxn::Get(const ReadOptions& options,
                 wpt_db_->ValidateSnapshot(callback.max_visible_seq(),
                                           backed_by_snapshot))) {
       wpt_db_->WPRecordTick(TXN_GET_TRY_AGAIN);
-      res = Status_TryAgain();
+      res = rocksdb_rs::status::Status_TryAgain();
     }
   }
 

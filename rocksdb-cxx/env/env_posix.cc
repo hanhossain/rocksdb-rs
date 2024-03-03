@@ -287,7 +287,7 @@ class PosixEnv : public CompositeEnv {
         }
       }
     }
-    return Status_IOError(
+    return rocksdb_rs::status::Status_IOError(
         IOErrorMsg("Failed to open shared library: xs", name), dlerror());
   }
 #endif  // !ROCKSDB_NO_DYNAMIC_EXTENSION

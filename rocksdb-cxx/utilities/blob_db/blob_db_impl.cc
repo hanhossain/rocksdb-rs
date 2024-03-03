@@ -1281,7 +1281,7 @@ rocksdb_rs::status::Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_
       (!force_evict && live_sst_size + blob_size > bdb_options_.max_db_size)) {
     // FIFO eviction is disabled, or no space to insert new blob even we evict
     // all blob files.
-    return Status_NoSpace(
+    return rocksdb_rs::status::Status_NoSpace(
         "Write failed, as writing it would exceed max_db_size limit.");
   }
 
@@ -1331,7 +1331,7 @@ rocksdb_rs::status::Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_
   }
   if (live_sst_size + total_blob_size_.load() + blob_size >
       bdb_options_.max_db_size) {
-    return Status_NoSpace(
+    return rocksdb_rs::status::Status_NoSpace(
         "Write failed, as writing it would exceed max_db_size limit.");
   }
   return rocksdb_rs::status::Status_OK();

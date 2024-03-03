@@ -177,7 +177,7 @@ rocksdb_rs::status::Status TableCache::FindTable(
 
   if (*handle == nullptr) {
     if (no_io) {
-      return Status_Incomplete("Table not found in table_cache, no_io is set");
+      return rocksdb_rs::status::Status_Incomplete("Table not found in table_cache, no_io is set");
     }
     MutexLock load_lock(&loader_mutex_.Get(key));
     // We check the cache again under loading mutex

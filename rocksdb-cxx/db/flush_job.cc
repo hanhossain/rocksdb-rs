@@ -288,11 +288,11 @@ rocksdb_rs::status::Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, File
   }
 
   if (s.ok() && cfd_->IsDropped()) {
-    s = Status_ColumnFamilyDropped("Column family dropped during compaction");
+    s = rocksdb_rs::status::Status_ColumnFamilyDropped("Column family dropped during compaction");
   }
   if ((s.ok() || s.IsColumnFamilyDropped()) &&
       shutting_down_->load(std::memory_order_acquire)) {
-    s = Status_ShutdownInProgress("Database shutdown");
+    s = rocksdb_rs::status::Status_ShutdownInProgress("Database shutdown");
   }
 
   if (!s.ok()) {
@@ -525,7 +525,7 @@ rocksdb_rs::status::Status FlushJob::MemPurge() {
       // then rollback to regular flush operation,
       // and destroy new_mem.
       if (new_mem->ApproximateMemoryUsage() > maxSize) {
-        s = Status_Aborted("Mempurge filled more than one memtable.");
+        s = rocksdb_rs::status::Status_Aborted("Mempurge filled more than one memtable.");
         new_mem_capacity = 1.0;
         break;
       }
@@ -568,7 +568,7 @@ rocksdb_rs::status::Status FlushJob::MemPurge() {
         // then rollback to regular flush operation,
         // and destroy new_mem.
         if (new_mem->ApproximateMemoryUsage() > maxSize) {
-          s = Status_Aborted(Slice("Mempurge filled more than one memtable."));
+          s = rocksdb_rs::status::Status_Aborted(Slice("Mempurge filled more than one memtable."));
           new_mem_capacity = 1.0;
           break;
         }
@@ -606,7 +606,7 @@ rocksdb_rs::status::Status FlushJob::MemPurge() {
         mems_[0]->SetFlushJobInfo(GetFlushJobInfo());
         db_mutex_->Unlock();
       } else {
-        s = Status_Aborted(Slice("Mempurge filled more than one memtable."));
+        s = rocksdb_rs::status::Status_Aborted(Slice("Mempurge filled more than one memtable."));
         new_mem_capacity = 1.0;
         if (new_mem) {
           job_context_->memtables_to_free.push_back(new_mem);

@@ -110,7 +110,7 @@ class BlockBasedTableIterator : public InternalIteratorBase<Slice> {
     } else if (block_iter_points_to_real_block_) {
       return block_iter_.status();
     } else if (async_read_in_progress_) {
-      return Status_TryAgain();
+      return rocksdb_rs::status::Status_TryAgain();
     } else {
       return rocksdb_rs::status::Status_OK();
     }

@@ -568,7 +568,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
                          "access_count: %" PRIu64 " num: %" PRIu64 "\n",
                          record.first, record.second);
           if (ret < 0) {
-            return Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_count_dist_f->Append(printout);
@@ -592,7 +592,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
           ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %" PRIu64 "\n",
                          record.first, record.second);
           if (ret < 0) {
-            return Status_IOError("Format output failed");
+            return rocksdb_rs::status::Status_IOError("Format output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_key_size_f->Append(printout);
@@ -622,7 +622,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
                          " is: %" PRIu64 "\n",
                          v_begin, v_end, record.second);
           if (ret < 0) {
-            return Status_IOError("Format output failed");
+            return rocksdb_rs::status::Status_IOError("Format output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_value_size_f->Append(printout);
@@ -660,7 +660,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceSta
   for (auto& record : stats.a_key_stats) {
     // write the key access statistic file
     if (!stats.a_key_f) {
-      return Status_IOError("Failed to open accessed_key_stats file.");
+      return rocksdb_rs::status::Status_IOError("Failed to open accessed_key_stats file.");
     }
     stats.a_succ_count += record.second.succ_count;
     double succ_ratio = 0.0;
@@ -673,7 +673,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceSta
                    record.second.value_size, record.second.key_id,
                    record.second.access_count, succ_ratio);
     if (ret < 0) {
-      return Status_IOError("Format output failed");
+      return rocksdb_rs::status::Status_IOError("Format output failed");
     }
     std::string printout(buffer_);
     s = stats.a_key_f->Append(printout);
@@ -704,7 +704,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceSta
                      record.second.key_id, prefix_access, prefix_count,
                      prefix_ave_access, prefix_succ_ratio, prefix_out.c_str());
         if (ret < 0) {
-          return Status_IOError("Format output failed");
+          return rocksdb_rs::status::Status_IOError("Format output failed");
         }
         std::string pout(buffer_);
         s = stats.a_prefix_cut_f->Append(pout);
@@ -808,7 +808,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           while (time_line < time_it.first) {
             ret = snprintf(buffer_, sizeof(buffer_), "%u\n", 0);
             if (ret < 0) {
-              return Status_IOError("Format the output failed");
+              return rocksdb_rs::status::Status_IOError("Format the output failed");
             }
             std::string printout(buffer_);
             s = stat.second.a_qps_f->Append(printout);
@@ -820,7 +820,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           }
           ret = snprintf(buffer_, sizeof(buffer_), "%u\n", time_it.second);
           if (ret < 0) {
-            return Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_qps_f->Append(printout);
@@ -870,7 +870,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %.12f\n",
                          cur_num, cur_ratio);
           if (ret < 0) {
-            return Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_key_num_f->Append(printout);
@@ -889,7 +889,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
                          stat.second.top_k_qps_sec.top().second,
                          stat.second.top_k_qps_sec.top().first);
           if (ret < 0) {
-            return Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_top_qps_prefix_f->Append(printout);
@@ -908,7 +908,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
                              "The prefix: %s Access count: %u\n",
                              qps_prefix_out.c_str(), qps_prefix.second);
               if (ret < 0) {
-                return Status_IOError("Format the output failed");
+                return rocksdb_rs::status::Status_IOError("Format the output failed");
               }
               std::string pout(buffer_);
               s = stat.second.a_top_qps_prefix_f->Append(pout);
@@ -932,7 +932,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           ret = snprintf(buffer_, sizeof(buffer_), "%u\n", type_qps[i][type]);
         }
         if (ret < 0) {
-          return Status_IOError("Format the output failed");
+          return rocksdb_rs::status::Status_IOError("Format the output failed");
         }
         std::string printout(buffer_);
         s = qps_f_->Append(printout);
@@ -963,7 +963,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           ret = snprintf(buffer_, sizeof(buffer_), "%u\n", v);
         }
         if (ret < 0) {
-          return Status_IOError("Format the output failed");
+          return rocksdb_rs::status::Status_IOError("Format the output failed");
         }
         std::string printout(buffer_);
         s = cf_qps_f_->Append(printout);
@@ -1020,7 +1020,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
                        stat.time_series.front().type,
                        stat.time_series.front().ts, key_id);
           if (ret < 0) {
-            return Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError("Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.time_series_f->Append(printout);
@@ -1069,7 +1069,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
                                "%" PRIu64 " %" PRIu64 "\n", cfs_[cf_id].w_count,
                                stat.a_key_stats[input_key].access_count);
                 if (ret < 0) {
-                  return Status_IOError("Format the output failed");
+                  return rocksdb_rs::status::Status_IOError("Format the output failed");
                 }
                 std::string printout(buffer_);
                 s = stat.w_key_f->Append(printout);
@@ -1090,7 +1090,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
                 ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %s\n",
                                cfs_[cf_id].w_count, prefix_out.c_str());
                 if (ret < 0) {
-                  return Status_IOError("Format the output failed");
+                  return rocksdb_rs::status::Status_IOError("Format the output failed");
                 }
                 std::string printout(buffer_);
                 s = stat.w_prefix_cut_f->Append(printout);
@@ -1855,7 +1855,7 @@ rocksdb_rs::status::Status TraceAnalyzer::WriteTraceSequence(const uint32_t& typ
   ret = snprintf(buffer_, sizeof(buffer_), "%u %u %zu %" PRIu64 "\n", type,
                  cf_id, value_size, ts);
   if (ret < 0) {
-    return Status_IOError("failed to format the output");
+    return rocksdb_rs::status::Status_IOError("failed to format the output");
   }
   std::string printout(buffer_);
   if (!FLAGS_no_key) {

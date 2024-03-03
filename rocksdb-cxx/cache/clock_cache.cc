@@ -396,7 +396,7 @@ rocksdb_rs::status::Status BaseClockTable::ChargeUsageMaybeEvictStrict(
     size_t total_charge, size_t capacity, bool need_evict_for_occupancy,
     typename Table::InsertState& state) {
   if (total_charge > capacity) {
-    return Status_MemoryLimit(
+    return rocksdb_rs::status::Status_MemoryLimit(
         "Cache entry too large for a single cache shard: " +
         std::to_string(total_charge) + " > " + std::to_string(capacity));
   }
@@ -435,11 +435,11 @@ rocksdb_rs::status::Status BaseClockTable::ChargeUsageMaybeEvictStrict(
       usage_.fetch_sub(evicted_charge + (new_usage - old_usage),
                        std::memory_order_relaxed);
       if (evicted_charge < need_evict_charge) {
-        return Status_MemoryLimit(
+        return rocksdb_rs::status::Status_MemoryLimit(
             "Insert failed because unable to evict entries to stay within "
             "capacity limit.");
       } else {
-        return Status_MemoryLimit(
+        return rocksdb_rs::status::Status_MemoryLimit(
             "Insert failed because unable to evict entries to stay within "
             "table occupancy limit.");
       }

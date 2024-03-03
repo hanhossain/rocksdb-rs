@@ -796,7 +796,7 @@ class VersionBuilder::Rep {
           f->ApproximateMemoryUsage(), true /* increase */);
       if (!s.ok()) {
         delete f;
-        s = Status_MemoryLimit(
+        s = rocksdb_rs::status::Status_MemoryLimit(
             "Can't allocate " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(
                 rocksdb_rs::cache::CacheEntryRole::kFileMetadata)) +

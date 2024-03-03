@@ -2191,7 +2191,7 @@ IOStatus BackupEngineImpl::CopyOrCreateFile(
   Slice data;
   do {
     if (stop_backup_.load(std::memory_order_acquire)) {
-      return status_to_io_status(Status_Incomplete("Backup stopped"));
+      return status_to_io_status(rocksdb_rs::status::Status_Incomplete("Backup stopped"));
     }
     if (!src.empty()) {
       size_t buffer_to_read =
@@ -2299,7 +2299,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
   if (kDbFileChecksumFuncName == src_checksum_func_name) {
     if (src_checksum_str == kUnknownFileChecksum) {
       return status_to_io_status(
-          Status_Aborted("Unknown checksum value for " + fname));
+          rocksdb_rs::status::Status_Aborted("Unknown checksum value for " + fname));
     }
     checksum_hex = ChecksumStrToHex(src_checksum_str);
   }
@@ -2509,7 +2509,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
     const EnvOptions& src_env_options, uint64_t size_limit,
     std::string* checksum_hex, const Temperature src_temperature) const {
   if (checksum_hex == nullptr) {
-    return status_to_io_status(Status_Aborted("Checksum pointer is null"));
+    return status_to_io_status(rocksdb_rs::status::Status_Aborted("Checksum pointer is null"));
   }
   uint32_t checksum_value = 0;
   if (size_limit == 0) {
@@ -2539,7 +2539,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
 
   do {
     if (stop_backup_.load(std::memory_order_acquire)) {
-      return status_to_io_status(Status_Incomplete("Backup stopped"));
+      return status_to_io_status(rocksdb_rs::status::Status_Incomplete("Backup stopped"));
     }
     size_t buffer_to_read =
         (buf_size < size_limit) ? buf_size : static_cast<size_t>(size_limit);

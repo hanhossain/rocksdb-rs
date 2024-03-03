@@ -207,7 +207,7 @@ rocksdb_rs::status::Status TestWritableFile::Flush() {
 
 rocksdb_rs::status::Status TestWritableFile::Sync() {
   if (!env_->IsFilesystemActive()) {
-    return Status_IOError("FaultInjectionTestEnv: not active");
+    return rocksdb_rs::status::Status_IOError("FaultInjectionTestEnv: not active");
   }
   // No need to actual sync.
   state_.pos_at_last_sync_ = state_.pos_;

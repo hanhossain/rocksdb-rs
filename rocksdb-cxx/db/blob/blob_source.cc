@@ -199,7 +199,7 @@ rocksdb_rs::status::Status BlobSource::GetBlob(const ReadOptions& read_options,
 
   const bool no_io = read_options.read_tier == kBlockCacheTier;
   if (no_io) {
-    s = Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
+    s = rocksdb_rs::status::Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
     return s;
   }
 
@@ -354,7 +354,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
         assert(req.status);
 
         *req.status =
-            Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
+            rocksdb_rs::status::Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
       }
     }
     return;

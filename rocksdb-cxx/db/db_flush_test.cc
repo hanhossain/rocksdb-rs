@@ -2423,7 +2423,7 @@ TEST_P(DBFlushTestBlobError, FlushError) {
     rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
-    (*s) = Status_IOError(sync_point_);
+    (*s) = rocksdb_rs::status::Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 

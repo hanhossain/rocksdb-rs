@@ -136,7 +136,7 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
           }
 
           if (file_range.GetValueSize() > read_options.value_size_soft_limit) {
-            s = Status_Aborted();
+            s = rocksdb_rs::status::Status_Aborted();
             break;
           }
         }

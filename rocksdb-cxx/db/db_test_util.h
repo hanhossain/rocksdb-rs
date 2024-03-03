@@ -154,7 +154,7 @@ class SpecialEnv : public EnvWrapper {
           // Drop writes on the floor
           return rocksdb_rs::status::Status_OK();
         } else if (env_->no_space_.load(std::memory_order_acquire)) {
-          return Status_NoSpace("No space left on device");
+          return rocksdb_rs::status::Status_NoSpace("No space left on device");
         } else {
           env_->bytes_written_ += data.size();
           return base_->Append(data);
@@ -173,7 +173,7 @@ class SpecialEnv : public EnvWrapper {
           // Drop writes on the floor
           return rocksdb_rs::status::Status_OK();
         } else if (env_->no_space_.load(std::memory_order_acquire)) {
-          return Status_NoSpace("No space left on device");
+          return rocksdb_rs::status::Status_NoSpace("No space left on device");
         } else {
           env_->bytes_written_ += data.size();
           return base_->PositionedAppend(data, offset);
@@ -242,7 +242,7 @@ class SpecialEnv : public EnvWrapper {
           : env_(env), base_(std::move(b)) {}
       rocksdb_rs::status::Status Append(const Slice& data) override {
         if (env_->manifest_write_error_.load(std::memory_order_acquire)) {
-          return Status_IOError("simulated writer error");
+          return rocksdb_rs::status::Status_IOError("simulated writer error");
         } else {
           return base_->Append(data);
         }
@@ -259,7 +259,7 @@ class SpecialEnv : public EnvWrapper {
       rocksdb_rs::status::Status Sync() override {
         ++env_->sync_counter_;
         if (env_->manifest_sync_error_.load(std::memory_order_acquire)) {
-          return Status_IOError("simulated sync error");
+          return rocksdb_rs::status::Status_IOError("simulated sync error");
         } else {
           if (env_->skip_fsync_) {
             return rocksdb_rs::status::Status_OK();
@@ -290,7 +290,7 @@ class SpecialEnv : public EnvWrapper {
 #endif
         rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
         if (env_->log_write_error_.load(std::memory_order_acquire)) {
-          s = Status_IOError("simulated writer error");
+          s = rocksdb_rs::status::Status_IOError("simulated writer error");
         } else {
           int slowdown =
               env_->log_write_slowdown_.load(std::memory_order_acquire);
@@ -333,7 +333,7 @@ class SpecialEnv : public EnvWrapper {
         ++env_->sync_counter_;
         if (env_->corrupt_in_sync_) {
           EXPECT_OK(Append(std::string(33000, ' ')));
-          return Status_IOError("Ingested Sync Failure");
+          return rocksdb_rs::status::Status_IOError("Ingested Sync Failure");
         }
         if (env_->skip_fsync_) {
           return rocksdb_rs::status::Status_OK();
@@ -394,7 +394,7 @@ class SpecialEnv : public EnvWrapper {
         random_number = rnd_.Uniform(100);
       }
       if (random_number < non_writeable_rate_.load()) {
-        return Status_IOError("simulated random write error");
+        return rocksdb_rs::status::Status_IOError("simulated random write error");
       }
     }
 
@@ -402,7 +402,7 @@ class SpecialEnv : public EnvWrapper {
 
     if (non_writable_count_.load() > 0) {
       non_writable_count_--;
-      return Status_IOError("simulated write error");
+      return rocksdb_rs::status::Status_IOError("simulated write error");
     }
 
     EnvOptions optimized = soptions;
@@ -469,7 +469,7 @@ class SpecialEnv : public EnvWrapper {
                           char* scratch) const override {
         if (Random::GetTLSInstance()->OneIn(fail_odd_)) {
           fail_cnt_->fetch_add(1);
-          return Status_IOError("random error");
+          return rocksdb_rs::status::Status_IOError("random error");
         }
         return target_->Read(offset, n, result, scratch);
       }

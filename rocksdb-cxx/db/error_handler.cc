@@ -570,7 +570,7 @@ rocksdb_rs::status::Status ErrorHandler::RecoverFromBGError(bool is_manual) {
     // If its a manual recovery and there's a background recovery in progress
     // return busy status
     if (recovery_in_prog_) {
-      return Status_Busy();
+      return rocksdb_rs::status::Status_Busy();
     }
     recovery_in_prog_ = true;
 
@@ -661,7 +661,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   InstrumentedMutexLock l(db_mutex_);
   if (end_recovery_) {
     EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                           Status_ShutdownInProgress(),
+                                           rocksdb_rs::status::Status_ShutdownInProgress(),
                                            db_mutex_);
     return;
   }
@@ -673,7 +673,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   while (resume_count > 0) {
     if (end_recovery_) {
       EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                             Status_ShutdownInProgress(),
+                                             rocksdb_rs::status::Status_ShutdownInProgress(),
                                              db_mutex_);
       return;
     }
@@ -756,7 +756,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   recovery_in_prog_ = false;
   EventHelpers::NotifyOnErrorRecoveryEnd(
       db_options_.listeners, bg_error_,
-      Status_Aborted("Exceeded resume retry count"), db_mutex_);
+      rocksdb_rs::status::Status_Aborted("Exceeded resume retry count"), db_mutex_);
   TEST_SYNC_POINT("RecoverFromRetryableBGIOError:LoopOut");
   if (bg_error_stats_ != nullptr) {
     RecordInHistogram(bg_error_stats_.get(),

@@ -788,7 +788,7 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
     s = table_reader_cache_res_mgr->MakeCacheReservation(
         mem_usage, &(rep->table_reader_cache_res_handle));
     if (s.IsMemoryLimit()) {
-      s = Status_MemoryLimit(
+      s = rocksdb_rs::status::Status_MemoryLimit(
           "Can't allocate " +
           static_cast<std::string>(CacheEntryRole_ToCamelString(rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader)) +
           " due to memory limit based on "
@@ -1724,7 +1724,7 @@ WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> BlockBasedTable::Retr
 
   const bool no_io = ro.read_tier == kBlockCacheTier;
   if (no_io) {
-    return Status_Incomplete("no blocking io");
+    return rocksdb_rs::status::Status_Incomplete("no blocking io");
   }
 
   const bool maybe_compressed =
@@ -2872,7 +2872,7 @@ rocksdb_rs::status::Status BlockBasedTable::DumpTable(WritableFile* out_file) {
   }
 
   if (!out_stream.good()) {
-    return Status_IOError("Failed to write to output file");
+    return rocksdb_rs::status::Status_IOError("Failed to write to output file");
   }
   return rocksdb_rs::status::Status_OK();
 }

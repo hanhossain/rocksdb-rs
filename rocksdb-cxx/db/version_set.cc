@@ -1231,7 +1231,7 @@ void LevelIterator::Seek(const Slice& target) {
     // blocks has been submitted. So it should return at this point and Seek
     // should be called again to retrieve the requested block and execute the
     // remaining code.
-    if (file_iter_.status().eq(Status_TryAgain())) {
+    if (file_iter_.status().eq(rocksdb_rs::status::Status_TryAgain())) {
       return;
     }
     if (!file_iter_.Valid() && file_iter_.status().ok() &&
@@ -2317,7 +2317,7 @@ void Version::MultiGetBlob(
         }
 
         if (range.GetValueSize() > read_options.value_size_soft_limit) {
-          *key_context->s = Status_Aborted();
+          *key_context->s = rocksdb_rs::status::Status_Aborted();
         }
       } else if (key_context->s->IsIncomplete()) {
         // read_options.read_tier == kBlockCacheTier
@@ -2782,7 +2782,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
 
       range->MarkKeyDone(iter);
       if (range->GetValueSize() > read_options.value_size_soft_limit) {
-        s = Status_Aborted();
+        s = rocksdb_rs::status::Status_Aborted();
         break;
       }
     } else {
@@ -5757,7 +5757,7 @@ rocksdb_rs::status::Status VersionSet::LogAndApply(
     if (!manifest_writers_.empty()) {
       manifest_writers_.front()->cv.Signal();
     }
-    return Status_ColumnFamilyDropped();
+    return rocksdb_rs::status::Status_ColumnFamilyDropped();
   }
   return ProcessManifestWrites(writers, mu, dir_contains_current_file,
                                new_descriptor_log, new_cf_options,
@@ -7276,7 +7276,7 @@ rocksdb_rs::status::Status ReactiveVersionSet::MaybeSwitchManifest(
          manifest_reader->get()->file()->file_name() != manifest_path);
   s = fs_->FileExists(manifest_path, IOOptions(), nullptr);
   if (s.IsNotFound()) {
-    return Status_TryAgain(
+    return rocksdb_rs::status::Status_TryAgain(
         "The primary may have switched to a new MANIFEST and deleted the old "
         "one.");
   } else if (!s.ok()) {
@@ -7311,7 +7311,7 @@ rocksdb_rs::status::Status ReactiveVersionSet::MaybeSwitchManifest(
     // This can happen if the primary switches to a new MANIFEST after the
     // secondary reads the CURRENT file but before the secondary actually tries
     // to open the MANIFEST.
-    s = Status_TryAgain(
+    s = rocksdb_rs::status::Status_TryAgain(
         "The primary may have switched to a new MANIFEST and deleted the old "
         "one.");
   }

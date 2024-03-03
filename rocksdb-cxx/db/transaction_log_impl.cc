@@ -219,7 +219,7 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
         current_status_ = rocksdb_rs::status::Status_OK();
       } else {
         const char* msg = "Create a new iterator to fetch the new tail.";
-        current_status_ = Status_TryAgain(msg);
+        current_status_ = rocksdb_rs::status::Status_TryAgain(msg);
       }
       return;
     }

@@ -1014,7 +1014,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   ASSERT_OK(s);
 
   listener->OverrideBGError(
-      rocksdb_rs::status::Status_new(Status_NoSpace(), rocksdb_rs::status::Severity::kHardError));
+      rocksdb_rs::status::Status_new(rocksdb_rs::status::Status_NoSpace(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1298,7 +1298,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteError) {
     WriteOptions wopts;
     wopts.sync = true;
     s = dbfull()->Write(wopts, &batch);
-    ASSERT_TRUE(s.eq(Status_NoSpace()));
+    ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_NoSpace()));
   }
   SyncPoint::GetInstance()->DisableProcessing();
   // `ClearAllCallBacks()` is needed in addition to `DisableProcessing()` to
@@ -1558,7 +1558,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBCompactionError) {
     ASSERT_OK(db[i]->Flush(FlushOptions()));
   }
 
-  def_env->SetFilesystemActive(false, Status_NoSpace("Out of space"));
+  def_env->SetFilesystemActive(false, rocksdb_rs::status::Status_NoSpace("Out of space"));
   for (auto i = 0; i < kNumDbInstances; ++i) {
     WriteBatch batch;
 
@@ -1677,7 +1677,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBVariousErrors) {
     ASSERT_OK(db[i]->Flush(FlushOptions()));
   }
 
-  def_env->SetFilesystemActive(false, Status_NoSpace("Out of space"));
+  def_env->SetFilesystemActive(false, rocksdb_rs::status::Status_NoSpace("Out of space"));
   for (auto i = 0; i < kNumDbInstances; ++i) {
     WriteBatch batch;
 
@@ -2462,7 +2462,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAbortRecovery) {
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
   ASSERT_EQ(listener->WaitForRecovery(5000000), true);
-  ASSERT_TRUE(listener->new_bg_error().eq(Status_Aborted()));
+  ASSERT_TRUE(listener->new_bg_error().eq(rocksdb_rs::status::Status_Aborted()));
   SyncPoint::GetInstance()->DisableProcessing();
   fault_fs_->SetFilesystemActive(true);
 

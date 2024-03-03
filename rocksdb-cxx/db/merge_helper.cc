@@ -228,7 +228,7 @@ rocksdb_rs::status::Status MergeHelper::MergeUntil(InternalIterator* iter,
   int cmp_with_full_history_ts_low = 0;
   for (; iter->Valid(); iter->Next(), original_key_is_iter = false) {
     if (IsShuttingDown()) {
-      s = Status_ShutdownInProgress();
+      s = rocksdb_rs::status::Status_ShutdownInProgress();
       return s;
     }
     // Skip range tombstones emitted by the compaction iterator.
@@ -386,7 +386,7 @@ rocksdb_rs::status::Status MergeHelper::MergeUntil(InternalIterator* iter,
         // Change to `Status_MergeInProgress()` to denote output consists of
         // merge operands only. Leave `iter` at the non-merge entry so it will
         // be output after.
-        s = Status_MergeInProgress();
+        s = rocksdb_rs::status::Status_MergeInProgress();
       }
       return s;
     } else {
@@ -517,13 +517,13 @@ rocksdb_rs::status::Status MergeHelper::MergeUntil(InternalIterator* iter,
     } else if (op_failure_scope == MergeOperator::OpFailureScope::kMustMerge) {
       // Change to `Status_MergeInProgress()` to denote output consists of
       // merge operands only.
-      s = Status_MergeInProgress();
+      s = rocksdb_rs::status::Status_MergeInProgress();
     }
   } else {
     // We haven't seen the beginning of the key nor a Put/Delete.
     // Attempt to use the user's associative merge function to
     // merge the stacked merge operands into a single operand.
-    s = Status_MergeInProgress();
+    s = rocksdb_rs::status::Status_MergeInProgress();
     if (merge_context_.GetNumOperands() >= 2 ||
         (allow_single_operand_ && merge_context_.GetNumOperands() == 1)) {
       bool merge_success = false;

@@ -102,9 +102,9 @@ struct StressTestIterator : public InternalIterator {
       return false;
     }
     if (rnd->Next() % 2) {
-      status_ = Status_Incomplete("test");
+      status_ = rocksdb_rs::status::Status_Incomplete("test");
     } else {
-      status_ = Status_IOError("test");
+      status_ = rocksdb_rs::status::Status_IOError("test");
     }
     if (trace) {
       std::cout << "injecting " << *status_.ToString() << std::endl;

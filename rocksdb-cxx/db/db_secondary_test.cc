@@ -133,7 +133,7 @@ TEST_F(DBSecondaryTest, FailOpenIfLoggerCreationFail) {
       "rocksdb::CreateLoggerFromOptions:AfterGetPath", [&](void* arg) {
         auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         assert(s);
-        *s = Status_IOError("Injected");
+        *s = rocksdb_rs::status::Status_IOError("Injected");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

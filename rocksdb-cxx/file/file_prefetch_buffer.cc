@@ -92,7 +92,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::Read(const IOOptions& opts,
   if (result.size() < read_len) {
     // Fake an IO error to force db_stress fault injection to ignore
     // truncated read errors
-    IGNORE_STATUS_IF_ERROR(Status_IOError());
+    IGNORE_STATUS_IF_ERROR(rocksdb_rs::status::Status_IOError());
   }
 #endif
   if (!s.ok()) {
@@ -788,7 +788,7 @@ void FilePrefetchBuffer::PrefetchAsyncCallback(const FSReadRequest& req,
   if (req.result.size() < req.len) {
     // Fake an IO error to force db_stress fault injection to ignore
     // truncated read errors
-    IGNORE_STATUS_IF_ERROR(Status_IOError());
+    IGNORE_STATUS_IF_ERROR(rocksdb_rs::status::Status_IOError());
   }
   IGNORE_STATUS_IF_ERROR(req.status);
 #endif
@@ -945,7 +945,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& op
     }
     readahead_size_ = std::min(max_readahead_size_, readahead_size_ * 2);
   }
-  return (data_found ? rocksdb_rs::status::Status_OK() : Status_TryAgain());
+  return (data_found ? rocksdb_rs::status::Status_OK() : rocksdb_rs::status::Status_TryAgain());
 }
 
 }  // namespace rocksdb

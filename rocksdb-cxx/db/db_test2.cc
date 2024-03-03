@@ -6438,7 +6438,7 @@ class RenameCurrentTest : public DBTestBase,
     SyncPoint::GetInstance()->SetCallBack(sync_point_, [&](void* arg) {
       rocksdb_rs::status::Status* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
       assert(s);
-      *s = Status_IOError("Injected IO error.");
+      *s = rocksdb_rs::status::Status_IOError("Injected IO error.");
     });
   }
 
@@ -7105,7 +7105,7 @@ TEST_F(DBTest2, PointInTimeRecoveryWithIOErrorWhileReadingWal) {
       "LogReader::ReadMore:AfterReadFile", [&](void* arg) {
         if (should_inject_error) {
           ASSERT_NE(nullptr, arg);
-          *reinterpret_cast<rocksdb_rs::status::Status*>(arg) = Status_IOError("Injected IOError");
+          *reinterpret_cast<rocksdb_rs::status::Status*>(arg) = rocksdb_rs::status::Status_IOError("Injected IOError");
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();

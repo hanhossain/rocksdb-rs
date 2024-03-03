@@ -234,7 +234,7 @@ rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Sl
       ROCKS_LOG_DEBUG(opt_.log, "Error inserting to cache file %d",
                       cache_file_->cacheid());
       stats_.write_latency_.Add(timer.ElapsedNanos() / 1000);
-      return Status_TryAgain();
+      return rocksdb_rs::status::Status_TryAgain();
     }
 
     assert(cache_file_->Eof());
@@ -248,7 +248,7 @@ rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Sl
   BlockInfo* info = metadata_.Insert(key, lba);
   assert(info);
   if (!info) {
-    return Status_IOError("Unexpected error inserting to index");
+    return rocksdb_rs::status::Status_IOError("Unexpected error inserting to index");
   }
 
   // insert to cache file reverse mapping
@@ -330,7 +330,7 @@ rocksdb_rs::status::Status BlockCacheTier::NewCacheFile() {
 
   bool status = f->Create(opt_.enable_direct_writes, opt_.enable_direct_reads);
   if (!status) {
-    return Status_IOError("Error creating file");
+    return rocksdb_rs::status::Status_IOError("Error creating file");
   }
 
   Info(opt_.log, "Created cache file %d", writer_cache_id_);
@@ -343,7 +343,7 @@ rocksdb_rs::status::Status BlockCacheTier::NewCacheFile() {
   assert(status);
   if (!status) {
     Error(opt_.log, "Error inserting to metadata");
-    return Status_IOError("Error inserting to metadata");
+    return rocksdb_rs::status::Status_IOError("Error inserting to metadata");
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -392,7 +392,7 @@ rocksdb_rs::status::Status NewPersistentCache(Env* const env, const std::string&
                           const bool optimized_for_nvm,
                           std::shared_ptr<PersistentCache>* cache) {
   if (!cache) {
-    return Status_IOError("invalid argument cache");
+    return rocksdb_rs::status::Status_IOError("invalid argument cache");
   }
 
   auto opt = PersistentCacheConfig(env, path, size, log);

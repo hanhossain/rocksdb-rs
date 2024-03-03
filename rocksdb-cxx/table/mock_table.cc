@@ -252,7 +252,7 @@ rocksdb_rs::status::Status MockTableFactory::NewTableReader(
 
   auto it = file_system_.files.find(id);
   if (it == file_system_.files.end()) {
-    return Status_IOError("Mock file not found");
+    return rocksdb_rs::status::Status_IOError("Mock file not found");
   }
 
   table_reader->reset(new MockTableReader(it->second));

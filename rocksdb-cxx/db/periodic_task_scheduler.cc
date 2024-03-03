@@ -70,12 +70,12 @@ rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task
       (initial_delay.fetch_add(1) % repeat_period_seconds) * kMicrosInSecond,
       repeat_period_seconds * kMicrosInSecond);
   if (!succeeded) {
-    return Status_Aborted("Failed to register periodic task");
+    return rocksdb_rs::status::Status_Aborted("Failed to register periodic task");
   }
   auto result = tasks_map_.try_emplace(
       task_type, TaskInfo{unique_id, repeat_period_seconds});
   if (!result.second) {
-    return Status_Aborted("Failed to add periodic task");
+    return rocksdb_rs::status::Status_Aborted("Failed to add periodic task");
   };
   return rocksdb_rs::status::Status_OK();
 }

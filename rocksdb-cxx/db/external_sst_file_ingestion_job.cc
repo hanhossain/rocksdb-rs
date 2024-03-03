@@ -385,7 +385,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Run() {
     return status;
   }
   if (need_flush) {
-    return Status_TryAgain();
+    return rocksdb_rs::status::Status_TryAgain();
   }
   assert(status.ok() && need_flush == false);
 #endif
@@ -860,7 +860,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignLevelAndSeqnoForIn
     *assigned_seqno = last_seqno + 1;
     if (compaction_style == kCompactionStyleUniversal || files_overlap_) {
       if (ingestion_options_.fail_if_not_bottommost_level) {
-        status = Status_TryAgain(
+        status = rocksdb_rs::status::Status_TryAgain(
             "Files cannot be ingested to Lmax. Please make sure key range of "
             "Lmax does not overlap with files to ingest.");
         return status;
@@ -946,7 +946,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignLevelAndSeqnoForIn
 
   if (ingestion_options_.fail_if_not_bottommost_level &&
       target_level < cfd_->NumberLevels() - 1) {
-    status = Status_TryAgain(
+    status = rocksdb_rs::status::Status_TryAgain(
         "Files cannot be ingested to Lmax. Please make sure key range of Lmax "
         "and ongoing compaction's output to Lmax"
         "does not overlap with files to ingest.");

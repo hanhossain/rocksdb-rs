@@ -83,7 +83,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
     case CompactionServiceJobStatus::kSuccess:
       break;
     case CompactionServiceJobStatus::kFailure:
-      sub_compact->status = Status_Incomplete(
+      sub_compact->status = rocksdb_rs::status::Status_Incomplete(
           "CompactionService failed to start compaction job.");
       ROCKS_LOG_WARN(db_options_.info_log,
                      "[%s] [JOB %d] Remote compaction failed to start.",
@@ -122,7 +122,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
   if (compaction_status == CompactionServiceJobStatus::kFailure) {
     if (s.ok()) {
       if (compaction_result.status.ok()) {
-        sub_compact->status = Status_Incomplete(
+        sub_compact->status = rocksdb_rs::status::Status_Incomplete(
             "CompactionService failed to run the compaction job (even though "
             "the internal status is okay).");
       } else {
@@ -131,7 +131,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
         sub_compact->status.copy_from(compaction_result.status);
       }
     } else {
-      sub_compact->status = Status_Incomplete(
+      sub_compact->status = rocksdb_rs::status::Status_Incomplete(
           "CompactionService failed to run the compaction job (and no valid "
           "result is returned).");
     }

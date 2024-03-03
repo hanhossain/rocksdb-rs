@@ -146,7 +146,7 @@ TEST(CacheReservationManagerIncreaseReservcationOnFullCacheTest,
 
   std::size_t new_mem_used = kSmallCacheCapacity + 1;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_MemoryLimit()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_MemoryLimit()))
       << "Failed to return status to indicate failure of dummy entry insertion "
          "during cache reservation on full cache";
   EXPECT_GE(test_cache_rev_mng->GetTotalReservedCacheSize(),
@@ -191,7 +191,7 @@ TEST(CacheReservationManagerIncreaseReservcationOnFullCacheTest,
   // Create cache full again for subsequent tests
   new_mem_used = kSmallCacheCapacity + 1;
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_MemoryLimit()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_MemoryLimit()))
       << "Failed to return status to indicate failure of dummy entry insertion "
          "during cache reservation on full cache";
   EXPECT_GE(test_cache_rev_mng->GetTotalReservedCacheSize(),

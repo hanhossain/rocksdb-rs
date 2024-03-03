@@ -457,7 +457,7 @@ rocksdb_rs::status::Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std
   int fd = open(directory.c_str(), O_DIRECTORY | O_RDONLY);
   if (fd == -1) {
     close(fd);
-    return Status_IOError("Cannot open directory " + directory);
+    return rocksdb_rs::status::Status_IOError("Cannot open directory " + directory);
   }
   *size = PosixHelper::GetLogicalBlockSizeOfFd(fd);
   close(fd);

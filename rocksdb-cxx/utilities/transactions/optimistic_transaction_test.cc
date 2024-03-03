@@ -1543,7 +1543,7 @@ rocksdb_rs::status::Status OptimisticTransactionStressTestInserter(OptimisticTra
   // Make sure at least some of the transactions succeeded.  It's ok if
   // some failed due to write-conflicts.
   if (inserter.GetFailureCount() > num_transactions / 2) {
-    return Status_TryAgain("Too many transactions failed! " +
+    return rocksdb_rs::status::Status_TryAgain("Too many transactions failed! " +
                             std::to_string(inserter.GetFailureCount()) + " / " +
                             std::to_string(num_transactions));
   }

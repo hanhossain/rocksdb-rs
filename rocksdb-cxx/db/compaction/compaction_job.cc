@@ -1350,15 +1350,15 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
 
   if (status.ok() && cfd->IsDropped()) {
     status =
-        Status_ColumnFamilyDropped("Column family dropped during compaction");
+        rocksdb_rs::status::Status_ColumnFamilyDropped("Column family dropped during compaction");
   }
   if ((status.ok() || status.IsColumnFamilyDropped()) &&
       shutting_down_->load(std::memory_order_relaxed)) {
-    status = Status_ShutdownInProgress("Database shutdown");
+    status = rocksdb_rs::status::Status_ShutdownInProgress("Database shutdown");
   }
   if ((status.ok() || status.IsColumnFamilyDropped()) &&
       (manual_compaction_canceled_.load(std::memory_order_relaxed))) {
-    status = Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
+    status = rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
   if (status.ok()) {
     status = input->status();
@@ -1589,7 +1589,7 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
   } else {
     fname = "(nil)";
     if (s.ok()) {
-      status_for_listener = Status_Aborted("Empty SST file not kept");
+      status_for_listener = rocksdb_rs::status::Status_Aborted("Empty SST file not kept");
     }
   }
   EventHelpers::LogAndNotifyTableFileCreationFinished(
@@ -1609,7 +1609,7 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
     if (sfm->IsMaxAllowedSpaceReached()) {
       // TODO(ajkr): should we return OK() if max space was reached by the final
       // compaction output file (similarly to how flush works when full)?
-      s = Status_SpaceLimit("Max allowed space was reached");
+      s = rocksdb_rs::status::Status_SpaceLimit("Max allowed space was reached");
       TEST_SYNC_POINT(
           "CompactionJob::FinishCompactionOutputFile:MaxAllowedSpaceReached");
       InstrumentedMutexLock l(db_mutex_);

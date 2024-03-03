@@ -1279,7 +1279,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
         "DBImpl::GetLogSizeAndMaybeTruncate:0", [&](void* arg) {
           auto* tmp_s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
           assert(tmp_s);
-          *tmp_s = Status_IOError("Injected");
+          *tmp_s = rocksdb_rs::status::Status_IOError("Injected");
         });
     SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1461,7 +1461,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
         "DBImpl::Open::BeforeSyncWAL", [&](void* arg) {
           auto* tmp_s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
           assert(tmp_s);
-          *tmp_s = Status_IOError("Injected");
+          *tmp_s = rocksdb_rs::status::Status_IOError("Injected");
         });
     SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1629,7 +1629,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
         "DBImpl::GetLogSizeAndMaybeTruncate:0", [&](void* arg) {
           auto* tmp_s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
           assert(tmp_s);
-          *tmp_s = Status_IOError("Injected");
+          *tmp_s = rocksdb_rs::status::Status_IOError("Injected");
         });
     SyncPoint::GetInstance()->EnableProcessing();
 

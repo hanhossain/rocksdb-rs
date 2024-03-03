@@ -611,7 +611,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadSta
   s = txn->GetForUpdate(ropts, new_pk, &empty_value);
   if (s.ok()) {
     assert(!empty_value.empty());
-    s = Status_Busy();
+    s = rocksdb_rs::status::Status_Busy();
     return s;
   } else if (!s.IsNotFound()) {
     return s;
@@ -660,7 +660,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadSta
   }
 
   if (FLAGS_rollback_one_in > 0 && thread->rand.OneIn(FLAGS_rollback_one_in)) {
-    s = Status_Incomplete();
+    s = rocksdb_rs::status::Status_Incomplete();
     return s;
   }
 
@@ -858,7 +858,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadS
   }
 
   if (FLAGS_rollback_one_in > 0 && thread->rand.OneIn(FLAGS_rollback_one_in)) {
-    s = Status_Incomplete();
+    s = rocksdb_rs::status::Status_Incomplete();
     return s;
   }
 
@@ -943,7 +943,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(Th
   }
 
   if (FLAGS_rollback_one_in > 0 && thread->rand.OneIn(FLAGS_rollback_one_in)) {
-    s = Status_Incomplete();
+    s = rocksdb_rs::status::Status_Incomplete();
     return s;
   }
 

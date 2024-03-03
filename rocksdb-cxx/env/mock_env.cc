@@ -1024,7 +1024,7 @@ rocksdb_rs::status::Status MockFileSystem::CorruptBuffer(const std::string& fnam
   MutexLock lock(&mutex_);
   auto iter = file_map_.find(fn);
   if (iter == file_map_.end()) {
-    return Status_IOError(fn, "File not found");
+    return rocksdb_rs::status::Status_IOError(fn, "File not found");
   }
   iter->second->CorruptBuffer();
   return rocksdb_rs::status::Status_OK();

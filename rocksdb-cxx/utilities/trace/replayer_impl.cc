@@ -52,10 +52,10 @@ rocksdb_rs::status::Status ReplayerImpl::Prepare() {
 
 rocksdb_rs::status::Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
   if (!prepared_) {
-    return Status_Incomplete("Not prepared!");
+    return rocksdb_rs::status::Status_Incomplete("Not prepared!");
   }
   if (trace_end_) {
-    return Status_Incomplete("Trace end.");
+    return rocksdb_rs::status::Status_Incomplete("Trace end.");
   }
 
   Trace trace;
@@ -63,7 +63,7 @@ rocksdb_rs::status::Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* reco
   // Reached the trace end.
   if (s.ok() && trace.type == kTraceEnd) {
     trace_end_ = true;
-    return Status_Incomplete("Trace end.");
+    return rocksdb_rs::status::Status_Incomplete("Trace end.");
   }
   if (!s.ok() || record == nullptr) {
     return s;
@@ -86,10 +86,10 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
   }
 
   if (!prepared_) {
-    return Status_Incomplete("Not prepared!");
+    return rocksdb_rs::status::Status_Incomplete("Not prepared!");
   }
   if (trace_end_) {
-    return Status_Incomplete("Trace end.");
+    return rocksdb_rs::status::Status_Incomplete("Trace end.");
   }
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
@@ -110,7 +110,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
       // No need to sleep before breaking the loop if at the trace end.
       if (trace.type == kTraceEnd) {
         trace_end_ = true;
-        s = Status_Incomplete("Trace end.");
+        s = rocksdb_rs::status::Status_Incomplete("Trace end.");
         break;
       }
 
@@ -196,7 +196,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
       // No need to sleep before breaking the loop if at the trace end.
       if (trace_type == kTraceEnd) {
         trace_end_ = true;
-        s = Status_Incomplete("Trace end.");
+        s = rocksdb_rs::status::Status_Incomplete("Trace end.");
         break;
       }
 

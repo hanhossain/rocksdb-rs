@@ -100,7 +100,7 @@ rocksdb_rs::status::Status BlobFile::WriteFooterAndCloseLocked(SequenceNumber se
 
 rocksdb_rs::status::Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   if (file_size_ < (BlobLogHeader::kSize + BlobLogFooter::kSize)) {
-    return Status_IOError("File does not have footer", PathName());
+    return rocksdb_rs::status::Status_IOError("File does not have footer", PathName());
   }
 
   uint64_t footer_offset = file_size_ - BlobLogFooter::kSize;
@@ -125,7 +125,7 @@ rocksdb_rs::status::Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   if (!s.ok()) return s;
   if (result.size() != BlobLogFooter::kSize) {
     // should not happen
-    return Status_IOError("EOF reached before footer");
+    return rocksdb_rs::status::Status_IOError("EOF reached before footer");
   }
 
   s = bf->DecodeFrom(result);

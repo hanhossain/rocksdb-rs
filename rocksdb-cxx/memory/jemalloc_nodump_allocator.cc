@@ -137,7 +137,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::InitializeArenas() {
     int ret =
         mallctl("arenas.create", &arena_index, &arena_index_size, nullptr, 0);
     if (ret != 0) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Failed to create jemalloc arena, error code: " +
           std::to_string(ret));
     }
@@ -150,7 +150,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::InitializeArenas() {
     size_t hooks_size = sizeof(hooks);
     ret = mallctl(key.c_str(), &hooks, &hooks_size, nullptr, 0);
     if (ret != 0) {
-      return Status_Incomplete("Failed to read existing hooks, error code: " +
+      return rocksdb_rs::status::Status_Incomplete("Failed to read existing hooks, error code: " +
                                 std::to_string(ret));
     }
 
@@ -164,7 +164,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::InitializeArenas() {
       // This could happen if jemalloc creates new arenas with different initial
       // values in their `alloc` function pointers. See `original_alloc_` API
       // doc for more details.
-      return Status_Incomplete("Original alloc conflict.");
+      return rocksdb_rs::status::Status_Incomplete("Original alloc conflict.");
     }
 
     // Set the custom hook.
@@ -174,7 +174,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::InitializeArenas() {
     extent_hooks_t* hooks_ptr = per_arena_hooks_.back().get();
     ret = mallctl(key.c_str(), nullptr, nullptr, &hooks_ptr, sizeof(hooks_ptr));
     if (ret != 0) {
-      return Status_Incomplete("Failed to set custom hook, error code: " +
+      return rocksdb_rs::status::Status_Incomplete("Failed to set custom hook, error code: " +
                                 std::to_string(ret));
     }
   }
@@ -261,7 +261,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::DestroyArena(uint32_t arena_
   std::string key = "arena." + std::to_string(arena_index) + ".destroy";
   int ret = mallctl(key.c_str(), nullptr, 0, nullptr, 0);
   if (ret != 0) {
-    return Status_Incomplete("Failed to destroy jemalloc arena, error code: " +
+    return rocksdb_rs::status::Status_Incomplete("Failed to destroy jemalloc arena, error code: " +
                               std::to_string(ret));
   }
   return rocksdb_rs::status::Status_OK();

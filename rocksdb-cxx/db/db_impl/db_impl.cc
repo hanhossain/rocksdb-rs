@@ -311,7 +311,7 @@ rocksdb_rs::status::Status DBImpl::Resume() {
 
   if (error_handler_.IsRecoveryInProgress()) {
     // Don't allow a mix of manual and automatic recovery
-    return Status_Busy();
+    return rocksdb_rs::status::Status_Busy();
   }
 
   mutex_.Unlock();
@@ -343,7 +343,7 @@ rocksdb_rs::status::Status DBImpl::ResumeImpl(DBRecoverContext context) {
   if (shutdown_initiated_) {
     // Returning shutdown status to SFM during auto recovery will cause it
     // to abort the recovery and allow the shutdown to progress
-    s = Status_ShutdownInProgress();
+    s = rocksdb_rs::status::Status_ShutdownInProgress();
   }
 
   if (s.ok()) {
@@ -469,7 +469,7 @@ rocksdb_rs::status::Status DBImpl::ResumeImpl(DBRecoverContext context) {
   // Check for shutdown again before scheduling further compactions,
   // since we released and re-acquired the lock above
   if (shutdown_initiated_) {
-    s = Status_ShutdownInProgress();
+    s = rocksdb_rs::status::Status_ShutdownInProgress();
   }
   if (s.ok()) {
     for (auto cfd : *versions_->GetColumnFamilySet()) {
@@ -543,7 +543,7 @@ rocksdb_rs::status::Status DBImpl::MaybeReleaseTimestampedSnapshotsAndCheck() {
 
   // If there is unreleased snapshot, fail the close call
   if (num_snapshots > 0) {
-    return Status_Aborted("Cannot close DB with unreleased snapshot.");
+    return rocksdb_rs::status::Status_Aborted("Cannot close DB with unreleased snapshot.");
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -728,7 +728,7 @@ rocksdb_rs::status::Status DBImpl::CloseHelper() {
     // Reserve IsAborted() error for those where users didn't release
     // certain resource and they can release them and come back and
     // retry. In this case, we wrap this exception to something else.
-    return Status_Incomplete(*ret.ToString());
+    return rocksdb_rs::status::Status_Incomplete(*ret.ToString());
   }
 
   return ret;
@@ -1361,7 +1361,7 @@ rocksdb_rs::status::Status DBImpl::SetDBOptions(
     new_options.Dump(immutable_db_options_.info_log.get());
     if (!persist_options_status.ok()) {
       if (immutable_db_options_.fail_if_options_file_error) {
-        s = Status_IOError(
+        s = rocksdb_rs::status::Status_IOError(
             "SetDBOptions() succeeded, but unable to persist options",
             *persist_options_status.ToString());
       }
@@ -1585,7 +1585,7 @@ rocksdb_rs::status::Status DBImpl::UnlockWAL() {
   {
     InstrumentedMutexLock lock(&mutex_);
     if (lock_wal_count_ == 0) {
-      return Status_Aborted("No LockWAL() in effect");
+      return rocksdb_rs::status::Status_Aborted("No LockWAL() in effect");
     }
     --lock_wal_count_;
     if (lock_wal_count_ == 0) {
@@ -2213,7 +2213,7 @@ rocksdb_rs::status::Status DBImpl::GetImpl(const ReadOptions& read_options, cons
         if (*get_impl_options.number_of_operands >
             get_impl_options.get_merge_operands_options
                 ->expected_max_number_of_operands) {
-          s = Status_Incomplete(
+          s = rocksdb_rs::status::Status_Incomplete(
               rocksdb_rs::status::SubCode::KMergeOperandsInsufficientCapacity);
         } else {
           // Each operand depends on one of the following resources: `sv`,
@@ -2323,7 +2323,7 @@ rust::Vec<rocksdb_rs::status::Status> DBImpl::MultiGet(
   if (should_fail) {
     for (auto& s : stat_list) {
       if (s.ok()) {
-        s = Status_Incomplete(
+        s = rocksdb_rs::status::Status_Incomplete(
             "DB not queried due to invalid argument(s) in the same MultiGet");
       }
     }
@@ -2448,7 +2448,7 @@ rust::Vec<rocksdb_rs::status::Status> DBImpl::MultiGet(
       curr_value_size += value->size();
       if (curr_value_size > read_options.value_size_soft_limit) {
         while (++keys_read < num_keys) {
-          stat_list[keys_read] = Status_Aborted();
+          stat_list[keys_read] = rocksdb_rs::status::Status_Aborted();
         }
         break;
       }
@@ -2466,7 +2466,7 @@ rust::Vec<rocksdb_rs::status::Status> DBImpl::MultiGet(
     assert(immutable_db_options_.clock->NowMicros() >
            static_cast<uint64_t>(read_options.deadline.count()));
     for (++keys_read; keys_read < num_keys; ++keys_read) {
-      stat_list[keys_read] = Status_TimedOut();
+      stat_list[keys_read] = rocksdb_rs::status::Status_TimedOut();
     }
   }
 
@@ -2660,7 +2660,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
   if (should_fail) {
     for (size_t i = 0; i < num_keys; ++i) {
       if (statuses[i].ok()) {
-        statuses[i] = Status_Incomplete(
+        statuses[i] = rocksdb_rs::status::Status_Incomplete(
             "DB not queried due to invalid argument(s) in the same MultiGet");
       }
     }
@@ -2977,7 +2977,7 @@ rocksdb_rs::status::Status DBImpl::MultiGetImpl(
     if (read_options.deadline.count() &&
         immutable_db_options_.clock->NowMicros() >
             static_cast<uint64_t>(read_options.deadline.count())) {
-      s = Status_TimedOut();
+      s = rocksdb_rs::status::Status_TimedOut();
       break;
     }
 
@@ -3019,7 +3019,7 @@ rocksdb_rs::status::Status DBImpl::MultiGetImpl(
     }
     curr_value_size = range.GetValueSize();
     if (curr_value_size > read_options.value_size_soft_limit) {
-      s = Status_Aborted();
+      s = rocksdb_rs::status::Status_Aborted();
       break;
     }
   }
@@ -4922,7 +4922,7 @@ rocksdb_rs::status::Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "Unnable to persist options -- %s", s.ToString()->c_str());
     if (immutable_db_options_.fail_if_options_file_error) {
-      return Status_IOError("Unable to persist options.",
+      return rocksdb_rs::status::Status_IOError("Unable to persist options.",
                              s.ToString()->c_str());
     }
   }
@@ -5980,7 +5980,7 @@ rocksdb_rs::status::Status DBImpl::EndTrace() {
     s = tracer_->Close();
     tracer_.reset();
   } else {
-    s = Status_IOError("No trace file to close");
+    s = rocksdb_rs::status::Status_IOError("No trace file to close");
   }
   return s;
 }

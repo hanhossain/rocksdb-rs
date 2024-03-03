@@ -171,28 +171,28 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
   Slice enc_slice = Slice(trace.payload);
 
   if (!GetFixed64(&enc_slice, &record->io_op_data)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read trace data.");
   }
   Slice file_operation;
   if (!GetLengthPrefixedSlice(&enc_slice, &file_operation)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read file operation.");
   }
   record->file_operation = file_operation.ToString();
   if (!GetFixed64(&enc_slice, &record->latency)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read latency.");
   }
   Slice io_status;
   if (!GetLengthPrefixedSlice(&enc_slice, &io_status)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read IO status.");
   }
   record->io_status = io_status.ToString();
   Slice file_name;
   if (!GetLengthPrefixedSlice(&enc_slice, &file_name)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read file name.");
   }
   record->file_name = file_name.ToString();
@@ -212,19 +212,19 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
     switch (set_pos) {
       case IOTraceOp::kIOFileSize:
         if (!GetFixed64(&enc_slice, &record->file_size)) {
-          return Status_Incomplete(
+          return rocksdb_rs::status::Status_Incomplete(
               "Incomplete access record: Failed to read file size.");
         }
         break;
       case IOTraceOp::kIOLen:
         if (!GetFixed64(&enc_slice, &record->len)) {
-          return Status_Incomplete(
+          return rocksdb_rs::status::Status_Incomplete(
               "Incomplete access record: Failed to read length.");
         }
         break;
       case IOTraceOp::kIOOffset:
         if (!GetFixed64(&enc_slice, &record->offset)) {
-          return Status_Incomplete(
+          return rocksdb_rs::status::Status_Incomplete(
               "Incomplete access record: Failed to read offset.");
         }
         break;
@@ -236,7 +236,7 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
   }
 
   if (!GetFixed64(&enc_slice, &record->trace_data)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read trace op.");
   }
   int64_t trace_data = static_cast<int64_t>(record->trace_data);
@@ -247,7 +247,7 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
       case IODebugContext::TraceData::kRequestID: {
         Slice request_id;
         if (!GetLengthPrefixedSlice(&enc_slice, &request_id)) {
-          return Status_Incomplete(
+          return rocksdb_rs::status::Status_Incomplete(
               "Incomplete access record: Failed to request id.");
         }
         record->request_id = request_id.ToString();
@@ -271,7 +271,7 @@ rocksdb_rs::status::Status IOTracer::StartIOTrace(SystemClock* clock,
                               std::unique_ptr<TraceWriter>&& trace_writer) {
   InstrumentedMutexLock lock_guard(&trace_writer_mutex_);
   if (writer_.load()) {
-    return Status_Busy();
+    return rocksdb_rs::status::Status_Busy();
   }
   trace_options_ = trace_options;
   writer_.store(

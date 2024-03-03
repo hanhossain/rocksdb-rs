@@ -1270,7 +1270,7 @@ TEST_P(TransactionStressTest, TwoPhaseExpirationTest) {
   ASSERT_OK(s);
 
   s = txn2->Prepare();
-  ASSERT_TRUE(s.eq(Status_Expired()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_Expired()));
 
   delete txn1;
   delete txn2;
@@ -5471,7 +5471,7 @@ rocksdb_rs::status::Status TransactionStressTestInserter(
   // some failed due to write-conflicts.
   if (num_transactions != 1 &&
       inserter.GetFailureCount() > num_transactions / 2) {
-    return Status_TryAgain("Too many transactions failed! " +
+    return rocksdb_rs::status::Status_TryAgain("Too many transactions failed! " +
                             std::to_string(inserter.GetFailureCount()) + " / " +
                             std::to_string(num_transactions));
   }

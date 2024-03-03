@@ -301,14 +301,14 @@ class CacheDumperHelper {
     assert(unit_meta != nullptr);
     Slice encoded_slice = Slice(encoded_data);
     if (!GetFixed32(&encoded_slice, &(unit_meta->sequence_num))) {
-      return Status_Incomplete("Decode dumped unit meta sequence_num failed");
+      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit meta sequence_num failed");
     }
     if (!GetFixed32(&encoded_slice, &(unit_meta->dump_unit_checksum))) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Decode dumped unit meta dump_unit_checksum failed");
     }
     if (!GetFixed64(&encoded_slice, &(unit_meta->dump_unit_size))) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Decode dumped unit meta dump_unit_size failed");
     }
     return rocksdb_rs::status::Status_OK();
@@ -322,30 +322,30 @@ class CacheDumperHelper {
 
     // Decode timestamp
     if (!GetFixed64(&encoded_slice, &dump_unit->timestamp)) {
-      return Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     // Decode the block type
     dump_unit->type = static_cast<CacheDumpUnitType>(encoded_slice[0]);
     encoded_slice.remove_prefix(1);
     // Decode the key
     if (!GetLengthPrefixedSlice(&encoded_slice, &(dump_unit->key))) {
-      return Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     // Decode the value size
     uint32_t value_len;
     if (!GetFixed32(&encoded_slice, &value_len)) {
-      return Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     dump_unit->value_len = static_cast<size_t>(value_len);
     // Decode the value checksum
     if (!GetFixed32(&encoded_slice, &(dump_unit->value_checksum))) {
-      return Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     // Decode the block content and copy to the memory space whose pointer
     // will be managed by the cache finally.
     Slice block;
     if (!GetLengthPrefixedSlice(&encoded_slice, &block)) {
-      return Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     dump_unit->value = (void*)block.data();
     assert(block.size() == dump_unit->value_len);

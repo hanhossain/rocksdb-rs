@@ -426,7 +426,7 @@ rocksdb_rs::status::Status WalManager::GetLiveWalFile(uint64_t number,
   }
 
   if (!number) {
-    return Status_PathNotFound("log file not available");
+    return rocksdb_rs::status::Status_PathNotFound("log file not available");
   }
 
   uint64_t size_bytes;

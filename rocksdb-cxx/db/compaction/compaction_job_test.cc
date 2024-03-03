@@ -1647,7 +1647,7 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   std::vector<rocksdb_rs::status::Status> status_list;
   status_list.push_back(rocksdb_rs::status::Status_OK());
   status_list.push_back(rocksdb_rs::status::Status_InvalidArgument("invalid option"));
-  status_list.push_back(Status_Aborted("failed to run"));
+  status_list.push_back(rocksdb_rs::status::Status_Aborted("failed to run"));
   status_list.push_back(rocksdb_rs::status::Status_NotSupported("not supported option"));
   result.status.copy_from(
       status_list.at(rnd.Uniform(static_cast<int>(status_list.size()))));

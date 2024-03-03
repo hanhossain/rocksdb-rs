@@ -1217,7 +1217,7 @@ rocksdb_rs::status::Status DBImpl::PreprocessWrite(const WriteOptions& write_opt
         InternalStats::kIntStatsWriteBufferManagerLimitStopsCounts, 1,
         true /* concurrent */);
     if (write_options.no_slowdown) {
-      status = Status_Incomplete("Write stall");
+      status = rocksdb_rs::status::Status_Incomplete("Write stall");
     } else {
       InstrumentedMutexLock l(&mutex_);
       WriteBufferManagerStallWrites();
@@ -1827,7 +1827,7 @@ rocksdb_rs::status::Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& w
     TEST_SYNC_POINT("DBImpl::DelayWrite:Start");
     if (delay > 0) {
       if (write_options.no_slowdown) {
-        return Status_Incomplete("Write stall");
+        return rocksdb_rs::status::Status_Incomplete("Write stall");
       }
       TEST_SYNC_POINT("DBImpl::DelayWrite:Sleep");
 
@@ -1863,7 +1863,7 @@ rocksdb_rs::status::Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& w
     while (error_handler_.GetBGError().ok() && write_controller_.IsStopped() &&
            !shutting_down_.load(std::memory_order_relaxed)) {
       if (write_options.no_slowdown) {
-        return Status_Incomplete("Write stall");
+        return rocksdb_rs::status::Status_Incomplete("Write stall");
       }
       delayed = true;
 
@@ -1895,9 +1895,9 @@ rocksdb_rs::status::Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& w
     if (!shutting_down_.load(std::memory_order_relaxed)) {
       // If writes are still stopped and db not shutdown, it means we bailed
       // due to a background error
-      s = Status_Incomplete(*error_handler_.GetBGError().ToString());
+      s = rocksdb_rs::status::Status_Incomplete(*error_handler_.GetBGError().ToString());
     } else {
-      s = Status_ShutdownInProgress("stalled writes");
+      s = rocksdb_rs::status::Status_ShutdownInProgress("stalled writes");
     }
   }
   if (error_handler_.IsDBStopped()) {
@@ -1943,7 +1943,7 @@ rocksdb_rs::status::Status DBImpl::ThrottleLowPriWritesIfNeeded(const WriteOptio
       return rocksdb_rs::status::Status_OK();
     }
     if (write_options.no_slowdown) {
-      return Status_Incomplete("Low priority write stall");
+      return rocksdb_rs::status::Status_Incomplete("Low priority write stall");
     } else {
       assert(my_batch != nullptr);
       // Rate limit those writes. The reason that we don't completely wait

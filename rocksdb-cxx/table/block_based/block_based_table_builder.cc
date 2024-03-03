@@ -1497,7 +1497,7 @@ void BlockBasedTableBuilder::WriteFilterBlock(
   if (ok()) {
     rep_->props.num_filter_entries +=
         rep_->filter_builder->EstimateEntriesAdded();
-    rocksdb_rs::status::Status s = Status_Incomplete();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_Incomplete();
     while (ok() && s.IsIncomplete()) {
       // filter_data is used to store the transferred filter data payload from
       // FilterBlockBuilder and deallocate the payload by going out of scope.

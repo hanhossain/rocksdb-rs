@@ -1362,7 +1362,7 @@ bool DBIter::TooManyInternalKeysSkipped(bool increment) {
   if ((max_skippable_internal_keys_ > 0) &&
       (num_internal_keys_skipped_ > max_skippable_internal_keys_)) {
     valid_ = false;
-    status_ = Status_Incomplete("Too many internal keys skipped.");
+    status_ = rocksdb_rs::status::Status_Incomplete("Too many internal keys skipped.");
     return true;
   } else if (increment) {
     num_internal_keys_skipped_++;

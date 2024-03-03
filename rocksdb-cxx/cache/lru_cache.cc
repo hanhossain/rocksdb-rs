@@ -390,7 +390,7 @@ rocksdb_rs::status::Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** h
         free(e);
         e = nullptr;
         *handle = nullptr;
-        s = Status_MemoryLimit("Insert failed due to LRU cache being full.");
+        s = rocksdb_rs::status::Status_MemoryLimit("Insert failed due to LRU cache being full.");
       }
     } else {
       // Insert into the cache. Note that the cache might get larger than its

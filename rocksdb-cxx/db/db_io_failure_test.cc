@@ -281,7 +281,7 @@ TEST_F(DBIOFailureTest, FlushSstRangeSyncError) {
       "SpecialEnv::SStableFile::RangeSync", [&](void* arg) {
         if (range_sync_called.fetch_add(1) == 0) {
           rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
-          *st = Status_IOError(io_error_msg);
+          *st = rocksdb_rs::status::Status_IOError(io_error_msg);
         }
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -363,7 +363,7 @@ TEST_F(DBIOFailureTest, CompactSstRangeSyncError) {
       "SpecialEnv::SStableFile::RangeSync", [&](void* arg) {
         if (range_sync_called.fetch_add(1) == 0) {
           rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
-          *st = Status_IOError(io_error_msg);
+          *st = rocksdb_rs::status::Status_IOError(io_error_msg);
         }
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -405,7 +405,7 @@ TEST_F(DBIOFailureTest, FlushSstCloseError) {
       "SpecialEnv::SStableFile::Close", [&](void* arg) {
         if (close_called.fetch_add(1) == 0) {
           rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
-          *st = Status_IOError(io_error_msg);
+          *st = rocksdb_rs::status::Status_IOError(io_error_msg);
         }
       });
 
@@ -459,7 +459,7 @@ TEST_F(DBIOFailureTest, CompactionSstCloseError) {
       "SpecialEnv::SStableFile::Close", [&](void* arg) {
         if (close_called.fetch_add(1) == 0) {
           rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
-          *st = Status_IOError(io_error_msg);
+          *st = rocksdb_rs::status::Status_IOError(io_error_msg);
         }
       });
 
@@ -501,7 +501,7 @@ TEST_F(DBIOFailureTest, FlushSstSyncError) {
       "SpecialEnv::SStableFile::Sync", [&](void* arg) {
         if (sync_called.fetch_add(1) == 0) {
           rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
-          *st = Status_IOError(io_error_msg);
+          *st = rocksdb_rs::status::Status_IOError(io_error_msg);
         }
       });
 
@@ -556,7 +556,7 @@ TEST_F(DBIOFailureTest, CompactionSstSyncError) {
       "SpecialEnv::SStableFile::Sync", [&](void* arg) {
         if (sync_called.fetch_add(1) == 0) {
           rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
-          *st = Status_IOError(io_error_msg);
+          *st = rocksdb_rs::status::Status_IOError(io_error_msg);
         }
       });
 

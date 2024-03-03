@@ -272,7 +272,7 @@ rocksdb_rs::status::Status WritePreparedTxnDB::Get(const ReadOptions& options,
     return res;
   } else {
     WPRecordTick(TXN_GET_TRY_AGAIN);
-    return Status_TryAgain();
+    return rocksdb_rs::status::Status_TryAgain();
   }
 }
 

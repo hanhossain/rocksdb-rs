@@ -286,7 +286,7 @@ TEST_F(CompactionServiceTest, BasicCompactions) {
       "DBImplSecondary::CompactWithoutInstallation::End", [&](void* status) {
         // override job status
         auto s = static_cast<rocksdb_rs::status::Status*>(status);
-        *s = Status_Aborted("MyTestCompactionService failed to compact!");
+        *s = rocksdb_rs::status::Status_Aborted("MyTestCompactionService failed to compact!");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
