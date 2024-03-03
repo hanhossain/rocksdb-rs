@@ -3110,9 +3110,9 @@ TEST_F(DBBasicTest, LastSstFileNotInManifest) {
   ASSERT_EQ(files.size(), 1);
   const std::string fname = files[0].erase(0, (dbname_ + "/").size());
   uint64_t number = 0;
-  FileType type = FileType::kTableFile;
+  rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kTableFile;
   ASSERT_TRUE(ParseFileName(fname, &number, &type));
-  ASSERT_EQ(type, FileType::kTableFile);
+  ASSERT_EQ(type, rocksdb_rs::types::FileType::kTableFile);
   ASSERT_GT(number, kSstFileNumber);
 }
 
@@ -3243,8 +3243,8 @@ TEST_F(DBBasicTest, RecoverWithNoManifest) {
     ASSERT_OK(env_->GetChildren(dbname_, &files));
     for (const auto& file : files) {
       uint64_t number = 0;
-      FileType type = FileType::kWalFile;
-      if (ParseFileName(file, &number, &type) && type == FileType::kDescriptorFile) {
+      rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;
+      if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kDescriptorFile) {
         ASSERT_OK(env_->DeleteFile(dbname_ + "/" + file));
       }
     }
@@ -4507,11 +4507,11 @@ TEST_F(DBBasicTest, VerifyFileChecksumsReadahead) {
   std::string sst_name;
   uint64_t sst_size;
   uint64_t number;
-  FileType type;
+  rocksdb_rs::types::FileType type;
   ASSERT_OK(env_->GetChildren(dbname_, &filenames));
   for (auto name : filenames) {
     if (ParseFileName(name, &number, &type)) {
-      if (type == FileType::kTableFile) {
+      if (type == rocksdb_rs::types::FileType::kTableFile) {
         sst_cnt++;
         sst_name = name;
       }

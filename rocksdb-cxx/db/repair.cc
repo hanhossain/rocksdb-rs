@@ -305,18 +305,18 @@ class Repairer {
       }
 
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       for (size_t i = 0; i < filenames.size(); i++) {
         if (rocksdb_rs::filename::ParseFileName(filenames[i], &number, &type)) {
-          if (type == FileType::kDescriptorFile) {
+          if (type == rocksdb_rs::types::FileType::kDescriptorFile) {
             manifests_.push_back(filenames[i]);
           } else {
             if (number + 1 > next_file_number_) {
               next_file_number_ = number + 1;
             }
-            if (type == FileType::kWalFile) {
+            if (type == rocksdb_rs::types::FileType::kWalFile) {
               logs_.push_back(number);
-            } else if (type == FileType::kTableFile) {
+            } else if (type == rocksdb_rs::types::FileType::kTableFile) {
               table_fds_.emplace_back(number, static_cast<uint32_t>(path_id),
                                       0);
             } else {

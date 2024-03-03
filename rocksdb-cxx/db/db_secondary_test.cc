@@ -105,11 +105,11 @@ void DBSecondaryTestBase::CheckFileTypeCounts(const std::string& dir,
   int log_cnt = 0, sst_cnt = 0, manifest_cnt = 0;
   for (auto file : filenames) {
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     if (ParseFileName(file, &number, &type)) {
-      log_cnt += (type == FileType::kWalFile);
-      sst_cnt += (type == FileType::kTableFile);
-      manifest_cnt += (type == FileType::kDescriptorFile);
+      log_cnt += (type == rocksdb_rs::types::FileType::kWalFile);
+      sst_cnt += (type == rocksdb_rs::types::FileType::kTableFile);
+      manifest_cnt += (type == rocksdb_rs::types::FileType::kDescriptorFile);
     }
   }
   ASSERT_EQ(expected_log, log_cnt);

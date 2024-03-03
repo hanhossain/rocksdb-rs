@@ -104,7 +104,7 @@ class DummyDB : public StackableDB {
       const LiveFilesStorageInfoOptions& opts,
       std::vector<LiveFileStorageInfo>* files) override {
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     files->clear();
     for (auto& f : live_files_) {
       bool success = ParseFileName(f, &number, &type);
@@ -117,10 +117,10 @@ class DummyDB : public StackableDB {
       info.directory = dbname_;
       info.file_number = number;
       info.file_type = type;
-      if (type == FileType::kDescriptorFile) {
+      if (type == rocksdb_rs::types::FileType::kDescriptorFile) {
         info.size = 100;  // See TestFs::GetChildrenFileAttributes below
         info.trim_to_size = true;
-      } else if (type == FileType::kCurrentFile) {
+      } else if (type == rocksdb_rs::types::FileType::kCurrentFile) {
         info.size = 0;
         info.trim_to_size = true;
       } else {
@@ -862,15 +862,15 @@ class BackupEngineTest : public testing::Test {
     ASSERT_OK(db_chroot_env_->GetChildren(dbname_, &delete_logs));
     for (auto f : delete_logs) {
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       bool ok = ParseFileName(f, &number, &type);
-      if (ok && type == FileType::kWalFile) {
+      if (ok && type == rocksdb_rs::types::FileType::kWalFile) {
         ASSERT_OK(db_chroot_env_->DeleteFile(dbname_ + "/" + f));
       }
     }
   }
 
-  Status GetDataFilesInDB(const FileType& file_type,
+  Status GetDataFilesInDB(const rocksdb_rs::types::FileType& file_type,
                           std::vector<FileAttributes>* files) {
     std::vector<std::string> live;
     uint64_t ignore_manifest_size;
@@ -881,7 +881,7 @@ class BackupEngineTest : public testing::Test {
     std::vector<FileAttributes> children;
     s = test_db_env_->GetChildrenFileAttributes(dbname_, &children);
     for (const auto& child : children) {
-      FileType type;
+      rocksdb_rs::types::FileType type;
       uint64_t number = 0;
       if (ParseFileName(child.name, &number, &type) && type == file_type &&
           std::find(live.begin(), live.end(), "/" + child.name) != live.end()) {
@@ -891,7 +891,7 @@ class BackupEngineTest : public testing::Test {
     return s;
   }
 
-  Status GetRandomDataFileInDB(const FileType& file_type,
+  Status GetRandomDataFileInDB(const rocksdb_rs::types::FileType& file_type,
                                std::string* fname_out,
                                uint64_t* fsize_out = nullptr) {
     Random rnd(6);  // NB: hardly "random"
@@ -911,7 +911,7 @@ class BackupEngineTest : public testing::Test {
     return Status_OK();
   }
 
-  Status CorruptRandomDataFileInDB(const FileType& file_type) {
+  Status CorruptRandomDataFileInDB(const rocksdb_rs::types::FileType& file_type) {
     std::string fname;
     uint64_t fsize = 0;
     Status s = GetRandomDataFileInDB(file_type, &fname, &fsize);
@@ -1549,7 +1549,7 @@ TEST_F(BackupEngineTest, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kTableFile));
   // file_checksum_gen_factory is null, and thus table checksum is not
   // verified for creating a new backup; no correction is detected
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
@@ -1565,7 +1565,7 @@ TEST_F(BackupEngineTest, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kTableFile));
   // table file checksum is enabled so we should be able to detect any
   // corruption
   ASSERT_NOK(backup_engine_->CreateNewBackup(db_.get()));
@@ -1582,7 +1582,7 @@ TEST_F(BackupEngineTest, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kBlobFile));
   // file_checksum_gen_factory is null, and thus blob checksum is not
   // verified for creating a new backup; no correction is detected
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
@@ -1598,7 +1598,7 @@ TEST_F(BackupEngineTest, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kBlobFile));
 
   // file checksum is enabled so we should be able to detect any
   // corruption
@@ -1617,7 +1617,7 @@ TEST_P(BackupEngineTestWithParam, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kTableFile));
   // cannot detect corruption since DB manifest has no table checksums
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -1631,7 +1631,7 @@ TEST_P(BackupEngineTestWithParam, TableFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random table file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kTableFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kTableFile));
   // corruption is detected
   ASSERT_NOK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -1646,7 +1646,7 @@ TEST_P(BackupEngineTestWithParam, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kBlobFile));
   // cannot detect corruption since DB manifest has no blob file checksums
   ASSERT_OK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -1660,7 +1660,7 @@ TEST_P(BackupEngineTestWithParam, BlobFileCorruptedBeforeBackup) {
   FillDB(db_.get(), 0, keys_iteration);
   CloseAndReopenDB(/*read_only*/ true);
   // corrupt a random blob file in the DB directory
-  ASSERT_OK(CorruptRandomDataFileInDB(FileType::kBlobFile));
+  ASSERT_OK(CorruptRandomDataFileInDB(rocksdb_rs::types::FileType::kBlobFile));
   // corruption is detected
   ASSERT_NOK(backup_engine_->CreateNewBackup(db_.get()));
   CloseDBAndBackupEngine();
@@ -2143,7 +2143,7 @@ TEST_F(BackupEngineTest, TableFileCorruptionBeforeIncremental) {
       CloseAndReopenDB(/*read_only*/ true);
 
       std::vector<FileAttributes> table_files;
-      ASSERT_OK(GetDataFilesInDB(FileType::kTableFile, &table_files));
+      ASSERT_OK(GetDataFilesInDB(rocksdb_rs::types::FileType::kTableFile, &table_files));
       ASSERT_EQ(table_files.size(), 2);
       std::string tf0 = dbname_ + "/" + table_files[0].name;
       std::string tf1 = dbname_ + "/" + table_files[1].name;
@@ -4103,7 +4103,7 @@ TEST_F(BackupEngineTest, FileTemperatures) {
     ASSERT_OK(
         db_->GetLiveFilesStorageInfo(LiveFilesStorageInfoOptions(), &infos));
     for (auto info : infos) {
-      if (info.file_type == FileType::kTableFile) {
+      if (info.file_type == rocksdb_rs::types::FileType::kTableFile) {
         manifest_temps.emplace(info.file_number, info.temperature);
         manifest_temp_counts[info.temperature]++;
       }

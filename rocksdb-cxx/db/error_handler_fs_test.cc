@@ -37,8 +37,8 @@ class DBErrorHandlingFSTest : public DBTestBase {
     }
     for (auto& file : live_files) {
       uint64_t num = 0;
-      FileType type;
-      if (ParseFileName(file, &num, &type) && type == FileType::kDescriptorFile) {
+      rocksdb_rs::types::FileType type;
+      if (ParseFileName(file, &num, &type) && type == rocksdb_rs::types::FileType::kDescriptorFile) {
         return file;
       }
     }

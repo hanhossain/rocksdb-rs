@@ -340,9 +340,9 @@ TEST_F(CheckpointTest, CheckpointWithBlob) {
   bool blob_file_found = false;
   for (const auto& file : files) {
     uint64_t number = 0;
-    FileType type = FileType::kWalFile;
+    rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;
 
-    if (ParseFileName(file, &number, &type) && type == FileType::kBlobFile) {
+    if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kBlobFile) {
       blob_file_found = true;
       break;
     }
@@ -705,9 +705,9 @@ TEST_F(CheckpointTest, CurrentFileModifiedWhileCheckpointing2PC) {
   int num_log_files = 0;
   for (auto& file : files) {
     uint64_t num;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     rocksdb_rs::transaction_log::WalFileType log_type;
-    if (ParseFileName(file, &num, &type, &log_type) && type == FileType::kWalFile) {
+    if (ParseFileName(file, &num, &type, &log_type) && type == rocksdb_rs::types::FileType::kWalFile) {
       num_log_files++;
     }
   }

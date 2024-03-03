@@ -175,8 +175,8 @@ uint64_t GetLogDirSize(std::string dir_path, Env* env) {
   EXPECT_OK(env->GetChildren(dir_path, &files));
   for (auto& f : files) {
     uint64_t number;
-    FileType type;
-    if (ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
+    rocksdb_rs::types::FileType type;
+    if (ParseFileName(f, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
       std::string const file_path = dir_path + "/" + f;
       uint64_t file_size;
       EXPECT_OK(env->GetFileSize(file_path, &file_size));
@@ -186,11 +186,11 @@ uint64_t GetLogDirSize(std::string dir_path, Env* env) {
   return dir_size;
 }
 std::vector<std::uint64_t> ListSpecificFiles(
-    Env* env, const std::string& path, const FileType expected_file_type) {
+    Env* env, const std::string& path, const rocksdb_rs::types::FileType expected_file_type) {
   std::vector<std::string> files;
   std::vector<uint64_t> file_numbers;
   uint64_t number;
-  FileType type;
+  rocksdb_rs::types::FileType type;
   EXPECT_OK(env->GetChildren(path, &files));
   for (size_t i = 0; i < files.size(); ++i) {
     if (ParseFileName(files[i], &number, &type)) {
@@ -238,7 +238,7 @@ TEST_F(WalManagerTest, WALArchivalSizeLimit) {
   CreateArchiveLogs(20, 5000);
 
   std::vector<std::uint64_t> log_files =
-      ListSpecificFiles(env_.get(), archive_dir, FileType::kWalFile);
+      ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_EQ(log_files.size(), 20U);
 
   db_options_.WAL_size_limit_MB = 8;
@@ -253,7 +253,7 @@ TEST_F(WalManagerTest, WALArchivalSizeLimit) {
   Reopen();
   wal_manager_->PurgeObsoleteWALFiles();
 
-  log_files = ListSpecificFiles(env_.get(), archive_dir, FileType::kWalFile);
+  log_files = ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_TRUE(log_files.empty());
 }
 
@@ -271,7 +271,7 @@ TEST_F(WalManagerTest, WALArchivalTtl) {
   CreateArchiveLogs(20, 5000);
 
   std::vector<uint64_t> log_files =
-      ListSpecificFiles(env_.get(), archive_dir, FileType::kWalFile);
+      ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_GT(log_files.size(), 0U);
 
   db_options_.WAL_ttl_seconds = 1;
@@ -279,7 +279,7 @@ TEST_F(WalManagerTest, WALArchivalTtl) {
   Reopen();
   wal_manager_->PurgeObsoleteWALFiles();
 
-  log_files = ListSpecificFiles(env_.get(), archive_dir, FileType::kWalFile);
+  log_files = ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_TRUE(log_files.empty());
 }
 

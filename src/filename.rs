@@ -159,6 +159,8 @@ mod ffi {
         include!("rocksdb-rs/src/transaction_log.rs.h");
 
         type DbPath = crate::options::ffi::DbPath;
+
+        #[namespace = "rocksdb_rs::types"]
         type FileType = crate::types::ffi::FileType;
 
         #[namespace = "rocksdb_rs::transaction_log"]

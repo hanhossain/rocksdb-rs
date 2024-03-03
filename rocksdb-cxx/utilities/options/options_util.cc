@@ -58,8 +58,8 @@ Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
   }
   for (auto& file_name : file_names) {
     uint64_t time_stamp;
-    FileType type;
-    if (rocksdb_rs::filename::ParseFileName(file_name, &time_stamp, &type) && type == FileType::kOptionsFile) {
+    rocksdb_rs::types::FileType type;
+    if (rocksdb_rs::filename::ParseFileName(file_name, &time_stamp, &type) && type == rocksdb_rs::types::FileType::kOptionsFile) {
       if (time_stamp > latest_time_stamp) {
         latest_time_stamp = time_stamp;
         latest_file_name = file_name;

@@ -1,4 +1,4 @@
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::types")]
 pub mod ffi {
     /// The types of files RocksDB uses in a DB directory. (Available for advanced options.)
     enum FileType {

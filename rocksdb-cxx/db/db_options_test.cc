@@ -1313,10 +1313,10 @@ TEST_F(DBOptionsTest, TempOptionsFailTest) {
   std::vector<std::string> filenames;
   ASSERT_OK(env_->GetChildren(dbname_, &filenames));
   uint64_t number;
-  FileType type;
+  rocksdb_rs::types::FileType type;
   bool found_temp_file = false;
   for (size_t i = 0; i < filenames.size(); i++) {
-    if (ParseFileName(filenames[i], &number, &type) && type == FileType::kTempFile) {
+    if (ParseFileName(filenames[i], &number, &type) && type == rocksdb_rs::types::FileType::kTempFile) {
       found_temp_file = true;
     }
   }

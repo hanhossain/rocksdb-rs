@@ -339,8 +339,8 @@ Status DBImpl::NewDB(std::vector<std::string>* new_filenames) {
     std::unique_ptr<WritableFileWriter> file_writer(new WritableFileWriter(
         std::move(file), manifest, file_options, immutable_db_options_.clock,
         io_tracer_, nullptr /* stats */, immutable_db_options_.listeners,
-        nullptr, tmp_set.Contains(FileType::kDescriptorFile),
-        tmp_set.Contains(FileType::kDescriptorFile)));
+        nullptr, tmp_set.Contains(rocksdb_rs::types::FileType::kDescriptorFile),
+        tmp_set.Contains(rocksdb_rs::types::FileType::kDescriptorFile)));
     log::Writer log(std::move(file_writer), 0, false);
     std::string record;
     new_db.EncodeTo(&record);
@@ -453,8 +453,8 @@ Status DBImpl::Recover(
       }
       for (const std::string& file : files_in_dbname) {
         uint64_t number = 0;
-        FileType type = FileType::kWalFile;  // initialize
-        if (ParseFileName(file, &number, &type) && type == FileType::kDescriptorFile) {
+        rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;  // initialize
+        if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kDescriptorFile) {
           uint64_t bytes;
           s = env_->GetFileSize(DescriptorFileName(dbname_, number), &bytes);
           if (s.ok() && bytes != 0) {
@@ -699,8 +699,8 @@ Status DBImpl::Recover(
     std::unordered_map<uint64_t, std::string> wal_files;
     for (const auto& file : files_in_wal_dir) {
       uint64_t number;
-      FileType type;
-      if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
+      rocksdb_rs::types::FileType type;
+      if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
         if (is_new_db) {
           return Status_Corruption(
               "While creating a new Db, wal_dir contains "
@@ -805,9 +805,9 @@ Status DBImpl::Recover(
     if (s.ok()) {
       uint64_t number = 0;
       uint64_t options_file_number = 0;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       for (const auto& fname : filenames) {
-        if (ParseFileName(fname, &number, &type) && type == FileType::kOptionsFile) {
+        if (ParseFileName(fname, &number, &type) && type == rocksdb_rs::types::FileType::kOptionsFile) {
           options_file_number = std::max(number, options_file_number);
         }
       }
@@ -1889,8 +1889,8 @@ IOStatus DBImpl::CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
     std::unique_ptr<WritableFileWriter> file_writer(new WritableFileWriter(
         std::move(lfile), log_fname, opt_file_options,
         immutable_db_options_.clock, io_tracer_, nullptr /* stats */, listeners,
-        nullptr, tmp_set.Contains(FileType::kWalFile),
-        tmp_set.Contains(FileType::kWalFile)));
+        nullptr, tmp_set.Contains(rocksdb_rs::types::FileType::kWalFile),
+        tmp_set.Contains(rocksdb_rs::types::FileType::kWalFile)));
     *new_log = new log::Writer(std::move(file_writer), log_file_num,
                                immutable_db_options_.recycle_log_file_num > 0,
                                immutable_db_options_.manual_wal_flush,
@@ -2165,10 +2165,10 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
                         /*IODebugContext*=*/nullptr);
       for (auto& file_name : existing_files) {
         uint64_t file_number;
-        FileType file_type;
+        rocksdb_rs::types::FileType file_type;
         std::string file_path = path + "/" + file_name;
         if (ParseFileName(file_name, &file_number, &file_type) &&
-            (file_type == FileType::kTableFile || file_type == FileType::kBlobFile)) {
+            (file_type == rocksdb_rs::types::FileType::kTableFile || file_type == rocksdb_rs::types::FileType::kBlobFile)) {
           // TODO: Check for errors from OnAddFile?
           if (known_file_sizes.count(file_name)) {
             // We're assuming that each sst file name exists in at most one of

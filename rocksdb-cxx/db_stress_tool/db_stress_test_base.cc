@@ -759,9 +759,9 @@ void StressTest::OperateDb(ThreadState* thread) {
       error_msg = IOStatus::IOError("Fatal IO Error");
       error_msg.SetDataLoss(true);
     }
-    std::vector<FileType> types = {FileType::kTableFile,
-                                   FileType::kDescriptorFile,
-                                   FileType::kCurrentFile};
+    std::vector<rocksdb_rs::types::FileType> types = {rocksdb_rs::types::FileType::kTableFile,
+                                   rocksdb_rs::types::FileType::kDescriptorFile,
+                                   rocksdb_rs::types::FileType::kCurrentFile};
     fault_fs_guard->SetRandomWriteError(
         thread->shared->GetSeed(), FLAGS_write_fault_one_in, error_msg,
         /*inject_for_all_file_types=*/false, types);
@@ -2640,7 +2640,7 @@ void StressTest::Open(SharedState* shared) {
           // WAL is durable. Buffering unsynced writes will cause false
           // positive in crash tests. Before we figure out a way to
           // solve it, skip WAL from failure injection.
-          fault_fs_guard->SetSkipDirectWritableTypes({FileType::kWalFile});
+          fault_fs_guard->SetSkipDirectWritableTypes({rocksdb_rs::types::FileType::kWalFile});
         }
         ingest_meta_error = FLAGS_open_metadata_write_fault_one_in;
         ingest_write_error = FLAGS_open_write_fault_one_in;

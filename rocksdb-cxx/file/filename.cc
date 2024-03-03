@@ -124,7 +124,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   assert(parent_dir != nullptr);
   assert(info_log_list != nullptr);
   uint64_t number = 0;
-  FileType type = FileType::kWalFile;
+  rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;
 
   if (!db_log_dir.empty()) {
     *parent_dir = db_log_dir;
@@ -143,7 +143,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
 
   for (auto& f : file_names) {
     if (ParseFileName(f, &number, info_log_prefix.prefix, &type) &&
-        (type == FileType::kInfoLogFile)) {
+        (type == rocksdb_rs::types::FileType::kInfoLogFile)) {
       info_log_list->push_back(f);
     }
   }

@@ -812,7 +812,7 @@ class BackupEngineImpl {
       bool shared, const std::string& src_dir,
       const std::string& fname,  // starts with "/"
       const EnvOptions& src_env_options, RateLimiter* rate_limiter,
-      FileType file_type, uint64_t size_bytes, Statistics* stats,
+      rocksdb_rs::types::FileType file_type, uint64_t size_bytes, Statistics* stats,
       uint64_t size_limit = 0, bool shared_checksum = false,
       std::function<void()> progress_callback = {},
       const std::string& contents = std::string(),
@@ -1422,23 +1422,23 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
     RateLimiter* rate_limiter = options_.backup_rate_limiter.get();
     io_s = status_to_io_status(checkpoint.CreateCustomCheckpoint(
         [&](const std::string& /*src_dirname*/, const std::string& /*fname*/,
-            FileType) {
+            rocksdb_rs::types::FileType) {
           // custom checkpoint will switch to calling copy_file_cb after it sees
           // NotSupported returned from link_file_cb.
           return IOStatus::NotSupported();
         } /* link_file_cb */,
         [&](const std::string& src_dirname, const std::string& fname,
-            uint64_t size_limit_bytes, FileType type,
+            uint64_t size_limit_bytes, rocksdb_rs::types::FileType type,
             const std::string& checksum_func_name,
             const std::string& checksum_val,
             const Temperature src_temperature) {
-          if (type == FileType::kWalFile && !options_.backup_log_files) {
+          if (type == rocksdb_rs::types::FileType::kWalFile && !options_.backup_log_files) {
             return IOStatus::OK();
           }
           Log(options_.info_log, "add file for backup %s", fname.c_str());
           uint64_t size_bytes = 0;
           IOStatus io_st;
-          if (type == FileType::kTableFile || type == FileType::kBlobFile) {
+          if (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile) {
             io_st = db_fs_->GetFileSize(src_dirname + "/" + fname, io_options_,
                                         &size_bytes, nullptr);
             if (!io_st.ok()) {
@@ -1449,19 +1449,19 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
           }
           EnvOptions src_env_options;
           switch (type) {
-            case FileType::kWalFile:
+            case rocksdb_rs::types::FileType::kWalFile:
               src_env_options =
                   db_env_->OptimizeForLogRead(src_raw_env_options);
               break;
-            case FileType::kTableFile:
+            case rocksdb_rs::types::FileType::kTableFile:
               src_env_options = db_env_->OptimizeForCompactionTableRead(
                   src_raw_env_options, ImmutableDBOptions(db_options));
               break;
-            case FileType::kDescriptorFile:
+            case rocksdb_rs::types::FileType::kDescriptorFile:
               src_env_options =
                   db_env_->OptimizeForManifestRead(src_raw_env_options);
               break;
-            case FileType::kBlobFile:
+            case rocksdb_rs::types::FileType::kBlobFile:
               src_env_options = db_env_->OptimizeForBlobFileRead(
                   src_raw_env_options, ImmutableDBOptions(db_options));
               break;
@@ -1476,17 +1476,17 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
               live_dst_paths, backup_items_to_finish,
               maybe_exclude_items ? &excludable_items : nullptr, new_backup_id,
               options_.share_table_files &&
-                  (type == FileType::kTableFile || type == FileType::kBlobFile),
+                  (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile),
               src_dirname, fname, src_env_options, rate_limiter, type,
               size_bytes, db_options.statistics.get(), size_limit_bytes,
               options_.share_files_with_checksum &&
-                  (type == FileType::kTableFile || type == FileType::kBlobFile),
+                  (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile),
               options.progress_callback, "" /* contents */, checksum_func_name,
               checksum_val, src_temperature);
           return io_st;
         } /* copy_file_cb */,
         [&](const std::string& fname, const std::string& contents,
-            FileType type) {
+            rocksdb_rs::types::FileType type) {
           Log(options_.info_log, "add file for backup %s", fname.c_str());
           return AddBackupFileWorkItem(
               live_dst_paths, backup_items_to_finish,
@@ -1779,7 +1779,7 @@ void BackupEngineImpl::SetBackupInfoFromBackupMeta(
       finfo.size = file_ptr->size;
       finfo.directory = dir;
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       bool ok = rocksdb_rs::filename::ParseFileName(file_ptr->filename, &number, &type);
       if (ok) {
         finfo.file_number = number;
@@ -1877,16 +1877,16 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
 
   if (options.keep_log_files) {
     // delete files in db_dir, but keep all the log files
-    DeleteChildren(db_dir, 1 << static_cast<int>(FileType::kWalFile));
+    DeleteChildren(db_dir, 1 << static_cast<int>(rocksdb_rs::types::FileType::kWalFile));
     // move all the files from archive dir to wal_dir
     std::string archive_dir = static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir));
     std::vector<std::string> archive_files;
     db_fs_->GetChildren(archive_dir, io_options_, &archive_files, nullptr);
     for (const auto& f : archive_files) {
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       bool ok = rocksdb_rs::filename::ParseFileName(f, &number, &type);
-      if (ok && type == FileType::kWalFile) {
+      if (ok && type == rocksdb_rs::types::FileType::kWalFile) {
         ROCKS_LOG_INFO(options_.info_log,
                        "Moving log file from archive/ to wal_dir: %s",
                        f.c_str());
@@ -1955,7 +1955,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
 
     // 2. find the filetype
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     bool ok = rocksdb_rs::filename::ParseFileName(dst, &number, &type);
     if (!ok) {
       return IOStatus::Corruption("Backup corrupted: Fail to parse filename " +
@@ -1963,7 +1963,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     }
     // 3. Construct the final path
     // FileType::kWalFile lives in wal_dir and all the rest live in db_dir
-    if (type == FileType::kWalFile) {
+    if (type == rocksdb_rs::types::FileType::kWalFile) {
       dst = wal_dir + "/" + dst;
       if (options_.sync && !wal_dir_for_fsync) {
         io_s = db_fs_->NewDirectory(wal_dir, io_options_, &wal_dir_for_fsync,
@@ -1985,7 +1985,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     // For atomicity, initially restore CURRENT file to a temporary name.
     // This is useful even without options_.sync e.g. in case the restore
     // process is interrupted.
-    if (type == FileType::kCurrentFile) {
+    if (type == rocksdb_rs::types::FileType::kCurrentFile) {
       final_current_file = dst;
       dst = temporary_current_file = dst + ".tmp";
     }
@@ -2270,7 +2270,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
     std::deque<BackupWorkItemPair>* excludable_items, BackupID backup_id,
     bool shared, const std::string& src_dir, const std::string& fname,
     const EnvOptions& src_env_options, RateLimiter* rate_limiter,
-    FileType file_type, uint64_t size_bytes, Statistics* stats,
+    rocksdb_rs::types::FileType file_type, uint64_t size_bytes, Statistics* stats,
     uint64_t size_limit, bool shared_checksum,
     std::function<void()> progress_callback, const std::string& contents,
     const std::string& src_checksum_func_name,
@@ -2307,7 +2307,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
   // Step 1: Prepare the relative path to destination
   if (shared && shared_checksum) {
     if (GetNamingNoFlags() != BackupEngineOptions::kLegacyCrc32cAndFileSize &&
-        file_type != FileType::kBlobFile) {
+        file_type != rocksdb_rs::types::FileType::kBlobFile) {
       // Prepare db_session_id to add to the file name
       // Ignore the returned status
       // In the failed cases, db_id and db_session_id will be empty
@@ -2642,7 +2642,7 @@ void BackupEngineImpl::DeleteChildren(const std::string& dir,
 
   for (const auto& f : children) {
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     bool ok = rocksdb_rs::filename::ParseFileName(f, &number, &type);
     if (ok && (file_type_filter & (1 << static_cast<int>(type)))) {
       // don't delete this file

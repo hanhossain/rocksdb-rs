@@ -243,7 +243,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
         info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName(meta->fd.GetNumber()));
         info.directory = GetDir(meta->fd.GetPathId());
         info.file_number = meta->fd.GetNumber();
-        info.file_type = FileType::kTableFile;
+        info.file_type = rocksdb_rs::types::FileType::kTableFile;
         info.size = meta->fd.GetFileSize();
         if (opts.include_checksum_info) {
           info.file_checksum_func_name = meta->file_checksum_func_name;
@@ -266,7 +266,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
       info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::BlobFileName(meta->GetBlobFileNumber()));
       info.directory = GetDir(/* path_id */ 0);
       info.file_number = meta->GetBlobFileNumber();
-      info.file_type = FileType::kBlobFile;
+      info.file_type = rocksdb_rs::types::FileType::kBlobFile;
       info.size = meta->GetBlobFileSize();
       if (opts.include_checksum_info) {
         info.file_checksum_func_name = meta->GetChecksumMethod();
@@ -297,7 +297,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     info.relative_filename = manifest_fname;
     info.directory = GetName();
     info.file_number = manifest_number;
-    info.file_type = FileType::kDescriptorFile;
+    info.file_type = rocksdb_rs::types::FileType::kDescriptorFile;
     info.size = manifest_size;
     info.trim_to_size = true;
     if (opts.include_checksum_info) {
@@ -312,7 +312,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
     info.relative_filename = kCurrentFileName;
     info.directory = GetName();
-    info.file_type = FileType::kCurrentFile;
+    info.file_type = rocksdb_rs::types::FileType::kCurrentFile;
     // CURRENT could be replaced so we have to record the contents as needed.
     info.replacement_contents = manifest_fname + "\n";
     info.size = manifest_fname.size() + 1;
@@ -334,7 +334,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::OptionsFileName(options_number));
     info.directory = GetName();
     info.file_number = options_number;
-    info.file_type = FileType::kOptionsFile;
+    info.file_type = rocksdb_rs::types::FileType::kOptionsFile;
     info.size = options_size;
     if (opts.include_checksum_info) {
       info.file_checksum_func_name = kUnknownFileChecksumFuncName;
@@ -387,7 +387,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
       info.relative_filename = f.substr(1);
       info.directory = wal_dir;
       info.file_number = live_wal_files[i]->LogNumber();
-      info.file_type = FileType::kWalFile;
+      info.file_type = rocksdb_rs::types::FileType::kWalFile;
       info.size = live_wal_files[i]->SizeFileBytes();
       // Only last should need to be trimmed
       info.trim_to_size = (i + 1 == wal_size);
