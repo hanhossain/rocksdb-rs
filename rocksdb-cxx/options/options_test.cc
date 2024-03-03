@@ -4412,7 +4412,7 @@ TEST_F(OptionTypeInfoTest, TestInvalidArgs) {
                               const std::string& value, void* addr) {
                              auto ptr = static_cast<int*>(addr);
                              *ptr = ParseInt(value);
-                             return Status_OK();
+                             return rocksdb_rs::status::Status_OK();
                            });
   ASSERT_OK(func_info.Parse(config_options, "b", "1", &i));
   ASSERT_NOK(func_info.Parse(config_options, "b", "x", &i));
@@ -4430,7 +4430,7 @@ TEST_F(OptionTypeInfoTest, TestParseFunc) {
       return Status_InvalidArgument(value);
     } else {
       *ptr = value + " " + name;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   });
   ConfigOptions config_options;
@@ -4451,7 +4451,7 @@ TEST_F(OptionTypeInfoTest, TestSerializeFunc) {
       return Status_InvalidArgument(name);
     } else {
       *value = name;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   });
   ConfigOptions config_options;
@@ -4509,7 +4509,7 @@ TEST_F(OptionTypeInfoTest, TestPrepareFunc) {
         } else {
           return Status_InvalidArgument("Bad Argument", name);
         }
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       });
   ConfigOptions config_options;
   int int1 = 100;
@@ -4535,7 +4535,7 @@ TEST_F(OptionTypeInfoTest, TestValidateFunc) {
       is_valid = (*sz == cf_opts.write_buffer_size);
     }
     if (is_valid) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       return Status_InvalidArgument("Mismatched value", name);
     }

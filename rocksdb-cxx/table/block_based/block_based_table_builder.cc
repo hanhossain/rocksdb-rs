@@ -222,7 +222,7 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
                      uint64_t /*file_size*/) override {
     // Intentionally left blank. Have no interest in collecting stats for
     // individual key/value pairs.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual void BlockAdd(uint64_t /* block_uncomp_bytes */,
@@ -241,7 +241,7 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
                         whole_key_filtering_ ? kPropTrue : kPropFalse});
     properties->insert({BlockBasedTablePropertyNames::kPrefixFiltering,
                         prefix_filtering_ ? kPropTrue : kPropFalse});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // The name of the properties collector can be used for debugging purpose.
@@ -372,7 +372,7 @@ struct BlockBasedTableBuilder::Rep {
     // to false, and this is ensured by status_mutex, so no special memory
     // order for status_ok is required.
     if (status_ok.load(std::memory_order_relaxed)) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       return CopyStatus();
     }
@@ -832,7 +832,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
       block_rep_buf[i].first_key_in_next_block.reset(new std::string());
       block_rep_buf[i].keys.reset(new Keys());
       block_rep_buf[i].slot.reset(new BlockRepSlot());
-      block_rep_buf[i].status = Status_OK();
+      block_rep_buf[i].status = rocksdb_rs::status::Status_OK();
       block_rep_pool.push(&block_rep_buf[i]);
     }
   }
@@ -1390,7 +1390,7 @@ void BlockBasedTableBuilder::BGWorkWriteMaybeCompressedBlock() {
       r->SetStatus(block_rep->status.Clone());
       // Reap block so that blocked Flush() can finish
       // if there is one, and Flush() will notice !ok() next time.
-      block_rep->status = Status_OK();
+      block_rep->status = rocksdb_rs::status::Status_OK();
       r->pc_rep->ReapBlock(block_rep);
       continue;
     }

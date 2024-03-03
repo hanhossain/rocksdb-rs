@@ -249,13 +249,13 @@ rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {
           s = env->DeleteFile(path);
         }
       } else if (s.IsNotSupported()) {
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
       if (!s.ok()) {
         // IsDirectory, etc. might not report NotFound
         if (s.IsNotFound() || env->FileExists(path).IsNotFound()) {
           // Allow files to be deleted externally
-          s = Status_OK();
+          s = rocksdb_rs::status::Status_OK();
         } else {
           break;
         }
@@ -268,7 +268,7 @@ rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {
     // DeleteDir might or might not report NotFound
     if (!s.ok() && (s.IsNotFound() || env->FileExists(dir).IsNotFound())) {
       // Allow to be deleted externally
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
   }
   return s;

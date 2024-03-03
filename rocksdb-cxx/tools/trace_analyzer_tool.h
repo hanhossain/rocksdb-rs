@@ -224,7 +224,7 @@ class TraceAnalyzer : private TraceRecord::Handler,
   using WriteBatch::Handler::PutBlobIndexCF;
   rocksdb_rs::status::Status PutBlobIndexCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                         const Slice& /*value*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // The default implementation of LogData does nothing.
@@ -232,24 +232,24 @@ class TraceAnalyzer : private TraceRecord::Handler,
   void LogData(const Slice& /*blob*/) override {}
 
   using WriteBatch::Handler::MarkBeginPrepare;
-  rocksdb_rs::status::Status MarkBeginPrepare(bool = false) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool = false) override { return rocksdb_rs::status::Status_OK(); }
 
   using WriteBatch::Handler::MarkEndPrepare;
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice& /*xid*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice& /*xid*/) override { return rocksdb_rs::status::Status_OK(); }
 
   using WriteBatch::Handler::MarkNoop;
-  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return rocksdb_rs::status::Status_OK(); }
 
   using WriteBatch::Handler::MarkRollback;
-  rocksdb_rs::status::Status MarkRollback(const Slice& /*xid*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice& /*xid*/) override { return rocksdb_rs::status::Status_OK(); }
 
   using WriteBatch::Handler::MarkCommit;
-  rocksdb_rs::status::Status MarkCommit(const Slice& /*xid*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice& /*xid*/) override { return rocksdb_rs::status::Status_OK(); }
 
   using WriteBatch::Handler::MarkCommitWithTimestamp;
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& /*xid*/,
                                  const Slice& /*commit_ts*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Process each trace operation and output the analysis result to

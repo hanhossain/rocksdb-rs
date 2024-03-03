@@ -845,7 +845,7 @@ TEST_P(DBWALTestWithParam, WALTrashCleanupOnOpen) {
     const char* Name() const override { return "MyEnv"; }
     rocksdb_rs::status::Status DeleteFile(const std::string& fname) override {
       if (fname.find(".log.trash") != std::string::npos && fake_log_delete) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
 
       return target()->DeleteFile(fname);
@@ -1340,7 +1340,7 @@ TEST_F(DBSSTTest, DBWithMaxSpaceAllowedRandomized) {
         bg_error_set = true;
         reached_max_space_on_flush++;
         // clear error to ensure compaction callback is called
-        *bg_error = Status_OK();
+        *bg_error = rocksdb_rs::status::Status_OK();
       });
 
   rocksdb::SyncPoint::GetInstance()->SetCallBack(

@@ -446,7 +446,7 @@ rocksdb_rs::status::Status SaveFilesInDirectory(const std::string& src_dirname,
 rocksdb_rs::status::Status InitUnverifiedSubdir(const std::string& dirname) {
   rocksdb_rs::status::Status s = Env::Default()->FileExists(dirname);
   if (s.IsNotFound()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const std::string kUnverifiedDirname = dirname + "/unverified";
@@ -467,7 +467,7 @@ rocksdb_rs::status::Status InitUnverifiedSubdir(const std::string& dirname) {
 rocksdb_rs::status::Status DestroyUnverifiedSubdir(const std::string& dirname) {
   rocksdb_rs::status::Status s = Env::Default()->FileExists(dirname);
   if (s.IsNotFound()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const std::string kUnverifiedDirname = dirname + "/unverified";
@@ -475,7 +475,7 @@ rocksdb_rs::status::Status DestroyUnverifiedSubdir(const std::string& dirname) {
     s = Env::Default()->FileExists(kUnverifiedDirname);
   }
   if (s.IsNotFound()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (s.ok()) {

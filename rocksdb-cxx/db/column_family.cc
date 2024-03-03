@@ -89,7 +89,7 @@ rocksdb_rs::status::Status ColumnFamilyHandleImpl::GetDescriptor(ColumnFamilyDes
   // accessing mutable cf-options requires db mutex.
   InstrumentedMutexLock l(mutex_);
   *desc = ColumnFamilyDescriptor(cfd()->GetName(), cfd()->GetLatestCFOptions());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 const Comparator* ColumnFamilyHandleImpl::GetComparator() const {
@@ -157,7 +157,7 @@ rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& 
     return Status_InvalidArgument(oss.str());
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status CheckConcurrentWritesSupported(const ColumnFamilyOptions& cf_options) {
@@ -170,7 +170,7 @@ rocksdb_rs::status::Status CheckConcurrentWritesSupported(const ColumnFamilyOpti
     return Status_InvalidArgument(
         "Memtable doesn't concurrent writes (allow_concurrent_memtable_write)");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status CheckCFPathsSupported(const DBOptions& db_options,
@@ -191,7 +191,7 @@ rocksdb_rs::status::Status CheckCFPathsSupported(const DBOptions& db_options,
           "universal and level compaction styles. ");
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {

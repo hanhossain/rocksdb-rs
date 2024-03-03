@@ -77,7 +77,7 @@ class PartitionedIndexIterator : public InternalIteratorBase<IndexValue> {
     } else if (block_iter_points_to_real_block_) {
       return block_iter_.status();
     } else {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
   inline IterBoundCheck UpperBoundCheckResult() override {
@@ -102,7 +102,7 @@ class PartitionedIndexIterator : public InternalIteratorBase<IndexValue> {
 
   void ResetPartitionedIndexIter() {
     if (block_iter_points_to_real_block_) {
-      block_iter_.Invalidate(Status_OK());
+      block_iter_.Invalidate(rocksdb_rs::status::Status_OK());
       block_iter_points_to_real_block_ = false;
     }
   }

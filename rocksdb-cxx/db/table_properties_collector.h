@@ -140,7 +140,7 @@ class TimestampTablePropertiesCollector : public IntTblPropCollector {
         cmp_->CompareTimestamp(timestamp_min_, timestamp_in_key) > 0) {
       timestamp_min_.assign(timestamp_in_key.data(), timestamp_in_key.size());
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void BlockAdd(uint64_t /* block_uncomp_bytes */,
@@ -156,7 +156,7 @@ class TimestampTablePropertiesCollector : public IntTblPropCollector {
             timestamp_max_.size() == cmp_->timestamp_size()));
     properties->insert({"rocksdb.timestamp_min", timestamp_min_});
     properties->insert({"rocksdb.timestamp_max", timestamp_max_});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const char* Name() const override {

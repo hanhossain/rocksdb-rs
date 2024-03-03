@@ -64,7 +64,7 @@ inline rocksdb_rs::status::Status PlainTableKeyDecoder::DecodeSize(uint32_t star
   if (inline_key_size < kSizeInlineLimit) {
     *key_size = inline_key_size;
     *bytes_read = 1;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     uint32_t extra_size;
     uint32_t tmp_bytes_read;
@@ -76,7 +76,7 @@ inline rocksdb_rs::status::Status PlainTableKeyDecoder::DecodeSize(uint32_t star
     assert(tmp_bytes_read > 0);
     *key_size = kSizeInlineLimit + extra_size;
     *bytes_read = tmp_bytes_read + 1;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 
@@ -292,7 +292,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::ReadInternalKey(
     }
     *bytes_read += user_key_size + 8;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t start_offset,
@@ -341,7 +341,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t s
       *internal_key = cur_key_.GetInternalKey();
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PlainTableKeyDecoder::NextPrefixEncodingKey(
@@ -452,7 +452,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::NextPrefixEncodingKey(
         return Status_Corruption("Un-identified size flag.");
     }
   } while (expect_suffix);  // Another round if suffix is expected.
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,

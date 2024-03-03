@@ -34,7 +34,7 @@ rocksdb_rs::status::Status AddAggregator(const std::string& function_name,
         "Cannot register function name kErrorFuncName");
   }
   func_map.emplace(function_name, std::move(agg));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 AggMergeOperator::AggMergeOperator() {}
@@ -57,7 +57,7 @@ rocksdb_rs::status::Status EncodeAggFuncAndPayload(const Slice& function_name, c
     return Status_InvalidArgument("Function name not registered");
   }
   output = EncodeAggFuncAndPayloadNoCheck(function_name, payload);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool ExtractAggFuncAndValue(const Slice& op, Slice& func, Slice& value) {

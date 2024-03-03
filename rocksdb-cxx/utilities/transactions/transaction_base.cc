@@ -55,7 +55,7 @@ rocksdb_rs::status::Status Transaction::CommitAndTryCreateSnapshot(
   if (snapshot) {
     *snapshot = new_snapshot;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 TransactionBaseImpl::TransactionBaseImpl(

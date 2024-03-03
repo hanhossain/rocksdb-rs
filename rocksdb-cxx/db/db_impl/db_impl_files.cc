@@ -73,7 +73,7 @@ rocksdb_rs::status::Status DBImpl::DisableFileDeletions() {
 rocksdb_rs::status::Status DBImpl::DisableFileDeletionsWithLock() {
   mutex_.AssertHeld();
   ++disable_delete_obsolete_files_;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::EnableFileDeletions(bool force) {
@@ -107,7 +107,7 @@ rocksdb_rs::status::Status DBImpl::EnableFileDeletions(bool force) {
   }
   job_context.Clean();
   LogFlush(immutable_db_options_.info_log);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool DBImpl::IsFileDeletionsEnabled() const {
@@ -944,7 +944,7 @@ rocksdb_rs::status::Status DBImpl::SetupDBId(bool read_only, RecoveryContext* re
     }
   }
   if (s.IsNotFound()) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   if (!s.ok()) {
     assert(s.IsIOError());

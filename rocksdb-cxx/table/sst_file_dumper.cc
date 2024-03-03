@@ -284,7 +284,7 @@ rocksdb_rs::status::Status SstFileDumper::ShowAllCompressionSizes(
       fprintf(stdout, "Unsupported compression type: %s.\n", i.second);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status SstFileDumper::ShowCompressionSize(
@@ -359,7 +359,7 @@ rocksdb_rs::status::Status SstFileDumper::ShowCompressionSize(
           ratio_not_compressed_blocks, ratio_not_compressed_pcnt);
   fprintf(stdout, " Not compressed (abort): %6" PRIu64 " (%5.1f%%)\n",
           not_compressed_blocks, not_compressed_pcnt);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Reads TableProperties prior to opening table reader in order to set up
@@ -434,7 +434,7 @@ rocksdb_rs::status::Status SstFileDumper::SetTableOptionsByMagicNumber(
     return Status_InvalidArgument(error_msg_buffer);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status SstFileDumper::SetOldTableOptions() {
@@ -444,7 +444,7 @@ rocksdb_rs::status::Status SstFileDumper::SetOldTableOptions() {
     fprintf(stdout, "Sst file format: block-based(old version)\n");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status SstFileDumper::ReadSequential(bool print_kv, uint64_t read_num,

@@ -67,7 +67,7 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMerge(
   if (operands.empty()) {
     assert(value != nullptr && result != nullptr);
     result->assign(value->data(), value->size());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (update_num_ops_stats) {
@@ -116,7 +116,7 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMerge(
     return Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status MergeHelper::TimedFullMergeWithEntity(
@@ -169,7 +169,7 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMergeWithEntity(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // PRE:  iter points to the first merge type entry

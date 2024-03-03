@@ -243,7 +243,7 @@ class MergingIterator : public InternalIterator {
 
   void SeekToFirst() override {
     ClearHeaps();
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     for (auto& child : children_) {
       child.iter.SeekToFirst();
       AddToMinHeapOrCheckStatus(&child);
@@ -266,7 +266,7 @@ class MergingIterator : public InternalIterator {
   void SeekToLast() override {
     ClearHeaps();
     InitMaxHeap();
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     for (auto& child : children_) {
       child.iter.SeekToLast();
       AddToMaxHeapOrCheckStatus(&child);
@@ -308,7 +308,7 @@ class MergingIterator : public InternalIterator {
     // holds after this call, and minHeap_.top().iter points to the
     // first key >= target among children_ that is not covered by any range
     // tombstone.
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     SeekImpl(target);
     FindNextVisibleKey();
 
@@ -322,7 +322,7 @@ class MergingIterator : public InternalIterator {
   void SeekForPrev(const Slice& target) override {
     assert(range_tombstone_iters_.empty() ||
            range_tombstone_iters_.size() == children_.size());
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     SeekForPrevImpl(target);
     FindPrevVisibleKey();
 

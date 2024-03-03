@@ -88,7 +88,7 @@ rocksdb_rs::status::Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
   *manifest_file_size = versions_->manifest_file_size();
 
   mutex_.Unlock();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
@@ -354,7 +354,7 @@ rocksdb_rs::status::Status DBImpl::GetLiveFilesStorageInfo(
     s = FlushWAL(
         immutable_db_options_.track_and_verify_wals_in_manifest /* sync */);
     if (s.IsNotSupported()) {  // read-only DB or similar
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
   }
 

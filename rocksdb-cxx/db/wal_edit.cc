@@ -47,7 +47,7 @@ rocksdb_rs::status::Status WalAddition::DecodeFrom(Slice* src) {
       }
       // TODO: process future tags such as checksum.
       case WalAdditionTag::kTerminate:
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       default: {
         std::stringstream ss;
         ss << "Unknown tag " << tag_value;
@@ -86,7 +86,7 @@ rocksdb_rs::status::Status WalDeletion::DecodeFrom(Slice* src) {
     return Status_Corruption(class_name, "Error decoding WAL log number");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 JSONWriter& operator<<(JSONWriter& jw, const WalDeletion& wal) {
@@ -108,7 +108,7 @@ std::string WalDeletion::DebugString() const {
 rocksdb_rs::status::Status WalSet::AddWal(const WalAddition& wal) {
   if (wal.GetLogNumber() < min_wal_number_to_keep_) {
     // The WAL has been obsolete, ignore it.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   auto it = wals_.lower_bound(wal.GetLogNumber());
@@ -116,7 +116,7 @@ rocksdb_rs::status::Status WalSet::AddWal(const WalAddition& wal) {
 
   if (!existing) {
     wals_.insert(it, {wal.GetLogNumber(), wal.GetMetadata()});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   assert(existing);
@@ -135,12 +135,12 @@ rocksdb_rs::status::Status WalSet::AddWal(const WalAddition& wal) {
     // bytes of 1.log. It's possible that thread 1 calls LogAndApply() after
     // thread 2.
     // In this case, just return ok.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Update synced size for the given WAL.
   it->second.SetSyncedSizeInBytes(wal.GetMetadata().GetSyncedSizeInBytes());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WalSet::AddWals(const WalAdditions& wals) {
@@ -159,7 +159,7 @@ rocksdb_rs::status::Status WalSet::DeleteWalsBefore(WalNumber wal) {
     min_wal_number_to_keep_ = wal;
     wals_.erase(wals_.begin(), wals_.lower_bound(wal));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void WalSet::Reset() {

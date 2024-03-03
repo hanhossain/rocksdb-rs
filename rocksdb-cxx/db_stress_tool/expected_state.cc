@@ -176,7 +176,7 @@ rocksdb_rs::status::Status AnonExpectedState::Open(bool /* create */) {
                                 sizeof(std::atomic<uint32_t>)]);
   values_ = &values_allocation_[0];
   Reset();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 ExpectedStateManager::ExpectedStateManager(size_t max_key,
@@ -386,7 +386,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   rocksdb_rs::status::Status Handle(const WriteQueryTraceRecord& record,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
     if (IsDone()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     WriteBatch batch(record.GetWriteBatchRep().ToString());
     return batch.Iterate(this);
@@ -395,19 +395,19 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   // Ignore reads.
   rocksdb_rs::status::Status Handle(const GetQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Ignore reads.
   rocksdb_rs::status::Status Handle(const IteratorSeekQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Ignore reads.
   rocksdb_rs::status::Status Handle(const MultiGetQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Below are the WriteBatch::Handler overrides. We could use a separate
@@ -432,7 +432,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     state_->SyncPut(column_family_id, static_cast<int64_t>(key_id), value_base);
     ++num_write_ops_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id, const Slice& key_with_ts,
@@ -471,7 +471,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     ++num_write_ops_;
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
@@ -491,7 +491,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     state_->SyncDelete(column_family_id, static_cast<int64_t>(key_id));
     ++num_write_ops_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
@@ -537,7 +537,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
                             static_cast<int64_t>(begin_key_id),
                             static_cast<int64_t>(end_key_id));
     ++num_write_ops_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key_with_ts,
@@ -557,7 +557,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   rocksdb_rs::status::Status MarkBeginPrepare(bool = false) override {
     assert(!buffered_writes_);
     buffered_writes_.reset(new WriteBatch());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkEndPrepare(const Slice& xid) override {
@@ -570,7 +570,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     buffered_writes_.reset();
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkCommit(const Slice& xid) override {
@@ -592,7 +592,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     assert(xid_to_buffered_writes_.at(xid_str));
     xid_to_buffered_writes_.erase(xid_str);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -675,12 +675,12 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
       // `db_stress` crashing while writing it. It shouldn't matter as long as
       // we already found all the write ops we need to catch up the expected
       // state.
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
     if (s.IsIncomplete()) {
       // OK because `Status_Incomplete` is expected upon finishing all the
       // trace records.
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
   }
 

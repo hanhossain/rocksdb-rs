@@ -181,13 +181,13 @@ rocksdb_rs::status::Status CompressedSecondaryCache::SetCapacity(size_t capacity
   MutexLock l(&capacity_mutex_);
   cache_options_.capacity = capacity;
   cache_->SetCapacity(capacity);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status CompressedSecondaryCache::GetCapacity(size_t& capacity) {
   MutexLock l(&capacity_mutex_);
   capacity = cache_options_.capacity;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::string CompressedSecondaryCache::GetPrintableOptions() const {

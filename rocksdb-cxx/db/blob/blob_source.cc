@@ -62,7 +62,7 @@ rocksdb_rs::status::Status BlobSource::GetBlobFromCache(
     RecordTick(statistics_, BLOB_DB_CACHE_BYTES_READ,
                cached_blob->GetValue()->size());
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   RecordTick(statistics_, BLOB_DB_CACHE_MISS);

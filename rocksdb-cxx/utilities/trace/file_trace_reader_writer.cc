@@ -28,7 +28,7 @@ FileTraceReader::~FileTraceReader() {
 
 rocksdb_rs::status::Status FileTraceReader::Close() {
   file_reader_.reset();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FileTraceReader::Reset() {
@@ -36,7 +36,7 @@ rocksdb_rs::status::Status FileTraceReader::Reset() {
     return Status_IOError("TraceReader is closed.");
   }
   offset_ = 0;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
@@ -93,7 +93,7 @@ FileTraceWriter::~FileTraceWriter() { Close(); }
 
 rocksdb_rs::status::Status FileTraceWriter::Close() {
   file_writer_.reset();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FileTraceWriter::Write(const Slice& data) {

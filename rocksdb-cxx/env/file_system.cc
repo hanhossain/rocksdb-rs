@@ -85,7 +85,7 @@ rocksdb_rs::status::Status FileSystem::CreateFromString(const ConfigOptions& con
   auto default_fs = FileSystem::Default();
   if (default_fs->IsInstanceOf(value)) {
     *result = default_fs;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     static std::once_flag once;
     std::call_once(once, [&]() {

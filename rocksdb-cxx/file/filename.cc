@@ -147,6 +147,6 @@ rocksdb_rs::status::Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs
       info_log_list->push_back(f);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

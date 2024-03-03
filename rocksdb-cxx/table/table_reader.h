@@ -169,7 +169,7 @@ class TableReader {
     (void)end;
     // Default implementation is NOOP.
     // The child class should implement functionality when applicable
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // convert db file to a human readable form

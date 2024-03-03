@@ -258,7 +258,7 @@ rocksdb_rs::status::Status CuckooTableBuilder::MakeHashTable(std::vector<CuckooB
     }
     (*buckets)[static_cast<size_t>(bucket_id)].vector_idx = vector_idx;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status CuckooTableBuilder::Finish() {

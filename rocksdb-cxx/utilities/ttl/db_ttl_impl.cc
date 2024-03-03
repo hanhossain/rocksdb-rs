@@ -315,7 +315,7 @@ DBWithTTLImpl::~DBWithTTLImpl() {
 }
 
 rocksdb_rs::status::Status DBWithTTLImpl::Close() {
-  rocksdb_rs::status::Status ret = Status_OK();
+  rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_OK();
   if (!closed_) {
     Options default_options = GetOptions();
     // Need to stop background compaction before getting rid of the filter
@@ -438,7 +438,7 @@ rocksdb_rs::status::Status DBWithTTLImpl::SanityCheckTimestamp(const Slice& str)
   if (timestamp_value < kMinTimestamp) {
     return Status_Corruption("Error: Timestamp < ttl feature release time!\n");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Checks if the string is stale or not according to TTl provided
@@ -467,7 +467,7 @@ rocksdb_rs::status::Status DBWithTTLImpl::StripTS(PinnableSlice* pinnable_val) {
   }
   // Erasing characters which hold the TS
   pinnable_val->remove_suffix(kTSLength);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Strips the TS from the end of the string
@@ -477,7 +477,7 @@ rocksdb_rs::status::Status DBWithTTLImpl::StripTS(std::string* str) {
   }
   // Erasing characters which hold the TS
   str->erase(str->length() - kTSLength, kTSLength);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBWithTTLImpl::Put(const WriteOptions& options,

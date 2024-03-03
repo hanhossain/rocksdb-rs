@@ -123,7 +123,7 @@ struct PersistentCacheConfig {
       return Status_InvalidArgument("invalid writer settings");
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   //

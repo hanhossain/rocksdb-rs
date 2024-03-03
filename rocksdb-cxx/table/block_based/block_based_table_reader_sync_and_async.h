@@ -594,7 +594,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
           handle_present = !block_handles[idx_in_batch].IsNull();
           parsed_block_value = results[idx_in_batch].GetValue();
           if (handle_present || parsed_block_value) {
-            first_biter.Invalidate(Status_OK());
+            first_biter.Invalidate(rocksdb_rs::status::Status_OK());
             NewDataBlockIterator<DataBlockIter>(
                 read_options, results[idx_in_batch].As<Block>(), &first_biter,
                 statuses[idx_in_batch].Clone());
@@ -621,7 +621,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
             break;
           }
 
-          next_biter.Invalidate(Status_OK());
+          next_biter.Invalidate(rocksdb_rs::status::Status_OK());
           rocksdb_rs::status::Status tmp_s = rocksdb_rs::status::Status_new();
           NewDataBlockIterator<DataBlockIter>(
               read_options, iiter->value().handle, &next_biter,

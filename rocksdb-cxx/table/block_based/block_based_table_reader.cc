@@ -442,7 +442,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
           seqno_pos->second.c_str());
       return Status_Corruption(msg_buf.data());
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   uint32_t version = DecodeFixed32(version_pos->second.c_str());
@@ -456,7 +456,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
                version, seqno_pos->second.c_str());
       return Status_Corruption(msg_buf.data());
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Since we have a plan to deprecate global_seqno, we do not return failure
@@ -494,7 +494,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
     return Status_Corruption(msg_buf.data());
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace
 
@@ -862,7 +862,7 @@ rocksdb_rs::status::Status BlockBasedTable::PrefetchTail(
       prefetch_buffer->reset(new FilePrefetchBuffer(
           0 /* readahead_size */, 0 /* max_readahead_size */,
           false /* enable */, true /* track_min_offset */));
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 
@@ -1282,7 +1282,7 @@ rocksdb_rs::status::Status BlockBasedTable::ReadMetaIndexBlock(
   *metaindex_block = std::move(metaindex);
   // meta block uses bytewise comparator.
   iter->reset(metaindex_block->get()->NewMetaIterator());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 template <typename TBlocklike>
@@ -2066,7 +2066,7 @@ rocksdb_rs::status::Status BlockBasedTable::ApproximateKeyAnchors(const ReadOpti
   if (count != 0) {
     anchors.emplace_back(last_key, range_size);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool BlockBasedTable::TimestampMayMatch(const ReadOptions& read_options) const {
@@ -2089,7 +2089,7 @@ rocksdb_rs::status::Status BlockBasedTable::Get(const ReadOptions& read_options,
   // Similar to Bloom filter !may_match
   // If timestamp is beyond the range of the table, skip
   if (!TimestampMayMatch(read_options)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   assert(key.size() >= 8);  // key must be internal key
   assert(get_context != nullptr);
@@ -2255,12 +2255,12 @@ rocksdb_rs::status::Status BlockBasedTable::MultiGetFilter(const ReadOptions& re
   if (mget_range->empty()) {
     // Caller should ensure non-empty (performance bug)
     assert(false);
-    return Status_OK();  // Nothing to do
+    return rocksdb_rs::status::Status_OK();  // Nothing to do
   }
 
   FilterBlockReader* const filter = rep_->filter.get();
   if (!filter) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // First check the full filter
@@ -2276,7 +2276,7 @@ rocksdb_rs::status::Status BlockBasedTable::MultiGetFilter(const ReadOptions& re
   FullFilterKeysMayMatch(filter, mget_range, no_io, prefix_extractor,
                          &lookup_context, read_options);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockBasedTable::Prefetch(const ReadOptions& read_options,
@@ -2338,7 +2338,7 @@ rocksdb_rs::status::Status BlockBasedTable::Prefetch(const ReadOptions& read_opt
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockBasedTable::VerifyChecksum(const ReadOptions& read_options,
@@ -2759,7 +2759,7 @@ rocksdb_rs::status::Status BlockBasedTable::GetKVPairsFromDataBlocks(
     }
     kv_pair_blocks->push_back(std::move(kv_pair_block));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockBasedTable::DumpTable(WritableFile* out_file) {
@@ -2874,7 +2874,7 @@ rocksdb_rs::status::Status BlockBasedTable::DumpTable(WritableFile* out_file) {
   if (!out_stream.good()) {
     return Status_IOError("Failed to write to output file");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockBasedTable::DumpIndexBlock(std::ostream& out_stream) {
@@ -2927,7 +2927,7 @@ rocksdb_rs::status::Status BlockBasedTable::DumpIndexBlock(std::ostream& out_str
     out_stream << "  ------\n";
   }
   out_stream << "\n";
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockBasedTable::DumpDataBlocks(std::ostream& out_stream) {
@@ -3005,7 +3005,7 @@ rocksdb_rs::status::Status BlockBasedTable::DumpDataBlocks(std::ostream& out_str
                << std::to_string(datablock_size_avg) << "\n";
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlockBasedTable::DumpKeyValue(const Slice& key, const Slice& value,

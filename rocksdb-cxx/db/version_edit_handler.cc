@@ -149,7 +149,7 @@ rocksdb_rs::status::Status FileChecksumRetriever::ApplyVersionEdit(VersionEdit& 
       return s;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 VersionEditHandler::VersionEditHandler(
@@ -569,7 +569,7 @@ rocksdb_rs::status::Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
       "VersionEditHandler::LoadTables:skip_load_table_files",
       &skip_load_table_files);
   if (skip_load_table_files) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   assert(cfd != nullptr);
   assert(!cfd->IsDropped());
@@ -586,10 +586,10 @@ rocksdb_rs::status::Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
       moptions->prefix_extractor, MaxFileSizeForL0MetaPin(*moptions),
       read_options_, moptions->block_protection_bytes_per_key);
   if ((s.IsPathNotFound() || s.IsCorruption()) && no_error_if_files_missing_) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   if (!s.ok() && !version_set_->db_options_->paranoid_checks) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   return s;
 }
@@ -662,13 +662,13 @@ rocksdb_rs::status::Status VersionEditHandler::ExtractInfoFromVersionEdit(Column
 rocksdb_rs::status::Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
     VersionEdit& edit, const ColumnFamilyData* cfd) {
   if (edit.GetNewFiles().empty()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   auto ucmp = cfd->user_comparator();
   assert(ucmp);
   size_t ts_sz = ucmp->timestamp_size();
   if (ts_sz == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   VersionEdit::NewFiles& new_files = edit.GetMutableNewFiles();
@@ -697,7 +697,7 @@ rocksdb_rs::status::Status VersionEditHandler::MaybeHandleFileBoundariesForNewFi
     meta.smallest.DecodeFrom(smallest_buf);
     meta.largest.DecodeFrom(largest_buf);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 VersionEditHandlerPointInTime::VersionEditHandlerPointInTime(
@@ -806,7 +806,7 @@ rocksdb_rs::status::Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     s = VerifyFile(cfd, fpath, level, meta);
     if (s.IsPathNotFound() || s.IsNotFound() || s.IsCorruption()) {
       missing_files.insert(file_num);
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     } else if (!s.ok()) {
       break;
     }
@@ -818,7 +818,7 @@ rocksdb_rs::status::Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     s = VerifyBlobFile(cfd, file_num, elem);
     if (s.IsPathNotFound() || s.IsNotFound() || s.IsCorruption()) {
       missing_blob_file_num = std::max(missing_blob_file_num, file_num);
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     } else if (!s.ok()) {
       break;
     }
@@ -878,7 +878,7 @@ rocksdb_rs::status::Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     if (!s.ok()) {
       delete version;
       if (s.IsCorruption()) {
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
       return s;
     }
@@ -929,7 +929,7 @@ rocksdb_rs::status::Status VersionEditHandlerPointInTime::VerifyBlobFile(
 rocksdb_rs::status::Status VersionEditHandlerPointInTime::LoadTables(
     ColumnFamilyData* /*cfd*/, bool /*prefetch_index_and_filter_in_cache*/,
     bool /*is_initial_load*/) {
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status ManifestTailer::Initialize() {
@@ -985,7 +985,7 @@ rocksdb_rs::status::Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
   *cfd = tmp_cfd;
   if (!tmp_cfd) {
     // For now, ignore new column families created after Recover() succeeds.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   auto builder_iter = builders_.find(edit.GetColumnFamily());
   assert(builder_iter != builders_.end());
@@ -1003,7 +1003,7 @@ rocksdb_rs::status::Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
   auto version_iter = versions_.find(edit.GetColumnFamily());
   assert(version_iter == versions_.end());
 #endif  // !NDEBUG
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void ManifestTailer::CheckIterationResult(const log::Reader& reader,

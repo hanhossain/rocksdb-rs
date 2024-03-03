@@ -166,7 +166,7 @@ rocksdb_rs::status::Status CuckooTableReader::Get(const ReadOptions& /*readOptio
          ++block_idx, bucket += bucket_length_) {
       if (ucomp_->Equal(Slice(unused_key_.data(), user_key.size()),
                         Slice(bucket, user_key.size()))) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
       // Here, we compare only the user key part as we support only one entry
       // per user key and we don't support snapshot.
@@ -189,11 +189,11 @@ rocksdb_rs::status::Status CuckooTableReader::Get(const ReadOptions& /*readOptio
           get_context->SaveValue(found_ikey, value, &dont_care);
         }
         // We don't support merge operations. So, we return here.
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void CuckooTableReader::Prepare(const Slice& key) {
@@ -225,7 +225,7 @@ class CuckooTableIterator : public InternalIterator {
   void Prev() override;
   Slice key() const override;
   Slice value() const override;
-  rocksdb_rs::status::Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
   void InitIfNeeded();
 
  private:

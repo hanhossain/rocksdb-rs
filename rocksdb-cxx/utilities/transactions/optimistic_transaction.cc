@@ -73,7 +73,7 @@ rocksdb_rs::status::Status OptimisticTransaction::Commit() {
       assert(0);
   }
   // unreachable, just void compiler complain
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status OptimisticTransaction::CommitWithSerialValidate() {
@@ -152,7 +152,7 @@ rocksdb_rs::status::Status OptimisticTransaction::CommitWithParallelValidate() {
 
 rocksdb_rs::status::Status OptimisticTransaction::Rollback() {
   Clear();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Record this key so that we can check it for conflicts at commit time.
@@ -165,7 +165,7 @@ rocksdb_rs::status::Status OptimisticTransaction::TryLock(ColumnFamilyHandle* co
   assert(!assume_tracked);  // not supported
   (void)assume_tracked;
   if (!do_validate) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   uint32_t cfh_id = GetColumnFamilyID(column_family);
 
@@ -183,7 +183,7 @@ rocksdb_rs::status::Status OptimisticTransaction::TryLock(ColumnFamilyHandle* co
   TrackKey(cfh_id, key_str, seq, read_only, exclusive);
 
   // Always return OK. Confilct checking will happen at commit time.
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Returns OK if it is safe to commit this transaction.  Returns Status_Busy

@@ -26,7 +26,7 @@ rocksdb_rs::status::Status ArenaWrappedDBIter::GetProperty(std::string prop_name
     if (!db_iter_->GetProperty(prop_name, prop).ok()) {
       *prop = std::to_string(sv_number_);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return db_iter_->GetProperty(prop_name, prop);
 }
@@ -142,7 +142,7 @@ rocksdb_rs::status::Status ArenaWrappedDBIter::Refresh() {
       break;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 ArenaWrappedDBIter* NewArenaWrappedDbIterator(

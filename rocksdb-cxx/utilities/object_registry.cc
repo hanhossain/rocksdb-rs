@@ -263,7 +263,7 @@ rocksdb_rs::status::Status ObjectRegistry::SetManagedObject(
   } else if (curr != object) {
     return Status_InvalidArgument("Object already exists: ", object_key);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::shared_ptr<Customizable> ObjectRegistry::GetManagedObject(
@@ -302,7 +302,7 @@ rocksdb_rs::status::Status ObjectRegistry::ListManagedObjects(
   if (parent_ != nullptr) {
     return parent_->ListManagedObjects(type, name, results);
   } else {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 

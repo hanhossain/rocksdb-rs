@@ -118,7 +118,7 @@ rocksdb_rs::status::Status BlockCacheTraceWriterImpl::WriteBlockAccess(
     const Slice& cf_name, const Slice& referenced_key) {
   uint64_t trace_file_size = trace_writer_->GetFileSize();
   if (trace_file_size > trace_options_.max_trace_file_size) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = record.access_timestamp;
@@ -203,7 +203,7 @@ rocksdb_rs::status::Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHead
         "Corrupted header in the trace file: The length of header is too "
         "long.");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
@@ -307,7 +307,7 @@ rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceReco
     }
     record->referenced_key_exist_in_block = static_cast<char>(enc_slice[0]);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 BlockCacheHumanReadableTraceWriter::~BlockCacheHumanReadableTraceWriter() {
@@ -332,7 +332,7 @@ rocksdb_rs::status::Status BlockCacheHumanReadableTraceWriter::WriteHumanReadabl
     const BlockCacheTraceRecord& access, uint64_t block_id,
     uint64_t get_key_id) {
   if (!human_readable_trace_file_writer_) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   int ret = snprintf(
       trace_record_buffer_, sizeof(trace_record_buffer_),
@@ -368,7 +368,7 @@ BlockCacheHumanReadableTraceReader::~BlockCacheHumanReadableTraceReader() {
 
 rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadHeader(
     BlockCacheTraceHeader* /*header*/) {
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadAccess(
@@ -443,7 +443,7 @@ rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadAccess(
     }
     record->referenced_key += tmp_get_key;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 BlockCacheTracer::BlockCacheTracer() { writer_.store(nullptr); }
@@ -477,11 +477,11 @@ rocksdb_rs::status::Status BlockCacheTracer::WriteBlockAccess(const BlockCacheTr
                                           const Slice& cf_name,
                                           const Slice& referenced_key) {
   if (!writer_.load() || !ShouldTrace(block_key, trace_options_)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   InstrumentedMutexLock lock_guard(&trace_writer_mutex_);
   if (!writer_.load()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return writer_.load()->WriteBlockAccess(record, block_key, cf_name,
                                           referenced_key);

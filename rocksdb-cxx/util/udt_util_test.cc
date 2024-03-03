@@ -70,19 +70,19 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
       return AddKey(cf, key);
     }
 
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
 
-    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-    rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-    rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
     rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
-    rocksdb_rs::status::Status MarkNoop(bool) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
 
     const std::vector<std::pair<uint32_t, const Slice>>& GetKeys() const {
       return keys_;
@@ -91,7 +91,7 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
    private:
     rocksdb_rs::status::Status AddKey(uint32_t cf, const Slice& key) {
       keys_.push_back(std::make_pair(cf, key));
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     std::vector<std::pair<uint32_t, const Slice>> keys_;
   };

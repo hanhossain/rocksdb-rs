@@ -186,7 +186,7 @@ rocksdb_rs::status::Status DeleteScheduler::MarkAsTrash(const std::string& file_
   if (DeleteScheduler::IsTrashFile(file_path)) {
     // This is already a trash file
     *trash_file = file_path;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   *trash_file = file_path + kTrashExtension;

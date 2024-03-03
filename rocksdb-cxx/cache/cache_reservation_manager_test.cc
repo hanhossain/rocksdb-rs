@@ -39,7 +39,7 @@ class CacheReservationManagerTest : public ::testing::Test {
 TEST_F(CacheReservationManagerTest, GenerateCacheKey) {
   std::size_t new_mem_used = 1 * kSizeDummyEntry;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_GE(cache->GetPinnedUsage(), 1 * kSizeDummyEntry);
   ASSERT_LT(cache->GetPinnedUsage(),
             1 * kSizeDummyEntry + kMetaDataChargeOverhead);
@@ -65,7 +65,7 @@ TEST_F(CacheReservationManagerTest, GenerateCacheKey) {
 TEST_F(CacheReservationManagerTest, KeepCacheReservationTheSame) {
   std::size_t new_mem_used = 1 * kSizeDummyEntry;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             1 * kSizeDummyEntry);
   ASSERT_EQ(test_cache_rev_mng->GetTotalMemoryUsed(), new_mem_used);
@@ -75,7 +75,7 @@ TEST_F(CacheReservationManagerTest, KeepCacheReservationTheSame) {
             1 * kSizeDummyEntry + kMetaDataChargeOverhead);
 
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to keep cache reservation the same when new_mem_used equals "
          "to current cache reservation";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
@@ -94,7 +94,7 @@ TEST_F(CacheReservationManagerTest,
        IncreaseCacheReservationByMultiplesOfDummyEntrySize) {
   std::size_t new_mem_used = 2 * kSizeDummyEntry;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to increase cache reservation correctly";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             2 * kSizeDummyEntry)
@@ -112,7 +112,7 @@ TEST_F(CacheReservationManagerTest,
        IncreaseCacheReservationNotByMultiplesOfDummyEntrySize) {
   std::size_t new_mem_used = 2 * kSizeDummyEntry + kSizeDummyEntry / 2;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to increase cache reservation correctly";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             3 * kSizeDummyEntry)
@@ -169,7 +169,7 @@ TEST(CacheReservationManagerIncreaseReservcationOnFullCacheTest,
 
   new_mem_used = kSmallCacheCapacity / 2;  // 2 dummy entries
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to decrease cache reservation after encountering cache "
          "reservation failure due to full cache";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
@@ -217,7 +217,7 @@ TEST(CacheReservationManagerIncreaseReservcationOnFullCacheTest,
   cache->SetCapacity(kBigCacheCapacity);
   new_mem_used = kSmallCacheCapacity + 1;
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to increase cache reservation after increasing cache capacity "
          "and mitigating cache full error";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
@@ -239,7 +239,7 @@ TEST_F(CacheReservationManagerTest,
        DecreaseCacheReservationByMultiplesOfDummyEntrySize) {
   std::size_t new_mem_used = 2 * kSizeDummyEntry;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             2 * kSizeDummyEntry);
   ASSERT_EQ(test_cache_rev_mng->GetTotalMemoryUsed(), new_mem_used);
@@ -249,7 +249,7 @@ TEST_F(CacheReservationManagerTest,
 
   new_mem_used = 1 * kSizeDummyEntry;
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to decrease cache reservation correctly";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             1 * kSizeDummyEntry)
@@ -267,7 +267,7 @@ TEST_F(CacheReservationManagerTest,
        DecreaseCacheReservationNotByMultiplesOfDummyEntrySize) {
   std::size_t new_mem_used = 2 * kSizeDummyEntry;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             2 * kSizeDummyEntry);
   ASSERT_EQ(test_cache_rev_mng->GetTotalMemoryUsed(), new_mem_used);
@@ -277,7 +277,7 @@ TEST_F(CacheReservationManagerTest,
 
   new_mem_used = kSizeDummyEntry / 2;
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to decrease cache reservation correctly";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             1 * kSizeDummyEntry)
@@ -308,7 +308,7 @@ TEST(CacheReservationManagerWithDelayedDecreaseTest,
 
   std::size_t new_mem_used = 8 * kSizeDummyEntry;
   rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             8 * kSizeDummyEntry);
   ASSERT_EQ(test_cache_rev_mng->GetTotalMemoryUsed(), new_mem_used);
@@ -319,7 +319,7 @@ TEST(CacheReservationManagerWithDelayedDecreaseTest,
 
   new_mem_used = 6 * kSizeDummyEntry;
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK())) << "Failed to delay decreasing cache reservation";
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK())) << "Failed to delay decreasing cache reservation";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             8 * kSizeDummyEntry)
       << "Failed to bookkeep correctly when delaying cache reservation "
@@ -331,7 +331,7 @@ TEST(CacheReservationManagerWithDelayedDecreaseTest,
 
   new_mem_used = 7 * kSizeDummyEntry;
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK())) << "Failed to delay decreasing cache reservation";
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK())) << "Failed to delay decreasing cache reservation";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
             8 * kSizeDummyEntry)
       << "Failed to bookkeep correctly when delaying cache reservation "
@@ -343,7 +343,7 @@ TEST(CacheReservationManagerWithDelayedDecreaseTest,
 
   new_mem_used = 6 * kSizeDummyEntry - 1;
   s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-  EXPECT_TRUE(s.eq(Status_OK()))
+  EXPECT_TRUE(s.eq(rocksdb_rs::status::Status_OK()))
       << "Failed to decrease cache reservation correctly when new_mem_used < "
          "GetTotalReservedCacheSize() * 3 / 4 on delayed decrease mode";
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(),
@@ -380,7 +380,7 @@ TEST(CacheReservationManagerDestructorTest,
             cache);
     std::size_t new_mem_used = 1 * kSizeDummyEntry;
     rocksdb_rs::status::Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
-    ASSERT_TRUE(s.eq(Status_OK()));
+    ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
     ASSERT_GE(cache->GetPinnedUsage(), 1 * kSizeDummyEntry);
     ASSERT_LT(cache->GetPinnedUsage(),
               1 * kSizeDummyEntry + kMetaDataChargeOverhead);
@@ -416,7 +416,7 @@ TEST(CacheReservationHandleTest, HandleTest) {
   rocksdb_rs::status::Status s = test_cache_rev_mng->MakeCacheReservation(
       incremental_mem_used_handle_1, &handle_1);
   mem_used = mem_used + incremental_mem_used_handle_1;
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   EXPECT_TRUE(handle_1 != nullptr);
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(), mem_used);
   EXPECT_EQ(test_cache_rev_mng->GetTotalMemoryUsed(), mem_used);
@@ -426,7 +426,7 @@ TEST(CacheReservationHandleTest, HandleTest) {
   s = test_cache_rev_mng->MakeCacheReservation(incremental_mem_used_handle_2,
                                                &handle_2);
   mem_used = mem_used + incremental_mem_used_handle_2;
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   EXPECT_TRUE(handle_2 != nullptr);
   EXPECT_EQ(test_cache_rev_mng->GetTotalReservedCacheSize(), mem_used);
   EXPECT_EQ(test_cache_rev_mng->GetTotalMemoryUsed(), mem_used);

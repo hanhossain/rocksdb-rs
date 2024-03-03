@@ -37,7 +37,7 @@ namespace rocksdb {
 
 rocksdb_rs::status::Status Checkpoint::Create(DB* db, Checkpoint** checkpoint_ptr) {
   *checkpoint_ptr = new CheckpointImpl(db);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status Checkpoint::CreateCheckpoint(const std::string& /*checkpoint_dir*/,
@@ -249,7 +249,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
                          info.file_type);
         if (s.IsNotSupported()) {
           same_fs = false;
-          s = Status_OK();
+          s = rocksdb_rs::status::Status_OK();
         }
       }
       if (!same_fs || info.trim_to_size) {
@@ -273,7 +273,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Exports all live SST files of a specified Column Family onto export_dir,
@@ -448,7 +448,7 @@ rocksdb_rs::status::Status CheckpointImpl::ExportFilesInMetaData(
         if (num_files == 1 && s.IsNotSupported()) {
           // Fallback to copy if link failed due to cross-device directories.
           hardlink_file = false;
-          s = Status_OK();
+          s = rocksdb_rs::status::Status_OK();
         }
       }
       if (!hardlink_file) {

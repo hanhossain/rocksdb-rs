@@ -461,7 +461,7 @@ rocksdb_rs::status::Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std
   }
   *size = PosixHelper::GetLogicalBlockSizeOfFd(fd);
   close(fd);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 size_t PosixHelper::GetLogicalBlockSizeOfFd(int fd) {

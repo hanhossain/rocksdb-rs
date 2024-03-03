@@ -355,7 +355,7 @@ rocksdb_rs::status::Status GenericRateLimiter::TuneLocked() {
     SetBytesPerSecondLocked(new_bytes_per_sec);
   }
   num_drains_ = 0;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 RateLimiter* NewGenericRateLimiter(

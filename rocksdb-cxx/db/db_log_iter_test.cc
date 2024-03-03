@@ -262,19 +262,19 @@ TEST_F(DBTestXactLogIterator, TransactionLogIteratorBlobs) {
     rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
       seen += "Put(" + std::to_string(cf) + ", " + key.ToString() + ", " +
               std::to_string(value.size()) + ")";
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
       seen += "Merge(" + std::to_string(cf) + ", " + key.ToString() + ", " +
               std::to_string(value.size()) + ")";
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     void LogData(const Slice& blob) override {
       seen += "LogData(" + blob.ToString() + ")";
     }
     rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
       seen += "Delete(" + std::to_string(cf) + ", " + key.ToString() + ")";
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   } handler;
   ASSERT_OK(res.writeBatchPtr->Iterate(&handler));

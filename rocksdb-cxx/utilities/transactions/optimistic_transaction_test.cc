@@ -1548,7 +1548,7 @@ rocksdb_rs::status::Status OptimisticTransactionStressTestInserter(OptimisticTra
                             std::to_string(num_transactions));
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace
 

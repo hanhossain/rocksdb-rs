@@ -58,7 +58,7 @@ class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
   // Therefore we are skipping it in here.
   virtual rocksdb_rs::status::Status MaybePostVerifyFilter(
       const Slice& /* filter_content */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

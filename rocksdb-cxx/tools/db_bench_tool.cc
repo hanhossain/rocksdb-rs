@@ -5390,7 +5390,7 @@ class Benchmark {
         }
       }
       if (!s.ok()) {
-        s = listener_->WaitForRecovery(600000000) ? Status_OK() : s.Clone();
+        s = listener_->WaitForRecovery(600000000) ? rocksdb_rs::status::Status_OK() : s.Clone();
       }
 
       if (!s.ok()) {
@@ -5718,7 +5718,7 @@ class Benchmark {
            {"level0_stop_writes_trigger",
             std::to_string(options_list[i].level0_stop_writes_trigger)}});
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void ReadSequential(ThreadState* thread) {
@@ -6125,7 +6125,7 @@ class Benchmark {
                     stat_list[i].ToString()->c_str());
             abort();
           }
-          stat_list[i] = Status_OK();
+          stat_list[i] = rocksdb_rs::status::Status_OK();
           pin_values[i].Reset();
         }
       }
@@ -6246,7 +6246,7 @@ class Benchmark {
         type_.push_back(range_);
         ratio_.push_back(ratio / sum);
       }
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     int GetType(int64_t rand_num) {
@@ -6365,7 +6365,7 @@ class Benchmark {
         offset += p_unit.keyrange_access;
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     // Generate the Key ID according to the input ini_rand and key distribution

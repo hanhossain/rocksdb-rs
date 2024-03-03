@@ -42,7 +42,7 @@ rocksdb_rs::status::Status BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlo
 
   if (!index_block_.IsEmpty()) {
     index_block->SetUnownedValue(index_block_.GetValue());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ReadOptions read_options = ro;

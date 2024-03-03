@@ -98,7 +98,7 @@ rocksdb_rs::status::Status CheckWriteBatchTimestampSizeConsistency(
       *ts_need_recovery = true;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace
 
@@ -198,7 +198,7 @@ rocksdb_rs::status::Status TimestampRecoveryHandler::ReconcileTimestampDiscrepan
     // The column family referred to by the WriteBatch is no longer running.
     // Copy over the entry as is to the new WriteBatch.
     *new_key = key;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   size_t running_ts_sz = running_iter->second;
   auto record_iter = record_ts_sz_.find(cf);
@@ -229,7 +229,7 @@ rocksdb_rs::status::Status TimestampRecoveryHandler::ReconcileTimestampDiscrepan
     default:
       assert(false);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status HandleWriteBatchTimestampSizeDifference(
@@ -240,7 +240,7 @@ rocksdb_rs::status::Status HandleWriteBatchTimestampSizeDifference(
     std::unique_ptr<WriteBatch>* new_batch) {
   // Quick path to bypass checking the WriteBatch.
   if (AllRunningColumnFamiliesConsistent(running_ts_sz, record_ts_sz)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   bool need_recovery = false;
   rocksdb_rs::status::Status status = CheckWriteBatchTimestampSizeConsistency(
@@ -259,6 +259,6 @@ rocksdb_rs::status::Status HandleWriteBatchTimestampSizeDifference(
       WriteBatchInternal::SetSequence(new_batch->get(), sequence);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

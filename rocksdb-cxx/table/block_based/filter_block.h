@@ -83,7 +83,7 @@ class FilterBlockBuilder {
   // FilterBlockBuilder::Finish.
   // Return Status_OK() if skipped.
   virtual rocksdb_rs::status::Status MaybePostVerifyFilter(const Slice& /* filter_content */) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 
@@ -166,7 +166,7 @@ class FilterBlockReader {
   virtual rocksdb_rs::status::Status CacheDependencies(
       const ReadOptions& /*ro*/, bool /*pin*/,
       FilePrefetchBuffer* /* tail_prefetch_buffer */) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual bool RangeMayExist(const Slice* /*iterate_upper_bound*/,

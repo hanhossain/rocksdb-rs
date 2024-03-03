@@ -85,7 +85,7 @@ rocksdb_rs::status::Status WritePreparedTxnDB::Initialize(
                     size_t /*index*/, size_t /*total*/) override {
       assert(!is_mem_disabled);
       db_->AddCommitted(commit_seq, commit_seq);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
    private:
@@ -110,7 +110,7 @@ rocksdb_rs::status::Status WritePreparedTxnDB::VerifyCFOptions(
         "memtable_factory->CanHandleDuplicatedKey() cannot be false with "
         "WritePrpeared transactions");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 Transaction* WritePreparedTxnDB::BeginTransaction(
@@ -163,7 +163,7 @@ rocksdb_rs::status::Status WritePreparedTxnDB::WriteInternal(const WriteOptions&
   if (batch->Count() == 0) {
     // Otherwise our 1 seq per batch logic will break since there is no seq
     // increased for this batch.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (write_options_orig.protection_bytes_per_key > 0) {
@@ -419,7 +419,7 @@ rocksdb_rs::status::Status WritePreparedTxnDB::NewIterators(
     db_iter->RegisterCleanup(CleanupWritePreparedTxnDBIterator, state, nullptr);
     iterators->push_back(db_iter);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void WritePreparedTxnDB::Init(const TransactionDBOptions& txn_db_opts) {

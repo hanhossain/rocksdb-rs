@@ -227,7 +227,7 @@ rocksdb_rs::status::Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, File
   if (mems_.empty()) {
     ROCKS_LOG_BUFFER(log_buffer_, "[%s] Nothing in memtable to flush",
                      cfd_->GetName().c_str());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // I/O measurement variables
@@ -281,7 +281,7 @@ rocksdb_rs::status::Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, File
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (mempurge_s.ok()) {
     base_->Unref();
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   } else {
     // This will release and re-acquire the mutex.
     s = WriteLevel0Table();

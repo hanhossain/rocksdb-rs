@@ -236,7 +236,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseStatement(std::string* nam
     return InvalidArgument(line_num,
                            "A valid statement must have a variable name.");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const std::string& file_name, FileSystem* fs,
@@ -366,7 +366,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::CheckSection(const OptionSectio
     }
     has_version_section_ = true;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(const std::string& ver_name,
@@ -417,7 +417,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(const std::s
              ver_name.c_str());
     return Status_InvalidArgument(buffer);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
@@ -472,7 +472,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
       // Return OK for not supported table factories as TableFactory
       // Deserialization is optional.
       cf_opt->table_factory.reset();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   } else if (section == kOptionSectionVersion) {
     for (const auto& pair : opt_map) {
@@ -506,7 +506,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ValidityCheck() {
         "A RocksDB Option file must have a single CFOptions:default section");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::string RocksDBOptionsParser::TrimAndRemoveComment(const std::string& line,
@@ -624,7 +624,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status RocksDBOptionsParser::VerifyDBOptions(
@@ -661,7 +661,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyDBOptions(
     }
     return Status_InvalidArgument(Slice(buffer, strlen(buffer)));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status RocksDBOptionsParser::VerifyCFOptions(
@@ -708,7 +708,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyCFOptions(
     }
     return Status_InvalidArgument(Slice(buffer, sizeof(buffer)));
   }  // For each option
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status RocksDBOptionsParser::VerifyTableFactory(
@@ -730,7 +730,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyTableFactory(
   } else {
     // TODO(yhchiang): further support sanity check here
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb
 

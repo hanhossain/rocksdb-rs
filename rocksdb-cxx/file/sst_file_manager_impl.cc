@@ -77,7 +77,7 @@ rocksdb_rs::status::Status SstFileManagerImpl::OnAddFile(const std::string& file
   OnAddFileImpl(file_path, file_size);
   TEST_SYNC_POINT_CALLBACK("SstFileManagerImpl::OnAddFile",
                            const_cast<std::string*>(&file_path));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status SstFileManagerImpl::OnDeleteFile(const std::string& file_path) {
@@ -87,7 +87,7 @@ rocksdb_rs::status::Status SstFileManagerImpl::OnDeleteFile(const std::string& f
   }
   TEST_SYNC_POINT_CALLBACK("SstFileManagerImpl::OnDeleteFile",
                            const_cast<std::string*>(&file_path));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void SstFileManagerImpl::OnCompactionCompletion(Compaction* c) {
@@ -114,7 +114,7 @@ rocksdb_rs::status::Status SstFileManagerImpl::OnMoveFile(const std::string& old
     OnDeleteFileImpl(old_path);
   }
   TEST_SYNC_POINT("SstFileManagerImpl::OnMoveFile");
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void SstFileManagerImpl::SetMaxAllowedSpaceUsage(uint64_t max_allowed_space) {
@@ -342,7 +342,7 @@ void SstFileManagerImpl::ClearError() {
     // could have removed it from the queue while we were in timed wait
     if (error_handler_list_.empty()) {
       ROCKS_LOG_INFO(logger_, "Clearing error\n");
-      bg_err_ = Status_OK();
+      bg_err_ = rocksdb_rs::status::Status_OK();
       return;
     }
   }
@@ -475,7 +475,7 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
 
   // trash_dir is deprecated and not needed anymore, but if user passed it
   // we will still remove files in it.
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (delete_existing_trash && trash_dir != "") {
     std::vector<std::string> files_in_trash;
     s = fs->GetChildren(trash_dir, IOOptions(), &files_in_trash, nullptr);

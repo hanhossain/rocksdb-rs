@@ -37,7 +37,7 @@ void Configurable::RegisterOptions(
 rocksdb_rs::status::Status Configurable::PrepareOptions(const ConfigOptions& opts) {
   // We ignore the invoke_prepare_options here intentionally,
   // as if you are here, you must have called PrepareOptions explicitly.
-  rocksdb_rs::status::Status status = Status_OK();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_OK();
   for (auto opt_iter : options_) {
     if (opt_iter.type_map != nullptr) {
       for (auto map_iter : *(opt_iter.type_map)) {
@@ -168,7 +168,7 @@ rocksdb_rs::status::Status Configurable::ConfigureOptions(
 
 rocksdb_rs::status::Status Configurable::ParseStringOptions(const ConfigOptions& /*config_options*/,
                                         const std::string& /*opts_str*/) {
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
@@ -191,7 +191,7 @@ rocksdb_rs::status::Status Configurable::ConfigureFromString(const ConfigOptions
   } else if (config_options.invoke_prepare_options) {
     s = PrepareOptions(config_options);
   } else {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   return s;
 }
@@ -240,7 +240,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureOptions(
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   std::unordered_map<std::string, std::string> remaining = opts_map;
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (!opts_map.empty()) {
     for (const auto& iter : configurable.options_) {
       if (iter.type_map != nullptr) {
@@ -258,7 +258,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureOptions(
     unused->insert(remaining.begin(), remaining.end());
   }
   if (config_options.ignore_unknown_options) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   } else if (s.ok() && unused == nullptr && !remaining.empty()) {
     s = Status_NotFound("Could not find option: ", remaining.begin()->first);
   }
@@ -281,8 +281,8 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureSomeOptions(
     const ConfigOptions& config_options, Configurable& configurable,
     const std::unordered_map<std::string, OptionTypeInfo>& type_map,
     std::unordered_map<std::string, std::string>* options, void* opt_ptr) {
-  rocksdb_rs::status::Status result = Status_OK();  // The last non-OK result (if any)
-  rocksdb_rs::status::Status notsup = Status_OK();  // The last NotSupported result (if any)
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_OK();  // The last non-OK result (if any)
+  rocksdb_rs::status::Status notsup = rocksdb_rs::status::Status_OK();  // The last NotSupported result (if any)
   std::string elem_name;
   int found = 1;
   std::unordered_set<std::string> unsupported;
@@ -290,7 +290,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureSomeOptions(
   // go through the remaining unused properties and attempt to configure them.
   while (found > 0 && !options->empty()) {
     found = 0;
-    notsup = Status_OK();
+    notsup = rocksdb_rs::status::Status_OK();
     for (auto it = options->begin(); it != options->end();) {
       const std::string& opt_name = configurable.GetOptionName(it->first);
       const std::string& opt_value = it->second;
@@ -326,11 +326,11 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureSomeOptions(
     }
   }
   if (config_options.ignore_unknown_options) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (!result.ok()) {
     return result;
   } else if (config_options.ignore_unsupported_options) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return notsup;
   }
@@ -368,7 +368,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
         EndsWith(opt_name, OptionTypeInfo::kIdPropSuffix())) {
       return configurable.ParseOption(copy, opt_info, name, value, opt_ptr);
     } else if (value.empty()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else if (custom == nullptr || !StartsWith(name, custom->GetId() + ".")) {
       return configurable.ParseOption(copy, opt_info, name, value, opt_ptr);
     } else if (value.find("=") != std::string::npos) {
@@ -384,7 +384,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
       // We do not have a Customizable to configure.  This is OK if the
       // value is empty (nothing being configured) but an error otherwise
       if (value.empty()) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return Status_InvalidArgument("Option not changeable: " + opt_name);
       }
@@ -393,7 +393,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
       // We have a property of the form "id=value" or "table.id=value"
       // This is OK if we ID/value matches the current customizable object
       if (custom->GetId() == value) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return Status_InvalidArgument("Option not changeable: " + opt_name);
       }
@@ -415,7 +415,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
       } else if (custom->GetId() != id) {
         return Status_InvalidArgument("Option not changeable: " + opt_name);
       } else if (props.empty()) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return custom->ConfigureFromMap(copy, props);
       }
@@ -556,7 +556,7 @@ rocksdb_rs::status::Status ConfigurableHelper::SerializeOptions(const ConfigOpti
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 //********************************************************************************
@@ -687,7 +687,7 @@ rocksdb_rs::status::Status Configurable::GetOptionsMap(
     if (!status.ok()) {       // There was an error creating the map.
       *id = value;            // Treat the value as id
       props->clear();         // Clear the properties
-      status = Status_OK();  // and ignore the error
+      status = rocksdb_rs::status::Status_OK();  // and ignore the error
     } else {
       auto iter = props->find(OptionTypeInfo::kIdPropName());
       if (iter != props->end()) {

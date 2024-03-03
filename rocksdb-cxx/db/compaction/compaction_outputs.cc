@@ -557,7 +557,7 @@ rocksdb_rs::status::Status CompactionOutputs::AddRangeDels(
     // This can only happen when lower_bound have the same user key as
     // next_table_min_key and that there is no point key in the current
     // compaction output file.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // The end key of the subcompaction must be bigger or equal to the upper
   // bound. If the end of subcompaction is null or the upper bound is null,
@@ -726,7 +726,7 @@ rocksdb_rs::status::Status CompactionOutputs::AddRangeDels(
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void CompactionOutputs::FillFilesToCutForTtl() {

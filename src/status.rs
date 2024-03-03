@@ -110,7 +110,6 @@ pub(crate) mod ffi {
         #[cxx_name = "Status_new"]
         fn status_new9(status: &Status, severity: Severity) -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_OK"]
         fn status_ok() -> Status;
 

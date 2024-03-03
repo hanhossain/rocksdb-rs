@@ -231,7 +231,7 @@ rocksdb_rs::status::Status ValidateOptionsByTable(
       return s;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace
 
@@ -303,7 +303,7 @@ rocksdb_rs::status::Status DBImpl::ValidateOptions(const DBOptions& db_options) 
         "writes in direct IO require writable_file_max_buffer_size > 0");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::NewDB(std::vector<std::string>* new_filenames) {
@@ -1322,7 +1322,7 @@ rocksdb_rs::status::Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& 
       if (immutable_db_options_.wal_recovery_mode ==
           WALRecoveryMode::kSkipAnyCorruptedRecords) {
         // We should ignore all errors unconditionally
-        status = Status_OK();
+        status = rocksdb_rs::status::Status_OK();
       } else if (immutable_db_options_.wal_recovery_mode ==
                  WALRecoveryMode::kPointInTimeRecovery) {
         if (status.IsIOError()) {
@@ -1336,7 +1336,7 @@ rocksdb_rs::status::Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& 
           return status;
         }
         // We should ignore the error but not continue replaying
-        status = Status_OK();
+        status = rocksdb_rs::status::Status_OK();
         stop_replay_for_corruption = true;
         corrupted_wal_number = wal_number;
         if (corrupted_wal_found != nullptr) {
@@ -1549,7 +1549,7 @@ rocksdb_rs::status::Status DBImpl::GetLogSizeAndMaybeTruncate(uint64_t wal_numbe
 
 rocksdb_rs::status::Status DBImpl::RestoreAliveLogFiles(const std::vector<uint64_t>& wal_numbers) {
   if (wal_numbers.empty()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   mutex_.AssertHeld();
@@ -1805,7 +1805,7 @@ rocksdb_rs::status::Status DB::OpenAndTrimHistory(
           "avoid_flush_during_recovery incompatible with "
           "OpenAndTrimHistory");
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   };
   auto s = validate_options();
   if (!s.ok()) {

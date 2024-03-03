@@ -306,7 +306,7 @@ rocksdb_rs::status::Status DBImpl::Resume() {
 
   if (!error_handler_.IsDBStopped() && !error_handler_.IsBGWorkStopped()) {
     // Nothing to do
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (error_handler_.IsRecoveryInProgress()) {
@@ -546,7 +546,7 @@ rocksdb_rs::status::Status DBImpl::MaybeReleaseTimestampedSnapshotsAndCheck() {
     return Status_Aborted("Cannot close DB with unreleased snapshot.");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::CloseHelper() {
@@ -582,7 +582,7 @@ rocksdb_rs::status::Status DBImpl::CloseHelper() {
     env_->UnSchedule(GetTaskTag(i), Env::Priority::HIGH);
   }
 
-  rocksdb_rs::status::Status ret = Status_OK();
+  rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_OK();
 
   // Wait for background work to finish
   while (bg_bottom_compaction_scheduled_ || bg_compaction_scheduled_ ||
@@ -757,7 +757,7 @@ void DBImpl::MaybeIgnoreError(rocksdb_rs::status::Status* s) const {
   } else {
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "Ignoring error %s",
                    s->ToString()->c_str());
-    *s = Status_OK();
+    *s = rocksdb_rs::status::Status_OK();
   }
 }
 
@@ -768,7 +768,7 @@ const rocksdb_rs::status::Status DBImpl::CreateArchivalDirectory() {
         static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(immutable_db_options_.GetWalDir()));
     return env_->CreateDirIfMissing(archivalPath);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::PrintStatistics() {
@@ -788,7 +788,7 @@ rocksdb_rs::status::Status DBImpl::StartPeriodicTaskScheduler() {
       "DBImpl::StartPeriodicTaskScheduler:DisableScheduler",
       &disable_scheduler);
   if (disable_scheduler) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   {
@@ -913,7 +913,7 @@ void DBImpl::PersistStats() {
 
   if (immutable_db_options_.persist_stats_to_disk) {
     WriteBatch batch;
-    rocksdb_rs::status::Status s = Status_OK();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
     if (stats_slice_initialized_) {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "Reading %" ROCKSDB_PRIszt " stats from statistics\n",
@@ -1220,7 +1220,7 @@ rocksdb_rs::status::Status DBImpl::SetDBOptions(
 
   MutableDBOptions new_options;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  rocksdb_rs::status::Status persist_options_status = Status_OK();
+  rocksdb_rs::status::Status persist_options_status = rocksdb_rs::status::Status_OK();
   bool wal_changed = false;
   WriteContext write_context;
   {
@@ -1420,7 +1420,7 @@ rocksdb_rs::status::Status DBImpl::FlushWAL(bool sync) {
     }
   }
   if (!sync) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // sync = true
   ROCKS_LOG_DEBUG(immutable_db_options_.info_log, "FlushWAL sync=true");
@@ -1613,7 +1613,7 @@ rocksdb_rs::status::Status DBImpl::UnlockWAL() {
   if (nonmem_maybe_stall_begun_count) {
     nonmem_write_thread_.WaitForStallEndedCount(nonmem_maybe_stall_begun_count);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::MarkLogsSynced(uint64_t up_to, bool synced_dir,
@@ -1690,7 +1690,7 @@ rocksdb_rs::status::Status DBImpl::GetFullHistoryTsLow(ColumnFamilyHandle* colum
   InstrumentedMutexLock l(&mutex_);
   *ts_low = cfd->GetFullHistoryTsLow();
   assert(cfd->user_comparator()->timestamp_size() == ts_low->size());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIterator* DBImpl::NewInternalIterator(const ReadOptions& read_options,
@@ -2995,7 +2995,7 @@ rocksdb_rs::status::Status DBImpl::MultiGetImpl(
     for (auto mget_iter = range.begin(); mget_iter != range.end();
          ++mget_iter) {
       mget_iter->merge_context.Clear();
-      *mget_iter->s = Status_OK();
+      *mget_iter->s = rocksdb_rs::status::Status_OK();
     }
 
     bool skip_memtable =
@@ -3582,7 +3582,7 @@ rocksdb_rs::status::Status DBImpl::NewIterators(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 const Snapshot* DBImpl::GetSnapshot() { return GetSnapshotImpl(false); }
@@ -3630,7 +3630,7 @@ rocksdb_rs::status::Status DBImpl::GetTimestampedSnapshots(
   timestamped_snapshots.clear();
   InstrumentedMutexLock lock_guard(&mutex_);
   timestamped_snapshots_.GetSnapshots(ts_lb, ts_ub, timestamped_snapshots);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 SnapshotImpl* DBImpl::GetSnapshotImpl(bool is_write_conflict_boundary,
@@ -3764,7 +3764,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
   if (lock) {
     mutex_.Unlock();
   }
-  return std::make_pair(Status_OK(), ret);
+  return std::make_pair(rocksdb_rs::status::Status_OK(), ret);
 }
 
 namespace {
@@ -3908,7 +3908,7 @@ rocksdb_rs::status::Status DBImpl::StartIOTrace(const TraceOptions& trace_option
 
 rocksdb_rs::status::Status DBImpl::EndIOTrace() {
   io_tracer_->EndIOTrace();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 
@@ -4046,7 +4046,7 @@ rocksdb_rs::status::Status DBImpl::ResetStats() {
       cfd->internal_stats()->Clear();
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool DBImpl::GetAggregatedIntProperty(const Slice& property,
@@ -4236,7 +4236,7 @@ rocksdb_rs::status::Status DBImpl::GetApproximateSizes(const SizeApproximationOp
   }
 
   ReturnAndCleanupSuperVersion(cfd, sv);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::list<uint64_t>::iterator
@@ -4326,7 +4326,7 @@ rocksdb_rs::status::Status DBImpl::DeleteFile(std::string name) {
                      "DeleteFile %s Skipped. File about to be compacted\n",
                      name.c_str());
       job_context.Clean();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     // Only the files in the last level can be deleted externally.
@@ -4380,7 +4380,7 @@ rocksdb_rs::status::Status DBImpl::DeleteFilesInRanges(ColumnFamilyHandle* colum
                                    bool include_end) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  rocksdb_rs::status::Status status = Status_OK();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_OK();
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   ColumnFamilyData* cfd = cfh->cfd();
   VersionEdit edit;
@@ -4570,7 +4570,7 @@ rocksdb_rs::status::Status DBImpl::CheckConsistency() {
       rocksdb_rs::status::Status s = env_->GetFileSize(file_path, &fsize);
       if (!s.ok() &&
           env_->GetFileSize(Rocks2LevelTableFileName(file_path), &fsize).ok()) {
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
       if (!s.ok()) {
         corruption_messages +=
@@ -4585,7 +4585,7 @@ rocksdb_rs::status::Status DBImpl::CheckConsistency() {
   }
 
   if (corruption_messages.size() == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return Status_Corruption(corruption_messages);
   }
@@ -4593,7 +4593,7 @@ rocksdb_rs::status::Status DBImpl::CheckConsistency() {
 
 rocksdb_rs::status::Status DBImpl::GetDbIdentity(std::string& identity) const {
   identity.assign(db_id_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::GetDbIdentityFromIdentityFile(std::string* identity) const {
@@ -4615,7 +4615,7 @@ rocksdb_rs::status::Status DBImpl::GetDbIdentityFromIdentityFile(std::string* id
 
 rocksdb_rs::status::Status DBImpl::GetDbSessionId(std::string& session_id) const {
   session_id.assign(db_session_id_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -4683,7 +4683,7 @@ rocksdb_rs::status::Status DB::DestroyColumnFamilyHandle(ColumnFamilyHandle* col
         "Cannot destroy the handle returned by DefaultColumnFamily()");
   }
   delete column_family;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 DB::~DB() {}
@@ -4926,7 +4926,7 @@ rocksdb_rs::status::Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
                              s.ToString()->c_str());
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -4974,7 +4974,7 @@ rocksdb_rs::status::Status DBImpl::DeleteObsoleteOptionsFiles() {
   const size_t kNumOptionsFilesKept = 2;
   DeleteOptionsFilesHelper(options_filenames, kNumOptionsFilesKept,
                            immutable_db_options_.info_log, GetEnv());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
@@ -5135,14 +5135,14 @@ rocksdb_rs::status::Status DBImpl::GetLatestSequenceForKey(
   if (*seq != kMaxSequenceNumber) {
     // Found a sequence number, no need to check immutable memtables
     *found_record_for_key = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   SequenceNumber lower_bound_in_mem = sv->mem->GetEarliestSequenceNumber();
   if (lower_bound_in_mem != kMaxSequenceNumber &&
       lower_bound_in_mem < lower_bound_seq) {
     *found_record_for_key = false;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Check if there is a record for this key in the immutable memtables
@@ -5167,14 +5167,14 @@ rocksdb_rs::status::Status DBImpl::GetLatestSequenceForKey(
   if (*seq != kMaxSequenceNumber) {
     // Found a sequence number, no need to check memtable history
     *found_record_for_key = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   SequenceNumber lower_bound_in_imm = sv->imm->GetEarliestSequenceNumber();
   if (lower_bound_in_imm != kMaxSequenceNumber &&
       lower_bound_in_imm < lower_bound_seq) {
     *found_record_for_key = false;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Check if there is a record for this key in the immutable memtables
@@ -5202,7 +5202,7 @@ rocksdb_rs::status::Status DBImpl::GetLatestSequenceForKey(
     // Found a sequence number, no need to check SST files
     assert(0 == ts_sz || *timestamp != std::string(ts_sz, '\xff'));
     *found_record_for_key = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // We could do a sv->imm->GetEarliestSequenceNumber(/*include_history*/ true)
@@ -5970,7 +5970,7 @@ rocksdb_rs::status::Status DBImpl::StartTrace(const TraceOptions& trace_options,
   InstrumentedMutexLock lock(&trace_mutex_);
   tracer_.reset(new Tracer(immutable_db_options_.clock, trace_options,
                            std::move(trace_writer)));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::EndTrace() {
@@ -5990,7 +5990,7 @@ rocksdb_rs::status::Status DBImpl::NewDefaultReplayer(
     std::unique_ptr<TraceReader>&& reader,
     std::unique_ptr<Replayer>* replayer) {
   replayer->reset(new ReplayerImpl(this, handles, std::move(reader)));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::StartBlockCacheTrace(
@@ -6018,7 +6018,7 @@ rocksdb_rs::status::Status DBImpl::StartBlockCacheTrace(
 
 rocksdb_rs::status::Status DBImpl::EndBlockCacheTrace() {
   block_cache_tracer_.EndTrace();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
@@ -6101,7 +6101,7 @@ rocksdb_rs::status::Status DBImpl::GetCreationTimeOfOldestFile(uint64_t* creatio
       }
     }
     *creation_time = oldest_time;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return Status_NotSupported("This API only works if max_open_files = -1");
   }

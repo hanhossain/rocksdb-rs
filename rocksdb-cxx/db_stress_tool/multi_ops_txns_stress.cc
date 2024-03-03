@@ -198,7 +198,7 @@ MultiOpsTxnsStressTest::Record::DecodePrimaryIndexValue(
     assert(false);
     return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
   }
-  return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{Status_OK(), b, c};
+  return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_OK(), b, c};
 }
 
 std::pair<rocksdb_rs::status::Status, uint32_t>
@@ -211,7 +211,7 @@ MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexValue(
   bool result __attribute__((unused)) =
       GetFixed32(&secondary_index_value, &crc);
   assert(result);
-  return std::make_pair(Status_OK(), crc);
+  return std::make_pair(rocksdb_rs::status::Status_OK(), crc);
 }
 
 std::pair<std::string, std::string>
@@ -277,7 +277,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
   }
   GetFixed32(&primary_index_value, &b_);
   GetFixed32(&primary_index_value, &c_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
@@ -322,7 +322,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
         << ", recomputed: " << crc;
     return Status_Corruption(oss.str());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void MultiOpsTxnsStressTest::FinishInitDb(SharedState* shared) {
@@ -409,7 +409,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestPrefixScan(
   (void)read_opts;
   (void)rand_column_families;
   (void)rand_keys;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Given a key K, this creates an iterator which scans to K and then
@@ -475,7 +475,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestBackupRestore(
   // TODO (yanqin)
   (void)thread;
   (void)rand_column_families;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestCheckpoint(
@@ -484,7 +484,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestCheckpoint(
   // TODO (yanqin)
   (void)thread;
   (void)rand_column_families;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestApproximateSize(
@@ -495,7 +495,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestApproximateSize(
   (void)thread;
   (void)iteration;
   (void)rand_column_families;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestCustomOperations(
@@ -1212,7 +1212,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
     oss << "Pk/sk mismatch: primary index has " << primary_index_entries_count
         << " entries. Secondary index has " << secondary_index_entries_count
         << " entries.";
-    VerificationAbort(thread->shared, oss.str(), Status_OK());
+    VerificationAbort(thread->shared, oss.str(), rocksdb_rs::status::Status_OK());
     assert(false);
     return;
   }

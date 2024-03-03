@@ -259,7 +259,7 @@ rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
                                      uint32_t protection_bytes_per_key,
                                      bool allow_data_in_errors) {
   if (protection_bytes_per_key == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   uint32_t key_length;
   const char* key_ptr = GetVarint32Ptr(entry, entry + 5, &key_length);
@@ -302,7 +302,7 @@ rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
     }
     return Status_Corruption(msg.c_str());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 int MemTable::KeyComparator::operator()(const char* prefix_len_key1,
@@ -356,7 +356,7 @@ class MemTableIterator : public InternalIterator {
         value_pinned_(
             !mem.GetImmutableMemTableOptions()->inplace_update_support),
         protection_bytes_per_key_(mem.moptions_.protection_bytes_per_key),
-        status_(Status_OK()),
+        status_(rocksdb_rs::status::Status_OK()),
         logger_(mem.moptions_.info_log) {
     if (use_range_del_table) {
       iter_ = mem.range_del_table_->GetIterator(arena);
@@ -842,7 +842,7 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
   UpdateOldestKeyTime();
 
   TEST_SYNC_POINT_CALLBACK("MemTable::Add:BeforeReturn:Encoded", &encoded);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Callback from MemTable::Get()
@@ -994,7 +994,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         Slice v = GetLengthPrefixedSlice(key_ptr + key_length);
 
-        *(s->status) = Status_OK();
+        *(s->status) = rocksdb_rs::status::Status_OK();
 
         if (s->value) {
           s->value->assign(v.data(), v.size());
@@ -1018,7 +1018,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         Slice v = GetLengthPrefixedSlice(key_ptr + key_length);
 
-        *(s->status) = Status_OK();
+        *(s->status) = rocksdb_rs::status::Status_OK();
 
         if (!s->do_merge) {
           // Preserve the value with the goal of returning it as part of
@@ -1077,7 +1077,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         Slice v = GetLengthPrefixedSlice(key_ptr + key_length);
 
-        *(s->status) = Status_OK();
+        *(s->status) = rocksdb_rs::status::Status_OK();
 
         if (!s->do_merge) {
           // Preserve the value with the goal of returning it as part of
@@ -1177,7 +1177,7 @@ static bool SaveValue(void* arg, const char* entry) {
             // We have found a final value (a base deletion) and have newer
             // merge operands that we do not intend to merge. Nothing remains
             // to be done so assign status to OK.
-            *(s->status) = Status_OK();
+            *(s->status) = rocksdb_rs::status::Status_OK();
           }
         } else {
           *(s->status) = Status_NotFound();
@@ -1511,7 +1511,7 @@ rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_
             UpdateEntryChecksum(nullptr, key, value, type, existing_seq,
                                 p + value.size());
           }
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       }
     }
@@ -1586,7 +1586,7 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
             UpdateEntryChecksum(nullptr, key, new_value, type, existing_seq,
                                 prev_buffer + new_prev_size);
           }
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         } else if (status == UpdateStatus::UPDATED) {
           rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
           if (kv_prot_info != nullptr) {
@@ -1605,7 +1605,7 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
           // `UPDATE_FAILED` is named incorrectly. It indicates no update
           // happened. It does not indicate a failure happened.
           UpdateFlushState();
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       }
     }

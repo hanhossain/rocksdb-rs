@@ -250,7 +250,7 @@ void ErrorHandler::CancelErrorRecovery() {
   EndAutoRecovery();
 }
 
-STATIC_AVOID_DESTRUCTION(const rocksdb_rs::status::Status, kOkStatus){Status_OK()};
+STATIC_AVOID_DESTRUCTION(const rocksdb_rs::status::Status, kOkStatus){rocksdb_rs::status::Status_OK()};
 
 // This is the main function for looking at an error during a background
 // operation and deciding the severity, and error recovery strategy. The high
@@ -553,7 +553,7 @@ rocksdb_rs::status::Status ErrorHandler::ClearBGError() {
   if (recovery_error_.ok()) {
     rocksdb_rs::status::Status old_bg_error = bg_error_.Clone();
     // Clear and check the recovery IO and BG error
-    bg_error_ = Status_OK();
+    bg_error_ = rocksdb_rs::status::Status_OK();
     recovery_io_error_ = IOStatus::OK();
     recovery_in_prog_ = false;
     soft_error_no_bg_work_ = false;
@@ -592,14 +592,14 @@ rocksdb_rs::status::Status ErrorHandler::RecoverFromBGError(bool is_manual) {
   if (bg_error_.severity() == rocksdb_rs::status::Severity::kSoftError &&
       recover_context_.flush_reason == FlushReason::kErrorRecovery) {
     // Simply clear the background error and return
-    recovery_error_ = Status_OK();
+    recovery_error_ = rocksdb_rs::status::Status_OK();
     return ClearBGError();
   }
 
   // Reset recovery_error_. We will use this to record any errors that happen
   // during the recovery process. While recovering, the only operations that
   // can generate background errors should be the flush operations
-  recovery_error_ = Status_OK();
+  recovery_error_ = rocksdb_rs::status::Status_OK();
   rocksdb_rs::status::Status s = db_->ResumeImpl(recover_context_);
   if (s.ok()) {
     soft_error_no_bg_work_ = false;
@@ -680,7 +680,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume0");
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume1");
     recovery_io_error_ = IOStatus::OK();
-    recovery_error_ = Status_OK();
+    recovery_error_ = rocksdb_rs::status::Status_OK();
     retry_count++;
     rocksdb_rs::status::Status s = db_->ResumeImpl(context);
     if (bg_error_stats_ != nullptr) {
@@ -720,7 +720,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
         TEST_SYNC_POINT("RecoverFromRetryableBGIOError:RecoverSuccess");
         rocksdb_rs::status::Status old_bg_error = bg_error_.Clone();
         is_db_stopped_.store(false, std::memory_order_release);
-        bg_error_ = Status_OK();
+        bg_error_ = rocksdb_rs::status::Status_OK();
         EventHelpers::NotifyOnErrorRecoveryEnd(
             db_options_.listeners, old_bg_error, bg_error_, db_mutex_);
         if (bg_error_stats_ != nullptr) {

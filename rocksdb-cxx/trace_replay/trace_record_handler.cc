@@ -79,7 +79,7 @@ rocksdb_rs::status::Status TraceExecutionHandler::Handle(
     result->reset(new SingleValueTraceExecutionResult(
         std::move(s), std::move(value), start, end, record.GetTraceType()));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TraceExecutionHandler::Handle(
@@ -184,7 +184,7 @@ rocksdb_rs::status::Status TraceExecutionHandler::Handle(
         std::move(ss), std::move(values), start, end, record.GetTraceType()));
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

@@ -32,7 +32,7 @@ rocksdb_rs::status::Status BlobDBImpl::DisableFileDeletions() {
 
   ROCKS_LOG_INFO(db_options_.info_log,
                  "Disabled blob file deletions. count: %d", count);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobDBImpl::EnableFileDeletions(bool force) {
@@ -57,7 +57,7 @@ rocksdb_rs::status::Status BlobDBImpl::EnableFileDeletions(bool force) {
                  count);
   // Consider trigger DeleteobsoleteFiles once after re-enabled, if we are to
   // make DeleteobsoleteFiles re-run interval configuration.
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
@@ -80,7 +80,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& re
     ret.emplace_back(
         rocksdb_rs::filename::BlobFileName("", bdb_options_.blob_dir, blob_file->BlobFileNumber()));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlobDBImpl::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {

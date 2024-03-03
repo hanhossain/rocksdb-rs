@@ -35,7 +35,7 @@ rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type, const char* da
 
   uint32_t computed = ComputeBuiltinChecksum(type, data, len);
   if (stored == computed) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // Unmask for people who might look for reference crc value
     if (type == kCRC32c) {

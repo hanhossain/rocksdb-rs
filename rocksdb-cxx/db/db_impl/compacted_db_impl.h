@@ -142,7 +142,7 @@ class CompactedDBImpl : public DBImpl {
  protected:
   rocksdb_rs::status::Status FlushForGetLiveFiles() override {
     // No-op for read-only DB
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

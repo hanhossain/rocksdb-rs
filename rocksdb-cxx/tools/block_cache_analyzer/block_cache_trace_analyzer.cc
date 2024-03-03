@@ -1527,7 +1527,7 @@ rocksdb_rs::status::Status BlockCacheTraceAnalyzer::RecordAccess(
 rocksdb_rs::status::Status BlockCacheTraceAnalyzer::Analyze() {
   SystemClock* clock = env_->GetSystemClock().get();
   std::unique_ptr<BlockCacheTraceReader> reader;
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (is_human_readable_trace_file_) {
     reader.reset(new BlockCacheHumanReadableTraceReader(trace_file_path_));
   } else {

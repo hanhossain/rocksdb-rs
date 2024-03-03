@@ -395,7 +395,7 @@ rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf
       return Status_Corruption("Found inconsistent keys at this snapshot");
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void StressTest::VerificationAbort(SharedState* shared, std::string msg,
@@ -637,7 +637,7 @@ rocksdb_rs::status::Status StressTest::NewTxn(WriteOptions& write_opts, Transact
   static std::atomic<uint64_t> txn_id = {0};
   if (FLAGS_use_optimistic_txn) {
     *txn = optimistic_txn_db_->BeginTransaction(write_opts);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     TransactionOptions txn_options;
     txn_options.use_only_the_last_commit_time_batch_for_recovery =
@@ -655,7 +655,7 @@ rocksdb_rs::status::Status StressTest::CommitTxn(Transaction* txn, ThreadState* 
   if (!FLAGS_use_txn) {
     return Status_InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
   }
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (FLAGS_use_optimistic_txn) {
     assert(optimistic_txn_db_);
     s = txn->Commit();
@@ -1336,7 +1336,7 @@ rocksdb_rs::status::Status StressTest::TestIterate(ThreadState* thread,
     op_logs += "; ";
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Test the return status of GetLiveFiles.
@@ -2197,7 +2197,7 @@ rocksdb_rs::status::Status StressTest::MaybeReleaseSnapshots(ThreadState* thread
       return s;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void StressTest::TestCompactRange(ThreadState* thread, int64_t rand_key,

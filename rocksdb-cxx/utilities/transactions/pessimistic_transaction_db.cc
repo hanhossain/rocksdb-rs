@@ -76,7 +76,7 @@ rocksdb_rs::status::Status PessimisticTransactionDB::VerifyCFOptions(
   assert(ucmp);
   size_t ts_sz = ucmp->timestamp_size();
   if (0 == ts_sz) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   if (ts_sz != sizeof(TxnTimestamp)) {
     std::ostringstream oss;
@@ -88,7 +88,7 @@ rocksdb_rs::status::Status PessimisticTransactionDB::VerifyCFOptions(
   if (txn_db_options_.write_policy != WRITE_COMMITTED) {
     return Status_NotSupported("Only WriteCommittedTxn supports timestamp");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PessimisticTransactionDB::Initialize(
@@ -774,7 +774,7 @@ rocksdb_rs::status::Status SnapshotCreationCallback::operator()(SequenceNumber s
   if (snapshot_ && snapshot_notifier_) {
     snapshot_notifier_->SnapshotCreated(snapshot_.get());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

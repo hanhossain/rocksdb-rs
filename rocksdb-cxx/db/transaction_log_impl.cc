@@ -216,7 +216,7 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
     } else {
       is_valid_ = false;
       if (current_last_seq_ == versions_->LastSequence()) {
-        current_status_ = Status_OK();
+        current_status_ = rocksdb_rs::status::Status_OK();
       } else {
         const char* msg = "Create a new iterator to fetch the new tail.";
         current_status_ = Status_TryAgain(msg);
@@ -277,7 +277,7 @@ void TransactionLogIteratorImpl::UpdateCurrentWriteBatch(const Slice& record) {
 
   current_batch_ = std::move(batch);
   is_valid_ = true;
-  current_status_ = Status_OK();
+  current_status_ = rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TransactionLogIteratorImpl::OpenLogReader(const LogFile* log_file) {
@@ -290,6 +290,6 @@ rocksdb_rs::status::Status TransactionLogIteratorImpl::OpenLogReader(const LogFi
   current_log_reader_.reset(
       new log::Reader(options_->info_log, std::move(file), &reporter_,
                       read_options_.verify_checksums_, log_file->LogNumber()));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

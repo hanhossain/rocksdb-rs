@@ -1911,7 +1911,7 @@ TEST_F(DBFlushTest, FlushError) {
   rocksdb_rs::status::Status s = dbfull()->TEST_SwitchMemtable();
   fault_injection_env->SetFilesystemActive(true);
   Destroy(options);
-  ASSERT_FALSE(s.eq(Status_OK()));
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
 }
 
 TEST_F(DBFlushTest, ManualFlushFailsInReadOnlyMode) {

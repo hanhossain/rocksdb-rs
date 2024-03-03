@@ -41,7 +41,7 @@ rocksdb_rs::status::Status Customizable::GetOption(const ConfigOptions& config_o
                                std::string* value) const {
   if (opt_name == OptionTypeInfo::kIdPropName()) {
     *value = GetId();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return Configurable::GetOption(config_options, opt_name, value);
   }

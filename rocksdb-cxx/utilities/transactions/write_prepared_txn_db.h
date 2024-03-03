@@ -896,7 +896,7 @@ class AddPreparedCallback : public PreReleaseCallback {
       db_impl_->logs_with_prep_tracker()->MarkLogAsContainingPrepSection(
           log_number);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -982,7 +982,7 @@ class WritePreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
     }
     // else SequenceNumber that is updated as part of the write already does the
     // publishing
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -1037,7 +1037,7 @@ class WritePreparedRollbackPreReleaseCallback : public PreReleaseCallback {
       db_->AddCommitted(prep_seq_ + i, last_commit_seq);
     }
     db_impl_->SetLastPublishedSequence(last_commit_seq);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -1060,27 +1060,27 @@ struct SubBatchCounter : public WriteBatch::Handler {
   size_t BatchCount() { return batches_; }
   void AddKey(const uint32_t cf, const Slice& key);
   void InitWithComp(const uint32_t cf);
-  rocksdb_rs::status::Status MarkNoop(bool) override { return Status_OK(); }
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
-  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
   rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
     AddKey(cf, key);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
     AddKey(cf, key);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
     AddKey(cf, key);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
     AddKey(cf, key);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
-  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
   Handler::OptionState WriteAfterCommit() const override {
     return Handler::OptionState::kDisabled;
   }

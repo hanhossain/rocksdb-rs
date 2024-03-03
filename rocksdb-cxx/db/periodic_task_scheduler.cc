@@ -53,7 +53,7 @@ rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task
   if (it != tasks_map_.end()) {
     // the task already exists and it's the same, no update needed
     if (it->second.repeat_every_sec == repeat_period_seconds) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // cancel the existing one before register new one
     timer_->Cancel(it->second.name);
@@ -77,7 +77,7 @@ rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task
   if (!result.second) {
     return Status_Aborted("Failed to add periodic task");
   };
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
@@ -90,7 +90,7 @@ rocksdb_rs::status::Status PeriodicTaskScheduler::Unregister(PeriodicTaskType ta
   if (!timer_->HasPendingTask()) {
     timer_->Shutdown();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 Timer* PeriodicTaskScheduler::Default() {

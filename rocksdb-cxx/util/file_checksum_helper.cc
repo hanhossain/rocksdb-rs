@@ -36,7 +36,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::GetAllFileChecksums(
     checksums->push_back(i.second.first);
     checksum_func_names->push_back(i.second.second);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FileChecksumListImpl::SearchOneFileChecksum(
@@ -53,7 +53,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::SearchOneFileChecksum(
     *checksum = it->second.first;
     *checksum_func_name = it->second.second;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FileChecksumListImpl::InsertOneFileChecksum(
@@ -67,7 +67,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::InsertOneFileChecksum(
     it->second.first = checksum;
     it->second.second = checksum_func_name;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FileChecksumListImpl::RemoveOneFileChecksum(uint64_t file_number) {
@@ -77,7 +77,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::RemoveOneFileChecksum(uint64_t 
   } else {
     checksum_map_.erase(it);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 FileChecksumList* NewFileChecksumList() {
@@ -161,7 +161,7 @@ rocksdb_rs::status::Status FileChecksumGenFactory::CreateFromString(
   });
   if (value == FileChecksumGenCrc32cFactory::kClassName()) {
     *result = GetFileChecksumGenCrc32cFactory();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     rocksdb_rs::status::Status s = LoadSharedObject<FileChecksumGenFactory>(options, value, result);
     return s;

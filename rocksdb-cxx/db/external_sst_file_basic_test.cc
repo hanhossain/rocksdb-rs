@@ -263,7 +263,7 @@ class ChecksumVerifyHelper {
     if (file_checksum_gen_factory == nullptr) {
       *file_checksum = kUnknownFileChecksum;
       *file_checksum_func_name = kUnknownFileChecksumFuncName;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       FileChecksumGenContext gen_context;
       std::unique_ptr<FileChecksumGenerator> file_checksum_gen =
@@ -283,7 +283,7 @@ class ChecksumVerifyHelper {
       file_checksum_gen->Finalize();
       *file_checksum = file_checksum_gen->GetChecksum();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 

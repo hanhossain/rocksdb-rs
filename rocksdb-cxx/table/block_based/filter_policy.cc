@@ -229,7 +229,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
   // it iterates to ResetAndFindSeedToSolve
   rocksdb_rs::status::Status MaybeVerifyHashEntriesChecksum() {
     if (!detect_filter_construct_corruption_) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     uint64_t actual_hash_entries_xor_checksum = 0;
@@ -238,7 +238,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
     }
 
     if (actual_hash_entries_xor_checksum == hash_entries_info_.xor_checksum) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       // Since these hash entries are corrupted and they will not be used
       // anymore, we can reset them and release memory.
@@ -391,7 +391,7 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
     final_filter_cache_res_handles_.push_back(
         std::move(final_filter_cache_res_handle));
     if (status) {
-      *status = Status_OK();
+      *status = rocksdb_rs::status::Status_OK();
     }
     return rv;
   }
@@ -623,7 +623,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
       // Save a conditional in Ribbon queries by using alternate reader
       // for zero entries added.
       if (status) {
-        *status = Status_OK();
+        *status = rocksdb_rs::status::Status_OK();
       }
       return FinishAlwaysFalse(buf);
     }
@@ -649,7 +649,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     BandingType banding;
     std::size_t bytes_banding = ribbon::StandardBanding<
         Standard128RibbonTypesAndSettings>::EstimateMemoryUsage(num_slots);
-    rocksdb_rs::status::Status status_banding_cache_res = Status_OK();
+    rocksdb_rs::status::Status status_banding_cache_res = rocksdb_rs::status::Status_OK();
 
     // Cache charging for banding
     std::unique_ptr<CacheReservationManager::CacheReservationHandle>
@@ -753,7 +753,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     final_filter_cache_res_handles_.push_back(
         std::move(final_filter_cache_res_handle));
     if (status) {
-      *status = Status_OK();
+      *status = rocksdb_rs::status::Status_OK();
     }
     return rv;
   }
@@ -1272,7 +1272,7 @@ class AlwaysFalseFilter : public BuiltinFilterBitsReader {
 };
 
 rocksdb_rs::status::Status XXPH3FilterBitsBuilder::MaybePostVerify(const Slice& filter_content) {
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
 
   if (!detect_filter_construct_corruption_) {
     return s;
@@ -1919,10 +1919,10 @@ rocksdb_rs::status::Status FilterPolicy::CreateFromString(
     std::shared_ptr<const FilterPolicy>* policy) {
   if (value == kNullptrString || value.empty()) {
     policy->reset();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (value == ReadOnlyBuiltinFilterPolicy::kClassName()) {
     *policy = std::make_shared<ReadOnlyBuiltinFilterPolicy>();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   std::string id;
@@ -1941,7 +1941,7 @@ rocksdb_rs::status::Status FilterPolicy::CreateFromString(
     status = options.registry->NewSharedObject(id, policy);
   }
   if (options.ignore_unsupported_options && status.IsNotSupported()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (status.ok()) {
     status = Customizable::ConfigureNewObject(
         options, const_cast<FilterPolicy*>(policy->get()), opt_map);

@@ -112,7 +112,7 @@ class PosixDynamicLibrary : public DynamicLibrary {
     dlerror();  // Clear any old error
     *func = dlsym(handle_, sym_name.c_str());
     if (*func != nullptr) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       char* err = dlerror();
       return Status_NotFound("Error finding symbol: " + sym_name, err);
@@ -189,7 +189,7 @@ class PosixClock : public SystemClock {
       return IOError("GetCurrentTime", "", errno);
     }
     *unix_time = (int64_t)ret;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   std::string TimeToString(uint64_t secondsSince1970) override {
@@ -253,7 +253,7 @@ class PosixEnv : public CompositeEnv {
       void* hndl = dlopen(NULL, RTLD_NOW);
       if (hndl != nullptr) {
         result->reset(new PosixDynamicLibrary(name, hndl));
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
     } else {
       std::string library_name = name;
@@ -270,7 +270,7 @@ class PosixEnv : public CompositeEnv {
         void* hndl = dlopen(library_name.c_str(), RTLD_NOW);
         if (hndl != nullptr) {
           result->reset(new PosixDynamicLibrary(library_name, hndl));
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       } else {
         std::string local_path;
@@ -281,7 +281,7 @@ class PosixEnv : public CompositeEnv {
             void* hndl = dlopen(full_name.c_str(), RTLD_NOW);
             if (hndl != nullptr) {
               result->reset(new PosixDynamicLibrary(full_name, hndl));
-              return Status_OK();
+              return rocksdb_rs::status::Status_OK();
             }
           }
         }
@@ -342,7 +342,7 @@ class PosixEnv : public CompositeEnv {
         return IOError("GetHostName", "", errno);
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ThreadStatusUpdater* GetThreadStatusUpdater() const override {
@@ -364,7 +364,7 @@ class PosixEnv : public CompositeEnv {
 
   rocksdb_rs::status::Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
     allow_non_owner_access_ = allow_non_owner_access;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Allow increasing the number of worker threads.
@@ -390,7 +390,7 @@ class PosixEnv : public CompositeEnv {
   rocksdb_rs::status::Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
     assert(pool >= Priority::BOTTOM && pool <= Priority::HIGH);
     thread_pools_[pool].LowerCPUPriority(pri);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

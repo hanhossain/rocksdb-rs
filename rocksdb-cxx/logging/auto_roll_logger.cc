@@ -34,7 +34,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
       db_log_dir_(db_log_dir),
       fs_(fs),
       clock_(clock),
-      status_(Status_OK()),
+      status_(rocksdb_rs::status::Status_OK()),
       kMaxLogFileSize(log_max_size),
       kLogFileTimeToRoll(log_file_time_to_roll),
       kKeepLogFileNum(keep_log_file_num),
@@ -164,7 +164,7 @@ rocksdb_rs::status::Status AutoRollLogger::TrimOldLogFiles() {
       return s;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::string AutoRollLogger::ValistToString(const char* format,
@@ -277,7 +277,7 @@ rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
                                std::shared_ptr<Logger>* logger) {
   if (options.info_log) {
     *logger = options.info_log;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   Env* env = options.env;
@@ -302,7 +302,7 @@ rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
       // not exist and error should be ignored. db_log_dir creation will handle
       // the error in case there is any error in the creation of dbname on same
       // filesystem.
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
   }
   assert(s.ok());
@@ -352,12 +352,12 @@ rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
     if (s.IsPathNotFound()) {
       s = env->FileExists(fname);
       if (s.IsNotFound()) {
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
     }
   } else if (s.IsNotFound()) {
     // "LOG" is not required to exist since this could be a new DB.
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   if (s.ok()) {
     s = env->NewLogger(fname, logger);

@@ -1072,7 +1072,7 @@ TEST_F(DBTest2, WalFilterTestWithColumnFamilies) {
             cf_wal_keys_[column_family_id].push_back(
                 std::string(key.data(), key.size()));
           }
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       } handler(log_number, cf_log_number_map_, cf_wal_keys_);
 
@@ -1761,7 +1761,7 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
   const int kValSize = 256;
   Random rnd(405);
 
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
 
   DestroyAndReopen(options);
   // Write 10 random files
@@ -2370,7 +2370,7 @@ class MockPersistentCache : public PersistentCache {
 
     data_.insert(std::make_pair(page_key.ToString(), std::string(data, size)));
     size_ += size;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
@@ -2385,7 +2385,7 @@ class MockPersistentCache : public PersistentCache {
     data->reset(new char[it->second.size()]);
     memcpy(data->get(), it->second.c_str(), it->second.size());
     *size = it->second.size();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   bool IsCompressed() override { return is_compressed_; }
@@ -4218,7 +4218,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
       default:
         return Status_Corruption("Type mismatch.");
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual rocksdb_rs::status::Status Handle(
@@ -4236,7 +4236,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
       default:
         return Status_Corruption("Type mismatch.");
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual rocksdb_rs::status::Status Handle(
@@ -4254,7 +4254,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
       default:
         return Status_Corruption("Type mismatch.");
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual rocksdb_rs::status::Status Handle(const IteratorTraceExecutionResult& result) override {
@@ -4272,7 +4272,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
       default:
         return Status_Corruption("Type mismatch.");
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void Reset() {
@@ -4601,7 +4601,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
     // Next should fail if unprepared.
     ASSERT_TRUE(replayer->Next(nullptr).IsIncomplete());
     ASSERT_OK(replayer->Prepare());
-    rocksdb_rs::status::Status s = Status_OK();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
     // Looping until trace end.
     while (s.ok()) {
       s = replayer->Next(&record);
@@ -5155,7 +5155,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   ASSERT_OK(Flush());
 
   PinnableSlice pinned_value;
-  ASSERT_TRUE(Get("foo", &pinned_value).eq(Status_OK()));
+  ASSERT_TRUE(Get("foo", &pinned_value).eq(rocksdb_rs::status::Status_OK()));
   // It is not safe to pin mmap files as they might disappear by compaction
   ASSERT_FALSE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
@@ -5172,7 +5172,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   // Unsafe to pin mmap files when they could be kicked out of table cache
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
-  ASSERT_TRUE(Get("foo", &pinned_value).eq(Status_OK()));
+  ASSERT_TRUE(Get("foo", &pinned_value).eq(rocksdb_rs::status::Status_OK()));
   ASSERT_FALSE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
 
@@ -5182,7 +5182,7 @@ TEST_F(DBTest2, PinnableSliceAndMmapReads) {
   Close();
   options.max_open_files = -1;
   ASSERT_OK(ReadOnlyReopen(options));
-  ASSERT_TRUE(Get("foo", &pinned_value).eq(Status_OK()));
+  ASSERT_TRUE(Get("foo", &pinned_value).eq(rocksdb_rs::status::Status_OK()));
   ASSERT_TRUE(pinned_value.IsPinned());
   ASSERT_EQ(pinned_value.ToString(), "bar");
 }

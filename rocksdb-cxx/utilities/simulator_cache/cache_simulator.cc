@@ -255,7 +255,7 @@ rocksdb_rs::status::Status BlockCacheTraceSimulator::InitializeCaches() {
       sim_caches_[config].push_back(sim_cache);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlockCacheTraceSimulator::Access(const BlockCacheTraceRecord& access) {

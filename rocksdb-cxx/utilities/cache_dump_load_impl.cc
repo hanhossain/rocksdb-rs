@@ -25,7 +25,7 @@ namespace rocksdb {
 // Therefore, a filter is need to decide if the key of the block satisfy the
 // requirement.
 rocksdb_rs::status::Status CacheDumperImpl::SetDumpFilter(std::vector<DB*> db_list) {
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   for (size_t i = 0; i < db_list.size(); i++) {
     assert(i < db_list.size());
     TablePropertiesCollection ptc;

@@ -790,7 +790,7 @@ rocksdb_rs::status::Status NewEncryptedFileSystemImpl(
     const std::shared_ptr<EncryptionProvider>& provider,
     std::unique_ptr<FileSystem>* result) {
   result->reset(new EncryptedFileSystemImpl(base, provider));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::shared_ptr<FileSystem> NewEncryptedFS(
@@ -851,7 +851,7 @@ rocksdb_rs::status::Status BlockAccessCipherStream::Encrypt(uint64_t fileOffset,
     }
     dataSize -= n;
     if (dataSize == 0) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     data += n;
     blockOffset = 0;
@@ -903,7 +903,7 @@ rocksdb_rs::status::Status BlockAccessCipherStream::Decrypt(uint64_t fileOffset,
 
     dataSize -= n;
     if (dataSize == 0) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     data += n;
     blockOffset = 0;
@@ -941,7 +941,7 @@ class ROT13BlockCipher : public BlockCipher {
     for (size_t i = 0; i < blockSize_; ++i) {
       data[i] += 13;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status Decrypt(char* data) override { return Encrypt(data); }
 };
@@ -977,7 +977,7 @@ rocksdb_rs::status::Status CTRCipherStream::EncryptBlock(uint64_t blockIndex, ch
   for (size_t i = 0; i < blockSize; i++) {
     data[i] = data[i] ^ scratch[i];
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status CTRCipherStream::DecryptBlock(uint64_t blockIndex, char* data,
@@ -1012,7 +1012,7 @@ rocksdb_rs::status::Status CTREncryptionProvider::AddCipher(const std::string& /
     return Status_NotSupported("Cannot add keys to CTREncryptionProvider");
   } else if (strcmp(ROT13BlockCipher::kClassName(), cipher) == 0) {
     cipher_.reset(new ROT13BlockCipher(len));
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return BlockCipher::CreateFromString(ConfigOptions(), std::string(cipher),
                                          &cipher_);
@@ -1120,7 +1120,7 @@ rocksdb_rs::status::Status CTREncryptionProvider::CreateCipherStreamFromPrefix(
     std::unique_ptr<BlockAccessCipherStream>* result) {
   (*result) = std::unique_ptr<BlockAccessCipherStream>(
       new CTRCipherStream(cipher_, iv.data(), initialCounter));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {

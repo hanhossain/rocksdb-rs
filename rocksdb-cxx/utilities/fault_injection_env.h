@@ -186,7 +186,7 @@ class FaultInjectionTestEnv : public EnvWrapper {
     if (!IsFilesystemActive() &&
         error_.subcode() == rocksdb_rs::status::SubCode::kNoSpace) {
       *disk_free = 0;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       return target()->GetFreeSpace(path, disk_free);
     }

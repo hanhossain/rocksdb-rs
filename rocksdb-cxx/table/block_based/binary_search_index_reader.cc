@@ -36,7 +36,7 @@ rocksdb_rs::status::Status BinarySearchIndexReader::Create(
   index_reader->reset(
       new BinarySearchIndexReader(table, std::move(index_block)));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIteratorBase<IndexValue>* BinarySearchIndexReader::NewIterator(

@@ -1616,7 +1616,7 @@ TEST_P(TransactionStressTest, TwoPhaseLongPrepareTest) {
 
   // verify data txn data
   s = db->Get(read_options, "foo", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar");
 
   // verify non txn data
@@ -1624,7 +1624,7 @@ TEST_P(TransactionStressTest, TwoPhaseLongPrepareTest) {
     std::string key(i, 'k');
     std::string val(1000, 'v');
     s = db->Get(read_options, key, &value);
-    ASSERT_TRUE(s.eq(Status_OK()));
+    ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
     ASSERT_EQ(value, val);
   }
 
@@ -1673,7 +1673,7 @@ TEST_P(TransactionTest, TwoPhaseSequenceTest) {
 
   // value is now available
   s = db->Get(read_options, "foo4", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar4");
 }
 #endif  // !defined(ROCKSDB_VALGRIND_RUN) || defined(ROCKSDB_FULL_VALGRIND_RUN)
@@ -1716,7 +1716,7 @@ TEST_P(TransactionTest, TwoPhaseDoubleRecoveryTest) {
   ASSERT_OK(s);
 
   s = db->Get(read_options, "foo", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar");
 
   delete txn;
@@ -1743,11 +1743,11 @@ TEST_P(TransactionTest, TwoPhaseDoubleRecoveryTest) {
 
   // value is now available
   s = db->Get(read_options, "foo", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar");
 
   s = db->Get(read_options, "foo2", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar2");
 }
 
@@ -5476,7 +5476,7 @@ rocksdb_rs::status::Status TransactionStressTestInserter(
                             std::to_string(num_transactions));
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace
 

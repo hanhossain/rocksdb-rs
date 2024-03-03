@@ -230,7 +230,7 @@ rocksdb_rs::status::Status SliceTransform::CreateFromString(
   } else {
     status = config_options.registry->NewSharedObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else if (status.ok()) {
       SliceTransform* transform = const_cast<SliceTransform*>(result->get());
       status =

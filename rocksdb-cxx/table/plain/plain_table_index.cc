@@ -34,7 +34,7 @@ rocksdb_rs::status::Status PlainTableIndex::InitFromRawData(Slice data) {
   char* index_data_begin = const_cast<char*>(data.data());
   index_ = reinterpret_cast<uint32_t*>(index_data_begin);
   sub_index_ = reinterpret_cast<char*>(index_ + index_size_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 PlainTableIndex::IndexSearchResult PlainTableIndex::GetOffset(

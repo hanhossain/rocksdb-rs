@@ -274,7 +274,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "PutCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ", " + value.ToString() + ")";
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
     if (column_family_id == 0) {
@@ -283,7 +283,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "DeleteCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ")";
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override {
     if (column_family_id == 0) {
@@ -292,7 +292,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "SingleDeleteCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ")";
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
                        const Slice& end_key) override {
@@ -303,7 +303,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "DeleteRangeCF(" + std::to_string(column_family_id) + ", " +
               begin_key.ToString() + ", " + end_key.ToString() + ")";
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
                  const Slice& value) override {
@@ -313,7 +313,7 @@ struct TestHandler : public WriteBatch::Handler {
       seen += "MergeCF(" + std::to_string(column_family_id) + ", " +
               key.ToString() + ", " + value.ToString() + ")";
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   void LogData(const Slice& blob) override {
     seen += "LogData(" + blob.ToString() + ")";
@@ -321,28 +321,28 @@ struct TestHandler : public WriteBatch::Handler {
   rocksdb_rs::status::Status MarkBeginPrepare(bool unprepare) override {
     seen +=
         "MarkBeginPrepare(" + std::string(unprepare ? "true" : "false") + ")";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status MarkEndPrepare(const Slice& xid) override {
     seen += "MarkEndPrepare(" + xid.ToString() + ")";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
     seen += "MarkNoop(" + std::string(empty_batch ? "true" : "false") + ")";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status MarkCommit(const Slice& xid) override {
     seen += "MarkCommit(" + xid.ToString() + ")";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& xid, const Slice& ts) override {
     seen += "MarkCommitWithTimestamp(" + xid.ToString() + ", " +
             ts.ToString(true) + ")";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status MarkRollback(const Slice& xid) override {
     seen += "MarkRollback(" + xid.ToString() + ")";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 }  // anonymous namespace
@@ -494,22 +494,22 @@ TEST_F(WriteBatchTest, DISABLED_ManyUpdates) {
         expected_char = 'A';
       }
       ++num_seen;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status DeleteCF(uint32_t /*column_family_id*/,
                     const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status SingleDeleteCF(uint32_t /*column_family_id*/,
                           const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                    const Slice& /*value*/) override {
       ADD_FAILURE();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     void LogData(const Slice& /*blob*/) override { ADD_FAILURE(); }
     bool Continue() override { return num_seen < kNumUpdates; }
@@ -545,22 +545,22 @@ TEST_F(WriteBatchTest, DISABLED_LargeKeyValue) {
       EXPECT_EQ('A' - num_seen, key[kKeyValueSize - 1]);
       EXPECT_EQ('A' - num_seen, value[kKeyValueSize - 1]);
       ++num_seen;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status DeleteCF(uint32_t /*column_family_id*/,
                     const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status SingleDeleteCF(uint32_t /*column_family_id*/,
                           const Slice& /*key*/) override {
       ADD_FAILURE();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                    const Slice& /*value*/) override {
       ADD_FAILURE();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     void LogData(const Slice& /*blob*/) override { ADD_FAILURE(); }
     bool Continue() override { return num_seen < 2; }
@@ -940,7 +940,7 @@ class TimestampChecker : public WriteBatch::Handler {
     assert(ucmp);
     size_t ts_sz = ucmp->timestamp_size();
     if (ts_sz == 0) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     if (key.size() < ts_sz) {
       return Status_Corruption();
@@ -949,7 +949,7 @@ class TimestampChecker : public WriteBatch::Handler {
     if (ts.compare(timestamp_) != 0) {
       return Status_Corruption();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

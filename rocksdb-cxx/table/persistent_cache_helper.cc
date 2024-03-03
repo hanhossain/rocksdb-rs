@@ -68,7 +68,7 @@ rocksdb_rs::status::Status PersistentCacheHelper::LookupSerialized(
          handle.size() + BlockBasedTable::kBlockTrailerSize);
   assert(size == expected_data_size);
   RecordTick(cache_options.statistics, PERSISTENT_CACHE_HIT);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PersistentCacheHelper::LookupUncompressed(
@@ -103,7 +103,7 @@ rocksdb_rs::status::Status PersistentCacheHelper::LookupUncompressed(
   RecordTick(cache_options.statistics, PERSISTENT_CACHE_HIT);
   // construct result and return
   *contents = BlockContents(std::move(data), size);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

@@ -113,7 +113,7 @@ class MockTableIterator : public InternalIterator {
 
   Slice value() const override { return Slice(itr_->second); }
 
-  rocksdb_rs::status::Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
  private:
   const KVVector& table_;
@@ -162,7 +162,7 @@ class MockTableBuilder : public TableBuilder {
   }
 
   // Return non-ok iff some error has been detected.
-  rocksdb_rs::status::Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
   // Return non-ok iff some error happens during IO.
   IOStatus io_status() const override { return IOStatus::OK(); }
@@ -170,7 +170,7 @@ class MockTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status Finish() override {
     MutexLock lock_guard(&file_system_->mutex);
     file_system_->files.insert({id_, table_});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void Abandon() override {}
@@ -225,7 +225,7 @@ rocksdb_rs::status::Status MockTableReader::Get(const ReadOptions&, const Slice&
       break;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::shared_ptr<const TableProperties> MockTableReader::GetTableProperties()
@@ -257,7 +257,7 @@ rocksdb_rs::status::Status MockTableFactory::NewTableReader(
 
   table_reader->reset(new MockTableReader(it->second));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 TableBuilder* MockTableFactory::NewTableBuilder(

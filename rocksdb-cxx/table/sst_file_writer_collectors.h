@@ -33,7 +33,7 @@ class SstFileWriterPropertiesCollector : public IntTblPropCollector {
                              uint64_t /*file_size*/) override {
     // Intentionally left blank. Have no interest in collecting stats for
     // individual key/value pairs.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual void BlockAdd(uint64_t /* block_uncomp_bytes */,
@@ -55,7 +55,7 @@ class SstFileWriterPropertiesCollector : public IntTblPropCollector {
     PutFixed64(&seqno_val, static_cast<uint64_t>(global_seqno_));
     properties->insert({ExternalSstFilePropertyNames::kGlobalSeqno, seqno_val});
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual const char* Name() const override {

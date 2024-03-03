@@ -74,7 +74,7 @@ rocksdb_rs::status::Status BlobFileReader::Create(
       new BlobFileReader(std::move(file_reader), file_size, compression_type,
                          immutable_options.clock, statistics));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileReader::OpenFile(
@@ -134,7 +134,7 @@ rocksdb_rs::status::Status BlobFileReader::OpenFile(
       blob_file_read_hist, immutable_options.rate_limiter.get(),
       immutable_options.listeners));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
@@ -189,7 +189,7 @@ rocksdb_rs::status::Status BlobFileReader::ReadHeader(const RandomAccessFileRead
 
   *compression_type = header.compression;
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
@@ -236,7 +236,7 @@ rocksdb_rs::status::Status BlobFileReader::ReadFooter(const RandomAccessFileRead
     return Status_Corruption("Unexpected TTL blob file");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
@@ -282,7 +282,7 @@ rocksdb_rs::status::Status BlobFileReader::ReadFromFile(const RandomAccessFileRe
     return Status_Corruption("Failed to read data from blob file");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 BlobFileReader::BlobFileReader(
@@ -390,7 +390,7 @@ rocksdb_rs::status::Status BlobFileReader::GetBlob(
     *bytes_read = record_size;
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlobFileReader::MultiGetBlob(
@@ -575,7 +575,7 @@ rocksdb_rs::status::Status BlobFileReader::VerifyBlob(const Slice& record_slice,
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileReader::UncompressBlobIfNeeded(
@@ -586,7 +586,7 @@ rocksdb_rs::status::Status BlobFileReader::UncompressBlobIfNeeded(
 
   if (compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     BlobContentsCreator::Create(result, nullptr, value_slice, allocator);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UncompressionContext context(compression_type);
@@ -615,7 +615,7 @@ rocksdb_rs::status::Status BlobFileReader::UncompressBlobIfNeeded(
 
   result->reset(new BlobContents(std::move(output), uncompressed_size));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

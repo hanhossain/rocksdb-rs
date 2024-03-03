@@ -148,7 +148,7 @@ rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
   auto no_footer = [&]() {
     *footer_offset = file_size;
     fprintf(stdout, "No blob log footer.\n");
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   };
   if (file_size < BlobLogHeader::kSize + BlobLogFooter::kSize) {
     return no_footer();

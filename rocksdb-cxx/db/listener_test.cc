@@ -59,12 +59,12 @@ struct TestPropertiesCollector
       rocksdb::EntryType /*type*/,
       rocksdb::SequenceNumber /*seq*/,
       uint64_t /*file_size*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status Finish(
       rocksdb::UserCollectedProperties* properties) override {
     properties->insert({"0", "1"});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const char* Name() const override { return "TestTablePropertiesCollector"; }
@@ -967,7 +967,7 @@ class BackgroundErrorListener : public EventListener {
     if (counter_ == 0) {
       // suppress the first error and disable write-dropping such that a retry
       // can succeed.
-      *bg_error = Status_OK();
+      *bg_error = rocksdb_rs::status::Status_OK();
       env_->drop_writes_.store(false, std::memory_order_release);
       env_->SetMockSleep(false);
     }

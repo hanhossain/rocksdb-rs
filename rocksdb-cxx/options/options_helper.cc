@@ -613,7 +613,7 @@ rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 
@@ -656,7 +656,7 @@ rocksdb_rs::status::Status GetStringFromCompressionType(std::string* compression
   bool ok = SerializeEnum<rocksdb_rs::compression_type::CompressionType>(compression_type_string_map,
                                            compression_type, compression_str);
   if (ok) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return Status_InvalidArgument("Invalid compression types");
   }
@@ -821,7 +821,7 @@ rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts, ch
   if (pos >= opts.size()) {
     *token = "";
     *end = std::string::npos;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (opts[pos] == '{') {
     int count = 1;
     size_t brace_pos = pos + 1;
@@ -862,14 +862,14 @@ rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts, ch
       *token = trim(opts.substr(pos, *end - pos));
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
                              const std::string& opt_name,
                              const std::string& value, void* opt_ptr) const {
   if (IsDeprecated()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   try {
     const std::string& opt_value = config_options.input_strings_escaped
@@ -884,12 +884,12 @@ rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_opt
       void* opt_addr = GetOffset(opt_ptr);
       return parse_func_(copy, opt_name, opt_value, opt_addr);
     } else if (ParseOptionHelper(GetOffset(opt_ptr), type_, opt_value)) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else if (IsConfigurable()) {
       // The option is <config>.<name>
       Configurable* config = AsRawPointer<Configurable>(opt_ptr);
       if (opt_value.empty()) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else if (config == nullptr) {
         return Status_NotFound("Could not find configurable: ", opt_name);
       } else {
@@ -947,7 +947,7 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseType(
       return Status_NotFound("Unrecognized option", opts_iter.first);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status OptionTypeInfo::ParseStruct(
@@ -996,7 +996,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
   // If the option is no longer used in rocksdb and marked as deprecated,
   // we skip it in the serialization.
   if (opt_ptr == nullptr || IsDeprecated()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (IsEnabled(OptionTypeFlags::kDontSerialize)) {
     return Status_NotSupported("Cannot serialize option: ", opt_name);
   } else if (serialize_func_ != nullptr) {
@@ -1037,7 +1037,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
         *opt_value = "";
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (IsConfigurable()) {
     const Configurable* config = AsRawPointer<Configurable>(opt_ptr);
     if (config != nullptr) {
@@ -1045,12 +1045,12 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
       embedded.delimiter = ";";
       *opt_value = config->ToString(embedded);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (config_options.mutable_options_only && !IsMutable()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (SerializeSingleOptionHelper(GetOffset(opt_ptr), type_,
                                          opt_value)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return Status_InvalidArgument("Cannot serialize option: ", opt_name);
   }
@@ -1373,7 +1373,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Prepare(const ConfigOptions& config_o
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status OptionTypeInfo::Validate(const DBOptions& db_opts,
@@ -1393,7 +1393,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Validate(const DBOptions& db_opts,
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 const OptionTypeInfo* OptionTypeInfo::Find(

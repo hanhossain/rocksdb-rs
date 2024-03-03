@@ -68,7 +68,7 @@ rocksdb_rs::status::Status DBImplSecondary::Recover(
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Secondary tries to read WAL, but WAL file(s) have already "
                    "been purged by primary.");
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   // TODO: update options_file_number_ needed?
 
@@ -174,7 +174,7 @@ rocksdb_rs::status::Status DBImplSecondary::MaybeInitLogReader(
   iter = log_readers_.find(log_number);
   assert(iter != log_readers_.end());
   *log_reader = iter->second->reader_;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // After manifest recovery, replay WALs and refresh log_readers_ if necessary
@@ -574,7 +574,7 @@ rocksdb_rs::status::Status DBImplSecondary::NewIterators(
           NewIteratorImpl(read_options, cfd, read_seq, read_callback));
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
@@ -593,7 +593,7 @@ rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
       "DBImplSecondary::CheckConsistency:AfterFirstAttempt", &s);
 
   if (immutable_db_options_.skip_checking_sst_file_sizes_on_db_open) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   std::vector<LiveFileMetaData> metadata;
@@ -609,14 +609,14 @@ rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
     if (!s.ok() &&
         (env_->GetFileSize(rocksdb_rs::filename::Rocks2LevelTableFileName(file_path), &fsize).ok() ||
          s.IsPathNotFound())) {
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
     if (!s.ok()) {
       corruption_messages +=
           "Can't access " + md.name + ": " + *s.ToString() + "\n";
     }
   }
-  return corruption_messages.empty() ? Status_OK()
+  return corruption_messages.empty() ? rocksdb_rs::status::Status_OK()
                                      : Status_Corruption(corruption_messages);
 }
 
@@ -657,7 +657,7 @@ rocksdb_rs::status::Status DBImplSecondary::TryCatchUpWithPrimary() {
           immutable_db_options_.info_log,
           "Secondary tries to read WAL, but WAL file(s) have already "
           "been purged by primary.");
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
     if (s.ok()) {
       for (auto cfd : cfds_changed) {

@@ -102,7 +102,7 @@ rocksdb_rs::status::Status BlobFileBuilder::Add(const Slice& key, const Slice& v
   assert(blob_index->empty());
 
   if (value.size() < min_blob_size_) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   {
@@ -153,12 +153,12 @@ rocksdb_rs::status::Status BlobFileBuilder::Add(const Slice& key, const Slice& v
   BlobIndex::EncodeBlob(blob_index, blob_file_number, blob_offset, blob.size(),
                         blob_compression_type_);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileBuilder::Finish() {
   if (!IsBlobFileOpen()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   return CloseBlobFile();
@@ -168,7 +168,7 @@ bool BlobFileBuilder::IsBlobFileOpen() const { return !!writer_; }
 
 rocksdb_rs::status::Status BlobFileBuilder::OpenBlobFileIfNeeded() {
   if (IsBlobFileOpen()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   assert(!blob_count_);
@@ -246,7 +246,7 @@ rocksdb_rs::status::Status BlobFileBuilder::OpenBlobFileIfNeeded() {
 
   assert(IsBlobFileOpen());
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileBuilder::CompressBlobIfNeeded(
@@ -257,7 +257,7 @@ rocksdb_rs::status::Status BlobFileBuilder::CompressBlobIfNeeded(
   assert(immutable_options_);
 
   if (blob_compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // TODO: allow user CompressionOptions, including max_compressed_bytes_per_kb
@@ -285,7 +285,7 @@ rocksdb_rs::status::Status BlobFileBuilder::CompressBlobIfNeeded(
 
   *blob = Slice(*compressed_blob);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileBuilder::WriteBlobToFile(const Slice& key, const Slice& blob,
@@ -310,7 +310,7 @@ rocksdb_rs::status::Status BlobFileBuilder::WriteBlobToFile(const Slice& key, co
   ++blob_count_;
   blob_bytes_ += BlobLogRecord::kHeaderSize + key.size() + blob.size();
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFileBuilder::CloseBlobFile() {
@@ -365,7 +365,7 @@ rocksdb_rs::status::Status BlobFileBuilder::CloseBlobFileIfNeeded() {
   assert(file_writer);
 
   if (file_writer->GetFileSize() < blob_file_size_) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   return CloseBlobFile();
@@ -393,7 +393,7 @@ void BlobFileBuilder::Abandon(const rocksdb_rs::status::Status& s) {
 rocksdb_rs::status::Status BlobFileBuilder::PutBlobIntoCacheIfNeeded(const Slice& blob,
                                                  uint64_t blob_file_number,
                                                  uint64_t blob_offset) const {
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
 
   BlobSource::SharedCacheInterface blob_cache{immutable_options_->blob_cache};
   auto statistics = immutable_options_->statistics.get();

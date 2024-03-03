@@ -75,7 +75,7 @@ rocksdb_rs::status::Status FilterBlockReaderCommon<TBlocklike>::GetOrReadFilterB
 
   if (!filter_block_.IsEmpty()) {
     filter_block->SetUnownedValue(filter_block_.GetValue());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ReadOptions ro = read_options;

@@ -555,7 +555,7 @@ class BatchedOpsStressTest : public StressTest {
 
     thread->stats.AddPrefixes(1, count);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void VerifyDb(ThreadState* /* thread */) const override {}

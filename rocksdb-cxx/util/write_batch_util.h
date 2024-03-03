@@ -21,7 +21,7 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
 
   rocksdb_rs::status::Status AddColumnFamilyId(uint32_t column_family_id) {
     column_family_ids_.insert(column_family_id);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  public:
@@ -56,19 +56,19 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MarkNoop(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
 
   const std::unordered_set<uint32_t>& column_families() const {
     return column_family_ids_;

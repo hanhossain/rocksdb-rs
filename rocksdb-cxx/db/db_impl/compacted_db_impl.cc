@@ -94,7 +94,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, Colu
     return s;
   }
   if (get_context.State() == GetContext::kFound) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return Status_NotFound();
 }
@@ -173,7 +173,7 @@ rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
       } else {
         value.assign(pinnable_val.data(), pinnable_val.size());
         if (get_context.State() == GetContext::kFound) {
-          statuses[idx] = Status_OK();
+          statuses[idx] = rocksdb_rs::status::Status_OK();
         }
       }
     }
@@ -215,7 +215,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
       return Status_NotSupported("Both L0 and other level contain files");
     }
     files_ = l0;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   for (int i = 1; i < vstorage->num_non_empty_levels() - 1; ++i) {
@@ -227,7 +227,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
   int level = vstorage->num_non_empty_levels() - 1;
   if (vstorage->LevelFilesBrief(level).num_files > 0) {
     files_ = vstorage->LevelFilesBrief(level);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return Status_NotSupported("no file exists");
 }

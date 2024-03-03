@@ -39,7 +39,7 @@ rocksdb_rs::status::Status LoadOptionsFromFile(const ConfigOptions& config_optio
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
@@ -72,7 +72,7 @@ rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, E
                             dbpath);
   }
   *options_file_name = latest_file_name;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status LoadLatestOptions(const ConfigOptions& config_options,

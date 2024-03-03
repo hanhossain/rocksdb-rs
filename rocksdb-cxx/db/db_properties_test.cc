@@ -1090,14 +1090,14 @@ class CountingUserTblPropCollector : public TablePropertiesCollector {
         {"CountingUserTblPropCollector", message_},
         {"Count", encoded},
     };
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     ++count_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {
@@ -1142,7 +1142,7 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
     if (type == kEntryDelete) {
       num_deletes_++;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   bool NeedCompact() const override { return num_deletes_ > 10; }
@@ -1154,7 +1154,7 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
   rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     *properties =
         UserCollectedProperties{{"num_delete", std::to_string(num_deletes_)}};
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -1184,13 +1184,13 @@ class BlockCountingTablePropertiesCollector : public TablePropertiesCollector {
   rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     (*properties)[kNumSampledBlocksPropertyName] =
         std::to_string(num_sampled_blocks_);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void BlockAdd(uint64_t /* block_uncomp_bytes */,

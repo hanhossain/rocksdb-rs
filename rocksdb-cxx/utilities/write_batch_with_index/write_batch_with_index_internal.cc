@@ -26,7 +26,7 @@ BaseDeltaIterator::BaseDeltaIterator(ColumnFamilyHandle* column_family,
     : forward_(true),
       current_at_base_(true),
       equal_keys_(false),
-      status_(Status_OK()),
+      status_(rocksdb_rs::status::Status_OK()),
       base_iterator_(base_iterator),
       delta_iterator_(delta_iterator),
       comparator_(comparator),
@@ -276,7 +276,7 @@ bool BaseDeltaIterator::DeltaValid() const { return delta_iterator_->Valid(); }
 void BaseDeltaIterator::UpdateCurrent() {
 // Suppress false positive clang analyzer warnings.
 #ifndef __clang_analyzer__
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   while (true) {
     auto delta_result = WBWIIteratorImpl::kNotFound;
     WriteEntry delta_entry;
@@ -515,7 +515,7 @@ rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(size_t dat
       return Status_Corruption("unknown WriteBatch tag ",
                                 std::to_string(static_cast<unsigned int>(tag)));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // If both of `entry1` and `entry2` point to real entry in write batch, we
@@ -700,7 +700,7 @@ rocksdb_rs::status::Status WriteBatchWithIndexInternal::MergeKey(const Slice& ke
 WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
     WriteBatchWithIndex* batch, const Slice& key, MergeContext* context,
     std::string* value, rocksdb_rs::status::Status* s) {
-  *s = Status_OK();
+  *s = rocksdb_rs::status::Status_OK();
 
   std::unique_ptr<WBWIIteratorImpl> iter(
       static_cast_with_check<WBWIIteratorImpl>(

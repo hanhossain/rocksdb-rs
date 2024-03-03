@@ -94,11 +94,11 @@ class DummyPropertiesCollector : public TablePropertiesCollector {
   const char* Name() const override { return "DummyPropertiesCollector"; }
 
   rocksdb_rs::status::Status Finish(UserCollectedProperties* /*properties*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status Add(const Slice& /*user_key*/, const Slice& /*value*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {
@@ -330,7 +330,7 @@ class BlockConstructor : public Constructor {
     BlockContents contents;
     contents.data = data_;
     block_ = new Block(std::move(contents));
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   InternalIterator* NewIterator(
       const SliceTransform* /*prefix_extractor*/) const override {
@@ -531,7 +531,7 @@ class MemTableConstructor : public Constructor {
       }
       seq++;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   InternalIterator* NewIterator(
       const SliceTransform* /*prefix_extractor*/) const override {
@@ -592,7 +592,7 @@ class DBConstructor : public Constructor {
       EXPECT_OK(batch.Put(kv.first, kv.second));
       EXPECT_TRUE(db_->Write(WriteOptions(), &batch).ok());
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   InternalIterator* NewIterator(
@@ -1276,7 +1276,7 @@ class FileChecksumTestHelper {
   rocksdb_rs::status::Status ResetTableBuilder(std::unique_ptr<TableBuilder>&& builder) {
     assert(builder != nullptr);
     table_builder_ = std::move(builder);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void AddKVtoKVMap(int num_entries) {
@@ -1348,7 +1348,7 @@ class FileChecksumTestHelper {
     EXPECT_EQ(offset, static_cast<uint64_t>(table_builder_->FileSize()));
     file_checksum_generator->Finalize();
     *checksum = file_checksum_generator->GetChecksum();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -1954,7 +1954,7 @@ void PrefetchRange(TableConstructor* c, Options* opt,
                    const char* key_end,
                    const std::vector<std::string>& keys_in_cache,
                    const std::vector<std::string>& keys_not_in_cache,
-                   const rocksdb_rs::status::Status expected_status = Status_OK()) {
+                   const rocksdb_rs::status::Status expected_status = rocksdb_rs::status::Status_OK()) {
   // reset the cache and reopen the table
   table_options->block_cache = NewLRUCache(16 * 1024 * 1024, 4);
   opt->table_factory.reset(NewBlockBasedTableFactory(*table_options));

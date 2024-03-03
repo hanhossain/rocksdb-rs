@@ -243,7 +243,7 @@ rocksdb_rs::status::Status MemTableRepFactory::CreateFromString(
   } else if (value.empty()) {
     // No Id and no options.  Clear the object
     result->reset();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (id.empty()) {  // We have no Id but have options.  Not good
     return Status_NotSupported("Cannot reset object ", id);
   } else {

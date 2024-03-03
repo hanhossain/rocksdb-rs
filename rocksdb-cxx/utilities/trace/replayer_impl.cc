@@ -47,7 +47,7 @@ rocksdb_rs::status::Status ReplayerImpl::Prepare() {
   header_ts_ = header.ts;
   prepared_ = true;
   trace_end_ = false;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
@@ -92,7 +92,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
     return Status_Incomplete("Trace end.");
   }
 
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
 
   if (options.num_threads <= 1) {
     // num_threads == 0 or num_threads == 1 uses single thread.
@@ -134,7 +134,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
         if (result_callback != nullptr) {
           result_callback(s.Clone(), nullptr);
         }
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
         continue;
       }
 
@@ -154,7 +154,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
 
     std::mutex mtx;
     // Background decoding and execution status.
-    rocksdb_rs::status::Status bg_s = Status_OK();
+    rocksdb_rs::status::Status bg_s = rocksdb_rs::status::Status_OK();
     uint64_t last_err_ts = static_cast<uint64_t>(-1);
     // Callback function used in background work to update bg_s for the ealiest
     // TraceRecord which has execution error. This is different from the
@@ -242,7 +242,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
     // Could happen when killing a process without calling EndTrace() API.
     // TODO: Add better error handling.
     trace_end_ = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return s;
 }

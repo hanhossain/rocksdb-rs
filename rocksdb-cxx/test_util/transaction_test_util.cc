@@ -122,7 +122,7 @@ rocksdb_rs::status::Status RandomTransactionInserter::DBGet(
   } else if (s.IsNotFound()) {
     // Have not yet written to this key, so assume its value is 0
     *int_value = 0;
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   return s;
 }
@@ -393,7 +393,7 @@ rocksdb_rs::status::Status RandomTransactionInserter::Verify(DB* db, uint16_t nu
     db->ReleaseSnapshot(roptions.snapshot);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

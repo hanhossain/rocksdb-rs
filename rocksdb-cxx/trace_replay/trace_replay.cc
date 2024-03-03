@@ -50,7 +50,7 @@ rocksdb_rs::status::Status TracerHelper::ParseVersionStr(std::string& v_string, 
     }
   }
   *v_num = tmp_num;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
@@ -72,7 +72,7 @@ rocksdb_rs::status::Status TracerHelper::ParseTraceHeader(const Trace& header, i
   db_v_str = s_vec[2].substr(17);
 
   rocksdb_rs::status::Status s = ParseVersionStr(t_v_str, trace_version);
-  if (!s.eq(Status_OK())) {
+  if (!s.eq(rocksdb_rs::status::Status_OK())) {
     return s;
   }
   s = ParseVersionStr(db_v_str, db_version);
@@ -100,7 +100,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTrace(const std::string& encoded_
   trace->type = static_cast<TraceType>(enc_slice[0]);
   enc_slice.remove_prefix(kTraceTypeSize + kTracePayloadLengthSize);
   trace->payload = enc_slice.ToString();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TracerHelper::DecodeHeader(const std::string& encoded_trace,
@@ -167,7 +167,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
         record->reset(new WriteQueryTraceRecord(std::move(rep), trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // Get
     case kTraceGet: {
@@ -208,7 +208,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
         record->reset(new GetQueryTraceRecord(cf_id, std::move(ps), trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // Iterator Seek and SeekForPrev
     case kTraceIteratorSeek:
@@ -267,7 +267,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
             trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // MultiGet
     case kTraceMultiGet: {
@@ -332,7 +332,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
             std::move(cf_ids), std::move(multiget_keys), trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     default:
       return Status_NotSupported("Unsupported trace type.");
@@ -354,7 +354,7 @@ Tracer::~Tracer() { trace_writer_.reset(); }
 rocksdb_rs::status::Status Tracer::Write(WriteBatch* write_batch) {
   TraceType trace_type = kTraceWrite;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -369,7 +369,7 @@ rocksdb_rs::status::Status Tracer::Write(WriteBatch* write_batch) {
 rocksdb_rs::status::Status Tracer::Get(ColumnFamilyHandle* column_family, const Slice& key) {
   TraceType trace_type = kTraceGet;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -389,7 +389,7 @@ rocksdb_rs::status::Status Tracer::IteratorSeek(const uint32_t& cf_id, const Sli
                             const Slice& lower_bound, const Slice upper_bound) {
   TraceType trace_type = kTraceIteratorSeek;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -425,7 +425,7 @@ rocksdb_rs::status::Status Tracer::IteratorSeekForPrev(const uint32_t& cf_id, co
                                    const Slice upper_bound) {
   TraceType trace_type = kTraceIteratorSeekForPrev;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -460,7 +460,7 @@ rocksdb_rs::status::Status Tracer::MultiGet(const size_t num_keys,
                         ColumnFamilyHandle** column_families,
                         const Slice* keys) {
   if (num_keys == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   std::vector<ColumnFamilyHandle*> v_column_families;
   std::vector<Slice> v_keys;
@@ -476,7 +476,7 @@ rocksdb_rs::status::Status Tracer::MultiGet(const size_t num_keys,
 rocksdb_rs::status::Status Tracer::MultiGet(const size_t num_keys,
                         ColumnFamilyHandle* column_family, const Slice* keys) {
   if (num_keys == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   std::vector<ColumnFamilyHandle*> column_families;
   std::vector<Slice> v_keys;
@@ -496,7 +496,7 @@ rocksdb_rs::status::Status Tracer::MultiGet(const std::vector<ColumnFamilyHandle
   }
   TraceType trace_type = kTraceMultiGet;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   uint32_t multiget_size = static_cast<uint32_t>(keys.size());
   Trace trace;

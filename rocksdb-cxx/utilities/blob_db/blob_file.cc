@@ -136,7 +136,7 @@ rocksdb_rs::status::Status BlobFile::SetFromFooterLocked(const BlobLogFooter& fo
   blob_count_ = footer.blob_count;
   expiration_range_ = footer.expiration_range;
   closed_ = true;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobFile::Fsync() {
@@ -273,7 +273,7 @@ rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSyst
   if (file_size_ < BlobLogHeader::kSize + BlobLogFooter::kSize) {
     // OK not to have footer.
     assert(!footer_valid_);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   std::string footer_buf;
   Slice footer_slice;
@@ -300,7 +300,7 @@ rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSyst
   if (!s.ok()) {
     // OK not to have footer.
     assert(!footer_valid_);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   blob_count_ = footer.blob_count;
   if (has_ttl_) {
@@ -309,7 +309,7 @@ rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSyst
     expiration_range_ = footer.expiration_range;
   }
   footer_valid_ = true;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace blob_db

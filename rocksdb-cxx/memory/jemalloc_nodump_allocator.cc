@@ -178,7 +178,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::InitializeArenas() {
                                 std::to_string(ret));
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 #endif  // ROCKSDB_JEMALLOC_NODUMP_ALLOCATOR
@@ -206,7 +206,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::PrepareOptions(
     return s;
   } else {
     // Already prepared
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 
@@ -264,7 +264,7 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::DestroyArena(uint32_t arena_
     return Status_Incomplete("Failed to destroy jemalloc arena, error code: " +
                               std::to_string(ret));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void JemallocNodumpAllocator::DestroyThreadSpecificCache(void* ptr) {

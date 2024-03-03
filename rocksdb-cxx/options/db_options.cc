@@ -439,7 +439,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             auto limiter = static_cast<std::shared_ptr<RateLimiter>*>(addr);
             limiter->reset(NewGenericRateLimiter(
                 static_cast<int64_t>(ParseUint64(value))));
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           }}},
         {"env",  //**TODO: Should this be kCustomizable?
          OptionTypeInfo(
@@ -547,7 +547,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             if (printed > 0) {
               value->append("}");
             }
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           },
           nullptr}},
         {"lowest_used_cache_tier",

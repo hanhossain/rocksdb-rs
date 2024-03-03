@@ -863,7 +863,7 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
       *properties = UserCollectedProperties{
           {kUserPropertyName, std::to_string(count_)},
       };
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     UserCollectedProperties GetReadableProperties() const override {
@@ -876,7 +876,7 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
                       EntryType /*type*/, SequenceNumber /*seq*/,
                       uint64_t /*file_size*/) override {
       count_++;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
    private:

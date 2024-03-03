@@ -267,7 +267,7 @@ inline rocksdb_rs::status::Status PessimisticTransactionDB::FailIfBatchHasTs(
         "Writes with timestamp must go through transaction API instead of "
         "TransactionDB.");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 inline rocksdb_rs::status::Status PessimisticTransactionDB::FailIfCfEnablesTs(
@@ -282,7 +282,7 @@ inline rocksdb_rs::status::Status PessimisticTransactionDB::FailIfCfEnablesTs(
         "Write operation with user timestamp must go through the transaction "
         "API instead of TransactionDB.");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 class SnapshotCreationCallback : public PostMemTableCallback {

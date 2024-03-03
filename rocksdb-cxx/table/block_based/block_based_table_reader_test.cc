@@ -560,7 +560,7 @@ TEST_P(ChargeTableReaderTest, Basic) {
          "between "
          "charge_table_reader_ == kDisabled and == kEnabled)";
 
-  rocksdb_rs::status::Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   std::size_t opened_table_reader_num = 0;
   std::string table_name;
   std::vector<std::unique_ptr<BlockBasedTable>> tables;

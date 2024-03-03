@@ -284,7 +284,7 @@ rocksdb_rs::status::Status PlainTableReader::MmapDataIfNeeded() {
         IOOptions(), 0, static_cast<size_t>(file_size_), &file_info_.file_data,
         nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PlainTableReader::PopulateIndex(TableProperties* props,
@@ -422,7 +422,7 @@ rocksdb_rs::status::Status PlainTableReader::PopulateIndex(TableProperties* prop
         std::to_string(0);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PlainTableReader::GetOffset(PlainTableKeyDecoder* decoder,
@@ -434,10 +434,10 @@ rocksdb_rs::status::Status PlainTableReader::GetOffset(PlainTableKeyDecoder* dec
   auto res = index_.GetOffset(prefix_hash, &prefix_index_offset);
   if (res == PlainTableIndex::kNoPrefixForBucket) {
     *offset = file_info_.data_end_offset;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (res == PlainTableIndex::kDirectToFile) {
     *offset = prefix_index_offset;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // point to sub-index, need to do a binary search
@@ -470,7 +470,7 @@ rocksdb_rs::status::Status PlainTableReader::GetOffset(PlainTableKeyDecoder* dec
         // first key after base_offset.
         prefix_matched = true;
         *offset = file_offset;
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         high = mid;
       }
@@ -499,7 +499,7 @@ rocksdb_rs::status::Status PlainTableReader::GetOffset(PlainTableKeyDecoder* dec
     // but with a different prefix. Key does not exist.
     *offset = file_info_.data_end_offset;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool PlainTableReader::MatchBloom(uint32_t hash) const {
@@ -522,7 +522,7 @@ rocksdb_rs::status::Status PlainTableReader::Next(PlainTableKeyDecoder* decoder,
                               bool* seekable) const {
   if (*offset == file_info_.data_end_offset) {
     *offset = file_info_.data_end_offset;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (*offset > file_info_.data_end_offset) {
@@ -536,7 +536,7 @@ rocksdb_rs::status::Status PlainTableReader::Next(PlainTableKeyDecoder* decoder,
     return s;
   }
   *offset = *offset + bytes_read;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void PlainTableReader::Prepare(const Slice& target) {
@@ -560,7 +560,7 @@ rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, cons
     }
     // Match whole user key for bloom filter check.
     if (!MatchBloom(GetSliceHash(ExtractUserKey(target)))) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // in total order mode, there is only one bucket 0, and we always use empty
     // prefix.
@@ -570,7 +570,7 @@ rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, cons
     prefix_slice = GetPrefix(target);
     prefix_hash = GetSliceHash(prefix_slice);
     if (!MatchBloom(prefix_hash)) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
   uint32_t offset;
@@ -599,7 +599,7 @@ rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, cons
       // Need to verify prefix for the first key found if it is not yet
       // checked.
       if (GetPrefix(found_key) != prefix_slice) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
       prefix_match = true;
     }
@@ -613,7 +613,7 @@ rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, cons
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 uint64_t PlainTableReader::ApproximateOffsetOf(
@@ -647,7 +647,7 @@ bool PlainTableIterator::Valid() const {
 }
 
 void PlainTableIterator::SeekToFirst() {
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   next_offset_ = table_->data_start_offset_;
   if (next_offset_ >= table_->file_info_.data_end_offset) {
     next_offset_ = offset_ = table_->file_info_.data_end_offset;
@@ -699,7 +699,7 @@ void PlainTableIterator::Seek(const Slice& target) {
   if (!table_->IsTotalOrderMode()) {
     prefix_hash = GetSliceHash(prefix_slice);
     if (!table_->MatchBloom(prefix_hash)) {
-      status_ = Status_OK();
+      status_ = rocksdb_rs::status::Status_OK();
       offset_ = next_offset_ = table_->file_info_.data_end_offset;
       return;
     }

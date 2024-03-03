@@ -71,7 +71,7 @@ rocksdb_rs::status::Status BlockCacheTier::Open() {
     insert_th_ = port::Thread(&BlockCacheTier::InsertMain, this);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool IsCacheFile(const std::string& file) {
@@ -111,7 +111,7 @@ rocksdb_rs::status::Status BlockCacheTier::CleanupCacheFolder(const std::string&
       ROCKS_LOG_DEBUG(opt_.log, "Skipping file %s", file.c_str());
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockCacheTier::Close() {
@@ -128,7 +128,7 @@ rocksdb_rs::status::Status BlockCacheTier::Close() {
   // clear all metadata
   WriteLock _(&lock_);
   metadata_.Clear();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 template <class T>
@@ -177,7 +177,7 @@ rocksdb_rs::status::Status BlockCacheTier::Insert(const Slice& key, const char* 
     // off load the write to the write thread
     insert_ops_.Push(
         InsertOp(key.ToString(), std::move(std::string(data, size))));
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   assert(!opt_.pipeline_writes);
@@ -226,7 +226,7 @@ rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Sl
   LBA lba;
   if (metadata_.Lookup(key, &lba)) {
     // the key already exists, this is duplicate insert
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   while (!cache_file_->Append(key, data, &lba)) {
@@ -257,7 +257,7 @@ rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Sl
   // update stats
   stats_.bytes_written_.Add(data.size());
   stats_.write_latency_.Add(timer.ElapsedNanos() / 1000);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_ptr<char[]>* val,
@@ -307,7 +307,7 @@ rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_
   stats_.cache_hits_++;
   stats_.read_hit_latency_.Add(timer.ElapsedNanos() / 1000);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool BlockCacheTier::Erase(const Slice& key) {
@@ -346,7 +346,7 @@ rocksdb_rs::status::Status BlockCacheTier::NewCacheFile() {
     return Status_IOError("Error inserting to metadata");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool BlockCacheTier::Reserve(const size_t size) {

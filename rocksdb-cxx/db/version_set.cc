@@ -1020,7 +1020,7 @@ class LevelIterator final : public InternalIterator {
   }
 
   rocksdb_rs::status::Status status() const override {
-    return file_iter_.iter() ? file_iter_.status() : Status_OK();
+    return file_iter_.iter() ? file_iter_.status() : rocksdb_rs::status::Status_OK();
   }
 
   bool PrepareValue() override { return file_iter_.PrepareValue(); }
@@ -1603,13 +1603,13 @@ rocksdb_rs::status::Status Version::GetPropertiesOfAllTables(const ReadOptions& 
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status Version::TablesRangeTombstoneSummary(int max_entries_to_print,
                                             std::string* out_str) {
   if (max_entries_to_print <= 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   int num_entries_left = max_entries_to_print;
 
@@ -1661,7 +1661,7 @@ rocksdb_rs::status::Status Version::TablesRangeTombstoneSummary(int max_entries_
   }
 
   *out_str = ss.str();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
@@ -1683,7 +1683,7 @@ rocksdb_rs::status::Status Version::GetPropertiesOfAllTables(const ReadOptions& 
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status Version::GetPropertiesOfTablesInRange(
@@ -1717,7 +1717,7 @@ rocksdb_rs::status::Status Version::GetPropertiesOfTablesInRange(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status Version::GetAggregatedTableProperties(
@@ -1739,7 +1739,7 @@ rocksdb_rs::status::Status Version::GetAggregatedTableProperties(
     new_tp->Add(*item.second);
   }
   tp->reset(new_tp);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 size_t Version::GetMemoryUsageByTableReaders(const ReadOptions& read_options) {
@@ -2499,7 +2499,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
   }
   if (GetContext::kMerge == get_context.State()) {
     if (!do_merge) {
-      *status = Status_OK();
+      *status = rocksdb_rs::status::Status_OK();
       return;
     }
     if (!merge_operator_) {
@@ -2569,7 +2569,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
     // state, so we set status to ok here. From now on, the iter status will
     // be used for IO errors, and get_context state will be used for any
     // key level errors
-    *(iter->s) = Status_OK();
+    *(iter->s) = rocksdb_rs::status::Status_OK();
   }
   int get_ctx_index = 0;
   for (auto iter = range->begin(); iter != range->end();
@@ -4972,9 +4972,9 @@ rocksdb_rs::status::Status AtomicGroupReadBuffer::AddEdit(VersionEdit* edit) {
     if (read_edits_in_atomic_group_ == replay_buffer_.size()) {
       TEST_SYNC_POINT_CALLBACK(
           "AtomicGroupReadBuffer::AddEdit:LastInAtomicGroup", edit);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // A normal edit.
@@ -4983,7 +4983,7 @@ rocksdb_rs::status::Status AtomicGroupReadBuffer::AddEdit(VersionEdit* edit) {
         "AtomicGroupReadBuffer::AddEdit:AtomicGroupMixedWithNormalEdits", edit);
     return Status_Corruption("corrupted atomic group");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool AtomicGroupReadBuffer::IsFull() const {
@@ -5357,7 +5357,7 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
           if (db_options_->paranoid_checks) {
             break;
           }
-          s = Status_OK();
+          s = rocksdb_rs::status::Status_OK();
         }
       }
     }
@@ -5693,7 +5693,7 @@ rocksdb_rs::status::Status VersionSet::LogAndApply(
     num_edits += static_cast<int>(elist.size());
   }
   if (num_edits == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (num_edits > 1) {
 #ifndef NDEBUG
     for (const auto& edit_list : edit_lists) {
@@ -5808,7 +5808,7 @@ rocksdb_rs::status::Status VersionSet::LogAndApplyHelper(ColumnFamilyData* cfd,
   // because WAL edits do not need to be applied to versions,
   // we return Status_OK() in this case.
   assert(builder || edit->IsWalManipulation());
-  return builder ? builder->Apply(edit) : Status_OK();
+  return builder ? builder->Apply(edit) : rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
@@ -5839,7 +5839,7 @@ rocksdb_rs::status::Status VersionSet::GetCurrentManifestPath(const std::string&
     manifest_path->push_back('/');
   }
   manifest_path->append(fname);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status VersionSet::Recover(
@@ -6172,7 +6172,7 @@ rocksdb_rs::status::Status VersionSet::ReduceNumberOfLevels(const std::string& d
   int current_levels = vstorage->num_levels();
 
   if (current_levels <= new_levels) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Make sure there are file only on one level from
@@ -6542,7 +6542,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // TODO(aekmekji): in CompactionJob::GenSubcompactionBoundaries(), this
@@ -6953,7 +6953,7 @@ rocksdb_rs::status::Status VersionSet::GetMetadataForFile(uint64_t number, int* 
           *meta = file;
           *filelevel = level;
           *cfd = cfd_iter;
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       }
     }

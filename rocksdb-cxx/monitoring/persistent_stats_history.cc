@@ -52,7 +52,7 @@ rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsV
 
   // read version_number but do nothing in current version
   *version_number = ParseUint64(result);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 int EncodePersistentStatsKey(uint64_t now_seconds, const std::string& key,

@@ -207,7 +207,7 @@ rocksdb_rs::status::Status MemTableListVersion::AddRangeTombstoneIterators(
                                      true /* immutable_memtable */));
     range_del_agg->AddTombstones(std::move(range_del_iter));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void MemTableListVersion::AddIterators(
@@ -808,7 +808,7 @@ rocksdb_rs::status::Status InstallMemtableAtomicFlushResults(
     assert(imm_lists->size() == num);
   }
   if (num == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   for (size_t k = 0; k != num; ++k) {

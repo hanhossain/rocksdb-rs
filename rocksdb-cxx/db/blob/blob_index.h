@@ -117,7 +117,7 @@ class BlobIndex {
         return Status_Corruption(kErrorMessage, "Corrupted blob offset");
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   std::string DebugString(bool output_hex) const {

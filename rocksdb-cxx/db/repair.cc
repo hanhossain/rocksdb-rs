@@ -177,7 +177,7 @@ class Repairer {
   }
 
   rocksdb_rs::status::Status Close() {
-    rocksdb_rs::status::Status s = Status_OK();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
     if (!closed_) {
       if (db_lock_ != nullptr) {
         s = env_->UnlockFile(db_lock_);
@@ -329,7 +329,7 @@ class Repairer {
     if (!found_file) {
       return Status_Corruption(dbname_, "repair found no files");
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void ConvertLogFilesToTables() {
@@ -754,7 +754,7 @@ class Repairer {
         return s;
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void ArchiveFile(const std::string& fname) {
@@ -795,7 +795,7 @@ rocksdb_rs::status::Status GetDefaultCFOptions(
         "column_families", "Must contain entry for default column family");
   }
   *res = iter->options;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // anonymous namespace
 

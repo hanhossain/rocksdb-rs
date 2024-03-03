@@ -121,7 +121,7 @@ class BlobDBIterator : public Iterator {
   // Return true if caller should continue to next value.
   bool UpdateBlobValue() {
     value_.Reset();
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     if (iter_->Valid() && iter_->status().ok() && iter_->IsBlob()) {
       rocksdb_rs::status::Status s = blob_db_->GetBlobValue(iter_->key(), iter_->value(), &value_);
       if (s.IsNotFound()) {

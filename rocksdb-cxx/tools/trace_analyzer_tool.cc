@@ -400,7 +400,7 @@ rocksdb_rs::status::Status TraceAnalyzer::PrepareProcessing() {
       return s;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TraceAnalyzer::ReadTraceHeader(Trace* header) {
@@ -499,7 +499,7 @@ rocksdb_rs::status::Status TraceAnalyzer::StartProcessing() {
   }
   if (s.IsIncomplete()) {
     // Fix it: Reaching eof returns Incomplete status at the moment.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return s;
 }
@@ -643,7 +643,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Process the statistics of the key access and
@@ -748,7 +748,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceSta
       prefix_succ_access += record.second.succ_count;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Process the statistics of different query type
@@ -769,7 +769,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticCorrelation(TraceStats& s
     stats.correlation_output[i].first += unit.v_correlation[i].count;
     stats.correlation_output[i].second += unit.v_correlation[i].total_ts;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Process the statistics of QPS
@@ -983,7 +983,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // In reprocessing, if we have the whole key space
@@ -1145,7 +1145,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // End the processing, print the requested results
@@ -1357,7 +1357,7 @@ rocksdb_rs::status::Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& 
   }
 
   unit.latest_ts = ts;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // when a new trace statistic is created, the file handler
@@ -1438,7 +1438,7 @@ rocksdb_rs::status::Status TraceAnalyzer::CreateOutputFile(
     fprintf(stderr, "Cannot open file: %s\n", path.c_str());
     exit(1);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Close the output files in the TraceStats if they are opened
@@ -1507,7 +1507,7 @@ rocksdb_rs::status::Status TraceAnalyzer::Handle(const WriteQueryTraceRecord& re
   // HasBeginPrepare()==false, so we process it normally.
   WriteBatch batch(record.GetWriteBatchRep().ToString());
   if (batch.Count() == 0 || (batch.HasBeginPrepare() && !batch.HasCommit())) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   write_batch_ts_ = record.GetTimestamp();
 
@@ -1519,7 +1519,7 @@ rocksdb_rs::status::Status TraceAnalyzer::Handle(const WriteQueryTraceRecord& re
     return s;
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TraceAnalyzer::Handle(const GetQueryTraceRecord& record,
@@ -1646,12 +1646,12 @@ rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationTyp
   }
   if (ta_[op_type].sample_count > 0) {
     ta_[op_type].sample_count++;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   ta_[op_type].sample_count++;
 
   if (!ta_[op_type].enabled) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   for (size_t i = 0; i < cf_ids.size(); i++) {
@@ -1665,7 +1665,7 @@ rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationTyp
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,

@@ -272,7 +272,7 @@ class LocalSavePoint {
                                    std::memory_order_relaxed);
       return Status_MemoryLimit();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -325,19 +325,19 @@ class TimestampUpdater : public WriteBatch::Handler {
     return UpdateTimestamp(cf, key);
   }
 
-  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return rocksdb_rs::status::Status_OK(); }
 
  private:
   // @param is_key specifies whether the update is for key or value.
@@ -355,7 +355,7 @@ class TimestampUpdater : public WriteBatch::Handler {
     size_t cf_ts_sz = ts_sz_func_(cf);
     if (0 == cf_ts_sz) {
       // Skip this column family.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else if (std::numeric_limits<size_t>::max() == cf_ts_sz) {
       // Column family timestamp info not found.
       return Status_NotFound();
@@ -367,7 +367,7 @@ class TimestampUpdater : public WriteBatch::Handler {
     char* ptr = const_cast<char*>(buf.data() + buf.size() - cf_ts_sz);
     assert(ptr);
     memcpy(ptr, timestamp_.data(), timestamp_.size());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void UpdateProtectionInformationIfNeeded(const Slice& buf, const Slice& ts,

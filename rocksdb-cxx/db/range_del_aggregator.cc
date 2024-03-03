@@ -442,7 +442,7 @@ class TruncatedRangeDelMergingIter : public InternalIterator {
   bool Valid() const override {
     return !heap_.empty() && !AfterEndKey(heap_.top());
   }
-  rocksdb_rs::status::Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
   void SeekToFirst() override {
     heap_.clear();

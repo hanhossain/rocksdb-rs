@@ -142,7 +142,7 @@ rocksdb_rs::status::Status RangeTreeLockManager::TryLock(PessimisticTransaction*
       return Status_Busy(rocksdb_rs::status::SubCode::kLockLimit);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Wait callback that locktree library will call to inform us about

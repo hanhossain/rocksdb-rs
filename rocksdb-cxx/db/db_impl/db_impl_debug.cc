@@ -243,7 +243,7 @@ rocksdb_rs::status::Status DBImpl::TEST_GetAllImmutableCFOptions(
     iopts_map->insert({cf_names[i], iopts[i]});
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 uint64_t DBImpl::TEST_FindMinLogContainingOutstandingPrep() {
@@ -269,7 +269,7 @@ rocksdb_rs::status::Status DBImpl::TEST_GetLatestMutableCFOptions(
 
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   *mutable_cf_options = *cfh->cfd()->GetLatestMutableCFOptions();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 int DBImpl::TEST_BGCompactionsAllowed() const {

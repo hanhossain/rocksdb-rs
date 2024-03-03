@@ -448,7 +448,7 @@ rocksdb_rs::status::Status BaseClockTable::ChargeUsageMaybeEvictStrict(
     // evicted something.
     assert(evicted_count > 0);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 template <class Table>
@@ -552,7 +552,7 @@ rocksdb_rs::status::Status BaseClockTable::Insert(const ClockHandleBasicData& pr
         // Don't insert the entry but still return ok, as if the entry
         // inserted into cache and evicted immediately.
         proto.FreeData(allocator_);
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         // Need to track usage of fallback standalone insert
         usage_.fetch_add(total_charge, std::memory_order_relaxed);
@@ -581,7 +581,7 @@ rocksdb_rs::status::Status BaseClockTable::Insert(const ClockHandleBasicData& pr
       if (handle) {
         *handle = e;
       }
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // Not inserted
     // Revert occupancy
@@ -594,7 +594,7 @@ rocksdb_rs::status::Status BaseClockTable::Insert(const ClockHandleBasicData& pr
       assert(usage_.load(std::memory_order_relaxed) < SIZE_MAX / 2);
       // As if unrefed entry immdiately evicted
       proto.FreeData(allocator_);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     use_standalone_insert = true;

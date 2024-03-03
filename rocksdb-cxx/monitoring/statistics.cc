@@ -477,7 +477,7 @@ rocksdb_rs::status::Status StatisticsImpl::Reset() {
       per_core_stats_.AccessAtCore(core_idx)->histograms_[i].Clear();
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {

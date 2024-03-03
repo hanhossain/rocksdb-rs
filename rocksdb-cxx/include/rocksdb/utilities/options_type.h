@@ -312,7 +312,7 @@ class OptionTypeInfo {
           if (map == nullptr) {
             return Status_NotSupported("No enum mapping ", name);
           } else if (ParseEnum<T>(*map, value, static_cast<T*>(addr))) {
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           } else {
             return Status_InvalidArgument("No mapping for enum ", name);
           }
@@ -329,7 +329,7 @@ class OptionTypeInfo {
             return Status_NotSupported("No enum mapping ", name);
           } else if (SerializeEnum<T>(*map, (*static_cast<const T*>(addr)),
                                       value)) {
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           } else {
             return Status_InvalidArgument("No mapping for enum ", name);
           }
@@ -490,7 +490,7 @@ class OptionTypeInfo {
       auto* shared = static_cast<std::shared_ptr<T>*>(addr);
       if (name == kIdPropName() && value.empty()) {
         shared->reset();
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return T::CreateFromString(opts, value, shared);
       }
@@ -530,7 +530,7 @@ class OptionTypeInfo {
       auto* unique = static_cast<std::unique_ptr<T>*>(addr);
       if (name == kIdPropName() && value.empty()) {
         unique->reset();
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return T::CreateFromString(opts, value, unique);
       }
@@ -569,7 +569,7 @@ class OptionTypeInfo {
       auto** pointer = static_cast<T**>(addr);
       if (name == kIdPropName() && value.empty()) {
         *pointer = nullptr;
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return T::CreateFromString(opts, value, pointer);
       }
@@ -982,7 +982,7 @@ rocksdb_rs::status::Status ParseArray(const ConfigOptions& config_options,
           status.IsNotSupported()) {
         // If we were ignoring unsupported options and this one should be
         // ignored, ignore it by setting the status to OK
-        status = Status_OK();
+        status = rocksdb_rs::status::Status_OK();
       }
     }
   }
@@ -1052,7 +1052,7 @@ rocksdb_rs::status::Status SerializeArray(const ConfigOptions& config_options,
   } else {
     *value = result;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Compares the input arrays array1 and array2 for equality
@@ -1126,7 +1126,7 @@ rocksdb_rs::status::Status ParseVector(const ConfigOptions& config_options,
                  status.IsNotSupported()) {
         // If we were ignoring unsupported options and this one should be
         // ignored, ignore it by setting the status to OK
-        status = Status_OK();
+        status = rocksdb_rs::status::Status_OK();
       }
     }
   }
@@ -1184,7 +1184,7 @@ rocksdb_rs::status::Status SerializeVector(const ConfigOptions& config_options,
   } else {
     *value = result;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Compares the input vectors vec1 and vec2 for equality

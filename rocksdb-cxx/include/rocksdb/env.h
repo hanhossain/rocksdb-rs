@@ -213,11 +213,11 @@ class Env : public Customizable {
 
   // See FileSystem::RegisterDbPaths.
   virtual rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // See FileSystem::UnregisterDbPaths.
   virtual rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Create a brand new sequentially-readable file with the specified name.
@@ -801,7 +801,7 @@ class RandomAccessFile {
 
   // Readahead the file starting from offset by n bytes for caching.
   virtual rocksdb_rs::status::Status Prefetch(uint64_t /*offset*/, size_t /*n*/) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Read a bunch of blocks as described by reqs. The blocks can
@@ -817,7 +817,7 @@ class RandomAccessFile {
       ReadRequest& req = reqs[i];
       req.status = Read(req.offset, req.len, &req.result, req.scratch);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Tries to get an unique ID for this file that will be the same each time
@@ -951,7 +951,7 @@ class WritableFile {
   // before closing. It is not always possible to keep track of the file
   // size due to whole pages writes. The behavior is undefined if called
   // with other writes to follow.
-  virtual rocksdb_rs::status::Status Truncate(uint64_t /*size*/) { return Status_OK(); }
+  virtual rocksdb_rs::status::Status Truncate(uint64_t /*size*/) { return rocksdb_rs::status::Status_OK(); }
 
   // The caller should call Close() before destroying the WritableFile to
   // surface any errors associated with finishing writes to the file.
@@ -1046,7 +1046,7 @@ class WritableFile {
     if (strict_bytes_per_sync_) {
       return Sync();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // PrepareWrite performs any necessary preparation for a write
@@ -1076,7 +1076,7 @@ class WritableFile {
 
   // Pre-allocates space for a file.
   virtual rocksdb_rs::status::Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // If you're adding methods here, remember to add them to

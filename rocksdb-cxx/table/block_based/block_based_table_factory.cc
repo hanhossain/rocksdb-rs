@@ -357,7 +357,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             uint64_t read_amp_bytes_per_bit = ParseUint64(value);
             *(static_cast<uint32_t*>(addr)) =
                 static_cast<uint32_t>(read_amp_bytes_per_bit);
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           }}},
         {"enable_index_compression",
          {offsetof(struct BlockBasedTableOptions, enable_index_compression),
@@ -495,7 +495,7 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
                     (bbto.persistent_cache != nullptr);
   if (cache_count <= 1) {
     // Nothing to share / overlap
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // More complex test of shared key space, in case the instances are wrappers
@@ -549,7 +549,7 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace
@@ -897,7 +897,7 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ParseOption(const ConfigOptio
     // !input_strings_escaped indicates the old API, where everything is
     // parsable.
     if (opt_info.IsByName()) {
-      status = Status_OK();
+      status = rocksdb_rs::status::Status_OK();
     }
   }
   return status;

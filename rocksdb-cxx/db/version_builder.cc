@@ -343,7 +343,7 @@ class VersionBuilder::Rep {
     const auto& level_files = vstorage->LevelFiles(level);
 
     if (level_files.empty()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     assert(level_files[0]);
@@ -371,7 +371,7 @@ class VersionBuilder::Rep {
       }
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Make sure table files are sorted correctly and that the links between
@@ -438,7 +438,7 @@ class VersionBuilder::Rep {
             }
           }
 
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         };
 
         const rocksdb_rs::status::Status s = CheckConsistencyDetailsForLevel(
@@ -477,7 +477,7 @@ class VersionBuilder::Rep {
             return Status_Corruption("VersionBuilder", oss.str());
           }
 
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         };
 
         const rocksdb_rs::status::Status s = CheckConsistencyDetailsForLevel(
@@ -528,7 +528,7 @@ class VersionBuilder::Rep {
     // Always run consistency checks in debug build
 #ifdef NDEBUG
     if (!vstorage->force_consistency_checks()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 #endif
     rocksdb_rs::status::Status s = CheckConsistencyDetails(vstorage);
@@ -633,7 +633,7 @@ class VersionBuilder::Rep {
     mutable_blob_file_metas_.emplace(
         blob_file_number, MutableBlobFileMetaData(std::move(shared_meta)));
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status ApplyBlobFileGarbage(const BlobFileGarbage& blob_file_garbage) {
@@ -656,7 +656,7 @@ class VersionBuilder::Rep {
       return Status_Corruption("VersionBuilder", oss.str());
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   int GetCurrentLevelForTableFile(uint64_t file_number) const {
@@ -721,7 +721,7 @@ class VersionBuilder::Rep {
       table_file_levels_[file_number] =
           VersionStorageInfo::FileLocation::Invalid().GetLevel();
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     const uint64_t blob_file_number =
@@ -751,7 +751,7 @@ class VersionBuilder::Rep {
     table_file_levels_[file_number] =
         VersionStorageInfo::FileLocation::Invalid().GetLevel();
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status ApplyFileAddition(int level, const FileMetaData& meta) {
@@ -777,7 +777,7 @@ class VersionBuilder::Rep {
       ++invalid_level_sizes_[level];
       table_file_levels_[file_number] = level;
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     auto& level_state = levels_[level];
@@ -823,7 +823,7 @@ class VersionBuilder::Rep {
 
     table_file_levels_[file_number] = level;
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status ApplyCompactCursors(int level,
@@ -839,7 +839,7 @@ class VersionBuilder::Rep {
       // Omit levels (>= num_levels_) when re-open with shrinking num_levels_
       updated_compact_cursors_[level] = smallest_uncompacted_key;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Apply all of the edits in *edit to the current state.
@@ -903,7 +903,7 @@ class VersionBuilder::Rep {
         return s.Clone();
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Helper function template for merging the blob file metadata from the base
@@ -1286,7 +1286,7 @@ class VersionBuilder::Rep {
       size_t table_cache_usage = table_cache_->get_cache().get()->GetUsage();
       if (table_cache_usage >= load_limit) {
         // TODO (yanqin) find a suitable status code.
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         max_load = load_limit - table_cache_usage;
       }
@@ -1301,7 +1301,7 @@ class VersionBuilder::Rep {
         // If the file has been opened before, just skip it.
         if (!file_meta->table_reader_handle) {
           files_meta.emplace_back(file_meta, level);
-          statuses.emplace_back(Status_OK());
+          statuses.emplace_back(rocksdb_rs::status::Status_OK());
         }
         if (files_meta.size() >= max_load) {
           break;

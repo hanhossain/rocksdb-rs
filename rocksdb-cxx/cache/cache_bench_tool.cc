@@ -243,7 +243,7 @@ size_t SizeFn(Cache::ObjectPtr /*obj*/) { return FLAGS_value_bytes; }
 rocksdb_rs::status::Status SaveToFn(Cache::ObjectPtr from_obj, size_t /*from_offset*/,
                 size_t length, char* out) {
   memcpy(out, from_obj, length);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status CreateFn(const Slice& data, Cache::CreateContext* /*context*/,
@@ -252,7 +252,7 @@ rocksdb_rs::status::Status CreateFn(const Slice& data, Cache::CreateContext* /*c
   *out_obj = new char[data.size()];
   memcpy(*out_obj, data.data(), data.size());
   *out_charge = data.size();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 };
 
 void DeleteFn(Cache::ObjectPtr value, MemoryAllocator* /*alloc*/) {

@@ -1819,7 +1819,7 @@ rocksdb_rs::status::Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
 
   SetBackupInfoFromBackupMeta(backup_id, *backup, backup_info,
                               include_file_details);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BackupEngineImpl::GetBackupInfo(std::vector<BackupInfo>* backup_info,
@@ -2611,7 +2611,7 @@ rocksdb_rs::status::Status BackupEngineImpl::GetFileDbIdentities(
         return s;
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     s = Status_Corruption("Table properties missing in " + file_path);
     ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString()->c_str());

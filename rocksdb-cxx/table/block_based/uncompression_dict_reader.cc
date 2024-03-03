@@ -40,7 +40,7 @@ rocksdb_rs::status::Status UncompressionDictReader::Create(
   uncompression_dict_reader->reset(
       new UncompressionDictReader(table, std::move(uncompression_dict)));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status UncompressionDictReader::ReadUncompressionDictionary(
@@ -85,7 +85,7 @@ rocksdb_rs::status::Status UncompressionDictReader::GetOrReadUncompressionDictio
 
   if (!uncompression_dict_.IsEmpty()) {
     uncompression_dict->SetUnownedValue(uncompression_dict_.GetValue());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ReadOptions read_options;

@@ -425,7 +425,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::SetReadTimestampForValidation(TxnT
         "Cannot decrease read timestamp for validation");
   }
   read_timestamp_ = ts;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteCommittedTxn::SetCommitTimestamp(TxnTimestamp ts) {
@@ -434,7 +434,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::SetCommitTimestamp(TxnTimestamp ts
         "Cannot commit at timestamp smaller than or equal to read timestamp");
   }
   commit_timestamp_ = ts;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
@@ -557,7 +557,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::PrepareInternal() {
       assert(log_number != 0);
       assert(!two_write_queues_ || is_mem_disabled);  // implies the 2nd queue
       db_->logs_with_prep_tracker()->MarkLogAsContainingPrepSection(log_number);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
    private:
@@ -902,16 +902,16 @@ rocksdb_rs::status::Status PessimisticTransaction::LockBatch(WriteBatch* batch,
     rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
                  const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
                    const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
       RecordKey(column_family_id, key);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   };
 
@@ -1111,7 +1111,7 @@ rocksdb_rs::status::Status PessimisticTransaction::ValidateSnapshot(
       // If the key has been previous validated (or locked) at a sequence number
       // earlier than the current snapshot's sequence number, we already know it
       // has not been modified aftter snap_seq either.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   } else {
     snap_seq = db_impl_->GetLatestSequenceNumber();

@@ -576,7 +576,7 @@ class CfConsistencyStressTest : public StressTest {
 
     thread->stats.AddPrefixes(1, count);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ColumnFamilyHandle* GetControlCfh(ThreadState* thread,
@@ -613,7 +613,7 @@ class CfConsistencyStressTest : public StressTest {
       iters.back()->SeekToFirst();
     }
 
-    rust::Vec<rocksdb_rs::status::Status> statuses = Status_OK().create_vec(num);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_OK().create_vec(num);
 
     assert(thread);
 

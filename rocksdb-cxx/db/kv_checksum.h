@@ -289,7 +289,7 @@ rocksdb_rs::status::Status ProtectionInfo<T>::GetStatus() const {
   if (val_ != 0) {
     return Status_Corruption("ProtectionInfo mismatch");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 template <typename T>

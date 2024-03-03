@@ -49,7 +49,7 @@ rocksdb_rs::status::Status BlobFileCache::GetBlobFileReader(
   TypedHandle* handle = cache_.Lookup(key);
   if (handle) {
     *blob_file_reader = cache_.Guard(handle);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   TEST_SYNC_POINT("BlobFileCache::GetBlobFileReader:DoubleCheck");
@@ -60,7 +60,7 @@ rocksdb_rs::status::Status BlobFileCache::GetBlobFileReader(
   handle = cache_.Lookup(key);
   if (handle) {
     *blob_file_reader = cache_.Guard(handle);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   assert(immutable_options_);
@@ -95,7 +95,7 @@ rocksdb_rs::status::Status BlobFileCache::GetBlobFileReader(
 
   *blob_file_reader = cache_.Guard(handle);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

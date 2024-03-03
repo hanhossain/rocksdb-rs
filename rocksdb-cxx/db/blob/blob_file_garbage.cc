@@ -83,7 +83,7 @@ rocksdb_rs::status::Status BlobFileGarbage::DecodeFrom(Slice* input) {
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::string BlobFileGarbage::DebugString() const {

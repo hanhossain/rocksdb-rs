@@ -103,7 +103,7 @@ BlobDBImpl::~BlobDBImpl() {
 
 rocksdb_rs::status::Status BlobDBImpl::Close() {
   if (closed_) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   closed_ = true;
 
@@ -804,7 +804,7 @@ rocksdb_rs::status::Status BlobDBImpl::CheckOrCreateWriterLocked(
   assert(writer != nullptr);
   *writer = blob_file->GetWriter();
   if (*writer != nullptr) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status s = CreateWriterLocked(blob_file);
   if (s.ok()) {
@@ -860,7 +860,7 @@ rocksdb_rs::status::Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>*
     if (open_non_ttl_file_) {
       assert(!open_non_ttl_file_->Immutable());
       *blob_file = open_non_ttl_file_;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 
@@ -870,7 +870,7 @@ rocksdb_rs::status::Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>*
   if (open_non_ttl_file_) {
     assert(!open_non_ttl_file_->Immutable());
     *blob_file = open_non_ttl_file_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   std::shared_ptr<BlobLogWriter> writer;
@@ -898,7 +898,7 @@ rocksdb_rs::status::Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
     *blob_file = FindBlobFileLocked(expiration);
     if (*blob_file != nullptr) {
       assert(!(*blob_file)->Immutable());
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 
@@ -908,7 +908,7 @@ rocksdb_rs::status::Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
   *blob_file = FindBlobFileLocked(expiration);
   if (*blob_file != nullptr) {
     assert(!(*blob_file)->Immutable());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const uint64_t exp_low =
@@ -1170,7 +1170,7 @@ rocksdb_rs::status::Status BlobDBImpl::DecompressSlice(const Slice& compressed_v
 
   value_output->PinSelf(contents.data);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobDBImpl::CompactFiles(
@@ -1274,7 +1274,7 @@ rocksdb_rs::status::Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_
   if (bdb_options_.max_db_size == 0 ||
       live_sst_size + total_blob_size_.load() + blob_size <=
           bdb_options_.max_db_size) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (bdb_options_.is_fifo == false ||
@@ -1334,7 +1334,7 @@ rocksdb_rs::status::Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_
     return Status_NoSpace(
         "Write failed, as writing it would exceed max_db_size limit.");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile>& bfile,
@@ -1441,7 +1441,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetBlobValue(const Slice& key, const Slic
     // TODO(yiwu): If index_entry is a PinnableSlice, we can also pin the same
     // memory buffer to avoid extra copy.
     value->PinSelf(blob_index.value());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
@@ -1467,7 +1467,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetBlobValue(const Slice& key, const Slic
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
@@ -1480,7 +1480,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
 
   if (!size) {
     value->PinSelf("");
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // offset has to have certain min, as we will read CRC
@@ -1602,7 +1602,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
 
   value->PinSelf(blob_value);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobDBImpl::Get(const ReadOptions& read_options,
@@ -1777,7 +1777,7 @@ rocksdb_rs::status::Status BlobDBImpl::CloseBlobFileIfNeeded(std::shared_ptr<Blo
 
   // atomic read
   if (bfile->GetFileSize() < bdb_options_.blob_file_size) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   WriteLock lock(&mutex_);
@@ -1785,7 +1785,7 @@ rocksdb_rs::status::Status BlobDBImpl::CloseBlobFileIfNeeded(std::shared_ptr<Blo
 
   assert(!bfile->Obsolete() || bfile->Immutable());
   if (bfile->Immutable()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   return CloseBlobFile(bfile);

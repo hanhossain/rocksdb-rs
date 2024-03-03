@@ -3008,7 +3008,7 @@ class ModelDB : public DB {
   }
 
   using DB::Close;
-  rocksdb_rs::status::Status Close() override { return Status_OK(); }
+  rocksdb_rs::status::Status Close() override { return rocksdb_rs::status::Status_OK(); }
   using DB::Delete;
   rocksdb_rs::status::Status Delete(const WriteOptions& o, ColumnFamilyHandle* cf,
                 const Slice& key) override {
@@ -3211,7 +3211,7 @@ class ModelDB : public DB {
     for (int i = 0; i < n; i++) {
       sizes[i] = 0;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   using DB::GetApproximateMemTableStats;
   void GetApproximateMemTableStats(ColumnFamilyHandle* /*column_family*/,
@@ -3265,7 +3265,7 @@ class ModelDB : public DB {
 
   virtual rocksdb_rs::status::Status WaitForCompact(
       const WaitForCompactOptions& /* wait_for_compact_options */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   using DB::NumberLevels;
@@ -3302,38 +3302,38 @@ class ModelDB : public DB {
   rocksdb_rs::status::Status Flush(
       const rocksdb::FlushOptions& /*options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_families*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status SyncWAL() override { return Status_OK(); }
+  rocksdb_rs::status::Status SyncWAL() override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status DisableFileDeletions() override { return Status_OK(); }
+  rocksdb_rs::status::Status DisableFileDeletions() override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override { return rocksdb_rs::status::Status_OK(); }
 
   rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>&, uint64_t* /*size*/,
                       bool /*flush_memtable*/ = true) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status GetLiveFilesChecksumInfo(
       FileChecksumList* /*checksum_list*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status GetLiveFilesStorageInfo(
       const LiveFilesStorageInfoOptions& /*opts*/,
       std::vector<LiveFileStorageInfo>* /*files*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status GetSortedWalFiles(VectorLogPtr& /*files*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status GetCurrentWalFile(
       std::unique_ptr<LogFile>* /*current_log_file*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual rocksdb_rs::status::Status GetCreationTimeOfOldestFile(
@@ -3341,7 +3341,7 @@ class ModelDB : public DB {
     return Status_NotSupported();
   }
 
-  rocksdb_rs::status::Status DeleteFile(std::string /*name*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status DeleteFile(std::string /*name*/) override { return rocksdb_rs::status::Status_OK(); }
 
   rocksdb_rs::status::Status GetUpdatesSince(
       rocksdb::SequenceNumber,
@@ -3355,23 +3355,23 @@ class ModelDB : public DB {
                                ColumnFamilyMetaData* /*metadata*/) override {}
 
   rocksdb_rs::status::Status GetDbIdentity(std::string& /*identity*/) const override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status GetDbSessionId(std::string& /*session_id*/) const override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   SequenceNumber GetLatestSequenceNumber() const override { return 0; }
 
   rocksdb_rs::status::Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
                                   std::string /*ts_low*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status GetFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
                              std::string* /*ts_low*/) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ColumnFamilyHandle* DefaultColumnFamily() const override { return nullptr; }
@@ -3411,7 +3411,7 @@ class ModelDB : public DB {
 
     Slice key() const override { return iter_->first; }
     Slice value() const override { return iter_->second; }
-    rocksdb_rs::status::Status status() const override { return Status_OK(); }
+    rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
    private:
     const KVMap* const map_;
@@ -6944,7 +6944,7 @@ TEST_F(DBTest, PinnableSliceAndRowCache) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(rocksdb_rs::status::Status_OK()));
     ASSERT_EQ(pin_slice.ToString(), "bar");
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -6973,8 +6973,8 @@ TEST_F(DBTest, ReusePinnableSlice) {
 
   {
     PinnableSlice pin_slice;
-    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
-    ASSERT_TRUE(Get("foo", &pin_slice).eq(Status_OK()));
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(rocksdb_rs::status::Status_OK()));
+    ASSERT_TRUE(Get("foo", &pin_slice).eq(rocksdb_rs::status::Status_OK()));
     ASSERT_EQ(pin_slice.ToString(), "bar");
 
     // Entry is already in cache, lookup will remove the element from lru
@@ -6997,11 +6997,11 @@ TEST_F(DBTest, ReusePinnableSlice) {
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_TRUE(Status_OK().eq(statuses[0]));
+    ASSERT_TRUE(rocksdb_rs::status::Status_OK().eq(statuses[0]));
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
                        multiget_values.data(), statuses.data());
-    ASSERT_TRUE(Status_OK().eq(statuses[0]));
+    ASSERT_TRUE(rocksdb_rs::status::Status_OK().eq(statuses[0]));
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7025,11 +7025,11 @@ TEST_F(DBTest, ReusePinnableSlice) {
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_TRUE(Status_OK().eq(statuses[0]));
+    ASSERT_TRUE(rocksdb_rs::status::Status_OK().eq(statuses[0]));
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),
                        statuses.data());
-    ASSERT_TRUE(Status_OK().eq(statuses[0]));
+    ASSERT_TRUE(rocksdb_rs::status::Status_OK().eq(statuses[0]));
 
     // Entry is already in cache, lookup will remove the element from lru
     ASSERT_EQ(
@@ -7238,7 +7238,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t creation_time;
   rocksdb_rs::status::Status s1 = dbfull()->GetCreationTimeOfOldestFile(&creation_time);
   ASSERT_EQ(0, creation_time);
-  ASSERT_TRUE(s1.eq(Status_OK()));
+  ASSERT_TRUE(s1.eq(rocksdb_rs::status::Status_OK()));
 
   // Testing with non-zero file creation time.
   set_file_creation_time_to_zero = false;
@@ -7263,7 +7263,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   uint64_t ctime;
   rocksdb_rs::status::Status s2 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
   ASSERT_EQ(uint_time_1, ctime);
-  ASSERT_TRUE(s2.eq(Status_OK()));
+  ASSERT_TRUE(s2.eq(rocksdb_rs::status::Status_OK()));
 
   // Testing with max_open_files != -1
   options = CurrentOptions();

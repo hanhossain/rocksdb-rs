@@ -212,7 +212,7 @@ rocksdb_rs::status::Status TestWritableFile::Sync() {
   // No need to actual sync.
   state_.pos_at_last_sync_ = state_.pos_;
   env_->WritableFileSynced(state_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 TestRandomRWFile::TestRandomRWFile(const std::string& /*fname*/,
@@ -271,7 +271,7 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::NewDirectory(const std::string
     return s;
   }
   result->reset(new TestDirectory(this, TrimDirname(name), r.release()));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FaultInjectionTestEnv::NewWritableFile(
@@ -394,7 +394,7 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::NewRandomAccessFile(
   assert(result);
   result->reset(new TestRandomAccessFile(std::move(*result), this));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFile(const std::string& f) {
@@ -536,7 +536,7 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFilesCreatedAfterLastDir
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 void FaultInjectionTestEnv::ResetState() {
   MutexLock l(&mutex_);

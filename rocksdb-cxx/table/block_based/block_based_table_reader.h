@@ -229,7 +229,7 @@ class BlockBasedTable : public TableReader {
     virtual rocksdb_rs::status::Status CacheDependencies(
         const ReadOptions& /*ro*/, bool /* pin */,
         FilePrefetchBuffer* /* tail_prefetch_buffer */) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   };
 

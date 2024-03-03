@@ -99,7 +99,7 @@ void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(
 
   total_added_in_built_ += filter_bits_builder_->EstimateEntriesAdded();
   std::unique_ptr<const char[]> filter_data;
-  rocksdb_rs::status::Status filter_construction_status = Status_OK();
+  rocksdb_rs::status::Status filter_construction_status = rocksdb_rs::status::Status_OK();
   Slice filter =
       filter_bits_builder_->Finish(&filter_data, &filter_construction_status);
   if (filter_construction_status.ok()) {
@@ -161,7 +161,7 @@ Slice PartitionedFilterBlockBuilder::Finish(
   // If there is no filter partition left, then return the index on filter
   // partitions
   if (UNLIKELY(filters.empty())) {
-    *status = Status_OK();
+    *status = rocksdb_rs::status::Status_OK();
     last_filter_data.reset();
     if (finishing_filters) {
       // Simplest to just add them all at the end
@@ -308,7 +308,7 @@ rocksdb_rs::status::Status PartitionedFilterBlockReader::GetFilterPartitionBlock
     // for the partition
     if (iter != filter_map_.end()) {
       filter_block->SetUnownedValue(iter->second.GetValue());
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 

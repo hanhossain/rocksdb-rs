@@ -209,7 +209,7 @@ rocksdb_rs::status::Status DBImplReadOnly::NewIterators(
     iterators->push_back(db_iter);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {

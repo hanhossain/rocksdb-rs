@@ -64,7 +64,7 @@ TransactionDBMutexFactoryImpl::AllocateCondVar() {
 
 rocksdb_rs::status::Status TransactionDBMutexImpl::Lock() {
   mutex_.lock();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
@@ -88,7 +88,7 @@ rocksdb_rs::status::Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_ti
     return Status_TimedOut(rocksdb_rs::status::SubCode::kMutexTimeout);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TransactionDBCondVarImpl::Wait(
@@ -101,7 +101,7 @@ rocksdb_rs::status::Status TransactionDBCondVarImpl::Wait(
   // Make sure unique_lock doesn't unlock mutex when it destructs
   lock.release();
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status TransactionDBCondVarImpl::WaitFor(

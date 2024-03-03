@@ -107,10 +107,10 @@ rocksdb_rs::status::Status DBIter::GetProperty(std::string prop_name, std::strin
     } else {
       *prop = "Iterator is not valid.";
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (prop_name == "rocksdb.iterator.internal-key") {
     *prop = saved_key_.GetUserKey().ToString();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return Status_InvalidArgument("Unidentified property.");
 }
@@ -1459,7 +1459,7 @@ void DBIter::Seek(const Slice& target) {
     db_impl_->TraceIteratorSeek(cfd_->GetID(), target, lower_bound, upper_bound);
   }
 
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   ReleaseTempPinnedData();
   ResetBlobValue();
   ResetValueAndColumns();
@@ -1534,7 +1534,7 @@ void DBIter::SeekForPrev(const Slice& target) {
                                    upper_bound);
   }
 
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   ReleaseTempPinnedData();
   ResetBlobValue();
   ResetValueAndColumns();
@@ -1592,7 +1592,7 @@ void DBIter::SeekToFirst() {
   if (!expect_total_order_inner_iter()) {
     max_skip_ = std::numeric_limits<uint64_t>::max();
   }
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   direction_ = Direction::kForward;
   ReleaseTempPinnedData();
   ResetBlobValue();
@@ -1653,7 +1653,7 @@ void DBIter::SeekToLast() {
   if (!expect_total_order_inner_iter()) {
     max_skip_ = std::numeric_limits<uint64_t>::max();
   }
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   direction_ = Direction::kReverse;
   ReleaseTempPinnedData();
   ResetBlobValue();

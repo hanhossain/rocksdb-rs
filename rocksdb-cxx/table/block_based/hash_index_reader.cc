@@ -52,7 +52,7 @@ rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
       FindMetaBlock(meta_index_iter, kHashIndexPrefixesBlock, &prefixes_handle);
   if (!s.ok()) {
     // TODO: log error
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Get index metadata block
@@ -61,7 +61,7 @@ rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
                     &prefixes_meta_handle);
   if (!s.ok()) {
     // TODO: log error
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   RandomAccessFileReader* const file = rep->file.get();
@@ -91,7 +91,7 @@ rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
   s = prefixes_meta_block_fetcher.ReadBlockContents();
   if (!s.ok()) {
     // TODO: log error
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   BlockPrefixIndex* prefix_index = nullptr;
@@ -106,7 +106,7 @@ rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
     hash_index_reader->prefix_index_.reset(prefix_index);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIteratorBase<IndexValue>* HashIndexReader::NewIterator(

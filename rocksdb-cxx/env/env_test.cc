@@ -2034,52 +2034,52 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
 
     rocksdb_rs::status::Status Append(const Slice& /*data*/) override {
       inc(1);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status Append(
         const Slice& /*data*/,
         const DataVerificationInfo& /* verification_info */) override {
       inc(1);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status PositionedAppend(const Slice& /*data*/,
                             uint64_t /*offset*/) override {
       inc(2);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status PositionedAppend(
         const Slice& /*data*/, uint64_t /*offset*/,
         const DataVerificationInfo& /* verification_info */) override {
       inc(2);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status Truncate(uint64_t /*size*/) override {
       inc(3);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status Close() override {
       inc(4);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status Flush() override {
       inc(5);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status Sync() override {
       inc(6);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status Fsync() override {
       inc(7);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     bool IsSyncThreadSafe() const override {
@@ -2132,19 +2132,19 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
 
     rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
       inc(19);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/) override {
       inc(20);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     void PrepareWrite(size_t /*offset*/, size_t /*len*/) override { inc(21); }
 
     rocksdb_rs::status::Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) override {
       inc(22);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
    public:
@@ -2383,7 +2383,7 @@ class TestEnv : public EnvWrapper {
    private:
     rocksdb_rs::status::Status CloseHelper() {
       env->CloseCountInc();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     TestEnv* env;
   };
@@ -2395,7 +2395,7 @@ class TestEnv : public EnvWrapper {
   rocksdb_rs::status::Status NewLogger(const std::string& /*fname*/,
                    std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

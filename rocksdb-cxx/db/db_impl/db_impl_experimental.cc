@@ -51,7 +51,7 @@ rocksdb_rs::status::Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* colum
     SchedulePendingCompaction(cfd);
     MaybeScheduleFlushOrCompaction();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {

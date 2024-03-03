@@ -231,7 +231,7 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
     assert(from_offset < slice.size());
     assert(from_offset + length <= slice.size());
     std::copy_n(slice.data() + from_offset, length, out);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   static rocksdb_rs::status::Status Create(const Slice& data, CreateContext* context,
@@ -245,7 +245,7 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
       TCreateContext::Create(&value, out_charge, data, allocator);
     }
     *out_obj = UpCastValue(value.release());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 

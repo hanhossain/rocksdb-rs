@@ -71,7 +71,7 @@ class FilterBitsBuilder {
   // status, which indicates the filter is already in a corrupted state and
   // there is no need to post-verify
   virtual rocksdb_rs::status::Status MaybePostVerify(const Slice& /* filter_content */) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Approximate the number of keys that can be added and generate a filter

@@ -27,7 +27,7 @@ rocksdb_rs::status::Status SaveToCallback(Cache::ObjectPtr from_obj, size_t from
   EXPECT_EQ(length, item->Size());
   EXPECT_EQ(from_offset, 0);
   memcpy(out, buf, length);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DeletionCallback(Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
@@ -48,7 +48,7 @@ rocksdb_rs::status::Status CreateCallback(const Slice& data, Cache::CreateContex
   }
   *out_obj = new TestItem(data.data(), data.size());
   *out_charge = data.size();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // If helpers without_secondary are provided, returns helpers with secondary

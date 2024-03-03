@@ -514,7 +514,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   std::vector<bool> pick_status;
   for (int i = 0; i != num_cfs; ++i) {
     // Initially all jobs are not executed, with status OK.
-    exec_status.emplace_back(false, Status_OK());
+    exec_status.emplace_back(false, rocksdb_rs::status::Status_OK());
     pick_status.push_back(false);
   }
 
@@ -566,7 +566,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   }
 
   if (s.IsColumnFamilyDropped()) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
 
   if (s.ok() || s.IsShutdownInProgress()) {
@@ -634,7 +634,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
           break;
         }
       }
-      return std::make_pair(Status_OK(), !ready);
+      return std::make_pair(rocksdb_rs::status::Status_OK(), !ready);
     };
 
     bool resuming_from_bg_err =
@@ -988,7 +988,7 @@ rocksdb_rs::status::Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData
         << Slice(ts_low).ToString(true) << std::endl;
     return Status_TryAgain(oss.str());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
@@ -1564,7 +1564,7 @@ rocksdb_rs::status::Status DBImpl::PauseBackgroundWork() {
     bg_cv_.Wait();
   }
   bg_work_paused_++;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::ContinueBackgroundWork() {
@@ -1581,7 +1581,7 @@ rocksdb_rs::status::Status DBImpl::ContinueBackgroundWork() {
   if (bg_work_paused_ == 0) {
     MaybeScheduleFlushOrCompaction();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::NotifyOnCompactionBegin(ColumnFamilyData* cfd, Compaction* c,
@@ -1667,7 +1667,7 @@ rocksdb_rs::status::Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, 
 
   auto* vstorage = cfd->current()->storage_info();
   if (vstorage->LevelFiles(level).empty()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // only allow one thread refitting
   if (refitting_level_) {
@@ -1800,7 +1800,7 @@ rocksdb_rs::status::Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, 
   }
 
   refitting_level_ = false;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 int DBImpl::NumberLevels(ColumnFamilyHandle* column_family) {
@@ -1828,7 +1828,7 @@ rocksdb_rs::status::Status DBImpl::FlushAllColumnFamilies(const FlushOptions& fl
     mutex_.Unlock();
     status = AtomicFlushMemTables(flush_options, flush_reason);
     if (status.IsColumnFamilyDropped()) {
-      status = Status_OK();
+      status = rocksdb_rs::status::Status_OK();
     }
     mutex_.Lock();
   } else {
@@ -1844,7 +1844,7 @@ rocksdb_rs::status::Status DBImpl::FlushAllColumnFamilies(const FlushOptions& fl
       if (!status.ok() && !status.IsColumnFamilyDropped()) {
         break;
       } else if (status.IsColumnFamilyDropped()) {
-        status = Status_OK();
+        status = rocksdb_rs::status::Status_OK();
       }
     }
   }
@@ -2478,7 +2478,7 @@ rocksdb_rs::status::Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamil
         // We waited so long that the memtable we were originally waiting on was
         // flushed.
         *flush_needed = false;
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
 
       const auto& mutable_cf_options = *cfd->GetLatestMutableCFOptions();
@@ -2506,7 +2506,7 @@ rocksdb_rs::status::Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamil
                                   .first;
     } while (write_stall_condition != WriteStallCondition::kNormal);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Wait for memtables to be flushed for multiple column families.
@@ -3349,7 +3349,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
       // Stay in the compaction queue.
       unscheduled_compactions_++;
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     auto cfd = PickCompactionFromQueue(&task_token, log_buffer);
@@ -3368,7 +3368,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
     if (cfd->UnrefAndTryDelete()) {
       // This was the last reference of the column family, so no need to
       // compact.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     // Pick up latest mutable CF Options and use it throughout the

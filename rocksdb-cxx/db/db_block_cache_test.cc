@@ -267,7 +267,7 @@ class PersistentCacheFromCache : public PersistentCache {
       data->reset(new char[*size]);
       std::copy_n(ptr, *size, data->get());
       cache_.Release(handle);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       return Status_NotFound();
     }

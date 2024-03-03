@@ -2791,7 +2791,7 @@ inline rocksdb_rs::status::Status DBImpl::FailIfCfHasTs(
         << column_family->GetName() << " that enables timestamp";
     return Status_InvalidArgument(oss.str());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 inline rocksdb_rs::status::Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
@@ -2829,7 +2829,7 @@ inline rocksdb_rs::status::Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle*
       return Status_InvalidArgument(oss.str());
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

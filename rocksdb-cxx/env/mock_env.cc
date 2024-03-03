@@ -39,13 +39,13 @@ static std::unordered_map<std::string, OptionTypeInfo> time_elapse_type_info = {
          const std::string& value, void* addr) {
         auto clock = static_cast<EmulatedSystemClock*>(addr);
         clock->SetTimeElapseOnlySleep(ParseBoolean("", value));
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       },
       [](const ConfigOptions& /*opts*/, const std::string& /*name*/,
          const void* addr, std::string* value) {
         const auto clock = static_cast<const EmulatedSystemClock*>(addr);
         *value = clock->IsTimeElapseOnlySleep() ? "true" : "false";
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       },
       nullptr}},
 };
@@ -57,13 +57,13 @@ static std::unordered_map<std::string, OptionTypeInfo> mock_sleep_type_info = {
          const std::string& value, void* addr) {
         auto clock = static_cast<EmulatedSystemClock*>(addr);
         clock->SetMockSleep(ParseBoolean("", value));
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       },
       [](const ConfigOptions& /*opts*/, const std::string& /*name*/,
          const void* addr, std::string* value) {
         const auto clock = static_cast<const EmulatedSystemClock*>(addr);
         *value = clock->IsMockSleepEnabled() ? "true" : "false";
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       },
       nullptr}},
 };
@@ -1027,7 +1027,7 @@ rocksdb_rs::status::Status MockFileSystem::CorruptBuffer(const std::string& fnam
     return Status_IOError(fn, "File not found");
   }
   iter->second->CorruptBuffer();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 MockEnv::MockEnv(Env* env, const std::shared_ptr<FileSystem>& fs,

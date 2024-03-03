@@ -311,7 +311,7 @@ class FileSystem : public Customizable {
   // Different implementations may take different actions.
   // By default, it's a no-op and returns Status_OK.
   virtual rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // Handles the event a DB or a ColumnFamily stops using the specified data
   // paths.
@@ -321,7 +321,7 @@ class FileSystem : public Customizable {
   // Different implementations may take different actions.
   // By default, it's a no-op and returns Status_OK.
   virtual rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Create a brand new sequentially-readable file with the specified name.

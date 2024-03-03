@@ -236,7 +236,7 @@ class WriteBatch : public WriteBatchBase {
         // backwards incompatible so we didn't change the return status
         // (this is a public API). We do an ordinary get and return Status_OK()
         Put(key, value);
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
       return Status_InvalidArgument(
           "non-default column family and PutCF not implemented");
@@ -255,7 +255,7 @@ class WriteBatch : public WriteBatchBase {
     virtual rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) {
       if (column_family_id == 0) {
         Delete(key);
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
       return Status_InvalidArgument(
           "non-default column family and DeleteCF not implemented");
@@ -267,7 +267,7 @@ class WriteBatch : public WriteBatchBase {
     virtual rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) {
       if (column_family_id == 0) {
         SingleDelete(key);
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
       return Status_InvalidArgument(
           "non-default column family and SingleDeleteCF not implemented");
@@ -288,7 +288,7 @@ class WriteBatch : public WriteBatchBase {
                            const Slice& value) {
       if (column_family_id == 0) {
         Merge(key, value);
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
       return Status_InvalidArgument(
           "non-default column family and MergeCF not implemented");

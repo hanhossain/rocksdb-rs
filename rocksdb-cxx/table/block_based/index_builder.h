@@ -242,7 +242,7 @@ class ShortenedIndexBuilder : public IndexBuilder {
           index_block_builder_without_seq_.Finish();
     }
     index_size_ = index_blocks->index_block_contents.size();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   size_t IndexSize() const override { return index_size_; }

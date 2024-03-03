@@ -566,7 +566,7 @@ rocksdb_rs::status::Status CreateEnvFromSystem(const ConfigOptions& config_optio
     // Neither specified.  Use the default
     *result = config_options.env;
     guard->reset();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 namespace {

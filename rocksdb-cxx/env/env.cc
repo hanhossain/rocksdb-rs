@@ -161,7 +161,7 @@ class LegacyRandomAccessFileWrapper : public FSRandomAccessFile {
       req.offset = fs_reqs[i].offset;
       req.len = fs_reqs[i].len;
       req.scratch = fs_reqs[i].scratch;
-      req.status = Status_OK();
+      req.status = rocksdb_rs::status::Status_OK();
       reqs.emplace_back(std::move(req));
     }
     status = target_->MultiRead(reqs.data(), num_reqs);
@@ -640,7 +640,7 @@ rocksdb_rs::status::Status Env::CreateFromString(const ConfigOptions& config_opt
   Env* base = Env::Default();
   if (value.empty() || base->IsInstanceOf(value)) {
     *result = base;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     RegisterSystemEnvs();
     Env* env = *result;
@@ -671,14 +671,14 @@ rocksdb_rs::status::Status Env::CreateFromString(const ConfigOptions& config_opt
   Env* base = Env::Default();
   if (id.empty() || base->IsInstanceOf(id)) {
     env = base;
-    status = Status_OK();
+    status = rocksdb_rs::status::Status_OK();
   } else {
     RegisterSystemEnvs();
     // First, try to load the Env as a unique object.
     status = config_options.registry->NewObject<Env>(id, &env, &uniq);
   }
   if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-    status = Status_OK();
+    status = rocksdb_rs::status::Status_OK();
   } else if (status.ok()) {
     status = Customizable::ConfigureNewObject(config_options, env, opt_map);
   }
@@ -696,7 +696,7 @@ rocksdb_rs::status::Status Env::CreateFromUri(const ConfigOptions& config_option
   if (env_uri.empty() && fs_uri.empty()) {
     // Neither specified.  Use the default
     guard->reset();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (!env_uri.empty() && !fs_uri.empty()) {
     // Both specified.  Cannot choose.  Return Invalid
     return Status_InvalidArgument("cannot specify both fs_uri and env_uri");
@@ -768,7 +768,7 @@ rocksdb_rs::status::Status Env::GetChildrenFileAttributes(const std::string& dir
     result_size++;
   }
   result->resize(result_size);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status Env::GetHostNameString(std::string* result) {
@@ -836,7 +836,7 @@ rocksdb_rs::status::Status Logger::Close() {
     closed_ = true;
     return CloseImpl();
   } else {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 
@@ -1155,7 +1155,7 @@ rocksdb_rs::status::Status NewEnvLogger(const std::string& fname, Env* env,
 
   *result = std::make_shared<EnvLogger>(std::move(writable_file), fname,
                                         options, env);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 const std::shared_ptr<FileSystem>& Env::GetFileSystem() const {
@@ -1224,7 +1224,7 @@ rocksdb_rs::status::Status SystemClock::CreateFromString(const ConfigOptions& co
   auto clock = SystemClock::Default();
   if (clock->IsInstanceOf(value)) {
     *result = clock;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     static std::once_flag once;
     std::call_once(once, [&]() {

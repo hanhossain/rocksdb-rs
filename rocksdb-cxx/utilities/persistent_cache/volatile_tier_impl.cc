@@ -75,7 +75,7 @@ rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key, cons
 
   cache_data.release();
   stats_.cache_inserts_++;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status VolatileCacheTier::Lookup(const Slice& page_key,
@@ -93,7 +93,7 @@ rocksdb_rs::status::Status VolatileCacheTier::Lookup(const Slice& page_key,
     kv->refs_--;
     // update stats
     stats_.cache_hits_++;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   stats_.cache_misses_++;

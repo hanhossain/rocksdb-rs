@@ -429,7 +429,7 @@ rocksdb_rs::status::Status CompactionPicker::GetCompactionInputsFromFileNumbers(
     input_files->emplace_back(std::move(matched_input_files[level]));
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Returns true if any one of the parent files are being compacted
@@ -1039,7 +1039,7 @@ rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFilesForAllL
         "A running compaction is writing to the same output level in an "
         "overlapping key range");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFiles(
@@ -1113,7 +1113,7 @@ rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFiles(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void CompactionPicker::RegisterCompaction(Compaction* c) {

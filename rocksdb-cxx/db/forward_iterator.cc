@@ -61,7 +61,7 @@ class ForwardLevelIterator : public InternalIterator {
 
   void SetFileIndex(uint32_t file_index) {
     assert(file_index < files_.size());
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     if (file_index != file_index_) {
       file_index_ = file_index;
       Reset();
@@ -173,7 +173,7 @@ class ForwardLevelIterator : public InternalIterator {
     } else if (file_iter_) {
       return file_iter_->status();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   bool PrepareValue() override {
     assert(valid_);
@@ -231,8 +231,8 @@ ForwardIterator::ForwardIterator(DBImpl* db, const ReadOptions& read_options,
       mutable_iter_(nullptr),
       current_(nullptr),
       valid_(false),
-      status_(Status_OK()),
-      immutable_status_(Status_OK()),
+      status_(rocksdb_rs::status::Status_OK()),
+      immutable_status_(rocksdb_rs::status::Status_OK()),
       has_iter_trimmed_for_upper_bound_(false),
       current_over_upper_bound_(false),
       is_prev_set_(false),
@@ -391,7 +391,7 @@ void ForwardIterator::SeekInternal(const Slice& internal_key,
   if (seek_to_first || seek_after_async_io ||
       NeedToSeekImmutable(internal_key)) {
     if (!seek_after_async_io) {
-      immutable_status_ = Status_OK();
+      immutable_status_ = rocksdb_rs::status::Status_OK();
       if (has_iter_trimmed_for_upper_bound_ &&
           (
               // prev_ is not set yet
@@ -641,7 +641,7 @@ rocksdb_rs::status::Status ForwardIterator::GetProperty(std::string prop_name, s
   assert(prop != nullptr);
   if (prop_name == "rocksdb.iterator.super-version-number") {
     *prop = std::to_string(sv_->version_number);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return Status_InvalidArgument();
 }
@@ -924,7 +924,7 @@ void ForwardIterator::UpdateCurrent() {
   }
   valid_ = current_ != nullptr && immutable_status_.ok();
   if (!status_.ok()) {
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
   }
 
   // Upper bound doesn't apply to the memtable iterator. We want Valid() to

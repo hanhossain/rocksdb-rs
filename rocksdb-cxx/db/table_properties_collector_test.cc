@@ -84,7 +84,7 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
         {"NumSingleDeletes", encoded_num_single_deletes},
         {"NumSizeChanges", encoded_num_size_changes},
     };
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& user_key, const Slice& /*value*/,
@@ -107,7 +107,7 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
       num_size_changes_++;
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {
@@ -136,7 +136,7 @@ class RegularKeysStartWithABackwardCompatible
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{{"TablePropertiesTest", "Rocksdb"},
                                           {"Count", encoded}};
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& /*value*/) override {
@@ -144,7 +144,7 @@ class RegularKeysStartWithABackwardCompatible
     if (user_key.data()[0] == 'A') {
       ++count_;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {
@@ -164,7 +164,7 @@ class RegularKeysStartWithAInternal : public IntTblPropCollector {
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{{"TablePropertiesTest", "Rocksdb"},
                                           {"Count", encoded}};
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status InternalAdd(const Slice& user_key, const Slice& /*value*/,
@@ -173,7 +173,7 @@ class RegularKeysStartWithAInternal : public IntTblPropCollector {
     if (user_key.data()[0] == 'A') {
       ++count_;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void BlockAdd(uint64_t /* block_uncomp_bytes */,

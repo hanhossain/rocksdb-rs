@@ -324,7 +324,7 @@ rocksdb_rs::status::Status WalManager::GetSortedWalsOfType(const std::string& pa
           s = env_->GetFileSize(archived_file, &size_bytes);
           if (!s.ok() && env_->FileExists(archived_file).IsNotFound()) {
             // oops, the file just got deleted from archived dir! move on
-            s = Status_OK();
+            s = rocksdb_rs::status::Status_OK();
             continue;
           }
         }
@@ -370,7 +370,7 @@ rocksdb_rs::status::Status WalManager::RetainProbableWalFiles(VectorLogPtr& all_
       static_cast<size_t>(std::max(static_cast<int64_t>(0), end));
   // The last wal file is always included
   all_logs.erase(all_logs.begin(), all_logs.begin() + start_index);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type,
@@ -387,7 +387,7 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
     auto itr = read_first_record_cache_.find(number);
     if (itr != read_first_record_cache_.end()) {
       *sequence = itr->second;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
@@ -408,7 +408,7 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
     // Status_OK(). The caller with identify this as empty file because
     // *sequence == 0
     if (!s.ok() && env_->FileExists(archived_file).IsNotFound()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 
@@ -440,7 +440,7 @@ rocksdb_rs::status::Status WalManager::GetLiveWalFile(uint64_t number,
                                   0,  // SequenceNumber
                                   size_bytes));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // the function returns status.ok() and sequence == 0 if the file exists, but is

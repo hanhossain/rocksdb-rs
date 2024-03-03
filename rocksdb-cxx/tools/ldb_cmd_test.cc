@@ -179,7 +179,7 @@ class FileChecksumTestHelper {
           stored_checksum + ". However, expected checksum name: " +
           checksum_func_name + " and checksum " + cur_checksum);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  public:
@@ -251,7 +251,7 @@ class FileChecksumTestHelper {
             live_files[i].file_checksum);
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Verify the checksum of each file by recalculting the checksum and

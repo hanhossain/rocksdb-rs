@@ -23,7 +23,7 @@ class SequentialFileMirror : public SequentialFile {
   rocksdb_rs::status::Status Read(size_t n, Slice* result, char* scratch) override {
     Slice aslice;
     rocksdb_rs::status::Status as = a_->Read(n, &aslice, scratch);
-    if (as.eq(Status_OK())) {
+    if (as.eq(rocksdb_rs::status::Status_OK())) {
       char* bscratch = new char[n];
       Slice bslice;
 #ifndef NDEBUG
@@ -71,7 +71,7 @@ class RandomAccessFileMirror : public RandomAccessFile {
   rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override {
     rocksdb_rs::status::Status as = a_->Read(offset, n, result, scratch);
-    if (as.eq(Status_OK())) {
+    if (as.eq(rocksdb_rs::status::Status_OK())) {
       char* bscratch = new char[n];
       Slice bslice;
       size_t off = 0;

@@ -360,7 +360,7 @@ rocksdb_rs::status::Status Comparator::CreateFromString(const ConfigOptions& con
   } else if (value.empty()) {
     // No Id and no options.  Clear the object
     *result = nullptr;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (id.empty()) {  // We have no Id but have options.  Not good
     return Status_NotSupported("Cannot reset object ", id);
   } else {
@@ -368,7 +368,7 @@ rocksdb_rs::status::Status Comparator::CreateFromString(const ConfigOptions& con
     if (!status.ok()) {
       if (config_options.ignore_unsupported_options &&
           status.IsNotSupported()) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return status;
       }

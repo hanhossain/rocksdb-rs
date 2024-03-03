@@ -180,7 +180,7 @@ rocksdb_rs::status::Status WinClock::GetCurrentTime(int64_t* unix_time) {
   }
 
   *unix_time = time;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 WinFileSystem::WinFileSystem(const std::shared_ptr<SystemClock>& clock)

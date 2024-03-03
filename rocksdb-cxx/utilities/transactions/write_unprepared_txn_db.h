@@ -88,7 +88,7 @@ class WriteUnpreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
     }
     // else SequenceNumber that is updated as part of the write already does the
     // publishing
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

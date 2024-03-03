@@ -991,7 +991,7 @@ std::string DBTestBase::AllEntriesFor(const Slice& user_key, int cf) {
     while (iter->Valid()) {
       ParsedInternalKey ikey(Slice(), 0, kTypeValue);
       if (!ParseInternalKey(iter->key(), &ikey, true /* log_err_key */)
-          .eq(Status_OK())) {
+          .eq(rocksdb_rs::status::Status_OK())) {
         result += "CORRUPTED";
       } else {
         if (!last_options_.comparator->Equal(ikey.user_key, user_key)) {
@@ -1225,7 +1225,7 @@ rocksdb_rs::status::Status DBTestBase::CountFiles(size_t* count) {
     *count = files_count + files.size();
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBTestBase::Size(const Slice& start, const Slice& limit, int cf,
@@ -1602,7 +1602,7 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     // Use a new iterator to make sure its status is clean.
     iter = db_->NewIterator(ro);
     iter_cnt = 0;
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
     auto data_rev = true_data.rbegin();
     for (iter->SeekToLast(); iter->Valid(); iter->Prev(), data_rev++) {
       ASSERT_EQ(iter->key().ToString(), data_rev->first);

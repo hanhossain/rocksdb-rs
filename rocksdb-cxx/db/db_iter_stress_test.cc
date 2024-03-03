@@ -180,7 +180,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     iter = 0;
     SkipForward();
   }
@@ -188,7 +188,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     iter = (int)data->entries.size() - 1;
     SkipBackward();
   }
@@ -197,7 +197,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     // Binary search.
     auto it = std::partition_point(
         data->entries.begin(), data->entries.end(),
@@ -209,7 +209,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     // Binary search.
     auto it = std::partition_point(
         data->entries.begin(), data->entries.end(),

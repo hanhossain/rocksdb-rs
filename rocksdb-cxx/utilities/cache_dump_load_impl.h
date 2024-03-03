@@ -311,7 +311,7 @@ class CacheDumperHelper {
       return Status_Incomplete(
           "Decode dumped unit meta dump_unit_size failed");
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Deserialize the dump_unit from a string.
@@ -349,7 +349,7 @@ class CacheDumperHelper {
     }
     dump_unit->value = (void*)block.data();
     assert(block.size() == dump_unit->value_len);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 

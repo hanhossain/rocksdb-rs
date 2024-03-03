@@ -552,14 +552,14 @@ class SstFileWriterCollector : public TablePropertiesCollector {
         {prefix_ + "_SstFileWriterCollector", "YES"},
         {prefix_ + "_Count", count},
     };
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     ++count_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {

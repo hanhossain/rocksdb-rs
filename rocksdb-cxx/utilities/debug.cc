@@ -111,7 +111,7 @@ rocksdb_rs::status::Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Sl
       break;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

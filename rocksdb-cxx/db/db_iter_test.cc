@@ -202,7 +202,7 @@ class TestIterator : public InternalIterator {
 
   rocksdb_rs::status::Status status() const override {
     assert(initialized_);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   bool IsKeyPinned() const override { return true; }

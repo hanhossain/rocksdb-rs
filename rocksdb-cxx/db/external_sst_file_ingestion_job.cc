@@ -987,14 +987,14 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::CheckLevelForIngestedBeh
   }
 
   file_to_ingest->picked_level = bottom_lvl;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForIngestedFile(
     IngestedFileInfo* file_to_ingest, SequenceNumber seqno) {
   if (file_to_ingest->original_seqno == seqno) {
     // This file already have the correct global seqno
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (!ingestion_options_.allow_global_seqno) {
     return Status_InvalidArgument("Global seqno is required, but disabled");
   } else if (file_to_ingest->global_seqno_offset == 0) {
@@ -1040,7 +1040,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForInge
   }
 
   file_to_ingest->assigned_seqno = seqno;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(

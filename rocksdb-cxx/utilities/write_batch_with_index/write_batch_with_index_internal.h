@@ -256,7 +256,7 @@ class WBWIIteratorImpl : public WBWIIterator {
   rocksdb_rs::status::Status status() const override {
     // this is in-memory data structure, so the only way status can be non-ok is
     // through memory corruption
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const WriteBatchIndexEntry* GetRawEntry() const {

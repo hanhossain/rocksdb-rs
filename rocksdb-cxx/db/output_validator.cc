@@ -28,6 +28,6 @@ rocksdb_rs::status::Status OutputValidator::Add(const Slice& key, const Slice& v
     }
     prev_key_.assign(key.data(), key.size());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

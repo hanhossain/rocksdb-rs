@@ -21,12 +21,12 @@ rocksdb_rs::status::Status BlobGarbageMeter::ProcessInFlow(const Slice& key, con
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   flows_[blob_file_number].AddInFlow(bytes);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
@@ -39,7 +39,7 @@ rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, co
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Note: in order to measure the amount of additional garbage, we only need to
@@ -47,12 +47,12 @@ rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, co
   // (Newly written files would only have outflow.)
   auto it = flows_.find(blob_file_number);
   if (it == flows_.end()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   it->second.AddOutFlow(bytes);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
@@ -73,7 +73,7 @@ rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice
   }
 
   if (ikey.type != kTypeBlobIndex) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   BlobIndex blob_index;
@@ -94,7 +94,7 @@ rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice
       blob_index.size() +
       BlobLogRecord::CalculateAdjustmentForRecordHeader(ikey.user_key.size());
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

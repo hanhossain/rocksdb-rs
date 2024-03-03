@@ -369,14 +369,14 @@ rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
       if (rollback_merge_operands_) {
         return Rollback(cf, key);
       } else {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
     }
 
-    rocksdb_rs::status::Status MarkNoop(bool) override { return Status_OK(); }
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
-    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
-    rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
+    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
+    rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
     rocksdb_rs::status::Status MarkRollback(const Slice&) override {
       return Status_InvalidArgument();
     }
@@ -485,7 +485,7 @@ rocksdb_rs::status::Status WritePreparedTxn::ValidateSnapshot(ColumnFamilyHandle
     // If the key has been previous validated at a sequence number earlier
     // than the curent snapshot's sequence number, we already know it has not
     // been modified.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   *tracked_at_seq = snap_seq;

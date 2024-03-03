@@ -183,7 +183,7 @@ rocksdb_rs::status::Status TableCache::FindTable(
     // We check the cache again under loading mutex
     *handle = cache_.Lookup(key);
     if (*handle != nullptr) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     std::unique_ptr<TableReader> table_reader;
@@ -207,7 +207,7 @@ rocksdb_rs::status::Status TableCache::FindTable(
     }
     return s;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIterator* TableCache::NewIterator(
@@ -474,7 +474,7 @@ rocksdb_rs::status::Status TableCache::Get(
     } else if (options.read_tier == kBlockCacheTier && s.IsIncomplete()) {
       // Couldn't find Table in cache but treat as kFound if no_io set
       get_context->MarkKeyMayExist();
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
       done = true;
     }
   }
@@ -582,7 +582,7 @@ rocksdb_rs::status::Status TableCache::GetTableProperties(
   if (table_reader) {
     *properties = table_reader->GetTableProperties();
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   TypedHandle* table_handle = nullptr;

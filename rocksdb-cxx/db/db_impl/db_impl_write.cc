@@ -872,7 +872,7 @@ rocksdb_rs::status::Status DBImpl::UnorderedWriteMemtable(const WriteOptions& wr
   if (!w.FinalStatus().ok()) {
     return w.FinalStatus();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // The 2nd write queue. If enabled it will be used only for WAL-only writes.
@@ -1296,7 +1296,7 @@ rocksdb_rs::status::Status DBImpl::MergeBatch(const WriteThread::WriteGroup& wri
     }
   }
   // return merged_batch;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // When two_write_queues_ is disabled, this function is called from the only
@@ -1550,7 +1550,7 @@ rocksdb_rs::status::Status DBImpl::WriteRecoverableState() {
     }
     return status;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::SelectColumnFamiliesForAtomicFlush(
@@ -1940,7 +1940,7 @@ rocksdb_rs::status::Status DBImpl::ThrottleLowPriWritesIfNeeded(const WriteOptio
   if (write_controller_.NeedSpeedupCompaction()) {
     if (allow_2pc() && (my_batch->HasCommit() || my_batch->HasRollback())) {
       // For 2PC, we only rate limit prepare, not commit.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     if (write_options.no_slowdown) {
       return Status_Incomplete("Low priority write stall");
@@ -1956,7 +1956,7 @@ rocksdb_rs::status::Status DBImpl::ThrottleLowPriWritesIfNeeded(const WriteOptio
           RateLimiter::OpType::kWrite);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::MaybeFlushStatsCF(autovector<ColumnFamilyData*>* cfds) {
@@ -2014,7 +2014,7 @@ rocksdb_rs::status::Status DBImpl::TrimMemtableHistory(WriteContext* context) {
       cfd = nullptr;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::ScheduleFlushes(WriteContext* context) {

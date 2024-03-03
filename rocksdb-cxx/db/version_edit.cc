@@ -56,7 +56,7 @@ rocksdb_rs::status::Status FileMetaData::UpdateBoundaries(const Slice& key, cons
   fd.smallest_seqno = std::min(fd.smallest_seqno, seqno);
   fd.largest_seqno = std::max(fd.largest_seqno, seqno);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void VersionEdit::Clear() {

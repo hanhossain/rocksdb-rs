@@ -152,7 +152,7 @@ class SpecialEnv : public EnvWrapper {
         }
         if (env_->drop_writes_.load(std::memory_order_acquire)) {
           // Drop writes on the floor
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         } else if (env_->no_space_.load(std::memory_order_acquire)) {
           return Status_NoSpace("No space left on device");
         } else {
@@ -171,7 +171,7 @@ class SpecialEnv : public EnvWrapper {
         }
         if (env_->drop_writes_.load(std::memory_order_acquire)) {
           // Drop writes on the floor
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         } else if (env_->no_space_.load(std::memory_order_acquire)) {
           return Status_NoSpace("No space left on device");
         } else {
@@ -262,7 +262,7 @@ class SpecialEnv : public EnvWrapper {
           return Status_IOError("simulated sync error");
         } else {
           if (env_->skip_fsync_) {
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           } else {
             return base_->Sync();
           }
@@ -336,7 +336,7 @@ class SpecialEnv : public EnvWrapper {
           return Status_IOError("Ingested Sync Failure");
         }
         if (env_->skip_fsync_) {
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         } else {
           return base_->Sync();
         }
@@ -367,7 +367,7 @@ class SpecialEnv : public EnvWrapper {
       rocksdb_rs::status::Status Flush() override { return base_->Flush(); }
       rocksdb_rs::status::Status Sync() override {
         if (env_->skip_fsync_) {
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         } else {
           return base_->Sync();
         }
@@ -601,12 +601,12 @@ class SpecialEnv : public EnvWrapper {
         NoopDirectory() {}
         ~NoopDirectory() {}
 
-        rocksdb_rs::status::Status Fsync() override { return Status_OK(); }
-        rocksdb_rs::status::Status Close() override { return Status_OK(); }
+        rocksdb_rs::status::Status Fsync() override { return rocksdb_rs::status::Status_OK(); }
+        rocksdb_rs::status::Status Close() override { return rocksdb_rs::status::Status_OK(); }
       };
 
       result->reset(new NoopDirectory());
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 

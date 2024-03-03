@@ -581,7 +581,7 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   ASSERT_OK(db_->Put(WriteOptions(), "k1", Timestamp(4, 0), "v2"));
   ASSERT_OK(db_->Delete(WriteOptions(), "k1", Timestamp(5, 0)));
   ASSERT_OK(db_->Put(WriteOptions(), "k1", Timestamp(6, 0), "v3"));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status_OK(), "v3",
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_OK(), "v3",
                     Timestamp(6, 0));
   ASSERT_OK(Flush());
   Close();
@@ -602,7 +602,7 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   // Trim data whose timestamp > Timestamp(4, 0), read(k1, ts(7)) <- v2
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(4, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status_OK(), "v2",
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_OK(), "v2",
                     Timestamp(4, 0));
   Close();
 
@@ -615,7 +615,7 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   // Trim data whose timestamp > Timestamp(6, 0), read(k1, ts(8)) <- v2
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(6, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(8, 0), Status_OK(), "v2",
+  check_value_by_ts(db_, "k1", Timestamp(8, 0), rocksdb_rs::status::Status_OK(), "v2",
                     Timestamp(4, 0));
   Close();
 }
@@ -2940,7 +2940,7 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetNoReturnTs) {
     ColumnFamilyHandle* column_families[] = {cfh, cfh};
     Slice keys[] = {"foo", "bar"};
     PinnableSlice values[] = {PinnableSlice(), PinnableSlice()};
-    rocksdb_rs::status::Status statuses[] = {Status_OK(), Status_OK()};
+    rocksdb_rs::status::Status statuses[] = {rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK()};
     dbfull()->MultiGet(read_opts, /*num_keys=*/2, &column_families[0], &keys[0],
                        &values[0], &statuses[0], /*sorted_input=*/false);
     for (const auto& s : statuses) {
@@ -2954,8 +2954,8 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetNoReturnTs) {
     Slice keys[] = {"fooxxxxxxxxxxxxxxxx", "barxxxxxxxxxxxxxxxx", "foo", "bar"};
     PinnableSlice values[] = {PinnableSlice(), PinnableSlice(), PinnableSlice(),
                               PinnableSlice()};
-    rocksdb_rs::status::Status statuses[] = {Status_OK(), Status_OK(), Status_OK(),
-                         Status_OK()};
+    rocksdb_rs::status::Status statuses[] = {rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK(),
+                         rocksdb_rs::status::Status_OK()};
     dbfull()->MultiGet(read_opts, /*num_keys=*/4, &column_families[0], &keys[0],
                        &values[0], &statuses[0], /*sorted_input=*/false);
     for (const auto& s : statuses) {
@@ -3649,7 +3649,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_opts.timestamp = &read_ts;
   read_opts.snapshot = before_tombstone;
   std::vector<rocksdb_rs::status::Status> expected_status;
-  expected_status.push_back(Status_OK());
+  expected_status.push_back(rocksdb_rs::status::Status_OK());
   expected_status.push_back(Status_NotFound());
   expected_status.push_back(Status_NotFound());
   expected_status.push_back(Status_NotFound());
@@ -3722,7 +3722,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_ts = read_ts_str;
   read_opts.timestamp = &read_ts;
   read_opts.snapshot = before_tombstone;
-  expected_status[1] = Status_OK();
+  expected_status[1] = rocksdb_rs::status::Status_OK();
   expected_timestamps[1] = Timestamp(1, 0);
   expected_values[1] = "val" + std::to_string(1);
   verify();
@@ -3747,7 +3747,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
       expected_status[i] = Status_NotFound();
       expected_values[i].clear();
     } else {
-      expected_status[i] = Status_OK();
+      expected_status[i] = rocksdb_rs::status::Status_OK();
       expected_values[i] = "val" + std::to_string(i);
     }
     expected_timestamps[i] = Timestamp(i, 0);

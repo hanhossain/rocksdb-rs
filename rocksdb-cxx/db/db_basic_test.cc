@@ -1169,7 +1169,7 @@ class TestEnv : public EnvWrapper {
   rocksdb_rs::status::Status NewLogger(const std::string& /*fname*/,
                    std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -1212,7 +1212,7 @@ TEST_F(DBBasicTest, DBClose) {
   ASSERT_TRUE(db != nullptr);
 
   s = db->Close();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 2);
   options.info_log.reset();
@@ -1268,15 +1268,15 @@ TEST_F(DBBasicTest, DBCloseFlushError) {
   ASSERT_OK(Put("key3", "value3"));
   fault_injection_env->SetFilesystemActive(false);
   rocksdb_rs::status::Status s = dbfull()->Close();
-  ASSERT_FALSE(s.eq(Status_OK()));
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
   // retry should return the same error
   s = dbfull()->Close();
-  ASSERT_FALSE(s.eq(Status_OK()));
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
   fault_injection_env->SetFilesystemActive(true);
   // retry close() is no-op even the system is back. Could be improved if
   // Close() is retry-able: #9029
   s = dbfull()->Close();
-  ASSERT_FALSE(s.eq(Status_OK()));
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
 }
 
@@ -2329,9 +2329,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(33));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(54));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2400,8 +2400,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
                      keys.data(), values.data(), statuses.data());
   SyncPoint::GetInstance()->DisableProcessing();
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_TRUE(statuses[2].eq(Status_IOError()));
 
   HistogramData multiget_io_batch_size;
@@ -2439,9 +2439,9 @@ TEST_P(DBMultiGetAsyncIOTest, LastKeyInFile) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(21));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(54));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2484,9 +2484,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(33));
   ASSERT_EQ(values[1], "val_l2_" + std::to_string(56));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2526,8 +2526,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeOverlapL0L1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 2);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l2_" + std::to_string(19));
   ASSERT_EQ(values[1], "val_l2_" + std::to_string(26));
 
@@ -2594,7 +2594,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2WithRangeDelInL1) {
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), keys.size());
   ASSERT_TRUE(statuses[0].eq(Status_NotFound()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(144));
   ASSERT_TRUE(statuses[2].eq(Status_NotFound()));
 
@@ -2627,9 +2627,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetNoIOUring) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
 
   HistogramData async_read_bytes;
 
@@ -2738,7 +2738,7 @@ TEST_F(DBBasicTest, MultiGetStats) {
     value.Reset();
   }
   for (rocksdb_rs::status::Status& status : s) {
-    status = Status_OK();
+    status = rocksdb_rs::status::Status_OK();
   }
   db_->MultiGet(read_opts, handles_[1], kMultiGetBatchSize, &keys[950],
                 values.data(), s.data(), false);
@@ -2862,7 +2862,7 @@ TEST_P(DBMultiGetRowCacheTest, MultiGetBatched) {
     keys.assign({"no_key", "k5", "k3", "k2"});
     for (size_t i = 0; i < keys.size(); ++i) {
       values[i].Reset();
-      s[i] = Status_OK();
+      s[i] = rocksdb_rs::status::Status_OK();
     }
     get_perf_context()->Reset();
 
@@ -2979,7 +2979,7 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
     // Make the value compressible. A purely random string doesn't compress
     // and the resultant data block will not be compressed
     std::string value(rnd.RandomString(128) + zero_str);
-    assert(Put(Key(i), value).eq(Status_OK()));
+    assert(Put(Key(i), value).eq(rocksdb_rs::status::Status_OK()));
   }
   ASSERT_OK(Flush());
 
@@ -3505,7 +3505,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         // and the resultant data block will not be compressed
         values_.emplace_back(rnd.RandomString(128) + zero_str);
         assert(((num_cfs == 1) ? Put(Key(i), values_[i])
-                               : Put(cf, Key(i), values_[i])).eq(Status_OK()));
+                               : Put(cf, Key(i), values_[i])).eq(rocksdb_rs::status::Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3518,7 +3518,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         uncompressable_values_.emplace_back(rnd.RandomString(256) + '\0');
         std::string tmp_key = "a" + Key(i);
         assert(((num_cfs == 1) ? Put(tmp_key, uncompressable_values_[i])
-                               : Put(cf, tmp_key, uncompressable_values_[i])).eq(Status_OK()));
+                               : Put(cf, tmp_key, uncompressable_values_[i])).eq(rocksdb_rs::status::Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3721,7 +3721,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   for (size_t i = 0; i < key_ints.size(); ++i) {
     key_data[i] = Key(key_ints[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status_OK();
+    statuses[i] = rocksdb_rs::status::Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3743,7 +3743,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   for (size_t i = 0; i < key_uncmp.size(); ++i) {
     key_data[i] = "a" + Key(key_uncmp[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status_OK();
+    statuses[i] = rocksdb_rs::status::Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3765,7 +3765,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   for (size_t i = 0; i < key_tr.size(); ++i) {
     key_data[i] = "a" + Key(key_tr[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status_OK();
+    statuses[i] = rocksdb_rs::status::Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3939,7 +3939,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
                      keys.data(), values.data(), statuses.data(), true);
   ASSERT_TRUE(CheckValue(0, values[0].ToString()));
   // ASSERT_TRUE(CheckValue(50, values[1].ToString()));
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_TRUE(statuses[1].eq(Status_Corruption()));
 
   SyncPoint::GetInstance()->DisableProcessing();

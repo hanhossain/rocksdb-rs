@@ -37,7 +37,7 @@ class SpecialTimeEnv : public EnvWrapper {
   void Sleep(int64_t sleep_time) { current_time_ += sleep_time; }
   rocksdb_rs::status::Status GetCurrentTime(int64_t* current_time) override {
     *current_time = current_time_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

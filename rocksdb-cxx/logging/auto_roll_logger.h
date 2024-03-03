@@ -109,7 +109,7 @@ class AutoRollLogger : public Logger {
     if (logger_) {
       return logger_->Close();
     } else {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 

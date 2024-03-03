@@ -279,7 +279,7 @@ rocksdb_rs::status::Status PartitionedIndexBuilder::Finish(
     }
     top_level_index_size_ = index_blocks->index_block_contents.size();
     index_size_ += top_level_index_size_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // Finish the next partition index in line and Incomplete() to indicate we
     // expect more calls to Finish

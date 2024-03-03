@@ -129,7 +129,7 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
     return Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 const std::string kOptNameBMCompOpts = "bottommost_compression_opts";
@@ -418,7 +418,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                  // Old format. Parse just a single uint64_t value.
                  auto options = static_cast<CompactionOptionsFIFO*>(addr);
                  options->max_table_files_size = ParseUint64(value);
-                 return Status_OK();
+                 return rocksdb_rs::status::Status_OK();
                } else {
                  return OptionTypeInfo::ParseStruct(
                      opts, "compaction_options_fifo",
@@ -656,7 +656,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                      }
                      *value = root_comp->ToString(opts);
                    }
-                   return Status_OK();
+                   return rocksdb_rs::status::Status_OK();
                  })},
         {"memtable_insert_with_hint_prefix_extractor",
          OptionTypeInfo::AsCustomSharedPtr<const SliceTransform>(

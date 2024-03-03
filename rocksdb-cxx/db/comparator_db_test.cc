@@ -53,7 +53,7 @@ class KVIter : public Iterator {
 
   Slice key() const override { return iter_->first; }
   Slice value() const override { return iter_->second; }
-  rocksdb_rs::status::Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
  private:
   const stl_wrappers::KVMap* const map_;

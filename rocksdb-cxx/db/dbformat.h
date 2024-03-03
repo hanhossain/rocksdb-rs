@@ -416,7 +416,7 @@ inline rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
   result->user_key = Slice(internal_key.data(), n - kNumInternalBytes);
 
   if (IsExtendedValueType(result->type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return Status_Corruption("Corrupted Key",
                               result->DebugString(log_err_key, true));

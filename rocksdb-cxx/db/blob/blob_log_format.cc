@@ -53,7 +53,7 @@ rocksdb_rs::status::Status BlobLogHeader::DecodeFrom(Slice src) {
       !GetFixed64(&src, &expiration_range.second)) {
     return Status_Corruption(kErrorMessage, "Error decoding expiration range");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlobLogFooter::EncodeTo(std::string* dst) {
@@ -90,7 +90,7 @@ rocksdb_rs::status::Status BlobLogFooter::DecodeFrom(Slice src) {
   if (src_crc != crc) {
     return Status_Corruption(kErrorMessage, "CRC mismatch");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlobLogRecord::EncodeHeaderTo(std::string* dst) {
@@ -126,7 +126,7 @@ rocksdb_rs::status::Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
   if (src_crc != header_crc) {
     return Status_Corruption(kErrorMessage, "Header CRC mismatch");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status BlobLogRecord::CheckBlobCRC() const {
@@ -137,7 +137,7 @@ rocksdb_rs::status::Status BlobLogRecord::CheckBlobCRC() const {
   if (expected_crc != blob_crc) {
     return Status_Corruption("Blob CRC mismatch");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

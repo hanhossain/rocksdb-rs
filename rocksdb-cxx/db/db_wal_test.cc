@@ -38,7 +38,7 @@ class DBWALTestBase : public DBTestBase {
     int alloc_status = fallocate(fd, 0, 0, 1);
     int err_number = errno;
     close(fd);
-    assert(env_->DeleteFile(fname_test_fallocate).eq(Status_OK()));
+    assert(env_->DeleteFile(fname_test_fallocate).eq(rocksdb_rs::status::Status_OK()));
     if (err_number == ENOSYS || err_number == EOPNOTSUPP) {
       fprintf(stderr, "Skipped preallocated space check: %s\n",
               errnoStr(err_number).c_str());
@@ -94,7 +94,7 @@ class EnrichedSpecialEnv : public SpecialEnv {
         }
       } else {
         skipped_wal = fname;
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
     }
     return SpecialEnv::DeleteFile(fname);

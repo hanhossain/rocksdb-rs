@@ -77,7 +77,7 @@ rocksdb_rs::status::Status WideColumnSerialization::SerializeImpl(const Slice* v
     output.append(value.data(), value.size());
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WideColumnSerialization::Deserialize(Slice& input,
@@ -99,7 +99,7 @@ rocksdb_rs::status::Status WideColumnSerialization::Deserialize(Slice& input,
   }
 
   if (!num_columns) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   columns.reserve(num_columns);
@@ -142,7 +142,7 @@ rocksdb_rs::status::Status WideColumnSerialization::Deserialize(Slice& input,
     pos += value_size;
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 WideColumns::const_iterator WideColumnSerialization::Find(
@@ -171,12 +171,12 @@ rocksdb_rs::status::Status WideColumnSerialization::GetValueOfDefaultColumn(Slic
 
   if (columns.empty() || columns[0].name() != kDefaultWideColumnName) {
     value.clear();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   value = columns[0].value();
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

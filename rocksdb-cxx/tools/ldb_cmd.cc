@@ -2526,30 +2526,30 @@ class InMemoryHandler : public WriteBatch::Handler {
   rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
     row_ << "PUT(" << cf << ") : ";
     commonPutMerge(key, value);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
     row_ << "MERGE(" << cf << ") : ";
     commonPutMerge(key, value);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkNoop(bool) override {
     row_ << "NOOP ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
     row_ << "DELETE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(key.ToString()) << " ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
     row_ << "SINGLE_DELETE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(key.ToString()) << " ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
@@ -2557,31 +2557,31 @@ class InMemoryHandler : public WriteBatch::Handler {
     row_ << "DELETE_RANGE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(begin_key.ToString()) << " ";
     row_ << LDBCommand::StringToHex(end_key.ToString()) << " ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkBeginPrepare(bool unprepare) override {
     row_ << "BEGIN_PREPARE(";
     row_ << (unprepare ? "true" : "false") << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkEndPrepare(const Slice& xid) override {
     row_ << "END_PREPARE(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkRollback(const Slice& xid) override {
     row_ << "ROLLBACK(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkCommit(const Slice& xid) override {
     row_ << "COMMIT(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& xid,
@@ -2589,7 +2589,7 @@ class InMemoryHandler : public WriteBatch::Handler {
     row_ << "COMMIT_WITH_TIMESTAMP(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ", ";
     row_ << LDBCommand::StringToHex(commit_ts.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ~InMemoryHandler() override {}

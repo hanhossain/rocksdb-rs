@@ -95,38 +95,38 @@ struct BatchContentClassifier : public WriteBatch::Handler {
 
   rocksdb_rs::status::Status PutCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_PUT;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status PutEntityCF(uint32_t /* column_family_id */, const Slice& /* key */,
                      const Slice& /* entity */) override {
     content_flags |= (uint32_t)ContentFlags::HAS_PUT_ENTITY;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status DeleteCF(uint32_t, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_DELETE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status SingleDeleteCF(uint32_t, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_SINGLE_DELETE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status DeleteRangeCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_DELETE_RANGE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MergeCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_MERGE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status PutBlobIndexCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_BLOB_INDEX;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkBeginPrepare(bool unprepare) override {
@@ -134,27 +134,27 @@ struct BatchContentClassifier : public WriteBatch::Handler {
     if (unprepare) {
       content_flags |= (uint32_t)ContentFlags::HAS_BEGIN_UNPREPARE;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_END_PREPARE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkCommit(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_COMMIT;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_COMMIT;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkRollback(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_ROLLBACK;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 
@@ -469,7 +469,7 @@ rocksdb_rs::status::Status ReadRecordFromWriteBatch(Slice* input, char* tag,
     default:
       return Status_Corruption("unknown WriteBatch tag");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatch::Iterate(Handler* handler) const {
@@ -530,7 +530,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
             "software bug or data corruption.");
       }
       last_was_try_again = true;
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
 
     switch (tag) {
@@ -714,7 +714,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
       found != WriteBatchInternal::Count(wb)) {
     return Status_Corruption("WriteBatch has wrong count");
   } else {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 
@@ -781,7 +781,7 @@ rocksdb_rs::status::Status CheckColumnFamilyTimestampSize(ColumnFamilyHandle* co
   if (cf_ts_sz != ts.size()) {
     return Status_InvalidArgument("timestamp size mismatch");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // anonymous namespace
 
@@ -878,7 +878,7 @@ rocksdb_rs::status::Status WriteBatchInternal::CheckSlicePartsLength(const Slice
   if (total_value_bytes >= size_t{std::numeric_limits<uint32_t>::max()}) {
     return Status_InvalidArgument("value is too large");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
@@ -1015,7 +1015,7 @@ rocksdb_rs::status::Status WriteBatch::PutEntity(ColumnFamilyHandle* column_fami
 
 rocksdb_rs::status::Status WriteBatchInternal::InsertNoop(WriteBatch* b) {
   b->rep_.push_back(static_cast<char>(kTypeNoop));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::MarkEndPrepare(WriteBatch* b, const Slice& xid,
@@ -1047,7 +1047,7 @@ rocksdb_rs::status::Status WriteBatchInternal::MarkEndPrepare(WriteBatch* b, con
                                     (uint32_t)ContentFlags::HAS_BEGIN_UNPREPARE,
                             std::memory_order_relaxed);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::MarkCommit(WriteBatch* b, const Slice& xid) {
@@ -1056,7 +1056,7 @@ rocksdb_rs::status::Status WriteBatchInternal::MarkCommit(WriteBatch* b, const S
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_COMMIT,
                           std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::MarkCommitWithTimestamp(WriteBatch* b,
@@ -1069,7 +1069,7 @@ rocksdb_rs::status::Status WriteBatchInternal::MarkCommitWithTimestamp(WriteBatc
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_COMMIT,
                           std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::MarkRollback(WriteBatch* b, const Slice& xid) {
@@ -1078,7 +1078,7 @@ rocksdb_rs::status::Status WriteBatchInternal::MarkRollback(WriteBatch* b, const
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_ROLLBACK,
                           std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
@@ -1630,7 +1630,7 @@ rocksdb_rs::status::Status WriteBatch::RollbackToSavePoint() {
     content_flags_.store(savepoint.content_flags, std::memory_order_relaxed);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatch::PopSavePoint() {
@@ -1641,7 +1641,7 @@ rocksdb_rs::status::Status WriteBatch::PopSavePoint() {
   // Pop the most recent savepoint off the stack
   save_points_->stack.pop();
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatch::UpdateTimestamps(
@@ -1657,7 +1657,7 @@ rocksdb_rs::status::Status WriteBatch::UpdateTimestamps(
 
 rocksdb_rs::status::Status WriteBatch::VerifyChecksum() const {
   if (prot_info_ == nullptr) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Slice input(rep_.data() + WriteBatchInternal::kHeader,
               rep_.size() - WriteBatchInternal::kHeader);
@@ -1744,7 +1744,7 @@ rocksdb_rs::status::Status WriteBatch::VerifyChecksum() const {
     return Status_Corruption("WriteBatch has wrong count");
   }
   assert(WriteBatchInternal::Count(this) == prot_info_->entries_.size());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -1959,7 +1959,7 @@ class MemTableInserter : public WriteBatch::Handler {
     bool found = cf_mems_->Seek(column_family_id);
     if (!found) {
       if (ignore_missing_column_families_) {
-        *s = Status_OK();
+        *s = rocksdb_rs::status::Status_OK();
       } else {
         *s = Status_InvalidArgument(
             "Invalid column family specified in write batch");
@@ -1975,7 +1975,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // column family already contains updates from this log. We can't apply
       // updates twice because of update-in-place or merge workloads -- ignore
       // the update
-      *s = Status_OK();
+      *s = rocksdb_rs::status::Status_OK();
       return false;
     }
 
@@ -2065,7 +2065,7 @@ class MemTableInserter : public WriteBatch::Handler {
         if (!get_status.ok() && !get_status.IsNotFound()) {
           ret_status.copy_from(get_status);
         } else {
-          ret_status = Status_OK();
+          ret_status = rocksdb_rs::status::Status_OK();
         }
         if (ret_status.ok()) {
           UpdateStatus update_status;
@@ -2385,7 +2385,7 @@ class MemTableInserter : public WriteBatch::Handler {
       } else if (cmp == 0) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
         // It's an empty range. Don't bother applying it to the DB.
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
     }
 
@@ -2667,7 +2667,7 @@ class MemTableInserter : public WriteBatch::Handler {
       }
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkEndPrepare(const Slice& name) override {
@@ -2692,7 +2692,7 @@ class MemTableInserter : public WriteBatch::Handler {
     const bool batch_boundry = true;
     MaybeAdvanceSeq(batch_boundry);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
@@ -2708,7 +2708,7 @@ class MemTableInserter : public WriteBatch::Handler {
       const bool batch_boundry = true;
       MaybeAdvanceSeq(batch_boundry);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkCommit(const Slice& name) override {
@@ -2856,7 +2856,7 @@ class MemTableInserter : public WriteBatch::Handler {
     const bool batch_boundry = true;
     MaybeAdvanceSeq(batch_boundry);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -2907,7 +2907,7 @@ rocksdb_rs::status::Status WriteBatchInternal::InsertInto(
     assert(!seq_per_batch || w->batch_cnt != 0);
     assert(!seq_per_batch || inserter.sequence() - w->sequence == w->batch_cnt);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::InsertInto(
@@ -3003,23 +3003,23 @@ class ProtectionInfoUpdater : public WriteBatch::Handler {
   }
 
   rocksdb_rs::status::Status MarkBeginPrepare(bool /* unprepare */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status MarkEndPrepare(const Slice& /* xid */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MarkCommit(const Slice& /* xid */) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice& /* xid */) override { return rocksdb_rs::status::Status_OK(); }
 
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& /* xid */,
                                  const Slice& /* ts */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MarkRollback(const Slice& /* xid */) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice& /* xid */) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkNoop(bool /* empty_batch */) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /* empty_batch */) override { return rocksdb_rs::status::Status_OK(); }
 
  private:
   rocksdb_rs::status::Status UpdateProtInfo(uint32_t cf, const Slice& key, const Slice& val,
@@ -3028,7 +3028,7 @@ class ProtectionInfoUpdater : public WriteBatch::Handler {
       prot_info_->entries_.emplace_back(
           ProtectionInfo64().ProtectKVO(key, val, op_type).ProtectC(cf));
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // No copy or move.
@@ -3048,7 +3048,7 @@ rocksdb_rs::status::Status WriteBatchInternal::SetContents(WriteBatch* b, const 
 
   b->rep_.assign(contents.data(), contents.size());
   b->content_flags_.store((uint32_t)ContentFlags::DEFERRED, std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
@@ -3098,7 +3098,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Append(WriteBatch* dst, const Wri
   dst->content_flags_.store(
       dst->content_flags_.load(std::memory_order_relaxed) | src_flags,
       std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 size_t WriteBatchInternal::AppendedByteSize(size_t leftByteSize,
@@ -3116,10 +3116,10 @@ rocksdb_rs::status::Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* 
   if (bytes_per_key == 0) {
     if (wb->prot_info_ != nullptr) {
       wb->prot_info_.reset();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       // Already not protected.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   } else if (bytes_per_key == 8) {
     if (wb->prot_info_ == nullptr) {
@@ -3135,7 +3135,7 @@ rocksdb_rs::status::Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* 
       return s;
     } else {
       // Already protected.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
   return Status_NotSupported(

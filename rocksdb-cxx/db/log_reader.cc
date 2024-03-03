@@ -612,7 +612,7 @@ rocksdb_rs::status::Status Reader::UpdateRecordedTimestampSize(
     }
     recorded_cf_to_ts_sz_.insert(std::make_pair(cf, ts_sz));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool FragmentBufferedReader::ReadRecord(Slice* record, std::string* scratch,

@@ -136,14 +136,14 @@ rocksdb_rs::status::Status FilePrefetchBuffer::Prefetch(const IOOptions& opts,
                                     uint64_t offset, size_t n,
                                     Env::IOPriority rate_limiter_priority) {
   if (!enable_ || reader == nullptr) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   TEST_SYNC_POINT("FilePrefetchBuffer::Prefetch:Start");
 
   if (offset + n <= bufs_[curr_].offset_ + bufs_[curr_].buffer_.CurrentSize()) {
     // All requested bytes are already in the curr_ buffer. So no need to Read
     // again.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
@@ -416,7 +416,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsyncInternal(
     size_t length, size_t readahead_size, Env::IOPriority rate_limiter_priority,
     bool& copy_to_third_buffer) {
   if (!enable_) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   TEST_SYNC_POINT("FilePrefetchBuffer::PrefetchAsyncInternal:Start");
@@ -861,7 +861,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& op
     // 3.1 If second also has some data or is not eligible for prefetching,
     // return.
     if (!is_eligible_for_prefetching || DoesBufferContainData(second)) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   } else {
     // Partial data in curr_.
@@ -945,7 +945,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& op
     }
     readahead_size_ = std::min(max_readahead_size_, readahead_size_ * 2);
   }
-  return (data_found ? Status_OK() : Status_TryAgain());
+  return (data_found ? rocksdb_rs::status::Status_OK() : Status_TryAgain());
 }
 
 }  // namespace rocksdb

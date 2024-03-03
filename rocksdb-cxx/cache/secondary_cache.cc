@@ -20,7 +20,7 @@ rocksdb_rs::status::Status SliceSaveTo(Cache::ObjectPtr from_obj, size_t from_of
                    char* out) {
   const Slice& slice = *static_cast<Slice*>(from_obj);
   std::memcpy(out, slice.data() + from_offset, length);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status FailCreate(const Slice&, Cache::CreateContext*, MemoryAllocator*,

@@ -216,7 +216,7 @@ rocksdb_rs::status::Status ThreadStatusUpdater::GetThreadList(
         op_elapsed_micros, op_stage, op_props, state_type);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 ThreadStatusData* ThreadStatusUpdater::GetLocalThreadStatus() {

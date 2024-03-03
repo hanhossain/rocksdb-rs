@@ -200,19 +200,19 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch*
     rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
@@ -220,7 +220,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch*
         txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                        false /* read_only */, true /* exclusive */);
       }
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     // Recovered batches do not contain 2PC markers.
@@ -304,7 +304,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
       if (!lock_status.locked) {
         txn_->untracked_keys_[cf].push_back(str);
       }
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
@@ -323,12 +323,12 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
       if (rollback_merge_operands_) {
         return AddUntrackedKey(cf, key);
       }
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     // The only expected 2PC marker is the initial Noop marker.
     rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? Status_OK() : Status_InvalidArgument();
+      return empty_batch ? rocksdb_rs::status::Status_OK() : Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
@@ -440,7 +440,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB(
 
     // The only expected 2PC marker is the initial Noop marker.
     rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? Status_OK() : Status_InvalidArgument();
+      return empty_batch ? rocksdb_rs::status::Status_OK() : Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
@@ -514,7 +514,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB(
   }
 
   unflushed_save_points_->clear();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteUnpreparedTxn::PrepareInternal() {
@@ -684,7 +684,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::WriteRollbackKeys(
       return s;
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   };
 
   std::unique_ptr<LockTracker::ColumnFamilyIterator> cf_it(
@@ -715,7 +715,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::WriteRollbackKeys(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteUnpreparedTxn::RollbackInternal() {
@@ -1031,7 +1031,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::ValidateSnapshot(ColumnFamilyHand
     // If the key has been previous validated at a sequence number earlier
     // than the curent snapshot's sequence number, we already know it has not
     // been modified.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   *tracked_at_seq = snap_seq;

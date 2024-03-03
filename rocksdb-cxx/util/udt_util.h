@@ -62,7 +62,7 @@ class UserDefinedTimestampSizeRecord {
       }
       cf_to_ts_sz_.emplace_back(cf_id, static_cast<size_t>(ts_sz));
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   inline std::string DebugString() const {
@@ -129,19 +129,19 @@ class TimestampRecoveryHandler : public WriteBatch::Handler {
   rocksdb_rs::status::Status PutBlobIndexCF(uint32_t cf, const Slice& key,
                         const Slice& value) override;
 
-  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
   rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return rocksdb_rs::status::Status_OK(); }
 
   std::unique_ptr<WriteBatch>&& TransferNewBatch() {
     assert(new_batch_diff_from_orig_batch_);

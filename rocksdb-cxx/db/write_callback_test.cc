@@ -46,7 +46,7 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
       return Status_InvalidArgument("");
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   bool AllowWriteBatching() override { return true; }
@@ -77,7 +77,7 @@ class MockWriteCallback : public WriteCallback {
     if (should_fail_) {
       return Status_Busy();
     } else {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 
@@ -319,7 +319,7 @@ TEST_P(WriteCallbackPTest, WriteWithCallbackTest) {
           rocksdb_rs::status::Status Callback(SequenceNumber last_seq, bool /*not used*/, uint64_t,
                           size_t /*index*/, size_t /*total*/) override {
             db_impl_->SetLastPublishedSequence(last_seq);
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           }
           DBImpl* db_impl_;
         } publish_seq_callback(db_impl);

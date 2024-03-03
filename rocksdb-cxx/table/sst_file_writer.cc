@@ -95,7 +95,7 @@ struct SstFileWriter::Rep {
     file_info.file_size = builder->FileSize();
 
     InvalidatePageCache(false /* closing */);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& value, ValueType value_type) {
@@ -142,7 +142,7 @@ struct SstFileWriter::Rep {
       return Status_InvalidArgument("end key comes before start key");
     } else if (cmp == 0) {
       // It's an empty range. Don't bother applying it to the DB.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     RangeTombstone tombstone(begin_key, end_key, 0 /* Sequence Number */);
@@ -172,7 +172,7 @@ struct SstFileWriter::Rep {
     file_info.file_size = builder->FileSize();
 
     InvalidatePageCache(false /* closing */);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key) {
@@ -215,7 +215,7 @@ struct SstFileWriter::Rep {
   }
 
   rocksdb_rs::status::Status InvalidatePageCache(bool closing) {
-    rocksdb_rs::status::Status s = Status_OK();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
     if (invalidate_page_cache == false) {
       // Fadvise disabled
       return s;
@@ -229,7 +229,7 @@ struct SstFileWriter::Rep {
       if (s.IsNotSupported()) {
         // NotSupported is fine as it could be a file type that doesn't use page
         // cache.
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
       last_fadvise_size = builder->FileSize();
     }

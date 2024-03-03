@@ -65,7 +65,7 @@ char* BlockHandle::EncodeTo(char* dst) const {
 
 rocksdb_rs::status::Status BlockHandle::DecodeFrom(Slice* input) {
   if (GetVarint64(input, &offset_) && GetVarint64(input, &size_)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // reset in case failure after partially decoding
     offset_ = 0;
@@ -77,7 +77,7 @@ rocksdb_rs::status::Status BlockHandle::DecodeFrom(Slice* input) {
 rocksdb_rs::status::Status BlockHandle::DecodeSizeFrom(uint64_t _offset, Slice* input) {
   if (GetVarint64(input, &size_)) {
     offset_ = _offset;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // reset in case failure after partially decoding
     offset_ = 0;
@@ -141,7 +141,7 @@ rocksdb_rs::status::Status IndexValue::DecodeFrom(Slice* input, bool have_first_
     return Status_Corruption("bad first key in block info");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::string IndexValue::ToString(bool hex, bool have_first_key) const {
@@ -411,7 +411,7 @@ rocksdb_rs::status::Status ReadFooterFromFile(const IOOptions& opts, RandomAcces
     s = rocksdb_rs::status::Status_CopyAppendMessage(s, " in ", file->file_name());
     return s;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -501,7 +501,7 @@ rocksdb_rs::status::Status UncompressBlockData(const UncompressionInfo& uncompre
                            BlockContents* out_contents, uint32_t format_version,
                            const ImmutableOptions& ioptions,
                            MemoryAllocator* allocator) {
-  rocksdb_rs::status::Status ret = Status_OK();
+  rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_OK();
 
   assert(uncompression_info.type() != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
          "Invalid compression type");
@@ -568,6 +568,6 @@ rocksdb_rs::status::Status ReifyDbHostIdProperty(Env* env, std::string* db_host_
     return s;
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

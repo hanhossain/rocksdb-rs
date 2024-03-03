@@ -30,7 +30,7 @@ rocksdb_rs::status::Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
                                 IODebugContext* dbg) {
   uint64_t trace_file_size = trace_writer_->GetFileSize();
   if (trace_file_size > trace_options_.max_trace_file_size) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = record.access_timestamp;
@@ -151,7 +151,7 @@ rocksdb_rs::status::Status IOTraceReader::ReadHeader(IOTraceHeader* header) {
         "Corrupted header in the trace file: The length of header is too "
         "long.");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
@@ -259,7 +259,7 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
     trace_data &= (trace_data - 1);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 IOTracer::IOTracer() : tracing_enabled(false) { writer_.store(nullptr); }

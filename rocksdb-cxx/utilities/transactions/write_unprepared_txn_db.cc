@@ -141,7 +141,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
         if (rollback_merge_operands_) {
           return Rollback(cf, key);
         } else {
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       }
 
@@ -191,7 +191,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteUnpreparedTxnDB::Initialize(
@@ -212,7 +212,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::Initialize(
                     size_t /*index*/, size_t /*total*/) override {
       assert(!is_mem_disabled);
       db_->AddCommitted(commit_seq, commit_seq);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
    private:

@@ -89,13 +89,13 @@ class DummyDB : public StackableDB {
   rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override {
     EXPECT_TRUE(!deletions_enabled_);
     deletions_enabled_ = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status DisableFileDeletions() override {
     EXPECT_TRUE(deletions_enabled_);
     deletions_enabled_ = false;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ColumnFamilyHandle* DefaultColumnFamily() const override { return nullptr; }
@@ -131,11 +131,11 @@ class DummyDB : public StackableDB {
         info.file_checksum_func_name = kUnknownFileChecksumFuncName;
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // To avoid FlushWAL called on stacked db which is nullptr
-  rocksdb_rs::status::Status FlushWAL(bool /*sync*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status FlushWAL(bool /*sync*/) override { return rocksdb_rs::status::Status_OK(); }
 
   std::vector<std::string> live_files_;
 
@@ -426,7 +426,7 @@ class FileManager : public EnvWrapper {
       int i = rnd_.Next() % children.size();
       fname->assign(dir + "/" + children[i].name);
       *fsize = children[i].size_bytes;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // should never get here
     assert(false);
@@ -908,7 +908,7 @@ class BackupEngineTest : public testing::Test {
     if (fsize_out) {
       *fsize_out = files[i].size_bytes;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   rocksdb_rs::status::Status CorruptRandomDataFileInDB(const rocksdb_rs::types::FileType& file_type) {

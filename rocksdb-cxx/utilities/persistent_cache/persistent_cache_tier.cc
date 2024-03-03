@@ -59,14 +59,14 @@ rocksdb_rs::status::Status PersistentCacheTier::Open() {
   if (next_tier_) {
     return next_tier_->Open();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status PersistentCacheTier::Close() {
   if (next_tier_) {
     return next_tier_->Close();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool PersistentCacheTier::Reserve(const size_t /*size*/) {
