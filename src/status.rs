@@ -369,13 +369,10 @@ pub(crate) mod ffi {
         #[cxx_name = "Status_PathNotFound"]
         fn status_path_not_found3() -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TxnNotPrepared"]
         fn status_txn_not_prepared(msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TxnNotPrepared"]
         fn status_txn_not_prepared2(msg: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TxnNotPrepared"]
         fn status_txn_not_prepared3() -> Status;
 

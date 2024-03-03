@@ -604,7 +604,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Commit() {
     if (skip_prepare_) {
       commit_without_prepare = true;
     } else {
-      return Status_TxnNotPrepared();
+      return rocksdb_rs::status::Status_TxnNotPrepared();
     }
   }
 
