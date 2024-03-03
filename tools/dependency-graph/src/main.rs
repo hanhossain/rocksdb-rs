@@ -5,7 +5,6 @@ use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
-// TODO: list files in order of number of dependencies (direct)
 // TODO: list files in order of number of dependencies (transitive)
 // TODO: show dependency tree of files (root file -> all dependencies -> all dependencies of dependencies)
 // TODO: show dependency tree of files (root file -> all dependents -> all dependents of dependents)
@@ -18,6 +17,8 @@ const GENERATED_INCLUDE_DIR: &str = env!("ROCKSDB_GENERATED_INCLUDE");
 enum Commands {
     /// Check for missing include paths
     MissingIncludePaths,
+    /// Show files in order of number of dependencies
+    Dependencies,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -50,9 +51,23 @@ fn main() -> anyhow::Result<()> {
         Commands::MissingIncludePaths => {
             show_missing_include_paths(&path_mappings);
         }
+        Commands::Dependencies => {
+            show_order_of_dependencies(&path_mappings);
+        }
     }
 
     Ok(())
+}
+
+fn show_order_of_dependencies(path_mappings: &HashMap<PathBuf, HashSet<IncludeMapping>>) {
+    println!("Files in order of number of dependencies:");
+
+    let mut files = path_mappings.keys().collect::<Vec<_>>();
+    files.sort_by_key(|k| path_mappings.get(*k).unwrap().len());
+    for (idx, file) in files.iter().enumerate() {
+        let deps = &path_mappings[*file];
+        println!("{} - {} deps - {:?}", idx + 1, deps.len(), file);
+    }
 }
 
 fn show_missing_include_paths(path_mappings: &HashMap<PathBuf, HashSet<IncludeMapping>>) {
