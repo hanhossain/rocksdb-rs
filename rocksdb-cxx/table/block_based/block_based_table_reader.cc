@@ -569,7 +569,7 @@ Status BlockBasedTable::Open(
     TailPrefetchStats* tail_prefetch_stats,
     BlockCacheTracer* const block_cache_tracer,
     size_t max_file_size_for_l0_meta_pin, const std::string& cur_db_session_id,
-    uint64_t cur_file_num, UniqueId64x2 expected_unique_id,
+    uint64_t cur_file_num, rocksdb_rs::unique_id::UniqueId64x2 expected_unique_id,
     const bool user_defined_timestamps_persisted) {
   table_reader->reset();
 
@@ -681,14 +681,14 @@ Status BlockBasedTable::Open(
       rep->index_has_first_key);
 
   // Check expected unique id if provided
-  if (expected_unique_id != UniqueId64x2_null()) {
+  if (expected_unique_id != rocksdb_rs::unique_id::UniqueId64x2_null()) {
     auto props = rep->table_properties;
     if (!props) {
       return Status_Corruption("Missing table properties on file " +
                                 std::to_string(cur_file_num) +
                                 " with known unique ID");
     }
-    UniqueId64x2 actual_unique_id{};
+    rocksdb_rs::unique_id::UniqueId64x2 actual_unique_id{};
     s = actual_unique_id.get_sst_internal_unique_id(props->db_id, props->db_session_id, props->orig_file_number, true);
     assert(s.ok());  // because force=true
     if (expected_unique_id != actual_unique_id) {

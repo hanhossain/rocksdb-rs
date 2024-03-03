@@ -385,7 +385,7 @@ class CompactionJobTestBase : public testing::Test {
         oldest_blob_file_number, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime,
         versions_->GetColumnFamilySet()->GetDefault()->NewEpochNumber(),
-        kUnknownFileChecksum, kUnknownFileChecksumFuncName, UniqueId64x2_null(),
+        kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
         /*compensated_range_deletion_size=*/0, /*tail_size=*/0,
         /*user_defined_timestamps_persisted=*/true);
 
@@ -1652,7 +1652,7 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   result.status.copy_from(
       status_list.at(rnd.Uniform(static_cast<int>(status_list.size()))));
   while (!rnd.OneIn(10)) {
-    UniqueId64x2 id{rnd64.Uniform(UINT64_MAX), rnd64.Uniform(UINT64_MAX)};
+    rocksdb_rs::unique_id::UniqueId64x2 id{rnd64.Uniform(UINT64_MAX), rnd64.Uniform(UINT64_MAX)};
     result.output_files.emplace_back(
         rnd.RandomString(rnd.Uniform(kStrMaxLen)), rnd64.Uniform(UINT64_MAX),
         rnd64.Uniform(UINT64_MAX),

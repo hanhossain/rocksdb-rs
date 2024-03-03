@@ -762,7 +762,7 @@ HyperClockTable::HandleImpl* HyperClockTable::DoInsert(
 }
 
 HyperClockTable::HandleImpl* HyperClockTable::Lookup(
-    const UniqueId64x2& hashed_key) {
+    const rocksdb_rs::unique_id::UniqueId64x2& hashed_key) {
   HandleImpl* e = FindSlot(
       hashed_key,
       [&](HandleImpl* h) {
@@ -914,7 +914,7 @@ void HyperClockTable::TEST_ReleaseN(HandleImpl* h, size_t n) {
 }
 #endif
 
-void HyperClockTable::Erase(const UniqueId64x2& hashed_key) {
+void HyperClockTable::Erase(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key) {
   (void)FindSlot(
       hashed_key,
       [&](HandleImpl* h) {
@@ -1007,7 +1007,7 @@ void HyperClockTable::EraseUnRefEntries() {
 
 template <typename MatchFn, typename AbortFn, typename UpdateFn>
 inline HyperClockTable::HandleImpl* HyperClockTable::FindSlot(
-    const UniqueId64x2& hashed_key, MatchFn match_fn, AbortFn abort_fn,
+    const rocksdb_rs::unique_id::UniqueId64x2& hashed_key, MatchFn match_fn, AbortFn abort_fn,
     UpdateFn update_fn) {
   // NOTE: upper 32 bits of hashed_key[0] is used for sharding
   //
@@ -1041,7 +1041,7 @@ inline HyperClockTable::HandleImpl* HyperClockTable::FindSlot(
   return nullptr;
 }
 
-inline void HyperClockTable::Rollback(const UniqueId64x2& hashed_key,
+inline void HyperClockTable::Rollback(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                                       const HandleImpl* h) {
   size_t current = ModTableSize(hashed_key.data[1]);
   size_t increment = static_cast<size_t>(hashed_key.data[0]) | 1U;
@@ -1084,7 +1084,7 @@ inline void HyperClockTable::Evict(size_t requested_charge,
       old_clock_pointer + (ClockHandle::kMaxCountdown << length_bits_);
 
   // For key reconstructed from hash
-  UniqueId64x2 unhashed;
+  rocksdb_rs::unique_id::UniqueId64x2 unhashed;
 
   for (;;) {
     for (size_t i = 0; i < step_size; i++) {
@@ -1170,7 +1170,7 @@ void ClockCacheShard<Table>::ApplyToSomeEntries(
   auto hash_seed = table_.GetHashSeed();
   ConstApplyToEntriesRange(
       [callback, hash_seed](const HandleImpl& h) {
-        UniqueId64x2 unhashed;
+        rocksdb_rs::unique_id::UniqueId64x2 unhashed;
         callback(ReverseHash(h.hashed_key, &unhashed, hash_seed), h.value,
                  h.GetTotalCharge(), h.helper);
       },
@@ -1215,7 +1215,7 @@ void ClockCacheShard<Table>::SetStrictCapacityLimit(
 
 template <class Table>
 Status ClockCacheShard<Table>::Insert(const Slice& key,
-                                      const UniqueId64x2& hashed_key,
+                                      const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                                       Cache::ObjectPtr value,
                                       const Cache::CacheItemHelper* helper,
                                       size_t charge, HandleImpl** handle,
@@ -1236,7 +1236,7 @@ Status ClockCacheShard<Table>::Insert(const Slice& key,
 
 template <class Table>
 typename Table::HandleImpl* ClockCacheShard<Table>::CreateStandalone(
-    const Slice& key, const UniqueId64x2& hashed_key, Cache::ObjectPtr obj,
+    const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key, Cache::ObjectPtr obj,
     const Cache::CacheItemHelper* helper, size_t charge, bool allow_uncharged) {
   if (UNLIKELY(key.size() != kCacheKeySize)) {
     return nullptr;
@@ -1253,7 +1253,7 @@ typename Table::HandleImpl* ClockCacheShard<Table>::CreateStandalone(
 
 template <class Table>
 typename ClockCacheShard<Table>::HandleImpl* ClockCacheShard<Table>::Lookup(
-    const Slice& key, const UniqueId64x2& hashed_key) {
+    const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key) {
   if (UNLIKELY(key.size() != kCacheKeySize)) {
     return nullptr;
   }
@@ -1298,7 +1298,7 @@ bool ClockCacheShard<Table>::Release(HandleImpl* handle,
 
 template <class Table>
 void ClockCacheShard<Table>::Erase(const Slice& key,
-                                   const UniqueId64x2& hashed_key) {
+                                   const rocksdb_rs::unique_id::UniqueId64x2& hashed_key) {
   if (UNLIKELY(key.size() != kCacheKeySize)) {
     return;
   }

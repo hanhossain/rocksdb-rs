@@ -4640,7 +4640,7 @@ std::string DBImpl::GenerateDbSessionId(Env*) {
     gen->GenerateNext(&hi, &lo);
     assert(lo != 0);
   }
-  return std::string(EncodeSessionId(hi, lo));
+  return std::string(rocksdb_rs::unique_id::EncodeSessionId(hi, lo));
 }
 
 void DBImpl::SetDbSessionId() {

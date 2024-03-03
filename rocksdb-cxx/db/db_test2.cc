@@ -7414,7 +7414,7 @@ TEST_F(DBTest2, SstUniqueIdVerifyBackwardCompatible) {
   // not in-memory manifest, so we need to re-open below.
   SyncPoint::GetInstance()->SetCallBack(
       "VersionEdit::EncodeTo:UniqueId", [&](void* arg) {
-        auto unique_id = static_cast<UniqueId64x2*>(arg);
+        auto unique_id = static_cast<rocksdb_rs::unique_id::UniqueId64x2*>(arg);
         // remove id before writing it to manifest
         unique_id->data[0] = 0;
         unique_id->data[1] = 0;

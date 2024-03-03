@@ -310,7 +310,7 @@ struct ClockHandleBasicData {
   const Cache::CacheItemHelper* helper = nullptr;
   // A lossless, reversible hash of the fixed-size (16 byte) cache key. This
   // eliminates the need to store a hash separately.
-  UniqueId64x2 hashed_key = UniqueId64x2_null();
+  rocksdb_rs::unique_id::UniqueId64x2 hashed_key = rocksdb_rs::unique_id::UniqueId64x2_null();
   size_t total_charge = 0;
 
   inline size_t GetTotalCharge() const { return total_charge; }
@@ -319,7 +319,7 @@ struct ClockHandleBasicData {
   void FreeData(MemoryAllocator* allocator) const;
 
   // Required by concept HandleImpl
-  const UniqueId64x2& GetHash() const { return hashed_key; }
+  const rocksdb_rs::unique_id::UniqueId64x2& GetHash() const { return hashed_key; }
 };
 
 struct ClockHandle : public ClockHandleBasicData {
@@ -532,11 +532,11 @@ class HyperClockTable : public BaseClockTable {
   void Evict(size_t requested_charge, size_t* freed_charge, size_t* freed_count,
              InsertState& state);
 
-  HandleImpl* Lookup(const UniqueId64x2& hashed_key);
+  HandleImpl* Lookup(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key);
 
   bool Release(HandleImpl* handle, bool useful, bool erase_if_last_ref);
 
-  void Erase(const UniqueId64x2& hashed_key);
+  void Erase(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key);
 
   void EraseUnRefEntries();
 
@@ -571,12 +571,12 @@ class HyperClockTable : public BaseClockTable {
   // slot probed. This function uses templates instead of std::function to
   // minimize the risk of heap-allocated closures being created.
   template <typename MatchFn, typename AbortFn, typename UpdateFn>
-  inline HandleImpl* FindSlot(const UniqueId64x2& hashed_key, MatchFn match_fn,
+  inline HandleImpl* FindSlot(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key, MatchFn match_fn,
                               AbortFn abort_fn, UpdateFn update_fn);
 
   // Re-decrement all displacements in probe path starting from beginning
   // until (not including) the given handle
-  inline void Rollback(const UniqueId64x2& hashed_key, const HandleImpl* h);
+  inline void Rollback(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key, const HandleImpl* h);
 
   // Subtracts `total_charge` from `usage_` and 1 from `occupancy_`.
   // Ideally this comes after releasing the entry itself so that we
@@ -620,7 +620,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
   // For CacheShard concept
   using HandleImpl = typename Table::HandleImpl;
   // Hash is lossless hash of 128-bit key
-  using HashVal = UniqueId64x2;
+  using HashVal = rocksdb_rs::unique_id::UniqueId64x2;
   using HashCref = const HashVal&;
   static inline uint32_t HashPieceForSharding(HashCref hash) {
     return Upper32of64(hash.data[0]);
@@ -638,8 +638,8 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
 
   // For reconstructing key from hashed_key. Requires the caller to provide
   // backing storage for the Slice in `unhashed`
-  static inline Slice ReverseHash(const UniqueId64x2& hashed,
-                                  UniqueId64x2* unhashed, uint32_t seed) {
+  static inline Slice ReverseHash(const rocksdb_rs::unique_id::UniqueId64x2& hashed,
+                                  rocksdb_rs::unique_id::UniqueId64x2* unhashed, uint32_t seed) {
     rocksdb_rs::hash::bijective_unhash2x64(hashed.data[1], hashed.data[0], unhashed->data[1], unhashed->data[0]);
     unhashed->data[0] ^= seed;
     // NOTE: endian dependence
@@ -653,16 +653,16 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
 
   void SetStrictCapacityLimit(bool strict_capacity_limit);
 
-  Status Insert(const Slice& key, const UniqueId64x2& hashed_key,
+  Status Insert(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                 Cache::ObjectPtr value, const Cache::CacheItemHelper* helper,
                 size_t charge, HandleImpl** handle, Cache::Priority priority);
 
-  HandleImpl* CreateStandalone(const Slice& key, const UniqueId64x2& hashed_key,
+  HandleImpl* CreateStandalone(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                                Cache::ObjectPtr obj,
                                const Cache::CacheItemHelper* helper,
                                size_t charge, bool allow_uncharged);
 
-  HandleImpl* Lookup(const Slice& key, const UniqueId64x2& hashed_key);
+  HandleImpl* Lookup(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key);
 
   bool Release(HandleImpl* handle, bool useful, bool erase_if_last_ref);
 
@@ -670,7 +670,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
 
   bool Ref(HandleImpl* handle);
 
-  void Erase(const Slice& key, const UniqueId64x2& hashed_key);
+  void Erase(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key);
 
   size_t GetCapacity() const;
 
@@ -696,7 +696,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
 
   std::string GetPrintableOptions() const { return std::string{}; }
 
-  HandleImpl* Lookup(const Slice& key, const UniqueId64x2& hashed_key,
+  HandleImpl* Lookup(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                      const Cache::CacheItemHelper* /*helper*/,
                      Cache::CreateContext* /*create_context*/,
                      Cache::Priority /*priority*/, Statistics* /*stats*/) {

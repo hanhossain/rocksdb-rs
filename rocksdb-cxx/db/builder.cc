@@ -360,7 +360,7 @@ Status BuildTable(
         if (!meta->unique_id.get_sst_internal_unique_id(tboptions.db_id, tboptions.db_session_id,
                                     meta->fd.GetNumber(), false).ok()) {
           // if failed to get unique id, just set it Null
-          meta->unique_id = UniqueId64x2_null();
+          meta->unique_id = rocksdb_rs::unique_id::UniqueId64x2_null();
         }
       }
     }

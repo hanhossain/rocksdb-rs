@@ -239,7 +239,7 @@ struct FileMetaData {
   std::string file_checksum_func_name = kUnknownFileChecksumFuncName;
 
   // SST unique id
-  UniqueId64x2 unique_id{};
+  rocksdb_rs::unique_id::UniqueId64x2 unique_id{};
 
   // Size of the "tail" part of a SST file
   // "Tail" refers to all blocks after data blocks till the end of the SST file
@@ -260,7 +260,7 @@ struct FileMetaData {
                uint64_t _oldest_ancester_time, uint64_t _file_creation_time,
                uint64_t _epoch_number, const std::string& _file_checksum,
                const std::string& _file_checksum_func_name,
-               UniqueId64x2 _unique_id,
+               rocksdb_rs::unique_id::UniqueId64x2 _unique_id,
                const uint64_t _compensated_range_deletion_size,
                uint64_t _tail_size, bool _user_defined_timestamps_persisted)
       : fd(file, file_path_id, file_size, smallest_seq, largest_seq),
@@ -460,7 +460,7 @@ class VersionEdit {
                uint64_t oldest_ancester_time, uint64_t file_creation_time,
                uint64_t epoch_number, const std::string& file_checksum,
                const std::string& file_checksum_func_name,
-               const UniqueId64x2& unique_id,
+               const rocksdb_rs::unique_id::UniqueId64x2& unique_id,
                const uint64_t compensated_range_deletion_size,
                uint64_t tail_size, bool user_defined_timestamps_persisted) {
     assert(smallest_seqno <= largest_seqno);

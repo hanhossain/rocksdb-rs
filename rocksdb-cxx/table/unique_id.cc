@@ -21,7 +21,7 @@ constexpr uint64_t kHiOffsetForZero = 17391078804906429400U;
 constexpr uint64_t kLoOffsetForZero = 6417269962128484497U;
 }  // namespace
 
-void InternalUniqueIdToExternal(UniqueIdPtr in_out) {
+void InternalUniqueIdToExternal(rocksdb_rs::unique_id::UniqueIdPtr in_out) {
   uint64_t hi, lo;
   rocksdb_rs::hash::bijective_hash2x64(in_out.ptr[1] + kHiOffsetForZero,
                                        in_out.ptr[0] + kLoOffsetForZero, hi, lo);
@@ -32,7 +32,7 @@ void InternalUniqueIdToExternal(UniqueIdPtr in_out) {
   }
 }
 
-void ExternalUniqueIdToInternal(UniqueIdPtr in_out) {
+void ExternalUniqueIdToInternal(rocksdb_rs::unique_id::UniqueIdPtr in_out) {
   uint64_t lo = in_out.ptr[0];
   uint64_t hi = in_out.ptr[1];
   if (in_out.extended) {
@@ -59,12 +59,12 @@ Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
 
 Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
                                               std::string& out_id) {
-  return GetUniqueIdFromTablePropertiesHelper<UniqueId64x3>(props, out_id);
+  return GetUniqueIdFromTablePropertiesHelper<rocksdb_rs::unique_id::UniqueId64x3>(props, out_id);
 }
 
 Status GetUniqueIdFromTableProperties(const TableProperties &props,
                                       std::string& out_id) {
-  return GetUniqueIdFromTablePropertiesHelper<UniqueId64x2>(props, out_id);
+  return GetUniqueIdFromTablePropertiesHelper<rocksdb_rs::unique_id::UniqueId64x2>(props, out_id);
 }
 
 }  // namespace rocksdb

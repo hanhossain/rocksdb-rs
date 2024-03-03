@@ -407,7 +407,7 @@ struct CompactionServiceOutputFile {
   uint64_t epoch_number;
   uint64_t paranoid_hash;
   bool marked_for_compaction;
-  UniqueId64x2 unique_id;
+  rocksdb_rs::unique_id::UniqueId64x2 unique_id;
 
   CompactionServiceOutputFile() = default;
   CompactionServiceOutputFile(
@@ -415,7 +415,7 @@ struct CompactionServiceOutputFile {
       std::string _smallest_internal_key, std::string _largest_internal_key,
       uint64_t _oldest_ancester_time, uint64_t _file_creation_time,
       uint64_t _epoch_number, uint64_t _paranoid_hash,
-      bool _marked_for_compaction, UniqueId64x2 _unique_id)
+      bool _marked_for_compaction, rocksdb_rs::unique_id::UniqueId64x2 _unique_id)
       : file_name(name),
         smallest_seqno(smallest),
         largest_seqno(largest),
