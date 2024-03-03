@@ -14,7 +14,7 @@
 
 namespace rocksdb {
 
-Status GetInfoLogList(DB* db, std::vector<std::string>* info_log_list) {
+rocksdb_rs::status::Status GetInfoLogList(DB* db, std::vector<std::string>* info_log_list) {
   if (!db) {
     return Status_InvalidArgument("DB pointer is not valid");
   }

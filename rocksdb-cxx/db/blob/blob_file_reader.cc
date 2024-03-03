@@ -26,7 +26,7 @@
 
 namespace rocksdb {
 
-Status BlobFileReader::Create(
+rocksdb_rs::status::Status BlobFileReader::Create(
     const ImmutableOptions& immutable_options, const ReadOptions& read_options,
     const FileOptions& file_options, uint32_t column_family_id,
     HistogramImpl* blob_file_read_hist, uint64_t blob_file_number,
@@ -39,7 +39,7 @@ Status BlobFileReader::Create(
   std::unique_ptr<RandomAccessFileReader> file_reader;
 
   {
-    const Status s =
+    const rocksdb_rs::status::Status s =
         OpenFile(immutable_options, file_options, blob_file_read_hist,
                  blob_file_number, io_tracer, &file_size, &file_reader);
     if (!s.ok()) {
@@ -54,7 +54,7 @@ Status BlobFileReader::Create(
   rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   {
-    const Status s =
+    const rocksdb_rs::status::Status s =
         ReadHeader(file_reader.get(), read_options, column_family_id,
                    statistics, &compression_type);
     if (!s.ok()) {
@@ -63,7 +63,7 @@ Status BlobFileReader::Create(
   }
 
   {
-    const Status s =
+    const rocksdb_rs::status::Status s =
         ReadFooter(file_reader.get(), read_options, file_size, statistics);
     if (!s.ok()) {
       return s.Clone();
@@ -77,7 +77,7 @@ Status BlobFileReader::Create(
   return Status_OK();
 }
 
-Status BlobFileReader::OpenFile(
+rocksdb_rs::status::Status BlobFileReader::OpenFile(
     const ImmutableOptions& immutable_options, const FileOptions& file_opts,
     HistogramImpl* blob_file_read_hist, uint64_t blob_file_number,
     const std::shared_ptr<IOTracer>& io_tracer, uint64_t* file_size,
@@ -99,7 +99,7 @@ Status BlobFileReader::OpenFile(
   {
     TEST_SYNC_POINT("BlobFileReader::OpenFile:GetFileSize");
 
-    const Status s =
+    const rocksdb_rs::status::Status s =
         fs->GetFileSize(blob_file_path, IOOptions(), file_size, dbg);
     if (!s.ok()) {
       return s.Clone();
@@ -115,7 +115,7 @@ Status BlobFileReader::OpenFile(
   {
     TEST_SYNC_POINT("BlobFileReader::OpenFile:NewRandomAccessFile");
 
-    const Status s =
+    const rocksdb_rs::status::Status s =
         fs->NewRandomAccessFile(blob_file_path, file_opts, &file, dbg);
     if (!s.ok()) {
       return s.Clone();
@@ -137,7 +137,7 @@ Status BlobFileReader::OpenFile(
   return Status_OK();
 }
 
-Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
+rocksdb_rs::status::Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
                                   const ReadOptions& read_options,
                                   uint32_t column_family_id,
                                   Statistics* statistics,
@@ -156,7 +156,7 @@ Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
     constexpr size_t read_size = BlobLogHeader::kSize;
 
     // TODO: rate limit reading headers from blob files.
-    const Status s =
+    const rocksdb_rs::status::Status s =
         ReadFromFile(file_reader, read_options, read_offset, read_size,
                      statistics, &header_slice, &buf, &aligned_buf,
                      Env::IO_TOTAL /* rate_limiter_priority */);
@@ -171,7 +171,7 @@ Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
   BlobLogHeader header;
 
   {
-    const Status s = header.DecodeFrom(header_slice);
+    const rocksdb_rs::status::Status s = header.DecodeFrom(header_slice);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -192,7 +192,7 @@ Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
   return Status_OK();
 }
 
-Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
+rocksdb_rs::status::Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
                                   const ReadOptions& read_options,
                                   uint64_t file_size, Statistics* statistics) {
   assert(file_size >= BlobLogHeader::kSize + BlobLogFooter::kSize);
@@ -209,7 +209,7 @@ Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
     constexpr size_t read_size = BlobLogFooter::kSize;
 
     // TODO: rate limit reading footers from blob files.
-    const Status s =
+    const rocksdb_rs::status::Status s =
         ReadFromFile(file_reader, read_options, read_offset, read_size,
                      statistics, &footer_slice, &buf, &aligned_buf,
                      Env::IO_TOTAL /* rate_limiter_priority */);
@@ -224,7 +224,7 @@ Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
   BlobLogFooter footer;
 
   {
-    const Status s = footer.DecodeFrom(footer_slice);
+    const rocksdb_rs::status::Status s = footer.DecodeFrom(footer_slice);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -239,7 +239,7 @@ Status BlobFileReader::ReadFooter(const RandomAccessFileReader* file_reader,
   return Status_OK();
 }
 
-Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
+rocksdb_rs::status::Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
                                     const ReadOptions& read_options,
                                     uint64_t read_offset, size_t read_size,
                                     Statistics* statistics, Slice* slice,
@@ -253,7 +253,7 @@ Status BlobFileReader::ReadFromFile(const RandomAccessFileReader* file_reader,
 
   RecordTick(statistics, BLOB_DB_BLOB_FILE_BYTES_READ, read_size);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   IOOptions io_options;
   s = file_reader->PrepareIOOptions(read_options, io_options);
@@ -299,7 +299,7 @@ BlobFileReader::BlobFileReader(
 
 BlobFileReader::~BlobFileReader() = default;
 
-Status BlobFileReader::GetBlob(
+rocksdb_rs::status::Status BlobFileReader::GetBlob(
     const ReadOptions& read_options, const Slice& user_key, uint64_t offset,
     uint64_t value_size, rocksdb_rs::compression_type::CompressionType compression_type,
     FilePrefetchBuffer* prefetch_buffer, MemoryAllocator* allocator,
@@ -339,7 +339,7 @@ Status BlobFileReader::GetBlob(
     constexpr bool for_compaction = true;
 
     IOOptions io_options;
-    Status s = file_reader_->PrepareIOOptions(read_options, io_options);
+    rocksdb_rs::status::Status s = file_reader_->PrepareIOOptions(read_options, io_options);
     if (!s.ok()) {
       return s;
     }
@@ -357,7 +357,7 @@ Status BlobFileReader::GetBlob(
     PERF_COUNTER_ADD(blob_read_count, 1);
     PERF_COUNTER_ADD(blob_read_byte, record_size);
     PERF_TIMER_GUARD(blob_read_time);
-    const Status s = ReadFromFile(
+    const rocksdb_rs::status::Status s = ReadFromFile(
         file_reader_.get(), read_options, record_offset,
         static_cast<size_t>(record_size), statistics_, &record_slice, &buf,
         &aligned_buf, read_options.rate_limiter_priority);
@@ -370,7 +370,7 @@ Status BlobFileReader::GetBlob(
                            &record_slice);
 
   if (read_options.verify_checksums) {
-    const Status s = VerifyBlob(record_slice, user_key, value_size);
+    const rocksdb_rs::status::Status s = VerifyBlob(record_slice, user_key, value_size);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -379,7 +379,7 @@ Status BlobFileReader::GetBlob(
   const Slice value_slice(record_slice.data() + adjustment, value_size);
 
   {
-    const Status s = UncompressBlobIfNeeded(
+    const rocksdb_rs::status::Status s = UncompressBlobIfNeeded(
         value_slice, compression_type, allocator, clock_, statistics_, result);
     if (!s.ok()) {
       return s.Clone();
@@ -451,7 +451,7 @@ void BlobFileReader::MultiGetBlob(
   Buffer buf;
   AlignedBuf aligned_buf;
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   bool direct_io = file_reader_->use_direct_io();
   if (direct_io) {
     for (size_t i = 0; i < read_reqs.size(); ++i) {
@@ -534,7 +534,7 @@ void BlobFileReader::MultiGetBlob(
   }
 }
 
-Status BlobFileReader::VerifyBlob(const Slice& record_slice,
+rocksdb_rs::status::Status BlobFileReader::VerifyBlob(const Slice& record_slice,
                                   const Slice& user_key, uint64_t value_size) {
   PERF_TIMER_GUARD(blob_checksum_time);
 
@@ -543,7 +543,7 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
   const Slice header_slice(record_slice.data(), BlobLogRecord::kHeaderSize);
 
   {
-    const Status s = record.DecodeHeaderFrom(header_slice);
+    const rocksdb_rs::status::Status s = record.DecodeHeaderFrom(header_slice);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -569,7 +569,7 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
     TEST_SYNC_POINT_CALLBACK("BlobFileReader::VerifyBlob:CheckBlobCRC",
                              &record);
 
-    const Status s = record.CheckBlobCRC();
+    const rocksdb_rs::status::Status s = record.CheckBlobCRC();
     if (!s.ok()) {
       return s.Clone();
     }
@@ -578,7 +578,7 @@ Status BlobFileReader::VerifyBlob(const Slice& record_slice,
   return Status_OK();
 }
 
-Status BlobFileReader::UncompressBlobIfNeeded(
+rocksdb_rs::status::Status BlobFileReader::UncompressBlobIfNeeded(
     const Slice& value_slice, rocksdb_rs::compression_type::CompressionType compression_type,
     MemoryAllocator* allocator, SystemClock* clock, Statistics* statistics,
     std::unique_ptr<BlobContents>* result) {

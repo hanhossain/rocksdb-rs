@@ -589,7 +589,7 @@ void DBTestBase::CreateColumnFamilies(const std::vector<std::string>& cfs,
   size_t cfi = handles_.size();
   handles_.resize(cfi + cfs.size());
   for (auto cf : cfs) {
-    Status s = db_->CreateColumnFamily(cf_opts, cf, &handles_[cfi++]);
+    rocksdb_rs::status::Status s = db_->CreateColumnFamily(cf_opts, cf, &handles_[cfi++]);
     ASSERT_OK(s);
   }
 }
@@ -645,7 +645,7 @@ void DBTestBase::MaybeInstallTimeElapseOnlySleep(const DBOptions& options) {
   }
 }
 
-Status DBTestBase::TryReopenWithColumnFamilies(
+rocksdb_rs::status::Status DBTestBase::TryReopenWithColumnFamilies(
     const std::vector<std::string>& cfs, const std::vector<Options>& options) {
   Close();
   EXPECT_EQ(cfs.size(), options.size());
@@ -659,7 +659,7 @@ Status DBTestBase::TryReopenWithColumnFamilies(
   return DB::Open(db_opts, dbname_, column_families, &handles_, &db_);
 }
 
-Status DBTestBase::TryReopenWithColumnFamilies(
+rocksdb_rs::status::Status DBTestBase::TryReopenWithColumnFamilies(
     const std::vector<std::string>& cfs, const Options& options) {
   Close();
   std::vector<Options> v_opts(cfs.size(), options);
@@ -698,12 +698,12 @@ void DBTestBase::Destroy(const Options& options, bool delete_cf_paths) {
   ASSERT_OK(DestroyDB(dbname_, options, column_families));
 }
 
-Status DBTestBase::ReadOnlyReopen(const Options& options) {
+rocksdb_rs::status::Status DBTestBase::ReadOnlyReopen(const Options& options) {
   MaybeInstallTimeElapseOnlySleep(options);
   return DB::OpenForReadOnly(options, dbname_, &db_);
 }
 
-Status DBTestBase::TryReopen(const Options& options) {
+rocksdb_rs::status::Status DBTestBase::TryReopen(const Options& options) {
   Close();
   last_options_.table_factory.reset();
   // Note: operator= is an unsafe approach here since it destructs
@@ -726,7 +726,7 @@ bool DBTestBase::IsMemoryMappedAccessSupported() const {
   return (!encrypted_env_);
 }
 
-Status DBTestBase::Flush(int cf) {
+rocksdb_rs::status::Status DBTestBase::Flush(int cf) {
   if (cf == 0) {
     return db_->Flush(FlushOptions());
   } else {
@@ -734,14 +734,14 @@ Status DBTestBase::Flush(int cf) {
   }
 }
 
-Status DBTestBase::Flush(const std::vector<int>& cf_ids) {
+rocksdb_rs::status::Status DBTestBase::Flush(const std::vector<int>& cf_ids) {
   std::vector<ColumnFamilyHandle*> cfhs;
   std::for_each(cf_ids.begin(), cf_ids.end(),
                 [&cfhs, this](int id) { cfhs.emplace_back(handles_[id]); });
   return db_->Flush(FlushOptions(), cfhs);
 }
 
-Status DBTestBase::Put(const Slice& k, const Slice& v, WriteOptions wo) {
+rocksdb_rs::status::Status DBTestBase::Put(const Slice& k, const Slice& v, WriteOptions wo) {
   if (kMergePut == option_config_) {
     return db_->Merge(wo, k, v);
   } else {
@@ -749,7 +749,7 @@ Status DBTestBase::Put(const Slice& k, const Slice& v, WriteOptions wo) {
   }
 }
 
-Status DBTestBase::Put(int cf, const Slice& k, const Slice& v,
+rocksdb_rs::status::Status DBTestBase::Put(int cf, const Slice& k, const Slice& v,
                        WriteOptions wo) {
   if (kMergePut == option_config_) {
     return db_->Merge(wo, handles_[cf], k, v);
@@ -758,28 +758,28 @@ Status DBTestBase::Put(int cf, const Slice& k, const Slice& v,
   }
 }
 
-Status DBTestBase::Merge(const Slice& k, const Slice& v, WriteOptions wo) {
+rocksdb_rs::status::Status DBTestBase::Merge(const Slice& k, const Slice& v, WriteOptions wo) {
   return db_->Merge(wo, k, v);
 }
 
-Status DBTestBase::Merge(int cf, const Slice& k, const Slice& v,
+rocksdb_rs::status::Status DBTestBase::Merge(int cf, const Slice& k, const Slice& v,
                          WriteOptions wo) {
   return db_->Merge(wo, handles_[cf], k, v);
 }
 
-Status DBTestBase::Delete(const std::string& k) {
+rocksdb_rs::status::Status DBTestBase::Delete(const std::string& k) {
   return db_->Delete(WriteOptions(), k);
 }
 
-Status DBTestBase::Delete(int cf, const std::string& k) {
+rocksdb_rs::status::Status DBTestBase::Delete(int cf, const std::string& k) {
   return db_->Delete(WriteOptions(), handles_[cf], k);
 }
 
-Status DBTestBase::SingleDelete(const std::string& k) {
+rocksdb_rs::status::Status DBTestBase::SingleDelete(const std::string& k) {
   return db_->SingleDelete(WriteOptions(), k);
 }
 
-Status DBTestBase::SingleDelete(int cf, const std::string& k) {
+rocksdb_rs::status::Status DBTestBase::SingleDelete(int cf, const std::string& k) {
   return db_->SingleDelete(WriteOptions(), handles_[cf], k);
 }
 
@@ -788,7 +788,7 @@ std::string DBTestBase::Get(const std::string& k, const Snapshot* snapshot) {
   options.verify_checksums = true;
   options.snapshot = snapshot;
   std::string result;
-  Status s = db_->Get(options, k, &result);
+  rocksdb_rs::status::Status s = db_->Get(options, k, &result);
   if (s.IsNotFound()) {
     result = "NOT_FOUND";
   } else if (!s.ok()) {
@@ -803,7 +803,7 @@ std::string DBTestBase::Get(int cf, const std::string& k,
   options.verify_checksums = true;
   options.snapshot = snapshot;
   std::string result;
-  Status s = db_->Get(options, handles_[cf], k, &result);
+  rocksdb_rs::status::Status s = db_->Get(options, handles_[cf], k, &result);
   if (s.IsNotFound()) {
     result = "NOT_FOUND";
   } else if (!s.ok()) {
@@ -831,7 +831,7 @@ std::vector<std::string> DBTestBase::MultiGet(std::vector<int> cfs,
   }
 
   if (!batched) {
-    rust::Vec<Status> s = db_->MultiGet(options, handles, keys, &result);
+    rust::Vec<rocksdb_rs::status::Status> s = db_->MultiGet(options, handles, keys, &result);
     for (size_t i = 0; i < s.size(); ++i) {
       if (s[i].IsNotFound()) {
         result[i] = "NOT_FOUND";
@@ -842,7 +842,7 @@ std::vector<std::string> DBTestBase::MultiGet(std::vector<int> cfs,
   } else {
     std::vector<PinnableSlice> pin_values(cfs.size());
     result.resize(cfs.size());
-    rust::Vec<Status> s = Status_new().create_vec(cfs.size());
+    rust::Vec<rocksdb_rs::status::Status> s = Status_new().create_vec(cfs.size());
     db_->MultiGet(options, cfs.size(), handles.data(), keys.data(),
                   pin_values.data(), s.data());
     for (size_t i = 0; i < s.size(); ++i) {
@@ -870,7 +870,7 @@ std::vector<std::string> DBTestBase::MultiGet(const std::vector<std::string>& k,
   options.async_io = async;
   std::vector<Slice> keys;
   std::vector<std::string> result(k.size());
-  rust::Vec<Status> statuses = Status_new().create_vec(k.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(k.size());
   std::vector<PinnableSlice> pin_values(k.size());
 
   for (size_t i = 0; i < k.size(); ++i) {
@@ -893,10 +893,10 @@ std::vector<std::string> DBTestBase::MultiGet(const std::vector<std::string>& k,
   return result;
 }
 
-Status DBTestBase::Get(const std::string& k, PinnableSlice* v) {
+rocksdb_rs::status::Status DBTestBase::Get(const std::string& k, PinnableSlice* v) {
   ReadOptions options;
   options.verify_checksums = true;
-  Status s = dbfull()->Get(options, dbfull()->DefaultColumnFamily(), k, v);
+  rocksdb_rs::status::Status s = dbfull()->Get(options, dbfull()->DefaultColumnFamily(), k, v);
   return s;
 }
 
@@ -1209,9 +1209,9 @@ size_t DBTestBase::CountFiles() {
   return count;
 };
 
-Status DBTestBase::CountFiles(size_t* count) {
+rocksdb_rs::status::Status DBTestBase::CountFiles(size_t* count) {
   std::vector<std::string> files;
-  Status s = env_->GetChildren(dbname_, &files);
+  rocksdb_rs::status::Status s = env_->GetChildren(dbname_, &files);
   if (!s.ok()) {
     return s;
   }
@@ -1228,7 +1228,7 @@ Status DBTestBase::CountFiles(size_t* count) {
   return Status_OK();
 }
 
-Status DBTestBase::Size(const Slice& start, const Slice& limit, int cf,
+rocksdb_rs::status::Status DBTestBase::Size(const Slice& start, const Slice& limit, int cf,
                         uint64_t* size) {
   Range r(start, limit);
   if (cf == 0) {
@@ -1497,14 +1497,14 @@ void DBTestBase::CopyFile(const std::string& source,
   ASSERT_OK(destfile->Close());
 }
 
-Status DBTestBase::GetAllDataFiles(
+rocksdb_rs::status::Status DBTestBase::GetAllDataFiles(
     const rocksdb_rs::types::FileType file_type, std::unordered_map<std::string, uint64_t>* files,
     uint64_t* total_size /* = nullptr */) {
   if (total_size) {
     *total_size = 0;
   }
   std::vector<std::string> children;
-  Status s = env_->GetChildren(dbname_, &children);
+  rocksdb_rs::status::Status s = env_->GetChildren(dbname_, &children);
   if (s.ok()) {
     for (auto& file_name : children) {
       uint64_t number;
@@ -1545,12 +1545,12 @@ std::vector<std::uint64_t> DBTestBase::ListTableFiles(Env* env,
 
 void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
                                  size_t* total_reads_res, bool tailing_iter,
-                                 std::map<std::string, Status> status) {
+                                 std::map<std::string, rocksdb_rs::status::Status> status) {
   size_t total_reads = 0;
 
   for (auto& kv : true_data) {
-    Status s = Status_new();
-    std::map<std::string, Status>::iterator it = status.find(kv.first);
+    rocksdb_rs::status::Status s = Status_new();
+    std::map<std::string, rocksdb_rs::status::Status>::iterator it = status.find(kv.first);
     if (it != status.end()) {
       s.copy_from(it->second);
     } else {
@@ -1574,11 +1574,11 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     // Verify Iterator::Next()
     iter_cnt = 0;
     auto data_iter = true_data.begin();
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     for (iter->SeekToFirst(); iter->Valid(); iter->Next(), data_iter++) {
       ASSERT_EQ(iter->key().ToString(), data_iter->first);
-      Status current_status = Status_new();
-      std::map<std::string, Status>::iterator it = status.find(data_iter->first);
+      rocksdb_rs::status::Status current_status = Status_new();
+      std::map<std::string, rocksdb_rs::status::Status>::iterator it = status.find(data_iter->first);
       if (it != status.end()) {
         current_status.copy_from(it->second);
       } else {
@@ -1606,8 +1606,8 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     auto data_rev = true_data.rbegin();
     for (iter->SeekToLast(); iter->Valid(); iter->Prev(), data_rev++) {
       ASSERT_EQ(iter->key().ToString(), data_rev->first);
-      Status current_status = Status_new();
-      std::map<std::string, Status>::iterator it = status.find(data_rev->first);
+      rocksdb_rs::status::Status current_status = Status_new();
+      std::map<std::string, rocksdb_rs::status::Status>::iterator it = status.find(data_rev->first);
       if (it != status.end()) {
         current_status.copy_from(it->second);
       } else {
@@ -1734,12 +1734,12 @@ TargetCacheChargeTrackingCache<R>::TargetCacheChargeTrackingCache(
       cache_charge_increments_sum_(0) {}
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-Status TargetCacheChargeTrackingCache<R>::Insert(const Slice& key,
+rocksdb_rs::status::Status TargetCacheChargeTrackingCache<R>::Insert(const Slice& key,
                                                  ObjectPtr value,
                                                  const CacheItemHelper* helper,
                                                  size_t charge, Handle** handle,
                                                  Priority priority) {
-  Status s = target_->Insert(key, value, helper, charge, handle, priority);
+  rocksdb_rs::status::Status s = target_->Insert(key, value, helper, charge, handle, priority);
   if (helper == kCrmHelper) {
     if (last_peak_tracked_) {
       cache_charge_peak_ = 0;

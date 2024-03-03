@@ -1472,7 +1472,7 @@ void BlockCacheTraceAnalyzer::ComputeReuseDistance(
   info->unique_blocks_since_last_access.clear();
 }
 
-Status BlockCacheTraceAnalyzer::RecordAccess(
+rocksdb_rs::status::Status BlockCacheTraceAnalyzer::RecordAccess(
     const BlockCacheTraceRecord& access) {
   ColumnFamilyAccessInfoAggregate& cf_aggr = cf_aggregates_map_[access.cf_name];
   SSTFileAccessInfoAggregate& file_aggr =
@@ -1524,10 +1524,10 @@ Status BlockCacheTraceAnalyzer::RecordAccess(
       access, block_access_info.block_id, get_key_id);
 }
 
-Status BlockCacheTraceAnalyzer::Analyze() {
+rocksdb_rs::status::Status BlockCacheTraceAnalyzer::Analyze() {
   SystemClock* clock = env_->GetSystemClock().get();
   std::unique_ptr<BlockCacheTraceReader> reader;
-  Status s = Status_OK();
+  rocksdb_rs::status::Status s = Status_OK();
   if (is_human_readable_trace_file_) {
     reader.reset(new BlockCacheHumanReadableTraceReader(trace_file_path_));
   } else {
@@ -2129,7 +2129,7 @@ int block_cache_trace_analyzer_tool(int argc, char** argv) {
   if (!cache_configs.empty()) {
     cache_simulator.reset(new BlockCacheTraceSimulator(
         warmup_seconds, downsample_ratio, cache_configs));
-    Status s = cache_simulator->InitializeCaches();
+    rocksdb_rs::status::Status s = cache_simulator->InitializeCaches();
     if (!s.ok()) {
       fprintf(stderr, "Cannot initialize cache simulators %s\n",
               s.ToString()->c_str());
@@ -2141,7 +2141,7 @@ int block_cache_trace_analyzer_tool(int argc, char** argv) {
       FLAGS_human_readable_trace_file_path,
       !FLAGS_reuse_distance_labels.empty(), FLAGS_mrc_only,
       FLAGS_is_block_cache_human_readable_trace, std::move(cache_simulator));
-  Status s = analyzer.Analyze();
+  rocksdb_rs::status::Status s = analyzer.Analyze();
   if (!s.IsIncomplete() && !s.ok()) {
     // Read all traces.
     fprintf(stderr, "Cannot process the trace %s\n", s.ToString()->c_str());

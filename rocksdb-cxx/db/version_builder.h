@@ -42,9 +42,9 @@ class VersionBuilder {
   ~VersionBuilder();
 
   bool CheckConsistencyForNumLevels();
-  Status Apply(const VersionEdit* edit);
-  Status SaveTo(VersionStorageInfo* vstorage) const;
-  Status LoadTableHandlers(
+  rocksdb_rs::status::Status Apply(const VersionEdit* edit);
+  rocksdb_rs::status::Status SaveTo(VersionStorageInfo* vstorage) const;
+  rocksdb_rs::status::Status LoadTableHandlers(
       InternalStats* internal_stats, int max_threads,
       bool prefetch_index_and_filter_in_cache, bool is_initial_load,
       const std::shared_ptr<const SliceTransform>& prefix_extractor,

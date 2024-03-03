@@ -67,7 +67,7 @@ class DBWALTest : public DBWALTestBase {
 class EnrichedSpecialEnv : public SpecialEnv {
  public:
   explicit EnrichedSpecialEnv(Env* base) : SpecialEnv(base) {}
-  Status NewSequentialFile(const std::string& f,
+  rocksdb_rs::status::Status NewSequentialFile(const std::string& f,
                            std::unique_ptr<SequentialFile>* r,
                            const EnvOptions& soptions) override {
     InstrumentedMutexLock l(&env_mutex_);
@@ -80,7 +80,7 @@ class EnrichedSpecialEnv : public SpecialEnv {
     }
     return SpecialEnv::NewSequentialFile(f, r, soptions);
   }
-  Status DeleteFile(const std::string& fname) override {
+  rocksdb_rs::status::Status DeleteFile(const std::string& fname) override {
     if (IsWAL(fname)) {
       deleted_wal_cnt++;
       InstrumentedMutexLock l(&env_mutex_);
@@ -323,7 +323,7 @@ class DBWALTestWithTimestamp
     DBBasicTestWithTimestampBase::SetUp();
   }
 
-  Status CreateAndReopenWithCFWithTs(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status CreateAndReopenWithCFWithTs(const std::vector<std::string>& cfs,
                                      const Options& options,
                                      bool avoid_flush_during_recovery = false) {
     CreateColumnFamilies(cfs, options);
@@ -331,7 +331,7 @@ class DBWALTestWithTimestamp
                                       avoid_flush_during_recovery);
   }
 
-  Status ReopenColumnFamiliesWithTs(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status ReopenColumnFamiliesWithTs(const std::vector<std::string>& cfs,
                                     Options ts_options,
                                     bool avoid_flush_during_recovery = false) {
     Options default_options = CurrentOptions();
@@ -347,7 +347,7 @@ class DBWALTestWithTimestamp
     return TryReopenWithColumnFamilies(cfs_plus_default, cf_options);
   }
 
-  Status Put(uint32_t cf, const Slice& key, const Slice& ts,
+  rocksdb_rs::status::Status Put(uint32_t cf, const Slice& key, const Slice& ts,
              const Slice& value) {
     WriteOptions write_opts;
     return db_->Put(write_opts, handles_[cf], key, ts, value);
@@ -827,7 +827,7 @@ TEST_F(DBWALTest, LockWal) {
     // Verify writes are stopped
     WriteOptions wopts;
     wopts.no_slowdown = true;
-    Status s = db_->Put(wopts, "foo", "dontcare");
+    rocksdb_rs::status::Status s = db_->Put(wopts, "foo", "dontcare");
     ASSERT_TRUE(s.IsIncomplete());
     {
       VectorLogPtr wals;
@@ -835,7 +835,7 @@ TEST_F(DBWALTest, LockWal) {
       ASSERT_FALSE(wals.empty());
     }
     port::Thread worker([&]() {
-      Status tmp_s = db_->Flush(FlushOptions());
+      rocksdb_rs::status::Status tmp_s = db_->Flush(FlushOptions());
       ASSERT_OK(tmp_s);
     });
     FlushOptions flush_opts;
@@ -870,7 +870,7 @@ TEST_P(DBRecoveryTestBlobError, RecoverWithBlobError) {
   // Reopen with blob files enabled but make blob file writing fail during
   // recovery.
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    Status* const s = static_cast<Status*>(arg);
+    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
     (*s) = Status_IOError(sync_point_);
@@ -977,7 +977,7 @@ TEST_F(DBWALTest, IgnoreRecoveredLog) {
       // we won't be needing this file no more
       ASSERT_OK(env_->DeleteFile(backup_logs + "/" + log));
     }
-    Status s = TryReopen(options);
+    rocksdb_rs::status::Status s = TryReopen(options);
     ASSERT_NOK(s);
     Destroy(options);
   } while (ChangeWalOptions());
@@ -1831,7 +1831,7 @@ TEST_F(DBWALTest, RaceInstallFlushResultsWithWalObsoletion) {
   SyncPoint::GetInstance()->ClearAllCallBacks();
 
   DB* db1 = nullptr;
-  Status s = DB::OpenForReadOnly(options, dbname_, &db1);
+  rocksdb_rs::status::Status s = DB::OpenForReadOnly(options, dbname_, &db1);
   ASSERT_OK(s);
   assert(db1);
   delete db1;
@@ -1898,7 +1898,7 @@ TEST_F(DBWALTest, FixSyncWalOnObseletedWalWithNewManifestCausingMissingWAL) {
   // Before the fix, `db_->SyncWAL()` will sync and record WAL addtion of the
   // obseleted WAL 4.log in a new manifest without any special treament.
   // This will result in missing-wal corruption in DB::Reopen().
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   EXPECT_OK(s);
 }
 
@@ -2602,7 +2602,7 @@ TEST_F(DBWALTest, GetCompressedWalsAfterSync) {
   ASSERT_OK(db_->SyncWAL());
 
   VectorLogPtr wals;
-  Status s = dbfull()->GetSortedWalFiles(wals);
+  rocksdb_rs::status::Status s = dbfull()->GetSortedWalFiles(wals);
   ASSERT_OK(s);
 }
 

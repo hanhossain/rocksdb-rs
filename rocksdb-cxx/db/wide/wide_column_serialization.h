@@ -43,32 +43,32 @@ class Slice;
 
 class WideColumnSerialization {
  public:
-  static Status Serialize(const WideColumns& columns, std::string& output);
-  static Status Serialize(const Slice& value_of_default,
+  static rocksdb_rs::status::Status Serialize(const WideColumns& columns, std::string& output);
+  static rocksdb_rs::status::Status Serialize(const Slice& value_of_default,
                           const WideColumns& other_columns,
                           std::string& output);
 
-  static Status Deserialize(Slice& input, WideColumns& columns);
+  static rocksdb_rs::status::Status Deserialize(Slice& input, WideColumns& columns);
 
   static WideColumns::const_iterator Find(const WideColumns& columns,
                                           const Slice& column_name);
-  static Status GetValueOfDefaultColumn(Slice& input, Slice& value);
+  static rocksdb_rs::status::Status GetValueOfDefaultColumn(Slice& input, Slice& value);
 
   static constexpr uint32_t kCurrentVersion = 1;
 
  private:
-  static Status SerializeImpl(const Slice* value_of_default,
+  static rocksdb_rs::status::Status SerializeImpl(const Slice* value_of_default,
                               const WideColumns& columns, std::string& output);
 };
 
-inline Status WideColumnSerialization::Serialize(const WideColumns& columns,
+inline rocksdb_rs::status::Status WideColumnSerialization::Serialize(const WideColumns& columns,
                                                  std::string& output) {
   constexpr Slice* value_of_default = nullptr;
 
   return SerializeImpl(value_of_default, columns, output);
 }
 
-inline Status WideColumnSerialization::Serialize(
+inline rocksdb_rs::status::Status WideColumnSerialization::Serialize(
     const Slice& value_of_default, const WideColumns& other_columns,
     std::string& output) {
   return SerializeImpl(&value_of_default, other_columns, output);

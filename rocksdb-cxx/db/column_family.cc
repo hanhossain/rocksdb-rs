@@ -85,7 +85,7 @@ const std::string& ColumnFamilyHandleImpl::GetName() const {
   return cfd()->GetName();
 }
 
-Status ColumnFamilyHandleImpl::GetDescriptor(ColumnFamilyDescriptor* desc) {
+rocksdb_rs::status::Status ColumnFamilyHandleImpl::GetDescriptor(ColumnFamilyDescriptor* desc) {
   // accessing mutable cf-options requires db mutex.
   InstrumentedMutexLock l(mutex_);
   *desc = ColumnFamilyDescriptor(cfd()->GetName(), cfd()->GetLatestCFOptions());
@@ -110,7 +110,7 @@ void GetIntTblPropCollectorFactory(
   }
 }
 
-Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
+rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
   if (!cf_options.compression_per_level.empty()) {
     for (size_t level = 0; level < cf_options.compression_per_level.size();
          ++level) {
@@ -160,7 +160,7 @@ Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
   return Status_OK();
 }
 
-Status CheckConcurrentWritesSupported(const ColumnFamilyOptions& cf_options) {
+rocksdb_rs::status::Status CheckConcurrentWritesSupported(const ColumnFamilyOptions& cf_options) {
   if (cf_options.inplace_update_support) {
     return Status_InvalidArgument(
         "In-place memtable updates (inplace_update_support) is not compatible "
@@ -173,7 +173,7 @@ Status CheckConcurrentWritesSupported(const ColumnFamilyOptions& cf_options) {
   return Status_OK();
 }
 
-Status CheckCFPathsSupported(const DBOptions& db_options,
+rocksdb_rs::status::Status CheckCFPathsSupported(const DBOptions& db_options,
                              const ColumnFamilyOptions& cf_options) {
   // More than one cf_paths are supported only in universal
   // and level compaction styles. This function also checks the case
@@ -557,7 +557,7 @@ ColumnFamilyData::ColumnFamilyData(
     // outside of this constructor which might be called with db mutex held.
     // TODO(cc): considering using ioptions_.fs, currently some tests rely on
     // EnvWrapper, that's the main reason why we use env here.
-    Status s = ioptions_.env->RegisterDbPaths(GetDbPaths());
+    rocksdb_rs::status::Status s = ioptions_.env->RegisterDbPaths(GetDbPaths());
     if (s.ok()) {
       db_paths_registered_ = true;
     } else {
@@ -689,7 +689,7 @@ ColumnFamilyData::~ColumnFamilyData() {
   if (db_paths_registered_) {
     // TODO(cc): considering using ioptions_.fs, currently some tests rely on
     // EnvWrapper, that's the main reason why we use env here.
-    Status s = ioptions_.env->UnregisterDbPaths(GetDbPaths());
+    rocksdb_rs::status::Status s = ioptions_.env->UnregisterDbPaths(GetDbPaths());
     if (!s.ok()) {
       ROCKS_LOG_ERROR(
           ioptions_.logger,
@@ -1129,7 +1129,7 @@ bool ColumnFamilyData::RangeOverlapWithCompaction(
       smallest_user_key, largest_user_key, level);
 }
 
-Status ColumnFamilyData::RangesOverlapWithMemtables(
+rocksdb_rs::status::Status ColumnFamilyData::RangesOverlapWithMemtables(
     const autovector<Range>& ranges, SuperVersion* super_version,
     bool allow_data_in_errors, bool* overlap) {
   assert(overlap != nullptr);
@@ -1152,7 +1152,7 @@ Status ColumnFamilyData::RangesOverlapWithMemtables(
       read_opts, read_seq, false /* immutable_memtable */);
   range_del_agg.AddTombstones(
       std::unique_ptr<FragmentedRangeTombstoneIterator>(active_range_del_iter));
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   status = super_version->imm->AddRangeTombstoneIterators(
       read_opts, nullptr /* arena */, &range_del_agg);
   // AddRangeTombstoneIterators always return Status_OK.
@@ -1338,9 +1338,9 @@ void ColumnFamilyData::ResetThreadLocalSuperVersions() {
   }
 }
 
-Status ColumnFamilyData::ValidateOptions(
+rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
     const DBOptions& db_options, const ColumnFamilyOptions& cf_options) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   s = CheckCompressionSupported(cf_options);
   if (s.ok() && db_options.allow_concurrent_memtable_write) {
     s = CheckConcurrentWritesSupported(cf_options);
@@ -1438,14 +1438,14 @@ Status ColumnFamilyData::ValidateOptions(
   return s;
 }
 
-Status ColumnFamilyData::SetOptions(
+rocksdb_rs::status::Status ColumnFamilyData::SetOptions(
     const DBOptions& db_opts,
     const std::unordered_map<std::string, std::string>& options_map) {
   ColumnFamilyOptions cf_opts =
       BuildColumnFamilyOptions(initial_cf_options_, mutable_cf_options_);
   ConfigOptions config_opts;
   config_opts.mutable_options_only = true;
-  Status s = GetColumnFamilyOptionsFromMap(config_opts, cf_opts, options_map,
+  rocksdb_rs::status::Status s = GetColumnFamilyOptionsFromMap(config_opts, cf_opts, options_map,
                                            &cf_opts);
   if (s.ok()) {
     s = ValidateOptions(db_opts, cf_opts);
@@ -1479,9 +1479,9 @@ Env::WriteLifeTimeHint ColumnFamilyData::CalculateSSTWriteHint(int level) {
       level - base_level + static_cast<int>(Env::WLTH_MEDIUM));
 }
 
-Status ColumnFamilyData::AddDirectories(
+rocksdb_rs::status::Status ColumnFamilyData::AddDirectories(
     std::map<std::string, std::shared_ptr<FSDirectory>>* created_dirs) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   assert(created_dirs != nullptr);
   assert(data_dirs_.empty());
   for (auto& p : ioptions_.cf_paths) {

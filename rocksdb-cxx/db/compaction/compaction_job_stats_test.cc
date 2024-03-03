@@ -154,7 +154,7 @@ class CompactionJobStatsTest : public testing::Test,
     ASSERT_OK(TryReopenWithColumnFamilies(cfs, options));
   }
 
-  Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                      const std::vector<Options>& options) {
     Close();
     EXPECT_EQ(cfs.size(), options.size());
@@ -166,7 +166,7 @@ class CompactionJobStatsTest : public testing::Test,
     return DB::Open(db_opts, dbname_, column_families, &handles_, &db_);
   }
 
-  Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                      const Options& options) {
     Close();
     std::vector<Options> v_opts(cfs.size(), options);
@@ -195,17 +195,17 @@ class CompactionJobStatsTest : public testing::Test,
     ASSERT_OK(DestroyDB(dbname_, options));
   }
 
-  Status ReadOnlyReopen(const Options& options) {
+  rocksdb_rs::status::Status ReadOnlyReopen(const Options& options) {
     return DB::OpenForReadOnly(options, dbname_, &db_);
   }
 
-  Status TryReopen(const Options& options) {
+  rocksdb_rs::status::Status TryReopen(const Options& options) {
     Close();
     last_options_ = options;
     return DB::Open(options, dbname_, &db_);
   }
 
-  Status Flush(int cf = 0) {
+  rocksdb_rs::status::Status Flush(int cf = 0) {
     if (cf == 0) {
       return db_->Flush(FlushOptions());
     } else {
@@ -213,18 +213,18 @@ class CompactionJobStatsTest : public testing::Test,
     }
   }
 
-  Status Put(const Slice& k, const Slice& v, WriteOptions wo = WriteOptions()) {
+  rocksdb_rs::status::Status Put(const Slice& k, const Slice& v, WriteOptions wo = WriteOptions()) {
     return db_->Put(wo, k, v);
   }
 
-  Status Put(int cf, const Slice& k, const Slice& v,
+  rocksdb_rs::status::Status Put(int cf, const Slice& k, const Slice& v,
              WriteOptions wo = WriteOptions()) {
     return db_->Put(wo, handles_[cf], k, v);
   }
 
-  Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
+  rocksdb_rs::status::Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
 
-  Status Delete(int cf, const std::string& k) {
+  rocksdb_rs::status::Status Delete(int cf, const std::string& k) {
     return db_->Delete(WriteOptions(), handles_[cf], k);
   }
 
@@ -233,7 +233,7 @@ class CompactionJobStatsTest : public testing::Test,
     options.verify_checksums = true;
     options.snapshot = snapshot;
     std::string result;
-    Status s = db_->Get(options, k, &result);
+    rocksdb_rs::status::Status s = db_->Get(options, k, &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -248,7 +248,7 @@ class CompactionJobStatsTest : public testing::Test,
     options.verify_checksums = true;
     options.snapshot = snapshot;
     std::string result;
-    Status s = db_->Get(options, handles_[cf], k, &result);
+    rocksdb_rs::status::Status s = db_->Get(options, handles_[cf], k, &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -290,7 +290,7 @@ class CompactionJobStatsTest : public testing::Test,
     return result;
   }
 
-  Status Size(uint64_t* size, const Slice& start, const Slice& limit,
+  rocksdb_rs::status::Status Size(uint64_t* size, const Slice& start, const Slice& limit,
               int cf = 0) {
     Range r(start, limit);
     if (cf == 0) {

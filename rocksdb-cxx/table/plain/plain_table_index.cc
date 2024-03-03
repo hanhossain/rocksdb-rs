@@ -20,7 +20,7 @@ inline uint32_t GetBucketIdFromHash(uint32_t hash, uint32_t num_buckets) {
 }
 }  // namespace
 
-Status PlainTableIndex::InitFromRawData(Slice data) {
+rocksdb_rs::status::Status PlainTableIndex::InitFromRawData(Slice data) {
   if (!GetVarint32(&data, &index_size_)) {
     return Status_Corruption("Couldn't read the index size!");
   }

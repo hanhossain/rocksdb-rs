@@ -93,7 +93,7 @@ void CuckooTableBuilder::Add(const Slice& key, const Slice& value) {
     return;
   }
   ParsedInternalKey ikey;
-  Status pik_status =
+  rocksdb_rs::status::Status pik_status =
       ParseInternalKey(key, &ikey, false /* log_err_key */);  // TODO
   if (!pik_status.ok()) {
     status_ = Status_Corruption("Unable to parse key into internal key. ",
@@ -197,7 +197,7 @@ Slice CuckooTableBuilder::GetValue(uint64_t idx) const {
       static_cast<size_t>(value_size_));
 }
 
-Status CuckooTableBuilder::MakeHashTable(std::vector<CuckooBucket>* buckets) {
+rocksdb_rs::status::Status CuckooTableBuilder::MakeHashTable(std::vector<CuckooBucket>* buckets) {
   buckets->resize(
       static_cast<size_t>(hash_table_size_ + cuckoo_block_size_ - 1));
   uint32_t make_space_for_key_call_id = 0;
@@ -261,7 +261,7 @@ Status CuckooTableBuilder::MakeHashTable(std::vector<CuckooBucket>* buckets) {
   return Status_OK();
 }
 
-Status CuckooTableBuilder::Finish() {
+rocksdb_rs::status::Status CuckooTableBuilder::Finish() {
   assert(!closed_);
   closed_ = true;
   std::vector<CuckooBucket> buckets;

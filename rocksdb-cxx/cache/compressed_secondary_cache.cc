@@ -60,7 +60,7 @@ std::unique_ptr<SecondaryCacheResultHandle> CompressedSecondaryCache::Lookup(
   }
   MemoryAllocator* allocator = cache_options_.memory_allocator.get();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   Cache::ObjectPtr value{nullptr};
   size_t charge{0};
   if (cache_options_.compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression ||
@@ -106,7 +106,7 @@ std::unique_ptr<SecondaryCacheResultHandle> CompressedSecondaryCache::Lookup(
   return handle;
 }
 
-Status CompressedSecondaryCache::Insert(const Slice& key,
+rocksdb_rs::status::Status CompressedSecondaryCache::Insert(const Slice& key,
                                         Cache::ObjectPtr value,
                                         const Cache::CacheItemHelper* helper) {
   if (value == nullptr) {
@@ -128,7 +128,7 @@ Status CompressedSecondaryCache::Insert(const Slice& key,
   CacheAllocationPtr ptr =
       AllocateBlock(size, cache_options_.memory_allocator.get());
 
-  Status s = (*helper->saveto_cb)(value, 0, size, ptr.get());
+  rocksdb_rs::status::Status s = (*helper->saveto_cb)(value, 0, size, ptr.get());
   if (!s.ok()) {
     return s;
   }
@@ -177,14 +177,14 @@ Status CompressedSecondaryCache::Insert(const Slice& key,
 
 void CompressedSecondaryCache::Erase(const Slice& key) { cache_->Erase(key); }
 
-Status CompressedSecondaryCache::SetCapacity(size_t capacity) {
+rocksdb_rs::status::Status CompressedSecondaryCache::SetCapacity(size_t capacity) {
   MutexLock l(&capacity_mutex_);
   cache_options_.capacity = capacity;
   cache_->SetCapacity(capacity);
   return Status_OK();
 }
 
-Status CompressedSecondaryCache::GetCapacity(size_t& capacity) {
+rocksdb_rs::status::Status CompressedSecondaryCache::GetCapacity(size_t& capacity) {
   MutexLock l(&capacity_mutex_);
   capacity = cache_options_.capacity;
   return Status_OK();
@@ -306,11 +306,11 @@ CompressedSecondaryCacheOptions::MakeSharedSecondaryCache() const {
   return std::make_shared<CompressedSecondaryCache>(*this);
 }
 
-Status CompressedSecondaryCache::Deflate(size_t decrease) {
+rocksdb_rs::status::Status CompressedSecondaryCache::Deflate(size_t decrease) {
   return cache_res_mgr_->UpdateCacheReservation(decrease, /*increase=*/true);
 }
 
-Status CompressedSecondaryCache::Inflate(size_t increase) {
+rocksdb_rs::status::Status CompressedSecondaryCache::Inflate(size_t increase) {
   return cache_res_mgr_->UpdateCacheReservation(increase, /*increase=*/false);
 }
 

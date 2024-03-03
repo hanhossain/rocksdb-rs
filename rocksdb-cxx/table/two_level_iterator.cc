@@ -52,7 +52,7 @@ class TwoLevelIndexIterator : public InternalIteratorBase<IndexValue> {
     assert(Valid());
     return second_level_iter_.value();
   }
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     if (!first_level_iter_.status().ok()) {
       assert(second_level_iter_.iter() == nullptr);
       return first_level_iter_.status();
@@ -69,7 +69,7 @@ class TwoLevelIndexIterator : public InternalIteratorBase<IndexValue> {
   bool IsValuePinned() const override { return false; }
 
  private:
-  void SaveError(const Status& s) {
+  void SaveError(const rocksdb_rs::status::Status& s) {
     if (status_.ok() && !s.ok()) status_.copy_from(s);
   }
   void SkipEmptyDataBlocksForward();
@@ -80,7 +80,7 @@ class TwoLevelIndexIterator : public InternalIteratorBase<IndexValue> {
   TwoLevelIteratorState* state_;
   IteratorWrapperBase<IndexValue> first_level_iter_;
   IteratorWrapperBase<IndexValue> second_level_iter_;  // May be nullptr
-  Status status_;
+  rocksdb_rs::status::Status status_;
   // If second_level_iter is non-nullptr, then "data_block_handle_" holds the
   // "index_value" passed to block_function_ to create the second_level_iter.
   BlockHandle data_block_handle_;

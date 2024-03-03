@@ -17,10 +17,13 @@
 #include "table/block_based/cachable_entry.h"
 #include "util/autovector.h"
 
+namespace rocksdb::status {
+    struct Status;
+}
+
 namespace rocksdb {
 
 struct ImmutableOptions;
-struct Status;
 class FilePrefetchBuffer;
 class Slice;
 
@@ -48,7 +51,7 @@ class BlobSource {
   // Note: For consistency, whether the blob is found in the cache or on disk,
   // sets "*bytes_read" to the size of on-disk (possibly compressed) blob
   // record.
-  Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
+  rocksdb_rs::status::Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
                  uint64_t file_number, uint64_t offset, uint64_t file_size,
                  uint64_t value_size, rocksdb_rs::compression_type::CompressionType compression_type,
                  FilePrefetchBuffer* prefetch_buffer, PinnableSlice* value,
@@ -93,7 +96,7 @@ class BlobSource {
                                autovector<BlobReadRequest>& blob_reqs,
                                uint64_t* bytes_read);
 
-  inline Status GetBlobFileReader(
+  inline rocksdb_rs::status::Status GetBlobFileReader(
       const ReadOptions& read_options, uint64_t blob_file_number,
       CacheHandleGuard<BlobFileReader>* blob_file_reader) {
     return blob_file_cache_->GetBlobFileReader(read_options, blob_file_number,
@@ -114,10 +117,10 @@ class BlobSource {
   using TypedHandle = SharedCacheInterface::TypedHandle;
 
  private:
-  Status GetBlobFromCache(const Slice& cache_key,
+  rocksdb_rs::status::Status GetBlobFromCache(const Slice& cache_key,
                           CacheHandleGuard<BlobContents>* cached_blob) const;
 
-  Status PutBlobIntoCache(const Slice& cache_key,
+  rocksdb_rs::status::Status PutBlobIntoCache(const Slice& cache_key,
                           std::unique_ptr<BlobContents>* blob,
                           CacheHandleGuard<BlobContents>* cached_blob) const;
 
@@ -129,7 +132,7 @@ class BlobSource {
 
   TypedHandle* GetEntryFromCache(const Slice& key) const;
 
-  Status InsertEntryIntoCache(const Slice& key, BlobContents* value,
+  rocksdb_rs::status::Status InsertEntryIntoCache(const Slice& key, BlobContents* value,
                               TypedHandle** cache_handle,
                               Cache::Priority priority) const;
 

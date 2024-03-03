@@ -57,7 +57,7 @@ class SubcompactionState {
   const std::optional<Slice> start, end;
 
   // The return status of this sub-compaction
-  Status status;
+  rocksdb_rs::status::Status status;
 
   // The return IO Status of this sub-compaction
   IOStatus io_status;
@@ -189,20 +189,20 @@ class SubcompactionState {
   }
 
   // Add compaction_iterator key/value to the `Current` output group.
-  Status AddToOutput(const CompactionIterator& iter,
+  rocksdb_rs::status::Status AddToOutput(const CompactionIterator& iter,
                      const CompactionFileOpenFunc& open_file_func,
                      const CompactionFileCloseFunc& close_file_func);
 
   // Close all compaction output files, both output_to_penultimate_level outputs
   // and normal outputs.
-  Status CloseCompactionFiles(const Status& curr_status,
+  rocksdb_rs::status::Status CloseCompactionFiles(const rocksdb_rs::status::Status& curr_status,
                               const CompactionFileOpenFunc& open_file_func,
                               const CompactionFileCloseFunc& close_file_func) {
     // Call FinishCompactionOutputFile() even if status is not ok: it needs to
     // close the output file.
     // CloseOutput() may open new compaction output files.
     is_current_penultimate_level_ = true;
-    Status s = penultimate_level_outputs_.CloseOutput(
+    rocksdb_rs::status::Status s = penultimate_level_outputs_.CloseOutput(
         curr_status, open_file_func, close_file_func);
     is_current_penultimate_level_ = false;
     s = compaction_outputs_.CloseOutput(s, open_file_func, close_file_func);

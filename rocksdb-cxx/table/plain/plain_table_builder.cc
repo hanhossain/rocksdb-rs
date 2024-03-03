@@ -200,7 +200,7 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
   status_ = io_status_;
 }
 
-Status PlainTableBuilder::Finish() {
+rocksdb_rs::status::Status PlainTableBuilder::Finish() {
   assert(!closed_);
   closed_ = true;
 
@@ -274,7 +274,7 @@ Status PlainTableBuilder::Finish() {
   IOStatus s = WriteBlock(property_block_builder.Finish(), file_, &offset_,
                           &property_block_handle);
   if (!s.ok()) {
-    return static_cast<Status>(s);
+    return static_cast<rocksdb_rs::status::Status>(s);
   }
   meta_index_builer.Add(kPropertiesBlockName, property_block_handle);
 

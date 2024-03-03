@@ -37,7 +37,7 @@
 
 namespace rocksdb {
 
-static Status ParseCompressionOptions(const std::string& value,
+static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& value,
                                       const std::string& name,
                                       CompressionOptions& compression_opts) {
   const char kDelimiter = ':';
@@ -672,7 +672,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             std::unique_ptr<MemTableRepFactory> factory;
             auto* shared =
                 static_cast<std::shared_ptr<MemTableRepFactory>*>(addr);
-            Status s =
+            rocksdb_rs::status::Status s =
                 MemTableRepFactory::CreateFromString(opts, value, shared);
             return s;
           }}},
@@ -685,7 +685,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             std::unique_ptr<MemTableRepFactory> factory;
             auto* shared =
                 static_cast<std::shared_ptr<MemTableRepFactory>*>(addr);
-            Status s =
+            rocksdb_rs::status::Status s =
                 MemTableRepFactory::CreateFromString(opts, value, shared);
             return s;
           }}},
@@ -717,7 +717,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
               } else {
                 new_factory.reset(NewBlockBasedTableFactory());
               }
-              Status s = new_factory->ConfigureFromString(opts, value);
+              rocksdb_rs::status::Status s = new_factory->ConfigureFromString(opts, value);
               if (s.ok()) {
                 table_factory->reset(new_factory.release());
               }
@@ -748,7 +748,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
               } else {
                 new_factory.reset(NewPlainTableFactory());
               }
-              Status s = new_factory->ConfigureFromString(opts, value);
+              rocksdb_rs::status::Status s = new_factory->ConfigureFromString(opts, value);
               if (s.ok()) {
                 table_factory->reset(new_factory.release());
               }
@@ -833,11 +833,11 @@ class ConfigurableCFOptions : public ConfigurableMutableCFOptions {
   }
 
  protected:
-  Status ConfigureOptions(
+  rocksdb_rs::status::Status ConfigureOptions(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, std::string>& opts_map,
       std::unordered_map<std::string, std::string>* unused) override {
-    Status s = Configurable::ConfigureOptions(config_options, opts_map, unused);
+    rocksdb_rs::status::Status s = Configurable::ConfigureOptions(config_options, opts_map, unused);
     if (s.ok()) {
       UpdateColumnFamilyOptions(mutable_, &cf_options_);
       UpdateColumnFamilyOptions(immutable_, &cf_options_);
@@ -1170,14 +1170,14 @@ void MutableCFOptions::Dump(Logger* log) const {
 MutableCFOptions::MutableCFOptions(const Options& options)
     : MutableCFOptions(ColumnFamilyOptions(options)) {}
 
-Status GetMutableOptionsFromStrings(
+rocksdb_rs::status::Status GetMutableOptionsFromStrings(
     const MutableCFOptions& base_options,
     const std::unordered_map<std::string, std::string>& options_map,
     Logger* /*info_log*/, MutableCFOptions* new_options) {
   assert(new_options);
   *new_options = base_options;
   ConfigOptions config_options;
-  Status s = OptionTypeInfo::ParseType(
+  rocksdb_rs::status::Status s = OptionTypeInfo::ParseType(
       config_options, options_map, cf_mutable_options_type_info, new_options);
   if (!s.ok()) {
     *new_options = base_options;
@@ -1185,7 +1185,7 @@ Status GetMutableOptionsFromStrings(
   return s;
 }
 
-Status GetStringFromMutableCFOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromMutableCFOptions(const ConfigOptions& config_options,
                                      const MutableCFOptions& mutable_opts,
                                      std::string* opt_string) {
   assert(opt_string);

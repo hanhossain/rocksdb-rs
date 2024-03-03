@@ -88,7 +88,7 @@ class TransactionLogIterator {
 
   // Returns ok if the iterator is valid.
   // Returns the Error when something has gone wrong.
-  virtual Status status() = 0;
+  virtual rocksdb_rs::status::Status status() = 0;
 
   // If valid return's the current write_batch and the sequence number of the
   // earliest transaction contained in the batch.

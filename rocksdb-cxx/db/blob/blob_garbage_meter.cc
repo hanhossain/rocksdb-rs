@@ -11,11 +11,11 @@
 
 namespace rocksdb {
 
-Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
   uint64_t blob_file_number = kInvalidBlobFileNumber;
   uint64_t bytes = 0;
 
-  const Status s = Parse(key, value, &blob_file_number, &bytes);
+  const rocksdb_rs::status::Status s = Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -29,11 +29,11 @@ Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
   return Status_OK();
 }
 
-Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
   uint64_t blob_file_number = kInvalidBlobFileNumber;
   uint64_t bytes = 0;
 
-  const Status s = Parse(key, value, &blob_file_number, &bytes);
+  const rocksdb_rs::status::Status s = Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -55,7 +55,7 @@ Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
   return Status_OK();
 }
 
-Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
+rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
                                uint64_t* blob_file_number, uint64_t* bytes) {
   assert(blob_file_number);
   assert(*blob_file_number == kInvalidBlobFileNumber);
@@ -66,7 +66,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
 
   {
     constexpr bool log_err_key = false;
-    const Status s = ParseInternalKey(key, &ikey, log_err_key);
+    const rocksdb_rs::status::Status s = ParseInternalKey(key, &ikey, log_err_key);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -79,7 +79,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
   BlobIndex blob_index;
 
   {
-    const Status s = blob_index.DecodeFrom(value);
+    const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value);
     if (!s.ok()) {
       return s.Clone();
     }

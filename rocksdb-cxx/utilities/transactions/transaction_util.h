@@ -39,7 +39,7 @@ class TransactionUtil {
   //
   // Returns OK on success, BUSY if there is a conflicting write, or other error
   // status for any unexpected errors.
-  static Status CheckKeyForConflicts(
+  static rocksdb_rs::status::Status CheckKeyForConflicts(
       DBImpl* db_impl, ColumnFamilyHandle* column_family,
       const std::string& key, SequenceNumber snap_seq,
       const std::string* const ts, bool cache_only,
@@ -57,7 +57,7 @@ class TransactionUtil {
   // This function should only be called on the write thread or if the
   // mutex is held.
   // tracker must support point lock.
-  static Status CheckKeysForConflicts(DBImpl* db_impl,
+  static rocksdb_rs::status::Status CheckKeysForConflicts(DBImpl* db_impl,
                                       const LockTracker& tracker,
                                       bool cache_only);
 
@@ -73,7 +73,7 @@ class TransactionUtil {
   //
   // If user-defined timestamp is enabled, a write conflict is detected if an
   // operation for `key` with timestamp greater than `ts` exists.
-  static Status CheckKey(DBImpl* db_impl, SuperVersion* sv,
+  static rocksdb_rs::status::Status CheckKey(DBImpl* db_impl, SuperVersion* sv,
                          SequenceNumber earliest_seq, SequenceNumber snap_seq,
                          const std::string& key, const std::string* const ts,
                          bool cache_only, ReadCallback* snap_checker = nullptr,

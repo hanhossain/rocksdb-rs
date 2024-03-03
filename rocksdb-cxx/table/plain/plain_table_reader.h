@@ -66,7 +66,7 @@ class PlainTableReader : public TableReader {
   // whether it points to the data offset of the first key with the key prefix
   // or the offset of it. If there are too many keys share this prefix, it will
   // create a binary search-able index from the suffix to offset on disk.
-  static Status Open(const ImmutableOptions& ioptions,
+  static rocksdb_rs::status::Status Open(const ImmutableOptions& ioptions,
                      const EnvOptions& env_options,
                      const InternalKeyComparator& internal_comparator,
                      std::unique_ptr<RandomAccessFileReader>&& file,
@@ -88,7 +88,7 @@ class PlainTableReader : public TableReader {
 
   void Prepare(const Slice& target) override;
 
-  Status Get(const ReadOptions& readOptions, const Slice& key,
+  rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
              GetContext* get_context, const SliceTransform* prefix_extractor,
              bool skip_filters = false) override;
 
@@ -131,17 +131,17 @@ class PlainTableReader : public TableReader {
   //        the object will be passed.
   //
 
-  Status PopulateIndex(TableProperties* props, int bloom_bits_per_key,
+  rocksdb_rs::status::Status PopulateIndex(TableProperties* props, int bloom_bits_per_key,
                        double hash_table_ratio, size_t index_sparseness,
                        size_t huge_page_tlb_size);
 
-  Status MmapDataIfNeeded();
+  rocksdb_rs::status::Status MmapDataIfNeeded();
 
  private:
   const InternalKeyComparator internal_comparator_;
   EncodingType encoding_type_;
   // represents plain table's current status.
-  Status status_;
+  rocksdb_rs::status::Status status_;
 
   PlainTableIndex index_;
   bool full_scan_mode_;
@@ -206,7 +206,7 @@ class PlainTableReader : public TableReader {
   // the rows, which contains index records as a list.
   // If bloom_ is not null, all the keys' full-key hash will be added to the
   // bloom filter.
-  Status PopulateIndexRecordList(PlainTableIndexBuilder* index_builder,
+  rocksdb_rs::status::Status PopulateIndexRecordList(PlainTableIndexBuilder* index_builder,
                                  std::vector<uint32_t>* prefix_hashes);
 
   // Internal helper function to allocate memory for bloom filter
@@ -223,13 +223,13 @@ class PlainTableReader : public TableReader {
   // format.
   // if `seekable` is not null, it will return whether we can directly read
   // data using this offset.
-  Status Next(PlainTableKeyDecoder* decoder, uint32_t* offset,
+  rocksdb_rs::status::Status Next(PlainTableKeyDecoder* decoder, uint32_t* offset,
               ParsedInternalKey* parsed_key, Slice* internal_key, Slice* value,
               bool* seekable = nullptr) const;
   // Get file offset for key target.
   // return value prefix_matched is set to true if the offset is confirmed
   // for a key with the same prefix as target.
-  Status GetOffset(PlainTableKeyDecoder* decoder, const Slice& target,
+  rocksdb_rs::status::Status GetOffset(PlainTableKeyDecoder* decoder, const Slice& target,
                    const Slice& prefix, uint32_t prefix_hash,
                    bool& prefix_matched, uint32_t* offset) const;
 

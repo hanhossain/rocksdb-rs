@@ -51,13 +51,13 @@ class ErrorHandler {
   rocksdb_rs::status::Severity GetErrorSeverity(BackgroundErrorReason reason,
                                     rocksdb_rs::status::Code code, rocksdb_rs::status::SubCode subcode);
 
-  const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
+  const rocksdb_rs::status::Status& SetBGError(const rocksdb_rs::status::Status& bg_err, BackgroundErrorReason reason);
 
-  Status GetBGError() const { return bg_error_.Clone(); }
+  rocksdb_rs::status::Status GetBGError() const { return bg_error_.Clone(); }
 
-  Status GetRecoveryError() const { return recovery_error_.Clone(); }
+  rocksdb_rs::status::Status GetRecoveryError() const { return recovery_error_.Clone(); }
 
-  Status ClearBGError();
+  rocksdb_rs::status::Status ClearBGError();
 
   bool IsDBStopped() { return is_db_stopped_.load(std::memory_order_acquire); }
 
@@ -73,7 +73,7 @@ class ErrorHandler {
 
   bool IsRecoveryInProgress() { return recovery_in_prog_; }
 
-  Status RecoverFromBGError(bool is_manual = false);
+  rocksdb_rs::status::Status RecoverFromBGError(bool is_manual = false);
   void CancelErrorRecovery();
 
   void EndAutoRecovery();
@@ -81,10 +81,10 @@ class ErrorHandler {
  private:
   DBImpl* db_;
   const ImmutableDBOptions& db_options_;
-  Status bg_error_;
+  rocksdb_rs::status::Status bg_error_;
   // A separate Status variable used to record any errors during the
   // recovery process from hard errors
-  Status recovery_error_;
+  rocksdb_rs::status::Status recovery_error_;
   // A separate IO Status variable used to record any IO errors during
   // the recovery process. At the same time, recovery_error_ is also set.
   IOStatus recovery_io_error_;
@@ -109,16 +109,16 @@ class ErrorHandler {
   // The pointer of DB statistics.
   std::shared_ptr<Statistics> bg_error_stats_;
 
-  const Status& HandleKnownErrors(const Status& bg_err,
+  const rocksdb_rs::status::Status& HandleKnownErrors(const rocksdb_rs::status::Status& bg_err,
                                   BackgroundErrorReason reason);
-  Status OverrideNoSpaceError(const Status& bg_error, bool* auto_recovery);
+  rocksdb_rs::status::Status OverrideNoSpaceError(const rocksdb_rs::status::Status& bg_error, bool* auto_recovery);
   void RecoverFromNoSpace();
-  const Status& StartRecoverFromRetryableBGIOError(const IOStatus& io_error);
+  const rocksdb_rs::status::Status& StartRecoverFromRetryableBGIOError(const IOStatus& io_error);
   void RecoverFromRetryableBGIOError();
   // First, if it is in recovery and the recovery_error is ok. Set the
   // recovery_error_ to bg_err. Second, if the severity is higher than the
   // current bg_error_, overwrite it.
-  void CheckAndSetRecoveryAndBGError(const Status& bg_err);
+  void CheckAndSetRecoveryAndBGError(const rocksdb_rs::status::Status& bg_err);
 };
 
 }  // namespace rocksdb

@@ -30,7 +30,7 @@ const std::string kCompatibleVersionKeyString =
 const uint64_t kStatsCFCurrentFormatVersion = 1;
 const uint64_t kStatsCFCompatibleFormatVersion = 1;
 
-Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
+rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
                                           uint64_t* version_number) {
   if (type >= StatsVersionKeyType::kKeyTypeMax) {
     return Status_InvalidArgument("Invalid stats version key type provided");
@@ -44,7 +44,7 @@ Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
   ReadOptions options;
   options.verify_checksums = true;
   std::string result;
-  Status s = db->Get(options, db->PersistentStatsColumnFamily(), key, &result);
+  rocksdb_rs::status::Status s = db->Get(options, db->PersistentStatsColumnFamily(), key, &result);
   if (!s.ok() || result.empty()) {
     return Status_NotFound("Persistent stats version key " + key +
                             " not found.");
@@ -78,7 +78,7 @@ PersistentStatsHistoryIterator::~PersistentStatsHistoryIterator() {}
 
 bool PersistentStatsHistoryIterator::Valid() const { return valid_; }
 
-Status PersistentStatsHistoryIterator::status() const { return status_.Clone(); }
+rocksdb_rs::status::Status PersistentStatsHistoryIterator::status() const { return status_.Clone(); }
 
 void PersistentStatsHistoryIterator::Next() {
   // increment start_time by 1 to avoid infinite loop

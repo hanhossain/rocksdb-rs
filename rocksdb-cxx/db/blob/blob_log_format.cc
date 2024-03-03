@@ -25,7 +25,7 @@ void BlobLogHeader::EncodeTo(std::string* dst) {
   PutFixed64(dst, expiration_range.second);
 }
 
-Status BlobLogHeader::DecodeFrom(Slice src) {
+rocksdb_rs::status::Status BlobLogHeader::DecodeFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob log header";
   if (src.size() != BlobLogHeader::kSize) {
     return Status_Corruption(kErrorMessage,
@@ -69,7 +69,7 @@ void BlobLogFooter::EncodeTo(std::string* dst) {
   PutFixed32(dst, crc);
 }
 
-Status BlobLogFooter::DecodeFrom(Slice src) {
+rocksdb_rs::status::Status BlobLogFooter::DecodeFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob log footer";
   if (src.size() != BlobLogFooter::kSize) {
     return Status_Corruption(kErrorMessage,
@@ -109,7 +109,7 @@ void BlobLogRecord::EncodeHeaderTo(std::string* dst) {
   PutFixed32(dst, blob_crc);
 }
 
-Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
+rocksdb_rs::status::Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob record";
   if (src.size() != BlobLogRecord::kHeaderSize) {
     return Status_Corruption(kErrorMessage,
@@ -129,7 +129,7 @@ Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
   return Status_OK();
 }
 
-Status BlobLogRecord::CheckBlobCRC() const {
+rocksdb_rs::status::Status BlobLogRecord::CheckBlobCRC() const {
   uint32_t expected_crc = 0;
   expected_crc = crc32c::Value(key.data(), key.size());
   expected_crc = crc32c::Extend(expected_crc, value.data(), value.size());

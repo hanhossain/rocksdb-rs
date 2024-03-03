@@ -99,7 +99,7 @@ struct PersistentCacheConfig {
   // Validate the settings. Our intentions are to catch erroneous settings ahead
   // of time instead going violating invariants or causing dead locks.
   //
-  Status ValidateSettings() const {
+  rocksdb_rs::status::Status ValidateSettings() const {
     // (1) check pre-conditions for variables
     if (!env || path.empty()) {
       return Status_InvalidArgument("empty or null args");
@@ -240,10 +240,10 @@ class PersistentCacheTier : public PersistentCache {
   virtual ~PersistentCacheTier() {}
 
   // Open the persistent cache tier
-  virtual Status Open();
+  virtual rocksdb_rs::status::Status Open();
 
   // Close the persistent cache tier
-  virtual Status Close();
+  virtual rocksdb_rs::status::Status Close();
 
   // Reserve space up to 'size' bytes
   virtual bool Reserve(const size_t size);
@@ -257,11 +257,11 @@ class PersistentCacheTier : public PersistentCache {
   virtual PersistentCache::StatsType Stats() override;
 
   // Insert to page cache
-  virtual Status Insert(const Slice& page_key, const char* data,
+  virtual rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
                         const size_t size) override = 0;
 
   // Lookup page cache by page identifier
-  virtual Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
+  virtual rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
                         size_t* size) override = 0;
 
   // Does it store compressed data ?
@@ -300,14 +300,14 @@ class PersistentTieredCache : public PersistentCacheTier {
  public:
   virtual ~PersistentTieredCache();
 
-  Status Open() override;
-  Status Close() override;
+  rocksdb_rs::status::Status Open() override;
+  rocksdb_rs::status::Status Close() override;
   bool Erase(const Slice& key) override;
   std::string PrintStats() override;
   PersistentCache::StatsType Stats() override;
-  Status Insert(const Slice& page_key, const char* data,
+  rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
                 const size_t size) override;
-  Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
+  rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
                 size_t* size) override;
   bool IsCompressed() override;
 

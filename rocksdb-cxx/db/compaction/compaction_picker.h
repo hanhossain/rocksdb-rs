@@ -94,14 +94,14 @@ class CompactionPicker {
 // into a valid one by adding more files, the function will return a
 // non-ok status with specific reason.
 //
-  Status SanitizeCompactionInputFiles(std::unordered_set<uint64_t>* input_files,
+  rocksdb_rs::status::Status SanitizeCompactionInputFiles(std::unordered_set<uint64_t>* input_files,
                                       const ColumnFamilyMetaData& cf_meta,
                                       const int output_level) const;
 
   // Free up the files that participated in a compaction
   //
   // Requirement: DB mutex held
-  void ReleaseCompactionFiles(Compaction* c, Status status);
+  void ReleaseCompactionFiles(Compaction* c, rocksdb_rs::status::Status status);
 
   // Returns true if any one of the specified files are being compacted
   bool AreFilesInCompaction(const std::vector<FileMetaData*>& files);
@@ -121,7 +121,7 @@ class CompactionPicker {
 
   // Converts a set of compaction input file numbers into
   // a list of CompactionInputFiles.
-  Status GetCompactionInputsFromFileNumbers(
+  rocksdb_rs::status::Status GetCompactionInputsFromFileNumbers(
       std::vector<CompactionInputFiles>* input_files,
       std::unordered_set<uint64_t>* input_set,
       const VersionStorageInfo* vstorage,
@@ -228,7 +228,7 @@ class CompactionPicker {
 
 // A helper function to SanitizeCompactionInputFiles() that
 // sanitizes "input_files" by adding necessary files.
-  virtual Status SanitizeCompactionInputFilesForAllLevels(
+  virtual rocksdb_rs::status::Status SanitizeCompactionInputFilesForAllLevels(
       std::unordered_set<uint64_t>* input_files,
       const ColumnFamilyMetaData& cf_meta, const int output_level) const;
 

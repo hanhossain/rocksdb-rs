@@ -120,7 +120,7 @@ TEST_F(ObsoleteFilesTest, RaceForObsoleteFileDeletion) {
   });
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::DeleteObsoleteFileImpl:AfterDeletion", [&](void* arg) {
-        Status* p_status = reinterpret_cast<Status*>(arg);
+        rocksdb_rs::status::Status* p_status = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_OK(*p_status);
       });
   SyncPoint::GetInstance()->SetCallBack(

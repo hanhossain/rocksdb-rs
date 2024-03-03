@@ -150,7 +150,7 @@ CuckooTableReader::CuckooTableReader(
                   nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
 }
 
-Status CuckooTableReader::Get(const ReadOptions& /*readOptions*/,
+rocksdb_rs::status::Status CuckooTableReader::Get(const ReadOptions& /*readOptions*/,
                               const Slice& key, GetContext* get_context,
                               const SliceTransform* /* prefix_extractor */,
                               bool /*skip_filters*/) {
@@ -182,7 +182,7 @@ Status CuckooTableReader::Get(const ReadOptions& /*readOptions*/,
         } else {
           Slice full_key(bucket, key_length_);
           ParsedInternalKey found_ikey;
-          Status s = ParseInternalKey(full_key, &found_ikey,
+          rocksdb_rs::status::Status s = ParseInternalKey(full_key, &found_ikey,
                                       false /* log_err_key */);  // TODO
           if (!s.ok()) return s;
           bool dont_care __attribute__((__unused__));
@@ -225,7 +225,7 @@ class CuckooTableIterator : public InternalIterator {
   void Prev() override;
   Slice key() const override;
   Slice value() const override;
-  Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return Status_OK(); }
   void InitIfNeeded();
 
  private:

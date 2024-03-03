@@ -29,7 +29,7 @@ using rocksdb::DBOptions;
 using rocksdb::NewLRUCache;
 using rocksdb::Options;
 using rocksdb::Slice;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 
 #if defined(OS_WIN)
 std::string kDBPath = "C:\\Windows\\TEMP\\rocksdb_options_file_example";
@@ -75,7 +75,7 @@ int main() {
 
   // destroy and open DB
   DB* db;
-  Status s = rocksdb::DestroyDB(kDBPath,
+  rocksdb_rs::status::Status s = rocksdb::DestroyDB(kDBPath,
                                           Options(db_opt, cf_descs[0].options));
   assert(s.ok());
   s = DB::Open(Options(db_opt, cf_descs[0].options), kDBPath, &db);

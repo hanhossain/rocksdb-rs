@@ -85,7 +85,7 @@ class AutoRollLoggerTest : public testing::Test {
   std::vector<std::string> GetLogFiles() {
     std::vector<std::string> ret;
     std::vector<std::string> files;
-    Status s = default_env->GetChildren(kTestDir, &files);
+    rocksdb_rs::status::Status s = default_env->GetChildren(kTestDir, &files);
     // Should call ASSERT_OK() here but it doesn't compile. It's not
     // worth the time figuring out why.
     EXPECT_TRUE(s.ok());

@@ -44,7 +44,7 @@ class InMemoryStatsHistoryIterator final : public StatsHistoryIterator {
 
   ~InMemoryStatsHistoryIterator() override;
   bool Valid() const override;
-  Status status() const override;
+  rocksdb_rs::status::Status status() const override;
 
   // Move to the next stats snapshot currently available
   // This function may invalidate the iterator
@@ -67,7 +67,7 @@ class InMemoryStatsHistoryIterator final : public StatsHistoryIterator {
   uint64_t start_time_;
   uint64_t end_time_;
   std::map<std::string, uint64_t> stats_map_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   bool valid_;
   DBImpl* db_impl_;
 };

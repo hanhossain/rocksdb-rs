@@ -35,14 +35,14 @@ class CacheReservationManager {
     virtual ~CacheReservationHandle() {}
   };
   virtual ~CacheReservationManager() {}
-  virtual Status UpdateCacheReservation(std::size_t new_memory_used) = 0;
+  virtual rocksdb_rs::status::Status UpdateCacheReservation(std::size_t new_memory_used) = 0;
   // TODO(hx235): replace the usage of
   // `UpdateCacheReservation(memory_used_delta, increase)` with
   // `UpdateCacheReservation(new_memory_used)` so that we only have one
   // `UpdateCacheReservation` function
-  virtual Status UpdateCacheReservation(std::size_t memory_used_delta,
+  virtual rocksdb_rs::status::Status UpdateCacheReservation(std::size_t memory_used_delta,
                                         bool increase) = 0;
-  virtual Status MakeCacheReservation(
+  virtual rocksdb_rs::status::Status MakeCacheReservation(
       std::size_t incremental_memory_used,
       std::unique_ptr<CacheReservationManager::CacheReservationHandle>
           *handle) = 0;
@@ -132,9 +132,9 @@ class CacheReservationManagerImpl
   //         Otherwise, it returns the first non-ok status;
   //         On releasing dummy entries, it always returns Status_OK().
   //         On keeping dummy entries the same, it always returns Status_OK().
-  Status UpdateCacheReservation(std::size_t new_memory_used) override;
+  rocksdb_rs::status::Status UpdateCacheReservation(std::size_t new_memory_used) override;
 
-  Status UpdateCacheReservation(std::size_t /* memory_used_delta */,
+  rocksdb_rs::status::Status UpdateCacheReservation(std::size_t /* memory_used_delta */,
                                 bool /* increase */) override {
     return Status_NotSupported();
   }
@@ -176,7 +176,7 @@ class CacheReservationManagerImpl
   //         Otherwise, it returns the first non-ok status;
   //
   // REQUIRES: handle != nullptr
-  Status MakeCacheReservation(
+  rocksdb_rs::status::Status MakeCacheReservation(
       std::size_t incremental_memory_used,
       std::unique_ptr<CacheReservationManager::CacheReservationHandle> *handle)
       override;
@@ -207,9 +207,9 @@ class CacheReservationManagerImpl
 
   Slice GetNextCacheKey();
 
-  Status ReleaseCacheReservation(std::size_t incremental_memory_used);
-  Status IncreaseCacheReservation(std::size_t new_mem_used);
-  Status DecreaseCacheReservation(std::size_t new_mem_used);
+  rocksdb_rs::status::Status ReleaseCacheReservation(std::size_t incremental_memory_used);
+  rocksdb_rs::status::Status IncreaseCacheReservation(std::size_t new_mem_used);
+  rocksdb_rs::status::Status DecreaseCacheReservation(std::size_t new_mem_used);
 
   using CacheInterface = PlaceholderSharedCacheInterface<R>;
   CacheInterface cache_;
@@ -262,16 +262,16 @@ class ConcurrentCacheReservationManager
 
   ~ConcurrentCacheReservationManager() override {}
 
-  inline Status UpdateCacheReservation(std::size_t new_memory_used) override {
+  inline rocksdb_rs::status::Status UpdateCacheReservation(std::size_t new_memory_used) override {
     std::lock_guard<std::mutex> lock(cache_res_mgr_mu_);
     return cache_res_mgr_->UpdateCacheReservation(new_memory_used);
   }
 
-  inline Status UpdateCacheReservation(std::size_t memory_used_delta,
+  inline rocksdb_rs::status::Status UpdateCacheReservation(std::size_t memory_used_delta,
                                        bool increase) override {
     std::lock_guard<std::mutex> lock(cache_res_mgr_mu_);
     std::size_t total_mem_used = cache_res_mgr_->GetTotalMemoryUsed();
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     if (!increase) {
       assert(total_mem_used >= memory_used_delta);
       s = cache_res_mgr_->UpdateCacheReservation(total_mem_used -
@@ -283,13 +283,13 @@ class ConcurrentCacheReservationManager
     return s;
   }
 
-  inline Status MakeCacheReservation(
+  inline rocksdb_rs::status::Status MakeCacheReservation(
       std::size_t incremental_memory_used,
       std::unique_ptr<CacheReservationManager::CacheReservationHandle> *handle)
       override {
     std::unique_ptr<CacheReservationManager::CacheReservationHandle>
         wrapped_handle;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     {
       std::lock_guard<std::mutex> lock(cache_res_mgr_mu_);
       s = cache_res_mgr_->MakeCacheReservation(incremental_memory_used,

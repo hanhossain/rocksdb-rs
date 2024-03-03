@@ -182,11 +182,11 @@ class CompactionJob {
   // Launch threads for each subcompaction and wait for them to finish. After
   // that, verify table is usable and finally do bookkeeping to unify
   // subcompaction results
-  Status Run();
+  rocksdb_rs::status::Status Run();
 
   // REQUIRED: mutex held
   // Add compaction input/output to the current version
-  Status Install(const MutableCFOptions& mutable_cf_options);
+  rocksdb_rs::status::Status Install(const MutableCFOptions& mutable_cf_options);
 
   // Return the IO status
   IOStatus io_status() const { return io_status_; }
@@ -253,14 +253,14 @@ class CompactionJob {
   // update the thread status for starting a compaction.
   void ReportStartedCompaction(Compaction* compaction);
 
-  Status FinishCompactionOutputFile(const Status& input_status,
+  rocksdb_rs::status::Status FinishCompactionOutputFile(const rocksdb_rs::status::Status& input_status,
                                     SubcompactionState* sub_compact,
                                     CompactionOutputs& outputs,
                                     const Slice& next_table_min_key,
                                     const Slice* comp_start_user_key,
                                     const Slice* comp_end_user_key);
-  Status InstallCompactionResults(const MutableCFOptions& mutable_cf_options);
-  Status OpenCompactionOutputFile(SubcompactionState* sub_compact,
+  rocksdb_rs::status::Status InstallCompactionResults(const MutableCFOptions& mutable_cf_options);
+  rocksdb_rs::status::Status OpenCompactionOutputFile(SubcompactionState* sub_compact,
                                   CompactionOutputs& outputs);
   void UpdateCompactionJobStats(
       const InternalStats::CompactionStats& stats) const;
@@ -383,8 +383,8 @@ struct CompactionServiceInput {
   std::string end;
 
   // serialization interface to read and write the object
-  static Status Read(const std::string& data_str, CompactionServiceInput* obj);
-  Status Write(std::string* output);
+  static rocksdb_rs::status::Status Read(const std::string& data_str, CompactionServiceInput* obj);
+  rocksdb_rs::status::Status Write(std::string* output);
 
   // Initialize a dummy ColumnFamilyDescriptor
   CompactionServiceInput() : column_family("", ColumnFamilyOptions()) {}
@@ -433,7 +433,7 @@ struct CompactionServiceOutputFile {
 // instance, with these information, the primary db instance with write
 // permission is able to install the result to the DB.
 struct CompactionServiceResult {
-  Status status;
+  rocksdb_rs::status::Status status;
   std::vector<CompactionServiceOutputFile> output_files;
   int output_level;
 
@@ -450,8 +450,8 @@ struct CompactionServiceResult {
   CompactionServiceResult() : status(Status_new()) {}
 
   // serialization interface to read and write the object
-  static Status Read(const std::string& data_str, CompactionServiceResult* obj);
-  Status Write(std::string* output);
+  static rocksdb_rs::status::Status Read(const std::string& data_str, CompactionServiceResult* obj);
+  rocksdb_rs::status::Status Write(std::string* output);
 
 #ifndef NDEBUG
   bool TEST_Equals(CompactionServiceResult* other);
@@ -481,7 +481,7 @@ class CompactionServiceCompactionJob : private CompactionJob {
       CompactionServiceResult* compaction_service_result);
 
   // Run the compaction in current thread and return the result
-  Status Run();
+  rocksdb_rs::status::Status Run();
 
   void CleanupCompaction();
 

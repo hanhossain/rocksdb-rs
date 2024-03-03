@@ -26,96 +26,96 @@ class CompositeEnv : public Env {
                         const std::shared_ptr<SystemClock>& clock)
       : Env(fs, clock) {}
 
-  Status RegisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& paths) override {
     return file_system_->RegisterDbPaths(paths);
   }
-  Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
     return file_system_->UnregisterDbPaths(paths);
   }
 
   // The following text is boilerplate that forwards all methods to target()
-  Status NewSequentialFile(const std::string& f,
+  rocksdb_rs::status::Status NewSequentialFile(const std::string& f,
                            std::unique_ptr<SequentialFile>* r,
                            const EnvOptions& options) override;
 
-  Status NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::status::Status NewRandomAccessFile(const std::string& f,
                              std::unique_ptr<RandomAccessFile>* r,
                              const EnvOptions& options) override;
 
-  Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
+  rocksdb_rs::status::Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
                          const EnvOptions& options) override;
 
-  Status ReopenWritableFile(const std::string& fname,
+  rocksdb_rs::status::Status ReopenWritableFile(const std::string& fname,
                             std::unique_ptr<WritableFile>* result,
                             const EnvOptions& options) override;
 
-  Status ReuseWritableFile(const std::string& fname,
+  rocksdb_rs::status::Status ReuseWritableFile(const std::string& fname,
                            const std::string& old_fname,
                            std::unique_ptr<WritableFile>* r,
                            const EnvOptions& options) override;
 
-  Status NewRandomRWFile(const std::string& fname,
+  rocksdb_rs::status::Status NewRandomRWFile(const std::string& fname,
                          std::unique_ptr<RandomRWFile>* result,
                          const EnvOptions& options) override;
 
-  Status NewMemoryMappedFileBuffer(
+  rocksdb_rs::status::Status NewMemoryMappedFileBuffer(
       const std::string& fname,
       std::unique_ptr<MemoryMappedFileBuffer>* result) override {
     return file_system_->NewMemoryMappedFileBuffer(fname, result);
   }
 
-  Status NewDirectory(const std::string& name,
+  rocksdb_rs::status::Status NewDirectory(const std::string& name,
                       std::unique_ptr<Directory>* result) override;
 
-  Status FileExists(const std::string& f) override {
+  rocksdb_rs::status::Status FileExists(const std::string& f) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->FileExists(f, io_opts, &dbg);
   }
-  Status GetChildren(const std::string& dir,
+  rocksdb_rs::status::Status GetChildren(const std::string& dir,
                      std::vector<std::string>* r) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->GetChildren(dir, io_opts, r, &dbg);
   }
-  Status GetChildrenFileAttributes(
+  rocksdb_rs::status::Status GetChildrenFileAttributes(
       const std::string& dir, std::vector<FileAttributes>* result) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->GetChildrenFileAttributes(dir, io_opts, result, &dbg);
   }
-  Status DeleteFile(const std::string& f) override {
+  rocksdb_rs::status::Status DeleteFile(const std::string& f) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->DeleteFile(f, io_opts, &dbg);
   }
-  Status Truncate(const std::string& fname, size_t size) override {
+  rocksdb_rs::status::Status Truncate(const std::string& fname, size_t size) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->Truncate(fname, size, io_opts, &dbg);
   }
-  Status CreateDir(const std::string& d) override {
+  rocksdb_rs::status::Status CreateDir(const std::string& d) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->CreateDir(d, io_opts, &dbg);
   }
-  Status CreateDirIfMissing(const std::string& d) override {
+  rocksdb_rs::status::Status CreateDirIfMissing(const std::string& d) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->CreateDirIfMissing(d, io_opts, &dbg);
   }
-  Status DeleteDir(const std::string& d) override {
+  rocksdb_rs::status::Status DeleteDir(const std::string& d) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->DeleteDir(d, io_opts, &dbg);
   }
-  Status GetFileSize(const std::string& f, uint64_t* s) override {
+  rocksdb_rs::status::Status GetFileSize(const std::string& f, uint64_t* s) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->GetFileSize(f, io_opts, s, &dbg);
   }
 
-  Status GetFileModificationTime(const std::string& fname,
+  rocksdb_rs::status::Status GetFileModificationTime(const std::string& fname,
                                  uint64_t* file_mtime) override {
     IOOptions io_opts;
     IODebugContext dbg;
@@ -123,64 +123,64 @@ class CompositeEnv : public Env {
                                                  &dbg);
   }
 
-  Status RenameFile(const std::string& s, const std::string& t) override {
+  rocksdb_rs::status::Status RenameFile(const std::string& s, const std::string& t) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->RenameFile(s, t, io_opts, &dbg);
   }
 
-  Status LinkFile(const std::string& s, const std::string& t) override {
+  rocksdb_rs::status::Status LinkFile(const std::string& s, const std::string& t) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->LinkFile(s, t, io_opts, &dbg);
   }
 
-  Status NumFileLinks(const std::string& fname, uint64_t* count) override {
+  rocksdb_rs::status::Status NumFileLinks(const std::string& fname, uint64_t* count) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->NumFileLinks(fname, io_opts, count, &dbg);
   }
 
-  Status AreFilesSame(const std::string& first, const std::string& second,
+  rocksdb_rs::status::Status AreFilesSame(const std::string& first, const std::string& second,
                       bool* res) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->AreFilesSame(first, second, io_opts, res, &dbg);
   }
 
-  Status LockFile(const std::string& f, FileLock** l) override {
+  rocksdb_rs::status::Status LockFile(const std::string& f, FileLock** l) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->LockFile(f, io_opts, l, &dbg);
   }
 
-  Status UnlockFile(FileLock* l) override {
+  rocksdb_rs::status::Status UnlockFile(FileLock* l) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->UnlockFile(l, io_opts, &dbg);
   }
 
-  Status GetAbsolutePath(const std::string& db_path,
+  rocksdb_rs::status::Status GetAbsolutePath(const std::string& db_path,
                          std::string* output_path) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->GetAbsolutePath(db_path, io_opts, output_path, &dbg);
   }
 
-  Status NewLogger(const std::string& fname,
+  rocksdb_rs::status::Status NewLogger(const std::string& fname,
                    std::shared_ptr<Logger>* result) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->NewLogger(fname, io_opts, result, &dbg);
   }
 
-  Status IsDirectory(const std::string& path, bool* is_dir) override {
+  rocksdb_rs::status::Status IsDirectory(const std::string& path, bool* is_dir) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->IsDirectory(path, io_opts, is_dir, &dbg);
   }
 
-  Status GetTestDirectory(std::string* path) override {
+  rocksdb_rs::status::Status GetTestDirectory(std::string* path) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->GetTestDirectory(io_opts, path, &dbg);
@@ -228,7 +228,7 @@ class CompositeEnv : public Env {
 #ifdef GetFreeSpace
 #undef GetFreeSpace
 #endif
-  Status GetFreeSpace(const std::string& path, uint64_t* diskfree) override {
+  rocksdb_rs::status::Status GetFreeSpace(const std::string& path, uint64_t* diskfree) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->GetFreeSpace(path, io_opts, diskfree, &dbg);
@@ -242,7 +242,7 @@ class CompositeEnv : public Env {
     system_clock_->SleepForMicroseconds(micros);
   }
 
-  Status GetCurrentTime(int64_t* unix_time) override {
+  rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
     return system_clock_->GetCurrentTime(unix_time);
   }
   std::string TimeToString(uint64_t time) override {
@@ -288,7 +288,7 @@ class CompositeEnvWrapper : public CompositeEnv {
   }
   const Customizable* Inner() const override { return target_.env; }
 
-  Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
   std::string SerializeOptions(const ConfigOptions& config_options,
                                const std::string& header) const override;
 
@@ -296,7 +296,7 @@ class CompositeEnvWrapper : public CompositeEnv {
   Env* env_target() const { return target_.env; }
 
 #if !defined(OS_WIN) && !defined(ROCKSDB_NO_DYNAMIC_EXTENSION)
-  Status LoadLibrary(const std::string& lib_name,
+  rocksdb_rs::status::Status LoadLibrary(const std::string& lib_name,
                      const std::string& search_path,
                      std::shared_ptr<DynamicLibrary>* result) override {
     return target_.env->LoadLibrary(lib_name, search_path, result);
@@ -328,7 +328,7 @@ class CompositeEnvWrapper : public CompositeEnv {
     return target_.env->ReleaseThreads(threads_to_be_released, pri);
   }
 
-  Status GetHostName(char* name, uint64_t len) override {
+  rocksdb_rs::status::Status GetHostName(char* name, uint64_t len) override {
     return target_.env->GetHostName(name, len);
   }
   void SetBackgroundThreads(int num, Priority pri) override {
@@ -338,7 +338,7 @@ class CompositeEnvWrapper : public CompositeEnv {
     return target_.env->GetBackgroundThreads(pri);
   }
 
-  Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
+  rocksdb_rs::status::Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
     return target_.env->SetAllowNonOwnerAccess(allow_non_owner_access);
   }
 
@@ -354,11 +354,11 @@ class CompositeEnvWrapper : public CompositeEnv {
     target_.env->LowerThreadPoolCPUPriority(pool);
   }
 
-  Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
+  rocksdb_rs::status::Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
     return target_.env->LowerThreadPoolCPUPriority(pool, pri);
   }
 
-  Status GetThreadList(std::vector<ThreadStatus>* thread_list) override {
+  rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* thread_list) override {
     return target_.env->GetThreadList(thread_list);
   }
 

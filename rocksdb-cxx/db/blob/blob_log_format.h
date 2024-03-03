@@ -60,7 +60,7 @@ struct BlobLogHeader {
 
   void EncodeTo(std::string* dst);
 
-  Status DecodeFrom(Slice slice);
+  rocksdb_rs::status::Status DecodeFrom(Slice slice);
 };
 
 // clang-format off
@@ -89,7 +89,7 @@ struct BlobLogFooter {
 
   void EncodeTo(std::string* dst);
 
-  Status DecodeFrom(Slice slice);
+  rocksdb_rs::status::Status DecodeFrom(Slice slice);
 };
 
 // clang-format off
@@ -142,9 +142,9 @@ struct BlobLogRecord {
 
   void EncodeHeaderTo(std::string* dst);
 
-  Status DecodeHeaderFrom(Slice src);
+  rocksdb_rs::status::Status DecodeHeaderFrom(Slice src);
 
-  Status CheckBlobCRC() const;
+  rocksdb_rs::status::Status CheckBlobCRC() const;
 };
 
 // Checks whether a blob offset is potentially valid or not.

@@ -30,7 +30,7 @@ TraceExecutionHandler::TraceExecutionHandler(
 
 TraceExecutionHandler::~TraceExecutionHandler() { cf_map_.clear(); }
 
-Status TraceExecutionHandler::Handle(
+rocksdb_rs::status::Status TraceExecutionHandler::Handle(
     const WriteQueryTraceRecord& record,
     std::unique_ptr<TraceRecordResult>* result) {
   if (result != nullptr) {
@@ -39,7 +39,7 @@ Status TraceExecutionHandler::Handle(
   uint64_t start = clock_->NowMicros();
 
   WriteBatch batch(record.GetWriteBatchRep().ToString());
-  Status s = db_->Write(write_opts_, &batch);
+  rocksdb_rs::status::Status s = db_->Write(write_opts_, &batch);
 
   uint64_t end = clock_->NowMicros();
 
@@ -51,7 +51,7 @@ Status TraceExecutionHandler::Handle(
   return s;
 }
 
-Status TraceExecutionHandler::Handle(
+rocksdb_rs::status::Status TraceExecutionHandler::Handle(
     const GetQueryTraceRecord& record,
     std::unique_ptr<TraceRecordResult>* result) {
   if (result != nullptr) {
@@ -65,7 +65,7 @@ Status TraceExecutionHandler::Handle(
   uint64_t start = clock_->NowMicros();
 
   std::string value;
-  Status s = db_->Get(read_opts_, it->second, record.GetKey(), &value);
+  rocksdb_rs::status::Status s = db_->Get(read_opts_, it->second, record.GetKey(), &value);
 
   uint64_t end = clock_->NowMicros();
 
@@ -82,7 +82,7 @@ Status TraceExecutionHandler::Handle(
   return Status_OK();
 }
 
-Status TraceExecutionHandler::Handle(
+rocksdb_rs::status::Status TraceExecutionHandler::Handle(
     const IteratorSeekQueryTraceRecord& record,
     std::unique_ptr<TraceRecordResult>* result) {
   if (result != nullptr) {
@@ -119,7 +119,7 @@ Status TraceExecutionHandler::Handle(
 
   uint64_t end = clock_->NowMicros();
 
-  Status s = single_iter->status();
+  rocksdb_rs::status::Status s = single_iter->status();
   if (s.ok() && result != nullptr) {
     if (single_iter->Valid()) {
       PinnableSlice ps_key;
@@ -139,7 +139,7 @@ Status TraceExecutionHandler::Handle(
   return s;
 }
 
-Status TraceExecutionHandler::Handle(
+rocksdb_rs::status::Status TraceExecutionHandler::Handle(
     const MultiGetQueryTraceRecord& record,
     std::unique_ptr<TraceRecordResult>* result) {
   if (result != nullptr) {
@@ -167,12 +167,12 @@ Status TraceExecutionHandler::Handle(
   uint64_t start = clock_->NowMicros();
 
   std::vector<std::string> values;
-  rust::Vec<Status> ss = db_->MultiGet(read_opts_, handles, keys, &values);
+  rust::Vec<rocksdb_rs::status::Status> ss = db_->MultiGet(read_opts_, handles, keys, &values);
 
   uint64_t end = clock_->NowMicros();
 
   // Treat not found as ok, return other errors.
-  for (const Status& s : ss) {
+  for (const rocksdb_rs::status::Status& s : ss) {
     if (!s.ok() && !s.IsNotFound()) {
       return s.Clone();
     }

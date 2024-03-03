@@ -185,7 +185,7 @@ class FragmentedRangeTombstoneIterator : public InternalIterator {
   Slice value() const override { return pos_->end_key; }
   bool IsKeyPinned() const override { return false; }
   bool IsValuePinned() const override { return true; }
-  Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return Status_OK(); }
 
   bool empty() const { return tombstones_->empty(); }
   void Invalidate() {

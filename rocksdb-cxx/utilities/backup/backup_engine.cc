@@ -151,7 +151,7 @@ class BackupEngineImpl {
   void GetBackupInfo(std::vector<BackupInfo>* backup_info,
                      bool include_file_details) const;
 
-  Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
+  rocksdb_rs::status::Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
                        bool include_file_details = false) const;
 
   void GetCorruptedBackups(std::vector<BackupID>* corrupt_backup_ids) const;
@@ -388,7 +388,7 @@ class BackupEngineImpl {
 
     void RecordTimestamp() {
       // Best effort
-      Status s = env_->GetCurrentTime(&timestamp_);
+      rocksdb_rs::status::Status s = env_->GetCurrentTime(&timestamp_);
       if (!s.ok()) {
         timestamp_ = /* something clearly fabricated */ 1;
       }
@@ -590,7 +590,7 @@ class BackupEngineImpl {
                                       const Temperature src_temperature) const;
 
   // Obtain db_id and db_session_id from the table properties of file_path
-  Status GetFileDbIdentities(Env* src_env, const EnvOptions& src_env_options,
+  rocksdb_rs::status::Status GetFileDbIdentities(Env* src_env, const EnvOptions& src_env_options,
                              const std::string& file_path,
                              Temperature file_temp, RateLimiter* rate_limiter,
                              std::string* db_id, std::string* db_session_id);
@@ -895,14 +895,14 @@ class BackupEngineImplThreadSafe : public BackupEngine,
     return impl_.GarbageCollect();
   }
 
-  Status GetLatestBackupInfo(BackupInfo* backup_info,
+  rocksdb_rs::status::Status GetLatestBackupInfo(BackupInfo* backup_info,
                              bool include_file_details = false) const override {
     ReadLock lock(&mutex_);
     return impl_.GetBackupInfo(kLatestBackupIDMarker, backup_info,
                                include_file_details);
   }
 
-  Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
+  rocksdb_rs::status::Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
                        bool include_file_details = false) const override {
     ReadLock lock(&mutex_);
     return impl_.GetBackupInfo(backup_id, backup_info, include_file_details);
@@ -1403,7 +1403,7 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
   std::deque<BackupWorkItemPair> excludable_items;
   std::deque<BackupAfterCopyOrCreateWorkItem> backup_items_to_finish;
   // Add a CopyOrCreateWorkItem to the channel for each live file
-  Status disabled = db->DisableFileDeletions();
+  rocksdb_rs::status::Status disabled = db->DisableFileDeletions();
   DBOptions db_options = db->GetDBOptions();
   Statistics* stats = db_options.statistics.get();
   if (io_s.ok()) {
@@ -1796,7 +1796,7 @@ void BackupEngineImpl::SetBackupInfoFromBackupMeta(
   }
 }
 
-Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
+rocksdb_rs::status::Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
                                        BackupInfo* backup_info,
                                        bool include_file_details) const {
   assert(initialized_);
@@ -2558,7 +2558,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
   return io_s;
 }
 
-Status BackupEngineImpl::GetFileDbIdentities(
+rocksdb_rs::status::Status BackupEngineImpl::GetFileDbIdentities(
     Env* src_env, const EnvOptions& src_env_options,
     const std::string& file_path, Temperature file_temp,
     RateLimiter* rate_limiter, std::string* db_id, std::string* db_session_id) {
@@ -2575,7 +2575,7 @@ Status BackupEngineImpl::GetFileDbIdentities(
 
   const TableProperties* table_properties = nullptr;
   std::shared_ptr<const TableProperties> tp;
-  Status s = sst_reader.getStatus();
+  rocksdb_rs::status::Status s = sst_reader.getStatus();
 
   if (s.ok()) {
     // Try to get table properties from the table reader of sst_reader

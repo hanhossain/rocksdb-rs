@@ -405,7 +405,7 @@ class BaseClockTable {
                                                bool allow_uncharged);
 
   template <class Table>
-  Status Insert(const ClockHandleBasicData& proto,
+  rocksdb_rs::status::Status Insert(const ClockHandleBasicData& proto,
                 typename Table::HandleImpl** handle, Cache::Priority priority,
                 size_t capacity, bool strict_capacity_limit);
 
@@ -444,7 +444,7 @@ class BaseClockTable {
   // required, and the operation should fail if not possible.
   // NOTE: Otherwise, occupancy_ is not managed in this function
   template <class Table>
-  Status ChargeUsageMaybeEvictStrict(size_t total_charge, size_t capacity,
+  rocksdb_rs::status::Status ChargeUsageMaybeEvictStrict(size_t total_charge, size_t capacity,
                                      bool need_evict_for_occupancy,
                                      typename Table::InsertState& state);
 
@@ -653,7 +653,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) ClockCacheShard final : public CacheShardBase {
 
   void SetStrictCapacityLimit(bool strict_capacity_limit);
 
-  Status Insert(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
+  rocksdb_rs::status::Status Insert(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                 Cache::ObjectPtr value, const Cache::CacheItemHelper* helper,
                 size_t charge, HandleImpl** handle, Cache::Priority priority);
 

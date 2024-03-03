@@ -41,7 +41,7 @@ class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
   size_t EstimateEntriesAdded() override;
 
   virtual Slice Finish(
-      const BlockHandle& last_partition_block_handle, Status* status,
+      const BlockHandle& last_partition_block_handle, rocksdb_rs::status::Status* status,
       std::unique_ptr<const char[]>* filter_data = nullptr) override;
 
   virtual void ResetFilterBitsBuilder() override {
@@ -56,7 +56,7 @@ class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
   // as part of PartitionFilterBlockBuilder::Finish
   // to avoid implementation complexity of doing it elsewhere.
   // Therefore we are skipping it in here.
-  virtual Status MaybePostVerifyFilter(
+  virtual rocksdb_rs::status::Status MaybePostVerifyFilter(
       const Slice& /* filter_content */) override {
     return Status_OK();
   }
@@ -78,7 +78,7 @@ class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
   // partitions experiences construction error.
   // If partitioned_filters_construction_status_ is non-okay,
   // then the whole partitioned filters should not be used.
-  Status partitioned_filters_construction_status_;
+  rocksdb_rs::status::Status partitioned_filters_construction_status_;
   std::string last_filter_entry_key;
   std::unique_ptr<const char[]> last_filter_data;
   std::unique_ptr<IndexBuilder> value;
@@ -138,7 +138,7 @@ class PartitionedFilterBlockReader
   BlockHandle GetFilterPartitionHandle(
       const CachableEntry<Block_kFilterPartitionIndex>& filter_block,
       const Slice& entry) const;
-  Status GetFilterPartitionBlock(
+  rocksdb_rs::status::Status GetFilterPartitionBlock(
       FilePrefetchBuffer* prefetch_buffer, const BlockHandle& handle,
       bool no_io, GetContext* get_context,
       BlockCacheLookupContext* lookup_context, const ReadOptions& read_options,
@@ -167,7 +167,7 @@ class PartitionedFilterBlockReader
                          BlockCacheLookupContext* lookup_context,
                          const ReadOptions& read_options,
                          FilterManyFunction filter_function) const;
-  Status CacheDependencies(const ReadOptions& ro, bool pin,
+  rocksdb_rs::status::Status CacheDependencies(const ReadOptions& ro, bool pin,
                            FilePrefetchBuffer* tail_prefetch_buffer) override;
 
   const InternalKeyComparator* internal_comparator() const;

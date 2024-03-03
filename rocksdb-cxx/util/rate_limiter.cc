@@ -121,7 +121,7 @@ void GenericRateLimiter::Request(int64_t bytes, const Env::IOPriority pri,
     std::chrono::microseconds now(NowMicrosMonotonicLocked());
     if (now - tuned_time_ >=
         kRefillsPerTune * std::chrono::microseconds(refill_period_us_)) {
-      Status s = TuneLocked();
+      rocksdb_rs::status::Status s = TuneLocked();
     }
   }
 
@@ -308,7 +308,7 @@ int64_t GenericRateLimiter::CalculateRefillBytesPerPeriodLocked(
   }
 }
 
-Status GenericRateLimiter::TuneLocked() {
+rocksdb_rs::status::Status GenericRateLimiter::TuneLocked() {
   const int kLowWatermarkPct = 50;
   const int kHighWatermarkPct = 90;
   const int kAdjustFactorPct = 5;

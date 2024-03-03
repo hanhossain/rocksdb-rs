@@ -12,7 +12,7 @@
 #include "table/meta_blocks.h"
 
 namespace rocksdb {
-Status HashIndexReader::Create(const BlockBasedTable* table,
+rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
                                const ReadOptions& ro,
                                FilePrefetchBuffer* prefetch_buffer,
                                InternalIterator* meta_index_iter,
@@ -28,7 +28,7 @@ Status HashIndexReader::Create(const BlockBasedTable* table,
 
   CachableEntry<Block> index_block;
   if (prefetch || !use_cache) {
-    const Status s =
+    const rocksdb_rs::status::Status s =
         ReadIndexBlock(table, prefetch_buffer, ro, use_cache,
                        /*get_context=*/nullptr, lookup_context, &index_block);
     if (!s.ok()) {
@@ -48,7 +48,7 @@ Status HashIndexReader::Create(const BlockBasedTable* table,
 
   // Get prefixes block
   BlockHandle prefixes_handle;
-  Status s =
+  rocksdb_rs::status::Status s =
       FindMetaBlock(meta_index_iter, kHashIndexPrefixesBlock, &prefixes_handle);
   if (!s.ok()) {
     // TODO: log error
@@ -116,7 +116,7 @@ InternalIteratorBase<IndexValue>* HashIndexReader::NewIterator(
   const BlockBasedTable::Rep* rep = table()->get_rep();
   const bool no_io = (read_options.read_tier == kBlockCacheTier);
   CachableEntry<Block> index_block;
-  const Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
+  const rocksdb_rs::status::Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
                                        &index_block, read_options);
   if (!s.ok()) {
     if (iter != nullptr) {

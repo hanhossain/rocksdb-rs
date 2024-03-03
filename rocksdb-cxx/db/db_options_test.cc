@@ -89,7 +89,7 @@ TEST_F(DBOptionsTest, ImmutableTrackAndVerifyWalsInManifest) {
   Reopen(options);
   ASSERT_TRUE(dbfull()->GetDBOptions().track_and_verify_wals_in_manifest);
 
-  Status s =
+  rocksdb_rs::status::Status s =
       dbfull()->SetDBOptions({{"track_and_verify_wals_in_manifest", "false"}});
   ASSERT_FALSE(s.ok());
 }
@@ -105,7 +105,7 @@ TEST_F(DBOptionsTest, ImmutableVerifySstUniqueIdInManifest) {
   Reopen(options);
   ASSERT_TRUE(dbfull()->GetDBOptions().verify_sst_unique_id_in_manifest);
 
-  Status s =
+  rocksdb_rs::status::Status s =
       dbfull()->SetDBOptions({{"verify_sst_unique_id_in_manifest", "false"}});
   ASSERT_FALSE(s.ok());
 }
@@ -1252,7 +1252,7 @@ TEST_F(DBOptionsTest, FIFOTemperatureAgeThresholdValidation) {
       {Temperature::kCold, 1000});
   options.compaction_options_fifo.file_temperature_age_thresholds.push_back(
       {Temperature::kWarm, 500});
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   ASSERT_TRUE(s.IsNotSupported());
   ASSERT_TRUE(std::strstr(
       s.getState()->c_str(),

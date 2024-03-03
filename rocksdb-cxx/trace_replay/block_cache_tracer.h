@@ -127,13 +127,13 @@ class BlockCacheTraceWriterImpl : public BlockCacheTraceWriter {
   BlockCacheTraceWriterImpl& operator=(BlockCacheTraceWriterImpl&&) = delete;
 
   // Pass Slice references to avoid copy.
-  Status WriteBlockAccess(const BlockCacheTraceRecord& record,
+  rocksdb_rs::status::Status WriteBlockAccess(const BlockCacheTraceRecord& record,
                           const Slice& block_key, const Slice& cf_name,
                           const Slice& referenced_key) override;
 
   // Write a trace header at the beginning, typically on initiating a trace,
   // with some metadata like a magic number and RocksDB version.
-  Status WriteHeader() override;
+  rocksdb_rs::status::Status WriteHeader() override;
 
  private:
   SystemClock* clock_;
@@ -148,10 +148,10 @@ class BlockCacheHumanReadableTraceWriter {
  public:
   ~BlockCacheHumanReadableTraceWriter();
 
-  Status NewWritableFile(const std::string& human_readable_trace_file_path,
+  rocksdb_rs::status::Status NewWritableFile(const std::string& human_readable_trace_file_path,
                          rocksdb::Env* env);
 
-  Status WriteHumanReadableTraceRecord(const BlockCacheTraceRecord& access,
+  rocksdb_rs::status::Status WriteHumanReadableTraceRecord(const BlockCacheTraceRecord& access,
                                        uint64_t block_id, uint64_t get_key_id);
 
  private:
@@ -172,9 +172,9 @@ class BlockCacheTraceReader {
   BlockCacheTraceReader(BlockCacheTraceReader&&) = delete;
   BlockCacheTraceReader& operator=(BlockCacheTraceReader&&) = delete;
 
-  Status ReadHeader(BlockCacheTraceHeader* header);
+  rocksdb_rs::status::Status ReadHeader(BlockCacheTraceHeader* header);
 
-  Status ReadAccess(BlockCacheTraceRecord* record);
+  rocksdb_rs::status::Status ReadAccess(BlockCacheTraceRecord* record);
 
  private:
   std::unique_ptr<TraceReader> trace_reader_;
@@ -189,9 +189,9 @@ class BlockCacheHumanReadableTraceReader : public BlockCacheTraceReader {
 
   ~BlockCacheHumanReadableTraceReader();
 
-  Status ReadHeader(BlockCacheTraceHeader* header);
+  rocksdb_rs::status::Status ReadHeader(BlockCacheTraceHeader* header);
 
-  Status ReadAccess(BlockCacheTraceRecord* record);
+  rocksdb_rs::status::Status ReadAccess(BlockCacheTraceRecord* record);
 
  private:
   std::ifstream human_readable_trace_reader_;
@@ -211,7 +211,7 @@ class BlockCacheTracer {
   BlockCacheTracer& operator=(BlockCacheTracer&&) = delete;
 
   // Start writing block cache accesses to the trace_writer.
-  Status StartTrace(const BlockCacheTraceOptions& trace_options,
+  rocksdb_rs::status::Status StartTrace(const BlockCacheTraceOptions& trace_options,
                     std::unique_ptr<BlockCacheTraceWriter>&& trace_writer);
 
   // Stop writing block cache accesses to the trace_writer.
@@ -221,7 +221,7 @@ class BlockCacheTracer {
     return writer_.load(std::memory_order_relaxed);
   }
 
-  Status WriteBlockAccess(const BlockCacheTraceRecord& record,
+  rocksdb_rs::status::Status WriteBlockAccess(const BlockCacheTraceRecord& record,
                           const Slice& block_key, const Slice& cf_name,
                           const Slice& referenced_key);
 

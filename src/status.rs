@@ -1,8 +1,7 @@
 use cxx::{CxxString, UniquePtr};
 
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::status")]
 pub(crate) mod ffi {
-    #[namespace = "rocksdb_rs::status"]
     #[derive(Debug)]
     enum Code {
         kOk = 0,
@@ -24,7 +23,6 @@ pub(crate) mod ffi {
         kMaxCode,
     }
 
-    #[namespace = "rocksdb_rs::status"]
     #[derive(Debug)]
     enum SubCode {
         kNone = 0,
@@ -46,7 +44,6 @@ pub(crate) mod ffi {
         kMaxSubCode,
     }
 
-    #[namespace = "rocksdb_rs::status"]
     #[derive(Debug)]
     enum Severity {
         kNoError = 0,
@@ -72,6 +69,7 @@ pub(crate) mod ffi {
     }
 
     extern "Rust" {
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new(
             code: Code,
@@ -82,12 +80,16 @@ pub(crate) mod ffi {
             scope: u8,
             state: UniquePtr<CxxString>,
         ) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new1() -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new2(code: Code) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new3(code: Code, subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new4(
             code: Code,
@@ -96,6 +98,7 @@ pub(crate) mod ffi {
             data_loss: bool,
             scope: u8,
         ) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new5(
             code: Code,
@@ -104,201 +107,287 @@ pub(crate) mod ffi {
             msg2: &Slice,
             sev: Severity,
         ) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new6(code: Code, msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new7(code: Code, subcode: SubCode, msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new9(status: &Status, severity: Severity) -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_OK"]
         fn status_ok() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_OkOverwritten"]
         fn status_ok_overwritten() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found() -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found1(msg: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found2(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found3(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found4(subcode: SubCode, msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found5(subcode: SubCode, msg: &Slice) -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption2(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption3() -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption4(msg: &Slice) -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_IOError"]
         fn status_io_error(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_IOError"]
         fn status_io_error2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_IOError"]
         fn status_io_error3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_IOError"]
         fn status_io_error4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_MergeInProgress"]
         fn status_merge_in_progress(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_MergeInProgress"]
         fn status_merge_in_progress2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_MergeInProgress"]
         fn status_merge_in_progress3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_MergeInProgress"]
         fn status_merge_in_progress4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Incomplete"]
         fn status_incomplete(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Incomplete"]
         fn status_incomplete2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Incomplete"]
         fn status_incomplete3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Incomplete"]
         fn status_incomplete4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ShutdownInProgress"]
         fn status_shutdown_in_progress(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ShutdownInProgress"]
         fn status_shutdown_in_progress2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ShutdownInProgress"]
         fn status_shutdown_in_progress3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ShutdownInProgress"]
         fn status_shutdown_in_progress4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Aborted"]
         fn status_aborted(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Aborted"]
         fn status_aborted2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Aborted"]
         fn status_aborted3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Aborted"]
         fn status_aborted4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Busy"]
         fn status_busy(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Busy"]
         fn status_busy2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Busy"]
         fn status_busy3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Busy"]
         fn status_busy4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TimedOut"]
         fn status_timed_out(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TimedOut"]
         fn status_timed_out2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TimedOut"]
         fn status_timed_out3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TimedOut"]
         fn status_timed_out4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Expired"]
         fn status_expired(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Expired"]
         fn status_expired2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Expired"]
         fn status_expired3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Expired"]
         fn status_expired4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TryAgain"]
         fn status_try_again(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TryAgain"]
         fn status_try_again2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TryAgain"]
         fn status_try_again3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TryAgain"]
         fn status_try_again4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CompactionTooLarge"]
         fn status_compaction_too_large(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CompactionTooLarge"]
         fn status_compaction_too_large2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CompactionTooLarge"]
         fn status_compaction_too_large3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CompactionTooLarge"]
         fn status_compaction_too_large4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ColumnFamilyDropped"]
         fn status_column_family_dropped(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ColumnFamilyDropped"]
         fn status_column_family_dropped2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ColumnFamilyDropped"]
         fn status_column_family_dropped3(subcode: SubCode) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_ColumnFamilyDropped"]
         fn status_column_family_dropped4() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NoSpace"]
         fn status_no_space(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NoSpace"]
         fn status_no_space2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NoSpace"]
         fn status_no_space3() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_MemoryLimit"]
         fn status_memory_limit(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_MemoryLimit"]
         fn status_memory_limit2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_MemoryLimit"]
         fn status_memory_limit3() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_SpaceLimit"]
         fn status_space_limit(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_SpaceLimit"]
         fn status_space_limit2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_SpaceLimit"]
         fn status_space_limit3() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_PathNotFound"]
         fn status_path_not_found(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_PathNotFound"]
         fn status_path_not_found2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_PathNotFound"]
         fn status_path_not_found3() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TxnNotPrepared"]
         fn status_txn_not_prepared(msg: &Slice, msg2: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TxnNotPrepared"]
         fn status_txn_not_prepared2(msg: &Slice) -> Status;
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_TxnNotPrepared"]
         fn status_txn_not_prepared3() -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CopyState"]
         fn status_copy_state(s: &CxxString) -> UniquePtr<CxxString>;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CopyAppendMessage"]
         fn status_copy_append_message(status: &Status, delim: &Slice, msg: &Slice) -> Status;
 
+        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Move"]
         fn status_move(status: Status) -> Status;
 
@@ -370,6 +459,7 @@ pub(crate) mod ffi {
     unsafe extern "C++" {
         include!("rocksdb/slice.h");
 
+        #[namespace = "rocksdb"]
         type Slice = crate::slice::ffi::Slice;
     }
 }

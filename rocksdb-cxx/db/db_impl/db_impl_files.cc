@@ -50,8 +50,8 @@ uint64_t DBImpl::GetObsoleteSstFilesSize() {
   return versions_->GetObsoleteSstFilesSize();
 }
 
-Status DBImpl::DisableFileDeletions() {
-  Status s = Status_new();
+rocksdb_rs::status::Status DBImpl::DisableFileDeletions() {
+  rocksdb_rs::status::Status s = Status_new();
   int my_disable_delete_obsolete_files;
   {
     InstrumentedMutexLock l(&mutex_);
@@ -70,13 +70,13 @@ Status DBImpl::DisableFileDeletions() {
 
 // FIXME: can be inconsistent with DisableFileDeletions in cases like
 // DBImplReadOnly
-Status DBImpl::DisableFileDeletionsWithLock() {
+rocksdb_rs::status::Status DBImpl::DisableFileDeletionsWithLock() {
   mutex_.AssertHeld();
   ++disable_delete_obsolete_files_;
   return Status_OK();
 }
 
-Status DBImpl::EnableFileDeletions(bool force) {
+rocksdb_rs::status::Status DBImpl::EnableFileDeletions(bool force) {
   // Job id == 0 means that this is not our background process, but rather
   // user thread
   JobContext job_context(0);
@@ -214,7 +214,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       // set of all files in the directory. We'll exclude files that are still
       // alive in the subsequent processings.
       std::vector<std::string> files;
-      Status s = immutable_db_options_.fs->GetChildren(
+      rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           path, io_opts, &files, /*IODebugContext*=*/nullptr);
       for (const std::string& file : files) {
         uint64_t number;
@@ -240,7 +240,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
     // Add log files in wal_dir
     if (!immutable_db_options_.IsWalDirSameAsDBPath(dbname_)) {
       std::vector<std::string> log_files;
-      Status s = immutable_db_options_.fs->GetChildren(
+      rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.wal_dir, io_opts, &log_files,
           /*IODebugContext*=*/nullptr);
       for (const std::string& log_file : log_files) {
@@ -253,7 +253,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
     if (!immutable_db_options_.db_log_dir.empty() &&
         immutable_db_options_.db_log_dir != dbname_) {
       std::vector<std::string> info_log_files;
-      Status s = immutable_db_options_.fs->GetChildren(
+      rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.db_log_dir, io_opts, &info_log_files,
           /*IODebugContext*=*/nullptr);
       for (std::string& log_file : info_log_files) {
@@ -365,7 +365,7 @@ void DBImpl::DeleteObsoleteFileImpl(int job_id, const std::string& fname,
   TEST_SYNC_POINT_CALLBACK("DBImpl::DeleteObsoleteFileImpl::BeforeDeletion",
                            const_cast<std::string*>(&fname));
 
-  Status file_deletion_status = Status_new();
+  rocksdb_rs::status::Status file_deletion_status = Status_new();
   if (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile || type == rocksdb_rs::types::FileType::kWalFile) {
     // Rate limit WAL deletion only if its in the DB dir
     file_deletion_status = DeleteDBFile(
@@ -663,7 +663,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "[JOB %d] Delete info log file %s\n", state.job_id,
                      full_path_to_delete.c_str());
-      Status s = env_->DeleteFile(full_path_to_delete);
+      rocksdb_rs::status::Status s = env_->DeleteFile(full_path_to_delete);
       if (!s.ok()) {
         if (env_->FileExists(full_path_to_delete).IsNotFound()) {
           ROCKS_LOG_INFO(
@@ -924,8 +924,8 @@ void DBImpl::SetDBId(std::string&& id, bool read_only,
   }
 }
 
-Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
-  Status s = Status_new();
+rocksdb_rs::status::Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
+  rocksdb_rs::status::Status s = Status_new();
   // Check for the IDENTITY file and create it if not there or
   // broken or not matching manifest
   std::string db_id_in_file;
@@ -962,7 +962,7 @@ Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
   return s;
 }
 
-Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
+rocksdb_rs::status::Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
   mutex_.AssertHeld();
   std::vector<std::string> paths;
   paths.push_back(static_cast<std::string>(NormalizePath(dbname_ + std::string(1, kFilePathSeparator))));
@@ -982,7 +982,7 @@ Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
 
   uint64_t next_file_number = versions_->current_next_file_number();
   uint64_t largest_file_number = next_file_number;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   for (const auto& path : paths) {
     std::vector<std::string> files;
     s = env_->GetChildren(path, &files);

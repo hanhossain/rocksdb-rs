@@ -31,38 +31,38 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
 
     ~KeyCollector() override {}
 
-    Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
         return Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }
 
-    Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
       return AddKey(cf, key);
     }
 
-    Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
       return AddKey(cf, key);
     }
 
-    Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
+    rocksdb_rs::status::Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
                          const Slice& end_key) override {
-      Status status = AddKey(cf, begin_key);
+      rocksdb_rs::status::Status status = AddKey(cf, begin_key);
       if (!status.ok()) {
         return status;
       }
       return AddKey(cf, end_key);
     }
 
-    Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
         return Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }
 
-    Status PutBlobIndexCF(uint32_t cf, const Slice& key,
+    rocksdb_rs::status::Status PutBlobIndexCF(uint32_t cf, const Slice& key,
                           const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
         return Status_InvalidArgument();
@@ -70,26 +70,26 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
       return AddKey(cf, key);
     }
 
-    Status MarkBeginPrepare(bool) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
 
-    Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
 
-    Status MarkRollback(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
 
-    Status MarkCommit(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
 
-    Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+    rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
       return Status_OK();
     }
 
-    Status MarkNoop(bool) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkNoop(bool) override { return Status_OK(); }
 
     const std::vector<std::pair<uint32_t, const Slice>>& GetKeys() const {
       return keys_;
     }
 
    private:
-    Status AddKey(uint32_t cf, const Slice& key) {
+    rocksdb_rs::status::Status AddKey(uint32_t cf, const Slice& key) {
       keys_.push_back(std::make_pair(cf, key));
       return Status_OK();
     }

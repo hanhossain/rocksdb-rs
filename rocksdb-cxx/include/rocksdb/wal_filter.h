@@ -25,7 +25,7 @@ struct ConfigOptions;
 class WalFilter : public Customizable {
  public:
   static const char* Type() { return "WalFilter"; }
-  static Status CreateFromString(const ConfigOptions& options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
                                  const std::string& value, WalFilter** result);
   enum class WalProcessingOption {
     // Continue processing as usual

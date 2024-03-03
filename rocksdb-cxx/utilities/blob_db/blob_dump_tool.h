@@ -28,7 +28,7 @@ class BlobDumpTool {
 
   BlobDumpTool();
 
-  Status Run(const std::string& filename, DisplayType show_key,
+  rocksdb_rs::status::Status Run(const std::string& filename, DisplayType show_key,
              DisplayType show_blob, DisplayType show_uncompressed_blob,
              bool show_summary);
 
@@ -37,10 +37,10 @@ class BlobDumpTool {
   std::unique_ptr<char[]> buffer_;
   size_t buffer_size_;
 
-  Status Read(uint64_t offset, size_t size, Slice* result);
-  Status DumpBlobLogHeader(uint64_t* offset, rocksdb_rs::compression_type::CompressionType* compression);
-  Status DumpBlobLogFooter(uint64_t file_size, uint64_t* footer_offset);
-  Status DumpRecord(DisplayType show_key, DisplayType show_blob,
+  rocksdb_rs::status::Status Read(uint64_t offset, size_t size, Slice* result);
+  rocksdb_rs::status::Status DumpBlobLogHeader(uint64_t* offset, rocksdb_rs::compression_type::CompressionType* compression);
+  rocksdb_rs::status::Status DumpBlobLogFooter(uint64_t file_size, uint64_t* footer_offset);
+  rocksdb_rs::status::Status DumpRecord(DisplayType show_key, DisplayType show_blob,
                     DisplayType show_uncompressed_blob, bool show_summary,
                     rocksdb_rs::compression_type::CompressionType compression, uint64_t* offset,
                     uint64_t* total_records, uint64_t* total_key_size,

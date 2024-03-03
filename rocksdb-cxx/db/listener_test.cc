@@ -53,7 +53,7 @@ class EventListenerTest : public DBTestBase {
 
 struct TestPropertiesCollector
     : public rocksdb::TablePropertiesCollector {
-  rocksdb::Status AddUserKey(
+  rocksdb_rs::status::Status AddUserKey(
       const rocksdb::Slice& /*key*/,
       const rocksdb::Slice& /*value*/,
       rocksdb::EntryType /*type*/,
@@ -61,7 +61,7 @@ struct TestPropertiesCollector
       uint64_t /*file_size*/) override {
     return Status_OK();
   }
-  rocksdb::Status Finish(
+  rocksdb_rs::status::Status Finish(
       rocksdb::UserCollectedProperties* properties) override {
     properties->insert({"0", "1"});
     return Status_OK();
@@ -807,7 +807,7 @@ class TableFileCreationListener : public EventListener {
   int started_[2];
   int finished_[2];
   int failure_[2];
-  Status last_failure_;
+  rocksdb_rs::status::Status last_failure_;
 };
 
 TEST_F(EventListenerTest, TableFileCreationListenersTest) {
@@ -963,7 +963,7 @@ class BackgroundErrorListener : public EventListener {
   BackgroundErrorListener(SpecialEnv* env) : env_(env), counter_(0) {}
 
   void OnBackgroundError(BackgroundErrorReason /*reason*/,
-                         Status* bg_error) override {
+                         rocksdb_rs::status::Status* bg_error) override {
     if (counter_ == 0) {
       // suppress the first error and disable write-dropping such that a retry
       // can succeed.
@@ -1174,7 +1174,7 @@ TEST_F(EventListenerTest, OnFileOperationTest) {
   options.listeners.emplace_back(listener);
 
   options.use_direct_io_for_flush_and_compaction = false;
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (s.IsInvalidArgument()) {
     options.use_direct_io_for_flush_and_compaction = false;
   } else {
@@ -1256,7 +1256,7 @@ TEST_F(EventListenerTest, ReadManifestAndWALOnRecovery) {
   options.listeners.emplace_back(listener);
 
   options.use_direct_io_for_flush_and_compaction = false;
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (s.IsInvalidArgument()) {
     options.use_direct_io_for_flush_and_compaction = false;
   } else {

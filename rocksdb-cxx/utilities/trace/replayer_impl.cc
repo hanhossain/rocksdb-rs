@@ -33,10 +33,10 @@ ReplayerImpl::~ReplayerImpl() {
   trace_reader_.reset();
 }
 
-Status ReplayerImpl::Prepare() {
+rocksdb_rs::status::Status ReplayerImpl::Prepare() {
   Trace header;
   int db_version;
-  Status s = ReadHeader(&header);
+  rocksdb_rs::status::Status s = ReadHeader(&header);
   if (!s.ok()) {
     return s;
   }
@@ -50,7 +50,7 @@ Status ReplayerImpl::Prepare() {
   return Status_OK();
 }
 
-Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
+rocksdb_rs::status::Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
   if (!prepared_) {
     return Status_Incomplete("Not prepared!");
   }
@@ -59,7 +59,7 @@ Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
   }
 
   Trace trace;
-  Status s = ReadTrace(&trace);  // ReadTrace is atomic
+  rocksdb_rs::status::Status s = ReadTrace(&trace);  // ReadTrace is atomic
   // Reached the trace end.
   if (s.ok() && trace.type == kTraceEnd) {
     trace_end_ = true;
@@ -72,14 +72,14 @@ Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
   return TracerHelper::DecodeTraceRecord(&trace, trace_file_version_, record);
 }
 
-Status ReplayerImpl::Execute(const std::unique_ptr<TraceRecord>& record,
+rocksdb_rs::status::Status ReplayerImpl::Execute(const std::unique_ptr<TraceRecord>& record,
                              std::unique_ptr<TraceRecordResult>* result) {
   return record->Accept(exec_handler_.get(), result);
 }
 
-Status ReplayerImpl::Replay(
+rocksdb_rs::status::Status ReplayerImpl::Replay(
     const ReplayOptions& options,
-    const std::function<void(Status, std::unique_ptr<TraceRecordResult>&&)>&
+    const std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)>&
         result_callback) {
   if (options.fast_forward <= 0.0) {
     return Status_InvalidArgument("Wrong fast forward speed!");
@@ -92,7 +92,7 @@ Status ReplayerImpl::Replay(
     return Status_Incomplete("Trace end.");
   }
 
-  Status s = Status_OK();
+  rocksdb_rs::status::Status s = Status_OK();
 
   if (options.num_threads <= 1) {
     // num_threads == 0 or num_threads == 1 uses single thread.
@@ -154,7 +154,7 @@ Status ReplayerImpl::Replay(
 
     std::mutex mtx;
     // Background decoding and execution status.
-    Status bg_s = Status_OK();
+    rocksdb_rs::status::Status bg_s = Status_OK();
     uint64_t last_err_ts = static_cast<uint64_t>(-1);
     // Callback function used in background work to update bg_s for the ealiest
     // TraceRecord which has execution error. This is different from the
@@ -171,7 +171,7 @@ Status ReplayerImpl::Replay(
     // the first error is also the last error, while in multi-thread replay, the
     // first error may not be the first error in execution, and it may not be
     // the last error in exeution as well.
-    auto error_cb = [&mtx, &bg_s, &last_err_ts](Status err, uint64_t err_ts) {
+    auto error_cb = [&mtx, &bg_s, &last_err_ts](rocksdb_rs::status::Status err, uint64_t err_ts) {
       std::lock_guard<std::mutex> gd(mtx);
       // Only record the first error.
       if (!err.ok() && !err.IsNotSupported() && err_ts < last_err_ts) {
@@ -249,9 +249,9 @@ Status ReplayerImpl::Replay(
 
 uint64_t ReplayerImpl::GetHeaderTimestamp() const { return header_ts_; }
 
-Status ReplayerImpl::ReadHeader(Trace* header) {
+rocksdb_rs::status::Status ReplayerImpl::ReadHeader(Trace* header) {
   assert(header != nullptr);
-  Status s = trace_reader_->Reset();
+  rocksdb_rs::status::Status s = trace_reader_->Reset();
   if (!s.ok()) {
     return s;
   }
@@ -265,7 +265,7 @@ Status ReplayerImpl::ReadHeader(Trace* header) {
   return TracerHelper::DecodeHeader(encoded_trace, header);
 }
 
-Status ReplayerImpl::ReadTrace(Trace* trace) {
+rocksdb_rs::status::Status ReplayerImpl::ReadTrace(Trace* trace) {
   assert(trace != nullptr);
   std::string encoded_trace;
   // We don't know if TraceReader is implemented thread-safe, so we protect the
@@ -273,7 +273,7 @@ Status ReplayerImpl::ReadTrace(Trace* trace) {
   // protected since it's local.
   {
     std::lock_guard<std::mutex> guard(mutex_);
-    Status s = trace_reader_->Read(&encoded_trace);
+    rocksdb_rs::status::Status s = trace_reader_->Read(&encoded_trace);
     if (!s.ok()) {
       return s;
     }
@@ -287,7 +287,7 @@ void ReplayerImpl::BackgroundWork(void* arg) {
   assert(ra != nullptr);
 
   std::unique_ptr<TraceRecord> record;
-  Status s = TracerHelper::DecodeTraceRecord(&(ra->trace_entry),
+  rocksdb_rs::status::Status s = TracerHelper::DecodeTraceRecord(&(ra->trace_entry),
                                              ra->trace_file_version, &record);
   if (!s.ok()) {
     // Stop the replay

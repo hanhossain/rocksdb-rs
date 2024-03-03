@@ -54,7 +54,7 @@ DeleteScheduler::~DeleteScheduler() {
   }
 }
 
-Status DeleteScheduler::DeleteFile(const std::string& file_path,
+rocksdb_rs::status::Status DeleteScheduler::DeleteFile(const std::string& file_path,
                                    const std::string& dir_to_sync,
                                    const bool force_bg) {
   if (rate_bytes_per_sec_.load() <= 0 ||
@@ -64,7 +64,7 @@ Status DeleteScheduler::DeleteFile(const std::string& file_path,
     // Rate limiting is disabled or trash size makes up more than
     // max_trash_db_ratio_ (default 25%) of the total DB size
     TEST_SYNC_POINT("DeleteScheduler::DeleteFile");
-    Status s = fs_->DeleteFile(file_path, IOOptions(), nullptr);
+    rocksdb_rs::status::Status s = fs_->DeleteFile(file_path, IOOptions(), nullptr);
     if (s.ok()) {
       s = sst_file_manager_->OnDeleteFile(file_path);
       ROCKS_LOG_INFO(info_log_,
@@ -80,7 +80,7 @@ Status DeleteScheduler::DeleteFile(const std::string& file_path,
 
   // Move file to trash
   std::string trash_file;
-  Status s = MarkAsTrash(file_path, &trash_file);
+  rocksdb_rs::status::Status s = MarkAsTrash(file_path, &trash_file);
   ROCKS_LOG_INFO(info_log_, "Mark file: %s as trash -- %s", trash_file.c_str(),
                  s.ToString()->c_str());
 
@@ -121,9 +121,9 @@ Status DeleteScheduler::DeleteFile(const std::string& file_path,
   return s;
 }
 
-const std::map<std::string, Status> DeleteScheduler::GetBackgroundErrors() {
+const std::map<std::string, rocksdb_rs::status::Status> DeleteScheduler::GetBackgroundErrors() {
   InstrumentedMutexLock l(&mu_);
-  std::map<std::string, Status> new_map;
+  std::map<std::string, rocksdb_rs::status::Status> new_map;
   for (const auto& it : bg_errors_) {
     new_map.insert({it.first, it.second.Clone()});
   }
@@ -137,9 +137,9 @@ bool DeleteScheduler::IsTrashFile(const std::string& file_path) {
               file_path.size() - kTrashExtension.size());
 }
 
-Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
+rocksdb_rs::status::Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
                                          const std::string& path) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   // Check if there are any files marked as trash in this path
   std::vector<std::string> files_in_path;
   const auto& fs = env->GetFileSystem();
@@ -156,7 +156,7 @@ Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
       continue;
     }
 
-    Status file_delete = Status_new();
+    rocksdb_rs::status::Status file_delete = Status_new();
     std::string trash_file = path + "/" + current_file;
     if (sfm) {
       // We have an SstFileManager that will schedule the file delete
@@ -175,7 +175,7 @@ Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
   return s;
 }
 
-Status DeleteScheduler::MarkAsTrash(const std::string& file_path,
+rocksdb_rs::status::Status DeleteScheduler::MarkAsTrash(const std::string& file_path,
                                     std::string* trash_file) {
   // Sanity check of the path
   size_t idx = file_path.rfind("/");
@@ -193,7 +193,7 @@ Status DeleteScheduler::MarkAsTrash(const std::string& file_path,
   // TODO(tec) : Implement Env::RenameFileIfNotExist and remove
   //             file_move_mu mutex.
   int cnt = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   InstrumentedMutexLock l(&file_move_mu_);
   while (true) {
     s = fs_->FileExists(*trash_file, IOOptions(), nullptr);
@@ -252,7 +252,7 @@ void DeleteScheduler::BackgroundEmptyTrash() {
       uint64_t deleted_bytes = 0;
       bool is_complete = true;
       // Delete file from trash and update total_penlty value
-      Status s =
+      rocksdb_rs::status::Status s =
           DeleteTrashFile(path_in_trash, fad.dir, &deleted_bytes, &is_complete);
       total_deleted_bytes += deleted_bytes;
       mu_.Lock();
@@ -299,12 +299,12 @@ void DeleteScheduler::BackgroundEmptyTrash() {
   }
 }
 
-Status DeleteScheduler::DeleteTrashFile(const std::string& path_in_trash,
+rocksdb_rs::status::Status DeleteScheduler::DeleteTrashFile(const std::string& path_in_trash,
                                         const std::string& dir_to_sync,
                                         uint64_t* deleted_bytes,
                                         bool* is_complete) {
   uint64_t file_size;
-  Status s = fs_->GetFileSize(path_in_trash, IOOptions(), &file_size, nullptr);
+  rocksdb_rs::status::Status s = fs_->GetFileSize(path_in_trash, IOOptions(), &file_size, nullptr);
   *is_complete = true;
   TEST_SYNC_POINT("DeleteScheduler::DeleteTrashFile:DeleteFile");
   if (s.ok()) {
@@ -315,7 +315,7 @@ Status DeleteScheduler::DeleteTrashFile(const std::string& path_in_trash,
       // file after the number of file link check and ftruncte because
       // the file is now in trash and no hardlink is supposed to create
       // to trash files by RocksDB.
-      Status my_status = fs_->NumFileLinks(path_in_trash, IOOptions(),
+      rocksdb_rs::status::Status my_status = fs_->NumFileLinks(path_in_trash, IOOptions(),
                                            &num_hard_links, nullptr);
       if (my_status.ok()) {
         if (num_hard_links == 1) {

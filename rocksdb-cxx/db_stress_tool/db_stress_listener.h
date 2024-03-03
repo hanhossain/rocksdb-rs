@@ -136,7 +136,7 @@ class DbStressListener : public EventListener {
   }
 
   void OnBackgroundError(BackgroundErrorReason /* reason */,
-                         Status* /* bg_error */) override {
+                         rocksdb_rs::status::Status* /* bg_error */) override {
     RandomSleep();
   }
 
@@ -176,12 +176,12 @@ class DbStressListener : public EventListener {
   }
 
   void OnErrorRecoveryBegin(BackgroundErrorReason /* reason */,
-                            Status /* bg_error */,
+                            rocksdb_rs::status::Status /* bg_error */,
                             bool* /* auto_recovery */) override {
     RandomSleep();
   }
 
-  void OnErrorRecoveryCompleted(Status /* old_bg_error */) override {
+  void OnErrorRecoveryCompleted(rocksdb_rs::status::Status /* old_bg_error */) override {
     RandomSleep();
   }
 

@@ -624,7 +624,7 @@ void ValidateKeyExistence(DB* db, const std::vector<Slice>& keys_must_exist,
   // Ensure that expected keys exist
   std::vector<std::string> values;
   if (keys_must_exist.size() > 0) {
-    rust::Vec<Status> status_list =
+    rust::Vec<rocksdb_rs::status::Status> status_list =
         db->MultiGet(ReadOptions(), keys_must_exist, &values);
     for (size_t i = 0; i < keys_must_exist.size(); i++) {
       ASSERT_OK(status_list[i]);
@@ -633,7 +633,7 @@ void ValidateKeyExistence(DB* db, const std::vector<Slice>& keys_must_exist,
 
   // Ensure that given keys don't exist
   if (keys_must_not_exist.size() > 0) {
-    rust::Vec<Status> status_list =
+    rust::Vec<rocksdb_rs::status::Status> status_list =
         db->MultiGet(ReadOptions(), keys_must_not_exist, &values);
     for (size_t i = 0; i < keys_must_not_exist.size(); i++) {
       ASSERT_TRUE(status_list[i].IsNotFound());
@@ -724,7 +724,7 @@ TEST_F(DBTest2, WalFilterTest) {
     // Reopen database with option to use WAL filter
     options = OptionsForLogIterTest();
     options.wal_filter = &test_wal_filter;
-    Status status =
+    rocksdb_rs::status::Status status =
         TryReopenWithColumnFamilies({"default", "pikachu"}, options);
     if (wal_processing_option ==
         WalFilter::WalProcessingOption::kCorruptedRecord) {
@@ -859,7 +859,7 @@ TEST_F(DBTest2, WalFilterTestWithChangeBatch) {
                                   bool* batch_changed) const override {
       if (current_record_index_ >= change_records_from_index_) {
         ChangeBatchHandler handler(new_batch, num_keys_to_add_in_new_batch_);
-        Status s = batch.Iterate(&handler);
+        rocksdb_rs::status::Status s = batch.Iterate(&handler);
         if (s.ok()) {
           *batch_changed = true;
         } else {
@@ -957,7 +957,7 @@ TEST_F(DBTest2, WalFilterTestWithChangeBatchExtraKeys) {
                                   WriteBatch* new_batch,
                                   bool* batch_changed) const override {
       *new_batch = batch;
-      Status s = new_batch->Put("key_extra", "value_extra");
+      rocksdb_rs::status::Status s = new_batch->Put("key_extra", "value_extra");
       if (s.ok()) {
         *batch_changed = true;
       } else {
@@ -999,7 +999,7 @@ TEST_F(DBTest2, WalFilterTestWithChangeBatchExtraKeys) {
   // Reopen database with option to use WAL filter
   options = OptionsForLogIterTest();
   options.wal_filter = &test_wal_filter_extra_keys;
-  Status status = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status status = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_TRUE(status.IsNotSupported());
 
   // Reopen without filter, now reopen should succeed - previous
@@ -1060,7 +1060,7 @@ TEST_F(DBTest2, WalFilterTestWithColumnFamilies) {
               cf_wal_keys_(cf_wal_keys),
               log_number_(current_log_number) {}
 
-        Status PutCF(uint32_t column_family_id, const Slice& key,
+        rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
                      const Slice& /*value*/) override {
           auto it = cf_log_number_map_.find(column_family_id);
           assert(it != cf_log_number_map_.end());
@@ -1076,7 +1076,7 @@ TEST_F(DBTest2, WalFilterTestWithColumnFamilies) {
         }
       } handler(log_number, cf_log_number_map_, cf_wal_keys_);
 
-      Status s = batch.Iterate(&handler);
+      rocksdb_rs::status::Status s = batch.Iterate(&handler);
       if (!s.ok()) {
         // TODO(AR) is this ok?
         return WalProcessingOption::kCorruptedRecord;
@@ -1157,7 +1157,7 @@ TEST_F(DBTest2, WalFilterTestWithColumnFamilies) {
   // Reopen database with option to use WAL filter
   options = OptionsForLogIterTest();
   options.wal_filter = &test_wal_filter_column_families;
-  Status status = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status status = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_TRUE(status.ok());
 
   // verify that handles_[0] only has post_flush keys
@@ -1737,7 +1737,7 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
   } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionFail) {
     rocksdb::SyncPoint::GetInstance()->SetCallBack(
         "UncompressBlockData:TamperWithReturnValue", [](void* arg) {
-          Status* ret = static_cast<Status*>(arg);
+          rocksdb_rs::status::Status* ret = static_cast<rocksdb_rs::status::Status*>(arg);
           ASSERT_OK(*ret);
           *ret = Status_Corruption("kTestDecompressionFail");
         });
@@ -1761,7 +1761,7 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
   const int kValSize = 256;
   Random rnd(405);
 
-  Status s = Status_OK();
+  rocksdb_rs::status::Status s = Status_OK();
 
   DestroyAndReopen(options);
   // Write 10 random files
@@ -2359,7 +2359,7 @@ class MockPersistentCache : public PersistentCache {
     return last_id_.fetch_add(1, std::memory_order_relaxed);
   }
 
-  Status Insert(const Slice& page_key, const char* data,
+  rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
                 const size_t size) override {
     MutexLock _(&lock_);
 
@@ -2373,7 +2373,7 @@ class MockPersistentCache : public PersistentCache {
     return Status_OK();
   }
 
-  Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
+  rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
                 size_t* size) override {
     MutexLock _(&lock_);
     auto it = data_.find(page_key.ToString());
@@ -2739,7 +2739,7 @@ TEST_F(DBTest2, ReadAmpBitmapLiveInCacheAfterDBClose) {
   {
     const int kIdBufLen = 100;
     char id_buf[kIdBufLen];
-    Status s = Status_NotSupported();
+    rocksdb_rs::status::Status s = Status_NotSupported();
 #ifndef OS_WIN
     // You can't open a directory on windows using random access file
     std::unique_ptr<RandomAccessFile> file;
@@ -4064,7 +4064,7 @@ TEST_F(DBTest2, ReadCallbackTest) {
     get_impl_options.value = &pinnable_val;
     get_impl_options.value_found = &dont_care;
     get_impl_options.callback = &callback;
-    Status s = dbfull()->GetImpl(roptions, key, get_impl_options);
+    rocksdb_rs::status::Status s = dbfull()->GetImpl(roptions, key, get_impl_options);
     ASSERT_TRUE(s.ok());
     // Assuming that after each Put the DB increased seq by one, the value and
     // seq number must be equal since we also inc value by 1 after each Put.
@@ -4204,7 +4204,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
   TraceExecutionResultHandler() {}
   ~TraceExecutionResultHandler() override {}
 
-  virtual Status Handle(const StatusOnlyTraceExecutionResult& result) override {
+  virtual rocksdb_rs::status::Status Handle(const StatusOnlyTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
     }
@@ -4221,7 +4221,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
     return Status_OK();
   }
 
-  virtual Status Handle(
+  virtual rocksdb_rs::status::Status Handle(
       const SingleValueTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
@@ -4239,7 +4239,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
     return Status_OK();
   }
 
-  virtual Status Handle(
+  virtual rocksdb_rs::status::Status Handle(
       const MultiValuesTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
@@ -4257,7 +4257,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
     return Status_OK();
   }
 
-  virtual Status Handle(const IteratorTraceExecutionResult& result) override {
+  virtual rocksdb_rs::status::Status Handle(const IteratorTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
       return Status_InvalidArgument("Invalid timestamps.");
     }
@@ -4401,8 +4401,8 @@ TEST_F(DBTest2, TraceAndReplay) {
       db2->NewDefaultReplayer(handles, std::move(trace_reader), &replayer));
 
   TraceExecutionResultHandler res_handler;
-  std::function<void(Status, std::unique_ptr<TraceRecordResult> &&)> res_cb =
-      [&res_handler](Status exec_s, std::unique_ptr<TraceRecordResult>&& res) {
+  std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult> &&)> res_cb =
+      [&res_handler](rocksdb_rs::status::Status exec_s, std::unique_ptr<TraceRecordResult>&& res) {
         ASSERT_TRUE(exec_s.ok() || exec_s.IsNotSupported());
         if (res != nullptr) {
           ASSERT_OK(res->Accept(&res_handler));
@@ -4601,7 +4601,7 @@ TEST_F(DBTest2, TraceAndManualReplay) {
     // Next should fail if unprepared.
     ASSERT_TRUE(replayer->Next(nullptr).IsIncomplete());
     ASSERT_OK(replayer->Prepare());
-    Status s = Status_OK();
+    rocksdb_rs::status::Status s = Status_OK();
     // Looping until trace end.
     while (s.ok()) {
       s = replayer->Next(&record);
@@ -5125,7 +5125,7 @@ TEST_F(DBTest2, TraceWithFilter) {
   // Count the number of records in the trace file;
   int count = 0;
   std::string data;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   while (true) {
     s = trace_reader3->Read(&data);
     if (!s.ok()) {
@@ -5380,13 +5380,13 @@ TEST_F(DBTest2, TestCompactFiles) {
   GetSstFiles(env_, dbname_, &files);
   ASSERT_EQ(files.size(), 2);
 
-  Status user_thread1_status = Status_new();
+  rocksdb_rs::status::Status user_thread1_status = Status_new();
   port::Thread user_thread1([&]() {
     user_thread1_status =
         db_->CompactFiles(CompactionOptions(), handle, files, 1);
   });
 
-  Status user_thread2_status = Status_new();
+  rocksdb_rs::status::Status user_thread2_status = Status_new();
   port::Thread user_thread2([&]() {
     user_thread2_status = db_->IngestExternalFile(handle, {external_file2},
                                                   IngestExternalFileOptions());
@@ -5830,7 +5830,7 @@ TEST_F(DBTest2, FileConsistencyCheckInOpen) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
-        Status* ret_s = static_cast<Status*>(arg);
+        rocksdb_rs::status::Status* ret_s = static_cast<rocksdb_rs::status::Status*>(arg);
         *ret_s = Status_Corruption("fcc");
       });
   SyncPoint::GetInstance()->EnableProcessing();
@@ -5933,7 +5933,7 @@ TEST_F(DBTest2, PartitionedIndexPrefetchFailure) {
     env_->rand_reads_fail_odd_ = 8;
 
     std::string value;
-    Status s = dbfull()->Get(ReadOptions(), Key(1), &value);
+    rocksdb_rs::status::Status s = dbfull()->Get(ReadOptions(), Key(1), &value);
     if (env_->num_reads_fails_ > 0) {
       ASSERT_NOK(s);
     } else {
@@ -6436,7 +6436,7 @@ class RenameCurrentTest : public DBTestBase,
   void SetupSyncPoints() {
     SyncPoint::GetInstance()->DisableProcessing();
     SyncPoint::GetInstance()->SetCallBack(sync_point_, [&](void* arg) {
-      Status* s = reinterpret_cast<Status*>(arg);
+      rocksdb_rs::status::Status* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
       assert(s);
       *s = Status_IOError("Injected IO error.");
     });
@@ -6455,7 +6455,7 @@ TEST_P(RenameCurrentTest, Open) {
   options.create_if_missing = true;
   SetupSyncPoints();
   SyncPoint::GetInstance()->EnableProcessing();
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   ASSERT_NOK(s);
 
   SyncPoint::GetInstance()->DisableProcessing();
@@ -7105,13 +7105,13 @@ TEST_F(DBTest2, PointInTimeRecoveryWithIOErrorWhileReadingWal) {
       "LogReader::ReadMore:AfterReadFile", [&](void* arg) {
         if (should_inject_error) {
           ASSERT_NE(nullptr, arg);
-          *reinterpret_cast<Status*>(arg) = Status_IOError("Injected IOError");
+          *reinterpret_cast<rocksdb_rs::status::Status*>(arg) = Status_IOError("Injected IOError");
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();
   options.avoid_flush_during_recovery = true;
   options.wal_recovery_mode = WALRecoveryMode::kPointInTimeRecovery;
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   ASSERT_TRUE(s.IsIOError());
 }
 
@@ -7579,7 +7579,7 @@ TEST_F(DBTest2, BestEffortsRecoveryWithSstUniqueIdVerification) {
     }
 
     options.verify_sst_unique_id_in_manifest = true;
-    Status s = TryReopen(options);
+    rocksdb_rs::status::Status s = TryReopen(options);
     ASSERT_TRUE(s.IsCorruption());
 
     options.best_efforts_recovery = true;
@@ -7649,7 +7649,7 @@ TEST_F(DBTest2, GetLatestSeqAndTsForKey) {
     bool found_record_for_key = false;
     bool is_blob_index = false;
 
-    const Status s = dbfull()->GetLatestSequenceForKey(
+    const rocksdb_rs::status::Status s = dbfull()->GetLatestSequenceForKey(
         sv, key_str, cache_only, lower_bound_seq, &seq, &ts,
         &found_record_for_key, &is_blob_index);
     ASSERT_OK(s);

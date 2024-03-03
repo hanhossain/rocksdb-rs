@@ -27,12 +27,12 @@ uint64_t PackFileNumberAndPathId(uint64_t number, uint64_t path_id) {
   return number | (path_id * (kFileNumberMask + 1));
 }
 
-Status FileMetaData::UpdateBoundaries(const Slice& key, const Slice& value,
+rocksdb_rs::status::Status FileMetaData::UpdateBoundaries(const Slice& key, const Slice& value,
                                       SequenceNumber seqno,
                                       ValueType value_type) {
   if (value_type == kTypeBlobIndex) {
     BlobIndex blob_index;
-    const Status s = blob_index.DecodeFrom(value);
+    const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -477,7 +477,7 @@ void VersionEdit::EncodeFileBoundaries(std::string* dst,
   return;
 };
 
-Status VersionEdit::DecodeFrom(const Slice& src) {
+rocksdb_rs::status::Status VersionEdit::DecodeFrom(const Slice& src) {
   Clear();
 #ifndef NDEBUG
   bool ignore_ignorable_tags = false;
@@ -658,7 +658,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
       case kBlobFileAddition:
       case kBlobFileAddition_DEPRECATED: {
         BlobFileAddition blob_file_addition;
-        const Status s = blob_file_addition.DecodeFrom(&input);
+        const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&input);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -670,7 +670,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
       case kBlobFileGarbage:
       case kBlobFileGarbage_DEPRECATED: {
         BlobFileGarbage blob_file_garbage;
-        const Status s = blob_file_garbage.DecodeFrom(&input);
+        const rocksdb_rs::status::Status s = blob_file_garbage.DecodeFrom(&input);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -681,7 +681,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
 
       case kWalAddition: {
         WalAddition wal_addition;
-        const Status s = wal_addition.DecodeFrom(&input);
+        const rocksdb_rs::status::Status s = wal_addition.DecodeFrom(&input);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -698,7 +698,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         }
 
         WalAddition wal_addition;
-        const Status s = wal_addition.DecodeFrom(&encoded);
+        const rocksdb_rs::status::Status s = wal_addition.DecodeFrom(&encoded);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -709,7 +709,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
 
       case kWalDeletion: {
         WalDeletion wal_deletion;
-        const Status s = wal_deletion.DecodeFrom(&input);
+        const rocksdb_rs::status::Status s = wal_deletion.DecodeFrom(&input);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -726,7 +726,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
         }
 
         WalDeletion wal_deletion;
-        const Status s = wal_deletion.DecodeFrom(&encoded);
+        const rocksdb_rs::status::Status s = wal_deletion.DecodeFrom(&encoded);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -801,7 +801,7 @@ Status VersionEdit::DecodeFrom(const Slice& src) {
     msg = "invalid tag";
   }
 
-  Status result = Status_new();
+  rocksdb_rs::status::Status result = Status_new();
   if (msg != nullptr) {
     result = Status_Corruption("VersionEdit", msg);
   }

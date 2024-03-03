@@ -133,7 +133,7 @@ CompactionPicker::CompactionPicker(const ImmutableOptions& ioptions,
 CompactionPicker::~CompactionPicker() {}
 
 // Delete this compaction from the list of running compactions.
-void CompactionPicker::ReleaseCompactionFiles(Compaction* c, Status status) {
+void CompactionPicker::ReleaseCompactionFiles(Compaction* c, rocksdb_rs::status::Status status) {
   UnregisterCompaction(c);
   if (!status.ok()) {
     c->ResetNextCompactionIndex();
@@ -383,7 +383,7 @@ Compaction* CompactionPicker::CompactFiles(
   return c;
 }
 
-Status CompactionPicker::GetCompactionInputsFromFileNumbers(
+rocksdb_rs::status::Status CompactionPicker::GetCompactionInputsFromFileNumbers(
     std::vector<CompactionInputFiles>* input_files,
     std::unordered_set<uint64_t>* input_set, const VersionStorageInfo* vstorage,
     const CompactionOptions& /*compact_options*/) const {
@@ -903,7 +903,7 @@ bool HaveOverlappingKeyRanges(const Comparator* c, const SstFileMetaData& a,
 }
 }  // namespace
 
-Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
+rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
     std::unordered_set<uint64_t>* input_files,
     const ColumnFamilyMetaData& cf_meta, const int output_level) const {
   auto& levels = cf_meta.levels;
@@ -1042,7 +1042,7 @@ Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
   return Status_OK();
 }
 
-Status CompactionPicker::SanitizeCompactionInputFiles(
+rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFiles(
     std::unordered_set<uint64_t>* input_files,
     const ColumnFamilyMetaData& cf_meta, const int output_level) const {
   assert(static_cast<int>(cf_meta.levels.size()) - 1 ==
@@ -1070,7 +1070,7 @@ Status CompactionPicker::SanitizeCompactionInputFiles(
         "A compaction must contain at least one file.");
   }
 
-  Status s = SanitizeCompactionInputFilesForAllLevels(input_files, cf_meta,
+  rocksdb_rs::status::Status s = SanitizeCompactionInputFilesForAllLevels(input_files, cf_meta,
                                                       output_level);
 
   if (!s.ok()) {

@@ -9,7 +9,7 @@
 
 namespace rocksdb {
 
-Status BlobFetcher::FetchBlob(const Slice& user_key,
+rocksdb_rs::status::Status BlobFetcher::FetchBlob(const Slice& user_key,
                               const Slice& blob_index_slice,
                               FilePrefetchBuffer* prefetch_buffer,
                               PinnableSlice* blob_value,
@@ -20,7 +20,7 @@ Status BlobFetcher::FetchBlob(const Slice& user_key,
                            prefetch_buffer, blob_value, bytes_read);
 }
 
-Status BlobFetcher::FetchBlob(const Slice& user_key,
+rocksdb_rs::status::Status BlobFetcher::FetchBlob(const Slice& user_key,
                               const BlobIndex& blob_index,
                               FilePrefetchBuffer* prefetch_buffer,
                               PinnableSlice* blob_value,

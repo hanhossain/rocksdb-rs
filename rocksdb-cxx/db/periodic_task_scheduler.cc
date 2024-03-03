@@ -35,12 +35,12 @@ static const std::map<PeriodicTaskType, std::string> kPeriodicTaskTypeNames = {
     {PeriodicTaskType::kRecordSeqnoTime, "record_seq_time"},
 };
 
-Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
+rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
                                        const PeriodicTaskFunc& fn) {
   return Register(task_type, fn, kDefaultPeriodSeconds.at(task_type));
 }
 
-Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
+rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
                                        const PeriodicTaskFunc& fn,
                                        uint64_t repeat_period_seconds) {
   MutexLock l(&timer_mutex);
@@ -80,7 +80,7 @@ Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
   return Status_OK();
 }
 
-Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
+rocksdb_rs::status::Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
   MutexLock l(&timer_mutex);
   auto it = tasks_map_.find(task_type);
   if (it != tasks_map_.end()) {

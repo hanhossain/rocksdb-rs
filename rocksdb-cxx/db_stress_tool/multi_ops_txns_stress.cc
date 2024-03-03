@@ -185,23 +185,23 @@ std::string MultiOpsTxnsStressTest::Record::EncodeSecondaryKey(uint32_t c,
   return ret;
 }
 
-std::tuple<Status, uint32_t, uint32_t>
+std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>
 MultiOpsTxnsStressTest::Record::DecodePrimaryIndexValue(
     Slice primary_index_value) {
   if (primary_index_value.size() != 8) {
-    return std::tuple<Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
+    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
   }
   uint32_t b = 0;
   uint32_t c = 0;
   if (!GetFixed32(&primary_index_value, &b) ||
       !GetFixed32(&primary_index_value, &c)) {
     assert(false);
-    return std::tuple<Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
+    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
   }
-  return std::tuple<Status, uint32_t, uint32_t>{Status_OK(), b, c};
+  return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{Status_OK(), b, c};
 }
 
-std::pair<Status, uint32_t>
+std::pair<rocksdb_rs::status::Status, uint32_t>
 MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexValue(
     Slice secondary_index_value) {
   if (secondary_index_value.size() != 4) {
@@ -248,7 +248,7 @@ std::string MultiOpsTxnsStressTest::Record::EncodeSecondaryKey() const {
   return EncodeSecondaryKey(c_, a_);
 }
 
-Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
     Slice primary_index_key, Slice primary_index_value) {
   if (primary_index_key.size() != 8) {
     assert(false);
@@ -280,7 +280,7 @@ Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
   return Status_OK();
 }
 
-Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
     Slice secondary_index_key, Slice secondary_index_value) {
   if (secondary_index_key.size() != 12) {
     return Status_Corruption("Secondary index key length is not 12");
@@ -369,7 +369,7 @@ void MultiOpsTxnsStressTest::ReopenAndPreloadDbIfNeeded(SharedState* shared) {
 }
 
 // Used for point-lookup transaction
-Status MultiOpsTxnsStressTest::TestGet(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestGet(
     ThreadState* thread, const ReadOptions& read_opts,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
@@ -380,11 +380,11 @@ Status MultiOpsTxnsStressTest::TestGet(
 }
 
 // Not used.
-rust::Vec<Status> MultiOpsTxnsStressTest::TestMultiGet(
+rust::Vec<rocksdb_rs::status::Status> MultiOpsTxnsStressTest::TestMultiGet(
     ThreadState* /*thread*/, const ReadOptions& /*read_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  rust::Vec<Status> vec;
+  rust::Vec<rocksdb_rs::status::Status> vec;
   vec.push_back(Status_NotSupported());
   return vec;
 }
@@ -401,7 +401,7 @@ void MultiOpsTxnsStressTest::TestMultiGetEntity(
     const std::vector<int>& /* rand_column_families */,
     const std::vector<int64_t>& /* rand_keys */) {}
 
-Status MultiOpsTxnsStressTest::TestPrefixScan(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestPrefixScan(
     ThreadState* thread, const ReadOptions& read_opts,
     const std::vector<int>& rand_column_families,
     const std::vector<int64_t>& rand_keys) {
@@ -414,7 +414,7 @@ Status MultiOpsTxnsStressTest::TestPrefixScan(
 
 // Given a key K, this creates an iterator which scans to K and then
 // does a random sequence of Next/Prev operations.
-Status MultiOpsTxnsStressTest::TestIterate(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestIterate(
     ThreadState* thread, const ReadOptions& read_opts,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
@@ -425,7 +425,7 @@ Status MultiOpsTxnsStressTest::TestIterate(
 }
 
 // Not intended for use.
-Status MultiOpsTxnsStressTest::TestPut(ThreadState* /*thread*/,
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestPut(ThreadState* /*thread*/,
                                        WriteOptions& /*write_opts*/,
                                        const ReadOptions& /*read_opts*/,
                                        const std::vector<int>& /*cf_ids*/,
@@ -436,7 +436,7 @@ Status MultiOpsTxnsStressTest::TestPut(ThreadState* /*thread*/,
 }
 
 // Not intended for use.
-Status MultiOpsTxnsStressTest::TestDelete(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestDelete(
     ThreadState* /*thread*/, WriteOptions& /*write_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
@@ -444,7 +444,7 @@ Status MultiOpsTxnsStressTest::TestDelete(
 }
 
 // Not intended for use.
-Status MultiOpsTxnsStressTest::TestDeleteRange(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestDeleteRange(
     ThreadState* /*thread*/, WriteOptions& /*write_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
@@ -469,7 +469,7 @@ void MultiOpsTxnsStressTest::TestCompactRange(
   (void)column_family;
 }
 
-Status MultiOpsTxnsStressTest::TestBackupRestore(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestBackupRestore(
     ThreadState* thread, const std::vector<int>& rand_column_families,
     const std::vector<int64_t>& /*rand_keys*/) {
   // TODO (yanqin)
@@ -478,7 +478,7 @@ Status MultiOpsTxnsStressTest::TestBackupRestore(
   return Status_OK();
 }
 
-Status MultiOpsTxnsStressTest::TestCheckpoint(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestCheckpoint(
     ThreadState* thread, const std::vector<int>& rand_column_families,
     const std::vector<int64_t>& /*rand_keys*/) {
   // TODO (yanqin)
@@ -487,7 +487,7 @@ Status MultiOpsTxnsStressTest::TestCheckpoint(
   return Status_OK();
 }
 
-Status MultiOpsTxnsStressTest::TestApproximateSize(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestApproximateSize(
     ThreadState* thread, uint64_t iteration,
     const std::vector<int>& rand_column_families,
     const std::vector<int64_t>& /*rand_keys*/) {
@@ -498,13 +498,13 @@ Status MultiOpsTxnsStressTest::TestApproximateSize(
   return Status_OK();
 }
 
-Status MultiOpsTxnsStressTest::TestCustomOperations(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestCustomOperations(
     ThreadState* thread, const std::vector<int>& rand_column_families) {
   (void)rand_column_families;
   // Randomly choose from 0, 1, and 2.
   // TODO (yanqin) allow user to configure probability of each operation.
   uint32_t rand = thread->rand.Uniform(3);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (0 == rand) {
     // Update primary key.
     uint32_t old_a = 0;
@@ -556,7 +556,7 @@ void MultiOpsTxnsStressTest::PrepareTxnDbOptions(
       };
 }
 
-Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
                                                    uint32_t old_a,
                                                    uint32_t old_a_pos,
                                                    uint32_t new_a) {
@@ -564,7 +564,7 @@ Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
   std::string new_pk = Record::EncodePrimaryKey(new_a);
   Transaction* txn = nullptr;
   WriteOptions wopts;
-  Status s = NewTxn(wopts, &txn);
+  rocksdb_rs::status::Status s = NewTxn(wopts, &txn);
   if (!s.ok()) {
     assert(!txn);
     thread->stats.AddErrors(1);
@@ -679,13 +679,13 @@ Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
   return s;
 }
 
-Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
                                                      uint32_t old_c,
                                                      uint32_t old_c_pos,
                                                      uint32_t new_c) {
   Transaction* txn = nullptr;
   WriteOptions wopts;
-  Status s = NewTxn(wopts, &txn);
+  rocksdb_rs::status::Status s = NewTxn(wopts, &txn);
   if (!s.ok()) {
     assert(!txn);
     thread->stats.AddErrors(1);
@@ -878,13 +878,13 @@ Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
   return s;
 }
 
-Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(ThreadState* thread,
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(ThreadState* thread,
                                                           uint32_t a,
                                                           uint32_t b_delta) {
   std::string pk_str = Record::EncodePrimaryKey(a);
   Transaction* txn = nullptr;
   WriteOptions wopts;
-  Status s = NewTxn(wopts, &txn);
+  rocksdb_rs::status::Status s = NewTxn(wopts, &txn);
   if (!s.ok()) {
     assert(!txn);
     thread->stats.AddErrors(1);
@@ -960,7 +960,7 @@ Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(ThreadState* thread,
   return s;
 }
 
-Status MultiOpsTxnsStressTest::PointLookupTxn(ThreadState* thread,
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::PointLookupTxn(ThreadState* thread,
                                               ReadOptions ropts, uint32_t a) {
   std::string pk_str = Record::EncodePrimaryKey(a);
   // pk may or may not exist
@@ -968,7 +968,7 @@ Status MultiOpsTxnsStressTest::PointLookupTxn(ThreadState* thread,
 
   Transaction* txn = nullptr;
   WriteOptions wopts;
-  Status s = NewTxn(wopts, &txn);
+  rocksdb_rs::status::Status s = NewTxn(wopts, &txn);
   if (!s.ok()) {
     assert(!txn);
     thread->stats.AddErrors(1);
@@ -1009,13 +1009,13 @@ Status MultiOpsTxnsStressTest::PointLookupTxn(ThreadState* thread,
   return s;
 }
 
-Status MultiOpsTxnsStressTest::RangeScanTxn(ThreadState* thread,
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::RangeScanTxn(ThreadState* thread,
                                             ReadOptions ropts, uint32_t c) {
   std::string sk = Record::EncodeSecondaryKey(c);
 
   Transaction* txn = nullptr;
   WriteOptions wopts;
-  Status s = NewTxn(wopts, &txn);
+  rocksdb_rs::status::Status s = NewTxn(wopts, &txn);
   if (!s.ok()) {
     assert(!txn);
     thread->stats.AddErrors(1);
@@ -1115,7 +1115,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
     std::unique_ptr<Iterator> it(db_->NewIterator(ropts));
     for (it->Seek(start_key); it->Valid(); it->Next()) {
       Record record;
-      Status s = record.DecodePrimaryIndexEntry(it->key(), it->value());
+      rocksdb_rs::status::Status s = record.DecodePrimaryIndexEntry(it->key(), it->value());
       if (!s.ok()) {
         oss << "Cannot decode primary index entry " << it->key().ToString(true)
             << "=>" << it->value().ToString(true);
@@ -1164,7 +1164,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
     for (it->Seek(start_key); it->Valid(); it->Next()) {
       ++secondary_index_entries_count;
       Record record;
-      Status s = record.DecodeSecondaryIndexEntry(it->key(), it->value());
+      rocksdb_rs::status::Status s = record.DecodeSecondaryIndexEntry(it->key(), it->value());
       if (!s.ok()) {
         oss << "Cannot decode secondary index entry "
             << it->key().ToString(true) << "=>" << it->value().ToString(true);
@@ -1257,7 +1257,7 @@ void MultiOpsTxnsStressTest::VerifyPkSkFast(const ReadOptions& read_options,
   std::unique_ptr<Iterator> it(db_->NewIterator(ropts));
   for (it->Seek(start_key); it->Valid(); it->Next()) {
     Record record;
-    Status s = record.DecodeSecondaryIndexEntry(it->key(), it->value());
+    rocksdb_rs::status::Status s = record.DecodeSecondaryIndexEntry(it->key(), it->value());
     if (!s.ok()) {
       oss << "Cannot decode secondary index entry " << it->key().ToString(true)
           << "=>" << it->value().ToString(true);
@@ -1331,15 +1331,15 @@ void MultiOpsTxnsStressTest::ProcessRecoveredPreparedTxnsHelper(
     Transaction* txn, SharedState*) {
   thread_local Random rand(static_cast<uint32_t>(FLAGS_seed));
   if (rand.OneIn(2)) {
-    Status s = txn->Commit();
+    rocksdb_rs::status::Status s = txn->Commit();
     assert(s.ok());
   } else {
-    Status s = txn->Rollback();
+    rocksdb_rs::status::Status s = txn->Rollback();
     assert(s.ok());
   }
 }
 
-Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(Transaction& txn) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(Transaction& txn) {
   WriteBatch* ctwb = txn.GetCommitTimeWriteBatch();
   assert(ctwb);
   // Do not change the content in key_buf.
@@ -1353,9 +1353,9 @@ Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(Transaction& txn) {
                    Slice(val_buf, sizeof(val_buf)));
 }
 
-Status MultiOpsTxnsStressTest::CommitAndCreateTimestampedSnapshotIfNeeded(
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::CommitAndCreateTimestampedSnapshotIfNeeded(
     ThreadState* thread, Transaction& txn) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (FLAGS_create_timestamped_snapshot_one_in > 0 &&
       thread->rand.OneInOpt(FLAGS_create_timestamped_snapshot_one_in)) {
     uint64_t ts = db_stress_env->NowNanos();
@@ -1413,7 +1413,7 @@ void MultiOpsTxnsStressTest::PersistKeySpacesDesc(
   std::string key_spaces_rep = key_spaces.EncodeTo();
 
   std::unique_ptr<WritableFile> wfile;
-  Status s1 =
+  rocksdb_rs::status::Status s1 =
       Env::Default()->NewWritableFile(key_spaces_path, &wfile, EnvOptions());
   assert(s1.ok());
   assert(wfile);
@@ -1425,7 +1425,7 @@ MultiOpsTxnsStressTest::KeySpaces MultiOpsTxnsStressTest::ReadKeySpacesDesc(
     const std::string& key_spaces_path) {
   KeySpaces key_spaces;
   std::unique_ptr<SequentialFile> sfile;
-  Status s1 =
+  rocksdb_rs::status::Status s1 =
       Env::Default()->NewSequentialFile(key_spaces_path, &sfile, EnvOptions());
   assert(s1.ok());
   assert(sfile);
@@ -1513,7 +1513,7 @@ void MultiOpsTxnsStressTest::PreloadDb(SharedState* shared, int threads,
     Record record(a, b, c);
     WriteBatch wb;
     const auto primary_index_entry = record.EncodePrimaryIndexEntry();
-    Status s = wb.Put(primary_index_entry.first, primary_index_entry.second);
+    rocksdb_rs::status::Status s = wb.Put(primary_index_entry.first, primary_index_entry.second);
     assert(s.ok());
 
     const auto secondary_index_entry = record.EncodeSecondaryIndexEntry();
@@ -1613,7 +1613,7 @@ void MultiOpsTxnsStressTest::ScanExistingDb(SharedState* shared, int threads) {
 
     for (it->SeekToFirst(); it->Valid(); it->Next()) {
       Record record;
-      Status s = record.DecodePrimaryIndexEntry(it->key(), it->value());
+      rocksdb_rs::status::Status s = record.DecodePrimaryIndexEntry(it->key(), it->value());
       if (!s.ok()) {
         fprintf(stderr, "Cannot decode primary index entry (%s => %s): %s\n",
                 it->key().ToString(true).c_str(),

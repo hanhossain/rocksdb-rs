@@ -82,7 +82,7 @@ class PlaceholderCacheInterface : public BaseCacheInterface<CachePtr> {
   CACHE_TYPE_DEFS();
   using BaseCacheInterface<CachePtr>::BaseCacheInterface;
 
-  inline Status Insert(const Slice& key, size_t charge, Handle** handle) {
+  inline rocksdb_rs::status::Status Insert(const Slice& key, size_t charge, Handle** handle) {
     return this->cache_->Insert(key, /*value=*/nullptr, GetHelper(), charge,
                                 handle);
   }
@@ -159,7 +159,7 @@ class BasicTypedCacheInterface : public BaseCacheInterface<CachePtr>,
     }
   };
 
-  inline Status Insert(const Slice& key, TValuePtr value, size_t charge,
+  inline rocksdb_rs::status::Status Insert(const Slice& key, TValuePtr value, size_t charge,
                        TypedHandle** handle = nullptr,
                        Priority priority = Priority::LOW) {
     auto untyped_handle = reinterpret_cast<Handle**>(handle);
@@ -224,7 +224,7 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
     return slice.size();
   }
 
-  static Status SaveTo(ObjectPtr v, size_t from_offset, size_t length,
+  static rocksdb_rs::status::Status SaveTo(ObjectPtr v, size_t from_offset, size_t length,
                        char* out) {
     TValuePtr value = DownCastValue(v);
     auto slice = value->ContentSlice();
@@ -234,7 +234,7 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
     return Status_OK();
   }
 
-  static Status Create(const Slice& data, CreateContext* context,
+  static rocksdb_rs::status::Status Create(const Slice& data, CreateContext* context,
                        MemoryAllocator* allocator, ObjectPtr* out_obj,
                        size_t* out_charge) {
     std::unique_ptr<TValue> value = nullptr;
@@ -298,7 +298,7 @@ class FullTypedCacheInterface
 
   // Insert with SecondaryCache compatibility (subject to CacheTier).
   // (Basic Insert() also inherited.)
-  inline Status InsertFull(
+  inline rocksdb_rs::status::Status InsertFull(
       const Slice& key, TValuePtr value, size_t charge,
       TypedHandle** handle = nullptr, Priority priority = Priority::LOW,
       CacheTier lowest_used_cache_tier = CacheTier::kNonVolatileBlockTier) {
@@ -312,14 +312,14 @@ class FullTypedCacheInterface
 
   // Like SecondaryCache::InsertSaved, with SecondaryCache compatibility
   // (subject to CacheTier).
-  inline Status InsertSaved(
+  inline rocksdb_rs::status::Status InsertSaved(
       const Slice& key, const Slice& data, TCreateContext* create_context,
       Priority priority = Priority::LOW,
       CacheTier lowest_used_cache_tier = CacheTier::kNonVolatileBlockTier,
       size_t* out_charge = nullptr) {
     ObjectPtr value;
     size_t charge;
-    Status st = GetFullHelper()->create_cb(data, create_context,
+    rocksdb_rs::status::Status st = GetFullHelper()->create_cb(data, create_context,
                                            this->cache_->memory_allocator(),
                                            &value, &charge);
     if (out_charge) {

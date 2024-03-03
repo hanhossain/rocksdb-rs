@@ -15,9 +15,9 @@
 namespace rocksdb {
 namespace blob_db {
 
-Status BlobDBImpl::DisableFileDeletions() {
+rocksdb_rs::status::Status BlobDBImpl::DisableFileDeletions() {
   // Disable base DB file deletions.
-  Status s = db_impl_->DisableFileDeletions();
+  rocksdb_rs::status::Status s = db_impl_->DisableFileDeletions();
   if (!s.ok()) {
     return s;
   }
@@ -35,9 +35,9 @@ Status BlobDBImpl::DisableFileDeletions() {
   return Status_OK();
 }
 
-Status BlobDBImpl::EnableFileDeletions(bool force) {
+rocksdb_rs::status::Status BlobDBImpl::EnableFileDeletions(bool force) {
   // Enable base DB file deletions.
-  Status s = db_impl_->EnableFileDeletions(force);
+  rocksdb_rs::status::Status s = db_impl_->EnableFileDeletions(force);
   if (!s.ok()) {
     return s;
   }
@@ -60,7 +60,7 @@ Status BlobDBImpl::EnableFileDeletions(bool force) {
   return Status_OK();
 }
 
-Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
+rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
                                 uint64_t* manifest_file_size,
                                 bool flush_memtable) {
   if (!bdb_options_.path_relative) {
@@ -69,7 +69,7 @@ Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
   }
   // Hold a lock in the beginning to avoid updates to base DB during the call
   ReadLock rl(&mutex_);
-  Status s = db_->GetLiveFiles(ret, manifest_file_size, flush_memtable);
+  rocksdb_rs::status::Status s = db_->GetLiveFiles(ret, manifest_file_size, flush_memtable);
   if (!s.ok()) {
     return s;
   }

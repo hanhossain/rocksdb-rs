@@ -94,7 +94,7 @@ DBIter::DBIter(Env* _env, const ReadOptions& read_options,
          user_comparator_.user_comparator()->timestamp_size());
 }
 
-Status DBIter::GetProperty(std::string prop_name, std::string* prop) {
+rocksdb_rs::status::Status DBIter::GetProperty(std::string prop_name, std::string* prop) {
   if (prop == nullptr) {
     return Status_InvalidArgument("prop is nullptr");
   }
@@ -116,7 +116,7 @@ Status DBIter::GetProperty(std::string prop_name, std::string* prop) {
 }
 
 bool DBIter::ParseKey(ParsedInternalKey* ikey) {
-  Status s = ParseInternalKey(iter_.key(), ikey, false /* log_err_key */);
+  rocksdb_rs::status::Status s = ParseInternalKey(iter_.key(), ikey, false /* log_err_key */);
   if (!s.ok()) {
     status_ = Status_Corruption("In DBIter: ", s.getState());
     valid_ = false;
@@ -205,7 +205,7 @@ bool DBIter::SetBlobValueIfNeeded(const Slice& user_key,
   constexpr FilePrefetchBuffer* prefetch_buffer = nullptr;
   constexpr uint64_t* bytes_read = nullptr;
 
-  const Status s = version_->GetBlob(read_options, user_key, blob_index,
+  const rocksdb_rs::status::Status s = version_->GetBlob(read_options, user_key, blob_index,
                                      prefetch_buffer, &blob_value_, bytes_read);
 
   if (!s.ok()) {
@@ -222,7 +222,7 @@ bool DBIter::SetValueAndColumnsFromEntity(Slice slice) {
   assert(value_.empty());
   assert(wide_columns_.empty());
 
-  const Status s = WideColumnSerialization::Deserialize(slice, wide_columns_);
+  const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(slice, wide_columns_);
 
   if (!s.ok()) {
     status_.copy_from(s);
@@ -1253,7 +1253,7 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
 bool DBIter::Merge(const Slice* val, const Slice& user_key) {
   // `op_failure_scope` (an output parameter) is not provided (set to nullptr)
   // since a failure must be propagated regardless of its value.
-  Status s = MergeHelper::TimedFullMerge(
+  rocksdb_rs::status::Status s = MergeHelper::TimedFullMerge(
       merge_operator_, user_key, val, merge_context_.GetOperands(),
       &saved_value_, logger_, statistics_, clock_, &pinned_value_,
       /* update_num_ops_stats */ true,
@@ -1274,7 +1274,7 @@ bool DBIter::Merge(const Slice* val, const Slice& user_key) {
 bool DBIter::MergeEntity(const Slice& entity, const Slice& user_key) {
   // `op_failure_scope` (an output parameter) is not provided (set to nullptr)
   // since a failure must be propagated regardless of its value.
-  Status s = MergeHelper::TimedFullMergeWithEntity(
+  rocksdb_rs::status::Status s = MergeHelper::TimedFullMergeWithEntity(
       merge_operator_, user_key, entity, merge_context_.GetOperands(),
       &saved_value_, logger_, statistics_, clock_,
       /* update_num_ops_stats */ true,

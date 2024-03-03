@@ -110,11 +110,11 @@ class IOTraceWriter {
   IOTraceWriter(IOTraceWriter&&) = delete;
   IOTraceWriter& operator=(IOTraceWriter&&) = delete;
 
-  Status WriteIOOp(const IOTraceRecord& record, IODebugContext* dbg);
+  rocksdb_rs::status::Status WriteIOOp(const IOTraceRecord& record, IODebugContext* dbg);
 
   // Write a trace header at the beginning, typically on initiating a trace,
   // with some metadata like a magic number and RocksDB version.
-  Status WriteHeader();
+  rocksdb_rs::status::Status WriteHeader();
 
  private:
   SystemClock* clock_;
@@ -133,9 +133,9 @@ class IOTraceReader {
   IOTraceReader(IOTraceReader&&) = delete;
   IOTraceReader& operator=(IOTraceReader&&) = delete;
 
-  Status ReadHeader(IOTraceHeader* header);
+  rocksdb_rs::status::Status ReadHeader(IOTraceHeader* header);
 
-  Status ReadIOOp(IOTraceRecord* record);
+  rocksdb_rs::status::Status ReadIOOp(IOTraceRecord* record);
 
  private:
   std::unique_ptr<TraceReader> trace_reader_;
@@ -160,7 +160,7 @@ class IOTracer {
   // tracing_enabled shows non updated value.
 
   // Start writing IO operations to the trace_writer.
-  TSAN_SUPPRESSION Status
+  TSAN_SUPPRESSION rocksdb_rs::status::Status
   StartIOTrace(SystemClock* clock, const TraceOptions& trace_options,
                std::unique_ptr<TraceWriter>&& trace_writer);
 

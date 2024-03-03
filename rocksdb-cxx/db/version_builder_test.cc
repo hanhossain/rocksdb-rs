@@ -467,7 +467,7 @@ TEST_F(VersionBuilderTest, ApplyFileDeletionIncorrectLevel) {
 
   edit.DeleteFile(incorrect_level, file_number);
 
-  const Status s = builder.Apply(&edit);
+  const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot delete table file #2345 from level 3 since "
@@ -491,7 +491,7 @@ TEST_F(VersionBuilderTest, ApplyFileDeletionNotInLSMTree) {
 
   edit.DeleteFile(level, file_number);
 
-  const Status s = builder.Apply(&edit);
+  const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot delete table file #1234 from level 3 since "
@@ -595,7 +595,7 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAlreadyInBase) {
       kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
       0, /* user_defined_timestamps_persisted */ true);
 
-  const Status s = builder.Apply(&edit);
+  const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot add table file #2345 to level 2 since it is "
@@ -646,7 +646,7 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAlreadyApplied) {
       kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
       0, /* user_defined_timestamps_persisted */ true);
 
-  const Status s = builder.Apply(&other_edit);
+  const rocksdb_rs::status::Status s = builder.Apply(&other_edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(),
                           "Cannot add table file #2345 to level 2 since it is "
@@ -794,7 +794,7 @@ TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyInBase) {
   edit.AddBlobFile(blob_file_number, total_blob_count, total_blob_bytes,
                    checksum_method, checksum_value);
 
-  const Status s = builder.Apply(&edit);
+  const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
 }
@@ -826,7 +826,7 @@ TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyApplied) {
 
   ASSERT_OK(builder.Apply(&edit));
 
-  const Status s = builder.Apply(&edit);
+  const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
 }
@@ -997,7 +997,7 @@ TEST_F(VersionBuilderTest, ApplyBlobFileGarbageFileNotFound) {
   edit.AddBlobFileGarbage(blob_file_number, garbage_blob_count,
                           garbage_blob_bytes);
 
-  const Status s = builder.Apply(&edit);
+  const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 not found"));
 }
@@ -1045,7 +1045,7 @@ TEST_F(VersionBuilderTest, BlobFileGarbageOverflow) {
     garbage.AddBlobFileGarbage(blob_file_number, garbage_blob_count,
                                garbage_blob_bytes);
 
-    const Status s = builder.Apply(&garbage);
+    const rocksdb_rs::status::Status s = builder.Apply(&garbage);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(
         std::strstr(s.getState()->c_str(), "Garbage overflow for blob file #1234"));
@@ -1061,7 +1061,7 @@ TEST_F(VersionBuilderTest, BlobFileGarbageOverflow) {
     garbage.AddBlobFileGarbage(blob_file_number, garbage_blob_count,
                                garbage_blob_bytes);
 
-    const Status s = builder.Apply(&garbage);
+    const rocksdb_rs::status::Status s = builder.Apply(&garbage);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(
         std::strstr(s.getState()->c_str(), "Garbage overflow for blob file #1234"));
@@ -1408,7 +1408,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesInconsistentLinks) {
                                   kCompactionStyleLevel, &vstorage_,
                                   force_consistency_checks);
 
-  const Status s = builder.SaveTo(&new_vstorage);
+  const rocksdb_rs::status::Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(
       s.getState()->c_str(),
@@ -1449,7 +1449,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesAllGarbage) {
                                   kCompactionStyleLevel, &vstorage_,
                                   force_consistency_checks);
 
-  const Status s = builder.SaveTo(&new_vstorage);
+  const rocksdb_rs::status::Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(
       std::strstr(s.getState()->c_str(), "Blob file #16 consists entirely of garbage"));
@@ -1498,7 +1498,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesAllGarbageLinkedSsts) {
                                   kCompactionStyleLevel, &vstorage_,
                                   force_consistency_checks);
 
-  const Status s = builder.SaveTo(&new_vstorage);
+  const rocksdb_rs::status::Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(
       std::strstr(s.getState()->c_str(), "Blob file #16 consists entirely of garbage"));
@@ -1728,7 +1728,7 @@ TEST_F(VersionBuilderTest, CheckConsistencyForFileDeletedTwice) {
 }
 
 TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   // To verify files of same epoch number of overlapping ranges are caught as
   // corrupted
   VersionEdit version_edit_1;

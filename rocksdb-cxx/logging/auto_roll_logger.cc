@@ -43,7 +43,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
       cached_now_access_count(0),
       call_NowMicros_every_N_records_(100),
       mutex_() {
-  Status s = fs->GetAbsolutePath(dbname, io_options_, &db_absolute_path_,
+  rocksdb_rs::status::Status s = fs->GetAbsolutePath(dbname, io_options_, &db_absolute_path_,
                                  &io_context_);
   if (s.IsNotSupported()) {
     db_absolute_path_ = dbname;
@@ -61,7 +61,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
   }
 }
 
-Status AutoRollLogger::ResetLogger() {
+rocksdb_rs::status::Status AutoRollLogger::ResetLogger() {
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:BeforeNewLogger");
   status_ = fs_->NewLogger(log_fname_, io_options_, &logger_, &io_context_);
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:AfterNewLogger");
@@ -108,7 +108,7 @@ void AutoRollLogger::RollLogFile() {
   if (logger_) {
     logger_->Close();
   }
-  Status s = fs_->RenameFile(log_fname_, old_fname, io_options_, &io_context_);
+  rocksdb_rs::status::Status s = fs_->RenameFile(log_fname_, old_fname, io_options_, &io_context_);
   if (!s.ok()) {
     // What should we do on error?
   }
@@ -124,7 +124,7 @@ void AutoRollLogger::GetExistingFiles() {
 
   std::string parent_dir;
   std::vector<std::string> info_log_files;
-  Status s =
+  rocksdb_rs::status::Status s =
       GetInfoLogFiles(fs_, db_log_dir_, dbname_, &parent_dir, &info_log_files);
   if (status_.ok()) {
     status_.copy_from(s);
@@ -138,7 +138,7 @@ void AutoRollLogger::GetExistingFiles() {
   }
 }
 
-Status AutoRollLogger::TrimOldLogFiles() {
+rocksdb_rs::status::Status AutoRollLogger::TrimOldLogFiles() {
   // Here we directly list info files and delete them through FileSystem.
   // The deletion isn't going through DB, so there are shortcomes:
   // 1. the deletion is not rate limited by SstFileManager
@@ -152,7 +152,7 @@ Status AutoRollLogger::TrimOldLogFiles() {
   // it's essentially the same thing, and checking empty before accessing
   // the queue feels safer.
   while (!old_log_files_.empty() && old_log_files_.size() >= kKeepLogFileNum) {
-    Status s =
+    rocksdb_rs::status::Status s =
         fs_->DeleteFile(old_log_files_.front(), io_options_, &io_context_);
     // Remove the file from the tracking anyway. It's possible that
     // DB cleaned up the old log file, or people cleaned it up manually.
@@ -206,8 +206,8 @@ void AutoRollLogger::Logv(const char* format, va_list ap) {
     if ((kLogFileTimeToRoll > 0 && LogExpired()) ||
         (kMaxLogFileSize > 0 && logger_->GetLogFileSize() >= kMaxLogFileSize)) {
       RollLogFile();
-      Status s = ResetLogger();
-      Status s2 = TrimOldLogFiles();
+      rocksdb_rs::status::Status s = ResetLogger();
+      rocksdb_rs::status::Status s2 = TrimOldLogFiles();
 
       if (!s.ok()) {
         // can't really log the error if creating a new LOG file failed
@@ -272,7 +272,7 @@ bool AutoRollLogger::LogExpired() {
   return cached_now >= ctime_ + kLogFileTimeToRoll;
 }
 
-Status CreateLoggerFromOptions(const std::string& dbname,
+rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
                                const DBOptions& options,
                                std::shared_ptr<Logger>* logger) {
   if (options.info_log) {
@@ -282,7 +282,7 @@ Status CreateLoggerFromOptions(const std::string& dbname,
 
   Env* env = options.env;
   std::string db_absolute_path;
-  Status s = env->GetAbsolutePath(dbname, &db_absolute_path);
+  rocksdb_rs::status::Status s = env->GetAbsolutePath(dbname, &db_absolute_path);
   TEST_SYNC_POINT_CALLBACK("rocksdb::CreateLoggerFromOptions:AfterGetPath", &s);
   if (!s.ok()) {
     return s;

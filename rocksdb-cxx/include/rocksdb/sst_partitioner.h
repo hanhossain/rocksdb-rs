@@ -84,7 +84,7 @@ class SstPartitionerFactory : public Customizable {
  public:
   ~SstPartitionerFactory() override {}
   static const char* Type() { return "SstPartitionerFactory"; }
-  static Status CreateFromString(
+  static rocksdb_rs::status::Status CreateFromString(
       const ConfigOptions& options, const std::string& value,
       std::shared_ptr<SstPartitionerFactory>* result);
 

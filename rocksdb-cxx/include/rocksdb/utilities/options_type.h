@@ -157,13 +157,13 @@ bool SerializeEnum(const std::unordered_map<std::string, T>& type_map,
 }
 
 template <typename T, size_t kSize>
-Status ParseArray(const ConfigOptions& config_options,
+rocksdb_rs::status::Status ParseArray(const ConfigOptions& config_options,
                   const OptionTypeInfo& elem_info, char separator,
                   const std::string& name, const std::string& value,
                   std::array<T, kSize>* result);
 
 template <typename T, size_t kSize>
-Status SerializeArray(const ConfigOptions& config_options,
+rocksdb_rs::status::Status SerializeArray(const ConfigOptions& config_options,
                       const OptionTypeInfo& elem_info, char separator,
                       const std::string& name, const std::array<T, kSize>& vec,
                       std::string* value);
@@ -175,13 +175,13 @@ bool ArraysAreEqual(const ConfigOptions& config_options,
                     const std::array<T, kSize>& array2, std::string* mismatch);
 
 template <typename T>
-Status ParseVector(const ConfigOptions& config_options,
+rocksdb_rs::status::Status ParseVector(const ConfigOptions& config_options,
                    const OptionTypeInfo& elem_info, char separator,
                    const std::string& name, const std::string& value,
                    std::vector<T>* result);
 
 template <typename T>
-Status SerializeVector(const ConfigOptions& config_options,
+rocksdb_rs::status::Status SerializeVector(const ConfigOptions& config_options,
                        const OptionTypeInfo& elem_info, char separator,
                        const std::string& name, const std::vector<T>& vec,
                        std::string* value);
@@ -199,7 +199,7 @@ bool VectorsAreEqual(const ConfigOptions& config_options,
 // @param name  The name of the options being parsed
 // @param value The string representation of the option
 // @param addr  Pointer to the object
-using ParseFunc = std::function<Status(
+using ParseFunc = std::function<rocksdb_rs::status::Status(
     const ConfigOptions& /*opts*/, const std::string& /*name*/,
     const std::string& /*value*/, void* /*addr*/)>;
 
@@ -210,7 +210,7 @@ using ParseFunc = std::function<Status(
 // @param name  The name of the options being serialized
 // @param addr  Pointer to the value being serialized
 // @param value The result of the serialization.
-using SerializeFunc = std::function<Status(
+using SerializeFunc = std::function<rocksdb_rs::status::Status(
     const ConfigOptions& /*opts*/, const std::string& /*name*/,
     const void* /*addr*/, std::string* /*value*/)>;
 
@@ -228,11 +228,11 @@ using EqualsFunc = std::function<bool(
 
 // Function for preparing/initializing an option.
 using PrepareFunc =
-    std::function<Status(const ConfigOptions& /*opts*/,
+    std::function<rocksdb_rs::status::Status(const ConfigOptions& /*opts*/,
                          const std::string& /*name*/, void* /*addr*/)>;
 
 // Function for validating an option.
-using ValidateFunc = std::function<Status(
+using ValidateFunc = std::function<rocksdb_rs::status::Status(
     const DBOptions& /*db_opts*/, const ColumnFamilyOptions& /*cf_opts*/,
     const std::string& /*name*/, const void* /*addr*/)>;
 
@@ -781,12 +781,12 @@ class OptionTypeInfo {
   // NotFound means the opt_name is not valid for this option
   // NotSupported means we do not know how to parse the value for this option
   // InvalidArgument means the opt_value is not valid for this option.
-  Status Parse(const ConfigOptions& config_options, const std::string& opt_name,
+  rocksdb_rs::status::Status Parse(const ConfigOptions& config_options, const std::string& opt_name,
                const std::string& opt_value, void* const opt_ptr) const;
 
   // Serializes the option in "opt_addr" according to the rules of this class
   // into the value at "opt_value".
-  Status Serialize(const ConfigOptions& config_options,
+  rocksdb_rs::status::Status Serialize(const ConfigOptions& config_options,
                    const std::string& opt_name, const void* const opt_ptr,
                    std::string* opt_value) const;
 
@@ -805,9 +805,9 @@ class OptionTypeInfo {
                       const std::string& opt_name, const void* const this_ptr,
                       const std::string& that_value) const;
 
-  Status Prepare(const ConfigOptions& config_options, const std::string& name,
+  rocksdb_rs::status::Status Prepare(const ConfigOptions& config_options, const std::string& name,
                  void* opt_ptr) const;
-  Status Validate(const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts,
+  rocksdb_rs::status::Status Validate(const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts,
                   const std::string& name, const void* opt_ptr) const;
 
   // Parses the input opts_map according to the type_map for the opt_addr
@@ -829,12 +829,12 @@ class OptionTypeInfo {
   // on success.  This method should typically only be used for simpler,
   // standalone structures and not those that contain shared and embedded
   // objects.
-  static Status ParseType(
+  static rocksdb_rs::status::Status ParseType(
       const ConfigOptions& config_options, const std::string& opts_str,
       const std::unordered_map<std::string, OptionTypeInfo>& type_map,
       void* opt_addr,
       std::unordered_map<std::string, std::string>* unused = nullptr);
-  static Status ParseType(
+  static rocksdb_rs::status::Status ParseType(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, std::string>& opts_map,
       const std::unordered_map<std::string, OptionTypeInfo>& type_map,
@@ -846,7 +846,7 @@ class OptionTypeInfo {
   // opt_name is the name of the option being evaluated.  This may
   // be the whole struct or a sub-element of it, based on struct_name and
   // opt_name.
-  static Status ParseStruct(
+  static rocksdb_rs::status::Status ParseStruct(
       const ConfigOptions& config_options, const std::string& struct_name,
       const std::unordered_map<std::string, OptionTypeInfo>* map,
       const std::string& opt_name, const std::string& value, void* opt_addr);
@@ -854,7 +854,7 @@ class OptionTypeInfo {
   // Serializes the values from opt_addr using the rules in type_map.
   // Returns the serialized form in result.
   // Returns OK on success or non-OK if some option could not be serialized.
-  static Status SerializeType(
+  static rocksdb_rs::status::Status SerializeType(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, OptionTypeInfo>& type_map,
       const void* opt_addr, std::string* value);
@@ -863,7 +863,7 @@ class OptionTypeInfo {
   // struct_name is the name of the struct option as registered
   // opt_name is the name of the option being evaluated.  This may
   // be the whole struct or a sub-element of it
-  static Status SerializeStruct(
+  static rocksdb_rs::status::Status SerializeStruct(
       const ConfigOptions& config_options, const std::string& struct_name,
       const std::unordered_map<std::string, OptionTypeInfo>* map,
       const std::string& opt_name, const void* opt_addr, std::string* value);
@@ -919,7 +919,7 @@ class OptionTypeInfo {
   //          (e.g. "{a={b=c;}" ) -- missing closing brace
   // @return InvalidArgument if an expected delimiter is not found
   //        e.g. "{a=b}c=d;" -- missing delimiter before "c"
-  static Status NextToken(const std::string& opts, char delimiter, size_t start,
+  static rocksdb_rs::status::Status NextToken(const std::string& opts, char delimiter, size_t start,
                           size_t* end, std::string* token);
 
   constexpr static const char* kIdPropName() { return "id"; }
@@ -962,11 +962,11 @@ class OptionTypeInfo {
 // @return NotFound         If the tokenized value contains unknown options for
 // its type
 template <typename T, size_t kSize>
-Status ParseArray(const ConfigOptions& config_options,
+rocksdb_rs::status::Status ParseArray(const ConfigOptions& config_options,
                   const OptionTypeInfo& elem_info, char separator,
                   const std::string& name, const std::string& value,
                   std::array<T, kSize>* result) {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
 
   ConfigOptions copy = config_options;
   copy.ignore_unsupported_options = false;
@@ -1020,7 +1020,7 @@ Status ParseArray(const ConfigOptions& config_options,
 // @return NotFound        If the tokenized value contains unknown options for
 //                          its type
 template <typename T, size_t kSize>
-Status SerializeArray(const ConfigOptions& config_options,
+rocksdb_rs::status::Status SerializeArray(const ConfigOptions& config_options,
                       const OptionTypeInfo& elem_info, char separator,
                       const std::string& name,
                       const std::array<T, kSize>& array, std::string* value) {
@@ -1030,7 +1030,7 @@ Status SerializeArray(const ConfigOptions& config_options,
   int printed = 0;
   for (const auto& elem : array) {
     std::string elem_str;
-    Status s = elem_info.Serialize(embedded, name, &elem, &elem_str);
+    rocksdb_rs::status::Status s = elem_info.Serialize(embedded, name, &elem, &elem_str);
     if (!s.ok()) {
       return s;
     } else if (!elem_str.empty()) {
@@ -1101,12 +1101,12 @@ bool ArraysAreEqual(const ConfigOptions& config_options,
 // @return NotFound         If the tokenized value contains unknown options for
 // its type
 template <typename T>
-Status ParseVector(const ConfigOptions& config_options,
+rocksdb_rs::status::Status ParseVector(const ConfigOptions& config_options,
                    const OptionTypeInfo& elem_info, char separator,
                    const std::string& name, const std::string& value,
                    std::vector<T>* result) {
   result->clear();
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
 
   // Turn off ignore_unknown_objects so we can tell if the returned
   // object is valid or not.
@@ -1152,7 +1152,7 @@ Status ParseVector(const ConfigOptions& config_options,
 // @return NotFound         If the tokenized value contains unknown options for
 // its type
 template <typename T>
-Status SerializeVector(const ConfigOptions& config_options,
+rocksdb_rs::status::Status SerializeVector(const ConfigOptions& config_options,
                        const OptionTypeInfo& elem_info, char separator,
                        const std::string& name, const std::vector<T>& vec,
                        std::string* value) {
@@ -1162,7 +1162,7 @@ Status SerializeVector(const ConfigOptions& config_options,
   int printed = 0;
   for (const auto& elem : vec) {
     std::string elem_str;
-    Status s = elem_info.Serialize(embedded, name, &elem, &elem_str);
+    rocksdb_rs::status::Status s = elem_info.Serialize(embedded, name, &elem, &elem_str);
     if (!s.ok()) {
       return s;
     } else if (!elem_str.empty()) {

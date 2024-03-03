@@ -170,7 +170,7 @@ class ShardedCache : public ShardedCacheBase {
         [s_c_l](CacheShard* cs) { cs->SetStrictCapacityLimit(s_c_l); });
   }
 
-  Status Insert(const Slice& key, ObjectPtr obj, const CacheItemHelper* helper,
+  rocksdb_rs::status::Status Insert(const Slice& key, ObjectPtr obj, const CacheItemHelper* helper,
                 size_t charge, Handle** handle = nullptr,
                 Priority priority = Priority::LOW) override {
     assert(helper);

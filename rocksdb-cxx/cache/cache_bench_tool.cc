@@ -240,13 +240,13 @@ Cache::ObjectPtr createValue(Random64& rnd) {
 // Callbacks for secondary cache
 size_t SizeFn(Cache::ObjectPtr /*obj*/) { return FLAGS_value_bytes; }
 
-Status SaveToFn(Cache::ObjectPtr from_obj, size_t /*from_offset*/,
+rocksdb_rs::status::Status SaveToFn(Cache::ObjectPtr from_obj, size_t /*from_offset*/,
                 size_t length, char* out) {
   memcpy(out, from_obj, length);
   return Status_OK();
 }
 
-Status CreateFn(const Slice& data, Cache::CreateContext* /*context*/,
+rocksdb_rs::status::Status CreateFn(const Slice& data, Cache::CreateContext* /*context*/,
                 MemoryAllocator* /*allocator*/, Cache::ObjectPtr* out_obj,
                 size_t* out_charge) {
   *out_obj = new char[data.size()];
@@ -311,7 +311,7 @@ class CacheBench {
                            false /* strict_capacity_limit */,
                            0.5 /* high_pri_pool_ratio */);
       if (!FLAGS_secondary_cache_uri.empty()) {
-        Status s = SecondaryCache::CreateFromString(
+        rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(
             ConfigOptions(), FLAGS_secondary_cache_uri, &secondary_cache);
         if (secondary_cache == nullptr) {
           fprintf(
@@ -336,7 +336,7 @@ class CacheBench {
     Random64 rnd(1);
     KeyGen keygen;
     for (uint64_t i = 0; i < 2 * FLAGS_cache_size; i += FLAGS_value_bytes) {
-      Status s = cache_->Insert(keygen.GetRand(rnd, max_key_, max_log_),
+      rocksdb_rs::status::Status s = cache_->Insert(keygen.GetRand(rnd, max_key_, max_log_),
                                 createValue(rnd), &helper1, FLAGS_value_bytes);
       assert(s.ok());
     }
@@ -560,7 +560,7 @@ class CacheBench {
           }
         } else {
           // do insert
-          Status s = cache_->Insert(key, createValue(thread->rnd), &helper2,
+          rocksdb_rs::status::Status s = cache_->Insert(key, createValue(thread->rnd), &helper2,
                                     FLAGS_value_bytes, &handle);
           assert(s.ok());
         }
@@ -570,7 +570,7 @@ class CacheBench {
           handle = nullptr;
         }
         // do insert
-        Status s = cache_->Insert(key, createValue(thread->rnd), &helper3,
+        rocksdb_rs::status::Status s = cache_->Insert(key, createValue(thread->rnd), &helper3,
                                   FLAGS_value_bytes, &handle);
         assert(s.ok());
       } else if (random_op < lookup_threshold_) {

@@ -1429,7 +1429,7 @@ TEST_P(DBFilterConstructionCorruptionTestWithParam, DetectCorruption) {
 
   DestroyAndReopen(options);
   int num_key = static_cast<int>(GetNumKey());
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   // Case 1: No corruption in filter construction
   for (int i = 0; i < num_key; i++) {
@@ -1519,7 +1519,7 @@ TEST_P(DBFilterConstructionCorruptionTestWithParam,
   options.create_if_missing = true;
 
   int num_key = static_cast<int>(GetNumKey());
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   DestroyAndReopen(options);
 
@@ -2041,7 +2041,7 @@ TEST_P(DBBloomFilterTestVaryPrefixAndFormatVer, PartitionedMultiGet) {
   std::array<Slice, Q> key_slices;
   std::array<ColumnFamilyHandle*, Q> column_families;
   // MultiGet Out
-  rust::Vec<Status> statuses = Status_new().create_vec(Q);
+  rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(Q);
   std::array<PinnableSlice, Q> values;
 
   PopTicker(options, BLOCK_CACHE_FILTER_HIT);

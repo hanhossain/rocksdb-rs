@@ -127,12 +127,12 @@ FileExpectedState::FileExpectedState(std::string expected_state_file_path,
     : ExpectedState(max_key, num_column_families),
       expected_state_file_path_(expected_state_file_path) {}
 
-Status FileExpectedState::Open(bool create) {
+rocksdb_rs::status::Status FileExpectedState::Open(bool create) {
   size_t expected_values_size = GetValuesLen();
 
   Env* default_env = Env::Default();
 
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   if (create) {
     std::unique_ptr<WritableFile> wfile;
     const EnvOptions soptions;
@@ -165,9 +165,9 @@ AnonExpectedState::AnonExpectedState(size_t max_key, size_t num_column_families)
     : ExpectedState(max_key, num_column_families) {}
 
 #ifndef NDEBUG
-Status AnonExpectedState::Open(bool create) {
+rocksdb_rs::status::Status AnonExpectedState::Open(bool create) {
 #else
-Status AnonExpectedState::Open(bool /* create */) {
+rocksdb_rs::status::Status AnonExpectedState::Open(bool /* create */) {
 #endif
   // AnonExpectedState only supports being freshly created.
   assert(create);
@@ -201,11 +201,11 @@ FileExpectedStateManager::FileExpectedStateManager(
   assert(!expected_state_dir_path_.empty());
 }
 
-Status FileExpectedStateManager::Open() {
+rocksdb_rs::status::Status FileExpectedStateManager::Open() {
   // Before doing anything, sync directory state with ours. That is, determine
   // `saved_seqno_`, and create any necessary missing files.
   std::vector<std::string> expected_state_dir_children;
-  Status s = Env::Default()->GetChildren(expected_state_dir_path_,
+  rocksdb_rs::status::Status s = Env::Default()->GetChildren(expected_state_dir_path_,
                                          &expected_state_dir_children);
   bool found_trace = false;
   if (s.ok()) {
@@ -227,7 +227,7 @@ Status FileExpectedStateManager::Open() {
     if (saved_seqno_ != kMaxSequenceNumber) {
       std::string saved_seqno_trace_path = GetPathForFilename(
           std::to_string(saved_seqno_) + kTraceFilenameSuffix);
-      Status exists_status = Env::Default()->FileExists(saved_seqno_trace_path);
+      rocksdb_rs::status::Status exists_status = Env::Default()->FileExists(saved_seqno_trace_path);
       if (exists_status.ok()) {
         found_trace = true;
       } else if (exists_status.IsNotFound()) {
@@ -256,7 +256,7 @@ Status FileExpectedStateManager::Open() {
       GetPathForFilename(kLatestBasename + kStateFilenameSuffix);
   bool found = false;
   if (s.ok()) {
-    Status exists_status = Env::Default()->FileExists(expected_state_file_path);
+    rocksdb_rs::status::Status exists_status = Env::Default()->FileExists(expected_state_file_path);
     if (exists_status.ok()) {
       found = true;
     } else if (exists_status.IsNotFound()) {
@@ -291,7 +291,7 @@ Status FileExpectedStateManager::Open() {
   return s;
 }
 
-Status FileExpectedStateManager::SaveAtAndAfter(DB* db) {
+rocksdb_rs::status::Status FileExpectedStateManager::SaveAtAndAfter(DB* db) {
   SequenceNumber seqno = db->GetLatestSequenceNumber();
 
   std::string state_filename = std::to_string(seqno) + kStateFilenameSuffix;
@@ -306,7 +306,7 @@ Status FileExpectedStateManager::SaveAtAndAfter(DB* db) {
 
   // Populate a tempfile and then rename it to atomically create "<seqno>.state"
   // with contents from "LATEST.state"
-  Status s = CopyFile(FileSystem::Default(), latest_file_path,
+  rocksdb_rs::status::Status s = CopyFile(FileSystem::Default(), latest_file_path,
                       state_file_temp_path, 0 /* size */, false /* use_fsync */,
                       nullptr /* io_tracer */, Temperature::kUnknown);
   if (s.ok()) {
@@ -383,7 +383,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   // True if we have already reached the limit on write operations to apply.
   bool IsDone() { return num_write_ops_ == max_write_ops_; }
 
-  Status Handle(const WriteQueryTraceRecord& record,
+  rocksdb_rs::status::Status Handle(const WriteQueryTraceRecord& record,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
     if (IsDone()) {
       return Status_OK();
@@ -393,19 +393,19 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   }
 
   // Ignore reads.
-  Status Handle(const GetQueryTraceRecord& /* record */,
+  rocksdb_rs::status::Status Handle(const GetQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
     return Status_OK();
   }
 
   // Ignore reads.
-  Status Handle(const IteratorSeekQueryTraceRecord& /* record */,
+  rocksdb_rs::status::Status Handle(const IteratorSeekQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
     return Status_OK();
   }
 
   // Ignore reads.
-  Status Handle(const MultiGetQueryTraceRecord& /* record */,
+  rocksdb_rs::status::Status Handle(const MultiGetQueryTraceRecord& /* record */,
                 std::unique_ptr<TraceRecordResult>* /* result */) override {
     return Status_OK();
   }
@@ -414,7 +414,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   // object, but it's convenient and works to share state with the
   // `TraceRecord::Handler`.
 
-  Status PutCF(uint32_t column_family_id, const Slice& key_with_ts,
+  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key_with_ts,
                const Slice& value) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
@@ -435,7 +435,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return Status_OK();
   }
 
-  Status PutEntityCF(uint32_t column_family_id, const Slice& key_with_ts,
+  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id, const Slice& key_with_ts,
                      const Slice& entity) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
@@ -474,7 +474,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return Status_OK();
   }
 
-  Status DeleteCF(uint32_t column_family_id,
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
                   const Slice& key_with_ts) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
@@ -494,7 +494,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return Status_OK();
   }
 
-  Status SingleDeleteCF(uint32_t column_family_id,
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
                         const Slice& key_with_ts) override {
     bool should_buffer_write = !(buffered_writes_ == nullptr);
     if (should_buffer_write) {
@@ -511,7 +511,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return DeleteCF(column_family_id, key_with_ts);
   }
 
-  Status DeleteRangeCF(uint32_t column_family_id,
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id,
                        const Slice& begin_key_with_ts,
                        const Slice& end_key_with_ts) override {
     Slice begin_key =
@@ -540,7 +540,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return Status_OK();
   }
 
-  Status MergeCF(uint32_t column_family_id, const Slice& key_with_ts,
+  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key_with_ts,
                  const Slice& value) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
@@ -554,13 +554,13 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return PutCF(column_family_id, key, value);
   }
 
-  Status MarkBeginPrepare(bool = false) override {
+  rocksdb_rs::status::Status MarkBeginPrepare(bool = false) override {
     assert(!buffered_writes_);
     buffered_writes_.reset(new WriteBatch());
     return Status_OK();
   }
 
-  Status MarkEndPrepare(const Slice& xid) override {
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice& xid) override {
     assert(buffered_writes_);
     std::string xid_str = xid.ToString();
     assert(xid_to_buffered_writes_.find(xid_str) ==
@@ -573,19 +573,19 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return Status_OK();
   }
 
-  Status MarkCommit(const Slice& xid) override {
+  rocksdb_rs::status::Status MarkCommit(const Slice& xid) override {
     std::string xid_str = xid.ToString();
     assert(xid_to_buffered_writes_.find(xid_str) !=
            xid_to_buffered_writes_.end());
     assert(xid_to_buffered_writes_.at(xid_str));
 
-    Status s = xid_to_buffered_writes_.at(xid_str)->Iterate(this);
+    rocksdb_rs::status::Status s = xid_to_buffered_writes_.at(xid_str)->Iterate(this);
     xid_to_buffered_writes_.erase(xid_str);
 
     return s;
   }
 
-  Status MarkRollback(const Slice& xid) override {
+  rocksdb_rs::status::Status MarkRollback(const Slice& xid) override {
     std::string xid_str = xid.ToString();
     assert(xid_to_buffered_writes_.find(xid_str) !=
            xid_to_buffered_writes_.end());
@@ -606,7 +606,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
 }  // anonymous namespace
 
-Status FileExpectedStateManager::Restore(DB* db) {
+rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
   assert(HasHistory());
   SequenceNumber seqno = db->GetLatestSequenceNumber();
   if (seqno < saved_seqno_) {
@@ -627,7 +627,7 @@ Status FileExpectedStateManager::Restore(DB* db) {
   std::string trace_file_path = GetPathForFilename(trace_filename);
 
   std::unique_ptr<TraceReader> trace_reader;
-  Status s = NewFileTraceReader(Env::Default(), EnvOptions(), trace_file_path,
+  rocksdb_rs::status::Status s = NewFileTraceReader(Env::Default(), EnvOptions(), trace_file_path,
                                 &trace_reader);
 
   if (s.ok()) {
@@ -708,9 +708,9 @@ Status FileExpectedStateManager::Restore(DB* db) {
   return s;
 }
 
-Status FileExpectedStateManager::Clean() {
+rocksdb_rs::status::Status FileExpectedStateManager::Clean() {
   std::vector<std::string> expected_state_dir_children;
-  Status s = Env::Default()->GetChildren(expected_state_dir_path_,
+  rocksdb_rs::status::Status s = Env::Default()->GetChildren(expected_state_dir_path_,
                                          &expected_state_dir_children);
   // An incomplete `Open()` or incomplete `SaveAtAndAfter()` could have left
   // behind invalid temporary files. An incomplete `SaveAtAndAfter()` could have
@@ -770,7 +770,7 @@ AnonExpectedStateManager::AnonExpectedStateManager(size_t max_key,
                                                    size_t num_column_families)
     : ExpectedStateManager(max_key, num_column_families) {}
 
-Status AnonExpectedStateManager::Open() {
+rocksdb_rs::status::Status AnonExpectedStateManager::Open() {
   latest_.reset(new AnonExpectedState(max_key_, num_column_families_));
   return latest_->Open(true /* create */);
 }

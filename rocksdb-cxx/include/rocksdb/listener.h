@@ -22,6 +22,10 @@
 #include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/status.rs.h"
 
+namespace rocksdb_rs::status {
+  struct Status;
+}
+
 namespace rocksdb {
 
 using TablePropertiesCollection =
@@ -29,7 +33,6 @@ using TablePropertiesCollection =
 
 class DB;
 class ColumnFamilyHandle;
-struct Status;
 struct CompactionJobStats;
 
 struct FileCreationBriefInfo {
@@ -75,7 +78,7 @@ struct TableFileCreationInfo : public TableFileCreationBriefInfo {
   // Detailed properties of the created file.
   TableProperties table_properties;
   // The status indicating whether the creation was successful or not.
-  Status status;
+  rocksdb_rs::status::Status status;
   // The checksum of the table file being created
   std::string file_checksum;
   // The checksum function name of checksum generator used for this table file
@@ -98,7 +101,7 @@ struct BlobFileCreationInfo : public BlobFileCreationBriefInfo {
                        const std::string& _file_path, int _job_id,
                        BlobFileCreationReason _reason,
                        uint64_t _total_blob_count, uint64_t _total_blob_bytes,
-                       Status _status, const std::string& _file_checksum,
+                       rocksdb_rs::status::Status _status, const std::string& _file_checksum,
                        const std::string& _file_checksum_func_name)
       : BlobFileCreationBriefInfo(_db_name, _cf_name, _file_path, _job_id,
                                   _reason),
@@ -113,7 +116,7 @@ struct BlobFileCreationInfo : public BlobFileCreationBriefInfo {
   // the total bytes in a file.
   uint64_t total_blob_bytes;
   // The status indicating whether the creation was successful or not.
-  Status status;
+  rocksdb_rs::status::Status status;
   // The checksum of the blob file being created.
   std::string file_checksum;
   // The checksum function name of checksum generator used for this blob file.
@@ -219,7 +222,7 @@ struct FileDeletionInfo {
   FileDeletionInfo() : status(Status_new()) {}
 
   FileDeletionInfo(const std::string& _db_name, const std::string& _file_path,
-                   int _job_id, Status _status)
+                   int _job_id, rocksdb_rs::status::Status _status)
       : db_name(_db_name),
         file_path(_file_path),
         job_id(_job_id),
@@ -231,7 +234,7 @@ struct FileDeletionInfo {
   // The id of the job which deleted the file.
   int job_id = 0;
   // The status indicating whether the deletion was successful or not.
-  Status status;
+  rocksdb_rs::status::Status status;
 };
 
 struct TableFileDeletionInfo : public FileDeletionInfo {};
@@ -239,7 +242,7 @@ struct TableFileDeletionInfo : public FileDeletionInfo {};
 struct BlobFileDeletionInfo : public FileDeletionInfo {
   BlobFileDeletionInfo(const std::string& _db_name,
                        const std::string& _file_path, int _job_id,
-                       Status _status)
+                       rocksdb_rs::status::Status _status)
       : FileDeletionInfo(_db_name, _file_path, _job_id, _status.Clone()) {}
 };
 
@@ -275,11 +278,11 @@ struct FileOperationInfo {
   size_t length;
   const Duration duration;
   const SystemTimePoint& start_ts;
-  Status status;
+  rocksdb_rs::status::Status status;
 
   FileOperationInfo(const FileOperationType _type, const std::string& _path,
                     const StartTimePoint& _start_ts,
-                    const FinishTimePoint& _finish_ts, const Status& _status,
+                    const FinishTimePoint& _finish_ts, const rocksdb_rs::status::Status& _status,
                     const Temperature _temperature = Temperature::kUnknown)
       : type(_type),
         path(_path),
@@ -402,7 +405,7 @@ struct SubcompactionJobInfo {
   // the name of the column family where the compaction happened.
   std::string cf_name;
   // the status indicating whether the compaction was successful or not.
-  Status status;
+  rocksdb_rs::status::Status status;
   // the id of the thread that completed this compaction job.
   uint64_t thread_id;
   // the job id, which is unique in the same thread.
@@ -440,7 +443,7 @@ struct CompactionJobInfo {
   // the name of the column family where the compaction happened.
   std::string cf_name;
   // the status indicating whether the compaction was successful or not.
-  Status status;
+  rocksdb_rs::status::Status status;
   // the id of the thread that completed this compaction job.
   uint64_t thread_id;
   // the job id, which is unique in the same thread.
@@ -527,11 +530,11 @@ struct ExternalFileIngestionInfo {
 // Result of auto background error recovery
 struct BackgroundErrorRecoveryInfo {
   // The original error that triggered the recovery
-  Status old_bg_error;
+  rocksdb_rs::status::Status old_bg_error;
 
   // The final bg_error after all recovery attempts. Status_OK() means
   // the recovery was successful and the database is fully operational.
-  Status new_bg_error;
+  rocksdb_rs::status::Status new_bg_error;
 
   BackgroundErrorRecoveryInfo() : old_bg_error(Status_new()), new_bg_error(Status_new()) {}
 };
@@ -586,7 +589,7 @@ struct IOErrorInfo {
 class EventListener : public Customizable {
  public:
   static const char* Type() { return "EventListener"; }
-  static Status CreateFromString(const ConfigOptions& options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
                                  const std::string& id,
                                  std::shared_ptr<EventListener>* result);
   const char* Name() const override {
@@ -760,7 +763,7 @@ class EventListener : public Customizable {
   // and user writes. So, it is extremely important not to perform heavy
   // computations or blocking calls in this function.
   virtual void OnBackgroundError(BackgroundErrorReason /* reason */,
-                                 Status* /* bg_error */) {}
+                                 rocksdb_rs::status::Status* /* bg_error */) {}
 
   // A callback function for RocksDB which will be called whenever a change
   // of superversion triggers a change of the stall conditions.
@@ -808,7 +811,7 @@ class EventListener : public Customizable {
   // recovery by setting *auto_recovery to false. The database will then
   // have to be transitioned out of read-only mode by calling DB::Resume()
   virtual void OnErrorRecoveryBegin(BackgroundErrorReason /* reason */,
-                                    Status /* bg_error */,
+                                    rocksdb_rs::status::Status /* bg_error */,
                                     bool* /* auto_recovery */) {}
 
   // DEPRECATED
@@ -816,7 +819,7 @@ class EventListener : public Customizable {
   // is recovered from read-only mode after an error. When this is called, it
   // means normal writes to the database can be issued and the user can
   // initiate any further recovery actions needed
-  virtual void OnErrorRecoveryCompleted(Status old_bg_error) {
+  virtual void OnErrorRecoveryCompleted(rocksdb_rs::status::Status old_bg_error) {
   }
 
   // A callback function for RocksDB which will be called once the recovery

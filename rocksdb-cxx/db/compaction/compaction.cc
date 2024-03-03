@@ -654,7 +654,7 @@ uint64_t Compaction::CalculateTotalInputSize() const {
   return size;
 }
 
-void Compaction::ReleaseCompactionFiles(Status status) {
+void Compaction::ReleaseCompactionFiles(rocksdb_rs::status::Status status) {
   MarkFilesBeingCompacted(false);
   cfd_->compaction_picker()->ReleaseCompactionFiles(this, status.Clone());
 }

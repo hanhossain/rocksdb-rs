@@ -92,7 +92,7 @@ class BlobIndex {
     return compression_;
   }
 
-  Status DecodeFrom(Slice slice) {
+  rocksdb_rs::status::Status DecodeFrom(Slice slice) {
     const char* kErrorMessage = "Error while decoding blob index";
     assert(slice.size() > 0);
     type_ = static_cast<Type>(*slice.data());

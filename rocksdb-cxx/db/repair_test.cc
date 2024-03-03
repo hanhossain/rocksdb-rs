@@ -24,12 +24,12 @@ class RepairTest : public DBTestBase {
  public:
   RepairTest() : DBTestBase("repair_test", /*env_do_fsync=*/true) {}
 
-  Status GetFirstSstPath(std::string* first_sst_path) {
+  rocksdb_rs::status::Status GetFirstSstPath(std::string* first_sst_path) {
     assert(first_sst_path != nullptr);
     first_sst_path->clear();
     uint64_t manifest_size;
     std::vector<std::string> files;
-    Status s = db_->GetLiveFiles(files, &manifest_size);
+    rocksdb_rs::status::Status s = db_->GetLiveFiles(files, &manifest_size);
     if (s.ok()) {
       auto sst_iter =
           std::find_if(files.begin(), files.end(), [](const std::string& file) {
@@ -326,7 +326,7 @@ class RepairTestWithTimestamp
   RepairTestWithTimestamp()
       : DBBasicTestWithTimestampBase("repair_test_with_timestamp") {}
 
-  Status Put(const Slice& key, const Slice& ts, const Slice& value) {
+  rocksdb_rs::status::Status Put(const Slice& key, const Slice& ts, const Slice& value) {
     WriteOptions write_opts;
     return db_->Put(write_opts, handles_[0], key, ts, value);
   }

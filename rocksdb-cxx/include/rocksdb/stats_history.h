@@ -65,7 +65,7 @@ class StatsHistoryIterator {
   virtual const std::map<std::string, uint64_t>& GetStatsMap() const = 0;
 
   // If an error has occurred, return it.  Else return an ok status.
-  virtual Status status() const = 0;
+  virtual rocksdb_rs::status::Status status() const = 0;
 };
 
 }  // namespace rocksdb

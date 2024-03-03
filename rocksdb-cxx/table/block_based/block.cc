@@ -717,7 +717,7 @@ bool IndexBlockIter::ParseNextIndexKey() {
 void IndexBlockIter::DecodeCurrentValue(bool is_shared) {
   Slice v(value_.data(), data_ + restarts_ - value_.data());
   // Delta encoding is used if `shared` != 0.
-  Status decode_s __attribute__((__unused__)) = decoded_value_.DecodeFrom(
+  rocksdb_rs::status::Status decode_s __attribute__((__unused__)) = decoded_value_.DecodeFrom(
       &v, have_first_key_,
       (value_delta_encoded_ && is_shared) ? &decoded_value_.handle : nullptr);
   assert(decode_s.ok());

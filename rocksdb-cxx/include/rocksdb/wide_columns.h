@@ -100,10 +100,10 @@ class PinnableWideColumns {
   void SetPlainValue(PinnableSlice&& value);
   void SetPlainValue(std::string&& value);
 
-  Status SetWideColumnValue(const Slice& value);
-  Status SetWideColumnValue(const Slice& value, Cleanable* cleanable);
-  Status SetWideColumnValue(PinnableSlice&& value);
-  Status SetWideColumnValue(std::string&& value);
+  rocksdb_rs::status::Status SetWideColumnValue(const Slice& value);
+  rocksdb_rs::status::Status SetWideColumnValue(const Slice& value, Cleanable* cleanable);
+  rocksdb_rs::status::Status SetWideColumnValue(PinnableSlice&& value);
+  rocksdb_rs::status::Status SetWideColumnValue(std::string&& value);
 
   void Reset();
 
@@ -114,7 +114,7 @@ class PinnableWideColumns {
   void MoveValue(std::string&& value);
 
   void CreateIndexForPlainValue();
-  Status CreateIndexForWideColumns();
+  rocksdb_rs::status::Status CreateIndexForWideColumns();
 
   PinnableSlice value_;
   WideColumns columns_;
@@ -171,23 +171,23 @@ inline void PinnableWideColumns::SetPlainValue(std::string&& value) {
   CreateIndexForPlainValue();
 }
 
-inline Status PinnableWideColumns::SetWideColumnValue(const Slice& value) {
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(const Slice& value) {
   CopyValue(value);
   return CreateIndexForWideColumns();
 }
 
-inline Status PinnableWideColumns::SetWideColumnValue(const Slice& value,
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(const Slice& value,
                                                       Cleanable* cleanable) {
   PinOrCopyValue(value, cleanable);
   return CreateIndexForWideColumns();
 }
 
-inline Status PinnableWideColumns::SetWideColumnValue(PinnableSlice&& value) {
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(PinnableSlice&& value) {
   MoveValue(std::move(value));
   return CreateIndexForWideColumns();
 }
 
-inline Status PinnableWideColumns::SetWideColumnValue(std::string&& value) {
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(std::string&& value) {
   MoveValue(std::move(value));
   return CreateIndexForWideColumns();
 }

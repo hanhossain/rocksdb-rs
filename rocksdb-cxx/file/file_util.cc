@@ -113,7 +113,7 @@ IOStatus CreateFile(FileSystem* fs, const std::string& destination,
   return dest_writer->Sync(use_fsync);
 }
 
-Status DeleteDBFile(const ImmutableDBOptions* db_options,
+rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_options,
                     const std::string& fname, const std::string& dir_to_sync,
                     const bool force_bg, const bool force_fg) {
   SstFileManagerImpl* sfm =
@@ -230,8 +230,8 @@ IOStatus GenerateOneFileChecksum(
   return IOStatus::OK();
 }
 
-Status DestroyDir(Env* env, const std::string& dir) {
-  Status s = Status_new();
+rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {
+  rocksdb_rs::status::Status s = Status_new();
   if (env->FileExists(dir).IsNotFound()) {
     return s;
   }

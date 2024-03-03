@@ -255,7 +255,7 @@ void MemTable::UpdateOldestKeyTime() {
   }
 }
 
-Status MemTable::VerifyEntryChecksum(const char* entry,
+rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
                                      uint32_t protection_bytes_per_key,
                                      bool allow_data_in_errors) {
   if (protection_bytes_per_key == 0) {
@@ -488,7 +488,7 @@ class MemTableIterator : public InternalIterator {
     return GetLengthPrefixedSlice(key_slice.data() + key_slice.size());
   }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   bool IsKeyPinned() const override {
     // memtable data is always pinned
@@ -509,7 +509,7 @@ class MemTableIterator : public InternalIterator {
   bool arena_mode_;
   bool value_pinned_;
   uint32_t protection_bytes_per_key_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   Logger* logger_;
 
   void VerifyEntryChecksum() {
@@ -618,7 +618,7 @@ MemTable::MemTableStats MemTable::ApproximateStats(const Slice& start_ikey,
   return {entry_count * (data_size / n), entry_count};
 }
 
-Status MemTable::VerifyEncodedEntry(Slice encoded,
+rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(Slice encoded,
                                     const ProtectionInfoKVOS64& kv_prot_info) {
   uint32_t ikey_len = 0;
   if (!GetVarint32(&encoded, &ikey_len)) {
@@ -678,7 +678,7 @@ void MemTable::UpdateEntryChecksum(const ProtectionInfoKVOS64* kv_prot_info,
   }
 }
 
-Status MemTable::Add(SequenceNumber s, ValueType type,
+rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
                      const Slice& key, /* user key */
                      const Slice& value,
                      const ProtectionInfoKVOS64* kv_prot_info,
@@ -718,7 +718,7 @@ Status MemTable::Add(SequenceNumber s, ValueType type,
   Slice encoded(buf, encoded_len - moptions_.protection_bytes_per_key);
   if (kv_prot_info != nullptr) {
     TEST_SYNC_POINT_CALLBACK("MemTable::Add:Encoded", &encoded);
-    Status status = VerifyEncodedEntry(encoded, *kv_prot_info);
+    rocksdb_rs::status::Status status = VerifyEncodedEntry(encoded, *kv_prot_info);
     if (!status.ok()) {
       return status;
     }
@@ -849,7 +849,7 @@ Status MemTable::Add(SequenceNumber s, ValueType type,
 namespace {
 
 struct Saver {
-  Status* status;
+  rocksdb_rs::status::Status* status;
   const LookupKey* key;
   bool* found_final_value;  // Is value set correctly? Used by KeyMayExist
   bool* merge_in_progress;
@@ -1252,7 +1252,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
 bool MemTable::Get(const LookupKey& key, std::string* value,
                    PinnableWideColumns* columns, std::string* timestamp,
-                   Status* s, MergeContext* merge_context,
+                   rocksdb_rs::status::Status* s, MergeContext* merge_context,
                    SequenceNumber* max_covering_tombstone_seq,
                    SequenceNumber* seq, const ReadOptions& read_opts,
                    bool immutable_memtable, ReadCallback* callback,
@@ -1331,7 +1331,7 @@ void MemTable::GetFromTable(const LookupKey& key,
                             bool do_merge, ReadCallback* callback,
                             bool* is_blob_index, std::string* value,
                             PinnableWideColumns* columns,
-                            std::string* timestamp, Status* s,
+                            std::string* timestamp, rocksdb_rs::status::Status* s,
                             MergeContext* merge_context, SequenceNumber* seq,
                             bool* found_final_value, bool* merge_in_progress) {
   Saver saver;
@@ -1458,7 +1458,7 @@ void MemTable::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
   PERF_COUNTER_ADD(get_from_memtable_count, 1);
 }
 
-Status MemTable::Update(SequenceNumber seq, ValueType value_type,
+rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_type,
                         const Slice& key, const Slice& value,
                         const ProtectionInfoKVOS64* kv_prot_info) {
   LookupKey lkey(key, seq);
@@ -1521,7 +1521,7 @@ Status MemTable::Update(SequenceNumber seq, ValueType value_type,
   return Add(seq, value_type, key, value, kv_prot_info);
 }
 
-Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
+rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
                                 const Slice& delta,
                                 const ProtectionInfoKVOS64* kv_prot_info) {
   LookupKey lkey(key, seq);
@@ -1588,7 +1588,7 @@ Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
           }
           return Status_OK();
         } else if (status == UpdateStatus::UPDATED) {
-          Status s = Status_new();
+          rocksdb_rs::status::Status s = Status_new();
           if (kv_prot_info != nullptr) {
             ProtectionInfoKVOS64 updated_kv_prot_info(*kv_prot_info);
             updated_kv_prot_info.UpdateV(delta, str_value);

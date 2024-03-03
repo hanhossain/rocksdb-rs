@@ -12,7 +12,7 @@
 namespace rocksdb {
 
 // Lookup a batch of keys in a single SST file
-DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
+DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
 (const ReadOptions& read_options, MultiGetRange file_range, int hit_file_level,
  bool skip_filters, bool skip_range_deletions, FdWithKeyRange* f,
  std::unordered_map<uint64_t, BlobReadContexts>& blob_ctxs,
@@ -21,7 +21,7 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
   bool timer_enabled = GetPerfLevel() >= PerfLevel::kEnableTimeExceptForMutex &&
                        get_perf_context()->per_level_perf_context_enabled;
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   StopWatchNano timer(clock_, timer_enabled /* auto_start */);
   s = CO_AWAIT(table_cache_->MultiGet)(
       read_options, *internal_comparator(), *f->file_metadata, &file_range,
@@ -46,7 +46,7 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
   for (auto iter = file_range.begin(); s.ok() && iter != file_range.end();
        ++iter) {
     GetContext& get_context = *iter->get_context;
-    Status* status = iter->s;
+    rocksdb_rs::status::Status* status = iter->s;
     // The Status in the KeyContext takes precedence over GetContext state
     // Status may be an error if there were any IO errors in the table
     // reader. We never expect Status to be NotFound(), as that is
@@ -103,7 +103,7 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
 
         if (iter->is_blob_index) {
           BlobIndex blob_index;
-          Status tmp_s = Status_new();
+          rocksdb_rs::status::Status tmp_s = Status_new();
 
           if (iter->value) {
             TEST_SYNC_POINT_CALLBACK("Version::MultiGet::TamperWithBlobIndex",

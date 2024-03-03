@@ -695,7 +695,7 @@ class Statistics : public Customizable {
  public:
   ~Statistics() override {}
   static const char* Type() { return "Statistics"; }
-  static Status CreateFromString(const ConfigOptions& opts,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
                                  const std::string& value,
                                  std::shared_ptr<Statistics>* result);
   // Default name of empty, for backwards compatibility.  Derived classes should
@@ -731,7 +731,7 @@ class Statistics : public Customizable {
   }
 
   // Resets all ticker and histogram stats
-  virtual Status Reset() { return Status_NotSupported("Not implemented"); }
+  virtual rocksdb_rs::status::Status Reset() { return Status_NotSupported("Not implemented"); }
 
   using Customizable::ToString;
   // String representation of the statistic object. Must be thread-safe.

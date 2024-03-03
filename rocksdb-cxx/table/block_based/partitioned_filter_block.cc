@@ -99,7 +99,7 @@ void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(
 
   total_added_in_built_ += filter_bits_builder_->EstimateEntriesAdded();
   std::unique_ptr<const char[]> filter_data;
-  Status filter_construction_status = Status_OK();
+  rocksdb_rs::status::Status filter_construction_status = Status_OK();
   Slice filter =
       filter_bits_builder_->Finish(&filter_data, &filter_construction_status);
   if (filter_construction_status.ok()) {
@@ -130,7 +130,7 @@ size_t PartitionedFilterBlockBuilder::EstimateEntriesAdded() {
 }
 
 Slice PartitionedFilterBlockBuilder::Finish(
-    const BlockHandle& last_partition_block_handle, Status* status,
+    const BlockHandle& last_partition_block_handle, rocksdb_rs::status::Status* status,
     std::unique_ptr<const char[]>* filter_data) {
   if (finishing_filters == true) {
     // Record the handle of the last written filter block in the index
@@ -207,7 +207,7 @@ std::unique_ptr<FilterBlockReader> PartitionedFilterBlockReader::Create(
 
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
   if (prefetch || !use_cache) {
-    const Status s = ReadFilterBlock(table, prefetch_buffer, ro, use_cache,
+    const rocksdb_rs::status::Status s = ReadFilterBlock(table, prefetch_buffer, ro, use_cache,
                                      nullptr /* get_context */, lookup_context,
                                      &filter_block);
     if (!s.ok()) {
@@ -293,7 +293,7 @@ BlockHandle PartitionedFilterBlockReader::GetFilterPartitionHandle(
   return fltr_blk_handle;
 }
 
-Status PartitionedFilterBlockReader::GetFilterPartitionBlock(
+rocksdb_rs::status::Status PartitionedFilterBlockReader::GetFilterPartitionBlock(
     FilePrefetchBuffer* prefetch_buffer, const BlockHandle& fltr_blk_handle,
     bool no_io, GetContext* get_context,
     BlockCacheLookupContext* lookup_context, const ReadOptions& _read_options,
@@ -317,7 +317,7 @@ Status PartitionedFilterBlockReader::GetFilterPartitionBlock(
     read_options.read_tier = kBlockCacheTier;
   }
 
-  const Status s =
+  const rocksdb_rs::status::Status s =
       table()->RetrieveBlock(prefetch_buffer, read_options, fltr_blk_handle,
                              UncompressionDict::GetEmptyDict(), filter_block,
                              get_context, lookup_context,
@@ -332,7 +332,7 @@ bool PartitionedFilterBlockReader::MayMatch(
     GetContext* get_context, BlockCacheLookupContext* lookup_context,
     const ReadOptions& read_options, FilterFunction filter_function) const {
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
-  Status s = GetOrReadFilterBlock(no_io, get_context, lookup_context,
+  rocksdb_rs::status::Status s = GetOrReadFilterBlock(no_io, get_context, lookup_context,
                                   &filter_block, read_options);
   if (UNLIKELY(!s.ok())) {
     IGNORE_STATUS_IF_ERROR(s);
@@ -368,7 +368,7 @@ void PartitionedFilterBlockReader::MayMatch(
     BlockCacheLookupContext* lookup_context, const ReadOptions& read_options,
     FilterManyFunction filter_function) const {
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
-  Status s = GetOrReadFilterBlock(no_io, range->begin()->get_context,
+  rocksdb_rs::status::Status s = GetOrReadFilterBlock(no_io, range->begin()->get_context,
                                   lookup_context, &filter_block, read_options);
   if (UNLIKELY(!s.ok())) {
     IGNORE_STATUS_IF_ERROR(s);
@@ -420,7 +420,7 @@ void PartitionedFilterBlockReader::MayMatchPartition(
     BlockCacheLookupContext* lookup_context, const ReadOptions& read_options,
     FilterManyFunction filter_function) const {
   CachableEntry<ParsedFullFilterBlock> filter_partition_block;
-  Status s = GetFilterPartitionBlock(
+  rocksdb_rs::status::Status s = GetFilterPartitionBlock(
       nullptr /* prefetch_buffer */, filter_handle, no_io,
       range->begin()->get_context, lookup_context, read_options,
       &filter_partition_block);
@@ -447,7 +447,7 @@ size_t PartitionedFilterBlockReader::ApproximateMemoryUsage() const {
 }
 
 // TODO(myabandeh): merge this with the same function in IndexReader
-Status PartitionedFilterBlockReader::CacheDependencies(
+rocksdb_rs::status::Status PartitionedFilterBlockReader::CacheDependencies(
     const ReadOptions& ro, bool pin, FilePrefetchBuffer* tail_prefetch_buffer) {
   assert(table());
 
@@ -458,7 +458,7 @@ Status PartitionedFilterBlockReader::CacheDependencies(
 
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
 
-  Status s = GetOrReadFilterBlock(false /* no_io */, nullptr /* get_context */,
+  rocksdb_rs::status::Status s = GetOrReadFilterBlock(false /* no_io */, nullptr /* get_context */,
                                   &lookup_context, &filter_block, ro);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(rep->ioptions.logger,

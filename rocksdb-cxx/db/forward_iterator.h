@@ -76,9 +76,9 @@ class ForwardIterator : public InternalIterator {
   virtual void Next() override;
   virtual Slice key() const override;
   virtual Slice value() const override;
-  virtual Status status() const override;
+  virtual rocksdb_rs::status::Status status() const override;
   virtual bool PrepareValue() override;
-  virtual Status GetProperty(std::string prop_name, std::string* prop) override;
+  virtual rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override;
   virtual void SetPinnedItersMgr(
       PinnedIteratorsManager* pinned_iters_mgr) override;
   virtual bool IsKeyPinned() const override;
@@ -138,10 +138,10 @@ class ForwardIterator : public InternalIterator {
   bool valid_;
 
   // Internal iterator status; set only by one of the unsupported methods.
-  Status status_;
+  rocksdb_rs::status::Status status_;
   // Status of immutable iterators, maintained here to avoid iterating over
   // all of them in status().
-  Status immutable_status_;
+  rocksdb_rs::status::Status immutable_status_;
   // Indicates that at least one of the immutable iterators pointed to a key
   // larger than iterate_upper_bound and was therefore destroyed. Seek() may
   // need to rebuild such iterators.

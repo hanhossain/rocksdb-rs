@@ -107,7 +107,7 @@ int FindFileInRange(const InternalKeyComparator& icmp,
   return static_cast<int>(std::lower_bound(b + left, b + right, key, cmp) - b);
 }
 
-Status OverlapWithIterator(const Comparator* ucmp,
+rocksdb_rs::status::Status OverlapWithIterator(const Comparator* ucmp,
                            const Slice& smallest_user_key,
                            const Slice& largest_user_key,
                            InternalIterator* iter, bool* overlap) {
@@ -121,7 +121,7 @@ Status OverlapWithIterator(const Comparator* ucmp,
   *overlap = false;
   if (iter->Valid()) {
     ParsedInternalKey seek_result;
-    Status s = ParseInternalKey(iter->key(), &seek_result,
+    rocksdb_rs::status::Status s = ParseInternalKey(iter->key(), &seek_result,
                                 false /* log_err_key */);  // TODO
     if (!s.ok()) return s;
 
@@ -1019,7 +1019,7 @@ class LevelIterator final : public InternalIterator {
     return file_iter_.value();
   }
 
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     return file_iter_.iter() ? file_iter_.status() : Status_OK();
   }
 
@@ -1535,13 +1535,13 @@ void LevelIterator::InitFileIterator(size_t new_file_index) {
 }
 }  // anonymous namespace
 
-Status Version::GetTableProperties(const ReadOptions& read_options,
+rocksdb_rs::status::Status Version::GetTableProperties(const ReadOptions& read_options,
                                    std::shared_ptr<const TableProperties>* tp,
                                    const FileMetaData* file_meta,
                                    const std::string* fname) const {
   auto table_cache = cfd_->table_cache();
   auto ioptions = cfd_->ioptions();
-  Status s = table_cache->GetTableProperties(
+  rocksdb_rs::status::Status s = table_cache->GetTableProperties(
       file_options_, read_options, cfd_->internal_comparator(), *file_meta, tp,
       mutable_cf_options_.block_protection_bytes_per_key,
       mutable_cf_options_.prefix_extractor, true /* no io */);
@@ -1593,9 +1593,9 @@ Status Version::GetTableProperties(const ReadOptions& read_options,
   return s;
 }
 
-Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
+rocksdb_rs::status::Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
                                          TablePropertiesCollection* props) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   for (int level = 0; level < storage_info_.num_levels_; level++) {
     s = GetPropertiesOfAllTables(read_options, props, level);
     if (!s.ok()) {
@@ -1606,7 +1606,7 @@ Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
   return Status_OK();
 }
 
-Status Version::TablesRangeTombstoneSummary(int max_entries_to_print,
+rocksdb_rs::status::Status Version::TablesRangeTombstoneSummary(int max_entries_to_print,
                                             std::string* out_str) {
   if (max_entries_to_print <= 0) {
     return Status_OK();
@@ -1628,7 +1628,7 @@ Status Version::TablesRangeTombstoneSummary(int max_entries_to_print,
       TableCache* table_cache = cfd_->table_cache();
       std::unique_ptr<FragmentedRangeTombstoneIterator> tombstone_iter;
 
-      Status s = table_cache->GetRangeTombstoneIterator(
+      rocksdb_rs::status::Status s = table_cache->GetRangeTombstoneIterator(
           read_options, cfd_->internal_comparator(), *file_meta,
           cfd_->GetLatestMutableCFOptions()->block_protection_bytes_per_key,
           &tombstone_iter);
@@ -1664,7 +1664,7 @@ Status Version::TablesRangeTombstoneSummary(int max_entries_to_print,
   return Status_OK();
 }
 
-Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
+rocksdb_rs::status::Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
                                          TablePropertiesCollection* props,
                                          int level) {
   for (const auto& file_meta : storage_info_.files_[level]) {
@@ -1674,7 +1674,7 @@ Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
     // 1. If the table is already present in table cache, load table
     // properties from there.
     std::shared_ptr<const TableProperties> table_properties;
-    Status s =
+    rocksdb_rs::status::Status s =
         GetTableProperties(read_options, &table_properties, file_meta, &fname);
     if (s.ok()) {
       props->insert({fname, table_properties});
@@ -1686,7 +1686,7 @@ Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
   return Status_OK();
 }
 
-Status Version::GetPropertiesOfTablesInRange(
+rocksdb_rs::status::Status Version::GetPropertiesOfTablesInRange(
     const ReadOptions& read_options, const Range* range, std::size_t n,
     TablePropertiesCollection* props) const {
   for (int level = 0; level < storage_info_.num_non_empty_levels(); level++) {
@@ -1705,7 +1705,7 @@ Status Version::GetPropertiesOfTablesInRange(
           // 1. If the table is already present in table cache, load table
           // properties from there.
           std::shared_ptr<const TableProperties> table_properties;
-          Status s = GetTableProperties(read_options, &table_properties,
+          rocksdb_rs::status::Status s = GetTableProperties(read_options, &table_properties,
                                         file_meta, &fname);
           if (s.ok()) {
             props->insert({fname, table_properties});
@@ -1720,11 +1720,11 @@ Status Version::GetPropertiesOfTablesInRange(
   return Status_OK();
 }
 
-Status Version::GetAggregatedTableProperties(
+rocksdb_rs::status::Status Version::GetAggregatedTableProperties(
     const ReadOptions& read_options, std::shared_ptr<const TableProperties>* tp,
     int level) {
   TablePropertiesCollection props;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (level < 0) {
     s = GetPropertiesOfAllTables(read_options, &props);
   } else {
@@ -2043,7 +2043,7 @@ void Version::AddIteratorsForLevel(const ReadOptions& read_options,
   }
 }
 
-Status Version::OverlapWithLevelIterator(const ReadOptions& read_options,
+rocksdb_rs::status::Status Version::OverlapWithLevelIterator(const ReadOptions& read_options,
                                          const FileOptions& file_options,
                                          const Slice& smallest_user_key,
                                          const Slice& largest_user_key,
@@ -2054,7 +2054,7 @@ Status Version::OverlapWithLevelIterator(const ReadOptions& read_options,
   auto ucmp = icmp.user_comparator();
 
   Arena arena;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   ReadRangeDelAggregator range_del_agg(&icmp,
                                        kMaxSequenceNumber /* upper_bound */);
 
@@ -2200,14 +2200,14 @@ Version::Version(ColumnFamilyData* column_family_data, VersionSet* vset,
   }
 }
 
-Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
+rocksdb_rs::status::Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
                         const Slice& blob_index_slice,
                         FilePrefetchBuffer* prefetch_buffer,
                         PinnableSlice* value, uint64_t* bytes_read) const {
   BlobIndex blob_index;
 
   {
-    Status s = blob_index.DecodeFrom(blob_index_slice);
+    rocksdb_rs::status::Status s = blob_index.DecodeFrom(blob_index_slice);
     if (!s.ok()) {
       return s;
     }
@@ -2217,7 +2217,7 @@ Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
                  bytes_read);
 }
 
-Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
+rocksdb_rs::status::Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
                         const BlobIndex& blob_index,
                         FilePrefetchBuffer* prefetch_buffer,
                         PinnableSlice* value, uint64_t* bytes_read) const {
@@ -2236,7 +2236,7 @@ Status Version::GetBlob(const ReadOptions& read_options, const Slice& user_key,
 
   assert(blob_source_);
   value->Reset();
-  const Status s = blob_source_->GetBlob(
+  const rocksdb_rs::status::Status s = blob_source_->GetBlob(
       read_options, user_key, blob_file_number, blob_index.offset(),
       blob_file_meta->GetBlobFileSize(), blob_index.size(),
       blob_index.compression(), prefetch_buffer, value, bytes_read);
@@ -2331,7 +2331,7 @@ void Version::MultiGetBlob(
 
 void Version::Get(const ReadOptions& read_options, const LookupKey& k,
                   PinnableSlice* value, PinnableWideColumns* columns,
-                  std::string* timestamp, Status* status,
+                  std::string* timestamp, rocksdb_rs::status::Status* status,
                   MergeContext* merge_context,
                   SequenceNumber* max_covering_tombstone_seq,
                   PinnedIteratorsManager* pinned_iters_mgr, bool* value_found,
@@ -2577,7 +2577,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
     iter->get_context = &(get_ctx[get_ctx_index]);
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   // blob_file => [[blob_idx, it], ...]
   std::unordered_map<uint64_t, BlobReadContexts> blob_ctxs;
   MultiGetRange keys_with_blobs_range(*range, range->begin(), range->end());
@@ -2630,7 +2630,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
         }
 #if USE_COROUTINES
       } else {
-        std::vector<folly::coro::Task<Status>> mget_tasks;
+        std::vector<folly::coro::Task<rocksdb_rs::status::Status>> mget_tasks;
         while (f != nullptr) {
           MultiGetRange file_range = fp.CurrentFileRange();
           TableCache::TypedHandle* table_handle = nullptr;
@@ -2639,7 +2639,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
                               fp.IsHitFileLastInLevel());
           bool skip_range_deletions = false;
           if (!skip_filters) {
-            Status status = table_cache_->MultiGetFilter(
+            rocksdb_rs::status::Status status = table_cache_->MultiGetFilter(
                 read_options, *internal_comparator(), *f->file_metadata,
                 mutable_cf_options_.prefix_extractor,
                 cfd_->internal_stats()->GetFileReadHist(fp.GetHitFileLevel()),
@@ -2672,11 +2672,11 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
           RecordTick(db_statistics_, MULTIGET_COROUTINE_COUNT,
                      mget_tasks.size());
           // Collect all results so far
-          std::vector<Status> statuses = folly::coro::blockingWait(
+          std::vector<rocksdb_rs::status::Status> statuses = folly::coro::blockingWait(
               folly::coro::collectAllRange(std::move(mget_tasks))
                   .scheduleOn(&range->context()->executor()));
           if (s.ok()) {
-            for (Status stat : statuses) {
+            for (rocksdb_rs::status::Status stat : statuses) {
               if (!stat.ok()) {
                 s = std::move(stat);
                 break;
@@ -2746,7 +2746,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
   // Process any left over keys
   for (auto iter = range->begin(); s.ok() && iter != range->end(); ++iter) {
     GetContext& get_context = *iter->get_context;
-    Status* status = iter->s;
+    rocksdb_rs::status::Status* status = iter->s;
     Slice user_key = iter->lkey->user_key();
 
     if (db_statistics_ != nullptr) {
@@ -2798,9 +2798,9 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
 }
 
 #ifdef USE_COROUTINES
-Status Version::ProcessBatch(
+rocksdb_rs::status::Status Version::ProcessBatch(
     const ReadOptions& read_options, FilePickerMultiGet* batch,
-    std::vector<folly::coro::Task<Status>>& mget_tasks,
+    std::vector<folly::coro::Task<rocksdb_rs::status::Status>>& mget_tasks,
     std::unordered_map<uint64_t, BlobReadContexts>* blob_ctxs,
     autovector<FilePickerMultiGet, 4>& batches, std::deque<size_t>& waiting,
     std::deque<size_t>& to_process, unsigned int& num_tasks_queued,
@@ -2812,7 +2812,7 @@ Status Version::ProcessBatch(
   // eventually become part of the new range.
   MultiGetRange leftover(range, range.begin(), range.begin());
   FdWithKeyRange* f = nullptr;
-  Status s;
+  rocksdb_rs::status::Status s;
 
   f = fp.GetNextFileInLevel();
   while (!f) {
@@ -2830,7 +2830,7 @@ Status Version::ProcessBatch(
                                         fp.IsHitFileLastInLevel());
     bool skip_range_deletions = false;
     if (!skip_filters) {
-      Status status = table_cache_->MultiGetFilter(
+      rocksdb_rs::status::Status status = table_cache_->MultiGetFilter(
           read_options, *internal_comparator(), *f->file_metadata,
           mutable_cf_options_.prefix_extractor,
           cfd_->internal_stats()->GetFileReadHist(fp.GetHitFileLevel()),
@@ -2908,14 +2908,14 @@ Status Version::ProcessBatch(
   return s;
 }
 
-Status Version::MultiGetAsync(
+rocksdb_rs::status::Status Version::MultiGetAsync(
     const ReadOptions& options, MultiGetRange* range,
     std::unordered_map<uint64_t, BlobReadContexts>* blob_ctxs) {
   autovector<FilePickerMultiGet, 4> batches;
   std::deque<size_t> waiting;
   std::deque<size_t> to_process;
-  Status s;
-  std::vector<folly::coro::Task<Status>> mget_tasks;
+  rocksdb_rs::status::Status s;
+  std::vector<folly::coro::Task<rocksdb_rs::status::Status>> mget_tasks;
   std::unordered_map<int, std::tuple<uint64_t, uint64_t, uint64_t>> mget_stats;
 
   // Create the initial batch with the input range
@@ -2964,12 +2964,12 @@ Status Version::MultiGetAsync(
         assert(waiting.size());
         RecordTick(db_statistics_, MULTIGET_COROUTINE_COUNT, mget_tasks.size());
         // Collect all results so far
-        std::vector<Status> statuses = folly::coro::blockingWait(
+        std::vector<rocksdb_rs::status::Status> statuses = folly::coro::blockingWait(
             folly::coro::collectAllRange(std::move(mget_tasks))
                 .scheduleOn(&range->context()->executor()));
         mget_tasks.clear();
         if (s.ok()) {
-          for (Status stat : statuses) {
+          for (rocksdb_rs::status::Status stat : statuses) {
             if (!stat.ok()) {
               s = std::move(stat);
               break;
@@ -3081,7 +3081,7 @@ bool Version::MaybeInitializeFileMetaData(const ReadOptions& read_options,
     return false;
   }
   std::shared_ptr<const TableProperties> tp;
-  Status s = GetTableProperties(read_options, &tp, file_meta);
+  rocksdb_rs::status::Status s = GetTableProperties(read_options, &tp, file_meta);
   file_meta->init_stats_from_file = true;
   if (!s.ok()) {
     ROCKS_LOG_ERROR(vset_->db_options_->info_log,
@@ -3909,7 +3909,7 @@ void SortFileByOverlappingRatio(
   auto next_level_it = next_level_files.begin();
 
   int64_t curr_time;
-  Status status = clock->GetCurrentTime(&curr_time);
+  rocksdb_rs::status::Status status = clock->GetCurrentTime(&curr_time);
   if (!status.ok()) {
     // If we can't get time, disable TTL.
     ttl = 0;
@@ -4920,18 +4920,18 @@ std::string Version::DebugString(bool hex, bool print_stats) const {
 
 // this is used to batch writes to the manifest file
 struct VersionSet::ManifestWriter {
-  Status status;
+  rocksdb_rs::status::Status status;
   bool done;
   InstrumentedCondVar cv;
   ColumnFamilyData* cfd;
   const MutableCFOptions mutable_cf_options;
   const autovector<VersionEdit*>& edit_list;
-  const std::function<void(const Status&)> manifest_write_callback;
+  const std::function<void(const rocksdb_rs::status::Status&)> manifest_write_callback;
 
   explicit ManifestWriter(
       InstrumentedMutex* mu, ColumnFamilyData* _cfd,
       const MutableCFOptions& cf_options, const autovector<VersionEdit*>& e,
-      const std::function<void(const Status&)>& manifest_wcb)
+      const std::function<void(const rocksdb_rs::status::Status&)>& manifest_wcb)
       : status(Status_new()),
         done(false),
         cv(mu),
@@ -4952,7 +4952,7 @@ struct VersionSet::ManifestWriter {
   }
 };
 
-Status AtomicGroupReadBuffer::AddEdit(VersionEdit* edit) {
+rocksdb_rs::status::Status AtomicGroupReadBuffer::AddEdit(VersionEdit* edit) {
   assert(edit);
   if (edit->is_in_atomic_group_) {
     TEST_SYNC_POINT("AtomicGroupReadBuffer::AddEdit:AtomicGroup");
@@ -5105,7 +5105,7 @@ void VersionSet::AppendVersion(ColumnFamilyData* column_family_data,
   v->next_->prev_ = v;
 }
 
-Status VersionSet::ProcessManifestWrites(
+rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
     std::deque<ManifestWriter>& writers, InstrumentedMutex* mu,
     FSDirectory* dir_contains_current_file, bool new_descriptor_log,
     const ColumnFamilyOptions* new_cf_options,
@@ -5230,7 +5230,7 @@ Status VersionSet::ProcessManifestWrites(
         } else if (group_start != std::numeric_limits<size_t>::max()) {
           group_start = std::numeric_limits<size_t>::max();
         }
-        Status s = LogAndApplyHelper(last_writer->cfd, builder, e,
+        rocksdb_rs::status::Status s = LogAndApplyHelper(last_writer->cfd, builder, e,
                                      &max_last_sequence, mu);
         if (!s.ok()) {
           // free up the allocated memory
@@ -5247,7 +5247,7 @@ Status VersionSet::ProcessManifestWrites(
       assert(!builder_guards.empty() &&
              builder_guards.size() == versions.size());
       auto* builder = builder_guards[i]->version_builder();
-      Status s = builder->SaveTo(versions[i]->storage_info());
+      rocksdb_rs::status::Status s = builder->SaveTo(versions[i]->storage_info());
       if (!s.ok()) {
         // free up the allocated memory
         for (auto v : versions) {
@@ -5331,7 +5331,7 @@ Status VersionSet::ProcessManifestWrites(
   }
 
   uint64_t new_manifest_file_size = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   IOStatus io_s;
   IOStatus manifest_io_status;
   {
@@ -5610,7 +5610,7 @@ Status VersionSet::ProcessManifestWrites(
                      "Deleting manifest %" PRIu64 " current manifest %" PRIu64
                      "\n",
                      pending_manifest_file_number_, manifest_file_number_);
-      Status manifest_del_status = env_->DeleteFile(
+      rocksdb_rs::status::Status manifest_del_status = env_->DeleteFile(
           DescriptorFileName(dbname_, pending_manifest_file_number_));
       if (!manifest_del_status.ok()) {
         ROCKS_LOG_WARN(db_options_->info_log,
@@ -5679,14 +5679,14 @@ void VersionSet::WakeUpWaitingManifestWriters() {
 
 // 'datas' is grammatically incorrect. We still use this notation to indicate
 // that this variable represents a collection of column_family_data.
-Status VersionSet::LogAndApply(
+rocksdb_rs::status::Status VersionSet::LogAndApply(
     const autovector<ColumnFamilyData*>& column_family_datas,
     const autovector<const MutableCFOptions*>& mutable_cf_options_list,
     const ReadOptions& read_options,
     const autovector<autovector<VersionEdit*>>& edit_lists,
     InstrumentedMutex* mu, FSDirectory* dir_contains_current_file,
     bool new_descriptor_log, const ColumnFamilyOptions* new_cf_options,
-    const std::vector<std::function<void(const Status&)>>& manifest_wcbs) {
+    const std::vector<std::function<void(const rocksdb_rs::status::Status&)>>& manifest_wcbs) {
   mu->AssertHeld();
   int num_edits = 0;
   for (const auto& elist : edit_lists) {
@@ -5717,7 +5717,7 @@ Status VersionSet::LogAndApply(
   }
   for (int i = 0; i < num_cfds; ++i) {
     const auto wcb =
-        manifest_wcbs.empty() ? [](const Status&) {} : manifest_wcbs[i];
+        manifest_wcbs.empty() ? [](const rocksdb_rs::status::Status&) {} : manifest_wcbs[i];
     writers.emplace_back(mu, column_family_datas[i],
                          *mutable_cf_options_list[i], edit_lists[i], wcb);
     manifest_writers_.push_back(&writers[i]);
@@ -5778,7 +5778,7 @@ void VersionSet::LogAndApplyCFHelper(VersionEdit* edit,
   }
 }
 
-Status VersionSet::LogAndApplyHelper(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status VersionSet::LogAndApplyHelper(ColumnFamilyData* cfd,
                                      VersionBuilder* builder, VersionEdit* edit,
                                      SequenceNumber* max_last_sequence,
                                      InstrumentedMutex* mu) {
@@ -5811,7 +5811,7 @@ Status VersionSet::LogAndApplyHelper(ColumnFamilyData* cfd,
   return builder ? builder->Apply(edit) : Status_OK();
 }
 
-Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
+rocksdb_rs::status::Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
                                           FileSystem* fs,
                                           std::string* manifest_path,
                                           uint64_t* manifest_file_number) {
@@ -5820,7 +5820,7 @@ Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
   assert(manifest_file_number != nullptr);
 
   std::string fname;
-  Status s = ReadFileToString(fs, static_cast<std::string>(CurrentFileName(dbname)), &fname);
+  rocksdb_rs::status::Status s = ReadFileToString(fs, static_cast<std::string>(CurrentFileName(dbname)), &fname);
   if (!s.ok()) {
     return s;
   }
@@ -5842,14 +5842,14 @@ Status VersionSet::GetCurrentManifestPath(const std::string& dbname,
   return Status_OK();
 }
 
-Status VersionSet::Recover(
+rocksdb_rs::status::Status VersionSet::Recover(
     const std::vector<ColumnFamilyDescriptor>& column_families, bool read_only,
     std::string* db_id, bool no_error_if_files_missing) {
   const ReadOptions read_options(Env::IOActivity::kDBOpen);
   // Read "CURRENT" file, which contains a pointer to the current manifest
   // file
   std::string manifest_path;
-  Status s = GetCurrentManifestPath(dbname_, fs_.get(), &manifest_path,
+  rocksdb_rs::status::Status s = GetCurrentManifestPath(dbname_, fs_.get(), &manifest_path,
                                     &manifest_file_number_);
   if (!s.ok()) {
     return s;
@@ -5875,7 +5875,7 @@ Status VersionSet::Recover(
   uint64_t log_number = 0;
   {
     VersionSet::LogReporter reporter;
-    Status log_read_status = Status_new();
+    rocksdb_rs::status::Status log_read_status = Status_new();
     reporter.status = &log_read_status;
     log::Reader reader(nullptr, std::move(manifest_file_reader), &reporter,
                        true /* checksum */, 0 /* log_number */);
@@ -6002,7 +6002,7 @@ std::string ManifestPicker::GetNextManifest(uint64_t* number,
 }
 }  // anonymous namespace
 
-Status VersionSet::TryRecover(
+rocksdb_rs::status::Status VersionSet::TryRecover(
     const std::vector<ColumnFamilyDescriptor>& column_families, bool read_only,
     const std::vector<std::string>& files_in_dbname, std::string* db_id,
     bool* has_missing_table_file) {
@@ -6010,7 +6010,7 @@ Status VersionSet::TryRecover(
   if (!manifest_picker.Valid()) {
     return Status_Corruption("Cannot locate MANIFEST file in " + dbname_);
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::string manifest_path =
       manifest_picker.GetNextManifest(&manifest_file_number_, nullptr);
   while (!manifest_path.empty()) {
@@ -6026,7 +6026,7 @@ Status VersionSet::TryRecover(
   return s;
 }
 
-Status VersionSet::TryRecoverFromOneManifest(
+rocksdb_rs::status::Status VersionSet::TryRecoverFromOneManifest(
     const std::string& manifest_path,
     const std::vector<ColumnFamilyDescriptor>& column_families, bool read_only,
     std::string* db_id, bool* has_missing_table_file) {
@@ -6034,7 +6034,7 @@ Status VersionSet::TryRecoverFromOneManifest(
   ROCKS_LOG_INFO(db_options_->info_log, "Trying to recover from manifest: %s\n",
                  manifest_path.c_str());
   std::unique_ptr<SequentialFileReader> manifest_file_reader;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   {
     std::unique_ptr<FSSequentialFile> manifest_file;
     s = fs_->NewSequentialFile(manifest_path,
@@ -6081,13 +6081,13 @@ void VersionSet::RecoverEpochNumbers() {
   }
 }
 
-Status VersionSet::ListColumnFamilies(std::vector<std::string>* column_families,
+rocksdb_rs::status::Status VersionSet::ListColumnFamilies(std::vector<std::string>* column_families,
                                       const std::string& dbname,
                                       FileSystem* fs) {
   // Read "CURRENT" file, which contains a pointer to the current manifest file
   std::string manifest_path;
   uint64_t manifest_file_number;
-  Status s =
+  rocksdb_rs::status::Status s =
       GetCurrentManifestPath(dbname, fs, &manifest_path, &manifest_file_number);
   if (!s.ok()) {
     return s;
@@ -6095,13 +6095,13 @@ Status VersionSet::ListColumnFamilies(std::vector<std::string>* column_families,
   return ListColumnFamiliesFromManifest(manifest_path, fs, column_families);
 }
 
-Status VersionSet::ListColumnFamiliesFromManifest(
+rocksdb_rs::status::Status VersionSet::ListColumnFamiliesFromManifest(
     const std::string& manifest_path, FileSystem* fs,
     std::vector<std::string>* column_families) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   std::unique_ptr<SequentialFileReader> file_reader;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   {
     std::unique_ptr<FSSequentialFile> file;
     // these are just for performance reasons, not correctness,
@@ -6133,7 +6133,7 @@ Status VersionSet::ListColumnFamiliesFromManifest(
   return handler.status().Clone();
 }
 
-Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
+rocksdb_rs::status::Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
                                         const Options* options,
                                         const FileOptions& file_options,
                                         int new_levels) {
@@ -6155,7 +6155,7 @@ Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
                       nullptr /*BlockCacheTracer*/, nullptr /*IOTracer*/,
                       /*db_id*/ "",
                       /*db_session_id*/ "");
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
 
   std::vector<ColumnFamilyDescriptor> dummy;
   ColumnFamilyDescriptor dummy_descriptor(kDefaultColumnFamilyName,
@@ -6241,9 +6241,9 @@ Status VersionSet::ReduceNumberOfLevels(const std::string& dbname,
 // FileChecksumList which contains a map from file number to its checksum info.
 // If DB is not running, make sure call VersionSet::Recover() to load the file
 // metadata from Manifest to VersionSet before calling this function.
-Status VersionSet::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
+rocksdb_rs::status::Status VersionSet::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
   // Clean the previously stored checksum information if any.
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (checksum_list == nullptr) {
     s = Status_InvalidArgument("checksum_list is nullptr");
     return s;
@@ -6303,7 +6303,7 @@ Status VersionSet::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
   return s;
 }
 
-Status VersionSet::DumpManifest(
+rocksdb_rs::status::Status VersionSet::DumpManifest(
     Options& options, std::string& dscname, bool verbose, bool hex, bool json,
     const std::vector<ColumnFamilyDescriptor>& cf_descs) {
   assert(options.env);
@@ -6311,7 +6311,7 @@ Status VersionSet::DumpManifest(
   const ReadOptions read_options;
 
   std::vector<std::string> column_families;
-  Status s = ListColumnFamiliesFromManifest(
+  rocksdb_rs::status::Status s = ListColumnFamiliesFromManifest(
       dscname, options.env->GetFileSystem().get(), &column_families);
   if (!s.ok()) {
     return s;
@@ -6373,7 +6373,7 @@ void VersionSet::MarkMinLogNumberToKeep(uint64_t number) {
   }
 }
 
-Status VersionSet::WriteCurrentStateToManifest(
+rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
     const std::unordered_map<uint32_t, MutableCFState>& curr_state,
     const VersionEdit& wal_additions, log::Writer* log, IOStatus& io_s) {
   // TODO: Break up into multiple records to reduce memory usage on recovery?
@@ -6938,7 +6938,7 @@ InternalIterator* VersionSet::MakeInputIterator(
   return result;
 }
 
-Status VersionSet::GetMetadataForFile(uint64_t number, int* filelevel,
+rocksdb_rs::status::Status VersionSet::GetMetadataForFile(uint64_t number, int* filelevel,
                                       FileMetaData** meta,
                                       ColumnFamilyData** cfd) {
   for (auto cfd_iter : *column_family_set_) {
@@ -7138,12 +7138,12 @@ uint64_t VersionSet::GetTotalBlobFileSize(Version* dummy_versions) {
   return all_versions_blob_file_size;
 }
 
-Status VersionSet::VerifyFileMetadata(const ReadOptions& read_options,
+rocksdb_rs::status::Status VersionSet::VerifyFileMetadata(const ReadOptions& read_options,
                                       ColumnFamilyData* cfd,
                                       const std::string& fpath, int level,
                                       const FileMetaData& meta) {
   uint64_t fsize = 0;
-  Status status = fs_->GetFileSize(fpath, IOOptions(), &fsize, nullptr);
+  rocksdb_rs::status::Status status = fs_->GetFileSize(fpath, IOOptions(), &fsize, nullptr);
   if (status.ok()) {
     if (fsize != meta.fd.GetFileSize()) {
       status = Status_Corruption("File size mismatch: " + fpath);
@@ -7196,20 +7196,20 @@ ReactiveVersionSet::ReactiveVersionSet(
 
 ReactiveVersionSet::~ReactiveVersionSet() {}
 
-Status ReactiveVersionSet::Recover(
+rocksdb_rs::status::Status ReactiveVersionSet::Recover(
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::unique_ptr<log::FragmentBufferedReader>* manifest_reader,
     std::unique_ptr<log::Reader::Reporter>* manifest_reporter,
-    std::unique_ptr<Status>* manifest_reader_status) {
+    std::unique_ptr<rocksdb_rs::status::Status>* manifest_reader_status) {
   assert(manifest_reader != nullptr);
   assert(manifest_reporter != nullptr);
   assert(manifest_reader_status != nullptr);
 
-  *manifest_reader_status = std::make_unique<Status>(Status_new());
+  *manifest_reader_status = std::make_unique<rocksdb_rs::status::Status>(Status_new());
   manifest_reporter->reset(new LogReporter());
   static_cast_with_check<LogReporter>(manifest_reporter->get())->status =
       manifest_reader_status->get();
-  Status s = MaybeSwitchManifest(manifest_reporter->get(), manifest_reader);
+  rocksdb_rs::status::Status s = MaybeSwitchManifest(manifest_reporter->get(), manifest_reader);
   if (!s.ok()) {
     return s;
   }
@@ -7229,16 +7229,16 @@ Status ReactiveVersionSet::Recover(
   return s;
 }
 
-Status ReactiveVersionSet::ReadAndApply(
+rocksdb_rs::status::Status ReactiveVersionSet::ReadAndApply(
     InstrumentedMutex* mu,
     std::unique_ptr<log::FragmentBufferedReader>* manifest_reader,
-    Status* manifest_read_status,
+    rocksdb_rs::status::Status* manifest_read_status,
     std::unordered_set<ColumnFamilyData*>* cfds_changed) {
   assert(manifest_reader != nullptr);
   assert(cfds_changed != nullptr);
   mu->AssertHeld();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   log::Reader* reader = manifest_reader->get();
   assert(reader);
   s = MaybeSwitchManifest(reader->GetReporter(), manifest_reader);
@@ -7254,11 +7254,11 @@ Status ReactiveVersionSet::ReadAndApply(
   return s;
 }
 
-Status ReactiveVersionSet::MaybeSwitchManifest(
+rocksdb_rs::status::Status ReactiveVersionSet::MaybeSwitchManifest(
     log::Reader::Reporter* reporter,
     std::unique_ptr<log::FragmentBufferedReader>* manifest_reader) {
   assert(manifest_reader != nullptr);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::string manifest_path;
   s = GetCurrentManifestPath(dbname_, fs_.get(), &manifest_path,
                              &manifest_file_number_);

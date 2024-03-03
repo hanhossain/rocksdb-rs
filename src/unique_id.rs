@@ -29,10 +29,10 @@ pub mod ffi {
         extended: bool,
     }
 
-    #[namespace = "rocksdb"]
     extern "C++" {
         include!("rocksdb-rs/src/status.rs.h");
 
+        #[namespace = "rocksdb_rs::status"]
         type Status = crate::status::ffi::Status;
     }
 

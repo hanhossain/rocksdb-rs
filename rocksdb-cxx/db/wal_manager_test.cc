@@ -105,7 +105,7 @@ class WalManagerTest : public testing::Test {
   std::unique_ptr<TransactionLogIterator> OpenTransactionLogIter(
       const SequenceNumber seq) {
     std::unique_ptr<TransactionLogIterator> iter;
-    Status status = wal_manager_->GetUpdatesSince(
+    rocksdb_rs::status::Status status = wal_manager_->GetUpdatesSince(
         seq, &iter, TransactionLogIterator::ReadOptions(), versions_.get());
     EXPECT_OK(status);
     return iter;

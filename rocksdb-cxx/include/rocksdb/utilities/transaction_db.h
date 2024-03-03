@@ -375,7 +375,7 @@ class TransactionDB : public StackableDB {
   // Optimized version of ::Write that receives more optimization request such
   // as skip_concurrency_control.
   using StackableDB::Write;
-  virtual Status Write(const WriteOptions& opts,
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
                        const TransactionDBWriteOptimizations&,
                        WriteBatch* updates) {
     // The default implementation ignores TransactionDBWriteOptimizations and
@@ -390,18 +390,18 @@ class TransactionDB : public StackableDB {
   // WRITE_PREPARED or WRITE_UNPREPARED , `skip_duplicate_key_check` must
   // additionally be set.
   using StackableDB::DeleteRange;
-  virtual Status DeleteRange(const WriteOptions&, ColumnFamilyHandle*,
+  virtual rocksdb_rs::status::Status DeleteRange(const WriteOptions&, ColumnFamilyHandle*,
                              const Slice&, const Slice&) override {
     return Status_NotSupported();
   }
   // Open a TransactionDB similar to DB::Open().
   // Internally call PrepareWrap() and WrapDB()
   // If the return status is not ok, then dbptr is set to nullptr.
-  static Status Open(const Options& options,
+  static rocksdb_rs::status::Status Open(const Options& options,
                      const TransactionDBOptions& txn_db_options,
                      const std::string& dbname, TransactionDB** dbptr);
 
-  static Status Open(const DBOptions& db_options,
+  static rocksdb_rs::status::Status Open(const DBOptions& db_options,
                      const TransactionDBOptions& txn_db_options,
                      const std::string& dbname,
                      const std::vector<ColumnFamilyDescriptor>& column_families,
@@ -416,7 +416,7 @@ class TransactionDB : public StackableDB {
   // input db parameter might or might not be deleted as a result of the
   // failure. If it is properly deleted it will be set to nullptr. If the return
   // status is ok, the ownership of db is transferred to dbptr.
-  static Status WrapDB(DB* db, const TransactionDBOptions& txn_db_options,
+  static rocksdb_rs::status::Status WrapDB(DB* db, const TransactionDBOptions& txn_db_options,
                        const std::vector<size_t>& compaction_enabled_cf_indices,
                        const std::vector<ColumnFamilyHandle*>& handles,
                        TransactionDB** dbptr);
@@ -424,7 +424,7 @@ class TransactionDB : public StackableDB {
   // input db parameter might or might not be deleted as a result of the
   // failure. If it is properly deleted it will be set to nullptr. If the return
   // status is ok, the ownership of db is transferred to dbptr.
-  static Status WrapStackableDB(
+  static rocksdb_rs::status::Status WrapStackableDB(
       StackableDB* db, const TransactionDBOptions& txn_db_options,
       const std::vector<size_t>& compaction_enabled_cf_indices,
       const std::vector<ColumnFamilyHandle*>& handles, TransactionDB** dbptr);
@@ -460,7 +460,7 @@ class TransactionDB : public StackableDB {
   // Create a snapshot and assign ts to it. Return the snapshot to caller. The
   // snapshot-timestamp mapping is also tracked by the database.
   // Caller must ensure there are no active writes when this API is called.
-  virtual std::pair<Status, std::shared_ptr<const Snapshot>>
+  virtual std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>>
   CreateTimestampedSnapshot(TxnTimestamp ts) = 0;
 
   // Return the latest timestamped snapshot if present.
@@ -479,7 +479,7 @@ class TransactionDB : public StackableDB {
 
   // Get all timestamped snapshots which will be stored in
   // timestamped_snapshots.
-  Status GetAllTimestampedSnapshots(
+  rocksdb_rs::status::Status GetAllTimestampedSnapshots(
       std::vector<std::shared_ptr<const Snapshot>>& timestamped_snapshots)
       const {
     return GetTimestampedSnapshots(/*ts_lb=*/0, /*ts_ub=*/kMaxTxnTimestamp,
@@ -488,7 +488,7 @@ class TransactionDB : public StackableDB {
 
   // Get all timestamped snapshots whose timestamps fall within [ts_lb, ts_ub).
   // timestamped_snapshots will be cleared and contain returned snapshots.
-  virtual Status GetTimestampedSnapshots(
+  virtual rocksdb_rs::status::Status GetTimestampedSnapshots(
       TxnTimestamp ts_lb, TxnTimestamp ts_ub,
       std::vector<std::shared_ptr<const Snapshot>>& timestamped_snapshots)
       const = 0;

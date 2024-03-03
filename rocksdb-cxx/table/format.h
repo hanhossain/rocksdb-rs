@@ -54,8 +54,8 @@ class BlockHandle {
 
   void EncodeTo(std::string* dst) const;
   char* EncodeTo(char* dst) const;
-  Status DecodeFrom(Slice* input);
-  Status DecodeSizeFrom(uint64_t offset, Slice* input);
+  rocksdb_rs::status::Status DecodeFrom(Slice* input);
+  rocksdb_rs::status::Status DecodeSizeFrom(uint64_t offset, Slice* input);
 
   // Return a string that contains the copy of handle.
   std::string ToString(bool hex = true) const;
@@ -106,7 +106,7 @@ struct IndexValue {
   //     previous_handle->offset() + previous_handle->size() + kBlockTrailerSize
   void EncodeTo(std::string* dst, bool have_first_key,
                 const BlockHandle* previous_handle) const;
-  Status DecodeFrom(Slice* input, bool have_first_key,
+  rocksdb_rs::status::Status DecodeFrom(Slice* input, bool have_first_key,
                     const BlockHandle* previous_handle);
 
   std::string ToString(bool hex, bool have_first_key) const;
@@ -141,7 +141,7 @@ class Footer {
   // `input` buffer (future use).
   // If enforce_table_magic_number != 0, will return corruption if table magic
   // number is not equal to enforce_table_magic_number.
-  Status DecodeFrom(Slice input, uint64_t input_offset,
+  rocksdb_rs::status::Status DecodeFrom(Slice input, uint64_t input_offset,
                     uint64_t enforce_table_magic_number = 0);
 
   // Table magic number identifies file as RocksDB SST file and which kind of
@@ -241,7 +241,7 @@ class FooterBuilder {
 // Read the footer from file
 // If enforce_table_magic_number != 0, ReadFooterFromFile() will return
 // corruption if table_magic number is not equal to enforce_table_magic_number
-Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
+rocksdb_rs::status::Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
                           FileSystem& fs, FilePrefetchBuffer* prefetch_buffer,
                           uint64_t file_size, Footer* footer,
                           uint64_t enforce_table_magic_number = 0);
@@ -348,7 +348,7 @@ struct BlockContents {
 // contents are returned in `out_contents`.
 // format_version is as defined in include/rocksdb/table.h, which is
 // used to determine compression format version.
-Status UncompressSerializedBlock(const UncompressionInfo& info,
+rocksdb_rs::status::Status UncompressSerializedBlock(const UncompressionInfo& info,
                                  const char* data, size_t size,
                                  BlockContents* out_contents,
                                  uint32_t format_version,
@@ -357,14 +357,14 @@ Status UncompressSerializedBlock(const UncompressionInfo& info,
 
 // This is a variant of UncompressSerializedBlock that does not expect a
 // block trailer beyond `size`. (rocksdb_rs::compression_type::CompressionType is taken from `info`.)
-Status UncompressBlockData(const UncompressionInfo& info, const char* data,
+rocksdb_rs::status::Status UncompressBlockData(const UncompressionInfo& info, const char* data,
                            size_t size, BlockContents* out_contents,
                            uint32_t format_version,
                            const ImmutableOptions& ioptions,
                            MemoryAllocator* allocator = nullptr);
 
 // Replace db_host_id contents with the real hostname if necessary
-Status ReifyDbHostIdProperty(Env* env, std::string* db_host_id);
+rocksdb_rs::status::Status ReifyDbHostIdProperty(Env* env, std::string* db_host_id);
 
 // Implementation details follow.  Clients should ignore,
 

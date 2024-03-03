@@ -368,8 +368,8 @@ void LRUCacheShard::SetStrictCapacityLimit(bool strict_capacity_limit) {
   strict_capacity_limit_ = strict_capacity_limit;
 }
 
-Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
-  Status s = Status_OK();
+rocksdb_rs::status::Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
+  rocksdb_rs::status::Status s = Status_OK();
   autovector<LRUHandle*> last_reference_list;
 
   {
@@ -543,7 +543,7 @@ LRUHandle* LRUCacheShard::CreateHandle(const Slice& key, uint32_t hash,
   return e;
 }
 
-Status LRUCacheShard::Insert(const Slice& key, uint32_t hash,
+rocksdb_rs::status::Status LRUCacheShard::Insert(const Slice& key, uint32_t hash,
                              Cache::ObjectPtr value,
                              const Cache::CacheItemHelper* helper,
                              size_t charge, LRUHandle** handle,

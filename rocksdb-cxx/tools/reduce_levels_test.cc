@@ -25,16 +25,16 @@ class ReduceLevelTest : public testing::Test {
     db_ = nullptr;
   }
 
-  Status OpenDB(bool create_if_missing, int levels);
+  rocksdb_rs::status::Status OpenDB(bool create_if_missing, int levels);
 
-  Status Put(const std::string& k, const std::string& v) {
+  rocksdb_rs::status::Status Put(const std::string& k, const std::string& v) {
     return db_->Put(WriteOptions(), k, v);
   }
 
   std::string Get(const std::string& k) {
     ReadOptions options;
     std::string result;
-    Status s = db_->Get(options, k, &result);
+    rocksdb_rs::status::Status s = db_->Get(options, k, &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -43,7 +43,7 @@ class ReduceLevelTest : public testing::Test {
     return result;
   }
 
-  Status Flush() {
+  rocksdb_rs::status::Status Flush() {
     if (db_ == nullptr) {
       return Status_InvalidArgument("DB not opened.");
     }
@@ -79,12 +79,12 @@ class ReduceLevelTest : public testing::Test {
   DB* db_;
 };
 
-Status ReduceLevelTest::OpenDB(bool create_if_missing, int num_levels) {
+rocksdb_rs::status::Status ReduceLevelTest::OpenDB(bool create_if_missing, int num_levels) {
   rocksdb::Options opt;
   opt.level_compaction_dynamic_level_bytes = false;
   opt.num_levels = num_levels;
   opt.create_if_missing = create_if_missing;
-  rocksdb::Status st =
+  rocksdb_rs::status::Status st =
       rocksdb::DB::Open(opt, dbname_, &db_);
   if (!st.ok()) {
     fprintf(stderr, "Can't open the db:%s\n", st.ToString()->c_str());

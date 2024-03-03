@@ -55,14 +55,14 @@ std::string PersistentCacheConfig::ToString() const {
 //
 // PersistentCacheTier implementation
 //
-Status PersistentCacheTier::Open() {
+rocksdb_rs::status::Status PersistentCacheTier::Open() {
   if (next_tier_) {
     return next_tier_->Open();
   }
   return Status_OK();
 }
 
-Status PersistentCacheTier::Close() {
+rocksdb_rs::status::Status PersistentCacheTier::Close() {
   if (next_tier_) {
     return next_tier_->Close();
   }
@@ -107,14 +107,14 @@ uint64_t PersistentCacheTier::NewId() {
 //
 PersistentTieredCache::~PersistentTieredCache() { assert(tiers_.empty()); }
 
-Status PersistentTieredCache::Open() {
+rocksdb_rs::status::Status PersistentTieredCache::Open() {
   assert(!tiers_.empty());
   return tiers_.front()->Open();
 }
 
-Status PersistentTieredCache::Close() {
+rocksdb_rs::status::Status PersistentTieredCache::Close() {
   assert(!tiers_.empty());
-  Status status = tiers_.front()->Close();
+  rocksdb_rs::status::Status status = tiers_.front()->Close();
   if (status.ok()) {
     tiers_.clear();
   }
@@ -136,13 +136,13 @@ std::string PersistentTieredCache::PrintStats() {
   return tiers_.front()->PrintStats();
 }
 
-Status PersistentTieredCache::Insert(const Slice& page_key, const char* data,
+rocksdb_rs::status::Status PersistentTieredCache::Insert(const Slice& page_key, const char* data,
                                      const size_t size) {
   assert(!tiers_.empty());
   return tiers_.front()->Insert(page_key, data, size);
 }
 
-Status PersistentTieredCache::Lookup(const Slice& page_key,
+rocksdb_rs::status::Status PersistentTieredCache::Lookup(const Slice& page_key,
                                      std::unique_ptr<char[]>* data,
                                      size_t* size) {
   assert(!tiers_.empty());

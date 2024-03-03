@@ -1745,10 +1745,10 @@ DEFINE_bool(track_and_verify_wals_in_manifest, false,
 
 namespace rocksdb {
 namespace {
-static Status CreateMemTableRepFactory(
+static rocksdb_rs::status::Status CreateMemTableRepFactory(
     const ConfigOptions& config_options,
     std::shared_ptr<MemTableRepFactory>* factory) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (!strcasecmp(FLAGS_memtablerep.c_str(), SkipListFactory::kNickName())) {
     factory->reset(new SkipListFactory(FLAGS_skip_list_lookahead));
   } else if (!strcasecmp(FLAGS_memtablerep.c_str(), "prefix_hash")) {
@@ -1991,7 +1991,7 @@ struct DBWithColumnFamilies {
     auto new_num_created = num_created + num_hot;
     assert(new_num_created <= cfh.size());
     for (size_t i = num_created; i < new_num_created; i++) {
-      Status s =
+      rocksdb_rs::status::Status s =
           db->CreateColumnFamily(options, ColumnFamilyName(i), &(cfh[i]));
       if (!s.ok()) {
         fprintf(stderr, "create column family error: %s\n",
@@ -2702,14 +2702,14 @@ class Benchmark {
     static const char* kClassName() { return "ErrorHandlerListener"; }
 
     void OnErrorRecoveryBegin(BackgroundErrorReason /*reason*/,
-                              Status /*bg_error*/,
+                              rocksdb_rs::status::Status /*bg_error*/,
                               bool* auto_recovery) override {
       if (*auto_recovery && no_auto_recovery_) {
         *auto_recovery = false;
       }
     }
 
-    void OnErrorRecoveryCompleted(Status /*old_bg_error*/) override {
+    void OnErrorRecoveryCompleted(rocksdb_rs::status::Status /*old_bg_error*/) override {
       InstrumentedMutexLock l(&mutex_);
       recovery_complete_ = true;
       cv_.SignalAll();
@@ -3063,7 +3063,7 @@ class Benchmark {
           kDefaultCacheMetadataChargePolicy, FLAGS_cache_low_pri_pool_ratio);
       opts.hash_seed = GetCacheHashSeed();
       if (!FLAGS_secondary_cache_uri.empty()) {
-        Status s = SecondaryCache::CreateFromString(
+        rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(
             ConfigOptions(), FLAGS_secondary_cache_uri, &secondary_cache);
         if (secondary_cache == nullptr) {
           fprintf(
@@ -3680,7 +3680,7 @@ class Benchmark {
         // replay.
         if (FLAGS_trace_file != "" && name != "replay") {
           std::unique_ptr<TraceWriter> trace_writer;
-          Status s = NewFileTraceWriter(FLAGS_env, EnvOptions(),
+          rocksdb_rs::status::Status s = NewFileTraceWriter(FLAGS_env, EnvOptions(),
                                         FLAGS_trace_file, &trace_writer);
           if (!s.ok()) {
             fprintf(stderr, "Encountered an error starting a trace, %s\n",
@@ -3716,7 +3716,7 @@ class Benchmark {
           block_cache_trace_options_.sampling_frequency =
               FLAGS_block_cache_trace_sampling_frequency;
           std::unique_ptr<TraceWriter> block_cache_trace_writer;
-          Status s = NewFileTraceWriter(FLAGS_env, EnvOptions(),
+          rocksdb_rs::status::Status s = NewFileTraceWriter(FLAGS_env, EnvOptions(),
                                         FLAGS_block_cache_trace_file,
                                         &block_cache_trace_writer);
           if (!s.ok()) {
@@ -3776,14 +3776,14 @@ class Benchmark {
     }
 
     if (name != "replay" && FLAGS_trace_file != "") {
-      Status s = db_.db->EndTrace();
+      rocksdb_rs::status::Status s = db_.db->EndTrace();
       if (!s.ok()) {
         fprintf(stderr, "Encountered an error ending the trace, %s\n",
                 s.ToString()->c_str());
       }
     }
     if (!FLAGS_block_cache_trace_file.empty()) {
-      Status s = db_.db->EndBlockCacheTrace();
+      rocksdb_rs::status::Status s = db_.db->EndBlockCacheTrace();
       if (!s.ok()) {
         fprintf(stderr,
                 "Encountered an error ending the block cache tracing, %s\n",
@@ -4177,7 +4177,7 @@ class Benchmark {
         FLAGS_level_compaction_dynamic_level_bytes;
     options.max_bytes_for_level_multiplier =
         FLAGS_max_bytes_for_level_multiplier;
-    Status s =
+    rocksdb_rs::status::Status s =
         CreateMemTableRepFactory(config_options, &options.memtable_factory);
     if (!s.ok()) {
       fprintf(stderr, "Could not create memtable factory: %s\n",
@@ -4368,7 +4368,7 @@ class Benchmark {
       block_based_options.data_block_hash_table_util_ratio =
           FLAGS_data_block_hash_table_util_ratio;
       if (FLAGS_read_cache_path != "") {
-        Status rc_status = Status_new();
+        rocksdb_rs::status::Status rc_status = Status_new();
 
         // Read cache need to be provided with a the Logger, we will put all
         // reac cache logs in the read cache path in a file named rc_LOG
@@ -4748,7 +4748,7 @@ class Benchmark {
   void OpenDb(Options options, const std::string& db_name,
               DBWithColumnFamilies* db) {
     uint64_t open_start = FLAGS_report_open_timing ? FLAGS_env->NowNanos() : 0;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     // Open with column families if necessary.
     if (FLAGS_num_column_families > 1) {
       size_t num_hot = FLAGS_num_column_families;
@@ -4866,7 +4866,7 @@ class Benchmark {
             [this](int interval, DBWithColumnFamilies* _db) {
               while (0 == secondary_update_stopped_.load(
                               std::memory_order_relaxed)) {
-                Status secondary_update_status =
+                rocksdb_rs::status::Status secondary_update_status =
                     _db->db->TryCatchUpWithPrimary();
                 if (!secondary_update_status.ok()) {
                   fprintf(stderr, "Failed to catch up with primary: %s\n",
@@ -5012,7 +5012,7 @@ class Benchmark {
     WriteBatch batch(/*reserved_bytes=*/0, /*max_bytes=*/0,
                      FLAGS_write_batch_protection_bytes_per_key,
                      user_timestamp_size_);
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     int64_t bytes = 0;
 
     std::unique_ptr<const char[]> key_guard;
@@ -5416,7 +5416,7 @@ class Benchmark {
     thread->stats.AddBytes(bytes);
   }
 
-  Status DoDeterministicCompact(ThreadState* thread,
+  rocksdb_rs::status::Status DoDeterministicCompact(ThreadState* thread,
                                 CompactionStyle compaction_style,
                                 WriteMode write_mode) {
     ColumnFamilyMetaData meta;
@@ -5781,7 +5781,7 @@ class Benchmark {
       GenerateKeyFromInt(key_rand, FLAGS_num, &key);
       key_rand++;
       read++;
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       if (FLAGS_num_column_families > 1) {
         s = db_with_cfh->db->Get(read_options_, db_with_cfh->GetCfh(key_rand),
                                  key, &pinnable_val);
@@ -5982,7 +5982,7 @@ class Benchmark {
         options.timestamp = &ts;
         ts_ptr = &ts_ret;
       }
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       pinnable_val.Reset();
       for (size_t i = 0; i < pinnable_vals.size(); ++i) {
         pinnable_vals[i].Reset();
@@ -6059,7 +6059,7 @@ class Benchmark {
     std::vector<std::string> values(entries_per_batch_);
     PinnableSlice* pin_values = new PinnableSlice[entries_per_batch_];
     std::unique_ptr<PinnableSlice[]> pin_values_guard(pin_values);
-    rust::Vec<Status> stat_list = Status_new().create_vec(entries_per_batch_);
+    rust::Vec<rocksdb_rs::status::Status> stat_list = Status_new().create_vec(entries_per_batch_);
     while (static_cast<int64_t>(keys.size()) < entries_per_batch_) {
       key_guards.push_back(std::unique_ptr<const char[]>());
       keys.push_back(AllocateKey(&key_guards.back()));
@@ -6094,7 +6094,7 @@ class Benchmark {
         options.timestamp = &ts;
       }
       if (!FLAGS_multiread_batched) {
-        rust::Vec<Status> statuses = db->MultiGet(options, keys, &values);
+        rust::Vec<rocksdb_rs::status::Status> statuses = db->MultiGet(options, keys, &values);
         assert(static_cast<int64_t>(statuses.size()) == entries_per_batch_);
 
         read += entries_per_batch_;
@@ -6234,7 +6234,7 @@ class Benchmark {
     QueryDecider() {}
     ~QueryDecider() {}
 
-    Status Initiate(std::vector<double> ratio_input) {
+    rocksdb_rs::status::Status Initiate(std::vector<double> ratio_input) {
       int range_max = 1000;
       double sum = 0.0;
       for (auto& ratio : ratio_input) {
@@ -6295,7 +6295,7 @@ class Benchmark {
 
     // Initiate the KeyrangeUnit vector and calculate the size of each
     // KeyrangeUnit.
-    Status InitiateExpDistribution(int64_t total_keys, double prefix_a,
+    rocksdb_rs::status::Status InitiateExpDistribution(int64_t total_keys, double prefix_a,
                                    double prefix_b, double prefix_c,
                                    double prefix_d) {
       int64_t amplify = 0;
@@ -6431,7 +6431,7 @@ class Benchmark {
     char value_buffer[default_value_max];
     QueryDecider query;
     RandomGenerator gen;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     if (value_max > FLAGS_mix_max_value_size) {
       value_max = FLAGS_mix_max_value_size;
     }
@@ -6794,7 +6794,7 @@ class Benchmark {
         GenerateKeyFromInt(k, FLAGS_num, &key);
         batch.Delete(key);
       }
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = batch.UpdateTimestamps(
@@ -6903,7 +6903,7 @@ class Benchmark {
       }
 
       GenerateKeyFromInt(thread->rand.Next() % FLAGS_num, FLAGS_num, &key);
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
 
       Slice val = gen.Generate();
       Slice ts;
@@ -7027,7 +7027,7 @@ class Benchmark {
 
   // Given a key K and value V, this puts (K+"0", V), (K+"1", V), (K+"2", V)
   // in DB atomically i.e in a single batch. Also refer GetMany.
-  Status PutMany(DB* db, const WriteOptions& writeoptions, const Slice& key,
+  rocksdb_rs::status::Status PutMany(DB* db, const WriteOptions& writeoptions, const Slice& key,
                  const Slice& value) {
     std::string suffixes[3] = {"2", "1", "0"};
     std::string keys[3];
@@ -7035,7 +7035,7 @@ class Benchmark {
     WriteBatch batch(/*reserved_bytes=*/0, /*max_bytes=*/0,
                      FLAGS_write_batch_protection_bytes_per_key,
                      user_timestamp_size_);
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     for (int i = 0; i < 3; i++) {
       keys[i] = key.ToString() + suffixes[i];
       batch.Put(keys[i], value);
@@ -7060,14 +7060,14 @@ class Benchmark {
 
   // Given a key K, this deletes (K+"0", V), (K+"1", V), (K+"2", V)
   // in DB atomically i.e in a single batch. Also refer GetMany.
-  Status DeleteMany(DB* db, const WriteOptions& writeoptions,
+  rocksdb_rs::status::Status DeleteMany(DB* db, const WriteOptions& writeoptions,
                     const Slice& key) {
     std::string suffixes[3] = {"1", "2", "0"};
     std::string keys[3];
 
     WriteBatch batch(0, 0, FLAGS_write_batch_protection_bytes_per_key,
                      user_timestamp_size_);
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     for (int i = 0; i < 3; i++) {
       keys[i] = key.ToString() + suffixes[i];
       batch.Delete(keys[i]);
@@ -7093,7 +7093,7 @@ class Benchmark {
   // Given a key K and value V, this gets values for K+"0", K+"1" and K+"2"
   // in the same snapshot, and verifies that all the values are identical.
   // ASSUMES that PutMany was used to put (K, V) into the DB.
-  Status GetMany(DB* db, const Slice& key, std::string* value) {
+  rocksdb_rs::status::Status GetMany(DB* db, const Slice& key, std::string* value) {
     std::string suffixes[3] = {"0", "1", "2"};
     std::string keys[3];
     Slice key_slices[3];
@@ -7109,7 +7109,7 @@ class Benchmark {
     }
 
     readoptionscopy.snapshot = db->GetSnapshot();
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     for (int i = 0; i < 3; i++) {
       keys[i] = key.ToString() + suffixes[i];
       key_slices[i] = keys[i];
@@ -7172,7 +7172,7 @@ class Benchmark {
                          FLAGS_numdistinct, &key);
       if (get_weight > 0) {
         // do all the gets first
-        Status s = GetMany(db, key, &value);
+        rocksdb_rs::status::Status s = GetMany(db, key, &value);
         if (!s.ok() && !s.IsNotFound()) {
           fprintf(stderr, "getmany error: %s\n", s.ToString()->c_str());
           // we continue after error rather than exiting so that we can
@@ -7186,7 +7186,7 @@ class Benchmark {
       } else if (put_weight > 0) {
         // then do all the corresponding number of puts
         // for all the gets we have done earlier
-        Status s = PutMany(db, write_options_, key, gen.Generate());
+        rocksdb_rs::status::Status s = PutMany(db, write_options_, key, gen.Generate());
         if (!s.ok()) {
           fprintf(stderr, "putmany error: %s\n", s.ToString()->c_str());
           exit(1);
@@ -7195,7 +7195,7 @@ class Benchmark {
         puts_done++;
         thread->stats.FinishedOps(&db_, db_.db, 1, OperationType::kWrite);
       } else if (delete_weight > 0) {
-        Status s = DeleteMany(db, write_options_, key);
+        rocksdb_rs::status::Status s = DeleteMany(db, write_options_, key);
         if (!s.ok()) {
           fprintf(stderr, "deletemany error: %s\n", s.ToString()->c_str());
           exit(1);
@@ -7251,7 +7251,7 @@ class Benchmark {
                                                     ts_guard.get());
           options.timestamp = &ts;
         }
-        Status s = db->Get(options, key, &value);
+        rocksdb_rs::status::Status s = db->Get(options, key, &value);
         if (!s.ok() && !s.IsNotFound()) {
           fprintf(stderr, "get error: %s\n", s.ToString()->c_str());
           // we continue after error rather than exiting so that we can
@@ -7265,7 +7265,7 @@ class Benchmark {
       } else if (put_weight > 0) {
         // then do all the corresponding number of puts
         // for all the gets we have done earlier
-        Status s = Status_new();
+        rocksdb_rs::status::Status s = Status_new();
         if (user_timestamp_size_ > 0) {
           Slice ts = mock_app_clock_->Allocate(ts_guard.get());
           s = db->Put(write_options_, key, ts, gen.Generate());
@@ -7333,7 +7333,7 @@ class Benchmark {
       }
 
       Slice val = gen.Generate();
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = db->Put(write_options_, key, ts, val);
@@ -7403,7 +7403,7 @@ class Benchmark {
         xor_operator.XOR(nullptr, value, &new_value);
       }
 
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = db->Put(write_options_, key, ts, Slice(new_value));
@@ -7470,7 +7470,7 @@ class Benchmark {
       }
       value.append(operand.data(), operand.size());
 
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       if (user_timestamp_size_ > 0) {
         ts = mock_app_clock_->Allocate(ts_guard.get());
         s = db->Put(write_options_, key, ts, value);
@@ -7515,7 +7515,7 @@ class Benchmark {
       int64_t key_rand = thread->rand.Next() % merge_keys_;
       GenerateKeyFromInt(key_rand, merge_keys_, &key);
 
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       Slice val = gen.Generate();
       if (FLAGS_num_column_families > 1) {
         s = db_with_cfh->db->Merge(write_options_,
@@ -7566,7 +7566,7 @@ class Benchmark {
       bool do_merge = int(thread->rand.Next() % 100) < FLAGS_mergereadpercent;
 
       if (do_merge) {
-        Status s = db->Merge(write_options_, key, gen.Generate());
+        rocksdb_rs::status::Status s = db->Merge(write_options_, key, gen.Generate());
         if (!s.ok()) {
           fprintf(stderr, "merge error: %s\n", s.ToString()->c_str());
           exit(1);
@@ -7574,7 +7574,7 @@ class Benchmark {
         num_merges++;
         thread->stats.FinishedOps(nullptr, db, 1, OperationType::kMerge);
       } else {
-        Status s = db->Get(read_options_, key, &value);
+        rocksdb_rs::status::Status s = db->Get(read_options_, key, &value);
         if (value.length() > max_length) max_length = value.length();
 
         if (!s.ok() && !s.IsNotFound()) {
@@ -7738,7 +7738,7 @@ class Benchmark {
     ro.rate_limiter_priority =
         FLAGS_rate_limit_user_ops ? Env::IO_USER : Env::IO_TOTAL;
     ro.readahead_size = FLAGS_readahead_size;
-    Status s = db->VerifyChecksum(ro);
+    rocksdb_rs::status::Status s = db->VerifyChecksum(ro);
     if (!s.ok()) {
       fprintf(stderr, "VerifyChecksum() failed: %s\n", s.ToString()->c_str());
       exit(1);
@@ -7753,7 +7753,7 @@ class Benchmark {
     ro.rate_limiter_priority =
         FLAGS_rate_limit_user_ops ? Env::IO_USER : Env::IO_TOTAL;
     ro.readahead_size = FLAGS_readahead_size;
-    Status s = db->VerifyFileChecksums(ro);
+    rocksdb_rs::status::Status s = db->VerifyFileChecksums(ro);
     if (!s.ok()) {
       fprintf(stderr, "VerifyFileChecksums() failed: %s\n",
               s.ToString()->c_str());
@@ -7843,7 +7843,7 @@ class Benchmark {
       return;
     }
 
-    Status s = RandomTransactionInserter::Verify(
+    rocksdb_rs::status::Status s = RandomTransactionInserter::Verify(
         db_.db, static_cast<uint16_t>(FLAGS_transaction_sets));
 
     if (s.ok()) {
@@ -7869,7 +7869,7 @@ class Benchmark {
     size_t max_counter = 50;
     RandomGenerator gen;
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     DB* db = SelectDB(thread);
     for (int64_t i = 0; i < FLAGS_numdistinct; i++) {
       GenerateKeyFromInt(i * max_counter, FLAGS_num, &key);
@@ -8050,7 +8050,7 @@ class Benchmark {
 
       timestamp_emulator_->Inc();
 
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       Slice val = gen.Generate();
       s = db->Put(write_options_, key, val);
 
@@ -8216,7 +8216,7 @@ class Benchmark {
     db_with_cfh.db->DefaultColumnFamily()->GetDescriptor(&cfDesc);
     options.output_file_size_limit = cfDesc.options.target_file_size_base;
 
-    Status status =
+    rocksdb_rs::status::Status status =
         db_with_cfh.db->CompactFiles(options, files_to_compact, next_level);
     if (!status.ok()) {
       // This can fail for valid reasons including the operation was aborted
@@ -8244,7 +8244,7 @@ class Benchmark {
     flush_opt.wait = true;
 
     if (db_.db != nullptr) {
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       if (FLAGS_num_column_families > 1) {
         s = db_.db->Flush(flush_opt, db_.cfh);
       } else {
@@ -8257,7 +8257,7 @@ class Benchmark {
       }
     } else {
       for (const auto& db_with_cfh : multi_dbs_) {
-        Status s = Status_new();
+        rocksdb_rs::status::Status s = Status_new();
         if (FLAGS_num_column_families > 1) {
           s = db_with_cfh.db->Flush(flush_opt, db_with_cfh.cfh);
         } else {
@@ -8298,7 +8298,7 @@ class Benchmark {
     }
 
     std::unique_ptr<StatsHistoryIterator> shi;
-    Status s =
+    rocksdb_rs::status::Status s =
         db->GetStatsHistory(0, std::numeric_limits<uint64_t>::max(), &shi);
     if (!s.ok()) {
       fprintf(stdout, "%s\n", s.ToString()->c_str());
@@ -8369,7 +8369,7 @@ class Benchmark {
   }
 
   void Replay(ThreadState* /*thread*/, DBWithColumnFamilies* db_with_cfh) {
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     std::unique_ptr<TraceReader> trace_reader;
     s = NewFileTraceReader(FLAGS_env, EnvOptions(), FLAGS_trace_file,
                            &trace_reader);
@@ -8413,7 +8413,7 @@ class Benchmark {
     DB* db = SelectDB(thread);
     std::unique_ptr<BackupEngineOptions> engine_options(
         new BackupEngineOptions(FLAGS_backup_dir));
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     BackupEngine* backup_engine;
     if (FLAGS_backup_rate_limit > 0) {
       engine_options->backup_rate_limiter.reset(NewGenericRateLimiter(
@@ -8441,7 +8441,7 @@ class Benchmark {
           10 /* fairness */, RateLimiter::Mode::kAllIo));
     }
     BackupEngineReadOnly* backup_engine;
-    Status s =
+    rocksdb_rs::status::Status s =
         BackupEngineReadOnly::Open(FLAGS_env, *engine_options, &backup_engine);
     assert(s.ok());
     s = backup_engine->RestoreDBFromLatestBackup(FLAGS_restore_dir,
@@ -8471,7 +8471,7 @@ int db_bench_tool(int argc, char** argv) {
     exit(1);
   }
   if (!FLAGS_statistics_string.empty()) {
-    Status s = Statistics::CreateFromString(config_options,
+    rocksdb_rs::status::Status s = Statistics::CreateFromString(config_options,
                                             FLAGS_statistics_string, &dbstats);
     if (dbstats == nullptr) {
       fprintf(stderr,
@@ -8520,7 +8520,7 @@ int db_bench_tool(int argc, char** argv) {
   }
 
   if (env_opts == 1) {
-    Status s = Env::CreateFromUri(config_options, FLAGS_env_uri, FLAGS_fs_uri,
+    rocksdb_rs::status::Status s = Env::CreateFromUri(config_options, FLAGS_env_uri, FLAGS_fs_uri,
                                   &FLAGS_env, &env_guard);
     if (!s.ok()) {
       fprintf(stderr, "Failed creating env: %s\n", s.ToString()->c_str());

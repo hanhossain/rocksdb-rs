@@ -53,7 +53,7 @@ class FullFilterBlockBuilder : public FilterBlockBuilder {
   virtual bool IsEmpty() const override { return !any_added_; }
   virtual size_t EstimateEntriesAdded() override;
   virtual Slice Finish(
-      const BlockHandle& tmp, Status* status,
+      const BlockHandle& tmp, rocksdb_rs::status::Status* status,
       std::unique_ptr<const char[]>* filter_data = nullptr) override;
   using FilterBlockBuilder::Finish;
 
@@ -61,7 +61,7 @@ class FullFilterBlockBuilder : public FilterBlockBuilder {
     filter_bits_builder_.reset();
   }
 
-  virtual Status MaybePostVerifyFilter(const Slice& filter_content) override {
+  virtual rocksdb_rs::status::Status MaybePostVerifyFilter(const Slice& filter_content) override {
     return filter_bits_builder_->MaybePostVerify(filter_content);
   }
 

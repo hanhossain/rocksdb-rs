@@ -52,7 +52,7 @@ class DBMergeOperatorTest : public DBTestBase {
     get_impl_options.column_family = db_->DefaultColumnFamily();
     get_impl_options.value = &value;
     get_impl_options.callback = &read_callback;
-    Status s = dbfull()->GetImpl(read_opt, key, get_impl_options);
+    rocksdb_rs::status::Status s = dbfull()->GetImpl(read_opt, key, get_impl_options);
     if (!s.ok()) {
       return *s.ToString();
     }
@@ -231,7 +231,7 @@ TEST_F(DBMergeOperatorTest, MergeOperatorFailsWithMustMerge) {
       {
         std::string value;
         ASSERT_OK(db_->Get(ReadOptions(), "k0", &value));
-        Status s = db_->Get(ReadOptions(), "k1", &value);
+        rocksdb_rs::status::Status s = db_->Get(ReadOptions(), "k1", &value);
         ASSERT_TRUE(s.IsCorruption());
         ASSERT_EQ(rocksdb_rs::status::SubCode::kMergeOperatorFailed, s.subcode());
         ASSERT_OK(db_->Get(ReadOptions(), "k2", &value));

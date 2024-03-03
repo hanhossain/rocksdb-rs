@@ -50,7 +50,7 @@ std::string KeyVersion::GetTypeName() const {
   }
 }
 
-Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
+rocksdb_rs::status::Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
                          size_t max_num_ikeys,
                          std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
@@ -60,7 +60,7 @@ Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
                            max_num_ikeys, key_versions);
 }
 
-Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
+rocksdb_rs::status::Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
                          Slice end_key, size_t max_num_ikeys,
                          std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
@@ -92,7 +92,7 @@ Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
   size_t num_keys = 0;
   for (; iter->Valid(); iter->Next()) {
     ParsedInternalKey ikey;
-    Status pik_status =
+    rocksdb_rs::status::Status pik_status =
         ParseInternalKey(iter->key(), &ikey, true /* log_err_key */);  // TODO
     if (!pik_status.ok()) {
       return pik_status;

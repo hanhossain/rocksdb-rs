@@ -15,7 +15,7 @@
 
 namespace rocksdb {
 
-Status WideColumnSerialization::SerializeImpl(const Slice* value_of_default,
+rocksdb_rs::status::Status WideColumnSerialization::SerializeImpl(const Slice* value_of_default,
                                               const WideColumns& columns,
                                               std::string& output) {
   const size_t num_columns =
@@ -80,7 +80,7 @@ Status WideColumnSerialization::SerializeImpl(const Slice* value_of_default,
   return Status_OK();
 }
 
-Status WideColumnSerialization::Deserialize(Slice& input,
+rocksdb_rs::status::Status WideColumnSerialization::Deserialize(Slice& input,
                                             WideColumns& columns) {
   assert(columns.empty());
 
@@ -160,11 +160,11 @@ WideColumns::const_iterator WideColumnSerialization::Find(
   return it;
 }
 
-Status WideColumnSerialization::GetValueOfDefaultColumn(Slice& input,
+rocksdb_rs::status::Status WideColumnSerialization::GetValueOfDefaultColumn(Slice& input,
                                                         Slice& value) {
   WideColumns columns;
 
-  const Status s = Deserialize(input, columns);
+  const rocksdb_rs::status::Status s = Deserialize(input, columns);
   if (!s.ok()) {
     return s.Clone();
   }

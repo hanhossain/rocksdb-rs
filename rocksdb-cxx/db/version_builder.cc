@@ -301,7 +301,7 @@ class VersionBuilder::Rep {
       }
 
       if (file_metadata_cache_res_mgr_) {
-        Status s = file_metadata_cache_res_mgr_->UpdateCacheReservation(
+        rocksdb_rs::status::Status s = file_metadata_cache_res_mgr_->UpdateCacheReservation(
             f->ApproximateMemoryUsage(), false /* increase */);
       }
       delete f;
@@ -328,7 +328,7 @@ class VersionBuilder::Rep {
   }
 
   template <typename Checker>
-  Status CheckConsistencyDetailsForLevel(
+  rocksdb_rs::status::Status CheckConsistencyDetailsForLevel(
       const VersionStorageInfo* vstorage, int level, Checker checker,
       const std::string& sync_point,
       ExpectedLinkedSsts* expected_linked_ssts) const {
@@ -365,7 +365,7 @@ class VersionBuilder::Rep {
       TEST_SYNC_POINT_CALLBACK(sync_point, &pair);
 #endif
 
-      const Status s = checker(lhs, rhs);
+      const rocksdb_rs::status::Status s = checker(lhs, rhs);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -376,7 +376,7 @@ class VersionBuilder::Rep {
 
   // Make sure table files are sorted correctly and that the links between
   // table files and blob files are consistent.
-  Status CheckConsistencyDetails(const VersionStorageInfo* vstorage) const {
+  rocksdb_rs::status::Status CheckConsistencyDetails(const VersionStorageInfo* vstorage) const {
     assert(vstorage);
 
     ExpectedLinkedSsts expected_linked_ssts;
@@ -441,7 +441,7 @@ class VersionBuilder::Rep {
           return Status_OK();
         };
 
-        const Status s = CheckConsistencyDetailsForLevel(
+        const rocksdb_rs::status::Status s = CheckConsistencyDetailsForLevel(
             vstorage, /* level */ 0, l0_checker,
             "VersionBuilder::CheckConsistency0", &expected_linked_ssts);
         if (!s.ok()) {
@@ -480,7 +480,7 @@ class VersionBuilder::Rep {
           return Status_OK();
         };
 
-        const Status s = CheckConsistencyDetailsForLevel(
+        const rocksdb_rs::status::Status s = CheckConsistencyDetailsForLevel(
             vstorage, level, checker, "VersionBuilder::CheckConsistency1",
             &expected_linked_ssts);
         if (!s.ok()) {
@@ -516,13 +516,13 @@ class VersionBuilder::Rep {
       }
     }
 
-    Status ret_s = Status_new();
+    rocksdb_rs::status::Status ret_s = Status_new();
     TEST_SYNC_POINT_CALLBACK("VersionBuilder::CheckConsistencyBeforeReturn",
                              &ret_s);
     return ret_s;
   }
 
-  Status CheckConsistency(const VersionStorageInfo* vstorage) const {
+  rocksdb_rs::status::Status CheckConsistency(const VersionStorageInfo* vstorage) const {
     assert(vstorage);
 
     // Always run consistency checks in debug build
@@ -531,7 +531,7 @@ class VersionBuilder::Rep {
       return Status_OK();
     }
 #endif
-    Status s = CheckConsistencyDetails(vstorage);
+    rocksdb_rs::status::Status s = CheckConsistencyDetails(vstorage);
     if (s.IsCorruption() && s.getState()) {
       // Make it clear the error is due to force_consistency_checks = 1 or
       // debug build
@@ -596,7 +596,7 @@ class VersionBuilder::Rep {
     return nullptr;
   }
 
-  Status ApplyBlobFileAddition(const BlobFileAddition& blob_file_addition) {
+  rocksdb_rs::status::Status ApplyBlobFileAddition(const BlobFileAddition& blob_file_addition) {
     const uint64_t blob_file_number = blob_file_addition.GetBlobFileNumber();
 
     if (IsBlobFileInVersion(blob_file_number)) {
@@ -636,7 +636,7 @@ class VersionBuilder::Rep {
     return Status_OK();
   }
 
-  Status ApplyBlobFileGarbage(const BlobFileGarbage& blob_file_garbage) {
+  rocksdb_rs::status::Status ApplyBlobFileGarbage(const BlobFileGarbage& blob_file_garbage) {
     const uint64_t blob_file_number = blob_file_garbage.GetBlobFileNumber();
 
     MutableBlobFileMetaData* const mutable_meta =
@@ -691,7 +691,7 @@ class VersionBuilder::Rep {
     return meta->oldest_blob_file_number;
   }
 
-  Status ApplyFileDeletion(int level, uint64_t file_number) {
+  rocksdb_rs::status::Status ApplyFileDeletion(int level, uint64_t file_number) {
     assert(level != VersionStorageInfo::FileLocation::Invalid().GetLevel());
 
     const int current_level = GetCurrentLevelForTableFile(file_number);
@@ -754,7 +754,7 @@ class VersionBuilder::Rep {
     return Status_OK();
   }
 
-  Status ApplyFileAddition(int level, const FileMetaData& meta) {
+  rocksdb_rs::status::Status ApplyFileAddition(int level, const FileMetaData& meta) {
     assert(level != VersionStorageInfo::FileLocation::Invalid().GetLevel());
 
     const uint64_t file_number = meta.fd.GetNumber();
@@ -792,7 +792,7 @@ class VersionBuilder::Rep {
     f->refs = 1;
 
     if (file_metadata_cache_res_mgr_) {
-      Status s = file_metadata_cache_res_mgr_->UpdateCacheReservation(
+      rocksdb_rs::status::Status s = file_metadata_cache_res_mgr_->UpdateCacheReservation(
           f->ApproximateMemoryUsage(), true /* increase */);
       if (!s.ok()) {
         delete f;
@@ -826,7 +826,7 @@ class VersionBuilder::Rep {
     return Status_OK();
   }
 
-  Status ApplyCompactCursors(int level,
+  rocksdb_rs::status::Status ApplyCompactCursors(int level,
                              const InternalKey& smallest_uncompacted_key) {
     if (level < 0) {
       std::ostringstream oss;
@@ -843,9 +843,9 @@ class VersionBuilder::Rep {
   }
 
   // Apply all of the edits in *edit to the current state.
-  Status Apply(const VersionEdit* edit) {
+  rocksdb_rs::status::Status Apply(const VersionEdit* edit) {
     {
-      const Status s = CheckConsistency(base_vstorage_);
+      const rocksdb_rs::status::Status s = CheckConsistency(base_vstorage_);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -857,7 +857,7 @@ class VersionBuilder::Rep {
 
     // Add new blob files
     for (const auto& blob_file_addition : edit->GetBlobFileAdditions()) {
-      const Status s = ApplyBlobFileAddition(blob_file_addition);
+      const rocksdb_rs::status::Status s = ApplyBlobFileAddition(blob_file_addition);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -865,7 +865,7 @@ class VersionBuilder::Rep {
 
     // Increase the amount of garbage for blob files affected by GC
     for (const auto& blob_file_garbage : edit->GetBlobFileGarbages()) {
-      const Status s = ApplyBlobFileGarbage(blob_file_garbage);
+      const rocksdb_rs::status::Status s = ApplyBlobFileGarbage(blob_file_garbage);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -876,7 +876,7 @@ class VersionBuilder::Rep {
       const int level = deleted_file.first;
       const uint64_t file_number = deleted_file.second;
 
-      const Status s = ApplyFileDeletion(level, file_number);
+      const rocksdb_rs::status::Status s = ApplyFileDeletion(level, file_number);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -887,7 +887,7 @@ class VersionBuilder::Rep {
       const int level = new_file.first;
       const FileMetaData& meta = new_file.second;
 
-      const Status s = ApplyFileAddition(level, meta);
+      const rocksdb_rs::status::Status s = ApplyFileAddition(level, meta);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -898,7 +898,7 @@ class VersionBuilder::Rep {
     for (const auto& cursor : edit->GetCompactCursors()) {
       const int level = cursor.first;
       const InternalKey smallest_uncompacted_key = cursor.second;
-      const Status s = ApplyCompactCursors(level, smallest_uncompacted_key);
+      const rocksdb_rs::status::Status s = ApplyCompactCursors(level, smallest_uncompacted_key);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -1226,8 +1226,8 @@ class VersionBuilder::Rep {
   }
 
   // Save the current state in *vstorage.
-  Status SaveTo(VersionStorageInfo* vstorage) const {
-    Status s = Status_new();
+  rocksdb_rs::status::Status SaveTo(VersionStorageInfo* vstorage) const {
+    rocksdb_rs::status::Status s = Status_new();
 
 #ifndef NDEBUG
     // The same check is done within Apply() so we skip it in release mode.
@@ -1252,7 +1252,7 @@ class VersionBuilder::Rep {
     return s;
   }
 
-  Status LoadTableHandlers(
+  rocksdb_rs::status::Status LoadTableHandlers(
       InternalStats* internal_stats, int max_threads,
       bool prefetch_index_and_filter_in_cache, bool is_initial_load,
       const std::shared_ptr<const SliceTransform>& prefix_extractor,
@@ -1294,7 +1294,7 @@ class VersionBuilder::Rep {
 
     // <file metadata, level>
     std::vector<std::pair<FileMetaData*, int>> files_meta;
-    std::vector<Status> statuses;
+    std::vector<rocksdb_rs::status::Status> statuses;
     for (int level = 0; level < num_levels_; level++) {
       for (auto& file_meta_pair : levels_[level].added_files) {
         auto* file_meta = file_meta_pair.second;
@@ -1346,7 +1346,7 @@ class VersionBuilder::Rep {
     for (auto& t : threads) {
       t.join();
     }
-    Status ret = Status_new();
+    rocksdb_rs::status::Status ret = Status_new();
     for (const auto& s : statuses) {
       if (!s.ok()) {
         if (ret.ok()) {
@@ -1372,15 +1372,15 @@ bool VersionBuilder::CheckConsistencyForNumLevels() {
   return rep_->CheckConsistencyForNumLevels();
 }
 
-Status VersionBuilder::Apply(const VersionEdit* edit) {
+rocksdb_rs::status::Status VersionBuilder::Apply(const VersionEdit* edit) {
   return rep_->Apply(edit);
 }
 
-Status VersionBuilder::SaveTo(VersionStorageInfo* vstorage) const {
+rocksdb_rs::status::Status VersionBuilder::SaveTo(VersionStorageInfo* vstorage) const {
   return rep_->SaveTo(vstorage);
 }
 
-Status VersionBuilder::LoadTableHandlers(
+rocksdb_rs::status::Status VersionBuilder::LoadTableHandlers(
     InternalStats* internal_stats, int max_threads,
     bool prefetch_index_and_filter_in_cache, bool is_initial_load,
     const std::shared_ptr<const SliceTransform>& prefix_extractor,

@@ -259,7 +259,7 @@ struct ConfigOptions {
 //     value for this option
 // @return Status_InvalidArgument means the one of the option values is not
 //     valid for this option.
-Status GetColumnFamilyOptionsFromMap(
+rocksdb_rs::status::Status GetColumnFamilyOptionsFromMap(
     const ConfigOptions& config_options,
     const ColumnFamilyOptions& base_options,
     const std::unordered_map<std::string, std::string>& opts_map,
@@ -297,7 +297,7 @@ Status GetColumnFamilyOptionsFromMap(
 //     value for this option
 // @return Status_InvalidArgument means the one of the option values is not
 //     valid for this option.
-Status GetDBOptionsFromMap(
+rocksdb_rs::status::Status GetDBOptionsFromMap(
     const ConfigOptions& cfg_options, const DBOptions& base_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     DBOptions* new_options);
@@ -342,7 +342,7 @@ Status GetDBOptionsFromMap(
 // @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
-Status GetBlockBasedTableOptionsFromMap(
+rocksdb_rs::status::Status GetBlockBasedTableOptionsFromMap(
     const ConfigOptions& config_options,
     const BlockBasedTableOptions& table_options,
     const std::unordered_map<std::string, std::string>& opts_map,
@@ -367,7 +367,7 @@ Status GetBlockBasedTableOptionsFromMap(
 // @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
-Status GetPlainTableOptionsFromMap(
+rocksdb_rs::status::Status GetPlainTableOptionsFromMap(
     const ConfigOptions& config_options, const PlainTableOptions& table_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     PlainTableOptions* new_table_options);
@@ -381,56 +381,56 @@ Status GetPlainTableOptionsFromMap(
 //   "write_buffer_size=1024;block_based_table_factory={block_size=4k};"
 //   "max_write_buffer_num=2"
 //
-Status GetColumnFamilyOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetColumnFamilyOptionsFromString(const ConfigOptions& config_options,
                                         const ColumnFamilyOptions& base_options,
                                         const std::string& opts_str,
                                         ColumnFamilyOptions* new_options);
 
-Status GetDBOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetDBOptionsFromString(const ConfigOptions& config_options,
                               const DBOptions& base_options,
                               const std::string& opts_str,
                               DBOptions* new_options);
 
-Status GetStringFromDBOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromDBOptions(const ConfigOptions& config_options,
                               const DBOptions& db_options,
                               std::string* opts_str);
 
-Status GetStringFromDBOptions(std::string* opts_str,
+rocksdb_rs::status::Status GetStringFromDBOptions(std::string* opts_str,
                               const DBOptions& db_options,
                               const std::string& delimiter = ";  ");
 
-Status GetStringFromColumnFamilyOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(const ConfigOptions& config_options,
                                         const ColumnFamilyOptions& cf_options,
                                         std::string* opts_str);
-Status GetStringFromColumnFamilyOptions(std::string* opts_str,
+rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(std::string* opts_str,
                                         const ColumnFamilyOptions& cf_options,
                                         const std::string& delimiter = ";  ");
-Status GetStringFromCompressionType(std::string* compression_str,
+rocksdb_rs::status::Status GetStringFromCompressionType(std::string* compression_str,
                                     rocksdb_rs::compression_type::CompressionType compression_type);
 
 std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedCompressions();
 
-Status GetBlockBasedTableOptionsFromString(
+rocksdb_rs::status::Status GetBlockBasedTableOptionsFromString(
     const ConfigOptions& config_options,
     const BlockBasedTableOptions& table_options, const std::string& opts_str,
     BlockBasedTableOptions* new_table_options);
 
-Status GetPlainTableOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetPlainTableOptionsFromString(const ConfigOptions& config_options,
                                       const PlainTableOptions& table_options,
                                       const std::string& opts_str,
                                       PlainTableOptions* new_table_options);
 
-Status GetMemTableRepFactoryFromString(
+rocksdb_rs::status::Status GetMemTableRepFactoryFromString(
     const std::string& opts_str,
     std::unique_ptr<MemTableRepFactory>* new_mem_factory);
 
-Status GetOptionsFromString(const Options& base_options,
+rocksdb_rs::status::Status GetOptionsFromString(const Options& base_options,
                             const std::string& opts_str, Options* new_options);
-Status GetOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetOptionsFromString(const ConfigOptions& config_options,
                             const Options& base_options,
                             const std::string& opts_str, Options* new_options);
 
-Status StringToMap(const std::string& opts_str,
+rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
                    std::unordered_map<std::string, std::string>* opts_map);
 
 // Request stopping background work, if wait is true wait until it's done
@@ -441,24 +441,24 @@ void CancelAllBackgroundWork(DB* db, bool wait = false);
 // entirely in the range. Also leaves L0 files regardless of whether they're
 // in the range.
 // Snapshots before the delete might not see the data in the given range.
-Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
                           const Slice* begin, const Slice* end,
                           bool include_end = true);
 
 // Delete files in multiple ranges at once
 // Delete files in a lot of ranges one at a time can be slow, use this API for
 // better performance in that case.
-Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
                            const RangePtr* ranges, size_t n,
                            bool include_end = true);
 
 // Verify the checksum of file
-Status VerifySstFileChecksum(const Options& options,
+rocksdb_rs::status::Status VerifySstFileChecksum(const Options& options,
                              const EnvOptions& env_options,
                              const std::string& file_path);
 
 // Verify the checksum of file
-Status VerifySstFileChecksum(const Options& options,
+rocksdb_rs::status::Status VerifySstFileChecksum(const Options& options,
                              const EnvOptions& env_options,
                              const ReadOptions& read_options,
                              const std::string& file_path,

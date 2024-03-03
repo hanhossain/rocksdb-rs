@@ -30,7 +30,7 @@ class SystemClock : public Customizable {
   ~SystemClock() override {}
 
   static const char* Type() { return "SystemClock"; }
-  static Status CreateFromString(const ConfigOptions& options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
                                  const std::string& value,
                                  std::shared_ptr<SystemClock>* result);
   // The name of this system clock
@@ -70,7 +70,7 @@ class SystemClock : public Customizable {
 
   // Get the number of seconds since the Epoch, 1970-01-01 00:00:00 (UTC).
   // Only overwrites *unix_time on success.
-  virtual Status GetCurrentTime(int64_t* unix_time) = 0;
+  virtual rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) = 0;
 
   // Converts seconds-since-Jan-01-1970 to a printable string
   virtual std::string TimeToString(uint64_t time) = 0;
@@ -94,7 +94,7 @@ class SystemClockWrapper : public SystemClock {
     return target_->SleepForMicroseconds(micros);
   }
 
-  Status GetCurrentTime(int64_t* unix_time) override {
+  rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
     return target_->GetCurrentTime(unix_time);
   }
 
@@ -102,7 +102,7 @@ class SystemClockWrapper : public SystemClock {
     return target_->TimeToString(time);
   }
 
-  Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
   std::string SerializeOptions(const ConfigOptions& config_options,
                                const std::string& header) const override;
   const Customizable* Inner() const override { return target_.get(); }

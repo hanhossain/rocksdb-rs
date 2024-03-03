@@ -60,7 +60,7 @@ class WritePreparedTxnDB : public PessimisticTransactionDB {
 
   virtual ~WritePreparedTxnDB();
 
-  virtual Status Initialize(
+  virtual rocksdb_rs::status::Status Initialize(
       const std::vector<size_t>& compaction_enabled_cf_indices,
       const std::vector<ColumnFamilyHandle*>& handles) override;
 
@@ -69,26 +69,26 @@ class WritePreparedTxnDB : public PessimisticTransactionDB {
                                 Transaction* old_txn) override;
 
   using TransactionDB::Write;
-  Status Write(const WriteOptions& opts, WriteBatch* updates) override;
+  rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override;
 
   // Optimized version of ::Write that receives more optimization request such
   // as skip_concurrency_control.
   using PessimisticTransactionDB::Write;
-  Status Write(const WriteOptions& opts, const TransactionDBWriteOptimizations&,
+  rocksdb_rs::status::Status Write(const WriteOptions& opts, const TransactionDBWriteOptimizations&,
                WriteBatch* updates) override;
 
   // Write the batch to the underlying DB and mark it as committed. Could be
   // used by both directly from TxnDB or through a transaction.
-  Status WriteInternal(const WriteOptions& write_options, WriteBatch* batch,
+  rocksdb_rs::status::Status WriteInternal(const WriteOptions& write_options, WriteBatch* batch,
                        size_t batch_cnt, WritePreparedTxn* txn);
 
   using DB::Get;
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) override;
 
   using DB::MultiGet;
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys,
@@ -99,7 +99,7 @@ class WritePreparedTxnDB : public PessimisticTransactionDB {
                                 ColumnFamilyHandle* column_family) override;
 
   using DB::NewIterators;
-  virtual Status NewIterators(
+  virtual rocksdb_rs::status::Status NewIterators(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families,
       std::vector<Iterator*>* iterators) override;
@@ -444,7 +444,7 @@ class WritePreparedTxnDB : public PessimisticTransactionDB {
   SnapshotImpl* GetSnapshotInternal(bool for_ww_conflict_check);
 
  protected:
-  virtual Status VerifyCFOptions(
+  virtual rocksdb_rs::status::Status VerifyCFOptions(
       const ColumnFamilyOptions& cf_options) override;
   // Assign the min and max sequence numbers for reading from the db. A seq >
   // max is not valid, and a seq < min is valid, and a min <= seq < max requires
@@ -867,7 +867,7 @@ class AddPreparedCallback : public PreReleaseCallback {
         first_prepare_batch_(first_prepare_batch) {
     (void)two_write_queues_;  // to silence unused private field warning
   }
-  virtual Status Callback(SequenceNumber prepare_seq,
+  virtual rocksdb_rs::status::Status Callback(SequenceNumber prepare_seq,
                           bool is_mem_disabled __attribute__((__unused__)),
                           uint64_t log_number, size_t index,
                           size_t total) override {
@@ -931,7 +931,7 @@ class WritePreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
     assert((aux_batch_cnt_ > 0) != (aux_seq == kMaxSequenceNumber));  // xor
   }
 
-  virtual Status Callback(SequenceNumber commit_seq,
+  virtual rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
                           bool is_mem_disabled __attribute__((__unused__)),
                           uint64_t, size_t /*index*/,
                           size_t /*total*/) override {
@@ -1023,7 +1023,7 @@ class WritePreparedRollbackPreReleaseCallback : public PreReleaseCallback {
     assert(prep_batch_cnt_ > 0);
   }
 
-  Status Callback(SequenceNumber commit_seq, bool is_mem_disabled, uint64_t,
+  rocksdb_rs::status::Status Callback(SequenceNumber commit_seq, bool is_mem_disabled, uint64_t,
                   size_t /*index*/, size_t /*total*/) override {
     // Always commit from the 2nd queue
     assert(is_mem_disabled);  // implies the 2nd queue
@@ -1060,27 +1060,27 @@ struct SubBatchCounter : public WriteBatch::Handler {
   size_t BatchCount() { return batches_; }
   void AddKey(const uint32_t cf, const Slice& key);
   void InitWithComp(const uint32_t cf);
-  Status MarkNoop(bool) override { return Status_OK(); }
-  Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
-  Status MarkCommit(const Slice&) override { return Status_OK(); }
-  Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
+  rocksdb_rs::status::Status MarkNoop(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
     AddKey(cf, key);
     return Status_OK();
   }
-  Status DeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
     AddKey(cf, key);
     return Status_OK();
   }
-  Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
     AddKey(cf, key);
     return Status_OK();
   }
-  Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
     AddKey(cf, key);
     return Status_OK();
   }
-  Status MarkBeginPrepare(bool) override { return Status_OK(); }
-  Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
   Handler::OptionState WriteAfterCommit() const override {
     return Handler::OptionState::kDisabled;
   }

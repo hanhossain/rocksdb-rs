@@ -62,7 +62,7 @@ class SeqnoToTimeMapping {
     void Encode(std::string& dest) const;
 
     // Decode the value from input Slice and remove it from the input
-    Status Decode(Slice& input);
+    rocksdb_rs::status::Status Decode(Slice& input);
 
     // subtraction of 2 SeqnoTimePair
     SeqnoTimePair operator-(const SeqnoTimePair& other) const;
@@ -123,7 +123,7 @@ class SeqnoToTimeMapping {
   void Add(SequenceNumber seqno, uint64_t time);
 
   // Decode and add the entries to the current obj. The list will be unsorted
-  Status Add(const std::string& seqno_time_mapping_str);
+  rocksdb_rs::status::Status Add(const std::string& seqno_time_mapping_str);
 
   // Return the number of entries
   size_t Size() const { return seqno_time_mapping_.size(); }
@@ -140,7 +140,7 @@ class SeqnoToTimeMapping {
 
   // Sort the list, which also remove the redundant entries, useless entries,
   // which makes sure the seqno is sorted, but also the time
-  Status Sort();
+  rocksdb_rs::status::Status Sort();
 
   // copy the current obj from the given smallest_seqno.
   SeqnoToTimeMapping Copy(SequenceNumber smallest_seqno) const;

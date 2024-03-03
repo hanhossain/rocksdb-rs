@@ -38,11 +38,11 @@ class BlockAccessCipherStream {
 
   // Encrypt one or more (partial) blocks of data at the file offset.
   // Length of data is given in dataSize.
-  virtual Status Encrypt(uint64_t fileOffset, char* data, size_t dataSize);
+  virtual rocksdb_rs::status::Status Encrypt(uint64_t fileOffset, char* data, size_t dataSize);
 
   // Decrypt one or more (partial) blocks of data at the file offset.
   // Length of data is given in dataSize.
-  virtual Status Decrypt(uint64_t fileOffset, char* data, size_t dataSize);
+  virtual rocksdb_rs::status::Status Decrypt(uint64_t fileOffset, char* data, size_t dataSize);
 
  protected:
   // Allocate scratch space which is passed to EncryptBlock/DecryptBlock.
@@ -50,12 +50,12 @@ class BlockAccessCipherStream {
 
   // Encrypt a block of data at the given block index.
   // Length of data is equal to BlockSize();
-  virtual Status EncryptBlock(uint64_t blockIndex, char* data,
+  virtual rocksdb_rs::status::Status EncryptBlock(uint64_t blockIndex, char* data,
                               char* scratch) = 0;
 
   // Decrypt a block of data at the given block index.
   // Length of data is equal to BlockSize();
-  virtual Status DecryptBlock(uint64_t blockIndex, char* data,
+  virtual rocksdb_rs::status::Status DecryptBlock(uint64_t blockIndex, char* data,
                               char* scratch) = 0;
 };
 
@@ -82,7 +82,7 @@ class BlockCipher : public Customizable {
   // @return OK if the cipher was successfully created
   // @return NotFound if an invalid name was specified in the value
   // @return InvalidArgument if either the options were not valid
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& value,
                                  std::shared_ptr<BlockCipher>* result);
 
@@ -97,11 +97,11 @@ class BlockCipher : public Customizable {
 
   // Encrypt a block of data.
   // Length of data is equal to BlockSize().
-  virtual Status Encrypt(char* data) = 0;
+  virtual rocksdb_rs::status::Status Encrypt(char* data) = 0;
 
   // Decrypt a block of data.
   // Length of data is equal to BlockSize().
-  virtual Status Decrypt(char* data) = 0;
+  virtual rocksdb_rs::status::Status Decrypt(char* data) = 0;
 };
 
 // The encryption provider is used to create a cipher stream for a specific
@@ -131,7 +131,7 @@ class EncryptionProvider : public Customizable {
   // @return OK if the provider was successfully created
   // @return NotFound if an invalid name was specified in the value
   // @return InvalidArgument if either the options were not valid
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& value,
                                  std::shared_ptr<EncryptionProvider>* result);
 
@@ -148,7 +148,7 @@ class EncryptionProvider : public Customizable {
 
   // CreateNewPrefix initialized an allocated block of prefix memory
   // for a new file.
-  virtual Status CreateNewPrefix(const std::string& fname, char* prefix,
+  virtual rocksdb_rs::status::Status CreateNewPrefix(const std::string& fname, char* prefix,
                                  size_t prefixLength) const = 0;
 
   // Method to add a new cipher key for use by the EncryptionProvider.
@@ -160,12 +160,12 @@ class EncryptionProvider : public Customizable {
   //                  files
   // @return OK if the cipher was successfully added to the provider, non-OK
   // otherwise
-  virtual Status AddCipher(const std::string& descriptor, const char* cipher,
+  virtual rocksdb_rs::status::Status AddCipher(const std::string& descriptor, const char* cipher,
                            size_t len, bool for_write) = 0;
 
   // CreateCipherStream creates a block access cipher stream for a file given
   // name and options.
-  virtual Status CreateCipherStream(
+  virtual rocksdb_rs::status::Status CreateCipherStream(
       const std::string& fname, const EnvOptions& options, Slice& prefix,
       std::unique_ptr<BlockAccessCipherStream>* result) = 0;
 
@@ -347,7 +347,7 @@ class EncryptedFileSystem : public FileSystemWrapper {
   //                  files
   // @return OK if the cipher was successfully added to the provider, non-OK
   // otherwise
-  virtual Status AddCipher(const std::string& descriptor, const char* cipher,
+  virtual rocksdb_rs::status::Status AddCipher(const std::string& descriptor, const char* cipher,
                            size_t len, bool for_write) = 0;
   static const char* kClassName() { return "EncryptedFileSystem"; }
   bool IsInstanceOf(const std::string& name) const override {

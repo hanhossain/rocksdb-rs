@@ -658,7 +658,7 @@ void WriteThread::ExitAsBatchGroupFollower(Writer* w) {
 
 static WriteThread::AdaptationContext eabgl_ctx("ExitAsBatchGroupLeader");
 void WriteThread::ExitAsBatchGroupLeader(WriteGroup& write_group,
-                                         Status& status) {
+                                         rocksdb_rs::status::Status& status) {
   TEST_SYNC_POINT_CALLBACK("WriteThread::ExitAsBatchGroupLeader:Start",
                            &write_group);
 

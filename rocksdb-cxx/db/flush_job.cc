@@ -211,7 +211,7 @@ void FlushJob::PickMemTable() {
   base_->Ref();  // it is likely that we do not need this reference
 }
 
-Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
+rocksdb_rs::status::Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
                      bool* switched_to_mempurge) {
   TEST_SYNC_POINT("FlushJob::Start");
   db_mutex_->AssertHeld();
@@ -248,7 +248,7 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
     prev_cpu_write_nanos = IOSTATS(cpu_write_nanos);
     prev_cpu_read_nanos = IOSTATS(cpu_read_nanos);
   }
-  Status mempurge_s = Status_NotFound("No MemPurge.");
+  rocksdb_rs::status::Status mempurge_s = Status_NotFound("No MemPurge.");
   if ((mempurge_threshold > 0.0) &&
       (flush_reason_ == FlushReason::kWriteBufferFull) && (!mems_.empty()) &&
       MemPurgeDecider(mempurge_threshold) && !(db_options_.atomic_flush)) {
@@ -278,7 +278,7 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
       }
     }
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (mempurge_s.ok()) {
     base_->Unref();
     s = Status_OK();
@@ -365,8 +365,8 @@ void FlushJob::Cancel() {
   base_->Unref();
 }
 
-Status FlushJob::MemPurge() {
-  Status s = Status_new();
+rocksdb_rs::status::Status FlushJob::MemPurge() {
+  rocksdb_rs::status::Status s = Status_new();
   db_mutex_->AssertHeld();
   db_mutex_->Unlock();
   assert(!mems_.empty());
@@ -661,8 +661,8 @@ bool FlushJob::MemPurgeDecider(double threshold) {
   ParsedInternalKey res;
   SnapshotImpl min_snapshot;
   std::string vget;
-  Status mget_s = Status_new();
-  Status parse_s = Status_new();
+  rocksdb_rs::status::Status mget_s = Status_new();
+  rocksdb_rs::status::Status parse_s = Status_new();
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0, sqno = 0,
                  min_seqno_snapshot = 0;
@@ -815,13 +815,13 @@ bool FlushJob::MemPurgeDecider(double threshold) {
           threshold);
 }
 
-Status FlushJob::WriteLevel0Table() {
+rocksdb_rs::status::Status FlushJob::WriteLevel0Table() {
   AutoThreadOperationStageUpdater stage_updater(
       ThreadStatus::STAGE_FLUSH_WRITE_L0);
   db_mutex_->AssertHeld();
   const uint64_t start_micros = clock_->NowMicros();
   const uint64_t start_cpu_micros = clock_->CPUMicros();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   SequenceNumber smallest_seqno = mems_.front()->GetEarliestSequenceNumber();
   if (!db_impl_seqno_time_mapping_.Empty()) {

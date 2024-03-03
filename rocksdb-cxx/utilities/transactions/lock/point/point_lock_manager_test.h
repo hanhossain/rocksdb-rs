@@ -26,7 +26,7 @@ class MockColumnFamilyHandle : public ColumnFamilyHandle {
 
   ColumnFamilyId GetID() const override { return cf_id_; }
 
-  Status GetDescriptor(ColumnFamilyDescriptor*) override {
+  rocksdb_rs::status::Status GetDescriptor(ColumnFamilyDescriptor*) override {
     return Status_OK();
   }
 

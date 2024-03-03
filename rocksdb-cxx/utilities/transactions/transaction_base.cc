@@ -21,7 +21,7 @@
 
 namespace rocksdb {
 
-Status Transaction::CommitAndTryCreateSnapshot(
+rocksdb_rs::status::Status Transaction::CommitAndTryCreateSnapshot(
     std::shared_ptr<TransactionNotifier> notifier, TxnTimestamp ts,
     std::shared_ptr<const Snapshot>* snapshot) {
   if (snapshot) {
@@ -32,7 +32,7 @@ Status Transaction::CommitAndTryCreateSnapshot(
     if (ts == kMaxTxnTimestamp) {
       return Status_InvalidArgument("Commit timestamp unset");
     } else {
-      const Status s = SetCommitTimestamp(ts);
+      const rocksdb_rs::status::Status s = SetCommitTimestamp(ts);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -44,7 +44,7 @@ Status Transaction::CommitAndTryCreateSnapshot(
     }
   }
   SetSnapshotOnNextOperation(notifier);
-  Status s = Commit();
+  rocksdb_rs::status::Status s = Commit();
   if (!s.ok()) {
     return s;
   }
@@ -147,7 +147,7 @@ void TransactionBaseImpl::SetSnapshotIfNeeded() {
   }
 }
 
-Status TransactionBaseImpl::TryLock(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::TryLock(ColumnFamilyHandle* column_family,
                                     const SliceParts& key, bool read_only,
                                     bool exclusive, const bool do_validate,
                                     const bool assume_tracked) {
@@ -179,7 +179,7 @@ void TransactionBaseImpl::SetSavePoint() {
   write_batch_.SetSavePoint();
 }
 
-Status TransactionBaseImpl::RollbackToSavePoint() {
+rocksdb_rs::status::Status TransactionBaseImpl::RollbackToSavePoint() {
   if (save_points_ != nullptr && save_points_->size() > 0) {
     // Restore saved SavePoint
     TransactionBaseImpl::SavePoint& save_point = save_points_->top();
@@ -191,7 +191,7 @@ Status TransactionBaseImpl::RollbackToSavePoint() {
     num_merges_ = save_point.num_merges_;
 
     // Rollback batch
-    Status s = write_batch_.RollbackToSavePoint();
+    rocksdb_rs::status::Status s = write_batch_.RollbackToSavePoint();
     assert(s.ok());
 
     // Rollback any keys that were tracked since the last savepoint
@@ -206,7 +206,7 @@ Status TransactionBaseImpl::RollbackToSavePoint() {
   }
 }
 
-Status TransactionBaseImpl::PopSavePoint() {
+rocksdb_rs::status::Status TransactionBaseImpl::PopSavePoint() {
   if (save_points_ == nullptr || save_points_->empty()) {
     // No SavePoint yet.
     assert(write_batch_.PopSavePoint().IsNotFound());
@@ -231,7 +231,7 @@ Status TransactionBaseImpl::PopSavePoint() {
   return write_batch_.PopSavePoint();
 }
 
-Status TransactionBaseImpl::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status TransactionBaseImpl::Get(const ReadOptions& read_options,
                                 ColumnFamilyHandle* column_family,
                                 const Slice& key, std::string* value) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
@@ -249,14 +249,14 @@ Status TransactionBaseImpl::Get(const ReadOptions& read_options,
   return s;
 }
 
-Status TransactionBaseImpl::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status TransactionBaseImpl::Get(const ReadOptions& read_options,
                                 ColumnFamilyHandle* column_family,
                                 const Slice& key, PinnableSlice* pinnable_val) {
   return write_batch_.GetFromBatchAndDB(db_, read_options, column_family, key,
                                         pinnable_val);
 }
 
-Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
+rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
                                          ColumnFamilyHandle* column_family,
                                          const Slice& key, std::string* value,
                                          bool exclusive,
@@ -271,7 +271,7 @@ Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
-  Status s =
+  rocksdb_rs::status::Status s =
       TryLock(column_family, key, true /* read_only */, exclusive, do_validate);
 
   if (s.ok() && value != nullptr) {
@@ -286,7 +286,7 @@ Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
   return s;
 }
 
-Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
+rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
                                          ColumnFamilyHandle* column_family,
                                          const Slice& key,
                                          PinnableSlice* pinnable_val,
@@ -302,7 +302,7 @@ Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
-  Status s =
+  rocksdb_rs::status::Status s =
       TryLock(column_family, key, true /* read_only */, exclusive, do_validate);
 
   if (s.ok() && pinnable_val != nullptr) {
@@ -311,13 +311,13 @@ Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
   return s;
 }
 
-rust::Vec<Status> TransactionBaseImpl::MultiGet(
+rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGet(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
   size_t num_keys = keys.size();
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    Status s = Status_InvalidArgument(
+    rocksdb_rs::status::Status s = Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return s.create_vec(num_keys);
@@ -325,7 +325,7 @@ rust::Vec<Status> TransactionBaseImpl::MultiGet(
 
   values->resize(num_keys);
 
-  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list = Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }
@@ -336,7 +336,7 @@ rust::Vec<Status> TransactionBaseImpl::MultiGet(
 void TransactionBaseImpl::MultiGet(const ReadOptions& read_options,
                                    ColumnFamilyHandle* column_family,
                                    const size_t num_keys, const Slice* keys,
-                                   PinnableSlice* values, Status* statuses,
+                                   PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                                    const bool sorted_input) {
   assert(read_options.io_activity == Env::IOActivity::kUnknown);
   write_batch_.MultiGetFromBatchAndDB(db_, read_options, column_family,
@@ -344,14 +344,14 @@ void TransactionBaseImpl::MultiGet(const ReadOptions& read_options,
                                       sorted_input);
 }
 
-rust::Vec<Status> TransactionBaseImpl::MultiGetForUpdate(
+rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGetForUpdate(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
   // Regardless of whether the MultiGet succeeded, track these keys.
   size_t num_keys = keys.size();
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    Status s = Status_InvalidArgument(
+    rocksdb_rs::status::Status s = Status_InvalidArgument(
         "Cannot call MultiGetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return s.create_vec(num_keys);
@@ -360,7 +360,7 @@ rust::Vec<Status> TransactionBaseImpl::MultiGetForUpdate(
 
   // Lock all keys
   for (size_t i = 0; i < num_keys; ++i) {
-    Status s = TryLock(column_family[i], keys[i], true /* read_only */,
+    rocksdb_rs::status::Status s = TryLock(column_family[i], keys[i], true /* read_only */,
                        true /* exclusive */);
     if (!s.ok()) {
       // Fail entire multiget if we cannot lock all keys
@@ -369,7 +369,7 @@ rust::Vec<Status> TransactionBaseImpl::MultiGetForUpdate(
   }
 
   // TODO(agiardullo): optimize multiget?
-  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list = Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }
@@ -394,11 +394,11 @@ Iterator* TransactionBaseImpl::GetIterator(const ReadOptions& read_options,
                                           &read_options);
 }
 
-Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
                                 const Slice& key, const Slice& value,
                                 const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, do_validate, assume_tracked);
 
   if (s.ok()) {
@@ -411,11 +411,11 @@ Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
                                 const SliceParts& key, const SliceParts& value,
                                 const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, do_validate, assume_tracked);
 
   if (s.ok()) {
@@ -428,11 +428,11 @@ Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::Merge(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::Merge(ColumnFamilyHandle* column_family,
                                   const Slice& key, const Slice& value,
                                   const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, do_validate, assume_tracked);
 
   if (s.ok()) {
@@ -445,11 +445,11 @@ Status TransactionBaseImpl::Merge(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
                                    const Slice& key,
                                    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, do_validate, assume_tracked);
 
   if (s.ok()) {
@@ -462,11 +462,11 @@ Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
                                    const SliceParts& key,
                                    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, do_validate, assume_tracked);
 
   if (s.ok()) {
@@ -479,11 +479,11 @@ Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
                                          const Slice& key,
                                          const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, do_validate, assume_tracked);
 
   if (s.ok()) {
@@ -496,11 +496,11 @@ Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
                                          const SliceParts& key,
                                          const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, do_validate, assume_tracked);
 
   if (s.ok()) {
@@ -513,9 +513,9 @@ Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
                                          const Slice& key, const Slice& value) {
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, false /* do_validate */);
 
   if (s.ok()) {
@@ -528,10 +528,10 @@ Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
                                          const SliceParts& key,
                                          const SliceParts& value) {
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, false /* do_validate */);
 
   if (s.ok()) {
@@ -544,10 +544,10 @@ Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::MergeUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::MergeUntracked(ColumnFamilyHandle* column_family,
                                            const Slice& key,
                                            const Slice& value) {
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, false /* do_validate */);
 
   if (s.ok()) {
@@ -560,9 +560,9 @@ Status TransactionBaseImpl::MergeUntracked(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
                                             const Slice& key) {
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, false /* do_validate */);
 
   if (s.ok()) {
@@ -575,9 +575,9 @@ Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
                                             const SliceParts& key) {
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, false /* do_validate */);
 
   if (s.ok()) {
@@ -590,9 +590,9 @@ Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status TransactionBaseImpl::SingleDeleteUntracked(
+rocksdb_rs::status::Status TransactionBaseImpl::SingleDeleteUntracked(
     ColumnFamilyHandle* column_family, const Slice& key) {
-  Status s = TryLock(column_family, key, false /* read_only */,
+  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
                      true /* exclusive */, false /* do_validate */);
 
   if (s.ok()) {
@@ -699,7 +699,7 @@ void TransactionBaseImpl::UndoGetForUpdate(ColumnFamilyHandle* column_family,
   }
 }
 
-Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch* src_batch) {
+rocksdb_rs::status::Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch* src_batch) {
   struct IndexedWriteBatchBuilder : public WriteBatch::Handler {
     Transaction* txn_;
     DBImpl* db_;
@@ -708,40 +708,40 @@ Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch* src_batch) {
       assert(dynamic_cast<TransactionBaseImpl*>(txn_) != nullptr);
     }
 
-    Status PutCF(uint32_t cf, const Slice& key, const Slice& val) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& val) override {
       return txn_->Put(db_->GetColumnFamilyHandle(cf), key, val);
     }
 
-    Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
       return txn_->Delete(db_->GetColumnFamilyHandle(cf), key);
     }
 
-    Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
       return txn_->SingleDelete(db_->GetColumnFamilyHandle(cf), key);
     }
 
-    Status MergeCF(uint32_t cf, const Slice& key, const Slice& val) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& val) override {
       return txn_->Merge(db_->GetColumnFamilyHandle(cf), key, val);
     }
 
     // this is used for reconstructing prepared transactions upon
     // recovery. there should not be any meta markers in the batches
     // we are processing.
-    Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
 
-    Status MarkEndPrepare(const Slice&) override {
+    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
       return Status_InvalidArgument();
     }
 
-    Status MarkCommit(const Slice&) override {
+    rocksdb_rs::status::Status MarkCommit(const Slice&) override {
       return Status_InvalidArgument();
     }
 
-    Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+    rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
       return Status_InvalidArgument();
     }
 
-    Status MarkRollback(const Slice&) override {
+    rocksdb_rs::status::Status MarkRollback(const Slice&) override {
       return Status_InvalidArgument();
     }
   };

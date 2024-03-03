@@ -19,7 +19,7 @@
 
 namespace rocksdb {
 
-Status ArenaWrappedDBIter::GetProperty(std::string prop_name,
+rocksdb_rs::status::Status ArenaWrappedDBIter::GetProperty(std::string prop_name,
                                        std::string* prop) {
   if (prop_name == "rocksdb.iterator.super-version-number") {
     // First try to pass the value returned from inner iterator.
@@ -54,7 +54,7 @@ void ArenaWrappedDBIter::Init(
   }
 }
 
-Status ArenaWrappedDBIter::Refresh() {
+rocksdb_rs::status::Status ArenaWrappedDBIter::Refresh() {
   if (cfd_ == nullptr || db_impl_ == nullptr || !allow_refresh_) {
     return Status_NotSupported("Creating renew iterator is not allowed.");
   }

@@ -42,7 +42,7 @@ BlobSource::BlobSource(const ImmutableOptions* immutable_options,
 
 BlobSource::~BlobSource() = default;
 
-Status BlobSource::GetBlobFromCache(
+rocksdb_rs::status::Status BlobSource::GetBlobFromCache(
     const Slice& cache_key, CacheHandleGuard<BlobContents>* cached_blob) const {
   assert(blob_cache_);
   assert(!cache_key.empty());
@@ -70,7 +70,7 @@ Status BlobSource::GetBlobFromCache(
   return Status_NotFound("Blob not found in cache");
 }
 
-Status BlobSource::PutBlobIntoCache(
+rocksdb_rs::status::Status BlobSource::PutBlobIntoCache(
     const Slice& cache_key, std::unique_ptr<BlobContents>* blob,
     CacheHandleGuard<BlobContents>* cached_blob) const {
   assert(blob_cache_);
@@ -81,7 +81,7 @@ Status BlobSource::PutBlobIntoCache(
   assert(cached_blob->IsEmpty());
 
   TypedHandle* cache_handle = nullptr;
-  const Status s = InsertEntryIntoCache(cache_key, blob->get(),
+  const rocksdb_rs::status::Status s = InsertEntryIntoCache(cache_key, blob->get(),
                                         &cache_handle, Cache::Priority::BOTTOM);
   if (s.ok()) {
     blob->release();
@@ -146,7 +146,7 @@ void BlobSource::PinOwnedBlob(std::unique_ptr<BlobContents>* owned_blob,
       blob, nullptr);
 }
 
-Status BlobSource::InsertEntryIntoCache(const Slice& key, BlobContents* value,
+rocksdb_rs::status::Status BlobSource::InsertEntryIntoCache(const Slice& key, BlobContents* value,
                                         TypedHandle** cache_handle,
                                         Cache::Priority priority) const {
   return blob_cache_.InsertFull(key, value, value->ApproximateMemoryUsage(),
@@ -154,7 +154,7 @@ Status BlobSource::InsertEntryIntoCache(const Slice& key, BlobContents* value,
                                 lowest_used_cache_tier_);
 }
 
-Status BlobSource::GetBlob(const ReadOptions& read_options,
+rocksdb_rs::status::Status BlobSource::GetBlob(const ReadOptions& read_options,
                            const Slice& user_key, uint64_t file_number,
                            uint64_t offset, uint64_t file_size,
                            uint64_t value_size,
@@ -163,7 +163,7 @@ Status BlobSource::GetBlob(const ReadOptions& read_options,
                            PinnableSlice* value, uint64_t* bytes_read) {
   assert(value);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   const CacheKey cache_key = GetCacheKey(file_number, file_size, offset);
 
@@ -313,7 +313,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
       const CacheKey cache_key = base_cache_key.WithOffset(req.offset);
       const Slice key = cache_key.AsSlice();
 
-      const Status s = GetBlobFromCache(key, &blob_handle);
+      const rocksdb_rs::status::Status s = GetBlobFromCache(key, &blob_handle);
 
       if (s.ok()) {
         assert(req.status);
@@ -373,7 +373,7 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
     }
 
     CacheHandleGuard<BlobFileReader> blob_file_reader;
-    Status s = blob_file_cache_->GetBlobFileReader(read_options, file_number,
+    rocksdb_rs::status::Status s = blob_file_cache_->GetBlobFileReader(read_options, file_number,
                                                    &blob_file_reader);
     if (!s.ok()) {
       for (size_t i = 0; i < _blob_reqs.size(); ++i) {
@@ -437,7 +437,7 @@ bool BlobSource::TEST_BlobInCache(uint64_t file_number, uint64_t file_size,
   const Slice key = cache_key.AsSlice();
 
   CacheHandleGuard<BlobContents> blob_handle;
-  const Status s = GetBlobFromCache(key, &blob_handle);
+  const rocksdb_rs::status::Status s = GetBlobFromCache(key, &blob_handle);
 
   if (s.ok() && blob_handle.GetValue() != nullptr) {
     if (charge) {

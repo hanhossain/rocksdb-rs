@@ -161,7 +161,7 @@ void CompactionIterator::Next() {
     if (merge_out_iter_.Valid()) {
       key_ = merge_out_iter_.key();
       value_ = merge_out_iter_.value();
-      Status s = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
+      rocksdb_rs::status::Status s = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
       // MergeUntil stops when it encounters a corrupt key and does not
       // include them in the result, so we expect the keys here to be valid.
       if (!s.ok()) {
@@ -278,7 +278,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
         // For Stacked BlobDB impl, the corresponding CompactionFilter's
         // FilterV2 method should read the blob value.
         BlobIndex blob_index;
-        Status s = blob_index.DecodeFrom(value_);
+        rocksdb_rs::status::Status s = blob_index.DecodeFrom(value_);
         if (!s.ok()) {
           status_.copy_from(s);
           validity_info_.Invalidate();
@@ -324,7 +324,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
         }
       } else {
         Slice value_copy = value_;
-        const Status s =
+        const rocksdb_rs::status::Status s =
             WideColumnSerialization::Deserialize(value_copy, existing_columns);
 
         if (!s.ok()) {
@@ -435,7 +435,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
               });
 
     {
-      const Status s = WideColumnSerialization::Serialize(
+      const rocksdb_rs::status::Status s = WideColumnSerialization::Serialize(
           sorted_columns, compaction_filter_value_);
       if (!s.ok()) {
         status_.copy_from(s);
@@ -467,7 +467,7 @@ void CompactionIterator::NextFromInput() {
     iter_stats_.num_input_records++;
     is_range_del_ = input_.IsDeleteRangeSentinelKey();
 
-    Status pik_status = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
+    rocksdb_rs::status::Status pik_status = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
     if (!pik_status.ok()) {
       iter_stats_.num_input_corrupt_records++;
 
@@ -1072,7 +1072,7 @@ bool CompactionIterator::ExtractLargeValueIfNeededImpl() {
   }
 
   blob_index_.clear();
-  const Status s = blob_file_builder_->Add(user_key(), value_, &blob_index_);
+  const rocksdb_rs::status::Status s = blob_file_builder_->Add(user_key(), value_, &blob_index_);
 
   if (!s.ok()) {
     status_.copy_from(s);
@@ -1117,7 +1117,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
     BlobIndex blob_index;
 
     {
-      const Status s = blob_index.DecodeFrom(value_);
+      const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value_);
 
       if (!s.ok()) {
         status_.copy_from(s);
@@ -1142,7 +1142,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
     {
       assert(blob_fetcher_);
 
-      const Status s = blob_fetcher_->FetchBlob(
+      const rocksdb_rs::status::Status s = blob_fetcher_->FetchBlob(
           user_key(), blob_index, prefetch_buffer, &blob_value_, &bytes_read);
 
       if (!s.ok()) {

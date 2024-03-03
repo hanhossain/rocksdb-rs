@@ -80,7 +80,7 @@ struct StressTestIterator : public InternalIterator {
   bool trace = false;
 
   int iter = -1;
-  Status status_;
+  rocksdb_rs::status::Status status_;
 
   StressTestIterator(Data* _data, Random64* _rnd, const Comparator* _cmp)
       : data(_data), rnd(_rnd), cmp(_cmp), status_(Status_new()) {}
@@ -93,7 +93,7 @@ struct StressTestIterator : public InternalIterator {
     return false;
   }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   bool MaybeFail() {
     if (rnd->Next() >=

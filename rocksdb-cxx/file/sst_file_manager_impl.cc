@@ -59,9 +59,9 @@ void SstFileManagerImpl::Close() {
   }
 }
 
-Status SstFileManagerImpl::OnAddFile(const std::string& file_path) {
+rocksdb_rs::status::Status SstFileManagerImpl::OnAddFile(const std::string& file_path) {
   uint64_t file_size;
-  Status s = fs_->GetFileSize(file_path, IOOptions(), &file_size, nullptr);
+  rocksdb_rs::status::Status s = fs_->GetFileSize(file_path, IOOptions(), &file_size, nullptr);
   if (s.ok()) {
     MutexLock l(&mu_);
     OnAddFileImpl(file_path, file_size);
@@ -71,7 +71,7 @@ Status SstFileManagerImpl::OnAddFile(const std::string& file_path) {
   return s;
 }
 
-Status SstFileManagerImpl::OnAddFile(const std::string& file_path,
+rocksdb_rs::status::Status SstFileManagerImpl::OnAddFile(const std::string& file_path,
                                      uint64_t file_size) {
   MutexLock l(&mu_);
   OnAddFileImpl(file_path, file_size);
@@ -80,7 +80,7 @@ Status SstFileManagerImpl::OnAddFile(const std::string& file_path,
   return Status_OK();
 }
 
-Status SstFileManagerImpl::OnDeleteFile(const std::string& file_path) {
+rocksdb_rs::status::Status SstFileManagerImpl::OnDeleteFile(const std::string& file_path) {
   {
     MutexLock l(&mu_);
     OnDeleteFileImpl(file_path);
@@ -102,7 +102,7 @@ void SstFileManagerImpl::OnCompactionCompletion(Compaction* c) {
   cur_compactions_reserved_size_ -= size_added_by_compaction;
 }
 
-Status SstFileManagerImpl::OnMoveFile(const std::string& old_path,
+rocksdb_rs::status::Status SstFileManagerImpl::OnMoveFile(const std::string& old_path,
                                       const std::string& new_path,
                                       uint64_t* file_size) {
   {
@@ -147,7 +147,7 @@ bool SstFileManagerImpl::IsMaxAllowedSpaceReachedIncludingCompactions() {
 
 bool SstFileManagerImpl::EnoughRoomForCompaction(
     ColumnFamilyData* cfd, const std::vector<CompactionInputFiles>& inputs,
-    const Status& bg_error) {
+    const rocksdb_rs::status::Status& bg_error) {
   MutexLock l(&mu_);
   uint64_t size_added_by_compaction = 0;
   // First check if we even have the space to do the compaction
@@ -176,7 +176,7 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
         rocksdb_rs::filename::TableFileName(cfd->ioptions()->cf_paths, inputs[0][0]->fd.GetNumber(),
                                             inputs[0][0]->fd.GetPathId());
     uint64_t free_space = 0;
-    Status s = fs_->GetFreeSpace(static_cast<std::string>(fn), IOOptions(), &free_space, nullptr);
+    rocksdb_rs::status::Status s = fs_->GetFreeSpace(static_cast<std::string>(fn), IOOptions(), &free_space, nullptr);
     // needed_headroom is based on current size reserved by compactions,
     // minus any files created by running compactions as they would count
     // against the reserved size. If user didn't specify any compaction
@@ -258,7 +258,7 @@ void SstFileManagerImpl::ClearError() {
     }
 
     uint64_t free_space = 0;
-    Status s = fs_->GetFreeSpace(path_, IOOptions(), &free_space, nullptr);
+    rocksdb_rs::status::Status s = fs_->GetFreeSpace(path_, IOOptions(), &free_space, nullptr);
     free_space = max_allowed_space_ > 0
                      ? std::min(max_allowed_space_, free_space)
                      : free_space;
@@ -315,7 +315,7 @@ void SstFileManagerImpl::ClearError() {
         // immediately got another error. If that's the case, and the new
         // error is also a NoSpace() non-fatal error, leave the instance in
         // the list
-        Status err = cur_instance_->GetBGError();
+        rocksdb_rs::status::Status err = cur_instance_->GetBGError();
         if (s.ok() && err.subcode() == rocksdb_rs::status::SubCode::kNoSpace &&
             err.severity() < rocksdb_rs::status::Severity::kFatalError) {
           s.copy_from(err);
@@ -349,7 +349,7 @@ void SstFileManagerImpl::ClearError() {
 }
 
 void SstFileManagerImpl::StartErrorRecovery(ErrorHandler* handler,
-                                            Status bg_error) {
+                                            rocksdb_rs::status::Status bg_error) {
   MutexLock l(&mu_);
   if (bg_error.severity() == rocksdb_rs::status::Severity::kSoftError) {
     if (bg_err_.ok()) {
@@ -412,7 +412,7 @@ bool SstFileManagerImpl::CancelErrorRecovery(ErrorHandler* handler) {
   return false;
 }
 
-Status SstFileManagerImpl::ScheduleFileDeletion(const std::string& file_path,
+rocksdb_rs::status::Status SstFileManagerImpl::ScheduleFileDeletion(const std::string& file_path,
                                                 const std::string& path_to_sync,
                                                 const bool force_bg) {
   TEST_SYNC_POINT_CALLBACK("SstFileManagerImpl::ScheduleFileDeletion",
@@ -452,7 +452,7 @@ void SstFileManagerImpl::OnDeleteFileImpl(const std::string& file_path) {
 SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<Logger> info_log,
                                   std::string trash_dir,
                                   int64_t rate_bytes_per_sec,
-                                  bool delete_existing_trash, Status* status,
+                                  bool delete_existing_trash, rocksdb_rs::status::Status* status,
                                   double max_trash_db_ratio,
                                   uint64_t bytes_max_delete_chunk) {
   const auto& fs = env->GetFileSystem();
@@ -465,7 +465,7 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
                                   std::shared_ptr<Logger> info_log,
                                   const std::string& trash_dir,
                                   int64_t rate_bytes_per_sec,
-                                  bool delete_existing_trash, Status* status,
+                                  bool delete_existing_trash, rocksdb_rs::status::Status* status,
                                   double max_trash_db_ratio,
                                   uint64_t bytes_max_delete_chunk) {
   const auto& clock = env->GetSystemClock();
@@ -475,7 +475,7 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
 
   // trash_dir is deprecated and not needed anymore, but if user passed it
   // we will still remove files in it.
-  Status s = Status_OK();
+  rocksdb_rs::status::Status s = Status_OK();
   if (delete_existing_trash && trash_dir != "") {
     std::vector<std::string> files_in_trash;
     s = fs->GetChildren(trash_dir, IOOptions(), &files_in_trash, nullptr);
@@ -483,7 +483,7 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
       for (const std::string& trash_file : files_in_trash) {
         std::string path_in_trash = trash_dir + "/" + trash_file;
         res->OnAddFile(path_in_trash);
-        Status file_delete =
+        rocksdb_rs::status::Status file_delete =
             res->ScheduleFileDeletion(path_in_trash, trash_dir);
         if (s.ok() && !file_delete.ok()) {
           s.copy_from(file_delete);

@@ -17,27 +17,27 @@ void CancelAllBackgroundWork(DB* db, bool wait) {
       ->CancelAllBackgroundWork(wait);
 }
 
-Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
                           const Slice* begin, const Slice* end,
                           bool include_end) {
   RangePtr range(begin, end);
   return DeleteFilesInRanges(db, column_family, &range, 1, include_end);
 }
 
-Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
                            const RangePtr* ranges, size_t n, bool include_end) {
   return (static_cast_with_check<DBImpl>(db->GetRootDB()))
       ->DeleteFilesInRanges(column_family, ranges, n, include_end);
 }
 
-Status VerifySstFileChecksum(const Options& options,
+rocksdb_rs::status::Status VerifySstFileChecksum(const Options& options,
                              const EnvOptions& env_options,
                              const std::string& file_path) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   return VerifySstFileChecksum(options, env_options, read_options, file_path);
 }
-Status VerifySstFileChecksum(const Options& options,
+rocksdb_rs::status::Status VerifySstFileChecksum(const Options& options,
                              const EnvOptions& env_options,
                              const ReadOptions& read_options,
                              const std::string& file_path,
@@ -47,7 +47,7 @@ Status VerifySstFileChecksum(const Options& options,
   InternalKeyComparator internal_comparator(options.comparator);
   ImmutableOptions ioptions(options);
 
-  Status s = ioptions.fs->NewRandomAccessFile(
+  rocksdb_rs::status::Status s = ioptions.fs->NewRandomAccessFile(
       file_path, FileOptions(env_options), &file, nullptr);
   if (s.ok()) {
     s = ioptions.fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr);

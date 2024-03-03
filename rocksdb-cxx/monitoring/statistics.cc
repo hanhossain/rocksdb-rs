@@ -336,14 +336,14 @@ static int RegisterBuiltinStatistics(ObjectLibrary& library,
   return 1;
 }
 
-Status Statistics::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Statistics::CreateFromString(const ConfigOptions& config_options,
                                     const std::string& id,
                                     std::shared_ptr<Statistics>* result) {
   static std::once_flag once;
   std::call_once(once, [&]() {
     RegisterBuiltinStatistics(*(ObjectLibrary::Default().get()), "");
   });
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (id == "" || id == StatisticsImpl::kClassName()) {
     result->reset(new StatisticsImpl(nullptr));
   } else if (id == kNullptrString) {
@@ -467,7 +467,7 @@ void StatisticsImpl::recordInHistogram(uint32_t histogramType, uint64_t value) {
   }
 }
 
-Status StatisticsImpl::Reset() {
+rocksdb_rs::status::Status StatisticsImpl::Reset() {
   MutexLock lock(&aggregate_lock_);
   for (uint32_t i = 0; i < TICKER_ENUM_MAX; ++i) {
     setTickerCountLocked(i, 0);

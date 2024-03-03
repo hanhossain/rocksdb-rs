@@ -89,9 +89,9 @@ class EnvLogger : public Logger {
     FlushLocked();
   }
 
-  Status CloseImpl() override { return CloseHelper(); }
+  rocksdb_rs::status::Status CloseImpl() override { return CloseHelper(); }
 
-  Status CloseHelper() {
+  rocksdb_rs::status::Status CloseHelper() {
     FileOpGuard guard(*this);
     const auto close_status = file_.Close();
 

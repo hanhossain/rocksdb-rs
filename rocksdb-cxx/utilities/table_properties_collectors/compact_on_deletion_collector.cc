@@ -35,7 +35,7 @@ CompactOnDeletionCollector::CompactOnDeletionCollector(
 // @params key    the user key that is inserted into the table.
 // @params value  the value that is inserted into the table.
 // @params file_size  file size up to now
-Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
+rocksdb_rs::status::Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
                                               const Slice& /*value*/,
                                               EntryType type,
                                               SequenceNumber /*seq*/,
@@ -88,7 +88,7 @@ Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
   return Status_OK();
 }
 
-Status CompactOnDeletionCollector::Finish(
+rocksdb_rs::status::Status CompactOnDeletionCollector::Finish(
     UserCollectedProperties* /*properties*/) {
   if (!need_compaction_ && deletion_ratio_enabled_ && total_entries_ > 0) {
     double ratio = static_cast<double>(deletion_entries_) / total_entries_;
@@ -206,7 +206,7 @@ static int RegisterTablePropertiesCollectorFactories(
 }
 }  // namespace
 
-Status TablePropertiesCollectorFactory::CreateFromString(
+rocksdb_rs::status::Status TablePropertiesCollectorFactory::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<TablePropertiesCollectorFactory>* result) {
   static std::once_flag once;

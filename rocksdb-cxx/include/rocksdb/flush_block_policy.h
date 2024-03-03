@@ -39,7 +39,7 @@ class FlushBlockPolicyFactory : public Customizable {
   // Creates a FlushBlockPolicyFactory based on the input value.
   // By default, this method can create EveryKey or BySize PolicyFactory,
   // which take now config_options.
-  static Status CreateFromString(
+  static rocksdb_rs::status::Status CreateFromString(
       const ConfigOptions& config_options, const std::string& value,
       std::shared_ptr<FlushBlockPolicyFactory>* result);
 

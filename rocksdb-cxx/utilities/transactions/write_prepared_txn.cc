@@ -43,7 +43,7 @@ void WritePreparedTxn::Initialize(const TransactionOptions& txn_options) {
 void WritePreparedTxn::MultiGet(const ReadOptions& options,
                                 ColumnFamilyHandle* column_family,
                                 const size_t num_keys, const Slice* keys,
-                                PinnableSlice* values, Status* statuses,
+                                PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                                 const bool sorted_input) {
   assert(options.io_activity == Env::IOActivity::kUnknown);
   SequenceNumber min_uncommitted, snap_seq;
@@ -63,7 +63,7 @@ void WritePreparedTxn::MultiGet(const ReadOptions& options,
   }
 }
 
-Status WritePreparedTxn::Get(const ReadOptions& options,
+rocksdb_rs::status::Status WritePreparedTxn::Get(const ReadOptions& options,
                              ColumnFamilyHandle* column_family,
                              const Slice& key, PinnableSlice* pinnable_val) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
@@ -76,7 +76,7 @@ Status WritePreparedTxn::Get(const ReadOptions& options,
       wpt_db_->AssignMinMaxSeqs(options.snapshot, &min_uncommitted, &snap_seq);
   WritePreparedTxnReadCallback callback(wpt_db_, snap_seq, min_uncommitted,
                                         backed_by_snapshot);
-  Status res = write_batch_.GetFromBatchAndDB(db_, options, column_family, key,
+  rocksdb_rs::status::Status res = write_batch_.GetFromBatchAndDB(db_, options, column_family, key,
                                               pinnable_val, &callback);
   const bool callback_valid =
       callback.valid();  // NOTE: validity of callback must always be checked
@@ -110,7 +110,7 @@ Iterator* WritePreparedTxn::GetIterator(const ReadOptions& options,
   return write_batch_.NewIteratorWithBase(column_family, db_iter);
 }
 
-Status WritePreparedTxn::PrepareInternal() {
+rocksdb_rs::status::Status WritePreparedTxn::PrepareInternal() {
   WriteOptions write_options = write_options_;
   write_options.disableWAL = false;
   const bool WRITE_AFTER_COMMIT = true;
@@ -138,18 +138,18 @@ Status WritePreparedTxn::PrepareInternal() {
   return s;
 }
 
-Status WritePreparedTxn::CommitWithoutPrepareInternal() {
+rocksdb_rs::status::Status WritePreparedTxn::CommitWithoutPrepareInternal() {
   // For each duplicate key we account for a new sub-batch
   const size_t batch_cnt = GetWriteBatch()->SubBatchCnt();
   return CommitBatchInternal(GetWriteBatch()->GetWriteBatch(), batch_cnt);
 }
 
-Status WritePreparedTxn::CommitBatchInternal(WriteBatch* batch,
+rocksdb_rs::status::Status WritePreparedTxn::CommitBatchInternal(WriteBatch* batch,
                                              size_t batch_cnt) {
   return wpt_db_->WriteInternal(write_options_, batch, batch_cnt, this);
 }
 
-Status WritePreparedTxn::CommitInternal() {
+rocksdb_rs::status::Status WritePreparedTxn::CommitInternal() {
   ROCKS_LOG_DETAILS(db_impl_->immutable_db_options().info_log,
                     "CommitInternal prepare_seq: %" PRIu64, GetID());
   // We take the commit-time batch and append the Commit marker.
@@ -266,7 +266,7 @@ Status WritePreparedTxn::CommitInternal() {
   return s;
 }
 
-Status WritePreparedTxn::RollbackInternal() {
+rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
   ROCKS_LOG_WARN(db_impl_->immutable_db_options().info_log,
                  "RollbackInternal prepare_seq: %" PRIu64, GetId());
 
@@ -311,8 +311,8 @@ Status WritePreparedTxn::RollbackInternal() {
           rollback_merge_operands_(rollback_merge_operands),
           roptions_(_roptions) {}
 
-    Status Rollback(uint32_t cf, const Slice& key) {
-      Status s = Status_new();
+    rocksdb_rs::status::Status Rollback(uint32_t cf, const Slice& key) {
+      rocksdb_rs::status::Status s = Status_new();
       CFKeys& cf_keys = keys_[cf];
       if (cf_keys.size() == 0) {  // just inserted
         auto cmp = comparators_[cf];
@@ -352,19 +352,19 @@ Status WritePreparedTxn::RollbackInternal() {
       return s;
     }
 
-    Status PutCF(uint32_t cf, const Slice& key, const Slice& /*val*/) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& /*val*/) override {
       return Rollback(cf, key);
     }
 
-    Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
       return Rollback(cf, key);
     }
 
-    Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
       return Rollback(cf, key);
     }
 
-    Status MergeCF(uint32_t cf, const Slice& key,
+    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
                    const Slice& /*val*/) override {
       if (rollback_merge_operands_) {
         return Rollback(cf, key);
@@ -373,11 +373,11 @@ Status WritePreparedTxn::RollbackInternal() {
       }
     }
 
-    Status MarkNoop(bool) override { return Status_OK(); }
-    Status MarkBeginPrepare(bool) override { return Status_OK(); }
-    Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
-    Status MarkCommit(const Slice&) override { return Status_OK(); }
-    Status MarkRollback(const Slice&) override {
+    rocksdb_rs::status::Status MarkNoop(bool) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
+    rocksdb_rs::status::Status MarkRollback(const Slice&) override {
       return Status_InvalidArgument();
     }
 
@@ -469,7 +469,7 @@ Status WritePreparedTxn::RollbackInternal() {
   return s;
 }
 
-Status WritePreparedTxn::ValidateSnapshot(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WritePreparedTxn::ValidateSnapshot(ColumnFamilyHandle* column_family,
                                           const Slice& key,
                                           SequenceNumber* tracked_at_seq) {
   assert(snapshot_);
@@ -507,7 +507,7 @@ void WritePreparedTxn::SetSnapshot() {
   SetSnapshotInternal(snapshot);
 }
 
-Status WritePreparedTxn::RebuildFromWriteBatch(WriteBatch* src_batch) {
+rocksdb_rs::status::Status WritePreparedTxn::RebuildFromWriteBatch(WriteBatch* src_batch) {
   auto ret = PessimisticTransaction::RebuildFromWriteBatch(src_batch);
   prepare_batch_cnt_ = GetWriteBatch()->SubBatchCnt();
   return ret;

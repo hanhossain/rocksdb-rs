@@ -67,7 +67,7 @@ class TransactionLogIteratorImpl : public TransactionLogIterator {
 
   virtual void Next() override;
 
-  virtual Status status() override;
+  virtual rocksdb_rs::status::Status status() override;
 
   virtual BatchResult GetBatch() override;
 
@@ -87,18 +87,18 @@ class TransactionLogIteratorImpl : public TransactionLogIterator {
   // State variables
   bool started_;
   bool is_valid_;  // not valid when it starts of.
-  Status current_status_;
+  rocksdb_rs::status::Status current_status_;
   size_t current_file_index_;
   std::unique_ptr<WriteBatch> current_batch_;
   std::unique_ptr<log::Reader> current_log_reader_;
   std::string scratch_;
-  Status OpenLogFile(const LogFile* log_file,
+  rocksdb_rs::status::Status OpenLogFile(const LogFile* log_file,
                      std::unique_ptr<SequentialFileReader>* file);
 
   struct LogReporter : public log::Reader::Reporter {
     Env* env;
     Logger* info_log;
-    virtual void Corruption(size_t bytes, const Status& s) override {
+    virtual void Corruption(size_t bytes, const rocksdb_rs::status::Status& s) override {
       ROCKS_LOG_ERROR(info_log, "dropping %" ROCKSDB_PRIszt " bytes; %s", bytes,
                       s.ToString()->c_str());
     }
@@ -123,6 +123,6 @@ class TransactionLogIteratorImpl : public TransactionLogIterator {
   bool IsBatchExpected(const WriteBatch* batch, SequenceNumber expected_seq);
   // Update current batch if a continuous batch is found.
   void UpdateCurrentWriteBatch(const Slice& record);
-  Status OpenLogReader(const LogFile* file);
+  rocksdb_rs::status::Status OpenLogReader(const LogFile* file);
 };
 }  // namespace rocksdb

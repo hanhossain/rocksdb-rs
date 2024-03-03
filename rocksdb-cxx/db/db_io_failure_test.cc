@@ -42,13 +42,13 @@ TEST_F(DBIOFailureTest, DropWrites) {
           if (level > 0 && level == dbfull()->NumberLevels() - 1) {
             break;
           }
-          Status s =
+          rocksdb_rs::status::Status s =
               dbfull()->TEST_CompactRange(level, nullptr, nullptr, nullptr,
                                           true /* disallow trivial move */);
           ASSERT_TRUE(s.ok() || s.IsCorruption());
         }
       } else {
-        Status s =
+        rocksdb_rs::status::Status s =
             dbfull()->CompactRange(CompactRangeOptions(), nullptr, nullptr);
         ASSERT_TRUE(s.ok() || s.IsCorruption());
       }
@@ -114,7 +114,7 @@ TEST_F(DBIOFailureTest, NoSpaceCompactRange) {
     // Force out-of-space errors
     env_->no_space_.store(true, std::memory_order_release);
 
-    Status s = dbfull()->TEST_CompactRange(0, nullptr, nullptr, nullptr,
+    rocksdb_rs::status::Status s = dbfull()->TEST_CompactRange(0, nullptr, nullptr, nullptr,
                                            true /* disallow trivial move */);
     ASSERT_TRUE(s.IsIOError());
     ASSERT_TRUE(s.IsNoSpace());
@@ -196,7 +196,7 @@ TEST_F(DBIOFailureTest, ManifestWriteError) {
 
     // Merging compaction (will fail)
     error_type->store(true, std::memory_order_release);
-    Status s =
+    rocksdb_rs::status::Status s =
         dbfull()->TEST_CompactRange(last, nullptr, nullptr);  // Should fail
     if (iter == 0) {
       ASSERT_OK(s);
@@ -280,7 +280,7 @@ TEST_F(DBIOFailureTest, FlushSstRangeSyncError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::RangeSync", [&](void* arg) {
         if (range_sync_called.fetch_add(1) == 0) {
-          Status* st = static_cast<Status*>(arg);
+          rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
@@ -303,7 +303,7 @@ TEST_F(DBIOFailureTest, FlushSstRangeSyncError) {
   ASSERT_OK(Put(1, "foo3_2", rnd_str));
   ASSERT_OK(Put(1, "foo3_3", rnd_str));
   ASSERT_OK(Put(1, "foo4", "bar"));
-  Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
+  rocksdb_rs::status::Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
   ASSERT_TRUE(s.IsIOError());
   ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
@@ -362,7 +362,7 @@ TEST_F(DBIOFailureTest, CompactSstRangeSyncError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::RangeSync", [&](void* arg) {
         if (range_sync_called.fetch_add(1) == 0) {
-          Status* st = static_cast<Status*>(arg);
+          rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
@@ -372,7 +372,7 @@ TEST_F(DBIOFailureTest, CompactSstRangeSyncError) {
                                  {
                                      {"disable_auto_compactions", "false"},
                                  }));
-  Status s = dbfull()->TEST_WaitForCompact();
+  rocksdb_rs::status::Status s = dbfull()->TEST_WaitForCompact();
   ASSERT_TRUE(s.IsIOError());
   ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
@@ -404,7 +404,7 @@ TEST_F(DBIOFailureTest, FlushSstCloseError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Close", [&](void* arg) {
         if (close_called.fetch_add(1) == 0) {
-          Status* st = static_cast<Status*>(arg);
+          rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
@@ -414,7 +414,7 @@ TEST_F(DBIOFailureTest, FlushSstCloseError) {
   ASSERT_OK(Put(1, "foo", "bar"));
   ASSERT_OK(Put(1, "foo1", "bar1"));
   ASSERT_OK(Put(1, "foo", "bar2"));
-  Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
+  rocksdb_rs::status::Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
   ASSERT_TRUE(s.IsIOError());
   ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
@@ -458,7 +458,7 @@ TEST_F(DBIOFailureTest, CompactionSstCloseError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Close", [&](void* arg) {
         if (close_called.fetch_add(1) == 0) {
-          Status* st = static_cast<Status*>(arg);
+          rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
@@ -468,7 +468,7 @@ TEST_F(DBIOFailureTest, CompactionSstCloseError) {
                                  {
                                      {"disable_auto_compactions", "false"},
                                  }));
-  Status s = dbfull()->TEST_WaitForCompact();
+  rocksdb_rs::status::Status s = dbfull()->TEST_WaitForCompact();
   ASSERT_TRUE(s.IsIOError());
   ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
@@ -500,7 +500,7 @@ TEST_F(DBIOFailureTest, FlushSstSyncError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Sync", [&](void* arg) {
         if (sync_called.fetch_add(1) == 0) {
-          Status* st = static_cast<Status*>(arg);
+          rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
@@ -510,7 +510,7 @@ TEST_F(DBIOFailureTest, FlushSstSyncError) {
   ASSERT_OK(Put(1, "foo", "bar"));
   ASSERT_OK(Put(1, "foo1", "bar1"));
   ASSERT_OK(Put(1, "foo", "bar2"));
-  Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
+  rocksdb_rs::status::Status s = dbfull()->TEST_WaitForFlushMemTable(handles_[1]);
   ASSERT_TRUE(s.IsIOError());
   ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 
@@ -555,7 +555,7 @@ TEST_F(DBIOFailureTest, CompactionSstSyncError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "SpecialEnv::SStableFile::Sync", [&](void* arg) {
         if (sync_called.fetch_add(1) == 0) {
-          Status* st = static_cast<Status*>(arg);
+          rocksdb_rs::status::Status* st = static_cast<rocksdb_rs::status::Status*>(arg);
           *st = Status_IOError(io_error_msg);
         }
       });
@@ -565,7 +565,7 @@ TEST_F(DBIOFailureTest, CompactionSstSyncError) {
                                  {
                                      {"disable_auto_compactions", "false"},
                                  }));
-  Status s = dbfull()->TEST_WaitForCompact();
+  rocksdb_rs::status::Status s = dbfull()->TEST_WaitForCompact();
   ASSERT_TRUE(s.IsIOError());
   ASSERT_STREQ(s.getState()->c_str(), io_error_msg);
 

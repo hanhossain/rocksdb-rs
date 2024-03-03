@@ -89,9 +89,9 @@ struct BlobDBOptions {
 class BlobDB : public StackableDB {
  public:
   using rocksdb::StackableDB::Put;
-  virtual Status Put(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Put(const WriteOptions& options, const Slice& key,
                      const Slice& value) override = 0;
-  virtual Status Put(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Put(const WriteOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& value) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
@@ -102,7 +102,7 @@ class BlobDB : public StackableDB {
   }
 
   using rocksdb::StackableDB::Delete;
-  virtual Status Delete(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Delete(const WriteOptions& options,
                         ColumnFamilyHandle* column_family,
                         const Slice& key) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
@@ -113,9 +113,9 @@ class BlobDB : public StackableDB {
     return db_->Delete(options, column_family, key);
   }
 
-  virtual Status PutWithTTL(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status PutWithTTL(const WriteOptions& options, const Slice& key,
                             const Slice& value, uint64_t ttl) = 0;
-  virtual Status PutWithTTL(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status PutWithTTL(const WriteOptions& options,
                             ColumnFamilyHandle* column_family, const Slice& key,
                             const Slice& value, uint64_t ttl) {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
@@ -127,9 +127,9 @@ class BlobDB : public StackableDB {
 
   // Put with expiration. Key with expiration time equal to
   // std::numeric_limits<uint64_t>::max() means the key don't expire.
-  virtual Status PutUntil(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status PutUntil(const WriteOptions& options, const Slice& key,
                           const Slice& value, uint64_t expiration) = 0;
-  virtual Status PutUntil(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status PutUntil(const WriteOptions& options,
                           ColumnFamilyHandle* column_family, const Slice& key,
                           const Slice& value, uint64_t expiration) {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
@@ -140,24 +140,24 @@ class BlobDB : public StackableDB {
   }
 
   using rocksdb::StackableDB::Get;
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) override = 0;
 
   // Get value and expiration.
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value, uint64_t* expiration) = 0;
-  virtual Status Get(const ReadOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
                      PinnableSlice* value, uint64_t* expiration) {
     return Get(options, DefaultColumnFamily(), key, value, expiration);
   }
 
   using rocksdb::StackableDB::MultiGet;
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) override = 0;
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families,
       const std::vector<Slice>& keys,
@@ -173,7 +173,7 @@ class BlobDB : public StackableDB {
   virtual void MultiGet(const ReadOptions& /*options*/,
                         ColumnFamilyHandle* /*column_family*/,
                         const size_t num_keys, const Slice* /*keys*/,
-                        PinnableSlice* /*values*/, Status* statuses,
+                        PinnableSlice* /*values*/, rocksdb_rs::status::Status* statuses,
                         const bool /*sorted_input*/ = false) override {
     for (size_t i = 0; i < num_keys; ++i) {
       statuses[i] =
@@ -182,20 +182,20 @@ class BlobDB : public StackableDB {
   }
 
   using rocksdb::StackableDB::SingleDelete;
-  virtual Status SingleDelete(const WriteOptions& /*wopts*/,
+  virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& /*wopts*/,
                               ColumnFamilyHandle* /*column_family*/,
                               const Slice& /*key*/) override {
     return Status_NotSupported("Not supported operation in blob db.");
   }
 
   using rocksdb::StackableDB::Merge;
-  virtual Status Merge(const WriteOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Merge(const WriteOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/,
                        const Slice& /*key*/, const Slice& /*value*/) override {
     return Status_NotSupported("Not supported operation in blob db.");
   }
 
-  virtual Status Write(const WriteOptions& opts,
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
                        WriteBatch* updates) override = 0;
 
   using rocksdb::StackableDB::NewIterator;
@@ -209,13 +209,13 @@ class BlobDB : public StackableDB {
     return NewIterator(options);
   }
 
-  Status CompactFiles(
+  rocksdb_rs::status::Status CompactFiles(
       const CompactionOptions& compact_options,
       const std::vector<std::string>& input_file_names, const int output_level,
       const int output_path_id = -1,
       std::vector<std::string>* const output_file_names = nullptr,
       CompactionJobInfo* compaction_job_info = nullptr) override = 0;
-  Status CompactFiles(
+  rocksdb_rs::status::Status CompactFiles(
       const CompactionOptions& compact_options,
       ColumnFamilyHandle* column_family,
       const std::vector<std::string>& input_file_names, const int output_level,
@@ -232,13 +232,13 @@ class BlobDB : public StackableDB {
   }
 
   using rocksdb::StackableDB::Close;
-  virtual Status Close() override = 0;
+  virtual rocksdb_rs::status::Status Close() override = 0;
 
   // Opening blob db.
-  static Status Open(const Options& options, const BlobDBOptions& bdb_options,
+  static rocksdb_rs::status::Status Open(const Options& options, const BlobDBOptions& bdb_options,
                      const std::string& dbname, BlobDB** blob_db);
 
-  static Status Open(const DBOptions& db_options,
+  static rocksdb_rs::status::Status Open(const DBOptions& db_options,
                      const BlobDBOptions& bdb_options,
                      const std::string& dbname,
                      const std::vector<ColumnFamilyDescriptor>& column_families,
@@ -247,7 +247,7 @@ class BlobDB : public StackableDB {
 
   virtual BlobDBOptions GetBlobDBOptions() const = 0;
 
-  virtual Status SyncBlobFiles() = 0;
+  virtual rocksdb_rs::status::Status SyncBlobFiles() = 0;
 
   virtual ~BlobDB() {}
 
@@ -256,7 +256,7 @@ class BlobDB : public StackableDB {
 };
 
 // Destroy the content of the database.
-Status DestroyBlobDB(const std::string& dbname, const Options& options,
+rocksdb_rs::status::Status DestroyBlobDB(const std::string& dbname, const Options& options,
                      const BlobDBOptions& bdb_options);
 
 }  // namespace blob_db

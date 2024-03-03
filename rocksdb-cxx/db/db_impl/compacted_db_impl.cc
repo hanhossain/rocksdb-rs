@@ -37,13 +37,13 @@ size_t CompactedDBImpl::FindFile(const Slice& key) {
       files_.files);
 }
 
-Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
+rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
                             const Slice& key, PinnableSlice* value) {
   return Get(options, /*column_family*/ nullptr, key, value,
              /*timestamp*/ nullptr);
 }
 
-Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
+rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
                             const Slice& key, PinnableSlice* value,
                             std::string* timestamp) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
@@ -53,13 +53,13 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
   }
   assert(user_comparator_);
   if (options.timestamp) {
-    const Status s = FailIfTsMismatchCf(
+    const rocksdb_rs::status::Status s = FailIfTsMismatchCf(
         DefaultColumnFamily(), *(options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
       return s.Clone();
     }
   } else {
-    const Status s = FailIfCfHasTs(DefaultColumnFamily());
+    const rocksdb_rs::status::Status s = FailIfCfHasTs(DefaultColumnFamily());
     if (!s.ok()) {
       return s.Clone();
     }
@@ -88,7 +88,7 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
           /*b_has_ts=*/false) < 0) {
     return Status_NotFound();
   }
-  Status s = f.fd.table_reader->Get(options, lkey.internal_key(), &get_context,
+  rocksdb_rs::status::Status s = f.fd.table_reader->Get(options, lkey.internal_key(), &get_context,
                                     nullptr);
   if (!s.ok() && !s.IsNotFound()) {
     return s;
@@ -99,13 +99,13 @@ Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
   return Status_NotFound();
 }
 
-rust::Vec<Status> CompactedDBImpl::MultiGet(
+rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
     const ReadOptions& options, const std::vector<ColumnFamilyHandle*>&,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
   return MultiGet(options, keys, values, /*timestamps*/ nullptr);
 }
 
-rust::Vec<Status> CompactedDBImpl::MultiGet(
+rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
     const ReadOptions& options, const std::vector<ColumnFamilyHandle*>&,
     const std::vector<Slice>& keys, std::vector<std::string>* values,
     std::vector<std::string>* timestamps) {
@@ -113,13 +113,13 @@ rust::Vec<Status> CompactedDBImpl::MultiGet(
   size_t num_keys = keys.size();
 
   if (options.timestamp) {
-    Status s = FailIfTsMismatchCf(DefaultColumnFamily(), *(options.timestamp),
+    rocksdb_rs::status::Status s = FailIfTsMismatchCf(DefaultColumnFamily(), *(options.timestamp),
                                   /*ts_for_read=*/true);
     if (!s.ok()) {
       return s.create_vec(num_keys);
     }
   } else {
-    Status s = FailIfCfHasTs(DefaultColumnFamily());
+    rocksdb_rs::status::Status s = FailIfCfHasTs(DefaultColumnFamily());
     if (!s.ok()) {
       return s.create_vec(num_keys);
     }
@@ -149,7 +149,7 @@ rust::Vec<Status> CompactedDBImpl::MultiGet(
       reader_list.push_back(f.fd.table_reader);
     }
   }
-  rust::Vec<Status> statuses = Status_NotFound().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> statuses = Status_NotFound().create_vec(num_keys);
   values->resize(num_keys);
   if (timestamps) {
     timestamps->resize(num_keys);
@@ -166,7 +166,7 @@ rust::Vec<Status> CompactedDBImpl::MultiGet(
           lkey.user_key(), &pinnable_val, /*columns=*/nullptr,
           user_comparator_->timestamp_size() > 0 ? timestamp : nullptr, nullptr,
           nullptr, true, nullptr, nullptr, nullptr, nullptr, &read_cb);
-      Status s = r->Get(options, lkey.internal_key(), &get_context, nullptr);
+      rocksdb_rs::status::Status s = r->Get(options, lkey.internal_key(), &get_context, nullptr);
       assert(static_cast<size_t>(idx) < statuses.size());
       if (!s.ok() && !s.IsNotFound()) {
         statuses[idx].copy_from(s);
@@ -182,12 +182,12 @@ rust::Vec<Status> CompactedDBImpl::MultiGet(
   return statuses;
 }
 
-Status CompactedDBImpl::Init(const Options& options) {
+rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
   SuperVersionContext sv_context(/* create_superversion */ true);
   mutex_.Lock();
   ColumnFamilyDescriptor cf(kDefaultColumnFamilyName,
                             ColumnFamilyOptions(options));
-  Status s = Recover({cf}, true /* read only */, false, true);
+  rocksdb_rs::status::Status s = Recover({cf}, true /* read only */, false, true);
   if (s.ok()) {
     cfd_ = static_cast_with_check<ColumnFamilyHandleImpl>(DefaultColumnFamily())
                ->cfd();
@@ -232,7 +232,7 @@ Status CompactedDBImpl::Init(const Options& options) {
   return Status_NotSupported("no file exists");
 }
 
-Status CompactedDBImpl::Open(const Options& options, const std::string& dbname,
+rocksdb_rs::status::Status CompactedDBImpl::Open(const Options& options, const std::string& dbname,
                              DB** dbptr) {
   *dbptr = nullptr;
 
@@ -244,7 +244,7 @@ Status CompactedDBImpl::Open(const Options& options, const std::string& dbname,
   }
   DBOptions db_options(options);
   std::unique_ptr<CompactedDBImpl> db(new CompactedDBImpl(db_options, dbname));
-  Status s = db->Init(options);
+  rocksdb_rs::status::Status s = db->Init(options);
   if (s.ok()) {
     s = db->StartPeriodicTaskScheduler();
   }

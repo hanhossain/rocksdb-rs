@@ -104,7 +104,7 @@ struct BlockAccessInfo {
         num_referenced_key_exist_in_block++;
         if (referenced_data_size > block_size && block_size != 0) {
           ParsedInternalKey internal_key;
-          Status s = ParseInternalKey(access.referenced_key, &internal_key,
+          rocksdb_rs::status::Status s = ParseInternalKey(access.referenced_key, &internal_key,
                                       false /* log_err_key */);  // TODO
           assert(s.ok());                                        // TODO
         }
@@ -161,7 +161,7 @@ class BlockCacheTraceAnalyzer {
   // a block, and aggregates the information by block type, sst file, and column
   // family. Subsequently, the caller may call Print* functions to print
   // statistics.
-  Status Analyze();
+  rocksdb_rs::status::Status Analyze();
 
   // Print a summary of statistics of the trace, e.g.,
   // Number of files: 2 Number of blocks: 50 Number of accesses: 50
@@ -330,7 +330,7 @@ class BlockCacheTraceAnalyzer {
 
   void ComputeReuseDistance(BlockAccessInfo* info) const;
 
-  Status RecordAccess(const BlockCacheTraceRecord& access);
+  rocksdb_rs::status::Status RecordAccess(const BlockCacheTraceRecord& access);
 
   void UpdateReuseIntervalStats(
       const std::string& label, const std::vector<uint64_t>& time_buckets,

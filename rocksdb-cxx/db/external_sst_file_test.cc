@@ -94,7 +94,7 @@ class ExternalSSTFileTest
  public:
   ExternalSSTFileTest() {}
 
-  Status GenerateOneExternalFile(
+  rocksdb_rs::status::Status GenerateOneExternalFile(
       const Options& options, ColumnFamilyHandle* cfh,
       std::vector<std::pair<std::string, std::string>>& data, int file_id,
       bool sort_data, std::string* external_file_path,
@@ -120,7 +120,7 @@ class ExternalSSTFileTest
     }
     std::string file_path = sst_files_dir_ + std::to_string(file_id);
     SstFileWriter sst_file_writer(EnvOptions(), options, cfh);
-    Status s = sst_file_writer.Open(file_path);
+    rocksdb_rs::status::Status s = sst_file_writer.Open(file_path);
     if (!s.ok()) {
       return s;
     }
@@ -143,7 +143,7 @@ class ExternalSSTFileTest
     return s;
   }
 
-  Status GenerateAndAddExternalFile(
+  rocksdb_rs::status::Status GenerateAndAddExternalFile(
       const Options options,
       std::vector<std::pair<std::string, std::string>> data, int file_id = -1,
       bool allow_global_seqno = false, bool write_global_seqno = false,
@@ -175,7 +175,7 @@ class ExternalSSTFileTest
     std::string file_path = sst_files_dir_ + std::to_string(file_id);
     SstFileWriter sst_file_writer(EnvOptions(), options, cfh);
 
-    Status s = sst_file_writer.Open(file_path);
+    rocksdb_rs::status::Status s = sst_file_writer.Open(file_path);
     if (!s.ok()) {
       return s;
     }
@@ -210,7 +210,7 @@ class ExternalSSTFileTest
     return s;
   }
 
-  Status GenerateAndAddExternalFiles(
+  rocksdb_rs::status::Status GenerateAndAddExternalFiles(
       const Options& options,
       const std::vector<ColumnFamilyHandle*>& column_families,
       const std::vector<IngestExternalFileOptions>& ifos,
@@ -227,7 +227,7 @@ class ExternalSSTFileTest
     std::vector<IngestExternalFileArg> args(num_cfs);
     for (size_t i = 0; i != num_cfs; ++i) {
       std::string external_file_path;
-      Status s = GenerateOneExternalFile(
+      rocksdb_rs::status::Status s = GenerateOneExternalFile(
           options, column_families[i], data[i], file_id, sort_data,
           &external_file_path,
           true_data.size() == num_cfs ? &true_data[i] : nullptr);
@@ -243,7 +243,7 @@ class ExternalSSTFileTest
     return db_->IngestExternalFiles(args);
   }
 
-  Status GenerateAndAddExternalFile(
+  rocksdb_rs::status::Status GenerateAndAddExternalFile(
       const Options options, std::vector<std::pair<int, std::string>> data,
       int file_id = -1, bool allow_global_seqno = false,
       bool write_global_seqno = false,
@@ -261,7 +261,7 @@ class ExternalSSTFileTest
                                       ingest_behind, sort_data, true_data, cfh);
   }
 
-  Status GenerateAndAddExternalFile(
+  rocksdb_rs::status::Status GenerateAndAddExternalFile(
       const Options options, std::vector<int> keys, int file_id = -1,
       bool allow_global_seqno = false, bool write_global_seqno = false,
       bool verify_checksums_before_ingest = true, bool ingest_behind = false,
@@ -278,7 +278,7 @@ class ExternalSSTFileTest
                                       ingest_behind, sort_data, true_data, cfh);
   }
 
-  Status DeprecatedAddFile(const std::vector<std::string>& files,
+  rocksdb_rs::status::Status DeprecatedAddFile(const std::vector<std::string>& files,
                            bool move_files = false,
                            bool skip_snapshot_check = false,
                            bool skip_write_global_seqno = false) {
@@ -546,7 +546,7 @@ class SstFileWriterCollector : public TablePropertiesCollector {
 
   const char* Name() const override { return name_.c_str(); }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     std::string count = std::to_string(count_);
     *properties = UserCollectedProperties{
         {prefix_ + "_SstFileWriterCollector", "YES"},
@@ -555,7 +555,7 @@ class SstFileWriterCollector : public TablePropertiesCollector {
     return Status_OK();
   }
 
-  Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     ++count_;
@@ -1027,7 +1027,7 @@ TEST_F(ExternalSSTFileTest, MultiThreaded) {
         files_to_add.push_back(file_names[file_idx + 1]);
       }
 
-      Status s = DeprecatedAddFile(files_to_add, move_file);
+      rocksdb_rs::status::Status s = DeprecatedAddFile(files_to_add, move_file);
       if (s.ok()) {
         files_added += static_cast<int>(files_to_add.size());
       }
@@ -1116,7 +1116,7 @@ TEST_F(ExternalSSTFileTest, OverlappingRanges) {
       int range_start = key_ranges[i].first;
       int range_end = key_ranges[i].second;
 
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       std::string range_val = "range_" + std::to_string(i);
 
       // For 20% of ranges we use DB::Put, for 80% we use DB::AddFile
@@ -1275,7 +1275,7 @@ TEST_F(ExternalSSTFileTest, IngestNonExistingFile) {
   Options options = CurrentOptions();
   DestroyAndReopen(options);
 
-  Status s = db_->IngestExternalFile({"non_existing_file"},
+  rocksdb_rs::status::Status s = db_->IngestExternalFile({"non_existing_file"},
                                      IngestExternalFileOptions());
   ASSERT_NOK(s);
 
@@ -2021,7 +2021,7 @@ TEST_P(ExternSSTFileLinkFailFallbackTest, LinkFailFallBackExternalSst) {
       [&](void* /* arg */) { copyfile = true; });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  const Status s = db_->IngestExternalFile({file_path}, ifo);
+  const rocksdb_rs::status::Status s = db_->IngestExternalFile({file_path}, ifo);
 
   ColumnFamilyHandleImpl* cfh =
       static_cast<ColumnFamilyHandleImpl*>(dbfull()->DefaultColumnFamily());

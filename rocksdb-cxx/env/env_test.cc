@@ -323,7 +323,7 @@ TEST_F(EnvPosixTest, MemoryMappedFileBuffer) {
   }
 
   std::unique_ptr<MemoryMappedFileBuffer> mmap_buffer;
-  Status status = env_->NewMemoryMappedFileBuffer(fname, &mmap_buffer);
+  rocksdb_rs::status::Status status = env_->NewMemoryMappedFileBuffer(fname, &mmap_buffer);
   // it should be supported at least on linux
 #if !defined(OS_LINUX)
   if (status.IsNotSupported()) {
@@ -347,7 +347,7 @@ TEST_F(EnvPosixTest, MemoryMappedFileBuffer) {
 TEST_F(EnvPosixTest, LoadRocksDBLibrary) {
   std::shared_ptr<DynamicLibrary> library;
   std::function<void*(void*, const char*)> function;
-  Status status = env_->LoadLibrary("no-such-library", "", &library);
+  rocksdb_rs::status::Status status = env_->LoadLibrary("no-such-library", "", &library);
   ASSERT_NOK(status);
   ASSERT_EQ(nullptr, library.get());
   status = env_->LoadLibrary("rocksdb", "", &library);
@@ -373,7 +373,7 @@ TEST_F(EnvPosixTest, LoadRocksDBLibraryWithSearchPath) {
   ASSERT_EQ(nullptr, library.get());
   ASSERT_NOK(env_->LoadLibrary("dl", "/tmp", &library));
   ASSERT_EQ(nullptr, library.get());
-  Status status = env_->LoadLibrary("rocksdb", "/tmp:./", &library);
+  rocksdb_rs::status::Status status = env_->LoadLibrary("rocksdb", "/tmp:./", &library);
   if (status.ok()) {
     ASSERT_NE(nullptr, library.get());
     ASSERT_OK(env_->LoadLibrary(library->Name(), "", &library));
@@ -1676,7 +1676,7 @@ TEST_F(EnvPosixTest, MultiReadIOUringError) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = file->MultiRead(reqs.data(), reqs.size());
+  rocksdb_rs::status::Status s = file->MultiRead(reqs.data(), reqs.size());
   if (io_uring_wait_cqe_called) {
     ASSERT_NOK(s);
   }
@@ -1716,7 +1716,7 @@ TEST_F(EnvPosixTest, MultiReadIOUringError2) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = file->MultiRead(reqs.data(), reqs.size());
+  rocksdb_rs::status::Status s = file->MultiRead(reqs.data(), reqs.size());
   if (io_uring_submit_and_wait_called) {
     ASSERT_NOK(s);
   }
@@ -2032,52 +2032,52 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
 
     explicit Base(int* step) : step_(step) { inc(0); }
 
-    Status Append(const Slice& /*data*/) override {
+    rocksdb_rs::status::Status Append(const Slice& /*data*/) override {
       inc(1);
       return Status_OK();
     }
 
-    Status Append(
+    rocksdb_rs::status::Status Append(
         const Slice& /*data*/,
         const DataVerificationInfo& /* verification_info */) override {
       inc(1);
       return Status_OK();
     }
 
-    Status PositionedAppend(const Slice& /*data*/,
+    rocksdb_rs::status::Status PositionedAppend(const Slice& /*data*/,
                             uint64_t /*offset*/) override {
       inc(2);
       return Status_OK();
     }
 
-    Status PositionedAppend(
+    rocksdb_rs::status::Status PositionedAppend(
         const Slice& /*data*/, uint64_t /*offset*/,
         const DataVerificationInfo& /* verification_info */) override {
       inc(2);
       return Status_OK();
     }
 
-    Status Truncate(uint64_t /*size*/) override {
+    rocksdb_rs::status::Status Truncate(uint64_t /*size*/) override {
       inc(3);
       return Status_OK();
     }
 
-    Status Close() override {
+    rocksdb_rs::status::Status Close() override {
       inc(4);
       return Status_OK();
     }
 
-    Status Flush() override {
+    rocksdb_rs::status::Status Flush() override {
       inc(5);
       return Status_OK();
     }
 
-    Status Sync() override {
+    rocksdb_rs::status::Status Sync() override {
       inc(6);
       return Status_OK();
     }
 
-    Status Fsync() override {
+    rocksdb_rs::status::Status Fsync() override {
       inc(7);
       return Status_OK();
     }
@@ -2130,19 +2130,19 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
       return 0;
     }
 
-    Status InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
+    rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
       inc(19);
       return Status_OK();
     }
 
-    Status RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/) override {
+    rocksdb_rs::status::Status RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/) override {
       inc(20);
       return Status_OK();
     }
 
     void PrepareWrite(size_t /*offset*/, size_t /*len*/) override { inc(21); }
 
-    Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) override {
+    rocksdb_rs::status::Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) override {
       inc(22);
       return Status_OK();
     }
@@ -2270,7 +2270,7 @@ class RandomRWFileWithMirrorString {
     StringWrite(offset, data);
 
     // Write to file
-    Status s = file_->Write(offset, data);
+    rocksdb_rs::status::Status s = file_->Write(offset, data);
     ASSERT_OK(s) << *s.ToString();
   }
 
@@ -2283,7 +2283,7 @@ class RandomRWFileWithMirrorString {
     }
 
     Slice file_res;
-    Status s = file_->Read(offset, n, &file_res, buf_);
+    rocksdb_rs::status::Status s = file_->Read(offset, n, &file_res, buf_);
     ASSERT_OK(s) << *s.ToString();
     StopSliceAtNull(&file_res);
 
@@ -2372,16 +2372,16 @@ class TestEnv : public EnvWrapper {
     explicit TestLogger(TestEnv* env_ptr) : Logger() { env = env_ptr; }
     ~TestLogger() override {
       if (!closed_) {
-        Status s = CloseHelper();
+        rocksdb_rs::status::Status s = CloseHelper();
       }
     }
     void Logv(const char* /*format*/, va_list /*ap*/) override {}
 
    protected:
-    Status CloseImpl() override { return CloseHelper(); }
+    rocksdb_rs::status::Status CloseImpl() override { return CloseHelper(); }
 
    private:
-    Status CloseHelper() {
+    rocksdb_rs::status::Status CloseHelper() {
       env->CloseCountInc();
       return Status_OK();
     }
@@ -2392,7 +2392,7 @@ class TestEnv : public EnvWrapper {
 
   int GetCloseCount() { return close_count; }
 
-  Status NewLogger(const std::string& /*fname*/,
+  rocksdb_rs::status::Status NewLogger(const std::string& /*fname*/,
                    std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
     return Status_OK();
@@ -2413,7 +2413,7 @@ class EnvTest : public testing::Test {
 TEST_F(EnvTest, Close) {
   TestEnv* env = new TestEnv();
   std::shared_ptr<Logger> logger;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   s = env->NewLogger("", &logger);
   ASSERT_OK(s);
@@ -2532,7 +2532,7 @@ TEST_P(EnvFSTestWithParam, OptionsTest) {
   }
   for (int i = 0; i < 2; ++i) {
     DB* db;
-    Status s = DB::Open(opts, dbname, &db);
+    rocksdb_rs::status::Status s = DB::Open(opts, dbname, &db);
     ASSERT_OK(s);
 
     WriteOptions wo;
@@ -2581,7 +2581,7 @@ TEST_F(EnvTest, MultipleCompositeEnv) {
 }
 
 TEST_F(EnvTest, IsDirectory) {
-  Status s = Env::Default()->CreateDirIfMissing(test_directory_);
+  rocksdb_rs::status::Status s = Env::Default()->CreateDirIfMissing(test_directory_);
   ASSERT_OK(s);
   const std::string test_sub_dir = test_directory_ + "sub1";
   const std::string test_file_path = test_directory_ + "file1";
@@ -2607,7 +2607,7 @@ TEST_F(EnvTest, IsDirectory) {
 }
 
 TEST_F(EnvTest, EnvWriteVerificationTest) {
-  Status s = Env::Default()->CreateDirIfMissing(test_directory_);
+  rocksdb_rs::status::Status s = Env::Default()->CreateDirIfMissing(test_directory_);
   const std::string test_file_path = test_directory_ + "file1";
   ASSERT_OK(s);
   std::shared_ptr<FaultInjectionTestFS> fault_fs(

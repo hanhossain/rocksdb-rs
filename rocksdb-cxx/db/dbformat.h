@@ -217,7 +217,7 @@ void ReplaceInternalKeyWithMinTimestamp(std::string* result, const Slice& key,
 // stores the parsed data in "*result", and returns true.
 //
 // On error, returns false, leaves "*result" in an undefined state.
-Status ParseInternalKey(const Slice& internal_key, ParsedInternalKey* result,
+rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key, ParsedInternalKey* result,
                         bool log_err_key);
 
 // Returns the user key portion of an internal key.
@@ -399,7 +399,7 @@ inline int InternalKeyComparator::Compare(const InternalKey& a,
   return Compare(a.Encode(), b.Encode());
 }
 
-inline Status ParseInternalKey(const Slice& internal_key,
+inline rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
                                ParsedInternalKey* result, bool log_err_key) {
   const size_t n = internal_key.size();
 
@@ -798,7 +798,7 @@ bool ReadKeyFromWriteBatchEntry(Slice* input, Slice* key, bool cf_record);
 // input will be advanced to after the record.
 // If user-defined timestamp is enabled for a column family, then the `key`
 // resulting from this call will include timestamp.
-Status ReadRecordFromWriteBatch(Slice* input, char* tag,
+rocksdb_rs::status::Status ReadRecordFromWriteBatch(Slice* input, char* tag,
                                 uint32_t* column_family, Slice* key,
                                 Slice* value, Slice* blob, Slice* xid);
 

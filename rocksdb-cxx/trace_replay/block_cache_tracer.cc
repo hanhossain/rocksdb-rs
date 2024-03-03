@@ -113,7 +113,7 @@ BlockCacheTraceWriterImpl::BlockCacheTraceWriterImpl(
       trace_options_(trace_options),
       trace_writer_(std::move(trace_writer)) {}
 
-Status BlockCacheTraceWriterImpl::WriteBlockAccess(
+rocksdb_rs::status::Status BlockCacheTraceWriterImpl::WriteBlockAccess(
     const BlockCacheTraceRecord& record, const Slice& block_key,
     const Slice& cf_name, const Slice& referenced_key) {
   uint64_t trace_file_size = trace_writer_->GetFileSize();
@@ -148,7 +148,7 @@ Status BlockCacheTraceWriterImpl::WriteBlockAccess(
   return trace_writer_->Write(encoded_trace);
 }
 
-Status BlockCacheTraceWriterImpl::WriteHeader() {
+rocksdb_rs::status::Status BlockCacheTraceWriterImpl::WriteHeader() {
   Trace trace;
   trace.ts = clock_->NowMicros();
   trace.type = TraceType::kTraceBegin;
@@ -164,10 +164,10 @@ BlockCacheTraceReader::BlockCacheTraceReader(
     std::unique_ptr<TraceReader>&& reader)
     : trace_reader_(std::move(reader)) {}
 
-Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHeader* header) {
+rocksdb_rs::status::Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHeader* header) {
   assert(header != nullptr);
   std::string encoded_trace;
-  Status s = trace_reader_->Read(&encoded_trace);
+  rocksdb_rs::status::Status s = trace_reader_->Read(&encoded_trace);
   if (!s.ok()) {
     return s;
   }
@@ -206,10 +206,10 @@ Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHeader* header) {
   return Status_OK();
 }
 
-Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
+rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
   assert(record);
   std::string encoded_trace;
-  Status s = trace_reader_->Read(&encoded_trace);
+  rocksdb_rs::status::Status s = trace_reader_->Read(&encoded_trace);
   if (!s.ok()) {
     return s;
   }
@@ -317,7 +317,7 @@ BlockCacheHumanReadableTraceWriter::~BlockCacheHumanReadableTraceWriter() {
   }
 }
 
-Status BlockCacheHumanReadableTraceWriter::NewWritableFile(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceWriter::NewWritableFile(
     const std::string& human_readable_trace_file_path,
     rocksdb::Env* env) {
   if (human_readable_trace_file_path.empty()) {
@@ -328,7 +328,7 @@ Status BlockCacheHumanReadableTraceWriter::NewWritableFile(
                               &human_readable_trace_file_writer_, EnvOptions());
 }
 
-Status BlockCacheHumanReadableTraceWriter::WriteHumanReadableTraceRecord(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceWriter::WriteHumanReadableTraceRecord(
     const BlockCacheTraceRecord& access, uint64_t block_id,
     uint64_t get_key_id) {
   if (!human_readable_trace_file_writer_) {
@@ -366,12 +366,12 @@ BlockCacheHumanReadableTraceReader::~BlockCacheHumanReadableTraceReader() {
   human_readable_trace_reader_.close();
 }
 
-Status BlockCacheHumanReadableTraceReader::ReadHeader(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadHeader(
     BlockCacheTraceHeader* /*header*/) {
   return Status_OK();
 }
 
-Status BlockCacheHumanReadableTraceReader::ReadAccess(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadAccess(
     BlockCacheTraceRecord* record) {
   std::string line;
   if (!std::getline(human_readable_trace_reader_, line)) {
@@ -450,7 +450,7 @@ BlockCacheTracer::BlockCacheTracer() { writer_.store(nullptr); }
 
 BlockCacheTracer::~BlockCacheTracer() { EndTrace(); }
 
-Status BlockCacheTracer::StartTrace(
+rocksdb_rs::status::Status BlockCacheTracer::StartTrace(
     const BlockCacheTraceOptions& trace_options,
     std::unique_ptr<BlockCacheTraceWriter>&& trace_writer) {
   InstrumentedMutexLock lock_guard(&trace_writer_mutex_);
@@ -472,7 +472,7 @@ void BlockCacheTracer::EndTrace() {
   writer_.store(nullptr);
 }
 
-Status BlockCacheTracer::WriteBlockAccess(const BlockCacheTraceRecord& record,
+rocksdb_rs::status::Status BlockCacheTracer::WriteBlockAccess(const BlockCacheTraceRecord& record,
                                           const Slice& block_key,
                                           const Slice& cf_name,
                                           const Slice& referenced_key) {

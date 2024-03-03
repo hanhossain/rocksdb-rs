@@ -109,7 +109,7 @@ TEST_F(RangeLockingTest, MyRocksLikeUpdate) {
   TransactionOptions txn_options;
   Transaction* txn0 = db->BeginTransaction(write_options, txn_options);
   auto cf = db->DefaultColumnFamily();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   // Get a range lock for the range we are about to update
   ASSERT_OK(txn0->GetRangeLock(cf, Endpoint("a"), Endpoint("c")));
@@ -139,7 +139,7 @@ TEST_F(RangeLockingTest, UpgradeLockAndGetConflict) {
   WriteOptions write_options;
   TransactionOptions txn_options;
   auto cf = db->DefaultColumnFamily();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::string value;
   txn_options.lock_timeout = 10;
 
@@ -168,7 +168,7 @@ TEST_F(RangeLockingTest, UpgradeLockAndGetConflict) {
 }
 
 TEST_F(RangeLockingTest, SnapshotValidation) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   Slice key_slice = Slice("k");
   ColumnFamilyHandle* cfh = db->DefaultColumnFamily();
 

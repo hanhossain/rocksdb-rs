@@ -45,12 +45,12 @@ namespace rocksdb {
 // created object
 // @param result The newly created and configured instance.
 template <typename T>
-static Status NewSharedObject(
+static rocksdb_rs::status::Status NewSharedObject(
     const ConfigOptions& config_options, const std::string& id,
     const std::unordered_map<std::string, std::string>& opt_map,
     std::shared_ptr<T>* result) {
   if (!id.empty()) {
-    Status status = config_options.registry->NewSharedObject(id, result);
+    rocksdb_rs::status::Status status = config_options.registry->NewSharedObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
       status = Status_OK();
     } else if (status.ok()) {
@@ -94,11 +94,11 @@ static Status NewSharedObject(
 // created object
 // @param result The managed instance.
 template <typename T>
-static Status NewManagedObject(
+static rocksdb_rs::status::Status NewManagedObject(
     const ConfigOptions& config_options, const std::string& id,
     const std::unordered_map<std::string, std::string>& opt_map,
     std::shared_ptr<T>* result) {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   if (!id.empty()) {
     status = config_options.registry->GetOrCreateManagedObject<T>(
         id, result, [config_options, opt_map](T* object) {
@@ -139,13 +139,13 @@ static Status NewManagedObject(
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static Status LoadSharedObject(const ConfigOptions& config_options,
+static rocksdb_rs::status::Status LoadSharedObject(const ConfigOptions& config_options,
                                const std::string& value,
                                std::shared_ptr<T>* result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
 
-  Status status = Customizable::GetOptionsMap(config_options, result->get(),
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
                                               value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
@@ -181,12 +181,12 @@ static Status LoadSharedObject(const ConfigOptions& config_options,
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static Status LoadManagedObject(const ConfigOptions& config_options,
+static rocksdb_rs::status::Status LoadManagedObject(const ConfigOptions& config_options,
                                 const std::string& value,
                                 std::shared_ptr<T>* result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  Status status = Customizable::GetOptionsMap(config_options, nullptr, value,
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, nullptr, value,
                                               &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
@@ -212,12 +212,12 @@ static Status LoadManagedObject(const ConfigOptions& config_options,
 // created object
 // @param result The newly created and configured instance.
 template <typename T>
-static Status NewUniqueObject(
+static rocksdb_rs::status::Status NewUniqueObject(
     const ConfigOptions& config_options, const std::string& id,
     const std::unordered_map<std::string, std::string>& opt_map,
     std::unique_ptr<T>* result) {
   if (!id.empty()) {
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = Status_new();
     status = config_options.registry->NewUniqueObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
       status = Status_OK();
@@ -246,12 +246,12 @@ static Status NewUniqueObject(
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static Status LoadUniqueObject(const ConfigOptions& config_options,
+static rocksdb_rs::status::Status LoadUniqueObject(const ConfigOptions& config_options,
                                const std::string& value,
                                std::unique_ptr<T>* result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  Status status = Customizable::GetOptionsMap(config_options, result->get(),
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
                                               value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
@@ -274,11 +274,11 @@ static Status LoadUniqueObject(const ConfigOptions& config_options,
 // created object
 // @param result The newly created and configured instance.
 template <typename T>
-static Status NewStaticObject(
+static rocksdb_rs::status::Status NewStaticObject(
     const ConfigOptions& config_options, const std::string& id,
     const std::unordered_map<std::string, std::string>& opt_map, T** result) {
   if (!id.empty()) {
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = Status_new();
     status = config_options.registry->NewStaticObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
       status = Status_OK();
@@ -307,11 +307,11 @@ static Status NewStaticObject(
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static Status LoadStaticObject(const ConfigOptions& config_options,
+static rocksdb_rs::status::Status LoadStaticObject(const ConfigOptions& config_options,
                                const std::string& value, T** result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  Status status = Customizable::GetOptionsMap(config_options, *result, value,
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, *result, value,
                                               &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;

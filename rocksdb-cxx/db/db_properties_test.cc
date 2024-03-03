@@ -1083,7 +1083,7 @@ class CountingUserTblPropCollector : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "CountingUserTblPropCollector"; }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     std::string encoded;
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{
@@ -1093,7 +1093,7 @@ class CountingUserTblPropCollector : public TablePropertiesCollector {
     return Status_OK();
   }
 
-  Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     ++count_;
@@ -1136,7 +1136,7 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "CountingDeleteTabPropCollector"; }
 
-  Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType type, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     if (type == kEntryDelete) {
@@ -1151,7 +1151,7 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
     return UserCollectedProperties{};
   }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     *properties =
         UserCollectedProperties{{"num_delete", std::to_string(num_deletes_)}};
     return Status_OK();
@@ -1181,13 +1181,13 @@ class BlockCountingTablePropertiesCollector : public TablePropertiesCollector {
     return "BlockCountingTablePropertiesCollector";
   }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     (*properties)[kNumSampledBlocksPropertyName] =
         std::to_string(num_sampled_blocks_);
     return Status_OK();
   }
 
-  Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     return Status_OK();
@@ -2204,7 +2204,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
 
       WriteOptions wo;
       wo.no_slowdown = true;
-      Status s = dbfull()->Put(
+      rocksdb_rs::status::Status s = dbfull()->Put(
           wo, handles_[1], Key(2),
           DummyString(options.write_buffer_manager->buffer_size()));
       ASSERT_TRUE(s.IsIncomplete());
@@ -2271,7 +2271,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
 
 namespace {
 std::string PopMetaIndexKey(InternalIterator* meta_iter) {
-  Status s = meta_iter->status();
+  rocksdb_rs::status::Status s = meta_iter->status();
   if (!s.ok()) {
     return *s.ToString();
   } else if (meta_iter->Valid()) {

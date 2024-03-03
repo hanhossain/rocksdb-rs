@@ -173,7 +173,7 @@ uint64_t WinClock::NowNanos() {
       .count();
 }
 
-Status WinClock::GetCurrentTime(int64_t* unix_time) {
+rocksdb_rs::status::Status WinClock::GetCurrentTime(int64_t* unix_time) {
   time_t time = std::time(nullptr);
   if (time == (time_t)(-1)) {
     return Status_NotSupported("Failed to get time");
@@ -1073,8 +1073,8 @@ IOStatus WinFileSystem::IsDirectory(const std::string& path,
   return IOStatus::OK();
 }
 
-Status WinEnvIO::GetHostName(char* name, uint64_t len) {
-  Status s;
+rocksdb_rs::status::Status WinEnvIO::GetHostName(char* name, uint64_t len) {
+  rocksdb_rs::status::Status s;
   DWORD nSize = static_cast<DWORD>(
       std::min<uint64_t>(len, std::numeric_limits<DWORD>::max()));
 
@@ -1371,12 +1371,12 @@ WinEnv::~WinEnv() {
   delete thread_status_updater_;
 }
 
-Status WinEnv::GetThreadList(std::vector<ThreadStatus>* thread_list) {
+rocksdb_rs::status::Status WinEnv::GetThreadList(std::vector<ThreadStatus>* thread_list) {
   assert(thread_status_updater_);
   return thread_status_updater_->GetThreadList(thread_list);
 }
 
-Status WinEnv::GetHostName(char* name, uint64_t len) {
+rocksdb_rs::status::Status WinEnv::GetHostName(char* name, uint64_t len) {
   return winenv_io_.GetHostName(name, len);
 }
 

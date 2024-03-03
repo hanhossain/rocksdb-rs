@@ -81,55 +81,55 @@ class WriteBatchInternal {
   static constexpr size_t kHeader = 12;
 
   // WriteBatch methods with column_family_id instead of ColumnFamilyHandle*
-  static Status Put(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Put(WriteBatch* batch, uint32_t column_family_id,
                     const Slice& key, const Slice& value);
 
-  static Status Put(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Put(WriteBatch* batch, uint32_t column_family_id,
                     const SliceParts& key, const SliceParts& value);
 
-  static Status PutEntity(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status PutEntity(WriteBatch* batch, uint32_t column_family_id,
                           const Slice& key, const WideColumns& columns);
 
-  static Status Delete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Delete(WriteBatch* batch, uint32_t column_family_id,
                        const SliceParts& key);
 
-  static Status Delete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Delete(WriteBatch* batch, uint32_t column_family_id,
                        const Slice& key);
 
-  static Status SingleDelete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status SingleDelete(WriteBatch* batch, uint32_t column_family_id,
                              const SliceParts& key);
 
-  static Status SingleDelete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status SingleDelete(WriteBatch* batch, uint32_t column_family_id,
                              const Slice& key);
 
-  static Status DeleteRange(WriteBatch* b, uint32_t column_family_id,
+  static rocksdb_rs::status::Status DeleteRange(WriteBatch* b, uint32_t column_family_id,
                             const Slice& begin_key, const Slice& end_key);
 
-  static Status DeleteRange(WriteBatch* b, uint32_t column_family_id,
+  static rocksdb_rs::status::Status DeleteRange(WriteBatch* b, uint32_t column_family_id,
                             const SliceParts& begin_key,
                             const SliceParts& end_key);
 
-  static Status Merge(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Merge(WriteBatch* batch, uint32_t column_family_id,
                       const Slice& key, const Slice& value);
 
-  static Status Merge(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Merge(WriteBatch* batch, uint32_t column_family_id,
                       const SliceParts& key, const SliceParts& value);
 
-  static Status PutBlobIndex(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status PutBlobIndex(WriteBatch* batch, uint32_t column_family_id,
                              const Slice& key, const Slice& value);
 
-  static Status MarkEndPrepare(WriteBatch* batch, const Slice& xid,
+  static rocksdb_rs::status::Status MarkEndPrepare(WriteBatch* batch, const Slice& xid,
                                const bool write_after_commit = true,
                                const bool unprepared_batch = false);
 
-  static Status MarkRollback(WriteBatch* batch, const Slice& xid);
+  static rocksdb_rs::status::Status MarkRollback(WriteBatch* batch, const Slice& xid);
 
-  static Status MarkCommit(WriteBatch* batch, const Slice& xid);
+  static rocksdb_rs::status::Status MarkCommit(WriteBatch* batch, const Slice& xid);
 
-  static Status MarkCommitWithTimestamp(WriteBatch* batch, const Slice& xid,
+  static rocksdb_rs::status::Status MarkCommitWithTimestamp(WriteBatch* batch, const Slice& xid,
                                         const Slice& commit_ts);
 
-  static Status InsertNoop(WriteBatch* batch);
+  static rocksdb_rs::status::Status InsertNoop(WriteBatch* batch);
 
   // Return the number of entries in the batch.
   static uint32_t Count(const WriteBatch* batch);
@@ -152,9 +152,9 @@ class WriteBatchInternal {
 
   static size_t ByteSize(const WriteBatch* batch) { return batch->rep_.size(); }
 
-  static Status SetContents(WriteBatch* batch, const Slice& contents);
+  static rocksdb_rs::status::Status SetContents(WriteBatch* batch, const Slice& contents);
 
-  static Status CheckSlicePartsLength(const SliceParts& key,
+  static rocksdb_rs::status::Status CheckSlicePartsLength(const SliceParts& key,
                                       const SliceParts& value);
 
   // Inserts batches[i] into memtable, for i in 0..num_batches-1 inclusive.
@@ -174,7 +174,7 @@ class WriteBatchInternal {
   //
   // Under concurrent use, the caller is responsible for making sure that
   // the memtables object itself is thread-local.
-  static Status InsertInto(
+  static rocksdb_rs::status::Status InsertInto(
       WriteThread::WriteGroup& write_group, SequenceNumber sequence,
       ColumnFamilyMemTables* memtables, FlushScheduler* flush_scheduler,
       TrimHistoryScheduler* trim_history_scheduler,
@@ -184,7 +184,7 @@ class WriteBatchInternal {
 
   // Convenience form of InsertInto when you have only one batch
   // next_seq returns the seq after last sequence number used in MemTable insert
-  static Status InsertInto(
+  static rocksdb_rs::status::Status InsertInto(
       const WriteBatch* batch, ColumnFamilyMemTables* memtables,
       FlushScheduler* flush_scheduler,
       TrimHistoryScheduler* trim_history_scheduler,
@@ -193,7 +193,7 @@ class WriteBatchInternal {
       SequenceNumber* next_seq = nullptr, bool* has_valid_writes = nullptr,
       bool seq_per_batch = false, bool batch_per_txn = true);
 
-  static Status InsertInto(WriteThread::Writer* writer, SequenceNumber sequence,
+  static rocksdb_rs::status::Status InsertInto(WriteThread::Writer* writer, SequenceNumber sequence,
                            ColumnFamilyMemTables* memtables,
                            FlushScheduler* flush_scheduler,
                            TrimHistoryScheduler* trim_history_scheduler,
@@ -208,7 +208,7 @@ class WriteBatchInternal {
   // write batch. Returns OK if the append is successful. Checks number of
   // checksum against count in dst and src write batches, and returns Corruption
   // if the count is inconsistent.
-  static Status Append(WriteBatch* dst, const WriteBatch* src,
+  static rocksdb_rs::status::Status Append(WriteBatch* dst, const WriteBatch* src,
                        const bool WAL_only = false);
 
   // Returns the byte size of appending a WriteBatch with ByteSize
@@ -216,7 +216,7 @@ class WriteBatchInternal {
   static size_t AppendedByteSize(size_t leftByteSize, size_t rightByteSize);
 
   // Iterate over [begin, end) range of a write batch
-  static Status Iterate(const WriteBatch* wb, WriteBatch::Handler* handler,
+  static rocksdb_rs::status::Status Iterate(const WriteBatch* wb, WriteBatch::Handler* handler,
                         size_t begin, size_t end);
 
   // This write batch includes the latest state that should be persisted. Such
@@ -224,7 +224,7 @@ class WriteBatchInternal {
   static void SetAsLatestPersistentState(WriteBatch* b);
   static bool IsLatestPersistentState(const WriteBatch* b);
 
-  static std::tuple<Status, uint32_t, size_t> GetColumnFamilyIdAndTimestampSize(
+  static std::tuple<rocksdb_rs::status::Status, uint32_t, size_t> GetColumnFamilyIdAndTimestampSize(
       WriteBatch* b, ColumnFamilyHandle* column_family);
 
   static bool TimestampsUpdateNeeded(const WriteBatch& wb) {
@@ -237,7 +237,7 @@ class WriteBatchInternal {
 
   // Update per-key value protection information on this write batch.
   // If checksum is provided, the batch content is verfied against the checksum.
-  static Status UpdateProtectionInfo(WriteBatch* wb, size_t bytes_per_key,
+  static rocksdb_rs::status::Status UpdateProtectionInfo(WriteBatch* wb, size_t bytes_per_key,
                                      uint64_t* checksum = nullptr);
 };
 
@@ -258,7 +258,7 @@ class LocalSavePoint {
 #ifndef NDEBUG
   ~LocalSavePoint() { assert(committed_); }
 #endif
-  Status commit() {
+  rocksdb_rs::status::Status commit() {
 #ifndef NDEBUG
     committed_ = true;
 #endif
@@ -296,58 +296,58 @@ class TimestampUpdater : public WriteBatch::Handler {
 
   ~TimestampUpdater() override {}
 
-  Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
     return UpdateTimestamp(cf, key);
   }
 
-  Status DeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
     return UpdateTimestamp(cf, key);
   }
 
-  Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
     return UpdateTimestamp(cf, key);
   }
 
-  Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
                        const Slice& end_key) override {
-    Status s = UpdateTimestamp(cf, begin_key, true /* is_key */);
+    rocksdb_rs::status::Status s = UpdateTimestamp(cf, begin_key, true /* is_key */);
     if (s.ok()) {
       s = UpdateTimestamp(cf, end_key, false /* is_key */);
     }
     return s;
   }
 
-  Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
     return UpdateTimestamp(cf, key);
   }
 
-  Status PutBlobIndexCF(uint32_t cf, const Slice& key, const Slice&) override {
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t cf, const Slice& key, const Slice&) override {
     return UpdateTimestamp(cf, key);
   }
 
-  Status MarkBeginPrepare(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
 
-  Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
 
-  Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
 
-  Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
     return Status_OK();
   }
 
-  Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
 
-  Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
 
  private:
   // @param is_key specifies whether the update is for key or value.
-  Status UpdateTimestamp(uint32_t cf, const Slice& buf, bool is_key = true) {
-    Status s = UpdateTimestampImpl(cf, buf, idx_, is_key);
+  rocksdb_rs::status::Status UpdateTimestamp(uint32_t cf, const Slice& buf, bool is_key = true) {
+    rocksdb_rs::status::Status s = UpdateTimestampImpl(cf, buf, idx_, is_key);
     ++idx_;
     return s;
   }
 
-  Status UpdateTimestampImpl(uint32_t cf, const Slice& buf, size_t /*idx*/,
+  rocksdb_rs::status::Status UpdateTimestampImpl(uint32_t cf, const Slice& buf, size_t /*idx*/,
                              bool is_key) {
     if (timestamp_.empty()) {
       return Status_InvalidArgument("Timestamp is empty");

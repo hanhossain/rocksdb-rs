@@ -31,7 +31,7 @@ class FaultInjectionSecondaryCache : public SecondaryCache {
 
   const char* Name() const override { return "FaultInjectionSecondaryCache"; }
 
-  Status Insert(const Slice& key, Cache::ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const Cache::CacheItemHelper* helper) override;
 
   std::unique_ptr<SecondaryCacheResultHandle> Lookup(
@@ -45,11 +45,11 @@ class FaultInjectionSecondaryCache : public SecondaryCache {
 
   void WaitAll(std::vector<SecondaryCacheResultHandle*> handles) override;
 
-  Status SetCapacity(size_t capacity) override {
+  rocksdb_rs::status::Status SetCapacity(size_t capacity) override {
     return base_->SetCapacity(capacity);
   }
 
-  Status GetCapacity(size_t& capacity) override {
+  rocksdb_rs::status::Status GetCapacity(size_t& capacity) override {
     return base_->GetCapacity(capacity);
   }
 

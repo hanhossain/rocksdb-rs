@@ -205,7 +205,7 @@ BlockCacheTraceSimulator::BlockCacheTraceSimulator(
       downsample_ratio_(downsample_ratio),
       cache_configurations_(cache_configurations) {}
 
-Status BlockCacheTraceSimulator::InitializeCaches() {
+rocksdb_rs::status::Status BlockCacheTraceSimulator::InitializeCaches() {
   for (auto const& config : cache_configurations_) {
     for (auto cache_capacity : config.cache_capacities) {
       // Scale down the cache capacity since the trace contains accesses on

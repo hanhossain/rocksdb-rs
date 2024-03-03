@@ -56,7 +56,7 @@ TEST_P(TimestampedSnapshotWithTsSanityCheck, WithoutCommitTs) {
   ASSERT_OK(txn->SetName("txn0"));
   ASSERT_OK(txn->Put("a", "v"));
   ASSERT_OK(txn->Prepare());
-  Status s = txn->CommitAndTryCreateSnapshot();
+  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot();
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(txn->Rollback());
 
@@ -76,7 +76,7 @@ TEST_P(TimestampedSnapshotWithTsSanityCheck, SetCommitTs) {
   ASSERT_OK(txn->Put("a", "v"));
   ASSERT_OK(txn->Prepare());
   std::shared_ptr<const Snapshot> snapshot;
-  Status s = txn->CommitAndTryCreateSnapshot(nullptr, 10, &snapshot);
+  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot(nullptr, 10, &snapshot);
   ASSERT_TRUE(s.IsNotSupported());
   ASSERT_OK(txn->Rollback());
 
@@ -95,7 +95,7 @@ TEST_P(TransactionTest, WithoutCommitTs) {
   ASSERT_OK(txn->SetName("txn0"));
   ASSERT_OK(txn->Put("a", "v"));
   ASSERT_OK(txn->Prepare());
-  Status s = txn->CommitAndTryCreateSnapshot();
+  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot();
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(txn->Rollback());
 
@@ -116,7 +116,7 @@ TEST_P(TransactionTest, ReuseExistingTxn) {
 
   auto notifier = std::make_shared<TsCheckingTxnNotifier>();
   std::shared_ptr<const Snapshot> snapshot1;
-  Status s =
+  rocksdb_rs::status::Status s =
       txn->CommitAndTryCreateSnapshot(notifier, /*commit_ts=*/100, &snapshot1);
   ASSERT_OK(s);
   ASSERT_EQ(100, snapshot1->GetTimestamp());
@@ -174,7 +174,7 @@ TEST_P(TransactionTest, CreateSnapshotWhenCommit) {
   std::shared_ptr<const Snapshot> snapshot;
   constexpr TxnTimestamp timestamp = 1;
   auto notifier = std::make_shared<TsCheckingTxnNotifier>();
-  Status s = txn->CommitAndTryCreateSnapshot(notifier, timestamp, &snapshot);
+  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot(notifier, timestamp, &snapshot);
   ASSERT_OK(s);
   ASSERT_LT(notifier->prev_snapshot_ts(), kMaxTxnTimestamp);
   assert(snapshot);
@@ -217,7 +217,7 @@ TEST_P(TransactionTest, CreateSnapshot) {
     ASSERT_EQ(nullptr, snapshot.get());
   }
   constexpr TxnTimestamp timestamp = 100;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::shared_ptr<const Snapshot> ts_snap0;
   std::tie(s, ts_snap0) = db->CreateTimestampedSnapshot(timestamp);
   ASSERT_OK(s);
@@ -257,7 +257,7 @@ TEST_P(TransactionTest, CreateSnapshot) {
 }
 
 TEST_P(TransactionTest, SequenceAndTsOrder) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::shared_ptr<const Snapshot> snapshot;
   std::tie(s, snapshot) = db->CreateTimestampedSnapshot(100);
   ASSERT_OK(s);
@@ -380,7 +380,7 @@ TEST_P(TransactionTest, MultipleTimestampedSnapshots) {
     ASSERT_EQ(snapshots[i], snapshot);
 
     std::vector<std::shared_ptr<const Snapshot> > tmp_snapshots;
-    Status s = db->GetTimestampedSnapshots(max_ts, start_ts + i * ts_delta,
+    rocksdb_rs::status::Status s = db->GetTimestampedSnapshots(max_ts, start_ts + i * ts_delta,
                                            tmp_snapshots);
     ASSERT_TRUE(s.IsInvalidArgument());
     ASSERT_TRUE(tmp_snapshots.empty());
@@ -402,7 +402,7 @@ TEST_P(TransactionTest, MultipleTimestampedSnapshots) {
 
   {
     std::vector<std::shared_ptr<const Snapshot> > tmp_snapshots;
-    const Status s = db->GetAllTimestampedSnapshots(tmp_snapshots);
+    const rocksdb_rs::status::Status s = db->GetAllTimestampedSnapshots(tmp_snapshots);
     ASSERT_OK(s);
     ASSERT_EQ(snapshots, tmp_snapshots);
 
@@ -430,7 +430,7 @@ TEST_P(TransactionTest, MultipleTimestampedSnapshots) {
     }
 
     std::vector<std::shared_ptr<const Snapshot> > tmp_snapshots;
-    const Status s = db->GetAllTimestampedSnapshots(tmp_snapshots);
+    const rocksdb_rs::status::Status s = db->GetAllTimestampedSnapshots(tmp_snapshots);
     ASSERT_OK(s);
     ASSERT_EQ(snapshots1, tmp_snapshots);
   }

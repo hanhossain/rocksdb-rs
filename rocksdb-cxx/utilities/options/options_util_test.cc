@@ -157,7 +157,7 @@ class DummyTableFactory : public TableFactory {
   const char* Name() const override { return "DummyTableFactory"; }
 
   using TableFactory::NewTableReader;
-  Status NewTableReader(
+  rocksdb_rs::status::Status NewTableReader(
       const ReadOptions& /*ro*/,
       const TableReaderOptions& /*table_reader_options*/,
       std::unique_ptr<RandomAccessFileReader>&& /*file*/,
@@ -172,7 +172,7 @@ class DummyTableFactory : public TableFactory {
     return nullptr;
   }
 
-  Status ValidateOptions(
+  rocksdb_rs::status::Status ValidateOptions(
       const DBOptions& /*db_opts*/,
       const ColumnFamilyOptions& /*cf_opts*/) const override {
     return Status_NotSupported();
@@ -370,7 +370,7 @@ TEST_F(OptionsUtilTest, SanityCheck) {
 
 TEST_F(OptionsUtilTest, LatestOptionsNotFound) {
   std::unique_ptr<Env> env(NewMemEnv(Env::Default()));
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   Options options;
   ConfigOptions config_opts;
   std::vector<ColumnFamilyDescriptor> cf_descs;
@@ -528,7 +528,7 @@ static void WriteOptionsFile(Env* env, const std::string& path,
 }
 
 TEST_F(OptionsUtilTest, BadLatestOptions) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   ConfigOptions config_opts;
   DBOptions db_opts;
   std::vector<ColumnFamilyDescriptor> cf_descs;

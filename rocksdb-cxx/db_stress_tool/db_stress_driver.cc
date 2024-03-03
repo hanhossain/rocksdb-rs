@@ -60,7 +60,7 @@ bool RunStressTestImpl(SharedState* shared) {
   StressTest* stress = shared->GetStressTest();
 
   if (shared->ShouldVerifyAtBeginning() && FLAGS_preserve_unverified_changes) {
-    Status s = InitUnverifiedSubdir(FLAGS_db);
+    rocksdb_rs::status::Status s = InitUnverifiedSubdir(FLAGS_db);
     if (s.ok() && !FLAGS_expected_values_dir.empty()) {
       s = InitUnverifiedSubdir(FLAGS_expected_values_dir);
     }
@@ -127,7 +127,7 @@ bool RunStressTestImpl(SharedState* shared) {
         fprintf(stderr, "Crash-recovery verification failed :(\n");
       } else {
         fprintf(stdout, "Crash-recovery verification passed :)\n");
-        Status s = DestroyUnverifiedSubdir(FLAGS_db);
+        rocksdb_rs::status::Status s = DestroyUnverifiedSubdir(FLAGS_db);
         if (s.ok() && !FLAGS_expected_values_dir.empty()) {
           s = DestroyUnverifiedSubdir(FLAGS_expected_values_dir);
         }

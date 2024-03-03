@@ -73,7 +73,7 @@ std::unique_ptr<PersistentTieredCache> NewTieredCache(
   auto scache = std::shared_ptr<PersistentCacheTier>(new BlockCacheTier(opt));
   tcache->AddTier(scache);
 
-  Status s = tcache->Open();
+  rocksdb_rs::status::Status s = tcache->Open();
   assert(s.ok());
   return tcache;
 }
@@ -91,7 +91,7 @@ std::unique_ptr<PersistentCacheTier> NewBlockCache(
   opt.max_write_pipeline_backlog_size = std::numeric_limits<uint64_t>::max();
   opt.enable_direct_writes = enable_direct_writes;
   std::unique_ptr<PersistentCacheTier> scache(new BlockCacheTier(opt));
-  Status s = scache->Open();
+  rocksdb_rs::status::Status s = scache->Open();
   assert(s.ok());
   return scache;
 }

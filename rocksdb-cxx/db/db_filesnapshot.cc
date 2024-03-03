@@ -28,19 +28,19 @@
 
 namespace rocksdb {
 
-Status DBImpl::FlushForGetLiveFiles() {
+rocksdb_rs::status::Status DBImpl::FlushForGetLiveFiles() {
   return DBImpl::FlushAllColumnFamilies(FlushOptions(),
                                         FlushReason::kGetLiveFiles);
 }
 
-Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
+rocksdb_rs::status::Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
                             uint64_t* manifest_file_size, bool flush_memtable) {
   *manifest_file_size = 0;
 
   mutex_.Lock();
 
   if (flush_memtable) {
-    Status status = FlushForGetLiveFiles();
+    rocksdb_rs::status::Status status = FlushForGetLiveFiles();
     if (!status.ok()) {
       mutex_.Unlock();
       ROCKS_LOG_ERROR(immutable_db_options_.info_log, "Cannot Flush data %s\n",
@@ -91,7 +91,7 @@ Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
   return Status_OK();
 }
 
-Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
+rocksdb_rs::status::Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
   // Record tracked WALs as a (minimum) cross-check for directory scan
   std::vector<uint64_t> required_by_manifest;
 
@@ -102,7 +102,7 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
   // long as deletions are disabled (so the below loop must terminate).
   // Also note that we disable deletions anyway to avoid the case where a
   // file is deleted in the middle of the scan, causing IO error.
-  Status deletions_disabled = DisableFileDeletions();
+  rocksdb_rs::status::Status deletions_disabled = DisableFileDeletions();
   {
     InstrumentedMutexLock l(&mutex_);
     while (pending_purge_obsolete_files_ > 0 || bg_purge_scheduled_ > 0) {
@@ -117,11 +117,11 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
     }
   }
 
-  Status s = wal_manager_.GetSortedWalFiles(files);
+  rocksdb_rs::status::Status s = wal_manager_.GetSortedWalFiles(files);
 
   // DisableFileDeletions / EnableFileDeletions not supported in read-only DB
   if (deletions_disabled.ok()) {
-    Status s2 = EnableFileDeletions(/*force*/ false);
+    rocksdb_rs::status::Status s2 = EnableFileDeletions(/*force*/ false);
     assert(s2.ok());
   } else {
     assert(deletions_disabled.IsNotSupported());
@@ -153,7 +153,7 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
   return s;
 }
 
-Status DBImpl::GetCurrentWalFile(std::unique_ptr<LogFile>* current_log_file) {
+rocksdb_rs::status::Status DBImpl::GetCurrentWalFile(std::unique_ptr<LogFile>* current_log_file) {
   uint64_t current_logfile_number;
   {
     InstrumentedMutexLock l(&mutex_);
@@ -163,7 +163,7 @@ Status DBImpl::GetCurrentWalFile(std::unique_ptr<LogFile>* current_log_file) {
   return wal_manager_.GetLiveWalFile(current_logfile_number, current_log_file);
 }
 
-Status DBImpl::GetLiveFilesStorageInfo(
+rocksdb_rs::status::Status DBImpl::GetLiveFilesStorageInfo(
     const LiveFilesStorageInfoOptions& opts,
     std::vector<LiveFileStorageInfo>* files) {
   // To avoid returning partial results, only move results to files on success.
@@ -173,7 +173,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
   // NOTE: This implementation was largely migrated from Checkpoint.
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   VectorLogPtr live_wal_files;
   bool flush_memtable = true;
   if (!immutable_db_options_.allow_2pc) {
@@ -205,7 +205,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
   // metadata.
   mutex_.Lock();
   if (flush_memtable) {
-    Status status = FlushForGetLiveFiles();
+    rocksdb_rs::status::Status status = FlushForGetLiveFiles();
     if (!status.ok()) {
       mutex_.Unlock();
       ROCKS_LOG_ERROR(immutable_db_options_.info_log, "Cannot Flush data %s\n",

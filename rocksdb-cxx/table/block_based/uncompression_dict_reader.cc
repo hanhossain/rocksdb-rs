@@ -13,7 +13,7 @@
 
 namespace rocksdb {
 
-Status UncompressionDictReader::Create(
+rocksdb_rs::status::Status UncompressionDictReader::Create(
     const BlockBasedTable* table, const ReadOptions& ro,
     FilePrefetchBuffer* prefetch_buffer, bool use_cache, bool prefetch,
     bool pin, BlockCacheLookupContext* lookup_context,
@@ -25,7 +25,7 @@ Status UncompressionDictReader::Create(
 
   CachableEntry<UncompressionDict> uncompression_dict;
   if (prefetch || !use_cache) {
-    const Status s = ReadUncompressionDictionary(
+    const rocksdb_rs::status::Status s = ReadUncompressionDictionary(
         table, prefetch_buffer, ro, use_cache, nullptr /* get_context */,
         lookup_context, &uncompression_dict);
     if (!s.ok()) {
@@ -43,7 +43,7 @@ Status UncompressionDictReader::Create(
   return Status_OK();
 }
 
-Status UncompressionDictReader::ReadUncompressionDictionary(
+rocksdb_rs::status::Status UncompressionDictReader::ReadUncompressionDictionary(
     const BlockBasedTable* table, FilePrefetchBuffer* prefetch_buffer,
     const ReadOptions& read_options, bool use_cache, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,
@@ -58,7 +58,7 @@ Status UncompressionDictReader::ReadUncompressionDictionary(
   assert(rep);
   assert(!rep->compression_dict_handle.IsNull());
 
-  const Status s = table->RetrieveBlock(
+  const rocksdb_rs::status::Status s = table->RetrieveBlock(
       prefetch_buffer, read_options, rep->compression_dict_handle,
       UncompressionDict::GetEmptyDict(), uncompression_dict, get_context,
       lookup_context,
@@ -76,7 +76,7 @@ Status UncompressionDictReader::ReadUncompressionDictionary(
   return s.Clone();
 }
 
-Status UncompressionDictReader::GetOrReadUncompressionDictionary(
+rocksdb_rs::status::Status UncompressionDictReader::GetOrReadUncompressionDictionary(
     FilePrefetchBuffer* prefetch_buffer, const ReadOptions& ro, bool no_io,
     bool verify_checksums, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,

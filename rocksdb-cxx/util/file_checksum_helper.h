@@ -73,18 +73,18 @@ class FileChecksumListImpl : public FileChecksumList {
 
   size_t size() const override;
 
-  Status GetAllFileChecksums(
+  rocksdb_rs::status::Status GetAllFileChecksums(
       std::vector<uint64_t>* file_numbers, std::vector<std::string>* checksums,
       std::vector<std::string>* checksum_func_names) override;
 
-  Status SearchOneFileChecksum(uint64_t file_number, std::string* checksum,
+  rocksdb_rs::status::Status SearchOneFileChecksum(uint64_t file_number, std::string* checksum,
                                std::string* checksum_func_name) override;
 
-  Status InsertOneFileChecksum(uint64_t file_number,
+  rocksdb_rs::status::Status InsertOneFileChecksum(uint64_t file_number,
                                const std::string& checksum,
                                const std::string& checksum_func_name) override;
 
-  Status RemoveOneFileChecksum(uint64_t file_number) override;
+  rocksdb_rs::status::Status RemoveOneFileChecksum(uint64_t file_number) override;
 
  private:
   // Key is the file number, the first portion of the value is checksum, the
@@ -95,7 +95,7 @@ class FileChecksumListImpl : public FileChecksumList {
 
 // If manifest_file_size < std::numeric_limits<uint64_t>::max(), only use
 // that length prefix of the manifest file.
-Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
+rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
                                     uint64_t manifest_file_size,
                                     FileChecksumList* checksum_list);
 

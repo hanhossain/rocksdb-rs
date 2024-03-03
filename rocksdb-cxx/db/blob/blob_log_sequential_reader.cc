@@ -22,14 +22,14 @@ BlobLogSequentialReader::BlobLogSequentialReader(
 
 BlobLogSequentialReader::~BlobLogSequentialReader() = default;
 
-Status BlobLogSequentialReader::ReadSlice(uint64_t size, Slice* slice,
+rocksdb_rs::status::Status BlobLogSequentialReader::ReadSlice(uint64_t size, Slice* slice,
                                           char* buf) {
   assert(slice);
   assert(file_);
 
   StopWatch read_sw(clock_, statistics_, BLOB_DB_BLOB_FILE_READ_MICROS);
   // TODO: rate limit `BlobLogSequentialReader` reads (it appears unused?)
-  Status s =
+  rocksdb_rs::status::Status s =
       file_->Read(IOOptions(), next_byte_, static_cast<size_t>(size), slice,
                   buf, nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
   next_byte_ += size;
@@ -43,14 +43,14 @@ Status BlobLogSequentialReader::ReadSlice(uint64_t size, Slice* slice,
   return s;
 }
 
-Status BlobLogSequentialReader::ReadHeader(BlobLogHeader* header) {
+rocksdb_rs::status::Status BlobLogSequentialReader::ReadHeader(BlobLogHeader* header) {
   assert(header);
   assert(next_byte_ == 0);
 
   static_assert(BlobLogHeader::kSize <= sizeof(header_buf_),
                 "Buffer is smaller than BlobLogHeader::kSize");
 
-  Status s = ReadSlice(BlobLogHeader::kSize, &buffer_, header_buf_);
+  rocksdb_rs::status::Status s = ReadSlice(BlobLogHeader::kSize, &buffer_, header_buf_);
   if (!s.ok()) {
     return s;
   }
@@ -62,14 +62,14 @@ Status BlobLogSequentialReader::ReadHeader(BlobLogHeader* header) {
   return header->DecodeFrom(buffer_);
 }
 
-Status BlobLogSequentialReader::ReadRecord(BlobLogRecord* record,
+rocksdb_rs::status::Status BlobLogSequentialReader::ReadRecord(BlobLogRecord* record,
                                            ReadLevel level,
                                            uint64_t* blob_offset) {
   assert(record);
   static_assert(BlobLogRecord::kHeaderSize <= sizeof(header_buf_),
                 "Buffer is smaller than BlobLogRecord::kHeaderSize");
 
-  Status s = ReadSlice(BlobLogRecord::kHeaderSize, &buffer_, header_buf_);
+  rocksdb_rs::status::Status s = ReadSlice(BlobLogRecord::kHeaderSize, &buffer_, header_buf_);
   if (!s.ok()) {
     return s;
   }
@@ -114,12 +114,12 @@ Status BlobLogSequentialReader::ReadRecord(BlobLogRecord* record,
   return s;
 }
 
-Status BlobLogSequentialReader::ReadFooter(BlobLogFooter* footer) {
+rocksdb_rs::status::Status BlobLogSequentialReader::ReadFooter(BlobLogFooter* footer) {
   assert(footer);
   static_assert(BlobLogFooter::kSize <= sizeof(header_buf_),
                 "Buffer is smaller than BlobLogFooter::kSize");
 
-  Status s = ReadSlice(BlobLogFooter::kSize, &buffer_, header_buf_);
+  rocksdb_rs::status::Status s = ReadSlice(BlobLogFooter::kSize, &buffer_, header_buf_);
   if (!s.ok()) {
     return s;
   }

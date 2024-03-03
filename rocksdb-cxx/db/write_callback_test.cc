@@ -37,7 +37,7 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
  public:
   bool was_called = false;
 
-  Status Callback(DB* db) override {
+  rocksdb_rs::status::Status Callback(DB* db) override {
     was_called = true;
 
     // Make sure db is a DBImpl
@@ -54,7 +54,7 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
 
 class WriteCallbackTestWriteCallback2 : public WriteCallback {
  public:
-  Status Callback(DB* /*db*/) override { return Status_Busy(); }
+  rocksdb_rs::status::Status Callback(DB* /*db*/) override { return Status_Busy(); }
   bool AllowWriteBatching() override { return true; }
 };
 
@@ -72,7 +72,7 @@ class MockWriteCallback : public WriteCallback {
     was_called_.store(other.was_called_.load());
   }
 
-  Status Callback(DB* /*db*/) override {
+  rocksdb_rs::status::Status Callback(DB* /*db*/) override {
     was_called_.store(true);
     if (should_fail_) {
       return Status_Busy();
@@ -311,12 +311,12 @@ TEST_P(WriteCallbackPTest, WriteWithCallbackTest) {
         ASSERT_OK(WriteBatchInternal::UpdateProtectionInfo(
             &write_op.write_batch_, woptions.protection_bytes_per_key));
       }
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       if (seq_per_batch_) {
         class PublishSeqCallback : public PreReleaseCallback {
          public:
           PublishSeqCallback(DBImpl* db_impl_in) : db_impl_(db_impl_in) {}
-          Status Callback(SequenceNumber last_seq, bool /*not used*/, uint64_t,
+          rocksdb_rs::status::Status Callback(SequenceNumber last_seq, bool /*not used*/, uint64_t,
                           size_t /*index*/, size_t /*total*/) override {
             db_impl_->SetLastPublishedSequence(last_seq);
             return Status_OK();
@@ -394,7 +394,7 @@ TEST_F(WriteCallbackTest, WriteCallBackTest) {
   ASSERT_OK(DestroyDB(dbname, options));
 
   options.create_if_missing = true;
-  Status s = DB::Open(options, dbname, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, dbname, &db);
   ASSERT_OK(s);
 
   db_impl = dynamic_cast<DBImpl*>(db);

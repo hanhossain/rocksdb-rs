@@ -143,7 +143,7 @@ TEST_P(WriteCommittedTxnWithTsTest, ReOpenWithTimestamp) {
 
   {
     std::string value;
-    const Status s =
+    const rocksdb_rs::status::Status s =
         GetFromDb(ReadOptions(), handles_[1], "foo", /*ts=*/23, &value);
     ASSERT_OK(s);
     ASSERT_EQ("value1", value);
@@ -151,7 +151,7 @@ TEST_P(WriteCommittedTxnWithTsTest, ReOpenWithTimestamp) {
 
   {
     std::string value;
-    const Status s = db->Get(ReadOptions(), handles_[0], "id", &value);
+    const rocksdb_rs::status::Status s = db->Get(ReadOptions(), handles_[0], "id", &value);
     ASSERT_OK(s);
     uint64_t ival = 0;
     Slice value_slc = value;
@@ -212,7 +212,7 @@ TEST_P(WriteCommittedTxnWithTsTest, RecoverFromWal) {
 
   {
     std::string value;
-    Status s = GetFromDb(ReadOptions(), handles_[1], "foo", /*ts=*/23, &value);
+    rocksdb_rs::status::Status s = GetFromDb(ReadOptions(), handles_[1], "foo", /*ts=*/23, &value);
     ASSERT_TRUE(s.IsNotFound());
 
     s = db->Get(ReadOptions(), handles_[0], "bar", &value);
@@ -344,7 +344,7 @@ TEST_P(WriteCommittedTxnWithTsTest, Merge) {
   txn.reset();
   {
     std::string value;
-    const Status s =
+    const rocksdb_rs::status::Status s =
         GetFromDb(ReadOptions(), handles_[1], "foo", /*ts=*/24, &value);
     ASSERT_OK(s);
     ASSERT_EQ("bar,1", value);

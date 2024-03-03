@@ -37,7 +37,7 @@ Transaction* OptimisticTransactionDBImpl::BeginTransaction(
   }
 }
 
-Status OptimisticTransactionDB::Open(const Options& options,
+rocksdb_rs::status::Status OptimisticTransactionDB::Open(const Options& options,
                                      const std::string& dbname,
                                      OptimisticTransactionDB** dbptr) {
   DBOptions db_options(options);
@@ -46,7 +46,7 @@ Status OptimisticTransactionDB::Open(const Options& options,
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
-  Status s = Open(db_options, dbname, column_families, &handles, dbptr);
+  rocksdb_rs::status::Status s = Open(db_options, dbname, column_families, &handles, dbptr);
   if (s.ok()) {
     assert(handles.size() == 1);
     // i can delete the handle since DBImpl is always holding a reference to
@@ -57,7 +57,7 @@ Status OptimisticTransactionDB::Open(const Options& options,
   return s;
 }
 
-Status OptimisticTransactionDB::Open(
+rocksdb_rs::status::Status OptimisticTransactionDB::Open(
     const DBOptions& db_options, const std::string& dbname,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles,
@@ -67,14 +67,14 @@ Status OptimisticTransactionDB::Open(
                                        column_families, handles, dbptr);
 }
 
-Status OptimisticTransactionDB::Open(
+rocksdb_rs::status::Status OptimisticTransactionDB::Open(
     const DBOptions& db_options,
     const OptimisticTransactionDBOptions& occ_options,
     const std::string& dbname,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles,
     OptimisticTransactionDB** dbptr) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   DB* db;
 
   std::vector<ColumnFamilyDescriptor> column_families_copy = column_families;

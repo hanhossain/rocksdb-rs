@@ -92,7 +92,7 @@ class NonBatchedOpsStressTest : public StressTest {
             prefix = Slice(seek_key.data(), prefix_to_use);
           }
 
-          Status s = iter->status();
+          rocksdb_rs::status::Status s = iter->status();
 
           std::string from_db;
 
@@ -138,7 +138,7 @@ class NonBatchedOpsStressTest : public StressTest {
           const std::string key = Key(i);
           std::string from_db;
 
-          Status s = db_->Get(options, column_families_[cf], key, &from_db);
+          rocksdb_rs::status::Status s = db_->Get(options, column_families_[cf], key, &from_db);
 
           VerifyOrSyncValue(static_cast<int>(cf), i, options, shared, from_db,
                             /* msg_prefix */ "Get verification", s);
@@ -157,7 +157,7 @@ class NonBatchedOpsStressTest : public StressTest {
           const std::string key = Key(i);
           PinnableWideColumns result;
 
-          Status s =
+          rocksdb_rs::status::Status s =
               db_->GetEntity(options, column_families_[cf], key, &result);
 
           std::string from_db;
@@ -197,7 +197,7 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableSlice> values(batch_size);
-          rust::Vec<Status> statuses = Status_new().create_vec(batch_size);
+          rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(batch_size);
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -235,7 +235,7 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableWideColumns> results(batch_size);
-          rust::Vec<Status> statuses = Status_new().create_vec(batch_size);
+          rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(batch_size);
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -294,7 +294,7 @@ class NonBatchedOpsStressTest : public StressTest {
           std::string from_db;
           int number_of_operands = 0;
 
-          Status s = db_->GetMergeOperands(options, column_families_[cf], k,
+          rocksdb_rs::status::Status s = db_->GetMergeOperands(options, column_families_[cf], k,
                                            values.data(), &merge_operands_info,
                                            &number_of_operands);
 
@@ -334,14 +334,14 @@ class NonBatchedOpsStressTest : public StressTest {
     }
     assert(cmp_db_);
     assert(!cmp_cfhs_.empty());
-    Status s = cmp_db_->TryCatchUpWithPrimary();
+    rocksdb_rs::status::Status s = cmp_db_->TryCatchUpWithPrimary();
     if (!s.ok()) {
       assert(false);
       exit(1);
     }
 
     const auto checksum_column_family = [](Iterator* iter,
-                                           uint32_t* checksum) -> Status {
+                                           uint32_t* checksum) -> rocksdb_rs::status::Status {
       assert(nullptr != checksum);
       uint32_t ret = 0;
       for (iter->SeekToFirst(); iter->Valid(); iter->Next()) {
@@ -436,7 +436,7 @@ class NonBatchedOpsStressTest : public StressTest {
               cf, new_name.c_str());
         }
         thread->shared->LockColumnFamily(cf);
-        Status s = db_->DropColumnFamily(column_families_[cf]);
+        rocksdb_rs::status::Status s = db_->DropColumnFamily(column_families_[cf]);
         delete column_families_[cf];
         if (!s.ok()) {
           fprintf(stderr, "dropping column family error: %s\n",
@@ -461,7 +461,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
   bool IsStateTracked() const override { return true; }
 
-  Status TestGet(ThreadState* thread, const ReadOptions& read_opts,
+  rocksdb_rs::status::Status TestGet(ThreadState* thread, const ReadOptions& read_opts,
                  const std::vector<int>& rand_column_families,
                  const std::vector<int64_t>& rand_keys) override {
     auto cfh = column_families_[rand_column_families[0]];
@@ -488,7 +488,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     const ExpectedValue pre_read_expected_value =
         thread->shared->Get(rand_column_families[0], rand_keys[0]);
-    Status s = db_->Get(read_opts_copy, cfh, key, &from_db);
+    rocksdb_rs::status::Status s = db_->Get(read_opts_copy, cfh, key, &from_db);
     const ExpectedValue post_read_expected_value =
         thread->shared->Get(rand_column_families[0], rand_keys[0]);
     if (fault_fs_guard) {
@@ -559,7 +559,7 @@ class NonBatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  rust::Vec<Status> TestMultiGet(
+  rust::Vec<rocksdb_rs::status::Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& read_opts,
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
@@ -569,7 +569,7 @@ class NonBatchedOpsStressTest : public StressTest {
     key_str.reserve(num_keys);
     keys.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(num_keys);
     // When Flags_use_txn is enabled, we also do a read your write check.
     std::vector<std::optional<ExpectedValue>> ryw_expected_values;
     ryw_expected_values.reserve(num_keys);
@@ -608,7 +608,7 @@ class NonBatchedOpsStressTest : public StressTest {
       if (FLAGS_rate_limit_auto_wal_flush) {
         wo.rate_limiter_priority = Env::IO_USER;
       }
-      Status s = NewTxn(wo, &txn);
+      rocksdb_rs::status::Status s = NewTxn(wo, &txn);
       if (!s.ok()) {
         fprintf(stderr, "NewTxn: %s\n", s.ToString()->c_str());
         std::terminate();
@@ -630,7 +630,7 @@ class NonBatchedOpsStressTest : public StressTest {
         // keys and exercise some corner cases in the code
         if (thread->rand.OneIn(10)) {
           int op = thread->rand.Uniform(2);
-          Status s = Status_new();
+          rocksdb_rs::status::Status s = Status_new();
           assert(txn);
           switch (op) {
             case 0:
@@ -710,7 +710,7 @@ class NonBatchedOpsStressTest : public StressTest {
     }
 
     auto ryw_check =
-        [](const Slice& key, const PinnableSlice& value, const Status& s,
+        [](const Slice& key, const PinnableSlice& value, const rocksdb_rs::status::Status& s,
            const std::optional<ExpectedValue>& ryw_expected_value) -> bool {
       if (!ryw_expected_value.has_value()) {
         return true;
@@ -761,7 +761,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     auto check_multiget =
         [&](const Slice& key, const PinnableSlice& expected_value,
-            const Status& s,
+            const rocksdb_rs::status::Status& s,
             const std::optional<ExpectedValue>& ryw_expected_value) -> bool {
       bool is_consistent = true;
       bool is_ryw_correct = true;
@@ -772,7 +772,7 @@ class NonBatchedOpsStressTest : public StressTest {
       // If test use transaction, after consistency check, also do a read your
       // own write check.
       if (do_consistency_check && !error_count && (s.ok() || s.IsNotFound())) {
-        Status tmp_s = Status_new();
+        rocksdb_rs::status::Status tmp_s = Status_new();
         std::string value;
 
         if (use_txn) {
@@ -899,7 +899,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     PinnableWideColumns from_db;
 
-    const Status s = db_->GetEntity(read_opts, cfh, key, &from_db);
+    const rocksdb_rs::status::Status s = db_->GetEntity(read_opts, cfh, key, &from_db);
 
     int error_count = 0;
 
@@ -999,7 +999,7 @@ class NonBatchedOpsStressTest : public StressTest {
     }
 
     std::vector<PinnableWideColumns> results(num_keys);
-    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(num_keys);
 
     if (fault_fs_guard) {
       fault_fs_guard->EnableErrorInjection();
@@ -1043,7 +1043,7 @@ class NonBatchedOpsStressTest : public StressTest {
     const bool check_get_entity = !error_count && thread->rand.OneIn(4);
 
     for (size_t i = 0; i < num_keys; ++i) {
-      const Status& s = statuses[i];
+      const rocksdb_rs::status::Status& s = statuses[i];
 
       bool is_consistent = true;
 
@@ -1058,7 +1058,7 @@ class NonBatchedOpsStressTest : public StressTest {
       } else if (check_get_entity && (s.ok() || s.IsNotFound())) {
         PinnableWideColumns cmp_result;
 
-        const Status cmp_s =
+        const rocksdb_rs::status::Status cmp_s =
             db_->GetEntity(read_opts_copy, cfh, key_slices[i], &cmp_result);
 
         if (!cmp_s.ok() && !cmp_s.IsNotFound()) {
@@ -1120,7 +1120,7 @@ class NonBatchedOpsStressTest : public StressTest {
     }
   }
 
-  Status TestPrefixScan(ThreadState* thread, const ReadOptions& read_opts,
+  rocksdb_rs::status::Status TestPrefixScan(ThreadState* thread, const ReadOptions& read_opts,
                         const std::vector<int>& rand_column_families,
                         const std::vector<int64_t>& rand_keys) override {
     assert(!rand_column_families.empty());
@@ -1152,7 +1152,7 @@ class NonBatchedOpsStressTest : public StressTest {
     std::unique_ptr<Iterator> iter(db_->NewIterator(ro_copy, cfh));
 
     uint64_t count = 0;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
 
     if (fault_fs_guard) {
       fault_fs_guard->EnableErrorInjection();
@@ -1208,7 +1208,7 @@ class NonBatchedOpsStressTest : public StressTest {
     return Status_OK();
   }
 
-  Status TestPut(ThreadState* thread, WriteOptions& write_opts,
+  rocksdb_rs::status::Status TestPut(ThreadState* thread, WriteOptions& write_opts,
                  const ReadOptions& read_opts,
                  const std::vector<int>& rand_column_families,
                  const std::vector<int64_t>& rand_keys,
@@ -1252,7 +1252,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     if (FLAGS_verify_before_write) {
       std::string from_db;
-      Status s = db_->Get(read_opts, cfh, k, &from_db);
+      rocksdb_rs::status::Status s = db_->Get(read_opts, cfh, k, &from_db);
       if (!VerifyOrSyncValue(rand_column_family, rand_key, read_opts, shared,
                              /* msg_prefix */ "Pre-Put Get verification",
                              from_db, s)) {
@@ -1267,7 +1267,7 @@ class NonBatchedOpsStressTest : public StressTest {
     const Slice v(value, sz);
 
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
 
     if (FLAGS_use_merge) {
       if (!FLAGS_use_txn) {
@@ -1332,7 +1332,7 @@ class NonBatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  Status TestDelete(ThreadState* thread, WriteOptions& write_opts,
+  rocksdb_rs::status::Status TestDelete(ThreadState* thread, WriteOptions& write_opts,
                     const std::vector<int>& rand_column_families,
                     const std::vector<int64_t>& rand_keys) override {
     int64_t rand_key = rand_keys[0];
@@ -1352,7 +1352,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     // Use delete if the key may be overwritten and a single deletion
     // otherwise.
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     if (shared->AllowsOverwrite(rand_key)) {
       PendingExpectedValue pending_expected_value =
           shared->PrepareDelete(rand_column_family, rand_key);
@@ -1430,7 +1430,7 @@ class NonBatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  Status TestDeleteRange(ThreadState* thread, WriteOptions& write_opts,
+  rocksdb_rs::status::Status TestDeleteRange(ThreadState* thread, WriteOptions& write_opts,
                          const std::vector<int>& rand_column_families,
                          const std::vector<int64_t>& rand_keys) override {
     // OPERATION delete range
@@ -1465,7 +1465,7 @@ class NonBatchedOpsStressTest : public StressTest {
     Slice end_key = end_keystr;
     std::string write_ts_str;
     Slice write_ts;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     if (FLAGS_user_timestamp_size) {
       write_ts_str = GetNowNanos();
       write_ts = write_ts_str;
@@ -1501,7 +1501,7 @@ class NonBatchedOpsStressTest : public StressTest {
                               const std::vector<int64_t>& rand_keys) override {
     const std::string sst_filename =
         FLAGS_db + "/." + std::to_string(thread->tid) + ".sst";
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     if (db_stress_env->FileExists(sst_filename).ok()) {
       // Maybe we terminated abnormally before, so cleanup to give this file
       // ingestion a clean slate
@@ -1577,7 +1577,7 @@ class NonBatchedOpsStressTest : public StressTest {
   // Given a key K, this creates an iterator which scans the range
   // [K, K + FLAGS_num_iterations) forward and backward.
   // Then does a random sequence of Next/Prev operations.
-  Status TestIterateAgainstExpected(
+  rocksdb_rs::status::Status TestIterateAgainstExpected(
       ThreadState* thread, const ReadOptions& read_opts,
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
@@ -1928,7 +1928,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
   bool VerifyOrSyncValue(int cf, int64_t key, const ReadOptions& /*opts*/,
                          SharedState* shared, const std::string& value_from_db,
-                         std::string msg_prefix, const Status& s) const {
+                         std::string msg_prefix, const rocksdb_rs::status::Status& s) const {
     if (shared->HasVerificationFailedYet()) {
       return false;
     }

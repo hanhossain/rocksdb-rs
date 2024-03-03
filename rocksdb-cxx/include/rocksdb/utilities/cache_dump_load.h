@@ -86,7 +86,7 @@ class CacheDumper {
  public:
   virtual ~CacheDumper() = default;
   // Only dump the blocks in the block cache that belong to the DBs in this list
-  virtual Status SetDumpFilter(std::vector<DB*> db_list) {
+  virtual rocksdb_rs::status::Status SetDumpFilter(std::vector<DB*> db_list) {
     (void)db_list;
     return Status_NotSupported("SetDumpFilter is not supported");
   }
@@ -124,13 +124,13 @@ IOStatus NewFromFileCacheDumpReader(const std::shared_ptr<FileSystem>& fs,
                                     std::unique_ptr<CacheDumpReader>* reader);
 
 // Get the default cache dumper
-Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
+rocksdb_rs::status::Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
                              const std::shared_ptr<Cache>& cache,
                              std::unique_ptr<CacheDumpWriter>&& writer,
                              std::unique_ptr<CacheDumper>* cache_dumper);
 
 // Get the default cache dump loader
-Status NewDefaultCacheDumpedLoader(
+rocksdb_rs::status::Status NewDefaultCacheDumpedLoader(
     const CacheDumpOptions& dump_options,
     const BlockBasedTableOptions& toptions,
     const std::shared_ptr<SecondaryCache>& secondary_cache,

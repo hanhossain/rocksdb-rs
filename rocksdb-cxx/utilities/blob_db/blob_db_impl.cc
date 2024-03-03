@@ -97,11 +97,11 @@ BlobDBImpl::BlobDBImpl(const std::string& dbname,
 BlobDBImpl::~BlobDBImpl() {
   tqueue_.shutdown();
   // CancelAllBackgroundWork(db_, true);
-  Status s __attribute__((__unused__)) = Close();
+  rocksdb_rs::status::Status s __attribute__((__unused__)) = Close();
   assert(s.ok());
 }
 
-Status BlobDBImpl::Close() {
+rocksdb_rs::status::Status BlobDBImpl::Close() {
   if (closed_) {
     return Status_OK();
   }
@@ -109,7 +109,7 @@ Status BlobDBImpl::Close() {
 
   // Close base DB before BlobDBImpl destructs to stop event listener and
   // compaction filter call.
-  Status s = db_->Close();
+  rocksdb_rs::status::Status s = db_->Close();
   // delete db_ anyway even if close failed.
   delete db_;
   // Reset pointers to avoid StackableDB delete the pointer again.
@@ -125,7 +125,7 @@ Status BlobDBImpl::Close() {
 
 BlobDBOptions BlobDBImpl::GetBlobDBOptions() const { return bdb_options_; }
 
-Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
+rocksdb_rs::status::Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
   assert(handles != nullptr);
   assert(db_ == nullptr);
 
@@ -148,7 +148,7 @@ Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* handles) {
     cf_options_.disable_auto_compactions = true;
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   // Create info log.
   if (db_options_.info_log == nullptr) {
@@ -295,10 +295,10 @@ void BlobDBImpl::StartBackgroundTasks() {
       std::bind(&BlobDBImpl::EvictExpiredFiles, this, std::placeholders::_1));
 }
 
-Status BlobDBImpl::GetAllBlobFiles(std::set<uint64_t>* file_numbers) {
+rocksdb_rs::status::Status BlobDBImpl::GetAllBlobFiles(std::set<uint64_t>* file_numbers) {
   assert(file_numbers != nullptr);
   std::vector<std::string> all_files;
-  Status s = env_->GetChildren(blob_dir_, &all_files);
+  rocksdb_rs::status::Status s = env_->GetChildren(blob_dir_, &all_files);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to get list of blob files, status: %s",
@@ -321,9 +321,9 @@ Status BlobDBImpl::GetAllBlobFiles(std::set<uint64_t>* file_numbers) {
   return s;
 }
 
-Status BlobDBImpl::OpenAllBlobFiles() {
+rocksdb_rs::status::Status BlobDBImpl::OpenAllBlobFiles() {
   std::set<uint64_t> file_numbers;
-  Status s = GetAllBlobFiles(&file_numbers);
+  rocksdb_rs::status::Status s = GetAllBlobFiles(&file_numbers);
   if (!s.ok()) {
     return s;
   }
@@ -342,7 +342,7 @@ Status BlobDBImpl::OpenAllBlobFiles() {
     blob_file->MarkImmutable(/* sequence */ 0);
 
     // Read file header and footer
-    Status read_metadata_status =
+    rocksdb_rs::status::Status read_metadata_status =
         blob_file->ReadMetadata(env_->GetFileSystem(), file_options_);
     if (read_metadata_status.IsCorruption()) {
       // Remove incomplete file.
@@ -671,12 +671,12 @@ void BlobDBImpl::CloseRandomAccessLocked(
   open_file_count_--;
 }
 
-Status BlobDBImpl::GetBlobFileReader(
+rocksdb_rs::status::Status BlobDBImpl::GetBlobFileReader(
     const std::shared_ptr<BlobFile>& blob_file,
     std::shared_ptr<RandomAccessFileReader>* reader) {
   assert(reader != nullptr);
   bool fresh_open = false;
-  Status s = blob_file->GetReader(env_, file_options_, reader, &fresh_open);
+  rocksdb_rs::status::Status s = blob_file->GetReader(env_, file_options_, reader, &fresh_open);
   if (s.ok() && fresh_open) {
     assert(*reader != nullptr);
     open_file_count_++;
@@ -715,12 +715,12 @@ void BlobDBImpl::RegisterBlobFile(std::shared_ptr<BlobFile> blob_file) {
                          blob_file_number, std::move(blob_file)));
 }
 
-Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<BlobFile>& bfile) {
+rocksdb_rs::status::Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<BlobFile>& bfile) {
   std::string fpath(bfile->PathName());
   std::unique_ptr<FSWritableFile> wfile;
   const auto& fs = env_->GetFileSystem();
 
-  Status s = fs->ReopenWritableFile(fpath, file_options_, &wfile, nullptr);
+  rocksdb_rs::status::Status s = fs->ReopenWritableFile(fpath, file_options_, &wfile, nullptr);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to open blob file for write: %s status: '%s'"
@@ -798,7 +798,7 @@ std::shared_ptr<BlobFile> BlobDBImpl::FindBlobFileLocked(
   return (b1 || b2) ? nullptr : (*finditr);
 }
 
-Status BlobDBImpl::CheckOrCreateWriterLocked(
+rocksdb_rs::status::Status BlobDBImpl::CheckOrCreateWriterLocked(
     const std::shared_ptr<BlobFile>& blob_file,
     std::shared_ptr<BlobLogWriter>* writer) {
   assert(writer != nullptr);
@@ -806,14 +806,14 @@ Status BlobDBImpl::CheckOrCreateWriterLocked(
   if (*writer != nullptr) {
     return Status_OK();
   }
-  Status s = CreateWriterLocked(blob_file);
+  rocksdb_rs::status::Status s = CreateWriterLocked(blob_file);
   if (s.ok()) {
     *writer = blob_file->GetWriter();
   }
   return s;
 }
 
-Status BlobDBImpl::CreateBlobFileAndWriter(
+rocksdb_rs::status::Status BlobDBImpl::CreateBlobFileAndWriter(
     bool has_ttl, const ExpirationRange& expiration_range,
     const std::string& reason, std::shared_ptr<BlobFile>* blob_file,
     std::shared_ptr<BlobLogWriter>* writer) {
@@ -826,7 +826,7 @@ Status BlobDBImpl::CreateBlobFileAndWriter(
   assert(*blob_file);
 
   // file not visible, hence no lock
-  Status s = CheckOrCreateWriterLocked(*blob_file, writer);
+  rocksdb_rs::status::Status s = CheckOrCreateWriterLocked(*blob_file, writer);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to get writer for blob file: %s, error: %s",
@@ -851,7 +851,7 @@ Status BlobDBImpl::CreateBlobFileAndWriter(
   return s;
 }
 
-Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
+rocksdb_rs::status::Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
   assert(blob_file);
 
   {
@@ -874,7 +874,7 @@ Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
   }
 
   std::shared_ptr<BlobLogWriter> writer;
-  const Status s = CreateBlobFileAndWriter(
+  const rocksdb_rs::status::Status s = CreateBlobFileAndWriter(
       /* has_ttl */ false, ExpirationRange(),
       /* reason */ "SelectBlobFile", blob_file, &writer);
   if (!s.ok()) {
@@ -887,7 +887,7 @@ Status BlobDBImpl::SelectBlobFile(std::shared_ptr<BlobFile>* blob_file) {
   return s.Clone();
 }
 
-Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
+rocksdb_rs::status::Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
                                      std::shared_ptr<BlobFile>* blob_file) {
   assert(blob_file);
   assert(expiration != kNoExpiration);
@@ -920,7 +920,7 @@ Status BlobDBImpl::SelectBlobFileTTL(uint64_t expiration,
   oss << "SelectBlobFileTTL range: [" << exp_low << ',' << exp_high << ')';
 
   std::shared_ptr<BlobLogWriter> writer;
-  const Status s =
+  const rocksdb_rs::status::Status s =
       CreateBlobFileAndWriter(/* has_ttl */ true, expiration_range,
                               /* reason */ oss.str(), blob_file, &writer);
   if (!s.ok()) {
@@ -949,43 +949,43 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
 
   WriteBatch* batch() { return &batch_; }
 
-  Status PutCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
                const Slice& value) override {
     if (column_family_id != default_cf_id_) {
       return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
-    Status s = blob_db_impl_->PutBlobValue(options_, key, value, kNoExpiration,
+    rocksdb_rs::status::Status s = blob_db_impl_->PutBlobValue(options_, key, value, kNoExpiration,
                                            &batch_);
     return s;
   }
 
-  Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
     if (column_family_id != default_cf_id_) {
       return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
-    Status s = WriteBatchInternal::Delete(&batch_, column_family_id, key);
+    rocksdb_rs::status::Status s = WriteBatchInternal::Delete(&batch_, column_family_id, key);
     return s;
   }
 
-  virtual Status DeleteRange(uint32_t column_family_id, const Slice& begin_key,
+  virtual rocksdb_rs::status::Status DeleteRange(uint32_t column_family_id, const Slice& begin_key,
                              const Slice& end_key) {
     if (column_family_id != default_cf_id_) {
       return Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
-    Status s = WriteBatchInternal::DeleteRange(&batch_, column_family_id,
+    rocksdb_rs::status::Status s = WriteBatchInternal::DeleteRange(&batch_, column_family_id,
                                                begin_key, end_key);
     return s;
   }
 
-  Status SingleDeleteCF(uint32_t /*column_family_id*/,
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t /*column_family_id*/,
                         const Slice& /*key*/) override {
     return Status_NotSupported("Not supported operation in blob db.");
   }
 
-  Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
+  rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                  const Slice& /*value*/) override {
     return Status_NotSupported("Not supported operation in blob db.");
   }
@@ -993,13 +993,13 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
   void LogData(const Slice& blob) override { batch_.PutLogData(blob); }
 };
 
-Status BlobDBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
+rocksdb_rs::status::Status BlobDBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
   StopWatch write_sw(clock_, statistics_, BLOB_DB_WRITE_MICROS);
   RecordTick(statistics_, BLOB_DB_NUM_WRITE);
   uint32_t default_cf_id =
       static_cast_with_check<ColumnFamilyHandleImpl>(DefaultColumnFamily())
           ->GetID();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   BlobInserter blob_inserter(options, this, default_cf_id);
   {
     // Release write_mutex_ before DB write to avoid race condition with
@@ -1014,23 +1014,23 @@ Status BlobDBImpl::Write(const WriteOptions& options, WriteBatch* updates) {
   return db_->Write(options, blob_inserter.batch());
 }
 
-Status BlobDBImpl::Put(const WriteOptions& options, const Slice& key,
+rocksdb_rs::status::Status BlobDBImpl::Put(const WriteOptions& options, const Slice& key,
                        const Slice& value) {
   return PutUntil(options, key, value, kNoExpiration);
 }
 
-Status BlobDBImpl::PutWithTTL(const WriteOptions& options, const Slice& key,
+rocksdb_rs::status::Status BlobDBImpl::PutWithTTL(const WriteOptions& options, const Slice& key,
                               const Slice& value, uint64_t ttl) {
   uint64_t now = EpochNow();
   uint64_t expiration = kNoExpiration - now > ttl ? now + ttl : kNoExpiration;
   return PutUntil(options, key, value, expiration);
 }
 
-Status BlobDBImpl::PutUntil(const WriteOptions& options, const Slice& key,
+rocksdb_rs::status::Status BlobDBImpl::PutUntil(const WriteOptions& options, const Slice& key,
                             const Slice& value, uint64_t expiration) {
   StopWatch write_sw(clock_, statistics_, BLOB_DB_WRITE_MICROS);
   RecordTick(statistics_, BLOB_DB_NUM_PUT);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   WriteBatch batch;
   {
     // Release write_mutex_ before DB write to avoid race condition with
@@ -1045,11 +1045,11 @@ Status BlobDBImpl::PutUntil(const WriteOptions& options, const Slice& key,
   return s;
 }
 
-Status BlobDBImpl::PutBlobValue(const WriteOptions& /*options*/,
+rocksdb_rs::status::Status BlobDBImpl::PutBlobValue(const WriteOptions& /*options*/,
                                 const Slice& key, const Slice& value,
                                 uint64_t expiration, WriteBatch* batch) {
   write_mutex_.AssertHeld();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::string index_entry;
   uint32_t column_family_id =
       static_cast_with_check<ColumnFamilyHandleImpl>(DefaultColumnFamily())
@@ -1146,7 +1146,7 @@ Slice BlobDBImpl::GetCompressedSlice(const Slice& raw,
   return *compression_output;
 }
 
-Status BlobDBImpl::DecompressSlice(const Slice& compressed_value,
+rocksdb_rs::status::Status BlobDBImpl::DecompressSlice(const Slice& compressed_value,
                                    rocksdb_rs::compression_type::CompressionType compression_type,
                                    PinnableSlice* value_output) const {
   assert(compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression);
@@ -1160,7 +1160,7 @@ Status BlobDBImpl::DecompressSlice(const Slice& compressed_value,
     UncompressionContext context(compression_type);
     UncompressionInfo info(context, UncompressionDict::GetEmptyDict(),
                            compression_type);
-    Status s = UncompressBlockData(
+    rocksdb_rs::status::Status s = UncompressBlockData(
         info, compressed_value.data(), compressed_value.size(), &contents,
         kBlockBasedTableVersionFormat, *(cfh->cfd()->ioptions()));
     if (!s.ok()) {
@@ -1173,7 +1173,7 @@ Status BlobDBImpl::DecompressSlice(const Slice& compressed_value,
   return Status_OK();
 }
 
-Status BlobDBImpl::CompactFiles(
+rocksdb_rs::status::Status BlobDBImpl::CompactFiles(
     const CompactionOptions& compact_options,
     const std::vector<std::string>& input_file_names, const int output_level,
     const int output_path_id, std::vector<std::string>* const output_file_names,
@@ -1186,7 +1186,7 @@ Status BlobDBImpl::CompactFiles(
     compaction_job_info = &info;
   }
 
-  const Status s =
+  const rocksdb_rs::status::Status s =
       db_->CompactFiles(compact_options, input_file_names, output_level,
                         output_path_id, output_file_names, compaction_job_info);
   if (!s.ok()) {
@@ -1255,7 +1255,7 @@ void BlobDBImpl::UpdateLiveSSTSize() {
   {
     // Trigger FIFO eviction if needed.
     MutexLock l(&write_mutex_);
-    Status s = CheckSizeAndEvictBlobFiles(0, true /*force*/);
+    rocksdb_rs::status::Status s = CheckSizeAndEvictBlobFiles(0, true /*force*/);
     if (s.IsNoSpace()) {
       ROCKS_LOG_WARN(db_options_.info_log,
                      "DB grow out-of-space after SST size updated. Current live"
@@ -1266,7 +1266,7 @@ void BlobDBImpl::UpdateLiveSSTSize() {
   }
 }
 
-Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_size,
+rocksdb_rs::status::Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_size,
                                               bool force_evict) {
   write_mutex_.AssertHeld();
 
@@ -1306,7 +1306,7 @@ Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_size,
     }
     // FIFO eviction can evict open blob files.
     if (!blob_file->Immutable()) {
-      Status s = CloseBlobFile(blob_file);
+      rocksdb_rs::status::Status s = CloseBlobFile(blob_file);
       if (!s.ok()) {
         return s;
       }
@@ -1337,11 +1337,11 @@ Status BlobDBImpl::CheckSizeAndEvictBlobFiles(uint64_t blob_size,
   return Status_OK();
 }
 
-Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile>& bfile,
+rocksdb_rs::status::Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile>& bfile,
                               const std::string& headerbuf, const Slice& key,
                               const Slice& value, uint64_t expiration,
                               std::string* index_entry) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   uint64_t blob_offset = 0;
   uint64_t key_offset = 0;
   {
@@ -1380,7 +1380,7 @@ Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile>& bfile,
   return s;
 }
 
-rust::Vec<Status> BlobDBImpl::MultiGet(const ReadOptions& read_options,
+rust::Vec<rocksdb_rs::status::Status> BlobDBImpl::MultiGet(const ReadOptions& read_options,
                                          const std::vector<Slice>& keys,
                                          std::vector<std::string>* values) {
   StopWatch multiget_sw(clock_, statistics_, BLOB_DB_MULTIGET_MICROS);
@@ -1390,7 +1390,7 @@ rust::Vec<Status> BlobDBImpl::MultiGet(const ReadOptions& read_options,
   ReadOptions ro(read_options);
   bool snapshot_created = SetSnapshotIfNeeded(&ro);
 
-  rust::Vec<Status> statuses;
+  rust::Vec<rocksdb_rs::status::Status> statuses;
   statuses.reserve(keys.size());
   values->clear();
   values->reserve(keys.size());
@@ -1415,12 +1415,12 @@ bool BlobDBImpl::SetSnapshotIfNeeded(ReadOptions* read_options) {
   return true;
 }
 
-Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
+rocksdb_rs::status::Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
                                 PinnableSlice* value, uint64_t* expiration) {
   assert(value);
 
   BlobIndex blob_index;
-  Status s = blob_index.DecodeFrom(index_entry);
+  rocksdb_rs::status::Status s = blob_index.DecodeFrom(index_entry);
   if (!s.ok()) {
     return s;
   }
@@ -1470,7 +1470,7 @@ Status BlobDBImpl::GetBlobValue(const Slice& key, const Slice& index_entry,
   return Status_OK();
 }
 
-Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
+rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
                                       uint64_t offset, uint64_t size,
                                       PinnableSlice* value,
                                       rocksdb_rs::compression_type::CompressionType* compression_type) {
@@ -1518,7 +1518,7 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
 
   // takes locks when called
   std::shared_ptr<RandomAccessFileReader> reader;
-  Status s = GetBlobFileReader(blob_file, &reader);
+  rocksdb_rs::status::Status s = GetBlobFileReader(blob_file, &reader);
   if (!s.ok()) {
     return s;
   }
@@ -1605,14 +1605,14 @@ Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint64_t file_number,
   return Status_OK();
 }
 
-Status BlobDBImpl::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status BlobDBImpl::Get(const ReadOptions& read_options,
                        ColumnFamilyHandle* column_family, const Slice& key,
                        PinnableSlice* value) {
   return Get(read_options, column_family, key, value,
              static_cast<uint64_t*>(nullptr) /*expiration*/);
 }
 
-Status BlobDBImpl::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status BlobDBImpl::Get(const ReadOptions& read_options,
                        ColumnFamilyHandle* column_family, const Slice& key,
                        PinnableSlice* value, uint64_t* expiration) {
   StopWatch get_sw(clock_, statistics_, BLOB_DB_GET_MICROS);
@@ -1620,7 +1620,7 @@ Status BlobDBImpl::Get(const ReadOptions& read_options,
   return GetImpl(read_options, column_family, key, value, expiration);
 }
 
-Status BlobDBImpl::GetImpl(const ReadOptions& read_options,
+rocksdb_rs::status::Status BlobDBImpl::GetImpl(const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            PinnableSlice* value, uint64_t* expiration) {
   if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
@@ -1639,7 +1639,7 @@ Status BlobDBImpl::GetImpl(const ReadOptions& read_options,
   bool snapshot_created = SetSnapshotIfNeeded(&ro);
 
   PinnableSlice index_entry;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   bool is_blob_index = false;
   DBImpl::GetImplOptions get_impl_options;
   get_impl_options.column_family = column_family;
@@ -1724,7 +1724,7 @@ std::pair<bool, int64_t> BlobDBImpl::SanityCheck(bool aborted) {
   return std::make_pair(true, -1);
 }
 
-Status BlobDBImpl::CloseBlobFile(std::shared_ptr<BlobFile> bfile) {
+rocksdb_rs::status::Status BlobDBImpl::CloseBlobFile(std::shared_ptr<BlobFile> bfile) {
   TEST_SYNC_POINT("BlobDBImpl::CloseBlobFile");
   assert(bfile);
   assert(!bfile->Immutable());
@@ -1740,7 +1740,7 @@ Status BlobDBImpl::CloseBlobFile(std::shared_ptr<BlobFile> bfile) {
 
   const SequenceNumber sequence = GetLatestSequenceNumber();
 
-  const Status s = bfile->WriteFooterAndCloseLocked(sequence);
+  const rocksdb_rs::status::Status s = bfile->WriteFooterAndCloseLocked(sequence);
 
   if (s.ok()) {
     total_blob_size_ += BlobLogFooter::kSize;
@@ -1772,7 +1772,7 @@ Status BlobDBImpl::CloseBlobFile(std::shared_ptr<BlobFile> bfile) {
   return s.Clone();
 }
 
-Status BlobDBImpl::CloseBlobFileIfNeeded(std::shared_ptr<BlobFile>& bfile) {
+rocksdb_rs::status::Status BlobDBImpl::CloseBlobFileIfNeeded(std::shared_ptr<BlobFile>& bfile) {
   write_mutex_.AssertHeld();
 
   // atomic read
@@ -1890,7 +1890,7 @@ std::pair<bool, int64_t> BlobDBImpl::EvictExpiredFiles(bool aborted) {
   return std::make_pair(true, -1);
 }
 
-Status BlobDBImpl::SyncBlobFiles() {
+rocksdb_rs::status::Status BlobDBImpl::SyncBlobFiles() {
   MutexLock l(&write_mutex_);
 
   std::vector<std::shared_ptr<BlobFile>> process_files;
@@ -1904,7 +1904,7 @@ Status BlobDBImpl::SyncBlobFiles() {
     }
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   for (auto& blob_file : process_files) {
     s = blob_file->Fsync();
     if (!s.ok()) {
@@ -1986,7 +1986,7 @@ std::pair<bool, int64_t> BlobDBImpl::DeleteObsoleteFiles(bool aborted) {
       blob_files_.erase(bfile->BlobFileNumber());
     }
 
-    Status s = DeleteDBFile(&(db_impl_->immutable_db_options()),
+    rocksdb_rs::status::Status s = DeleteDBFile(&(db_impl_->immutable_db_options()),
                             bfile->PathName(), blob_dir_, true,
                             /*force_fg=*/false);
     if (!s.ok()) {
@@ -2007,7 +2007,7 @@ std::pair<bool, int64_t> BlobDBImpl::DeleteObsoleteFiles(bool aborted) {
 
   // directory change. Fsync
   if (file_deleted) {
-    Status s = dir_ent_->FsyncWithDirOptions(
+    rocksdb_rs::status::Status s = dir_ent_->FsyncWithDirOptions(
         IOOptions(), nullptr,
         DirFsyncOptions(DirFsyncOptions::FsyncReason::kFileDeleted));
     if (!s.ok()) {
@@ -2059,12 +2059,12 @@ Iterator* BlobDBImpl::NewIterator(const ReadOptions& read_options) {
   return new BlobDBIterator(own_snapshot, iter, this, clock_, statistics_);
 }
 
-Status DestroyBlobDB(const std::string& dbname, const Options& options,
+rocksdb_rs::status::Status DestroyBlobDB(const std::string& dbname, const Options& options,
                      const BlobDBOptions& bdb_options) {
   const ImmutableDBOptions soptions(SanitizeOptions(dbname, options));
   Env* env = soptions.env;
 
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   std::string blobdir;
   blobdir = (bdb_options.path_relative) ? dbname + "/" + bdb_options.blob_dir
                                         : bdb_options.blob_dir;
@@ -2075,7 +2075,7 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
       uint64_t number;
       rocksdb_rs::types::FileType type;
       if (rocksdb_rs::filename::ParseFileName(f, &number, &type) && type == rocksdb_rs::types::FileType::kBlobFile) {
-        Status del = DeleteDBFile(&soptions, blobdir + "/" + f, blobdir, true,
+        rocksdb_rs::status::Status del = DeleteDBFile(&soptions, blobdir + "/" + f, blobdir, true,
                                   /*force_fg=*/false);
         if (status.ok() && !del.ok()) {
           status.copy_from(del);
@@ -2085,7 +2085,7 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
     // TODO: What to do if we cannot delete the directory?
     env->DeleteDir(blobdir);
   }
-  Status destroy = DestroyDB(dbname, options);
+  rocksdb_rs::status::Status destroy = DestroyDB(dbname, options);
   if (status.ok() && !destroy.ok()) {
     status.copy_from(destroy);
   }
@@ -2094,7 +2094,7 @@ Status DestroyBlobDB(const std::string& dbname, const Options& options,
 }
 
 #ifndef NDEBUG
-Status BlobDBImpl::TEST_GetBlobValue(const Slice& key, const Slice& index_entry,
+rocksdb_rs::status::Status BlobDBImpl::TEST_GetBlobValue(const Slice& key, const Slice& index_entry,
                                      PinnableSlice* value) {
   return GetBlobValue(key, index_entry, value);
 }
@@ -2142,7 +2142,7 @@ void BlobDBImpl::TEST_DeleteObsoleteFiles() {
   DeleteObsoleteFiles(false /*abort*/);
 }
 
-Status BlobDBImpl::TEST_CloseBlobFile(std::shared_ptr<BlobFile>& bfile) {
+rocksdb_rs::status::Status BlobDBImpl::TEST_CloseBlobFile(std::shared_ptr<BlobFile>& bfile) {
   MutexLock l(&write_mutex_);
   WriteLock lock(&mutex_);
   WriteLock file_lock(&bfile->mutex_);

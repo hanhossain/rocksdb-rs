@@ -546,7 +546,7 @@ class TestMemLogger : public Logger {
       assert(p <= limit);
       const size_t write_size = p - base;
 
-      Status s = file_->Append(Slice(base, write_size), options_, dbg_);
+      rocksdb_rs::status::Status s = file_->Append(Slice(base, write_size), options_, dbg_);
       if (s.ok()) {
         flush_pending_ = true;
         log_size_ += write_size;
@@ -586,8 +586,8 @@ MockFileSystem::~MockFileSystem() {
   }
 }
 
-Status MockFileSystem::PrepareOptions(const ConfigOptions& options) {
-  Status s = FileSystem::PrepareOptions(options);
+rocksdb_rs::status::Status MockFileSystem::PrepareOptions(const ConfigOptions& options) {
+  rocksdb_rs::status::Status s = FileSystem::PrepareOptions(options);
   if (s.ok() && system_clock_ == SystemClock::Default()) {
     system_clock_ = options.env->GetSystemClock();
     clock_ = system_clock_.get();
@@ -1019,7 +1019,7 @@ IOStatus MockFileSystem::GetTestDirectory(const IOOptions& /*options*/,
   return IOStatus::OK();
 }
 
-Status MockFileSystem::CorruptBuffer(const std::string& fname) {
+rocksdb_rs::status::Status MockFileSystem::CorruptBuffer(const std::string& fname) {
   auto fn = NormalizeMockPath(fname);
   MutexLock lock(&mutex_);
   auto iter = file_map_.find(fn);
@@ -1045,7 +1045,7 @@ MockEnv* MockEnv::Create(Env* env, const std::shared_ptr<SystemClock>& clock) {
   return new MockEnv(env, fs, clock);
 }
 
-Status MockEnv::CorruptBuffer(const std::string& fname) {
+rocksdb_rs::status::Status MockEnv::CorruptBuffer(const std::string& fname) {
   auto mock = static_cast_with_check<MockFileSystem>(GetFileSystem().get());
   return mock->CorruptBuffer(fname);
 }

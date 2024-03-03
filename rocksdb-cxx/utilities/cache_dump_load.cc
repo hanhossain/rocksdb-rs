@@ -44,7 +44,7 @@ IOStatus NewFromFileCacheDumpReader(const std::shared_ptr<FileSystem>& fs,
   return io_s;
 }
 
-Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
+rocksdb_rs::status::Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
                              const std::shared_ptr<Cache>& cache,
                              std::unique_ptr<CacheDumpWriter>&& writer,
                              std::unique_ptr<CacheDumper>* cache_dumper) {
@@ -53,7 +53,7 @@ Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
   return Status_OK();
 }
 
-Status NewDefaultCacheDumpedLoader(
+rocksdb_rs::status::Status NewDefaultCacheDumpedLoader(
     const CacheDumpOptions& dump_options,
     const BlockBasedTableOptions& toptions,
     const std::shared_ptr<SecondaryCache>& secondary_cache,

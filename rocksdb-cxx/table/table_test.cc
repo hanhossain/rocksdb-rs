@@ -93,11 +93,11 @@ class DummyPropertiesCollector : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "DummyPropertiesCollector"; }
 
-  Status Finish(UserCollectedProperties* /*properties*/) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* /*properties*/) override {
     return Status_OK();
   }
 
-  Status Add(const Slice& /*user_key*/, const Slice& /*value*/) override {
+  rocksdb_rs::status::Status Add(const Slice& /*user_key*/, const Slice& /*value*/) override {
     return Status_OK();
   }
 
@@ -208,13 +208,13 @@ class Constructor {
       keys->push_back(kv.first);
     }
     data_.clear();
-    Status s = FinishImpl(options, ioptions, moptions, table_options,
+    rocksdb_rs::status::Status s = FinishImpl(options, ioptions, moptions, table_options,
                           internal_comparator, *kvmap);
     ASSERT_TRUE(s.ok()) << *s.ToString();
   }
 
   // Construct the data structure from the data in "data"
-  virtual Status FinishImpl(const Options& options,
+  virtual rocksdb_rs::status::Status FinishImpl(const Options& options,
                             const ImmutableOptions& ioptions,
                             const MutableCFOptions& moptions,
                             const BlockBasedTableOptions& table_options,
@@ -276,7 +276,7 @@ class KeyConvertingIterator : public InternalIterator {
   Slice key() const override {
     assert(Valid());
     ParsedInternalKey parsed_key;
-    Status pik_status =
+    rocksdb_rs::status::Status pik_status =
         ParseInternalKey(iter_->key(), &parsed_key, true /* log_err_key */);
     if (!pik_status.ok()) {
       status_.copy_from(pik_status);
@@ -286,12 +286,12 @@ class KeyConvertingIterator : public InternalIterator {
   }
 
   Slice value() const override { return iter_->value(); }
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     return status_.ok() ? iter_->status() : status_.Clone();
   }
 
  private:
-  mutable Status status_;
+  mutable rocksdb_rs::status::Status status_;
   InternalIterator* iter_;
   bool arena_mode_;
 
@@ -306,7 +306,7 @@ class BlockConstructor : public Constructor {
   explicit BlockConstructor(const Comparator* cmp)
       : Constructor(cmp), comparator_(cmp), block_(nullptr) {}
   ~BlockConstructor() override { delete block_; }
-  Status FinishImpl(const Options& /*options*/,
+  rocksdb_rs::status::Status FinishImpl(const Options& /*options*/,
                     const ImmutableOptions& /*ioptions*/,
                     const MutableCFOptions& /*moptions*/,
                     const BlockBasedTableOptions& table_options,
@@ -362,7 +362,7 @@ class TableConstructor : public Constructor {
   }
   ~TableConstructor() override { Reset(); }
 
-  Status FinishImpl(const Options& options, const ImmutableOptions& ioptions,
+  rocksdb_rs::status::Status FinishImpl(const Options& options, const ImmutableOptions& ioptions,
                     const MutableCFOptions& moptions,
                     const BlockBasedTableOptions& /*table_options*/,
                     const InternalKeyComparator& internal_comparator,
@@ -401,7 +401,7 @@ class TableConstructor : public Constructor {
       }
       EXPECT_OK(builder->status());
     }
-    Status s = builder->Finish();
+    rocksdb_rs::status::Status s = builder->Finish();
     EXPECT_OK(file_writer_->Flush());
     EXPECT_TRUE(s.ok()) << *s.ToString();
 
@@ -437,7 +437,7 @@ class TableConstructor : public Constructor {
         read_options, key, TableReaderCaller::kUncategorized);
   }
 
-  virtual Status Reopen(const ImmutableOptions& ioptions,
+  virtual rocksdb_rs::status::Status Reopen(const ImmutableOptions& ioptions,
                         const MutableCFOptions& moptions) {
     std::unique_ptr<FSRandomAccessFile> source(new test::StringSource(
         TEST_GetSink()->contents(), file_num_, ioptions.allow_mmap_reads));
@@ -511,7 +511,7 @@ class MemTableConstructor : public Constructor {
     memtable_->Ref();
   }
   ~MemTableConstructor() override { delete memtable_->Unref(); }
-  Status FinishImpl(const Options&, const ImmutableOptions& ioptions,
+  rocksdb_rs::status::Status FinishImpl(const Options&, const ImmutableOptions& ioptions,
                     const MutableCFOptions& /*moptions*/,
                     const BlockBasedTableOptions& /*table_options*/,
                     const InternalKeyComparator& /*internal_comparator*/,
@@ -524,7 +524,7 @@ class MemTableConstructor : public Constructor {
     memtable_->Ref();
     int seq = 1;
     for (const auto& kv : kv_map) {
-      Status s = memtable_->Add(seq, kTypeValue, kv.first, kv.second,
+      rocksdb_rs::status::Status s = memtable_->Add(seq, kTypeValue, kv.first, kv.second,
                                 nullptr /* kv_prot_info */);
       if (!s.ok()) {
         return s;
@@ -564,7 +564,7 @@ class InternalIteratorFromIterator : public InternalIterator {
   void Prev() override { it_->Prev(); }
   Slice key() const override { return it_->key(); }
   Slice value() const override { return it_->value(); }
-  Status status() const override { return it_->status(); }
+  rocksdb_rs::status::Status status() const override { return it_->status(); }
 
  private:
   std::unique_ptr<Iterator> it_;
@@ -578,7 +578,7 @@ class DBConstructor : public Constructor {
     NewDB();
   }
   ~DBConstructor() override { delete db_; }
-  Status FinishImpl(const Options& /*options*/,
+  rocksdb_rs::status::Status FinishImpl(const Options& /*options*/,
                     const ImmutableOptions& /*ioptions*/,
                     const MutableCFOptions& /*moptions*/,
                     const BlockBasedTableOptions& /*table_options*/,
@@ -608,7 +608,7 @@ class DBConstructor : public Constructor {
 
     Options options;
     options.comparator = comparator_;
-    Status status = DestroyDB(name, options);
+    rocksdb_rs::status::Status status = DestroyDB(name, options);
     ASSERT_TRUE(status.ok()) << *status.ToString();
 
     options.create_if_missing = true;
@@ -1173,7 +1173,7 @@ class BlockBasedTableTest
 
     {
       std::unique_ptr<TraceReader> trace_reader;
-      Status s = NewFileTraceReader(env_, EnvOptions(), trace_file_path_,
+      rocksdb_rs::status::Status s = NewFileTraceReader(env_, EnvOptions(), trace_file_path_,
                                     &trace_reader);
       EXPECT_OK(s);
       BlockCacheTraceReader reader(std::move(trace_reader));
@@ -1273,7 +1273,7 @@ class FileChecksumTestHelper {
 
   WritableFileWriter* GetFileWriter() { return file_writer_.get(); }
 
-  Status ResetTableBuilder(std::unique_ptr<TableBuilder>&& builder) {
+  rocksdb_rs::status::Status ResetTableBuilder(std::unique_ptr<TableBuilder>&& builder) {
     assert(builder != nullptr);
     table_builder_ = std::move(builder);
     return Status_OK();
@@ -1287,7 +1287,7 @@ class FileChecksumTestHelper {
     }
   }
 
-  Status WriteKVAndFlushTable() {
+  rocksdb_rs::status::Status WriteKVAndFlushTable() {
     for (const auto& kv : kv_map_) {
       if (convert_to_internal_key_) {
         ParsedInternalKey ikey(kv.first, kMaxSequenceNumber, kTypeValue);
@@ -1299,7 +1299,7 @@ class FileChecksumTestHelper {
       }
       EXPECT_TRUE(table_builder_->status().ok());
     }
-    Status s = table_builder_->Finish();
+    rocksdb_rs::status::Status s = table_builder_->Finish();
     EXPECT_OK(file_writer_->Flush());
     EXPECT_OK(s);
 
@@ -1316,7 +1316,7 @@ class FileChecksumTestHelper {
     return table_builder_->GetFileChecksumFuncName();
   }
 
-  Status CalculateFileChecksum(FileChecksumGenerator* file_checksum_generator,
+  rocksdb_rs::status::Status CalculateFileChecksum(FileChecksumGenerator* file_checksum_generator,
                                std::string* checksum) {
     assert(file_checksum_generator != nullptr);
     cur_file_num_ = checksum_file_num_++;
@@ -1329,7 +1329,7 @@ class FileChecksumTestHelper {
     std::unique_ptr<char[]> scratch(new char[2048]);
     Slice result;
     uint64_t offset = 0;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     s = file_reader_->Read(IOOptions(), offset, 2048, &result, scratch.get(),
                            nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
     if (!s.ok()) {
@@ -1954,7 +1954,7 @@ void PrefetchRange(TableConstructor* c, Options* opt,
                    const char* key_end,
                    const std::vector<std::string>& keys_in_cache,
                    const std::vector<std::string>& keys_not_in_cache,
-                   const Status expected_status = Status_OK()) {
+                   const rocksdb_rs::status::Status expected_status = Status_OK()) {
   // reset the cache and reopen the table
   table_options->block_cache = NewLRUCache(16 * 1024 * 1024, 4);
   opt->table_factory.reset(NewBlockBasedTableFactory(*table_options));
@@ -1964,7 +1964,7 @@ void PrefetchRange(TableConstructor* c, Options* opt,
 
   // prefetch
   auto* table_reader = dynamic_cast<BlockBasedTable*>(c->GetTableReader());
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::unique_ptr<Slice> begin, end;
   std::unique_ptr<InternalKey> i_begin, i_end;
   if (key_begin != nullptr) {
@@ -2262,7 +2262,7 @@ TEST_P(BlockBasedTableTest, BadChecksumType) {
   // (Re-)Open table file with bad checksum type
   const ImmutableOptions new_ioptions(options);
   const MutableCFOptions new_moptions(options);
-  Status s = c.Reopen(new_ioptions, new_moptions);
+  rocksdb_rs::status::Status s = c.Reopen(new_ioptions, new_moptions);
   ASSERT_NOK(s);
   // "test" is file name
   ASSERT_EQ(*s.ToString(),
@@ -3256,7 +3256,7 @@ TEST_P(BlockBasedTableTest, TracingMultiGetTest) {
     std::array<std::string, 2> encoded_keys;
     encoded_keys[0] = InternalKey(ukeys[0], 0, kTypeValue).Encode().ToString();
     encoded_keys[1] = InternalKey(ukeys[1], 0, kTypeValue).Encode().ToString();
-    std::array<Status, 2> statuses { Status_new(), Status_new() };
+    std::array<rocksdb_rs::status::Status, 2> statuses { Status_new(), Status_new() };
     autovector<KeyContext, MultiGetContext::MAX_BATCH_SIZE> key_context;
     key_context.emplace_back(/*ColumnFamilyHandle omitted*/ nullptr, ukeys[0],
                              &values[0],
@@ -5820,7 +5820,7 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
   BlockBasedTableOptions table_options = BlockBasedTableOptions();
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   Destroy(options);
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   EXPECT_TRUE(s.ok());
   const auto* sanitized_table_options =
       options.table_factory->GetOptions<BlockBasedTableOptions>();

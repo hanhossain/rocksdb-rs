@@ -81,7 +81,7 @@ class WriteThread {
     Writer* last_writer = nullptr;
     SequenceNumber last_sequence;
     // before running goes to zero, status needs leader->StateMutex()
-    Status status;
+    rocksdb_rs::status::Status status;
     std::atomic<size_t> running;
     size_t size = 0;
 
@@ -134,8 +134,8 @@ class WriteThread {
     std::atomic<uint8_t> state;  // write under StateMutex() or pre-link
     WriteGroup* write_group;
     SequenceNumber sequence;  // the sequence number to use for the first key
-    Status status;
-    Status callback_status;  // status returned by callback->Callback()
+    rocksdb_rs::status::Status status;
+    rocksdb_rs::status::Status callback_status;  // status returned by callback->Callback()
 
     std::aligned_storage<sizeof(std::mutex)>::type state_mutex_bytes;
     std::aligned_storage<sizeof(std::condition_variable)>::type state_cv_bytes;
@@ -218,7 +218,7 @@ class WriteThread {
     }
 
     // returns the aggregate status of this Writer
-    Status FinalStatus() {
+    rocksdb_rs::status::Status FinalStatus() {
       if (!status.ok()) {
         // a non-ok memtable write status takes presidence
         assert(callback == nullptr || callback_status.ok());
@@ -307,7 +307,7 @@ class WriteThread {
   //
   // WriteGroup* write_group: the write group
   // Status status:           Status of write operation
-  void ExitAsBatchGroupLeader(WriteGroup& write_group, Status& status);
+  void ExitAsBatchGroupLeader(WriteGroup& write_group, rocksdb_rs::status::Status& status);
 
   // Exit batch group on behalf of batch group leader.
   void ExitAsBatchGroupFollower(Writer* w);

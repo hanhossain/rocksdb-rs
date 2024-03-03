@@ -52,7 +52,7 @@ class UnregisteredTableFactory : public TableFactory {
   UnregisteredTableFactory() {}
   const char* Name() const override { return "Unregistered"; }
   using TableFactory::NewTableReader;
-  Status NewTableReader(const ReadOptions&, const TableReaderOptions&,
+  rocksdb_rs::status::Status NewTableReader(const ReadOptions&, const TableReaderOptions&,
                         std::unique_ptr<RandomAccessFileReader>&&, uint64_t,
                         std::unique_ptr<TableReader>*, bool) const override {
     return Status_NotSupported();
@@ -356,7 +356,7 @@ TEST_F(OptionsTest, GetOptionsFromMapTest) {
   ASSERT_EQ(new_db_opt.strict_bytes_per_sync, true);
 
   db_options_map["max_open_files"] = "hello";
-  Status s =
+  rocksdb_rs::status::Status s =
       GetDBOptionsFromMap(exact, base_db_opt, db_options_map, &new_db_opt);
   ASSERT_NOK(s);
   ASSERT_TRUE(s.IsInvalidArgument());
@@ -445,7 +445,7 @@ TEST_F(OptionsTest, GetColumnFamilyOptionsFromStringTest) {
   ASSERT_EQ(kMoName, std::string(new_cf_opt.merge_operator->Name()));
 
   // Wrong key/value pair
-  Status s = GetColumnFamilyOptionsFromString(
+  rocksdb_rs::status::Status s = GetColumnFamilyOptionsFromString(
       config_options, base_cf_opt,
       "write_buffer_size=13;max_write_buffer_number;", &new_cf_opt);
   ASSERT_NOK(s);
@@ -890,7 +890,7 @@ TEST_F(OptionsTest, OldInterfaceTest) {
   ASSERT_EQ(new_db_opt.verify_sst_unique_id_in_manifest, true);
   ASSERT_EQ(new_db_opt.max_open_files, 32);
   db_options_map["unknown_option"] = "1";
-  Status s = GetDBOptionsFromMap(db_config_options, base_db_opt, db_options_map,
+  rocksdb_rs::status::Status s = GetDBOptionsFromMap(db_config_options, base_db_opt, db_options_map,
                                  &new_db_opt);
   ASSERT_NOK(s);
   ASSERT_TRUE(s.IsInvalidArgument());
@@ -967,7 +967,7 @@ TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
   EXPECT_EQ(1U, new_opt.read_amp_bytes_per_bit);
 
   // unknown option
-  Status s = GetBlockBasedTableOptionsFromString(
+  rocksdb_rs::status::Status s = GetBlockBasedTableOptionsFromString(
       config_options, table_opt,
       "cache_index_and_filter_blocks=1;index_type=kBinarySearch;"
       "bad_option=1",
@@ -1187,7 +1187,7 @@ TEST_F(OptionsTest, GetPlainTableOptionsFromString) {
   ASSERT_TRUE(new_opt.store_index_in_file);
 
   // unknown option
-  Status s = GetPlainTableOptionsFromString(
+  rocksdb_rs::status::Status s = GetPlainTableOptionsFromString(
       config_options, table_opt,
       "user_key_len=66;bloom_bits_per_key=20;hash_table_ratio=0.5;"
       "bad_option=1",
@@ -1412,7 +1412,7 @@ TEST_F(OptionsTest, GetOptionsFromStringTest) {
   base_options.dump_malloc_stats = false;
   base_options.write_buffer_size = 1024;
   Options bad_options = new_options;
-  Status s = GetOptionsFromString(config_options, base_options,
+  rocksdb_rs::status::Status s = GetOptionsFromString(config_options, base_options,
                                   "create_if_missing=XX;dump_malloc_stats=true",
                                   &bad_options);
   ASSERT_NOK(s);
@@ -1747,7 +1747,7 @@ TEST_F(OptionsTest, MutableCFOptions) {
 }
 
 
-Status StringToMap(
+rocksdb_rs::status::Status StringToMap(
     const std::string& opts_str,
     std::unordered_map<std::string, std::string>* opts_map);
 
@@ -1886,7 +1886,7 @@ TEST_F(OptionsTest, StringToMapRandomTest) {
         size_t pos = static_cast<size_t>(
             rnd.Uniform(static_cast<int>(base.size())));
         str[pos] = ' ';
-        Status s = StringToMap(str, &opts_map);
+        rocksdb_rs::status::Status s = StringToMap(str, &opts_map);
         ASSERT_TRUE(s.ok() || s.IsInvalidArgument());
         opts_map.clear();
       }
@@ -1905,7 +1905,7 @@ TEST_F(OptionsTest, StringToMapRandomTest) {
           rnd.Uniform(static_cast<int>(chars.size())));
       str.append(1, chars[pos]);
     }
-    Status s = StringToMap(str, &opts_map);
+    rocksdb_rs::status::Status s = StringToMap(str, &opts_map);
     ASSERT_TRUE(s.ok() || s.IsInvalidArgument());
     s = StringToMap("name=" + str, &opts_map);
     ASSERT_TRUE(s.ok() || s.IsInvalidArgument());
@@ -3887,7 +3887,7 @@ class OptionsSanityCheckTest : public OptionsParserTest,
   }
 
  protected:
-  Status SanityCheckOptions(const DBOptions& db_opts,
+  rocksdb_rs::status::Status SanityCheckOptions(const DBOptions& db_opts,
                             const ColumnFamilyOptions& cf_opts,
                             ConfigOptions::SanityLevel level) {
     config_options_.sanity_level = level;
@@ -3896,7 +3896,7 @@ class OptionsSanityCheckTest : public OptionsParserTest,
         fs_.get());
   }
 
-  Status SanityCheckCFOptions(const ColumnFamilyOptions& cf_opts,
+  rocksdb_rs::status::Status SanityCheckCFOptions(const ColumnFamilyOptions& cf_opts,
                               ConfigOptions::SanityLevel level) {
     return SanityCheckOptions(DBOptions(), cf_opts, level);
   }
@@ -3914,7 +3914,7 @@ class OptionsSanityCheckTest : public OptionsParserTest,
     }
   }
 
-  Status SanityCheckDBOptions(const DBOptions& db_opts,
+  rocksdb_rs::status::Status SanityCheckDBOptions(const DBOptions& db_opts,
                               ConfigOptions::SanityLevel level) {
     return SanityCheckOptions(db_opts, ColumnFamilyOptions(), level);
   }
@@ -3932,9 +3932,9 @@ class OptionsSanityCheckTest : public OptionsParserTest,
     }
   }
 
-  Status PersistOptions(const DBOptions& db_opts,
+  rocksdb_rs::status::Status PersistOptions(const DBOptions& db_opts,
                         const ColumnFamilyOptions& cf_opts) {
-    Status s = fs_->DeleteFile(kOptionsFileName, IOOptions(), nullptr);
+    rocksdb_rs::status::Status s = fs_->DeleteFile(kOptionsFileName, IOOptions(), nullptr);
     if (!s.ok()) {
       return s;
     }
@@ -3942,11 +3942,11 @@ class OptionsSanityCheckTest : public OptionsParserTest,
                                  kOptionsFileName, fs_.get());
   }
 
-  Status PersistCFOptions(const ColumnFamilyOptions& cf_opts) {
+  rocksdb_rs::status::Status PersistCFOptions(const ColumnFamilyOptions& cf_opts) {
     return PersistOptions(DBOptions(), cf_opts);
   }
 
-  Status PersistDBOptions(const DBOptions& db_opts) {
+  rocksdb_rs::status::Status PersistDBOptions(const DBOptions& db_opts) {
     return PersistOptions(db_opts, ColumnFamilyOptions());
   }
 
@@ -3962,7 +3962,7 @@ TEST_P(OptionsSanityCheckTest, MergeOperatorErrorMessage) {
 
   // Test when going from merge operator -> nullptr
   opts.merge_operator = nullptr;
-  Status s =
+  rocksdb_rs::status::Status s =
       SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelLooselyCompatible);
   ASSERT_TRUE(s.IsInvalidArgument());
   std::string err_msg = *s.ToString();

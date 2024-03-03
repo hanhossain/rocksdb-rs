@@ -41,7 +41,7 @@ void PersistentCacheHelper::InsertUncompressed(
   ;
 }
 
-Status PersistentCacheHelper::LookupSerialized(
+rocksdb_rs::status::Status PersistentCacheHelper::LookupSerialized(
     const PersistentCacheOptions& cache_options, const BlockHandle& handle,
     std::unique_ptr<char[]>* out_data, const size_t expected_data_size) {
 #ifdef NDEBUG
@@ -54,7 +54,7 @@ Status PersistentCacheHelper::LookupSerialized(
       BlockBasedTable::GetCacheKey(cache_options.base_cache_key, handle);
 
   size_t size;
-  Status s =
+  rocksdb_rs::status::Status s =
       cache_options.persistent_cache->Lookup(key.AsSlice(), out_data, &size);
   if (!s.ok()) {
     // cache miss
@@ -71,7 +71,7 @@ Status PersistentCacheHelper::LookupSerialized(
   return Status_OK();
 }
 
-Status PersistentCacheHelper::LookupUncompressed(
+rocksdb_rs::status::Status PersistentCacheHelper::LookupUncompressed(
     const PersistentCacheOptions& cache_options, const BlockHandle& handle,
     BlockContents* contents) {
   assert(cache_options.persistent_cache);
@@ -87,7 +87,7 @@ Status PersistentCacheHelper::LookupUncompressed(
 
   std::unique_ptr<char[]> data;
   size_t size;
-  Status s =
+  rocksdb_rs::status::Status s =
       cache_options.persistent_cache->Lookup(key.AsSlice(), &data, &size);
   if (!s.ok()) {
     // cache miss

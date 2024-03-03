@@ -20,7 +20,7 @@ size_t SizeCallback(Cache::ObjectPtr obj) {
   return static_cast<TestItem*>(obj)->Size();
 }
 
-Status SaveToCallback(Cache::ObjectPtr from_obj, size_t from_offset,
+rocksdb_rs::status::Status SaveToCallback(Cache::ObjectPtr from_obj, size_t from_offset,
                       size_t length, char* out) {
   auto item = static_cast<TestItem*>(from_obj);
   const char* buf = item->Buf();
@@ -34,12 +34,12 @@ void DeletionCallback(Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
   delete static_cast<TestItem*>(obj);
 }
 
-Status SaveToCallbackFail(Cache::ObjectPtr /*obj*/, size_t /*offset*/,
+rocksdb_rs::status::Status SaveToCallbackFail(Cache::ObjectPtr /*obj*/, size_t /*offset*/,
                           size_t /*size*/, char* /*out*/) {
   return Status_NotSupported();
 }
 
-Status CreateCallback(const Slice& data, Cache::CreateContext* context,
+rocksdb_rs::status::Status CreateCallback(const Slice& data, Cache::CreateContext* context,
                       MemoryAllocator* /*allocator*/, Cache::ObjectPtr* out_obj,
                       size_t* out_charge) {
   auto t = static_cast<TestCreateContext*>(context);

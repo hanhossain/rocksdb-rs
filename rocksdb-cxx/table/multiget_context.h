@@ -31,7 +31,7 @@ struct KeyContext {
   Slice ukey_without_ts;
   Slice ikey;
   ColumnFamilyHandle* column_family;
-  Status* s;
+  rocksdb_rs::status::Status* s;
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq;
   bool key_exists;
@@ -44,7 +44,7 @@ struct KeyContext {
 
   KeyContext(ColumnFamilyHandle* col_family, const Slice& user_key,
              PinnableSlice* val, PinnableWideColumns* cols, std::string* ts,
-             Status* stat)
+             rocksdb_rs::status::Status* stat)
       : key(&user_key),
         lkey(nullptr),
         column_family(col_family),

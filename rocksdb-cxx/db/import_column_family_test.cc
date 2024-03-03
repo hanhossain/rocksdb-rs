@@ -643,7 +643,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     // Create column family with existing cf name.
     ExportImportFilesMetaData metadata;
     metadata.db_comparator_name = options.comparator->Name();
-    Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "koko",
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "koko",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Column family already exists"));
@@ -654,7 +654,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     // Import with no files specified.
     ExportImportFilesMetaData metadata;
     metadata.db_comparator_name = options.comparator->Name();
-    Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "The list of files is empty"));
@@ -707,7 +707,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
         LiveFileMetaDataInit(file1_sst_name, sst_files_dir_, 1, 10, 19));
     metadata.db_comparator_name = mismatch_options.comparator->Name();
 
-    Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "coco",
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "coco",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Comparator name mismatch"));
@@ -732,7 +732,7 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
         LiveFileMetaDataInit(file3_sst_name, sst_files_dir_, 1, 10, 19));
     metadata.db_comparator_name = options.comparator->Name();
 
-    Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
                                                  ImportColumnFamilyOptions(),
                                                  metadata, &import_cfh_);
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "No such file or directory"));

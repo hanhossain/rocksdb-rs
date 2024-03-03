@@ -40,7 +40,7 @@ class SliceTransform : public Customizable {
   static const char* Type() { return "SliceTransform"; }
 
   // Creates and configures a new SliceTransform from the input options and id.
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& id,
                                  std::shared_ptr<const SliceTransform>* result);
 

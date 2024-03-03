@@ -59,13 +59,13 @@ bool AllRunningColumnFamiliesConsistent(
   return true;
 }
 
-Status CheckWriteBatchTimestampSizeConsistency(
+rocksdb_rs::status::Status CheckWriteBatchTimestampSizeConsistency(
     const WriteBatch* batch,
     const UnorderedMap<uint32_t, size_t>& running_ts_sz,
     const UnorderedMap<uint32_t, size_t>& record_ts_sz,
     TimestampSizeConsistencyMode check_mode, bool* ts_need_recovery) {
   std::vector<uint32_t> column_family_ids;
-  Status status =
+  rocksdb_rs::status::Status status =
       CollectColumnFamilyIdsFromWriteBatch(*batch, &column_family_ids);
   if (!status.ok()) {
     return status;
@@ -111,11 +111,11 @@ TimestampRecoveryHandler::TimestampRecoveryHandler(
       handler_valid_(true),
       new_batch_diff_from_orig_batch_(false) {}
 
-Status TimestampRecoveryHandler::PutCF(uint32_t cf, const Slice& key,
+rocksdb_rs::status::Status TimestampRecoveryHandler::PutCF(uint32_t cf, const Slice& key,
                                        const Slice& value) {
   std::string new_key_buf;
   Slice new_key;
-  Status status =
+  rocksdb_rs::status::Status status =
       ReconcileTimestampDiscrepancy(cf, key, &new_key_buf, &new_key);
   if (!status.ok()) {
     return status;
@@ -123,10 +123,10 @@ Status TimestampRecoveryHandler::PutCF(uint32_t cf, const Slice& key,
   return WriteBatchInternal::Put(new_batch_.get(), cf, new_key, value);
 }
 
-Status TimestampRecoveryHandler::DeleteCF(uint32_t cf, const Slice& key) {
+rocksdb_rs::status::Status TimestampRecoveryHandler::DeleteCF(uint32_t cf, const Slice& key) {
   std::string new_key_buf;
   Slice new_key;
-  Status status =
+  rocksdb_rs::status::Status status =
       ReconcileTimestampDiscrepancy(cf, key, &new_key_buf, &new_key);
   if (!status.ok()) {
     return status;
@@ -134,10 +134,10 @@ Status TimestampRecoveryHandler::DeleteCF(uint32_t cf, const Slice& key) {
   return WriteBatchInternal::Delete(new_batch_.get(), cf, new_key);
 }
 
-Status TimestampRecoveryHandler::SingleDeleteCF(uint32_t cf, const Slice& key) {
+rocksdb_rs::status::Status TimestampRecoveryHandler::SingleDeleteCF(uint32_t cf, const Slice& key) {
   std::string new_key_buf;
   Slice new_key;
-  Status status =
+  rocksdb_rs::status::Status status =
       ReconcileTimestampDiscrepancy(cf, key, &new_key_buf, &new_key);
   if (!status.ok()) {
     return status;
@@ -145,14 +145,14 @@ Status TimestampRecoveryHandler::SingleDeleteCF(uint32_t cf, const Slice& key) {
   return WriteBatchInternal::SingleDelete(new_batch_.get(), cf, new_key);
 }
 
-Status TimestampRecoveryHandler::DeleteRangeCF(uint32_t cf,
+rocksdb_rs::status::Status TimestampRecoveryHandler::DeleteRangeCF(uint32_t cf,
                                                const Slice& begin_key,
                                                const Slice& end_key) {
   std::string new_begin_key_buf;
   Slice new_begin_key;
   std::string new_end_key_buf;
   Slice new_end_key;
-  Status status = ReconcileTimestampDiscrepancy(
+  rocksdb_rs::status::Status status = ReconcileTimestampDiscrepancy(
       cf, begin_key, &new_begin_key_buf, &new_begin_key);
   if (!status.ok()) {
     return status;
@@ -166,11 +166,11 @@ Status TimestampRecoveryHandler::DeleteRangeCF(uint32_t cf,
                                          new_end_key);
 }
 
-Status TimestampRecoveryHandler::MergeCF(uint32_t cf, const Slice& key,
+rocksdb_rs::status::Status TimestampRecoveryHandler::MergeCF(uint32_t cf, const Slice& key,
                                          const Slice& value) {
   std::string new_key_buf;
   Slice new_key;
-  Status status =
+  rocksdb_rs::status::Status status =
       ReconcileTimestampDiscrepancy(cf, key, &new_key_buf, &new_key);
   if (!status.ok()) {
     return status;
@@ -178,11 +178,11 @@ Status TimestampRecoveryHandler::MergeCF(uint32_t cf, const Slice& key,
   return WriteBatchInternal::Merge(new_batch_.get(), cf, new_key, value);
 }
 
-Status TimestampRecoveryHandler::PutBlobIndexCF(uint32_t cf, const Slice& key,
+rocksdb_rs::status::Status TimestampRecoveryHandler::PutBlobIndexCF(uint32_t cf, const Slice& key,
                                                 const Slice& value) {
   std::string new_key_buf;
   Slice new_key;
-  Status status =
+  rocksdb_rs::status::Status status =
       ReconcileTimestampDiscrepancy(cf, key, &new_key_buf, &new_key);
   if (!status.ok()) {
     return status;
@@ -190,7 +190,7 @@ Status TimestampRecoveryHandler::PutBlobIndexCF(uint32_t cf, const Slice& key,
   return WriteBatchInternal::PutBlobIndex(new_batch_.get(), cf, new_key, value);
 }
 
-Status TimestampRecoveryHandler::ReconcileTimestampDiscrepancy(
+rocksdb_rs::status::Status TimestampRecoveryHandler::ReconcileTimestampDiscrepancy(
     uint32_t cf, const Slice& key, std::string* new_key_buf, Slice* new_key) {
   assert(handler_valid_);
   auto running_iter = running_ts_sz_.find(cf);
@@ -232,7 +232,7 @@ Status TimestampRecoveryHandler::ReconcileTimestampDiscrepancy(
   return Status_OK();
 }
 
-Status HandleWriteBatchTimestampSizeDifference(
+rocksdb_rs::status::Status HandleWriteBatchTimestampSizeDifference(
     const WriteBatch* batch,
     const UnorderedMap<uint32_t, size_t>& running_ts_sz,
     const UnorderedMap<uint32_t, size_t>& record_ts_sz,
@@ -243,7 +243,7 @@ Status HandleWriteBatchTimestampSizeDifference(
     return Status_OK();
   }
   bool need_recovery = false;
-  Status status = CheckWriteBatchTimestampSizeConsistency(
+  rocksdb_rs::status::Status status = CheckWriteBatchTimestampSizeConsistency(
       batch, running_ts_sz, record_ts_sz, check_mode, &need_recovery);
   if (!status.ok()) {
     return status;

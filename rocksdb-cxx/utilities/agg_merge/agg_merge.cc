@@ -27,7 +27,7 @@ static std::unordered_map<std::string, std::unique_ptr<Aggregator>> func_map;
 const std::string kUnnamedFuncName = "";
 const std::string kErrorFuncName = "kErrorFuncName";
 
-Status AddAggregator(const std::string& function_name,
+rocksdb_rs::status::Status AddAggregator(const std::string& function_name,
                      std::unique_ptr<Aggregator>&& agg) {
   if (function_name == kErrorFuncName) {
     return Status_InvalidArgument(
@@ -47,7 +47,7 @@ std::string EncodeAggFuncAndPayloadNoCheck(const Slice& function_name,
   return result;
 }
 
-Status EncodeAggFuncAndPayload(const Slice& function_name, const Slice& payload,
+rocksdb_rs::status::Status EncodeAggFuncAndPayload(const Slice& function_name, const Slice& payload,
                                std::string& output) {
   if (function_name == kErrorFuncName) {
     return Status_InvalidArgument("Cannot use error function name");

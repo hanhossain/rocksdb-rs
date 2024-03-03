@@ -13,7 +13,7 @@
 using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Snapshot;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb_rs::status::SubCode;
 using rocksdb::Transaction;
 using rocksdb::TransactionDB;
@@ -34,7 +34,7 @@ int main() {
   options.create_if_missing = true;
   TransactionDB* txn_db;
 
-  Status s = TransactionDB::Open(options, txn_db_options, kDBPath, &txn_db);
+  rocksdb_rs::status::Status s = TransactionDB::Open(options, txn_db_options, kDBPath, &txn_db);
   assert(s.ok());
 
   WriteOptions write_options;

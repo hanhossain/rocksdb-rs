@@ -86,13 +86,13 @@ class DummyDB : public StackableDB {
 
   DBOptions GetDBOptions() const override { return DBOptions(options_); }
 
-  Status EnableFileDeletions(bool /*force*/) override {
+  rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override {
     EXPECT_TRUE(!deletions_enabled_);
     deletions_enabled_ = true;
     return Status_OK();
   }
 
-  Status DisableFileDeletions() override {
+  rocksdb_rs::status::Status DisableFileDeletions() override {
     EXPECT_TRUE(deletions_enabled_);
     deletions_enabled_ = false;
     return Status_OK();
@@ -100,7 +100,7 @@ class DummyDB : public StackableDB {
 
   ColumnFamilyHandle* DefaultColumnFamily() const override { return nullptr; }
 
-  Status GetLiveFilesStorageInfo(
+  rocksdb_rs::status::Status GetLiveFilesStorageInfo(
       const LiveFilesStorageInfoOptions& opts,
       std::vector<LiveFileStorageInfo>* files) override {
     uint64_t number;
@@ -135,7 +135,7 @@ class DummyDB : public StackableDB {
   }
 
   // To avoid FlushWAL called on stacked db which is nullptr
-  Status FlushWAL(bool /*sync*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status FlushWAL(bool /*sync*/) override { return Status_OK(); }
 
   std::vector<std::string> live_files_;
 
@@ -412,7 +412,7 @@ class FileManager : public EnvWrapper {
   explicit FileManager(Env* t) : EnvWrapper(t), rnd_(5) {}
   const char* Name() const override { return "FileManager"; }
 
-  Status GetRandomFileInDir(const std::string& dir, std::string* fname,
+  rocksdb_rs::status::Status GetRandomFileInDir(const std::string& dir, std::string* fname,
                             uint64_t* fsize) {
     std::vector<FileAttributes> children;
     auto s = GetChildrenFileAttributes(dir, &children);
@@ -433,9 +433,9 @@ class FileManager : public EnvWrapper {
     return Status_NotFound("");
   }
 
-  Status DeleteRandomFileInDir(const std::string& dir) {
+  rocksdb_rs::status::Status DeleteRandomFileInDir(const std::string& dir) {
     std::vector<std::string> children;
-    Status s = GetChildren(dir, &children);
+    rocksdb_rs::status::Status s = GetChildren(dir, &children);
     if (!s.ok()) {
       return s;
     }
@@ -448,10 +448,10 @@ class FileManager : public EnvWrapper {
     return Status_NotFound("");
   }
 
-  Status AppendToRandomFileInDir(const std::string& dir,
+  rocksdb_rs::status::Status AppendToRandomFileInDir(const std::string& dir,
                                  const std::string& data) {
     std::vector<std::string> children;
-    Status s = GetChildren(dir, &children);
+    rocksdb_rs::status::Status s = GetChildren(dir, &children);
     if (!s.ok()) {
       return s;
     }
@@ -464,9 +464,9 @@ class FileManager : public EnvWrapper {
     return Status_NotFound("");
   }
 
-  Status CorruptFile(const std::string& fname, uint64_t bytes_to_corrupt) {
+  rocksdb_rs::status::Status CorruptFile(const std::string& fname, uint64_t bytes_to_corrupt) {
     std::string file_contents;
-    Status s = ReadFileToString(this, fname, &file_contents);
+    rocksdb_rs::status::Status s = ReadFileToString(this, fname, &file_contents);
     if (!s.ok()) {
       return s;
     }
@@ -482,10 +482,10 @@ class FileManager : public EnvWrapper {
     return WriteToFile(fname, file_contents);
   }
 
-  Status CorruptFileStart(const std::string& fname) {
+  rocksdb_rs::status::Status CorruptFileStart(const std::string& fname) {
     std::string to_xor = "blah";
     std::string file_contents;
-    Status s = ReadFileToString(this, fname, &file_contents);
+    rocksdb_rs::status::Status s = ReadFileToString(this, fname, &file_contents);
     if (!s.ok()) {
       return s;
     }
@@ -499,9 +499,9 @@ class FileManager : public EnvWrapper {
     return WriteToFile(fname, file_contents);
   }
 
-  Status CorruptChecksum(const std::string& fname, bool appear_valid) {
+  rocksdb_rs::status::Status CorruptChecksum(const std::string& fname, bool appear_valid) {
     std::string metadata;
-    Status s = ReadFileToString(this, fname, &metadata);
+    rocksdb_rs::status::Status s = ReadFileToString(this, fname, &metadata);
     if (!s.ok()) {
       return s;
     }
@@ -537,11 +537,11 @@ class FileManager : public EnvWrapper {
     return WriteToFile(fname, metadata);
   }
 
-  Status WriteToFile(const std::string& fname, const std::string& data) {
+  rocksdb_rs::status::Status WriteToFile(const std::string& fname, const std::string& data) {
     std::unique_ptr<WritableFile> file;
     EnvOptions env_options;
     env_options.use_mmap_writes = false;
-    Status s = EnvWrapper::NewWritableFile(fname, &file, env_options);
+    rocksdb_rs::status::Status s = EnvWrapper::NewWritableFile(fname, &file, env_options);
     if (!s.ok()) {
       return s;
     }
@@ -589,7 +589,7 @@ void AssertExists(DB* db, int from, int to) {
   for (int i = from; i < to; ++i) {
     std::string key = "testkey" + std::to_string(i);
     std::string value;
-    Status s = db->Get(ReadOptions(), Slice(key), &value);
+    rocksdb_rs::status::Status s = db->Get(ReadOptions(), Slice(key), &value);
     ASSERT_EQ(value, "testvalue" + std::to_string(i));
   }
 }
@@ -599,7 +599,7 @@ void AssertEmpty(DB* db, int from, int to) {
     std::string key = "testkey" + std::to_string(i);
     std::string value = "testvalue" + std::to_string(i);
 
-    Status s = db->Get(ReadOptions(), Slice(key), &value);
+    rocksdb_rs::status::Status s = db->Get(ReadOptions(), Slice(key), &value);
     ASSERT_TRUE(s.IsNotFound());
   }
 }
@@ -870,11 +870,11 @@ class BackupEngineTest : public testing::Test {
     }
   }
 
-  Status GetDataFilesInDB(const rocksdb_rs::types::FileType& file_type,
+  rocksdb_rs::status::Status GetDataFilesInDB(const rocksdb_rs::types::FileType& file_type,
                           std::vector<FileAttributes>* files) {
     std::vector<std::string> live;
     uint64_t ignore_manifest_size;
-    Status s = db_->GetLiveFiles(live, &ignore_manifest_size, /*flush*/ false);
+    rocksdb_rs::status::Status s = db_->GetLiveFiles(live, &ignore_manifest_size, /*flush*/ false);
     if (!s.ok()) {
       return s;
     }
@@ -891,12 +891,12 @@ class BackupEngineTest : public testing::Test {
     return s;
   }
 
-  Status GetRandomDataFileInDB(const rocksdb_rs::types::FileType& file_type,
+  rocksdb_rs::status::Status GetRandomDataFileInDB(const rocksdb_rs::types::FileType& file_type,
                                std::string* fname_out,
                                uint64_t* fsize_out = nullptr) {
     Random rnd(6);  // NB: hardly "random"
     std::vector<FileAttributes> files;
-    Status s = GetDataFilesInDB(file_type, &files);
+    rocksdb_rs::status::Status s = GetDataFilesInDB(file_type, &files);
     if (!s.ok()) {
       return s;
     }
@@ -911,10 +911,10 @@ class BackupEngineTest : public testing::Test {
     return Status_OK();
   }
 
-  Status CorruptRandomDataFileInDB(const rocksdb_rs::types::FileType& file_type) {
+  rocksdb_rs::status::Status CorruptRandomDataFileInDB(const rocksdb_rs::types::FileType& file_type) {
     std::string fname;
     uint64_t fsize = 0;
-    Status s = GetRandomDataFileInDB(file_type, &fname, &fsize);
+    rocksdb_rs::status::Status s = GetRandomDataFileInDB(file_type, &fname, &fsize);
     if (!s.ok()) {
       return s;
     }
@@ -1196,7 +1196,7 @@ TEST_P(BackupEngineTestWithParam, OnlineIntegrationTest) {
   for (int i = 1; i <= 5; ++i) {
     if (i == 2) {
       // we deleted backup 2
-      Status s = backup_engine_->RestoreDBFromBackup(2, dbname_, dbname_);
+      rocksdb_rs::status::Status s = backup_engine_->RestoreDBFromBackup(2, dbname_, dbname_);
       ASSERT_TRUE(!s.ok());
     } else {
       int fill_up_to = std::min(keys_iteration * i, max_key);
@@ -1337,7 +1337,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
 TEST_F(BackupEngineTest, CorruptionsTest) {
   const int keys_iteration = 5000;
   Random rnd(6);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   OpenDBAndBackupEngine(true);
   // create five backups
@@ -1691,7 +1691,7 @@ TEST_F(BackupEngineTest, TableFileWithoutDbChecksumCorruptedDuringBackup) {
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();
-  Status s = backup_engine_->CreateNewBackup(db_.get());
+  rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
   if (corrupted) {
     ASSERT_NOK(s);
   } else {
@@ -1940,7 +1940,7 @@ TEST_F(BackupEngineTest, FailOverwritingBackups) {
   OpenDBAndBackupEngine(false);
   // More data, bigger SST
   FillDB(db_.get(), 1000, 1300, FillDBFlushAction::kFlushAll);
-  Status s = backup_engine_->CreateNewBackup(db_.get());
+  rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
   // the new backup fails because new table files
   // clash with old table files from backups 4 and 5
   // (since write_buffer_size is huge, we can be sure that
@@ -2164,7 +2164,7 @@ TEST_F(BackupEngineTest, TableFileCorruptionBeforeIncremental) {
       ASSERT_OK(db_file_manager_->CorruptFileStart(tf0));
 
       OpenDBAndBackupEngine(false, false, share);
-      Status s = backup_engine_->CreateNewBackup(db_.get());
+      rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
 
       // Even though none of the naming options catch the inconsistency
       // between the first and second time backing up fname, in the case
@@ -2268,7 +2268,7 @@ TEST_F(BackupEngineTest, FileSizeForIncremental) {
     }
 
     OpenDBAndBackupEngine(false, false, share);
-    Status s = backup_engine_->CreateNewBackup(db_.get());
+    rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
     EXPECT_TRUE(s.IsCorruption());
 
     ASSERT_OK(backup_engine_->PurgeOldBackups(0));
@@ -3607,7 +3607,7 @@ TEST_F(BackupEngineTest, Concurrency) {
       restore_verify_threads[i] =
           std::thread([this, &db_opts, restore_db_dir, to_restore] {
             DB* restored;
-            Status s = Status_new();
+            rocksdb_rs::status::Status s = Status_new();
             for (;;) {
               s = DB::Open(db_opts, restore_db_dir, &restored);
               if (s.IsInvalidArgument()) {
@@ -3978,11 +3978,11 @@ TEST_F(BackupEngineTest, BackgroundThreadCpuPriority) {
 // Populates `*total_size` with the size of all files under `backup_dir`.
 // We don't go through `BackupEngine` currently because it's hard to figure out
 // the metadata file size.
-Status GetSizeOfBackupFiles(FileSystem* backup_fs,
+rocksdb_rs::status::Status GetSizeOfBackupFiles(FileSystem* backup_fs,
                             const std::string& backup_dir, size_t* total_size) {
   *total_size = 0;
   std::vector<std::string> dir_stack = {backup_dir};
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   while (s.ok() && !dir_stack.empty()) {
     std::string dir = std::move(dir_stack.back());
     dir_stack.pop_back();

@@ -23,7 +23,7 @@ void WalAddition::EncodeTo(std::string* dst) const {
   PutVarint32(dst, static_cast<uint32_t>(WalAdditionTag::kTerminate));
 }
 
-Status WalAddition::DecodeFrom(Slice* src) {
+rocksdb_rs::status::Status WalAddition::DecodeFrom(Slice* src) {
   constexpr char class_name[] = "WalAddition";
 
   if (!GetVarint64(src, &number_)) {
@@ -79,7 +79,7 @@ void WalDeletion::EncodeTo(std::string* dst) const {
   PutVarint64(dst, number_);
 }
 
-Status WalDeletion::DecodeFrom(Slice* src) {
+rocksdb_rs::status::Status WalDeletion::DecodeFrom(Slice* src) {
   constexpr char class_name[] = "WalDeletion";
 
   if (!GetVarint64(src, &number_)) {
@@ -105,7 +105,7 @@ std::string WalDeletion::DebugString() const {
   return oss.str();
 }
 
-Status WalSet::AddWal(const WalAddition& wal) {
+rocksdb_rs::status::Status WalSet::AddWal(const WalAddition& wal) {
   if (wal.GetLogNumber() < min_wal_number_to_keep_) {
     // The WAL has been obsolete, ignore it.
     return Status_OK();
@@ -143,8 +143,8 @@ Status WalSet::AddWal(const WalAddition& wal) {
   return Status_OK();
 }
 
-Status WalSet::AddWals(const WalAdditions& wals) {
-  Status s = Status_new();
+rocksdb_rs::status::Status WalSet::AddWals(const WalAdditions& wals) {
+  rocksdb_rs::status::Status s = Status_new();
   for (const WalAddition& wal : wals) {
     s = AddWal(wal);
     if (!s.ok()) {
@@ -154,7 +154,7 @@ Status WalSet::AddWals(const WalAdditions& wals) {
   return s;
 }
 
-Status WalSet::DeleteWalsBefore(WalNumber wal) {
+rocksdb_rs::status::Status WalSet::DeleteWalsBefore(WalNumber wal) {
   if (wal > min_wal_number_to_keep_) {
     min_wal_number_to_keep_ = wal;
     wals_.erase(wals_.begin(), wals_.lower_bound(wal));
@@ -167,12 +167,12 @@ void WalSet::Reset() {
   min_wal_number_to_keep_ = 0;
 }
 
-Status WalSet::CheckWals(
+rocksdb_rs::status::Status WalSet::CheckWals(
     Env* env,
     const std::unordered_map<WalNumber, std::string>& logs_on_disk) const {
   assert(env != nullptr);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   for (const auto& wal : wals_) {
     const uint64_t log_number = wal.first;
     const WalMetadata& wal_meta = wal.second;

@@ -172,7 +172,7 @@ void SeqnoToTimeMapping::Encode(std::string& dest, const SequenceNumber start,
   }
 }
 
-Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
+rocksdb_rs::status::Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
   Slice input(seqno_time_mapping_str);
   if (input.empty()) {
     return Status_OK();
@@ -185,7 +185,7 @@ Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
   SeqnoTimePair base;
   for (uint64_t i = 0; i < size; i++) {
     SeqnoTimePair val;
-    Status s = val.Decode(input);
+    rocksdb_rs::status::Status s = val.Decode(input);
     if (!s.ok()) {
       return s;
     }
@@ -200,7 +200,7 @@ void SeqnoToTimeMapping::SeqnoTimePair::Encode(std::string& dest) const {
   PutVarint64Varint64(&dest, seqno, time);
 }
 
-Status SeqnoToTimeMapping::SeqnoTimePair::Decode(Slice& input) {
+rocksdb_rs::status::Status SeqnoToTimeMapping::SeqnoTimePair::Decode(Slice& input) {
   if (!GetVarint64(&input, &seqno)) {
     return Status_Corruption("Invalid sequence number");
   }
@@ -254,7 +254,7 @@ bool SeqnoToTimeMapping::Resize(uint64_t min_time_duration,
   return true;
 }
 
-Status SeqnoToTimeMapping::Sort() {
+rocksdb_rs::status::Status SeqnoToTimeMapping::Sort() {
   if (is_sorted_) {
     return Status_OK();
   }

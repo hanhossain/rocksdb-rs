@@ -68,7 +68,7 @@ class SecondaryCache : public Customizable {
   ~SecondaryCache() override = default;
 
   static const char* Type() { return "SecondaryCache"; }
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& id,
                                  std::shared_ptr<SecondaryCache>* result);
 
@@ -79,7 +79,7 @@ class SecondaryCache : public Customizable {
   // `helper` to extract the persistable data (typically an uncompressed block)
   // and writes it to this cache tier. OK may be returned even if the insertion
   // is not made.
-  virtual Status Insert(const Slice& key, Cache::ObjectPtr obj,
+  virtual rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr obj,
                         const Cache::CacheItemHelper* helper) = 0;
 
   // Insert a value from its saved/persistable data (typically uncompressed
@@ -91,7 +91,7 @@ class SecondaryCache : public Customizable {
   // The default implementation only assumes the entry helper's create_cb is
   // called at Lookup() time and not Insert() time, so should work for all
   // foreseeable implementations.
-  virtual Status InsertSaved(const Slice& key, const Slice& saved);
+  virtual rocksdb_rs::status::Status InsertSaved(const Slice& key, const Slice& saved);
 
   // Lookup the data for the given key in this cache. The create_cb
   // will be used to create the object. The handle returned may not be
@@ -127,12 +127,12 @@ class SecondaryCache : public Customizable {
   // purge the released entries from the cache in order to lower the usage.
   //
   // The derived class can make this function no-op and return NotSupported().
-  virtual Status SetCapacity(size_t /* capacity */) {
+  virtual rocksdb_rs::status::Status SetCapacity(size_t /* capacity */) {
     return Status_NotSupported();
   }
 
   // The derived class can make this function no-op and return NotSupported().
-  virtual Status GetCapacity(size_t& /* capacity */) {
+  virtual rocksdb_rs::status::Status GetCapacity(size_t& /* capacity */) {
     return Status_NotSupported();
   }
 
@@ -142,10 +142,10 @@ class SecondaryCache : public Customizable {
   // distributes the new capacity across all shards and is meant for large
   // changes in capacity, whereas the former is meant for relatively small
   // changes and may be uneven by lowering capacity in a single shard.
-  virtual Status Deflate(size_t /*decrease*/) { return Status_NotSupported(); }
+  virtual rocksdb_rs::status::Status Deflate(size_t /*decrease*/) { return Status_NotSupported(); }
 
   // Restore the capacity reduced by a prior call to Deflate().
-  virtual Status Inflate(size_t /*increase*/) { return Status_NotSupported(); }
+  virtual rocksdb_rs::status::Status Inflate(size_t /*increase*/) { return Status_NotSupported(); }
 };
 
 }  // namespace rocksdb

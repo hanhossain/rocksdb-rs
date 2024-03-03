@@ -39,9 +39,9 @@ ConfigOptions::ConfigOptions(const DBOptions& db_opts) : env(db_opts.env) {
   registry = ObjectRegistry::NewInstance();
 }
 
-Status ValidateOptions(const DBOptions& db_opts,
+rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                        const ColumnFamilyOptions& cf_opts) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   auto db_cfg = DBOptionsAsConfigurable(db_opts);
   auto cf_cfg = CFOptionsAsConfigurable(cf_opts);
   s = db_cfg->ValidateOptions(db_opts, cf_opts);
@@ -561,11 +561,11 @@ bool SerializeSingleOptionHelper(const void* opt_address,
 }
 
 template <typename T>
-Status ConfigureFromMap(
+rocksdb_rs::status::Status ConfigureFromMap(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opt_map,
     const std::string& option_name, Configurable* config, T* new_opts) {
-  Status s = config->ConfigureFromMap(config_options, opt_map);
+  rocksdb_rs::status::Status s = config->ConfigureFromMap(config_options, opt_map);
   if (s.ok()) {
     *new_opts = *(config->GetOptions<T>(option_name));
   }
@@ -573,7 +573,7 @@ Status ConfigureFromMap(
 }
 
 
-Status StringToMap(const std::string& opts_str,
+rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
                    std::unordered_map<std::string, std::string>* opts_map) {
   assert(opts_map);
   // Example:
@@ -600,7 +600,7 @@ Status StringToMap(const std::string& opts_str,
     }
 
     std::string value;
-    Status s = OptionTypeInfo::NextToken(opts, ';', eq_pos + 1, &pos, &value);
+    rocksdb_rs::status::Status s = OptionTypeInfo::NextToken(opts, ';', eq_pos + 1, &pos, &value);
     if (!s.ok()) {
       return s;
     } else {
@@ -617,7 +617,7 @@ Status StringToMap(const std::string& opts_str,
 }
 
 
-Status GetStringFromDBOptions(std::string* opt_string,
+rocksdb_rs::status::Status GetStringFromDBOptions(std::string* opt_string,
                               const DBOptions& db_options,
                               const std::string& delimiter) {
   ConfigOptions config_options(db_options);
@@ -625,7 +625,7 @@ Status GetStringFromDBOptions(std::string* opt_string,
   return GetStringFromDBOptions(config_options, db_options, opt_string);
 }
 
-Status GetStringFromDBOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromDBOptions(const ConfigOptions& config_options,
                               const DBOptions& db_options,
                               std::string* opt_string) {
   assert(opt_string);
@@ -635,7 +635,7 @@ Status GetStringFromDBOptions(const ConfigOptions& config_options,
 }
 
 
-Status GetStringFromColumnFamilyOptions(std::string* opt_string,
+rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(std::string* opt_string,
                                         const ColumnFamilyOptions& cf_options,
                                         const std::string& delimiter) {
   ConfigOptions config_options;
@@ -644,14 +644,14 @@ Status GetStringFromColumnFamilyOptions(std::string* opt_string,
                                           opt_string);
 }
 
-Status GetStringFromColumnFamilyOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(const ConfigOptions& config_options,
                                         const ColumnFamilyOptions& cf_options,
                                         std::string* opt_string) {
   const auto config = CFOptionsAsConfigurable(cf_options);
   return config->GetOptionString(config_options, opt_string);
 }
 
-Status GetStringFromCompressionType(std::string* compression_str,
+rocksdb_rs::status::Status GetStringFromCompressionType(std::string* compression_str,
                                     rocksdb_rs::compression_type::CompressionType compression_type) {
   bool ok = SerializeEnum<rocksdb_rs::compression_type::CompressionType>(compression_type_string_map,
                                            compression_type, compression_str);
@@ -662,7 +662,7 @@ Status GetStringFromCompressionType(std::string* compression_str,
   }
 }
 
-Status GetColumnFamilyOptionsFromMap(
+rocksdb_rs::status::Status GetColumnFamilyOptionsFromMap(
     const ConfigOptions& config_options,
     const ColumnFamilyOptions& base_options,
     const std::unordered_map<std::string, std::string>& opts_map,
@@ -672,7 +672,7 @@ Status GetColumnFamilyOptionsFromMap(
   *new_options = base_options;
 
   const auto config = CFOptionsAsConfigurable(base_options);
-  Status s = ConfigureFromMap<ColumnFamilyOptions>(
+  rocksdb_rs::status::Status s = ConfigureFromMap<ColumnFamilyOptions>(
       config_options, opts_map, OptionsHelper::kCFOptionsName, config.get(),
       new_options);
   // Translate any errors (NotFound, NotSupported, to InvalidArgument
@@ -683,12 +683,12 @@ Status GetColumnFamilyOptionsFromMap(
   }
 }
 
-Status GetColumnFamilyOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetColumnFamilyOptionsFromString(const ConfigOptions& config_options,
                                         const ColumnFamilyOptions& base_options,
                                         const std::string& opts_str,
                                         ColumnFamilyOptions* new_options) {
   std::unordered_map<std::string, std::string> opts_map;
-  Status s = StringToMap(opts_str, &opts_map);
+  rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
     *new_options = base_options;
     return s;
@@ -697,14 +697,14 @@ Status GetColumnFamilyOptionsFromString(const ConfigOptions& config_options,
                                        new_options);
 }
 
-Status GetDBOptionsFromMap(
+rocksdb_rs::status::Status GetDBOptionsFromMap(
     const ConfigOptions& config_options, const DBOptions& base_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     DBOptions* new_options) {
   assert(new_options);
   *new_options = base_options;
   auto config = DBOptionsAsConfigurable(base_options);
-  Status s = ConfigureFromMap<DBOptions>(config_options, opts_map,
+  rocksdb_rs::status::Status s = ConfigureFromMap<DBOptions>(config_options, opts_map,
                                          OptionsHelper::kDBOptionsName,
                                          config.get(), new_options);
   // Translate any errors (NotFound, NotSupported, to InvalidArgument
@@ -715,12 +715,12 @@ Status GetDBOptionsFromMap(
   }
 }
 
-Status GetDBOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetDBOptionsFromString(const ConfigOptions& config_options,
                               const DBOptions& base_options,
                               const std::string& opts_str,
                               DBOptions* new_options) {
   std::unordered_map<std::string, std::string> opts_map;
-  Status s = StringToMap(opts_str, &opts_map);
+  rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
     *new_options = base_options;
     return s;
@@ -729,7 +729,7 @@ Status GetDBOptionsFromString(const ConfigOptions& config_options,
                              new_options);
 }
 
-Status GetOptionsFromString(const Options& base_options,
+rocksdb_rs::status::Status GetOptionsFromString(const Options& base_options,
                             const std::string& opts_str, Options* new_options) {
   ConfigOptions config_options(base_options);
   config_options.input_strings_escaped = false;
@@ -739,7 +739,7 @@ Status GetOptionsFromString(const Options& base_options,
                               new_options);
 }
 
-Status GetOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetOptionsFromString(const ConfigOptions& config_options,
                             const Options& base_options,
                             const std::string& opts_str, Options* new_options) {
   ColumnFamilyOptions new_cf_options;
@@ -748,7 +748,7 @@ Status GetOptionsFromString(const ConfigOptions& config_options,
 
   assert(new_options);
   *new_options = base_options;
-  Status s = StringToMap(opts_str, &opts_map);
+  rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
     return s;
   }
@@ -812,7 +812,7 @@ std::unordered_map<std::string, PrepopulateBlobCache>
         {"kDisable", PrepopulateBlobCache::kDisable},
         {"kFlushOnly", PrepopulateBlobCache::kFlushOnly}};
 
-Status OptionTypeInfo::NextToken(const std::string& opts, char delimiter,
+rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts, char delimiter,
                                  size_t pos, size_t* end, std::string* token) {
   while (pos < opts.size() && isspace(opts[pos])) {
     ++pos;
@@ -865,7 +865,7 @@ Status OptionTypeInfo::NextToken(const std::string& opts, char delimiter,
   return Status_OK();
 }
 
-Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
+rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
                              const std::string& opt_name,
                              const std::string& value, void* opt_ptr) const {
   if (IsDeprecated()) {
@@ -914,12 +914,12 @@ Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
   }
 }
 
-Status OptionTypeInfo::ParseType(
+rocksdb_rs::status::Status OptionTypeInfo::ParseType(
     const ConfigOptions& config_options, const std::string& opts_str,
     const std::unordered_map<std::string, OptionTypeInfo>& type_map,
     void* opt_addr, std::unordered_map<std::string, std::string>* unused) {
   std::unordered_map<std::string, std::string> opts_map;
-  Status status = StringToMap(opts_str, &opts_map);
+  rocksdb_rs::status::Status status = StringToMap(opts_str, &opts_map);
   if (!status.ok()) {
     return status;
   } else {
@@ -927,7 +927,7 @@ Status OptionTypeInfo::ParseType(
   }
 }
 
-Status OptionTypeInfo::ParseType(
+rocksdb_rs::status::Status OptionTypeInfo::ParseType(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     const std::unordered_map<std::string, OptionTypeInfo>& type_map,
@@ -936,7 +936,7 @@ Status OptionTypeInfo::ParseType(
     std::string opt_name;
     const auto* opt_info = Find(opts_iter.first, type_map, &opt_name);
     if (opt_info != nullptr) {
-      Status status =
+      rocksdb_rs::status::Status status =
           opt_info->Parse(config_options, opt_name, opts_iter.second, opt_addr);
       if (!status.ok()) {
         return status;
@@ -950,12 +950,12 @@ Status OptionTypeInfo::ParseType(
   return Status_OK();
 }
 
-Status OptionTypeInfo::ParseStruct(
+rocksdb_rs::status::Status OptionTypeInfo::ParseStruct(
     const ConfigOptions& config_options, const std::string& struct_name,
     const std::unordered_map<std::string, OptionTypeInfo>* struct_map,
     const std::string& opt_name, const std::string& opt_value, void* opt_addr) {
   assert(struct_map);
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   if (opt_name == struct_name || EndsWith(opt_name, "." + struct_name)) {
     // This option represents the entire struct
     std::unordered_map<std::string, std::string> unused;
@@ -989,7 +989,7 @@ Status OptionTypeInfo::ParseStruct(
   return status;
 }
 
-Status OptionTypeInfo::Serialize(const ConfigOptions& config_options,
+rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config_options,
                                  const std::string& opt_name,
                                  const void* const opt_ptr,
                                  std::string* opt_value) const {
@@ -1056,11 +1056,11 @@ Status OptionTypeInfo::Serialize(const ConfigOptions& config_options,
   }
 }
 
-Status OptionTypeInfo::SerializeType(
+rocksdb_rs::status::Status OptionTypeInfo::SerializeType(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, OptionTypeInfo>& type_map,
     const void* opt_addr, std::string* result) {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   for (const auto& iter : type_map) {
     std::string single;
     const auto& opt_info = iter.second;
@@ -1077,12 +1077,12 @@ Status OptionTypeInfo::SerializeType(
   return status;
 }
 
-Status OptionTypeInfo::SerializeStruct(
+rocksdb_rs::status::Status OptionTypeInfo::SerializeStruct(
     const ConfigOptions& config_options, const std::string& struct_name,
     const std::unordered_map<std::string, OptionTypeInfo>* struct_map,
     const std::string& opt_name, const void* opt_addr, std::string* value) {
   assert(struct_map);
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   if (EndsWith(opt_name, struct_name)) {
     // We are going to write the struct as "{ prop1=value1; prop2=value2;}.
     // Set the delimiter to ";" so that the everything will be on one line.
@@ -1358,7 +1358,7 @@ bool OptionTypeInfo::AreEqualByName(const ConfigOptions& config_options,
   return (this_value == that_value);
 }
 
-Status OptionTypeInfo::Prepare(const ConfigOptions& config_options,
+rocksdb_rs::status::Status OptionTypeInfo::Prepare(const ConfigOptions& config_options,
                                const std::string& name, void* opt_ptr) const {
   if (ShouldPrepare()) {
     if (prepare_func_ != nullptr) {
@@ -1376,7 +1376,7 @@ Status OptionTypeInfo::Prepare(const ConfigOptions& config_options,
   return Status_OK();
 }
 
-Status OptionTypeInfo::Validate(const DBOptions& db_opts,
+rocksdb_rs::status::Status OptionTypeInfo::Validate(const DBOptions& db_opts,
                                 const ColumnFamilyOptions& cf_opts,
                                 const std::string& name,
                                 const void* opt_ptr) const {

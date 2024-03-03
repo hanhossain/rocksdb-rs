@@ -101,7 +101,7 @@ class RateLimiter {
   // by NewGenericRateLimiter but is not required by RocksDB.
   //
   // REQUIRED: total_pending_request != nullptr
-  virtual Status GetTotalPendingRequests(
+  virtual rocksdb_rs::status::Status GetTotalPendingRequests(
       int64_t* total_pending_requests,
       const Env::IOPriority pri = Env::IO_TOTAL) const {
     assert(total_pending_requests != nullptr);

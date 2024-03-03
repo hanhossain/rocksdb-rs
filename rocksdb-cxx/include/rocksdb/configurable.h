@@ -110,10 +110,10 @@ class Configurable {
   //       parsed.  This can also be returned if PrepareOptions encounters an
   //       error.
   // @see ConfigOptions for a description of the controls.
-  Status ConfigureFromMap(
+  rocksdb_rs::status::Status ConfigureFromMap(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, std::string>& opt_map);
-  Status ConfigureFromMap(
+  rocksdb_rs::status::Status ConfigureFromMap(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, std::string>& opt_map,
       std::unordered_map<std::string, std::string>* unused);
@@ -129,7 +129,7 @@ class Configurable {
   //       not know how to convert the value.  This can happen if, for example,
   //       there is some nested Configurable that cannot be created.
   // @return InvalidArgument If the value cannot be successfully  parsed.
-  Status ConfigureOption(const ConfigOptions& config_options,
+  rocksdb_rs::status::Status ConfigureOption(const ConfigOptions& config_options,
                          const std::string& name, const std::string& value);
 
   // Configures the options for this class based on the input parameters.
@@ -154,7 +154,7 @@ class Configurable {
   // @return InvalidArgument If any of the values cannot be successfully
   //       parsed.  This can also be returned if PrepareOptions encounters an
   //       error.
-  Status ConfigureFromString(const ConfigOptions& config_options,
+  rocksdb_rs::status::Status ConfigureFromString(const ConfigOptions& config_options,
                              const std::string& opts);
 
   // Fills in result with the serialized options for this object.
@@ -164,7 +164,7 @@ class Configurable {
   // @return OK If the options for this object were successfully serialized.
   // @return InvalidArgument If one or more of the options could not be
   // serialized.
-  Status GetOptionString(const ConfigOptions& config_options,
+  rocksdb_rs::status::Status GetOptionString(const ConfigOptions& config_options,
                          std::string* result) const;
   // Returns the serialized options for this object.
   // This method is similar to GetOptionString with no errors.
@@ -182,7 +182,7 @@ class Configurable {
   // @param result The set of option names for this object. Note that
   //      options that are deprecated or aliases are not returned.
   // @return OK on success.
-  Status GetOptionNames(const ConfigOptions& config_options,
+  rocksdb_rs::status::Status GetOptionNames(const ConfigOptions& config_options,
                         std::unordered_set<std::string>* result) const;
 
   // Returns the value of the option associated with the input name
@@ -194,7 +194,7 @@ class Configurable {
   // @return NotFound If the name is not valid for this object.
   // @param InvalidArgument If the name is valid for this object but
   //      its value cannot be serialized.
-  virtual Status GetOption(const ConfigOptions& config_options,
+  virtual rocksdb_rs::status::Status GetOption(const ConfigOptions& config_options,
                            const std::string& name, std::string* value) const;
 
   // Checks to see if this Configurable is equivalent to other.
@@ -235,7 +235,7 @@ class Configurable {
   // @return OK If the object was successfully initialized.
   // @return InvalidArgument If this object could not be successfully
   // initialized.
-  virtual Status PrepareOptions(const ConfigOptions& config_options);
+  virtual rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options);
 
   // Checks to see if the settings are valid for this object.
   // This method checks to see if the input DBOptions and ColumnFamilyOptions
@@ -251,7 +251,7 @@ class Configurable {
   // @return OK if the options are valid
   // @return InvalidArgument If the arguments are not valid for the options
   //       of the current object.
-  virtual Status ValidateOptions(const DBOptions& db_opts,
+  virtual rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                                  const ColumnFamilyOptions& cf_opts) const;
 
   // Splits the input opt_value into the ID field and the remaining options.
@@ -268,7 +268,7 @@ class Configurable {
   // found.
   // @return InvalidArgument if the value could not be converted to a map or
   // there was or there is no id property in the map.
-  static Status GetOptionsMap(
+  static rocksdb_rs::status::Status GetOptionsMap(
       const std::string& opt_value, const std::string& default_id,
       std::string* id, std::unordered_map<std::string, std::string>* options);
 
@@ -291,7 +291,7 @@ class Configurable {
   // themselves from constant or simple ":"-separated strings.
   //
   // The default implementation does nothing and returns OK
-  virtual Status ParseStringOptions(const ConfigOptions& config_options,
+  virtual rocksdb_rs::status::Status ParseStringOptions(const ConfigOptions& config_options,
                                     const std::string& opts_str);
 
   // Internal method to configure an object from a map of name-value options.
@@ -305,7 +305,7 @@ class Configurable {
   // @param opts_map The set of options to configure
   // @param unused Any options from opt_map that were not configured.
   // @returns a Status based on the rules outlined in ConfigureFromMap
-  virtual Status ConfigureOptions(
+  virtual rocksdb_rs::status::Status ConfigureOptions(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, std::string>& opts_map,
       std::unordered_map<std::string, std::string>* unused);
@@ -315,7 +315,7 @@ class Configurable {
   // input parameters.
   // Classes may override this method to extend the functionality, or
   // change the returned Status.
-  virtual Status ParseOption(const ConfigOptions& config_options,
+  virtual rocksdb_rs::status::Status ParseOption(const ConfigOptions& config_options,
                              const OptionTypeInfo& opt_info,
                              const std::string& opt_name,
                              const std::string& opt_value, void* opt_ptr);

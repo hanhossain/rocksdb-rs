@@ -89,7 +89,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
             kUint64tHashEntryCacheResBucketSize) ==
            kUint64tHashEntryCacheResBucketSize / 2)) {
         hash_entries_info_.cache_res_bucket_handles.emplace_back(nullptr);
-        Status s = cache_res_mgr_->MakeCacheReservation(
+        rocksdb_rs::status::Status s = cache_res_mgr_->MakeCacheReservation(
             kUint64tHashEntryCacheResBucketSize * sizeof(hash),
             &hash_entries_info_.cache_res_bucket_handles.back());
       }
@@ -100,7 +100,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
     return hash_entries_info_.entries.size();
   }
 
-  virtual Status MaybePostVerify(const Slice& filter_content) override;
+  virtual rocksdb_rs::status::Status MaybePostVerify(const Slice& filter_content) override;
 
  protected:
   static constexpr uint32_t kMetadataLen = 5;
@@ -227,7 +227,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
   // Possible solution:
   // pass a custom iterator that tracks the xor checksum as
   // it iterates to ResetAndFindSeedToSolve
-  Status MaybeVerifyHashEntriesChecksum() {
+  rocksdb_rs::status::Status MaybeVerifyHashEntriesChecksum() {
     if (!detect_filter_construct_corruption_) {
       return Status_OK();
     }
@@ -326,7 +326,7 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
   }
 
   virtual Slice Finish(std::unique_ptr<const char[]>* buf,
-                       Status* status) override {
+                       rocksdb_rs::status::Status* status) override {
     size_t num_entries = hash_entries_info_.entries.size();
     size_t len_with_metadata = CalculateSpace(num_entries);
 
@@ -337,7 +337,7 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
         AllocateMaybeRounding(len_with_metadata, num_entries, &mutable_buf);
     // Cache charging for mutable_buf
     if (cache_res_mgr_) {
-      Status s = cache_res_mgr_->MakeCacheReservation(
+      rocksdb_rs::status::Status s = cache_res_mgr_->MakeCacheReservation(
           len_with_metadata * sizeof(char), &final_filter_cache_res_handle);
     }
 
@@ -357,7 +357,7 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
           "TamperHashEntries",
           &hash_entries_info_.entries);
       AddAllEntries(mutable_buf.get(), len, num_probes);
-      Status verify_hash_entries_checksum_status =
+      rocksdb_rs::status::Status verify_hash_entries_checksum_status =
           MaybeVerifyHashEntriesChecksum();
       if (!verify_hash_entries_checksum_status.ok()) {
         if (status) {
@@ -610,7 +610,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
   }
 
   virtual Slice Finish(std::unique_ptr<const char[]>* buf,
-                       Status* status) override {
+                       rocksdb_rs::status::Status* status) override {
     if (hash_entries_info_.entries.size() > kMaxRibbonEntries) {
       ROCKS_LOG_WARN(
           info_log_, "Too many keys for Ribbon filter: %llu",
@@ -649,7 +649,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     BandingType banding;
     std::size_t bytes_banding = ribbon::StandardBanding<
         Standard128RibbonTypesAndSettings>::EstimateMemoryUsage(num_slots);
-    Status status_banding_cache_res = Status_OK();
+    rocksdb_rs::status::Status status_banding_cache_res = Status_OK();
 
     // Cache charging for banding
     std::unique_ptr<CacheReservationManager::CacheReservationHandle>
@@ -689,7 +689,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
       return bloom_fallback_.Finish(buf, status);
     }
 
-    Status verify_hash_entries_checksum_status =
+    rocksdb_rs::status::Status verify_hash_entries_checksum_status =
         MaybeVerifyHashEntriesChecksum();
     if (!verify_hash_entries_checksum_status.ok()) {
       ROCKS_LOG_WARN(info_log_, "Verify hash entries checksum error: %s",
@@ -715,7 +715,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
         AllocateMaybeRounding(len_with_metadata, num_entries, &mutable_buf);
     // Cache charging for mutable_buf
     if (cache_res_mgr_) {
-      Status s = cache_res_mgr_->MakeCacheReservation(
+      rocksdb_rs::status::Status s = cache_res_mgr_->MakeCacheReservation(
           len_with_metadata * sizeof(char), &final_filter_cache_res_handle);
     }
 
@@ -898,7 +898,7 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     return fake_soln.ExpectedFpRate();
   }
 
-  Status MaybePostVerify(const Slice& filter_content) override {
+  rocksdb_rs::status::Status MaybePostVerify(const Slice& filter_content) override {
     bool fall_back = (bloom_fallback_.EstimateEntriesAdded() > 0);
     return fall_back ? bloom_fallback_.MaybePostVerify(filter_content)
                      : XXPH3FilterBitsBuilder::MaybePostVerify(filter_content);
@@ -1271,8 +1271,8 @@ class AlwaysFalseFilter : public BuiltinFilterBitsReader {
   using BuiltinFilterBitsReader::HashMayMatch;  // inherit overload
 };
 
-Status XXPH3FilterBitsBuilder::MaybePostVerify(const Slice& filter_content) {
-  Status s = Status_OK();
+rocksdb_rs::status::Status XXPH3FilterBitsBuilder::MaybePostVerify(const Slice& filter_content) {
+  rocksdb_rs::status::Status s = Status_OK();
 
   if (!detect_filter_construct_corruption_) {
     return s;
@@ -1914,7 +1914,7 @@ static int RegisterBuiltinFilterPolicies(ObjectLibrary& library,
 }
 }  // namespace
 
-Status FilterPolicy::CreateFromString(
+rocksdb_rs::status::Status FilterPolicy::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<const FilterPolicy>* policy) {
   if (value == kNullptrString || value.empty()) {
@@ -1927,7 +1927,7 @@ Status FilterPolicy::CreateFromString(
 
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  Status status =
+  rocksdb_rs::status::Status status =
       Customizable::GetOptionsMap(options, policy->get(), value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;

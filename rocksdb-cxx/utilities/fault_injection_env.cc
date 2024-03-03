@@ -30,10 +30,10 @@ std::string GetDirName(const std::string filename) {
 }
 
 // A basic file truncation function suitable for this test.
-Status Truncate(Env* env, const std::string& filename, uint64_t length) {
+rocksdb_rs::status::Status Truncate(Env* env, const std::string& filename, uint64_t length) {
   std::unique_ptr<SequentialFile> orig_file;
   const EnvOptions options;
-  Status s = env->NewSequentialFile(filename, &orig_file, options);
+  rocksdb_rs::status::Status s = env->NewSequentialFile(filename, &orig_file, options);
   if (!s.ok()) {
     fprintf(stderr, "Cannot open file %s for truncation: %s\n",
             filename.c_str(), s.ToString()->c_str());
@@ -85,12 +85,12 @@ std::pair<std::string, std::string> GetDirAndName(const std::string& name) {
   return std::make_pair(dirname, fname);
 }
 
-Status FileState::DropUnsyncedData(Env* env) const {
+rocksdb_rs::status::Status FileState::DropUnsyncedData(Env* env) const {
   ssize_t sync_pos = pos_at_last_sync_ == -1 ? 0 : pos_at_last_sync_;
   return Truncate(env, filename_, sync_pos);
 }
 
-Status FileState::DropRandomUnsyncedData(Env* env, Random* rand) const {
+rocksdb_rs::status::Status FileState::DropRandomUnsyncedData(Env* env, Random* rand) const {
   ssize_t sync_pos = pos_at_last_sync_ == -1 ? 0 : pos_at_last_sync_;
   assert(pos_ >= sync_pos);
   int range = static_cast<int>(pos_ - sync_pos);
@@ -99,7 +99,7 @@ Status FileState::DropRandomUnsyncedData(Env* env, Random* rand) const {
   return Truncate(env, filename_, truncated_size);
 }
 
-Status TestDirectory::Fsync() {
+rocksdb_rs::status::Status TestDirectory::Fsync() {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
@@ -107,7 +107,7 @@ Status TestDirectory::Fsync() {
   return dir_->Fsync();
 }
 
-Status TestDirectory::Close() {
+rocksdb_rs::status::Status TestDirectory::Close() {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
@@ -121,7 +121,7 @@ TestRandomAccessFile::TestRandomAccessFile(
   assert(env_);
 }
 
-Status TestRandomAccessFile::Read(uint64_t offset, size_t n, Slice* result,
+rocksdb_rs::status::Status TestRandomAccessFile::Read(uint64_t offset, size_t n, Slice* result,
                                   char* scratch) const {
   assert(env_);
   if (!env_->IsFilesystemActive()) {
@@ -132,7 +132,7 @@ Status TestRandomAccessFile::Read(uint64_t offset, size_t n, Slice* result,
   return target_->Read(offset, n, result, scratch);
 }
 
-Status TestRandomAccessFile::Prefetch(uint64_t offset, size_t n) {
+rocksdb_rs::status::Status TestRandomAccessFile::Prefetch(uint64_t offset, size_t n) {
   assert(env_);
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
@@ -142,10 +142,10 @@ Status TestRandomAccessFile::Prefetch(uint64_t offset, size_t n) {
   return target_->Prefetch(offset, n);
 }
 
-Status TestRandomAccessFile::MultiRead(ReadRequest* reqs, size_t num_reqs) {
+rocksdb_rs::status::Status TestRandomAccessFile::MultiRead(ReadRequest* reqs, size_t num_reqs) {
   assert(env_);
   if (!env_->IsFilesystemActive()) {
-    const Status s = env_->GetError();
+    const rocksdb_rs::status::Status s = env_->GetError();
 
     assert(reqs);
     for (size_t i = 0; i < num_reqs; ++i) {
@@ -176,11 +176,11 @@ TestWritableFile::~TestWritableFile() {
   }
 }
 
-Status TestWritableFile::Append(const Slice& data) {
+rocksdb_rs::status::Status TestWritableFile::Append(const Slice& data) {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
-  Status s = target_->Append(data);
+  rocksdb_rs::status::Status s = target_->Append(data);
   if (s.ok()) {
     state_.pos_ += data.size();
     env_->WritableFileAppended(state_);
@@ -188,24 +188,24 @@ Status TestWritableFile::Append(const Slice& data) {
   return s;
 }
 
-Status TestWritableFile::Close() {
+rocksdb_rs::status::Status TestWritableFile::Close() {
   writable_file_opened_ = false;
-  Status s = target_->Close();
+  rocksdb_rs::status::Status s = target_->Close();
   if (s.ok()) {
     env_->WritableFileClosed(state_);
   }
   return s;
 }
 
-Status TestWritableFile::Flush() {
-  Status s = target_->Flush();
+rocksdb_rs::status::Status TestWritableFile::Flush() {
+  rocksdb_rs::status::Status s = target_->Flush();
   if (s.ok() && env_->IsFilesystemActive()) {
     state_.pos_at_last_flush_ = state_.pos_;
   }
   return s;
 }
 
-Status TestWritableFile::Sync() {
+rocksdb_rs::status::Status TestWritableFile::Sync() {
   if (!env_->IsFilesystemActive()) {
     return Status_IOError("FaultInjectionTestEnv: not active");
   }
@@ -228,14 +228,14 @@ TestRandomRWFile::~TestRandomRWFile() {
   }
 }
 
-Status TestRandomRWFile::Write(uint64_t offset, const Slice& data) {
+rocksdb_rs::status::Status TestRandomRWFile::Write(uint64_t offset, const Slice& data) {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
   return target_->Write(offset, data);
 }
 
-Status TestRandomRWFile::Read(uint64_t offset, size_t n, Slice* result,
+rocksdb_rs::status::Status TestRandomRWFile::Read(uint64_t offset, size_t n, Slice* result,
                               char* scratch) const {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
@@ -243,29 +243,29 @@ Status TestRandomRWFile::Read(uint64_t offset, size_t n, Slice* result,
   return target_->Read(offset, n, result, scratch);
 }
 
-Status TestRandomRWFile::Close() {
+rocksdb_rs::status::Status TestRandomRWFile::Close() {
   file_opened_ = false;
   return target_->Close();
 }
 
-Status TestRandomRWFile::Flush() {
+rocksdb_rs::status::Status TestRandomRWFile::Flush() {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
   return target_->Flush();
 }
 
-Status TestRandomRWFile::Sync() {
+rocksdb_rs::status::Status TestRandomRWFile::Sync() {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
   return target_->Sync();
 }
 
-Status FaultInjectionTestEnv::NewDirectory(const std::string& name,
+rocksdb_rs::status::Status FaultInjectionTestEnv::NewDirectory(const std::string& name,
                                            std::unique_ptr<Directory>* result) {
   std::unique_ptr<Directory> r;
-  Status s = target()->NewDirectory(name, &r);
+  rocksdb_rs::status::Status s = target()->NewDirectory(name, &r);
   assert(s.ok());
   if (!s.ok()) {
     return s;
@@ -274,14 +274,14 @@ Status FaultInjectionTestEnv::NewDirectory(const std::string& name,
   return Status_OK();
 }
 
-Status FaultInjectionTestEnv::NewWritableFile(
+rocksdb_rs::status::Status FaultInjectionTestEnv::NewWritableFile(
     const std::string& fname, std::unique_ptr<WritableFile>* result,
     const EnvOptions& soptions) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
   // Not allow overwriting files
-  Status s = target()->FileExists(fname);
+  rocksdb_rs::status::Status s = target()->FileExists(fname);
   if (s.ok()) {
     return Status_Corruption("File already exists.");
   } else if (!s.IsNotFound()) {
@@ -303,7 +303,7 @@ Status FaultInjectionTestEnv::NewWritableFile(
   return s;
 }
 
-Status FaultInjectionTestEnv::ReopenWritableFile(
+rocksdb_rs::status::Status FaultInjectionTestEnv::ReopenWritableFile(
     const std::string& fname, std::unique_ptr<WritableFile>* result,
     const EnvOptions& soptions) {
   if (!IsFilesystemActive()) {
@@ -311,8 +311,8 @@ Status FaultInjectionTestEnv::ReopenWritableFile(
   }
 
   bool exists;
-  Status s = Status_new();
-  Status exists_s = target()->FileExists(fname);
+  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status exists_s = target()->FileExists(fname);
   if (exists_s.IsNotFound()) {
     exists = false;
   } else if (exists_s.ok()) {
@@ -357,13 +357,13 @@ Status FaultInjectionTestEnv::ReopenWritableFile(
   return s;
 }
 
-Status FaultInjectionTestEnv::NewRandomRWFile(
+rocksdb_rs::status::Status FaultInjectionTestEnv::NewRandomRWFile(
     const std::string& fname, std::unique_ptr<RandomRWFile>* result,
     const EnvOptions& soptions) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
-  Status s = target()->NewRandomRWFile(fname, result, soptions);
+  rocksdb_rs::status::Status s = target()->NewRandomRWFile(fname, result, soptions);
   if (s.ok()) {
     result->reset(new TestRandomRWFile(fname, std::move(*result), this));
     // WritableFileWriter* file is opened
@@ -378,7 +378,7 @@ Status FaultInjectionTestEnv::NewRandomRWFile(
   return s;
 }
 
-Status FaultInjectionTestEnv::NewRandomAccessFile(
+rocksdb_rs::status::Status FaultInjectionTestEnv::NewRandomAccessFile(
     const std::string& fname, std::unique_ptr<RandomAccessFile>* result,
     const EnvOptions& soptions) {
   if (!IsFilesystemActive()) {
@@ -386,7 +386,7 @@ Status FaultInjectionTestEnv::NewRandomAccessFile(
   }
 
   assert(target());
-  const Status s = target()->NewRandomAccessFile(fname, result, soptions);
+  const rocksdb_rs::status::Status s = target()->NewRandomAccessFile(fname, result, soptions);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -397,23 +397,23 @@ Status FaultInjectionTestEnv::NewRandomAccessFile(
   return Status_OK();
 }
 
-Status FaultInjectionTestEnv::DeleteFile(const std::string& f) {
+rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFile(const std::string& f) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
-  Status s = EnvWrapper::DeleteFile(f);
+  rocksdb_rs::status::Status s = EnvWrapper::DeleteFile(f);
   if (s.ok()) {
     UntrackFile(f);
   }
   return s;
 }
 
-Status FaultInjectionTestEnv::RenameFile(const std::string& s,
+rocksdb_rs::status::Status FaultInjectionTestEnv::RenameFile(const std::string& s,
                                          const std::string& t) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
-  Status ret = EnvWrapper::RenameFile(s, t);
+  rocksdb_rs::status::Status ret = EnvWrapper::RenameFile(s, t);
 
   if (ret.ok()) {
     MutexLock l(&mutex_);
@@ -434,12 +434,12 @@ Status FaultInjectionTestEnv::RenameFile(const std::string& s,
   return ret;
 }
 
-Status FaultInjectionTestEnv::LinkFile(const std::string& s,
+rocksdb_rs::status::Status FaultInjectionTestEnv::LinkFile(const std::string& s,
                                        const std::string& t) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
-  Status ret = EnvWrapper::LinkFile(s, t);
+  rocksdb_rs::status::Status ret = EnvWrapper::LinkFile(s, t);
 
   if (ret.ok()) {
     MutexLock l(&mutex_);
@@ -492,9 +492,9 @@ void FaultInjectionTestEnv::WritableFileAppended(const FileState& state) {
 
 // For every file that is not fully synced, make a call to `func` with
 // FileState of the file as the parameter.
-Status FaultInjectionTestEnv::DropFileData(
-    std::function<Status(Env*, FileState)> func) {
-  Status s = Status_new();
+rocksdb_rs::status::Status FaultInjectionTestEnv::DropFileData(
+    std::function<rocksdb_rs::status::Status(Env*, FileState)> func) {
+  rocksdb_rs::status::Status s = Status_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FileState>::const_iterator it =
            db_file_state_.begin();
@@ -507,19 +507,19 @@ Status FaultInjectionTestEnv::DropFileData(
   return s;
 }
 
-Status FaultInjectionTestEnv::DropUnsyncedFileData() {
+rocksdb_rs::status::Status FaultInjectionTestEnv::DropUnsyncedFileData() {
   return DropFileData([&](Env* env, const FileState& state) {
     return state.DropUnsyncedData(env);
   });
 }
 
-Status FaultInjectionTestEnv::DropRandomUnsyncedFileData(Random* rnd) {
+rocksdb_rs::status::Status FaultInjectionTestEnv::DropRandomUnsyncedFileData(Random* rnd) {
   return DropFileData([&](Env* env, const FileState& state) {
     return state.DropRandomUnsyncedData(env, rnd);
   });
 }
 
-Status FaultInjectionTestEnv::DeleteFilesCreatedAfterLastDirSync() {
+rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFilesCreatedAfterLastDirSync() {
   // Because DeleteFile access this container make a copy to avoid deadlock
   std::map<std::string, std::set<std::string>> map_copy;
   {
@@ -530,7 +530,7 @@ Status FaultInjectionTestEnv::DeleteFilesCreatedAfterLastDirSync() {
 
   for (auto& pair : map_copy) {
     for (std::string name : pair.second) {
-      Status s = DeleteFile(pair.first + "/" + name);
+      rocksdb_rs::status::Status s = DeleteFile(pair.first + "/" + name);
       if (!s.ok()) {
         return s;
       }

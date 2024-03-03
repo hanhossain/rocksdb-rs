@@ -37,7 +37,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
   Header(options.info_log, "DB Session ID:  %s\n", session_id.c_str());
 
   // Get files in dbname dir
-  Status s = env->GetChildren(dbname, &files);
+  rocksdb_rs::status::Status s = env->GetChildren(dbname, &files);
   if (!s.ok()) {
     Error(options.info_log, "Error when reading %s dir %s\n", dbname.c_str(),
           s.ToString()->c_str());

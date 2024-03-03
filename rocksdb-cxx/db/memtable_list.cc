@@ -106,7 +106,7 @@ int MemTableList::NumFlushed() const {
 // Operands stores the list of merge operations to apply, so far.
 bool MemTableListVersion::Get(const LookupKey& key, std::string* value,
                               PinnableWideColumns* columns,
-                              std::string* timestamp, Status* s,
+                              std::string* timestamp, rocksdb_rs::status::Status* s,
                               MergeContext* merge_context,
                               SequenceNumber* max_covering_tombstone_seq,
                               SequenceNumber* seq, const ReadOptions& read_opts,
@@ -129,7 +129,7 @@ void MemTableListVersion::MultiGet(const ReadOptions& read_options,
 }
 
 bool MemTableListVersion::GetMergeOperands(
-    const LookupKey& key, Status* s, MergeContext* merge_context,
+    const LookupKey& key, rocksdb_rs::status::Status* s, MergeContext* merge_context,
     SequenceNumber* max_covering_tombstone_seq, const ReadOptions& read_opts) {
   for (MemTable* memtable : memlist_) {
     bool done = memtable->Get(
@@ -145,7 +145,7 @@ bool MemTableListVersion::GetMergeOperands(
 
 bool MemTableListVersion::GetFromHistory(
     const LookupKey& key, std::string* value, PinnableWideColumns* columns,
-    std::string* timestamp, Status* s, MergeContext* merge_context,
+    std::string* timestamp, rocksdb_rs::status::Status* s, MergeContext* merge_context,
     SequenceNumber* max_covering_tombstone_seq, SequenceNumber* seq,
     const ReadOptions& read_opts, bool* is_blob_index) {
   return GetFromList(&memlist_history_, key, value, columns, timestamp, s,
@@ -155,7 +155,7 @@ bool MemTableListVersion::GetFromHistory(
 
 bool MemTableListVersion::GetFromList(
     std::list<MemTable*>* list, const LookupKey& key, std::string* value,
-    PinnableWideColumns* columns, std::string* timestamp, Status* s,
+    PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
     MergeContext* merge_context, SequenceNumber* max_covering_tombstone_seq,
     SequenceNumber* seq, const ReadOptions& read_opts, ReadCallback* callback,
     bool* is_blob_index) {
@@ -191,7 +191,7 @@ bool MemTableListVersion::GetFromList(
   return false;
 }
 
-Status MemTableListVersion::AddRangeTombstoneIterators(
+rocksdb_rs::status::Status MemTableListVersion::AddRangeTombstoneIterators(
     const ReadOptions& read_opts, Arena* /*arena*/,
     RangeDelAggregator* range_del_agg) {
   assert(range_del_agg != nullptr);
@@ -455,7 +455,7 @@ void MemTableList::RollbackMemtableFlush(const autovector<MemTable*>& mems,
 
 // Try record a successful flush in the manifest file. It might just return
 // Status_OK letting a concurrent flush to do actual the recording..
-Status MemTableList::TryInstallMemtableFlushResults(
+rocksdb_rs::status::Status MemTableList::TryInstallMemtableFlushResults(
     ColumnFamilyData* cfd, const MutableCFOptions& mutable_cf_options,
     const autovector<MemTable*>& mems, LogsWithPrepTracker* prep_tracker,
     VersionSet* vset, InstrumentedMutex* mu, uint64_t file_number,
@@ -481,7 +481,7 @@ Status MemTableList::TryInstallMemtableFlushResults(
   }
 
   // if some other thread is already committing, then return
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (commit_in_progress_) {
     TEST_SYNC_POINT("MemTableList::TryInstallMemtableFlushResults:InProgress");
     return s;
@@ -574,7 +574,7 @@ Status MemTableList::TryInstallMemtableFlushResults(
       edit_list.push_back(&wal_deletion);
 
       const auto manifest_write_cb = [this, cfd, batch_count, log_buffer,
-                                      to_delete, mu](const Status& status) {
+                                      to_delete, mu](const rocksdb_rs::status::Status& status) {
         RemoveMemTablesOrRestoreFlags(status, cfd, batch_count, log_buffer,
                                       to_delete, mu);
       };
@@ -685,7 +685,7 @@ void MemTableList::InstallNewVersion() {
 }
 
 void MemTableList::RemoveMemTablesOrRestoreFlags(
-    const Status& s, ColumnFamilyData* cfd, size_t batch_count,
+    const rocksdb_rs::status::Status& s, ColumnFamilyData* cfd, size_t batch_count,
     LogBuffer* log_buffer, autovector<MemTable*>* to_delete,
     InstrumentedMutex* mu) {
   assert(mu);
@@ -785,7 +785,7 @@ uint64_t MemTableList::PrecomputeMinLogContainingPrepSection(
 }
 
 // Commit a successful atomic flush in the manifest file.
-Status InstallMemtableAtomicFlushResults(
+rocksdb_rs::status::Status InstallMemtableAtomicFlushResults(
     const autovector<MemTableList*>* imm_lists,
     const autovector<ColumnFamilyData*>& cfds,
     const autovector<const MutableCFOptions*>& mutable_cf_options_list,
@@ -834,7 +834,7 @@ Status InstallMemtableAtomicFlushResults(
     }
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
 
   autovector<autovector<VersionEdit*>> edit_lists;
   uint32_t num_entries = 0;

@@ -90,7 +90,7 @@ class MyTestCompactionService : public CompactionService {
     OpenAndCompactOptions options;
     options.canceled = &canceled_;
 
-    Status s = DB::OpenAndCompact(
+    rocksdb_rs::status::Status s = DB::OpenAndCompact(
         options, db_path_, db_path_ + "/" + std::to_string(info.job_id),
         compaction_input, compaction_service_result, options_override);
     if (is_override_wait_result_) {
@@ -285,12 +285,12 @@ TEST_F(CompactionServiceTest, BasicCompactions) {
   SyncPoint::GetInstance()->SetCallBack(
       "DBImplSecondary::CompactWithoutInstallation::End", [&](void* status) {
         // override job status
-        auto s = static_cast<Status*>(status);
+        auto s = static_cast<rocksdb_rs::status::Status*>(status);
         *s = Status_Aborted("MyTestCompactionService failed to compact!");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   for (int i = 0; i < 10; i++) {
     for (int j = 0; j < 10; j++) {
       int key_id = i * 20 + j * 2;
@@ -423,7 +423,7 @@ TEST_F(CompactionServiceTest, FailedToStart) {
   std::string end_str = Key(45);
   Slice start(start_str);
   Slice end(end_str);
-  Status s = db_->CompactRange(CompactRangeOptions(), &start, &end);
+  rocksdb_rs::status::Status s = db_->CompactRange(CompactRangeOptions(), &start, &end);
   ASSERT_TRUE(s.IsIncomplete());
 }
 
@@ -441,7 +441,7 @@ TEST_F(CompactionServiceTest, InvalidResult) {
   std::string end_str = Key(45);
   Slice start(start_str);
   Slice end(end_str);
-  Status s = db_->CompactRange(CompactRangeOptions(), &start, &end);
+  rocksdb_rs::status::Status s = db_->CompactRange(CompactRangeOptions(), &start, &end);
   ASSERT_FALSE(s.ok());
 }
 
@@ -460,7 +460,7 @@ TEST_F(CompactionServiceTest, SubCompaction) {
 
   auto cro = CompactRangeOptions();
   cro.max_subcompactions = 10;
-  Status s = db_->CompactRange(cro, nullptr, nullptr);
+  rocksdb_rs::status::Status s = db_->CompactRange(cro, nullptr, nullptr);
   ASSERT_OK(s);
   VerifyTestData();
   int compaction_num = my_cs->GetCompactionNum() - compaction_num_before;
@@ -859,7 +859,7 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
 
   class TablePropertiesCollectorTest : public TablePropertiesCollector {
    public:
-    Status Finish(UserCollectedProperties* properties) override {
+    rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
       *properties = UserCollectedProperties{
           {kUserPropertyName, std::to_string(count_)},
       };
@@ -872,7 +872,7 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
 
     const char* Name() const override { return "TablePropertiesCollectorTest"; }
 
-    Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
+    rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                       EntryType /*type*/, SequenceNumber /*seq*/,
                       uint64_t /*file_size*/) override {
       count_++;

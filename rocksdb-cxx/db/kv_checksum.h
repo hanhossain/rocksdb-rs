@@ -60,7 +60,7 @@ class ProtectionInfo {
  public:
   ProtectionInfo() = default;
 
-  Status GetStatus() const;
+  rocksdb_rs::status::Status GetStatus() const;
   ProtectionInfoKVO<T> ProtectKVO(const Slice& key, const Slice& value,
                                   ValueType op_type) const;
   ProtectionInfoKVO<T> ProtectKVO(const SliceParts& key,
@@ -285,7 +285,7 @@ class ProtectionInfoKV {
 };
 
 template <typename T>
-Status ProtectionInfo<T>::GetStatus() const {
+rocksdb_rs::status::Status ProtectionInfo<T>::GetStatus() const {
   if (val_ != 0) {
     return Status_Corruption("ProtectionInfo mismatch");
   }

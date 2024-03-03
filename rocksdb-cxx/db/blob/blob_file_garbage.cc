@@ -46,7 +46,7 @@ void BlobFileGarbage::EncodeTo(std::string* output) const {
   PutVarint32(output, (uint32_t)CustomFieldTags::kEndMarker);
 }
 
-Status BlobFileGarbage::DecodeFrom(Slice* input) {
+rocksdb_rs::status::Status BlobFileGarbage::DecodeFrom(Slice* input) {
   constexpr char class_name[] = "BlobFileGarbage";
 
   if (!GetVarint64(input, &blob_file_number_)) {

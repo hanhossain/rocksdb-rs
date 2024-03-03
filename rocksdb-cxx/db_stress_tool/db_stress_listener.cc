@@ -30,7 +30,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   const std::shared_ptr<FileSystem> fs = env->GetFileSystem();
   IOOptions opts;
 
-  Status st = fs->CreateDirIfMissing(db_name, opts, nullptr);
+  rocksdb_rs::status::Status st = fs->CreateDirIfMissing(db_name, opts, nullptr);
   if (!st.ok()) {
     fprintf(stderr, "Failed to create directory %s: %s\n", db_name.c_str(),
             st.ToString()->c_str());
@@ -60,7 +60,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   uint64_t size = 0;
   {
     std::unique_ptr<FSSequentialFile> reader;
-    Status s = fs->NewSequentialFile(tmp_path, FileOptions(), &reader,
+    rocksdb_rs::status::Status s = fs->NewSequentialFile(tmp_path, FileOptions(), &reader,
                                      /*dbg*/ nullptr);
     if (s.ok()) {
       // Load from file
@@ -94,7 +94,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
       // Newly created is ok.
       // But FileSystem doesn't tell us whether non-existence was the cause of
       // the failure. (Issue #9021)
-      Status s2 = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr);
+      rocksdb_rs::status::Status s2 = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr);
       if (!s2.IsNotFound()) {
         fprintf(stderr, "Error opening unique id file: %s\n",
                 s.ToString()->c_str());
@@ -175,7 +175,7 @@ void DbStressListener::VerifyTableFileUniqueId(
   // Unit tests verify that GetUniqueIdFromTableProperties returns just a
   // substring of this, and we're only going to pull out 64 bits, so using
   // GetExtendedUniqueIdFromTableProperties is arguably stronger testing here.
-  Status s = GetExtendedUniqueIdFromTableProperties(new_file_properties, id);
+  rocksdb_rs::status::Status s = GetExtendedUniqueIdFromTableProperties(new_file_properties, id);
   if (!s.ok()) {
     fprintf(stderr, "Error getting SST unique id for %s: %s\n",
             file_path.c_str(), s.ToString()->c_str());

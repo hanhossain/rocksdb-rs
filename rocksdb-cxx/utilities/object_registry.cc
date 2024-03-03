@@ -237,7 +237,7 @@ std::shared_ptr<ObjectRegistry> ObjectRegistry::NewInstance(
   return std::make_shared<ObjectRegistry>(parent);
 }
 
-Status ObjectRegistry::SetManagedObject(
+rocksdb_rs::status::Status ObjectRegistry::SetManagedObject(
     const std::string &type, const std::string &id,
     const std::shared_ptr<Customizable> &object) {
   std::string object_key = ToManagedObjectKey(type, id);
@@ -282,7 +282,7 @@ std::shared_ptr<Customizable> ObjectRegistry::GetManagedObject(
   }
 }
 
-Status ObjectRegistry::ListManagedObjects(
+rocksdb_rs::status::Status ObjectRegistry::ListManagedObjects(
     const std::string &type, const std::string &name,
     std::vector<std::shared_ptr<Customizable>> *results) const {
   {

@@ -49,7 +49,7 @@ TBlockIter* BlockBasedTable::NewDataBlockIterator(
     BlockType block_type, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,
     FilePrefetchBuffer* prefetch_buffer, bool for_compaction, bool async_read,
-    Status& s) const {
+    rocksdb_rs::status::Status& s) const {
   using IterBlocklike = typename IterTraits<TBlockIter>::IterBlocklike;
   PERF_TIMER_GUARD(new_table_block_iter_nanos);
 
@@ -150,7 +150,7 @@ template <typename TBlockIter>
 TBlockIter* BlockBasedTable::NewDataBlockIterator(const ReadOptions& ro,
                                                   CachableEntry<Block>& block,
                                                   TBlockIter* input_iter,
-                                                  Status s) const {
+                                                  rocksdb_rs::status::Status s) const {
   PERF_TIMER_GUARD(new_table_block_iter_nanos);
 
   TBlockIter* iter = input_iter != nullptr ? input_iter : new TBlockIter;

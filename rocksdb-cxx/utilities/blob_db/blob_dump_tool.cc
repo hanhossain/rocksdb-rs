@@ -27,12 +27,12 @@ namespace blob_db {
 BlobDumpTool::BlobDumpTool()
     : reader_(nullptr), buffer_(nullptr), buffer_size_(0) {}
 
-Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
+rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
                          DisplayType show_blob,
                          DisplayType show_uncompressed_blob,
                          bool show_summary) {
   constexpr size_t kReadaheadSize = 2 * 1024 * 1024;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   const auto fs = FileSystem::Default();
   IOOptions io_opts;
   s = fs->FileExists(filename, io_opts, nullptr);
@@ -92,7 +92,7 @@ Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
   return s;
 }
 
-Status BlobDumpTool::Read(uint64_t offset, size_t size, Slice* result) {
+rocksdb_rs::status::Status BlobDumpTool::Read(uint64_t offset, size_t size, Slice* result) {
   if (buffer_size_ < size) {
     if (buffer_size_ == 0) {
       buffer_size_ = 4096;
@@ -102,7 +102,7 @@ Status BlobDumpTool::Read(uint64_t offset, size_t size, Slice* result) {
     }
     buffer_.reset(new char[buffer_size_]);
   }
-  Status s = reader_->Read(IOOptions(), offset, size, result, buffer_.get(),
+  rocksdb_rs::status::Status s = reader_->Read(IOOptions(), offset, size, result, buffer_.get(),
                            nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
   if (!s.ok()) {
     return s;
@@ -113,10 +113,10 @@ Status BlobDumpTool::Read(uint64_t offset, size_t size, Slice* result) {
   return s;
 }
 
-Status BlobDumpTool::DumpBlobLogHeader(uint64_t* offset,
+rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogHeader(uint64_t* offset,
                                        rocksdb_rs::compression_type::CompressionType* compression) {
   Slice slice;
-  Status s = Read(0, BlobLogHeader::kSize, &slice);
+  rocksdb_rs::status::Status s = Read(0, BlobLogHeader::kSize, &slice);
   if (!s.ok()) {
     return s;
   }
@@ -143,7 +143,7 @@ Status BlobDumpTool::DumpBlobLogHeader(uint64_t* offset,
   return s;
 }
 
-Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
+rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
                                        uint64_t* footer_offset) {
   auto no_footer = [&]() {
     *footer_offset = file_size;
@@ -155,7 +155,7 @@ Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
   }
   Slice slice;
   *footer_offset = file_size - BlobLogFooter::kSize;
-  Status s = Read(*footer_offset, BlobLogFooter::kSize, &slice);
+  rocksdb_rs::status::Status s = Read(*footer_offset, BlobLogFooter::kSize, &slice);
   if (!s.ok()) {
     return s;
   }
@@ -171,7 +171,7 @@ Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
   return s;
 }
 
-Status BlobDumpTool::DumpRecord(DisplayType show_key, DisplayType show_blob,
+rocksdb_rs::status::Status BlobDumpTool::DumpRecord(DisplayType show_key, DisplayType show_blob,
                                 DisplayType show_uncompressed_blob,
                                 bool show_summary, rocksdb_rs::compression_type::CompressionType compression,
                                 uint64_t* offset, uint64_t* total_records,
@@ -183,7 +183,7 @@ Status BlobDumpTool::DumpRecord(DisplayType show_key, DisplayType show_blob,
             *offset, *offset);
   }
   Slice slice;
-  Status s = Read(*offset, BlobLogRecord::kHeaderSize, &slice);
+  rocksdb_rs::status::Status s = Read(*offset, BlobLogRecord::kHeaderSize, &slice);
   if (!s.ok()) {
     return s;
   }

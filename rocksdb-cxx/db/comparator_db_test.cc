@@ -53,7 +53,7 @@ class KVIter : public Iterator {
 
   Slice key() const override { return iter_->first; }
   Slice value() const override { return iter_->second; }
-  Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return Status_OK(); }
 
  private:
   const stl_wrappers::KVMap* const map_;
@@ -304,7 +304,7 @@ class ComparatorDBTest
     ASSERT_OK(DestroyDB(dbname_, last_options_));
   }
 
-  Status TryReopen() {
+  rocksdb_rs::status::Status TryReopen() {
     delete db_;
     db_ = nullptr;
     last_options_.create_if_missing = true;

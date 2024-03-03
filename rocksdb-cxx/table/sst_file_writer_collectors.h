@@ -29,7 +29,7 @@ class SstFileWriterPropertiesCollector : public IntTblPropCollector {
                                             SequenceNumber global_seqno)
       : version_(version), global_seqno_(global_seqno) {}
 
-  virtual Status InternalAdd(const Slice& /*key*/, const Slice& /*value*/,
+  virtual rocksdb_rs::status::Status InternalAdd(const Slice& /*key*/, const Slice& /*value*/,
                              uint64_t /*file_size*/) override {
     // Intentionally left blank. Have no interest in collecting stats for
     // individual key/value pairs.
@@ -44,7 +44,7 @@ class SstFileWriterPropertiesCollector : public IntTblPropCollector {
     return;
   }
 
-  virtual Status Finish(UserCollectedProperties* properties) override {
+  virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     // File version
     std::string version_val;
     PutFixed32(&version_val, static_cast<uint32_t>(version_));

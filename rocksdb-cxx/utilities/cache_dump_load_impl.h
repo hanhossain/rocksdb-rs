@@ -98,7 +98,7 @@ class CacheDumperImpl : public CacheDumper {
                   std::unique_ptr<CacheDumpWriter>&& writer)
       : options_(dump_options), cache_(cache), writer_(std::move(writer)) {}
   ~CacheDumperImpl() { writer_.reset(); }
-  Status SetDumpFilter(std::vector<DB*> db_list) override;
+  rocksdb_rs::status::Status SetDumpFilter(std::vector<DB*> db_list) override;
   IOStatus DumpCacheEntriesToWriter() override;
 
  private:
@@ -296,7 +296,7 @@ class CacheDumperHelper {
   }
 
   // Deserialize the dump_unit_meta from a string
-  static Status DecodeDumpUnitMeta(const std::string& encoded_data,
+  static rocksdb_rs::status::Status DecodeDumpUnitMeta(const std::string& encoded_data,
                                    DumpUnitMeta* unit_meta) {
     assert(unit_meta != nullptr);
     Slice encoded_slice = Slice(encoded_data);
@@ -315,7 +315,7 @@ class CacheDumperHelper {
   }
 
   // Deserialize the dump_unit from a string.
-  static Status DecodeDumpUnit(const std::string& encoded_data,
+  static rocksdb_rs::status::Status DecodeDumpUnit(const std::string& encoded_data,
                                DumpUnit* dump_unit) {
     assert(dump_unit != nullptr);
     Slice encoded_slice = Slice(encoded_data);

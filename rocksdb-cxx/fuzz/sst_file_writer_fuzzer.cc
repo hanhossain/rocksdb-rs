@@ -33,7 +33,7 @@ using rocksdb::ParseInternalKey;
 using rocksdb::RandomAccessFileReader;
 using rocksdb::ReadOptions;
 using rocksdb::SstFileWriter;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::TableReader;
 using rocksdb::TableReaderCaller;
 using rocksdb::TableReaderOptions;
@@ -84,7 +84,7 @@ TableReader* NewTableReader(const std::string& sst_file_path,
   std::unique_ptr<TableReader> table_reader;
   const auto& fs = options.env->GetFileSystem();
   FileOptions fopts(env_options);
-  Status s = options.env->GetFileSize(sst_file_path, &file_size);
+  rocksdb_rs::status::Status s = options.env->GetFileSize(sst_file_path, &file_size);
   if (s.ok()) {
     s = RandomAccessFileReader::Create(fs, sst_file_path, fopts, &file_reader,
                                        nullptr);

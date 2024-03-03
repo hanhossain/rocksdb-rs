@@ -63,7 +63,7 @@ std::unique_ptr<PersistentCacheTier> NewBlockCache() {
   opt.pipeline_writes = FLAGS_enable_pipelined_writes;
   opt.max_write_pipeline_backlog_size = std::numeric_limits<uint64_t>::max();
   std::unique_ptr<PersistentCacheTier> cache(new BlockCacheTier(opt));
-  Status status = cache->Open();
+  rocksdb_rs::status::Status status = cache->Open();
   return cache;
 }
 
@@ -81,7 +81,7 @@ std::unique_ptr<PersistentTieredCache> NewTieredCache(
   auto scache = std::shared_ptr<PersistentCacheTier>(new BlockCacheTier(opt));
   tcache->AddTier(scache);
 
-  Status s = tcache->Open();
+  rocksdb_rs::status::Status s = tcache->Open();
   assert(s.ok());
   return tcache;
 }
@@ -195,7 +195,7 @@ class CacheTierBenchmark {
     // insert
     StopWatchNano timer(SystemClock::Default().get(), /*auto_start=*/true);
     while (true) {
-      Status status = cache_->Insert(block_key, block.get(), FLAGS_iosize);
+      rocksdb_rs::status::Status status = cache_->Insert(block_key, block.get(), FLAGS_iosize);
       if (status.ok()) {
         break;
       }
@@ -228,7 +228,7 @@ class CacheTierBenchmark {
     StopWatchNano timer(SystemClock::Default().get(), /*auto_start=*/true);
     std::unique_ptr<char[]> block;
     size_t size;
-    Status status = cache_->Lookup(key, &block, &size);
+    rocksdb_rs::status::Status status = cache_->Lookup(key, &block, &size);
     if (!status.ok()) {
       fprintf(stderr, "%s\n", status.ToString().c_str());
     }

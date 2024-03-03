@@ -16,7 +16,7 @@ class WriteUnpreparedTxnDB : public WritePreparedTxnDB {
  public:
   using WritePreparedTxnDB::WritePreparedTxnDB;
 
-  Status Initialize(const std::vector<size_t>& compaction_enabled_cf_indices,
+  rocksdb_rs::status::Status Initialize(const std::vector<size_t>& compaction_enabled_cf_indices,
                     const std::vector<ColumnFamilyHandle*>& handles) override;
 
   Transaction* BeginTransaction(const WriteOptions& write_options,
@@ -32,7 +32,7 @@ class WriteUnpreparedTxnDB : public WritePreparedTxnDB {
                         WriteUnpreparedTxn* txn);
 
  private:
-  Status RollbackRecoveredTransaction(const DBImpl::RecoveredTransaction* rtxn);
+  rocksdb_rs::status::Status RollbackRecoveredTransaction(const DBImpl::RecoveredTransaction* rtxn);
 };
 
 class WriteUnpreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
@@ -54,7 +54,7 @@ class WriteUnpreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
     assert(unprep_seqs.size() > 0);
   }
 
-  virtual Status Callback(SequenceNumber commit_seq,
+  virtual rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
                           bool is_mem_disabled __attribute__((__unused__)),
                           uint64_t, size_t /*index*/,
                           size_t /*total*/) override {

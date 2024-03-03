@@ -32,7 +32,7 @@ class ExpectedState {
 
   // Requires external locking preventing concurrent execution with any other
   // member function.
-  virtual Status Open(bool create) = 0;
+  virtual rocksdb_rs::status::Status Open(bool create) = 0;
 
   // Requires external locking covering all keys in `cf`.
   void ClearColumnFamily(int cf);
@@ -133,7 +133,7 @@ class FileExpectedState : public ExpectedState {
 
   // Requires external locking preventing concurrent execution with any other
   // member function.
-  Status Open(bool create) override;
+  rocksdb_rs::status::Status Open(bool create) override;
 
  private:
   const std::string expected_state_file_path_;
@@ -148,7 +148,7 @@ class AnonExpectedState : public ExpectedState {
 
   // Requires external locking preventing concurrent execution with any other
   // member function.
-  Status Open(bool create) override;
+  rocksdb_rs::status::Status Open(bool create) override;
 
  private:
   std::unique_ptr<std::atomic<uint32_t>[]> values_allocation_;
@@ -165,7 +165,7 @@ class ExpectedStateManager {
 
   // Requires external locking preventing concurrent execution with any other
   // member function.
-  virtual Status Open() = 0;
+  virtual rocksdb_rs::status::Status Open() = 0;
 
   // Saves expected values for the current state of `db` and begins tracking
   // changes. Following a successful `SaveAtAndAfter()`, `Restore()` can be
@@ -175,7 +175,7 @@ class ExpectedStateManager {
   // Requires external locking preventing concurrent execution with any other
   // member function. Furthermore, `db` must not be mutated while this function
   // is executing.
-  virtual Status SaveAtAndAfter(DB* db) = 0;
+  virtual rocksdb_rs::status::Status SaveAtAndAfter(DB* db) = 0;
 
   // Returns true if at least one state of historical expected values can be
   // restored.
@@ -190,7 +190,7 @@ class ExpectedStateManager {
   // Requires external locking preventing concurrent execution with any other
   // member function. Furthermore, `db` must not be mutated while this function
   // is executing.
-  virtual Status Restore(DB* db) = 0;
+  virtual rocksdb_rs::status::Status Restore(DB* db) = 0;
 
   // Requires external locking covering all keys in `cf`.
   void ClearColumnFamily(int cf) { return latest_->ClearColumnFamily(cf); }
@@ -257,7 +257,7 @@ class FileExpectedStateManager : public ExpectedStateManager {
 
   // Requires external locking preventing concurrent execution with any other
   // member function.
-  Status Open() override;
+  rocksdb_rs::status::Status Open() override;
 
   // See `ExpectedStateManager::SaveAtAndAfter()` API doc.
   //
@@ -265,7 +265,7 @@ class FileExpectedStateManager : public ExpectedStateManager {
   // "<current seqno>.state", and starts a trace in "<current seqno>.trace".
   // Due to using external files, a following `Restore()` can happen even
   // from a different process.
-  Status SaveAtAndAfter(DB* db) override;
+  rocksdb_rs::status::Status SaveAtAndAfter(DB* db) override;
 
   // See `ExpectedStateManager::HasHistory()` API doc.
   bool HasHistory() override;
@@ -276,12 +276,12 @@ class FileExpectedStateManager : public ExpectedStateManager {
   // was called and now it is `b`. Then this function replays `b - a` write
   // operations from "`a`.trace" onto "`a`.state", and then copies the resulting
   // file into "LATEST.state".
-  Status Restore(DB* db) override;
+  rocksdb_rs::status::Status Restore(DB* db) override;
 
  private:
   // Requires external locking preventing concurrent execution with any other
   // member function.
-  Status Clean();
+  rocksdb_rs::status::Status Clean();
 
   std::string GetTempPathForFilename(const std::string& filename);
   std::string GetPathForFilename(const std::string& filename);
@@ -306,7 +306,7 @@ class AnonExpectedStateManager : public ExpectedStateManager {
   //
   // This implementation returns `Status_NotSupported` since we do not
   // currently have a need to keep history of expected state within a process.
-  Status SaveAtAndAfter(DB* /* db */) override {
+  rocksdb_rs::status::Status SaveAtAndAfter(DB* /* db */) override {
     return Status_NotSupported();
   }
 
@@ -317,11 +317,11 @@ class AnonExpectedStateManager : public ExpectedStateManager {
   //
   // This implementation returns `Status_NotSupported` since we do not
   // currently have a need to keep history of expected state within a process.
-  Status Restore(DB* /* db */) override { return Status_NotSupported(); }
+  rocksdb_rs::status::Status Restore(DB* /* db */) override { return Status_NotSupported(); }
 
   // Requires external locking preventing concurrent execution with any other
   // member function.
-  Status Open() override;
+  rocksdb_rs::status::Status Open() override;
 };
 }  // namespace rocksdb
 

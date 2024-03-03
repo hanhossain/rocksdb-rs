@@ -641,7 +641,7 @@ TEST_P(BlobFileBuilderIOErrorTest, IOError) {
       BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    Status* const s = static_cast<Status*>(arg);
+    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
     (*s) = Status_IOError(sync_point_);

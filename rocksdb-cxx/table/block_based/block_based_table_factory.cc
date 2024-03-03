@@ -482,7 +482,7 @@ void BlockBasedTableFactory::InitializeOptions() {
   }
 }
 
-Status BlockBasedTableFactory::PrepareOptions(const ConfigOptions& opts) {
+rocksdb_rs::status::Status BlockBasedTableFactory::PrepareOptions(const ConfigOptions& opts) {
   InitializeOptions();
   return TableFactory::PrepareOptions(opts);
 }
@@ -490,7 +490,7 @@ Status BlockBasedTableFactory::PrepareOptions(const ConfigOptions& opts) {
 namespace {
 // Different cache kinds use the same keys for physically different values, so
 // they must not share an underlying key space with each other.
-Status CheckCacheOptionCompatibility(const BlockBasedTableOptions& bbto) {
+rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOptions& bbto) {
   int cache_count = (bbto.block_cache != nullptr) +
                     (bbto.persistent_cache != nullptr);
   if (cache_count <= 1) {
@@ -554,7 +554,7 @@ Status CheckCacheOptionCompatibility(const BlockBasedTableOptions& bbto) {
 
 }  // namespace
 
-Status BlockBasedTableFactory::NewTableReader(
+rocksdb_rs::status::Status BlockBasedTableFactory::NewTableReader(
     const ReadOptions& ro, const TableReaderOptions& table_reader_options,
     std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
     std::unique_ptr<TableReader>* table_reader,
@@ -582,7 +582,7 @@ TableBuilder* BlockBasedTableFactory::NewTableBuilder(
                                     file);
 }
 
-Status BlockBasedTableFactory::ValidateOptions(
+rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
     const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts) const {
   if (table_options_.index_type == BlockBasedTableOptions::kHashSearch &&
       cf_opts.prefix_extractor == nullptr) {
@@ -696,7 +696,7 @@ Status BlockBasedTableFactory::ValidateOptions(
     }
   }
   {
-    Status s = CheckCacheOptionCompatibility(table_options_);
+    rocksdb_rs::status::Status s = CheckCacheOptionCompatibility(table_options_);
     if (!s.ok()) {
       return s;
     }
@@ -886,12 +886,12 @@ const void* BlockBasedTableFactory::GetOptionsPtr(
 // @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
-Status BlockBasedTableFactory::ParseOption(const ConfigOptions& config_options,
+rocksdb_rs::status::Status BlockBasedTableFactory::ParseOption(const ConfigOptions& config_options,
                                            const OptionTypeInfo& opt_info,
                                            const std::string& opt_name,
                                            const std::string& opt_value,
                                            void* opt_ptr) {
-  Status status = TableFactory::ParseOption(config_options, opt_info, opt_name,
+  rocksdb_rs::status::Status status = TableFactory::ParseOption(config_options, opt_info, opt_name,
                                             opt_value, opt_ptr);
   if (config_options.input_strings_escaped && !status.ok()) {  // Got an error
     // !input_strings_escaped indicates the old API, where everything is
@@ -903,12 +903,12 @@ Status BlockBasedTableFactory::ParseOption(const ConfigOptions& config_options,
   return status;
 }
 
-Status GetBlockBasedTableOptionsFromString(
+rocksdb_rs::status::Status GetBlockBasedTableOptionsFromString(
     const ConfigOptions& config_options,
     const BlockBasedTableOptions& table_options, const std::string& opts_str,
     BlockBasedTableOptions* new_table_options) {
   std::unordered_map<std::string, std::string> opts_map;
-  Status s = StringToMap(opts_str, &opts_map);
+  rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
     return s;
   }
@@ -922,14 +922,14 @@ Status GetBlockBasedTableOptionsFromString(
   }
 }
 
-Status GetBlockBasedTableOptionsFromMap(
+rocksdb_rs::status::Status GetBlockBasedTableOptionsFromMap(
     const ConfigOptions& config_options,
     const BlockBasedTableOptions& table_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     BlockBasedTableOptions* new_table_options) {
   assert(new_table_options);
   BlockBasedTableFactory bbtf(table_options);
-  Status s = bbtf.ConfigureFromMap(config_options, opts_map);
+  rocksdb_rs::status::Status s = bbtf.ConfigureFromMap(config_options, opts_map);
   if (s.ok()) {
     *new_table_options = *(bbtf.GetOptions<BlockBasedTableOptions>());
   } else {

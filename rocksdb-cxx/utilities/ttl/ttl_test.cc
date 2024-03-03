@@ -35,7 +35,7 @@ class SpecialTimeEnv : public EnvWrapper {
   }
   const char* Name() const override { return "SpecialTimeEnv"; }
   void Sleep(int64_t sleep_time) { current_time_ += sleep_time; }
-  Status GetCurrentTime(int64_t* current_time) override {
+  rocksdb_rs::status::Status GetCurrentTime(int64_t* current_time) override {
     *current_time = current_time_;
     return Status_OK();
   }
@@ -182,7 +182,7 @@ class TtlTest : public testing::Test {
   }
 
   // Runs a manual compaction
-  Status ManualCompact(ColumnFamilyHandle* cf = nullptr) {
+  rocksdb_rs::status::Status ManualCompact(ColumnFamilyHandle* cf = nullptr) {
     assert(db_ttl_);
     if (cf == nullptr) {
       return db_ttl_->CompactRange(CompactRangeOptions(), nullptr, nullptr);
@@ -253,7 +253,7 @@ class TtlTest : public testing::Test {
     advance(kv_it_, st_pos);
     std::string v;
     for (int64_t i = 0; kv_it_ != kvmap_.end() && i < span; i++, ++kv_it_) {
-      Status s = (cf == nullptr) ? db_ttl_->Get(ropts, kv_it_->first, &v)
+      rocksdb_rs::status::Status s = (cf == nullptr) ? db_ttl_->Get(ropts, kv_it_->first, &v)
                                  : db_ttl_->Get(ropts, cf, kv_it_->first, &v);
       if (s.ok() != check) {
         fprintf(stderr, "key=%s ", kv_it_->first.c_str());
@@ -565,7 +565,7 @@ TEST_F(TtlTest, ReadOnlyPresentForever) {
   ASSERT_TRUE(db_ttl_);
 
   env_->Sleep(2);
-  Status s = ManualCompact();  // T=2:Set1 should still be there
+  rocksdb_rs::status::Status s = ManualCompact();  // T=2:Set1 should still be there
   ASSERT_TRUE(s.IsNotSupported());
   CompactCheck(0, kSampleSize_);
   CloseTtl();

@@ -136,7 +136,7 @@ class SpecialEnv : public EnvWrapper {
   static const char* kClassName() { return "SpecialEnv"; }
   const char* Name() const override { return kClassName(); }
 
-  Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
+  rocksdb_rs::status::Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
                          const EnvOptions& soptions) override {
     class SSTableFile : public WritableFile {
      private:
@@ -146,7 +146,7 @@ class SpecialEnv : public EnvWrapper {
      public:
       SSTableFile(SpecialEnv* env, std::unique_ptr<WritableFile>&& base)
           : env_(env), base_(std::move(base)) {}
-      Status Append(const Slice& data) override {
+      rocksdb_rs::status::Status Append(const Slice& data) override {
         if (env_->table_write_callback_) {
           (*env_->table_write_callback_)();
         }
@@ -160,12 +160,12 @@ class SpecialEnv : public EnvWrapper {
           return base_->Append(data);
         }
       }
-      Status Append(
+      rocksdb_rs::status::Status Append(
           const Slice& data,
           const DataVerificationInfo& /* verification_info */) override {
         return Append(data);
       }
-      Status PositionedAppend(const Slice& data, uint64_t offset) override {
+      rocksdb_rs::status::Status PositionedAppend(const Slice& data, uint64_t offset) override {
         if (env_->table_write_callback_) {
           (*env_->table_write_callback_)();
         }
@@ -179,20 +179,20 @@ class SpecialEnv : public EnvWrapper {
           return base_->PositionedAppend(data, offset);
         }
       }
-      Status PositionedAppend(
+      rocksdb_rs::status::Status PositionedAppend(
           const Slice& data, uint64_t offset,
           const DataVerificationInfo& /* verification_info */) override {
         return PositionedAppend(data, offset);
       }
-      Status Truncate(uint64_t size) override { return base_->Truncate(size); }
-      Status RangeSync(uint64_t offset, uint64_t nbytes) override {
-        Status s = base_->RangeSync(offset, nbytes);
+      rocksdb_rs::status::Status Truncate(uint64_t size) override { return base_->Truncate(size); }
+      rocksdb_rs::status::Status RangeSync(uint64_t offset, uint64_t nbytes) override {
+        rocksdb_rs::status::Status s = base_->RangeSync(offset, nbytes);
 #if !(defined NDEBUG) || !defined(OS_WIN)
         TEST_SYNC_POINT_CALLBACK("SpecialEnv::SStableFile::RangeSync", &s);
 #endif  // !(defined NDEBUG) || !defined(OS_WIN)
         return s;
       }
-      Status Close() override {
+      rocksdb_rs::status::Status Close() override {
 // SyncPoint is not supported in Released Windows Mode.
 #if !(defined NDEBUG) || !defined(OS_WIN)
         // Check preallocation size
@@ -201,19 +201,19 @@ class SpecialEnv : public EnvWrapper {
         TEST_SYNC_POINT_CALLBACK("DBTestWritableFile.GetPreallocationStatus",
                                  &preallocation_size);
 #endif  // !(defined NDEBUG) || !defined(OS_WIN)
-        Status s = base_->Close();
+        rocksdb_rs::status::Status s = base_->Close();
 #if !(defined NDEBUG) || !defined(OS_WIN)
         TEST_SYNC_POINT_CALLBACK("SpecialEnv::SStableFile::Close", &s);
 #endif  // !(defined NDEBUG) || !defined(OS_WIN)
         return s;
       }
-      Status Flush() override { return base_->Flush(); }
-      Status Sync() override {
+      rocksdb_rs::status::Status Flush() override { return base_->Flush(); }
+      rocksdb_rs::status::Status Sync() override {
         ++env_->sync_counter_;
         while (env_->delay_sstable_sync_.load(std::memory_order_acquire)) {
           env_->SleepForMicroseconds(100000);
         }
-        Status s = Status_new();
+        rocksdb_rs::status::Status s = Status_new();
         if (!env_->skip_fsync_) {
           s = base_->Sync();
         }
@@ -229,7 +229,7 @@ class SpecialEnv : public EnvWrapper {
         return base_->GetIOPriority();
       }
       bool use_direct_io() const override { return base_->use_direct_io(); }
-      Status Allocate(uint64_t offset, uint64_t len) override {
+      rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t len) override {
         return base_->Allocate(offset, len);
       }
       size_t GetUniqueId(char* id, size_t max_size) const override {
@@ -240,23 +240,23 @@ class SpecialEnv : public EnvWrapper {
      public:
       ManifestFile(SpecialEnv* env, std::unique_ptr<WritableFile>&& b)
           : env_(env), base_(std::move(b)) {}
-      Status Append(const Slice& data) override {
+      rocksdb_rs::status::Status Append(const Slice& data) override {
         if (env_->manifest_write_error_.load(std::memory_order_acquire)) {
           return Status_IOError("simulated writer error");
         } else {
           return base_->Append(data);
         }
       }
-      Status Append(
+      rocksdb_rs::status::Status Append(
           const Slice& data,
           const DataVerificationInfo& /*verification_info*/) override {
         return Append(data);
       }
 
-      Status Truncate(uint64_t size) override { return base_->Truncate(size); }
-      Status Close() override { return base_->Close(); }
-      Status Flush() override { return base_->Flush(); }
-      Status Sync() override {
+      rocksdb_rs::status::Status Truncate(uint64_t size) override { return base_->Truncate(size); }
+      rocksdb_rs::status::Status Close() override { return base_->Close(); }
+      rocksdb_rs::status::Status Flush() override { return base_->Flush(); }
+      rocksdb_rs::status::Status Sync() override {
         ++env_->sync_counter_;
         if (env_->manifest_sync_error_.load(std::memory_order_acquire)) {
           return Status_IOError("simulated sync error");
@@ -269,7 +269,7 @@ class SpecialEnv : public EnvWrapper {
         }
       }
       uint64_t GetFileSize() override { return base_->GetFileSize(); }
-      Status Allocate(uint64_t offset, uint64_t len) override {
+      rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t len) override {
         return base_->Allocate(offset, len);
       }
 
@@ -284,11 +284,11 @@ class SpecialEnv : public EnvWrapper {
         env_->num_open_wal_file_.fetch_add(1);
       }
       virtual ~WalFile() { env_->num_open_wal_file_.fetch_add(-1); }
-      Status Append(const Slice& data) override {
+      rocksdb_rs::status::Status Append(const Slice& data) override {
 #if !(defined NDEBUG) || !defined(OS_WIN)
         TEST_SYNC_POINT("SpecialEnv::WalFile::Append:1");
 #endif
-        Status s = Status_new();
+        rocksdb_rs::status::Status s = Status_new();
         if (env_->log_write_error_.load(std::memory_order_acquire)) {
           s = Status_IOError("simulated writer error");
         } else {
@@ -304,19 +304,19 @@ class SpecialEnv : public EnvWrapper {
 #endif
         return s;
       }
-      Status Append(
+      rocksdb_rs::status::Status Append(
           const Slice& data,
           const DataVerificationInfo& /* verification_info */) override {
         return Append(data);
       }
-      Status Truncate(uint64_t size) override { return base_->Truncate(size); }
+      rocksdb_rs::status::Status Truncate(uint64_t size) override { return base_->Truncate(size); }
       void PrepareWrite(size_t offset, size_t len) override {
         base_->PrepareWrite(offset, len);
       }
       void SetPreallocationBlockSize(size_t size) override {
         base_->SetPreallocationBlockSize(size);
       }
-      Status Close() override {
+      rocksdb_rs::status::Status Close() override {
 // SyncPoint is not supported in Released Windows Mode.
 #if !(defined NDEBUG) || !defined(OS_WIN)
         // Check preallocation size
@@ -328,8 +328,8 @@ class SpecialEnv : public EnvWrapper {
 
         return base_->Close();
       }
-      Status Flush() override { return base_->Flush(); }
-      Status Sync() override {
+      rocksdb_rs::status::Status Flush() override { return base_->Flush(); }
+      rocksdb_rs::status::Status Sync() override {
         ++env_->sync_counter_;
         if (env_->corrupt_in_sync_) {
           EXPECT_OK(Append(std::string(33000, ' ')));
@@ -344,7 +344,7 @@ class SpecialEnv : public EnvWrapper {
       bool IsSyncThreadSafe() const override {
         return env_->is_wal_sync_thread_safe_.load();
       }
-      Status Allocate(uint64_t offset, uint64_t len) override {
+      rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t len) override {
         return base_->Allocate(offset, len);
       }
 
@@ -356,16 +356,16 @@ class SpecialEnv : public EnvWrapper {
      public:
       OtherFile(SpecialEnv* env, std::unique_ptr<WritableFile>&& b)
           : env_(env), base_(std::move(b)) {}
-      Status Append(const Slice& data) override { return base_->Append(data); }
-      Status Append(
+      rocksdb_rs::status::Status Append(const Slice& data) override { return base_->Append(data); }
+      rocksdb_rs::status::Status Append(
           const Slice& data,
           const DataVerificationInfo& /*verification_info*/) override {
         return Append(data);
       }
-      Status Truncate(uint64_t size) override { return base_->Truncate(size); }
-      Status Close() override { return base_->Close(); }
-      Status Flush() override { return base_->Flush(); }
-      Status Sync() override {
+      rocksdb_rs::status::Status Truncate(uint64_t size) override { return base_->Truncate(size); }
+      rocksdb_rs::status::Status Close() override { return base_->Close(); }
+      rocksdb_rs::status::Status Flush() override { return base_->Flush(); }
+      rocksdb_rs::status::Status Sync() override {
         if (env_->skip_fsync_) {
           return Status_OK();
         } else {
@@ -373,7 +373,7 @@ class SpecialEnv : public EnvWrapper {
         }
       }
       uint64_t GetFileSize() override { return base_->GetFileSize(); }
-      Status Allocate(uint64_t offset, uint64_t len) override {
+      rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t len) override {
         return base_->Allocate(offset, len);
       }
 
@@ -412,7 +412,7 @@ class SpecialEnv : public EnvWrapper {
       optimized.use_direct_writes = false;
     }
 
-    Status s = target()->NewWritableFile(f, r, optimized);
+    rocksdb_rs::status::Status s = target()->NewWritableFile(f, r, optimized);
     if (s.ok()) {
       if (strstr(f.c_str(), ".sst") != nullptr) {
         r->reset(new SSTableFile(this, std::move(*r)));
@@ -427,7 +427,7 @@ class SpecialEnv : public EnvWrapper {
     return s;
   }
 
-  Status NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::status::Status NewRandomAccessFile(const std::string& f,
                              std::unique_ptr<RandomAccessFile>* r,
                              const EnvOptions& soptions) override {
     class CountingFile : public RandomAccessFile {
@@ -438,16 +438,16 @@ class SpecialEnv : public EnvWrapper {
           : target_(std::move(target)),
             counter_(counter),
             bytes_read_(bytes_read) {}
-      virtual Status Read(uint64_t offset, size_t n, Slice* result,
+      virtual rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
                           char* scratch) const override {
         counter_->Increment();
-        Status s = target_->Read(offset, n, result, scratch);
+        rocksdb_rs::status::Status s = target_->Read(offset, n, result, scratch);
         *bytes_read_ += result->size();
         return s;
       }
 
-      virtual Status Prefetch(uint64_t offset, size_t n) override {
-        Status s = target_->Prefetch(offset, n);
+      virtual rocksdb_rs::status::Status Prefetch(uint64_t offset, size_t n) override {
+        rocksdb_rs::status::Status s = target_->Prefetch(offset, n);
         *bytes_read_ += n;
         return s;
       }
@@ -465,7 +465,7 @@ class SpecialEnv : public EnvWrapper {
           : target_(std::move(target)),
             fail_cnt_(failure_cnt),
             fail_odd_(fail_odd) {}
-      virtual Status Read(uint64_t offset, size_t n, Slice* result,
+      virtual rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
                           char* scratch) const override {
         if (Random::GetTLSInstance()->OneIn(fail_odd_)) {
           fail_cnt_->fetch_add(1);
@@ -474,7 +474,7 @@ class SpecialEnv : public EnvWrapper {
         return target_->Read(offset, n, result, scratch);
       }
 
-      virtual Status Prefetch(uint64_t offset, size_t n) override {
+      virtual rocksdb_rs::status::Status Prefetch(uint64_t offset, size_t n) override {
         return target_->Prefetch(offset, n);
       }
 
@@ -484,7 +484,7 @@ class SpecialEnv : public EnvWrapper {
       uint32_t fail_odd_;
     };
 
-    Status s = target()->NewRandomAccessFile(f, r, soptions);
+    rocksdb_rs::status::Status s = target()->NewRandomAccessFile(f, r, soptions);
     random_file_open_counter_++;
     if (s.ok()) {
       if (count_random_reads_) {
@@ -502,7 +502,7 @@ class SpecialEnv : public EnvWrapper {
     return s;
   }
 
-  virtual Status NewSequentialFile(const std::string& f,
+  virtual rocksdb_rs::status::Status NewSequentialFile(const std::string& f,
                                    std::unique_ptr<SequentialFile>* r,
                                    const EnvOptions& soptions) override {
     class CountingFile : public SequentialFile {
@@ -510,18 +510,18 @@ class SpecialEnv : public EnvWrapper {
       CountingFile(std::unique_ptr<SequentialFile>&& target,
                    anon::AtomicCounter* counter)
           : target_(std::move(target)), counter_(counter) {}
-      virtual Status Read(size_t n, Slice* result, char* scratch) override {
+      virtual rocksdb_rs::status::Status Read(size_t n, Slice* result, char* scratch) override {
         counter_->Increment();
         return target_->Read(n, result, scratch);
       }
-      virtual Status Skip(uint64_t n) override { return target_->Skip(n); }
+      virtual rocksdb_rs::status::Status Skip(uint64_t n) override { return target_->Skip(n); }
 
      private:
       std::unique_ptr<SequentialFile> target_;
       anon::AtomicCounter* counter_;
     };
 
-    Status s = target()->NewSequentialFile(f, r, soptions);
+    rocksdb_rs::status::Status s = target()->NewSequentialFile(f, r, soptions);
     if (s.ok() && count_sequential_reads_) {
       r->reset(new CountingFile(std::move(*r), &sequential_read_counter_));
     }
@@ -550,8 +550,8 @@ class SpecialEnv : public EnvWrapper {
     addon_microseconds_.fetch_add(seconds * 1000000);
   }
 
-  virtual Status GetCurrentTime(int64_t* unix_time) override {
-    Status s = Status_new();
+  virtual rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
+    rocksdb_rs::status::Status s = Status_new();
     if (time_elapse_only_sleep_) {
       *unix_time = maybe_starting_time_;
     } else {
@@ -579,19 +579,19 @@ class SpecialEnv : public EnvWrapper {
            addon_microseconds_.load();
   }
 
-  virtual Status DeleteFile(const std::string& fname) override {
+  virtual rocksdb_rs::status::Status DeleteFile(const std::string& fname) override {
     delete_count_.fetch_add(1);
     return target()->DeleteFile(fname);
   }
 
-  virtual Status DeleteFile(const rust::String& fname) override {
+  virtual rocksdb_rs::status::Status DeleteFile(const rust::String& fname) override {
     delete_count_.fetch_add(1);
     return target()->DeleteFile(fname);
   }
 
   void SetMockSleep(bool enabled = true) { no_slowdown_ = enabled; }
 
-  Status NewDirectory(const std::string& name,
+  rocksdb_rs::status::Status NewDirectory(const std::string& name,
                       std::unique_ptr<Directory>* result) override {
     if (!skip_fsync_) {
       return target()->NewDirectory(name, result);
@@ -601,8 +601,8 @@ class SpecialEnv : public EnvWrapper {
         NoopDirectory() {}
         ~NoopDirectory() {}
 
-        Status Fsync() override { return Status_OK(); }
-        Status Close() override { return Status_OK(); }
+        rocksdb_rs::status::Status Fsync() override { return Status_OK(); }
+        rocksdb_rs::status::Status Close() override { return Status_OK(); }
       };
 
       result->reset(new NoopDirectory());
@@ -610,7 +610,7 @@ class SpecialEnv : public EnvWrapper {
     }
   }
 
-  Status RenameFile(const std::string& src, const std::string& dest) override {
+  rocksdb_rs::status::Status RenameFile(const std::string& src, const std::string& dest) override {
     rename_count_.fetch_add(1);
     if (rename_error_.load(std::memory_order_acquire)) {
       return Status_NotSupported("Simulated `RenameFile()` error.");
@@ -941,7 +941,7 @@ class TargetCacheChargeTrackingCache : public CacheWrapper {
 
   const char* Name() const override { return "TargetCacheChargeTrackingCache"; }
 
-  Status Insert(const Slice& key, ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, ObjectPtr value,
                 const CacheItemHelper* helper, size_t charge,
                 Handle** handle = nullptr,
                 Priority priority = Priority::LOW) override;
@@ -1114,10 +1114,10 @@ class DBTestBase : public testing::Test {
   void ReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                 const Options& options);
 
-  Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                      const std::vector<Options>& options);
 
-  Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                      const Options& options);
 
   void Reopen(const Options& options);
@@ -1128,43 +1128,43 @@ class DBTestBase : public testing::Test {
 
   void Destroy(const Options& options, bool delete_cf_paths = false);
 
-  Status ReadOnlyReopen(const Options& options);
+  rocksdb_rs::status::Status ReadOnlyReopen(const Options& options);
 
-  Status TryReopen(const Options& options);
+  rocksdb_rs::status::Status TryReopen(const Options& options);
 
   bool IsDirectIOSupported();
 
   bool IsMemoryMappedAccessSupported() const;
 
-  Status Flush(int cf = 0);
+  rocksdb_rs::status::Status Flush(int cf = 0);
 
-  Status Flush(const std::vector<int>& cf_ids);
+  rocksdb_rs::status::Status Flush(const std::vector<int>& cf_ids);
 
-  Status Put(const Slice& k, const Slice& v, WriteOptions wo = WriteOptions());
+  rocksdb_rs::status::Status Put(const Slice& k, const Slice& v, WriteOptions wo = WriteOptions());
 
-  Status Put(int cf, const Slice& k, const Slice& v,
+  rocksdb_rs::status::Status Put(int cf, const Slice& k, const Slice& v,
              WriteOptions wo = WriteOptions());
 
-  Status Merge(const Slice& k, const Slice& v,
+  rocksdb_rs::status::Status Merge(const Slice& k, const Slice& v,
                WriteOptions wo = WriteOptions());
 
-  Status Merge(int cf, const Slice& k, const Slice& v,
+  rocksdb_rs::status::Status Merge(int cf, const Slice& k, const Slice& v,
                WriteOptions wo = WriteOptions());
 
-  Status Delete(const std::string& k);
+  rocksdb_rs::status::Status Delete(const std::string& k);
 
-  Status Delete(int cf, const std::string& k);
+  rocksdb_rs::status::Status Delete(int cf, const std::string& k);
 
-  Status SingleDelete(const std::string& k);
+  rocksdb_rs::status::Status SingleDelete(const std::string& k);
 
-  Status SingleDelete(int cf, const std::string& k);
+  rocksdb_rs::status::Status SingleDelete(int cf, const std::string& k);
 
   std::string Get(const std::string& k, const Snapshot* snapshot = nullptr);
 
   std::string Get(int cf, const std::string& k,
                   const Snapshot* snapshot = nullptr);
 
-  Status Get(const std::string& k, PinnableSlice* v);
+  rocksdb_rs::status::Status Get(const std::string& k, PinnableSlice* v);
 
   std::vector<std::string> MultiGet(std::vector<int> cfs,
                                     const std::vector<std::string>& k,
@@ -1222,13 +1222,13 @@ class DBTestBase : public testing::Test {
 
   size_t CountFiles();
 
-  Status CountFiles(size_t* count);
+  rocksdb_rs::status::Status CountFiles(size_t* count);
 
-  Status Size(const Slice& start, const Slice& limit, uint64_t* size) {
+  rocksdb_rs::status::Status Size(const Slice& start, const Slice& limit, uint64_t* size) {
     return Size(start, limit, 0, size);
   }
 
-  Status Size(const Slice& start, const Slice& limit, int cf, uint64_t* size);
+  rocksdb_rs::status::Status Size(const Slice& start, const Slice& limit, int cf, uint64_t* size);
 
   void Compact(int cf, const Slice& start, const Slice& limit,
                uint32_t target_path_id);
@@ -1304,7 +1304,7 @@ class DBTestBase : public testing::Test {
   void CopyFile(const std::string& source, const std::string& destination,
                 uint64_t size = 0);
 
-  Status GetAllDataFiles(const rocksdb_rs::types::FileType file_type,
+  rocksdb_rs::status::Status GetAllDataFiles(const rocksdb_rs::types::FileType file_type,
                          std::unordered_map<std::string, uint64_t>* sst_files,
                          uint64_t* total_size = nullptr);
 
@@ -1313,7 +1313,7 @@ class DBTestBase : public testing::Test {
   void VerifyDBFromMap(
       std::map<std::string, std::string> true_data,
       size_t* total_reads_res = nullptr, bool tailing_iter = false,
-      std::map<std::string, Status> status = std::map<std::string, Status>());
+      std::map<std::string, rocksdb_rs::status::Status> status = std::map<std::string, rocksdb_rs::status::Status>());
 
   void VerifyDBInternal(
       std::vector<std::pair<std::string, std::string>> true_data);

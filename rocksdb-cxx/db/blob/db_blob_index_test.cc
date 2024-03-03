@@ -47,13 +47,13 @@ class DBBlobIndexTest : public DBTestBase {
     return static_cast_with_check<ColumnFamilyHandleImpl>(cfh())->cfd();
   }
 
-  Status PutBlobIndex(WriteBatch* batch, const Slice& key,
+  rocksdb_rs::status::Status PutBlobIndex(WriteBatch* batch, const Slice& key,
                       const Slice& blob_index) {
     return WriteBatchInternal::PutBlobIndex(batch, cfd()->GetID(), key,
                                             blob_index);
   }
 
-  Status Write(WriteBatch* batch) {
+  rocksdb_rs::status::Status Write(WriteBatch* batch) {
     return dbfull()->Write(WriteOptions(), batch);
   }
 
@@ -497,7 +497,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
     return get_key(index) + "_value" + std::to_string(version);
   };
 
-  auto check_iterator = [&](Iterator* iterator, Status expected_status,
+  auto check_iterator = [&](Iterator* iterator, rocksdb_rs::status::Status expected_status,
                             const Slice& expected_value) {
     ASSERT_TRUE(expected_status.eq(iterator->status()));
     if (expected_status.ok()) {
@@ -508,7 +508,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
     }
   };
 
-  auto verify = [&](size_t index, Status expected_status,
+  auto verify = [&](size_t index, rocksdb_rs::status::Status expected_status,
                     const Slice& expected_value) {
     // Seek
     {
@@ -574,7 +574,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
 
   std::string expected_value = get_value(1, 0) + "," + get_value(1, 1) + "," +
                                get_value(1, 2) + "," + get_value(1, 3);
-  Status expected_status = Status_new();
+  rocksdb_rs::status::Status expected_status = Status_new();
   verify(1, expected_status.Clone(), expected_value);
 
   // Test DBIter::FindValueForCurrentKeyUsingSeek flow.

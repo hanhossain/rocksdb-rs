@@ -86,7 +86,7 @@ class PlainTableIndex {
 
   // Initialize data from `index_data`, which points to raw data for
   // index stored in the SST file.
-  Status InitFromRawData(Slice index_data);
+  rocksdb_rs::status::Status InitFromRawData(Slice index_data);
 
   // Decode the sub index for specific hash bucket.
   // The `offset` is the value returned as `bucket_value` by GetOffset()

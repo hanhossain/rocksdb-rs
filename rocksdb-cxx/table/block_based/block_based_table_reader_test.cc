@@ -129,7 +129,7 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
                                 const std::string& table_name,
                                 std::unique_ptr<BlockBasedTable>* table,
                                 bool prefetch_index_and_filter_in_cache = true,
-                                Status* status = nullptr,
+                                rocksdb_rs::status::Status* status = nullptr,
                                 bool user_defined_timestamps_persisted = true) {
     const MutableCFOptions moptions(options_);
     TableReaderOptions table_reader_options = TableReaderOptions(
@@ -150,7 +150,7 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
     ReadOptions read_opts;
     read_opts.verify_checksums = true;
     std::unique_ptr<TableReader> general_table;
-    Status s = options_.table_factory->NewTableReader(
+    rocksdb_rs::status::Status s = options_.table_factory->NewTableReader(
         read_opts, table_reader_options, std::move(file), file_size,
         &general_table, prefetch_index_and_filter_in_cache);
 
@@ -273,7 +273,7 @@ TEST_P(BlockBasedTableReaderTest, MultiGet) {
   autovector<Slice, MultiGetContext::MAX_BATCH_SIZE> keys;
   autovector<Slice, MultiGetContext::MAX_BATCH_SIZE> keys_without_timestamps;
   autovector<PinnableSlice, MultiGetContext::MAX_BATCH_SIZE> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
   {
     const int step =
         static_cast<int>(kv.size()) / MultiGetContext::MAX_BATCH_SIZE;
@@ -348,7 +348,7 @@ TEST_P(BlockBasedTableReaderTest, MultiGet) {
             1);
   ASSERT_GE(perf_ctx->block_read_byte, 1);
 
-  for (const Status& status : statuses) {
+  for (const rocksdb_rs::status::Status& status : statuses) {
     ASSERT_OK(status);
   }
   // Check that keys are in cache after MultiGet.
@@ -517,7 +517,7 @@ class ChargeTableReaderTest
     CreateTable(table_name, ioptions, compression_type_, kv_);
 
     std::unique_ptr<BlockBasedTable> table;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     NewBlockBasedTableReader(
         FileOptions(), ImmutableOptions(options_),
         InternalKeyComparator(options_.comparator), table_name, &table,
@@ -560,7 +560,7 @@ TEST_P(ChargeTableReaderTest, Basic) {
          "between "
          "charge_table_reader_ == kDisabled and == kEnabled)";
 
-  Status s = Status_OK();
+  rocksdb_rs::status::Status s = Status_OK();
   std::size_t opened_table_reader_num = 0;
   std::string table_name;
   std::vector<std::unique_ptr<BlockBasedTable>> tables;
@@ -689,7 +689,7 @@ TEST_P(BlockBasedTableReaderTestVerifyChecksum, ChecksumMismatch) {
                            nullptr /* status */, persist_udt_);
   ASSERT_EQ(0,
             options.statistics->getTickerCount(BLOCK_CHECKSUM_MISMATCH_COUNT));
-  Status s =
+  rocksdb_rs::status::Status s =
       table->VerifyChecksum(read_opts, TableReaderCaller::kUserVerifyChecksum);
   ASSERT_EQ(1,
             options.statistics->getTickerCount(BLOCK_CHECKSUM_MISMATCH_COUNT));

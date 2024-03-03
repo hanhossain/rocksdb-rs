@@ -30,27 +30,27 @@ class ReplayerImpl : public Replayer {
   ~ReplayerImpl() override;
 
   using Replayer::Prepare;
-  Status Prepare() override;
+  rocksdb_rs::status::Status Prepare() override;
 
   using Replayer::Next;
-  Status Next(std::unique_ptr<TraceRecord>* record) override;
+  rocksdb_rs::status::Status Next(std::unique_ptr<TraceRecord>* record) override;
 
   using Replayer::Execute;
-  Status Execute(const std::unique_ptr<TraceRecord>& record,
+  rocksdb_rs::status::Status Execute(const std::unique_ptr<TraceRecord>& record,
                  std::unique_ptr<TraceRecordResult>* result) override;
 
   using Replayer::Replay;
-  Status Replay(
+  rocksdb_rs::status::Status Replay(
       const ReplayOptions& options,
-      const std::function<void(Status, std::unique_ptr<TraceRecordResult>&&)>&
+      const std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)>&
           result_callback) override;
 
   using Replayer::GetHeaderTimestamp;
   uint64_t GetHeaderTimestamp() const override;
 
  private:
-  Status ReadHeader(Trace* header);
-  Status ReadTrace(Trace* trace);
+  rocksdb_rs::status::Status ReadHeader(Trace* header);
+  rocksdb_rs::status::Status ReadTrace(Trace* trace);
 
   // Generic function to execute a Trace in a thread pool.
   static void BackgroundWork(void* arg);
@@ -76,10 +76,10 @@ struct ReplayerWorkerArg {
   TraceRecord::Handler* handler;
   // Callback function to report the error status and the timestamp of the
   // TraceRecord (not the start/end timestamp of executing the TraceRecord).
-  std::function<void(Status, uint64_t)> error_cb;
+  std::function<void(rocksdb_rs::status::Status, uint64_t)> error_cb;
   // Callback function to report the trace execution status and operation
   // execution status/result(s).
-  std::function<void(Status, std::unique_ptr<TraceRecordResult>&&)> result_cb;
+  std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)> result_cb;
 };
 
 }  // namespace rocksdb

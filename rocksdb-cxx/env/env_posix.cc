@@ -107,7 +107,7 @@ class PosixDynamicLibrary : public DynamicLibrary {
       : name_(name), handle_(handle) {}
   ~PosixDynamicLibrary() override { dlclose(handle_); }
 
-  Status LoadSymbol(const std::string& sym_name, void** func) override {
+  rocksdb_rs::status::Status LoadSymbol(const std::string& sym_name, void** func) override {
     assert(nullptr != func);
     dlerror();  // Clear any old error
     *func = dlsym(handle_, sym_name.c_str());
@@ -183,7 +183,7 @@ class PosixClock : public SystemClock {
 
   void SleepForMicroseconds(int micros) override { usleep(micros); }
 
-  Status GetCurrentTime(int64_t* unix_time) override {
+  rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
     time_t ret = time(nullptr);
     if (ret == (time_t)-1) {
       return IOError("GetCurrentTime", "", errno);
@@ -246,7 +246,7 @@ class PosixEnv : public CompositeEnv {
   // be loaded using the default path (LD_LIBRARY_PATH) If search_path is
   // specified, the shared library will be searched for in the directories
   // provided by the search path
-  Status LoadLibrary(const std::string& name, const std::string& path,
+  rocksdb_rs::status::Status LoadLibrary(const std::string& name, const std::string& path,
                      std::shared_ptr<DynamicLibrary>* result) override {
     assert(result != nullptr);
     if (name.empty()) {
@@ -308,7 +308,7 @@ class PosixEnv : public CompositeEnv {
 
   int ReleaseThreads(int threads_to_be_released, Priority pri) override;
 
-  Status GetThreadList(std::vector<ThreadStatus>* thread_list) override {
+  rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* thread_list) override {
     assert(thread_status_updater_);
     return thread_status_updater_->GetThreadList(thread_list);
   }
@@ -329,7 +329,7 @@ class PosixEnv : public CompositeEnv {
     return thread_id;
   }
 
-  Status GetHostName(char* name, uint64_t len) override {
+  rocksdb_rs::status::Status GetHostName(char* name, uint64_t len) override {
     const size_t max_len = static_cast<size_t>(len);
     int ret = gethostname(name, max_len);
     if (ret < 0) {
@@ -362,7 +362,7 @@ class PosixEnv : public CompositeEnv {
     return thread_pools_[pri].GetBackgroundThreads();
   }
 
-  Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
+  rocksdb_rs::status::Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
     allow_non_owner_access_ = allow_non_owner_access;
     return Status_OK();
   }
@@ -387,7 +387,7 @@ class PosixEnv : public CompositeEnv {
     thread_pools_[pool].LowerCPUPriority(rocksdb_rs::port_defs::CpuPriority::kLow);
   }
 
-  Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
+  rocksdb_rs::status::Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
     assert(pool >= Priority::BOTTOM && pool <= Priority::HIGH);
     thread_pools_[pool].LowerCPUPriority(pri);
     return Status_OK();

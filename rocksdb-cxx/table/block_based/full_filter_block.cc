@@ -104,7 +104,7 @@ void FullFilterBlockBuilder::Reset() {
 }
 
 Slice FullFilterBlockBuilder::Finish(
-    const BlockHandle& /*tmp*/, Status* status,
+    const BlockHandle& /*tmp*/, rocksdb_rs::status::Status* status,
     std::unique_ptr<const char[]>* filter_data) {
   Reset();
   // In this impl we ignore BlockHandle
@@ -144,7 +144,7 @@ std::unique_ptr<FilterBlockReader> FullFilterBlockReader::Create(
 
   CachableEntry<ParsedFullFilterBlock> filter_block;
   if (prefetch || !use_cache) {
-    const Status s = ReadFilterBlock(table, prefetch_buffer, ro, use_cache,
+    const rocksdb_rs::status::Status s = ReadFilterBlock(table, prefetch_buffer, ro, use_cache,
                                      nullptr /* get_context */, lookup_context,
                                      &filter_block);
     if (!s.ok()) {
@@ -174,7 +174,7 @@ bool FullFilterBlockReader::MayMatch(const Slice& entry, bool no_io,
                                      const ReadOptions& read_options) const {
   CachableEntry<ParsedFullFilterBlock> filter_block;
 
-  const Status s = GetOrReadFilterBlock(no_io, get_context, lookup_context,
+  const rocksdb_rs::status::Status s = GetOrReadFilterBlock(no_io, get_context, lookup_context,
                                         &filter_block, read_options);
   if (!s.ok()) {
     IGNORE_STATUS_IF_ERROR(s);
@@ -222,7 +222,7 @@ void FullFilterBlockReader::MayMatch(MultiGetRange* range, bool no_io,
                                      const ReadOptions& read_options) const {
   CachableEntry<ParsedFullFilterBlock> filter_block;
 
-  const Status s =
+  const rocksdb_rs::status::Status s =
       GetOrReadFilterBlock(no_io, range->begin()->get_context, lookup_context,
                            &filter_block, read_options);
   if (!s.ok()) {

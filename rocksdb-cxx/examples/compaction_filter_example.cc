@@ -64,7 +64,7 @@ std::string kRemoveDirCommand = "rm -rf ";
 
 int main() {
   rocksdb::DB* raw_db;
-  rocksdb::Status status = rocksdb::Status_new();
+  rocksdb_rs::status::Status status = rocksdb::Status_new();
 
   MyFilter filter;
 

@@ -88,7 +88,7 @@ class LegacySystemClock : public SystemClock {
 
   // Get the number of seconds since the Epoch, 1970-01-01 00:00:00 (UTC).
   // Only overwrites *unix_time on success.
-  Status GetCurrentTime(int64_t* unix_time) override {
+  rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
     return env_->GetCurrentTime(unix_time);
   }
   // Converts seconds-since-Jan-01-1970 to a printable string
@@ -152,7 +152,7 @@ class LegacyRandomAccessFileWrapper : public FSRandomAccessFile {
                      const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
     std::vector<ReadRequest> reqs;
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = Status_new();
 
     reqs.reserve(num_reqs);
     for (size_t i = 0; i < num_reqs; ++i) {
@@ -375,7 +375,7 @@ class LegacyFileSystemWrapper : public FileSystem {
                              std::unique_ptr<FSSequentialFile>* r,
                              IODebugContext* /*dbg*/) override {
     std::unique_ptr<SequentialFile> file;
-    Status s = target_->NewSequentialFile(f, &file, file_opts);
+    rocksdb_rs::status::Status s = target_->NewSequentialFile(f, &file, file_opts);
     if (s.ok()) {
       r->reset(new LegacySequentialFileWrapper(std::move(file)));
     }
@@ -386,7 +386,7 @@ class LegacyFileSystemWrapper : public FileSystem {
                                std::unique_ptr<FSRandomAccessFile>* r,
                                IODebugContext* /*dbg*/) override {
     std::unique_ptr<RandomAccessFile> file;
-    Status s = target_->NewRandomAccessFile(f, &file, file_opts);
+    rocksdb_rs::status::Status s = target_->NewRandomAccessFile(f, &file, file_opts);
     if (s.ok()) {
       r->reset(new LegacyRandomAccessFileWrapper(std::move(file)));
     }
@@ -396,7 +396,7 @@ class LegacyFileSystemWrapper : public FileSystem {
                            std::unique_ptr<FSWritableFile>* r,
                            IODebugContext* /*dbg*/) override {
     std::unique_ptr<WritableFile> file;
-    Status s = target_->NewWritableFile(f, &file, file_opts);
+    rocksdb_rs::status::Status s = target_->NewWritableFile(f, &file, file_opts);
     if (s.ok()) {
       r->reset(new LegacyWritableFileWrapper(std::move(file)));
     }
@@ -407,7 +407,7 @@ class LegacyFileSystemWrapper : public FileSystem {
                               std::unique_ptr<FSWritableFile>* result,
                               IODebugContext* /*dbg*/) override {
     std::unique_ptr<WritableFile> file;
-    Status s = target_->ReopenWritableFile(fname, &file, file_opts);
+    rocksdb_rs::status::Status s = target_->ReopenWritableFile(fname, &file, file_opts);
     if (s.ok()) {
       result->reset(new LegacyWritableFileWrapper(std::move(file)));
     }
@@ -419,7 +419,7 @@ class LegacyFileSystemWrapper : public FileSystem {
                              std::unique_ptr<FSWritableFile>* r,
                              IODebugContext* /*dbg*/) override {
     std::unique_ptr<WritableFile> file;
-    Status s = target_->ReuseWritableFile(fname, old_fname, &file, file_opts);
+    rocksdb_rs::status::Status s = target_->ReuseWritableFile(fname, old_fname, &file, file_opts);
     if (s.ok()) {
       r->reset(new LegacyWritableFileWrapper(std::move(file)));
     }
@@ -430,7 +430,7 @@ class LegacyFileSystemWrapper : public FileSystem {
                            std::unique_ptr<FSRandomRWFile>* result,
                            IODebugContext* /*dbg*/) override {
     std::unique_ptr<RandomRWFile> file;
-    Status s = target_->NewRandomRWFile(fname, &file, file_opts);
+    rocksdb_rs::status::Status s = target_->NewRandomRWFile(fname, &file, file_opts);
     if (s.ok()) {
       result->reset(new LegacyRandomRWFileWrapper(std::move(file)));
     }
@@ -446,7 +446,7 @@ class LegacyFileSystemWrapper : public FileSystem {
                         std::unique_ptr<FSDirectory>* result,
                         IODebugContext* /*dbg*/) override {
     std::unique_ptr<Directory> dir;
-    Status s = target_->NewDirectory(name, &dir);
+    rocksdb_rs::status::Status s = target_->NewDirectory(name, &dir);
     if (s.ok()) {
       result->reset(new LegacyDirectoryWrapper(std::move(dir)));
     }
@@ -630,12 +630,12 @@ Env::Env(const std::shared_ptr<FileSystem>& fs,
 
 Env::~Env() {}
 
-Status Env::NewLogger(const std::string& fname,
+rocksdb_rs::status::Status Env::NewLogger(const std::string& fname,
                       std::shared_ptr<Logger>* result) {
   return NewEnvLogger(fname, this, result);
 }
 
-Status Env::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Env::CreateFromString(const ConfigOptions& config_options,
                              const std::string& value, Env** result) {
   Env* base = Env::Default();
   if (value.empty() || base->IsInstanceOf(value)) {
@@ -644,7 +644,7 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
   } else {
     RegisterSystemEnvs();
     Env* env = *result;
-    Status s = LoadStaticObject<Env>(config_options, value, &env);
+    rocksdb_rs::status::Status s = LoadStaticObject<Env>(config_options, value, &env);
     if (s.ok()) {
       *result = env;
     }
@@ -652,7 +652,7 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
   }
 }
 
-Status Env::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Env::CreateFromString(const ConfigOptions& config_options,
                              const std::string& value, Env** result,
                              std::shared_ptr<Env>* guard) {
   assert(result);
@@ -663,7 +663,7 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
 
-  Status status =
+  rocksdb_rs::status::Status status =
       Customizable::GetOptionsMap(config_options, env, value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
@@ -689,7 +689,7 @@ Status Env::CreateFromString(const ConfigOptions& config_options,
   return status;
 }
 
-Status Env::CreateFromUri(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Env::CreateFromUri(const ConfigOptions& config_options,
                           const std::string& env_uri, const std::string& fs_uri,
                           Env** result, std::shared_ptr<Env>* guard) {
   *result = config_options.env;
@@ -704,7 +704,7 @@ Status Env::CreateFromUri(const ConfigOptions& config_options,
     return CreateFromString(config_options, env_uri, result, guard);
   } else {
     std::shared_ptr<FileSystem> fs;
-    Status s = FileSystem::CreateFromString(config_options, fs_uri, &fs);
+    rocksdb_rs::status::Status s = FileSystem::CreateFromString(config_options, fs_uri, &fs);
     if (s.ok()) {
       guard->reset(new CompositeEnvWrapper(*result, fs));
       *result = guard->get();
@@ -734,22 +734,22 @@ uint64_t Env::GetThreadID() const {
   return hasher(std::this_thread::get_id());
 }
 
-Status Env::ReuseWritableFile(const std::string& fname,
+rocksdb_rs::status::Status Env::ReuseWritableFile(const std::string& fname,
                               const std::string& old_fname,
                               std::unique_ptr<WritableFile>* result,
                               const EnvOptions& options) {
-  Status s = RenameFile(old_fname, fname);
+  rocksdb_rs::status::Status s = RenameFile(old_fname, fname);
   if (!s.ok()) {
     return s;
   }
   return NewWritableFile(fname, result, options);
 }
 
-Status Env::GetChildrenFileAttributes(const std::string& dir,
+rocksdb_rs::status::Status Env::GetChildrenFileAttributes(const std::string& dir,
                                       std::vector<FileAttributes>* result) {
   assert(result != nullptr);
   std::vector<std::string> child_fnames;
-  Status s = GetChildren(dir, &child_fnames);
+  rocksdb_rs::status::Status s = GetChildren(dir, &child_fnames);
   if (!s.ok()) {
     return s;
   }
@@ -771,9 +771,9 @@ Status Env::GetChildrenFileAttributes(const std::string& dir,
   return Status_OK();
 }
 
-Status Env::GetHostNameString(std::string* result) {
+rocksdb_rs::status::Status Env::GetHostNameString(std::string* result) {
   std::array<char, kMaxHostNameLen> hostname_buf{};
-  Status s = GetHostName(hostname_buf.data(), hostname_buf.size());
+  rocksdb_rs::status::Status s = GetHostName(hostname_buf.data(), hostname_buf.size());
   if (s.ok()) {
     hostname_buf[hostname_buf.size() - 1] = '\0';
     result->assign(hostname_buf.data());
@@ -831,7 +831,7 @@ MemoryMappedFileBuffer::~MemoryMappedFileBuffer() {}
 
 Logger::~Logger() {}
 
-Status Logger::Close() {
+rocksdb_rs::status::Status Logger::Close() {
   if (!closed_) {
     closed_ = true;
     return CloseImpl();
@@ -840,7 +840,7 @@ Status Logger::Close() {
   }
 }
 
-Status Logger::CloseImpl() { return Status_NotSupported(); }
+rocksdb_rs::status::Status Logger::CloseImpl() { return Status_NotSupported(); }
 
 FileLock::~FileLock() {}
 
@@ -1054,13 +1054,13 @@ void Log(const std::shared_ptr<Logger>& info_log, const char* format, ...) {
   va_end(ap);
 }
 
-Status WriteStringToFile(Env* env, const Slice& data, const std::string& fname,
+rocksdb_rs::status::Status WriteStringToFile(Env* env, const Slice& data, const std::string& fname,
                          bool should_sync) {
   const auto& fs = env->GetFileSystem();
   return WriteStringToFile(fs.get(), data, fname, should_sync);
 }
 
-Status ReadFileToString(Env* env, const std::string& fname, std::string* data) {
+rocksdb_rs::status::Status ReadFileToString(Env* env, const std::string& fname, std::string* data) {
   const auto& fs = env->GetFileSystem();
   return ReadFileToString(fs.get(), fname, data);
 }
@@ -1141,7 +1141,7 @@ EnvOptions::EnvOptions() {
   AssignEnvOptions(this, options);
 }
 
-Status NewEnvLogger(const std::string& fname, Env* env,
+rocksdb_rs::status::Status NewEnvLogger(const std::string& fname, Env* env,
                     std::shared_ptr<Logger>* result) {
   FileOptions options;
   // TODO: Tune the buffer size.
@@ -1178,7 +1178,7 @@ SystemClockWrapper::SystemClockWrapper(const std::shared_ptr<SystemClock>& t)
   RegisterOptions("", &target_, &sc_wrapper_type_info);
 }
 
-Status SystemClockWrapper::PrepareOptions(const ConfigOptions& options) {
+rocksdb_rs::status::Status SystemClockWrapper::PrepareOptions(const ConfigOptions& options) {
   if (target_ == nullptr) {
     target_ = SystemClock::Default();
   }
@@ -1218,7 +1218,7 @@ static int RegisterBuiltinSystemClocks(ObjectLibrary& library,
   return static_cast<int>(library.GetFactoryCount(&num_types));
 }
 
-Status SystemClock::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status SystemClock::CreateFromString(const ConfigOptions& config_options,
                                      const std::string& value,
                                      std::shared_ptr<SystemClock>* result) {
   auto clock = SystemClock::Default();

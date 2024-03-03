@@ -74,7 +74,7 @@ class PlainTableIterator : public InternalIterator {
 
   Slice value() const override;
 
-  Status status() const override;
+  rocksdb_rs::status::Status status() const override;
 
  private:
   PlainTableReader* table_;
@@ -84,7 +84,7 @@ class PlainTableIterator : public InternalIterator {
   uint32_t next_offset_;
   Slice key_;
   Slice value_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
 };
 
 extern const uint64_t kPlainTableMagicNumber;
@@ -109,7 +109,7 @@ PlainTableReader::PlainTableReader(
       file_size_(file_size),
       table_properties_(nullptr) {}
 
-Status PlainTableReader::Open(
+rocksdb_rs::status::Status PlainTableReader::Open(
     const ImmutableOptions& ioptions, const EnvOptions& env_options,
     const InternalKeyComparator& internal_comparator,
     std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
@@ -208,7 +208,7 @@ InternalIterator* PlainTableReader::NewIterator(
   }
 }
 
-Status PlainTableReader::PopulateIndexRecordList(
+rocksdb_rs::status::Status PlainTableReader::PopulateIndexRecordList(
     PlainTableIndexBuilder* index_builder,
     std::vector<uint32_t>* prefix_hashes) {
   Slice prev_key_prefix_slice;
@@ -224,7 +224,7 @@ Status PlainTableReader::PopulateIndexRecordList(
     ParsedInternalKey key;
     Slice value_slice;
     bool seekable = false;
-    Status s = Next(&decoder, &pos, &key, nullptr, &value_slice, &seekable);
+    rocksdb_rs::status::Status s = Next(&decoder, &pos, &key, nullptr, &value_slice, &seekable);
     if (!s.ok()) {
       return s;
     }
@@ -277,7 +277,7 @@ void PlainTableReader::FillBloom(const std::vector<uint32_t>& prefix_hashes) {
   }
 }
 
-Status PlainTableReader::MmapDataIfNeeded() {
+rocksdb_rs::status::Status PlainTableReader::MmapDataIfNeeded() {
   if (file_info_.is_mmap_mode) {
     // Get mmapped memory.
     return file_info_.file->Read(
@@ -287,7 +287,7 @@ Status PlainTableReader::MmapDataIfNeeded() {
   return Status_OK();
 }
 
-Status PlainTableReader::PopulateIndex(TableProperties* props,
+rocksdb_rs::status::Status PlainTableReader::PopulateIndex(TableProperties* props,
                                        int bloom_bits_per_key,
                                        double hash_table_ratio,
                                        size_t index_sparseness,
@@ -298,7 +298,7 @@ Status PlainTableReader::PopulateIndex(TableProperties* props,
 
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status s =
+  rocksdb_rs::status::Status s =
       ReadMetaBlock(file_info_.file.get(), nullptr /* prefetch_buffer */,
                     file_size_, kPlainTableMagicNumber, ioptions_, read_options,
                     PlainTableIndexBuilder::kPlainTableIndexBlock,
@@ -425,7 +425,7 @@ Status PlainTableReader::PopulateIndex(TableProperties* props,
   return Status_OK();
 }
 
-Status PlainTableReader::GetOffset(PlainTableKeyDecoder* decoder,
+rocksdb_rs::status::Status PlainTableReader::GetOffset(PlainTableKeyDecoder* decoder,
                                    const Slice& target, const Slice& prefix,
                                    uint32_t prefix_hash, bool& prefix_matched,
                                    uint32_t* offset) const {
@@ -448,7 +448,7 @@ Status PlainTableReader::GetOffset(PlainTableKeyDecoder* decoder,
   uint32_t high = upper_bound;
   ParsedInternalKey mid_key;
   ParsedInternalKey parsed_target;
-  Status s = ParseInternalKey(target, &parsed_target,
+  rocksdb_rs::status::Status s = ParseInternalKey(target, &parsed_target,
                               false /* log_err_key */);  // TODO
   if (!s.ok()) return s;
 
@@ -516,7 +516,7 @@ bool PlainTableReader::MatchBloom(uint32_t hash) const {
   }
 }
 
-Status PlainTableReader::Next(PlainTableKeyDecoder* decoder, uint32_t* offset,
+rocksdb_rs::status::Status PlainTableReader::Next(PlainTableKeyDecoder* decoder, uint32_t* offset,
                               ParsedInternalKey* parsed_key,
                               Slice* internal_key, Slice* value,
                               bool* seekable) const {
@@ -530,7 +530,7 @@ Status PlainTableReader::Next(PlainTableKeyDecoder* decoder, uint32_t* offset,
   }
 
   uint32_t bytes_read;
-  Status s = decoder->NextKey(*offset, parsed_key, internal_key, value,
+  rocksdb_rs::status::Status s = decoder->NextKey(*offset, parsed_key, internal_key, value,
                               &bytes_read, seekable);
   if (!s.ok()) {
     return s;
@@ -546,7 +546,7 @@ void PlainTableReader::Prepare(const Slice& target) {
   }
 }
 
-Status PlainTableReader::Get(const ReadOptions& /*ro*/, const Slice& target,
+rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, const Slice& target,
                              GetContext* get_context,
                              const SliceTransform* /* prefix_extractor */,
                              bool /*skip_filters*/) {
@@ -577,7 +577,7 @@ Status PlainTableReader::Get(const ReadOptions& /*ro*/, const Slice& target,
   bool prefix_match;
   PlainTableKeyDecoder decoder(&file_info_, encoding_type_, user_key_len_,
                                prefix_extractor_);
-  Status s = GetOffset(&decoder, target, prefix_slice, prefix_hash,
+  rocksdb_rs::status::Status s = GetOffset(&decoder, target, prefix_slice, prefix_hash,
                        prefix_match, &offset);
 
   if (!s.ok()) {
@@ -763,6 +763,6 @@ Slice PlainTableIterator::value() const {
   return value_;
 }
 
-Status PlainTableIterator::status() const { return status_.Clone(); }
+rocksdb_rs::status::Status PlainTableIterator::status() const { return status_.Clone(); }
 
 }  // namespace rocksdb

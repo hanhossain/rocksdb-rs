@@ -55,12 +55,12 @@ OptimisticTransaction::~OptimisticTransaction() {}
 
 void OptimisticTransaction::Clear() { TransactionBaseImpl::Clear(); }
 
-Status OptimisticTransaction::Prepare() {
+rocksdb_rs::status::Status OptimisticTransaction::Prepare() {
   return Status_InvalidArgument(
       "Two phase commit not supported for optimistic transactions.");
 }
 
-Status OptimisticTransaction::Commit() {
+rocksdb_rs::status::Status OptimisticTransaction::Commit() {
   auto txn_db_impl = static_cast_with_check<OptimisticTransactionDBImpl,
                                             OptimisticTransactionDB>(txn_db_);
   assert(txn_db_impl);
@@ -76,14 +76,14 @@ Status OptimisticTransaction::Commit() {
   return Status_OK();
 }
 
-Status OptimisticTransaction::CommitWithSerialValidate() {
+rocksdb_rs::status::Status OptimisticTransaction::CommitWithSerialValidate() {
   // Set up callback which will call CheckTransactionForConflicts() to
   // check whether this transaction is safe to be committed.
   OptimisticTransactionCallback callback(this);
 
   DBImpl* db_impl = static_cast_with_check<DBImpl>(db_->GetRootDB());
 
-  Status s = db_impl->WriteWithCallback(
+  rocksdb_rs::status::Status s = db_impl->WriteWithCallback(
       write_options_, GetWriteBatch()->GetWriteBatch(), &callback);
 
   if (s.ok()) {
@@ -93,7 +93,7 @@ Status OptimisticTransaction::CommitWithSerialValidate() {
   return s;
 }
 
-Status OptimisticTransaction::CommitWithParallelValidate() {
+rocksdb_rs::status::Status OptimisticTransaction::CommitWithParallelValidate() {
   auto txn_db_impl = static_cast_with_check<OptimisticTransactionDBImpl,
                                             OptimisticTransactionDB>(txn_db_);
   assert(txn_db_impl);
@@ -136,7 +136,7 @@ Status OptimisticTransaction::CommitWithParallelValidate() {
     }
   });
 
-  Status s = TransactionUtil::CheckKeysForConflicts(db_impl, *tracked_locks_,
+  rocksdb_rs::status::Status s = TransactionUtil::CheckKeysForConflicts(db_impl, *tracked_locks_,
                                                     true /* cache_only */);
   if (!s.ok()) {
     return s;
@@ -150,7 +150,7 @@ Status OptimisticTransaction::CommitWithParallelValidate() {
   return s;
 }
 
-Status OptimisticTransaction::Rollback() {
+rocksdb_rs::status::Status OptimisticTransaction::Rollback() {
   Clear();
   return Status_OK();
 }
@@ -158,7 +158,7 @@ Status OptimisticTransaction::Rollback() {
 // Record this key so that we can check it for conflicts at commit time.
 //
 // 'exclusive' is unused for OptimisticTransaction.
-Status OptimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status OptimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
                                       const Slice& key, bool read_only,
                                       bool exclusive, const bool do_validate,
                                       const bool assume_tracked) {
@@ -192,7 +192,7 @@ Status OptimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
 //
 // Should only be called on writer thread in order to avoid any race conditions
 // in detecting write conflicts.
-Status OptimisticTransaction::CheckTransactionForConflicts(DB* db) {
+rocksdb_rs::status::Status OptimisticTransaction::CheckTransactionForConflicts(DB* db) {
   auto db_impl = static_cast_with_check<DBImpl>(db);
 
   // Since we are on the write thread and do not want to block other writers,
@@ -203,7 +203,7 @@ Status OptimisticTransaction::CheckTransactionForConflicts(DB* db) {
                                                 true /* cache_only */);
 }
 
-Status OptimisticTransaction::SetName(const TransactionName& /* unused */) {
+rocksdb_rs::status::Status OptimisticTransaction::SetName(const TransactionName& /* unused */) {
   return Status_InvalidArgument("Optimistic transactions cannot be named.");
 }
 

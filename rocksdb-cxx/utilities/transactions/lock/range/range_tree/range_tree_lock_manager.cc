@@ -59,7 +59,7 @@ void deserialize_endpoint(const DBT* dbt, EndpointStruct* endp) {
 }
 
 // Get a range lock on [start_key; end_key] range
-Status RangeTreeLockManager::TryLock(PessimisticTransaction* txn,
+rocksdb_rs::status::Status RangeTreeLockManager::TryLock(PessimisticTransaction* txn,
                                      uint32_t column_family_id,
                                      const Endpoint& start_endp,
                                      const Endpoint& end_endp, Env*,

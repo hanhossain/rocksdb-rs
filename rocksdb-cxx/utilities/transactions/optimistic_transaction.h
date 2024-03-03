@@ -41,16 +41,16 @@ class OptimisticTransaction : public TransactionBaseImpl {
                     const WriteOptions& write_options,
                     const OptimisticTransactionOptions& txn_options);
 
-  Status Prepare() override;
+  rocksdb_rs::status::Status Prepare() override;
 
-  Status Commit() override;
+  rocksdb_rs::status::Status Commit() override;
 
-  Status Rollback() override;
+  rocksdb_rs::status::Status Rollback() override;
 
-  Status SetName(const TransactionName& name) override;
+  rocksdb_rs::status::Status SetName(const TransactionName& name) override;
 
  protected:
-  Status TryLock(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status TryLock(ColumnFamilyHandle* column_family, const Slice& key,
                  bool read_only, bool exclusive, const bool do_validate = true,
                  const bool assume_tracked = false) override;
 
@@ -66,7 +66,7 @@ class OptimisticTransaction : public TransactionBaseImpl {
   // OR if we can not determine whether there would be any such conflicts.
   //
   // Should only be called on writer thread.
-  Status CheckTransactionForConflicts(DB* db);
+  rocksdb_rs::status::Status CheckTransactionForConflicts(DB* db);
 
   void Clear() override;
 
@@ -75,9 +75,9 @@ class OptimisticTransaction : public TransactionBaseImpl {
     // Nothing to unlock.
   }
 
-  Status CommitWithSerialValidate();
+  rocksdb_rs::status::Status CommitWithSerialValidate();
 
-  Status CommitWithParallelValidate();
+  rocksdb_rs::status::Status CommitWithParallelValidate();
 };
 
 // Used at commit time to trigger transaction validation
@@ -86,7 +86,7 @@ class OptimisticTransactionCallback : public WriteCallback {
   explicit OptimisticTransactionCallback(OptimisticTransaction* txn)
       : txn_(txn) {}
 
-  Status Callback(DB* db) override {
+  rocksdb_rs::status::Status Callback(DB* db) override {
     return txn_->CheckTransactionForConflicts(db);
   }
 

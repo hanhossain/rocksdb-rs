@@ -572,7 +572,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
     RegisterOptions("EncryptionProvider", &provider_, &encrypted_fs_type_info);
   }
 
-  Status AddCipher(const std::string& descriptor, const char* cipher,
+  rocksdb_rs::status::Status AddCipher(const std::string& descriptor, const char* cipher,
                    size_t len, bool for_write) override {
     return provider_->AddCipher(descriptor, cipher, len, for_write);
   }
@@ -785,7 +785,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
 };
 }  // namespace
 
-Status NewEncryptedFileSystemImpl(
+rocksdb_rs::status::Status NewEncryptedFileSystemImpl(
     const std::shared_ptr<FileSystem>& base,
     const std::shared_ptr<EncryptionProvider>& provider,
     std::unique_ptr<FileSystem>* result) {
@@ -797,7 +797,7 @@ std::shared_ptr<FileSystem> NewEncryptedFS(
     const std::shared_ptr<FileSystem>& base,
     const std::shared_ptr<EncryptionProvider>& provider) {
   std::unique_ptr<FileSystem> efs;
-  Status s = NewEncryptedFileSystemImpl(base, provider, &efs);
+  rocksdb_rs::status::Status s = NewEncryptedFileSystemImpl(base, provider, &efs);
   if (s.ok()) {
     s = efs->PrepareOptions(ConfigOptions());
   }
@@ -815,7 +815,7 @@ Env* NewEncryptedEnv(Env* base_env,
       base_env, NewEncryptedFS(base_env->GetFileSystem(), provider));
 }
 
-Status BlockAccessCipherStream::Encrypt(uint64_t fileOffset, char* data,
+rocksdb_rs::status::Status BlockAccessCipherStream::Encrypt(uint64_t fileOffset, char* data,
                                         size_t dataSize) {
   // Calculate block index
   auto blockSize = BlockSize();
@@ -859,7 +859,7 @@ Status BlockAccessCipherStream::Encrypt(uint64_t fileOffset, char* data,
   }
 }
 
-Status BlockAccessCipherStream::Decrypt(uint64_t fileOffset, char* data,
+rocksdb_rs::status::Status BlockAccessCipherStream::Decrypt(uint64_t fileOffset, char* data,
                                         size_t dataSize) {
   // Calculate block index
   auto blockSize = BlockSize();
@@ -937,13 +937,13 @@ class ROT13BlockCipher : public BlockCipher {
   const char* Name() const override { return kClassName(); }
 
   size_t BlockSize() override { return blockSize_; }
-  Status Encrypt(char* data) override {
+  rocksdb_rs::status::Status Encrypt(char* data) override {
     for (size_t i = 0; i < blockSize_; ++i) {
       data[i] += 13;
     }
     return Status_OK();
   }
-  Status Decrypt(char* data) override { return Encrypt(data); }
+  rocksdb_rs::status::Status Decrypt(char* data) override { return Encrypt(data); }
 };
 
 static const std::unordered_map<std::string, OptionTypeInfo>
@@ -960,7 +960,7 @@ void CTRCipherStream::AllocateScratch(std::string& scratch) {
   scratch.reserve(blockSize);
 }
 
-Status CTRCipherStream::EncryptBlock(uint64_t blockIndex, char* data,
+rocksdb_rs::status::Status CTRCipherStream::EncryptBlock(uint64_t blockIndex, char* data,
                                      char* scratch) {
   // Create nonce + counter
   auto blockSize = cipher_->BlockSize();
@@ -980,7 +980,7 @@ Status CTRCipherStream::EncryptBlock(uint64_t blockIndex, char* data,
   return Status_OK();
 }
 
-Status CTRCipherStream::DecryptBlock(uint64_t blockIndex, char* data,
+rocksdb_rs::status::Status CTRCipherStream::DecryptBlock(uint64_t blockIndex, char* data,
                                      char* scratch) {
   // For CTR decryption & encryption are the same
   return EncryptBlock(blockIndex, data, scratch);
@@ -1005,7 +1005,7 @@ size_t CTREncryptionProvider::GetPrefixLength() const {
   return defaultPrefixLength;
 }
 
-Status CTREncryptionProvider::AddCipher(const std::string& /*descriptor*/,
+rocksdb_rs::status::Status CTREncryptionProvider::AddCipher(const std::string& /*descriptor*/,
                                         const char* cipher, size_t len,
                                         bool /*for_write*/) {
   if (cipher_) {
@@ -1029,7 +1029,7 @@ static void decodeCTRParameters(const char* prefix, size_t blockSize,
   iv = Slice(prefix + blockSize, blockSize);
 }
 
-Status CTREncryptionProvider::CreateNewPrefix(const std::string& /*fname*/,
+rocksdb_rs::status::Status CTREncryptionProvider::CreateNewPrefix(const std::string& /*fname*/,
                                               char* prefix,
                                               size_t prefixLength) const {
   if (!cipher_) {
@@ -1054,7 +1054,7 @@ Status CTREncryptionProvider::CreateNewPrefix(const std::string& /*fname*/,
   // Encrypt the prefix, starting from block 2 (leave block 0, 1 with initial
   // counter & IV unencrypted)
   CTRCipherStream cipherStream(cipher_, prefixIV.data(), initialCounter);
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   {
     PERF_TIMER_GUARD(encrypt_data_nanos);
     status = cipherStream.Encrypt(0, prefix + (2 * blockSize),
@@ -1074,7 +1074,7 @@ size_t CTREncryptionProvider::PopulateSecretPrefixPart(
   return 0;
 }
 
-Status CTREncryptionProvider::CreateCipherStream(
+rocksdb_rs::status::Status CTREncryptionProvider::CreateCipherStream(
     const std::string& fname, const EnvOptions& options, Slice& prefix,
     std::unique_ptr<BlockAccessCipherStream>* result) {
   if (!cipher_) {
@@ -1097,7 +1097,7 @@ Status CTREncryptionProvider::CreateCipherStream(
   // Decrypt the encrypted part of the prefix, starting from block 2 (block 0, 1
   // with initial counter & IV are unencrypted)
   CTRCipherStream cipherStream(cipher_, iv.data(), initialCounter);
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
     status = cipherStream.Decrypt(0, (char*)prefix.data() + (2 * blockSize),
@@ -1114,7 +1114,7 @@ Status CTREncryptionProvider::CreateCipherStream(
 
 // CreateCipherStreamFromPrefix creates a block access cipher stream for a file
 // given name and options. The given prefix is already decrypted.
-Status CTREncryptionProvider::CreateCipherStreamFromPrefix(
+rocksdb_rs::status::Status CTREncryptionProvider::CreateCipherStreamFromPrefix(
     const std::string& /*fname*/, const EnvOptions& /*options*/,
     uint64_t initialCounter, const Slice& iv, const Slice& /*prefix*/,
     std::unique_ptr<BlockAccessCipherStream>* result) {
@@ -1174,14 +1174,14 @@ static void RegisterEncryptionBuiltins() {
 }
 }  // namespace
 
-Status BlockCipher::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status BlockCipher::CreateFromString(const ConfigOptions& config_options,
                                      const std::string& value,
                                      std::shared_ptr<BlockCipher>* result) {
   RegisterEncryptionBuiltins();
   return LoadSharedObject<BlockCipher>(config_options, value, result);
 }
 
-Status EncryptionProvider::CreateFromString(
+rocksdb_rs::status::Status EncryptionProvider::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::shared_ptr<EncryptionProvider>* result) {
   RegisterEncryptionBuiltins();

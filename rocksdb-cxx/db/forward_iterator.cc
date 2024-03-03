@@ -167,7 +167,7 @@ class ForwardLevelIterator : public InternalIterator {
     assert(valid_);
     return file_iter_->value();
   }
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     if (!status_.ok()) {
       return status_.Clone();
     } else if (file_iter_) {
@@ -207,7 +207,7 @@ class ForwardLevelIterator : public InternalIterator {
 
   bool valid_;
   uint32_t file_index_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   InternalIterator* file_iter_;
   PinnedIteratorsManager* pinned_iters_mgr_;
   // Kept alive by ForwardIterator::sv_->mutable_cf_options
@@ -611,7 +611,7 @@ Slice ForwardIterator::value() const {
   return current_->value();
 }
 
-Status ForwardIterator::status() const {
+rocksdb_rs::status::Status ForwardIterator::status() const {
   if (!status_.ok()) {
     return status_.Clone();
   } else if (!mutable_iter_->status().ok()) {
@@ -637,7 +637,7 @@ bool ForwardIterator::PrepareValue() {
   return false;
 }
 
-Status ForwardIterator::GetProperty(std::string prop_name, std::string* prop) {
+rocksdb_rs::status::Status ForwardIterator::GetProperty(std::string prop_name, std::string* prop) {
   assert(prop != nullptr);
   if (prop_name == "rocksdb.iterator.super-version-number") {
     *prop = std::to_string(sv_->version_number);
@@ -708,7 +708,7 @@ void ForwardIterator::RebuildIterators(bool refresh_sv) {
             false /* immutable_memtable */));
     range_del_agg.AddTombstones(std::move(range_del_iter));
     // Always return Status_OK().
-    Status temp_s = sv_->imm->AddRangeTombstoneIterators(read_options_, &arena_,
+    rocksdb_rs::status::Status temp_s = sv_->imm->AddRangeTombstoneIterators(read_options_, &arena_,
                                                          &range_del_agg);
     assert(temp_s.ok());
   }
@@ -775,7 +775,7 @@ void ForwardIterator::RenewIterators() {
             false /* immutable_memtable */));
     range_del_agg.AddTombstones(std::move(range_del_iter));
     // Always return Status_OK().
-    Status temp_s = svnew->imm->AddRangeTombstoneIterators(
+    rocksdb_rs::status::Status temp_s = svnew->imm->AddRangeTombstoneIterators(
         read_options_, &arena_, &range_del_agg);
     assert(temp_s.ok());
   }

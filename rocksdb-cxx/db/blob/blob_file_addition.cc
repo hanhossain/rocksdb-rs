@@ -48,7 +48,7 @@ void BlobFileAddition::EncodeTo(std::string* output) const {
   PutVarint32(output, (uint32_t)CustomFieldTags::kEndMarker);
 }
 
-Status BlobFileAddition::DecodeFrom(Slice* input) {
+rocksdb_rs::status::Status BlobFileAddition::DecodeFrom(Slice* input) {
   constexpr char class_name[] = "BlobFileAddition";
 
   if (!GetVarint64(input, &blob_file_number_)) {

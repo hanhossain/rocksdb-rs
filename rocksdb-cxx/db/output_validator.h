@@ -26,7 +26,7 @@ class OutputValidator {
 
   // Add a key to the KV sequence, and return whether the key follows
   // criteria, e.g. key is ordered.
-  Status Add(const Slice& key, const Slice& value);
+  rocksdb_rs::status::Status Add(const Slice& key, const Slice& value);
 
   // Compare result of two key orders are the same. It can be used
   // to compare the keys inserted into a file, and what is read back.

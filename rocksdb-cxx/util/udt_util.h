@@ -44,7 +44,7 @@ class UserDefinedTimestampSizeRecord {
     }
   }
 
-  inline Status DecodeFrom(Slice* src) {
+  inline rocksdb_rs::status::Status DecodeFrom(Slice* src) {
     const size_t total_size = src->size();
     if ((total_size % kSizePerColumnFamily) != 0) {
       std::ostringstream oss;
@@ -115,33 +115,33 @@ class TimestampRecoveryHandler : public WriteBatch::Handler {
   TimestampRecoveryHandler& operator=(const TimestampRecoveryHandler&) = delete;
   TimestampRecoveryHandler& operator=(TimestampRecoveryHandler&&) = delete;
 
-  Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override;
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override;
 
-  Status DeleteCF(uint32_t cf, const Slice& key) override;
+  rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override;
 
-  Status SingleDeleteCF(uint32_t cf, const Slice& key) override;
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override;
 
-  Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
                        const Slice& end_key) override;
 
-  Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override;
+  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override;
 
-  Status PutBlobIndexCF(uint32_t cf, const Slice& key,
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t cf, const Slice& key,
                         const Slice& value) override;
 
-  Status MarkBeginPrepare(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_OK(); }
 
-  Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
 
-  Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return Status_OK(); }
 
-  Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
     return Status_OK();
   }
 
-  Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return Status_OK(); }
 
-  Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return Status_OK(); }
 
   std::unique_ptr<WriteBatch>&& TransferNewBatch() {
     assert(new_batch_diff_from_orig_batch_);
@@ -150,7 +150,7 @@ class TimestampRecoveryHandler : public WriteBatch::Handler {
   }
 
  private:
-  Status ReconcileTimestampDiscrepancy(uint32_t cf, const Slice& key,
+  rocksdb_rs::status::Status ReconcileTimestampDiscrepancy(uint32_t cf, const Slice& key,
                                        std::string* new_key_buf,
                                        Slice* new_key);
 
@@ -210,7 +210,7 @@ enum class TimestampSizeConsistencyMode {
 // interpreted as that column family has zero timestamp size. On the other hand,
 // `running_ts_sz` should contain the timestamp size for all running column
 // families including the ones with zero timestamp size.
-Status HandleWriteBatchTimestampSizeDifference(
+rocksdb_rs::status::Status HandleWriteBatchTimestampSizeDifference(
     const WriteBatch* batch,
     const UnorderedMap<uint32_t, size_t>& running_ts_sz,
     const UnorderedMap<uint32_t, size_t>& record_ts_sz,

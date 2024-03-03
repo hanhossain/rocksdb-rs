@@ -26,7 +26,7 @@ IOTraceWriter::IOTraceWriter(SystemClock* clock,
       trace_options_(trace_options),
       trace_writer_(std::move(trace_writer)) {}
 
-Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
+rocksdb_rs::status::Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
                                 IODebugContext* dbg) {
   uint64_t trace_file_size = trace_writer_->GetFileSize();
   if (trace_file_size > trace_options_.max_trace_file_size) {
@@ -97,7 +97,7 @@ Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
   return trace_writer_->Write(encoded_trace);
 }
 
-Status IOTraceWriter::WriteHeader() {
+rocksdb_rs::status::Status IOTraceWriter::WriteHeader() {
   Trace trace;
   trace.ts = clock_->NowMicros();
   trace.type = TraceType::kTraceBegin;
@@ -112,10 +112,10 @@ Status IOTraceWriter::WriteHeader() {
 IOTraceReader::IOTraceReader(std::unique_ptr<TraceReader>&& reader)
     : trace_reader_(std::move(reader)) {}
 
-Status IOTraceReader::ReadHeader(IOTraceHeader* header) {
+rocksdb_rs::status::Status IOTraceReader::ReadHeader(IOTraceHeader* header) {
   assert(header != nullptr);
   std::string encoded_trace;
-  Status s = trace_reader_->Read(&encoded_trace);
+  rocksdb_rs::status::Status s = trace_reader_->Read(&encoded_trace);
   if (!s.ok()) {
     return s;
   }
@@ -154,10 +154,10 @@ Status IOTraceReader::ReadHeader(IOTraceHeader* header) {
   return Status_OK();
 }
 
-Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
+rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
   assert(record);
   std::string encoded_trace;
-  Status s = trace_reader_->Read(&encoded_trace);
+  rocksdb_rs::status::Status s = trace_reader_->Read(&encoded_trace);
   if (!s.ok()) {
     return s;
   }
@@ -266,7 +266,7 @@ IOTracer::IOTracer() : tracing_enabled(false) { writer_.store(nullptr); }
 
 IOTracer::~IOTracer() { EndIOTrace(); }
 
-Status IOTracer::StartIOTrace(SystemClock* clock,
+rocksdb_rs::status::Status IOTracer::StartIOTrace(SystemClock* clock,
                               const TraceOptions& trace_options,
                               std::unique_ptr<TraceWriter>&& trace_writer) {
   InstrumentedMutexLock lock_guard(&trace_writer_mutex_);

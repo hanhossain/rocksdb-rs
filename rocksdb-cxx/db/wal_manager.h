@@ -49,11 +49,11 @@ class WalManager {
         wal_in_db_path_(db_options_.IsWalDirSameAsDBPath()),
         io_tracer_(io_tracer) {}
 
-  Status GetSortedWalFiles(VectorLogPtr& files);
+  rocksdb_rs::status::Status GetSortedWalFiles(VectorLogPtr& files);
 
   // Allow user to tail transaction log to find all recent changes to the
   // database that are newer than `seq_number`.
-  Status GetUpdatesSince(
+  rocksdb_rs::status::Status GetUpdatesSince(
       SequenceNumber seq_number, std::unique_ptr<TransactionLogIterator>* iter,
       const TransactionLogIterator::ReadOptions& read_options,
       VersionSet* version_set);
@@ -62,27 +62,27 @@ class WalManager {
 
   void ArchiveWALFile(const std::string& fname, uint64_t number);
 
-  Status DeleteFile(const std::string& fname, uint64_t number);
+  rocksdb_rs::status::Status DeleteFile(const std::string& fname, uint64_t number);
 
-  Status GetLiveWalFile(uint64_t number, std::unique_ptr<LogFile>* log_file);
+  rocksdb_rs::status::Status GetLiveWalFile(uint64_t number, std::unique_ptr<LogFile>* log_file);
 
-  Status TEST_ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
+  rocksdb_rs::status::Status TEST_ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
                               SequenceNumber* sequence) {
     return ReadFirstRecord(type, number, sequence);
   }
 
-  Status TEST_ReadFirstLine(const std::string& fname, const uint64_t number,
+  rocksdb_rs::status::Status TEST_ReadFirstLine(const std::string& fname, const uint64_t number,
                             SequenceNumber* sequence) {
     return ReadFirstLine(fname, number, sequence);
   }
 
  private:
-  Status GetSortedWalsOfType(const std::string& path, VectorLogPtr& log_files,
+  rocksdb_rs::status::Status GetSortedWalsOfType(const std::string& path, VectorLogPtr& log_files,
                              rocksdb_rs::transaction_log::WalFileType type);
   // Requires: all_logs should be sorted with earliest log file first
   // Retains all log files in all_logs which contain updates with seq no.
   // Greater Than or Equal to the requested SequenceNumber.
-  Status RetainProbableWalFiles(VectorLogPtr& all_logs,
+  rocksdb_rs::status::Status RetainProbableWalFiles(VectorLogPtr& all_logs,
                                 const SequenceNumber target);
 
   // ReadFirstRecord checks the read_first_record_cache_ to see if the entry
@@ -93,7 +93,7 @@ class WalManager {
   // order to include that WAL and is inserted in read_first_record_cache_.
   // Therefore, sequence_number is used as boolean if WAL should be included or
   // not and that sequence_number shouldn't be use for any other purpose.
-  Status ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
+  rocksdb_rs::status::Status ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
                          SequenceNumber* sequence);
 
   // In case of no wal_compression, ReadFirstLine returns status.ok() and
@@ -104,7 +104,7 @@ class WalManager {
   // result for an empty file, GetSortedWalsOfType() will skip these WALs
   // causing the operations to fail. To avoid that, it sets sequence_number to
   // 1 inorder to include that WAL.
-  Status ReadFirstLine(const std::string& fname, const uint64_t number,
+  rocksdb_rs::status::Status ReadFirstLine(const std::string& fname, const uint64_t number,
                        SequenceNumber* sequence);
 
   // ------- state from DBImpl ------

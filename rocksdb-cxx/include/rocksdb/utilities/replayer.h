@@ -42,7 +42,7 @@ class Replayer {
 
   // Make some preparation before replaying the trace. This will also reset the
   // replayer in order to restart replaying.
-  virtual Status Prepare() = 0;
+  virtual rocksdb_rs::status::Status Prepare() = 0;
 
   // Return the timestamp when the trace recording was started.
   virtual uint64_t GetHeaderTimestamp() const = 0;
@@ -53,7 +53,7 @@ class Replayer {
   // Status_Incomplete() if Prepare() was not called or no more available
   // trace;
   // Status_NotSupported() if the read trace type is not supported.
-  virtual Status Next(std::unique_ptr<TraceRecord>* record) = 0;
+  virtual rocksdb_rs::status::Status Next(std::unique_ptr<TraceRecord>* record) = 0;
 
   // Execute one TraceRecord.
   // Return Status_OK() if the execution was successful. Get/MultiGet traces
@@ -67,7 +67,7 @@ class Replayer {
   // The actual operation execution status and result(s) will be saved in
   // result. For example, a GetQueryTraceRecord will have its DB::Get() status
   // and the returned value saved in a SingleValueTraceExecutionResult.
-  virtual Status Execute(const std::unique_ptr<TraceRecord>& record,
+  virtual rocksdb_rs::status::Status Execute(const std::unique_ptr<TraceRecord>& record,
                          std::unique_ptr<TraceRecordResult>* result) = 0;
 
   // Replay all the traces from the provided trace stream, taking the delay
@@ -75,9 +75,9 @@ class Replayer {
   //
   // result_callback reports the status of executing a trace record, and the
   // actual operation execution result (See the description for Execute()).
-  virtual Status Replay(
+  virtual rocksdb_rs::status::Status Replay(
       const ReplayOptions& options,
-      const std::function<void(Status, std::unique_ptr<TraceRecordResult>&&)>&
+      const std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)>&
           result_callback) = 0;
 };
 

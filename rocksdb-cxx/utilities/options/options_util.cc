@@ -13,13 +13,13 @@
 #include "table/block_based/block_based_table_factory.h"
 
 namespace rocksdb {
-Status LoadOptionsFromFile(const ConfigOptions& config_options,
+rocksdb_rs::status::Status LoadOptionsFromFile(const ConfigOptions& config_options,
                            const std::string& file_name, DBOptions* db_options,
                            std::vector<ColumnFamilyDescriptor>* cf_descs,
                            std::shared_ptr<Cache>* cache) {
   RocksDBOptionsParser parser;
   const auto& fs = config_options.env->GetFileSystem();
-  Status s = parser.Parse(config_options, file_name, fs.get());
+  rocksdb_rs::status::Status s = parser.Parse(config_options, file_name, fs.get());
   if (!s.ok()) {
     return s;
   }
@@ -42,9 +42,9 @@ Status LoadOptionsFromFile(const ConfigOptions& config_options,
   return Status_OK();
 }
 
-Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
+rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
                                 std::string* options_file_name) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::string latest_file_name;
   uint64_t latest_time_stamp = 0;
   std::vector<std::string> file_names;
@@ -75,12 +75,12 @@ Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
   return Status_OK();
 }
 
-Status LoadLatestOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status LoadLatestOptions(const ConfigOptions& config_options,
                          const std::string& dbpath, DBOptions* db_options,
                          std::vector<ColumnFamilyDescriptor>* cf_descs,
                          std::shared_ptr<Cache>* cache) {
   std::string options_file_name;
-  Status s =
+  rocksdb_rs::status::Status s =
       GetLatestOptionsFileName(dbpath, config_options.env, &options_file_name);
   if (!s.ok()) {
     return s;
@@ -89,12 +89,12 @@ Status LoadLatestOptions(const ConfigOptions& config_options,
                              db_options, cf_descs, cache);
 }
 
-Status CheckOptionsCompatibility(
+rocksdb_rs::status::Status CheckOptionsCompatibility(
     const ConfigOptions& config_options, const std::string& dbpath,
     const DBOptions& db_options,
     const std::vector<ColumnFamilyDescriptor>& cf_descs) {
   std::string options_file_name;
-  Status s =
+  rocksdb_rs::status::Status s =
       GetLatestOptionsFileName(dbpath, config_options.env, &options_file_name);
   if (!s.ok()) {
     return s;

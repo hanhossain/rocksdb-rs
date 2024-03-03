@@ -243,7 +243,7 @@ void PartitionedIndexBuilder::AddIndexEntry(
   }
 }
 
-Status PartitionedIndexBuilder::Finish(
+rocksdb_rs::status::Status PartitionedIndexBuilder::Finish(
     IndexBlocks* index_blocks, const BlockHandle& last_partition_block_handle) {
   if (partition_cnt_ == 0) {
     partition_cnt_ = entries_.size();

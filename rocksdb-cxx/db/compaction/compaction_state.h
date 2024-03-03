@@ -26,7 +26,7 @@ class CompactionState {
 
   // REQUIRED: subcompaction states are stored in order of increasing key-range
   std::vector<SubcompactionState> sub_compact_states;
-  Status status;
+  rocksdb_rs::status::Status status;
 
   void AggregateCompactionStats(
       InternalStats::CompactionStatsFull& compaction_stats,

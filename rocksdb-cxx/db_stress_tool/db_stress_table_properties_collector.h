@@ -23,13 +23,13 @@ class DbStressTablePropertiesCollector : public TablePropertiesCollector {
       : need_compact_(Random::GetTLSInstance()->OneInOpt(
             FLAGS_mark_for_compaction_one_file_in)) {}
 
-  virtual Status AddUserKey(const Slice& /* key */, const Slice& /* value */,
+  virtual rocksdb_rs::status::Status AddUserKey(const Slice& /* key */, const Slice& /* value */,
                             EntryType /*type*/, SequenceNumber /*seq*/,
                             uint64_t /*file_size*/) override {
     return Status_OK();
   }
 
-  virtual Status Finish(UserCollectedProperties* /* properties */) override {
+  virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* /* properties */) override {
     return Status_OK();
   }
 

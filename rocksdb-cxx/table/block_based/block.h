@@ -324,7 +324,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
 
   // Makes Valid() return false, status() return `s`, and Seek()/Prev()/etc do
   // nothing. Calls cleanup functions.
-  virtual void Invalidate(const Status& s) {
+  virtual void Invalidate(const rocksdb_rs::status::Status& s) {
     // Assert that the BlockIter is never deleted while Pinning is Enabled.
     assert(!pinned_iters_mgr_ || !pinned_iters_mgr_->PinningEnabled());
 
@@ -381,7 +381,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
     UpdateKey();
   }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   Slice key() const override {
     assert(Valid());
@@ -443,7 +443,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
   // Buffer for key data when global seqno assignment is enabled.
   IterKey key_buf_;
   Slice value_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   // Key to be exposed to users.
   Slice key_;
   SequenceNumber global_seqno_;
@@ -738,7 +738,7 @@ class DataBlockIter final : public BlockIter<Slice> {
     return res;
   }
 
-  void Invalidate(const Status& s) override {
+  void Invalidate(const rocksdb_rs::status::Status& s) override {
     BlockIter::Invalidate(s);
     // Clear prev entries cache.
     prev_entries_keys_buff_.clear();
@@ -874,7 +874,7 @@ class IndexBlockIter final : public BlockIter<IndexValue> {
     } else {
       IndexValue entry;
       Slice v = value_;
-      Status decode_s __attribute__((__unused__)) =
+      rocksdb_rs::status::Status decode_s __attribute__((__unused__)) =
           entry.DecodeFrom(&v, have_first_key_, nullptr);
       assert(decode_s.ok());
       return entry;

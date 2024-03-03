@@ -103,7 +103,7 @@ class BlockBasedTableIterator : public InternalIteratorBase<Slice> {
 
     return block_iter_.value();
   }
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     // Prefix index set status to NotFound when the prefix does not exist
     if (!index_iter_->status().ok() && !index_iter_->status().IsNotFound()) {
       return index_iter_->status();

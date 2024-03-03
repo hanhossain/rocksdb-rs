@@ -43,10 +43,10 @@ WriteMode operator+(WriteMode lhs, const int rhs) {
   return static_cast<WriteMode>(static_cast<T>(lhs) + rhs);
 }
 
-std::pair<WriteBatch, Status> GetWriteBatch(ColumnFamilyHandle* cf_handle,
+std::pair<WriteBatch, rocksdb_rs::status::Status> GetWriteBatch(ColumnFamilyHandle* cf_handle,
                                             size_t protection_bytes_per_key,
                                             WriteBatchOpType op_type) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   WriteBatch wb(0 /* reserved_bytes */, 0 /* max_bytes */,
                 protection_bytes_per_key, 0 /* default_cf_ts_sz */);
   switch (op_type) {
@@ -105,7 +105,7 @@ class DbKvChecksumTest
     memtable_protection_bytes_per_key_ = std::get<3>(GetParam());
   }
 
-  Status ExecuteWrite(ColumnFamilyHandle* cf_handle) {
+  rocksdb_rs::status::Status ExecuteWrite(ColumnFamilyHandle* cf_handle) {
     switch (write_mode_) {
       case WriteMode::kWriteUnprotectedBatch: {
         auto batch_and_status =

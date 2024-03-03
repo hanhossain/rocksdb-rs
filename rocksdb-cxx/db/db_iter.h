@@ -165,7 +165,7 @@ class DBIter final : public Iterator {
     return wide_columns_;
   }
 
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     if (status_.ok()) {
       return iter_.status();
     } else {
@@ -188,7 +188,7 @@ class DBIter final : public Iterator {
     return is_blob_;
   }
 
-  Status GetProperty(std::string prop_name, std::string* prop) override;
+  rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override;
 
   void Next() final override;
   void Prev() final override;
@@ -356,7 +356,7 @@ class DBIter final : public Iterator {
   // SetUserKey() and use it using GetUserKey().
   IterKey prefix_;
 
-  Status status_;
+  rocksdb_rs::status::Status status_;
   Direction direction_;
   bool valid_;
   bool current_entry_is_merged_;

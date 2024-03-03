@@ -11,13 +11,16 @@
 #include "db/blob/blob_file_reader.h"
 #include "util/mutexlock.h"
 
+namespace rocksdb::status {
+    struct Status;
+}
+
 namespace rocksdb {
 
 class Cache;
 struct ImmutableOptions;
 struct FileOptions;
 class HistogramImpl;
-struct Status;
 class Slice;
 class IOTracer;
 
@@ -31,7 +34,7 @@ class BlobFileCache {
   BlobFileCache(const BlobFileCache&) = delete;
   BlobFileCache& operator=(const BlobFileCache&) = delete;
 
-  Status GetBlobFileReader(const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetBlobFileReader(const ReadOptions& read_options,
                            uint64_t blob_file_number,
                            CacheHandleGuard<BlobFileReader>* blob_file_reader);
 

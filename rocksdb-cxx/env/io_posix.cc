@@ -380,7 +380,7 @@ std::string RemoveTrailingSlash(const std::string& path) {
   return p;
 }
 
-Status LogicalBlockSizeCache::RefAndCacheLogicalBlockSize(
+rocksdb_rs::status::Status LogicalBlockSizeCache::RefAndCacheLogicalBlockSize(
     const std::vector<std::string>& directories) {
   std::vector<std::string> dirs;
   dirs.reserve(directories.size());
@@ -398,7 +398,7 @@ Status LogicalBlockSizeCache::RefAndCacheLogicalBlockSize(
     }
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   for (auto& dir_size : dir_sizes) {
     s = get_logical_block_size_of_directory_(dir_size.first, &dir_size.second);
     if (!s.ok()) {
@@ -452,7 +452,7 @@ size_t LogicalBlockSizeCache::GetLogicalBlockSize(const std::string& fname,
 }
 #endif
 
-Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std::string& directory,
+rocksdb_rs::status::Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std::string& directory,
                                                    size_t* size) {
   int fd = open(directory.c_str(), O_DIRECTORY | O_RDONLY);
   if (fd == -1) {

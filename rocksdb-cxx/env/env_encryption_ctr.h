@@ -32,9 +32,9 @@ class CTRCipherStream final : public BlockAccessCipherStream {
  protected:
   void AllocateScratch(std::string&) override;
 
-  Status EncryptBlock(uint64_t blockIndex, char* data, char* scratch) override;
+  rocksdb_rs::status::Status EncryptBlock(uint64_t blockIndex, char* data, char* scratch) override;
 
-  Status DecryptBlock(uint64_t blockIndex, char* data, char* scratch) override;
+  rocksdb_rs::status::Status DecryptBlock(uint64_t blockIndex, char* data, char* scratch) override;
 };
 
 // This encryption provider uses a CTR cipher stream, with a given block cipher
@@ -61,13 +61,13 @@ class CTREncryptionProvider : public EncryptionProvider {
   const char* Name() const override { return kClassName(); }
   bool IsInstanceOf(const std::string& name) const override;
   size_t GetPrefixLength() const override;
-  Status CreateNewPrefix(const std::string& fname, char* prefix,
+  rocksdb_rs::status::Status CreateNewPrefix(const std::string& fname, char* prefix,
                          size_t prefixLength) const override;
-  Status CreateCipherStream(
+  rocksdb_rs::status::Status CreateCipherStream(
       const std::string& fname, const EnvOptions& options, Slice& prefix,
       std::unique_ptr<BlockAccessCipherStream>* result) override;
 
-  Status AddCipher(const std::string& descriptor, const char* /*cipher*/,
+  rocksdb_rs::status::Status AddCipher(const std::string& descriptor, const char* /*cipher*/,
                    size_t /*len*/, bool /*for_write*/) override;
 
  protected:
@@ -82,13 +82,13 @@ class CTREncryptionProvider : public EncryptionProvider {
   // CreateCipherStreamFromPrefix creates a block access cipher stream for a
   // file given
   // given name and options. The given prefix is already decrypted.
-  virtual Status CreateCipherStreamFromPrefix(
+  virtual rocksdb_rs::status::Status CreateCipherStreamFromPrefix(
       const std::string& fname, const EnvOptions& options,
       uint64_t initialCounter, const Slice& iv, const Slice& prefix,
       std::unique_ptr<BlockAccessCipherStream>* result);
 };
 
-Status NewEncryptedFileSystemImpl(
+rocksdb_rs::status::Status NewEncryptedFileSystemImpl(
     const std::shared_ptr<FileSystem>& base_fs,
     const std::shared_ptr<EncryptionProvider>& provider,
     std::unique_ptr<FileSystem>* fs);

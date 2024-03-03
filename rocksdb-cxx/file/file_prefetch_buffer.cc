@@ -79,13 +79,13 @@ void FilePrefetchBuffer::CalculateOffsetAndLen(size_t alignment,
   }
 }
 
-Status FilePrefetchBuffer::Read(const IOOptions& opts,
+rocksdb_rs::status::Status FilePrefetchBuffer::Read(const IOOptions& opts,
                                 RandomAccessFileReader* reader,
                                 Env::IOPriority rate_limiter_priority,
                                 uint64_t read_len, uint64_t chunk_len,
                                 uint64_t rounddown_start, uint32_t index) {
   Slice result;
-  Status s = reader->Read(opts, rounddown_start + chunk_len, read_len, &result,
+  rocksdb_rs::status::Status s = reader->Read(opts, rounddown_start + chunk_len, read_len, &result,
                           bufs_[index].buffer_.BufferStart() + chunk_len,
                           /*aligned_buf=*/nullptr, rate_limiter_priority);
 #ifndef NDEBUG
@@ -105,7 +105,7 @@ Status FilePrefetchBuffer::Read(const IOOptions& opts,
   return s;
 }
 
-Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
+rocksdb_rs::status::Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
                                      RandomAccessFileReader* reader,
                                      uint64_t read_len,
                                      uint64_t rounddown_start, uint32_t index) {
@@ -121,7 +121,7 @@ Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
   req.scratch = bufs_[index].buffer_.BufferStart();
   bufs_[index].async_req_len_ = req.len;
 
-  Status s =
+  rocksdb_rs::status::Status s =
       reader->ReadAsync(req, opts, fp, &(bufs_[index].pos_),
                         &(bufs_[index].io_handle_), &(bufs_[index].del_fn_),
                         /*aligned_buf=*/nullptr);
@@ -131,7 +131,7 @@ Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
   return s;
 }
 
-Status FilePrefetchBuffer::Prefetch(const IOOptions& opts,
+rocksdb_rs::status::Status FilePrefetchBuffer::Prefetch(const IOOptions& opts,
                                     RandomAccessFileReader* reader,
                                     uint64_t offset, size_t n,
                                     Env::IOPriority rate_limiter_priority) {
@@ -159,7 +159,7 @@ Status FilePrefetchBuffer::Prefetch(const IOOptions& opts,
                         true /*refit_tail*/, chunk_len);
   size_t read_len = static_cast<size_t>(roundup_len - chunk_len);
 
-  Status s = Read(opts, reader, rate_limiter_priority, read_len, chunk_len,
+  rocksdb_rs::status::Status s = Read(opts, reader, rate_limiter_priority, read_len, chunk_len,
                   rounddown_offset, curr_);
   if (usage_ == FilePrefetchBufferUsage::kTableOpenPrefetchTail && s.ok()) {
     RecordInHistogram(stats_, TABLE_OPEN_PREFETCH_TAIL_READ_BYTES, read_len);
@@ -215,7 +215,7 @@ void FilePrefetchBuffer::AbortIOIfNeeded(uint64_t offset) {
   }
   if (!handles.empty()) {
     StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-    Status s = fs_->AbortIO(handles);
+    rocksdb_rs::status::Status s = fs_->AbortIO(handles);
     assert(s.ok());
   }
 
@@ -243,7 +243,7 @@ void FilePrefetchBuffer::AbortAllIOs() {
   }
   if (!handles.empty()) {
     StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-    Status s = fs_->AbortIO(handles);
+    rocksdb_rs::status::Status s = fs_->AbortIO(handles);
     assert(s.ok());
   }
 
@@ -325,12 +325,12 @@ void FilePrefetchBuffer::PollAndUpdateBuffersIfNeeded(uint64_t offset) {
   UpdateBuffersIfNeeded(offset);
 }
 
-Status FilePrefetchBuffer::HandleOverlappingData(
+rocksdb_rs::status::Status FilePrefetchBuffer::HandleOverlappingData(
     const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
     size_t length, size_t readahead_size,
     Env::IOPriority /*rate_limiter_priority*/, bool& copy_to_third_buffer,
     uint64_t& tmp_offset, size_t& tmp_length) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
   uint32_t second;
 
@@ -411,7 +411,7 @@ Status FilePrefetchBuffer::HandleOverlappingData(
 //        curr_, send async request on curr_, wait for poll to fill second
 //        buffer (if any), and copy remaining data from second buffer to third
 //        buffer.
-Status FilePrefetchBuffer::PrefetchAsyncInternal(
+rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsyncInternal(
     const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
     size_t length, size_t readahead_size, Env::IOPriority rate_limiter_priority,
     bool& copy_to_third_buffer) {
@@ -422,7 +422,7 @@ Status FilePrefetchBuffer::PrefetchAsyncInternal(
   TEST_SYNC_POINT("FilePrefetchBuffer::PrefetchAsyncInternal:Start");
 
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   uint64_t tmp_offset = offset;
   size_t tmp_length = length;
 
@@ -500,7 +500,7 @@ Status FilePrefetchBuffer::PrefetchAsyncInternal(
       handles.emplace_back(bufs_[second].io_handle_);
       {
         StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-        Status status = fs_->AbortIO(handles);
+        rocksdb_rs::status::Status status = fs_->AbortIO(handles);
         assert(status.ok());
       }
     }
@@ -588,7 +588,7 @@ Status FilePrefetchBuffer::PrefetchAsyncInternal(
         handles.emplace_back(bufs_[second].io_handle_);
         {
           StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-          Status status = fs_->AbortIO(handles);
+          rocksdb_rs::status::Status status = fs_->AbortIO(handles);
           assert(status.ok());
         }
       }
@@ -608,7 +608,7 @@ Status FilePrefetchBuffer::PrefetchAsyncInternal(
 bool FilePrefetchBuffer::TryReadFromCache(const IOOptions& opts,
                                           RandomAccessFileReader* reader,
                                           uint64_t offset, size_t n,
-                                          Slice* result, Status* status,
+                                          Slice* result, rocksdb_rs::status::Status* status,
                                           Env::IOPriority rate_limiter_priority,
                                           bool for_compaction /* = false */) {
   bool ret = TryReadFromCacheUntracked(opts, reader, offset, n, result, status,
@@ -625,7 +625,7 @@ bool FilePrefetchBuffer::TryReadFromCache(const IOOptions& opts,
 
 bool FilePrefetchBuffer::TryReadFromCacheUntracked(
     const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
-    size_t n, Slice* result, Status* status,
+    size_t n, Slice* result, rocksdb_rs::status::Status* status,
     Env::IOPriority rate_limiter_priority, bool for_compaction /* = false */) {
   if (track_min_offset_ && offset < min_offset_read_) {
     min_offset_read_ = static_cast<size_t>(offset);
@@ -642,7 +642,7 @@ bool FilePrefetchBuffer::TryReadFromCacheUntracked(
                            &readahead_size_);
   if (offset + n > bufs_[curr_].offset_ + bufs_[curr_].buffer_.CurrentSize()) {
     if (readahead_size_ > 0) {
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       assert(reader != nullptr);
       assert(max_readahead_size_ >= readahead_size_);
       if (for_compaction) {
@@ -680,7 +680,7 @@ bool FilePrefetchBuffer::TryReadFromCacheUntracked(
 
 bool FilePrefetchBuffer::TryReadFromCacheAsync(
     const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
-    size_t n, Slice* result, Status* status,
+    size_t n, Slice* result, rocksdb_rs::status::Status* status,
     Env::IOPriority rate_limiter_priority) {
   bool ret = TryReadFromCacheAsyncUntracked(opts, reader, offset, n, result,
                                             status, rate_limiter_priority);
@@ -696,7 +696,7 @@ bool FilePrefetchBuffer::TryReadFromCacheAsync(
 
 bool FilePrefetchBuffer::TryReadFromCacheAsyncUntracked(
     const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
-    size_t n, Slice* result, Status* status,
+    size_t n, Slice* result, rocksdb_rs::status::Status* status,
     Env::IOPriority rate_limiter_priority) {
   if (track_min_offset_ && offset < min_offset_read_) {
     min_offset_read_ = static_cast<size_t>(offset);
@@ -738,7 +738,7 @@ bool FilePrefetchBuffer::TryReadFromCacheAsyncUntracked(
        offset + n >
            bufs_[curr_].offset_ + bufs_[curr_].buffer_.CurrentSize())) {
     if (readahead_size_ > 0) {
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = Status_new();
       assert(reader != nullptr);
       assert(max_readahead_size_ >= readahead_size_);
 
@@ -810,7 +810,7 @@ void FilePrefetchBuffer::PrefetchAsyncCallback(const FSReadRequest& req,
   }
 }
 
-Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
+rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
                                          RandomAccessFileReader* reader,
                                          uint64_t offset, size_t n,
                                          Slice* result) {
@@ -869,7 +869,7 @@ Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
   }
   bufs_[second].buffer_.Clear();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
   size_t prefetch_size = is_eligible_for_prefetching ? readahead_size_ / 2 : 0;
   size_t offset_to_read = static_cast<size_t>(offset);

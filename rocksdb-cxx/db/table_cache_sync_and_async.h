@@ -14,7 +14,7 @@ namespace rocksdb {
 #endif
 
 // Batched version of TableCache::MultiGet.
-DEFINE_SYNC_AND_ASYNC(Status, TableCache::MultiGet)
+DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, TableCache::MultiGet)
 (const ReadOptions& options, const InternalKeyComparator& internal_comparator,
  const FileMetaData& file_meta, const MultiGetContext::Range* mget_range,
  uint8_t block_protection_bytes_per_key,
@@ -22,7 +22,7 @@ DEFINE_SYNC_AND_ASYNC(Status, TableCache::MultiGet)
  HistogramImpl* file_read_hist, bool skip_filters, bool skip_range_deletions,
  int level, TypedHandle* handle) {
   auto& fd = file_meta.fd;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   TableReader* t = fd.table_reader;
   MultiGetRange table_range(*mget_range, mget_range->begin(),
                             mget_range->end());
@@ -85,7 +85,7 @@ DEFINE_SYNC_AND_ASYNC(Status, TableCache::MultiGet)
       (options, &table_range, prefix_extractor.get(), skip_filters);
     } else if (options.read_tier == kBlockCacheTier && s.IsIncomplete()) {
       for (auto iter = table_range.begin(); iter != table_range.end(); ++iter) {
-        Status* status = iter->s;
+        rocksdb_rs::status::Status* status = iter->s;
         if (status->IsIncomplete()) {
           // Couldn't find Table in cache but treat as kFound if no_io set
           iter->get_context->MarkKeyMayExist();

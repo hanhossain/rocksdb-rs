@@ -113,7 +113,7 @@ static int RegisterFlushBlockPolicyFactories(ObjectLibrary& library,
 FlushBlockBySizePolicyFactory::FlushBlockBySizePolicyFactory()
     : FlushBlockPolicyFactory() {}
 
-Status FlushBlockPolicyFactory::CreateFromString(
+rocksdb_rs::status::Status FlushBlockPolicyFactory::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::shared_ptr<FlushBlockPolicyFactory>* factory) {
   static std::once_flag once;

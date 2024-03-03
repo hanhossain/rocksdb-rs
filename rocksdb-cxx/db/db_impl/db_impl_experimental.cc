@@ -21,7 +21,7 @@
 
 namespace rocksdb {
 
-Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
                                    const Slice* begin, const Slice* end) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
@@ -54,7 +54,7 @@ Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
   return Status_OK();
 }
 
-Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
+rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
   assert(column_family);
 
   if (target_level < 1) {
@@ -64,7 +64,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
   }
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   VersionEdit edit;
   JobContext job_context(next_job_id_.fetch_add(1), true);
   {

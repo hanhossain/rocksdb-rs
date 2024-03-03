@@ -30,7 +30,7 @@ DBImplSecondary::DBImplSecondary(const DBOptions& db_options,
 
 DBImplSecondary::~DBImplSecondary() {}
 
-Status DBImplSecondary::Recover(
+rocksdb_rs::status::Status DBImplSecondary::Recover(
     const std::vector<ColumnFamilyDescriptor>& column_families,
     bool /*readonly*/, bool /*error_if_wal_file_exists*/,
     bool /*error_if_data_exists_in_wals*/, uint64_t*,
@@ -38,7 +38,7 @@ Status DBImplSecondary::Recover(
   mutex_.AssertHeld();
 
   JobContext job_context(0);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   s = static_cast<ReactiveVersionSet*>(versions_.get())
           ->Recover(column_families, &manifest_reader_, &manifest_reporter_,
                     &manifest_reader_status_);
@@ -77,12 +77,12 @@ Status DBImplSecondary::Recover(
 }
 
 // find new WAL and apply them in order to the secondary instance
-Status DBImplSecondary::FindAndRecoverLogFiles(
+rocksdb_rs::status::Status DBImplSecondary::FindAndRecoverLogFiles(
     std::unordered_set<ColumnFamilyData*>* cfds_changed,
     JobContext* job_context) {
   assert(nullptr != cfds_changed);
   assert(nullptr != job_context);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   std::vector<uint64_t> logs;
   s = FindNewLogNumbers(&logs);
   if (s.ok() && !logs.empty()) {
@@ -93,10 +93,10 @@ Status DBImplSecondary::FindAndRecoverLogFiles(
 }
 
 // List wal_dir and find all new WALs, return these log numbers
-Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
+rocksdb_rs::status::Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
   assert(logs != nullptr);
   std::vector<std::string> filenames;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   IOOptions io_opts;
   io_opts.do_not_recurse = true;
   s = immutable_db_options_.fs->GetChildren(immutable_db_options_.GetWalDir(),
@@ -131,7 +131,7 @@ Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
   return s;
 }
 
-Status DBImplSecondary::MaybeInitLogReader(
+rocksdb_rs::status::Status DBImplSecondary::MaybeInitLogReader(
     uint64_t log_number, log::FragmentBufferedReader** log_reader) {
   auto iter = log_readers_.find(log_number);
   // make sure the log file is still present
@@ -153,7 +153,7 @@ Status DBImplSecondary::MaybeInitLogReader(
     std::unique_ptr<SequentialFileReader> file_reader;
     {
       std::unique_ptr<FSSequentialFile> file;
-      Status status = fs_->NewSequentialFile(
+      rocksdb_rs::status::Status status = fs_->NewSequentialFile(
           fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr);
       if (!status.ok()) {
         *log_reader = nullptr;
@@ -179,14 +179,14 @@ Status DBImplSecondary::MaybeInitLogReader(
 
 // After manifest recovery, replay WALs and refresh log_readers_ if necessary
 // REQUIRES: log_numbers are sorted in ascending order
-Status DBImplSecondary::RecoverLogFiles(
+rocksdb_rs::status::Status DBImplSecondary::RecoverLogFiles(
     const std::vector<uint64_t>& log_numbers, SequenceNumber* next_sequence,
     std::unordered_set<ColumnFamilyData*>* cfds_changed,
     JobContext* job_context) {
   assert(nullptr != cfds_changed);
   assert(nullptr != job_context);
   mutex_.AssertHeld();
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   for (auto log_number : log_numbers) {
     log::FragmentBufferedReader* reader = nullptr;
     status = MaybeInitLogReader(log_number, &reader);
@@ -202,7 +202,7 @@ Status DBImplSecondary::RecoverLogFiles(
     auto it = log_readers_.find(log_number);
     assert(it != log_readers_.end());
     log::FragmentBufferedReader* reader = it->second->reader_;
-    const std::unique_ptr<Status>& wal_read_status = it->second->status_;
+    const std::unique_ptr<rocksdb_rs::status::Status>& wal_read_status = it->second->status_;
     assert(wal_read_status);
     // Manually update the file number allocation counter in VersionSet.
     versions_->MarkFileNumberUsed(log_number);
@@ -337,20 +337,20 @@ Status DBImplSecondary::RecoverLogFiles(
 }
 
 // Implementation of the DB interface
-Status DBImplSecondary::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImplSecondary::Get(const ReadOptions& read_options,
                             ColumnFamilyHandle* column_family, const Slice& key,
                             PinnableSlice* value) {
   return GetImpl(read_options, column_family, key, value,
                  /*timestamp*/ nullptr);
 }
 
-Status DBImplSecondary::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImplSecondary::Get(const ReadOptions& read_options,
                             ColumnFamilyHandle* column_family, const Slice& key,
                             PinnableSlice* value, std::string* timestamp) {
   return GetImpl(read_options, column_family, key, value, timestamp);
 }
 
-Status DBImplSecondary::GetImpl(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImplSecondary::GetImpl(const ReadOptions& read_options,
                                 ColumnFamilyHandle* column_family,
                                 const Slice& key, PinnableSlice* pinnable_val,
                                 std::string* timestamp) {
@@ -366,13 +366,13 @@ Status DBImplSecondary::GetImpl(const ReadOptions& read_options,
 
   assert(column_family);
   if (read_options.timestamp) {
-    const Status s = FailIfTsMismatchCf(
+    const rocksdb_rs::status::Status s = FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
       return s.Clone();
     }
   } else {
-    const Status s = FailIfCfHasTs(column_family);
+    const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -398,7 +398,7 @@ Status DBImplSecondary::GetImpl(const ReadOptions& read_options,
   GetWithTimestampReadCallback read_cb(snapshot);
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   LookupKey lkey(key, snapshot, read_options.timestamp);
   PERF_TIMER_STOP(get_snapshot_time);
 
@@ -467,13 +467,13 @@ Iterator* DBImplSecondary::NewIterator(const ReadOptions& read_options,
 
   assert(column_family);
   if (read_options.timestamp) {
-    const Status s = FailIfTsMismatchCf(
+    const rocksdb_rs::status::Status s = FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
       return NewErrorIterator(s);
     }
   } else {
-    const Status s = FailIfCfHasTs(column_family);
+    const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
     if (!s.ok()) {
       return NewErrorIterator(s);
     }
@@ -519,7 +519,7 @@ ArenaWrappedDBIter* DBImplSecondary::NewIteratorImpl(
   return db_iter;
 }
 
-Status DBImplSecondary::NewIterators(
+rocksdb_rs::status::Status DBImplSecondary::NewIterators(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
@@ -543,7 +543,7 @@ Status DBImplSecondary::NewIterators(
   if (read_options.timestamp) {
     for (auto* cf : column_families) {
       assert(cf);
-      const Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
+      const rocksdb_rs::status::Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
                                           /*ts_for_read=*/true);
       if (!s.ok()) {
         return s.Clone();
@@ -552,7 +552,7 @@ Status DBImplSecondary::NewIterators(
   } else {
     for (auto* cf : column_families) {
       assert(cf);
-      const Status s = FailIfCfHasTs(cf);
+      const rocksdb_rs::status::Status s = FailIfCfHasTs(cf);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -577,9 +577,9 @@ Status DBImplSecondary::NewIterators(
   return Status_OK();
 }
 
-Status DBImplSecondary::CheckConsistency() {
+rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
   mutex_.AssertHeld();
-  Status s = DBImpl::CheckConsistency();
+  rocksdb_rs::status::Status s = DBImpl::CheckConsistency();
   // If DBImpl::CheckConsistency() which is stricter returns success, then we
   // do not need to give a second chance.
   if (s.ok()) {
@@ -620,10 +620,10 @@ Status DBImplSecondary::CheckConsistency() {
                                      : Status_Corruption(corruption_messages);
 }
 
-Status DBImplSecondary::TryCatchUpWithPrimary() {
+rocksdb_rs::status::Status DBImplSecondary::TryCatchUpWithPrimary() {
   assert(versions_.get() != nullptr);
   assert(manifest_reader_.get() != nullptr);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   // read the manifest and apply new changes to the secondary instance
   std::unordered_set<ColumnFamilyData*> cfds_changed;
   JobContext job_context(0, true /*create_superversion*/);
@@ -686,7 +686,7 @@ Status DBImplSecondary::TryCatchUpWithPrimary() {
   return s;
 }
 
-Status DB::OpenAsSecondary(const Options& options, const std::string& dbname,
+rocksdb_rs::status::Status DB::OpenAsSecondary(const Options& options, const std::string& dbname,
                            const std::string& secondary_path, DB** dbptr) {
   *dbptr = nullptr;
 
@@ -696,7 +696,7 @@ Status DB::OpenAsSecondary(const Options& options, const std::string& dbname,
   column_families.emplace_back(kDefaultColumnFamilyName, cf_options);
   std::vector<ColumnFamilyHandle*> handles;
 
-  Status s = DB::OpenAsSecondary(db_options, dbname, secondary_path,
+  rocksdb_rs::status::Status s = DB::OpenAsSecondary(db_options, dbname, secondary_path,
                                  column_families, &handles, dbptr);
   if (s.ok()) {
     assert(handles.size() == 1);
@@ -705,7 +705,7 @@ Status DB::OpenAsSecondary(const Options& options, const std::string& dbname,
   return s;
 }
 
-Status DB::OpenAsSecondary(
+rocksdb_rs::status::Status DB::OpenAsSecondary(
     const DBOptions& db_options, const std::string& dbname,
     const std::string& secondary_path,
     const std::vector<ColumnFamilyDescriptor>& column_families,
@@ -713,7 +713,7 @@ Status DB::OpenAsSecondary(
   *dbptr = nullptr;
 
   DBOptions tmp_opts(db_options);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (nullptr == tmp_opts.info_log) {
     s = CreateLoggerFromOptions(secondary_path, tmp_opts, &tmp_opts.info_log);
     if (!s.ok()) {
@@ -791,7 +791,7 @@ Status DB::OpenAsSecondary(
   return s;
 }
 
-Status DBImplSecondary::CompactWithoutInstallation(
+rocksdb_rs::status::Status DBImplSecondary::CompactWithoutInstallation(
     const OpenAndCompactOptions& options, ColumnFamilyHandle* cfh,
     const CompactionServiceInput& input, CompactionServiceResult* result) {
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
@@ -826,7 +826,7 @@ Status DBImplSecondary::CompactWithoutInstallation(
       vstorage->base_level(), cf_options.level_compaction_dynamic_level_bytes);
 
   std::vector<CompactionInputFiles> input_files;
-  Status s = cfd->compaction_picker()->GetCompactionInputsFromFileNumbers(
+  rocksdb_rs::status::Status s = cfd->compaction_picker()->GetCompactionInputsFromFileNumbers(
       &input_files, &input_set, vstorage, comp_options);
   if (!s.ok()) {
     return s;
@@ -882,7 +882,7 @@ Status DBImplSecondary::CompactWithoutInstallation(
   return s;
 }
 
-Status DB::OpenAndCompact(
+rocksdb_rs::status::Status DB::OpenAndCompact(
     const OpenAndCompactOptions& options, const std::string& name,
     const std::string& output_directory, const std::string& input,
     std::string* output,
@@ -891,7 +891,7 @@ Status DB::OpenAndCompact(
     return Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
   CompactionServiceInput compaction_input;
-  Status s = CompactionServiceInput::Read(input, &compaction_input);
+  rocksdb_rs::status::Status s = CompactionServiceInput::Read(input, &compaction_input);
   if (!s.ok()) {
     return s;
   }
@@ -948,7 +948,7 @@ Status DB::OpenAndCompact(
   s = db_secondary->CompactWithoutInstallation(
       options, handles[0], compaction_input, &compaction_result);
 
-  Status serialization_status = compaction_result.Write(output);
+  rocksdb_rs::status::Status serialization_status = compaction_result.Write(output);
 
   for (auto& handle : handles) {
     delete handle;
@@ -960,7 +960,7 @@ Status DB::OpenAndCompact(
   return s;
 }
 
-Status DB::OpenAndCompact(
+rocksdb_rs::status::Status DB::OpenAndCompact(
     const std::string& name, const std::string& output_directory,
     const std::string& input, std::string* output,
     const CompactionServiceOptionsOverride& override_options) {

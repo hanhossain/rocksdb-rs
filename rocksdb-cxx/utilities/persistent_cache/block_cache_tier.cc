@@ -19,8 +19,8 @@ namespace rocksdb {
 //
 // BlockCacheImpl
 //
-Status BlockCacheTier::Open() {
-  Status status = Status_new();
+rocksdb_rs::status::Status BlockCacheTier::Open() {
+  rocksdb_rs::status::Status status = Status_new();
 
   WriteLock _(&lock_);
 
@@ -87,9 +87,9 @@ bool IsCacheFile(const std::string& file) {
   return suffix == ".rc";
 }
 
-Status BlockCacheTier::CleanupCacheFolder(const std::string& folder) {
+rocksdb_rs::status::Status BlockCacheTier::CleanupCacheFolder(const std::string& folder) {
   std::vector<std::string> files;
-  Status status = opt_.env->GetChildren(folder, &files);
+  rocksdb_rs::status::Status status = opt_.env->GetChildren(folder, &files);
   if (!status.ok()) {
     Error(opt_.log, "Error getting files for %s. %s", folder.c_str(),
           status.ToString()->c_str());
@@ -114,7 +114,7 @@ Status BlockCacheTier::CleanupCacheFolder(const std::string& folder) {
   return Status_OK();
 }
 
-Status BlockCacheTier::Close() {
+rocksdb_rs::status::Status BlockCacheTier::Close() {
   // stop the insert thread
   if (opt_.pipeline_writes && insert_th_.joinable()) {
     InsertOp op(/*quit=*/true);
@@ -168,7 +168,7 @@ PersistentCache::StatsType BlockCacheTier::Stats() {
   return out;
 }
 
-Status BlockCacheTier::Insert(const Slice& key, const char* data,
+rocksdb_rs::status::Status BlockCacheTier::Insert(const Slice& key, const char* data,
                               const size_t size) {
   // update stats
   stats_.bytes_pipelined_.Add(size);
@@ -194,7 +194,7 @@ void BlockCacheTier::InsertMain() {
     }
 
     size_t retry = 0;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     while ((s = InsertImpl(Slice(op.key_), Slice(op.data_))).IsTryAgain()) {
       if (retry > kMaxRetry) {
         break;
@@ -213,7 +213,7 @@ void BlockCacheTier::InsertMain() {
   }
 }
 
-Status BlockCacheTier::InsertImpl(const Slice& key, const Slice& data) {
+rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Slice& data) {
   // pre-condition
   assert(key.size());
   assert(data.size());
@@ -238,7 +238,7 @@ Status BlockCacheTier::InsertImpl(const Slice& key, const Slice& data) {
     }
 
     assert(cache_file_->Eof());
-    Status status = NewCacheFile();
+    rocksdb_rs::status::Status status = NewCacheFile();
     if (!status.ok()) {
       return status;
     }
@@ -260,7 +260,7 @@ Status BlockCacheTier::InsertImpl(const Slice& key, const Slice& data) {
   return Status_OK();
 }
 
-Status BlockCacheTier::Lookup(const Slice& key, std::unique_ptr<char[]>* val,
+rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_ptr<char[]>* val,
                               size_t* size) {
   StopWatchNano timer(opt_.clock, /*auto_start=*/true);
 
@@ -318,7 +318,7 @@ bool BlockCacheTier::Erase(const Slice& key) {
   return true;
 }
 
-Status BlockCacheTier::NewCacheFile() {
+rocksdb_rs::status::Status BlockCacheTier::NewCacheFile() {
   lock_.AssertHeld();
 
   TEST_SYNC_POINT_CALLBACK("BlockCacheTier::NewCacheFile:DeleteDir",
@@ -386,7 +386,7 @@ bool BlockCacheTier::Reserve(const size_t size) {
   return true;
 }
 
-Status NewPersistentCache(Env* const env, const std::string& path,
+rocksdb_rs::status::Status NewPersistentCache(Env* const env, const std::string& path,
                           const uint64_t size,
                           const std::shared_ptr<Logger>& log,
                           const bool optimized_for_nvm,
@@ -406,7 +406,7 @@ Status NewPersistentCache(Env* const env, const std::string& path,
   }
 
   auto pcache = std::make_shared<BlockCacheTier>(opt);
-  Status s = pcache->Open();
+  rocksdb_rs::status::Status s = pcache->Open();
 
   if (!s.ok()) {
     return s;

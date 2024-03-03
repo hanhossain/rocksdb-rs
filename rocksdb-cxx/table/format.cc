@@ -63,7 +63,7 @@ char* BlockHandle::EncodeTo(char* dst) const {
   return cur;
 }
 
-Status BlockHandle::DecodeFrom(Slice* input) {
+rocksdb_rs::status::Status BlockHandle::DecodeFrom(Slice* input) {
   if (GetVarint64(input, &offset_) && GetVarint64(input, &size_)) {
     return Status_OK();
   } else {
@@ -74,7 +74,7 @@ Status BlockHandle::DecodeFrom(Slice* input) {
   }
 }
 
-Status BlockHandle::DecodeSizeFrom(uint64_t _offset, Slice* input) {
+rocksdb_rs::status::Status BlockHandle::DecodeSizeFrom(uint64_t _offset, Slice* input) {
   if (GetVarint64(input, &size_)) {
     offset_ = _offset;
     return Status_OK();
@@ -117,7 +117,7 @@ void IndexValue::EncodeTo(std::string* dst, bool have_first_key,
   }
 }
 
-Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
+rocksdb_rs::status::Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
                               const BlockHandle* previous_handle) {
   if (previous_handle) {
     int64_t delta;
@@ -129,7 +129,7 @@ Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
                              BlockBasedTable::kBlockTrailerSize,
                          previous_handle->size() + delta);
   } else {
-    Status s = handle.DecodeFrom(input);
+    rocksdb_rs::status::Status s = handle.DecodeFrom(input);
     if (!s.ok()) {
       return s;
     }
@@ -258,7 +258,7 @@ void FooterBuilder::Build(uint64_t magic_number, uint32_t format_version,
   }
 }
 
-Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
+rocksdb_rs::status::Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
                           uint64_t enforce_table_magic_number) {
   (void)input_offset;  // Future use
 
@@ -316,7 +316,7 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
   }
 
   // Parse Part2
-  Status result = metaindex_handle_.DecodeFrom(&input);
+  rocksdb_rs::status::Status result = metaindex_handle_.DecodeFrom(&input);
   if (result.ok()) {
     result = index_handle_.DecodeFrom(&input);
   }
@@ -345,7 +345,7 @@ std::string Footer::ToString() const {
   return result;
 }
 
-Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
+rocksdb_rs::status::Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
                           FileSystem& fs, FilePrefetchBuffer* prefetch_buffer,
                           uint64_t file_size, Footer* footer,
                           uint64_t enforce_table_magic_number) {
@@ -363,7 +363,7 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
   uint64_t read_offset = (file_size > Footer::kMaxEncodedLength)
                              ? file_size - Footer::kMaxEncodedLength
                              : 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   // TODO: Need to pass appropriate deadline to TryReadFromCache(). Right now,
   // there is no readahead for point lookups, so TryReadFromCache will fail if
   // the required data is not in the prefetch buffer. Once deadline is enabled
@@ -496,12 +496,12 @@ uint32_t ComputeBuiltinChecksumWithLastByte(ChecksumType type, const char* data,
   }
 }
 
-Status UncompressBlockData(const UncompressionInfo& uncompression_info,
+rocksdb_rs::status::Status UncompressBlockData(const UncompressionInfo& uncompression_info,
                            const char* data, size_t size,
                            BlockContents* out_contents, uint32_t format_version,
                            const ImmutableOptions& ioptions,
                            MemoryAllocator* allocator) {
-  Status ret = Status_OK();
+  rocksdb_rs::status::Status ret = Status_OK();
 
   assert(uncompression_info.type() != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
          "Invalid compression type");
@@ -544,7 +544,7 @@ Status UncompressBlockData(const UncompressionInfo& uncompression_info,
   return ret;
 }
 
-Status UncompressSerializedBlock(const UncompressionInfo& uncompression_info,
+rocksdb_rs::status::Status UncompressSerializedBlock(const UncompressionInfo& uncompression_info,
                                  const char* data, size_t size,
                                  BlockContents* out_contents,
                                  uint32_t format_version,
@@ -558,10 +558,10 @@ Status UncompressSerializedBlock(const UncompressionInfo& uncompression_info,
 
 // Replace the contents of db_host_id with the actual hostname, if db_host_id
 // matches the keyword kHostnameForDbHostId
-Status ReifyDbHostIdProperty(Env* env, std::string* db_host_id) {
+rocksdb_rs::status::Status ReifyDbHostIdProperty(Env* env, std::string* db_host_id) {
   assert(db_host_id);
   if (*db_host_id == kHostnameForDbHostId) {
-    Status s = env->GetHostNameString(db_host_id);
+    rocksdb_rs::status::Status s = env->GetHostNameString(db_host_id);
     if (!s.ok()) {
       db_host_id->clear();
     }

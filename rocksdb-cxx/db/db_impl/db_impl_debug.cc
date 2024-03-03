@@ -22,7 +22,7 @@ uint64_t DBImpl::TEST_GetLevel0TotalSize() {
   return default_cf_handle_->cfd()->current()->storage_info()->NumLevelBytes(0);
 }
 
-Status DBImpl::TEST_SwitchWAL() {
+rocksdb_rs::status::Status DBImpl::TEST_SwitchWAL() {
   WriteContext write_context;
   InstrumentedMutexLock l(&mutex_);
   void* writer = TEST_BeginWrite();
@@ -90,7 +90,7 @@ uint64_t DBImpl::TEST_Current_Next_FileNo() {
   return versions_->current_next_file_number();
 }
 
-Status DBImpl::TEST_CompactRange(int level, const Slice* begin,
+rocksdb_rs::status::Status DBImpl::TEST_CompactRange(int level, const Slice* begin,
                                  const Slice* end,
                                  ColumnFamilyHandle* column_family,
                                  bool disallow_trivial_move) {
@@ -113,14 +113,14 @@ Status DBImpl::TEST_CompactRange(int level, const Slice* begin,
       "" /*trim_ts*/);
 }
 
-Status DBImpl::TEST_SwitchMemtable(ColumnFamilyData* cfd) {
+rocksdb_rs::status::Status DBImpl::TEST_SwitchMemtable(ColumnFamilyData* cfd) {
   WriteContext write_context;
   InstrumentedMutexLock l(&mutex_);
   if (cfd == nullptr) {
     cfd = default_cf_handle_->cfd();
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   void* writer = TEST_BeginWrite();
   if (two_write_queues_) {
     WriteThread::Writer nonmem_w;
@@ -134,7 +134,7 @@ Status DBImpl::TEST_SwitchMemtable(ColumnFamilyData* cfd) {
   return s;
 }
 
-Status DBImpl::TEST_FlushMemTable(bool wait, bool allow_write_stall,
+rocksdb_rs::status::Status DBImpl::TEST_FlushMemTable(bool wait, bool allow_write_stall,
                                   ColumnFamilyHandle* cfh) {
   FlushOptions fo;
   fo.wait = wait;
@@ -149,25 +149,25 @@ Status DBImpl::TEST_FlushMemTable(bool wait, bool allow_write_stall,
   return FlushMemTable(cfd, fo, FlushReason::kTest);
 }
 
-Status DBImpl::TEST_FlushMemTable(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status DBImpl::TEST_FlushMemTable(ColumnFamilyData* cfd,
                                   const FlushOptions& flush_opts) {
   return FlushMemTable(cfd, flush_opts, FlushReason::kTest);
 }
 
-Status DBImpl::TEST_AtomicFlushMemTables(
+rocksdb_rs::status::Status DBImpl::TEST_AtomicFlushMemTables(
     const autovector<ColumnFamilyData*>& provided_candidate_cfds,
     const FlushOptions& flush_opts) {
   return AtomicFlushMemTables(flush_opts, FlushReason::kTest,
                               provided_candidate_cfds);
 }
 
-Status DBImpl::TEST_WaitForBackgroundWork() {
+rocksdb_rs::status::Status DBImpl::TEST_WaitForBackgroundWork() {
   InstrumentedMutexLock l(&mutex_);
   WaitForBackgroundWork();
   return error_handler_.GetBGError();
 }
 
-Status DBImpl::TEST_WaitForFlushMemTable(ColumnFamilyHandle* column_family) {
+rocksdb_rs::status::Status DBImpl::TEST_WaitForFlushMemTable(ColumnFamilyHandle* column_family) {
   ColumnFamilyData* cfd;
   if (column_family == nullptr) {
     cfd = default_cf_handle_->cfd();
@@ -178,15 +178,15 @@ Status DBImpl::TEST_WaitForFlushMemTable(ColumnFamilyHandle* column_family) {
   return WaitForFlushMemTable(cfd, nullptr, false);
 }
 
-Status DBImpl::TEST_WaitForCompact() {
+rocksdb_rs::status::Status DBImpl::TEST_WaitForCompact() {
   return WaitForCompact(WaitForCompactOptions());
 }
-Status DBImpl::TEST_WaitForCompact(
+rocksdb_rs::status::Status DBImpl::TEST_WaitForCompact(
     const WaitForCompactOptions& wait_for_compact_options) {
   return WaitForCompact(wait_for_compact_options);
 }
 
-Status DBImpl::TEST_WaitForPurge() {
+rocksdb_rs::status::Status DBImpl::TEST_WaitForPurge() {
   InstrumentedMutexLock l(&mutex_);
   while (bg_purge_scheduled_ && error_handler_.GetBGError().ok()) {
     bg_cv_.Wait();
@@ -194,7 +194,7 @@ Status DBImpl::TEST_WaitForPurge() {
   return error_handler_.GetBGError();
 }
 
-Status DBImpl::TEST_GetBGError() {
+rocksdb_rs::status::Status DBImpl::TEST_GetBGError() {
   InstrumentedMutexLock l(&mutex_);
   return error_handler_.GetBGError();
 }
@@ -227,7 +227,7 @@ uint64_t DBImpl::TEST_LogfileNumber() {
   return logfile_number_;
 }
 
-Status DBImpl::TEST_GetAllImmutableCFOptions(
+rocksdb_rs::status::Status DBImpl::TEST_GetAllImmutableCFOptions(
     std::unordered_map<std::string, const ImmutableCFOptions*>* iopts_map) {
   std::vector<std::string> cf_names;
   std::vector<const ImmutableCFOptions*> iopts;
@@ -263,7 +263,7 @@ uint64_t DBImpl::TEST_FindMinPrepLogReferencedByMemTable() {
   return FindMinPrepLogReferencedByMemTable(versions_.get(), empty_list);
 }
 
-Status DBImpl::TEST_GetLatestMutableCFOptions(
+rocksdb_rs::status::Status DBImpl::TEST_GetLatestMutableCFOptions(
     ColumnFamilyHandle* column_family, MutableCFOptions* mutable_cf_options) {
   InstrumentedMutexLock l(&mutex_);
 

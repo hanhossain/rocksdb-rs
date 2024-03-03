@@ -13,9 +13,9 @@ namespace rocksdb {
 namespace experimental {
 
 // Supported only for Leveled compaction
-Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
                            const Slice* begin, const Slice* end);
-Status SuggestCompactRange(DB* db, const Slice* begin, const Slice* end);
+rocksdb_rs::status::Status SuggestCompactRange(DB* db, const Slice* begin, const Slice* end);
 
 // Move all L0 files to target_level skipping compaction.
 // This operation succeeds only if the files in L0 have disjoint ranges; this
@@ -23,7 +23,7 @@ Status SuggestCompactRange(DB* db, const Slice* begin, const Slice* end);
 // order. Furthermore, all levels between 1 and target_level must be empty.
 // If any of the above condition is violated, InvalidArgument will be
 // returned.
-Status PromoteL0(DB* db, ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status PromoteL0(DB* db, ColumnFamilyHandle* column_family,
                  int target_level = 1);
 
 struct UpdateManifestForFilesStateOptions {
@@ -48,7 +48,7 @@ struct UpdateManifestForFilesStateOptions {
 //   typically required to achieve goal of manifest consistency/completeness
 //   (because current DB configuration would ensure new files get the desired
 //   consistent metadata).
-Status UpdateManifestForFilesState(
+rocksdb_rs::status::Status UpdateManifestForFilesState(
     const DBOptions& db_opts, const std::string& db_name,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     const UpdateManifestForFilesStateOptions& opts = {});

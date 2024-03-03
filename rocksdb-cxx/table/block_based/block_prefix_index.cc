@@ -160,12 +160,12 @@ class BlockPrefixIndex::Builder {
   Arena arena_;
 };
 
-Status BlockPrefixIndex::Create(const SliceTransform* prefix_extractor,
+rocksdb_rs::status::Status BlockPrefixIndex::Create(const SliceTransform* prefix_extractor,
                                 const Slice& prefixes, const Slice& prefix_meta,
                                 BlockPrefixIndex** prefix_index) {
   uint64_t pos = 0;
   auto meta_pos = prefix_meta;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   Builder builder;
 
   while (!meta_pos.empty()) {

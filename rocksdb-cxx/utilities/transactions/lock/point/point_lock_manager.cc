@@ -222,7 +222,7 @@ bool PointLockManager::IsLockExpired(TransactionID txn_id,
   return expired;
 }
 
-Status PointLockManager::TryLock(PessimisticTransaction* txn,
+rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* txn,
                                  ColumnFamilyId column_family_id,
                                  const std::string& key, Env* env,
                                  bool exclusive) {
@@ -250,11 +250,11 @@ Status PointLockManager::TryLock(PessimisticTransaction* txn,
 }
 
 // Helper function for TryLock().
-Status PointLockManager::AcquireWithTimeout(
+rocksdb_rs::status::Status PointLockManager::AcquireWithTimeout(
     PessimisticTransaction* txn, LockMap* lock_map, LockMapStripe* stripe,
     ColumnFamilyId column_family_id, const std::string& key, Env* env,
     int64_t timeout, const LockInfo& lock_info) {
-  Status result = Status_new();
+  rocksdb_rs::status::Status result = Status_new();
   uint64_t end_time = 0;
 
   if (timeout > 0) {
@@ -472,14 +472,14 @@ bool PointLockManager::IncrementWaiters(
 // Sets *expire_time to the expiration time in microseconds
 //  or 0 if no expiration.
 // REQUIRED:  Stripe mutex must be held.
-Status PointLockManager::AcquireLocked(LockMap* lock_map, LockMapStripe* stripe,
+rocksdb_rs::status::Status PointLockManager::AcquireLocked(LockMap* lock_map, LockMapStripe* stripe,
                                        const std::string& key, Env* env,
                                        const LockInfo& txn_lock_info,
                                        uint64_t* expire_time,
                                        autovector<TransactionID>* txn_ids) {
   assert(txn_lock_info.txn_ids.size() == 1);
 
-  Status result = Status_new();
+  rocksdb_rs::status::Status result = Status_new();
   // Check if this key is already locked
   auto stripe_iter = stripe->keys.find(key);
   if (stripe_iter != stripe->keys.end()) {
@@ -700,7 +700,7 @@ PointLockManager::RangeLockStatus PointLockManager::GetRangeLockStatus() {
   return {};
 }
 
-Status PointLockManager::TryLock(PessimisticTransaction* /* txn */,
+rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* /* txn */,
                                  ColumnFamilyId /* cf_id */,
                                  const Endpoint& /* start */,
                                  const Endpoint& /* end */, Env* /* env */,

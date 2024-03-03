@@ -61,7 +61,7 @@ class BlockBasedTableBuilder : public TableBuilder {
   void Add(const Slice& key, const Slice& value) override;
 
   // Return non-ok iff some error has been detected.
-  Status status() const override;
+  rocksdb_rs::status::Status status() const override;
 
   // Return non-ok iff some error happens during IO.
   IOStatus io_status() const override;
@@ -69,7 +69,7 @@ class BlockBasedTableBuilder : public TableBuilder {
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.
   // REQUIRES: Finish(), Abandon() have not been called
-  Status Finish() override;
+  rocksdb_rs::status::Status Finish() override;
 
   // Indicate that the contents of this builder should be abandoned.  Stops
   // using the file passed to the constructor after this function returns.
@@ -136,14 +136,14 @@ class BlockBasedTableBuilder : public TableBuilder {
   void SetupCacheKeyPrefix(const TableBuilderOptions& tbo);
 
   template <typename TBlocklike>
-  Status InsertBlockInCache(const Slice& block_contents,
+  rocksdb_rs::status::Status InsertBlockInCache(const Slice& block_contents,
                             const BlockHandle* handle, BlockType block_type);
 
-  Status InsertBlockInCacheHelper(const Slice& block_contents,
+  rocksdb_rs::status::Status InsertBlockInCacheHelper(const Slice& block_contents,
                                   const BlockHandle* handle,
                                   BlockType block_type);
 
-  Status InsertBlockInCompressedCache(const Slice& block_contents,
+  rocksdb_rs::status::Status InsertBlockInCompressedCache(const Slice& block_contents,
                                       const rocksdb_rs::compression_type::CompressionType type,
                                       const BlockHandle* handle);
 
@@ -188,7 +188,7 @@ class BlockBasedTableBuilder : public TableBuilder {
                               std::string* compressed_output,
                               Slice* result_block_contents,
                               rocksdb_rs::compression_type::CompressionType* result_compression_type,
-                              Status* out_status);
+                              rocksdb_rs::status::Status* out_status);
 
   // Get compressed blocks from BGWorkCompression and write them into SST
   void BGWorkWriteMaybeCompressedBlock();

@@ -79,7 +79,7 @@ class VectorIterator : public InternalIterator {
     return Slice(values_[indices_[current_]]);
   }
 
-  virtual Status status() const override { return Status_OK(); }
+  virtual rocksdb_rs::status::Status status() const override { return Status_OK(); }
 
   virtual bool IsKeyPinned() const override { return true; }
   virtual bool IsValuePinned() const override { return true; }

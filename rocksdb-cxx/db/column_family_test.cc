@@ -40,7 +40,7 @@ class EnvCounter : public SpecialEnv {
   explicit EnvCounter(Env* base)
       : SpecialEnv(base), num_new_writable_file_(0) {}
   int GetNumberOfNewWritableFileCalls() { return num_new_writable_file_; }
-  Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
+  rocksdb_rs::status::Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
                          const EnvOptions& soptions) override {
     ++num_new_writable_file_;
     return EnvWrapper::NewWritableFile(f, r, soptions);
@@ -70,7 +70,7 @@ class ColumnFamilyTestBase : public testing::Test {
     std::vector<ColumnFamilyDescriptor> column_families;
     for (auto h : handles_) {
       ColumnFamilyDescriptor cfdescriptor;
-      Status s = h->GetDescriptor(&cfdescriptor);
+      rocksdb_rs::status::Status s = h->GetDescriptor(&cfdescriptor);
       EXPECT_OK(s);
       column_families.push_back(cfdescriptor);
     }
@@ -168,7 +168,7 @@ class ColumnFamilyTestBase : public testing::Test {
     db_ = nullptr;
   }
 
-  Status TryOpen(std::vector<std::string> cf,
+  rocksdb_rs::status::Status TryOpen(std::vector<std::string> cf,
                  std::vector<ColumnFamilyOptions> options = {}) {
     std::vector<ColumnFamilyDescriptor> column_families;
     names_.clear();
@@ -180,7 +180,7 @@ class ColumnFamilyTestBase : public testing::Test {
     return DB::Open(db_options_, dbname_, column_families, &handles_, &db_);
   }
 
-  Status OpenReadOnly(std::vector<std::string> cf,
+  rocksdb_rs::status::Status OpenReadOnly(std::vector<std::string> cf,
                       std::vector<ColumnFamilyOptions> options = {}) {
     std::vector<ColumnFamilyDescriptor> column_families;
     names_.clear();
@@ -320,19 +320,19 @@ class ColumnFamilyTestBase : public testing::Test {
     ASSERT_EQ(value, MaxTotalInMemoryState());
   }
 
-  Status Put(int cf, const std::string& key, const std::string& value) {
+  rocksdb_rs::status::Status Put(int cf, const std::string& key, const std::string& value) {
     return db_->Put(WriteOptions(), handles_[cf], Slice(key), Slice(value));
   }
-  Status Merge(int cf, const std::string& key, const std::string& value) {
+  rocksdb_rs::status::Status Merge(int cf, const std::string& key, const std::string& value) {
     return db_->Merge(WriteOptions(), handles_[cf], Slice(key), Slice(value));
   }
-  Status Flush(int cf) { return db_->Flush(FlushOptions(), handles_[cf]); }
+  rocksdb_rs::status::Status Flush(int cf) { return db_->Flush(FlushOptions(), handles_[cf]); }
 
   std::string Get(int cf, const std::string& key) {
     ReadOptions options;
     options.verify_checksums = true;
     std::string result;
-    Status s = db_->Get(options, handles_[cf], Slice(key), &result);
+    rocksdb_rs::status::Status s = db_->Get(options, handles_[cf], Slice(key), &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -403,7 +403,7 @@ class ColumnFamilyTestBase : public testing::Test {
     env_->SleepForMicroseconds(micros_wait_for_log_deletion);
     int ret = 0;
     VectorLogPtr wal_files;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     // GetSortedWalFiles is a flakey function -- it gets all the wal_dir
     // children files and then later checks for their existence. if some of the
     // log files doesn't exist anymore, it reports an error. it does all of this
@@ -800,7 +800,7 @@ TEST_P(ColumnFamilyTest, WriteBatchFailure) {
       batch.Put(handles_[0], Slice("still here"), Slice("column-family")));
   ASSERT_OK(db_->Write(woptions_ignore_missing_cf, &batch));
   ASSERT_EQ("column-family", Get(0, "still here"));
-  Status s = db_->Write(WriteOptions(), &batch);
+  rocksdb_rs::status::Status s = db_->Write(WriteOptions(), &batch);
   ASSERT_TRUE(s.IsInvalidArgument());
   Close();
 }
@@ -2088,7 +2088,7 @@ TEST_P(ColumnFamilyTest, ReadOnlyDBTest) {
 
   Close();
   // can't open dropped column family
-  Status s = OpenReadOnly({"default", "one", "two"});
+  rocksdb_rs::status::Status s = OpenReadOnly({"default", "one", "two"});
   ASSERT_TRUE(!s.ok());
 
   // Can't open without specifying default column family
@@ -2166,7 +2166,7 @@ TEST_P(ColumnFamilyTest, FlushStaleColumnFamilies) {
 }
 
 TEST_P(ColumnFamilyTest, CreateMissingColumnFamilies) {
-  Status s = TryOpen({"one", "two"});
+  rocksdb_rs::status::Status s = TryOpen({"one", "two"});
   ASSERT_TRUE(!s.ok());
   db_options_.create_missing_column_families = true;
   s = TryOpen({"default", "one", "two"});

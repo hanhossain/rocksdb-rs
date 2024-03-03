@@ -39,7 +39,7 @@ class AutoRollLogger : public Logger {
   virtual void LogHeader(const char* format, va_list ap) override;
 
   // check if the logger has encountered any problem.
-  Status GetStatus() { return status_.Clone(); }
+  rocksdb_rs::status::Status GetStatus() { return status_.Clone(); }
 
   size_t GetLogFileSize() const override {
     if (!logger_) {
@@ -105,7 +105,7 @@ class AutoRollLogger : public Logger {
 
  protected:
   // Implementation of Close()
-  virtual Status CloseImpl() override {
+  virtual rocksdb_rs::status::Status CloseImpl() override {
     if (logger_) {
       return logger_->Close();
     } else {
@@ -115,13 +115,13 @@ class AutoRollLogger : public Logger {
 
  private:
   bool LogExpired();
-  Status ResetLogger();
+  rocksdb_rs::status::Status ResetLogger();
   void RollLogFile();
   // Read all names of old log files into old_log_files_
   // If there is any error, put the error code in status_
   void GetExistingFiles();
   // Delete old log files if it excceeds the limit.
-  Status TrimOldLogFiles();
+  rocksdb_rs::status::Status TrimOldLogFiles();
   // Log message to logger without rolling
   void LogInternal(const char* format, ...);
   // Serialize the va_list to a string
@@ -136,7 +136,7 @@ class AutoRollLogger : public Logger {
   std::shared_ptr<SystemClock> clock_;
   std::shared_ptr<Logger> logger_;
   // current status of the logger
-  Status status_;
+  rocksdb_rs::status::Status status_;
   const size_t kMaxLogFileSize;
   const size_t kLogFileTimeToRoll;
   const size_t kKeepLogFileNum;
@@ -158,7 +158,7 @@ class AutoRollLogger : public Logger {
 };
 
 // Facade to craete logger automatically
-Status CreateLoggerFromOptions(const std::string& dbname,
+rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
                                const DBOptions& options,
                                std::shared_ptr<Logger>* logger);
 

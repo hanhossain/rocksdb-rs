@@ -38,9 +38,9 @@ class LockTest : public testing::Test {
 
   ~LockTest() override {}
 
-  Status LockFile(FileLock** db_lock) { return env_->LockFile(file_, db_lock); }
+  rocksdb_rs::status::Status LockFile(FileLock** db_lock) { return env_->LockFile(file_, db_lock); }
 
-  Status UnlockFile(FileLock* db_lock) { return env_->UnlockFile(db_lock); }
+  rocksdb_rs::status::Status UnlockFile(FileLock* db_lock) { return env_->UnlockFile(db_lock); }
 
   bool AssertFileIsLocked() {
     return CheckFileLock(/* lock_expected = */ true);
@@ -126,7 +126,7 @@ TEST_F(LockTest, LockBySameThread) {
   ASSERT_TRUE(AssertFileIsLocked());
 
   // re-acquire the lock on the same file. This should fail.
-  Status s = LockFile(&lock2);
+  rocksdb_rs::status::Status s = LockFile(&lock2);
   ASSERT_TRUE(s.IsIOError());
 #ifndef OS_WIN
   // Validate that error message contains current thread ID.

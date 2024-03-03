@@ -294,7 +294,7 @@ void CompactionJob::Prepare() {
     for (const auto& each_level : *c->inputs()) {
       for (const auto& fmd : each_level.files) {
         std::shared_ptr<const TableProperties> tp;
-        Status s =
+        rocksdb_rs::status::Status s =
             cfd->current()->GetTableProperties(read_options, &tp, fmd, nullptr);
         if (s.ok()) {
           seqno_time_mapping_.Add(tp->seqno_to_time_mapping);
@@ -503,7 +503,7 @@ void CompactionJob::GenSubcompactionBoundaries() {
       for (size_t i = 0; i < num_files; i++) {
         FileMetaData* f = flevel->files[i].file_metadata;
         std::vector<TableReader::Anchor> my_anchors;
-        Status s = cfd->table_cache()->ApproximateKeyAnchors(
+        rocksdb_rs::status::Status s = cfd->table_cache()->ApproximateKeyAnchors(
             read_options, icomp, *f,
             c->mutable_cf_options()->block_protection_bytes_per_key,
             my_anchors);
@@ -613,7 +613,7 @@ void CompactionJob::GenSubcompactionBoundaries() {
                extra_num_subcompaction_threads_reserved_));
 }
 
-Status CompactionJob::Run() {
+rocksdb_rs::status::Status CompactionJob::Run() {
   AutoThreadOperationStageUpdater stage_updater(
       ThreadStatus::STAGE_COMPACTION_RUN);
   TEST_SYNC_POINT("CompactionJob::Run():Start");
@@ -656,7 +656,7 @@ Status CompactionJob::Run() {
   TEST_SYNC_POINT("CompactionJob::Run:BeforeVerify");
 
   // Check if any thread encountered an error during execution
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   IOStatus io_s;
   bool wrote_new_blob_files = false;
 
@@ -709,7 +709,7 @@ Status CompactionJob::Run() {
     auto& prefix_extractor =
         compact_->compaction->mutable_cf_options()->prefix_extractor;
     std::atomic<size_t> next_file_idx(0);
-    auto verify_table = [&](Status& output_status) {
+    auto verify_table = [&](rocksdb_rs::status::Status& output_status) {
       while (true) {
         size_t file_idx = next_file_idx.fetch_add(1);
         if (file_idx >= files_output.size()) {
@@ -813,13 +813,13 @@ Status CompactionJob::Run() {
   return status;
 }
 
-Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
+rocksdb_rs::status::Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
   assert(compact_);
 
   AutoThreadOperationStageUpdater stage_updater(
       ThreadStatus::STAGE_COMPACTION_INSTALL);
   db_mutex_->AssertHeld();
-  Status status = compact_->status.Clone();
+  rocksdb_rs::status::Status status = compact_->status.Clone();
 
   ColumnFamilyData* cfd = compact_->compaction->column_family_data();
   assert(cfd);
@@ -1270,7 +1270,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
 
   const CompactionFileCloseFunc close_file_func =
       [this, sub_compact, start_user_key, end_user_key](
-          CompactionOutputs& outputs, const Status& status,
+          CompactionOutputs& outputs, const rocksdb_rs::status::Status& status,
           const Slice& next_table_min_key) {
         return this->FinishCompactionOutputFile(
             status, sub_compact, outputs, next_table_min_key,
@@ -1278,7 +1278,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
             sub_compact->end.has_value() ? &end_user_key : nullptr);
       };
 
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   TEST_SYNC_POINT_CALLBACK(
       "CompactionJob::ProcessKeyValueCompaction()::Processing",
       reinterpret_cast<void*>(
@@ -1453,8 +1453,8 @@ void CompactionJob::RecordDroppedKeys(
   }
 }
 
-Status CompactionJob::FinishCompactionOutputFile(
-    const Status& input_status, SubcompactionState* sub_compact,
+rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
+    const rocksdb_rs::status::Status& input_status, SubcompactionState* sub_compact,
     CompactionOutputs& outputs, const Slice& next_table_min_key,
     const Slice* comp_start_user_key, const Slice* comp_end_user_key) {
   AutoThreadOperationStageUpdater stage_updater(
@@ -1471,7 +1471,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   std::string file_checksum_func_name = kUnknownFileChecksumFuncName;
 
   // Check for iterator errors
-  Status s = input_status.Clone();
+  rocksdb_rs::status::Status s = input_status.Clone();
 
   // Add range tombstones
   auto earliest_snapshot = kMaxSequenceNumber;
@@ -1551,7 +1551,7 @@ Status CompactionJob::FinishCompactionOutputFile(
 
     // TODO(AR) it is not clear if there are any larger implications if
     // DeleteFile fails here
-    Status ds = env_->DeleteFile(fname);
+    rocksdb_rs::status::Status ds = env_->DeleteFile(fname);
     if (!ds.ok()) {
       ROCKS_LOG_WARN(
           db_options_.info_log,
@@ -1581,7 +1581,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   std::string fname;
   FileDescriptor output_fd;
   uint64_t oldest_blob_file_number = kInvalidBlobFileNumber;
-  Status status_for_listener = s.Clone();
+  rocksdb_rs::status::Status status_for_listener = s.Clone();
   if (meta != nullptr) {
     fname = GetTableFileName(meta->fd.GetNumber());
     output_fd = meta->fd;
@@ -1602,7 +1602,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   auto sfm =
       static_cast<SstFileManagerImpl*>(db_options_.sst_file_manager.get());
   if (sfm && meta != nullptr && meta->fd.GetPathId() == 0) {
-    Status add_s = sfm->OnAddFile(fname);
+    rocksdb_rs::status::Status add_s = sfm->OnAddFile(fname);
     if (!add_s.ok() && s.ok()) {
       s.copy_from(add_s);
     }
@@ -1621,7 +1621,7 @@ Status CompactionJob::FinishCompactionOutputFile(
   return s;
 }
 
-Status CompactionJob::InstallCompactionResults(
+rocksdb_rs::status::Status CompactionJob::InstallCompactionResults(
     const MutableCFOptions& mutable_cf_options) {
   assert(compact_);
 
@@ -1732,7 +1732,7 @@ void CompactionJob::RecordCompactionIOStats() {
   IOSTATS_RESET(bytes_written);
 }
 
-Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
+rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
                                                CompactionOutputs& outputs) {
   assert(sub_compact != nullptr);
 
@@ -1765,7 +1765,7 @@ Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
   }
   fo_copy.temperature = temperature;
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   IOStatus io_s = NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
   s = io_s;
   if (sub_compact->io_status.ok()) {

@@ -227,7 +227,7 @@ TEST_P(EnvBasicTestWithParam, Basics) {
   ASSERT_TRUE(Status_NotFound().eq(env_->FileExists(test_dir_ + "/g")));
   ASSERT_OK(env_->GetChildren(test_dir_, &children));
   ASSERT_EQ(0U, children.size());
-  Status s = env_->GetChildren(test_dir_ + "/non_existent", &children);
+  rocksdb_rs::status::Status s = env_->GetChildren(test_dir_ + "/non_existent", &children);
   ASSERT_TRUE(s.IsNotFound());
 }
 

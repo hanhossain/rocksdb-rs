@@ -150,7 +150,7 @@ class FaultInjectionTest
     return options;
   }
 
-  Status NewDB() {
+  rocksdb_rs::status::Status NewDB() {
     assert(db_ == nullptr);
     assert(tiny_cache_ == nullptr);
     assert(env_ == nullptr);
@@ -171,7 +171,7 @@ class FaultInjectionTest
     EXPECT_OK(DestroyDB(dbname_, options_));
 
     options_.create_if_missing = true;
-    Status s = OpenDB();
+    rocksdb_rs::status::Status s = OpenDB();
     options_.create_if_missing = false;
     return s;
   }
@@ -184,7 +184,7 @@ class FaultInjectionTest
   void TearDown() override {
     CloseDB();
 
-    Status s = DestroyDB(dbname_, options_);
+    rocksdb_rs::status::Status s = DestroyDB(dbname_, options_);
 
     delete env_;
     env_ = nullptr;
@@ -205,7 +205,7 @@ class FaultInjectionTest
     }
   }
 
-  Status ReadValue(int i, std::string* val) const {
+  rocksdb_rs::status::Status ReadValue(int i, std::string* val) const {
     std::string key_space, value_space;
     Slice key = Key(i, &key_space);
     Value(i, &value_space);
@@ -213,11 +213,11 @@ class FaultInjectionTest
     return db_->Get(options, key, val);
   }
 
-  Status Verify(int start_idx, int num_vals,
+  rocksdb_rs::status::Status Verify(int start_idx, int num_vals,
                 ExpectedVerifResult expected) const {
     std::string val;
     std::string value_space;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = Status_new();
     for (int i = start_idx; i < start_idx + num_vals && s.ok(); i++) {
       Value(i, &value_space);
       s = ReadValue(i, &val);
@@ -266,10 +266,10 @@ class FaultInjectionTest
     db_ = nullptr;
   }
 
-  Status OpenDB() {
+  rocksdb_rs::status::Status OpenDB() {
     CloseDB();
     env_->ResetState();
-    Status s = DB::Open(options_, dbname_, &db_);
+    rocksdb_rs::status::Status s = DB::Open(options_, dbname_, &db_);
     assert(db_ != nullptr);
     return s;
   }
@@ -556,7 +556,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   constexpr uint64_t log_number = 0;
   {
     std::unique_ptr<FSWritableFile> file;
-    const Status s =
+    const rocksdb_rs::status::Status s =
         fault_fs->NewWritableFile(file_name, FileOptions(), &file, nullptr);
     ASSERT_OK(s);
     std::unique_ptr<WritableFileWriter> fwriter(
@@ -574,7 +574,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
     edit.SetColumnFamily(0);
     std::string buf;
     assert(edit.EncodeTo(&buf));
-    const Status s = log_writer->AddRecord(buf);
+    const rocksdb_rs::status::Status s = log_writer->AddRecord(buf);
     ASSERT_NOK(s);
   }
 
@@ -586,17 +586,17 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
 
   {
     std::unique_ptr<FSSequentialFile> file;
-    Status s =
+    rocksdb_rs::status::Status s =
         fault_fs->NewSequentialFile(file_name, FileOptions(), &file, nullptr);
     ASSERT_OK(s);
     std::unique_ptr<SequentialFileReader> freader(
         new SequentialFileReader(std::move(file), file_name));
-    Status log_read_s = Status_new();
+    rocksdb_rs::status::Status log_read_s = Status_new();
     class LogReporter : public log::Reader::Reporter {
      public:
-      Status* status_;
-      explicit LogReporter(Status* _s) : status_(_s) {}
-      void Corruption(size_t /*bytes*/, const Status& _s) override {
+      rocksdb_rs::status::Status* status_;
+      explicit LogReporter(rocksdb_rs::status::Status* _s) : status_(_s) {}
+      void Corruption(size_t /*bytes*/, const rocksdb_rs::status::Status& _s) override {
         if (status_->ok()) {
           status_->copy_from(_s);
         }

@@ -643,7 +643,7 @@ InternalStats::InternalStats(int num_levels, SystemClock* clock,
   Cache* block_cache = GetBlockCacheForStats();
   if (block_cache) {
     // Extract or create stats collector. Could fail in rare cases.
-    Status s = CacheEntryStatsCollector<CacheEntryRoleStats>::GetShared(
+    rocksdb_rs::status::Status s = CacheEntryStatsCollector<CacheEntryRoleStats>::GetShared(
         block_cache, clock_, &cache_entry_stats_collector_);
     if (s.ok()) {
       assert(cache_entry_stats_collector_);

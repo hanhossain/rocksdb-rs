@@ -367,7 +367,7 @@ typename Table::HandleImpl* BaseClockTable::CreateStandalone(
 
   const size_t total_charge = proto.GetTotalCharge();
   if (strict_capacity_limit) {
-    Status s = ChargeUsageMaybeEvictStrict<Table>(
+    rocksdb_rs::status::Status s = ChargeUsageMaybeEvictStrict<Table>(
         total_charge, capacity,
         /*need_evict_for_occupancy=*/false, state);
     if (!s.ok()) {
@@ -392,7 +392,7 @@ typename Table::HandleImpl* BaseClockTable::CreateStandalone(
 }
 
 template <class Table>
-Status BaseClockTable::ChargeUsageMaybeEvictStrict(
+rocksdb_rs::status::Status BaseClockTable::ChargeUsageMaybeEvictStrict(
     size_t total_charge, size_t capacity, bool need_evict_for_occupancy,
     typename Table::InsertState& state) {
   if (total_charge > capacity) {
@@ -512,7 +512,7 @@ inline bool BaseClockTable::ChargeUsageMaybeEvictNonStrict(
 }
 
 template <class Table>
-Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
+rocksdb_rs::status::Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
                               typename Table::HandleImpl** handle,
                               Cache::Priority priority, size_t capacity,
                               bool strict_capacity_limit) {
@@ -534,7 +534,7 @@ Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
   bool use_standalone_insert = false;
   const size_t total_charge = proto.GetTotalCharge();
   if (strict_capacity_limit) {
-    Status s = ChargeUsageMaybeEvictStrict<Table>(
+    rocksdb_rs::status::Status s = ChargeUsageMaybeEvictStrict<Table>(
         total_charge, capacity, need_evict_for_occupancy, state);
     if (!s.ok()) {
       // Revert occupancy
@@ -1214,7 +1214,7 @@ void ClockCacheShard<Table>::SetStrictCapacityLimit(
 }
 
 template <class Table>
-Status ClockCacheShard<Table>::Insert(const Slice& key,
+rocksdb_rs::status::Status ClockCacheShard<Table>::Insert(const Slice& key,
                                       const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                                       Cache::ObjectPtr value,
                                       const Cache::CacheItemHelper* helper,

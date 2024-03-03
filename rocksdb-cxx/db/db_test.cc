@@ -464,7 +464,7 @@ TEST_F(DBTest, LevelLimitReopen) {
 
   options.num_levels = 1;
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
-  Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
   ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
@@ -849,7 +849,7 @@ TEST_F(DBTest, DISABLED_VeryLargeValue) {
   ASSERT_EQ(1, NumTableFilesAtLevel(0));
 
   std::string value;
-  Status s = db_->Get(ReadOptions(), key1, &value);
+  rocksdb_rs::status::Status s = db_->Get(ReadOptions(), key1, &value);
   ASSERT_OK(s);
   ASSERT_EQ(kValueSize, value.size());
   ASSERT_EQ('v', value[0]);
@@ -2249,7 +2249,7 @@ TEST_F(DBTest, ComparatorCheck) {
     new_options = CurrentOptions();
     new_options.comparator = &cmp;
     // only the non-default column family has non-matching comparator
-    Status s = TryReopenWithColumnFamilies(
+    rocksdb_rs::status::Status s = TryReopenWithColumnFamilies(
         {"default", "pikachu"}, std::vector<Options>({options, new_options}));
     ASSERT_TRUE(!s.ok());
     ASSERT_TRUE(s.ToString()->find("comparator") != std::string::npos)
@@ -2326,7 +2326,7 @@ TEST_F(DBTest, DBOpen_Options) {
   // Does not exist, and create_if_missing == false: error
   DB* db = nullptr;
   options.create_if_missing = false;
-  Status s = DB::Open(options, dbname, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, dbname, &db);
   ASSERT_TRUE(strstr(s.ToString()->c_str(), "does not exist") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
@@ -2372,7 +2372,7 @@ TEST_F(DBTest, DBOpen_Change_NumLevels) {
 
   options.create_if_missing = false;
   options.num_levels = 2;
-  Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_TRUE(strstr(s.ToString()->c_str(), "Invalid argument") != nullptr);
   ASSERT_TRUE(db_ == nullptr);
 }
@@ -2493,7 +2493,7 @@ TEST_F(DBTest, SnapshotFiles) {
     DBOptions opts;
     opts.env = env_;
     opts.create_if_missing = false;
-    Status stat =
+    rocksdb_rs::status::Status stat =
         DB::Open(opts, snapdir, column_families, &cf_handles, &snapdb);
     ASSERT_OK(stat);
 
@@ -2756,7 +2756,7 @@ static void MTThreadBody(void* arg) {
       // same)
       std::vector<Slice> keys(kColumnFamilies, Slice(keybuf));
       std::vector<std::string> values;
-      rust::Vec<Status> statuses;
+      rust::Vec<rocksdb_rs::status::Status> statuses;
       if (!t->multiget_batched) {
         statuses = db->MultiGet(ReadOptions(), t->state->test->handles_, keys,
                                 &values);
@@ -2778,7 +2778,7 @@ static void MTThreadBody(void* arg) {
           }
         }
       }
-      Status s = statuses[0].Clone();
+      rocksdb_rs::status::Status s = statuses[0].Clone();
       // all statuses have to be the same
       for (size_t i = 1; i < statuses.size(); ++i) {
         // they are either both ok or both not-found
@@ -2984,23 +2984,23 @@ class ModelDB : public DB {
 
   explicit ModelDB(const Options& options) : options_(options) {}
   using DB::Put;
-  Status Put(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
+  rocksdb_rs::status::Status Put(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
              const Slice& v) override {
     WriteBatch batch;
-    Status s = batch.Put(cf, k, v);
+    rocksdb_rs::status::Status s = batch.Put(cf, k, v);
     if (!s.ok()) {
       return s;
     }
     return Write(o, &batch);
   }
-  Status Put(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
+  rocksdb_rs::status::Status Put(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
              const Slice& /*k*/, const Slice& /*ts*/,
              const Slice& /*v*/) override {
     return Status_NotSupported();
   }
 
   using DB::PutEntity;
-  Status PutEntity(const WriteOptions& /* options */,
+  rocksdb_rs::status::Status PutEntity(const WriteOptions& /* options */,
                    ColumnFamilyHandle* /* column_family */,
                    const Slice& /* key */,
                    const WideColumns& /* columns */) override {
@@ -3008,58 +3008,58 @@ class ModelDB : public DB {
   }
 
   using DB::Close;
-  Status Close() override { return Status_OK(); }
+  rocksdb_rs::status::Status Close() override { return Status_OK(); }
   using DB::Delete;
-  Status Delete(const WriteOptions& o, ColumnFamilyHandle* cf,
+  rocksdb_rs::status::Status Delete(const WriteOptions& o, ColumnFamilyHandle* cf,
                 const Slice& key) override {
     WriteBatch batch;
-    Status s = batch.Delete(cf, key);
+    rocksdb_rs::status::Status s = batch.Delete(cf, key);
     if (!s.ok()) {
       return s;
     }
     return Write(o, &batch);
   }
-  Status Delete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
+  rocksdb_rs::status::Status Delete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                 const Slice& /*key*/, const Slice& /*ts*/) override {
     return Status_NotSupported();
   }
   using DB::SingleDelete;
-  Status SingleDelete(const WriteOptions& o, ColumnFamilyHandle* cf,
+  rocksdb_rs::status::Status SingleDelete(const WriteOptions& o, ColumnFamilyHandle* cf,
                       const Slice& key) override {
     WriteBatch batch;
-    Status s = batch.SingleDelete(cf, key);
+    rocksdb_rs::status::Status s = batch.SingleDelete(cf, key);
     if (!s.ok()) {
       return s;
     }
     return Write(o, &batch);
   }
-  Status SingleDelete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
+  rocksdb_rs::status::Status SingleDelete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                       const Slice& /*key*/, const Slice& /*ts*/) override {
     return Status_NotSupported();
   }
   using DB::Merge;
-  Status Merge(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
+  rocksdb_rs::status::Status Merge(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
                const Slice& v) override {
     WriteBatch batch;
-    Status s = batch.Merge(cf, k, v);
+    rocksdb_rs::status::Status s = batch.Merge(cf, k, v);
     if (!s.ok()) {
       return s;
     }
     return Write(o, &batch);
   }
-  Status Merge(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
+  rocksdb_rs::status::Status Merge(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                const Slice& /*k*/, const Slice& /*ts*/,
                const Slice& /*value*/) override {
     return Status_NotSupported();
   }
   using DB::Get;
-  Status Get(const ReadOptions& /*options*/, ColumnFamilyHandle* /*cf*/,
+  rocksdb_rs::status::Status Get(const ReadOptions& /*options*/, ColumnFamilyHandle* /*cf*/,
              const Slice& key, PinnableSlice* /*value*/) override {
     return Status_NotSupported(key);
   }
 
   using DB::GetMergeOperands;
-  virtual Status GetMergeOperands(
+  virtual rocksdb_rs::status::Status GetMergeOperands(
       const ReadOptions& /*options*/, ColumnFamilyHandle* /*column_family*/,
       const Slice& key, PinnableSlice* /*slice*/,
       GetMergeOperandsOptions* /*merge_operands_options*/,
@@ -3068,17 +3068,17 @@ class ModelDB : public DB {
   }
 
   using DB::MultiGet;
-  rust::Vec<Status> MultiGet(
+  rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& /*options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys,
       std::vector<std::string>* /*values*/) override {
-    rust::Vec<Status> s = Status_NotSupported("Not implemented.").create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s = Status_NotSupported("Not implemented.").create_vec(keys.size());
     return s;
   }
 
   using DB::IngestExternalFile;
-  Status IngestExternalFile(
+  rocksdb_rs::status::Status IngestExternalFile(
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*external_files*/,
       const IngestExternalFileOptions& /*options*/) override {
@@ -3086,13 +3086,13 @@ class ModelDB : public DB {
   }
 
   using DB::IngestExternalFiles;
-  Status IngestExternalFiles(
+  rocksdb_rs::status::Status IngestExternalFiles(
       const std::vector<IngestExternalFileArg>& /*args*/) override {
     return Status_NotSupported("Not implemented");
   }
 
   using DB::CreateColumnFamilyWithImport;
-  virtual Status CreateColumnFamilyWithImport(
+  virtual rocksdb_rs::status::Status CreateColumnFamilyWithImport(
       const ColumnFamilyOptions& /*options*/,
       const std::string& /*column_family_name*/,
       const ImportColumnFamilyOptions& /*import_options*/,
@@ -3102,25 +3102,25 @@ class ModelDB : public DB {
   }
 
   using DB::VerifyChecksum;
-  Status VerifyChecksum(const ReadOptions&) override {
+  rocksdb_rs::status::Status VerifyChecksum(const ReadOptions&) override {
     return Status_NotSupported("Not implemented.");
   }
 
   using DB::ClipColumnFamily;
-  virtual Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
+  virtual rocksdb_rs::status::Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
                                   const Slice& /*begin*/,
                                   const Slice& /*end*/) override {
     return Status_NotSupported("Not implemented.");
   }
 
   using DB::GetPropertiesOfAllTables;
-  Status GetPropertiesOfAllTables(
+  rocksdb_rs::status::Status GetPropertiesOfAllTables(
       ColumnFamilyHandle* /*column_family*/,
       TablePropertiesCollection* /*props*/) override {
     return Status_new();
   }
 
-  Status GetPropertiesOfTablesInRange(
+  rocksdb_rs::status::Status GetPropertiesOfTablesInRange(
       ColumnFamilyHandle* /*column_family*/, const Range* /*range*/,
       std::size_t /*n*/, TablePropertiesCollection* /*props*/) override {
     return Status_new();
@@ -3149,7 +3149,7 @@ class ModelDB : public DB {
       return new ModelIter(snapshot_state, false);
     }
   }
-  Status NewIterators(const ReadOptions& /*options*/,
+  rocksdb_rs::status::Status NewIterators(const ReadOptions& /*options*/,
                       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
                       std::vector<Iterator*>* /*iterators*/) override {
     return Status_NotSupported("Not supported yet");
@@ -3164,7 +3164,7 @@ class ModelDB : public DB {
     delete reinterpret_cast<const ModelSnapshot*>(snapshot);
   }
 
-  Status Write(const WriteOptions& /*options*/, WriteBatch* batch) override {
+  rocksdb_rs::status::Status Write(const WriteOptions& /*options*/, WriteBatch* batch) override {
     class Handler : public WriteBatch::Handler {
      public:
       KVMap* map_;
@@ -3204,7 +3204,7 @@ class ModelDB : public DB {
     return false;
   }
   using DB::GetApproximateSizes;
-  Status GetApproximateSizes(const SizeApproximationOptions& /*options*/,
+  rocksdb_rs::status::Status GetApproximateSizes(const SizeApproximationOptions& /*options*/,
                              ColumnFamilyHandle* /*column_family*/,
                              const Range* /*range*/, int n,
                              uint64_t* sizes) override {
@@ -3222,20 +3222,20 @@ class ModelDB : public DB {
     *size = 0;
   }
   using DB::CompactRange;
-  Status CompactRange(const CompactRangeOptions& /*options*/,
+  rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& /*options*/,
                       ColumnFamilyHandle* /*column_family*/,
                       const Slice* /*start*/, const Slice* /*end*/) override {
     return Status_NotSupported("Not supported operation.");
   }
 
-  Status SetDBOptions(
+  rocksdb_rs::status::Status SetDBOptions(
       const std::unordered_map<std::string, std::string>& /*new_options*/)
       override {
     return Status_NotSupported("Not supported operation.");
   }
 
   using DB::CompactFiles;
-  Status CompactFiles(
+  rocksdb_rs::status::Status CompactFiles(
       const CompactionOptions& /*compact_options*/,
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*input_file_names*/,
@@ -3245,15 +3245,15 @@ class ModelDB : public DB {
     return Status_NotSupported("Not supported operation.");
   }
 
-  Status PauseBackgroundWork() override {
+  rocksdb_rs::status::Status PauseBackgroundWork() override {
     return Status_NotSupported("Not supported operation.");
   }
 
-  Status ContinueBackgroundWork() override {
+  rocksdb_rs::status::Status ContinueBackgroundWork() override {
     return Status_NotSupported("Not supported operation.");
   }
 
-  Status EnableAutoCompaction(
+  rocksdb_rs::status::Status EnableAutoCompaction(
       const std::vector<ColumnFamilyHandle*>& /*column_family_handles*/)
       override {
     return Status_NotSupported("Not supported operation.");
@@ -3263,7 +3263,7 @@ class ModelDB : public DB {
 
   void DisableManualCompaction() override { return; }
 
-  virtual Status WaitForCompact(
+  virtual rocksdb_rs::status::Status WaitForCompact(
       const WaitForCompactOptions& /* wait_for_compact_options */) override {
     return Status_OK();
   }
@@ -3294,56 +3294,56 @@ class ModelDB : public DB {
   DBOptions GetDBOptions() const override { return options_; }
 
   using DB::Flush;
-  Status Flush(const rocksdb::FlushOptions& /*options*/,
+  rocksdb_rs::status::Status Flush(const rocksdb::FlushOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/) override {
-    Status ret = Status_new();
+    rocksdb_rs::status::Status ret = Status_new();
     return ret;
   }
-  Status Flush(
+  rocksdb_rs::status::Status Flush(
       const rocksdb::FlushOptions& /*options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_families*/) override {
     return Status_OK();
   }
 
-  Status SyncWAL() override { return Status_OK(); }
+  rocksdb_rs::status::Status SyncWAL() override { return Status_OK(); }
 
-  Status DisableFileDeletions() override { return Status_OK(); }
+  rocksdb_rs::status::Status DisableFileDeletions() override { return Status_OK(); }
 
-  Status EnableFileDeletions(bool /*force*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override { return Status_OK(); }
 
-  Status GetLiveFiles(std::vector<std::string>&, uint64_t* /*size*/,
+  rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>&, uint64_t* /*size*/,
                       bool /*flush_memtable*/ = true) override {
     return Status_OK();
   }
 
-  Status GetLiveFilesChecksumInfo(
+  rocksdb_rs::status::Status GetLiveFilesChecksumInfo(
       FileChecksumList* /*checksum_list*/) override {
     return Status_OK();
   }
 
-  Status GetLiveFilesStorageInfo(
+  rocksdb_rs::status::Status GetLiveFilesStorageInfo(
       const LiveFilesStorageInfoOptions& /*opts*/,
       std::vector<LiveFileStorageInfo>* /*files*/) override {
     return Status_OK();
   }
 
-  Status GetSortedWalFiles(VectorLogPtr& /*files*/) override {
+  rocksdb_rs::status::Status GetSortedWalFiles(VectorLogPtr& /*files*/) override {
     return Status_OK();
   }
 
-  Status GetCurrentWalFile(
+  rocksdb_rs::status::Status GetCurrentWalFile(
       std::unique_ptr<LogFile>* /*current_log_file*/) override {
     return Status_OK();
   }
 
-  virtual Status GetCreationTimeOfOldestFile(
+  virtual rocksdb_rs::status::Status GetCreationTimeOfOldestFile(
       uint64_t* /*creation_time*/) override {
     return Status_NotSupported();
   }
 
-  Status DeleteFile(std::string /*name*/) override { return Status_OK(); }
+  rocksdb_rs::status::Status DeleteFile(std::string /*name*/) override { return Status_OK(); }
 
-  Status GetUpdatesSince(
+  rocksdb_rs::status::Status GetUpdatesSince(
       rocksdb::SequenceNumber,
       std::unique_ptr<rocksdb::TransactionLogIterator>*,
       const TransactionLogIterator::ReadOptions& /*read_options*/ =
@@ -3354,22 +3354,22 @@ class ModelDB : public DB {
   void GetColumnFamilyMetaData(ColumnFamilyHandle* /*column_family*/,
                                ColumnFamilyMetaData* /*metadata*/) override {}
 
-  Status GetDbIdentity(std::string& /*identity*/) const override {
+  rocksdb_rs::status::Status GetDbIdentity(std::string& /*identity*/) const override {
     return Status_OK();
   }
 
-  Status GetDbSessionId(std::string& /*session_id*/) const override {
+  rocksdb_rs::status::Status GetDbSessionId(std::string& /*session_id*/) const override {
     return Status_OK();
   }
 
   SequenceNumber GetLatestSequenceNumber() const override { return 0; }
 
-  Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
+  rocksdb_rs::status::Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
                                   std::string /*ts_low*/) override {
     return Status_OK();
   }
 
-  Status GetFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
+  rocksdb_rs::status::Status GetFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
                              std::string* /*ts_low*/) override {
     return Status_OK();
   }
@@ -3411,7 +3411,7 @@ class ModelDB : public DB {
 
     Slice key() const override { return iter_->first; }
     Slice value() const override { return iter_->second; }
-    Status status() const override { return Status_OK(); }
+    rocksdb_rs::status::Status status() const override { return Status_OK(); }
 
    private:
     const KVMap* const map_;
@@ -4624,7 +4624,7 @@ TEST_F(DBTest, GetThreadStatus) {
   TryReopen(options);
 
   std::vector<ThreadStatus> thread_list;
-  Status s = env_->GetThreadList(&thread_list);
+  rocksdb_rs::status::Status s = env_->GetThreadList(&thread_list);
 
   for (int i = 0; i < 2; ++i) {
     // repeat the test with differet number of high / low priority threads
@@ -4866,7 +4866,7 @@ TEST_F(DBTest, PreShutdownFlush) {
   CreateAndReopenWithCF({"pikachu"}, options);
   ASSERT_OK(Put(1, "key", "value"));
   CancelAllBackgroundWork(db_);
-  Status s =
+  rocksdb_rs::status::Status s =
       db_->CompactRange(CompactRangeOptions(), handles_[1], nullptr, nullptr);
   ASSERT_TRUE(s.IsShutdownInProgress());
 }
@@ -5633,7 +5633,7 @@ TEST_F(DBTest, FileCreationRandomFailure) {
     for (int k = 0; k < kTestSize; ++k) {
       // here we expect some of the Put fails.
       std::string value = rnd.RandomString(100);
-      Status s = Put(Key(k), Slice(value));
+      rocksdb_rs::status::Status s = Put(Key(k), Slice(value));
       if (s.ok()) {
         // update the latest successful put
         values[k] = value;
@@ -5875,7 +5875,7 @@ TEST_F(DBTest, CloseSpeedup) {
   // Delete archival files.
   bool deleteDir = true;
   for (size_t i = 0; i < filenames.size(); ++i) {
-    Status s = env_->DeleteFile(dbname_ + "/" + filenames[i]);
+    rocksdb_rs::status::Status s = env_->DeleteFile(dbname_ + "/" + filenames[i]);
     if (!s.ok()) {
       deleteDir = false;
     }
@@ -6059,7 +6059,7 @@ TEST_F(DBTest, EmptyCompactedDB) {
   options.max_open_files = -1;
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
-  Status s = Put("new", "value");
+  rocksdb_rs::status::Status s = Put("new", "value");
   ASSERT_TRUE(s.IsNotSupported());
   Close();
 }
@@ -6255,7 +6255,7 @@ TEST_F(DBTest, PromoteL0Failure) {
   ASSERT_OK(Put(Key(1), ""));
   ASSERT_OK(Flush());
 
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   // Fails because L0 has overlapping files.
   status = experimental::PromoteL0(db_, db_->DefaultColumnFamily());
   ASSERT_TRUE(status.IsInvalidArgument());
@@ -6991,7 +6991,7 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses;
+    std::vector<rocksdb_rs::status::Status> statuses;
     statuses.push_back(Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
@@ -7019,7 +7019,7 @@ TEST_F(DBTest, ReusePinnableSlice) {
     std::vector<Slice> multiget_keys;
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
-    std::vector<Status> statuses;
+    std::vector<rocksdb_rs::status::Status> statuses;
     statuses.push_back(Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
@@ -7080,7 +7080,7 @@ TEST_F(DBTest, DeletingOldWalAfterDrop) {
 TEST_F(DBTest, UnsupportedManualSync) {
   DestroyAndReopen(CurrentOptions());
   env_->is_wal_sync_thread_safe_.store(false);
-  Status s = db_->SyncWAL();
+  rocksdb_rs::status::Status s = db_->SyncWAL();
   ASSERT_TRUE(s.IsNotSupported());
 }
 
@@ -7236,7 +7236,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   // At this point there should be 2 files, one with file_creation_time = 0 and
   // the other non-zero. GetCreationTimeOfOldestFile API should return 0.
   uint64_t creation_time;
-  Status s1 = dbfull()->GetCreationTimeOfOldestFile(&creation_time);
+  rocksdb_rs::status::Status s1 = dbfull()->GetCreationTimeOfOldestFile(&creation_time);
   ASSERT_EQ(0, creation_time);
   ASSERT_TRUE(s1.eq(Status_OK()));
 
@@ -7261,7 +7261,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   // At this point there should be 2 files with non-zero file creation time.
   // GetCreationTimeOfOldestFile API should return non-zero value.
   uint64_t ctime;
-  Status s2 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
+  rocksdb_rs::status::Status s2 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
   ASSERT_EQ(uint_time_1, ctime);
   ASSERT_TRUE(s2.eq(Status_OK()));
 
@@ -7269,7 +7269,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   options = CurrentOptions();
   options.max_open_files = 10;
   DestroyAndReopen(options);
-  Status s3 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
+  rocksdb_rs::status::Status s3 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
   ASSERT_TRUE(s3.eq(Status_NotSupported()));
 
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
@@ -7346,7 +7346,7 @@ TEST_F(DBTest, ShuttingDownNotBlockStalledWrites) {
   Reopen(options);
 
   std::thread thd([&]() {
-    Status s = Put("key_" + std::to_string(101), "101");
+    rocksdb_rs::status::Status s = Put("key_" + std::to_string(101), "101");
     ASSERT_EQ(s.code(), rocksdb_rs::status::Code::kShutdownInProgress);
   });
 

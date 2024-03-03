@@ -9,7 +9,7 @@
 #include "util/hash.h"
 
 namespace rocksdb {
-Status OutputValidator::Add(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status OutputValidator::Add(const Slice& key, const Slice& value) {
   if (enable_hash_) {
     // Generate a rolling 64-bit hash of the key and values
     paranoid_hash_ = NPHash64(key.data(), key.size(), paranoid_hash_);

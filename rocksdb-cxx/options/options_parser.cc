@@ -35,7 +35,7 @@ static const std::string option_file_header =
     "#\n"
     "\n";
 
-Status PersistRocksDBOptions(const DBOptions& db_opt,
+rocksdb_rs::status::Status PersistRocksDBOptions(const DBOptions& db_opt,
                              const std::vector<std::string>& cf_names,
                              const std::vector<ColumnFamilyOptions>& cf_opts,
                              const std::string& file_name, FileSystem* fs) {
@@ -52,7 +52,7 @@ Status PersistRocksDBOptions(const DBOptions& db_opt,
                                file_name, fs);
 }
 
-Status PersistRocksDBOptions(const ConfigOptions& config_options_in,
+rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_options_in,
                              const DBOptions& db_opt,
                              const std::vector<std::string>& cf_names,
                              const std::vector<ColumnFamilyOptions>& cf_opts,
@@ -67,7 +67,7 @@ Status PersistRocksDBOptions(const ConfigOptions& config_options_in,
   }
   std::unique_ptr<FSWritableFile> wf;
 
-  Status s =
+  rocksdb_rs::status::Status s =
       fs->NewWritableFile(file_name, FileOptions(), &wf, nullptr);
   if (!s.ok()) {
     return s;
@@ -171,7 +171,7 @@ bool RocksDBOptionsParser::IsSection(const std::string& line) {
   return true;
 }
 
-Status RocksDBOptionsParser::ParseSection(OptionSection* section,
+rocksdb_rs::status::Status RocksDBOptionsParser::ParseSection(OptionSection* section,
                                           std::string* title,
                                           std::string* argument,
                                           const std::string& line,
@@ -213,14 +213,14 @@ Status RocksDBOptionsParser::ParseSection(OptionSection* section,
   return Status_InvalidArgument(std::string("Unknown section ") + line);
 }
 
-Status RocksDBOptionsParser::InvalidArgument(const int line_num,
+rocksdb_rs::status::Status RocksDBOptionsParser::InvalidArgument(const int line_num,
                                              const std::string& message) {
   return Status_InvalidArgument(
       "[RocksDBOptionsParser Error] ",
       message + " (at line " + std::to_string(line_num) + ")");
 }
 
-Status RocksDBOptionsParser::ParseStatement(std::string* name,
+rocksdb_rs::status::Status RocksDBOptionsParser::ParseStatement(std::string* name,
                                             std::string* value,
                                             const std::string& line,
                                             const int line_num) {
@@ -239,7 +239,7 @@ Status RocksDBOptionsParser::ParseStatement(std::string* name,
   return Status_OK();
 }
 
-Status RocksDBOptionsParser::Parse(const std::string& file_name, FileSystem* fs,
+rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const std::string& file_name, FileSystem* fs,
                                    bool ignore_unknown_options,
                                    size_t file_readahead_size) {
   ConfigOptions
@@ -251,14 +251,14 @@ Status RocksDBOptionsParser::Parse(const std::string& file_name, FileSystem* fs,
   return Parse(config_options, file_name, fs);
 }
 
-Status RocksDBOptionsParser::Parse(const ConfigOptions& config_options_in,
+rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const ConfigOptions& config_options_in,
                                    const std::string& file_name,
                                    FileSystem* fs) {
   Reset();
   ConfigOptions config_options = config_options_in;
 
   std::unique_ptr<FSSequentialFile> seq_file;
-  Status s = fs->NewSequentialFile(file_name, FileOptions(), &seq_file,
+  rocksdb_rs::status::Status s = fs->NewSequentialFile(file_name, FileOptions(), &seq_file,
                                    nullptr);
   if (!s.ok()) {
     return s;
@@ -322,7 +322,7 @@ Status RocksDBOptionsParser::Parse(const ConfigOptions& config_options_in,
   return ValidityCheck();
 }
 
-Status RocksDBOptionsParser::CheckSection(const OptionSection section,
+rocksdb_rs::status::Status RocksDBOptionsParser::CheckSection(const OptionSection section,
                                           const std::string& section_arg,
                                           const int line_num) {
   if (section == kOptionSectionDBOptions) {
@@ -369,7 +369,7 @@ Status RocksDBOptionsParser::CheckSection(const OptionSection section,
   return Status_OK();
 }
 
-Status RocksDBOptionsParser::ParseVersionNumber(const std::string& ver_name,
+rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(const std::string& ver_name,
                                                 const std::string& ver_string,
                                                 const int max_count,
                                                 int* version) {
@@ -420,11 +420,11 @@ Status RocksDBOptionsParser::ParseVersionNumber(const std::string& ver_name,
   return Status_OK();
 }
 
-Status RocksDBOptionsParser::EndSection(
+rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
     const ConfigOptions& config_options, const OptionSection section,
     const std::string& section_title, const std::string& section_arg,
     const std::unordered_map<std::string, std::string>& opt_map) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   if (section == kOptionSectionDBOptions) {
     s = GetDBOptionsFromMap(config_options, DBOptions(), opt_map, &db_opt_);
     if (!s.ok()) {
@@ -496,7 +496,7 @@ Status RocksDBOptionsParser::EndSection(
   return s;
 }
 
-Status RocksDBOptionsParser::ValidityCheck() {
+rocksdb_rs::status::Status RocksDBOptionsParser::ValidityCheck() {
   if (!has_db_options_) {
     return Status_Corruption(
         "A RocksDB Option file must have a single DBOptions section");
@@ -546,7 +546,7 @@ std::string RocksDBOptionsParser::TrimAndRemoveComment(const std::string& line,
   return "";
 }
 
-Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
+rocksdb_rs::status::Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
     const ConfigOptions& config_options_in, const DBOptions& db_opt,
     const std::vector<std::string>& cf_names,
     const std::vector<ColumnFamilyOptions>& cf_opts,
@@ -561,7 +561,7 @@ Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
     // (if the ObjectRegistry is not initialized)
     config_options.ignore_unsupported_options = true;
   }
-  Status s = parser.Parse(config_options, file_name, fs);
+  rocksdb_rs::status::Status s = parser.Parse(config_options, file_name, fs);
   if (!s.ok()) {
     return s;
   }
@@ -627,7 +627,7 @@ Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
   return Status_OK();
 }
 
-Status RocksDBOptionsParser::VerifyDBOptions(
+rocksdb_rs::status::Status RocksDBOptionsParser::VerifyDBOptions(
     const ConfigOptions& config_options, const DBOptions& base_opt,
     const DBOptions& file_opt,
     const std::unordered_map<std::string, std::string>* opt_map) {
@@ -644,7 +644,7 @@ Status RocksDBOptionsParser::VerifyDBOptions(
                           "[RocksDBOptionsParser]: "
                           "failed the verification on DBOptions::%s -- ",
                           mismatch.c_str());
-    Status s = base_config->GetOption(config_options, mismatch, &base_value);
+    rocksdb_rs::status::Status s = base_config->GetOption(config_options, mismatch, &base_value);
     if (s.ok()) {
       s = file_config->GetOption(config_options, mismatch, &file_value);
     }
@@ -664,7 +664,7 @@ Status RocksDBOptionsParser::VerifyDBOptions(
   return Status_OK();
 }
 
-Status RocksDBOptionsParser::VerifyCFOptions(
+rocksdb_rs::status::Status RocksDBOptionsParser::VerifyCFOptions(
     const ConfigOptions& config_options, const ColumnFamilyOptions& base_opt,
     const ColumnFamilyOptions& file_opt,
     const std::unordered_map<std::string, std::string>* opt_map) {
@@ -678,7 +678,7 @@ Status RocksDBOptionsParser::VerifyCFOptions(
     // The options do not match
     const size_t kBufferSize = 2048;
     char buffer[kBufferSize];
-    Status s = base_config->GetOption(config_options, mismatch, &base_value);
+    rocksdb_rs::status::Status s = base_config->GetOption(config_options, mismatch, &base_value);
     if (s.ok()) {
       s = file_config->GetOption(config_options, mismatch, &file_value);
       // In file_opt, certain options like MergeOperator may be nullptr due to
@@ -711,7 +711,7 @@ Status RocksDBOptionsParser::VerifyCFOptions(
   return Status_OK();
 }
 
-Status RocksDBOptionsParser::VerifyTableFactory(
+rocksdb_rs::status::Status RocksDBOptionsParser::VerifyTableFactory(
     const ConfigOptions& config_options, const TableFactory* base_tf,
     const TableFactory* file_tf) {
   std::string mismatch;

@@ -36,7 +36,7 @@ std::string Customizable::GenerateIndividualId() const {
   return ostr.str();
 }
 
-Status Customizable::GetOption(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Customizable::GetOption(const ConfigOptions& config_options,
                                const std::string& opt_name,
                                std::string* value) const {
   if (opt_name == OptionTypeInfo::kIdPropName()) {
@@ -90,11 +90,11 @@ bool Customizable::AreEquivalent(const ConfigOptions& config_options,
   return true;
 }
 
-Status Customizable::GetOptionsMap(
+rocksdb_rs::status::Status Customizable::GetOptionsMap(
     const ConfigOptions& config_options, const Customizable* customizable,
     const std::string& value, std::string* id,
     std::unordered_map<std::string, std::string>* props) {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   if (value.empty() || value == kNullptrString) {
     *id = "";
     props->clear();
@@ -120,10 +120,10 @@ Status Customizable::GetOptionsMap(
   return status;
 }
 
-Status Customizable::ConfigureNewObject(
+rocksdb_rs::status::Status Customizable::ConfigureNewObject(
     const ConfigOptions& config_options, Customizable* object,
     const std::unordered_map<std::string, std::string>& opt_map) {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = Status_new();
   if (object != nullptr) {
     status = object->ConfigureFromMap(config_options, opt_map);
   } else if (!opt_map.empty()) {

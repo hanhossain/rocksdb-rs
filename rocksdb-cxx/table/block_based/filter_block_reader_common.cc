@@ -14,7 +14,7 @@
 namespace rocksdb {
 
 template <typename TBlocklike>
-Status FilterBlockReaderCommon<TBlocklike>::ReadFilterBlock(
+rocksdb_rs::status::Status FilterBlockReaderCommon<TBlocklike>::ReadFilterBlock(
     const BlockBasedTable* table, FilePrefetchBuffer* prefetch_buffer,
     const ReadOptions& read_options, bool use_cache, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,
@@ -28,7 +28,7 @@ Status FilterBlockReaderCommon<TBlocklike>::ReadFilterBlock(
   const BlockBasedTable::Rep* const rep = table->get_rep();
   assert(rep);
 
-  const Status s =
+  const rocksdb_rs::status::Status s =
       table->RetrieveBlock(prefetch_buffer, read_options, rep->filter_handle,
                            UncompressionDict::GetEmptyDict(), filter_block,
                            get_context, lookup_context,
@@ -66,7 +66,7 @@ bool FilterBlockReaderCommon<TBlocklike>::cache_filter_blocks() const {
 }
 
 template <typename TBlocklike>
-Status FilterBlockReaderCommon<TBlocklike>::GetOrReadFilterBlock(
+rocksdb_rs::status::Status FilterBlockReaderCommon<TBlocklike>::GetOrReadFilterBlock(
     bool no_io, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,
     CachableEntry<TBlocklike>* filter_block,

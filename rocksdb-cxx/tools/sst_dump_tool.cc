@@ -37,7 +37,7 @@ void print_help(bool to_stderr) {
       supported_compressions += ", ";
     }
     std::string str;
-    Status s = GetStringFromCompressionType(&str, ct);
+    rocksdb_rs::status::Status s = GetStringFromCompressionType(&str, ct);
     assert(s.ok());
     supported_compressions += str;
   }
@@ -266,7 +266,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
       Slice sl_key = rocksdb::Slice(in_key);
       ParsedInternalKey ikey;
       int retc = 0;
-      Status pik_status =
+      rocksdb_rs::status::Status pik_status =
           ParseInternalKey(sl_key, &ikey, true /* log_err_key */);
       if (!pik_status.ok()) {
         std::cerr << *pik_status.getState() << "\n";
@@ -370,7 +370,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
   {
     ConfigOptions config_options;
     config_options.env = options.env;
-    Status s = Env::CreateFromUri(config_options, env_uri, fs_uri, &options.env,
+    rocksdb_rs::status::Status s = Env::CreateFromUri(config_options, env_uri, fs_uri, &options.env,
                                   &env_guard);
     if (!s.ok()) {
       fprintf(stderr, "CreateEnvFromUri: %s\n", s.ToString()->c_str());
@@ -382,12 +382,12 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
 
   std::vector<std::string> filenames;
   rocksdb::Env* env = options.env;
-  rocksdb::Status st = env->GetChildren(dir_or_file, &filenames);
+  rocksdb_rs::status::Status st = env->GetChildren(dir_or_file, &filenames);
   bool dir = true;
   if (!st.ok() || filenames.empty()) {
     // dir_or_file does not exist or does not contain children
     // Check its existence first
-    Status s = env->FileExists(dir_or_file);
+    rocksdb_rs::status::Status s = env->FileExists(dir_or_file);
     // dir_or_file does not exist
     if (!s.ok()) {
       fprintf(stderr, "%s%s: No such file or directory\n", s.ToString()->c_str(),

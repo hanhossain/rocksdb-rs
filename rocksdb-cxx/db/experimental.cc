@@ -13,7 +13,7 @@ namespace rocksdb {
 namespace experimental {
 
 
-Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
                            const Slice* begin, const Slice* end) {
   if (db == nullptr) {
     return Status_InvalidArgument("DB is empty");
@@ -22,7 +22,7 @@ Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
   return db->SuggestCompactRange(column_family, begin, end);
 }
 
-Status PromoteL0(DB* db, ColumnFamilyHandle* column_family, int target_level) {
+rocksdb_rs::status::Status PromoteL0(DB* db, ColumnFamilyHandle* column_family, int target_level) {
   if (db == nullptr) {
     return Status_InvalidArgument("Didn't recognize DB object");
   }
@@ -30,18 +30,18 @@ Status PromoteL0(DB* db, ColumnFamilyHandle* column_family, int target_level) {
 }
 
 
-Status SuggestCompactRange(DB* db, const Slice* begin, const Slice* end) {
+rocksdb_rs::status::Status SuggestCompactRange(DB* db, const Slice* begin, const Slice* end) {
   return SuggestCompactRange(db, db->DefaultColumnFamily(), begin, end);
 }
 
-Status UpdateManifestForFilesState(
+rocksdb_rs::status::Status UpdateManifestForFilesState(
     const DBOptions& db_opts, const std::string& db_name,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     const UpdateManifestForFilesStateOptions& opts) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   OfflineManifestWriter w(db_opts, db_name);
-  Status s = w.Recover(column_families);
+  rocksdb_rs::status::Status s = w.Recover(column_families);
 
   size_t files_updated = 0;
   size_t cfs_updated = 0;

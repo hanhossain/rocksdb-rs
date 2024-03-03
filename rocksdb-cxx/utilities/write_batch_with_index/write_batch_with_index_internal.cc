@@ -177,7 +177,7 @@ Slice BaseDeltaIterator::value() const {
   }
 }
 
-Status BaseDeltaIterator::status() const {
+rocksdb_rs::status::Status BaseDeltaIterator::status() const {
   if (!status_.ok()) {
     return status_.Clone();
   }
@@ -187,7 +187,7 @@ Status BaseDeltaIterator::status() const {
   return delta_iterator_->status();
 }
 
-void BaseDeltaIterator::Invalidate(Status s) { status_.copy_from(s); }
+void BaseDeltaIterator::Invalidate(rocksdb_rs::status::Status s) { status_.copy_from(s); }
 
 void BaseDeltaIterator::AssertInvariants() {
 #ifndef NDEBUG
@@ -452,7 +452,7 @@ WBWIIteratorImpl::Result WBWIIteratorImpl::FindLatestUpdate(
   return result;
 }
 
-Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
+rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
                                                   WriteType* type, Slice* Key,
                                                   Slice* value, Slice* blob,
                                                   Slice* xid) const {
@@ -472,7 +472,7 @@ Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
   Slice input = Slice(rep_.data() + data_offset, rep_.size() - data_offset);
   char tag;
   uint32_t column_family;
-  Status s = ReadRecordFromWriteBatch(&input, &tag, &column_family, Key, value,
+  rocksdb_rs::status::Status s = ReadRecordFromWriteBatch(&input, &tag, &column_family, Key, value,
                                       blob, xid);
   if (!s.ok()) {
     return s;
@@ -646,7 +646,7 @@ WriteBatchWithIndexInternal::WriteBatchWithIndexInternal(
     const DBOptions* db_options, ColumnFamilyHandle* column_family)
     : db_(nullptr), db_options_(db_options), column_family_(column_family) {}
 
-Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
+rocksdb_rs::status::Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
                                              const Slice* value,
                                              const MergeContext& context,
                                              std::string* result) const {
@@ -699,7 +699,7 @@ Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
 
 WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
     WriteBatchWithIndex* batch, const Slice& key, MergeContext* context,
-    std::string* value, Status* s) {
+    std::string* value, rocksdb_rs::status::Status* s) {
   *s = Status_OK();
 
   std::unique_ptr<WBWIIteratorImpl> iter(

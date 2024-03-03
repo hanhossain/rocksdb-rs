@@ -52,7 +52,7 @@ class WritePreparedTxn : public PessimisticTransaction {
   // seq in the WAL that is also published, LastPublishedSequence, as opposed to
   // the last seq in the memtable.
   using Transaction::Get;
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) override;
 
@@ -60,7 +60,7 @@ class WritePreparedTxn : public PessimisticTransaction {
   virtual void MultiGet(const ReadOptions& options,
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
-                        PinnableSlice* values, Status* statuses,
+                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                         const bool sorted_input = false) override;
 
   // Note: The behavior is undefined in presence of interleaved writes to the
@@ -87,11 +87,11 @@ class WritePreparedTxn : public PessimisticTransaction {
   friend class WriteUnpreparedTxnDB;
   friend class WriteUnpreparedTxn;
 
-  Status PrepareInternal() override;
+  rocksdb_rs::status::Status PrepareInternal() override;
 
-  Status CommitWithoutPrepareInternal() override;
+  rocksdb_rs::status::Status CommitWithoutPrepareInternal() override;
 
-  Status CommitBatchInternal(WriteBatch* batch, size_t batch_cnt) override;
+  rocksdb_rs::status::Status CommitBatchInternal(WriteBatch* batch, size_t batch_cnt) override;
 
   // Since the data is already written to memtables at the Prepare phase, the
   // commit entails writing only a commit marker in the WAL. The sequence number
@@ -99,15 +99,15 @@ class WritePreparedTxn : public PessimisticTransaction {
   // make WAL commit markers visible, the snapshot will be based on the last seq
   // in the WAL that is also published, LastPublishedSequence, as opposed to the
   // last seq in the memtable.
-  Status CommitInternal() override;
+  rocksdb_rs::status::Status CommitInternal() override;
 
-  Status RollbackInternal() override;
+  rocksdb_rs::status::Status RollbackInternal() override;
 
-  virtual Status ValidateSnapshot(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status ValidateSnapshot(ColumnFamilyHandle* column_family,
                                   const Slice& key,
                                   SequenceNumber* tracked_at_seq) override;
 
-  virtual Status RebuildFromWriteBatch(WriteBatch* src_batch) override;
+  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(WriteBatch* src_batch) override;
 
   WritePreparedTxnDB* wpt_db_;
   // Number of sub-batches in prepare

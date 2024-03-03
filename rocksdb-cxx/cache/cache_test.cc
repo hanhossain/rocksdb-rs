@@ -635,7 +635,7 @@ TEST_P(CacheTest, NewId) {
 TEST_P(CacheTest, ReleaseAndErase) {
   std::shared_ptr<Cache> cache = NewCache(5, 0, false);
   Cache::Handle* handle;
-  Status s =
+  rocksdb_rs::status::Status s =
       cache->Insert(EncodeKey(100), EncodeValue(100), &kHelper, 1, &handle);
   ASSERT_TRUE(s.ok());
   ASSERT_EQ(5U, cache->GetCapacity());
@@ -650,7 +650,7 @@ TEST_P(CacheTest, ReleaseAndErase) {
 TEST_P(CacheTest, ReleaseWithoutErase) {
   std::shared_ptr<Cache> cache = NewCache(5, 0, false);
   Cache::Handle* handle;
-  Status s =
+  rocksdb_rs::status::Status s =
       cache->Insert(EncodeKey(100), EncodeValue(100), &kHelper, 1, &handle);
   ASSERT_TRUE(s.ok());
   ASSERT_EQ(5U, cache->GetCapacity());
@@ -694,7 +694,7 @@ TEST_P(CacheTest, SetCapacity) {
   // Insert 5 entries, but not releasing.
   for (int i = 0; i < 5; i++) {
     std::string key = EncodeKey(i + 1);
-    Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
+    rocksdb_rs::status::Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
   ASSERT_EQ(5U, cache.get()->GetCapacity());
@@ -709,7 +709,7 @@ TEST_P(CacheTest, SetCapacity) {
   // and usage should be 7
   for (int i = 5; i < 10; i++) {
     std::string key = EncodeKey(i + 1);
-    Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
+    rocksdb_rs::status::Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
   ASSERT_EQ(10U, cache.get()->GetCapacity());
@@ -737,7 +737,7 @@ TEST_P(LRUCacheTest, SetStrictCapacityLimit) {
   // all go through.
   SharedCache cache{NewCache(5, 0, false)};
   std::vector<TypedHandle*> handles(10);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   for (int i = 0; i < 10; i++) {
     std::string key = EncodeKey(i + 1);
     s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
@@ -793,7 +793,7 @@ TEST_P(CacheTest, OverCapacity) {
   // Insert n+1 entries, but not releasing.
   for (int i = 0; i < static_cast<int>(n + 1); i++) {
     std::string key = EncodeKey(i + 1);
-    Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
+    rocksdb_rs::status::Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
 

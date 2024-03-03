@@ -54,7 +54,7 @@ class PosixHelper {
  public:
   static size_t GetUniqueIdFromFile(int fd, char* id, size_t max_size);
   static size_t GetLogicalBlockSizeOfFd(int fd);
-  static Status GetLogicalBlockSizeOfDirectory(const std::string& directory,
+  static rocksdb_rs::status::Status GetLogicalBlockSizeOfDirectory(const std::string& directory,
                                                size_t* size);
 };
 
@@ -170,7 +170,7 @@ class LogicalBlockSizeCache {
   LogicalBlockSizeCache(
       std::function<size_t(int)> get_logical_block_size_of_fd =
           PosixHelper::GetLogicalBlockSizeOfFd,
-      std::function<Status(const std::string&, size_t*)>
+      std::function<rocksdb_rs::status::Status(const std::string&, size_t*)>
           get_logical_block_size_of_directory =
               PosixHelper::GetLogicalBlockSizeOfDirectory)
       : get_logical_block_size_of_fd_(get_logical_block_size_of_fd),
@@ -181,7 +181,7 @@ class LogicalBlockSizeCache {
   // 1. Increases reference count of the directories;
   // 2. If the directory's logical block size is not cached,
   //    compute the buffer size and cache the result.
-  Status RefAndCacheLogicalBlockSize(
+  rocksdb_rs::status::Status RefAndCacheLogicalBlockSize(
       const std::vector<std::string>& directories);
 
   // Takes the following actions:
@@ -224,7 +224,7 @@ class LogicalBlockSizeCache {
   };
 
   std::function<size_t(int)> get_logical_block_size_of_fd_;
-  std::function<Status(const std::string&, size_t*)>
+  std::function<rocksdb_rs::status::Status(const std::string&, size_t*)>
       get_logical_block_size_of_directory_;
 
   std::map<std::string, CacheValue> cache_;

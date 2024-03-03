@@ -301,7 +301,7 @@ OffsetableCacheKey::OffsetableCacheKey(const std::string &db_id,
                                        const std::string &db_session_id,
                                        uint64_t file_number) {
   rocksdb_rs::unique_id::UniqueId64x2 internal_id{};
-  Status s = internal_id.get_sst_internal_unique_id(db_id, db_session_id, file_number, /*force=*/true);
+  rocksdb_rs::status::Status s = internal_id.get_sst_internal_unique_id(db_id, db_session_id, file_number, /*force=*/true);
   assert(s.ok());
   *this = FromInternalUniqueId(internal_id.as_unique_id_ptr());
 }

@@ -452,7 +452,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                // Parse the input value as an Env
                auto old_env = static_cast<Env**>(addr);  // Get the old value
                Env* new_env = *old_env;                  // Set new to old
-               Status s = Env::CreateFromString(opts, value,
+               rocksdb_rs::status::Status s = Env::CreateFromString(opts, value,
                                                 &new_env);  // Update new value
                if (s.ok()) {                                // It worked
                  *old_env = new_env;  // Update the old one
@@ -504,7 +504,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             ConfigOptions embedded = opts;
             embedded.ignore_unsupported_options = true;
             std::vector<std::shared_ptr<EventListener>> listeners;
-            Status s = Status_new();
+            rocksdb_rs::status::Status s = Status_new();
             for (size_t start = 0, end = 0;
                  s.ok() && start < value.size() && end != std::string::npos;
                  start = end + 1) {
@@ -634,11 +634,11 @@ class DBOptionsConfigurable : public MutableDBConfigurable {
   }
 
  protected:
-  Status ConfigureOptions(
+  rocksdb_rs::status::Status ConfigureOptions(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, std::string>& opts_map,
       std::unordered_map<std::string, std::string>* unused) override {
-    Status s = Configurable::ConfigureOptions(config_options, opts_map, unused);
+    rocksdb_rs::status::Status s = Configurable::ConfigureOptions(config_options, opts_map, unused);
     if (s.ok()) {
       db_options_ = BuildDBOptions(immutable_, mutable_);
       s = PrepareOptions(config_options);
@@ -936,7 +936,7 @@ bool ImmutableDBOptions::IsWalDirSameAsDBPath(
     const std::string& db_path) const {
   bool same = wal_dir.empty();
   if (!same) {
-    Status s = env->AreFilesSame(wal_dir, db_path, &same);
+    rocksdb_rs::status::Status s = env->AreFilesSame(wal_dir, db_path, &same);
     if (s.IsNotSupported()) {
       same = wal_dir == db_path;
     }
@@ -1046,14 +1046,14 @@ void MutableDBOptions::Dump(Logger* log) const {
                           max_background_flushes);
 }
 
-Status GetMutableDBOptionsFromStrings(
+rocksdb_rs::status::Status GetMutableDBOptionsFromStrings(
     const MutableDBOptions& base_options,
     const std::unordered_map<std::string, std::string>& options_map,
     MutableDBOptions* new_options) {
   assert(new_options);
   *new_options = base_options;
   ConfigOptions config_options;
-  Status s = OptionTypeInfo::ParseType(
+  rocksdb_rs::status::Status s = OptionTypeInfo::ParseType(
       config_options, options_map, db_mutable_options_type_info, new_options);
   if (!s.ok()) {
     *new_options = base_options;
@@ -1070,7 +1070,7 @@ bool MutableDBOptionsAreEqual(const MutableDBOptions& this_options,
       "MutableDBOptions", &this_options, &that_options, &mismatch);
 }
 
-Status GetStringFromMutableDBOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromMutableDBOptions(const ConfigOptions& config_options,
                                      const MutableDBOptions& mutable_opts,
                                      std::string* opt_string) {
   return OptionTypeInfo::SerializeType(

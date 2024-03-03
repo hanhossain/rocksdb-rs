@@ -41,13 +41,13 @@ class DBSecondaryTestBase : public DBBasicTestWithTimestampBase {
   }
 
  protected:
-  Status ReopenAsSecondary(const Options& options) {
+  rocksdb_rs::status::Status ReopenAsSecondary(const Options& options) {
     return DB::OpenAsSecondary(options, dbname_, secondary_path_, &db_);
   }
 
   void OpenSecondary(const Options& options);
 
-  Status TryOpenSecondary(const Options& options);
+  rocksdb_rs::status::Status TryOpenSecondary(const Options& options);
 
   void OpenSecondaryWithColumnFamilies(
       const std::vector<std::string>& column_families, const Options& options);
@@ -77,8 +77,8 @@ void DBSecondaryTestBase::OpenSecondary(const Options& options) {
   ASSERT_OK(TryOpenSecondary(options));
 }
 
-Status DBSecondaryTestBase::TryOpenSecondary(const Options& options) {
-  Status s =
+rocksdb_rs::status::Status DBSecondaryTestBase::TryOpenSecondary(const Options& options) {
+  rocksdb_rs::status::Status s =
       DB::OpenAsSecondary(options, dbname_, secondary_path_, &db_secondary_);
   return s;
 }
@@ -90,7 +90,7 @@ void DBSecondaryTestBase::OpenSecondaryWithColumnFamilies(
   for (const auto& cf_name : column_families) {
     cf_descs.emplace_back(cf_name, options);
   }
-  Status s = DB::OpenAsSecondary(options, dbname_, secondary_path_, cf_descs,
+  rocksdb_rs::status::Status s = DB::OpenAsSecondary(options, dbname_, secondary_path_, cf_descs,
                                  &handles_secondary_, &db_secondary_);
   ASSERT_OK(s);
 }
@@ -131,14 +131,14 @@ TEST_F(DBSecondaryTest, FailOpenIfLoggerCreationFail) {
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->SetCallBack(
       "rocksdb::CreateLoggerFromOptions:AfterGetPath", [&](void* arg) {
-        auto* s = reinterpret_cast<Status*>(arg);
+        auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         assert(s);
         *s = Status_IOError("Injected");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
   options.max_open_files = -1;
-  Status s = TryOpenSecondary(options);
+  rocksdb_rs::status::Status s = TryOpenSecondary(options);
   ASSERT_EQ(nullptr, options.info_log);
   ASSERT_TRUE(s.IsIOError());
 
@@ -153,7 +153,7 @@ TEST_F(DBSecondaryTest, NonExistingDb) {
   options.env = env_;
   options.max_open_files = -1;
   const std::string dbname = "/doesnt/exist";
-  Status s =
+  rocksdb_rs::status::Status s =
       DB::OpenAsSecondary(options, dbname, secondary_path_, &db_secondary_);
   ASSERT_TRUE(s.IsIOError());
 }
@@ -306,7 +306,7 @@ TEST_F(DBSecondaryTest, InternalCompactionMultiLevels) {
   }
   OpenSecondary(options);
   cfh = db_secondary_->DefaultColumnFamily();
-  Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
+  rocksdb_rs::status::Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
       OpenAndCompactOptions(), cfh, input2, &result);
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(result.status);
@@ -353,7 +353,7 @@ TEST_F(DBSecondaryTest, InternalCompactionCompactedFiles) {
   auto cfh = db_secondary_->DefaultColumnFamily();
 
   CompactionServiceResult result;
-  Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
+  rocksdb_rs::status::Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
       OpenAndCompactOptions(), cfh, input, &result);
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(result.status);
@@ -391,7 +391,7 @@ TEST_F(DBSecondaryTest, InternalCompactionMissingFiles) {
   auto cfh = db_secondary_->DefaultColumnFamily();
 
   CompactionServiceResult result;
-  Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
+  rocksdb_rs::status::Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
       OpenAndCompactOptions(), cfh, input, &result);
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(result.status);
@@ -464,7 +464,7 @@ class TraceFileEnv : public EnvWrapper {
   static const char* kClassName() { return "TraceFileEnv"; }
   const char* Name() const override { return kClassName(); }
 
-  Status NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::status::Status NewRandomAccessFile(const std::string& f,
                              std::unique_ptr<RandomAccessFile>* r,
                              const EnvOptions& env_options) override {
     class TracedRandomAccessFile : public RandomAccessFile {
@@ -475,7 +475,7 @@ class TraceFileEnv : public EnvWrapper {
       ~TracedRandomAccessFile() override {
         files_closed_.fetch_add(1, std::memory_order_relaxed);
       }
-      Status Read(uint64_t offset, size_t n, Slice* result,
+      rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
                   char* scratch) const override {
         return target_->Read(offset, n, result, scratch);
       }
@@ -484,7 +484,7 @@ class TraceFileEnv : public EnvWrapper {
       std::unique_ptr<RandomAccessFile> target_;
       std::atomic<int>& files_closed_;
     };
-    Status s = target()->NewRandomAccessFile(f, r, env_options);
+    rocksdb_rs::status::Status s = target()->NewRandomAccessFile(f, r, env_options);
     if (s.ok()) {
       r->reset(new TracedRandomAccessFile(std::move(*r), files_closed_));
     }
@@ -539,7 +539,7 @@ TEST_F(DBSecondaryTest, SecondaryCloseFiles) {
   ASSERT_OK(db_secondary_->TryCatchUpWithPrimary());
   ASSERT_EQ(2, static_cast<TraceFileEnv*>(traced_env.get())->files_closed());
 
-  Status s = db_secondary_->SetDBOptions({{"max_open_files", "-1"}});
+  rocksdb_rs::status::Status s = db_secondary_->SetDBOptions({{"max_open_files", "-1"}});
   ASSERT_TRUE(s.IsNotSupported());
   CloseSecondary();
 }
@@ -617,7 +617,7 @@ TEST_F(DBSecondaryTest, SecondaryTailingBug_ISSUE_8467) {
                              const std::string& bar_val) {
     std::string value;
     ReadOptions ropts;
-    Status s = db_secondary_->Get(ropts, "foo", &value);
+    rocksdb_rs::status::Status s = db_secondary_->Get(ropts, "foo", &value);
     ASSERT_OK(s);
     ASSERT_EQ(foo_val, value);
 
@@ -689,7 +689,7 @@ TEST_F(DBSecondaryTest, OpenWithNonExistColumnFamily) {
   cf_descs.emplace_back(kDefaultColumnFamilyName, options1);
   cf_descs.emplace_back("pikachu", options1);
   cf_descs.emplace_back("eevee", options1);
-  Status s = DB::OpenAsSecondary(options1, dbname_, secondary_path_, cf_descs,
+  rocksdb_rs::status::Status s = DB::OpenAsSecondary(options1, dbname_, secondary_path_, cf_descs,
                                  &handles_secondary_, &db_secondary_);
   ASSERT_NOK(s);
 }
@@ -737,7 +737,7 @@ TEST_F(DBSecondaryTest, SwitchToNewManifestDuringOpen) {
     Options options1;
     options1.env = env_;
     options1.max_open_files = -1;
-    Status s = TryOpenSecondary(options1);
+    rocksdb_rs::status::Status s = TryOpenSecondary(options1);
     ASSERT_TRUE(s.IsTryAgain());
 
     // Try again
@@ -1172,7 +1172,7 @@ TEST_F(DBSecondaryTest, CheckConsistencyWhenOpen) {
       "DBImplSecondary::CheckConsistency:AfterFirstAttempt", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
         called = true;
-        auto* s = reinterpret_cast<Status*>(arg);
+        auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_NOK(*s);
       });
   SyncPoint::GetInstance()->LoadDependency(
@@ -1210,13 +1210,13 @@ TEST_F(DBSecondaryTest, StartFromInconsistent) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
-        *(reinterpret_cast<Status*>(arg)) =
+        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) =
             Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
   Options options1;
   options1.env = env_;
-  Status s = TryOpenSecondary(options1);
+  rocksdb_rs::status::Status s = TryOpenSecondary(options1);
   ASSERT_TRUE(s.IsCorruption());
 }
 
@@ -1244,11 +1244,11 @@ TEST_F(DBSecondaryTest, InconsistencyDuringCatchUp) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
-        *(reinterpret_cast<Status*>(arg)) =
+        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) =
             Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
-  Status s = db_secondary_->TryCatchUpWithPrimary();
+  rocksdb_rs::status::Status s = db_secondary_->TryCatchUpWithPrimary();
   ASSERT_TRUE(s.IsCorruption());
 }
 
@@ -1304,7 +1304,7 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorAndGetReadTimestampSizeMismatch) {
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -1347,7 +1347,7 @@ TEST_F(DBSecondaryTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1392,7 +1392,7 @@ TEST_F(DBSecondaryTestWithTimestamp,
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -1438,7 +1438,7 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorAndGet) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
+      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
                           "value" + std::to_string(i));
       ASSERT_OK(s);
     }
@@ -1536,7 +1536,7 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorsReadTimestampSizeMismatch) {
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -1573,7 +1573,7 @@ TEST_F(DBSecondaryTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1612,7 +1612,7 @@ TEST_F(DBSecondaryTestWithTimestamp,
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -1649,7 +1649,7 @@ TEST_F(DBSecondaryTestWithTimestamp, Iterators) {
   const std::string read_timestamp = Timestamp(2, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }

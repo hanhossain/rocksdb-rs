@@ -335,7 +335,7 @@ class ReduceDBLevelsCommand : public LDBCommand {
   static const std::string ARG_NEW_LEVELS;
   static const std::string ARG_PRINT_OLD_LEVELS;
 
-  Status GetOldNumOfLevels(Options& opt, int* levels);
+  rocksdb_rs::status::Status GetOldNumOfLevels(Options& opt, int* levels);
 };
 
 class ChangeCompactionStyleCommand : public LDBCommand {

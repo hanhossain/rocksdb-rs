@@ -36,7 +36,7 @@ BlobFileCache::BlobFileCache(Cache* cache,
   assert(file_options_);
 }
 
-Status BlobFileCache::GetBlobFileReader(
+rocksdb_rs::status::Status BlobFileCache::GetBlobFileReader(
     const ReadOptions& read_options, uint64_t blob_file_number,
     CacheHandleGuard<BlobFileReader>* blob_file_reader) {
   assert(blob_file_reader);
@@ -72,7 +72,7 @@ Status BlobFileCache::GetBlobFileReader(
 
   {
     assert(file_options_);
-    const Status s = BlobFileReader::Create(
+    const rocksdb_rs::status::Status s = BlobFileReader::Create(
         *immutable_options_, read_options, *file_options_, column_family_id_,
         blob_file_read_hist_, blob_file_number, io_tracer_, &reader);
     if (!s.ok()) {
@@ -84,7 +84,7 @@ Status BlobFileCache::GetBlobFileReader(
   {
     constexpr size_t charge = 1;
 
-    const Status s = cache_.Insert(key, reader.get(), charge, &handle);
+    const rocksdb_rs::status::Status s = cache_.Insert(key, reader.get(), charge, &handle);
     if (!s.ok()) {
       RecordTick(statistics, NO_FILE_ERRORS);
       return s.Clone();

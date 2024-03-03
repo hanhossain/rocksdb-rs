@@ -72,7 +72,7 @@ class IOStatus {
     bool IsAborted() const { return status_.IsAborted(); }
     bool IsPathNotFound() const { return status_.IsPathNotFound(); }
     bool IsInvalidArgument() const { return status_.IsInvalidArgument(); }
-    operator Status() const { return status_.Clone(); }
+    operator rocksdb_rs::status::Status() const { return status_.Clone(); }
 
     rocksdb_rs::status::SubCode subcode() const { return status_.subcode(); }
     std::string ToString() const { return *status_.ToString(); }
@@ -158,9 +158,9 @@ class IOStatus {
   // std::string ToString() const;
 
  private:
-    Status status_;
+    rocksdb_rs::status::Status status_;
 
-  friend IOStatus status_to_io_status(Status&&);
+  friend IOStatus status_to_io_status(rocksdb_rs::status::Status&&);
 
   explicit IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode = rocksdb_rs::status::SubCode::kNone)
     : status_(Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem)) {}
@@ -239,9 +239,9 @@ inline bool IOStatus::operator!=(const IOStatus& rhs) const {
   return !(*this == rhs);
 }
 
-inline IOStatus status_to_io_status(Status&& status) {
+inline IOStatus status_to_io_status(rocksdb_rs::status::Status&& status) {
   IOStatus io_s;
-  Status& s = io_s.status_;
+  rocksdb_rs::status::Status& s = io_s.status_;
   s = std::move(status);
   return io_s;
 }

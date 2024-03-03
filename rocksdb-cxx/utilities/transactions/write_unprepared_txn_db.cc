@@ -15,7 +15,7 @@ namespace rocksdb {
 // Instead of reconstructing a Transaction object, and calling rollback on it,
 // we can be more efficient with RollbackRecoveredTransaction by skipping
 // unnecessary steps (eg. updating CommitMap, reconstructing keyset)
-Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
+rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
     const DBImpl::RecoveredTransaction* rtxn) {
   // TODO(lth): Reduce duplicate code with WritePrepared rollback logic.
   assert(rtxn->unprepared_);
@@ -86,8 +86,8 @@ Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
             handles_(handles),
             rollback_merge_operands_(rollback_merge_operands) {}
 
-      Status Rollback(uint32_t cf, const Slice& key) {
-        Status s = Status_new();
+      rocksdb_rs::status::Status Rollback(uint32_t cf, const Slice& key) {
+        rocksdb_rs::status::Status s = Status_new();
         CFKeys& cf_keys = keys_[cf];
         if (cf_keys.size() == 0) {  // just inserted
           auto cmp = comparators_[cf];
@@ -123,20 +123,20 @@ Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
         return s;
       }
 
-      Status PutCF(uint32_t cf, const Slice& key,
+      rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
                    const Slice& /*val*/) override {
         return Rollback(cf, key);
       }
 
-      Status DeleteCF(uint32_t cf, const Slice& key) override {
+      rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
         return Rollback(cf, key);
       }
 
-      Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+      rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
         return Rollback(cf, key);
       }
 
-      Status MergeCF(uint32_t cf, const Slice& key,
+      rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
                      const Slice& /*val*/) override {
         if (rollback_merge_operands_) {
           return Rollback(cf, key);
@@ -146,17 +146,17 @@ Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
       }
 
       // Recovered batches do not contain 2PC markers.
-      Status MarkNoop(bool) override { return Status_InvalidArgument(); }
-      Status MarkBeginPrepare(bool) override {
+      rocksdb_rs::status::Status MarkNoop(bool) override { return Status_InvalidArgument(); }
+      rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
         return Status_InvalidArgument();
       }
-      Status MarkEndPrepare(const Slice&) override {
+      rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
         return Status_InvalidArgument();
       }
-      Status MarkCommit(const Slice&) override {
+      rocksdb_rs::status::Status MarkCommit(const Slice&) override {
         return Status_InvalidArgument();
       }
-      Status MarkRollback(const Slice&) override {
+      rocksdb_rs::status::Status MarkRollback(const Slice&) override {
         return Status_InvalidArgument();
       }
     } rollback_handler(db_impl_, last_visible_txn, &rollback_batch,
@@ -194,7 +194,7 @@ Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
   return Status_OK();
 }
 
-Status WriteUnpreparedTxnDB::Initialize(
+rocksdb_rs::status::Status WriteUnpreparedTxnDB::Initialize(
     const std::vector<size_t>& compaction_enabled_cf_indices,
     const std::vector<ColumnFamilyHandle*>& handles) {
   // TODO(lth): Reduce code duplication in this function.
@@ -207,7 +207,7 @@ Status WriteUnpreparedTxnDB::Initialize(
    public:
     explicit CommitSubBatchPreReleaseCallback(WritePreparedTxnDB* db)
         : db_(db) {}
-    Status Callback(SequenceNumber commit_seq,
+    rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
                     bool is_mem_disabled __attribute__((__unused__)), uint64_t,
                     size_t /*index*/, size_t /*total*/) override {
       assert(!is_mem_disabled);
@@ -228,7 +228,7 @@ Status WriteUnpreparedTxnDB::Initialize(
   // Verify cf options
   for (auto handle : handles) {
     ColumnFamilyDescriptor cfd;
-    Status s = handle->GetDescriptor(&cfd);
+    rocksdb_rs::status::Status s = handle->GetDescriptor(&cfd);
     if (!s.ok()) {
       return s;
     }
@@ -278,7 +278,7 @@ Status WriteUnpreparedTxnDB::Initialize(
 
     real_trx->SetLogNumber(first_log_number);
     real_trx->SetId(first_seq);
-    Status s = real_trx->SetName(recovered_trx->name_);
+    rocksdb_rs::status::Status s = real_trx->SetName(recovered_trx->name_);
     if (!s.ok()) {
       return s;
     }
@@ -330,7 +330,7 @@ Status WriteUnpreparedTxnDB::Initialize(
     db_impl_->versions_->SetLastPublishedSequence(last_seq + 1);
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = Status_new();
   // Rollback unprepared transactions.
   for (auto rtxn : rtxns) {
     auto recovered_trx = rtxn.second;

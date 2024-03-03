@@ -23,7 +23,7 @@ void ForceReleaseCachedEntry(void* arg, void* h) {
 }
 
 // WART: this is specific to block-based table
-Status VerifyBlockChecksum(ChecksumType type, const char* data,
+rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type, const char* data,
                            size_t block_size, const std::string& file_name,
                            uint64_t offset) {
   PERF_TIMER_GUARD(block_checksum_time);
