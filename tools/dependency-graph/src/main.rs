@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::Parser;
 use regex::RegexBuilder;
 use rocksdb_rs as _;
 use std::collections::{HashMap, HashSet};
@@ -10,19 +10,13 @@ const GENERATED_INCLUDE_DIR: &str = env!("ROCKSDB_GENERATED_INCLUDE");
 /// This tool is used to interact with the dependency graph of the C++ files.
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
-struct Args {
-    #[command(subcommand)]
-    subcommand: Option<Commands>,
-}
-
-#[derive(Debug, Subcommand)]
 enum Commands {
     /// Check for missing include paths
     MissingIncludePaths,
 }
 
 fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
+    let commands = Commands::parse();
 
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let repo_root = std::fs::canonicalize(format!("{manifest_dir}/../.."))?;
@@ -47,12 +41,9 @@ fn main() -> anyhow::Result<()> {
         path_mappings.insert(path.clone(), include_mappings);
     }
 
-    match args.subcommand {
-        Some(Commands::MissingIncludePaths) => {
+    match commands {
+        Commands::MissingIncludePaths => {
             show_missing_include_paths(&path_mappings);
-        }
-        None => {
-            println!("No subcommand provided");
         }
     }
 
