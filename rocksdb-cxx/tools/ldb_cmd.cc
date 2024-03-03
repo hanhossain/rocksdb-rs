@@ -1414,9 +1414,9 @@ void ManifestDumpCommand::DoCommand() {
         fname = file_path;
       }
       uint64_t file_num = 0;
-      FileType file_type = FileType::kWalFile;  // Just for initialization
+      rocksdb_rs::types::FileType file_type = rocksdb_rs::types::FileType::kWalFile;  // Just for initialization
       if (ParseFileName(fname, &file_num, &file_type) &&
-          file_type == FileType::kDescriptorFile) {
+          file_type == rocksdb_rs::types::FileType::kDescriptorFile) {
         if (!matched_file.empty()) {
           exec_state_ = LDBCommandExecuteResult::Failed(
               "Multiple MANIFEST files found; use --path to select one");
@@ -2028,7 +2028,7 @@ void DBDumperCommand::DoCommand() {
     assert(!path_.empty());
     std::string fileName = GetFileNameFromPath(path_);
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
 
     exec_state_ = LDBCommandExecuteResult::Succeed("");
 
@@ -2039,21 +2039,21 @@ void DBDumperCommand::DoCommand() {
     }
 
     switch (type) {
-      case FileType::kWalFile:
+      case rocksdb_rs::types::FileType::kWalFile:
         // TODO(myabandeh): allow configuring is_write_commited
         DumpWalFile(options_, path_, /* print_header_ */ true,
                     /* print_values_ */ true, true /* is_write_commited */,
                     &exec_state_);
         break;
-      case FileType::kTableFile:
+      case rocksdb_rs::types::FileType::kTableFile:
         DumpSstFile(options_, path_, is_key_hex_, /* show_properties */ true,
                     decode_blob_index_, from_, to_);
         break;
-      case FileType::kDescriptorFile:
+      case rocksdb_rs::types::FileType::kDescriptorFile:
         DumpManifestFile(options_, path_, /* verbose_ */ false, is_key_hex_,
                          /*  json_ */ false, column_families_);
         break;
-      case FileType::kBlobFile:
+      case rocksdb_rs::types::FileType::kBlobFile:
         DumpBlobFile(path_, is_key_hex_, is_value_hex_,
                      dump_uncompressed_blobs_);
         break;
@@ -2626,7 +2626,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
   } else {
     StdErrReporter reporter;
     uint64_t log_number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
 
     // we need the log number, but ParseFilename expects dbname/NNN.log.
     std::string sanitized = wal_file;

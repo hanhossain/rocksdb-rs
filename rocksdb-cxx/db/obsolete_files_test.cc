@@ -70,11 +70,11 @@ class ObsoleteFilesTest : public DBTestBase {
     int manifest_cnt = 0;
     for (auto file : filenames) {
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       if (ParseFileName(file, &number, &type)) {
-        log_cnt += (type == FileType::kWalFile);
-        sst_cnt += (type == FileType::kTableFile);
-        manifest_cnt += (type == FileType::kDescriptorFile);
+        log_cnt += (type == rocksdb_rs::types::FileType::kWalFile);
+        sst_cnt += (type == rocksdb_rs::types::FileType::kTableFile);
+        manifest_cnt += (type == rocksdb_rs::types::FileType::kDescriptorFile);
       }
     }
     ASSERT_EQ(required_log, log_cnt);
@@ -175,11 +175,11 @@ TEST_F(ObsoleteFilesTest, DeleteObsoleteOptionsFile) {
   for (const auto& file : files) {
     uint64_t file_num;
     Slice dummy_info_log_name_prefix;
-    FileType type;
-    WalFileType log_type;
+    rocksdb_rs::types::FileType type;
+    rocksdb_rs::transaction_log::WalFileType log_type;
     if (ParseFileName(file, &file_num, dummy_info_log_name_prefix.ToString(), &type,
                       &log_type) &&
-        type == FileType::kOptionsFile) {
+        type == rocksdb_rs::types::FileType::kOptionsFile) {
       opts_file_count++;
     }
   }

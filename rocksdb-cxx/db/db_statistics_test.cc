@@ -219,7 +219,7 @@ TEST_F(DBStatisticsTest, VerifyChecksumReadStat) {
   ASSERT_OK(Flush());
   std::unordered_map<std::string, uint64_t> table_files;
   uint64_t table_files_size = 0;
-  GetAllDataFiles(FileType::kTableFile, &table_files, &table_files_size);
+  GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &table_files, &table_files_size);
 
   {
     // Scenario 1: Table verified in `VerifyFileChecksums()`. This should read
@@ -269,7 +269,7 @@ TEST_F(DBStatisticsTest, BlockChecksumStats) {
   // Scenario 2: Corrupted table verified in `VerifyChecksum()`. The corruption
   // is in the fourth and final verified block, i.e., the data block.
   std::unordered_map<std::string, uint64_t> table_files;
-  ASSERT_OK(GetAllDataFiles(FileType::kTableFile, &table_files));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &table_files));
   ASSERT_EQ(1, table_files.size());
   std::string table_name = table_files.begin()->first;
   // Assumes the data block starts at offset zero.

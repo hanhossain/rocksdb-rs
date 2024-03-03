@@ -318,8 +318,8 @@ TEST_F(CompactionServiceTest, BasicCompactions) {
   SyncPoint::GetInstance()->SetCallBack(
       "BlockBasedTable::Open::PassedVerifyUniqueId", [&](void* arg) {
         // override job status
-        auto id = static_cast<UniqueId64x2*>(arg);
-        assert(*id != UniqueId64x2_null());
+        auto id = static_cast<rocksdb_rs::unique_id::UniqueId64x2*>(arg);
+        assert(*id != rocksdb_rs::unique_id::UniqueId64x2_null());
         verify_passed++;
       });
   Reopen(options);

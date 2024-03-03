@@ -844,7 +844,7 @@ Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Failed to get SST unique id for file %s",
                    file_to_ingest->internal_file_path.c_str());
-    file_to_ingest->unique_id = UniqueId64x2_null();
+    file_to_ingest->unique_id = rocksdb_rs::unique_id::UniqueId64x2_null();
   }
 
   return status;

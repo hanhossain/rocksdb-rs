@@ -19,8 +19,13 @@ docker build -t rocksdb --target=test-all .
 ```
 
 ## Dev tips
-Regex to find enums which need to be convered to enum class: `(?<!(static )|\w)enum\s+(?!class)(?!.*=)`
 
-## Potential issues with the migration
-- LogReaderContainer (in [db_impl_secondary.h](rocksdb-cxx/db/db_impl/db_impl_secondary.h)) may need to be refactored to use unique_ptr<Status> instead of a raw pointer.
-- manifest_reader_status (in [version_set.cc](rocksdb-cxx/db/version_set.cc)) may need to a std::unique_ptr instead of a raw pointer.
+Referencing a shared type from rust:
+```rust
+extern "C++" {
+    include!("rocksdb-rs/src/transaction_log.rs.h");
+
+    #[namespace = "rocksdb_rs::transaction_log"]
+    type WalFileType = crate::transaction_log::ffi::WalFileType;
+}
+```

@@ -1552,7 +1552,7 @@ class CacheKeyTest : public testing::Test {
                                            uint64_t file_number) {
     // Like SemiStructuredUniqueIdGen::GenerateNext
     // TODO: make db_session_id be a rust::String
-    tp_.db_session_id = std::string(EncodeSessionId(base_session_upper_,
+    tp_.db_session_id = std::string(rocksdb_rs::unique_id::EncodeSessionId(base_session_upper_,
                                         base_session_lower_ ^ session_counter));
     tp_.db_id = std::to_string(db_id_);
     tp_.orig_file_number = file_number;
@@ -1567,7 +1567,7 @@ class CacheKeyTest : public testing::Test {
     // BEGIN some assertions in relation to SST unique IDs
     std::string external_unique_id_str;
     EXPECT_OK(GetUniqueIdFromTableProperties(tp_, external_unique_id_str));
-    UniqueId64x2 sst_unique_id = {};
+    rocksdb_rs::unique_id::UniqueId64x2 sst_unique_id = {};
     EXPECT_OK(sst_unique_id.decode_bytes(external_unique_id_str));
     ExternalUniqueIdToInternal(sst_unique_id.as_unique_id_ptr());
     OffsetableCacheKey ock =
@@ -1592,8 +1592,8 @@ TEST_F(CacheKeyTest, DBImplSessionIdStructure) {
   std::string session_id1 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   std::string session_id2 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   uint64_t upper1, upper2, lower1, lower2;
-  ASSERT_OK(DecodeSessionId(session_id1, upper1, lower1));
-  ASSERT_OK(DecodeSessionId(session_id2, upper2, lower2));
+  ASSERT_OK(rocksdb_rs::unique_id::DecodeSessionId(session_id1, upper1, lower1));
+  ASSERT_OK(rocksdb_rs::unique_id::DecodeSessionId(session_id2, upper2, lower2));
   // Because generated in same process
   ASSERT_EQ(upper1, upper2);
   // Unless we generate > 4 billion session IDs in this process...

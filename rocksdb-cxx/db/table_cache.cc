@@ -136,11 +136,11 @@ Status TableCache::GetTableReader(
                                    file_read_hist, ioptions_.rate_limiter.get(),
                                    ioptions_.listeners, file_temperature,
                                    level == ioptions_.num_levels - 1));
-    UniqueId64x2 expected_unique_id;
+    rocksdb_rs::unique_id::UniqueId64x2 expected_unique_id;
     if (ioptions_.verify_sst_unique_id_in_manifest) {
       expected_unique_id = file_meta.unique_id;
     } else {
-      expected_unique_id = UniqueId64x2_null();  // null ID == no verification
+      expected_unique_id = rocksdb_rs::unique_id::UniqueId64x2_null();  // null ID == no verification
     }
     s = ioptions_.table_factory->NewTableReader(
         ro,

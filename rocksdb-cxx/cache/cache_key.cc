@@ -300,13 +300,13 @@ CacheKey CacheKey::CreateUniqueForProcessLifetime() {
 OffsetableCacheKey::OffsetableCacheKey(const std::string &db_id,
                                        const std::string &db_session_id,
                                        uint64_t file_number) {
-  UniqueId64x2 internal_id{};
+  rocksdb_rs::unique_id::UniqueId64x2 internal_id{};
   Status s = internal_id.get_sst_internal_unique_id(db_id, db_session_id, file_number, /*force=*/true);
   assert(s.ok());
   *this = FromInternalUniqueId(internal_id.as_unique_id_ptr());
 }
 
-OffsetableCacheKey OffsetableCacheKey::FromInternalUniqueId(UniqueIdPtr id) {
+OffsetableCacheKey OffsetableCacheKey::FromInternalUniqueId(rocksdb_rs::unique_id::UniqueIdPtr id) {
   uint64_t session_lower = id.ptr[0];
   uint64_t file_num_etc = id.ptr[1];
 
@@ -348,13 +348,13 @@ OffsetableCacheKey OffsetableCacheKey::FromInternalUniqueId(UniqueIdPtr id) {
 
 // Inverse of FromInternalUniqueId (assuming file_num_etc64 == 0 only if
 // offset_etc64 == 0)
-UniqueId64x2 OffsetableCacheKey::ToInternalUniqueId() {
+rocksdb_rs::unique_id::UniqueId64x2 OffsetableCacheKey::ToInternalUniqueId() {
   uint64_t a = file_num_etc64_;
   uint64_t b = offset_etc64_;
   if (b == 0) {
     std::swap(a, b);
   }
-  UniqueId64x2 rv;
+  rocksdb_rs::unique_id::UniqueId64x2 rv;
   rv.data[0] = ReverseBits(b);
   rv.data[1] = ReverseBits(a ^ DownwardInvolution(rv.data[0]));
   return rv;

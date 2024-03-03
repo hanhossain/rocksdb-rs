@@ -51,7 +51,7 @@ class GenerateLevelFilesBriefTest : public testing::Test {
         largest_seq, /* marked_for_compact */ false, Temperature::kUnknown,
         kInvalidBlobFileNumber, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime, kUnknownEpochNumber, kUnknownFileChecksum,
-        kUnknownFileChecksumFuncName, UniqueId64x2_null(), 0, 0,
+        kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
         /* user_defined_timestamps_persisted */ true);
     files_.push_back(f);
   }
@@ -164,7 +164,7 @@ class VersionStorageInfoTestBase : public testing::Test {
         Temperature::kUnknown, oldest_blob_file_number,
         kUnknownOldestAncesterTime, kUnknownFileCreationTime,
         kUnknownEpochNumber, kUnknownFileChecksum, kUnknownFileChecksumFuncName,
-        UniqueId64x2_null(), compensated_range_deletion_size, 0,
+        rocksdb_rs::unique_id::UniqueId64x2_null(), compensated_range_deletion_size, 0,
         /* user_defined_timestamps_persisted */ true);
     vstorage_.AddFile(level, f);
   }
@@ -3297,7 +3297,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       file_metas->emplace_back(
           file_num, /*file_path_id=*/0, file_size, ikey, ikey, 0, 0, false,
           Temperature::kUnknown, 0, 0, 0, info.epoch_number,
-          kUnknownFileChecksum, kUnknownFileChecksumFuncName, UniqueId64x2_null(),
+          kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
           0, 0, /* user_defined_timestamps_persisted */ true);
     }
   }
@@ -3355,7 +3355,7 @@ TEST_F(VersionSetTestMissingFiles, ManifestFarBehindSst) {
         file_num, /*file_path_id=*/0, /*file_size=*/12, smallest_ikey,
         largest_ikey, 0, 0, false, Temperature::kUnknown, 0, 0, 0,
         file_num /* epoch_number */, kUnknownFileChecksum,
-        kUnknownFileChecksumFuncName, UniqueId64x2_null(), 0, 0,
+        kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
         /* user_defined_timestamps_persisted */ true);
     added_files.emplace_back(0, meta);
   }
@@ -3417,7 +3417,7 @@ TEST_F(VersionSetTestMissingFiles, ManifestAheadofSst) {
         file_num, /*file_path_id=*/0, /*file_size=*/12, smallest_ikey,
         largest_ikey, 0, 0, false, Temperature::kUnknown, 0, 0, 0,
         file_num /* epoch_number */, kUnknownFileChecksum,
-        kUnknownFileChecksumFuncName, UniqueId64x2_null(), 0, 0,
+        kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
         /* user_defined_timestamps_persisted */ true);
     added_files.emplace_back(0, meta);
   }

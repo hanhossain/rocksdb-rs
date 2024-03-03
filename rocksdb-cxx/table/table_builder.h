@@ -42,7 +42,7 @@ struct TableReaderOptions {
       int _level = -1, BlockCacheTracer* const _block_cache_tracer = nullptr,
       size_t _max_file_size_for_l0_meta_pin = 0,
       const std::string& _cur_db_session_id = "", uint64_t _cur_file_num = 0,
-      UniqueId64x2 _unique_id = {}, SequenceNumber _largest_seqno = 0,
+      rocksdb_rs::unique_id::UniqueId64x2 _unique_id = {}, SequenceNumber _largest_seqno = 0,
       uint64_t _tail_size = 0, bool _user_defined_timestamps_persisted = true)
       : ioptions(_ioptions),
         prefix_extractor(_prefix_extractor),
@@ -89,7 +89,7 @@ struct TableReaderOptions {
   uint64_t cur_file_num;
 
   // Known unique_id or {}, UniqueId64x2_null() means unknown
-  UniqueId64x2 unique_id;
+  rocksdb_rs::unique_id::UniqueId64x2 unique_id;
 
   uint8_t block_protection_bytes_per_key;
 

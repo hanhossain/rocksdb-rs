@@ -400,7 +400,7 @@ class ClockCacheTest : public testing::Test {
               /*allocator*/ nullptr, &eviction_callback_, &hash_seed_, opts);
   }
 
-  Status Insert(const UniqueId64x2& hashed_key,
+  Status Insert(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                 Cache::Priority priority = Cache::Priority::LOW) {
     return shard_->Insert(TestKey(hashed_key), hashed_key, nullptr /*value*/,
                           &kNoopCacheItemHelper, 1 /*charge*/,
@@ -418,7 +418,7 @@ class ClockCacheTest : public testing::Test {
                           nullptr /*handle*/, Cache::Priority::LOW);
   }
 
-  bool Lookup(const Slice& key, const UniqueId64x2& hashed_key,
+  bool Lookup(const Slice& key, const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
               bool useful = true) {
     auto handle = shard_->Lookup(key, hashed_key);
     if (handle) {
@@ -428,7 +428,7 @@ class ClockCacheTest : public testing::Test {
     return false;
   }
 
-  bool Lookup(const UniqueId64x2& hashed_key, bool useful = true) {
+  bool Lookup(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key, bool useful = true) {
     return Lookup(TestKey(hashed_key), hashed_key, useful);
   }
 
@@ -437,15 +437,15 @@ class ClockCacheTest : public testing::Test {
   }
 
   void Erase(char key) {
-    UniqueId64x2 hashed_key = TestHashedKey(key);
+    rocksdb_rs::unique_id::UniqueId64x2 hashed_key = TestHashedKey(key);
     shard_->Erase(TestKey(hashed_key), hashed_key);
   }
 
-  static inline Slice TestKey(const UniqueId64x2& hashed_key) {
+  static inline Slice TestKey(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key) {
     return Slice(reinterpret_cast<const char*>(&hashed_key), 16U);
   }
 
-  static inline UniqueId64x2 TestHashedKey(char key) {
+  static inline rocksdb_rs::unique_id::UniqueId64x2 TestHashedKey(char key) {
     // For testing hash near-collision behavior, put the variance in
     // hashed_key in bits that are unlikely to be used as hash bits.
     return {(static_cast<uint64_t>(key) << 56) + 1234U, 5678U};
@@ -488,7 +488,7 @@ TEST_F(ClockCacheTest, Limits) {
     // Also tests switching between strict limit and not
     shard_->SetStrictCapacityLimit(strict_capacity_limit);
 
-    UniqueId64x2 hkey = TestHashedKey('x');
+    rocksdb_rs::unique_id::UniqueId64x2 hkey = TestHashedKey('x');
 
     // Single entry charge beyond capacity
     {
@@ -686,7 +686,7 @@ TEST_F(ClockCacheTest, ClockCounterOverflowTest) {
   NewShard(6, /*strict_capacity_limit*/ false);
   HandleImpl* h;
   DeleteCounter val;
-  UniqueId64x2 hkey = TestHashedKey('x');
+  rocksdb_rs::unique_id::UniqueId64x2 hkey = TestHashedKey('x');
   ASSERT_OK(shard_->Insert(TestKey(hkey), hkey, &val, &kDeleteCounterHelper, 1,
                            &h, Cache::Priority::HIGH));
 
@@ -730,14 +730,14 @@ TEST_F(ClockCacheTest, ClockTableFull) {
   std::vector<HandleImpl*> handles;
   // NOTE: the three extra insertions should create standalone entries
   for (size_t i = 0; i < size + 3; ++i) {
-    UniqueId64x2 hkey = TestHashedKey(static_cast<char>(i));
+    rocksdb_rs::unique_id::UniqueId64x2 hkey = TestHashedKey(static_cast<char>(i));
     ASSERT_OK(shard_->Insert(TestKey(hkey), hkey, &val, &kDeleteCounterHelper,
                              1, &handles.emplace_back(),
                              Cache::Priority::HIGH));
   }
 
   for (size_t i = 0; i < size + 3; ++i) {
-    UniqueId64x2 hkey = TestHashedKey(static_cast<char>(i));
+    rocksdb_rs::unique_id::UniqueId64x2 hkey = TestHashedKey(static_cast<char>(i));
     HandleImpl* h = shard_->Lookup(TestKey(hkey), hkey);
     if (i < size) {
       ASSERT_NE(h, nullptr);
@@ -761,7 +761,7 @@ TEST_F(ClockCacheTest, ClockTableFull) {
   }
 
   for (size_t i = size + 3; i > 0; --i) {
-    UniqueId64x2 hkey = TestHashedKey(static_cast<char>(i - 1));
+    rocksdb_rs::unique_id::UniqueId64x2 hkey = TestHashedKey(static_cast<char>(i - 1));
     shard_->Erase(TestKey(hkey), hkey);
     if (i - 1 > size) {
       ASSERT_EQ(val.deleted, 3);
@@ -776,11 +776,11 @@ TEST_F(ClockCacheTest, ClockTableFull) {
 TEST_F(ClockCacheTest, CollidingInsertEraseTest) {
   NewShard(6, /*strict_capacity_limit*/ false);
   DeleteCounter val;
-  UniqueId64x2 hkey1 = TestHashedKey('x');
+  rocksdb_rs::unique_id::UniqueId64x2 hkey1 = TestHashedKey('x');
   Slice key1 = TestKey(hkey1);
-  UniqueId64x2 hkey2 = TestHashedKey('y');
+  rocksdb_rs::unique_id::UniqueId64x2 hkey2 = TestHashedKey('y');
   Slice key2 = TestKey(hkey2);
-  UniqueId64x2 hkey3 = TestHashedKey('z');
+  rocksdb_rs::unique_id::UniqueId64x2 hkey3 = TestHashedKey('z');
   Slice key3 = TestKey(hkey3);
   HandleImpl* h1;
   ASSERT_OK(shard_->Insert(key1, hkey1, &val, &kDeleteCounterHelper, 1, &h1,

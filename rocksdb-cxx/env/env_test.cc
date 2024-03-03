@@ -235,15 +235,15 @@ TEST_F(EnvPosixTest, DISABLED_FilePermission) {
 }
 
 TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
-  std::atomic<CpuPriority> from_priority(CpuPriority::kNormal);
-  std::atomic<CpuPriority> to_priority(CpuPriority::kNormal);
+  std::atomic<rocksdb_rs::port_defs::CpuPriority> from_priority(rocksdb_rs::port_defs::CpuPriority::kNormal);
+  std::atomic<rocksdb_rs::port_defs::CpuPriority> to_priority(rocksdb_rs::port_defs::CpuPriority::kNormal);
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ThreadPoolImpl::BGThread::BeforeSetCpuPriority", [&](void* pri) {
-        from_priority.store(*reinterpret_cast<CpuPriority*>(pri));
+        from_priority.store(*reinterpret_cast<rocksdb_rs::port_defs::CpuPriority*>(pri));
       });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ThreadPoolImpl::BGThread::AfterSetCpuPriority", [&](void* pri) {
-        to_priority.store(*reinterpret_cast<CpuPriority*>(pri));
+        to_priority.store(*reinterpret_cast<rocksdb_rs::port_defs::CpuPriority*>(pri));
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
@@ -265,42 +265,42 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
   {
     // Same priority, no-op.
     env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM,
-                                     CpuPriority::kNormal);
+                                     rocksdb_rs::port_defs::CpuPriority::kNormal);
     RunTask(Env::Priority::BOTTOM);
-    ASSERT_EQ(from_priority, CpuPriority::kNormal);
-    ASSERT_EQ(to_priority, CpuPriority::kNormal);
+    ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
+    ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
   }
 
   {
     // Higher priority, no-op.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kHigh);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, rocksdb_rs::port_defs::CpuPriority::kHigh);
     RunTask(Env::Priority::BOTTOM);
-    ASSERT_EQ(from_priority, CpuPriority::kNormal);
-    ASSERT_EQ(to_priority, CpuPriority::kNormal);
+    ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
+    ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
   }
 
   {
     // Lower priority from kNormal -> kLow.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kLow);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, rocksdb_rs::port_defs::CpuPriority::kLow);
     RunTask(Env::Priority::BOTTOM);
-    ASSERT_EQ(from_priority, CpuPriority::kNormal);
-    ASSERT_EQ(to_priority, CpuPriority::kLow);
+    ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
+    ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kLow);
   }
 
   {
     // Lower priority from kLow -> kIdle.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, CpuPriority::kIdle);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, rocksdb_rs::port_defs::CpuPriority::kIdle);
     RunTask(Env::Priority::BOTTOM);
-    ASSERT_EQ(from_priority, CpuPriority::kLow);
-    ASSERT_EQ(to_priority, CpuPriority::kIdle);
+    ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kLow);
+    ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kIdle);
   }
 
   {
     // Lower priority from kNormal -> kIdle for another pool.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::HIGH, CpuPriority::kIdle);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::HIGH, rocksdb_rs::port_defs::CpuPriority::kIdle);
     RunTask(Env::Priority::HIGH);
-    ASSERT_EQ(from_priority, CpuPriority::kNormal);
-    ASSERT_EQ(to_priority, CpuPriority::kIdle);
+    ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
+    ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kIdle);
   }
 
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();

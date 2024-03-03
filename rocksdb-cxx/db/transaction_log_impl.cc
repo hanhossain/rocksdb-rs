@@ -51,7 +51,7 @@ Status TransactionLogIteratorImpl::OpenLogFile(
   std::string fname;
   Status s = Status_new();
   EnvOptions optimized_env_options = fs->OptimizeForLogRead(soptions_);
-  if (log_file->Type() == WalFileType::kArchivedLogFile) {
+  if (log_file->Type() == rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
     fname = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(dir_, log_file->LogNumber()));
     s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr);
   } else {

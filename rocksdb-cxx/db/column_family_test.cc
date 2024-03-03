@@ -419,7 +419,7 @@ class ColumnFamilyTestBase : public testing::Test {
     }
     EXPECT_OK(s);
     for (const auto& wal : wal_files) {
-      if (wal->Type() == WalFileType::kAliveLogFile) {
+      if (wal->Type() == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
         ++ret;
       }
     }
@@ -3188,10 +3188,10 @@ TEST_P(ColumnFamilyTest, DISABLED_LogTruncationTest) {
   std::vector<std::string> logfs;
   for (size_t i = 0; i < filenames.size(); i++) {
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     if (!(ParseFileName(filenames[i], &number, &type))) continue;
 
-    if (type != FileType::kWalFile) continue;
+    if (type != rocksdb_rs::types::FileType::kWalFile) continue;
 
     logfs.push_back(filenames[i]);
   }

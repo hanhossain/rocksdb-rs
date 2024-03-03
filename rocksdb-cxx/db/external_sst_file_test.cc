@@ -1297,8 +1297,8 @@ TEST_F(ExternalSSTFileTest, IngestNonExistingFile) {
   int num_sst_files = 0;
   for (auto& f : files) {
     uint64_t number;
-    FileType type;
-    if (ParseFileName(f, &number, &type) && type == FileType::kTableFile) {
+    rocksdb_rs::types::FileType type;
+    if (ParseFileName(f, &number, &type) && type == rocksdb_rs::types::FileType::kTableFile) {
       num_sst_files++;
     }
   }

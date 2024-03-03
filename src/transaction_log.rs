@@ -1,4 +1,4 @@
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::transaction_log")]
 pub mod ffi {
     enum WalFileType {
         /// Indicates that WAL file is in archive directory. WAL files are moved from

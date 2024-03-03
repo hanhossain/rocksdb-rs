@@ -253,11 +253,11 @@ class WriteStress {
     std::set<uint64_t> sst_file_numbers;
     for (const auto& file : metadata) {
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       if (!ParseFileName(file.name, &number, "LOG", &type)) {
         continue;
       }
-      if (type == FileType::kTableFile) {
+      if (type == rocksdb_rs::types::FileType::kTableFile) {
         sst_file_numbers.insert(number);
       }
     }
@@ -266,11 +266,11 @@ class WriteStress {
     Env::Default()->GetChildren(FLAGS_db, &children);
     for (const auto& child : children) {
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       if (!ParseFileName(child, &number, "LOG", &type)) {
         continue;
       }
-      if (type == FileType::kTableFile) {
+      if (type == rocksdb_rs::types::FileType::kTableFile) {
         if (sst_file_numbers.find(number) == sst_file_numbers.end()) {
           fprintf(stderr,
                   "Found a table file in DB path that should have been "

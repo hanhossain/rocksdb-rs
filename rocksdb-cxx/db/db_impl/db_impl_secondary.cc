@@ -118,8 +118,8 @@ Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
   }
   for (size_t i = 0; i < filenames.size(); i++) {
     uint64_t number;
-    FileType type;
-    if (rocksdb_rs::filename::ParseFileName(filenames[i], &number, &type) && type == FileType::kWalFile &&
+    rocksdb_rs::types::FileType type;
+    if (rocksdb_rs::filename::ParseFileName(filenames[i], &number, &type) && type == rocksdb_rs::types::FileType::kWalFile &&
         number >= log_number_min) {
       logs->push_back(number);
     }

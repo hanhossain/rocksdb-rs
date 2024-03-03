@@ -176,17 +176,17 @@ class SmallEnumSetTest : public testing::Test {
 TEST_F(SmallEnumSetTest, SmallEnumSetTest1) {
   FileTypeSet fs;  // based on a legacy enum type
   ASSERT_TRUE(fs.empty());
-  ASSERT_TRUE(fs.Add(FileType::kIdentityFile));
+  ASSERT_TRUE(fs.Add(rocksdb_rs::types::FileType::kIdentityFile));
   ASSERT_FALSE(fs.empty());
-  ASSERT_FALSE(fs.Add(FileType::kIdentityFile));
-  ASSERT_TRUE(fs.Add(FileType::kInfoLogFile));
-  ASSERT_TRUE(fs.Contains(FileType::kIdentityFile));
-  ASSERT_FALSE(fs.Contains(FileType::kDBLockFile));
+  ASSERT_FALSE(fs.Add(rocksdb_rs::types::FileType::kIdentityFile));
+  ASSERT_TRUE(fs.Add(rocksdb_rs::types::FileType::kInfoLogFile));
+  ASSERT_TRUE(fs.Contains(rocksdb_rs::types::FileType::kIdentityFile));
+  ASSERT_FALSE(fs.Contains(rocksdb_rs::types::FileType::kDBLockFile));
   ASSERT_FALSE(fs.empty());
-  ASSERT_FALSE(fs.Remove(FileType::kDBLockFile));
-  ASSERT_TRUE(fs.Remove(FileType::kIdentityFile));
+  ASSERT_FALSE(fs.Remove(rocksdb_rs::types::FileType::kDBLockFile));
+  ASSERT_TRUE(fs.Remove(rocksdb_rs::types::FileType::kIdentityFile));
   ASSERT_FALSE(fs.empty());
-  ASSERT_TRUE(fs.Remove(FileType::kInfoLogFile));
+  ASSERT_TRUE(fs.Remove(rocksdb_rs::types::FileType::kInfoLogFile));
   ASSERT_TRUE(fs.empty());
 }
 

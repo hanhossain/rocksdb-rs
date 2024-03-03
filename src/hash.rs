@@ -3,7 +3,7 @@ mod xxph3;
 use crate::hash::xxph3::{xxph3_64, xxph3_64_with_seed};
 use xxhash_rust::xxh3::{xxh3_128, xxh3_128_with_seed};
 
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::hash")]
 mod ffi {
     extern "Rust" {
         #[cxx_name = "hash2x64"]

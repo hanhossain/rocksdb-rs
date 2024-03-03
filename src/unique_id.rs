@@ -5,7 +5,7 @@ use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
 use cxx::{CxxString, UniquePtr};
 
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::unique_id")]
 pub mod ffi {
     /// Standard size unique ID, good enough for almost all practical purposes
     #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -29,6 +29,7 @@ pub mod ffi {
         extended: bool,
     }
 
+    #[namespace = "rocksdb"]
     extern "C++" {
         include!("rocksdb-rs/src/status.rs.h");
 

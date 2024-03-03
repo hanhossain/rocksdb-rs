@@ -110,7 +110,7 @@ class BlockBasedTable : public TableReader {
       BlockCacheTracer* const block_cache_tracer = nullptr,
       size_t max_file_size_for_l0_meta_pin = 0,
       const std::string& cur_db_session_id = "", uint64_t cur_file_num = 0,
-      UniqueId64x2 expected_unique_id = {},
+      rocksdb_rs::unique_id::UniqueId64x2 expected_unique_id = {},
       const bool user_defined_timestamps_persisted = true);
 
   bool PrefixRangeMayMatch(const Slice& internal_key,

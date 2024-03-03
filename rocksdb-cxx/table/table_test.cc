@@ -450,7 +450,7 @@ class TableConstructor : public Constructor {
                            /*skip_filters*/ false,
                            /*immortal*/ false, false, level_,
                            &block_cache_tracer_, moptions.write_buffer_size, "",
-                           file_num_, UniqueId64x2_null(), largest_seqno_),
+                           file_num_, rocksdb_rs::unique_id::UniqueId64x2_null(), largest_seqno_),
         std::move(file_reader_), TEST_GetSink()->contents().size(),
         &table_reader_);
   }
@@ -1403,8 +1403,8 @@ TEST_F(TablePropertyTest, PrefixScanTest) {
 
 namespace {
 struct TestIds {
-  UniqueId64x3 internal_id;
-  UniqueId64x3 external_id;
+  rocksdb_rs::unique_id::UniqueId64x3 internal_id;
+  rocksdb_rs::unique_id::UniqueId64x3 external_id;
 };
 
 inline bool operator==(const TestIds& lhs, const TestIds& rhs) {
@@ -1426,8 +1426,8 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   if (db_session_id.size() == 20) {
     uint64_t upper;
     uint64_t lower;
-    EXPECT_OK(DecodeSessionId(db_session_id, upper, lower));
-    EXPECT_EQ(EncodeSessionId(upper, lower), db_session_id);
+    EXPECT_OK(rocksdb_rs::unique_id::DecodeSessionId(db_session_id, upper, lower));
+    EXPECT_EQ(rocksdb_rs::unique_id::EncodeSessionId(upper, lower), db_session_id);
   }
 
   // Get external using public API
@@ -1457,19 +1457,19 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
 
   // Get internal with internal API
   EXPECT_OK(t.internal_id.get_sst_internal_unique_id(db_id, db_session_id, file_number, false));
-  EXPECT_NE(t.internal_id, UniqueId64x3_null());
+  EXPECT_NE(t.internal_id, rocksdb_rs::unique_id::UniqueId64x3_null());
 
   // Verify relationship
-  UniqueId64x3 tmp = t.internal_id;
+  rocksdb_rs::unique_id::UniqueId64x3 tmp = t.internal_id;
   InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
   EXPECT_EQ(tmp, t.external_id);
   ExternalUniqueIdToInternal(tmp.as_unique_id_ptr());
   EXPECT_EQ(tmp, t.internal_id);
 
   // And 128-bit internal version
-  UniqueId64x2 tmp2{};
+  rocksdb_rs::unique_id::UniqueId64x2 tmp2{};
   EXPECT_OK(tmp2.get_sst_internal_unique_id(db_id, db_session_id, file_number, false));
-  EXPECT_NE(tmp2, UniqueId64x2_null());
+  EXPECT_NE(tmp2, rocksdb_rs::unique_id::UniqueId64x2_null());
 
   EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
   EXPECT_EQ(tmp2.data[1], t.internal_id.data[1]);
@@ -1595,8 +1595,8 @@ TEST_F(TablePropertyTest, UniqueIdsSchemaAndQuality) {
   // external IDs. This way, as long as we avoid "all zeros" in internal IDs,
   // we avoid it in external IDs.
   {
-    UniqueId64x3 id1{{0, 0, Random::GetTLSInstance()->Next64()}};
-    UniqueId64x3 id2 = id1;
+    rocksdb_rs::unique_id::UniqueId64x3 id1{{0, 0, Random::GetTLSInstance()->Next64()}};
+    rocksdb_rs::unique_id::UniqueId64x3 id2 = id1;
     InternalUniqueIdToExternal(id1.as_unique_id_ptr());
     EXPECT_EQ(id1, id2);
     ExternalUniqueIdToInternal(id2.as_unique_id_ptr());
@@ -1626,17 +1626,17 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
                           '\xbd', '\xf0', '\xb4', '\x8e', '\x64', '\xf3',
                           '\x03', '\x93', '\x08', '\xca', '\x17', '\x28',
                           '\x4b', '\x32', '\xe7', '\xf7', '\x44', '\x4b'}}));
-  EXPECT_EQ(UniqueIdToHumanString(tmp),
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp),
             "6474DF650323BDF0-B48E64F3039308CA-17284B32E7F7444B");
 
   EXPECT_OK(GetUniqueIdFromTableProperties(tp, tmp));
-  EXPECT_EQ(UniqueIdToHumanString(tmp), "6474DF650323BDF0-B48E64F3039308CA");
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "6474DF650323BDF0-B48E64F3039308CA");
 
   // including zero padding
   tmp = std::string(24U, '\0');
   tmp[15] = '\x12';
   tmp[23] = '\xAB';
-  EXPECT_EQ(UniqueIdToHumanString(tmp),
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp),
             "0000000000000000-0000000000000012-00000000000000AB");
 
   // And shortened
@@ -1644,23 +1644,23 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
   tmp[5] = '\x12';
   tmp[10] = '\xAB';
   tmp[17] = '\xEF';
-  EXPECT_EQ(UniqueIdToHumanString(tmp),
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp),
             "0000000000120000-0000AB0000000000-00EF0000");
 
   tmp.resize(16);
-  EXPECT_EQ(UniqueIdToHumanString(tmp), "0000000000120000-0000AB0000000000");
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "0000000000120000-0000AB0000000000");
 
   tmp.resize(11);
-  EXPECT_EQ(UniqueIdToHumanString(tmp), "0000000000120000-0000AB");
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "0000000000120000-0000AB");
 
   tmp.resize(6);
-  EXPECT_EQ(UniqueIdToHumanString(tmp), "000000000012");
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "000000000012");
 
   // Also internal IDs to human string
-  UniqueId64x3 euid = {12345, 678, 9};
+  rocksdb_rs::unique_id::UniqueId64x3 euid = {12345, 678, 9};
   EXPECT_EQ(euid.to_internal_human_string(), "{12345,678,9}");
 
-  UniqueId64x2 uid = {1234, 567890};
+  rocksdb_rs::unique_id::UniqueId64x2 uid = {1234, 567890};
   EXPECT_EQ(uid.to_internal_human_string(), "{1234,567890}");
 }
 

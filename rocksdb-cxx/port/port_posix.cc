@@ -251,24 +251,24 @@ static size_t GetPageSize() {
 
 const size_t kPageSize = GetPageSize();
 
-void SetCpuPriority(ThreadId id, CpuPriority priority) {
+void SetCpuPriority(ThreadId id, rocksdb_rs::port_defs::CpuPriority priority) {
 #ifdef OS_LINUX
   sched_param param;
   param.sched_priority = 0;
   switch (priority) {
-    case CpuPriority::kHigh:
+    case rocksdb_rs::port_defs::CpuPriority::kHigh:
       sched_setscheduler(id, SCHED_OTHER, &param);
       setpriority(PRIO_PROCESS, id, -20);
       break;
-    case CpuPriority::kNormal:
+    case rocksdb_rs::port_defs::CpuPriority::kNormal:
       sched_setscheduler(id, SCHED_OTHER, &param);
       setpriority(PRIO_PROCESS, id, 0);
       break;
-    case CpuPriority::kLow:
+    case rocksdb_rs::port_defs::CpuPriority::kLow:
       sched_setscheduler(id, SCHED_OTHER, &param);
       setpriority(PRIO_PROCESS, id, 19);
       break;
-    case CpuPriority::kIdle:
+    case rocksdb_rs::port_defs::CpuPriority::kIdle:
       sched_setscheduler(id, SCHED_IDLE, &param);
       break;
     default:

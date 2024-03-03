@@ -26,7 +26,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
 
   auto* env = options.env;
   uint64_t number = 0;
-  FileType type = FileType::kInfoLogFile;
+  rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kInfoLogFile;
 
   std::vector<std::string> files;
   uint64_t file_num = 0;
@@ -48,13 +48,13 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       continue;
     }
     switch (type) {
-      case FileType::kCurrentFile:
+      case rocksdb_rs::types::FileType::kCurrentFile:
         Header(options.info_log, "CURRENT file:  %s\n", file.c_str());
         break;
-      case FileType::kIdentityFile:
+      case rocksdb_rs::types::FileType::kIdentityFile:
         Header(options.info_log, "IDENTITY file:  %s\n", file.c_str());
         break;
-      case FileType::kDescriptorFile:
+      case rocksdb_rs::types::FileType::kDescriptorFile:
         s = env->GetFileSize(dbname + "/" + file, &file_size);
         if (s.ok()) {
           Header(options.info_log,
@@ -66,7 +66,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
                 file.c_str(), s.ToString()->c_str());
         }
         break;
-      case FileType::kWalFile:
+      case rocksdb_rs::types::FileType::kWalFile:
         s = env->GetFileSize(dbname + "/" + file, &file_size);
         if (s.ok()) {
           wal_info.append(file)
@@ -78,7 +78,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
                 dbname.c_str(), file.c_str(), s.ToString()->c_str());
         }
         break;
-      case FileType::kTableFile:
+      case rocksdb_rs::types::FileType::kTableFile:
         if (++file_num < 10) {
           file_info.append(file).append(" ");
         }
@@ -100,7 +100,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       std::sort(files.begin(), files.end());
       for (const std::string& file : files) {
         if (rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
-          if (type == FileType::kTableFile && ++file_num < 10) {
+          if (type == rocksdb_rs::types::FileType::kTableFile && ++file_num < 10) {
             file_info.append(file).append(" ");
           }
         }
@@ -125,7 +125,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
     wal_info.clear();
     for (const std::string& file : files) {
       if (rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
-        if (type == FileType::kWalFile) {
+        if (type == rocksdb_rs::types::FileType::kWalFile) {
           s = env->GetFileSize(wal_dir + "/" + file, &file_size);
           if (s.ok()) {
             wal_info.append(file)

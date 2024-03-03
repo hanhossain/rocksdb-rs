@@ -14,12 +14,12 @@ class DBBlobCorruptionTest : public DBTestBase {
   DBBlobCorruptionTest()
       : DBTestBase("db_blob_corruption_test", /* env_do_fsync */ false) {}
 
-  void Corrupt(FileType filetype, int offset, int bytes_to_corrupt) {
+  void Corrupt(rocksdb_rs::types::FileType filetype, int offset, int bytes_to_corrupt) {
     // Pick file to corrupt
     std::vector<std::string> filenames;
     ASSERT_OK(env_->GetChildren(dbname_, &filenames));
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     std::string fname;
     uint64_t picked_number = kInvalidBlobFileNumber;
     for (size_t i = 0; i < filenames.size(); i++) {
@@ -50,7 +50,7 @@ TEST_F(DBBlobCorruptionTest, VerifyWholeBlobFileChecksum) {
   ASSERT_OK(db_->VerifyFileChecksums(ReadOptions()));
   Close();
 
-  Corrupt(FileType::kBlobFile, 0, 2);
+  Corrupt(rocksdb_rs::types::FileType::kBlobFile, 0, 2);
 
   ASSERT_OK(TryReopen(options));
 

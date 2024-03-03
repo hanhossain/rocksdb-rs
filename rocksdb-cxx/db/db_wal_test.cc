@@ -746,7 +746,7 @@ TEST_F(DBWALTest, WALWithChecksumHandoff) {
   do {
     Options options = CurrentOptions();
 
-    options.checksum_handoff_file_types.Add(FileType::kWalFile);
+    options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kWalFile);
     options.env = fault_fs_env.get();
     fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
 
@@ -893,14 +893,14 @@ TEST_P(DBRecoveryTestBlobError, RecoverWithBlobError) {
   ASSERT_OK(env_->GetChildren(dbname_, &files));
   for (const auto& file : files) {
     uint64_t number = 0;
-    FileType type = FileType::kTableFile;
+    rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kTableFile;
 
     if (!ParseFileName(file, &number, &type)) {
       continue;
     }
 
-    ASSERT_NE(type, FileType::kTableFile);
-    ASSERT_NE(type, FileType::kBlobFile);
+    ASSERT_NE(type, rocksdb_rs::types::FileType::kTableFile);
+    ASSERT_NE(type, rocksdb_rs::types::FileType::kBlobFile);
   }
 }
 
@@ -1193,7 +1193,7 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
     // nothing has been written to the log yet
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_EQ(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), WalFileType::kAliveLogFile);
+    ASSERT_EQ(log_file->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
     // add some data and verify that the file size actually moves foward
@@ -1205,7 +1205,7 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
 
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_GT(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), WalFileType::kAliveLogFile);
+    ASSERT_EQ(log_file->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
     // force log files to cycle and add some more data, then check if
@@ -1224,7 +1224,7 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
 
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_GT(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), WalFileType::kAliveLogFile);
+    ASSERT_EQ(log_file->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
   } while (ChangeWalOptions());
@@ -2395,9 +2395,9 @@ TEST_F(DBWALTest, DISABLED_TruncateLastLogAfterRecoverWALEmpty) {
   ASSERT_OK(env_->GetChildren(dbname_, &filenames));
   for (auto fname : filenames) {
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     if (ParseFileName(fname, &number, &type, nullptr)) {
-      if (type == FileType::kWalFile && number > last_log_num) {
+      if (type == rocksdb_rs::types::FileType::kWalFile && number > last_log_num) {
         last_log = fname;
       }
     }
@@ -2620,8 +2620,8 @@ TEST_F(DBWALTest, EmptyWalReopenTest) {
     ASSERT_OK(env_->GetChildren(dbname_, &files));
     for (const auto& file : files) {
       uint64_t number = 0;
-      FileType type = FileType::kWalFile;
-      if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
+      rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;
+      if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
         num_wal_files++;
       }
     }

@@ -62,7 +62,7 @@ class FileSystem;
 struct Options;
 struct DbPath;
 
-using FileTypeSet = SmallEnumSet<FileType, FileType::kBlobFile>;
+using FileTypeSet = SmallEnumSet<rocksdb_rs::types::FileType, rocksdb_rs::types::FileType::kBlobFile>;
 
 struct ColumnFamilyOptions : public AdvancedColumnFamilyOptions {
   // The function recovers options to a previous version. Only 4.6 or later

@@ -1753,7 +1753,7 @@ void DBImpl::BackgroundCallPurge() {
 
     const std::string& fname = purge_file.fname;
     const std::string& dir_to_sync = purge_file.dir_to_sync;
-    FileType type = purge_file.type;
+    rocksdb_rs::types::FileType type = purge_file.type;
     uint64_t number = purge_file.number;
     int job_id = purge_file.job_id;
 
@@ -4277,18 +4277,18 @@ Status DBImpl::DeleteFile(std::string name) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   uint64_t number;
-  FileType type;
-  WalFileType log_type;
+  rocksdb_rs::types::FileType type;
+  rocksdb_rs::transaction_log::WalFileType log_type;
   if (!ParseFileName(name, &number, &type, &log_type) ||
-      (type != FileType::kTableFile && type != FileType::kWalFile)) {
+      (type != rocksdb_rs::types::FileType::kTableFile && type != rocksdb_rs::types::FileType::kWalFile)) {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log, "DeleteFile %s failed.\n",
                     name.c_str());
     return Status_InvalidArgument("Invalid file name");
   }
 
-  if (type == FileType::kWalFile) {
+  if (type == rocksdb_rs::types::FileType::kWalFile) {
     // Only allow deleting archived log files
-    if (log_type != WalFileType::kArchivedLogFile) {
+    if (log_type != rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DeleteFile %s failed - not archived log.\n",
                       name.c_str());
@@ -4640,7 +4640,7 @@ std::string DBImpl::GenerateDbSessionId(Env*) {
     gen->GenerateNext(&hi, &lo);
     assert(lo != 0);
   }
-  return std::string(EncodeSessionId(hi, lo));
+  return std::string(rocksdb_rs::unique_id::EncodeSessionId(hi, lo));
 }
 
 void DBImpl::SetDbSessionId() {
@@ -4736,21 +4736,21 @@ Status DestroyDB(const std::string& dbname, const Options& options,
   Status result = env->LockFile(lockname, &lock);
   if (result.ok()) {
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!soptions.db_log_dir.empty(), dbname);
     for (const auto& fname : filenames) {
       if (ParseFileName(fname, &number, info_log_prefix.prefix, &type) &&
-          type != FileType::kDBLockFile) {  // Lock file will be deleted at end
+          type != rocksdb_rs::types::FileType::kDBLockFile) {  // Lock file will be deleted at end
         Status del = Status_new();
         std::string path_to_delete = dbname + "/" + fname;
-        if (type == FileType::kMetaDatabase) {
+        if (type == rocksdb_rs::types::FileType::kMetaDatabase) {
           del = DestroyDB(path_to_delete, options);
-        } else if (type == FileType::kTableFile || type == FileType::kWalFile ||
-                   type == FileType::kBlobFile) {
+        } else if (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kWalFile ||
+                   type == rocksdb_rs::types::FileType::kBlobFile) {
           del = DeleteDBFile(
               &soptions, path_to_delete, dbname,
               /*force_bg=*/false,
-              /*force_fg=*/(type == FileType::kWalFile) ? !wal_in_db_path : false);
+              /*force_fg=*/(type == rocksdb_rs::types::FileType::kWalFile) ? !wal_in_db_path : false);
         } else {
           del = env->DeleteFile(path_to_delete);
         }
@@ -4777,8 +4777,8 @@ Status DestroyDB(const std::string& dbname, const Options& options,
               .ok()) {
         for (const auto& fname : filenames) {
           if (ParseFileName(fname, &number, &type) &&
-              (type == FileType::kTableFile ||
-               type == FileType::kBlobFile)) {  // Lock file will be deleted at end
+              (type == rocksdb_rs::types::FileType::kTableFile ||
+               type == rocksdb_rs::types::FileType::kBlobFile)) {  // Lock file will be deleted at end
             std::string file_path = path + "/" + fname;
             Status del = DeleteDBFile(&soptions, file_path, dbname,
                                       /*force_bg=*/false, /*force_fg=*/false);
@@ -4814,7 +4814,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
             .ok()) {
       // Delete archival files.
       for (const auto& file : archiveFiles) {
-        if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
+        if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
           Status del =
               DeleteDBFile(&soptions, archivedir + "/" + file, archivedir,
                            /*force_bg=*/false, /*force_fg=*/!wal_in_db_path);
@@ -4830,7 +4830,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     // Delete log files in the WAL dir
     if (wal_dir_exists) {
       for (const auto& file : walDirFiles) {
-        if (ParseFileName(file, &number, &type) && type == FileType::kWalFile) {
+        if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
           Status del =
               DeleteDBFile(&soptions, static_cast<std::string>(LogFileName(soptions.wal_dir, number)),
                            soptions.wal_dir, /*force_bg=*/false,
@@ -4962,8 +4962,8 @@ Status DBImpl::DeleteObsoleteOptionsFiles() {
   }
   for (auto& filename : filenames) {
     uint64_t file_number;
-    FileType type;
-    if (ParseFileName(filename, &file_number, &type) && type == FileType::kOptionsFile) {
+    rocksdb_rs::types::FileType type;
+    if (ParseFileName(filename, &file_number, &type) && type == rocksdb_rs::types::FileType::kOptionsFile) {
       options_filenames.insert(
           {std::numeric_limits<uint64_t>::max() - file_number,
            GetName() + "/" + filename});
