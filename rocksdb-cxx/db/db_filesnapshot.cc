@@ -136,7 +136,7 @@ rocksdb_rs::status::Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
     while (required != required_by_manifest.end()) {
       if (included == files.end() || *required < (*included)->LogNumber()) {
         // FAIL - did not find
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "WAL file " + std::to_string(*required) +
             " required by manifest but not in directory list");
       }

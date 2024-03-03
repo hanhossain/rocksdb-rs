@@ -589,14 +589,14 @@ rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
   while (pos < opts.size()) {
     size_t eq_pos = opts.find_first_of("={};", pos);
     if (eq_pos == std::string::npos) {
-      return Status_InvalidArgument("Mismatched key value pair, '=' expected");
+      return rocksdb_rs::status::Status_InvalidArgument("Mismatched key value pair, '=' expected");
     } else if (opts[eq_pos] != '=') {
-      return Status_InvalidArgument("Unexpected char in key");
+      return rocksdb_rs::status::Status_InvalidArgument("Unexpected char in key");
     }
 
     std::string key = trim(opts.substr(pos, eq_pos - pos));
     if (key.empty()) {
-      return Status_InvalidArgument("Empty key found");
+      return rocksdb_rs::status::Status_InvalidArgument("Empty key found");
     }
 
     std::string value;
@@ -658,7 +658,7 @@ rocksdb_rs::status::Status GetStringFromCompressionType(std::string* compression
   if (ok) {
     return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_InvalidArgument("Invalid compression types");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid compression types");
   }
 }
 
@@ -679,7 +679,7 @@ rocksdb_rs::status::Status GetColumnFamilyOptionsFromMap(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(*s.getState());
+    return rocksdb_rs::status::Status_InvalidArgument(*s.getState());
   }
 }
 
@@ -711,7 +711,7 @@ rocksdb_rs::status::Status GetDBOptionsFromMap(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(*s.getState());
+    return rocksdb_rs::status::Status_InvalidArgument(*s.getState());
   }
 }
 
@@ -772,7 +772,7 @@ rocksdb_rs::status::Status GetOptionsFromString(const ConfigOptions& config_opti
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(*s.getState());
+    return rocksdb_rs::status::Status_InvalidArgument(*s.getState());
   }
 }
 
@@ -846,11 +846,11 @@ rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts, ch
         ++pos;
       }
       if (pos < opts.size() && opts[pos] != delimiter) {
-        return Status_InvalidArgument("Unexpected chars after nested options");
+        return rocksdb_rs::status::Status_InvalidArgument("Unexpected chars after nested options");
       }
       *end = pos;
     } else {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Mismatched curly braces for nested options");
     }
   } else {
@@ -903,13 +903,13 @@ rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_opt
         }
       }
     } else if (IsByName()) {
-      return Status_NotSupported("Deserializing the option " + opt_name +
+      return rocksdb_rs::status::Status_NotSupported("Deserializing the option " + opt_name +
                                   " is not supported");
     } else {
-      return Status_InvalidArgument("Error parsing:", opt_name);
+      return rocksdb_rs::status::Status_InvalidArgument("Error parsing:", opt_name);
     }
   } catch (std::exception& e) {
-    return Status_InvalidArgument("Error parsing " + opt_name + ":" +
+    return rocksdb_rs::status::Status_InvalidArgument("Error parsing " + opt_name + ":" +
                                    std::string(e.what()));
   }
 }
@@ -962,7 +962,7 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseStruct(
     status =
         ParseType(config_options, opt_value, *struct_map, opt_addr, &unused);
     if (status.ok() && !unused.empty()) {
-      status = Status_InvalidArgument(
+      status = rocksdb_rs::status::Status_InvalidArgument(
           "Unrecognized option", struct_name + "." + unused.begin()->first);
     }
   } else if (StartsWith(opt_name, struct_name + ".")) {
@@ -973,7 +973,7 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseStruct(
     if (opt_info != nullptr) {
       status = opt_info->Parse(config_options, elem_name, opt_value, opt_addr);
     } else {
-      status = Status_InvalidArgument("Unrecognized option", opt_name);
+      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option", opt_name);
     }
   } else {
     // This option represents a field in the struct (e.g. field)
@@ -982,7 +982,7 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseStruct(
     if (opt_info != nullptr) {
       status = opt_info->Parse(config_options, elem_name, opt_value, opt_addr);
     } else {
-      status = Status_InvalidArgument("Unrecognized option",
+      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option",
                                        struct_name + "." + opt_name);
     }
   }
@@ -998,7 +998,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
   if (opt_ptr == nullptr || IsDeprecated()) {
     return rocksdb_rs::status::Status_OK();
   } else if (IsEnabled(OptionTypeFlags::kDontSerialize)) {
-    return Status_NotSupported("Cannot serialize option: ", opt_name);
+    return rocksdb_rs::status::Status_NotSupported("Cannot serialize option: ", opt_name);
   } else if (serialize_func_ != nullptr) {
     const void* opt_addr = GetOffset(opt_ptr);
     return serialize_func_(config_options, opt_name, opt_addr, opt_value);
@@ -1052,7 +1052,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
                                          opt_value)) {
     return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_InvalidArgument("Cannot serialize option: ", opt_name);
+    return rocksdb_rs::status::Status_InvalidArgument("Cannot serialize option: ", opt_name);
   }
 }
 
@@ -1105,14 +1105,14 @@ rocksdb_rs::status::Status OptionTypeInfo::SerializeStruct(
     if (opt_info != nullptr) {
       status = opt_info->Serialize(config_options, elem_name, opt_addr, value);
     } else {
-      status = Status_InvalidArgument("Unrecognized option", opt_name);
+      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option", opt_name);
     }
   } else {
     // This option represents a field in the struct (e.g. field)
     std::string elem_name;
     const auto opt_info = Find(opt_name, *struct_map, &elem_name);
     if (opt_info == nullptr) {
-      status = Status_InvalidArgument("Unrecognized option", opt_name);
+      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option", opt_name);
     } else if (opt_info->ShouldSerialize()) {
       status = opt_info->Serialize(config_options, opt_name + "." + elem_name,
                                    opt_addr, value);

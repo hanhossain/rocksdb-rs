@@ -22,7 +22,7 @@ rocksdb_rs::status::Status WideColumnSerialization::SerializeImpl(const Slice* v
       value_of_default ? columns.size() + 1 : columns.size();
 
   if (num_columns > static_cast<size_t>(std::numeric_limits<uint32_t>::max())) {
-    return Status_InvalidArgument("Too many wide columns");
+    return rocksdb_rs::status::Status_InvalidArgument("Too many wide columns");
   }
 
   PutVarint32(&output, kCurrentVersion);
@@ -33,7 +33,7 @@ rocksdb_rs::status::Status WideColumnSerialization::SerializeImpl(const Slice* v
   if (value_of_default) {
     if (value_of_default->size() >
         static_cast<size_t>(std::numeric_limits<uint32_t>::max())) {
-      return Status_InvalidArgument("Wide column value too long");
+      return rocksdb_rs::status::Status_InvalidArgument("Wide column value too long");
     }
 
     PutLengthPrefixedSlice(&output, kDefaultWideColumnName);
@@ -48,17 +48,17 @@ rocksdb_rs::status::Status WideColumnSerialization::SerializeImpl(const Slice* v
     const Slice& name = column.name();
     if (name.size() >
         static_cast<size_t>(std::numeric_limits<uint32_t>::max())) {
-      return Status_InvalidArgument("Wide column name too long");
+      return rocksdb_rs::status::Status_InvalidArgument("Wide column name too long");
     }
 
     if (prev_name && prev_name->compare(name) >= 0) {
-      return Status_Corruption("Wide columns out of order");
+      return rocksdb_rs::status::Status_Corruption("Wide columns out of order");
     }
 
     const Slice& value = column.value();
     if (value.size() >
         static_cast<size_t>(std::numeric_limits<uint32_t>::max())) {
-      return Status_InvalidArgument("Wide column value too long");
+      return rocksdb_rs::status::Status_InvalidArgument("Wide column value too long");
     }
 
     PutLengthPrefixedSlice(&output, name);
@@ -86,16 +86,16 @@ rocksdb_rs::status::Status WideColumnSerialization::Deserialize(Slice& input,
 
   uint32_t version = 0;
   if (!GetVarint32(&input, &version)) {
-    return Status_Corruption("Error decoding wide column version");
+    return rocksdb_rs::status::Status_Corruption("Error decoding wide column version");
   }
 
   if (version > kCurrentVersion) {
-    return Status_NotSupported("Unsupported wide column version");
+    return rocksdb_rs::status::Status_NotSupported("Unsupported wide column version");
   }
 
   uint32_t num_columns = 0;
   if (!GetVarint32(&input, &num_columns)) {
-    return Status_Corruption("Error decoding number of wide columns");
+    return rocksdb_rs::status::Status_Corruption("Error decoding number of wide columns");
   }
 
   if (!num_columns) {
@@ -110,18 +110,18 @@ rocksdb_rs::status::Status WideColumnSerialization::Deserialize(Slice& input,
   for (uint32_t i = 0; i < num_columns; ++i) {
     Slice name;
     if (!GetLengthPrefixedSlice(&input, &name)) {
-      return Status_Corruption("Error decoding wide column name");
+      return rocksdb_rs::status::Status_Corruption("Error decoding wide column name");
     }
 
     if (!columns.empty() && columns.back().name().compare(name) >= 0) {
-      return Status_Corruption("Wide columns out of order");
+      return rocksdb_rs::status::Status_Corruption("Wide columns out of order");
     }
 
     columns.emplace_back(name, Slice());
 
     uint32_t value_size = 0;
     if (!GetVarint32(&input, &value_size)) {
-      return Status_Corruption("Error decoding wide column value size");
+      return rocksdb_rs::status::Status_Corruption("Error decoding wide column value size");
     }
 
     column_value_sizes.emplace_back(value_size);
@@ -134,7 +134,7 @@ rocksdb_rs::status::Status WideColumnSerialization::Deserialize(Slice& input,
     const uint32_t value_size = column_value_sizes[i];
 
     if (pos + value_size > data.size()) {
-      return Status_Corruption("Error decoding wide column value payload");
+      return rocksdb_rs::status::Status_Corruption("Error decoding wide column value payload");
     }
 
     columns[i].value() = Slice(data.data() + pos, value_size);

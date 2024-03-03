@@ -364,7 +364,7 @@ rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf
     return s;
   }
   if (!snap_state.status.eq(s)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "The snapshot gave inconsistent results for key " +
         std::to_string(Hash(snap_state.key.c_str(), snap_state.key.size(), 0)) +
         " in cf " + cf->GetName() + ": (" + *snap_state.status.ToString() +
@@ -372,7 +372,7 @@ rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf
   }
   if (s.ok()) {
     if (exp_v.as_slice() != v.as_slice()) {
-      return Status_Corruption("The snapshot gave inconsistent values: (" +
+      return rocksdb_rs::status::Status_Corruption("The snapshot gave inconsistent values: (" +
                                 exp_v.ToString() + ") vs. (" + v.ToString() +
                                 ")");
     }
@@ -392,7 +392,7 @@ rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf
     }
     if (!std::equal(snap_state.key_vec->begin(), snap_state.key_vec->end(),
                     tmp_bitvec.get()->begin())) {
-      return Status_Corruption("Found inconsistent keys at this snapshot");
+      return rocksdb_rs::status::Status_Corruption("Found inconsistent keys at this snapshot");
     }
   }
   return rocksdb_rs::status::Status_OK();
@@ -631,7 +631,7 @@ void StressTest::ProcessRecoveredPreparedTxnsHelper(Transaction* txn,
 
 rocksdb_rs::status::Status StressTest::NewTxn(WriteOptions& write_opts, Transaction** txn) {
   if (!FLAGS_use_txn) {
-    return Status_InvalidArgument("NewTxn when FLAGS_use_txn is not set");
+    return rocksdb_rs::status::Status_InvalidArgument("NewTxn when FLAGS_use_txn is not set");
   }
   write_opts.disableWAL = FLAGS_disable_wal;
   static std::atomic<uint64_t> txn_id = {0};
@@ -653,7 +653,7 @@ rocksdb_rs::status::Status StressTest::NewTxn(WriteOptions& write_opts, Transact
 
 rocksdb_rs::status::Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
   if (!FLAGS_use_txn) {
-    return Status_InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
+    return rocksdb_rs::status::Status_InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
   }
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (FLAGS_use_optimistic_txn) {
@@ -704,7 +704,7 @@ rocksdb_rs::status::Status StressTest::CommitTxn(Transaction* txn, ThreadState* 
 
 rocksdb_rs::status::Status StressTest::RollbackTxn(Transaction* txn) {
   if (!FLAGS_use_txn) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "RollbackTxn when FLAGS_use_txn is not"
         " set");
   }
@@ -1729,14 +1729,14 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
         std::ostringstream oss;
         oss << "0x" << key.ToString(true)
             << " exists in restore but not in original db";
-        s = Status_Corruption(oss.str());
+        s = rocksdb_rs::status::Status_Corruption(oss.str());
       }
     } else if (get_status.IsNotFound()) {
       if (exists && from_latest && ShouldAcquireMutexOnKey()) {
         std::ostringstream oss;
         oss << "0x" << key.ToString(true)
             << " exists in original db but not in restore";
-        s = Status_Corruption(oss.str());
+        s = rocksdb_rs::status::Status_Corruption(oss.str());
       }
     } else {
       s.copy_from(get_status);
@@ -1922,7 +1922,7 @@ rocksdb_rs::status::Status StressTest::TestCheckpoint(ThreadState* thread,
           std::ostringstream oss;
           oss << "0x" << key.ToString(true) << " exists in checkpoint "
               << checkpoint_dir << " but not in original db";
-          s = Status_Corruption(oss.str());
+          s = rocksdb_rs::status::Status_Corruption(oss.str());
         }
       } else if (get_status.IsNotFound()) {
         if (exists && ShouldAcquireMutexOnKey()) {
@@ -1930,7 +1930,7 @@ rocksdb_rs::status::Status StressTest::TestCheckpoint(ThreadState* thread,
           oss << "0x" << key.ToString(true)
               << " exists in original db but not in checkpoint "
               << checkpoint_dir;
-          s = Status_Corruption(oss.str());
+          s = rocksdb_rs::status::Status_Corruption(oss.str());
         }
       } else {
         s.copy_from(get_status);

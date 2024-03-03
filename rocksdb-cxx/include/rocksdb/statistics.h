@@ -731,7 +731,7 @@ class Statistics : public Customizable {
   }
 
   // Resets all ticker and histogram stats
-  virtual rocksdb_rs::status::Status Reset() { return Status_NotSupported("Not implemented"); }
+  virtual rocksdb_rs::status::Status Reset() { return rocksdb_rs::status::Status_NotSupported("Not implemented"); }
 
   using Customizable::ToString;
   // String representation of the statistic object. Must be thread-safe.

@@ -228,7 +228,7 @@ rocksdb_rs::status::Status Configurable::ParseOption(const ConfigOptions& config
       return opt_info.Parse(config_options, opt_name, opt_value, opt_ptr);
     }
   } else if (config_options.mutable_options_only) {
-    return Status_InvalidArgument("Option not changeable: " + opt_name);
+    return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
   } else {
     return opt_info.Parse(config_options, opt_name, opt_value, opt_ptr);
   }
@@ -386,7 +386,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
       if (value.empty()) {
         return rocksdb_rs::status::Status_OK();
       } else {
-        return Status_InvalidArgument("Option not changeable: " + opt_name);
+        return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
       }
     } else if (EndsWith(opt_name, OptionTypeInfo::kIdPropSuffix()) ||
                name == OptionTypeInfo::kIdPropName()) {
@@ -395,7 +395,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
       if (custom->GetId() == value) {
         return rocksdb_rs::status::Status_OK();
       } else {
-        return Status_InvalidArgument("Option not changeable: " + opt_name);
+        return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
       }
     } else if (opt_name == name) {
       // The properties are of one of forms:
@@ -413,7 +413,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
       if (!s.ok()) {
         return s;
       } else if (custom->GetId() != id) {
-        return Status_InvalidArgument("Option not changeable: " + opt_name);
+        return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
       } else if (props.empty()) {
         return rocksdb_rs::status::Status_OK();
       } else {

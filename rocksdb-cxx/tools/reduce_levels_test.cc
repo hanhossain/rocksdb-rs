@@ -45,7 +45,7 @@ class ReduceLevelTest : public testing::Test {
 
   rocksdb_rs::status::Status Flush() {
     if (db_ == nullptr) {
-      return Status_InvalidArgument("DB not opened.");
+      return rocksdb_rs::status::Status_InvalidArgument("DB not opened.");
     }
     DBImpl* db_impl = static_cast_with_check<DBImpl>(db_);
     return db_impl->TEST_FlushMemTable();

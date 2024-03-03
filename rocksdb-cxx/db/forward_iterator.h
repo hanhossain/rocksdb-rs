@@ -58,15 +58,15 @@ class ForwardIterator : public InternalIterator {
   virtual ~ForwardIterator();
 
   void SeekForPrev(const Slice& /*target*/) override {
-    status_ = Status_NotSupported("ForwardIterator::SeekForPrev()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardIterator::SeekForPrev()");
     valid_ = false;
   }
   void SeekToLast() override {
-    status_ = Status_NotSupported("ForwardIterator::SeekToLast()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardIterator::SeekToLast()");
     valid_ = false;
   }
   void Prev() override {
-    status_ = Status_NotSupported("ForwardIterator::Prev");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardIterator::Prev");
     valid_ = false;
   }
 

@@ -109,7 +109,7 @@ class BatchedOpsStressTest : public StressTest {
                          const std::vector<int>& /* rand_column_families */,
                          const std::vector<int64_t>& /* rand_keys */) override {
     assert(false);
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "BatchedOpsStressTest does not support "
         "TestDeleteRange");
   }

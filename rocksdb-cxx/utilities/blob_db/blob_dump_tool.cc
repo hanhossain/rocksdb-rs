@@ -51,7 +51,7 @@ rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, Displa
   }
   file = NewReadaheadRandomAccessFile(std::move(file), kReadaheadSize);
   if (file_size == 0) {
-    return Status_Corruption("File is empty.");
+    return rocksdb_rs::status::Status_Corruption("File is empty.");
   }
   reader_.reset(new RandomAccessFileReader(std::move(file), filename));
   uint64_t offset = 0;
@@ -108,7 +108,7 @@ rocksdb_rs::status::Status BlobDumpTool::Read(uint64_t offset, size_t size, Slic
     return s;
   }
   if (result->size() != size) {
-    return Status_Corruption("Reach the end of the file unexpectedly.");
+    return rocksdb_rs::status::Status_Corruption("Reach the end of the file unexpectedly.");
   }
   return s;
 }

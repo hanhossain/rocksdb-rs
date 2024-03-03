@@ -123,13 +123,13 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
   while (RestrictedRead(&record)) {
     if (record.size() < WriteBatchInternal::kHeader) {
       reporter_.Corruption(record.size(),
-                           Status_Corruption("very small log record"));
+                           rocksdb_rs::status::Status_Corruption("very small log record"));
       continue;
     }
     UpdateCurrentWriteBatch(record);
     if (current_last_seq_ >= starting_sequence_number_) {
       if (strict && current_batch_seq_ != starting_sequence_number_) {
-        current_status_ = Status_Corruption(
+        current_status_ = rocksdb_rs::status::Status_Corruption(
             "Gap in sequence number. Could not "
             "seek to required sequence number");
         reporter_.Info(current_status_.ToString()->c_str());
@@ -152,12 +152,12 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
   // If strict is set, we want to seek exactly till the start sequence and it
   // should have been present in the file we scanned above
   if (strict) {
-    current_status_ = Status_Corruption(
+    current_status_ = rocksdb_rs::status::Status_Corruption(
         "Gap in sequence number. Could not "
         "seek to required sequence number");
     reporter_.Info(current_status_.ToString()->c_str());
   } else if (files_->size() != 1) {
-    current_status_ = Status_Corruption(
+    current_status_ = rocksdb_rs::status::Status_Corruption(
         "Start sequence was not found, "
         "skipping to the next available");
     reporter_.Info(current_status_.ToString()->c_str());
@@ -189,7 +189,7 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
     while (RestrictedRead(&record)) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter_.Corruption(record.size(),
-                             Status_Corruption("very small log record"));
+                             rocksdb_rs::status::Status_Corruption("very small log record"));
         continue;
       } else {
         // started_ should be true if called by application

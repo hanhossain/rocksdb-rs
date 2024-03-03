@@ -5448,7 +5448,7 @@ class Benchmark {
     std::vector<size_t> num_files_at_level0(num_db, 0);
     if (compaction_style == kCompactionStyleLevel) {
       if (num_levels == 0) {
-        return Status_InvalidArgument("num_levels should be larger than 1");
+        return rocksdb_rs::status::Status_InvalidArgument("num_levels should be larger than 1");
       }
       bool should_stop = false;
       while (!should_stop) {
@@ -5565,11 +5565,11 @@ class Benchmark {
       }
     } else if (compaction_style == kCompactionStyleFIFO) {
       if (num_levels != 1) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "num_levels should be 1 for FIFO compaction");
       }
       if (FLAGS_num_multi_db != 0) {
-        return Status_InvalidArgument("Doesn't support multiDB");
+        return rocksdb_rs::status::Status_InvalidArgument("Doesn't support multiDB");
       }
       auto db = db_list[0];
       std::vector<std::string> file_names;
@@ -5601,7 +5601,7 @@ class Benchmark {
       fprintf(stdout,
               "%-12s : skipped (-compaction_stype=kCompactionStyleNone)\n",
               "filldeterministic");
-      return Status_InvalidArgument("None compaction is not supported");
+      return rocksdb_rs::status::Status_InvalidArgument("None compaction is not supported");
     }
 
 // Verify seqno and key range

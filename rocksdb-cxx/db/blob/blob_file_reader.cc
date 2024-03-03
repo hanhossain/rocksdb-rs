@@ -107,7 +107,7 @@ rocksdb_rs::status::Status BlobFileReader::OpenFile(
   }
 
   if (*file_size < BlobLogHeader::kSize + BlobLogFooter::kSize) {
-    return Status_Corruption("Malformed blob file");
+    return rocksdb_rs::status::Status_Corruption("Malformed blob file");
   }
 
   std::unique_ptr<FSRandomAccessFile> file;
@@ -180,11 +180,11 @@ rocksdb_rs::status::Status BlobFileReader::ReadHeader(const RandomAccessFileRead
   constexpr ExpirationRange no_expiration_range;
 
   if (header.has_ttl || header.expiration_range != no_expiration_range) {
-    return Status_Corruption("Unexpected TTL blob file");
+    return rocksdb_rs::status::Status_Corruption("Unexpected TTL blob file");
   }
 
   if (header.column_family_id != column_family_id) {
-    return Status_Corruption("Column family ID mismatch");
+    return rocksdb_rs::status::Status_Corruption("Column family ID mismatch");
   }
 
   *compression_type = header.compression;
@@ -233,7 +233,7 @@ rocksdb_rs::status::Status BlobFileReader::ReadFooter(const RandomAccessFileRead
   constexpr ExpirationRange no_expiration_range;
 
   if (footer.expiration_range != no_expiration_range) {
-    return Status_Corruption("Unexpected TTL blob file");
+    return rocksdb_rs::status::Status_Corruption("Unexpected TTL blob file");
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -279,7 +279,7 @@ rocksdb_rs::status::Status BlobFileReader::ReadFromFile(const RandomAccessFileRe
   }
 
   if (slice->size() != read_size) {
-    return Status_Corruption("Failed to read data from blob file");
+    return rocksdb_rs::status::Status_Corruption("Failed to read data from blob file");
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -309,11 +309,11 @@ rocksdb_rs::status::Status BlobFileReader::GetBlob(
   const uint64_t key_size = user_key.size();
 
   if (!IsValidBlobOffset(offset, key_size, value_size, file_size_)) {
-    return Status_Corruption("Invalid blob offset");
+    return rocksdb_rs::status::Status_Corruption("Invalid blob offset");
   }
 
   if (compression_type != compression_type_) {
-    return Status_Corruption("Compression type mismatch when reading blob");
+    return rocksdb_rs::status::Status_Corruption("Compression type mismatch when reading blob");
   }
 
   // Note: if verify_checksum is set, we read the entire blob record to be able
@@ -423,12 +423,12 @@ void BlobFileReader::MultiGetBlob(
     const uint64_t value_size = req->len;
 
     if (!IsValidBlobOffset(offset, key_size, value_size, file_size_)) {
-      *req->status = Status_Corruption("Invalid blob offset");
+      *req->status = rocksdb_rs::status::Status_Corruption("Invalid blob offset");
       continue;
     }
     if (req->compression != compression_type_) {
       *req->status =
-          Status_Corruption("Compression type mismatch when reading a blob");
+          rocksdb_rs::status::Status_Corruption("Compression type mismatch when reading a blob");
       continue;
     }
 
@@ -550,17 +550,17 @@ rocksdb_rs::status::Status BlobFileReader::VerifyBlob(const Slice& record_slice,
   }
 
   if (record.key_size != user_key.size()) {
-    return Status_Corruption("Key size mismatch when reading blob");
+    return rocksdb_rs::status::Status_Corruption("Key size mismatch when reading blob");
   }
 
   if (record.value_size != value_size) {
-    return Status_Corruption("Value size mismatch when reading blob");
+    return rocksdb_rs::status::Status_Corruption("Value size mismatch when reading blob");
   }
 
   record.key =
       Slice(record_slice.data() + BlobLogRecord::kHeaderSize, record.key_size);
   if (record.key != user_key) {
-    return Status_Corruption("Key mismatch when reading blob");
+    return rocksdb_rs::status::Status_Corruption("Key mismatch when reading blob");
   }
 
   record.value = Slice(record.key.data() + record.key_size, value_size);
@@ -610,7 +610,7 @@ rocksdb_rs::status::Status BlobFileReader::UncompressBlobIfNeeded(
       "BlobFileReader::UncompressBlobIfNeeded:TamperWithResult", &output);
 
   if (!output) {
-    return Status_Corruption("Unable to uncompress blob");
+    return rocksdb_rs::status::Status_Corruption("Unable to uncompress blob");
   }
 
   result->reset(new BlobContents(std::move(output), uncompressed_size));

@@ -148,18 +148,18 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
         continue;
       case GetContext::kCorrupt:
         *status =
-            Status_Corruption("corrupted key for ", iter->lkey->user_key());
+            rocksdb_rs::status::Status_Corruption("corrupted key for ", iter->lkey->user_key());
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kUnexpectedBlobIndex:
         ROCKS_LOG_ERROR(info_log_, "Encounter unexpected blob index.");
-        *status = Status_NotSupported(
+        *status = rocksdb_rs::status::Status_NotSupported(
             "Encounter unexpected blob index. Please open DB with "
             "rocksdb::blob_db::BlobDB instead.");
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kMergeOperatorFailed:
-        *status = Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
+        *status = rocksdb_rs::status::Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
         file_range.MarkKeyDone(iter);
         continue;
     }

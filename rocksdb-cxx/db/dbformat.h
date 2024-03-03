@@ -404,7 +404,7 @@ inline rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
   const size_t n = internal_key.size();
 
   if (n < kNumInternalBytes) {
-    return Status_Corruption("Corrupted Key: Internal Key too small. Size=" +
+    return rocksdb_rs::status::Status_Corruption("Corrupted Key: Internal Key too small. Size=" +
                               std::to_string(n) + ". ");
   }
 
@@ -418,7 +418,7 @@ inline rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
   if (IsExtendedValueType(result->type)) {
     return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_Corruption("Corrupted Key",
+    return rocksdb_rs::status::Status_Corruption("Corrupted Key",
                               result->DebugString(log_err_key, true));
   }
 }

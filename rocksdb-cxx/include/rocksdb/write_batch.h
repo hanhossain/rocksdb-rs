@@ -238,7 +238,7 @@ class WriteBatch : public WriteBatchBase {
         Put(key, value);
         return rocksdb_rs::status::Status_OK();
       }
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "non-default column family and PutCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -248,7 +248,7 @@ class WriteBatch : public WriteBatchBase {
     virtual rocksdb_rs::status::Status PutEntityCF(uint32_t /* column_family_id */,
                                const Slice& /* key */,
                                const Slice& /* entity */) {
-      return Status_NotSupported("PutEntityCF not implemented");
+      return rocksdb_rs::status::Status_NotSupported("PutEntityCF not implemented");
     }
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -257,7 +257,7 @@ class WriteBatch : public WriteBatchBase {
         Delete(key);
         return rocksdb_rs::status::Status_OK();
       }
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "non-default column family and DeleteCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -269,7 +269,7 @@ class WriteBatch : public WriteBatchBase {
         SingleDelete(key);
         return rocksdb_rs::status::Status_OK();
       }
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "non-default column family and SingleDeleteCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -280,7 +280,7 @@ class WriteBatch : public WriteBatchBase {
     virtual rocksdb_rs::status::Status DeleteRangeCF(uint32_t /*column_family_id*/,
                                  const Slice& /*begin_key*/,
                                  const Slice& /*end_key*/) {
-      return Status_InvalidArgument("DeleteRangeCF not implemented");
+      return rocksdb_rs::status::Status_InvalidArgument("DeleteRangeCF not implemented");
     }
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -290,7 +290,7 @@ class WriteBatch : public WriteBatchBase {
         Merge(key, value);
         return rocksdb_rs::status::Status_OK();
       }
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "non-default column family and MergeCF not implemented");
     }
     // If user-defined timestamp is enabled, then `key` includes timestamp.
@@ -300,36 +300,36 @@ class WriteBatch : public WriteBatchBase {
     virtual rocksdb_rs::status::Status PutBlobIndexCF(uint32_t /*column_family_id*/,
                                   const Slice& /*key*/,
                                   const Slice& /*value*/) {
-      return Status_InvalidArgument("PutBlobIndexCF not implemented");
+      return rocksdb_rs::status::Status_InvalidArgument("PutBlobIndexCF not implemented");
     }
 
     // The default implementation of LogData does nothing.
     virtual void LogData(const Slice& blob);
 
     virtual rocksdb_rs::status::Status MarkBeginPrepare(bool = false) {
-      return Status_InvalidArgument("MarkBeginPrepare() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument("MarkBeginPrepare() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkEndPrepare(const Slice& /*xid*/) {
-      return Status_InvalidArgument("MarkEndPrepare() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument("MarkEndPrepare() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) {
-      return Status_InvalidArgument("MarkNoop() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument("MarkNoop() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkRollback(const Slice& /*xid*/) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "MarkRollbackPrepare() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkCommit(const Slice& /*xid*/) {
-      return Status_InvalidArgument("MarkCommit() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument("MarkCommit() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& /*xid*/,
                                            const Slice& /*commit_ts*/) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "MarkCommitWithTimestamp() handler not defined.");
     }
 

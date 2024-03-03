@@ -314,7 +314,7 @@ class DB {
   // auto-resume is in progress, without waiting for it to complete.
   // See DBOptions::max_bgerror_resume_count and
   // EventListener::OnErrorRecoveryBegin
-  virtual rocksdb_rs::status::Status Resume() { return Status_NotSupported(); }
+  virtual rocksdb_rs::status::Status Resume() { return rocksdb_rs::status::Status_NotSupported(); }
 
   // Close the DB by releasing resources, closing files etc. This should be
   // called before calling the destructor so that the caller can get back a
@@ -328,7 +328,7 @@ class DB {
   // other status, re-calling Close() will be no-op and return the original
   // close status. If the return status is NotSupported(), then the DB
   // implementation does cleanup in the destructor
-  virtual rocksdb_rs::status::Status Close() { return Status_NotSupported(); }
+  virtual rocksdb_rs::status::Status Close() { return rocksdb_rs::status::Status_NotSupported(); }
 
   // ListColumnFamilies will open the DB specified by argument name
   // and return the list of all column families in that DB
@@ -560,7 +560,7 @@ class DB {
                      ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*key*/, PinnableSlice* /*value*/,
                      std::string* /*timestamp*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Get() that returns timestamp is not implemented.");
   }
   virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
@@ -581,7 +581,7 @@ class DB {
                            ColumnFamilyHandle* /* column_family */,
                            const Slice& /* key */,
                            PinnableWideColumns* /* columns */) {
-    return Status_NotSupported("GetEntity not supported");
+    return rocksdb_rs::status::Status_NotSupported("GetEntity not supported");
   }
 
   // Populates the `merge_operands` array with all the merge operands in the DB
@@ -641,7 +641,7 @@ class DB {
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys, std::vector<std::string>* /*values*/,
       std::vector<std::string>* /*timestamps*/) {
-    return Status_NotSupported("MultiGet() returning timestamps not implemented.").create_vec(keys.size());
+    return rocksdb_rs::status::Status_NotSupported("MultiGet() returning timestamps not implemented.").create_vec(keys.size());
   }
   virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
@@ -814,7 +814,7 @@ class DB {
                               rocksdb_rs::status::Status* statuses,
                               bool /* sorted_input */ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status_NotSupported("MultiGetEntity not supported");
+      statuses[i] = rocksdb_rs::status::Status_NotSupported("MultiGetEntity not supported");
     }
   }
 
@@ -846,7 +846,7 @@ class DB {
                               rocksdb_rs::status::Status* statuses,
                               bool /* sorted_input */ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status_NotSupported("MultiGetEntity not supported");
+      statuses[i] = rocksdb_rs::status::Status_NotSupported("MultiGetEntity not supported");
     }
   }
 
@@ -1282,7 +1282,7 @@ class DB {
   // Note this doesn't reset options.statistics as it is not owned by
   // DB.
   virtual rocksdb_rs::status::Status ResetStats() {
-    return Status_NotSupported("Not implemented");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
   }
 
   // Same as GetIntProperty(), but this one returns the aggregated int
@@ -1387,7 +1387,7 @@ class DB {
   virtual rocksdb_rs::status::Status SetOptions(
       ColumnFamilyHandle* /*column_family*/,
       const std::unordered_map<std::string, std::string>& /*opts_map*/) {
-    return Status_NotSupported("Not implemented");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
   }
   // Shortcut for SetOptions on the default column family handle.
   virtual rocksdb_rs::status::Status SetOptions(
@@ -1539,7 +1539,7 @@ class DB {
   // included in a Checkpoint or Backup. Without manual_wal_flush, there is no
   // such internal buffer. If sync is true, it calls SyncWAL() afterwards.
   virtual rocksdb_rs::status::Status FlushWAL(bool /*sync*/) {
-    return Status_NotSupported("FlushWAL not implemented");
+    return rocksdb_rs::status::Status_NotSupported("FlushWAL not implemented");
   }
 
   // Ensure all WAL writes have been synced to storage, so that (assuming OS
@@ -1563,14 +1563,14 @@ class DB {
   // status is generally only possible with some kind of corruption or I/O
   // error.
   virtual rocksdb_rs::status::Status LockWAL() {
-    return Status_NotSupported("LockWAL not implemented");
+    return rocksdb_rs::status::Status_NotSupported("LockWAL not implemented");
   }
 
   // Unfreeze the DB state from a successful LockWAL().
   // The write stop on the database will be cleared when UnlockWAL() have been
   // called for each successful LockWAL().
   virtual rocksdb_rs::status::Status UnlockWAL() {
-    return Status_NotSupported("UnlockWAL not implemented");
+    return rocksdb_rs::status::Status_NotSupported("UnlockWAL not implemented");
   }
 
   // The sequence number of the most recent transaction.
@@ -1825,7 +1825,7 @@ class DB {
   // Verify the checksums of files in db. Currently the whole-file checksum of
   // table files are checked.
   virtual rocksdb_rs::status::Status VerifyFileChecksums(const ReadOptions& /*read_options*/) {
-    return Status_NotSupported("File verification not supported");
+    return rocksdb_rs::status::Status_NotSupported("File verification not supported");
   }
 
   // Verify the block checksums of files in db. The block checksums of table
@@ -1863,49 +1863,49 @@ class DB {
   virtual rocksdb_rs::status::Status SuggestCompactRange(ColumnFamilyHandle* /*column_family*/,
                                      const Slice* /*begin*/,
                                      const Slice* /*end*/) {
-    return Status_NotSupported("SuggestCompactRange() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("SuggestCompactRange() is not implemented.");
   }
 
   virtual rocksdb_rs::status::Status PromoteL0(ColumnFamilyHandle* /*column_family*/,
                            int /*target_level*/) {
-    return Status_NotSupported("PromoteL0() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("PromoteL0() is not implemented.");
   }
 
   // Trace DB operations. Use EndTrace() to stop tracing.
   virtual rocksdb_rs::status::Status StartTrace(const TraceOptions& /*options*/,
                             std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartTrace() is not implemented.");
   }
 
   virtual rocksdb_rs::status::Status EndTrace() {
-    return Status_NotSupported("EndTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("EndTrace() is not implemented.");
   }
 
   // IO Tracing operations. Use EndIOTrace() to stop tracing.
   virtual rocksdb_rs::status::Status StartIOTrace(const TraceOptions& /*options*/,
                               std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartIOTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartIOTrace() is not implemented.");
   }
 
   virtual rocksdb_rs::status::Status EndIOTrace() {
-    return Status_NotSupported("EndIOTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("EndIOTrace() is not implemented.");
   }
 
   // Trace block cache accesses. Use EndBlockCacheTrace() to stop tracing.
   virtual rocksdb_rs::status::Status StartBlockCacheTrace(
       const TraceOptions& /*trace_options*/,
       std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartBlockCacheTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartBlockCacheTrace() is not implemented.");
   }
 
   virtual rocksdb_rs::status::Status StartBlockCacheTrace(
       const BlockCacheTraceOptions& /*options*/,
       std::unique_ptr<BlockCacheTraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartBlockCacheTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartBlockCacheTrace() is not implemented.");
   }
 
   virtual rocksdb_rs::status::Status EndBlockCacheTrace() {
-    return Status_NotSupported("EndBlockCacheTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("EndBlockCacheTrace() is not implemented.");
   }
 
   // Create a default trace replayer.
@@ -1913,7 +1913,7 @@ class DB {
       const std::vector<ColumnFamilyHandle*>& /*handles*/,
       std::unique_ptr<TraceReader>&& /*reader*/,
       std::unique_ptr<Replayer>* /*replayer*/) {
-    return Status_NotSupported("NewDefaultReplayer() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("NewDefaultReplayer() is not implemented.");
   }
 
 
@@ -1926,7 +1926,7 @@ class DB {
   virtual rocksdb_rs::status::Status GetStatsHistory(
       uint64_t /*start_time*/, uint64_t /*end_time*/,
       std::unique_ptr<StatsHistoryIterator>* /*stats_iterator*/) {
-    return Status_NotSupported("GetStatsHistory() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("GetStatsHistory() is not implemented.");
   }
 
   // Make the secondary instance catch up with the primary by tailing and
@@ -1940,7 +1940,7 @@ class DB {
   // handles, the data of the column family is still accessible to the
   // secondary.
   virtual rocksdb_rs::status::Status TryCatchUpWithPrimary() {
-    return Status_NotSupported("Supported only by secondary instance");
+    return rocksdb_rs::status::Status_NotSupported("Supported only by secondary instance");
   }
 };
 

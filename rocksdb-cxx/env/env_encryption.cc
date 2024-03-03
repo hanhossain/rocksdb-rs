@@ -898,7 +898,7 @@ rocksdb_rs::status::Status BlockAccessCipherStream::Decrypt(uint64_t fileOffset,
     // which will very likely make it read over the original bounds later
     assert(dataSize >= n);
     if (dataSize < n) {
-      return Status_Corruption("Cannot decrypt data at given offset");
+      return rocksdb_rs::status::Status_Corruption("Cannot decrypt data at given offset");
     }
 
     dataSize -= n;
@@ -1009,7 +1009,7 @@ rocksdb_rs::status::Status CTREncryptionProvider::AddCipher(const std::string& /
                                         const char* cipher, size_t len,
                                         bool /*for_write*/) {
   if (cipher_) {
-    return Status_NotSupported("Cannot add keys to CTREncryptionProvider");
+    return rocksdb_rs::status::Status_NotSupported("Cannot add keys to CTREncryptionProvider");
   } else if (strcmp(ROT13BlockCipher::kClassName(), cipher) == 0) {
     cipher_.reset(new ROT13BlockCipher(len));
     return rocksdb_rs::status::Status_OK();
@@ -1033,7 +1033,7 @@ rocksdb_rs::status::Status CTREncryptionProvider::CreateNewPrefix(const std::str
                                               char* prefix,
                                               size_t prefixLength) const {
   if (!cipher_) {
-    return Status_InvalidArgument("Encryption Cipher is missing");
+    return rocksdb_rs::status::Status_InvalidArgument("Encryption Cipher is missing");
   }
   // Create & seed rnd.
   Random rnd((uint32_t)SystemClock::Default()->NowMicros());
@@ -1078,7 +1078,7 @@ rocksdb_rs::status::Status CTREncryptionProvider::CreateCipherStream(
     const std::string& fname, const EnvOptions& options, Slice& prefix,
     std::unique_ptr<BlockAccessCipherStream>* result) {
   if (!cipher_) {
-    return Status_InvalidArgument("Encryption Cipher is missing");
+    return rocksdb_rs::status::Status_InvalidArgument("Encryption Cipher is missing");
   }
   // Read plain text part of prefix.
   auto blockSize = cipher_->BlockSize();
@@ -1090,7 +1090,7 @@ rocksdb_rs::status::Status CTREncryptionProvider::CreateCipherStream(
   // very large chunk of the file (and very likely read over the bounds)
   assert(prefix.size() >= 2 * blockSize);
   if (prefix.size() < 2 * blockSize) {
-    return Status_Corruption("Unable to read from file " + fname +
+    return rocksdb_rs::status::Status_Corruption("Unable to read from file " + fname +
                               ": read attempt would read beyond file bounds");
   }
 

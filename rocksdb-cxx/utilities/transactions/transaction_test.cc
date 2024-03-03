@@ -939,7 +939,7 @@ TEST_P(TransactionTest, CommitTimeBatchFailTest) {
 
   // fails due to non-empty commit-time batch
   s = txn1->Commit();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   delete txn1;
 }
@@ -1056,7 +1056,7 @@ TEST_P(TransactionTest, SimpleTwoPhaseTransactionTest) {
 
     // we already committed
     s = txn->Commit();
-    ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+    ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
     // no longer is prepared results
     db->GetAllPreparedTransactions(&prepared_trans);
@@ -1129,15 +1129,15 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant prepare txn without name
   s = txn1->Prepare();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // name too short
   s = txn1->SetName("");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // name too long
   s = txn1->SetName(std::string(513, 'x'));
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // valid set name
   s = txn1->SetName("name1");
@@ -1145,11 +1145,11 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant have duplicate name
   s = txn2->SetName("name1");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // shouldn't be able to prepare
   s = txn2->Prepare();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // valid name set
   s = txn2->SetName("name2");
@@ -1157,7 +1157,7 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant reset name
   s = txn2->SetName("name3");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   ASSERT_EQ(txn1->GetName(), "name1");
   ASSERT_EQ(txn2->GetName(), "name2");
@@ -1167,7 +1167,7 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // can't rename after prepare
   s = txn1->SetName("name4");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   ASSERT_OK(txn1->Rollback());
   ASSERT_OK(txn2->Rollback());
@@ -1336,11 +1336,11 @@ TEST_P(TransactionTest, TwoPhaseRollbackTest) {
 
   // make commit
   s = txn->Commit();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // try rollback again
   s = txn->Rollback();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   delete txn;
 }
@@ -1435,7 +1435,7 @@ TEST_P(TransactionTest, PersistentTwoPhaseTransactionTest) {
 
   // we already committed
   s = txn->Commit();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // no longer is prepared results
   prepared_trans.clear();

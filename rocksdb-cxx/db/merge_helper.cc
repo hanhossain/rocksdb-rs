@@ -113,7 +113,7 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMerge(
 
   if (!success) {
     RecordTick(statistics, NUMBER_MERGE_FAILURES);
-    return Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
+    return rocksdb_rs::status::Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
   }
 
   return rocksdb_rs::status::Status_OK();

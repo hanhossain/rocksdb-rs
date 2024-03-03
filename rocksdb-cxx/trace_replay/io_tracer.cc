@@ -128,26 +128,26 @@ rocksdb_rs::status::Status IOTraceReader::ReadHeader(IOTraceHeader* header) {
   Slice enc_slice = Slice(trace.payload);
   Slice magic_number;
   if (!GetLengthPrefixedSlice(&enc_slice, &magic_number)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read the magic number.");
   }
   if (magic_number.ToString() != kTraceMagic) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Magic number does not match.");
   }
   if (!GetFixed32(&enc_slice, &header->rocksdb_major_version)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb major "
         "version number.");
   }
   if (!GetFixed32(&enc_slice, &header->rocksdb_minor_version)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb minor "
         "version number.");
   }
   // We should have retrieved all information in the header.
   if (!enc_slice.empty()) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: The length of header is too "
         "long.");
   }

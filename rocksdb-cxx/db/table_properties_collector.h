@@ -127,7 +127,7 @@ class TimestampTablePropertiesCollector : public IntTblPropCollector {
     auto user_key = ExtractUserKey(key);
     assert(cmp_ && cmp_->timestamp_size() > 0);
     if (user_key.size() < cmp_->timestamp_size()) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "User key size mismatch when comparing to timestamp size.");
     }
     auto timestamp_in_key =

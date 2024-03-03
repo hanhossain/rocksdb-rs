@@ -17,13 +17,13 @@ namespace rocksdb {
 
 rocksdb_rs::status::Status Iterator::GetProperty(std::string prop_name, std::string* prop) {
   if (prop == nullptr) {
-    return Status_InvalidArgument("prop is nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("prop is nullptr");
   }
   if (prop_name == "rocksdb.iterator.is-key-pinned") {
     *prop = "0";
     return rocksdb_rs::status::Status_OK();
   }
-  return Status_InvalidArgument("Unidentified property.");
+  return rocksdb_rs::status::Status_InvalidArgument("Unidentified property.");
 }
 
 namespace {

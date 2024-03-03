@@ -533,7 +533,7 @@ rocksdb_rs::status::Status TableCache::MultiGetFilter(
   // lookup.
   KeyContext& first_key = *mget_range->begin();
   if (ioptions_.row_cache && !first_key.get_context->NeedToReadSequence()) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;

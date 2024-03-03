@@ -526,11 +526,11 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
       char c = v->c;
       bbto.block_cache->Release(handle);
       if (c == kPersistentCacheMarker) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "block_cache and persistent_cache share the same key space, "
             "which is not supported");
       } else if (v != &kRegularBlockCacheMarker) {
-        return Status_Corruption("Unexpected mutation to block_cache");
+        return rocksdb_rs::status::Status_Corruption("Unexpected mutation to block_cache");
       }
     }
   }
@@ -541,11 +541,11 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
     bbto.persistent_cache->Lookup(sentinel_key.AsSlice(), &data, &size);
     if (data && size > 0) {
       if (data[0] == kRegularBlockCacheMarker.c) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "persistent_cache and block_cache share the same key space, "
             "which is not supported");
       } else if (data[0] != kPersistentCacheMarker) {
-        return Status_Corruption("Unexpected mutation to persistent_cache");
+        return rocksdb_rs::status::Status_Corruption("Unexpected mutation to persistent_cache");
       }
     }
   }
@@ -586,51 +586,51 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
     const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts) const {
   if (table_options_.index_type == BlockBasedTableOptions::kHashSearch &&
       cf_opts.prefix_extractor == nullptr) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Hash index is specified for block-based "
         "table, but prefix_extractor is not given");
   }
   if (table_options_.cache_index_and_filter_blocks &&
       table_options_.no_block_cache) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Enable cache_index_and_filter_blocks, "
         ", but block cache is disabled");
   }
   if (table_options_.pin_l0_filter_and_index_blocks_in_cache &&
       table_options_.no_block_cache) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Enable pin_l0_filter_and_index_blocks_in_cache, "
         ", but block cache is disabled");
   }
   if (!IsSupportedFormatVersion(table_options_.format_version)) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Unsupported BlockBasedTable format_version. Please check "
         "include/rocksdb/table.h for more info");
   }
   if (table_options_.block_align && (cf_opts.compression != rocksdb_rs::compression_type::CompressionType::kNoCompression)) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Enable block_align, but compression "
         "enabled");
   }
   if (table_options_.block_align &&
       (table_options_.block_size & (table_options_.block_size - 1))) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Block alignment requested but block size is not a power of 2");
   }
   if (table_options_.block_size > std::numeric_limits<uint32_t>::max()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "block size exceeds maximum number (4GiB) allowed");
   }
   if (table_options_.data_block_index_type ==
           BlockBasedTableOptions::kDataBlockBinaryAndHash &&
       table_options_.data_block_hash_table_util_ratio <= 0) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "data_block_hash_table_util_ratio should be greater than 0 when "
         "data_block_index_type is set to kDataBlockBinaryAndHash");
   }
   if (db_opts.unordered_write && cf_opts.max_successive_merges > 0) {
     // TODO(myabandeh): support it
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "max_successive_merges larger than 0 is currently inconsistent with "
         "unordered_write");
   }
@@ -648,7 +648,7 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
         rocksdb_rs::cache::CacheEntryRole::kBlobCache};
     if (options.charged != CacheEntryRoleOptions::Decision::kFallback &&
         kMemoryChargingSupported.count(role) == 0) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Enable/Disable CacheEntryRoleOptions::charged"
           " for rocksdb_rs::cache::CacheEntryRole " +
           static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
@@ -656,7 +656,7 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
     }
     if (table_options_.no_block_cache &&
         options.charged == CacheEntryRoleOptions::Decision::kEnabled) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Enable CacheEntryRoleOptions::charged"
           " for rocksdb_rs::cache::CacheEntryRole " +
           static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
@@ -665,21 +665,21 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
     if (role == rocksdb_rs::cache::CacheEntryRole::kBlobCache &&
         options.charged == CacheEntryRoleOptions::Decision::kEnabled) {
       if (cf_opts.blob_cache == nullptr) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but blob cache is not configured");
       }
       if (table_options_.no_block_cache) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
             " but block cache is disabled");
       }
       if (table_options_.block_cache == cf_opts.blob_cache) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
@@ -687,7 +687,7 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
       }
       if (cf_opts.blob_cache->GetCapacity() >
           table_options_.block_cache->GetCapacity()) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "Enable CacheEntryRoleOptions::charged"
             " for rocksdb_rs::cache::CacheEntryRole " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(role)) +
@@ -704,7 +704,7 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
   std::string garbage;
   if (!SerializeEnum<ChecksumType>(checksum_type_string_map,
                                    table_options_.checksum, &garbage)) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Unrecognized ChecksumType for checksum: " +
         std::to_string(static_cast<uint32_t>(table_options_.checksum)));
   }
@@ -918,7 +918,7 @@ rocksdb_rs::status::Status GetBlockBasedTableOptionsFromString(
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(s.getState());
+    return rocksdb_rs::status::Status_InvalidArgument(s.getState());
   }
 }
 

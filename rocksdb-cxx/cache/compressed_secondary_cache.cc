@@ -110,7 +110,7 @@ rocksdb_rs::status::Status CompressedSecondaryCache::Insert(const Slice& key,
                                         Cache::ObjectPtr value,
                                         const Cache::CacheItemHelper* helper) {
   if (value == nullptr) {
-    return Status_InvalidArgument();
+    return rocksdb_rs::status::Status_InvalidArgument();
   }
 
   Cache::Handle* lru_handle = cache_->Lookup(key);
@@ -150,7 +150,7 @@ rocksdb_rs::status::Status CompressedSecondaryCache::Insert(const Slice& key,
                      cache_options_.compress_format_version, &compressed_val);
 
     if (!success) {
-      return Status_Corruption("Error compressing value.");
+      return rocksdb_rs::status::Status_Corruption("Error compressing value.");
     }
 
     val = Slice(compressed_val);

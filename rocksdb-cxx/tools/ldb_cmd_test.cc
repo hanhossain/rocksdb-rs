@@ -173,7 +173,7 @@ class FileChecksumTestHelper {
     std::string stored_checksum_func_name = file_meta.file_checksum_func_name;
     if ((cur_checksum != stored_checksum) ||
         (checksum_func_name != stored_checksum_func_name)) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Checksum does not match! The file: " + file_meta.name +
           ", checksum name: " + stored_checksum_func_name + " and checksum " +
           stored_checksum + ". However, expected checksum name: " +
@@ -229,7 +229,7 @@ class FileChecksumTestHelper {
 
     // Step 3 verify the checksum
     if (live_files.size() != checksum_list->size()) {
-      return Status_Corruption("The number of files does not match!");
+      return rocksdb_rs::status::Status_Corruption("The number of files does not match!");
     }
     for (size_t i = 0; i < live_files.size(); i++) {
       std::string stored_checksum = "";
@@ -241,7 +241,7 @@ class FileChecksumTestHelper {
       }
       if (live_files[i].file_checksum != stored_checksum ||
           live_files[i].file_checksum_func_name != stored_func_name) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "Checksum does not match! The file: " +
             std::to_string(live_files[i].file_number) +
             ". In Manifest, checksum name: " + stored_func_name +

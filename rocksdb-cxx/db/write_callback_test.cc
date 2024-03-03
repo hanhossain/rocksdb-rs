@@ -43,7 +43,7 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
     // Make sure db is a DBImpl
     DBImpl* db_impl = dynamic_cast<DBImpl*>(db);
     if (db_impl == nullptr) {
-      return Status_InvalidArgument("");
+      return rocksdb_rs::status::Status_InvalidArgument("");
     }
 
     return rocksdb_rs::status::Status_OK();

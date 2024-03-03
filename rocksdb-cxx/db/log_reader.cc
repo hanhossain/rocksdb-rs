@@ -397,7 +397,7 @@ void Reader::UnmarkEOFInternal() {
 }
 
 void Reader::ReportCorruption(size_t bytes, const char* reason) {
-  ReportDrop(bytes, Status_Corruption(reason));
+  ReportDrop(bytes, rocksdb_rs::status::Status_Corruption(reason));
 }
 
 void Reader::ReportDrop(size_t bytes, const rocksdb_rs::status::Status& reason) {
@@ -600,13 +600,13 @@ rocksdb_rs::status::Status Reader::UpdateRecordedTimestampSize(
   for (const auto& [cf, ts_sz] : cf_to_ts_sz) {
     // Zero user-defined timestamp size are not recorded.
     if (ts_sz == 0) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "User-defined timestamp size record contains zero timestamp size.");
     }
     // The user-defined timestamp size record for a column family should not be
     // updated in the same log file.
     if (recorded_cf_to_ts_sz_.count(cf) != 0) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "User-defined timestamp size record contains update to "
           "recorded column family.");
     }

@@ -251,55 +251,55 @@ rocksdb_rs::status::Status DBImpl::ValidateOptions(
 
 rocksdb_rs::status::Status DBImpl::ValidateOptions(const DBOptions& db_options) {
   if (db_options.db_paths.size() > 4) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "More than four DB paths are not supported yet. ");
   }
 
   if (db_options.allow_mmap_reads && db_options.use_direct_reads) {
     // Protect against assert in PosixMMapReadableFile constructor
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "If memory mapped reads (allow_mmap_reads) are enabled "
         "then direct I/O reads (use_direct_reads) must be disabled. ");
   }
 
   if (db_options.allow_mmap_writes &&
       db_options.use_direct_io_for_flush_and_compaction) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "If memory mapped writes (allow_mmap_writes) are enabled "
         "then direct I/O writes (use_direct_io_for_flush_and_compaction) must "
         "be disabled. ");
   }
 
   if (db_options.keep_log_file_num == 0) {
-    return Status_InvalidArgument("keep_log_file_num must be greater than 0");
+    return rocksdb_rs::status::Status_InvalidArgument("keep_log_file_num must be greater than 0");
   }
 
   if (db_options.unordered_write &&
       !db_options.allow_concurrent_memtable_write) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "unordered_write is incompatible with "
         "!allow_concurrent_memtable_write");
   }
 
   if (db_options.unordered_write && db_options.enable_pipelined_write) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "unordered_write is incompatible with enable_pipelined_write");
   }
 
   if (db_options.atomic_flush && db_options.enable_pipelined_write) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "atomic_flush is incompatible with enable_pipelined_write");
   }
 
   // TODO remove this restriction
   if (db_options.atomic_flush && db_options.best_efforts_recovery) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "atomic_flush is currently incompatible with best-efforts recovery");
   }
 
   if (db_options.use_direct_io_for_flush_and_compaction &&
       0 == db_options.writable_file_max_buffer_size) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "writes in direct IO require writable_file_max_buffer_size > 0");
   }
 
@@ -474,12 +474,12 @@ rocksdb_rs::status::Status DBImpl::Recover(
           return s;
         }
       } else {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             current_fname, "does not exist (create_if_missing is false)");
       }
     } else if (s.ok()) {
       if (immutable_db_options_.error_if_exists) {
-        return Status_InvalidArgument(dbname_,
+        return rocksdb_rs::status::Status_InvalidArgument(dbname_,
                                        "exists (error_if_exists is true)");
       }
     } else {
@@ -502,10 +502,10 @@ rocksdb_rs::status::Status DBImpl::Recover(
         customized_fs.use_direct_reads = false;
         s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
         if (s.ok()) {
-          return Status_InvalidArgument(
+          return rocksdb_rs::status::Status_InvalidArgument(
               "Direct I/O is not supported by the specified DB.");
         } else {
-          return Status_InvalidArgument(
+          return rocksdb_rs::status::Status_InvalidArgument(
               "Found options incompatible with filesystem", error_str.c_str());
         }
       }
@@ -517,7 +517,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
     rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
         dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr);
     if (s.IsNotFound()) {
-      return Status_InvalidArgument(dbname_,
+      return rocksdb_rs::status::Status_InvalidArgument(dbname_,
                                      "does not exist (open for read only)");
     } else if (s.IsIOError()) {
       return s;
@@ -691,7 +691,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
           wal_dir, io_opts, &files_in_wal_dir, /*IODebugContext*=*/nullptr);
     }
     if (s.IsNotFound()) {
-      return Status_InvalidArgument("wal_dir not found", wal_dir);
+      return rocksdb_rs::status::Status_InvalidArgument("wal_dir not found", wal_dir);
     } else if (!s.ok()) {
       return s;
     }
@@ -702,7 +702,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
       rocksdb_rs::types::FileType type;
       if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
         if (is_new_db) {
-          return Status_Corruption(
+          return rocksdb_rs::status::Status_Corruption(
               "While creating a new Db, wal_dir contains "
               "existing log file: ",
               file);
@@ -738,7 +738,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
 
     if (!wal_files.empty()) {
       if (error_if_wal_file_exists) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "The db was opened in readonly mode with error_if_wal_file_exists"
             "flag but a WAL file already exists");
       } else if (error_if_data_exists_in_wals) {
@@ -747,7 +747,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
           s = env_->GetFileSize(wal_file.second, &bytes);
           if (s.ok()) {
             if (bytes > 0) {
-              return Status_Corruption(
+              return rocksdb_rs::status::Status_Corruption(
                   "error_if_data_exists_in_wals is set but there are data "
                   " in WAL files.");
             }
@@ -1005,7 +1005,7 @@ bool DBImpl::InvokeWalFilterIfNeededOnWalRecord(uint64_t wal_number,
       stop_replay = true;
       break;
     case WalFilter::WalProcessingOption::kCorruptedRecord: {
-      status = Status_Corruption("Corruption reported by Wal Filter ",
+      status = rocksdb_rs::status::Status_Corruption("Corruption reported by Wal Filter ",
                                   wal_filter.Name());
       MaybeIgnoreError(&status);
       if (!status.ok()) {
@@ -1018,7 +1018,7 @@ bool DBImpl::InvokeWalFilterIfNeededOnWalRecord(uint64_t wal_number,
       // logical error which should not happen. If RocksDB throws, we would
       // just do `throw std::logic_error`.
       assert(false);
-      status = Status_NotSupported(
+      status = rocksdb_rs::status::Status_NotSupported(
           "Unknown WalProcessingOption returned by Wal Filter ",
           wal_filter.Name());
       MaybeIgnoreError(&status);
@@ -1048,7 +1048,7 @@ bool DBImpl::InvokeWalFilterIfNeededOnWalRecord(uint64_t wal_number,
           "Aborting recovery.",
           wal_number, static_cast<int>(immutable_db_options_.wal_recovery_mode),
           wal_filter.Name(), new_count, original_count);
-      status = Status_NotSupported(
+      status = rocksdb_rs::status::Status_NotSupported(
           "More than original # of records "
           "returned by Wal Filter ",
           wal_filter.Name());
@@ -1207,7 +1207,7 @@ rocksdb_rs::status::Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& 
            status.ok()) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter.Corruption(record.size(),
-                            Status_Corruption("log record too small"));
+                            rocksdb_rs::status::Status_Corruption("log record too small"));
         continue;
       }
 
@@ -1400,7 +1400,7 @@ rocksdb_rs::status::Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& 
         ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                         "Column family inconsistency: SST file contains data"
                         " beyond the point of corruption.");
-        return Status_Corruption("SST file is ahead of WALs in CF " +
+        return rocksdb_rs::status::Status_Corruption("SST file is ahead of WALs in CF " +
                                   cfd->GetName());
       }
     }
@@ -1695,7 +1695,7 @@ rocksdb_rs::status::Status DBImpl::WriteLevel0TableForRecovery(int job_id, Colum
                        "[%s] [JOB %d] Level-0 flush during recover: %s",
                        cfd->GetName().c_str(), job_id, msg.c_str());
         if (immutable_db_options_.flush_verify_memtable_count) {
-          s = Status_Corruption(msg);
+          s = rocksdb_rs::status::Status_Corruption(msg);
         }
       }
     }
@@ -1801,7 +1801,7 @@ rocksdb_rs::status::Status DB::OpenAndTrimHistory(
   assert(handles != nullptr);
   auto validate_options = [&db_options] {
     if (db_options.avoid_flush_during_recovery) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "avoid_flush_during_recovery incompatible with "
           "OpenAndTrimHistory");
     }
@@ -2055,7 +2055,7 @@ rocksdb_rs::status::Status DBImpl::Open(const DBOptions& db_options, const std::
             break;
           }
         } else {
-          s = Status_InvalidArgument("Column family not found", cf.name);
+          s = rocksdb_rs::status::Status_InvalidArgument("Column family not found", cf.name);
           break;
         }
       }
@@ -2083,7 +2083,7 @@ rocksdb_rs::status::Status DBImpl::Open(const DBOptions& db_options, const std::
       }
       if (cfd->ioptions()->merge_operator != nullptr &&
           !cfd->mem()->IsMergeOperatorSupported()) {
-        s = Status_InvalidArgument(
+        s = rocksdb_rs::status::Status_InvalidArgument(
             "The memtable of column family %s does not support merge operator "
             "its options.merge_operator is non-null",
             cfd->GetName().c_str());

@@ -118,7 +118,7 @@ rocksdb_rs::status::Status PlainTableReader::Open(
     bool full_scan_mode, const bool immortal_table,
     const SliceTransform* prefix_extractor) {
   if (file_size > PlainTableIndex::kMaxFileSize) {
-    return Status_NotSupported("File is too large for PlainTableReader!");
+    return rocksdb_rs::status::Status_NotSupported("File is too large for PlainTableReader!");
   }
 
   std::unique_ptr<TableProperties> props;
@@ -138,11 +138,11 @@ rocksdb_rs::status::Status PlainTableReader::Open(
       !prefix_extractor_in_file.empty() /* old version sst file*/
       && prefix_extractor_in_file != "nullptr") {
     if (!prefix_extractor) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Prefix extractor is missing when opening a PlainTable built "
           "using a prefix extractor");
     } else if (prefix_extractor_in_file != prefix_extractor->AsString()) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Prefix extractor given doesn't match the one used to build "
           "PlainTable");
     }
@@ -249,7 +249,7 @@ rocksdb_rs::status::Status PlainTableReader::PopulateIndexRecordList(
     index_builder->AddKeyPrefix(GetPrefix(key), key_offset);
 
     if (!seekable && is_first_record) {
-      return Status_Corruption("Key for a prefix is not seekable");
+      return rocksdb_rs::status::Status_Corruption("Key for a prefix is not seekable");
     }
 
     is_first_record = false;
@@ -341,7 +341,7 @@ rocksdb_rs::status::Status PlainTableReader::PopulateIndex(TableProperties* prop
 
   if ((prefix_extractor_ == nullptr) && (hash_table_ratio != 0)) {
     // moptions.prefix_extractor is requried for a hash-based look-up.
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "PlainTable requires a prefix extractor enable prefix hash mode.");
   }
 
@@ -526,7 +526,7 @@ rocksdb_rs::status::Status PlainTableReader::Next(PlainTableKeyDecoder* decoder,
   }
 
   if (*offset > file_info_.data_end_offset) {
-    return Status_Corruption("Offset is out of file size");
+    return rocksdb_rs::status::Status_Corruption("Offset is out of file size");
   }
 
   uint32_t bytes_read;
@@ -556,7 +556,7 @@ rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, cons
   if (IsTotalOrderMode()) {
     if (full_scan_mode_) {
       status_ =
-          Status_InvalidArgument("Get() is not allowed in full scan mode.");
+          rocksdb_rs::status::Status_InvalidArgument("Get() is not allowed in full scan mode.");
     }
     // Match whole user key for bloom filter check.
     if (!MatchBloom(GetSliceHash(ExtractUserKey(target)))) {
@@ -658,7 +658,7 @@ void PlainTableIterator::SeekToFirst() {
 
 void PlainTableIterator::SeekToLast() {
   assert(false);
-  status_ = Status_NotSupported("SeekToLast() is not supported in PlainTable");
+  status_ = rocksdb_rs::status::Status_NotSupported("SeekToLast() is not supported in PlainTable");
   next_offset_ = offset_ = table_->file_info_.data_end_offset;
 }
 
@@ -669,7 +669,7 @@ void PlainTableIterator::Seek(const Slice& target) {
     // it. This is needed for compaction: it creates iterator with
     // total_order_seek = true but usually never does Seek() on it,
     // only SeekToFirst().
-    status_ = Status_InvalidArgument(
+    status_ = rocksdb_rs::status::Status_InvalidArgument(
         "total_order_seek not implemented for PlainTable.");
     offset_ = next_offset_ = table_->file_info_.data_end_offset;
     return;
@@ -680,12 +680,12 @@ void PlainTableIterator::Seek(const Slice& target) {
   if (table_->IsTotalOrderMode()) {
     if (table_->full_scan_mode_) {
       status_ =
-          Status_InvalidArgument("Seek() is not allowed in full scan mode.");
+          rocksdb_rs::status::Status_InvalidArgument("Seek() is not allowed in full scan mode.");
       offset_ = next_offset_ = table_->file_info_.data_end_offset;
       return;
     } else if (table_->GetIndexSize() > 1) {
       assert(false);
-      status_ = Status_NotSupported(
+      status_ = rocksdb_rs::status::Status_NotSupported(
           "PlainTable cannot issue non-prefix seek unless in total order "
           "mode.");
       offset_ = next_offset_ = table_->file_info_.data_end_offset;
@@ -734,7 +734,7 @@ void PlainTableIterator::Seek(const Slice& target) {
 void PlainTableIterator::SeekForPrev(const Slice& /*target*/) {
   assert(false);
   status_ =
-      Status_NotSupported("SeekForPrev() is not supported in PlainTable");
+      rocksdb_rs::status::Status_NotSupported("SeekForPrev() is not supported in PlainTable");
   offset_ = next_offset_ = table_->file_info_.data_end_offset;
 }
 

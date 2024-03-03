@@ -105,7 +105,7 @@ rocksdb_rs::status::Status WalManager::GetUpdatesSince(
     const TransactionLogIterator::ReadOptions& read_options,
     VersionSet* version_set) {
   if (seq_per_batch_) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   assert(!seq_per_batch_);
@@ -380,7 +380,7 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
   if (type != rocksdb_rs::transaction_log::WalFileType::kAliveLogFile && type != rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
     ROCKS_LOG_ERROR(db_options_.info_log, "[WalManger] Unknown file type %s",
                     std::to_string(static_cast<int>(type)).c_str());
-    return Status_NotSupported("File Type Not Known " + std::to_string(static_cast<int>(type)));
+    return rocksdb_rs::status::Status_NotSupported("File Type Not Known " + std::to_string(static_cast<int>(type)));
   }
   {
     MutexLock l(&read_first_record_cache_mutex_);
@@ -422,7 +422,7 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
 rocksdb_rs::status::Status WalManager::GetLiveWalFile(uint64_t number,
                                   std::unique_ptr<LogFile>* log_file) {
   if (!log_file) {
-    return Status_InvalidArgument("log_file not preallocated.");
+    return rocksdb_rs::status::Status_InvalidArgument("log_file not preallocated.");
   }
 
   if (!number) {
@@ -491,7 +491,7 @@ rocksdb_rs::status::Status WalManager::ReadFirstLine(const std::string& fname,
       (status.ok() || !db_options_.paranoid_checks)) {
     if (record.size() < WriteBatchInternal::kHeader) {
       reporter.Corruption(record.size(),
-                          Status_Corruption("log record too small"));
+                          rocksdb_rs::status::Status_Corruption("log record too small"));
       // TODO read record's till the first no corrupt entry?
     } else {
       WriteBatch batch;

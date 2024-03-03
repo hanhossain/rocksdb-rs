@@ -88,7 +88,7 @@ class CacheDumper {
   // Only dump the blocks in the block cache that belong to the DBs in this list
   virtual rocksdb_rs::status::Status SetDumpFilter(std::vector<DB*> db_list) {
     (void)db_list;
-    return Status_NotSupported("SetDumpFilter is not supported");
+    return rocksdb_rs::status::Status_NotSupported("SetDumpFilter is not supported");
   }
   // The main function to dump out all the blocks that satisfy the filter
   // condition from block cache to a certain CacheDumpWriter in one shot. This

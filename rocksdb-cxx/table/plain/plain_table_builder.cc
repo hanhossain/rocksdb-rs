@@ -141,7 +141,7 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
     return;
   }
   if (internal_key.type == kTypeRangeDeletion) {
-    status_ = Status_NotSupported("Range deletion unsupported");
+    status_ = rocksdb_rs::status::Status_NotSupported("Range deletion unsupported");
     return;
   }
 

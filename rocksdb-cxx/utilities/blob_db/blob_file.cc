@@ -217,7 +217,7 @@ rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSyst
     ROCKS_LOG_ERROR(
         info_log_, "Incomplete blob file blob file %" PRIu64 ", size: %" PRIu64,
         file_number_, file_size);
-    return Status_Corruption("Incomplete blob file header.");
+    return rocksdb_rs::status::Status_Corruption("Incomplete blob file header.");
   }
 
   // Create file reader.

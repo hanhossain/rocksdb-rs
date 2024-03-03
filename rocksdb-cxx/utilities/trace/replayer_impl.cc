@@ -82,7 +82,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
     const std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)>&
         result_callback) {
   if (options.fast_forward <= 0.0) {
-    return Status_InvalidArgument("Wrong fast forward speed!");
+    return rocksdb_rs::status::Status_InvalidArgument("Wrong fast forward speed!");
   }
 
   if (!prepared_) {
@@ -225,7 +225,7 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
       } else {
         // Skip unsupported traces.
         if (result_callback != nullptr) {
-          result_callback(Status_NotSupported("Unsupported trace type."),
+          result_callback(rocksdb_rs::status::Status_NotSupported("Unsupported trace type."),
                           nullptr);
         }
       }

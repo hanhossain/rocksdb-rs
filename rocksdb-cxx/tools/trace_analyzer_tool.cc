@@ -415,10 +415,10 @@ rocksdb_rs::status::Status TraceAnalyzer::ReadTraceHeader(Trace* header) {
   s = TracerHelper::DecodeTrace(encoded_trace, header);
 
   if (header->type != kTraceBegin) {
-    return Status_Corruption("Corrupted trace file. Incorrect header.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect header.");
   }
   if (header->payload.substr(0, kTraceMagic.length()) != kTraceMagic) {
-    return Status_Corruption("Corrupted trace file. Incorrect magic.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect magic.");
   }
 
   return s;
@@ -431,7 +431,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReadTraceFooter(Trace* footer) {
     return s;
   }
   if (footer->type != kTraceEnd) {
-    return Status_Corruption("Corrupted trace file. Incorrect footer.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect footer.");
   }
   return s;
 }
@@ -757,7 +757,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticCorrelation(TraceStats& s
                                                StatsUnit& unit) {
   if (stats.correlation_output.size() !=
       analyzer_opts_.correlation_list.size()) {
-    return Status_Corruption("Cannot make the statistic of correlation.");
+    return rocksdb_rs::status::Status_Corruption("Cannot make the statistic of correlation.");
   }
 
   for (int i = 0; i < static_cast<int>(analyzer_opts_.correlation_list.size());
@@ -1636,7 +1636,7 @@ rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationTyp
       s = WriteTraceSequence(op_type, cf_ids[i], keys[i], value_sizes[i],
                              timestamp);
       if (!s.ok()) {
-        return Status_Corruption("Failed to write the trace sequence to file");
+        return rocksdb_rs::status::Status_Corruption("Failed to write the trace sequence to file");
       }
     }
   }
@@ -1661,7 +1661,7 @@ rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationTyp
         op_type, cf_ids[i], keys[i].ToString(),
         value_sizes[i] == 0 ? kShadowValueSize : value_sizes[i], timestamp);
     if (!s.ok()) {
-      return Status_Corruption("Failed to insert key statistics");
+      return rocksdb_rs::status::Status_Corruption("Failed to insert key statistics");
     }
   }
 

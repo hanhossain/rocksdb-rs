@@ -65,7 +65,7 @@ struct SstFileWriter::Rep {
   rocksdb_rs::status::Status AddImpl(const Slice& user_key, const Slice& value,
                  ValueType value_type) {
     if (!builder) {
-      return Status_InvalidArgument("File is not opened");
+      return rocksdb_rs::status::Status_InvalidArgument("File is not opened");
     }
 
     if (file_info.num_entries == 0) {
@@ -74,7 +74,7 @@ struct SstFileWriter::Rep {
       if (internal_comparator.user_comparator()->Compare(
               user_key, file_info.largest_key) <= 0) {
         // Make sure that keys are added in order
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "Keys must be added in strict ascending order.");
       }
     }
@@ -100,7 +100,7 @@ struct SstFileWriter::Rep {
 
   rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& value, ValueType value_type) {
     if (internal_comparator.user_comparator()->timestamp_size() != 0) {
-      return Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
     }
 
     return AddImpl(user_key, value, value_type);
@@ -112,7 +112,7 @@ struct SstFileWriter::Rep {
 
     if (internal_comparator.user_comparator()->timestamp_size() !=
         timestamp_size) {
-      return Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
     }
 
     const size_t user_key_size = user_key.size();
@@ -132,14 +132,14 @@ struct SstFileWriter::Rep {
 
   rocksdb_rs::status::Status DeleteRangeImpl(const Slice& begin_key, const Slice& end_key) {
     if (!builder) {
-      return Status_InvalidArgument("File is not opened");
+      return rocksdb_rs::status::Status_InvalidArgument("File is not opened");
     }
     int cmp = internal_comparator.user_comparator()->CompareWithoutTimestamp(
         begin_key, end_key);
     if (cmp > 0) {
       // It's an empty range where endpoints appear mistaken. Don't bother
       // applying it to the DB, and return an error to the user.
-      return Status_InvalidArgument("end key comes before start key");
+      return rocksdb_rs::status::Status_InvalidArgument("end key comes before start key");
     } else if (cmp == 0) {
       // It's an empty range. Don't bother applying it to the DB.
       return rocksdb_rs::status::Status_OK();
@@ -177,7 +177,7 @@ struct SstFileWriter::Rep {
 
   rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key) {
     if (internal_comparator.user_comparator()->timestamp_size() != 0) {
-      return Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
     }
     return DeleteRangeImpl(begin_key, end_key);
   }
@@ -189,7 +189,7 @@ struct SstFileWriter::Rep {
 
     if (internal_comparator.user_comparator()->timestamp_size() !=
         timestamp_size) {
-      return Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
     }
 
     const size_t begin_key_size = begin_key.size();
@@ -396,11 +396,11 @@ rocksdb_rs::status::Status SstFileWriter::DeleteRange(const Slice& begin_key, co
 rocksdb_rs::status::Status SstFileWriter::Finish(ExternalSstFileInfo* file_info) {
   Rep* r = rep_.get();
   if (!r->builder) {
-    return Status_InvalidArgument("File is not opened");
+    return rocksdb_rs::status::Status_InvalidArgument("File is not opened");
   }
   if (r->file_info.num_entries == 0 &&
       r->file_info.num_range_del_entries == 0) {
-    return Status_InvalidArgument("Cannot create sst file with no entries");
+    return rocksdb_rs::status::Status_InvalidArgument("Cannot create sst file with no entries");
   }
 
   rocksdb_rs::status::Status s = r->builder->Finish();

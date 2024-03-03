@@ -252,7 +252,7 @@ rocksdb_rs::status::Status ObjectRegistry::SetManagedObject(
     if (iter != managed_objects_.end()) {  // The object exists
       curr = iter->second.lock();
       if (curr != nullptr && curr != object) {
-        return Status_InvalidArgument("Object already exists: ", object_key);
+        return rocksdb_rs::status::Status_InvalidArgument("Object already exists: ", object_key);
       } else {
         iter->second = object;
       }
@@ -261,7 +261,7 @@ rocksdb_rs::status::Status ObjectRegistry::SetManagedObject(
       managed_objects_[object_key] = object;
     }
   } else if (curr != object) {
-    return Status_InvalidArgument("Object already exists: ", object_key);
+    return rocksdb_rs::status::Status_InvalidArgument("Object already exists: ", object_key);
   }
   return rocksdb_rs::status::Status_OK();
 }

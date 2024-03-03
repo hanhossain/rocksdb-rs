@@ -1718,7 +1718,7 @@ class ReactiveVersionSet : public VersionSet {
       bool /*new_descriptor_log*/, const ColumnFamilyOptions* /*new_cf_option*/,
       const std::vector<std::function<void(const rocksdb_rs::status::Status&)>>& /*manifest_wcbs*/)
       override {
-    return Status_NotSupported("not supported in reactive mode");
+    return rocksdb_rs::status::Status_NotSupported("not supported in reactive mode");
   }
 
   // No copy allowed

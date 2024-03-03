@@ -179,7 +179,7 @@ rocksdb_rs::status::Status SeqnoToTimeMapping::Add(const std::string& seqno_time
   }
   uint64_t size;
   if (!GetVarint64(&input, &size)) {
-    return Status_Corruption("Invalid sequence number time size");
+    return rocksdb_rs::status::Status_Corruption("Invalid sequence number time size");
   }
   is_sorted_ = false;
   SeqnoTimePair base;
@@ -202,10 +202,10 @@ void SeqnoToTimeMapping::SeqnoTimePair::Encode(std::string& dest) const {
 
 rocksdb_rs::status::Status SeqnoToTimeMapping::SeqnoTimePair::Decode(Slice& input) {
   if (!GetVarint64(&input, &seqno)) {
-    return Status_Corruption("Invalid sequence number");
+    return rocksdb_rs::status::Status_Corruption("Invalid sequence number");
   }
   if (!GetVarint64(&input, &time)) {
-    return Status_Corruption("Invalid time");
+    return rocksdb_rs::status::Status_Corruption("Invalid time");
   }
   return rocksdb_rs::status::Status_OK();
 }

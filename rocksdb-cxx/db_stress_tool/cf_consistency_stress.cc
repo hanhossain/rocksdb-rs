@@ -554,7 +554,7 @@ class CfConsistencyStressTest : public StressTest {
       ++count;
 
       if (!VerifyWideColumns(iter->value(), iter->columns())) {
-        s = Status_Corruption("Value and columns inconsistent",
+        s = rocksdb_rs::status::Status_Corruption("Value and columns inconsistent",
                                DebugString(iter->value(), iter->columns()));
         break;
       }
@@ -634,7 +634,7 @@ class CfConsistencyStressTest : public StressTest {
         if (iter->Valid()) {
           if (!VerifyWideColumns(iter->value(), iter->columns())) {
             statuses[i] =
-                Status_Corruption("Value and columns inconsistent",
+                rocksdb_rs::status::Status_Corruption("Value and columns inconsistent",
                                    DebugString(iter->value(), iter->columns()));
           } else {
             ++valid_cnt;

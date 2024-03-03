@@ -130,12 +130,12 @@ rocksdb_rs::status::Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* ha
   assert(db_ == nullptr);
 
   if (blob_dir_.empty()) {
-    return Status_NotSupported("No blob directory in options");
+    return rocksdb_rs::status::Status_NotSupported("No blob directory in options");
   }
 
   if (bdb_options_.garbage_collection_cutoff < 0.0 ||
       bdb_options_.garbage_collection_cutoff > 1.0) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Garbage collection cutoff must be in the interval [0.0, 1.0]");
   }
 
@@ -234,7 +234,7 @@ rocksdb_rs::status::Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* ha
     }
 
     if (blob_dir_same_as_cf_dir) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Using the base DB's storage directories for BlobDB files is not "
           "supported.");
     }
@@ -751,7 +751,7 @@ rocksdb_rs::status::Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Open blob file: %s with wrong size: %" PRIu64,
                    fpath.c_str(), boffset);
-    return Status_Corruption("Invalid blob file size");
+    return rocksdb_rs::status::Status_Corruption("Invalid blob file size");
   }
 
   constexpr bool do_flush = true;
@@ -952,7 +952,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
   rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
                const Slice& value) override {
     if (column_family_id != default_cf_id_) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     rocksdb_rs::status::Status s = blob_db_impl_->PutBlobValue(options_, key, value, kNoExpiration,
@@ -962,7 +962,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
 
   rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
     if (column_family_id != default_cf_id_) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     rocksdb_rs::status::Status s = WriteBatchInternal::Delete(&batch_, column_family_id, key);
@@ -972,7 +972,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
   virtual rocksdb_rs::status::Status DeleteRange(uint32_t column_family_id, const Slice& begin_key,
                              const Slice& end_key) {
     if (column_family_id != default_cf_id_) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     rocksdb_rs::status::Status s = WriteBatchInternal::DeleteRange(&batch_, column_family_id,
@@ -982,12 +982,12 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
 
   rocksdb_rs::status::Status SingleDeleteCF(uint32_t /*column_family_id*/,
                         const Slice& /*key*/) override {
-    return Status_NotSupported("Not supported operation in blob db.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in blob db.");
   }
 
   rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
                  const Slice& /*value*/) override {
-    return Status_NotSupported("Not supported operation in blob db.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in blob db.");
   }
 
   void LogData(const Slice& blob) override { batch_.PutLogData(blob); }
@@ -1164,7 +1164,7 @@ rocksdb_rs::status::Status BlobDBImpl::DecompressSlice(const Slice& compressed_v
         info, compressed_value.data(), compressed_value.size(), &contents,
         kBlockBasedTableVersionFormat, *(cfh->cfd()->ioptions()));
     if (!s.ok()) {
-      return Status_Corruption("Unable to decompress blob.");
+      return rocksdb_rs::status::Status_Corruption("Unable to decompress blob.");
     }
   }
 
@@ -1567,7 +1567,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
         ", read %" ROCKSDB_PRIszt " bytes, expected %" PRIu64 " bytes",
         file_number, offset, size, key.size(), blob_record.size(), record_size);
 
-    return Status_Corruption("Failed to retrieve blob from blob index.");
+    return rocksdb_rs::status::Status_Corruption("Failed to retrieve blob from blob index.");
   }
 
   Slice crc_slice(blob_record.data(), sizeof(uint32_t));
@@ -1581,7 +1581,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
         "Unable to decode CRC from blob file %" PRIu64 ", blob_offset: %" PRIu64
         ", blob_size: %" PRIu64 ", key size: %" ROCKSDB_PRIszt ", status: '%s'",
         file_number, offset, size, key.size(), s.ToString()->c_str());
-    return Status_Corruption("Unable to decode checksum.");
+    return rocksdb_rs::status::Status_Corruption("Unable to decode checksum.");
   }
 
   uint32_t crc = crc32c::Value(blob_record.data() + sizeof(uint32_t),
@@ -1597,7 +1597,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
           key.ToString(/* output_hex */ true).c_str(), s.ToString()->c_str());
     }
 
-    return Status_Corruption("Corruption. Blob CRC mismatch");
+    return rocksdb_rs::status::Status_Corruption("Corruption. Blob CRC mismatch");
   }
 
   value->PinSelf(blob_value);
@@ -1624,11 +1624,11 @@ rocksdb_rs::status::Status BlobDBImpl::GetImpl(const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            PinnableSlice* value, uint64_t* expiration) {
   if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Blob DB doesn't support non-default column family.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -2038,7 +2038,7 @@ void BlobDBImpl::CopyBlobFiles(
 
 Iterator* BlobDBImpl::NewIterator(const ReadOptions& read_options) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }

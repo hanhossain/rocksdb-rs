@@ -2654,7 +2654,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
       row.str("");
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter.Corruption(record.size(),
-                            Status_Corruption("log record too small"));
+                            rocksdb_rs::status::Status_Corruption("log record too small"));
       } else {
         status = WriteBatchInternal::SetContents(&batch, record);
         if (!status.ok()) {

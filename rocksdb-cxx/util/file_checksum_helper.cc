@@ -28,7 +28,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::GetAllFileChecksums(
     std::vector<std::string>* checksum_func_names) {
   if (file_numbers == nullptr || checksums == nullptr ||
       checksum_func_names == nullptr) {
-    return Status_InvalidArgument("Pointer has not been initiated");
+    return rocksdb_rs::status::Status_InvalidArgument("Pointer has not been initiated");
   }
 
   for (auto i : checksum_map_) {
@@ -43,7 +43,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::SearchOneFileChecksum(
     uint64_t file_number, std::string* checksum,
     std::string* checksum_func_name) {
   if (checksum == nullptr || checksum_func_name == nullptr) {
-    return Status_InvalidArgument("Pointer has not been initiated");
+    return rocksdb_rs::status::Status_InvalidArgument("Pointer has not been initiated");
   }
 
   auto it = checksum_map_.find(file_number);
@@ -95,7 +95,7 @@ rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std:
                                     uint64_t manifest_file_size,
                                     FileChecksumList* checksum_list) {
   if (checksum_list == nullptr) {
-    return Status_InvalidArgument("checksum_list is nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("checksum_list is nullptr");
   }
   assert(checksum_list);
   // TODO: plumb Env::IOActivity

@@ -19,12 +19,12 @@ rocksdb_rs::status::Status OutputValidator::Add(const Slice& key, const Slice& v
     TEST_SYNC_POINT_CALLBACK("OutputValidator::Add:order_check",
                              /*arg=*/nullptr);
     if (key.size() < kNumInternalBytes) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Compaction tries to write a key without internal bytes.");
     }
     // prev_key_ starts with empty.
     if (!prev_key_.empty() && icmp_.Compare(key, prev_key_) < 0) {
-      return Status_Corruption("Compaction sees out-of-order keys.");
+      return rocksdb_rs::status::Status_Corruption("Compaction sees out-of-order keys.");
     }
     prev_key_.assign(key.data(), key.size());
   }

@@ -106,7 +106,7 @@ rocksdb_rs::status::Status WritePreparedTxnDB::VerifyCFOptions(
     return s;
   }
   if (!cf_options.memtable_factory->CanHandleDuplicatedKey()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "memtable_factory->CanHandleDuplicatedKey() cannot be false with "
         "WritePrpeared transactions");
   }
@@ -251,7 +251,7 @@ rocksdb_rs::status::Status WritePreparedTxnDB::Get(const ReadOptions& options,
                                ColumnFamilyHandle* column_family,
                                const Slice& key, PinnableSlice* value) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -348,7 +348,7 @@ static void CleanupWritePreparedTxnDBIterator(void* arg1, void* /*arg2*/) {
 Iterator* WritePreparedTxnDB::NewIterator(const ReadOptions& options,
                                           ColumnFamilyHandle* column_family) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }

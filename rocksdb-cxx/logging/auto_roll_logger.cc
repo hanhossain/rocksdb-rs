@@ -73,7 +73,7 @@ rocksdb_rs::status::Status AutoRollLogger::ResetLogger() {
   logger_->SetInfoLogLevel(Logger::GetInfoLogLevel());
 
   if (logger_->GetLogFileSize() == Logger::kDoNotSupportGetLogFileSize) {
-    status_ = Status_NotSupported(
+    status_ = rocksdb_rs::status::Status_NotSupported(
         "The underlying logger doesn't support GetLogFileSize()");
   }
   if (status_.ok()) {

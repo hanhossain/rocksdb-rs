@@ -132,7 +132,7 @@ rocksdb_rs::status::Status BuildTable(
           ioptions.compaction_filter_factory->CreateCompactionFilter(context);
       if (compaction_filter != nullptr &&
           !compaction_filter->IgnoreSnapshots()) {
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             "CompactionFilter::IgnoreSnapshots() = false is not supported "
             "anymore.");
       }
@@ -413,7 +413,7 @@ rocksdb_rs::status::Status BuildTable(
         }
         s = it->status();
         if (s.ok() && !output_validator.CompareValidator(file_validator)) {
-          s = Status_Corruption("Paranoid checksums do not match");
+          s = rocksdb_rs::status::Status_Corruption("Paranoid checksums do not match");
         }
       }
     }

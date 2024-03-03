@@ -45,19 +45,19 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
   std::string field;
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.window_bits = ParseInt(field);
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.level = ParseInt(field);
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.strategy = ParseInt(field);
@@ -65,7 +65,7 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
   // max_dict_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.max_dict_bytes = ParseInt(field);
@@ -74,7 +74,7 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
   // zstd_max_train_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.zstd_max_train_bytes = ParseInt(field);
@@ -83,7 +83,7 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
   // parallel_threads is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     // Since parallel_threads comes before enabled but was added optionally
@@ -101,7 +101,7 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
   // enabled is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.enabled = ParseBoolean("", field);
@@ -110,7 +110,7 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
   // max_dict_buffer_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.max_dict_buffer_bytes = ParseUint64(field);
@@ -119,14 +119,14 @@ static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& val
   // use_zstd_dict_trainer is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.use_zstd_dict_trainer = ParseBoolean("", field);
   }
 
   if (!field_stream.eof()) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   return rocksdb_rs::status::Status_OK();

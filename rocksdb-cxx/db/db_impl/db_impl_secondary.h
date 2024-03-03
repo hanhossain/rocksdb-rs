@@ -137,7 +137,7 @@ class DBImplSecondary : public DBImpl {
   rocksdb_rs::status::Status Put(const WriteOptions& /*options*/,
              ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
              const Slice& /*value*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::PutEntity;
@@ -145,40 +145,40 @@ class DBImplSecondary : public DBImpl {
                    ColumnFamilyHandle* /* column_family */,
                    const Slice& /* key */,
                    const WideColumns& /* columns */) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::Merge;
   rocksdb_rs::status::Status Merge(const WriteOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
                const Slice& /*value*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::Delete;
   rocksdb_rs::status::Status Delete(const WriteOptions& /*options*/,
                 ColumnFamilyHandle* /*column_family*/,
                 const Slice& /*key*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SingleDelete;
   rocksdb_rs::status::Status SingleDelete(const WriteOptions& /*options*/,
                       ColumnFamilyHandle* /*column_family*/,
                       const Slice& /*key*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   rocksdb_rs::status::Status Write(const WriteOptions& /*options*/,
                WriteBatch* /*updates*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::CompactRange;
   rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& /*options*/,
                       ColumnFamilyHandle* /*column_family*/,
                       const Slice* /*begin*/, const Slice* /*end*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::CompactFiles;
@@ -189,27 +189,27 @@ class DBImplSecondary : public DBImpl {
       const int /*output_level*/, const int /*output_path_id*/ = -1,
       std::vector<std::string>* const /*output_file_names*/ = nullptr,
       CompactionJobInfo* /*compaction_job_info*/ = nullptr) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   rocksdb_rs::status::Status DisableFileDeletions() override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>&,
                       uint64_t* /*manifest_file_size*/,
                       bool /*flush_memtable*/ = true) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::Flush;
   rocksdb_rs::status::Status Flush(const FlushOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SetDBOptions;
@@ -217,7 +217,7 @@ class DBImplSecondary : public DBImpl {
                       /*options_map*/) override {
     // Currently not supported because changing certain options may cause
     // flush/compaction.
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SetOptions;
@@ -227,12 +227,12 @@ class DBImplSecondary : public DBImpl {
       override {
     // Currently not supported because changing certain options may cause
     // flush/compaction and/or write to MANIFEST.
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DBImpl::SyncWAL;
   rocksdb_rs::status::Status SyncWAL() override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   using DB::IngestExternalFile;
@@ -240,7 +240,7 @@ class DBImplSecondary : public DBImpl {
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*external_files*/,
       const IngestExternalFileOptions& /*ingestion_options*/) override {
-    return Status_NotSupported("Not supported operation in secondary mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in secondary mode.");
   }
 
   // Try to catch up with the primary by reading as much as possible from the

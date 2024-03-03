@@ -1739,7 +1739,7 @@ TEST_P(CompressionFailuresTest, CompressionFailures) {
         "UncompressBlockData:TamperWithReturnValue", [](void* arg) {
           rocksdb_rs::status::Status* ret = static_cast<rocksdb_rs::status::Status*>(arg);
           ASSERT_OK(*ret);
-          *ret = Status_Corruption("kTestDecompressionFail");
+          *ret = rocksdb_rs::status::Status_Corruption("kTestDecompressionFail");
         });
   } else if (compression_failure_type_ == CompressionFailureType::kTestDecompressionCorruption) {
     rocksdb::SyncPoint::GetInstance()->SetCallBack(
@@ -2739,7 +2739,7 @@ TEST_F(DBTest2, ReadAmpBitmapLiveInCacheAfterDBClose) {
   {
     const int kIdBufLen = 100;
     char id_buf[kIdBufLen];
-    rocksdb_rs::status::Status s = Status_NotSupported();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_NotSupported();
 #ifndef OS_WIN
     // You can't open a directory on windows using random access file
     std::unique_ptr<RandomAccessFile> file;
@@ -4206,7 +4206,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
 
   virtual rocksdb_rs::status::Status Handle(const StatusOnlyTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status_InvalidArgument("Invalid timestamps.");
+      return rocksdb_rs::status::Status_InvalidArgument("Invalid timestamps.");
     }
     switch (result.GetTraceType()) {
       case kTraceWrite: {
@@ -4216,7 +4216,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status_Corruption("Type mismatch.");
+        return rocksdb_rs::status::Status_Corruption("Type mismatch.");
     }
     return rocksdb_rs::status::Status_OK();
   }
@@ -4224,7 +4224,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
   virtual rocksdb_rs::status::Status Handle(
       const SingleValueTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status_InvalidArgument("Invalid timestamps.");
+      return rocksdb_rs::status::Status_InvalidArgument("Invalid timestamps.");
     }
     switch (result.GetTraceType()) {
       case kTraceGet: {
@@ -4234,7 +4234,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status_Corruption("Type mismatch.");
+        return rocksdb_rs::status::Status_Corruption("Type mismatch.");
     }
     return rocksdb_rs::status::Status_OK();
   }
@@ -4242,7 +4242,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
   virtual rocksdb_rs::status::Status Handle(
       const MultiValuesTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status_InvalidArgument("Invalid timestamps.");
+      return rocksdb_rs::status::Status_InvalidArgument("Invalid timestamps.");
     }
     switch (result.GetTraceType()) {
       case kTraceMultiGet: {
@@ -4252,14 +4252,14 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status_Corruption("Type mismatch.");
+        return rocksdb_rs::status::Status_Corruption("Type mismatch.");
     }
     return rocksdb_rs::status::Status_OK();
   }
 
   virtual rocksdb_rs::status::Status Handle(const IteratorTraceExecutionResult& result) override {
     if (result.GetStartTimestamp() > result.GetEndTimestamp()) {
-      return Status_InvalidArgument("Invalid timestamps.");
+      return rocksdb_rs::status::Status_InvalidArgument("Invalid timestamps.");
     }
     switch (result.GetTraceType()) {
       case kTraceIteratorSeek:
@@ -4270,7 +4270,7 @@ class TraceExecutionResultHandler : public TraceRecordResult::Handler {
         break;
       }
       default:
-        return Status_Corruption("Type mismatch.");
+        return rocksdb_rs::status::Status_Corruption("Type mismatch.");
     }
     return rocksdb_rs::status::Status_OK();
   }
@@ -5831,7 +5831,7 @@ TEST_F(DBTest2, FileConsistencyCheckInOpen) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         rocksdb_rs::status::Status* ret_s = static_cast<rocksdb_rs::status::Status*>(arg);
-        *ret_s = Status_Corruption("fcc");
+        *ret_s = rocksdb_rs::status::Status_Corruption("fcc");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

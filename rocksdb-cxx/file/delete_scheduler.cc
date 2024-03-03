@@ -180,7 +180,7 @@ rocksdb_rs::status::Status DeleteScheduler::MarkAsTrash(const std::string& file_
   // Sanity check of the path
   size_t idx = file_path.rfind("/");
   if (idx == std::string::npos || idx == file_path.size() - 1) {
-    return Status_InvalidArgument("file_path is corrupted");
+    return rocksdb_rs::status::Status_InvalidArgument("file_path is corrupted");
   }
 
   if (DeleteScheduler::IsTrashFile(file_path)) {

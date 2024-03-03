@@ -50,14 +50,14 @@ class UserDefinedTimestampSizeRecord {
       std::ostringstream oss;
       oss << "User-defined timestamp size record length: " << total_size
           << " is not a multiple of " << kSizePerColumnFamily << std::endl;
-      return Status_Corruption(oss.str());
+      return rocksdb_rs::status::Status_Corruption(oss.str());
     }
     int num_of_entries = static_cast<int>(total_size / kSizePerColumnFamily);
     for (int i = 0; i < num_of_entries; i++) {
       uint32_t cf_id = 0;
       uint16_t ts_sz = 0;
       if (!GetFixed32(src, &cf_id) || !GetFixed16(src, &ts_sz)) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "Error decoding user-defined timestamp size record entry");
       }
       cf_to_ts_sz_.emplace_back(cf_id, static_cast<size_t>(ts_sz));

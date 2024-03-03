@@ -102,7 +102,7 @@ struct PersistentCacheConfig {
   rocksdb_rs::status::Status ValidateSettings() const {
     // (1) check pre-conditions for variables
     if (!env || path.empty()) {
-      return Status_InvalidArgument("empty or null args");
+      return rocksdb_rs::status::Status_InvalidArgument("empty or null args");
     }
 
     // (2) assert size related invariants
@@ -111,7 +111,7 @@ struct PersistentCacheConfig {
     // - total write buffer size cannot be less than 2X cache file size
     if (cache_size < cache_file_size || write_buffer_size >= cache_file_size ||
         write_buffer_size * write_buffer_count() < 2 * cache_file_size) {
-      return Status_InvalidArgument("invalid cache size");
+      return rocksdb_rs::status::Status_InvalidArgument("invalid cache size");
     }
 
     // (2) check writer settings
@@ -120,7 +120,7 @@ struct PersistentCacheConfig {
     // - dispatch size and buffer size need to be aligned
     if (!writer_qdepth || writer_dispatch_size > write_buffer_size ||
         write_buffer_size % writer_dispatch_size) {
-      return Status_InvalidArgument("invalid writer settings");
+      return rocksdb_rs::status::Status_InvalidArgument("invalid writer settings");
     }
 
     return rocksdb_rs::status::Status_OK();

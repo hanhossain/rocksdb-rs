@@ -76,7 +76,7 @@ class OptimisticTransactionDBImpl : public OptimisticTransactionDB {
   using StackableDB::DeleteRange;
   virtual rocksdb_rs::status::Status DeleteRange(const WriteOptions&, ColumnFamilyHandle*,
                              const Slice&, const Slice&) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   // Range deletions also must not be snuck into `WriteBatch`es as they are
@@ -84,7 +84,7 @@ class OptimisticTransactionDBImpl : public OptimisticTransactionDB {
   virtual rocksdb_rs::status::Status Write(const WriteOptions& write_opts,
                        WriteBatch* batch) override {
     if (batch->HasDeleteRange()) {
-      return Status_NotSupported();
+      return rocksdb_rs::status::Status_NotSupported();
     }
     return OptimisticTransactionDB::Write(write_opts, batch);
   }

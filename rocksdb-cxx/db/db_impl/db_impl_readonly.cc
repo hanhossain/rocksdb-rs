@@ -41,7 +41,7 @@ rocksdb_rs::status::Status DBImplReadOnly::Get(const ReadOptions& read_options,
                            PinnableSlice* pinnable_val,
                            std::string* timestamp) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -119,7 +119,7 @@ rocksdb_rs::status::Status DBImplReadOnly::Get(const ReadOptions& read_options,
 Iterator* DBImplReadOnly::NewIterator(const ReadOptions& read_options,
                                       ColumnFamilyHandle* column_family) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -183,7 +183,7 @@ rocksdb_rs::status::Status DBImplReadOnly::NewIterators(
 
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (iterators == nullptr) {
-    return Status_InvalidArgument("iterators not allowed to be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("iterators not allowed to be nullptr");
   }
   iterators->clear();
   iterators->reserve(column_families.size());
@@ -301,7 +301,7 @@ rocksdb_rs::status::Status DBImplReadOnly::OpenForReadOnlyWithoutCheck(
       auto cfd =
           impl->versions_->GetColumnFamilySet()->GetColumnFamily(cf.name);
       if (cfd == nullptr) {
-        s = Status_InvalidArgument("Column family not found", cf.name);
+        s = rocksdb_rs::status::Status_InvalidArgument("Column family not found", cf.name);
         break;
       }
       handles->push_back(new ColumnFamilyHandleImpl(cfd, impl, &impl->mutex_));

@@ -127,7 +127,7 @@ rocksdb_rs::status::Status Customizable::ConfigureNewObject(
   if (object != nullptr) {
     status = object->ConfigureFromMap(config_options, opt_map);
   } else if (!opt_map.empty()) {
-    status = Status_InvalidArgument("Cannot configure null object ");
+    status = rocksdb_rs::status::Status_InvalidArgument("Cannot configure null object ");
   }
   return status;
 }

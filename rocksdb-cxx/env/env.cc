@@ -699,7 +699,7 @@ rocksdb_rs::status::Status Env::CreateFromUri(const ConfigOptions& config_option
     return rocksdb_rs::status::Status_OK();
   } else if (!env_uri.empty() && !fs_uri.empty()) {
     // Both specified.  Cannot choose.  Return Invalid
-    return Status_InvalidArgument("cannot specify both fs_uri and env_uri");
+    return rocksdb_rs::status::Status_InvalidArgument("cannot specify both fs_uri and env_uri");
   } else if (fs_uri.empty()) {  // Only have an ENV URI.  Create an Env from it
     return CreateFromString(config_options, env_uri, result, guard);
   } else {
@@ -840,7 +840,7 @@ rocksdb_rs::status::Status Logger::Close() {
   }
 }
 
-rocksdb_rs::status::Status Logger::CloseImpl() { return Status_NotSupported(); }
+rocksdb_rs::status::Status Logger::CloseImpl() { return rocksdb_rs::status::Status_NotSupported(); }
 
 FileLock::~FileLock() {}
 

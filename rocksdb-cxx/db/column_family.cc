@@ -115,7 +115,7 @@ rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& 
     for (size_t level = 0; level < cf_options.compression_per_level.size();
          ++level) {
       if (!CompressionTypeSupported(cf_options.compression_per_level[level])) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "Compression type " +
             CompressionTypeToString(cf_options.compression_per_level[level]) +
             " is not linked with the binary.");
@@ -123,7 +123,7 @@ rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& 
     }
   } else {
     if (!CompressionTypeSupported(cf_options.compression)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Compression type " +
           CompressionTypeToString(cf_options.compression) +
           " is not linked with the binary.");
@@ -132,17 +132,17 @@ rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& 
   if (cf_options.compression_opts.zstd_max_train_bytes > 0) {
     if (cf_options.compression_opts.use_zstd_dict_trainer) {
       if (!ZSTD_TrainDictionarySupported()) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "zstd dictionary trainer cannot be used because ZSTD 1.1.3+ "
             "is not linked with the binary.");
       }
     } else if (!ZSTD_FinalizeDictionarySupported()) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "zstd finalizeDictionary cannot be used because ZSTD 1.4.5+ "
           "is not linked with the binary.");
     }
     if (cf_options.compression_opts.max_dict_bytes == 0) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "The dictionary size limit (`CompressionOptions::max_dict_bytes`) "
           "should be nonzero if we're using zstd's dictionary generator.");
     }
@@ -154,7 +154,7 @@ rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& 
         << CompressionTypeToString(cf_options.blob_compression_type)
         << " is not available.";
 
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -162,12 +162,12 @@ rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& 
 
 rocksdb_rs::status::Status CheckConcurrentWritesSupported(const ColumnFamilyOptions& cf_options) {
   if (cf_options.inplace_update_support) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "In-place memtable updates (inplace_update_support) is not compatible "
         "with concurrent writes (allow_concurrent_memtable_write)");
   }
   if (!cf_options.memtable_factory->IsInsertConcurrentlySupported()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Memtable doesn't concurrent writes (allow_concurrent_memtable_write)");
   }
   return rocksdb_rs::status::Status_OK();
@@ -182,11 +182,11 @@ rocksdb_rs::status::Status CheckCFPathsSupported(const DBOptions& db_options,
   if ((cf_options.compaction_style != kCompactionStyleUniversal) &&
       (cf_options.compaction_style != kCompactionStyleLevel)) {
     if (cf_options.cf_paths.size() > 1) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "More than one CF paths are only supported in "
           "universal and level compaction styles. ");
     } else if (cf_options.cf_paths.empty() && db_options.db_paths.size() > 1) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "More than one DB paths are only supported in "
           "universal and level compaction styles. ");
     }
@@ -1347,7 +1347,7 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
   }
   if (s.ok() && db_options.unordered_write &&
       cf_options.max_successive_merges != 0) {
-    s = Status_InvalidArgument(
+    s = rocksdb_rs::status::Status_InvalidArgument(
         "max_successive_merges > 0 is incompatible with unordered_write");
   }
   if (s.ok()) {
@@ -1360,7 +1360,7 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
   if (cf_options.ttl > 0 && cf_options.ttl != kDefaultTtl) {
     if (!cf_options.table_factory->IsInstanceOf(
             TableFactory::kBlockBasedTableName())) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "TTL is only supported in Block-Based Table format. ");
     }
   }
@@ -1369,7 +1369,7 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
       cf_options.periodic_compaction_seconds != kDefaultPeriodicCompSecs) {
     if (!cf_options.table_factory->IsInstanceOf(
             TableFactory::kBlockBasedTableName())) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Periodic Compaction is only supported in "
           "Block-Based Table format. ");
     }
@@ -1378,13 +1378,13 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
   if (cf_options.enable_blob_garbage_collection) {
     if (cf_options.blob_garbage_collection_age_cutoff < 0.0 ||
         cf_options.blob_garbage_collection_age_cutoff > 1.0) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "The age cutoff for blob garbage collection should be in the range "
           "[0.0, 1.0].");
     }
     if (cf_options.blob_garbage_collection_force_threshold < 0.0 ||
         cf_options.blob_garbage_collection_force_threshold > 1.0) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "The garbage ratio threshold for forcing blob garbage collection "
           "should be in the range [0.0, 1.0].");
     }
@@ -1392,7 +1392,7 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
 
   if (cf_options.compaction_style == kCompactionStyleFIFO &&
       db_options.max_open_files != -1 && cf_options.ttl > 0) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "FIFO compaction only supported with max_open_files = -1.");
   }
 
@@ -1400,13 +1400,13 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
   if (std::find(supported.begin(), supported.end(),
                 cf_options.memtable_protection_bytes_per_key) ==
       supported.end()) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Memtable per key-value checksum protection only supports 0, 1, 2, 4 "
         "or 8 bytes per key.");
   }
   if (std::find(supported.begin(), supported.end(),
                 cf_options.block_protection_bytes_per_key) == supported.end()) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Block per key-value checksum protection only supports 0, 1, 2, 4 "
         "or 8 bytes per key.");
   }
@@ -1414,11 +1414,11 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
   if (!cf_options.compaction_options_fifo.file_temperature_age_thresholds
            .empty()) {
     if (cf_options.compaction_style != kCompactionStyleFIFO) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Option file_temperature_age_thresholds only supports FIFO "
           "compaction.");
     } else if (cf_options.num_levels > 1) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Option file_temperature_age_thresholds is only supported when "
           "num_levels = 1.");
     } else {
@@ -1428,7 +1428,7 @@ rocksdb_rs::status::Status ColumnFamilyData::ValidateOptions(
       // check that age is sorted
       for (size_t i = 0; i < ages.size() - 1; ++i) {
         if (ages[i].age >= ages[i + 1].age) {
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Option file_temperature_age_thresholds requires elements to be "
               "sorted in increasing order with respect to `age` field.");
         }

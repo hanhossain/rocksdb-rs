@@ -36,7 +36,7 @@ void DeletionCallback(Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
 
 rocksdb_rs::status::Status SaveToCallbackFail(Cache::ObjectPtr /*obj*/, size_t /*offset*/,
                           size_t /*size*/, char* /*out*/) {
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
 rocksdb_rs::status::Status CreateCallback(const Slice& data, Cache::CreateContext* context,
@@ -44,7 +44,7 @@ rocksdb_rs::status::Status CreateCallback(const Slice& data, Cache::CreateContex
                       size_t* out_charge) {
   auto t = static_cast<TestCreateContext*>(context);
   if (t->fail_create_) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   *out_obj = new TestItem(data.data(), data.size());
   *out_charge = data.size();

@@ -16,7 +16,7 @@ namespace experimental {
 rocksdb_rs::status::Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
                            const Slice* begin, const Slice* end) {
   if (db == nullptr) {
-    return Status_InvalidArgument("DB is empty");
+    return rocksdb_rs::status::Status_InvalidArgument("DB is empty");
   }
 
   return db->SuggestCompactRange(column_family, begin, end);
@@ -24,7 +24,7 @@ rocksdb_rs::status::Status SuggestCompactRange(DB* db, ColumnFamilyHandle* colum
 
 rocksdb_rs::status::Status PromoteL0(DB* db, ColumnFamilyHandle* column_family, int target_level) {
   if (db == nullptr) {
-    return Status_InvalidArgument("Didn't recognize DB object");
+    return rocksdb_rs::status::Status_InvalidArgument("Didn't recognize DB object");
   }
   return db->PromoteL0(column_family, target_level);
 }

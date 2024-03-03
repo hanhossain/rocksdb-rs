@@ -305,7 +305,7 @@ void ThreadStatusUpdater::ClearThreadState() {}
 
 rocksdb_rs::status::Status ThreadStatusUpdater::GetThreadList(
     std::vector<ThreadStatus>* /*thread_list*/) {
-  return Status_NotSupported(
+  return rocksdb_rs::status::Status_NotSupported(
       "GetThreadList is not supported in the current running environment.");
 }
 

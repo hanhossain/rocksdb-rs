@@ -52,33 +52,33 @@ rocksdb_rs::status::Status BlobFileAddition::DecodeFrom(Slice* input) {
   constexpr char class_name[] = "BlobFileAddition";
 
   if (!GetVarint64(input, &blob_file_number_)) {
-    return Status_Corruption(class_name, "Error decoding blob file number");
+    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding blob file number");
   }
 
   if (!GetVarint64(input, &total_blob_count_)) {
-    return Status_Corruption(class_name, "Error decoding total blob count");
+    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding total blob count");
   }
 
   if (!GetVarint64(input, &total_blob_bytes_)) {
-    return Status_Corruption(class_name, "Error decoding total blob bytes");
+    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding total blob bytes");
   }
 
   Slice checksum_method;
   if (!GetLengthPrefixedSlice(input, &checksum_method)) {
-    return Status_Corruption(class_name, "Error decoding checksum method");
+    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding checksum method");
   }
   checksum_method_ = checksum_method.ToString();
 
   Slice checksum_value;
   if (!GetLengthPrefixedSlice(input, &checksum_value)) {
-    return Status_Corruption(class_name, "Error decoding checksum value");
+    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding checksum value");
   }
   checksum_value_ = checksum_value.ToString();
 
   while (true) {
     uint32_t custom_field_tag = 0;
     if (!GetVarint32(input, &custom_field_tag)) {
-      return Status_Corruption(class_name, "Error decoding custom field tag");
+      return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding custom field tag");
     }
 
     if (custom_field_tag == (uint32_t)CustomFieldTags::kEndMarker) {
@@ -86,13 +86,13 @@ rocksdb_rs::status::Status BlobFileAddition::DecodeFrom(Slice* input) {
     }
 
     if (custom_field_tag & (uint32_t)CustomFieldTags::kForwardIncompatibleMask) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           class_name, "Forward incompatible custom field encountered");
     }
 
     Slice custom_field_value;
     if (!GetLengthPrefixedSlice(input, &custom_field_value)) {
-      return Status_Corruption(class_name,
+      return rocksdb_rs::status::Status_Corruption(class_name,
                                 "Error decoding custom field value");
     }
   }

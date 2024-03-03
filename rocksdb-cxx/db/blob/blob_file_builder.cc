@@ -280,7 +280,7 @@ rocksdb_rs::status::Status BlobFileBuilder::CompressBlobIfNeeded(
   }
 
   if (!success) {
-    return Status_Corruption("Error compressing blob");
+    return rocksdb_rs::status::Status_Corruption("Error compressing blob");
   }
 
   *blob = Slice(*compressed_blob);

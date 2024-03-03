@@ -382,7 +382,7 @@ bool BlockBasedTableIterator::MaterializeCurrentBlock() {
   if (!block_iter_.Valid() ||
       icomp_.Compare(block_iter_.key(),
                      index_iter_->value().first_internal_key) != 0) {
-    block_iter_.Invalidate(Status_Corruption(
+    block_iter_.Invalidate(rocksdb_rs::status::Status_Corruption(
         "first key in index doesn't match first key in block"));
     return false;
   }

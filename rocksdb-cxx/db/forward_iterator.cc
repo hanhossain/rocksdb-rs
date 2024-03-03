@@ -93,16 +93,16 @@ class ForwardLevelIterator : public InternalIterator {
     file_iter_->SetPinnedItersMgr(pinned_iters_mgr_);
     valid_ = false;
     if (!range_del_agg.IsEmpty()) {
-      status_ = Status_NotSupported(
+      status_ = rocksdb_rs::status::Status_NotSupported(
           "Range tombstones unsupported with ForwardIterator");
     }
   }
   void SeekToLast() override {
-    status_ = Status_NotSupported("ForwardLevelIterator::SeekToLast()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::SeekToLast()");
     valid_ = false;
   }
   void Prev() override {
-    status_ = Status_NotSupported("ForwardLevelIterator::Prev()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::Prev()");
     valid_ = false;
   }
   bool Valid() const override { return valid_; }
@@ -132,7 +132,7 @@ class ForwardLevelIterator : public InternalIterator {
     valid_ = file_iter_->Valid();
   }
   void SeekForPrev(const Slice& /*internal_key*/) override {
-    status_ = Status_NotSupported("ForwardLevelIterator::SeekForPrev()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::SeekForPrev()");
     valid_ = false;
   }
   void Next() override {
@@ -643,7 +643,7 @@ rocksdb_rs::status::Status ForwardIterator::GetProperty(std::string prop_name, s
     *prop = std::to_string(sv_->version_number);
     return rocksdb_rs::status::Status_OK();
   }
-  return Status_InvalidArgument();
+  return rocksdb_rs::status::Status_InvalidArgument();
 }
 
 void ForwardIterator::SetPinnedItersMgr(
@@ -745,7 +745,7 @@ void ForwardIterator::RebuildIterators(bool refresh_sv) {
 
   UpdateChildrenPinnedItersMgr();
   if (!range_del_agg.IsEmpty()) {
-    status_ = Status_NotSupported(
+    status_ = rocksdb_rs::status::Status_NotSupported(
         "Range tombstones unsupported with ForwardIterator");
     valid_ = false;
   }
@@ -840,7 +840,7 @@ void ForwardIterator::RenewIterators() {
 
   UpdateChildrenPinnedItersMgr();
   if (!range_del_agg.IsEmpty()) {
-    status_ = Status_NotSupported(
+    status_ = rocksdb_rs::status::Status_NotSupported(
         "Range tombstones unsupported with ForwardIterator");
     valid_ = false;
   }

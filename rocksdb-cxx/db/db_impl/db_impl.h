@@ -2789,7 +2789,7 @@ inline rocksdb_rs::status::Status DBImpl::FailIfCfHasTs(
     std::ostringstream oss;
     oss << "cannot call this method on column family "
         << column_family->GetName() << " that enables timestamp";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -2798,7 +2798,7 @@ inline rocksdb_rs::status::Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle*
                                          const Slice& ts,
                                          bool ts_for_read) const {
   if (!column_family) {
-    return Status_InvalidArgument("column family handle cannot be null");
+    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be null");
   }
   assert(column_family);
   const Comparator* const ucmp = column_family->GetComparator();
@@ -2807,14 +2807,14 @@ inline rocksdb_rs::status::Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle*
     std::stringstream oss;
     oss << "cannot call this method on column family "
         << column_family->GetName() << " that does not enable timestamp";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   const size_t ts_sz = ts.size();
   if (ts_sz != ucmp->timestamp_size()) {
     std::stringstream oss;
     oss << "Timestamp sizes mismatch: expect " << ucmp->timestamp_size() << ", "
         << ts_sz << " given";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   if (ts_for_read) {
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
@@ -2826,7 +2826,7 @@ inline rocksdb_rs::status::Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle*
       oss << "Read timestamp: " << ts.ToString(true)
           << " is smaller than full_history_ts_low: "
           << Slice(current_ts_low).ToString(true) << std::endl;
-      return Status_InvalidArgument(oss.str());
+      return rocksdb_rs::status::Status_InvalidArgument(oss.str());
     }
   }
   return rocksdb_rs::status::Status_OK();

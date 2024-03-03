@@ -1214,7 +1214,7 @@ void Block::InitializeMetaIndexBlockProtectionInfo(
 MetaBlockIter* Block::NewMetaIterator(bool block_contents_pinned) {
   MetaBlockIter* iter = new MetaBlockIter();
   if (size_ < 2 * sizeof(uint32_t)) {
-    iter->Invalidate(Status_Corruption("bad block contents"));
+    iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
     return iter;
   } else if (num_restarts_ == 0) {
     // Empty block.
@@ -1239,7 +1239,7 @@ DataBlockIter* Block::NewDataIterator(const Comparator* raw_ucmp,
     ret_iter = new DataBlockIter;
   }
   if (size_ < 2 * sizeof(uint32_t)) {
-    ret_iter->Invalidate(Status_Corruption("bad block contents"));
+    ret_iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
     return ret_iter;
   }
   if (num_restarts_ == 0) {
@@ -1277,7 +1277,7 @@ IndexBlockIter* Block::NewIndexIterator(
     ret_iter = new IndexBlockIter;
   }
   if (size_ < 2 * sizeof(uint32_t)) {
-    ret_iter->Invalidate(Status_Corruption("bad block contents"));
+    ret_iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
     return ret_iter;
   }
   if (num_restarts_ == 0) {

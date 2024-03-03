@@ -384,7 +384,7 @@ class SpecialEnv : public EnvWrapper {
 
     if (no_file_overwrite_.load(std::memory_order_acquire) &&
         target()->FileExists(f).ok()) {
-      return Status_NotSupported("SpecialEnv::no_file_overwrite_ is true.");
+      return rocksdb_rs::status::Status_NotSupported("SpecialEnv::no_file_overwrite_ is true.");
     }
 
     if (non_writeable_rate_.load(std::memory_order_acquire) > 0) {
@@ -613,7 +613,7 @@ class SpecialEnv : public EnvWrapper {
   rocksdb_rs::status::Status RenameFile(const std::string& src, const std::string& dest) override {
     rename_count_.fetch_add(1);
     if (rename_error_.load(std::memory_order_acquire)) {
-      return Status_NotSupported("Simulated `RenameFile()` error.");
+      return rocksdb_rs::status::Status_NotSupported("Simulated `RenameFile()` error.");
     }
     return target()->RenameFile(src, dest);
   }

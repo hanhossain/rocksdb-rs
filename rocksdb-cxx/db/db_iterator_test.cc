@@ -2449,7 +2449,7 @@ TEST_P(DBIteratorTest, RefreshWithSnapshot) {
 TEST_P(DBIteratorTest, CreationFailure) {
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::NewInternalIterator:StatusCallback", [](void* arg) {
-        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) = Status_Corruption("test status");
+        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) = rocksdb_rs::status::Status_Corruption("test status");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

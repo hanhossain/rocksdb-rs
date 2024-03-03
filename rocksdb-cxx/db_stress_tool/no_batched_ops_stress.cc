@@ -1175,7 +1175,7 @@ class NonBatchedOpsStressTest : public StressTest {
       }
 
       if (!VerifyWideColumns(iter->value(), iter->columns())) {
-        s = Status_Corruption("Value and columns inconsistent",
+        s = rocksdb_rs::status::Status_Corruption("Value and columns inconsistent",
                                DebugString(iter->value(), iter->columns()));
         break;
       }

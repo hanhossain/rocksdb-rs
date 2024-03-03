@@ -163,7 +163,7 @@ class DummyTableFactory : public TableFactory {
       std::unique_ptr<RandomAccessFileReader>&& /*file*/,
       uint64_t /*file_size*/, std::unique_ptr<TableReader>* /*table_reader*/,
       bool /*prefetch_index_and_filter_in_cache*/) const override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   TableBuilder* NewTableBuilder(
@@ -175,7 +175,7 @@ class DummyTableFactory : public TableFactory {
   rocksdb_rs::status::Status ValidateOptions(
       const DBOptions& /*db_opts*/,
       const ColumnFamilyOptions& /*cf_opts*/) const override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   std::string GetPrintableOptions() const override { return ""; }

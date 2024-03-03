@@ -175,12 +175,12 @@ rocksdb_rs::status::Status BlockPrefixIndex::Create(const SliceTransform* prefix
     if (!GetVarint32(&meta_pos, &prefix_size) ||
         !GetVarint32(&meta_pos, &entry_index) ||
         !GetVarint32(&meta_pos, &num_blocks)) {
-      s = Status_Corruption(
+      s = rocksdb_rs::status::Status_Corruption(
           "Corrupted prefix meta block: unable to read from it.");
       break;
     }
     if (pos + prefix_size > prefixes.size()) {
-      s = Status_Corruption(
+      s = rocksdb_rs::status::Status_Corruption(
           "Corrupted prefix meta block: size inconsistency.");
       break;
     }
@@ -191,7 +191,7 @@ rocksdb_rs::status::Status BlockPrefixIndex::Create(const SliceTransform* prefix
   }
 
   if (s.ok() && pos != prefixes.size()) {
-    s = Status_Corruption("Corrupted prefix meta block");
+    s = rocksdb_rs::status::Status_Corruption("Corrupted prefix meta block");
   }
 
   if (s.ok()) {

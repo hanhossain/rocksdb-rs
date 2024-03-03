@@ -103,7 +103,7 @@ rocksdb_rs::status::Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64
                                             io_opts, &filenames,
                                             /*IODebugContext*=*/nullptr);
   if (s.IsNotFound()) {
-    return Status_InvalidArgument("Failed to open wal_dir",
+    return rocksdb_rs::status::Status_InvalidArgument("Failed to open wal_dir",
                                    immutable_db_options_.GetWalDir());
   } else if (!s.ok()) {
     return s;
@@ -218,7 +218,7 @@ rocksdb_rs::status::Status DBImplSecondary::RecoverLogFiles(
            wal_read_status->ok() && status.ok()) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reader->GetReporter()->Corruption(
-            record.size(), Status_Corruption("log record too small"));
+            record.size(), rocksdb_rs::status::Status_Corruption("log record too small"));
         continue;
       }
       status = WriteBatchInternal::SetContents(&batch, record);
@@ -355,7 +355,7 @@ rocksdb_rs::status::Status DBImplSecondary::GetImpl(const ReadOptions& read_opti
                                 const Slice& key, PinnableSlice* pinnable_val,
                                 std::string* timestamp) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -453,14 +453,14 @@ Iterator* DBImplSecondary::NewIterator(const ReadOptions& read_options,
                                        ColumnFamilyHandle* column_family) {
   if (read_options.managed) {
     return NewErrorIterator(
-        Status_NotSupported("Managed iterator is not supported anymore."));
+        rocksdb_rs::status::Status_NotSupported("Managed iterator is not supported anymore."));
   }
   if (read_options.read_tier == kPersistedTier) {
-    return NewErrorIterator(Status_NotSupported(
+    return NewErrorIterator(rocksdb_rs::status::Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators."));
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -484,12 +484,12 @@ Iterator* DBImplSecondary::NewIterator(const ReadOptions& read_options,
   auto cfd = cfh->cfd();
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (read_options.tailing) {
-    return NewErrorIterator(Status_NotSupported(
+    return NewErrorIterator(rocksdb_rs::status::Status_NotSupported(
         "tailing iterator not supported in secondary mode"));
   } else if (read_options.snapshot != nullptr) {
     // TODO (yanqin) support snapshot.
     return NewErrorIterator(
-        Status_NotSupported("snapshot not supported in secondary mode"));
+        rocksdb_rs::status::Status_NotSupported("snapshot not supported in secondary mode"));
   } else {
     SequenceNumber snapshot(kMaxSequenceNumber);
     result = NewIteratorImpl(read_options, cfd, snapshot, read_callback);
@@ -524,20 +524,20 @@ rocksdb_rs::status::Status DBImplSecondary::NewIterators(
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
   if (read_options.managed) {
-    return Status_NotSupported("Managed iterator is not supported anymore.");
+    return rocksdb_rs::status::Status_NotSupported("Managed iterator is not supported anymore.");
   }
   if (read_options.read_tier == kPersistedTier) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterators with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (iterators == nullptr) {
-    return Status_InvalidArgument("iterators not allowed to be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("iterators not allowed to be nullptr");
   }
 
   if (read_options.timestamp) {
@@ -561,11 +561,11 @@ rocksdb_rs::status::Status DBImplSecondary::NewIterators(
   iterators->clear();
   iterators->reserve(column_families.size());
   if (read_options.tailing) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "tailing iterator not supported in secondary mode");
   } else if (read_options.snapshot != nullptr) {
     // TODO (yanqin) support snapshot.
-    return Status_NotSupported("snapshot not supported in secondary mode");
+    return rocksdb_rs::status::Status_NotSupported("snapshot not supported in secondary mode");
   } else {
     SequenceNumber read_seq(kMaxSequenceNumber);
     for (auto cfh : column_families) {
@@ -617,7 +617,7 @@ rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
     }
   }
   return corruption_messages.empty() ? rocksdb_rs::status::Status_OK()
-                                     : Status_Corruption(corruption_messages);
+                                     : rocksdb_rs::status::Status_Corruption(corruption_messages);
 }
 
 rocksdb_rs::status::Status DBImplSecondary::TryCatchUpWithPrimary() {
@@ -760,7 +760,7 @@ rocksdb_rs::status::Status DB::OpenAsSecondary(
       auto cfd =
           impl->versions_->GetColumnFamilySet()->GetColumnFamily(cf.name);
       if (nullptr == cfd) {
-        s = Status_InvalidArgument("Column family not found", cf.name);
+        s = rocksdb_rs::status::Status_InvalidArgument("Column family not found", cf.name);
         break;
       }
       handles->push_back(new ColumnFamilyHandleImpl(cfd, impl, &impl->mutex_));
@@ -800,7 +800,7 @@ rocksdb_rs::status::Status DBImplSecondary::CompactWithoutInstallation(
   InstrumentedMutexLock l(&mutex_);
   auto cfd = static_cast_with_check<ColumnFamilyHandleImpl>(cfh)->cfd();
   if (!cfd) {
-    return Status_InvalidArgument("Cannot find column family" +
+    return rocksdb_rs::status::Status_InvalidArgument("Cannot find column family" +
                                    cfh->GetName());
   }
 

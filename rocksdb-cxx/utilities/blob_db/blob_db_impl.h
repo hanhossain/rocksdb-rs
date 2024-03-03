@@ -118,7 +118,7 @@ class BlobDBImpl : public BlobDB {
       const ReadOptions& /*read_options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_families*/,
       std::vector<Iterator*>* /*iterators*/) override {
-    return Status_NotSupported("Not implemented");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
   }
 
   using BlobDB::MultiGet;

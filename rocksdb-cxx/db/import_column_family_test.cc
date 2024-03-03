@@ -873,7 +873,7 @@ TEST_F(ImportColumnFamilyTest, ImportMultiColumnFamilyWithOverlap) {
                                                              metadata_ptr2_};
 
   ASSERT_TRUE(db_->CreateColumnFamilyWithImport(options, "toto", import_options, metadatas, &import_cfh_)
-            .eq(Status_InvalidArgument("CFs have overlapping ranges")));
+            .eq(rocksdb_rs::status::Status_InvalidArgument("CFs have overlapping ranges")));
 
   ASSERT_OK(db_copy->DropColumnFamily(copy_cfh));
   ASSERT_OK(db_copy->DestroyColumnFamilyHandle(copy_cfh));

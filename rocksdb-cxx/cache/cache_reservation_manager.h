@@ -136,7 +136,7 @@ class CacheReservationManagerImpl
 
   rocksdb_rs::status::Status UpdateCacheReservation(std::size_t /* memory_used_delta */,
                                 bool /* increase */) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   // One of the two ways of reserving cache space and releasing is done through

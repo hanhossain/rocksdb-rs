@@ -234,7 +234,7 @@ rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* txn
     snprintf(msg, sizeof(msg), "Column family id not found: %" PRIu32,
              column_family_id);
 
-    return Status_InvalidArgument(msg);
+    return rocksdb_rs::status::Status_InvalidArgument(msg);
   }
 
   // Need to lock the mutex for the stripe that this key hashes to
@@ -705,7 +705,7 @@ rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* /* 
                                  const Endpoint& /* start */,
                                  const Endpoint& /* end */, Env* /* env */,
                                  bool /* exclusive */) {
-  return Status_NotSupported(
+  return rocksdb_rs::status::Status_NotSupported(
       "PointLockManager does not support range locking");
 }
 

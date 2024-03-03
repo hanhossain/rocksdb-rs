@@ -263,7 +263,7 @@ class WriteCommittedTxnDB : public PessimisticTransactionDB {
 inline rocksdb_rs::status::Status PessimisticTransactionDB::FailIfBatchHasTs(
     const WriteBatch* batch) {
   if (batch != nullptr && WriteBatchInternal::HasKeyWithTimestamp(*batch)) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Writes with timestamp must go through transaction API instead of "
         "TransactionDB.");
   }
@@ -278,7 +278,7 @@ inline rocksdb_rs::status::Status PessimisticTransactionDB::FailIfCfEnablesTs(
   const Comparator* const ucmp = column_family->GetComparator();
   assert(ucmp);
   if (ucmp->timestamp_size() > 0) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Write operation with user timestamp must go through the transaction "
         "API instead of TransactionDB.");
   }

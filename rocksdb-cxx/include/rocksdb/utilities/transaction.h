@@ -395,7 +395,7 @@ class Transaction {
   // Get a range lock on [start_endpoint; end_endpoint].
   virtual rocksdb_rs::status::Status GetRangeLock(ColumnFamilyHandle*, const Endpoint&,
                               const Endpoint&) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   virtual rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options, const Slice& key,
@@ -645,11 +645,11 @@ class Transaction {
   uint64_t GetId() { return id_; }
 
   virtual rocksdb_rs::status::Status SetReadTimestampForValidation(TxnTimestamp /*ts*/) {
-    return Status_NotSupported("timestamp not supported");
+    return rocksdb_rs::status::Status_NotSupported("timestamp not supported");
   }
 
   virtual rocksdb_rs::status::Status SetCommitTimestamp(TxnTimestamp /*ts*/) {
-    return Status_NotSupported("timestamp not supported");
+    return rocksdb_rs::status::Status_NotSupported("timestamp not supported");
   }
 
   virtual TxnTimestamp GetCommitTimestamp() const { return kMaxTxnTimestamp; }

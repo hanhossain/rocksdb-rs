@@ -97,14 +97,14 @@ class BlobIndex {
     assert(slice.size() > 0);
     type_ = static_cast<Type>(*slice.data());
     if (type_ >= Type::kUnknown) {
-      return Status_Corruption(kErrorMessage,
+      return rocksdb_rs::status::Status_Corruption(kErrorMessage,
                                 "Unknown blob index type: " +
                                     std::to_string(static_cast<char>(type_)));
     }
     slice = Slice(slice.data() + 1, slice.size() - 1);
     if (HasTTL()) {
       if (!GetVarint64(&slice, &expiration_)) {
-        return Status_Corruption(kErrorMessage, "Corrupted expiration");
+        return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Corrupted expiration");
       }
     }
     if (IsInlined()) {
@@ -114,7 +114,7 @@ class BlobIndex {
           GetVarint64(&slice, &size_) && slice.size() == 1) {
         compression_ = static_cast<rocksdb_rs::compression_type::CompressionType>(*slice.data());
       } else {
-        return Status_Corruption(kErrorMessage, "Corrupted blob offset");
+        return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Corrupted blob offset");
       }
     }
     return rocksdb_rs::status::Status_OK();

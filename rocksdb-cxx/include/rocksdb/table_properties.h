@@ -98,7 +98,7 @@ class TablePropertiesCollector {
   // @params key    the user key that is inserted into the table.
   // @params value  the value that is inserted into the table.
   virtual rocksdb_rs::status::Status Add(const Slice& /*key*/, const Slice& /*value*/) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "TablePropertiesCollector::Add() deprecated.");
   }
 

@@ -35,7 +35,7 @@ void DecodeCFAndKey(std::string& buffer, uint32_t* cf_id, Slice* key) {
 rocksdb_rs::status::Status TracerHelper::ParseVersionStr(std::string& v_string, int* v_num) {
   if (v_string.find_first_of('.') == std::string::npos ||
       v_string.find_first_of('.') != v_string.find_last_of('.')) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted trace file. Incorrect version format.");
   }
   int tmp_num = 0;
@@ -45,7 +45,7 @@ rocksdb_rs::status::Status TracerHelper::ParseVersionStr(std::string& v_string, 
     } else if (isdigit(v_string[i])) {
       tmp_num = tmp_num * 10 + (v_string[i] - '0');
     } else {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Corrupted trace file. Incorrect version format");
     }
   }
@@ -108,10 +108,10 @@ rocksdb_rs::status::Status TracerHelper::DecodeHeader(const std::string& encoded
   rocksdb_rs::status::Status s = TracerHelper::DecodeTrace(encoded_trace, header);
 
   if (header->type != kTraceBegin) {
-    return Status_Corruption("Corrupted trace file. Incorrect header.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect header.");
   }
   if (header->payload.substr(0, kTraceMagic.length()) != kTraceMagic) {
-    return Status_Corruption("Corrupted trace file. Incorrect magic.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect magic.");
   }
 
   return s;
@@ -272,7 +272,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
     // MultiGet
     case kTraceMultiGet: {
       if (trace_file_version < 2) {
-        return Status_Corruption("MultiGet is not supported.");
+        return rocksdb_rs::status::Status_Corruption("MultiGet is not supported.");
       }
 
       uint32_t multiget_size = 0;
@@ -309,7 +309,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
         payload_map &= (payload_map - 1);
       }
       if (multiget_size == 0) {
-        return Status_InvalidArgument("Empty MultiGet cf_ids or keys.");
+        return rocksdb_rs::status::Status_InvalidArgument("Empty MultiGet cf_ids or keys.");
       }
 
       // Decode the cfids_payload and keys_payload
@@ -335,7 +335,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
       return rocksdb_rs::status::Status_OK();
     }
     default:
-      return Status_NotSupported("Unsupported trace type.");
+      return rocksdb_rs::status::Status_NotSupported("Unsupported trace type.");
   }
 }
 
@@ -492,7 +492,7 @@ rocksdb_rs::status::Status Tracer::MultiGet(const size_t num_keys,
 rocksdb_rs::status::Status Tracer::MultiGet(const std::vector<ColumnFamilyHandle*>& column_families,
                         const std::vector<Slice>& keys) {
   if (column_families.size() != keys.size()) {
-    return Status_Corruption("the CFs size and keys size does not match!");
+    return rocksdb_rs::status::Status_Corruption("the CFs size and keys size does not match!");
   }
   TraceType trace_type = kTraceMultiGet;
   if (ShouldSkipTrace(trace_type)) {

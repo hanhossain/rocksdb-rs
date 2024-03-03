@@ -103,7 +103,7 @@ rocksdb_rs::status::Status ListColumnFamiliesHandler::ApplyVersionEdit(
   if (edit.is_column_family_add_) {
     if (column_family_names_.find(edit.column_family_) !=
         column_family_names_.end()) {
-      s = Status_Corruption("Manifest adding the same column family twice");
+      s = rocksdb_rs::status::Status_Corruption("Manifest adding the same column family twice");
     } else {
       column_family_names_.insert(
           {edit.column_family_, edit.column_family_name_});
@@ -111,7 +111,7 @@ rocksdb_rs::status::Status ListColumnFamiliesHandler::ApplyVersionEdit(
   } else if (edit.is_column_family_drop_) {
     if (column_family_names_.find(edit.column_family_) ==
         column_family_names_.end()) {
-      s = Status_Corruption("Manifest - dropping non-existing column family");
+      s = rocksdb_rs::status::Status_Corruption("Manifest - dropping non-existing column family");
     } else {
       column_family_names_.erase(edit.column_family_);
     }
@@ -179,7 +179,7 @@ rocksdb_rs::status::Status VersionEditHandler::Initialize() {
     }
     auto default_cf_iter = name_to_options_.find(kDefaultColumnFamilyName);
     if (default_cf_iter == name_to_options_.end()) {
-      s = Status_InvalidArgument("Default column family not specified");
+      s = rocksdb_rs::status::Status_InvalidArgument("Default column family not specified");
     }
     if (s.ok()) {
       VersionEdit default_cf_edit;
@@ -228,7 +228,7 @@ rocksdb_rs::status::Status VersionEditHandler::OnColumnFamilyAdd(VersionEdit& ed
   *cfd = nullptr;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (cf_in_builders || cf_in_not_found) {
-    s = Status_Corruption("MANIFEST adding the same column family twice: " +
+    s = rocksdb_rs::status::Status_Corruption("MANIFEST adding the same column family twice: " +
                            edit.column_family_name_);
   }
   if (s.ok()) {
@@ -271,7 +271,7 @@ rocksdb_rs::status::Status VersionEditHandler::OnColumnFamilyDrop(VersionEdit& e
   } else if (cf_in_not_found) {
     column_families_not_found_.erase(edit.column_family_);
   } else {
-    s = Status_Corruption("MANIFEST - dropping non-existing column family");
+    s = rocksdb_rs::status::Status_Corruption("MANIFEST - dropping non-existing column family");
   }
   *cfd = tmp_cfd;
   return s;
@@ -299,7 +299,7 @@ rocksdb_rs::status::Status VersionEditHandler::OnNonCfOperation(VersionEdit& edi
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!cf_in_not_found) {
     if (!cf_in_builders) {
-      s = Status_Corruption(
+      s = rocksdb_rs::status::Status_Corruption(
           "MANIFEST record referencing unknown column family");
     }
     ColumnFamilyData* tmp_cfd = nullptr;
@@ -392,7 +392,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
     }
     msg = msg.substr(0, msg.size() - 2);
     msg.append(" entry in MANIFEST");
-    *s = Status_Corruption(msg);
+    *s = rocksdb_rs::status::Status_Corruption(msg);
   }
   // There were some column families in the MANIFEST that weren't specified
   // in the argument. This is OK in read_only mode
@@ -404,7 +404,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       msg.append(cf.second);
     }
     msg = msg.substr(2);
-    *s = Status_InvalidArgument("Column families not opened: " + msg);
+    *s = rocksdb_rs::status::Status_InvalidArgument("Column families not opened: " + msg);
   }
   if (s->ok()) {
     version_set_->GetColumnFamilySet()->UpdateMaxColumnFamily(
@@ -421,7 +421,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       assert(builder_iter != builders_.end());
       auto* builder = builder_iter->second->version_builder();
       if (!builder->CheckConsistencyForNumLevels()) {
-        *s = Status_InvalidArgument(
+        *s = rocksdb_rs::status::Status_InvalidArgument(
             "db has more levels than options.num_levels");
         break;
       }
@@ -440,7 +440,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       if (!s->ok()) {
         // If s is IOError::PathNotFound, then we mark the db as corrupted.
         if (s->IsPathNotFound()) {
-          *s = Status_Corruption("Corruption: " + *s->ToString());
+          *s = rocksdb_rs::status::Status_Corruption("Corruption: " + *s->ToString());
         }
         break;
       }
@@ -616,7 +616,7 @@ rocksdb_rs::status::Status VersionEditHandler::ExtractInfoFromVersionEdit(Column
     if (edit.has_comparator_ &&
         edit.comparator_ != cfd->user_comparator()->Name()) {
       if (!cf_to_cmp_names_) {
-        s = Status_InvalidArgument(
+        s = rocksdb_rs::status::Status_InvalidArgument(
             cfd->user_comparator()->Name(),
             "does not match existing comparator " + edit.comparator_);
       } else {
@@ -682,7 +682,7 @@ rocksdb_rs::status::Status VersionEditHandler::MaybeHandleFileBoundariesForNewFi
       // at the time when the SST file was created. As a result, all added SST
       // files in one `VersionEdit` should have the same value for it.
       if (file_boundaries_need_handling) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "New files in one VersionEdit has different "
             "user_defined_timestamps_persisted value.");
       }

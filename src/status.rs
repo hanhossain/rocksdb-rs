@@ -129,42 +129,30 @@ pub(crate) mod ffi {
         #[cxx_name = "Status_NotFound"]
         fn status_not_found5(subcode: SubCode, msg: &Slice) -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption(msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption2(subcode: SubCode) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption3() -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Corruption"]
         fn status_corruption4(msg: &Slice) -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported(msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported2(msg: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported3(subcode: SubCode) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotSupported"]
         fn status_not_supported4() -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument(msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument2(msg: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument3(subcode: SubCode) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_InvalidArgument"]
         fn status_invalid_argument4() -> Status;
 

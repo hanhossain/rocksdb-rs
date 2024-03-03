@@ -367,30 +367,30 @@ TEST_F(DBBasicTestWithTimestamp, UpdateFullHistoryTsLowWithPublicAPI) {
   std::string ts_low_str_back = Timestamp(8, 0);
   auto s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                          ts_low_str_back);
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
   // test IncreaseFullHistoryTsLow with a timestamp whose length is longger
   // than the cf's timestamp size
   std::string ts_low_str_long(Timestamp(0, 0).size() + 1, 'a');
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                     ts_low_str_long);
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
   // test IncreaseFullHistoryTsLow with a timestamp which is null
   std::string ts_low_str_null = "";
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(),
                                     ts_low_str_null);
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
   // test IncreaseFullHistoryTsLow for a column family that does not enable
   // timestamp
   options.comparator = BytewiseComparator();
   DestroyAndReopen(options);
   ts_low_str = Timestamp(10, 0);
   s = db_->IncreaseFullHistoryTsLow(db_->DefaultColumnFamily(), ts_low_str);
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
   // test GetFullHistoryTsLow for a column family that does not enable
   // timestamp
   std::string current_ts_low;
   s = db_->GetFullHistoryTsLow(db_->DefaultColumnFamily(), &current_ts_low);
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
   Close();
 }
 

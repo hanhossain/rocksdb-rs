@@ -47,18 +47,18 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
     if (file_to_ingest.cf_id !=
             TablePropertiesCollectorFactory::Context::kUnknownColumnFamily &&
         file_to_ingest.cf_id != cfd_->GetID()) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "External file column family id don't match");
     }
 
     if (file_to_ingest.num_entries == 0 &&
         file_to_ingest.num_range_deletions == 0) {
-      return Status_InvalidArgument("File contain no entries");
+      return rocksdb_rs::status::Status_InvalidArgument("File contain no entries");
     }
 
     if (!file_to_ingest.smallest_internal_key.Valid() ||
         !file_to_ingest.largest_internal_key.Valid()) {
-      return Status_Corruption("Generated table have corrupted keys");
+      return rocksdb_rs::status::Status_Corruption("Generated table have corrupted keys");
     }
 
     files_to_ingest_.emplace_back(std::move(file_to_ingest));
@@ -67,7 +67,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
   const Comparator* ucmp = cfd_->internal_comparator().user_comparator();
   auto num_files = files_to_ingest_.size();
   if (num_files == 0) {
-    return Status_InvalidArgument("The list of files is empty");
+    return rocksdb_rs::status::Status_InvalidArgument("The list of files is empty");
   } else if (num_files > 1) {
     // Verify that passed files don't have overlapping ranges
     autovector<const IngestedFileInfo*> sorted_files;
@@ -97,7 +97,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
   }
 
   if (ingestion_options_.ingest_behind && files_overlap_) {
-    return Status_NotSupported("Files have overlapping ranges");
+    return rocksdb_rs::status::Status_NotSupported("Files have overlapping ranges");
   }
 
   // Copy/Move external files into DB
@@ -254,7 +254,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
           for (size_t i = 0; i < files_to_ingest_.size(); i++) {
             if (files_checksum_func_names[i] !=
                 generated_checksum_func_names[i]) {
-              status = Status_InvalidArgument(
+              status = rocksdb_rs::status::Status_InvalidArgument(
                   "Checksum function name does not match with the checksum "
                   "function name of this DB");
               ROCKS_LOG_WARN(
@@ -264,7 +264,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
               break;
             }
             if (files_checksums[i] != generated_checksums[i]) {
-              status = Status_Corruption(
+              status = rocksdb_rs::status::Status_Corruption(
                   "Ingested checksum does not match with the generated "
                   "checksum");
               ROCKS_LOG_WARN(
@@ -282,7 +282,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
           // in the Manifest.
           for (size_t i = 0; i < files_to_ingest_.size(); i++) {
             if (files_checksum_func_names[i] != file_checksum_gen->Name()) {
-              status = Status_InvalidArgument(
+              status = rocksdb_rs::status::Status_InvalidArgument(
                   "Checksum function name does not match with the checksum "
                   "function name of this DB");
               ROCKS_LOG_WARN(
@@ -301,7 +301,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
                   files_checksums.size() != 0)) {
         // The checksum or checksum function name vector are not both empty
         // and they are incomplete.
-        status = Status_InvalidArgument(
+        status = rocksdb_rs::status::Status_InvalidArgument(
             "The checksum information of ingested sst files are nonempty and "
             "the size of checksums or the size of the checksum function "
             "names "
@@ -366,7 +366,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::NeedsFlush(bool* flush_n
       ranges, super_version, db_options_.allow_data_in_errors, flush_needed);
   if (status.ok() && *flush_needed &&
       !ingestion_options_.allow_blocking_flush) {
-    status = Status_InvalidArgument("External file requires flush");
+    status = rocksdb_rs::status::Status_InvalidArgument("External file requires flush");
   }
   return status;
 }
@@ -725,7 +725,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
   // Get table version
   auto version_iter = uprops.find(ExternalSstFilePropertyNames::kVersion);
   if (version_iter == uprops.end()) {
-    return Status_Corruption("External file version not found");
+    return rocksdb_rs::status::Status_Corruption("External file version not found");
   }
   file_to_ingest->version = DecodeFixed32(version_iter->second.c_str());
 
@@ -733,7 +733,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
   if (file_to_ingest->version == 2) {
     // version 2 imply that we have global sequence number
     if (seqno_iter == uprops.end()) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "External file global sequence number not found");
     }
 
@@ -741,7 +741,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     file_to_ingest->original_seqno = DecodeFixed64(seqno_iter->second.c_str());
     if (props->external_sst_file_global_seqno_offset == 0) {
       file_to_ingest->global_seqno_offset = 0;
-      return Status_Corruption("Was not able to find file global seqno field");
+      return rocksdb_rs::status::Status_Corruption("Was not able to find file global seqno field");
     }
     file_to_ingest->global_seqno_offset =
         static_cast<size_t>(props->external_sst_file_global_seqno_offset);
@@ -751,11 +751,11 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     file_to_ingest->original_seqno = 0;
     if (ingestion_options_.allow_blocking_flush ||
         ingestion_options_.allow_global_seqno) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "External SST file V1 does not support global seqno");
     }
   } else {
-    return Status_InvalidArgument("External file version is not supported");
+    return rocksdb_rs::status::Status_InvalidArgument("External file version is not supported");
   }
   // Get number of entries in table
   file_to_ingest->num_entries = props->num_entries;
@@ -782,22 +782,22 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     rocksdb_rs::status::Status pik_status =
         ParseInternalKey(iter->key(), &key, allow_data_in_errors);
     if (!pik_status.ok()) {
-      return Status_Corruption("Corrupted key in external file. ",
+      return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
                                 pik_status.getState());
     }
     if (key.sequence != 0) {
-      return Status_Corruption("External file has non zero sequence number");
+      return rocksdb_rs::status::Status_Corruption("External file has non zero sequence number");
     }
     file_to_ingest->smallest_internal_key.SetFrom(key);
 
     iter->SeekToLast();
     pik_status = ParseInternalKey(iter->key(), &key, allow_data_in_errors);
     if (!pik_status.ok()) {
-      return Status_Corruption("Corrupted key in external file. ",
+      return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
                                 pik_status.getState());
     }
     if (key.sequence != 0) {
-      return Status_Corruption("External file has non zero sequence number");
+      return rocksdb_rs::status::Status_Corruption("External file has non zero sequence number");
     }
     file_to_ingest->largest_internal_key.SetFrom(key);
 
@@ -813,7 +813,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
       rocksdb_rs::status::Status pik_status =
           ParseInternalKey(range_del_iter->key(), &key, allow_data_in_errors);
       if (!pik_status.ok()) {
-        return Status_Corruption("Corrupted key in external file. ",
+        return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
                                   pik_status.getState());
       }
       RangeTombstone tombstone(key, range_del_iter->value());
@@ -969,7 +969,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::CheckLevelForIngestedBeh
   // First, check if new files fit in the bottommost level
   int bottom_lvl = cfd_->NumberLevels() - 1;
   if (!IngestedFileFitInLevel(file_to_ingest, bottom_lvl)) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Can't ingest_behind file as it doesn't fit "
         "at the bottommost level!");
   }
@@ -979,7 +979,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::CheckLevelForIngestedBeh
   for (int lvl = 0; lvl < cfd_->NumberLevels() - 1; lvl++) {
     for (auto file : vstorage->LevelFiles(lvl)) {
       if (file->fd.smallest_seqno == 0) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "Can't ingest_behind file as despite allow_ingest_behind=true "
             "there are files with 0 seqno in database at upper levels!");
       }
@@ -996,9 +996,9 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForInge
     // This file already have the correct global seqno
     return rocksdb_rs::status::Status_OK();
   } else if (!ingestion_options_.allow_global_seqno) {
-    return Status_InvalidArgument("Global seqno is required, but disabled");
+    return rocksdb_rs::status::Status_InvalidArgument("Global seqno is required, but disabled");
   } else if (file_to_ingest->global_seqno_offset == 0) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Trying to set global seqno for a file that don't have a global seqno "
         "field");
   }

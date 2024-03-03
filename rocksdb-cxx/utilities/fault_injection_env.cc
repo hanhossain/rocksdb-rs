@@ -283,7 +283,7 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::NewWritableFile(
   // Not allow overwriting files
   rocksdb_rs::status::Status s = target()->FileExists(fname);
   if (s.ok()) {
-    return Status_Corruption("File already exists.");
+    return rocksdb_rs::status::Status_Corruption("File already exists.");
   } else if (!s.IsNotFound()) {
     assert(s.IsIOError());
     return s;

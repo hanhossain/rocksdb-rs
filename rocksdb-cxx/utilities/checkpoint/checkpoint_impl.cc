@@ -43,7 +43,7 @@ rocksdb_rs::status::Status Checkpoint::Create(DB* db, Checkpoint** checkpoint_pt
 rocksdb_rs::status::Status Checkpoint::CreateCheckpoint(const std::string& /*checkpoint_dir*/,
                                     uint64_t /*log_size_for_flush*/,
                                     uint64_t* /*sequence_number_ptr*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
 void CheckpointImpl::CleanStagingDirectory(const std::string& full_private_path,
@@ -73,7 +73,7 @@ void CheckpointImpl::CleanStagingDirectory(const std::string& full_private_path,
 rocksdb_rs::status::Status Checkpoint::ExportColumnFamily(
     ColumnFamilyHandle* /*handle*/, const std::string& /*export_dir*/,
     ExportImportFilesMetaData** /*metadata*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
 // Builds an openable snapshot of RocksDB
@@ -84,7 +84,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
 
   rocksdb_rs::status::Status s = db_->GetEnv()->FileExists(checkpoint_dir);
   if (s.ok()) {
-    return Status_InvalidArgument("Directory exists");
+    return rocksdb_rs::status::Status_InvalidArgument("Directory exists");
   } else if (!s.IsNotFound()) {
     assert(s.IsIOError());
     return s;
@@ -101,7 +101,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
     // directory, but it shouldn't be because we verified above the directory
     // doesn't exist.
     assert(checkpoint_dir.empty());
-    return Status_InvalidArgument("invalid checkpoint directory name");
+    return rocksdb_rs::status::Status_InvalidArgument("invalid checkpoint directory name");
   }
 
   std::string full_private_path =
@@ -224,7 +224,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
     }
   }
   if (dirs.size() > 1) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "db_paths / cf_paths not supported for Checkpoint nor BackupEngine");
   }
 
@@ -237,7 +237,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
       assert(info.file_type == rocksdb_rs::types::FileType::kCurrentFile);
 
       if (info.size != info.replacement_contents.size()) {
-        s = Status_Corruption("Inconsistent size metadata for " +
+        s = rocksdb_rs::status::Status_Corruption("Inconsistent size metadata for " +
                                info.relative_filename);
       } else {
         s = create_file_cb(info.relative_filename, info.replacement_contents,
@@ -289,7 +289,7 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
   assert(*metadata == nullptr);
   auto s = db_->GetEnv()->FileExists(export_dir);
   if (s.ok()) {
-    return Status_InvalidArgument("Specified export_dir exists");
+    return rocksdb_rs::status::Status_InvalidArgument("Specified export_dir exists");
   } else if (!s.IsNotFound()) {
     assert(s.IsIOError());
     return s;
@@ -297,7 +297,7 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
 
   const auto final_nonslash_idx = export_dir.find_last_not_of('/');
   if (final_nonslash_idx == std::string::npos) {
-    return Status_InvalidArgument("Specified export_dir invalid");
+    return rocksdb_rs::status::Status_InvalidArgument("Specified export_dir invalid");
   }
   ROCKS_LOG_INFO(db_options.info_log,
                  "[%s] export column family onto export directory %s",
@@ -433,7 +433,7 @@ rocksdb_rs::status::Status CheckpointImpl::ExportFilesInMetaData(
       rocksdb_rs::types::FileType type;
       const auto ok = rocksdb_rs::filename::ParseFileName(file_metadata.name, &number, &type);
       if (!ok) {
-        s = Status_Corruption("Could not parse file name");
+        s = rocksdb_rs::status::Status_Corruption("Could not parse file name");
         break;
       }
 

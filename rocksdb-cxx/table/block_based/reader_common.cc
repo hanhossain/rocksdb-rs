@@ -42,7 +42,7 @@ rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type, const char* da
       stored = crc32c::Unmask(stored);
       computed = crc32c::Unmask(computed);
     }
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "block checksum mismatch: stored = " + std::to_string(stored) +
         ", computed = " + std::to_string(computed) +
         ", type = " + std::to_string(type) + "  in " + file_name + " offset " +

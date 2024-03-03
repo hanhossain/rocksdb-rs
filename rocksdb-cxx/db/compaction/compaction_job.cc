@@ -757,7 +757,7 @@ rocksdb_rs::status::Status CompactionJob::Run() {
           }
           if (s.ok() &&
               !validator.CompareValidator(files_output[file_idx]->validator)) {
-            s = Status_Corruption("Paranoid checksums do not match");
+            s = rocksdb_rs::status::Status_Corruption("Paranoid checksums do not match");
           }
         }
 
@@ -1059,7 +1059,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
     compaction_filter = compaction_filter_from_factory.get();
   }
   if (compaction_filter != nullptr && !compaction_filter->IgnoreSnapshots()) {
-    sub_compact->status = Status_NotSupported(
+    sub_compact->status = rocksdb_rs::status::Status_NotSupported(
         "CompactionFilter::IgnoreSnapshots() = false is not supported "
         "anymore.");
     return;

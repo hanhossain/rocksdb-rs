@@ -86,7 +86,7 @@ rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice
   }
 
   if (blob_index.IsInlined() || blob_index.HasTTL()) {
-    return Status_Corruption("Unexpected TTL/inlined blob index");
+    return rocksdb_rs::status::Status_Corruption("Unexpected TTL/inlined blob index");
   }
 
   *blob_file_number = blob_index.file_number();

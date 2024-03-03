@@ -134,7 +134,7 @@ class DbKvChecksumTest
       case WriteMode::kNum:
         assert(false);
     }
-    return Status_NotSupported("WriteMode " +
+    return rocksdb_rs::status::Status_NotSupported("WriteMode " +
                                 std::to_string(static_cast<int>(write_mode_)));
   }
 

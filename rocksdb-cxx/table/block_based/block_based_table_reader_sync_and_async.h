@@ -182,7 +182,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
     if (s.ok()) {
       if ((req.result.size() != req.len) ||
           (req_offset + BlockSizeWithTrailer(handle) > req.result.size())) {
-        s = Status_Corruption("truncated block read from " +
+        s = rocksdb_rs::status::Status_Corruption("truncated block read from " +
                                rep_->file->file_name() + " offset " +
                                std::to_string(handle.offset()) + ", expected " +
                                std::to_string(req.len) + " bytes, got " +

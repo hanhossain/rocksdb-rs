@@ -75,7 +75,7 @@ class SanityTest {
         return s;
       }
       if (result != v) {
-        return Status_Corruption("Unexpected value for key " + k);
+        return rocksdb_rs::status::Status_Corruption("Unexpected value for key " + k);
       }
     }
     return rocksdb_rs::status::Status_OK();

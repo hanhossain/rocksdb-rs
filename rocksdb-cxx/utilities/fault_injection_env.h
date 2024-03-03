@@ -226,14 +226,14 @@ class FaultInjectionTestEnv : public EnvWrapper {
     return filesystem_active_;
   }
   void SetFilesystemActiveNoLock(
-      bool active, rocksdb_rs::status::Status error = Status_Corruption("Not active")) {
+      bool active, rocksdb_rs::status::Status error = rocksdb_rs::status::Status_Corruption("Not active")) {
     filesystem_active_ = active;
     if (!active) {
       error_.copy_from(error);
     }
   }
   void SetFilesystemActive(bool active,
-                           rocksdb_rs::status::Status error = Status_Corruption("Not active")) {
+                           rocksdb_rs::status::Status error = rocksdb_rs::status::Status_Corruption("Not active")) {
     MutexLock l(&mutex_);
     SetFilesystemActiveNoLock(active, error.Clone());
   }

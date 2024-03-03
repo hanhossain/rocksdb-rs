@@ -25,7 +25,7 @@ rocksdb_rs::status::Status SliceSaveTo(Cache::ObjectPtr from_obj, size_t from_of
 
 rocksdb_rs::status::Status FailCreate(const Slice&, Cache::CreateContext*, MemoryAllocator*,
                   Cache::ObjectPtr*, size_t*) {
-  return Status_NotSupported("Only for dumping data into SecondaryCache");
+  return rocksdb_rs::status::Status_NotSupported("Only for dumping data into SecondaryCache");
 }
 
 }  // namespace

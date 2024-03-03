@@ -64,7 +64,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& re
                                 uint64_t* manifest_file_size,
                                 bool flush_memtable) {
   if (!bdb_options_.path_relative) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Not able to get relative blob file path from absolute blob_dir.");
   }
   // Hold a lock in the beginning to avoid updates to base DB during the call

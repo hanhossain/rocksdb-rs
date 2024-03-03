@@ -247,7 +247,7 @@ class PersistentCacheFromCache : public PersistentCache {
   rocksdb_rs::status::Status Insert(const Slice& key, const char* data,
                 const size_t size) override {
     if (read_only_) {
-      return Status_NotSupported();
+      return rocksdb_rs::status::Status_NotSupported();
     }
     std::unique_ptr<char[]> copy{new char[size]};
     std::copy_n(data, size, copy.get());
@@ -295,7 +295,7 @@ class ReadOnlyCacheWrapper : public CacheWrapper {
   rocksdb_rs::status::Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
                 const CacheItemHelper* /*helper*/, size_t /*charge*/,
                 Handle** /*handle*/, Priority /*priority*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 };
 

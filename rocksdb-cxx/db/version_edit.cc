@@ -39,7 +39,7 @@ rocksdb_rs::status::Status FileMetaData::UpdateBoundaries(const Slice& key, cons
 
     if (!blob_index.IsInlined() && !blob_index.HasTTL()) {
       if (blob_index.file_number() == kInvalidBlobFileNumber) {
-        return Status_Corruption("Invalid blob file number");
+        return rocksdb_rs::status::Status_Corruption("Invalid blob file number");
       }
 
       if (oldest_blob_file_number == kInvalidBlobFileNumber ||
@@ -803,7 +803,7 @@ rocksdb_rs::status::Status VersionEdit::DecodeFrom(const Slice& src) {
 
   rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
   if (msg != nullptr) {
-    result = Status_Corruption("VersionEdit", msg);
+    result = rocksdb_rs::status::Status_Corruption("VersionEdit", msg);
   }
   return result;
 }

@@ -141,7 +141,7 @@ class ExternalSSTFileBasicTest
           true_data->erase(key);
           break;
         default:
-          return Status_InvalidArgument("Value type is not supported");
+          return rocksdb_rs::status::Status_InvalidArgument("Value type is not supported");
       }
       if (!s.ok()) {
         sst_file_writer.Finish();
@@ -1213,7 +1213,7 @@ TEST_F(ExternalSSTFileBasicTest, ReopenNotSupported) {
   SyncPoint::GetInstance()->SetCallBack(
       "ExternalSstFileIngestionJob::Prepare:Reopen", [&](void* arg) {
         rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(arg);
-        *s = Status_NotSupported();
+        *s = rocksdb_rs::status::Status_NotSupported();
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

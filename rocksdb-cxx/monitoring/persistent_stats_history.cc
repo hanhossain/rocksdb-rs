@@ -33,7 +33,7 @@ const uint64_t kStatsCFCompatibleFormatVersion = 1;
 rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
                                           uint64_t* version_number) {
   if (type >= StatsVersionKeyType::kKeyTypeMax) {
-    return Status_InvalidArgument("Invalid stats version key type provided");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid stats version key type provided");
   }
   std::string key;
   if (type == StatsVersionKeyType::kFormatVersion) {

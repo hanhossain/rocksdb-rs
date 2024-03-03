@@ -286,7 +286,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::ReadInternalKey(
     rocksdb_rs::status::Status pik_status = ParseInternalKey(*internal_key, parsed_key,
                                          false /* log_err_key */);  // TODO
     if (!pik_status.ok()) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           Slice("Corrupted key found during next key read. "),
           *pik_status.getState());
     }
@@ -362,7 +362,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::NextPrefixEncodingKey(
       return s;
     }
     if (my_bytes_read == 0) {
-      return Status_Corruption("Unexpected EOF when reading size of the key");
+      return rocksdb_rs::status::Status_Corruption("Unexpected EOF when reading size of the key");
     }
     *bytes_read += my_bytes_read;
 
@@ -449,7 +449,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::NextPrefixEncodingKey(
         break;
       }
       default:
-        return Status_Corruption("Un-identified size flag.");
+        return rocksdb_rs::status::Status_Corruption("Un-identified size flag.");
     }
   } while (expect_suffix);  // Another round if suffix is expected.
   return rocksdb_rs::status::Status_OK();
@@ -472,7 +472,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,
       return file_reader_.status();
     }
     if (value_size_bytes == 0) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Unexpected EOF when reading the next value's size.");
     }
     *bytes_read += value_size_bytes;

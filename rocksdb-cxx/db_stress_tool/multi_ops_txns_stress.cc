@@ -189,14 +189,14 @@ std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>
 MultiOpsTxnsStressTest::Record::DecodePrimaryIndexValue(
     Slice primary_index_value) {
   if (primary_index_value.size() != 8) {
-    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
+    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_Corruption(""), 0, 0};
   }
   uint32_t b = 0;
   uint32_t c = 0;
   if (!GetFixed32(&primary_index_value, &b) ||
       !GetFixed32(&primary_index_value, &c)) {
     assert(false);
-    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{Status_Corruption(""), 0, 0};
+    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_Corruption(""), 0, 0};
   }
   return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_OK(), b, c};
 }
@@ -205,7 +205,7 @@ std::pair<rocksdb_rs::status::Status, uint32_t>
 MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexValue(
     Slice secondary_index_value) {
   if (secondary_index_value.size() != 4) {
-    return std::make_pair(Status_Corruption(""), 0);
+    return std::make_pair(rocksdb_rs::status::Status_Corruption(""), 0);
   }
   uint32_t crc = 0;
   bool result __attribute__((unused)) =
@@ -252,7 +252,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
     Slice primary_index_key, Slice primary_index_value) {
   if (primary_index_key.size() != 8) {
     assert(false);
-    return Status_Corruption("Primary index key length is not 8");
+    return rocksdb_rs::status::Status_Corruption("Primary index key length is not 8");
   }
 
   uint32_t index_id = 0;
@@ -264,7 +264,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
   if (index_id != kPrimaryIndexId) {
     std::ostringstream oss;
     oss << "Unexpected primary index id: " << index_id;
-    return Status_Corruption(oss.str());
+    return rocksdb_rs::status::Status_Corruption(oss.str());
   }
 
   res = GetFixed32(&primary_index_key, &a_);
@@ -273,7 +273,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
   assert(primary_index_key.empty());
 
   if (primary_index_value.size() != 8) {
-    return Status_Corruption("Primary index value length is not 8");
+    return rocksdb_rs::status::Status_Corruption("Primary index value length is not 8");
   }
   GetFixed32(&primary_index_value, &b_);
   GetFixed32(&primary_index_value, &c_);
@@ -283,7 +283,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
 rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
     Slice secondary_index_key, Slice secondary_index_value) {
   if (secondary_index_key.size() != 12) {
-    return Status_Corruption("Secondary index key length is not 12");
+    return rocksdb_rs::status::Status_Corruption("Secondary index key length is not 12");
   }
   uint32_t crc =
       crc32c::Value(secondary_index_key.data(), secondary_index_key.size());
@@ -297,7 +297,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
   if (index_id != kSecondaryIndexId) {
     std::ostringstream oss;
     oss << "Unexpected secondary index id: " << index_id;
-    return Status_Corruption(oss.str());
+    return rocksdb_rs::status::Status_Corruption(oss.str());
   }
 
   assert(secondary_index_key.size() == 8);
@@ -312,7 +312,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
   assert(secondary_index_key.empty());
 
   if (secondary_index_value.size() != 4) {
-    return Status_Corruption("Secondary index value length is not 4");
+    return rocksdb_rs::status::Status_Corruption("Secondary index value length is not 4");
   }
   uint32_t val = 0;
   GetFixed32(&secondary_index_value, &val);
@@ -320,7 +320,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
     std::ostringstream oss;
     oss << "Secondary index key checksum mismatch, stored: " << val
         << ", recomputed: " << crc;
-    return Status_Corruption(oss.str());
+    return rocksdb_rs::status::Status_Corruption(oss.str());
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -385,7 +385,7 @@ rust::Vec<rocksdb_rs::status::Status> MultiOpsTxnsStressTest::TestMultiGet(
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
   rust::Vec<rocksdb_rs::status::Status> vec;
-  vec.push_back(Status_NotSupported());
+  vec.push_back(rocksdb_rs::status::Status_NotSupported());
   return vec;
 }
 
@@ -432,7 +432,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestPut(ThreadState* /*thread
                                        const std::vector<int64_t>& /*keys*/,
                                        char (&value)[100]) {
   (void)value;
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
 // Not intended for use.
@@ -440,7 +440,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestDelete(
     ThreadState* /*thread*/, WriteOptions& /*write_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
 // Not intended for use.
@@ -448,7 +448,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestDeleteRange(
     ThreadState* /*thread*/, WriteOptions& /*write_opts*/,
     const std::vector<int>& /*rand_column_families*/,
     const std::vector<int64_t>& /*rand_keys*/) {
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
 void MultiOpsTxnsStressTest::TestIngestExternalFile(
@@ -819,7 +819,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadS
           << " (published " << dbimpl->GetLastPublishedSequence()
           << "), pk/sk mismatch. pk: (a=" << record.a_value() << ", "
           << "c=" << c << "), sk: (c=" << old_c << ")";
-      s = Status_Corruption();
+      s = rocksdb_rs::status::Status_Corruption();
       fprintf(stderr, "%s\n", oss.str().c_str());
       assert(false);
       break;

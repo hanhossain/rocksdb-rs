@@ -329,7 +329,7 @@ rocksdb_rs::status::Status ReadTablePropertiesHelper(
     // properties block should be strictly sorted with no duplicate key.
     if (!last_key.empty() &&
         BytewiseComparator()->Compare(key, last_key) <= 0) {
-      s = Status_Corruption("properties unsorted");
+      s = rocksdb_rs::status::Status_Corruption("properties unsorted");
       break;
     }
     last_key = key;
@@ -475,7 +475,7 @@ rocksdb_rs::status::Status FindMetaBlock(InternalIterator* meta_index_iter,
   rocksdb_rs::status::Status s =
       FindOptionalMetaBlock(meta_index_iter, meta_block_name, block_handle);
   if (s.ok() && block_handle->IsNull()) {
-    return Status_Corruption("Cannot find the meta block", meta_block_name);
+    return rocksdb_rs::status::Status_Corruption("Cannot find the meta block", meta_block_name);
   } else {
     return s;
   }

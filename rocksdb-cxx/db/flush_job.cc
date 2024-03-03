@@ -451,7 +451,7 @@ rocksdb_rs::status::Status FlushJob::MemPurge() {
           ioptions->compaction_filter_factory->CreateCompactionFilter(ctx);
       if (compaction_filter != nullptr &&
           !compaction_filter->IgnoreSnapshots()) {
-        s = Status_NotSupported(
+        s = rocksdb_rs::status::Status_NotSupported(
             "CompactionFilter::IgnoreSnapshots() = false is not supported "
             "anymore.");
         return s;
@@ -960,7 +960,7 @@ rocksdb_rs::status::Status FlushJob::WriteLevel0Table() {
                        cfd_->GetName().c_str(), job_context_->job_id,
                        msg.c_str());
         if (db_options_.flush_verify_memtable_count) {
-          s = Status_Corruption(msg);
+          s = rocksdb_rs::status::Status_Corruption(msg);
         }
       }
       if (tboptions.reason == TableFileCreationReason::kFlush) {

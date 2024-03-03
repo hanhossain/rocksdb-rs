@@ -362,7 +362,7 @@ rocksdb_rs::status::Status Comparator::CreateFromString(const ConfigOptions& con
     *result = nullptr;
     return rocksdb_rs::status::Status_OK();
   } else if (id.empty()) {  // We have no Id but have options.  Not good
-    return Status_NotSupported("Cannot reset object ", id);
+    return rocksdb_rs::status::Status_NotSupported("Cannot reset object ", id);
   } else {
     status = config_options.registry->NewStaticObject(id, result);
     if (!status.ok()) {

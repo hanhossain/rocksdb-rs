@@ -1634,12 +1634,12 @@ class CompressionTypeRecord {
 
     uint32_t val;
     if (!GetFixed32(src, &val)) {
-      return Status_Corruption(class_name,
+      return rocksdb_rs::status::Status_Corruption(class_name,
                                 "Error decoding WAL compression type");
     }
     rocksdb_rs::compression_type::CompressionType compression_type = static_cast<rocksdb_rs::compression_type::CompressionType>(val);
     if (!StreamingCompressionTypeSupported(compression_type)) {
-      return Status_Corruption(class_name,
+      return rocksdb_rs::status::Status_Corruption(class_name,
                                 "WAL compression type not supported");
     }
     compression_type_ = compression_type;

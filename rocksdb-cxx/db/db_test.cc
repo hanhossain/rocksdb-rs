@@ -2996,7 +2996,7 @@ class ModelDB : public DB {
   rocksdb_rs::status::Status Put(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
              const Slice& /*k*/, const Slice& /*ts*/,
              const Slice& /*v*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   using DB::PutEntity;
@@ -3004,7 +3004,7 @@ class ModelDB : public DB {
                    ColumnFamilyHandle* /* column_family */,
                    const Slice& /* key */,
                    const WideColumns& /* columns */) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   using DB::Close;
@@ -3021,7 +3021,7 @@ class ModelDB : public DB {
   }
   rocksdb_rs::status::Status Delete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                 const Slice& /*key*/, const Slice& /*ts*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   using DB::SingleDelete;
   rocksdb_rs::status::Status SingleDelete(const WriteOptions& o, ColumnFamilyHandle* cf,
@@ -3035,7 +3035,7 @@ class ModelDB : public DB {
   }
   rocksdb_rs::status::Status SingleDelete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                       const Slice& /*key*/, const Slice& /*ts*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   using DB::Merge;
   rocksdb_rs::status::Status Merge(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
@@ -3050,12 +3050,12 @@ class ModelDB : public DB {
   rocksdb_rs::status::Status Merge(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
                const Slice& /*k*/, const Slice& /*ts*/,
                const Slice& /*value*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   using DB::Get;
   rocksdb_rs::status::Status Get(const ReadOptions& /*options*/, ColumnFamilyHandle* /*cf*/,
              const Slice& key, PinnableSlice* /*value*/) override {
-    return Status_NotSupported(key);
+    return rocksdb_rs::status::Status_NotSupported(key);
   }
 
   using DB::GetMergeOperands;
@@ -3064,7 +3064,7 @@ class ModelDB : public DB {
       const Slice& key, PinnableSlice* /*slice*/,
       GetMergeOperandsOptions* /*merge_operands_options*/,
       int* /*number_of_operands*/) override {
-    return Status_NotSupported(key);
+    return rocksdb_rs::status::Status_NotSupported(key);
   }
 
   using DB::MultiGet;
@@ -3073,7 +3073,7 @@ class ModelDB : public DB {
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys,
       std::vector<std::string>* /*values*/) override {
-    rust::Vec<rocksdb_rs::status::Status> s = Status_NotSupported("Not implemented.").create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_NotSupported("Not implemented.").create_vec(keys.size());
     return s;
   }
 
@@ -3082,13 +3082,13 @@ class ModelDB : public DB {
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*external_files*/,
       const IngestExternalFileOptions& /*options*/) override {
-    return Status_NotSupported("Not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented.");
   }
 
   using DB::IngestExternalFiles;
   rocksdb_rs::status::Status IngestExternalFiles(
       const std::vector<IngestExternalFileArg>& /*args*/) override {
-    return Status_NotSupported("Not implemented");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
   }
 
   using DB::CreateColumnFamilyWithImport;
@@ -3098,19 +3098,19 @@ class ModelDB : public DB {
       const ImportColumnFamilyOptions& /*import_options*/,
       const std::vector<const ExportImportFilesMetaData*>& /*metadatas*/,
       ColumnFamilyHandle** /*handle*/) override {
-    return Status_NotSupported("Not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented.");
   }
 
   using DB::VerifyChecksum;
   rocksdb_rs::status::Status VerifyChecksum(const ReadOptions&) override {
-    return Status_NotSupported("Not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented.");
   }
 
   using DB::ClipColumnFamily;
   virtual rocksdb_rs::status::Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
                                   const Slice& /*begin*/,
                                   const Slice& /*end*/) override {
-    return Status_NotSupported("Not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented.");
   }
 
   using DB::GetPropertiesOfAllTables;
@@ -3152,7 +3152,7 @@ class ModelDB : public DB {
   rocksdb_rs::status::Status NewIterators(const ReadOptions& /*options*/,
                       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
                       std::vector<Iterator*>* /*iterators*/) override {
-    return Status_NotSupported("Not supported yet");
+    return rocksdb_rs::status::Status_NotSupported("Not supported yet");
   }
   const Snapshot* GetSnapshot() override {
     ModelSnapshot* snapshot = new ModelSnapshot;
@@ -3225,13 +3225,13 @@ class ModelDB : public DB {
   rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& /*options*/,
                       ColumnFamilyHandle* /*column_family*/,
                       const Slice* /*start*/, const Slice* /*end*/) override {
-    return Status_NotSupported("Not supported operation.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation.");
   }
 
   rocksdb_rs::status::Status SetDBOptions(
       const std::unordered_map<std::string, std::string>& /*new_options*/)
       override {
-    return Status_NotSupported("Not supported operation.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation.");
   }
 
   using DB::CompactFiles;
@@ -3242,21 +3242,21 @@ class ModelDB : public DB {
       const int /*output_level*/, const int /*output_path_id*/ = -1,
       std::vector<std::string>* const /*output_file_names*/ = nullptr,
       CompactionJobInfo* /*compaction_job_info*/ = nullptr) override {
-    return Status_NotSupported("Not supported operation.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation.");
   }
 
   rocksdb_rs::status::Status PauseBackgroundWork() override {
-    return Status_NotSupported("Not supported operation.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation.");
   }
 
   rocksdb_rs::status::Status ContinueBackgroundWork() override {
-    return Status_NotSupported("Not supported operation.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation.");
   }
 
   rocksdb_rs::status::Status EnableAutoCompaction(
       const std::vector<ColumnFamilyHandle*>& /*column_family_handles*/)
       override {
-    return Status_NotSupported("Not supported operation.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation.");
   }
 
   void EnableManualCompaction() override { return; }
@@ -3338,7 +3338,7 @@ class ModelDB : public DB {
 
   virtual rocksdb_rs::status::Status GetCreationTimeOfOldestFile(
       uint64_t* /*creation_time*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   rocksdb_rs::status::Status DeleteFile(std::string /*name*/) override { return rocksdb_rs::status::Status_OK(); }
@@ -3348,7 +3348,7 @@ class ModelDB : public DB {
       std::unique_ptr<rocksdb::TransactionLogIterator>*,
       const TransactionLogIterator::ReadOptions& /*read_options*/ =
           TransactionLogIterator::ReadOptions()) override {
-    return Status_NotSupported("Not supported in Model DB");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in Model DB");
   }
 
   void GetColumnFamilyMetaData(ColumnFamilyHandle* /*column_family*/,
@@ -7270,7 +7270,7 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   options.max_open_files = 10;
   DestroyAndReopen(options);
   rocksdb_rs::status::Status s3 = dbfull()->GetCreationTimeOfOldestFile(&ctime);
-  ASSERT_TRUE(s3.eq(Status_NotSupported()));
+  ASSERT_TRUE(s3.eq(rocksdb_rs::status::Status_NotSupported()));
 
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 }

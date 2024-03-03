@@ -54,7 +54,7 @@ rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
     return Status_Incomplete();
   }
   if (result_.size() < kTraceMetadataSize) {
-    return Status_Corruption("Corrupted trace file.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file.");
   }
   *data = result_.ToString();
   offset_ += kTraceMetadataSize;
@@ -73,7 +73,7 @@ rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
       return s;
     }
     if (result_.size() < to_read) {
-      return Status_Corruption("Corrupted trace file.");
+      return rocksdb_rs::status::Status_Corruption("Corrupted trace file.");
     }
     data->append(result_.data(), result_.size());
 

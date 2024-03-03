@@ -60,7 +60,7 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
   if (target_level < 1) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "PromoteL0 FAILED. Invalid target level %d\n", target_level);
-    return Status_InvalidArgument("Invalid target level");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid target level");
   }
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
@@ -77,7 +77,7 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
                      "PromoteL0 FAILED. Target level %d does not exist\n",
                      target_level);
       job_context.Clean();
-      status = Status_InvalidArgument("Target level does not exist");
+      status = rocksdb_rs::status::Status_InvalidArgument("Target level does not exist");
       return status;
     }
 
@@ -99,7 +99,7 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
                        f->fd.GetNumber());
         job_context.Clean();
         status =
-            Status_InvalidArgument("PromoteL0 called during L0 compaction");
+            rocksdb_rs::status::Status_InvalidArgument("PromoteL0 called during L0 compaction");
         return status;
       }
 
@@ -111,7 +111,7 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
                        " have overlapping ranges\n",
                        prev_f->fd.GetNumber(), f->fd.GetNumber());
         job_context.Clean();
-        status = Status_InvalidArgument("L0 has overlapping files");
+        status = rocksdb_rs::status::Status_InvalidArgument("L0 has overlapping files");
         return status;
       }
     }
@@ -122,7 +122,7 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
         ROCKS_LOG_INFO(immutable_db_options_.info_log,
                        "PromoteL0 FAILED. Level %d not empty\n", level);
         job_context.Clean();
-        status = Status_InvalidArgument(
+        status = rocksdb_rs::status::Status_InvalidArgument(
             "All levels up to target_level "
             "must be empty");
         return status;

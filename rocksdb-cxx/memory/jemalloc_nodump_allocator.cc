@@ -188,14 +188,14 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::PrepareOptions(
   std::string message;
 
   if (!IsSupported(&message)) {
-    return Status_NotSupported(message);
+    return rocksdb_rs::status::Status_NotSupported(message);
   } else if (options_.limit_tcache_size &&
              options_.tcache_size_lower_bound >=
                  options_.tcache_size_upper_bound) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "tcache_size_lower_bound larger or equal to tcache_size_upper_bound.");
   } else if (options_.num_arenas < 1) {
-    return Status_InvalidArgument("num_arenas must be a positive integer");
+    return rocksdb_rs::status::Status_InvalidArgument("num_arenas must be a positive integer");
   } else if (IsMutable()) {
     rocksdb_rs::status::Status s = MemoryAllocator::PrepareOptions(config_options);
 #ifdef ROCKSDB_JEMALLOC_NODUMP_ALLOCATOR
@@ -284,11 +284,11 @@ rocksdb_rs::status::Status NewJemallocNodumpAllocator(
     JemallocAllocatorOptions& options,
     std::shared_ptr<MemoryAllocator>* memory_allocator) {
   if (memory_allocator == nullptr) {
-    return Status_InvalidArgument("memory_allocator must be non-null.");
+    return rocksdb_rs::status::Status_InvalidArgument("memory_allocator must be non-null.");
   }
 #ifndef ROCKSDB_JEMALLOC
   (void)options;
-  return Status_NotSupported("Not compiled with JEMALLOC");
+  return rocksdb_rs::status::Status_NotSupported("Not compiled with JEMALLOC");
 #else
   std::unique_ptr<MemoryAllocator> allocator(
       new JemallocNodumpAllocator(options));

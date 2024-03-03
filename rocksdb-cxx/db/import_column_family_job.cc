@@ -47,13 +47,13 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
       }
 
       if (file_to_import.num_entries == 0) {
-        status = Status_InvalidArgument("File contain no entries");
+        status = rocksdb_rs::status::Status_InvalidArgument("File contain no entries");
         return status;
       }
 
       if (!file_to_import.smallest_internal_key.Valid() ||
           !file_to_import.largest_internal_key.Valid()) {
-        status = Status_Corruption("File has corrupted keys");
+        status = rocksdb_rs::status::Status_Corruption("File has corrupted keys");
         return status;
       }
 
@@ -77,7 +77,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
     }
 
     if (num_files == 0) {
-      status = Status_InvalidArgument("The list of files is empty");
+      status = rocksdb_rs::status::Status_InvalidArgument("The list of files is empty");
       return status;
     }
     files_to_import_.push_back(files_to_import_per_cf);
@@ -98,7 +98,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
     if (cfd_->user_comparator()->Compare(
             cf_ingest_infos[i].largest_internal_key.user_key(),
             cf_ingest_infos[i + 1].smallest_internal_key.user_key()) >= 0) {
-      status = Status_InvalidArgument("CFs have overlapping ranges");
+      status = rocksdb_rs::status::Status_InvalidArgument("CFs have overlapping ranges");
       return status;
     }
   }
@@ -378,7 +378,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
         rocksdb_rs::status::Status pik_status = ParseInternalKey(range_del_iter->key(), &key,
                                              db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
-          return Status_Corruption("Corrupted key in external file. ",
+          return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
                                     pik_status.getState());
         }
         RangeTombstone first_tombstone(key, range_del_iter->value());
@@ -394,7 +394,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
         pik_status = ParseInternalKey(range_del_iter->key(), &key,
                                       db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
-          return Status_Corruption("Corrupted key in external file. ",
+          return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
                                     pik_status.getState());
         }
         RangeTombstone last_tombstone(key, range_del_iter->value());

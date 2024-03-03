@@ -63,7 +63,7 @@ static rocksdb_rs::status::Status NewSharedObject(
     result->reset();
     return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_NotSupported("Cannot reset object ");
+    return rocksdb_rs::status::Status_NotSupported("Cannot reset object ");
   }
 }
 
@@ -108,7 +108,7 @@ static rocksdb_rs::status::Status NewManagedObject(
       return rocksdb_rs::status::Status_OK();
     }
   } else {
-    status = Status_NotSupported("Cannot reset object ");
+    status = rocksdb_rs::status::Status_NotSupported("Cannot reset object ");
   }
   return status;
 }
@@ -231,7 +231,7 @@ static rocksdb_rs::status::Status NewUniqueObject(
     result->reset();
     return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_NotSupported("Cannot reset object ");
+    return rocksdb_rs::status::Status_NotSupported("Cannot reset object ");
   }
 }
 
@@ -292,7 +292,7 @@ static rocksdb_rs::status::Status NewStaticObject(
     *result = nullptr;
     return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_NotSupported("Cannot reset object ");
+    return rocksdb_rs::status::Status_NotSupported("Cannot reset object ");
   }
 }
 

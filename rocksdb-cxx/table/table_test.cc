@@ -2057,7 +2057,7 @@ TEST_P(BlockBasedTableTest, PrefetchTest) {
                 {"k01", "k02", "k03", "k04", "k05"}, {"k06", "k07"});
   // invalid
   PrefetchRange(&c, &opt, &table_options, "k06", "k00", {}, {},
-                Status_InvalidArgument(Slice("k06 "), Slice("k07")));
+                rocksdb_rs::status::Status_InvalidArgument(Slice("k06 "), Slice("k07")));
   c.ResetTableReader();
 }
 

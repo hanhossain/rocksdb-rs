@@ -243,7 +243,7 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
       // Since these hash entries are corrupted and they will not be used
       // anymore, we can reset them and release memory.
       ResetEntries();
-      return Status_Corruption("Filter's hash entries checksum mismatched");
+      return rocksdb_rs::status::Status_Corruption("Filter's hash entries checksum mismatched");
     }
   }
 
@@ -1288,7 +1288,7 @@ rocksdb_rs::status::Status XXPH3FilterBitsBuilder::MaybePostVerify(const Slice& 
     // given the extra implementation complixity to detect such case.
     bool may_match = bits_reader->HashMayMatch(h);
     if (!may_match) {
-      s = Status_Corruption("Corrupted filter content");
+      s = rocksdb_rs::status::Status_Corruption("Corrupted filter content");
       break;
     }
   }
@@ -1932,7 +1932,7 @@ rocksdb_rs::status::Status FilterPolicy::CreateFromString(
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else if (id.empty()) {  // We have no Id but have options.  Not good
-    return Status_NotSupported("Cannot reset object ", id);
+    return rocksdb_rs::status::Status_NotSupported("Cannot reset object ", id);
   } else {
     static std::once_flag loaded;
     std::call_once(loaded, [&]() {

@@ -404,7 +404,7 @@ class VersionBuilder::Rep {
                   << ", #" << rhs->fd.GetNumber()
                   << " with seqnos (largest, smallest) "
                   << rhs->fd.largest_seqno << " , " << rhs->fd.smallest_seqno;
-              return Status_Corruption("VersionBuilder", oss.str());
+              return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
             }
           } else if (epoch_number_requirement ==
                      EpochNumberRequirement::kMustPresent) {
@@ -424,7 +424,7 @@ class VersionBuilder::Rep {
                     << " , smallest key: " << rhs->smallest.DebugString(true)
                     << " , largest key: " << rhs->largest.DebugString(true)
                     << " , epoch number: " << rhs->epoch_number;
-                return Status_Corruption("VersionBuilder", oss.str());
+                return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
               }
             }
 
@@ -434,7 +434,7 @@ class VersionBuilder::Rep {
                   << lhs->fd.GetNumber() << " with epoch number "
                   << lhs->epoch_number << ", #" << rhs->fd.GetNumber()
                   << " with epoch number " << rhs->epoch_number;
-              return Status_Corruption("VersionBuilder", oss.str());
+              return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
             }
           }
 
@@ -462,7 +462,7 @@ class VersionBuilder::Rep {
             oss << 'L' << level << " files are not sorted properly: files #"
                 << lhs->fd.GetNumber() << ", #" << rhs->fd.GetNumber();
 
-            return Status_Corruption("VersionBuilder", oss.str());
+            return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
           }
 
           // Make sure there is no overlap in level
@@ -474,7 +474,7 @@ class VersionBuilder::Rep {
                 << " vs. file #" << rhs->fd.GetNumber()
                 << " smallest key: " << rhs->smallest.DebugString(true);
 
-            return Status_Corruption("VersionBuilder", oss.str());
+            return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
           }
 
           return rocksdb_rs::status::Status_OK();
@@ -503,7 +503,7 @@ class VersionBuilder::Rep {
         oss << "Blob file #" << blob_file_number
             << " consists entirely of garbage";
 
-        return Status_Corruption("VersionBuilder", oss.str());
+        return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
       }
 
       if (blob_file_meta->GetLinkedSsts() !=
@@ -512,7 +512,7 @@ class VersionBuilder::Rep {
         oss << "Links are inconsistent between table files and blob file #"
             << blob_file_number;
 
-        return Status_Corruption("VersionBuilder", oss.str());
+        return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
       }
     }
 
@@ -540,7 +540,7 @@ class VersionBuilder::Rep {
 #else
       auto prefix = "force_consistency_checks(DEBUG)";
 #endif
-      s = Status_Corruption(prefix, s.getState());
+      s = rocksdb_rs::status::Status_Corruption(prefix, s.getState());
     } else {
       // was only expecting corruption with message, or OK
       assert(s.ok());
@@ -603,7 +603,7 @@ class VersionBuilder::Rep {
       std::ostringstream oss;
       oss << "Blob file #" << blob_file_number << " already added";
 
-      return Status_Corruption("VersionBuilder", oss.str());
+      return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
     }
 
     // Note: we use C++11 for now but in C++14, this could be done in a more
@@ -646,14 +646,14 @@ class VersionBuilder::Rep {
       std::ostringstream oss;
       oss << "Blob file #" << blob_file_number << " not found";
 
-      return Status_Corruption("VersionBuilder", oss.str());
+      return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
     }
 
     if (!mutable_meta->AddGarbage(blob_file_garbage.GetGarbageBlobCount(),
                                   blob_file_garbage.GetGarbageBlobBytes())) {
       std::ostringstream oss;
       oss << "Garbage overflow for blob file #" << blob_file_number;
-      return Status_Corruption("VersionBuilder", oss.str());
+      return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
     }
 
     return rocksdb_rs::status::Status_OK();
@@ -711,7 +711,7 @@ class VersionBuilder::Rep {
         oss << "on level " << current_level;
       }
 
-      return Status_Corruption("VersionBuilder", oss.str());
+      return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
     }
 
     if (level >= num_levels_) {
@@ -770,7 +770,7 @@ class VersionBuilder::Rep {
       std::ostringstream oss;
       oss << "Cannot add table file #" << file_number << " to level " << level
           << " since it is already in the LSM tree on level " << current_level;
-      return Status_Corruption("VersionBuilder", oss.str());
+      return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
     }
 
     if (level >= num_levels_) {
@@ -833,7 +833,7 @@ class VersionBuilder::Rep {
       oss << "Cannot add compact cursor (" << level << ","
           << smallest_uncompacted_key.Encode().ToString()
           << " due to invalid level (level = " << level << ")";
-      return Status_Corruption("VersionBuilder", oss.str());
+      return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
     }
     if (level < num_levels_) {
       // Omit levels (>= num_levels_) when re-open with shrinking num_levels_

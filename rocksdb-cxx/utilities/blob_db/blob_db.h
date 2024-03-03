@@ -95,7 +95,7 @@ class BlobDB : public StackableDB {
                      ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& value) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     return Put(options, key, value);
@@ -106,7 +106,7 @@ class BlobDB : public StackableDB {
                         ColumnFamilyHandle* column_family,
                         const Slice& key) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     assert(db_ != nullptr);
@@ -119,7 +119,7 @@ class BlobDB : public StackableDB {
                             ColumnFamilyHandle* column_family, const Slice& key,
                             const Slice& value, uint64_t ttl) {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     return PutWithTTL(options, key, value, ttl);
@@ -133,7 +133,7 @@ class BlobDB : public StackableDB {
                           ColumnFamilyHandle* column_family, const Slice& key,
                           const Slice& value, uint64_t expiration) {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
     return PutUntil(options, key, value, expiration);
@@ -164,7 +164,7 @@ class BlobDB : public StackableDB {
       std::vector<std::string>* values) override {
     for (auto column_family : column_families) {
       if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-        return Status_NotSupported("Blob DB doesn't support non-default column family.")
+        return rocksdb_rs::status::Status_NotSupported("Blob DB doesn't support non-default column family.")
             .create_vec(column_families.size());
       }
     }
@@ -177,7 +177,7 @@ class BlobDB : public StackableDB {
                         const bool /*sorted_input*/ = false) override {
     for (size_t i = 0; i < num_keys; ++i) {
       statuses[i] =
-          Status_NotSupported("Blob DB doesn't support batched MultiGet");
+          rocksdb_rs::status::Status_NotSupported("Blob DB doesn't support batched MultiGet");
     }
   }
 
@@ -185,14 +185,14 @@ class BlobDB : public StackableDB {
   virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& /*wopts*/,
                               ColumnFamilyHandle* /*column_family*/,
                               const Slice& /*key*/) override {
-    return Status_NotSupported("Not supported operation in blob db.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in blob db.");
   }
 
   using rocksdb::StackableDB::Merge;
   virtual rocksdb_rs::status::Status Merge(const WriteOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/,
                        const Slice& /*key*/, const Slice& /*value*/) override {
-    return Status_NotSupported("Not supported operation in blob db.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported operation in blob db.");
   }
 
   virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
@@ -223,7 +223,7 @@ class BlobDB : public StackableDB {
       std::vector<std::string>* const output_file_names = nullptr,
       CompactionJobInfo* compaction_job_info = nullptr) override {
     if (column_family->GetID() != DefaultColumnFamily()->GetID()) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
     }
 

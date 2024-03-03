@@ -109,7 +109,7 @@ class DummyDB : public StackableDB {
     for (auto& f : live_files_) {
       bool success = ParseFileName(f, &number, &type);
       if (!success) {
-        return Status_InvalidArgument("Bad file name: " + f);
+        return rocksdb_rs::status::Status_InvalidArgument("Bad file name: " + f);
       }
       files->emplace_back();
       LiveFileStorageInfo& info = files->back();
@@ -512,15 +512,15 @@ class FileManager : public EnvWrapper {
 
     auto pos = metadata.find("private");
     if (pos == std::string::npos) {
-      return Status_Corruption("private file is expected");
+      return rocksdb_rs::status::Status_Corruption("private file is expected");
     }
     pos = metadata.find(" crc32 ", pos + 6);
     if (pos == std::string::npos) {
-      return Status_Corruption("checksum not found");
+      return rocksdb_rs::status::Status_Corruption("checksum not found");
     }
 
     if (metadata.size() < pos + 7) {
-      return Status_Corruption("bad CRC32 checksum value");
+      return rocksdb_rs::status::Status_Corruption("bad CRC32 checksum value");
     }
 
     if (appear_valid) {

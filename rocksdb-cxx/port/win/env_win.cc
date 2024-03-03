@@ -176,7 +176,7 @@ uint64_t WinClock::NowNanos() {
 rocksdb_rs::status::Status WinClock::GetCurrentTime(int64_t* unix_time) {
   time_t time = std::time(nullptr);
   if (time == (time_t)(-1)) {
-    return Status_NotSupported("Failed to get time");
+    return rocksdb_rs::status::Status_NotSupported("Failed to get time");
   }
 
   *unix_time = time;

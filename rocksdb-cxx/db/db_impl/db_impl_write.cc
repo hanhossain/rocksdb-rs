@@ -56,7 +56,7 @@ rocksdb_rs::status::Status DBImpl::Merge(const WriteOptions& o, ColumnFamilyHand
   }
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   if (!cfh->cfd()->ioptions()->merge_operator) {
-    return Status_NotSupported("Provide a merge_operator when opening DB");
+    return rocksdb_rs::status::Status_NotSupported("Provide a merge_operator when opening DB");
   } else {
     return DB::Merge(o, column_family, key, val);
   }
@@ -179,7 +179,7 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
          write_options.protection_bytes_per_key ==
              my_batch->GetProtectionBytesPerKey());
   if (my_batch == nullptr) {
-    return Status_InvalidArgument("Batch is nullptr!");
+    return rocksdb_rs::status::Status_InvalidArgument("Batch is nullptr!");
   } else if (!disable_memtable &&
              WriteBatchInternal::TimestampsUpdateNeeded(*my_batch)) {
     // If writing to memtable, then we require the caller to set/update the
@@ -192,22 +192,22 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
     // without inserting to memtable. The keys in the batch do not have to be
     // assigned timestamps because they will be used only during recovery if
     // there is a commit marker which includes their commit timestamp.
-    return Status_InvalidArgument("write batch must have timestamp(s) set");
+    return rocksdb_rs::status::Status_InvalidArgument("write batch must have timestamp(s) set");
   } else if (write_options.rate_limiter_priority != Env::IO_TOTAL &&
              write_options.rate_limiter_priority != Env::IO_USER) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "WriteOptions::rate_limiter_priority only allows "
         "Env::IO_TOTAL and Env::IO_USER due to implementation constraints");
   } else if (write_options.rate_limiter_priority != Env::IO_TOTAL &&
              (write_options.disableWAL || manual_wal_flush_)) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "WriteOptions::rate_limiter_priority currently only supports "
         "rate-limiting automatic WAL flush, which requires "
         "`WriteOptions::disableWAL` and "
         "`DBOptions::manual_wal_flush` both set to false");
   } else if (write_options.protection_bytes_per_key != 0 &&
              write_options.protection_bytes_per_key != 8) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "`WriteOptions::protection_bytes_per_key` must be zero or eight");
   }
   // TODO: this use of operator bool on `tracer_` can avoid unnecessary lock
@@ -223,29 +223,29 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
     }
   }
   if (write_options.sync && write_options.disableWAL) {
-    return Status_InvalidArgument("Sync writes has to enable WAL.");
+    return rocksdb_rs::status::Status_InvalidArgument("Sync writes has to enable WAL.");
   }
   if (two_write_queues_ && immutable_db_options_.enable_pipelined_write) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "pipelined_writes is not compatible with concurrent prepares");
   }
   if (seq_per_batch_ && immutable_db_options_.enable_pipelined_write) {
     // TODO(yiwu): update pipeline write with seq_per_batch and batch_cnt
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "pipelined_writes is not compatible with seq_per_batch");
   }
   if (immutable_db_options_.unordered_write &&
       immutable_db_options_.enable_pipelined_write) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "pipelined_writes is not compatible with unordered_write");
   }
   if (immutable_db_options_.enable_pipelined_write &&
       post_memtable_callback != nullptr) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "pipelined write currently does not honor post_memtable_callback");
   }
   if (seq_per_batch_ && post_memtable_callback != nullptr) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "seq_per_batch currently does not honor post_memtable_callback");
   }
   // Otherwise IsLatestPersistentState optimization does not make sense

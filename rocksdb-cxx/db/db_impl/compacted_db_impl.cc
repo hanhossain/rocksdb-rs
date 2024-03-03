@@ -47,7 +47,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, Colu
                             const Slice& key, PinnableSlice* value,
                             std::string* timestamp) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -203,16 +203,16 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
   user_comparator_ = cfd_->user_comparator();
   auto* vstorage = version_->storage_info();
   if (vstorage->num_non_empty_levels() == 0) {
-    return Status_NotSupported("no file exists");
+    return rocksdb_rs::status::Status_NotSupported("no file exists");
   }
   const LevelFilesBrief& l0 = vstorage->LevelFilesBrief(0);
   // L0 should not have files
   if (l0.num_files > 1) {
-    return Status_NotSupported("L0 contain more than 1 file");
+    return rocksdb_rs::status::Status_NotSupported("L0 contain more than 1 file");
   }
   if (l0.num_files == 1) {
     if (vstorage->num_non_empty_levels() > 1) {
-      return Status_NotSupported("Both L0 and other level contain files");
+      return rocksdb_rs::status::Status_NotSupported("Both L0 and other level contain files");
     }
     files_ = l0;
     return rocksdb_rs::status::Status_OK();
@@ -220,7 +220,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
 
   for (int i = 1; i < vstorage->num_non_empty_levels() - 1; ++i) {
     if (vstorage->LevelFilesBrief(i).num_files > 0) {
-      return Status_NotSupported("Other levels also contain files");
+      return rocksdb_rs::status::Status_NotSupported("Other levels also contain files");
     }
   }
 
@@ -229,7 +229,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
     files_ = vstorage->LevelFilesBrief(level);
     return rocksdb_rs::status::Status_OK();
   }
-  return Status_NotSupported("no file exists");
+  return rocksdb_rs::status::Status_NotSupported("no file exists");
 }
 
 rocksdb_rs::status::Status CompactedDBImpl::Open(const Options& options, const std::string& dbname,
@@ -237,10 +237,10 @@ rocksdb_rs::status::Status CompactedDBImpl::Open(const Options& options, const s
   *dbptr = nullptr;
 
   if (options.max_open_files != -1) {
-    return Status_InvalidArgument("require max_open_files = -1");
+    return rocksdb_rs::status::Status_InvalidArgument("require max_open_files = -1");
   }
   if (options.merge_operator.get() != nullptr) {
-    return Status_InvalidArgument("merge operator is not supported");
+    return rocksdb_rs::status::Status_InvalidArgument("merge operator is not supported");
   }
   DBOptions db_options(options);
   std::unique_ptr<CompactedDBImpl> db(new CompactedDBImpl(db_options, dbname));

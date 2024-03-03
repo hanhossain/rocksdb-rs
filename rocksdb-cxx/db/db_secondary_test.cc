@@ -1211,7 +1211,7 @@ TEST_F(DBSecondaryTest, StartFromInconsistent) {
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
         *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) =
-            Status_Corruption("Inject corruption");
+            rocksdb_rs::status::Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
   Options options1;
@@ -1245,7 +1245,7 @@ TEST_F(DBSecondaryTest, InconsistencyDuringCatchUp) {
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
         *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) =
-            Status_Corruption("Inject corruption");
+            rocksdb_rs::status::Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
   rocksdb_rs::status::Status s = db_secondary_->TryCatchUpWithPrimary();

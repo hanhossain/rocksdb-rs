@@ -816,7 +816,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& op
                                          Slice* result) {
   assert(reader != nullptr);
   if (!enable_) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   TEST_SYNC_POINT("FilePrefetchBuffer::PrefetchAsync:Start");

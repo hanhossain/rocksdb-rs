@@ -350,7 +350,7 @@ class TimestampUpdater : public WriteBatch::Handler {
   rocksdb_rs::status::Status UpdateTimestampImpl(uint32_t cf, const Slice& buf, size_t /*idx*/,
                              bool is_key) {
     if (timestamp_.empty()) {
-      return Status_InvalidArgument("Timestamp is empty");
+      return rocksdb_rs::status::Status_InvalidArgument("Timestamp is empty");
     }
     size_t cf_ts_sz = ts_sz_func_(cf);
     if (0 == cf_ts_sz) {
@@ -360,7 +360,7 @@ class TimestampUpdater : public WriteBatch::Handler {
       // Column family timestamp info not found.
       return rocksdb_rs::status::Status_NotFound();
     } else if (cf_ts_sz != timestamp_.size()) {
-      return Status_InvalidArgument("timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument("timestamp size mismatch");
     }
     UpdateProtectionInformationIfNeeded(buf, timestamp_, is_key);
 

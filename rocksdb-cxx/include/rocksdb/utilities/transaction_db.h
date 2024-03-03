@@ -392,7 +392,7 @@ class TransactionDB : public StackableDB {
   using StackableDB::DeleteRange;
   virtual rocksdb_rs::status::Status DeleteRange(const WriteOptions&, ColumnFamilyHandle*,
                              const Slice&, const Slice&) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   // Open a TransactionDB similar to DB::Open().
   // Internally call PrepareWrap() and WrapDB()

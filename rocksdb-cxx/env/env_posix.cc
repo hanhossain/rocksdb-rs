@@ -334,7 +334,7 @@ class PosixEnv : public CompositeEnv {
     int ret = gethostname(name, max_len);
     if (ret < 0) {
       if (errno == EFAULT || errno == EINVAL) {
-        return Status_InvalidArgument(errnoStr(errno).c_str());
+        return rocksdb_rs::status::Status_InvalidArgument(errnoStr(errno).c_str());
       } else if (errno == ENAMETOOLONG) {
         return IOError("GetHostName", std::string(name, strnlen(name, max_len)),
                        errno);

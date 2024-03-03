@@ -116,11 +116,11 @@ class WriteBatchWithIndex : public WriteBatchBase {
   rocksdb_rs::status::Status PutEntity(ColumnFamilyHandle* column_family, const Slice& /* key */,
                    const WideColumns& /* columns */) override {
     if (!column_family) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Cannot call this method without a column family handle");
     }
 
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "PutEntity not supported by WriteBatchWithIndex");
   }
 
@@ -131,7 +131,7 @@ class WriteBatchWithIndex : public WriteBatchBase {
   rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) override;
   rocksdb_rs::status::Status Merge(ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
                const Slice& /*ts*/, const Slice& /*value*/) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Merge does not support user-defined timestamp");
   }
 
@@ -152,18 +152,18 @@ class WriteBatchWithIndex : public WriteBatchBase {
   rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* /* column_family */,
                      const Slice& /* begin_key */,
                      const Slice& /* end_key */) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
   rocksdb_rs::status::Status DeleteRange(const Slice& /* begin_key */,
                      const Slice& /* end_key */) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
   rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*begin_key*/, const Slice& /*end_key*/,
                      const Slice& /*ts*/) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
 

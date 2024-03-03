@@ -287,7 +287,7 @@ class ProtectionInfoKV {
 template <typename T>
 rocksdb_rs::status::Status ProtectionInfo<T>::GetStatus() const {
   if (val_ != 0) {
-    return Status_Corruption("ProtectionInfo mismatch");
+    return rocksdb_rs::status::Status_Corruption("ProtectionInfo mismatch");
   }
   return rocksdb_rs::status::Status_OK();
 }

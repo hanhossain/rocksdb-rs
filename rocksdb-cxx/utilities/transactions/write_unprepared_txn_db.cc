@@ -146,18 +146,18 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
       }
 
       // Recovered batches do not contain 2PC markers.
-      rocksdb_rs::status::Status MarkNoop(bool) override { return Status_InvalidArgument(); }
+      rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
       rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
-        return Status_InvalidArgument();
+        return rocksdb_rs::status::Status_InvalidArgument();
       }
       rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
-        return Status_InvalidArgument();
+        return rocksdb_rs::status::Status_InvalidArgument();
       }
       rocksdb_rs::status::Status MarkCommit(const Slice&) override {
-        return Status_InvalidArgument();
+        return rocksdb_rs::status::Status_InvalidArgument();
       }
       rocksdb_rs::status::Status MarkRollback(const Slice&) override {
-        return Status_InvalidArgument();
+        return rocksdb_rs::status::Status_InvalidArgument();
       }
     } rollback_handler(db_impl_, last_visible_txn, &rollback_batch,
                        *cf_comp_map_shared_ptr.get(), *cf_map_shared_ptr.get(),
@@ -389,7 +389,7 @@ Iterator* WriteUnpreparedTxnDB::NewIterator(const ReadOptions& options,
                                             ColumnFamilyHandle* column_family,
                                             WriteUnpreparedTxn* txn) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }

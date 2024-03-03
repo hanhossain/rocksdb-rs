@@ -748,7 +748,7 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_result_type_info = {
 rocksdb_rs::status::Status CompactionServiceInput::Read(const std::string& data_str,
                                     CompactionServiceInput* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return Status_InvalidArgument("Invalid CompactionServiceInput string");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceInput string");
   }
   auto format_version = DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -759,7 +759,7 @@ rocksdb_rs::status::Status CompactionServiceInput::Read(const std::string& data_
         cf, data_str.substr(sizeof(BinaryFormatVersion)), cs_input_type_info,
         obj);
   } else {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Compaction Service Input data version not supported: " +
         std::to_string(format_version));
   }
@@ -777,7 +777,7 @@ rocksdb_rs::status::Status CompactionServiceInput::Write(std::string* output) {
 rocksdb_rs::status::Status CompactionServiceResult::Read(const std::string& data_str,
                                      CompactionServiceResult* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return Status_InvalidArgument("Invalid CompactionServiceResult string");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceResult string");
   }
   auto format_version = DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -788,7 +788,7 @@ rocksdb_rs::status::Status CompactionServiceResult::Read(const std::string& data
         cf, data_str.substr(sizeof(BinaryFormatVersion)), cs_result_type_info,
         obj);
   } else {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Compaction Service Result data version not supported: " +
         std::to_string(format_version));
   }

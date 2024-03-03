@@ -172,7 +172,7 @@ class InternalIteratorBase : public Cleanable {
   virtual bool IsValuePinned() const { return false; }
 
   virtual rocksdb_rs::status::Status GetProperty(std::string /*prop_name*/, std::string* /*prop*/) {
-    return Status_NotSupported("");
+    return rocksdb_rs::status::Status_NotSupported("");
   }
 
   // When iterator moves from one file to another file at same level, new file's

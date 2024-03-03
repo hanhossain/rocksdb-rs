@@ -203,7 +203,7 @@ void TwoLevelIndexIterator::InitDataBlock() {
       data_block_handle_ = handle;
       SetSecondLevelIterator(iter);
       if (iter == nullptr) {
-        status_ = Status_Corruption("Missing block for partition " +
+        status_ = rocksdb_rs::status::Status_Corruption("Missing block for partition " +
                                      handle.ToString());
       }
     }

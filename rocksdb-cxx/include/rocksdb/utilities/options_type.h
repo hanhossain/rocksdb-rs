@@ -310,11 +310,11 @@ class OptionTypeInfo {
         [map](const ConfigOptions&, const std::string& name,
               const std::string& value, void* addr) {
           if (map == nullptr) {
-            return Status_NotSupported("No enum mapping ", name);
+            return rocksdb_rs::status::Status_NotSupported("No enum mapping ", name);
           } else if (ParseEnum<T>(*map, value, static_cast<T*>(addr))) {
             return rocksdb_rs::status::Status_OK();
           } else {
-            return Status_InvalidArgument("No mapping for enum ", name);
+            return rocksdb_rs::status::Status_InvalidArgument("No mapping for enum ", name);
           }
         });
     info.SetSerializeFunc(
@@ -326,12 +326,12 @@ class OptionTypeInfo {
         [map](const ConfigOptions&, const std::string& name, const void* addr,
               std::string* value) {
           if (map == nullptr) {
-            return Status_NotSupported("No enum mapping ", name);
+            return rocksdb_rs::status::Status_NotSupported("No enum mapping ", name);
           } else if (SerializeEnum<T>(*map, (*static_cast<const T*>(addr)),
                                       value)) {
             return rocksdb_rs::status::Status_OK();
           } else {
-            return Status_InvalidArgument("No mapping for enum ", name);
+            return rocksdb_rs::status::Status_InvalidArgument("No mapping for enum ", name);
           }
         });
     info.SetEqualsFunc(
@@ -991,11 +991,11 @@ rocksdb_rs::status::Status ParseArray(const ConfigOptions& config_options,
   }
   // make sure the element number matches the array size
   if (i < kSize) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Serialized value has less elements than array size", name);
   }
   if (start < value.size() && end != std::string::npos) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Serialized value has more elements than array size", name);
   }
   return status;

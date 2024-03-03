@@ -47,7 +47,7 @@ rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task
   static std::atomic<uint64_t> initial_delay(0);
 
   if (repeat_period_seconds == kInvalidPeriodSec) {
-    return Status_InvalidArgument("Invalid task repeat period");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid task repeat period");
   }
   auto it = tasks_map_.find(task_type);
   if (it != tasks_map_.end()) {

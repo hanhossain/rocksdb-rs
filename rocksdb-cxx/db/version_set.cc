@@ -2224,14 +2224,14 @@ rocksdb_rs::status::Status Version::GetBlob(const ReadOptions& read_options, con
   assert(value);
 
   if (blob_index.HasTTL() || blob_index.IsInlined()) {
-    return Status_Corruption("Unexpected TTL/inlined blob index");
+    return rocksdb_rs::status::Status_Corruption("Unexpected TTL/inlined blob index");
   }
 
   const uint64_t blob_file_number = blob_index.file_number();
 
   auto blob_file_meta = storage_info_.GetBlobFileMetaData(blob_file_number);
   if (!blob_file_meta) {
-    return Status_Corruption("Invalid blob file number");
+    return rocksdb_rs::status::Status_Corruption("Invalid blob file number");
   }
 
   assert(blob_source_);
@@ -2272,13 +2272,13 @@ void Version::MultiGetBlob(
       }
 
       if (!blob_file_meta) {
-        *key_context->s = Status_Corruption("Invalid blob file number");
+        *key_context->s = rocksdb_rs::status::Status_Corruption("Invalid blob file number");
         continue;
       }
 
       if (blob_index.HasTTL() || blob_index.IsInlined()) {
         *key_context->s =
-            Status_Corruption("Unexpected TTL/inlined blob index");
+            rocksdb_rs::status::Status_Corruption("Unexpected TTL/inlined blob index");
         continue;
       }
 
@@ -2480,16 +2480,16 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
         *status = rocksdb_rs::status::Status_NotFound();
         return;
       case GetContext::kCorrupt:
-        *status = Status_Corruption("corrupted key for ", user_key);
+        *status = rocksdb_rs::status::Status_Corruption("corrupted key for ", user_key);
         return;
       case GetContext::kUnexpectedBlobIndex:
         ROCKS_LOG_ERROR(info_log_, "Encounter unexpected blob index.");
-        *status = Status_NotSupported(
+        *status = rocksdb_rs::status::Status_NotSupported(
             "Encounter unexpected blob index. Please open DB with "
             "rocksdb::blob_db::BlobDB instead.");
         return;
       case GetContext::kMergeOperatorFailed:
-        *status = Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
+        *status = rocksdb_rs::status::Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
         return;
     }
     f = fp.GetNextFile();
@@ -2503,7 +2503,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
       return;
     }
     if (!merge_operator_) {
-      *status = Status_InvalidArgument(
+      *status = rocksdb_rs::status::Status_InvalidArgument(
           "merge_operator is not properly initialized.");
       return;
     }
@@ -2754,7 +2754,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
     }
     if (GetContext::kMerge == get_context.State()) {
       if (!merge_operator_) {
-        *status = Status_InvalidArgument(
+        *status = rocksdb_rs::status::Status_InvalidArgument(
             "merge_operator is not properly initialized.");
         range->MarkKeyDone(iter);
         continue;
@@ -4966,7 +4966,7 @@ rocksdb_rs::status::Status AtomicGroupReadBuffer::AddEdit(VersionEdit* edit) {
         static_cast<uint32_t>(replay_buffer_.size())) {
       TEST_SYNC_POINT_CALLBACK(
           "AtomicGroupReadBuffer::AddEdit:IncorrectAtomicGroupSize", edit);
-      return Status_Corruption("corrupted atomic group");
+      return rocksdb_rs::status::Status_Corruption("corrupted atomic group");
     }
     replay_buffer_[read_edits_in_atomic_group_ - 1] = *edit;
     if (read_edits_in_atomic_group_ == replay_buffer_.size()) {
@@ -4981,7 +4981,7 @@ rocksdb_rs::status::Status AtomicGroupReadBuffer::AddEdit(VersionEdit* edit) {
   if (!replay_buffer().empty()) {
     TEST_SYNC_POINT_CALLBACK(
         "AtomicGroupReadBuffer::AddEdit:AtomicGroupMixedWithNormalEdits", edit);
-    return Status_Corruption("corrupted atomic group");
+    return rocksdb_rs::status::Status_Corruption("corrupted atomic group");
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -5411,7 +5411,7 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
         auto& e = batch_edits[bidx];
         std::string record;
         if (!e->EncodeTo(&record, batch_edits_ts_sz[bidx])) {
-          s = Status_Corruption("Unable to encode VersionEdit:" +
+          s = rocksdb_rs::status::Status_Corruption("Unable to encode VersionEdit:" +
                                  e->DebugString(true));
           break;
         }
@@ -5825,14 +5825,14 @@ rocksdb_rs::status::Status VersionSet::GetCurrentManifestPath(const std::string&
     return s;
   }
   if (fname.empty() || fname.back() != '\n') {
-    return Status_Corruption("CURRENT file does not end with newline");
+    return rocksdb_rs::status::Status_Corruption("CURRENT file does not end with newline");
   }
   // remove the trailing '\n'
   fname.resize(fname.size() - 1);
   rocksdb_rs::types::FileType type;
   bool parse_ok = ParseFileName(fname, manifest_file_number, &type);
   if (!parse_ok || type != rocksdb_rs::types::FileType::kDescriptorFile) {
-    return Status_Corruption("CURRENT file corrupted");
+    return rocksdb_rs::status::Status_Corruption("CURRENT file corrupted");
   }
   *manifest_path = dbname;
   if (dbname.back() != '/') {
@@ -6008,7 +6008,7 @@ rocksdb_rs::status::Status VersionSet::TryRecover(
     bool* has_missing_table_file) {
   ManifestPicker manifest_picker(dbname_, files_in_dbname);
   if (!manifest_picker.Valid()) {
-    return Status_Corruption("Cannot locate MANIFEST file in " + dbname_);
+    return rocksdb_rs::status::Status_Corruption("Cannot locate MANIFEST file in " + dbname_);
   }
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string manifest_path =
@@ -6138,7 +6138,7 @@ rocksdb_rs::status::Status VersionSet::ReduceNumberOfLevels(const std::string& d
                                         const FileOptions& file_options,
                                         int new_levels) {
   if (new_levels <= 1) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Number of levels needs to be bigger than 1");
   }
 
@@ -6192,7 +6192,7 @@ rocksdb_rs::status::Status VersionSet::ReduceNumberOfLevels(const std::string& d
                  "[%d:%d],[%d:%d].\n",
                  first_nonempty_level, first_nonempty_level_filenum, i,
                  file_num);
-        return Status_InvalidArgument(msg);
+        return rocksdb_rs::status::Status_InvalidArgument(msg);
       }
     }
   }
@@ -6245,7 +6245,7 @@ rocksdb_rs::status::Status VersionSet::GetLiveFilesChecksumInfo(FileChecksumList
   // Clean the previously stored checksum information if any.
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (checksum_list == nullptr) {
-    s = Status_InvalidArgument("checksum_list is nullptr");
+    s = rocksdb_rs::status::Status_InvalidArgument("checksum_list is nullptr");
     return s;
   }
   checksum_list->reset();
@@ -6391,7 +6391,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
     edit_for_db_id.SetDBId(db_id_);
     std::string db_id_record;
     if (!edit_for_db_id.EncodeTo(&db_id_record)) {
-      return Status_Corruption("Unable to Encode VersionEdit:" +
+      return rocksdb_rs::status::Status_Corruption("Unable to Encode VersionEdit:" +
                                 edit_for_db_id.DebugString(true));
     }
     io_s = log->AddRecord(db_id_record);
@@ -6406,7 +6406,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
                              const_cast<VersionEdit*>(&wal_additions));
     std::string record;
     if (!wal_additions.EncodeTo(&record)) {
-      return Status_Corruption("Unable to Encode VersionEdit: " +
+      return rocksdb_rs::status::Status_Corruption("Unable to Encode VersionEdit: " +
                                 wal_additions.DebugString(true));
     }
     io_s = log->AddRecord(record);
@@ -6423,7 +6423,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
   wal_deletions.DeleteWalsBefore(min_log_number_to_keep());
   std::string wal_deletions_record;
   if (!wal_deletions.EncodeTo(&wal_deletions_record)) {
-    return Status_Corruption("Unable to Encode VersionEdit: " +
+    return rocksdb_rs::status::Status_Corruption("Unable to Encode VersionEdit: " +
                               wal_deletions.DebugString(true));
   }
   io_s = log->AddRecord(wal_deletions_record);
@@ -6451,7 +6451,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
           cfd->internal_comparator().user_comparator()->Name());
       std::string record;
       if (!edit.EncodeTo(&record)) {
-        return Status_Corruption("Unable to Encode VersionEdit:" +
+        return rocksdb_rs::status::Status_Corruption("Unable to Encode VersionEdit:" +
                                   edit.DebugString(true));
       }
       io_s = log->AddRecord(record);
@@ -6533,7 +6533,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
       assert(ucmp);
       std::string record;
       if (!edit.EncodeTo(&record, ucmp->timestamp_size())) {
-        return Status_Corruption("Unable to Encode VersionEdit:" +
+        return rocksdb_rs::status::Status_Corruption("Unable to Encode VersionEdit:" +
                                   edit.DebugString(true));
       }
       io_s = log->AddRecord(record);
@@ -7146,7 +7146,7 @@ rocksdb_rs::status::Status VersionSet::VerifyFileMetadata(const ReadOptions& rea
   rocksdb_rs::status::Status status = fs_->GetFileSize(fpath, IOOptions(), &fsize, nullptr);
   if (status.ok()) {
     if (fsize != meta.fd.GetFileSize()) {
-      status = Status_Corruption("File size mismatch: " + fpath);
+      status = rocksdb_rs::status::Status_Corruption("File size mismatch: " + fpath);
     }
   }
   if (status.ok() && db_options_->verify_sst_unique_id_in_manifest) {

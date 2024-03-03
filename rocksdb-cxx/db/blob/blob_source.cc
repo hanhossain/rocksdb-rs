@@ -218,7 +218,7 @@ rocksdb_rs::status::Status BlobSource::GetBlob(const ReadOptions& read_options,
     assert(blob_file_reader.GetValue());
 
     if (compression_type != blob_file_reader.GetValue()->GetCompressionType()) {
-      return Status_Corruption("Compression type mismatch when reading blob");
+      return rocksdb_rs::status::Status_Corruption("Compression type mismatch when reading blob");
     }
 
     MemoryAllocator* const allocator =

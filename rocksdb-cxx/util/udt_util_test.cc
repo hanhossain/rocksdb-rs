@@ -33,7 +33,7 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
 
     rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
-        return Status_InvalidArgument();
+        return rocksdb_rs::status::Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }
@@ -57,7 +57,7 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
 
     rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
-        return Status_InvalidArgument();
+        return rocksdb_rs::status::Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }
@@ -65,7 +65,7 @@ class HandleTimestampSizeDifferenceTest : public testing::Test {
     rocksdb_rs::status::Status PutBlobIndexCF(uint32_t cf, const Slice& key,
                           const Slice& value) override {
       if (value.compare(kValuePlaceHolder) != 0) {
-        return Status_InvalidArgument();
+        return rocksdb_rs::status::Status_InvalidArgument();
       }
       return AddKey(cf, key);
     }

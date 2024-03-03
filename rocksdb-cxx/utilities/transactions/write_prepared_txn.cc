@@ -67,7 +67,7 @@ rocksdb_rs::status::Status WritePreparedTxn::Get(const ReadOptions& options,
                              ColumnFamilyHandle* column_family,
                              const Slice& key, PinnableSlice* pinnable_val) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -167,7 +167,7 @@ rocksdb_rs::status::Status WritePreparedTxn::CommitInternal() {
     if (for_recovery) {
       WriteBatchInternal::SetAsLatestPersistentState(working_batch);
     } else {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Commit-time-batch can only be used if "
           "use_only_the_last_commit_time_batch_for_recovery is true");
     }
@@ -378,7 +378,7 @@ rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
     rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
     rocksdb_rs::status::Status MarkRollback(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
    protected:

@@ -528,7 +528,7 @@ rocksdb_rs::status::Status ErrorHandler::OverrideNoSpaceError(const rocksdb_rs::
   {
     uint64_t free_space;
     if (db_options_.env->GetFreeSpace(db_options_.db_paths[0].path,
-                                      &free_space).eq(Status_NotSupported())) {
+                                      &free_space).eq(rocksdb_rs::status::Status_NotSupported())) {
       *auto_recovery = false;
     }
   }

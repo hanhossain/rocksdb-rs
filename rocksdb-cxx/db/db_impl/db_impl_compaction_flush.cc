@@ -943,11 +943,11 @@ rocksdb_rs::status::Status DBImpl::IncreaseFullHistoryTsLow(ColumnFamilyHandle* 
   }
   assert(cfd != nullptr && cfd->user_comparator() != nullptr);
   if (cfd->user_comparator()->timestamp_size() == 0) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Timestamp is not enabled in this column family");
   }
   if (cfd->user_comparator()->timestamp_size() != ts_low.size()) {
-    return Status_InvalidArgument("ts_low size mismatch");
+    return rocksdb_rs::status::Status_InvalidArgument("ts_low size mismatch");
   }
   return IncreaseFullHistoryTsLowImpl(cfd, ts_low);
 }
@@ -969,7 +969,7 @@ rocksdb_rs::status::Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData
   assert(ucmp->timestamp_size() == ts_low.size() && !ts_low.empty());
   if (!current_ts_low.empty() &&
       ucmp->CompareTimestamp(ts_low, current_ts_low) < 0) {
-    return Status_InvalidArgument("Cannot decrease full_history_ts_low");
+    return rocksdb_rs::status::Status_InvalidArgument("Cannot decrease full_history_ts_low");
   }
 
   rocksdb_rs::status::Status s = versions_->LogAndApply(cfd, *cfd->GetLatestMutableCFOptions(),
@@ -999,7 +999,7 @@ rocksdb_rs::status::Status DBImpl::CompactRangeInternal(const CompactRangeOption
   auto cfd = cfh->cfd();
 
   if (options.target_path_id >= cfd->ioptions()->cf_paths.size()) {
-    return Status_InvalidArgument("Invalid target path ID");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid target path ID");
   }
 
   bool flush_needed = true;
@@ -1009,7 +1009,7 @@ rocksdb_rs::status::Status DBImpl::CompactRangeInternal(const CompactRangeOption
       !options.full_history_ts_low->empty()) {
     std::string ts_low = options.full_history_ts_low->ToString();
     if (begin != nullptr || end != nullptr) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Cannot specify compaction range with full_history_ts_low");
     }
     rocksdb_rs::status::Status s = IncreaseFullHistoryTsLowImpl(cfd, ts_low);
@@ -1289,7 +1289,7 @@ rocksdb_rs::status::Status DBImpl::CompactFiles(const CompactionOptions& compact
                             std::vector<std::string>* const output_file_names,
                             CompactionJobInfo* compaction_job_info) {
   if (column_family == nullptr) {
-    return Status_InvalidArgument("ColumnFamilyHandle must be non-null.");
+    return rocksdb_rs::status::Status_InvalidArgument("ColumnFamilyHandle must be non-null.");
   }
 
   auto cfd =
@@ -1377,7 +1377,7 @@ rocksdb_rs::status::Status DBImpl::CompactFilesImpl(
     if (cfd->ioptions()->cf_paths.size() == 1U) {
       output_path_id = 0;
     } else {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Automatic output path selection is not "
           "yet supported in CompactFiles()");
     }
@@ -1385,7 +1385,7 @@ rocksdb_rs::status::Status DBImpl::CompactFilesImpl(
 
   if (cfd->ioptions()->allow_ingest_behind &&
       output_level >= cfd->ioptions()->num_levels - 1) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Exceed the maximum output level defined by "
         "the current compaction algorithm with ingest_behind --- " +
         std::to_string(cfd->ioptions()->num_levels - 1));
@@ -1570,7 +1570,7 @@ rocksdb_rs::status::Status DBImpl::PauseBackgroundWork() {
 rocksdb_rs::status::Status DBImpl::ContinueBackgroundWork() {
   InstrumentedMutexLock guard_lock(&mutex_);
   if (bg_work_paused_ == 0) {
-    return Status_InvalidArgument();
+    return rocksdb_rs::status::Status_InvalidArgument();
   }
   assert(bg_work_paused_ > 0);
   assert(bg_compaction_paused_ > 0);
@@ -1656,7 +1656,7 @@ void DBImpl::NotifyOnCompactionCompleted(
 rocksdb_rs::status::Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
   assert(level < cfd->NumberLevels());
   if (target_level >= cfd->NumberLevels()) {
-    return Status_InvalidArgument("Target level exceeds number of levels");
+    return rocksdb_rs::status::Status_InvalidArgument("Target level exceeds number of levels");
   }
 
   const ReadOptions read_options(Env::IOActivity::kCompaction);
@@ -1673,7 +1673,7 @@ rocksdb_rs::status::Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, 
   if (refitting_level_) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "[ReFitLevel] another thread is refitting");
-    return Status_NotSupported("another thread is refitting");
+    return rocksdb_rs::status::Status_NotSupported("another thread is refitting");
   }
   refitting_level_ = true;
 
@@ -1697,21 +1697,21 @@ rocksdb_rs::status::Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, 
     if (to_level > level) {
       if (level == 0) {
         refitting_level_ = false;
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             "Cannot change from level 0 to other levels.");
       }
       // Check levels are empty for a trivial move
       for (int l = level + 1; l <= to_level; l++) {
         if (vstorage->NumLevelFiles(l) > 0) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target are not empty for a move.");
         }
         if (cfd->RangeOverlapWithCompaction(refit_level_smallest.user_key(),
                                             refit_level_largest.user_key(),
                                             l)) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target "
               "will have some ongoing compaction's output.");
         }
@@ -1722,14 +1722,14 @@ rocksdb_rs::status::Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, 
       for (int l = to_level; l < level; l++) {
         if (vstorage->NumLevelFiles(l) > 0) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target are not empty for a move.");
         }
         if (cfd->RangeOverlapWithCompaction(refit_level_smallest.user_key(),
                                             refit_level_largest.user_key(),
                                             l)) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target "
               "will have some ongoing compaction's output.");
         }

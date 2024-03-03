@@ -366,65 +366,65 @@ rocksdb_rs::status::Status ReadRecordFromWriteBatch(Slice* input, char* tag,
   switch (*tag) {
     case kTypeColumnFamilyValue:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch Put");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Put");
       }
       FALLTHROUGH_INTENDED;
     case kTypeValue:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch Put");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Put");
       }
       break;
     case kTypeColumnFamilyDeletion:
     case kTypeColumnFamilySingleDeletion:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch Delete");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Delete");
       }
       FALLTHROUGH_INTENDED;
     case kTypeDeletion:
     case kTypeSingleDeletion:
       if (!GetLengthPrefixedSlice(input, key)) {
-        return Status_Corruption("bad WriteBatch Delete");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Delete");
       }
       break;
     case kTypeColumnFamilyRangeDeletion:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch DeleteRange");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch DeleteRange");
       }
       FALLTHROUGH_INTENDED;
     case kTypeRangeDeletion:
       // for range delete, "key" is begin_key, "value" is end_key
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch DeleteRange");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch DeleteRange");
       }
       break;
     case kTypeColumnFamilyMerge:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch Merge");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Merge");
       }
       FALLTHROUGH_INTENDED;
     case kTypeMerge:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch Merge");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Merge");
       }
       break;
     case kTypeColumnFamilyBlobIndex:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch BlobIndex");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch BlobIndex");
       }
       FALLTHROUGH_INTENDED;
     case kTypeBlobIndex:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch BlobIndex");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch BlobIndex");
       }
       break;
     case kTypeLogData:
       assert(blob != nullptr);
       if (!GetLengthPrefixedSlice(input, blob)) {
-        return Status_Corruption("bad WriteBatch Blob");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Blob");
       }
       break;
     case kTypeNoop:
@@ -437,44 +437,44 @@ rocksdb_rs::status::Status ReadRecordFromWriteBatch(Slice* input, char* tag,
       break;
     case kTypeEndPrepareXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status_Corruption("bad EndPrepare XID");
+        return rocksdb_rs::status::Status_Corruption("bad EndPrepare XID");
       }
       break;
     case kTypeCommitXIDAndTimestamp:
       if (!GetLengthPrefixedSlice(input, key)) {
-        return Status_Corruption("bad commit timestamp");
+        return rocksdb_rs::status::Status_Corruption("bad commit timestamp");
       }
       FALLTHROUGH_INTENDED;
     case kTypeCommitXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status_Corruption("bad Commit XID");
+        return rocksdb_rs::status::Status_Corruption("bad Commit XID");
       }
       break;
     case kTypeRollbackXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status_Corruption("bad Rollback XID");
+        return rocksdb_rs::status::Status_Corruption("bad Rollback XID");
       }
       break;
     case kTypeColumnFamilyWideColumnEntity:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch PutEntity");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch PutEntity");
       }
       FALLTHROUGH_INTENDED;
     case kTypeWideColumnEntity:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch PutEntity");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch PutEntity");
       }
       break;
     default:
-      return Status_Corruption("unknown WriteBatch tag");
+      return rocksdb_rs::status::Status_Corruption("unknown WriteBatch tag");
   }
   return rocksdb_rs::status::Status_OK();
 }
 
 rocksdb_rs::status::Status WriteBatch::Iterate(Handler* handler) const {
   if (rep_.size() < WriteBatchInternal::kHeader) {
-    return Status_Corruption("malformed WriteBatch (too small)");
+    return rocksdb_rs::status::Status_Corruption("malformed WriteBatch (too small)");
   }
 
   return WriteBatchInternal::Iterate(this, handler, WriteBatchInternal::kHeader,
@@ -485,7 +485,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
                                    WriteBatch::Handler* handler, size_t begin,
                                    size_t end) {
   if (begin > wb->rep_.size() || end > wb->rep_.size() || end < begin) {
-    return Status_Corruption("Invalid start/end bounds for Iterate");
+    return rocksdb_rs::status::Status_Corruption("Invalid start/end bounds for Iterate");
   }
   assert(begin <= end);
   Slice input(wb->rep_.data() + begin, static_cast<size_t>(end - begin));
@@ -525,7 +525,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
       assert(s.IsTryAgain());
       assert(!last_was_try_again);  // to detect infinite loop bugs
       if (UNLIKELY(last_was_try_again)) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "two consecutive TryAgain in WriteBatch handler; this is either a "
             "software bug or data corruption.");
       }
@@ -606,7 +606,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kDisabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteCommitted txn tag when write_after_commit_ is disabled (in "
               "WritePrepared/WriteUnprepared mode). If it is not due to "
               "corruption, the WAL must be emptied before changing the "
@@ -614,7 +614,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         }
         if (handler->WriteBeforePrepare() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteCommitted txn tag when write_before_prepare_ is enabled "
               "(in WriteUnprepared mode). If it is not due to corruption, the "
               "WAL must be emptied before changing the WritePolicy.");
@@ -628,7 +628,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WritePrepared/WriteUnprepared txn tag when write_after_commit_ "
               "is enabled (in default WriteCommitted mode). If it is not due "
               "to corruption, the WAL must be emptied before changing the "
@@ -643,14 +643,14 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteUnprepared txn tag when write_after_commit_ is enabled (in "
               "default WriteCommitted mode). If it is not due to corruption, "
               "the WAL must be emptied before changing the WritePolicy.");
         }
         if (handler->WriteBeforePrepare() ==
             WriteBatch::Handler::OptionState::kDisabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteUnprepared txn tag when write_before_prepare_ is disabled "
               "(in WriteCommitted/WritePrepared mode). If it is not due to "
               "corruption, the WAL must be emptied before changing the "
@@ -704,7 +704,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         }
         break;
       default:
-        return Status_Corruption("unknown WriteBatch tag");
+        return rocksdb_rs::status::Status_Corruption("unknown WriteBatch tag");
     }
   }
   if (!s.ok()) {
@@ -712,7 +712,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
   }
   if (handler_continue && whole_batch &&
       found != WriteBatchInternal::Count(wb)) {
-    return Status_Corruption("WriteBatch has wrong count");
+    return rocksdb_rs::status::Status_Corruption("WriteBatch has wrong count");
   } else {
     return rocksdb_rs::status::Status_OK();
   }
@@ -757,7 +757,7 @@ WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(
     if (ucmp) {
       ts_sz = ucmp->timestamp_size();
       if (0 == cf_id && b->default_cf_ts_sz_ != ts_sz) {
-        s = Status_InvalidArgument("Default cf timestamp size mismatch");
+        s = rocksdb_rs::status::Status_InvalidArgument("Default cf timestamp size mismatch");
       }
     }
   } else if (b->default_cf_ts_sz_ > 0) {
@@ -770,16 +770,16 @@ namespace {
 rocksdb_rs::status::Status CheckColumnFamilyTimestampSize(ColumnFamilyHandle* column_family,
                                       const Slice& ts) {
   if (!column_family) {
-    return Status_InvalidArgument("column family handle cannot be null");
+    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be null");
   }
   const Comparator* const ucmp = column_family->GetComparator();
   assert(ucmp);
   size_t cf_ts_sz = ucmp->timestamp_size();
   if (0 == cf_ts_sz) {
-    return Status_InvalidArgument("timestamp disabled");
+    return rocksdb_rs::status::Status_InvalidArgument("timestamp disabled");
   }
   if (cf_ts_sz != ts.size()) {
-    return Status_InvalidArgument("timestamp size mismatch");
+    return rocksdb_rs::status::Status_InvalidArgument("timestamp size mismatch");
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -788,10 +788,10 @@ rocksdb_rs::status::Status CheckColumnFamilyTimestampSize(ColumnFamilyHandle* co
 rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
                                const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
   if (value.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("value is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("value is too large");
   }
 
   LocalSavePoint save(b);
@@ -868,7 +868,7 @@ rocksdb_rs::status::Status WriteBatchInternal::CheckSlicePartsLength(const Slice
     total_key_bytes += key.parts[i].size();
   }
   if (total_key_bytes >= size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
 
   size_t total_value_bytes = 0;
@@ -876,7 +876,7 @@ rocksdb_rs::status::Status WriteBatchInternal::CheckSlicePartsLength(const Slice
     total_value_bytes += value.parts[i].size();
   }
   if (total_value_bytes >= size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("value is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("value is too large");
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -929,7 +929,7 @@ rocksdb_rs::status::Status WriteBatch::Put(ColumnFamilyHandle* column_family, co
     return WriteBatchInternal::Put(this, cf_id, key, value);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -939,7 +939,7 @@ rocksdb_rs::status::Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t
   assert(b);
 
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
 
   WideColumns sorted_columns(columns);
@@ -955,7 +955,7 @@ rocksdb_rs::status::Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t
   }
 
   if (entity.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("wide column entity is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("wide column entity is too large");
   }
 
   LocalSavePoint save(b);
@@ -989,7 +989,7 @@ rocksdb_rs::status::Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t
 rocksdb_rs::status::Status WriteBatch::PutEntity(ColumnFamilyHandle* column_family,
                              const Slice& key, const WideColumns& columns) {
   if (!column_family) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call this method without a column family handle");
   }
 
@@ -1006,7 +1006,7 @@ rocksdb_rs::status::Status WriteBatch::PutEntity(ColumnFamilyHandle* column_fami
   }
 
   if (ts_sz) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call this method on column family enabling timestamp");
   }
 
@@ -1190,7 +1190,7 @@ rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::Delete(this, cf_id, key);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -1307,7 +1307,7 @@ rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_f
     return WriteBatchInternal::SingleDelete(this, cf_id, key);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -1431,17 +1431,17 @@ rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_fa
     return WriteBatchInternal::DeleteRange(this, cf_id, begin_key, end_key);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
                                  const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
   if (value.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("value is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("value is too large");
   }
 
   LocalSavePoint save(b);
@@ -1557,7 +1557,7 @@ rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::Merge(this, cf_id, key, value);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
@@ -1725,7 +1725,7 @@ rocksdb_rs::status::Status WriteBatch::VerifyChecksum() const {
         tag = kTypeWideColumnEntity;
         break;
       default:
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "unknown WriteBatch tag",
             std::to_string(static_cast<unsigned int>(tag)));
     }
@@ -1741,7 +1741,7 @@ rocksdb_rs::status::Status WriteBatch::VerifyChecksum() const {
   }
 
   if (prot_info_idx != WriteBatchInternal::Count(this)) {
-    return Status_Corruption("WriteBatch has wrong count");
+    return rocksdb_rs::status::Status_Corruption("WriteBatch has wrong count");
   }
   assert(WriteBatchInternal::Count(this) == prot_info_->entries_.size());
   return rocksdb_rs::status::Status_OK();
@@ -1961,7 +1961,7 @@ class MemTableInserter : public WriteBatch::Handler {
       if (ignore_missing_column_families_) {
         *s = rocksdb_rs::status::Status_OK();
       } else {
-        *s = Status_InvalidArgument(
+        *s = rocksdb_rs::status::Status_InvalidArgument(
             "Invalid column family specified in write batch");
       }
       return false;
@@ -2053,7 +2053,7 @@ class MemTableInserter : public WriteBatch::Handler {
         std::string merged_value;
 
         auto cf_handle = cf_mems_->GetColumnFamilyHandle();
-        rocksdb_rs::status::Status get_status = Status_NotSupported();
+        rocksdb_rs::status::Status get_status = rocksdb_rs::status::Status_NotSupported();
         if (db_ != nullptr && recovering_log_number_ == 0) {
           if (cf_handle == nullptr) {
             cf_handle = db_->DefaultColumnFamily();
@@ -2370,7 +2370,7 @@ class MemTableInserter : public WriteBatch::Handler {
           static_cast_with_check<ColumnFamilyHandleImpl>(cf_handle)->cfd();
       if (!cfd->is_delete_range_supported()) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             std::string("DeleteRange not supported for table type ") +
             cfd->ioptions()->table_factory->Name() + " in CF " +
             cfd->GetName());
@@ -2381,7 +2381,7 @@ class MemTableInserter : public WriteBatch::Handler {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
         // It's an empty range where endpoints appear mistaken. Don't bother
         // applying it to the DB, and return an error to the user.
-        return Status_InvalidArgument("end key comes before start key");
+        return rocksdb_rs::status::Status_InvalidArgument("end key comes before start key");
       } else if (cmp == 0) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
         // It's an empty range. Don't bother applying it to the DB.
@@ -2451,7 +2451,7 @@ class MemTableInserter : public WriteBatch::Handler {
     MemTable* mem = cf_mems_->GetMemTable();
     auto* moptions = mem->GetImmutableMemTableOptions();
     if (moptions->merge_operator == nullptr) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Merge requires `ColumnFamilyOptions::merge_operator != nullptr`");
     }
     bool perform_merge = false;
@@ -2648,7 +2648,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // during recovery we rebuild a hollow transaction
       // from all encountered prepare sections of the wal
       if (db_->allow_2pc() == false) {
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             "WAL contains prepared transactions. Open with "
             "TransactionDB::Open().");
       }
@@ -3059,7 +3059,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Append(WriteBatch* dst, const Wri
        src->prot_info_->entries_.size() != src->Count()) ||
       (dst->prot_info_ != nullptr &&
        dst->prot_info_->entries_.size() != dst->Count())) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Write batch has inconsistent count and number of checksums");
   }
 
@@ -3129,7 +3129,7 @@ rocksdb_rs::status::Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* 
       if (s.ok() && checksum != nullptr) {
         uint64_t expected_hash = XXH3_64bits(wb->rep_.data(), wb->rep_.size());
         if (expected_hash != *checksum) {
-          return Status_Corruption("Write batch content corrupted.");
+          return rocksdb_rs::status::Status_Corruption("Write batch content corrupted.");
         }
       }
       return s;
@@ -3138,7 +3138,7 @@ rocksdb_rs::status::Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* 
       return rocksdb_rs::status::Status_OK();
     }
   }
-  return Status_NotSupported(
+  return rocksdb_rs::status::Status_NotSupported(
       "WriteBatch protection info must be zero or eight bytes/key");
 }
 

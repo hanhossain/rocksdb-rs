@@ -59,7 +59,7 @@ rocksdb_rs::status::Status TraceExecutionHandler::Handle(
   }
   auto it = cf_map_.find(record.GetColumnFamilyID());
   if (it == cf_map_.end()) {
-    return Status_Corruption("Invalid Column Family ID.");
+    return rocksdb_rs::status::Status_Corruption("Invalid Column Family ID.");
   }
 
   uint64_t start = clock_->NowMicros();
@@ -90,7 +90,7 @@ rocksdb_rs::status::Status TraceExecutionHandler::Handle(
   }
   auto it = cf_map_.find(record.GetColumnFamilyID());
   if (it == cf_map_.end()) {
-    return Status_Corruption("Invalid Column Family ID.");
+    return rocksdb_rs::status::Status_Corruption("Invalid Column Family ID.");
   }
 
   ReadOptions r_opts = read_opts_;
@@ -150,7 +150,7 @@ rocksdb_rs::status::Status TraceExecutionHandler::Handle(
   for (uint32_t cf_id : record.GetColumnFamilyIDs()) {
     auto it = cf_map_.find(cf_id);
     if (it == cf_map_.end()) {
-      return Status_Corruption("Invalid Column Family ID.");
+      return rocksdb_rs::status::Status_Corruption("Invalid Column Family ID.");
     }
     handles.push_back(it->second);
   }
@@ -158,10 +158,10 @@ rocksdb_rs::status::Status TraceExecutionHandler::Handle(
   std::vector<Slice> keys = record.GetKeys();
 
   if (handles.empty() || keys.empty()) {
-    return Status_InvalidArgument("Empty MultiGet cf_ids or keys.");
+    return rocksdb_rs::status::Status_InvalidArgument("Empty MultiGet cf_ids or keys.");
   }
   if (handles.size() != keys.size()) {
-    return Status_InvalidArgument("MultiGet cf_ids and keys size mismatch.");
+    return rocksdb_rs::status::Status_InvalidArgument("MultiGet cf_ids and keys size mismatch.");
   }
 
   uint64_t start = clock_->NowMicros();

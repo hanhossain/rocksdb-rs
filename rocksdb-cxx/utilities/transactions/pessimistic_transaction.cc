@@ -168,7 +168,7 @@ inline rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdateImpl(
     const ReadOptions& read_options, ColumnFamilyHandle* column_family,
     const Slice& key, TValue* value, bool exclusive, const bool do_validate) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -192,11 +192,11 @@ inline rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdateImpl(
   }
 
   if (!do_validate) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with read_timestamp is not "
         "defined.");
   } else if (kMaxTxnTimestamp == read_timestamp_) {
-    return Status_InvalidArgument("read_timestamp must be set for validation");
+    return rocksdb_rs::status::Status_InvalidArgument("read_timestamp must be set for validation");
   }
 
   if (!read_options.timestamp) {
@@ -213,7 +213,7 @@ inline rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdateImpl(
   assert(read_options.timestamp->size() == sizeof(kMaxTxnTimestamp));
   TxnTimestamp ts = DecodeFixed64(ts_buf);
   if (ts != read_timestamp_) {
-    return Status_InvalidArgument("Must read from the same read_timestamp");
+    return rocksdb_rs::status::Status_InvalidArgument("Must read from the same read_timestamp");
   }
   return TransactionBaseImpl::GetForUpdate(read_options, column_family, key,
                                            value, exclusive, do_validate);
@@ -421,7 +421,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::Operate(ColumnFamilyHandle* column
 
 rocksdb_rs::status::Status WriteCommittedTxn::SetReadTimestampForValidation(TxnTimestamp ts) {
   if (read_timestamp_ < kMaxTxnTimestamp && ts < read_timestamp_) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot decrease read timestamp for validation");
   }
   read_timestamp_ = ts;
@@ -430,7 +430,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::SetReadTimestampForValidation(TxnT
 
 rocksdb_rs::status::Status WriteCommittedTxn::SetCommitTimestamp(TxnTimestamp ts) {
   if (read_timestamp_ < kMaxTxnTimestamp && ts <= read_timestamp_) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot commit at timestamp smaller than or equal to read timestamp");
   }
   commit_timestamp_ = ts;
@@ -445,7 +445,7 @@ rocksdb_rs::status::Status PessimisticTransaction::CommitBatch(WriteBatch* batch
     // This means timestamp order may violate the order of locking, thus
     // violate the sequence number order for the same user key.
     // Therefore, we disallow this operation for now.
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Batch to commit includes timestamp assigned before locking");
   }
 
@@ -478,7 +478,7 @@ rocksdb_rs::status::Status PessimisticTransaction::CommitBatch(WriteBatch* batch
   } else if (txn_state_ == LOCKS_STOLEN) {
     s = Status_Expired();
   } else {
-    s = Status_InvalidArgument("Transaction is not in state for commit.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   txn_db_impl_->UnLock(this, *keys_to_unlock);
@@ -488,7 +488,7 @@ rocksdb_rs::status::Status PessimisticTransaction::CommitBatch(WriteBatch* batch
 
 rocksdb_rs::status::Status PessimisticTransaction::Prepare() {
   if (name_.empty()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot prepare a transaction that has not been named.");
   }
 
@@ -524,13 +524,13 @@ rocksdb_rs::status::Status PessimisticTransaction::Prepare() {
   } else if (txn_state_ == LOCKS_STOLEN) {
     s = Status_Expired();
   } else if (txn_state_ == PREPARED) {
-    s = Status_InvalidArgument("Transaction has already been prepared.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been prepared.");
   } else if (txn_state_ == COMMITTED) {
-    s = Status_InvalidArgument("Transaction has already been committed.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been committed.");
   } else if (txn_state_ == ROLLEDBACK) {
-    s = Status_InvalidArgument("Transaction has already been rolledback.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been rolledback.");
   } else {
-    s = Status_InvalidArgument("Transaction is not in state for commit.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   return s;
@@ -612,7 +612,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Commit() {
   if (commit_without_prepare) {
     assert(!commit_prepared);
     if (WriteBatchInternal::Count(GetCommitTimeWriteBatch()) > 0) {
-      s = Status_InvalidArgument(
+      s = rocksdb_rs::status::Status_InvalidArgument(
           "Commit-time batch contains values that will not be committed.");
     } else {
       txn_state_.store(AWAITING_COMMIT);
@@ -653,11 +653,11 @@ rocksdb_rs::status::Status PessimisticTransaction::Commit() {
   } else if (txn_state_ == LOCKS_STOLEN) {
     s = Status_Expired();
   } else if (txn_state_ == COMMITTED) {
-    s = Status_InvalidArgument("Transaction has already been committed.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been committed.");
   } else if (txn_state_ == ROLLEDBACK) {
-    s = Status_InvalidArgument("Transaction has already been rolledback.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been rolledback.");
   } else {
-    s = Status_InvalidArgument("Transaction is not in state for commit.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   return s;
@@ -671,7 +671,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
 
   const bool needs_ts = WriteBatchInternal::HasKeyWithTimestamp(*wb);
   if (needs_ts && commit_timestamp_ == kMaxTxnTimestamp) {
-    return Status_InvalidArgument("Must assign a commit timestamp");
+    return rocksdb_rs::status::Status_InvalidArgument("Must assign a commit timestamp");
   }
 
   if (needs_ts) {
@@ -702,7 +702,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
   PostMemTableCallback* post_mem_cb = nullptr;
   if (snapshot_needed_) {
     if (commit_timestamp_ == kMaxTxnTimestamp) {
-      return Status_InvalidArgument("Must set transaction commit timestamp");
+      return rocksdb_rs::status::Status_InvalidArgument("Must set transaction commit timestamp");
     } else {
       post_mem_cb = &snapshot_creation_cb;
     }
@@ -739,7 +739,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitInternal() {
 
   const bool needs_ts = WriteBatchInternal::HasKeyWithTimestamp(*wb);
   if (needs_ts && commit_timestamp_ == kMaxTxnTimestamp) {
-    return Status_InvalidArgument("Must assign a commit timestamp");
+    return rocksdb_rs::status::Status_InvalidArgument("Must assign a commit timestamp");
   }
   // We take the commit-time batch and append the Commit marker.
   // The Memtable will ignore the Commit marker in non-recovery mode
@@ -788,7 +788,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitInternal() {
   PostMemTableCallback* post_mem_cb = nullptr;
   if (snapshot_needed_) {
     if (commit_timestamp_ == kMaxTxnTimestamp) {
-      s = Status_InvalidArgument("Must set transaction commit timestamp");
+      s = rocksdb_rs::status::Status_InvalidArgument("Must set transaction commit timestamp");
       return s;
     } else {
       post_mem_cb = &snapshot_creation_cb;
@@ -835,9 +835,9 @@ rocksdb_rs::status::Status PessimisticTransaction::Rollback() {
     // prepare couldn't have taken place
     Clear();
   } else if (txn_state_ == COMMITTED) {
-    s = Status_InvalidArgument("This transaction has already been committed.");
+    s = rocksdb_rs::status::Status_InvalidArgument("This transaction has already been committed.");
   } else {
-    s = Status_InvalidArgument(
+    s = rocksdb_rs::status::Status_InvalidArgument(
         "Two phase transaction is not in state for rollback.");
   }
 
@@ -854,7 +854,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::RollbackInternal() {
 
 rocksdb_rs::status::Status PessimisticTransaction::RollbackToSavePoint() {
   if (txn_state_ != STARTED) {
-    return Status_InvalidArgument("Transaction is beyond state for rollback.");
+    return rocksdb_rs::status::Status_InvalidArgument("Transaction is beyond state for rollback.");
   }
 
   if (save_points_ != nullptr && !save_points_->empty()) {
@@ -875,7 +875,7 @@ rocksdb_rs::status::Status PessimisticTransaction::RollbackToSavePoint() {
 rocksdb_rs::status::Status PessimisticTransaction::LockBatch(WriteBatch* batch,
                                          LockTracker* keys_to_unlock) {
   if (!batch) {
-    return Status_InvalidArgument("batch is nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("batch is nullptr");
   }
 
   class Handler : public WriteBatch::Handler {
@@ -1013,7 +1013,7 @@ rocksdb_rs::status::Status PessimisticTransaction::TryLock(ColumnFamilyHandle* c
                        (0 == ts_sz || kMaxTxnTimestamp == read_timestamp_))) {
     if (assume_tracked && !previously_locked &&
         tracked_locks_->IsPointLockSupported()) {
-      s = Status_InvalidArgument(
+      s = rocksdb_rs::status::Status_InvalidArgument(
           "assume_tracked is set but it is not tracked yet");
     }
     // Need to remember the earliest sequence number that we know that this
@@ -1159,18 +1159,18 @@ rocksdb_rs::status::Status PessimisticTransaction::SetName(const TransactionName
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (txn_state_ == STARTED) {
     if (name_.length()) {
-      s = Status_InvalidArgument("Transaction has already been named.");
+      s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been named.");
     } else if (txn_db_impl_->GetTransactionByName(name) != nullptr) {
-      s = Status_InvalidArgument("Transaction name must be unique.");
+      s = rocksdb_rs::status::Status_InvalidArgument("Transaction name must be unique.");
     } else if (name.length() < 1 || name.length() > 512) {
-      s = Status_InvalidArgument(
+      s = rocksdb_rs::status::Status_InvalidArgument(
           "Transaction name length must be between 1 and 512 chars.");
     } else {
       name_ = name;
       txn_db_impl_->RegisterTransaction(this);
     }
   } else {
-    s = Status_InvalidArgument("Transaction is beyond state for naming.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is beyond state for naming.");
   }
   return s;
 }

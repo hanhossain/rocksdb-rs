@@ -975,7 +975,7 @@ class TestSecondaryCache : public SecondaryCache {
   rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const Cache::CacheItemHelper* helper) override {
     if (inject_failure_) {
-      return Status_Corruption("Insertion Data Corrupted");
+      return rocksdb_rs::status::Status_Corruption("Insertion Data Corrupted");
     }
     CheckCacheKeyCommonPrefix(key);
     size_t size;

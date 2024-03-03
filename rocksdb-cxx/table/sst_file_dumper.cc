@@ -431,7 +431,7 @@ rocksdb_rs::status::Status SstFileDumper::SetTableOptionsByMagicNumber(
     snprintf(error_msg_buffer, sizeof(error_msg_buffer) - 1,
              "Unsupported table magic number --- %lx",
              (long)table_magic_number);
-    return Status_InvalidArgument(error_msg_buffer);
+    return rocksdb_rs::status::Status_InvalidArgument(error_msg_buffer);
   }
 
   return rocksdb_rs::status::Status_OK();

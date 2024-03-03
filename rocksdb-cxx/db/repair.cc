@@ -149,7 +149,7 @@ class Repairer {
     const ReadOptions read_options;
     const auto* cf_opts = GetColumnFamilyOptions(cf_name);
     if (cf_opts == nullptr) {
-      return Status_Corruption("Encountered unknown column family with name=" +
+      return rocksdb_rs::status::Status_Corruption("Encountered unknown column family with name=" +
                                 cf_name + ", id=" + std::to_string(cf_id));
     }
     Options opts(db_options_, *cf_opts);
@@ -327,7 +327,7 @@ class Repairer {
       }
     }
     if (!found_file) {
-      return Status_Corruption(dbname_, "repair found no files");
+      return rocksdb_rs::status::Status_Corruption(dbname_, "repair found no files");
     }
     return rocksdb_rs::status::Status_OK();
   }
@@ -404,7 +404,7 @@ class Repairer {
     while (reader.ReadRecord(&record, &scratch)) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter.Corruption(record.size(),
-                            Status_Corruption("log record too small"));
+                            rocksdb_rs::status::Status_Corruption("log record too small"));
         continue;
       }
       rocksdb_rs::status::Status record_status = WriteBatchInternal::SetContents(&batch, record);
@@ -582,7 +582,7 @@ class Repairer {
             "family id %" PRIu32 ".",
             t->meta.fd.GetNumber(), props->column_family_name.c_str(),
             cfd->GetName().c_str(), t->column_family_id);
-        status = Status_Corruption(dbname_, "inconsistent column family name");
+        status = rocksdb_rs::status::Status_Corruption(dbname_, "inconsistent column family name");
       }
     }
     if (status.ok()) {
@@ -791,7 +791,7 @@ rocksdb_rs::status::Status GetDefaultCFOptions(
                              return cfd.name == kDefaultColumnFamilyName;
                            });
   if (iter == column_families.end()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "column_families", "Must contain entry for default column family");
   }
   *res = iter->options;

@@ -84,12 +84,12 @@ rocksdb_rs::status::Status CheckWriteBatchTimestampSizeConsistency(
                                   : std::nullopt);
     if (recovery_type != RecoveryType::kNoop) {
       if (check_mode == TimestampSizeConsistencyMode::kVerifyConsistency) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "WriteBatch contains timestamp size inconsistency.");
       }
 
       if (recovery_type == RecoveryType::kUnrecoverable) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "WriteBatch contains unrecoverable timestamp size inconsistency.");
       }
 
@@ -223,7 +223,7 @@ rocksdb_rs::status::Status TimestampRecoveryHandler::ReconcileTimestampDiscrepan
       new_batch_diff_from_orig_batch_ = true;
       break;
     case RecoveryType::kUnrecoverable:
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Unrecoverable timestamp size inconsistency encountered by "
           "TimestampRecoveryHandler.");
     default:

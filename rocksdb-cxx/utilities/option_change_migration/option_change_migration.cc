@@ -169,7 +169,7 @@ rocksdb_rs::status::Status OptionChangeMigration(std::string dbname, const Optio
     }
     return CompactToLevel(old_opts, dbname, 0, l0_file_size, true);
   } else {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Do not how to migrate to this compaction style");
   }
 }

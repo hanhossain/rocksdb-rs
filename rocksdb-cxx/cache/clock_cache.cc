@@ -1221,7 +1221,7 @@ rocksdb_rs::status::Status ClockCacheShard<Table>::Insert(const Slice& key,
                                       size_t charge, HandleImpl** handle,
                                       Cache::Priority priority) {
   if (UNLIKELY(key.size() != kCacheKeySize)) {
-    return Status_NotSupported("ClockCache only supports key size " +
+    return rocksdb_rs::status::Status_NotSupported("ClockCache only supports key size " +
                                 std::to_string(kCacheKeySize) + "B");
   }
   ClockHandleBasicData proto;

@@ -254,14 +254,14 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Rep::ReBuildIndex() {
       case kTypeNoop:
         break;
       default:
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "unknown WriteBatch tag in ReBuildIndex",
             std::to_string(static_cast<unsigned int>(tag)));
     }
   }
 
   if (s.ok() && found != write_batch.Count()) {
-    s = Status_Corruption("WriteBatch has wrong count");
+    s = rocksdb_rs::status::Status_Corruption("WriteBatch has wrong count");
   }
 
   return s;
@@ -338,10 +338,10 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Put(ColumnFamilyHandle* column_f
                                 const Slice& /*key*/, const Slice& /*ts*/,
                                 const Slice& /*value*/) {
   if (!column_family) {
-    return Status_InvalidArgument("column family handle cannot be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be nullptr");
   }
   // TODO: support WBWI::Put() with timestamp.
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
 rocksdb_rs::status::Status WriteBatchWithIndex::Delete(ColumnFamilyHandle* column_family,
@@ -366,10 +366,10 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Delete(const Slice& key) {
 rocksdb_rs::status::Status WriteBatchWithIndex::Delete(ColumnFamilyHandle* column_family,
                                    const Slice& /*key*/, const Slice& /*ts*/) {
   if (!column_family) {
-    return Status_InvalidArgument("column family handle cannot be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be nullptr");
   }
   // TODO: support WBWI::Delete() with timestamp.
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
 rocksdb_rs::status::Status WriteBatchWithIndex::SingleDelete(ColumnFamilyHandle* column_family,
@@ -395,10 +395,10 @@ rocksdb_rs::status::Status WriteBatchWithIndex::SingleDelete(ColumnFamilyHandle*
                                          const Slice& /*key*/,
                                          const Slice& /*ts*/) {
   if (!column_family) {
-    return Status_InvalidArgument("column family handle cannot be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be nullptr");
   }
   // TODO: support WBWI::SingleDelete() with timestamp.
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
 rocksdb_rs::status::Status WriteBatchWithIndex::Merge(ColumnFamilyHandle* column_family,
@@ -506,7 +506,7 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
   const Comparator* const ucmp = rep->comparator.GetComparator(column_family);
   size_t ts_sz = ucmp ? ucmp->timestamp_size() : 0;
   if (ts_sz > 0 && !read_options.timestamp) {
-    return Status_InvalidArgument("Must specify timestamp");
+    return rocksdb_rs::status::Status_InvalidArgument("Must specify timestamp");
   }
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
@@ -577,7 +577,7 @@ void WriteBatchWithIndex::MultiGetFromBatchAndDB(
   size_t ts_sz = ucmp ? ucmp->timestamp_size() : 0;
   if (ts_sz > 0 && !read_options.timestamp) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status_InvalidArgument("Must specify timestamp");
+      statuses[i] = rocksdb_rs::status::Status_InvalidArgument("Must specify timestamp");
     }
     return;
   }

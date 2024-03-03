@@ -934,7 +934,7 @@ class TimestampChecker : public WriteBatch::Handler {
   rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& /*value*/) override {
     auto cf_iter = cf_to_ucmps_.find(cf);
     if (cf_iter == cf_to_ucmps_.end()) {
-      return Status_Corruption();
+      return rocksdb_rs::status::Status_Corruption();
     }
     const Comparator* const ucmp = cf_iter->second;
     assert(ucmp);
@@ -943,11 +943,11 @@ class TimestampChecker : public WriteBatch::Handler {
       return rocksdb_rs::status::Status_OK();
     }
     if (key.size() < ts_sz) {
-      return Status_Corruption();
+      return rocksdb_rs::status::Status_Corruption();
     }
     Slice ts = ExtractTimestampFromUserKey(key, ts_sz);
     if (ts.compare(timestamp_) != 0) {
-      return Status_Corruption();
+      return rocksdb_rs::status::Status_Corruption();
     }
     return rocksdb_rs::status::Status_OK();
   }

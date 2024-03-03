@@ -30,7 +30,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeyForConflicts(
   SuperVersion* sv = db_impl->GetAndRefSuperVersion(cfd);
 
   if (sv == nullptr) {
-    result = Status_InvalidArgument("Could not access column family " +
+    result = rocksdb_rs::status::Status_InvalidArgument("Could not access column family " +
                                      cfh->GetName());
   }
 
@@ -163,7 +163,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_imp
 
     SuperVersion* sv = db_impl->GetAndRefSuperVersion(cf);
     if (sv == nullptr) {
-      result = Status_InvalidArgument("Could not access column family " +
+      result = rocksdb_rs::status::Status_InvalidArgument("Could not access column family " +
                                        std::to_string(cf));
       break;
     }

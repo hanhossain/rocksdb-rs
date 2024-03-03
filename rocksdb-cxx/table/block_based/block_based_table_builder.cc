@@ -1227,12 +1227,12 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
           const char* const msg =
               "Decompressed block did not match pre-compression block";
           ROCKS_LOG_ERROR(r->ioptions.logger, "%s", msg);
-          *out_status = Status_Corruption(msg);
+          *out_status = rocksdb_rs::status::Status_Corruption(msg);
           *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
         }
       } else {
         // Decompression reported an error. abort.
-        *out_status = Status_Corruption(std::string("Could not decompress: ") +
+        *out_status = rocksdb_rs::status::Status_Corruption(std::string("Could not decompress: ") +
                                          *uncompress_status.getState());
         *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }

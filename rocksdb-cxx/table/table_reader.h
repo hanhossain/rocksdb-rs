@@ -100,7 +100,7 @@ class TableReader {
   // The last one tends to be the largest key.
   virtual rocksdb_rs::status::Status ApproximateKeyAnchors(const ReadOptions& /*read_options*/,
                                        std::vector<Anchor>& /*anchors*/) {
-    return Status_NotSupported("ApproximateKeyAnchors() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("ApproximateKeyAnchors() not supported.");
   }
 
   // Set up the table for Compaction. Might change some parameters with
@@ -137,7 +137,7 @@ class TableReader {
   virtual rocksdb_rs::status::Status MultiGetFilter(const ReadOptions& /*readOptions*/,
                                 const SliceTransform* /*prefix_extractor*/,
                                 MultiGetContext::Range* /*mget_range*/) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   virtual void MultiGet(const ReadOptions& readOptions,
@@ -174,13 +174,13 @@ class TableReader {
 
   // convert db file to a human readable form
   virtual rocksdb_rs::status::Status DumpTable(WritableFile* /*out_file*/) {
-    return Status_NotSupported("DumpTable() not supported");
+    return rocksdb_rs::status::Status_NotSupported("DumpTable() not supported");
   }
 
   // check whether there is corruption in this db file
   virtual rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& /*read_options*/,
                                 TableReaderCaller /*caller*/) {
-    return Status_NotSupported("VerifyChecksum() not supported");
+    return rocksdb_rs::status::Status_NotSupported("VerifyChecksum() not supported");
   }
 };
 

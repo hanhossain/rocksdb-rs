@@ -30,7 +30,7 @@ rocksdb_rs::status::Status Transaction::CommitAndTryCreateSnapshot(
   TxnTimestamp commit_ts = GetCommitTimestamp();
   if (commit_ts == kMaxTxnTimestamp) {
     if (ts == kMaxTxnTimestamp) {
-      return Status_InvalidArgument("Commit timestamp unset");
+      return rocksdb_rs::status::Status_InvalidArgument("Commit timestamp unset");
     } else {
       const rocksdb_rs::status::Status s = SetCommitTimestamp(ts);
       if (!s.ok()) {
@@ -40,7 +40,7 @@ rocksdb_rs::status::Status Transaction::CommitAndTryCreateSnapshot(
   } else if (ts != kMaxTxnTimestamp) {
     if (ts != commit_ts) {
       // For now we treat this as error.
-      return Status_InvalidArgument("Different commit ts specified");
+      return rocksdb_rs::status::Status_InvalidArgument("Different commit ts specified");
     }
   }
   SetSnapshotOnNextOperation(notifier);
@@ -235,7 +235,7 @@ rocksdb_rs::status::Status TransactionBaseImpl::Get(const ReadOptions& read_opti
                                 ColumnFamilyHandle* column_family,
                                 const Slice& key, std::string* value) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -262,12 +262,12 @@ rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(const ReadOptions& 
                                          bool exclusive,
                                          const bool do_validate) {
   if (!do_validate && read_options.snapshot != nullptr) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with snapshot is not "
         "defined.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -293,12 +293,12 @@ rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(const ReadOptions& 
                                          bool exclusive,
                                          const bool do_validate) {
   if (!do_validate && read_options.snapshot != nullptr) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with snapshot is not "
         "defined.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -317,7 +317,7 @@ rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGet(
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
   size_t num_keys = keys.size();
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    rocksdb_rs::status::Status s = Status_InvalidArgument(
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return s.create_vec(num_keys);
@@ -351,7 +351,7 @@ rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGetForUpdate(
   // Regardless of whether the MultiGet succeeded, track these keys.
   size_t num_keys = keys.size();
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    rocksdb_rs::status::Status s = Status_InvalidArgument(
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call MultiGetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return s.create_vec(num_keys);
@@ -727,22 +727,22 @@ rocksdb_rs::status::Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch
     // this is used for reconstructing prepared transactions upon
     // recovery. there should not be any meta markers in the batches
     // we are processing.
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkCommit(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkRollback(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
   };
 

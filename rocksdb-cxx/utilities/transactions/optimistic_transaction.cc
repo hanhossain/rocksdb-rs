@@ -56,7 +56,7 @@ OptimisticTransaction::~OptimisticTransaction() {}
 void OptimisticTransaction::Clear() { TransactionBaseImpl::Clear(); }
 
 rocksdb_rs::status::Status OptimisticTransaction::Prepare() {
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Two phase commit not supported for optimistic transactions.");
 }
 
@@ -204,7 +204,7 @@ rocksdb_rs::status::Status OptimisticTransaction::CheckTransactionForConflicts(D
 }
 
 rocksdb_rs::status::Status OptimisticTransaction::SetName(const TransactionName& /* unused */) {
-  return Status_InvalidArgument("Optimistic transactions cannot be named.");
+  return rocksdb_rs::status::Status_InvalidArgument("Optimistic transactions cannot be named.");
 }
 
 }  // namespace rocksdb

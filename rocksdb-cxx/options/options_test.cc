@@ -55,7 +55,7 @@ class UnregisteredTableFactory : public TableFactory {
   rocksdb_rs::status::Status NewTableReader(const ReadOptions&, const TableReaderOptions&,
                         std::unique_ptr<RandomAccessFileReader>&&, uint64_t,
                         std::unique_ptr<TableReader>*, bool) const override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   TableBuilder* NewTableBuilder(const TableBuilderOptions&,
                                 WritableFileWriter*) const override {
@@ -4427,7 +4427,7 @@ TEST_F(OptionTypeInfoTest, TestParseFunc) {
                            void* addr) {
     auto ptr = static_cast<std::string*>(addr);
     if (name == "Oops") {
-      return Status_InvalidArgument(value);
+      return rocksdb_rs::status::Status_InvalidArgument(value);
     } else {
       *ptr = value + " " + name;
       return rocksdb_rs::status::Status_OK();
@@ -4448,7 +4448,7 @@ TEST_F(OptionTypeInfoTest, TestSerializeFunc) {
                                const std::string& name, const void* /*addr*/,
                                std::string* value) {
     if (name == "Oops") {
-      return Status_InvalidArgument(name);
+      return rocksdb_rs::status::Status_InvalidArgument(name);
     } else {
       *value = name;
       return rocksdb_rs::status::Status_OK();
@@ -4507,7 +4507,7 @@ TEST_F(OptionTypeInfoTest, TestPrepareFunc) {
         } else if (name == "/2") {
           *i1 /= 2;
         } else {
-          return Status_InvalidArgument("Bad Argument", name);
+          return rocksdb_rs::status::Status_InvalidArgument("Bad Argument", name);
         }
         return rocksdb_rs::status::Status_OK();
       });
@@ -4537,7 +4537,7 @@ TEST_F(OptionTypeInfoTest, TestValidateFunc) {
     if (is_valid) {
       return rocksdb_rs::status::Status_OK();
     } else {
-      return Status_InvalidArgument("Mismatched value", name);
+      return rocksdb_rs::status::Status_InvalidArgument("Mismatched value", name);
     }
   });
   ConfigOptions config_options;

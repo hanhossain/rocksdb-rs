@@ -2219,7 +2219,7 @@ TEST_F(BlobDBTest, MaintainBlobFileToSstMapping) {
     info.input_file_infos.emplace_back(CompactionFileInfo{1, 7, 2});
     info.input_file_infos.emplace_back(CompactionFileInfo{2, 22, 5});
     info.output_file_infos.emplace_back(CompactionFileInfo{2, 25, 3});
-    info.status = Status_Corruption();
+    info.status = rocksdb_rs::status::Status_Corruption();
 
     blob_db_impl()->TEST_ProcessCompactionJobInfo(info);
 

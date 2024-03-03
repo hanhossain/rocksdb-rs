@@ -247,7 +247,7 @@ class ValidatedConfigurable : public SimpleConfigurable {
 
   rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override {
     if (++prepared <= 0) {
-      return Status_InvalidArgument("Cannot prepare option");
+      return rocksdb_rs::status::Status_InvalidArgument("Cannot prepare option");
     } else {
       return SimpleConfigurable::PrepareOptions(config_options);
     }
@@ -256,7 +256,7 @@ class ValidatedConfigurable : public SimpleConfigurable {
   rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                          const ColumnFamilyOptions& cf_opts) const override {
     if (!validated) {
-      return Status_InvalidArgument("Not Validated");
+      return rocksdb_rs::status::Status_InvalidArgument("Not Validated");
     } else {
       return SimpleConfigurable::ValidateOptions(db_opts, cf_opts);
     }

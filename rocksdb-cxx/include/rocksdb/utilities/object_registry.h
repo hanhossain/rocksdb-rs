@@ -326,13 +326,13 @@ class ObjectRegistry {
       if (*object != nullptr) {
         return rocksdb_rs::status::Status_OK();
       } else if (errmsg.empty()) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             std::string("Could not load ") + T::Type(), target);
       } else {
-        return Status_InvalidArgument(errmsg, target);
+        return rocksdb_rs::status::Status_InvalidArgument(errmsg, target);
       }
     } else {
-      return Status_NotSupported(std::string("Could not load ") + T::Type(),
+      return rocksdb_rs::status::Status_NotSupported(std::string("Could not load ") + T::Type(),
                                   target);
     }
   }
@@ -353,7 +353,7 @@ class ObjectRegistry {
       result->reset(guard.release());
       return rocksdb_rs::status::Status_OK();
     } else {
-      return Status_InvalidArgument(std::string("Cannot make a unique ") +
+      return rocksdb_rs::status::Status_InvalidArgument(std::string("Cannot make a unique ") +
                                          T::Type() + " from unguarded one ",
                                      target);
     }
@@ -376,7 +376,7 @@ class ObjectRegistry {
       result->reset(guard.release());
       return rocksdb_rs::status::Status_OK();
     } else {
-      return Status_InvalidArgument(std::string("Cannot make a shared ") +
+      return rocksdb_rs::status::Status_InvalidArgument(std::string("Cannot make a shared ") +
                                          T::Type() + " from unguarded one ",
                                      target);
     }
@@ -395,7 +395,7 @@ class ObjectRegistry {
     if (!s.ok()) {
       return s;
     } else if (guard.get()) {
-      return Status_InvalidArgument(std::string("Cannot make a static ") +
+      return rocksdb_rs::status::Status_InvalidArgument(std::string("Cannot make a static ") +
                                          T::Type() + " from a guarded one ",
                                      target);
     } else {

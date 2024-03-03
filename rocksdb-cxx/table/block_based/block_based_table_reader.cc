@@ -440,7 +440,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
           msg_buf.data(), msg_buf.max_size(),
           "A non-external sst file have global seqno property with value %s",
           seqno_pos->second.c_str());
-      return Status_Corruption(msg_buf.data());
+      return rocksdb_rs::status::Status_Corruption(msg_buf.data());
     }
     return rocksdb_rs::status::Status_OK();
   }
@@ -454,7 +454,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
                "An external sst file with version %u have global seqno "
                "property with value %s",
                version, seqno_pos->second.c_str());
-      return Status_Corruption(msg_buf.data());
+      return rocksdb_rs::status::Status_Corruption(msg_buf.data());
     }
     return rocksdb_rs::status::Status_OK();
   }
@@ -480,7 +480,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
           "with value %s, while largest seqno in the file is %llu",
           version, seqno_pos->second.c_str(),
           static_cast<unsigned long long>(largest_seqno));
-      return Status_Corruption(msg_buf.data());
+      return rocksdb_rs::status::Status_Corruption(msg_buf.data());
     }
   }
   *seqno = global_seqno;
@@ -491,7 +491,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
              "An external sst file with version %u have global seqno property "
              "with value %llu, which is greater than kMaxSequenceNumber",
              version, static_cast<unsigned long long>(global_seqno));
-    return Status_Corruption(msg_buf.data());
+    return rocksdb_rs::status::Status_Corruption(msg_buf.data());
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -625,7 +625,7 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
     return s;
   }
   if (!IsSupportedFormatVersion(footer.format_version())) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Unknown Footer version. Maybe this file was created with newer "
         "version of RocksDB?");
   }
@@ -684,7 +684,7 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
   if (expected_unique_id != rocksdb_rs::unique_id::UniqueId64x2_null()) {
     auto props = rep->table_properties;
     if (!props) {
-      return Status_Corruption("Missing table properties on file " +
+      return rocksdb_rs::status::Status_Corruption("Missing table properties on file " +
                                 std::to_string(cur_file_num) +
                                 " with known unique ID");
     }
@@ -692,7 +692,7 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
     s = actual_unique_id.get_sst_internal_unique_id(props->db_id, props->db_session_id, props->orig_file_number, true);
     assert(s.ok());  // because force=true
     if (expected_unique_id != actual_unique_id) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Mismatch in unique ID on table file " +
           std::to_string(cur_file_num) +
           ". Expected: " + std::string(expected_unique_id.to_internal_human_string()) +
@@ -2286,7 +2286,7 @@ rocksdb_rs::status::Status BlockBasedTable::Prefetch(const ReadOptions& read_opt
   UserComparatorWrapper user_comparator(comparator.user_comparator());
   // pre-condition
   if (begin && end && comparator.Compare(*begin, *end) > 0) {
-    return Status_InvalidArgument(*begin, *end);
+    return rocksdb_rs::status::Status_InvalidArgument(*begin, *end);
   }
   BlockCacheLookupContext lookup_context{TableReaderCaller::kPrefetch};
   IndexBlockIter iiter_on_stack;
@@ -2565,7 +2565,7 @@ rocksdb_rs::status::Status BlockBasedTable::CreateIndexReader(
     default: {
       std::string error_message =
           "Unrecognized index type: " + std::to_string(rep_->index_type);
-      return Status_InvalidArgument(error_message.c_str());
+      return rocksdb_rs::status::Status_InvalidArgument(error_message.c_str());
     }
   }
 }

@@ -62,7 +62,7 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_opt
 
   TEST_SYNC_POINT("PersistRocksDBOptions:start");
   if (cf_names.size() != cf_opts.size()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "cf_names.size() and cf_opts.size() must be the same");
   }
   std::unique_ptr<FSWritableFile> wf;
@@ -210,12 +210,12 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseSection(OptionSection* sec
       }
     }
   }
-  return Status_InvalidArgument(std::string("Unknown section ") + line);
+  return rocksdb_rs::status::Status_InvalidArgument(std::string("Unknown section ") + line);
 }
 
 rocksdb_rs::status::Status RocksDBOptionsParser::InvalidArgument(const int line_num,
                                              const std::string& message) {
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "[RocksDBOptionsParser Error] ",
       message + " (at line " + std::to_string(line_num) + ")");
 }
@@ -388,13 +388,13 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(const std::s
         snprintf(buffer, sizeof(buffer) - 1,
                  "A valid %s can only contains at most %d dots.",
                  ver_name.c_str(), max_count - 1);
-        return Status_InvalidArgument(buffer);
+        return rocksdb_rs::status::Status_InvalidArgument(buffer);
       }
       if (current_digit_count == 0) {
         snprintf(buffer, sizeof(buffer) - 1,
                  "A valid %s must have at least one digit before each dot.",
                  ver_name.c_str());
-        return Status_InvalidArgument(buffer);
+        return rocksdb_rs::status::Status_InvalidArgument(buffer);
       }
       version[version_index++] = current_number;
       current_number = 0;
@@ -407,7 +407,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(const std::s
       snprintf(buffer, sizeof(buffer) - 1,
                "A valid %s can only contains dots and numbers.",
                ver_name.c_str());
-      return Status_InvalidArgument(buffer);
+      return rocksdb_rs::status::Status_InvalidArgument(buffer);
     }
   }
   version[version_index] = current_number;
@@ -415,7 +415,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(const std::s
     snprintf(buffer, sizeof(buffer) - 1,
              "A valid %s must have at least one digit after each dot.",
              ver_name.c_str());
-    return Status_InvalidArgument(buffer);
+    return rocksdb_rs::status::Status_InvalidArgument(buffer);
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -448,7 +448,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
     assert(GetCFOptions(section_arg) != nullptr);
     auto* cf_opt = GetCFOptionsImpl(section_arg);
     if (cf_opt == nullptr) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "The specified column family must be defined before the "
           "TableOptions section:",
           section_arg);
@@ -466,7 +466,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
       if (s.ok() || s.IsInvalidArgument()) {
         return s;
       } else {
-        return Status_InvalidArgument(*s.getState());
+        return rocksdb_rs::status::Status_InvalidArgument(*s.getState());
       }
     } else {
       // Return OK for not supported table factories as TableFactory
@@ -487,7 +487,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
           return s;
         }
         if (opt_file_version[0] < 1) {
-          return Status_InvalidArgument(
+          return rocksdb_rs::status::Status_InvalidArgument(
               "A valid options_file_version must be at least 1.");
         }
       }
@@ -498,11 +498,11 @@ rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
 
 rocksdb_rs::status::Status RocksDBOptionsParser::ValidityCheck() {
   if (!has_db_options_) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "A RocksDB Option file must have a single DBOptions section");
   }
   if (!has_default_cf_options_) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "A RocksDB Option file must have a single CFOptions:default section");
   }
 
@@ -577,11 +577,11 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
   if (cf_names.size() != parser.cf_names()->size()) {
     if (config_options.sanity_level >=
         ConfigOptions::kSanityLevelLooselyCompatible) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "[RocksDBOptionParser Error] The persisted options does not have "
           "the same number of column family names as the db instance.");
     } else if (cf_opts.size() > parser.cf_opts()->size()) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "[RocksDBOptionsParser Error]",
           "The persisted options file has less number of column family "
           "names than that of the specified one.");
@@ -589,7 +589,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
   }
   for (size_t i = 0; i < cf_names.size(); ++i) {
     if (cf_names[i] != parser.cf_names()->at(i)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "[RocksDBOptionParser Error] The persisted options and the db"
           "instance does not have the same name for column family ",
           std::to_string(i));
@@ -600,12 +600,12 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
   if (cf_opts.size() != parser.cf_opts()->size()) {
     if (config_options.sanity_level >=
         ConfigOptions::kSanityLevelLooselyCompatible) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "[RocksDBOptionsParser Error]",
           "The persisted options does not have the same number of "
           "column families as the db instance.");
     } else if (cf_opts.size() > parser.cf_opts()->size()) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "[RocksDBOptionsParser Error]",
           "The persisted options file has less number of column families "
           "than that of the specified number.");
@@ -659,7 +659,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyDBOptions(
                "-- Unable to re-serialize an option: %s.\n",
                s.ToString()->c_str());
     }
-    return Status_InvalidArgument(Slice(buffer, strlen(buffer)));
+    return rocksdb_rs::status::Status_InvalidArgument(Slice(buffer, strlen(buffer)));
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -706,7 +706,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyCFOptions(
                "--- Unable to re-serialize an option: %s.\n",
                s.ToString()->c_str());
     }
-    return Status_InvalidArgument(Slice(buffer, sizeof(buffer)));
+    return rocksdb_rs::status::Status_InvalidArgument(Slice(buffer, sizeof(buffer)));
   }  // For each option
   return rocksdb_rs::status::Status_OK();
 }
@@ -718,11 +718,11 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyTableFactory(
   if (base_tf && file_tf) {
     if (config_options.sanity_level > ConfigOptions::kSanityLevelNone &&
         std::string(base_tf->Name()) != std::string(file_tf->Name())) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "[RocksDBOptionsParser]: "
           "failed the verification on TableFactory->Name()");
     } else if (!base_tf->AreEquivalent(config_options, file_tf, &mismatch)) {
-      return Status_Corruption(std::string("[RocksDBOptionsParser]:"
+      return rocksdb_rs::status::Status_Corruption(std::string("[RocksDBOptionsParser]:"
                                             "failed the verification on ") +
                                     base_tf->Name() + "::",
                                 mismatch);

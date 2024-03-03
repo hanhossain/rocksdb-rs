@@ -1806,7 +1806,7 @@ rocksdb_rs::status::Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
   }
   auto corrupt_itr = corrupt_backups_.find(backup_id);
   if (corrupt_itr != corrupt_backups_.end()) {
-    return Status_Corruption(corrupt_itr->second.first.ToString());
+    return rocksdb_rs::status::Status_Corruption(corrupt_itr->second.first.ToString());
   }
   auto backup_itr = backups_.find(backup_id);
   if (backup_itr == backups_.end()) {
@@ -2613,7 +2613,7 @@ rocksdb_rs::status::Status BackupEngineImpl::GetFileDbIdentities(
     }
     return rocksdb_rs::status::Status_OK();
   } else {
-    s = Status_Corruption("Table properties missing in " + file_path);
+    s = rocksdb_rs::status::Status_Corruption("Table properties missing in " + file_path);
     ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString()->c_str());
     return s;
   }

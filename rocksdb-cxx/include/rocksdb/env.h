@@ -273,7 +273,7 @@ class Env : public Customizable {
   virtual rocksdb_rs::status::Status ReopenWritableFile(const std::string& /*fname*/,
                                     std::unique_ptr<WritableFile>* /*result*/,
                                     const EnvOptions& /*options*/) {
-    return Status_NotSupported("Env::ReopenWritableFile() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("Env::ReopenWritableFile() not supported.");
   }
 
   // Reuse an existing file by renaming it and opening it as writable.
@@ -290,7 +290,7 @@ class Env : public Customizable {
   virtual rocksdb_rs::status::Status NewRandomRWFile(const std::string& /*fname*/,
                                  std::unique_ptr<RandomRWFile>* /*result*/,
                                  const EnvOptions& /*options*/) {
-    return Status_NotSupported("RandomRWFile is not implemented in this Env");
+    return rocksdb_rs::status::Status_NotSupported("RandomRWFile is not implemented in this Env");
   }
 
   // Opens `fname` as a memory-mapped file for read and write (in-place updates
@@ -299,7 +299,7 @@ class Env : public Customizable {
   virtual rocksdb_rs::status::Status NewMemoryMappedFileBuffer(
       const std::string& /*fname*/,
       std::unique_ptr<MemoryMappedFileBuffer>* /*result*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "MemoryMappedFileBuffer is not implemented in this Env");
   }
 
@@ -353,7 +353,7 @@ class Env : public Customizable {
 
   // Truncate the named file to the specified size.
   virtual rocksdb_rs::status::Status Truncate(const std::string& /*fname*/, size_t /*size*/) {
-    return Status_NotSupported("Truncate is not supported for this Env");
+    return rocksdb_rs::status::Status_NotSupported("Truncate is not supported for this Env");
   }
 
   // Create the specified directory. Returns error if directory exists.
@@ -384,18 +384,18 @@ class Env : public Customizable {
   // Hard Link file src to target.
   virtual rocksdb_rs::status::Status LinkFile(const std::string& /*src*/,
                           const std::string& /*target*/) {
-    return Status_NotSupported("LinkFile is not supported for this Env");
+    return rocksdb_rs::status::Status_NotSupported("LinkFile is not supported for this Env");
   }
 
   virtual rocksdb_rs::status::Status NumFileLinks(const std::string& /*fname*/,
                               uint64_t* /*count*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Getting number of file links is not supported for this Env");
   }
 
   virtual rocksdb_rs::status::Status AreFilesSame(const std::string& /*first*/,
                               const std::string& /*second*/, bool* /*res*/) {
-    return Status_NotSupported("AreFilesSame is not supported for this Env");
+    return rocksdb_rs::status::Status_NotSupported("AreFilesSame is not supported for this Env");
   }
 
   // Lock the specified file.  Used to prevent concurrent access to
@@ -428,7 +428,7 @@ class Env : public Customizable {
   virtual rocksdb_rs::status::Status LoadLibrary(const std::string& /*lib_name*/,
                              const std::string& /*search_path */,
                              std::shared_ptr<DynamicLibrary>* /*result*/) {
-    return Status_NotSupported("LoadLibrary is not implemented in this Env");
+    return rocksdb_rs::status::Status_NotSupported("LoadLibrary is not implemented in this Env");
   }
 
   // Priority for scheduling job in thread pool
@@ -563,7 +563,7 @@ class Env : public Customizable {
   virtual int GetBackgroundThreads(Priority pri = LOW) = 0;
 
   virtual rocksdb_rs::status::Status SetAllowNonOwnerAccess(bool /*allow_non_owner_access*/) {
-    return Status_NotSupported("Env::SetAllowNonOwnerAccess() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("Env::SetAllowNonOwnerAccess() not supported.");
   }
 
   // Enlarge number of background worker threads of a specific thread pool
@@ -577,7 +577,7 @@ class Env : public Customizable {
   // Lower CPU priority for threads from the specified pool.
   virtual rocksdb_rs::status::Status LowerThreadPoolCPUPriority(Priority /*pool*/,
                                             rocksdb_rs::port_defs::CpuPriority /*pri*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Env::LowerThreadPoolCPUPriority(Priority, CpuPriority) not supported");
   }
 
@@ -637,7 +637,7 @@ class Env : public Customizable {
 
   // Returns the status of all threads that belong to the current Env.
   virtual rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* /*thread_list*/) {
-    return Status_NotSupported("Env::GetThreadList() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("Env::GetThreadList() not supported.");
   }
 
   // Returns the pointer to ThreadStatusUpdater.  This function will be
@@ -656,12 +656,12 @@ class Env : public Customizable {
   // Get the amount of free disk space
   virtual rocksdb_rs::status::Status GetFreeSpace(const std::string& /*path*/,
                               uint64_t* /*diskfree*/) {
-    return Status_NotSupported("Env::GetFreeSpace() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("Env::GetFreeSpace() not supported.");
   }
 
   // Check whether the specified path is a directory
   virtual rocksdb_rs::status::Status IsDirectory(const std::string& /*path*/, bool* /*is_dir*/) {
-    return Status_NotSupported("Env::IsDirectory() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("Env::IsDirectory() not supported.");
   }
 
   virtual void SanitizeEnvOptions(EnvOptions* /*env_opts*/) const {}
@@ -737,7 +737,7 @@ class SequentialFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   virtual rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "SequentialFile::InvalidateCache not supported.");
   }
 
@@ -745,7 +745,7 @@ class SequentialFile {
   // If Direct I/O enabled, offset, n, and scratch should be properly aligned
   virtual rocksdb_rs::status::Status PositionedRead(uint64_t /*offset*/, size_t /*n*/,
                                 Slice* /*result*/, char* /*scratch*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "SequentialFile::PositionedRead() not supported.");
   }
 
@@ -856,7 +856,7 @@ class RandomAccessFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   virtual rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "RandomAccessFile::InvalidateCache not supported.");
   }
 
@@ -930,7 +930,7 @@ class WritableFile {
   // required is queried via GetRequiredBufferAlignment()
   virtual rocksdb_rs::status::Status PositionedAppend(const Slice& /* data */,
                                   uint64_t /* offset */) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WritableFile::PositionedAppend() not supported.");
   }
 
@@ -944,7 +944,7 @@ class WritableFile {
   virtual rocksdb_rs::status::Status PositionedAppend(
       const Slice& /* data */, uint64_t /* offset */,
       const DataVerificationInfo& /* verification_info */) {
-    return Status_NotSupported("PositionedAppend");
+    return rocksdb_rs::status::Status_NotSupported("PositionedAppend");
   }
 
   // Truncate is necessary to trim the file to the correct size
@@ -1033,7 +1033,7 @@ class WritableFile {
   // If the system is not caching the file contents, then this is a noop.
   // This call has no effect on dirty pages in the cache.
   virtual rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status_NotSupported("WritableFile::InvalidateCache not supported.");
+    return rocksdb_rs::status::Status_NotSupported("WritableFile::InvalidateCache not supported.");
   }
 
   // Sync a file range with disk.
@@ -1182,7 +1182,7 @@ class Directory {
   // Calling Close() before destroying a Directory is recommended to surface
   // any errors associated with finishing writes (in case of future features).
   // The directory is considered closed regardless of return status.
-  virtual rocksdb_rs::status::Status Close() { return Status_NotSupported("Close"); }
+  virtual rocksdb_rs::status::Status Close() { return rocksdb_rs::status::Status_NotSupported("Close"); }
 
   virtual size_t GetUniqueId(char* /*id*/, size_t /*max_size*/) const {
     return 0;

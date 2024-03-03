@@ -224,20 +224,20 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch*
     }
 
     // Recovered batches do not contain 2PC markers.
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
-    rocksdb_rs::status::Status MarkNoop(bool) override { return Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
 
     rocksdb_rs::status::Status MarkCommit(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkRollback(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
   };
 
@@ -286,7 +286,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
     } else
 #endif
     {
-      return Status_InvalidArgument("Cannot write to DB without SetName.");
+      return rocksdb_rs::status::Status_InvalidArgument("Cannot write to DB without SetName.");
     }
   }
 
@@ -328,21 +328,21 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
 
     // The only expected 2PC marker is the initial Noop marker.
     rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? rocksdb_rs::status::Status_OK() : Status_InvalidArgument();
+      return empty_batch ? rocksdb_rs::status::Status_OK() : rocksdb_rs::status::Status_InvalidArgument();
     }
 
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkCommit(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkRollback(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
   };
 
@@ -440,21 +440,21 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB(
 
     // The only expected 2PC marker is the initial Noop marker.
     rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? rocksdb_rs::status::Status_OK() : Status_InvalidArgument();
+      return empty_batch ? rocksdb_rs::status::Status_OK() : rocksdb_rs::status::Status_InvalidArgument();
     }
 
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkCommit(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
 
     rocksdb_rs::status::Status MarkRollback(const Slice&) override {
-      return Status_InvalidArgument();
+      return rocksdb_rs::status::Status_InvalidArgument();
     }
   };
 
@@ -556,7 +556,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::CommitInternal() {
     if (for_recovery) {
       WriteBatchInternal::SetAsLatestPersistentState(working_batch);
     } else {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Commit-time-batch can only be used if "
           "use_only_the_last_commit_time_batch_for_recovery is true");
     }
@@ -833,7 +833,7 @@ void WriteUnpreparedTxn::Clear() {
   largest_validated_seq_ = 0;
   for (auto& it : active_iterators_) {
     auto bdit = static_cast<BaseDeltaIterator*>(it);
-    bdit->Invalidate(Status_InvalidArgument(
+    bdit->Invalidate(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot use iterator after transaction has finished"));
   }
   active_iterators_.clear();
@@ -970,7 +970,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::Get(const ReadOptions& options,
                                ColumnFamilyHandle* column_family,
                                const Slice& key, PinnableSlice* value) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }

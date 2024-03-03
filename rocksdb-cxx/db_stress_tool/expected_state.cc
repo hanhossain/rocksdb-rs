@@ -420,7 +420,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
     uint64_t key_id;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return Status_Corruption("unable to parse key", key.ToString());
+      return rocksdb_rs::status::Status_Corruption("unable to parse key", key.ToString());
     }
     uint32_t value_base = GetValueBase(value);
 
@@ -442,18 +442,18 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
 
     uint64_t key_id = 0;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return Status_Corruption("Unable to parse key", key.ToString());
+      return rocksdb_rs::status::Status_Corruption("Unable to parse key", key.ToString());
     }
 
     Slice entity_copy = entity;
     WideColumns columns;
     if (!WideColumnSerialization::Deserialize(entity_copy, columns).ok()) {
-      return Status_Corruption("Unable to deserialize entity",
+      return rocksdb_rs::status::Status_Corruption("Unable to deserialize entity",
                                 entity.ToString(/* hex */ true));
     }
 
     if (!VerifyWideColumns(columns)) {
-      return Status_Corruption("Wide columns in entity inconsistent",
+      return rocksdb_rs::status::Status_Corruption("Wide columns in entity inconsistent",
                                 entity.ToString(/* hex */ true));
     }
 
@@ -480,7 +480,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
     uint64_t key_id;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return Status_Corruption("unable to parse key", key.ToString());
+      return rocksdb_rs::status::Status_Corruption("unable to parse key", key.ToString());
     }
 
     bool should_buffer_write = !(buffered_writes_ == nullptr);
@@ -520,11 +520,11 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
         StripTimestampFromUserKey(end_key_with_ts, FLAGS_user_timestamp_size);
     uint64_t begin_key_id, end_key_id;
     if (!GetIntVal(begin_key.ToString(), &begin_key_id)) {
-      return Status_Corruption("unable to parse begin key",
+      return rocksdb_rs::status::Status_Corruption("unable to parse begin key",
                                 begin_key.ToString());
     }
     if (!GetIntVal(end_key.ToString(), &end_key_id)) {
-      return Status_Corruption("unable to parse end key", end_key.ToString());
+      return rocksdb_rs::status::Status_Corruption("unable to parse end key", end_key.ToString());
     }
 
     bool should_buffer_write = !(buffered_writes_ == nullptr);
@@ -610,7 +610,7 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
   assert(HasHistory());
   SequenceNumber seqno = db->GetLatestSequenceNumber();
   if (seqno < saved_seqno_) {
-    return Status_Corruption("DB is older than any restorable expected state");
+    return rocksdb_rs::status::Status_Corruption("DB is older than any restorable expected state");
   }
 
   std::string state_filename =

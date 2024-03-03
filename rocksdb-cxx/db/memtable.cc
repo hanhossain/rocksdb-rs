@@ -264,10 +264,10 @@ rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
   uint32_t key_length;
   const char* key_ptr = GetVarint32Ptr(entry, entry + 5, &key_length);
   if (key_ptr == nullptr) {
-    return Status_Corruption("Unable to parse internal key length");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key length");
   }
   if (key_length < 8) {
-    return Status_Corruption("Memtable entry internal key length too short.");
+    return rocksdb_rs::status::Status_Corruption("Memtable entry internal key length too short.");
   }
   Slice user_key = Slice(key_ptr, key_length - 8);
 
@@ -280,7 +280,7 @@ rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
   const char* value_ptr = GetVarint32Ptr(
       key_ptr + key_length, key_ptr + key_length + 5, &value_length);
   if (value_ptr == nullptr) {
-    return Status_Corruption("Unable to parse internal key value");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key value");
   }
   Slice value = Slice(value_ptr, value_length);
 
@@ -300,7 +300,7 @@ rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
       msg.append("User key: " + user_key.ToString(/*hex=*/true) + ". ");
       msg.append("seq: " + std::to_string(seq) + ".");
     }
-    return Status_Corruption(msg.c_str());
+    return rocksdb_rs::status::Status_Corruption(msg.c_str());
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -622,14 +622,14 @@ rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(Slice encoded,
                                     const ProtectionInfoKVOS64& kv_prot_info) {
   uint32_t ikey_len = 0;
   if (!GetVarint32(&encoded, &ikey_len)) {
-    return Status_Corruption("Unable to parse internal key length");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key length");
   }
   size_t ts_sz = GetInternalKeyComparator().user_comparator()->timestamp_size();
   if (ikey_len < 8 + ts_sz) {
-    return Status_Corruption("Internal key length too short");
+    return rocksdb_rs::status::Status_Corruption("Internal key length too short");
   }
   if (ikey_len > encoded.size()) {
-    return Status_Corruption("Internal key length too long");
+    return rocksdb_rs::status::Status_Corruption("Internal key length too long");
   }
   uint32_t value_len = 0;
   const size_t user_key_len = ikey_len - 8;
@@ -643,13 +643,13 @@ rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(Slice encoded,
   encoded.remove_prefix(8);
 
   if (!GetVarint32(&encoded, &value_len)) {
-    return Status_Corruption("Unable to parse value length");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse value length");
   }
   if (value_len < encoded.size()) {
-    return Status_Corruption("Value length too short");
+    return rocksdb_rs::status::Status_Corruption("Value length too short");
   }
   if (value_len > encoded.size()) {
-    return Status_Corruption("Value length too long");
+    return rocksdb_rs::status::Status_Corruption("Value length too long");
   }
   Slice value(encoded.data(), value_len);
 
@@ -966,14 +966,14 @@ static bool SaveValue(void* arg, const char* entry) {
     switch (type) {
       case kTypeBlobIndex: {
         if (!s->do_merge) {
-          *(s->status) = Status_NotSupported(
+          *(s->status) = rocksdb_rs::status::Status_NotSupported(
               "GetMergeOperands not supported by stacked BlobDB");
           *(s->found_final_value) = true;
           return false;
         }
 
         if (*(s->merge_in_progress)) {
-          *(s->status) = Status_NotSupported(
+          *(s->status) = rocksdb_rs::status::Status_NotSupported(
               "Merge operator not supported by stacked BlobDB");
           *(s->found_final_value) = true;
           return false;
@@ -981,7 +981,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         if (s->is_blob_index == nullptr) {
           ROCKS_LOG_ERROR(s->logger, "Encountered unexpected blob index.");
-          *(s->status) = Status_NotSupported(
+          *(s->status) = rocksdb_rs::status::Status_NotSupported(
               "Encountered unexpected blob index. Please open DB with "
               "rocksdb::blob_db::BlobDB.");
           *(s->found_final_value) = true;
@@ -1187,7 +1187,7 @@ static bool SaveValue(void* arg, const char* entry) {
       }
       case kTypeMerge: {
         if (!merge_operator) {
-          *(s->status) = Status_InvalidArgument(
+          *(s->status) = rocksdb_rs::status::Status_InvalidArgument(
               "merge_operator is not properly initialized.");
           // Normally we continue the loop (return true) when we see a merge
           // operand.  But in case of an error, we should stop the loop
@@ -1240,7 +1240,7 @@ static bool SaveValue(void* arg, const char* entry) {
                      ". ");
           msg.append("seq: " + std::to_string(seq) + ".");
         }
-        *(s->status) = Status_Corruption(msg.c_str());
+        *(s->status) = rocksdb_rs::status::Status_Corruption(msg.c_str());
         return false;
       }
     }

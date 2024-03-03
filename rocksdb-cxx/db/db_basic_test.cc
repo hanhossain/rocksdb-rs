@@ -3050,7 +3050,7 @@ TEST_F(DBBasicTest, BestEffortsRecoveryWithVersionBuildingFailure) {
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
         *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) =
-            Status_Corruption("Inject corruption");
+            rocksdb_rs::status::Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -3923,7 +3923,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
         rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
         read_count++;
         if (read_count == 2) {
-          *s = Status_Corruption();
+          *s = rocksdb_rs::status::Status_Corruption();
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();
@@ -3940,7 +3940,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
   ASSERT_TRUE(CheckValue(0, values[0].ToString()));
   // ASSERT_TRUE(CheckValue(50, values[1].ToString()));
   ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_Corruption()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_Corruption()));
 
   SyncPoint::GetInstance()->DisableProcessing();
 }

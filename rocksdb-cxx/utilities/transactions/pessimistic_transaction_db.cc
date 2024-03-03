@@ -83,10 +83,10 @@ rocksdb_rs::status::Status PessimisticTransactionDB::VerifyCFOptions(
     oss << "Timestamp of transaction must have " << sizeof(TxnTimestamp)
         << " bytes. CF comparator " << std::string(ucmp->Name())
         << " timestamp size is " << ts_sz << " bytes";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   if (txn_db_options_.write_policy != WRITE_COMMITTED) {
-    return Status_NotSupported("Only WriteCommittedTxn supports timestamp");
+    return rocksdb_rs::status::Status_NotSupported("Only WriteCommittedTxn supports timestamp");
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -227,18 +227,18 @@ rocksdb_rs::status::Status TransactionDB::Open(
   DB* db = nullptr;
   if (txn_db_options.write_policy == WRITE_COMMITTED &&
       db_options.unordered_write) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WRITE_COMMITTED is incompatible with unordered_writes");
   }
   if (txn_db_options.write_policy == WRITE_UNPREPARED &&
       db_options.unordered_write) {
     // TODO(lth): support it
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WRITE_UNPREPARED is currently incompatible with unordered_writes");
   }
   if (txn_db_options.write_policy == WRITE_PREPARED &&
       db_options.unordered_write && !db_options.two_write_queues) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WRITE_PREPARED is incompatible with unordered_writes if "
         "two_write_queues is not enabled.");
   }
@@ -717,7 +717,7 @@ void PessimisticTransactionDB::UnregisterTransaction(Transaction* txn) {
 std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>>
 PessimisticTransactionDB::CreateTimestampedSnapshot(TxnTimestamp ts) {
   if (kMaxTxnTimestamp == ts) {
-    return std::make_pair(Status_InvalidArgument("invalid ts"), nullptr);
+    return std::make_pair(rocksdb_rs::status::Status_InvalidArgument("invalid ts"), nullptr);
   }
   assert(db_impl_);
   return db_impl_->CreateTimestampedSnapshot(kMaxSequenceNumber, ts);
