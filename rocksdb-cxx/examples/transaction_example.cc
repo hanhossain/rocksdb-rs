@@ -14,7 +14,7 @@ using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Snapshot;
 using rocksdb::Status;
-using rocksdb::rocksdb_rs::status::SubCode;
+using rocksdb_rs::status::SubCode;
 using rocksdb::Transaction;
 using rocksdb::TransactionDB;
 using rocksdb::TransactionDBOptions;

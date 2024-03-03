@@ -48,7 +48,7 @@ class ErrorHandler {
 
   void EnableAutoRecovery() { auto_recovery_ = true; }
 
-  Severity GetErrorSeverity(BackgroundErrorReason reason,
+  rocksdb_rs::status::Severity GetErrorSeverity(BackgroundErrorReason reason,
                                     rocksdb_rs::status::Code code, rocksdb_rs::status::SubCode subcode);
 
   const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
@@ -65,7 +65,7 @@ class ErrorHandler {
     assert(db_mutex_);
     db_mutex_->AssertHeld();
     return !bg_error_.ok() &&
-           (bg_error_.severity() >= Severity::kHardError ||
+           (bg_error_.severity() >= rocksdb_rs::status::Severity::kHardError ||
             !auto_recovery_ || soft_error_no_bg_work_);
   }
 

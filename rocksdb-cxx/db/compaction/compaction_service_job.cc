@@ -634,7 +634,7 @@ namespace {
 struct StatusSerializationAdapter {
   rocksdb_rs::status::Code code;
   rocksdb_rs::status::SubCode subcode;
-  Severity severity;
+  rocksdb_rs::status::Severity severity;
   std::string message;
 
   StatusSerializationAdapter() = default;
@@ -649,7 +649,7 @@ struct StatusSerializationAdapter {
   Status GetStatus() const {
     return Status_new(static_cast<rocksdb_rs::status::Code>(code),
                   static_cast<rocksdb_rs::status::SubCode>(subcode),
-                  static_cast<Severity>(severity),
+                  static_cast<rocksdb_rs::status::Severity>(severity),
                   message);
   }
 };

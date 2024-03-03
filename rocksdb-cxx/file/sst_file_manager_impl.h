@@ -146,7 +146,7 @@ class SstFileManagerImpl : public SstFileManager {
 
   void ClearError();
   bool CheckFreeSpace() {
-    return bg_err_.severity() == Severity::kSoftError;
+    return bg_err_.severity() == rocksdb_rs::status::Severity::kSoftError;
   }
 
   std::shared_ptr<SystemClock> clock_;

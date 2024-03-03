@@ -8560,7 +8560,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_TRUE(s.eq(Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -8598,7 +8598,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_TRUE(s.eq(Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -8740,7 +8740,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   s = Flush();
   ASSERT_TRUE(s.eq(Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
 }
@@ -8794,7 +8794,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   s = Flush();
   ASSERT_TRUE(s.eq(Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);

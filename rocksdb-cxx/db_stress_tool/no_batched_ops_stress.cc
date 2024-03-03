@@ -1313,10 +1313,10 @@ class NonBatchedOpsStressTest : public StressTest {
 
     if (!s.ok()) {
       if (FLAGS_injest_error_severity >= 2) {
-        if (!is_db_stopped_ && s.severity() >= Severity::kFatalError) {
+        if (!is_db_stopped_ && s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
-                   s.severity() < Severity::kFatalError) {
+                   s.severity() < rocksdb_rs::status::Severity::kFatalError) {
           fprintf(stderr, "put or merge error: %s\n", s.ToString()->c_str());
           std::terminate();
         }
@@ -1378,10 +1378,10 @@ class NonBatchedOpsStressTest : public StressTest {
       if (!s.ok()) {
         if (FLAGS_injest_error_severity >= 2) {
           if (!is_db_stopped_ &&
-              s.severity() >= Severity::kFatalError) {
+              s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
             is_db_stopped_ = true;
           } else if (!is_db_stopped_ ||
-                     s.severity() < Severity::kFatalError) {
+                     s.severity() < rocksdb_rs::status::Severity::kFatalError) {
             fprintf(stderr, "delete error: %s\n", s.ToString()->c_str());
             std::terminate();
           }
@@ -1414,10 +1414,10 @@ class NonBatchedOpsStressTest : public StressTest {
       if (!s.ok()) {
         if (FLAGS_injest_error_severity >= 2) {
           if (!is_db_stopped_ &&
-              s.severity() >= Severity::kFatalError) {
+              s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
             is_db_stopped_ = true;
           } else if (!is_db_stopped_ ||
-                     s.severity() < Severity::kFatalError) {
+                     s.severity() < rocksdb_rs::status::Severity::kFatalError) {
             fprintf(stderr, "single delete error: %s\n", s.ToString()->c_str());
             std::terminate();
           }
@@ -1475,10 +1475,10 @@ class NonBatchedOpsStressTest : public StressTest {
     }
     if (!s.ok()) {
       if (FLAGS_injest_error_severity >= 2) {
-        if (!is_db_stopped_ && s.severity() >= Severity::kFatalError) {
+        if (!is_db_stopped_ && s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
-                   s.severity() < Severity::kFatalError) {
+                   s.severity() < rocksdb_rs::status::Severity::kFatalError) {
           fprintf(stderr, "delete range error: %s\n", s.ToString()->c_str());
           std::terminate();
         }

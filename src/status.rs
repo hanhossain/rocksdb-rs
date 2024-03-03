@@ -46,6 +46,7 @@ pub(crate) mod ffi {
         kMaxSubCode,
     }
 
+    #[namespace = "rocksdb_rs::status"]
     #[derive(Debug)]
     enum Severity {
         kNoError = 0,

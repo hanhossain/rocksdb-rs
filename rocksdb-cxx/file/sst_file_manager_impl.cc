@@ -268,7 +268,7 @@ void SstFileManagerImpl::ClearError() {
       // error will basically override previously reported soft errors. Once
       // we clear the hard error, we don't keep track of previous errors for
       // now
-      if (bg_err_.severity() == Severity::kHardError) {
+      if (bg_err_.severity() == rocksdb_rs::status::Severity::kHardError) {
         if (free_space < reserved_disk_buffer_) {
           ROCKS_LOG_ERROR(logger_,
                           "free space [%" PRIu64
@@ -278,7 +278,7 @@ void SstFileManagerImpl::ClearError() {
           ROCKS_LOG_ERROR(logger_, "Cannot clear hard error\n");
           s = Status_NoSpace();
         }
-      } else if (bg_err_.severity() == Severity::kSoftError) {
+      } else if (bg_err_.severity() == rocksdb_rs::status::Severity::kSoftError) {
         if (free_space < free_space_trigger_) {
           ROCKS_LOG_WARN(logger_,
                          "free space [%" PRIu64
@@ -317,14 +317,14 @@ void SstFileManagerImpl::ClearError() {
         // the list
         Status err = cur_instance_->GetBGError();
         if (s.ok() && err.subcode() == rocksdb_rs::status::SubCode::kNoSpace &&
-            err.severity() < Severity::kFatalError) {
+            err.severity() < rocksdb_rs::status::Severity::kFatalError) {
           s.copy_from(err);
         }
         cur_instance_ = nullptr;
       }
 
       if (s.ok() || s.IsShutdownInProgress() ||
-          (!s.ok() && s.severity() >= Severity::kFatalError)) {
+          (!s.ok() && s.severity() >= rocksdb_rs::status::Severity::kFatalError)) {
         // If shutdown is in progress, abandon this handler instance
         // and continue with the others
         error_handler_list_.pop_front();
@@ -351,7 +351,7 @@ void SstFileManagerImpl::ClearError() {
 void SstFileManagerImpl::StartErrorRecovery(ErrorHandler* handler,
                                             Status bg_error) {
   MutexLock l(&mu_);
-  if (bg_error.severity() == Severity::kSoftError) {
+  if (bg_error.severity() == rocksdb_rs::status::Severity::kSoftError) {
     if (bg_err_.ok()) {
       // Setting bg_err_ basically means we're in degraded mode
       // Assume that all pending compactions will fail similarly. The trigger
@@ -360,7 +360,7 @@ void SstFileManagerImpl::StartErrorRecovery(ErrorHandler* handler,
       // EnoughRoomForCompaction once this much free space is available
       bg_err_.copy_from(bg_error);
     }
-  } else if (bg_error.severity() == Severity::kHardError) {
+  } else if (bg_error.severity() == rocksdb_rs::status::Severity::kHardError) {
     bg_err_.copy_from(bg_error);
   } else {
     assert(false);
