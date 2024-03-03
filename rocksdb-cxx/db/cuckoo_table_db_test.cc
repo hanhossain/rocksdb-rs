@@ -73,16 +73,16 @@ class CuckooTableDBTest : public testing::Test {
     Reopen(options);
   }
 
-  Status Put(const Slice& k, const Slice& v) {
+  rocksdb_rs::status::Status Put(const Slice& k, const Slice& v) {
     return db_->Put(WriteOptions(), k, v);
   }
 
-  Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
+  rocksdb_rs::status::Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
 
   std::string Get(const std::string& k) {
     ReadOptions options;
     std::string result;
-    Status s = db_->Get(options, k, &result);
+    rocksdb_rs::status::Status s = db_->Get(options, k, &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {

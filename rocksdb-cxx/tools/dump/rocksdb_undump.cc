@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
   rocksdb::Options db_options;
   if (FLAGS_db_options != "") {
     rocksdb::Options parsed_options;
-    rocksdb::Status s = rocksdb::GetOptionsFromString(
+    rocksdb_rs::status::Status s = rocksdb::GetOptionsFromString(
         db_options, FLAGS_db_options, &parsed_options);
     if (!s.ok()) {
       fprintf(stderr, "Cannot parse provided db_options\n");

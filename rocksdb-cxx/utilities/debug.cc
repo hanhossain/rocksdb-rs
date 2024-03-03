@@ -50,27 +50,27 @@ std::string KeyVersion::GetTypeName() const {
   }
 }
 
-Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
+rocksdb_rs::status::Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
                          size_t max_num_ikeys,
                          std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
-    return Status_InvalidArgument("db cannot be null.");
+    return rocksdb_rs::status::Status_InvalidArgument("db cannot be null.");
   }
   return GetAllKeyVersions(db, db->DefaultColumnFamily(), begin_key, end_key,
                            max_num_ikeys, key_versions);
 }
 
-Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
+rocksdb_rs::status::Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
                          Slice end_key, size_t max_num_ikeys,
                          std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
-    return Status_InvalidArgument("db cannot be null.");
+    return rocksdb_rs::status::Status_InvalidArgument("db cannot be null.");
   }
   if (nullptr == cfh) {
-    return Status_InvalidArgument("Column family handle cannot be null.");
+    return rocksdb_rs::status::Status_InvalidArgument("Column family handle cannot be null.");
   }
   if (nullptr == key_versions) {
-    return Status_InvalidArgument("key_versions cannot be null.");
+    return rocksdb_rs::status::Status_InvalidArgument("key_versions cannot be null.");
   }
   key_versions->clear();
 
@@ -92,7 +92,7 @@ Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
   size_t num_keys = 0;
   for (; iter->Valid(); iter->Next()) {
     ParsedInternalKey ikey;
-    Status pik_status =
+    rocksdb_rs::status::Status pik_status =
         ParseInternalKey(iter->key(), &ikey, true /* log_err_key */);  // TODO
     if (!pik_status.ok()) {
       return pik_status;
@@ -111,7 +111,7 @@ Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
       break;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

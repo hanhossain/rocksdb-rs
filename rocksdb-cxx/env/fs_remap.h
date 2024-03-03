@@ -47,9 +47,9 @@ class RemapFileSystem : public FileSystemWrapper {
     }
   }
 
-  Status RegisterDbPaths(const std::vector<std::string>& paths) override;
+  rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& paths) override;
 
-  Status UnregisterDbPaths(const std::vector<std::string>& paths) override;
+  rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& paths) override;
 
   IOStatus NewSequentialFile(const std::string& fname,
                              const FileOptions& options,

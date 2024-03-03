@@ -70,28 +70,28 @@ PessimisticTransactionDB::~PessimisticTransactionDB() {
   }
 }
 
-Status PessimisticTransactionDB::VerifyCFOptions(
+rocksdb_rs::status::Status PessimisticTransactionDB::VerifyCFOptions(
     const ColumnFamilyOptions& cf_options) {
   const Comparator* const ucmp = cf_options.comparator;
   assert(ucmp);
   size_t ts_sz = ucmp->timestamp_size();
   if (0 == ts_sz) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   if (ts_sz != sizeof(TxnTimestamp)) {
     std::ostringstream oss;
     oss << "Timestamp of transaction must have " << sizeof(TxnTimestamp)
         << " bytes. CF comparator " << std::string(ucmp->Name())
         << " timestamp size is " << ts_sz << " bytes";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   if (txn_db_options_.write_policy != WRITE_COMMITTED) {
-    return Status_NotSupported("Only WriteCommittedTxn supports timestamp");
+    return rocksdb_rs::status::Status_NotSupported("Only WriteCommittedTxn supports timestamp");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status PessimisticTransactionDB::Initialize(
+rocksdb_rs::status::Status PessimisticTransactionDB::Initialize(
     const std::vector<size_t>& compaction_enabled_cf_indices,
     const std::vector<ColumnFamilyHandle*>& handles) {
   for (auto cf_ptr : handles) {
@@ -100,7 +100,7 @@ Status PessimisticTransactionDB::Initialize(
   // Verify cf options
   for (auto handle : handles) {
     ColumnFamilyDescriptor cfd;
-    Status s = handle->GetDescriptor(&cfd);
+    rocksdb_rs::status::Status s = handle->GetDescriptor(&cfd);
     if (!s.ok()) {
       return s;
     }
@@ -118,7 +118,7 @@ Status PessimisticTransactionDB::Initialize(
     compaction_enabled_cf_handles.push_back(handles[index]);
   }
 
-  Status s = EnableAutoCompaction(compaction_enabled_cf_handles);
+  rocksdb_rs::status::Status s = EnableAutoCompaction(compaction_enabled_cf_handles);
 
   // create 'real' transactions from recovered shell transactions
   auto dbimpl = static_cast_with_check<DBImpl>(GetRootDB());
@@ -197,7 +197,7 @@ TransactionDBOptions PessimisticTransactionDB::ValidateTxnDBOptions(
   return validated;
 }
 
-Status TransactionDB::Open(const Options& options,
+rocksdb_rs::status::Status TransactionDB::Open(const Options& options,
                            const TransactionDBOptions& txn_db_options,
                            const std::string& dbname, TransactionDB** dbptr) {
   DBOptions db_options(options);
@@ -206,7 +206,7 @@ Status TransactionDB::Open(const Options& options,
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
-  Status s = TransactionDB::Open(db_options, txn_db_options, dbname,
+  rocksdb_rs::status::Status s = TransactionDB::Open(db_options, txn_db_options, dbname,
                                  column_families, &handles, dbptr);
   if (s.ok()) {
     assert(handles.size() == 1);
@@ -218,27 +218,27 @@ Status TransactionDB::Open(const Options& options,
   return s;
 }
 
-Status TransactionDB::Open(
+rocksdb_rs::status::Status TransactionDB::Open(
     const DBOptions& db_options, const TransactionDBOptions& txn_db_options,
     const std::string& dbname,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles, TransactionDB** dbptr) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DB* db = nullptr;
   if (txn_db_options.write_policy == WRITE_COMMITTED &&
       db_options.unordered_write) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WRITE_COMMITTED is incompatible with unordered_writes");
   }
   if (txn_db_options.write_policy == WRITE_UNPREPARED &&
       db_options.unordered_write) {
     // TODO(lth): support it
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WRITE_UNPREPARED is currently incompatible with unordered_writes");
   }
   if (txn_db_options.write_policy == WRITE_PREPARED &&
       db_options.unordered_write && !db_options.two_write_queues) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WRITE_PREPARED is incompatible with unordered_writes if "
         "two_write_queues is not enabled.");
   }
@@ -294,7 +294,7 @@ void TransactionDB::PrepareWrap(
 
 namespace {
 template <typename DBType>
-Status WrapAnotherDBInternal(
+rocksdb_rs::status::Status WrapAnotherDBInternal(
     DBType* db, const TransactionDBOptions& txn_db_options,
     const std::vector<size_t>& compaction_enabled_cf_indices,
     const std::vector<ColumnFamilyHandle*>& handles, TransactionDB** dbptr) {
@@ -318,7 +318,7 @@ Status WrapAnotherDBInternal(
           db, PessimisticTransactionDB::ValidateTxnDBOptions(txn_db_options)));
   }
   txn_db->UpdateCFComparatorMap(handles);
-  Status s = txn_db->Initialize(compaction_enabled_cf_indices, handles);
+  rocksdb_rs::status::Status s = txn_db->Initialize(compaction_enabled_cf_indices, handles);
   // In case of a failure at this point, db is deleted via the txn_db destructor
   // and set to nullptr.
   if (s.ok()) {
@@ -336,7 +336,7 @@ Status WrapAnotherDBInternal(
 }
 }  // namespace
 
-Status TransactionDB::WrapDB(
+rocksdb_rs::status::Status TransactionDB::WrapDB(
     // make sure this db is already opened with memtable history enabled,
     // auto compaction distabled and 2 phase commit enabled
     DB* db, const TransactionDBOptions& txn_db_options,
@@ -346,7 +346,7 @@ Status TransactionDB::WrapDB(
                                compaction_enabled_cf_indices, handles, dbptr);
 }
 
-Status TransactionDB::WrapStackableDB(
+rocksdb_rs::status::Status TransactionDB::WrapStackableDB(
     // make sure this stackable_db is already opened with memtable history
     // enabled, auto compaction distabled and 2 phase commit enabled
     StackableDB* db, const TransactionDBOptions& txn_db_options,
@@ -363,11 +363,11 @@ void PessimisticTransactionDB::AddColumnFamily(
   lock_manager_->AddColumnFamily(handle);
 }
 
-Status PessimisticTransactionDB::CreateColumnFamily(
+rocksdb_rs::status::Status PessimisticTransactionDB::CreateColumnFamily(
     const ColumnFamilyOptions& options, const std::string& column_family_name,
     ColumnFamilyHandle** handle) {
   InstrumentedMutexLock l(&column_family_mutex_);
-  Status s = VerifyCFOptions(options);
+  rocksdb_rs::status::Status s = VerifyCFOptions(options);
   if (!s.ok()) {
     return s;
   }
@@ -381,13 +381,13 @@ Status PessimisticTransactionDB::CreateColumnFamily(
   return s;
 }
 
-Status PessimisticTransactionDB::CreateColumnFamilies(
+rocksdb_rs::status::Status PessimisticTransactionDB::CreateColumnFamilies(
     const ColumnFamilyOptions& options,
     const std::vector<std::string>& column_family_names,
     std::vector<ColumnFamilyHandle*>* handles) {
   InstrumentedMutexLock l(&column_family_mutex_);
 
-  Status s = VerifyCFOptions(options);
+  rocksdb_rs::status::Status s = VerifyCFOptions(options);
   if (!s.ok()) {
     return s;
   }
@@ -403,19 +403,19 @@ Status PessimisticTransactionDB::CreateColumnFamilies(
   return s;
 }
 
-Status PessimisticTransactionDB::CreateColumnFamilies(
+rocksdb_rs::status::Status PessimisticTransactionDB::CreateColumnFamilies(
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles) {
   InstrumentedMutexLock l(&column_family_mutex_);
 
   for (auto& cf_desc : column_families) {
-    Status s = VerifyCFOptions(cf_desc.options);
+    rocksdb_rs::status::Status s = VerifyCFOptions(cf_desc.options);
     if (!s.ok()) {
       return s;
     }
   }
 
-  Status s = db_->CreateColumnFamilies(column_families, handles);
+  rocksdb_rs::status::Status s = db_->CreateColumnFamilies(column_families, handles);
   if (s.ok()) {
     for (auto* handle : *handles) {
       lock_manager_->AddColumnFamily(handle);
@@ -428,11 +428,11 @@ Status PessimisticTransactionDB::CreateColumnFamilies(
 
 // Let LockManager know that it can deallocate the LockMap for this
 // column family.
-Status PessimisticTransactionDB::DropColumnFamily(
+rocksdb_rs::status::Status PessimisticTransactionDB::DropColumnFamily(
     ColumnFamilyHandle* column_family) {
   InstrumentedMutexLock l(&column_family_mutex_);
 
-  Status s = db_->DropColumnFamily(column_family);
+  rocksdb_rs::status::Status s = db_->DropColumnFamily(column_family);
   if (s.ok()) {
     lock_manager_->RemoveColumnFamily(column_family);
   }
@@ -440,11 +440,11 @@ Status PessimisticTransactionDB::DropColumnFamily(
   return s;
 }
 
-Status PessimisticTransactionDB::DropColumnFamilies(
+rocksdb_rs::status::Status PessimisticTransactionDB::DropColumnFamilies(
     const std::vector<ColumnFamilyHandle*>& column_families) {
   InstrumentedMutexLock l(&column_family_mutex_);
 
-  Status s = db_->DropColumnFamilies(column_families);
+  rocksdb_rs::status::Status s = db_->DropColumnFamilies(column_families);
   if (s.ok()) {
     for (auto* handle : column_families) {
       lock_manager_->RemoveColumnFamily(handle);
@@ -454,14 +454,14 @@ Status PessimisticTransactionDB::DropColumnFamilies(
   return s;
 }
 
-Status PessimisticTransactionDB::TryLock(PessimisticTransaction* txn,
+rocksdb_rs::status::Status PessimisticTransactionDB::TryLock(PessimisticTransaction* txn,
                                          uint32_t cfh_id,
                                          const std::string& key,
                                          bool exclusive) {
   return lock_manager_->TryLock(txn, cfh_id, key, GetEnv(), exclusive);
 }
 
-Status PessimisticTransactionDB::TryRangeLock(PessimisticTransaction* txn,
+rocksdb_rs::status::Status PessimisticTransactionDB::TryRangeLock(PessimisticTransaction* txn,
                                               uint32_t cfh_id,
                                               const Endpoint& start_endp,
                                               const Endpoint& end_endp) {
@@ -499,10 +499,10 @@ Transaction* PessimisticTransactionDB::BeginInternalTransaction(
 // sort its keys before locking them.  This guarantees that TransactionDB write
 // methods cannot deadlock with each other (but still could deadlock with a
 // Transaction).
-Status PessimisticTransactionDB::Put(const WriteOptions& options,
+rocksdb_rs::status::Status PessimisticTransactionDB::Put(const WriteOptions& options,
                                      ColumnFamilyHandle* column_family,
                                      const Slice& key, const Slice& val) {
-  Status s = FailIfCfEnablesTs(this, column_family);
+  rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
   }
@@ -523,10 +523,10 @@ Status PessimisticTransactionDB::Put(const WriteOptions& options,
   return s;
 }
 
-Status PessimisticTransactionDB::Delete(const WriteOptions& wopts,
+rocksdb_rs::status::Status PessimisticTransactionDB::Delete(const WriteOptions& wopts,
                                         ColumnFamilyHandle* column_family,
                                         const Slice& key) {
-  Status s = FailIfCfEnablesTs(this, column_family);
+  rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
   }
@@ -548,10 +548,10 @@ Status PessimisticTransactionDB::Delete(const WriteOptions& wopts,
   return s;
 }
 
-Status PessimisticTransactionDB::SingleDelete(const WriteOptions& wopts,
+rocksdb_rs::status::Status PessimisticTransactionDB::SingleDelete(const WriteOptions& wopts,
                                               ColumnFamilyHandle* column_family,
                                               const Slice& key) {
-  Status s = FailIfCfEnablesTs(this, column_family);
+  rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
   }
@@ -573,10 +573,10 @@ Status PessimisticTransactionDB::SingleDelete(const WriteOptions& wopts,
   return s;
 }
 
-Status PessimisticTransactionDB::Merge(const WriteOptions& options,
+rocksdb_rs::status::Status PessimisticTransactionDB::Merge(const WriteOptions& options,
                                        ColumnFamilyHandle* column_family,
                                        const Slice& key, const Slice& value) {
-  Status s = FailIfCfEnablesTs(this, column_family);
+  rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
   }
@@ -598,14 +598,14 @@ Status PessimisticTransactionDB::Merge(const WriteOptions& options,
   return s;
 }
 
-Status PessimisticTransactionDB::Write(const WriteOptions& opts,
+rocksdb_rs::status::Status PessimisticTransactionDB::Write(const WriteOptions& opts,
                                        WriteBatch* updates) {
   return WriteWithConcurrencyControl(opts, updates);
 }
 
-Status WriteCommittedTxnDB::Write(const WriteOptions& opts,
+rocksdb_rs::status::Status WriteCommittedTxnDB::Write(const WriteOptions& opts,
                                   WriteBatch* updates) {
-  Status s = FailIfBatchHasTs(updates);
+  rocksdb_rs::status::Status s = FailIfBatchHasTs(updates);
   if (!s.ok()) {
     return s;
   }
@@ -616,10 +616,10 @@ Status WriteCommittedTxnDB::Write(const WriteOptions& opts,
   }
 }
 
-Status WriteCommittedTxnDB::Write(
+rocksdb_rs::status::Status WriteCommittedTxnDB::Write(
     const WriteOptions& opts,
     const TransactionDBWriteOptimizations& optimizations, WriteBatch* updates) {
-  Status s = FailIfBatchHasTs(updates);
+  rocksdb_rs::status::Status s = FailIfBatchHasTs(updates);
   if (!s.ok()) {
     return s;
   }
@@ -714,10 +714,10 @@ void PessimisticTransactionDB::UnregisterTransaction(Transaction* txn) {
   transactions_.erase(it);
 }
 
-std::pair<Status, std::shared_ptr<const Snapshot>>
+std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>>
 PessimisticTransactionDB::CreateTimestampedSnapshot(TxnTimestamp ts) {
   if (kMaxTxnTimestamp == ts) {
-    return std::make_pair(Status_InvalidArgument("invalid ts"), nullptr);
+    return std::make_pair(rocksdb_rs::status::Status_InvalidArgument("invalid ts"), nullptr);
   }
   assert(db_impl_);
   return db_impl_->CreateTimestampedSnapshot(kMaxSequenceNumber, ts);
@@ -735,14 +735,14 @@ void PessimisticTransactionDB::ReleaseTimestampedSnapshotsOlderThan(
   db_impl_->ReleaseTimestampedSnapshotsOlderThan(ts);
 }
 
-Status PessimisticTransactionDB::GetTimestampedSnapshots(
+rocksdb_rs::status::Status PessimisticTransactionDB::GetTimestampedSnapshots(
     TxnTimestamp ts_lb, TxnTimestamp ts_ub,
     std::vector<std::shared_ptr<const Snapshot>>& timestamped_snapshots) const {
   assert(db_impl_);
   return db_impl_->GetTimestampedSnapshots(ts_lb, ts_ub, timestamped_snapshots);
 }
 
-Status SnapshotCreationCallback::operator()(SequenceNumber seq,
+rocksdb_rs::status::Status SnapshotCreationCallback::operator()(SequenceNumber seq,
                                             bool disable_memtable) {
   assert(db_impl_);
   assert(commit_ts_ != kMaxTxnTimestamp);
@@ -774,7 +774,7 @@ Status SnapshotCreationCallback::operator()(SequenceNumber seq,
   if (snapshot_ && snapshot_notifier_) {
     snapshot_notifier_->SnapshotCreated(snapshot_.get());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

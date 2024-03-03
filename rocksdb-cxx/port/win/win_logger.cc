@@ -57,10 +57,10 @@ void WinLogger::DebugWriter(const char* str, int len) {
 
 WinLogger::~WinLogger() { CloseInternal(); }
 
-Status WinLogger::CloseImpl() { return CloseInternal(); }
+rocksdb_rs::status::Status WinLogger::CloseImpl() { return CloseInternal(); }
 
-Status WinLogger::CloseInternal() {
-  Status s;
+rocksdb_rs::status::Status WinLogger::CloseInternal() {
+  rocksdb_rs::status::Status s;
   if (INVALID_HANDLE_VALUE != file_) {
     BOOL ret = FlushFileBuffers(file_);
     if (ret == 0) {

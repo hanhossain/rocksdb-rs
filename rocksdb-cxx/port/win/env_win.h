@@ -95,7 +95,7 @@ class WinClock : public SystemClock {
   uint64_t CPUMicros() override { return 0; }
   void SleepForMicroseconds(int micros) override;
 
-  Status GetCurrentTime(int64_t* unix_time) override;
+  rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override;
   // Converts seconds-since-Jan-01-1970 to a printable string
   std::string TimeToString(uint64_t time) override;
 
@@ -254,7 +254,7 @@ class WinEnvIO {
 
   virtual ~WinEnvIO();
 
-  virtual Status GetHostName(char* name, uint64_t len);
+  virtual rocksdb_rs::status::Status GetHostName(char* name, uint64_t len);
 
  private:
   Env* hosted_env_;
@@ -269,9 +269,9 @@ class WinEnv : public CompositeEnv {
   const char* Name() const override { return kClassName(); }
   const char* NickName() const override { return kDefaultName(); }
 
-  Status GetHostName(char* name, uint64_t len) override;
+  rocksdb_rs::status::Status GetHostName(char* name, uint64_t len) override;
 
-  Status GetThreadList(std::vector<ThreadStatus>* thread_list) override;
+  rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* thread_list) override;
 
   void Schedule(void (*function)(void*), void* arg, Env::Priority pri,
                 void* tag, void (*unschedFunction)(void* arg)) override;

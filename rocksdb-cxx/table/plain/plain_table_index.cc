@@ -20,13 +20,13 @@ inline uint32_t GetBucketIdFromHash(uint32_t hash, uint32_t num_buckets) {
 }
 }  // namespace
 
-Status PlainTableIndex::InitFromRawData(Slice data) {
+rocksdb_rs::status::Status PlainTableIndex::InitFromRawData(Slice data) {
   if (!GetVarint32(&data, &index_size_)) {
-    return Status_Corruption("Couldn't read the index size!");
+    return rocksdb_rs::status::Status_Corruption("Couldn't read the index size!");
   }
   assert(index_size_ > 0);
   if (!GetVarint32(&data, &num_prefixes_)) {
-    return Status_Corruption("Couldn't read the index size!");
+    return rocksdb_rs::status::Status_Corruption("Couldn't read the index size!");
   }
   sub_index_size_ =
       static_cast<uint32_t>(data.size()) - index_size_ * kOffsetLen;
@@ -34,7 +34,7 @@ Status PlainTableIndex::InitFromRawData(Slice data) {
   char* index_data_begin = const_cast<char*>(data.data());
   index_ = reinterpret_cast<uint32_t*>(index_data_begin);
   sub_index_ = reinterpret_cast<char*>(index_ + index_size_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 PlainTableIndex::IndexSearchResult PlainTableIndex::GetOffset(

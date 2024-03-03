@@ -11,7 +11,7 @@
 #include "block_cache.h"
 
 namespace rocksdb {
-Status BlockBasedTable::IndexReaderCommon::ReadIndexBlock(
+rocksdb_rs::status::Status BlockBasedTable::IndexReaderCommon::ReadIndexBlock(
     const BlockBasedTable* table, FilePrefetchBuffer* prefetch_buffer,
     const ReadOptions& read_options, bool use_cache, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,
@@ -25,7 +25,7 @@ Status BlockBasedTable::IndexReaderCommon::ReadIndexBlock(
   const Rep* const rep = table->get_rep();
   assert(rep != nullptr);
 
-  const Status s = table->RetrieveBlock(
+  const rocksdb_rs::status::Status s = table->RetrieveBlock(
       prefetch_buffer, read_options, rep->footer.index_handle(),
       UncompressionDict::GetEmptyDict(), &index_block->As<Block_kIndex>(),
       get_context, lookup_context, /* for_compaction */ false, use_cache,
@@ -34,7 +34,7 @@ Status BlockBasedTable::IndexReaderCommon::ReadIndexBlock(
   return s.Clone();
 }
 
-Status BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlock(
+rocksdb_rs::status::Status BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlock(
     bool no_io, GetContext* get_context,
     BlockCacheLookupContext* lookup_context, CachableEntry<Block>* index_block,
     const ReadOptions& ro) const {
@@ -42,7 +42,7 @@ Status BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlock(
 
   if (!index_block_.IsEmpty()) {
     index_block->SetUnownedValue(index_block_.GetValue());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ReadOptions read_options = ro;

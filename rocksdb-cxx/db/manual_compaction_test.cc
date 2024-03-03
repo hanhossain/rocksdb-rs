@@ -16,7 +16,7 @@
 using rocksdb::CompactionFilter;
 using rocksdb::CompactionStyle;
 using rocksdb::CompactRangeOptions;
-using rocksdb::CompressionType;
+using rocksdb_rs::compression_type::CompressionType;
 using rocksdb::DB;
 using rocksdb::DestroyDB;
 using rocksdb::FlushOptions;
@@ -107,7 +107,7 @@ TEST_F(ManualCompactionTest, CompactTouchesAllKeys) {
       options.compaction_style = CompactionStyle::kCompactionStyleUniversal;
     }
     options.create_if_missing = true;
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.compaction_filter = new DestroyAllCompactionFilter();
     ASSERT_OK(DB::Open(options, dbname_, &db));
 
@@ -140,7 +140,7 @@ TEST_F(ManualCompactionTest, Test) {
   Options db_options;
   db_options.write_buffer_size = 1024;
   db_options.create_if_missing = true;
-  db_options.compression = CompressionType::kNoCompression;
+  db_options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   ASSERT_OK(DB::Open(db_options, dbname_, &db));
 
   // create first key range
@@ -196,7 +196,7 @@ TEST_F(ManualCompactionTest, SkipLevel) {
   options.level0_file_num_compaction_trigger = 100;
   options.compaction_style = CompactionStyle::kCompactionStyleLevel;
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   LogCompactionFilter* filter = new LogCompactionFilter();
   options.compaction_filter = filter;
   ASSERT_OK(DB::Open(options, dbname_, &db));

@@ -44,16 +44,16 @@ IOStatus NewFromFileCacheDumpReader(const std::shared_ptr<FileSystem>& fs,
   return io_s;
 }
 
-Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
+rocksdb_rs::status::Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
                              const std::shared_ptr<Cache>& cache,
                              std::unique_ptr<CacheDumpWriter>&& writer,
                              std::unique_ptr<CacheDumper>* cache_dumper) {
   cache_dumper->reset(
       new CacheDumperImpl(dump_options, cache, std::move(writer)));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status NewDefaultCacheDumpedLoader(
+rocksdb_rs::status::Status NewDefaultCacheDumpedLoader(
     const CacheDumpOptions& dump_options,
     const BlockBasedTableOptions& toptions,
     const std::shared_ptr<SecondaryCache>& secondary_cache,
@@ -61,7 +61,7 @@ Status NewDefaultCacheDumpedLoader(
     std::unique_ptr<CacheDumpedLoader>* cache_dump_loader) {
   cache_dump_loader->reset(new CacheDumpedLoaderImpl(
       dump_options, toptions, secondary_cache, std::move(reader)));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

@@ -22,7 +22,7 @@ namespace {
 class CacheActivityLogger {
  public:
   CacheActivityLogger()
-      : activity_logging_enabled_(false), max_logging_size_(0), bg_status_(Status_new()) {}
+      : activity_logging_enabled_(false), max_logging_size_(0), bg_status_(rocksdb_rs::status::Status_new()) {}
 
   ~CacheActivityLogger() {
     MutexLock l(&mutex_);
@@ -30,12 +30,12 @@ class CacheActivityLogger {
     StopLoggingInternal();
   }
 
-  Status StartLogging(const std::string& activity_log_file, Env* env,
+  rocksdb_rs::status::Status StartLogging(const std::string& activity_log_file, Env* env,
                       uint64_t max_logging_size = 0) {
     assert(activity_log_file != "");
     assert(env != nullptr);
 
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     FileOptions file_opts;
 
     MutexLock l(&mutex_);
@@ -72,7 +72,7 @@ class CacheActivityLogger {
     oss << "LOOKUP - " << key.ToString(true) << std::endl;
 
     MutexLock l(&mutex_);
-    Status s = file_writer_->Append(oss.str());
+    rocksdb_rs::status::Status s = file_writer_->Append(oss.str());
     if (!s.ok() && bg_status_.ok()) {
       bg_status_.copy_from(s);
     }
@@ -92,7 +92,7 @@ class CacheActivityLogger {
     // line format: "ADD - <KEY> - <KEY-SIZE>"
     oss << "ADD - " << key.ToString(true) << " - " << size << std::endl;
     MutexLock l(&mutex_);
-    Status s = file_writer_->Append(oss.str());
+    rocksdb_rs::status::Status s = file_writer_->Append(oss.str());
     if (!s.ok() && bg_status_.ok()) {
       bg_status_.copy_from(s);
     }
@@ -104,7 +104,7 @@ class CacheActivityLogger {
     }
   }
 
-  Status& bg_status() {
+  rocksdb_rs::status::Status& bg_status() {
     MutexLock l(&mutex_);
     return bg_status_;
   }
@@ -125,7 +125,7 @@ class CacheActivityLogger {
     }
 
     activity_logging_enabled_.store(false);
-    Status s = file_writer_->Close();
+    rocksdb_rs::status::Status s = file_writer_->Close();
     if (!s.ok() && bg_status_.ok()) {
       bg_status_.copy_from(s);
     }
@@ -141,7 +141,7 @@ class CacheActivityLogger {
   // Value of 0 means unlimited
   uint64_t max_logging_size_;
   std::unique_ptr<WritableFileWriter> file_writer_;
-  Status bg_status_;
+  rocksdb_rs::status::Status bg_status_;
 };
 
 // SimCacheImpl definition
@@ -166,7 +166,7 @@ class SimCacheImpl : public SimCache {
     target_->SetStrictCapacityLimit(strict_capacity_limit);
   }
 
-  Status Insert(const Slice& key, Cache::ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const CacheItemHelper* helper, size_t charge, Handle** handle,
                 Priority priority) override {
     // The handle and value passed in are for real cache, so we pass nullptr
@@ -185,7 +185,7 @@ class SimCacheImpl : public SimCache {
 
     cache_activity_logger_.ReportAdd(key, charge);
     if (!target_) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     return target_->Insert(key, value, helper, charge, handle, priority);
   }
@@ -308,7 +308,7 @@ class SimCacheImpl : public SimCache {
     return oss.str();
   }
 
-  Status StartActivityLogging(const std::string& activity_log_file, Env* env,
+  rocksdb_rs::status::Status StartActivityLogging(const std::string& activity_log_file, Env* env,
                               uint64_t max_logging_size = 0) override {
     return cache_activity_logger_.StartLogging(activity_log_file, env,
                                                max_logging_size);
@@ -316,7 +316,7 @@ class SimCacheImpl : public SimCache {
 
   void StopActivityLogging() override { cache_activity_logger_.StopLogging(); }
 
-  Status GetActivityLoggingStatus() override {
+  rocksdb_rs::status::Status GetActivityLoggingStatus() override {
     return cache_activity_logger_.bg_status().Clone();
   }
 

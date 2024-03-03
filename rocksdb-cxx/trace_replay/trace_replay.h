@@ -87,20 +87,20 @@ enum TracePayloadType : char {
 class TracerHelper {
  public:
   // Parse the string with major and minor version only
-  static Status ParseVersionStr(std::string& v_string, int* v_num);
+  static rocksdb_rs::status::Status ParseVersionStr(std::string& v_string, int* v_num);
 
   // Parse the trace file version and db version in trace header
-  static Status ParseTraceHeader(const Trace& header, int* trace_version,
+  static rocksdb_rs::status::Status ParseTraceHeader(const Trace& header, int* trace_version,
                                  int* db_version);
 
   // Encode a version 0.1 trace object into the given string.
   static void EncodeTrace(const Trace& trace, std::string* encoded_trace);
 
   // Decode a string into the given trace object.
-  static Status DecodeTrace(const std::string& encoded_trace, Trace* trace);
+  static rocksdb_rs::status::Status DecodeTrace(const std::string& encoded_trace, Trace* trace);
 
   // Decode a string into the given trace header.
-  static Status DecodeHeader(const std::string& encoded_trace, Trace* header);
+  static rocksdb_rs::status::Status DecodeHeader(const std::string& encoded_trace, Trace* header);
 
   // Set the payload map based on the payload type
   static bool SetPayloadMap(uint64_t& payload_map,
@@ -110,7 +110,7 @@ class TracerHelper {
   // Return Status_OK() if nothing is wrong, record will be set accordingly.
   // Return Status_NotSupported() if the trace type is not support, or the
   // corresponding error status, record will be set to nullptr.
-  static Status DecodeTraceRecord(Trace* trace, int trace_file_version,
+  static rocksdb_rs::status::Status DecodeTraceRecord(Trace* trace, int trace_file_version,
                                   std::unique_ptr<TraceRecord>* record);
 };
 
@@ -124,26 +124,26 @@ class Tracer {
   ~Tracer();
 
   // Trace all write operations -- Put, Merge, Delete, SingleDelete, Write
-  Status Write(WriteBatch* write_batch);
+  rocksdb_rs::status::Status Write(WriteBatch* write_batch);
 
   // Trace Get operations.
-  Status Get(ColumnFamilyHandle* cfname, const Slice& key);
+  rocksdb_rs::status::Status Get(ColumnFamilyHandle* cfname, const Slice& key);
 
   // Trace Iterators.
-  Status IteratorSeek(const uint32_t& cf_id, const Slice& key,
+  rocksdb_rs::status::Status IteratorSeek(const uint32_t& cf_id, const Slice& key,
                       const Slice& lower_bound, const Slice upper_bound);
-  Status IteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
+  rocksdb_rs::status::Status IteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
                              const Slice& lower_bound, const Slice upper_bound);
 
   // Trace MultiGet
 
-  Status MultiGet(const size_t num_keys, ColumnFamilyHandle** column_families,
+  rocksdb_rs::status::Status MultiGet(const size_t num_keys, ColumnFamilyHandle** column_families,
                   const Slice* keys);
 
-  Status MultiGet(const size_t num_keys, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status MultiGet(const size_t num_keys, ColumnFamilyHandle* column_family,
                   const Slice* keys);
 
-  Status MultiGet(const std::vector<ColumnFamilyHandle*>& column_family,
+  rocksdb_rs::status::Status MultiGet(const std::vector<ColumnFamilyHandle*>& column_family,
                   const std::vector<Slice>& keys);
 
   // Returns true if the trace is over the configured max trace file limit.
@@ -155,20 +155,20 @@ class Tracer {
   bool IsWriteOrderPreserved() { return trace_options_.preserve_write_order; }
 
   // Writes a trace footer at the end of the tracing
-  Status Close();
+  rocksdb_rs::status::Status Close();
 
  private:
   // Write a trace header at the beginning, typically on initiating a trace,
   // with some metadata like a magic number, trace version, RocksDB version, and
   // trace format.
-  Status WriteHeader();
+  rocksdb_rs::status::Status WriteHeader();
 
   // Write a trace footer, typically on ending a trace, with some metadata.
-  Status WriteFooter();
+  rocksdb_rs::status::Status WriteFooter();
 
   // Write a single trace using the provided TraceWriter to the underlying
   // system, say, a filesystem or a streaming service.
-  Status WriteTrace(const Trace& trace);
+  rocksdb_rs::status::Status WriteTrace(const Trace& trace);
 
   // Helps in filtering and sampling of traces.
   // Returns true if a trace should be skipped, false otherwise.

@@ -46,7 +46,7 @@ class SstFileReaderTest : public testing::Test {
   }
 
   ~SstFileReaderTest() {
-    Status s = env_->DeleteFile(sst_name_);
+    rocksdb_rs::status::Status s = env_->DeleteFile(sst_name_);
     EXPECT_OK(s);
   }
 

@@ -27,12 +27,12 @@ ChrootFileSystem::ChrootFileSystem(const std::shared_ptr<FileSystem>& base,
   RegisterOptions("chroot_dir", &chroot_dir_, &chroot_fs_type_info);
 }
 
-Status ChrootFileSystem::PrepareOptions(const ConfigOptions& options) {
-  Status s = FileSystemWrapper::PrepareOptions(options);
+rocksdb_rs::status::Status ChrootFileSystem::PrepareOptions(const ConfigOptions& options) {
+  rocksdb_rs::status::Status s = FileSystemWrapper::PrepareOptions(options);
   if (!s.ok()) {
     return s;
   } else if (chroot_dir_.empty()) {
-    s = Status_InvalidArgument("ChRootFileSystem requires a chroot dir");
+    s = rocksdb_rs::status::Status_InvalidArgument("ChRootFileSystem requires a chroot dir");
   } else {
     s = target_->FileExists(chroot_dir_, IOOptions(), nullptr);
   }
@@ -123,7 +123,7 @@ std::pair<IOStatus, std::string> ChrootFileSystem::EncodePathWithNewBasename(
 std::shared_ptr<FileSystem> NewChrootFileSystem(
     const std::shared_ptr<FileSystem>& base, const std::string& chroot_dir) {
   auto chroot_fs = std::make_shared<ChrootFileSystem>(base, chroot_dir);
-  Status s = chroot_fs->PrepareOptions(ConfigOptions());
+  rocksdb_rs::status::Status s = chroot_fs->PrepareOptions(ConfigOptions());
   if (s.ok()) {
     return chroot_fs;
   } else {

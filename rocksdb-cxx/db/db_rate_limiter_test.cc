@@ -148,7 +148,7 @@ TEST_P(DBRateLimiterOnReadTest, NewMultiGet) {
       key_bufs.emplace_back(Key(i));
       keys.emplace_back(key_bufs[i]);
     }
-    rust::Vec<Status> statuses = Status_new().create_vec(kNumKeys);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(kNumKeys);
     std::vector<PinnableSlice> values(kNumKeys);
     const int64_t prev_total_rl_req = options_.rate_limiter->GetTotalRequests();
     db_->MultiGet(GetReadOptions(), dbfull()->DefaultColumnFamily(), kNumKeys,
@@ -187,7 +187,7 @@ TEST_P(DBRateLimiterOnReadTest, OldMultiGet) {
       keys.emplace_back(key_bufs[i]);
     }
     std::vector<std::string> values;
-    rust::Vec<Status> statuses =
+    rust::Vec<rocksdb_rs::status::Status> statuses =
         db_->MultiGet(GetReadOptions(), keys, &values);
     for (int i = 0; i < kNumKeys; ++i) {
       ASSERT_OK(statuses[i]);
@@ -409,7 +409,7 @@ TEST_P(DBRateLimiterOnWriteWALTest, AutoWalFlush) {
       options_.rate_limiter->GetTotalRequests(Env::IO_TOTAL);
   ASSERT_EQ(0, options_.rate_limiter->GetTotalRequests(Env::IO_USER));
 
-  Status s = Put("foo", "v1", GetWriteOptions());
+  rocksdb_rs::status::Status s = Put("foo", "v1", GetWriteOptions());
 
   if (no_rate_limit_auto_wal_flush || valid_arg) {
     EXPECT_TRUE(s.ok());

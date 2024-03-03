@@ -18,11 +18,14 @@
 #include "logging/event_logger.h"
 #include "port/port.h"
 
+namespace rocksdb::status {
+ struct Status;
+}
+
 namespace rocksdb {
 
 class JSONWriter;
 class Slice;
-struct Status;
 
 using WalNumber = uint64_t;
 
@@ -85,7 +88,7 @@ class WalAddition {
 
   void EncodeTo(std::string* dst) const;
 
-  Status DecodeFrom(Slice* src);
+  rocksdb_rs::status::Status DecodeFrom(Slice* src);
 
   std::string DebugString() const;
 
@@ -110,7 +113,7 @@ class WalDeletion {
 
   void EncodeTo(std::string* dst) const;
 
-  Status DecodeFrom(Slice* src);
+  rocksdb_rs::status::Status DecodeFrom(Slice* src);
 
   std::string DebugString() const;
 
@@ -141,12 +144,12 @@ class WalSet {
   // then there must be an existing unclosed WAL,
   // otherwise, return Status_Corruption.
   // Can happen when applying a VersionEdit or recovering from MANIFEST.
-  Status AddWal(const WalAddition& wal);
-  Status AddWals(const WalAdditions& wals);
+  rocksdb_rs::status::Status AddWal(const WalAddition& wal);
+  rocksdb_rs::status::Status AddWals(const WalAdditions& wals);
 
   // Delete WALs with log number smaller than the specified wal number.
   // Can happen when applying a VersionEdit or recovering from MANIFEST.
-  Status DeleteWalsBefore(WalNumber wal);
+  rocksdb_rs::status::Status DeleteWalsBefore(WalNumber wal);
 
   // Resets the internal state.
   void Reset();
@@ -162,7 +165,7 @@ class WalSet {
   // logs_on_disk is a map from log number to the log filename.
   // Note that logs_on_disk may contain logs that is obsolete but
   // haven't been deleted from disk.
-  Status CheckWals(
+  rocksdb_rs::status::Status CheckWals(
       Env* env,
       const std::unordered_map<WalNumber, std::string>& logs_on_disk) const;
 

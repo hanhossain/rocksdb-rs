@@ -70,7 +70,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   BlobFileAddition blob_file_addition;
 
   {
-    const Status s = blob_file_addition.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "blob file number"));
   }
@@ -80,7 +80,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_addition.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "total blob count"));
   }
@@ -90,7 +90,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_addition.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "total blob bytes"));
   }
@@ -100,7 +100,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_addition.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "checksum method"));
   }
@@ -110,7 +110,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_addition.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "checksum value"));
   }
@@ -122,7 +122,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_addition.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field tag"));
   }
@@ -132,7 +132,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_addition.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field value"));
   }
@@ -193,7 +193,7 @@ TEST_F(BlobFileAdditionTest, ForwardIncompatibleCustomField) {
 
   BlobFileAddition decoded_blob_file_addition;
   Slice input(encoded);
-  const Status s = decoded_blob_file_addition.DecodeFrom(&input);
+  const rocksdb_rs::status::Status s = decoded_blob_file_addition.DecodeFrom(&input);
 
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Forward incompatible"));

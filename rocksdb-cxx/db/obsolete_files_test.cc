@@ -70,11 +70,11 @@ class ObsoleteFilesTest : public DBTestBase {
     int manifest_cnt = 0;
     for (auto file : filenames) {
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       if (ParseFileName(file, &number, &type)) {
-        log_cnt += (type == kWalFile);
-        sst_cnt += (type == kTableFile);
-        manifest_cnt += (type == kDescriptorFile);
+        log_cnt += (type == rocksdb_rs::types::FileType::kWalFile);
+        sst_cnt += (type == rocksdb_rs::types::FileType::kTableFile);
+        manifest_cnt += (type == rocksdb_rs::types::FileType::kDescriptorFile);
       }
     }
     ASSERT_EQ(required_log, log_cnt);
@@ -120,7 +120,7 @@ TEST_F(ObsoleteFilesTest, RaceForObsoleteFileDeletion) {
   });
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::DeleteObsoleteFileImpl:AfterDeletion", [&](void* arg) {
-        Status* p_status = reinterpret_cast<Status*>(arg);
+        rocksdb_rs::status::Status* p_status = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_OK(*p_status);
       });
   SyncPoint::GetInstance()->SetCallBack(
@@ -175,11 +175,11 @@ TEST_F(ObsoleteFilesTest, DeleteObsoleteOptionsFile) {
   for (const auto& file : files) {
     uint64_t file_num;
     Slice dummy_info_log_name_prefix;
-    FileType type;
-    WalFileType log_type;
-    if (ParseFileName(file, &file_num, dummy_info_log_name_prefix, &type,
+    rocksdb_rs::types::FileType type;
+    rocksdb_rs::transaction_log::WalFileType log_type;
+    if (ParseFileName(file, &file_num, dummy_info_log_name_prefix.ToString(), &type,
                       &log_type) &&
-        type == kOptionsFile) {
+        type == rocksdb_rs::types::FileType::kOptionsFile) {
       opts_file_count++;
     }
   }
@@ -300,8 +300,8 @@ TEST_F(ObsoleteFilesTest, BlobFiles) {
 
   std::sort(deleted_files.begin(), deleted_files.end());
   const std::vector<std::string> expected_deleted_files{
-      BlobFileName(path, old_blob_file_number),
-      BlobFileName(path, first_blob_file_number)};
+      static_cast<std::string>(BlobFileName(path, old_blob_file_number)),
+      static_cast<std::string>(BlobFileName(path, first_blob_file_number))};
 
   ASSERT_EQ(deleted_files, expected_deleted_files);
 }

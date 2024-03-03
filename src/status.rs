@@ -1,6 +1,6 @@
 use cxx::{CxxString, UniquePtr};
 
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::status")]
 pub(crate) mod ffi {
     #[derive(Debug)]
     enum Code {
@@ -367,6 +367,7 @@ pub(crate) mod ffi {
     unsafe extern "C++" {
         include!("rocksdb/slice.h");
 
+        #[namespace = "rocksdb"]
         type Slice = crate::slice::ffi::Slice;
     }
 }

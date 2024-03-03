@@ -48,7 +48,7 @@ inline IOStatus CreateFile(const std::shared_ptr<FileSystem>& fs,
   return CreateFile(fs.get(), destination, contents, use_fsync);
 }
 
-extern Status DeleteDBFile(const ImmutableDBOptions* db_options,
+extern rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_options,
                            const std::string& fname,
                            const std::string& path_to_sync, const bool force_bg,
                            const bool force_fg);
@@ -88,7 +88,7 @@ inline IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
 
 // Test method to delete the input directory and all of its contents.
 // This method is destructive and is meant for use only in tests!!!
-Status DestroyDir(Env* env, const std::string& dir);
+rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir);
 
 inline bool CheckFSFeatureSupport(FileSystem* fs, FSSupportedOps feat) {
   int64_t supported_ops = 0;

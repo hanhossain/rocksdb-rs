@@ -29,19 +29,19 @@ DBImplReadOnly::DBImplReadOnly(const DBOptions& db_options,
 DBImplReadOnly::~DBImplReadOnly() {}
 
 // Implementations of the DB interface
-Status DBImplReadOnly::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImplReadOnly::Get(const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            PinnableSlice* pinnable_val) {
   return Get(read_options, column_family, key, pinnable_val,
              /*timestamp*/ nullptr);
 }
 
-Status DBImplReadOnly::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImplReadOnly::Get(const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            PinnableSlice* pinnable_val,
                            std::string* timestamp) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -52,13 +52,13 @@ Status DBImplReadOnly::Get(const ReadOptions& read_options,
 
   assert(column_family);
   if (read_options.timestamp) {
-    const Status s = FailIfTsMismatchCf(
+    const rocksdb_rs::status::Status s = FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
       return s.Clone();
     }
   } else {
-    const Status s = FailIfCfHasTs(column_family);
+    const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -74,7 +74,7 @@ Status DBImplReadOnly::Get(const ReadOptions& read_options,
   assert(ucmp);
   std::string* ts = ucmp->timestamp_size() > 0 ? timestamp : nullptr;
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   SequenceNumber snapshot = versions_->LastSequence();
   GetWithTimestampReadCallback read_cb(snapshot);
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
@@ -119,19 +119,19 @@ Status DBImplReadOnly::Get(const ReadOptions& read_options,
 Iterator* DBImplReadOnly::NewIterator(const ReadOptions& read_options,
                                       ColumnFamilyHandle* column_family) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
   assert(column_family);
   if (read_options.timestamp) {
-    const Status s = FailIfTsMismatchCf(
+    const rocksdb_rs::status::Status s = FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
       return NewErrorIterator(s);
     }
   } else {
-    const Status s = FailIfCfHasTs(column_family);
+    const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
     if (!s.ok()) {
       return NewErrorIterator(s);
     }
@@ -158,14 +158,14 @@ Iterator* DBImplReadOnly::NewIterator(const ReadOptions& read_options,
   return db_iter;
 }
 
-Status DBImplReadOnly::NewIterators(
+rocksdb_rs::status::Status DBImplReadOnly::NewIterators(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
   if (read_options.timestamp) {
     for (auto* cf : column_families) {
       assert(cf);
-      const Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
+      const rocksdb_rs::status::Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
                                           /*ts_for_read=*/true);
       if (!s.ok()) {
         return s.Clone();
@@ -174,7 +174,7 @@ Status DBImplReadOnly::NewIterators(
   } else {
     for (auto* cf : column_families) {
       assert(cf);
-      const Status s = FailIfCfHasTs(cf);
+      const rocksdb_rs::status::Status s = FailIfCfHasTs(cf);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -183,7 +183,7 @@ Status DBImplReadOnly::NewIterators(
 
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (iterators == nullptr) {
-    return Status_InvalidArgument("iterators not allowed to be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("iterators not allowed to be nullptr");
   }
   iterators->clear();
   iterators->reserve(column_families.size());
@@ -209,15 +209,15 @@ Status DBImplReadOnly::NewIterators(
     iterators->push_back(db_iter);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
 // Return OK if dbname exists in the file system or create it if
 // create_if_missing
-Status OpenForReadOnlyCheckExistence(const DBOptions& db_options,
+rocksdb_rs::status::Status OpenForReadOnlyCheckExistence(const DBOptions& db_options,
                                      const std::string& dbname) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!db_options.create_if_missing) {
     // Attempt to read "CURRENT" file
     const std::shared_ptr<FileSystem>& fs = db_options.env->GetFileSystem();
@@ -233,9 +233,9 @@ Status OpenForReadOnlyCheckExistence(const DBOptions& db_options,
 }
 }  // namespace
 
-Status DB::OpenForReadOnly(const Options& options, const std::string& dbname,
+rocksdb_rs::status::Status DB::OpenForReadOnly(const Options& options, const std::string& dbname,
                            DB** dbptr, bool /*error_if_wal_file_exists*/) {
-  Status s = OpenForReadOnlyCheckExistence(options, dbname);
+  rocksdb_rs::status::Status s = OpenForReadOnlyCheckExistence(options, dbname);
   if (!s.ok()) {
     return s;
   }
@@ -266,13 +266,13 @@ Status DB::OpenForReadOnly(const Options& options, const std::string& dbname,
   return s;
 }
 
-Status DB::OpenForReadOnly(
+rocksdb_rs::status::Status DB::OpenForReadOnly(
     const DBOptions& db_options, const std::string& dbname,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
     bool error_if_wal_file_exists) {
   // If dbname does not exist in the file system, should not do anything
-  Status s = OpenForReadOnlyCheckExistence(db_options, dbname);
+  rocksdb_rs::status::Status s = OpenForReadOnlyCheckExistence(db_options, dbname);
   if (!s.ok()) {
     return s;
   }
@@ -282,7 +282,7 @@ Status DB::OpenForReadOnly(
       error_if_wal_file_exists);
 }
 
-Status DBImplReadOnly::OpenForReadOnlyWithoutCheck(
+rocksdb_rs::status::Status DBImplReadOnly::OpenForReadOnlyWithoutCheck(
     const DBOptions& db_options, const std::string& dbname,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
@@ -293,7 +293,7 @@ Status DBImplReadOnly::OpenForReadOnlyWithoutCheck(
   SuperVersionContext sv_context(/* create_superversion */ true);
   DBImplReadOnly* impl = new DBImplReadOnly(db_options, dbname);
   impl->mutex_.Lock();
-  Status s = impl->Recover(column_families, true /* read only */,
+  rocksdb_rs::status::Status s = impl->Recover(column_families, true /* read only */,
                            error_if_wal_file_exists);
   if (s.ok()) {
     // set column family handles
@@ -301,7 +301,7 @@ Status DBImplReadOnly::OpenForReadOnlyWithoutCheck(
       auto cfd =
           impl->versions_->GetColumnFamilySet()->GetColumnFamily(cf.name);
       if (cfd == nullptr) {
-        s = Status_InvalidArgument("Column family not found", cf.name);
+        s = rocksdb_rs::status::Status_InvalidArgument("Column family not found", cf.name);
         break;
       }
       handles->push_back(new ColumnFamilyHandleImpl(cfd, impl, &impl->mutex_));

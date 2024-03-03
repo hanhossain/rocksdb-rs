@@ -35,25 +35,25 @@ static const std::map<PeriodicTaskType, std::string> kPeriodicTaskTypeNames = {
     {PeriodicTaskType::kRecordSeqnoTime, "record_seq_time"},
 };
 
-Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
+rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
                                        const PeriodicTaskFunc& fn) {
   return Register(task_type, fn, kDefaultPeriodSeconds.at(task_type));
 }
 
-Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
+rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
                                        const PeriodicTaskFunc& fn,
                                        uint64_t repeat_period_seconds) {
   MutexLock l(&timer_mutex);
   static std::atomic<uint64_t> initial_delay(0);
 
   if (repeat_period_seconds == kInvalidPeriodSec) {
-    return Status_InvalidArgument("Invalid task repeat period");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid task repeat period");
   }
   auto it = tasks_map_.find(task_type);
   if (it != tasks_map_.end()) {
     // the task already exists and it's the same, no update needed
     if (it->second.repeat_every_sec == repeat_period_seconds) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // cancel the existing one before register new one
     timer_->Cancel(it->second.name);
@@ -70,17 +70,17 @@ Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
       (initial_delay.fetch_add(1) % repeat_period_seconds) * kMicrosInSecond,
       repeat_period_seconds * kMicrosInSecond);
   if (!succeeded) {
-    return Status_Aborted("Failed to register periodic task");
+    return rocksdb_rs::status::Status_Aborted("Failed to register periodic task");
   }
   auto result = tasks_map_.try_emplace(
       task_type, TaskInfo{unique_id, repeat_period_seconds});
   if (!result.second) {
-    return Status_Aborted("Failed to add periodic task");
+    return rocksdb_rs::status::Status_Aborted("Failed to add periodic task");
   };
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
+rocksdb_rs::status::Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
   MutexLock l(&timer_mutex);
   auto it = tasks_map_.find(task_type);
   if (it != tasks_map_.end()) {
@@ -90,7 +90,7 @@ Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
   if (!timer_->HasPendingTask()) {
     timer_->Shutdown();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 Timer* PeriodicTaskScheduler::Default() {

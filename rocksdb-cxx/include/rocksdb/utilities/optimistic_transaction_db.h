@@ -87,15 +87,15 @@ struct OptimisticTransactionDBOptions {
 class OptimisticTransactionDB : public StackableDB {
  public:
   // Open an OptimisticTransactionDB similar to DB::Open().
-  static Status Open(const Options& options, const std::string& dbname,
+  static rocksdb_rs::status::Status Open(const Options& options, const std::string& dbname,
                      OptimisticTransactionDB** dbptr);
 
-  static Status Open(const DBOptions& db_options, const std::string& dbname,
+  static rocksdb_rs::status::Status Open(const DBOptions& db_options, const std::string& dbname,
                      const std::vector<ColumnFamilyDescriptor>& column_families,
                      std::vector<ColumnFamilyHandle*>* handles,
                      OptimisticTransactionDB** dbptr);
 
-  static Status Open(const DBOptions& db_options,
+  static rocksdb_rs::status::Status Open(const DBOptions& db_options,
                      const OptimisticTransactionDBOptions& occ_options,
                      const std::string& dbname,
                      const std::vector<ColumnFamilyDescriptor>& column_families,

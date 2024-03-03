@@ -22,10 +22,10 @@ class MockSystemClock : public SystemClockWrapper {
 
   static const char* kClassName() { return "MockSystemClock"; }
   const char* Name() const override { return kClassName(); }
-  virtual Status GetCurrentTime(int64_t* time_sec) override {
+  virtual rocksdb_rs::status::Status GetCurrentTime(int64_t* time_sec) override {
     assert(time_sec != nullptr);
     *time_sec = static_cast<int64_t>(current_time_us_ / kMicrosInSecond);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual uint64_t NowSeconds() { return current_time_us_ / kMicrosInSecond; }

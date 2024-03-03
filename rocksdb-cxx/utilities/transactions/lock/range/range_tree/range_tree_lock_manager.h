@@ -39,7 +39,7 @@ class RangeTreeLockManager : public RangeLockManagerBase,
   //  @note only exclusive locks are currently supported (requesting a
   //  non-exclusive lock will get an exclusive one)
   using LockManager::TryLock;
-  Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
                  const Endpoint& start_endp, const Endpoint& end_endp, Env* env,
                  bool exclusive) override;
 

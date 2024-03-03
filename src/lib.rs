@@ -4,10 +4,13 @@ pub mod compression_type;
 pub mod env;
 mod filename;
 mod hash;
+mod options;
 pub mod port_defs;
 pub mod slice;
 pub mod status;
 mod string_util;
+mod transaction_log;
+mod types;
 pub mod unique_id;
 
 #[cxx::bridge(namespace = "rocksdb")]

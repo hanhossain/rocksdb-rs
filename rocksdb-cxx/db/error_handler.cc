@@ -19,212 +19,212 @@ namespace rocksdb {
 // (i.e from all 4 fields in a tuple to only the BackgroundErrorReason and
 // paranoid_checks). The less specific map serves as a catch all in case we miss
 // a specific error code or subcode.
-std::map<std::tuple<BackgroundErrorReason, Code, SubCode, bool>,
-         Severity>
+std::map<std::tuple<BackgroundErrorReason, rocksdb_rs::status::Code, rocksdb_rs::status::SubCode, bool>,
+         rocksdb_rs::status::Severity>
     ErrorSeverityMap = {
         // Errors during BG compaction
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          true),
-         Severity::kSoftError},
+         rocksdb_rs::status::Severity::kSoftError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          false),
-         Severity::kNoError},
+         rocksdb_rs::status::Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kIOError, SubCode::kSpaceLimit,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kSpaceLimit,
                          true),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          false),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         // Errors during BG flush
-        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
-                         SubCode::kNoSpace, true),
-         Severity::kHardError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
-                         SubCode::kNoSpace, false),
-         Severity::kNoError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
-                         SubCode::kSpaceLimit, true),
-         Severity::kHardError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
-                         SubCode::kIOFenced, true),
-         Severity::kFatalError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
-                         SubCode::kIOFenced, false),
-         Severity::kFatalError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, rocksdb_rs::status::Code::kIOError,
+                         rocksdb_rs::status::SubCode::kNoSpace, true),
+         rocksdb_rs::status::Severity::kHardError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, rocksdb_rs::status::Code::kIOError,
+                         rocksdb_rs::status::SubCode::kNoSpace, false),
+         rocksdb_rs::status::Severity::kNoError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, rocksdb_rs::status::Code::kIOError,
+                         rocksdb_rs::status::SubCode::kSpaceLimit, true),
+         rocksdb_rs::status::Severity::kHardError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, rocksdb_rs::status::Code::kIOError,
+                         rocksdb_rs::status::SubCode::kIOFenced, true),
+         rocksdb_rs::status::Severity::kFatalError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, rocksdb_rs::status::Code::kIOError,
+                         rocksdb_rs::status::SubCode::kIOFenced, false),
+         rocksdb_rs::status::Severity::kFatalError},
         // Errors during Write
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          true),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          false),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          false),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         // Errors during MANIFEST write
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          true),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          false),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          false),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         // Errors during BG flush with WAL disabled
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          true),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          false),
-         Severity::kNoError},
+         rocksdb_rs::status::Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kIOError, SubCode::kSpaceLimit,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kSpaceLimit,
                          true),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          false),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         // Errors during MANIFEST write when WAL is disabled
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          true),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Code::kIOError, SubCode::kNoSpace,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kNoSpace,
                          false),
-         Severity::kHardError},
+         rocksdb_rs::status::Severity::kHardError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Code::kIOError, SubCode::kIOFenced,
+                         rocksdb_rs::status::Code::kIOError, rocksdb_rs::status::SubCode::kIOFenced,
                          false),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
 
 };
 
-std::map<std::tuple<BackgroundErrorReason, Code, bool>,
-         Severity>
+std::map<std::tuple<BackgroundErrorReason, rocksdb_rs::status::Code, bool>,
+         rocksdb_rs::status::Severity>
     DefaultErrorSeverityMap = {
         // Errors during BG compaction
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kCorruption, true),
-         Severity::kUnrecoverableError},
+                         rocksdb_rs::status::Code::kCorruption, true),
+         rocksdb_rs::status::Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kCorruption, false),
-         Severity::kNoError},
+                         rocksdb_rs::status::Code::kCorruption, false),
+         rocksdb_rs::status::Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kIOError, true),
-         Severity::kFatalError},
+                         rocksdb_rs::status::Code::kIOError, true),
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kCompaction,
-                         Code::kIOError, false),
-         Severity::kNoError},
+                         rocksdb_rs::status::Code::kIOError, false),
+         rocksdb_rs::status::Severity::kNoError},
         // Errors during BG flush
         {std::make_tuple(BackgroundErrorReason::kFlush,
-                         Code::kCorruption, true),
-         Severity::kUnrecoverableError},
+                         rocksdb_rs::status::Code::kCorruption, true),
+         rocksdb_rs::status::Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kFlush,
-                         Code::kCorruption, false),
-         Severity::kNoError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
+                         rocksdb_rs::status::Code::kCorruption, false),
+         rocksdb_rs::status::Severity::kNoError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, rocksdb_rs::status::Code::kIOError,
                          true),
-         Severity::kFatalError},
-        {std::make_tuple(BackgroundErrorReason::kFlush, Code::kIOError,
+         rocksdb_rs::status::Severity::kFatalError},
+        {std::make_tuple(BackgroundErrorReason::kFlush, rocksdb_rs::status::Code::kIOError,
                          false),
-         Severity::kNoError},
+         rocksdb_rs::status::Severity::kNoError},
         // Errors during Write
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kCorruption, true),
-         Severity::kUnrecoverableError},
+                         rocksdb_rs::status::Code::kCorruption, true),
+         rocksdb_rs::status::Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kCorruption, false),
-         Severity::kNoError},
+                         rocksdb_rs::status::Code::kCorruption, false),
+         rocksdb_rs::status::Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kIOError, true),
-         Severity::kFatalError},
+                         rocksdb_rs::status::Code::kIOError, true),
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback,
-                         Code::kIOError, false),
-         Severity::kNoError},
+                         rocksdb_rs::status::Code::kIOError, false),
+         rocksdb_rs::status::Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Code::kIOError, true),
-         Severity::kFatalError},
+                         rocksdb_rs::status::Code::kIOError, true),
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWrite,
-                         Code::kIOError, false),
-         Severity::kFatalError},
+                         rocksdb_rs::status::Code::kIOError, false),
+         rocksdb_rs::status::Severity::kFatalError},
         // Errors during BG flush with WAL disabled
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kCorruption, true),
-         Severity::kUnrecoverableError},
+                         rocksdb_rs::status::Code::kCorruption, true),
+         rocksdb_rs::status::Severity::kUnrecoverableError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kCorruption, false),
-         Severity::kNoError},
+                         rocksdb_rs::status::Code::kCorruption, false),
+         rocksdb_rs::status::Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kIOError, true),
-         Severity::kFatalError},
+                         rocksdb_rs::status::Code::kIOError, true),
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kFlushNoWAL,
-                         Code::kIOError, false),
-         Severity::kNoError},
+                         rocksdb_rs::status::Code::kIOError, false),
+         rocksdb_rs::status::Severity::kNoError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Code::kIOError, true),
-         Severity::kFatalError},
+                         rocksdb_rs::status::Code::kIOError, true),
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kManifestWriteNoWAL,
-                         Code::kIOError, false),
-         Severity::kFatalError},
+                         rocksdb_rs::status::Code::kIOError, false),
+         rocksdb_rs::status::Severity::kFatalError},
 };
 
-std::map<std::tuple<BackgroundErrorReason, bool>, Severity>
+std::map<std::tuple<BackgroundErrorReason, bool>, rocksdb_rs::status::Severity>
     DefaultReasonMap = {
         // Errors during BG compaction
         {std::make_tuple(BackgroundErrorReason::kCompaction, true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kCompaction, false),
-         Severity::kNoError},
+         rocksdb_rs::status::Severity::kNoError},
         // Errors during BG flush
         {std::make_tuple(BackgroundErrorReason::kFlush, true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kFlush, false),
-         Severity::kNoError},
+         rocksdb_rs::status::Severity::kNoError},
         // Errors during Write
         {std::make_tuple(BackgroundErrorReason::kWriteCallback, true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kWriteCallback, false),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         // Errors during Memtable update
         {std::make_tuple(BackgroundErrorReason::kMemTable, true),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
         {std::make_tuple(BackgroundErrorReason::kMemTable, false),
-         Severity::kFatalError},
+         rocksdb_rs::status::Severity::kFatalError},
 };
 
 void ErrorHandler::CancelErrorRecovery() {
@@ -250,7 +250,7 @@ void ErrorHandler::CancelErrorRecovery() {
   EndAutoRecovery();
 }
 
-STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status_OK()};
+STATIC_AVOID_DESTRUCTION(const rocksdb_rs::status::Status, kOkStatus){rocksdb_rs::status::Status_OK()};
 
 // This is the main function for looking at an error during a background
 // operation and deciding the severity, and error recovery strategy. The high
@@ -270,7 +270,7 @@ STATIC_AVOID_DESTRUCTION(const Status, kOkStatus){Status_OK()};
 // This can also get called as part of a recovery operation. In that case, we
 // also track the error separately in recovery_error_ so we can tell in the
 // end whether recovery succeeded or not
-const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
+const rocksdb_rs::status::Status& ErrorHandler::HandleKnownErrors(const rocksdb_rs::status::Status& bg_err,
                                               BackgroundErrorReason reason) {
   db_mutex_->AssertHeld();
   if (bg_err.ok()) {
@@ -285,8 +285,8 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
                  "ErrorHandler: Set regular background error\n");
 
   bool paranoid = db_options_.paranoid_checks;
-  Severity sev = Severity::kFatalError;
-  Status new_bg_err = Status_new();
+  rocksdb_rs::status::Severity sev = rocksdb_rs::status::Severity::kFatalError;
+  rocksdb_rs::status::Status new_bg_err = rocksdb_rs::status::Status_new();
   DBRecoverContext context;
   bool found = false;
 
@@ -315,7 +315,7 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
     }
   }
 
-  new_bg_err = Status_new(bg_err, sev);
+  new_bg_err = rocksdb_rs::status::Status_new(bg_err, sev);
 
   // Check if recovery is currently in progress. If it is, we will save this
   // error so we can check it at the end to see if recovery succeeded or not
@@ -324,18 +324,18 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
   }
 
   bool auto_recovery = auto_recovery_;
-  if (new_bg_err.severity() >= Severity::kFatalError && auto_recovery) {
+  if (new_bg_err.severity() >= rocksdb_rs::status::Severity::kFatalError && auto_recovery) {
     auto_recovery = false;
   }
 
   // Allow some error specific overrides
-  if (new_bg_err.subcode() == SubCode::kNoSpace ||
-      new_bg_err.subcode() == SubCode::kSpaceLimit) {
+  if (new_bg_err.subcode() == rocksdb_rs::status::SubCode::kNoSpace ||
+      new_bg_err.subcode() == rocksdb_rs::status::SubCode::kSpaceLimit) {
     new_bg_err = OverrideNoSpaceError(new_bg_err, &auto_recovery);
   }
 
   if (!new_bg_err.ok()) {
-    Status s = new_bg_err.Clone();
+    rocksdb_rs::status::Status s = new_bg_err.Clone();
     EventHelpers::NotifyOnBackgroundError(db_options_.listeners, reason, &s,
                                           db_mutex_, &auto_recovery);
     if (!s.ok() && (s.severity() > bg_error_.severity())) {
@@ -352,12 +352,12 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
     recovery_in_prog_ = true;
 
     // Kick-off error specific recovery
-    if (new_bg_err.subcode() == SubCode::kNoSpace ||
-        new_bg_err.subcode() == SubCode::kSpaceLimit) {
+    if (new_bg_err.subcode() == rocksdb_rs::status::SubCode::kNoSpace ||
+        new_bg_err.subcode() == rocksdb_rs::status::SubCode::kSpaceLimit) {
       RecoverFromNoSpace();
     }
   }
-  if (bg_error_.severity() >= Severity::kHardError) {
+  if (bg_error_.severity() >= rocksdb_rs::status::Severity::kHardError) {
     is_db_stopped_.store(true, std::memory_order_release);
   }
   return bg_error_;
@@ -384,10 +384,10 @@ const Status& ErrorHandler::HandleKnownErrors(const Status& bg_err,
 //    c) all other errors are mapped to hard error.
 // 3) for other cases, SetBGError(const Status& bg_err, BackgroundErrorReason
 //    reason) will be called to handle other error cases.
-const Status& ErrorHandler::SetBGError(const Status& bg_status,
+const rocksdb_rs::status::Status& ErrorHandler::SetBGError(const rocksdb_rs::status::Status& bg_status,
                                        BackgroundErrorReason reason) {
   db_mutex_->AssertHeld();
-  Status tmp_status = bg_status.Clone();
+  rocksdb_rs::status::Status tmp_status = bg_status.Clone();
   IOStatus bg_io_err = status_to_io_status(std::move(tmp_status));
 
   if (bg_io_err.ok()) {
@@ -406,14 +406,14 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
     db_->DisableFileDeletionsWithLock();
   }
 
-  Status new_bg_io_err = bg_io_err;
+  rocksdb_rs::status::Status new_bg_io_err = bg_io_err;
   DBRecoverContext context;
   if (bg_io_err.GetScope() != IOStatus::IOErrorScope::kIOErrorScopeFile &&
       bg_io_err.GetDataLoss()) {
     // First, data loss (non file scope) is treated as unrecoverable error. So
     // it can directly overwrite any existing bg_error_.
     bool auto_recovery = false;
-    Status bg_err = Status_new(new_bg_io_err, Severity::kUnrecoverableError);
+    rocksdb_rs::status::Status bg_err = rocksdb_rs::status::Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kUnrecoverableError);
     CheckAndSetRecoveryAndBGError(bg_err);
     if (bg_error_stats_ != nullptr) {
       RecordTick(bg_error_stats_.get(), ERROR_HANDLER_BG_ERROR_COUNT);
@@ -430,7 +430,7 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
                                           &bg_err, db_mutex_, &auto_recovery);
     recover_context_ = context;
     return bg_error_;
-  } else if (bg_io_err.subcode() != SubCode::kNoSpace &&
+  } else if (bg_io_err.subcode() != rocksdb_rs::status::SubCode::kNoSpace &&
              (bg_io_err.GetScope() ==
                   IOStatus::IOErrorScope::kIOErrorScopeFile ||
               bg_io_err.GetRetryable())) {
@@ -482,14 +482,14 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
       // continues to receive writes when BG error is soft error, to avoid
       // to many small memtable being generated during auto resume, the flush
       // reason is set to kErrorRecoveryRetryFlush.
-      Status bg_err = Status_new(new_bg_io_err, Severity::kSoftError);
+      rocksdb_rs::status::Status bg_err = rocksdb_rs::status::Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kSoftError);
       CheckAndSetRecoveryAndBGError(bg_err);
       soft_error_no_bg_work_ = true;
       context.flush_reason = FlushReason::kErrorRecoveryRetryFlush;
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
     } else {
-      Status bg_err = Status_new(new_bg_io_err, Severity::kHardError);
+      rocksdb_rs::status::Status bg_err = rocksdb_rs::status::Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kHardError);
       CheckAndSetRecoveryAndBGError(bg_err);
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
@@ -504,9 +504,9 @@ const Status& ErrorHandler::SetBGError(const Status& bg_status,
   }
 }
 
-Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
+rocksdb_rs::status::Status ErrorHandler::OverrideNoSpaceError(const rocksdb_rs::status::Status& bg_error,
                                           bool* auto_recovery) {
-  if (bg_error.severity() >= Severity::kFatalError) {
+  if (bg_error.severity() >= rocksdb_rs::status::Severity::kFatalError) {
     return bg_error.Clone();
   }
 
@@ -517,18 +517,18 @@ Status ErrorHandler::OverrideNoSpaceError(const Status& bg_error,
   }
 
   if (db_options_.allow_2pc &&
-      (bg_error.severity() <= Severity::kSoftError)) {
+      (bg_error.severity() <= rocksdb_rs::status::Severity::kSoftError)) {
     // Don't know how to recover, as the contents of the current WAL file may
     // be inconsistent, and it may be needed for 2PC. If 2PC is not enabled,
     // we can just flush the memtable and discard the log
     *auto_recovery = false;
-    return Status_new(bg_error, Severity::kFatalError);
+    return rocksdb_rs::status::Status_new(bg_error, rocksdb_rs::status::Severity::kFatalError);
   }
 
   {
     uint64_t free_space;
     if (db_options_.env->GetFreeSpace(db_options_.db_paths[0].path,
-                                      &free_space).eq(Status_NotSupported())) {
+                                      &free_space).eq(rocksdb_rs::status::Status_NotSupported())) {
       *auto_recovery = false;
     }
   }
@@ -546,14 +546,14 @@ void ErrorHandler::RecoverFromNoSpace() {
   }
 }
 
-Status ErrorHandler::ClearBGError() {
+rocksdb_rs::status::Status ErrorHandler::ClearBGError() {
   db_mutex_->AssertHeld();
 
   // Signal that recovery succeeded
   if (recovery_error_.ok()) {
-    Status old_bg_error = bg_error_.Clone();
+    rocksdb_rs::status::Status old_bg_error = bg_error_.Clone();
     // Clear and check the recovery IO and BG error
-    bg_error_ = Status_OK();
+    bg_error_ = rocksdb_rs::status::Status_OK();
     recovery_io_error_ = IOStatus::OK();
     recovery_in_prog_ = false;
     soft_error_no_bg_work_ = false;
@@ -563,14 +563,14 @@ Status ErrorHandler::ClearBGError() {
   return recovery_error_.Clone();
 }
 
-Status ErrorHandler::RecoverFromBGError(bool is_manual) {
+rocksdb_rs::status::Status ErrorHandler::RecoverFromBGError(bool is_manual) {
   InstrumentedMutexLock l(db_mutex_);
   bool no_bg_work_original_flag = soft_error_no_bg_work_;
   if (is_manual) {
     // If its a manual recovery and there's a background recovery in progress
     // return busy status
     if (recovery_in_prog_) {
-      return Status_Busy();
+      return rocksdb_rs::status::Status_Busy();
     }
     recovery_in_prog_ = true;
 
@@ -589,18 +589,18 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
     }
   }
 
-  if (bg_error_.severity() == Severity::kSoftError &&
+  if (bg_error_.severity() == rocksdb_rs::status::Severity::kSoftError &&
       recover_context_.flush_reason == FlushReason::kErrorRecovery) {
     // Simply clear the background error and return
-    recovery_error_ = Status_OK();
+    recovery_error_ = rocksdb_rs::status::Status_OK();
     return ClearBGError();
   }
 
   // Reset recovery_error_. We will use this to record any errors that happen
   // during the recovery process. While recovering, the only operations that
   // can generate background errors should be the flush operations
-  recovery_error_ = Status_OK();
-  Status s = db_->ResumeImpl(recover_context_);
+  recovery_error_ = rocksdb_rs::status::Status_OK();
+  rocksdb_rs::status::Status s = db_->ResumeImpl(recover_context_);
   if (s.ok()) {
     soft_error_no_bg_work_ = false;
   } else {
@@ -611,13 +611,13 @@ Status ErrorHandler::RecoverFromBGError(bool is_manual) {
   // recovery_in_prog_ to false. For automatic background recovery, leave it
   // as is regardless of success or failure as it will be retried
   if (is_manual || s.IsShutdownInProgress() ||
-      bg_error_.severity() >= Severity::kFatalError) {
+      bg_error_.severity() >= rocksdb_rs::status::Severity::kFatalError) {
     recovery_in_prog_ = false;
   }
   return s;
 }
 
-const Status& ErrorHandler::StartRecoverFromRetryableBGIOError(
+const rocksdb_rs::status::Status& ErrorHandler::StartRecoverFromRetryableBGIOError(
     const IOStatus& io_error) {
   db_mutex_->AssertHeld();
   if (bg_error_.ok()) {
@@ -661,7 +661,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   InstrumentedMutexLock l(db_mutex_);
   if (end_recovery_) {
     EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                           Status_ShutdownInProgress(),
+                                           rocksdb_rs::status::Status_ShutdownInProgress(),
                                            db_mutex_);
     return;
   }
@@ -673,22 +673,22 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   while (resume_count > 0) {
     if (end_recovery_) {
       EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, bg_error_,
-                                             Status_ShutdownInProgress(),
+                                             rocksdb_rs::status::Status_ShutdownInProgress(),
                                              db_mutex_);
       return;
     }
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume0");
     TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume1");
     recovery_io_error_ = IOStatus::OK();
-    recovery_error_ = Status_OK();
+    recovery_error_ = rocksdb_rs::status::Status_OK();
     retry_count++;
-    Status s = db_->ResumeImpl(context);
+    rocksdb_rs::status::Status s = db_->ResumeImpl(context);
     if (bg_error_stats_ != nullptr) {
       RecordTick(bg_error_stats_.get(),
                  ERROR_HANDLER_AUTORESUME_RETRY_TOTAL_COUNT);
     }
     if (s.IsShutdownInProgress() ||
-        bg_error_.severity() >= Severity::kFatalError) {
+        bg_error_.severity() >= rocksdb_rs::status::Severity::kFatalError) {
       // If DB shutdown in progress or the error severity is higher than
       // Hard Error, stop auto resume and returns.
       recovery_in_prog_ = false;
@@ -701,7 +701,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
       return;
     }
     if (!recovery_io_error_.ok() &&
-        recovery_error_.severity() <= Severity::kHardError &&
+        recovery_error_.severity() <= rocksdb_rs::status::Severity::kHardError &&
         recovery_io_error_.GetRetryable()) {
       // If new BG IO error happens during auto recovery and it is retryable
       // and its severity is Hard Error or lower, the auto resmue sleep for
@@ -718,9 +718,9 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
         // recover from the retryable IO error and no other BG errors. Clean
         // the bg_error and notify user.
         TEST_SYNC_POINT("RecoverFromRetryableBGIOError:RecoverSuccess");
-        Status old_bg_error = bg_error_.Clone();
+        rocksdb_rs::status::Status old_bg_error = bg_error_.Clone();
         is_db_stopped_.store(false, std::memory_order_release);
-        bg_error_ = Status_OK();
+        bg_error_ = rocksdb_rs::status::Status_OK();
         EventHelpers::NotifyOnErrorRecoveryEnd(
             db_options_.listeners, old_bg_error, bg_error_, db_mutex_);
         if (bg_error_stats_ != nullptr) {
@@ -756,7 +756,7 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   recovery_in_prog_ = false;
   EventHelpers::NotifyOnErrorRecoveryEnd(
       db_options_.listeners, bg_error_,
-      Status_Aborted("Exceeded resume retry count"), db_mutex_);
+      rocksdb_rs::status::Status_Aborted("Exceeded resume retry count"), db_mutex_);
   TEST_SYNC_POINT("RecoverFromRetryableBGIOError:LoopOut");
   if (bg_error_stats_ != nullptr) {
     RecordInHistogram(bg_error_stats_.get(),
@@ -765,14 +765,14 @@ void ErrorHandler::RecoverFromRetryableBGIOError() {
   return;
 }
 
-void ErrorHandler::CheckAndSetRecoveryAndBGError(const Status& bg_err) {
+void ErrorHandler::CheckAndSetRecoveryAndBGError(const rocksdb_rs::status::Status& bg_err) {
   if (recovery_in_prog_ && recovery_error_.ok()) {
     recovery_error_.copy_from(bg_err);
   }
   if (bg_err.severity() > bg_error_.severity()) {
     bg_error_.copy_from(bg_err);
   }
-  if (bg_error_.severity() >= Severity::kHardError) {
+  if (bg_error_.severity() >= rocksdb_rs::status::Severity::kHardError) {
     is_db_stopped_.store(true, std::memory_order_release);
   }
   return;

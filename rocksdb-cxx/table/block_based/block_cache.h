@@ -28,7 +28,7 @@ class Block_kData : public Block {
  public:
   using Block::Block;
 
-  static constexpr CacheEntryRole kCacheEntryRole = CacheEntryRole::kDataBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kDataBlock;
   static constexpr BlockType kBlockType = BlockType::kData;
 };
 
@@ -36,7 +36,7 @@ class Block_kIndex : public Block {
  public:
   using Block::Block;
 
-  static constexpr CacheEntryRole kCacheEntryRole = CacheEntryRole::kIndexBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kIndexBlock;
   static constexpr BlockType kBlockType = BlockType::kIndex;
 };
 
@@ -44,8 +44,8 @@ class Block_kFilterPartitionIndex : public Block {
  public:
   using Block::Block;
 
-  static constexpr CacheEntryRole kCacheEntryRole =
-      CacheEntryRole::kFilterMetaBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole =
+      rocksdb_rs::cache::CacheEntryRole::kFilterMetaBlock;
   static constexpr BlockType kBlockType = BlockType::kFilterPartitionIndex;
 };
 
@@ -53,7 +53,7 @@ class Block_kRangeDeletion : public Block {
  public:
   using Block::Block;
 
-  static constexpr CacheEntryRole kCacheEntryRole = CacheEntryRole::kOtherBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kOtherBlock;
   static constexpr BlockType kBlockType = BlockType::kRangeDeletion;
 };
 
@@ -63,7 +63,7 @@ class Block_kMetaIndex : public Block {
  public:
   using Block::Block;
 
-  static constexpr CacheEntryRole kCacheEntryRole = CacheEntryRole::kOtherBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kOtherBlock;
   static constexpr BlockType kBlockType = BlockType::kMetaIndex;
 };
 
@@ -135,6 +135,6 @@ const Cache::CacheItemHelper* GetCacheItemHelper(
 // Can get difficult compiler/linker errors without a good check like this.
 template <typename TUse, typename TBlocklike>
 using WithBlocklikeCheck = std::enable_if_t<
-    TBlocklike::kCacheEntryRole == CacheEntryRole::kMisc || true, TUse>;
+    TBlocklike::kCacheEntryRole == rocksdb_rs::cache::CacheEntryRole::kMisc || true, TUse>;
 
 }  // namespace rocksdb

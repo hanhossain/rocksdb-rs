@@ -47,14 +47,14 @@ inline void BlockFetcher::ProcessTrailerIfPresent() {
         BlockBasedTable::GetBlockCompressionType(slice_.data(), block_size_);
   } else {
     // E.g. plain table or cuckoo table
-    compression_type_ = CompressionType::kNoCompression;
+    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
 }
 
 inline bool BlockFetcher::TryGetUncompressBlockFromPersistentCache() {
   if (cache_options_.persistent_cache &&
       !cache_options_.persistent_cache->IsCompressed()) {
-    Status status = PersistentCacheHelper::LookupUncompressed(
+    rocksdb_rs::status::Status status = PersistentCacheHelper::LookupUncompressed(
         cache_options_, handle_, contents_);
     if (status.ok()) {
       // uncompressed page is found for the block handle
@@ -81,11 +81,11 @@ inline bool BlockFetcher::TryGetFromPrefetchBuffer() {
       if (read_options_.async_io && !for_compaction_) {
         read_from_prefetch_buffer = prefetch_buffer_->TryReadFromCacheAsync(
                 opts, file_, handle_.offset(), block_size_with_trailer_, &slice_,
-                reinterpret_cast<Status *>(&io_s), read_options_.rate_limiter_priority);
+                reinterpret_cast<rocksdb_rs::status::Status *>(&io_s), read_options_.rate_limiter_priority);
       } else {
         read_from_prefetch_buffer = prefetch_buffer_->TryReadFromCache(
                 opts, file_, handle_.offset(), block_size_with_trailer_, &slice_,
-                reinterpret_cast<Status *>(&io_s), read_options_.rate_limiter_priority, for_compaction_);
+                reinterpret_cast<rocksdb_rs::status::Status *>(&io_s), read_options_.rate_limiter_priority, for_compaction_);
       }
       if (read_from_prefetch_buffer) {
         ProcessTrailerIfPresent();
@@ -219,14 +219,14 @@ inline void BlockFetcher::GetBlockContents() {
     if (got_from_prefetch_buffer_ || used_buf_ == &stack_buf_[0]) {
       CopyBufferToHeapBuf();
     } else if (used_buf_ == compressed_buf_.get()) {
-      if (compression_type_ == CompressionType::kNoCompression &&
+      if (compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression &&
           memory_allocator_ != memory_allocator_compressed_) {
         CopyBufferToHeapBuf();
       } else {
         heap_buf_ = std::move(compressed_buf_);
       }
     } else if (direct_io_buf_.get() != nullptr) {
-      if (compression_type_ == CompressionType::kNoCompression) {
+      if (compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
         CopyBufferToHeapBuf();
       } else {
         CopyBufferToCompressedBuf();
@@ -242,7 +242,7 @@ inline void BlockFetcher::GetBlockContents() {
 
 IOStatus BlockFetcher::ReadBlockContents() {
   if (TryGetUncompressBlockFromPersistentCache()) {
-    compression_type_ = CompressionType::kNoCompression;
+    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifndef NDEBUG
     contents_->has_trailer = footer_.GetBlockTrailerSize() > 0;
 #endif  // NDEBUG
@@ -326,7 +326,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
     }
   }
 
-  if (do_uncompress_ && compression_type_ != CompressionType::kNoCompression) {
+  if (do_uncompress_ && compression_type_ != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     PERF_TIMER_GUARD(block_decompress_time);
     // compressed page, uncompress, update cache
     UncompressionContext context(compression_type_);
@@ -337,7 +337,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
 #ifndef NDEBUG
     num_heap_buf_memcpy_++;
 #endif
-    compression_type_ = CompressionType::kNoCompression;
+    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   } else {
     GetBlockContents();
   }
@@ -349,7 +349,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
 
 IOStatus BlockFetcher::ReadAsyncBlockContents() {
   if (TryGetUncompressBlockFromPersistentCache()) {
-    compression_type_ = CompressionType::kNoCompression;
+    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifndef NDEBUG
     contents_->has_trailer = footer_.GetBlockTrailerSize() > 0;
 #endif  // NDEBUG
@@ -376,7 +376,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
         }
         used_buf_ = const_cast<char*>(slice_.data());
 
-        if (do_uncompress_ && compression_type_ != CompressionType::kNoCompression) {
+        if (do_uncompress_ && compression_type_ != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
           PERF_TIMER_GUARD(block_decompress_time);
           // compressed page, uncompress, update cache
           UncompressionContext context(compression_type_);
@@ -388,7 +388,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
 #ifndef NDEBUG
           num_heap_buf_memcpy_++;
 #endif
-          compression_type_ = CompressionType::kNoCompression;
+          compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
         } else {
           GetBlockContents();
         }

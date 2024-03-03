@@ -160,12 +160,12 @@ class BlockPrefixIndex::Builder {
   Arena arena_;
 };
 
-Status BlockPrefixIndex::Create(const SliceTransform* prefix_extractor,
+rocksdb_rs::status::Status BlockPrefixIndex::Create(const SliceTransform* prefix_extractor,
                                 const Slice& prefixes, const Slice& prefix_meta,
                                 BlockPrefixIndex** prefix_index) {
   uint64_t pos = 0;
   auto meta_pos = prefix_meta;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Builder builder;
 
   while (!meta_pos.empty()) {
@@ -175,12 +175,12 @@ Status BlockPrefixIndex::Create(const SliceTransform* prefix_extractor,
     if (!GetVarint32(&meta_pos, &prefix_size) ||
         !GetVarint32(&meta_pos, &entry_index) ||
         !GetVarint32(&meta_pos, &num_blocks)) {
-      s = Status_Corruption(
+      s = rocksdb_rs::status::Status_Corruption(
           "Corrupted prefix meta block: unable to read from it.");
       break;
     }
     if (pos + prefix_size > prefixes.size()) {
-      s = Status_Corruption(
+      s = rocksdb_rs::status::Status_Corruption(
           "Corrupted prefix meta block: size inconsistency.");
       break;
     }
@@ -191,7 +191,7 @@ Status BlockPrefixIndex::Create(const SliceTransform* prefix_extractor,
   }
 
   if (s.ok() && pos != prefixes.size()) {
-    s = Status_Corruption("Corrupted prefix meta block");
+    s = rocksdb_rs::status::Status_Corruption("Corrupted prefix meta block");
   }
 
   if (s.ok()) {

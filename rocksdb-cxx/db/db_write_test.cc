@@ -75,7 +75,7 @@ TEST_P(DBWriteTest, WriteStallRemoveNoSlowdownWrite) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions wo;
     wo.no_slowdown = true;
-    Status s = dbfull()->Put(wo, key, "bar");
+    rocksdb_rs::status::Status s = dbfull()->Put(wo, key, "bar");
     ASSERT_TRUE(s.ok() || s.IsIncomplete());
   };
   std::function<void(void*)> unblock_main_thread_func = [&](void*) {
@@ -195,7 +195,7 @@ TEST_P(DBWriteTest, WriteThreadHangOnWriteStall) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions wo;
     wo.no_slowdown = true;
-    Status s = dbfull()->Put(wo, key, "bar");
+    rocksdb_rs::status::Status s = dbfull()->Put(wo, key, "bar");
     ASSERT_TRUE(s.ok() || s.IsIncomplete());
   };
   std::function<void(void*)> unblock_main_thread_func = [&](void*) {
@@ -592,15 +592,15 @@ TEST_P(DBWriteTest, IOErrorOnSwitchMemtable) {
   options.wal_bytes_per_sync = 256 * 1024;
   options.manual_wal_flush = true;
   Reopen(options);
-  mock_env->SetFilesystemActive(false, Status_IOError("Not active"));
-  Status s = Status_new();
+  mock_env->SetFilesystemActive(false, rocksdb_rs::status::Status_IOError("Not active"));
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (int i = 0; i < 4 * 512; ++i) {
     s = Put(Key(i), rnd.RandomString(1024));
     if (!s.ok()) {
       break;
     }
   }
-  ASSERT_EQ(s.severity(), Severity::kFatalError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
 
   mock_env->SetFilesystemActive(true);
   // Close before mock_env destruct.
@@ -643,7 +643,7 @@ TEST_P(DBWriteTest, LockWALInEffect) {
 
   // Fail the WAL flush if applicable
   fault_fs->SetFilesystemActive(false);
-  Status s = Put("key2", "value");
+  rocksdb_rs::status::Status s = Put("key2", "value");
   if (options.manual_wal_flush) {
     ASSERT_OK(s);
     // I/O failure

@@ -69,7 +69,7 @@ class FlushJob {
            SnapshotChecker* snapshot_checker, JobContext* job_context,
            FlushReason flush_reason, LogBuffer* log_buffer,
            FSDirectory* db_directory, FSDirectory* output_file_directory,
-           CompressionType output_compression, Statistics* stats,
+           rocksdb_rs::compression_type::CompressionType output_compression, Statistics* stats,
            EventLogger* event_logger, bool measure_io_stats,
            const bool sync_output_directory, const bool write_manifest,
            Env::Priority thread_pri, const std::shared_ptr<IOTracer>& io_tracer,
@@ -83,7 +83,7 @@ class FlushJob {
   // Require db_mutex held.
   // Once PickMemTable() is called, either Run() or Cancel() has to be called.
   void PickMemTable();
-  Status Run(LogsWithPrepTracker* prep_tracker = nullptr,
+  rocksdb_rs::status::Status Run(LogsWithPrepTracker* prep_tracker = nullptr,
              FileMetaData* file_meta = nullptr,
              bool* switched_to_mempurge = nullptr);
   void Cancel();
@@ -99,7 +99,7 @@ class FlushJob {
   void ReportStartedFlush();
   void ReportFlushInputSize(const autovector<MemTable*>& mems);
   void RecordFlushIOStats();
-  Status WriteLevel0Table();
+  rocksdb_rs::status::Status WriteLevel0Table();
 
   // Memtable Garbage Collection algorithm: a MemPurge takes the list
   // of immutable memtables and filters out (or "purge") the outdated bytes
@@ -121,7 +121,7 @@ class FlushJob {
   // first go through the MemPurge process. Therefore, we strongly
   // recommend all users not to set this flag as true given that the MemPurge
   // process has not matured yet.
-  Status MemPurge();
+  rocksdb_rs::status::Status MemPurge();
   bool MemPurgeDecider(double threshold);
   // The rate limiter priority (io_priority) is determined dynamically here.
   Env::IOPriority GetRateLimiterPriorityForWrite();
@@ -150,7 +150,7 @@ class FlushJob {
   LogBuffer* log_buffer_;
   FSDirectory* db_directory_;
   FSDirectory* output_file_directory_;
-  CompressionType output_compression_;
+  rocksdb_rs::compression_type::CompressionType output_compression_;
   Statistics* stats_;
   EventLogger* event_logger_;
   TableProperties table_properties_;

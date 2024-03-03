@@ -151,7 +151,7 @@ class BackupEngineImpl {
   void GetBackupInfo(std::vector<BackupInfo>* backup_info,
                      bool include_file_details) const;
 
-  Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
+  rocksdb_rs::status::Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
                        bool include_file_details = false) const;
 
   void GetCorruptedBackups(std::vector<BackupID>* corrupt_backup_ids) const;
@@ -388,7 +388,7 @@ class BackupEngineImpl {
 
     void RecordTimestamp() {
       // Best effort
-      Status s = env_->GetCurrentTime(&timestamp_);
+      rocksdb_rs::status::Status s = env_->GetCurrentTime(&timestamp_);
       if (!s.ok()) {
         timestamp_ = /* something clearly fabricated */ 1;
       }
@@ -590,7 +590,7 @@ class BackupEngineImpl {
                                       const Temperature src_temperature) const;
 
   // Obtain db_id and db_session_id from the table properties of file_path
-  Status GetFileDbIdentities(Env* src_env, const EnvOptions& src_env_options,
+  rocksdb_rs::status::Status GetFileDbIdentities(Env* src_env, const EnvOptions& src_env_options,
                              const std::string& file_path,
                              Temperature file_temp, RateLimiter* rate_limiter,
                              std::string* db_id, std::string* db_session_id);
@@ -789,7 +789,7 @@ class BackupEngineImpl {
   std::mutex byte_report_mutex_;
   mutable channel<CopyOrCreateWorkItem> files_to_copy_or_create_;
   std::vector<port::Thread> threads_;
-  std::atomic<CpuPriority> threads_cpu_priority_;
+  std::atomic<rocksdb_rs::port_defs::CpuPriority> threads_cpu_priority_;
 
   // Certain operations like PurgeOldBackups and DeleteBackup will trigger
   // automatic GarbageCollect (true) unless we've already done one in this
@@ -812,7 +812,7 @@ class BackupEngineImpl {
       bool shared, const std::string& src_dir,
       const std::string& fname,  // starts with "/"
       const EnvOptions& src_env_options, RateLimiter* rate_limiter,
-      FileType file_type, uint64_t size_bytes, Statistics* stats,
+      rocksdb_rs::types::FileType file_type, uint64_t size_bytes, Statistics* stats,
       uint64_t size_limit = 0, bool shared_checksum = false,
       std::function<void()> progress_callback = {},
       const std::string& contents = std::string(),
@@ -895,14 +895,14 @@ class BackupEngineImplThreadSafe : public BackupEngine,
     return impl_.GarbageCollect();
   }
 
-  Status GetLatestBackupInfo(BackupInfo* backup_info,
+  rocksdb_rs::status::Status GetLatestBackupInfo(BackupInfo* backup_info,
                              bool include_file_details = false) const override {
     ReadLock lock(&mutex_);
     return impl_.GetBackupInfo(kLatestBackupIDMarker, backup_info,
                                include_file_details);
   }
 
-  Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
+  rocksdb_rs::status::Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
                        bool include_file_details = false) const override {
     ReadLock lock(&mutex_);
     return impl_.GetBackupInfo(backup_id, backup_info, include_file_details);
@@ -1239,7 +1239,7 @@ IOStatus BackupEngineImpl::Initialize() {
 
   // set up threads perform copies from files_to_copy_or_create_ in the
   // background
-  threads_cpu_priority_ = CpuPriority::kNormal;
+  threads_cpu_priority_ = rocksdb_rs::port_defs::CpuPriority::kNormal;
   threads_.reserve(options_.max_background_operations);
   for (int t = 0; t < options_.max_background_operations; t++) {
     threads_.emplace_back([this]() {
@@ -1248,11 +1248,11 @@ IOStatus BackupEngineImpl::Initialize() {
       pthread_setname_np(pthread_self(), "backup_engine");
 #endif
 #endif
-      CpuPriority current_priority = CpuPriority::kNormal;
+      rocksdb_rs::port_defs::CpuPriority current_priority = rocksdb_rs::port_defs::CpuPriority::kNormal;
       CopyOrCreateWorkItem work_item;
       uint64_t bytes_toward_next_callback = 0;
       while (files_to_copy_or_create_.read(work_item)) {
-        CpuPriority priority = threads_cpu_priority_;
+        rocksdb_rs::port_defs::CpuPriority priority = threads_cpu_priority_;
         if (current_priority != priority) {
           TEST_SYNC_POINT_CALLBACK(
               "BackupEngineImpl::Initialize:SetCpuPriority", &priority);
@@ -1403,7 +1403,7 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
   std::deque<BackupWorkItemPair> excludable_items;
   std::deque<BackupAfterCopyOrCreateWorkItem> backup_items_to_finish;
   // Add a CopyOrCreateWorkItem to the channel for each live file
-  Status disabled = db->DisableFileDeletions();
+  rocksdb_rs::status::Status disabled = db->DisableFileDeletions();
   DBOptions db_options = db->GetDBOptions();
   Statistics* stats = db_options.statistics.get();
   if (io_s.ok()) {
@@ -1422,23 +1422,23 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
     RateLimiter* rate_limiter = options_.backup_rate_limiter.get();
     io_s = status_to_io_status(checkpoint.CreateCustomCheckpoint(
         [&](const std::string& /*src_dirname*/, const std::string& /*fname*/,
-            FileType) {
+            rocksdb_rs::types::FileType) {
           // custom checkpoint will switch to calling copy_file_cb after it sees
           // NotSupported returned from link_file_cb.
           return IOStatus::NotSupported();
         } /* link_file_cb */,
         [&](const std::string& src_dirname, const std::string& fname,
-            uint64_t size_limit_bytes, FileType type,
+            uint64_t size_limit_bytes, rocksdb_rs::types::FileType type,
             const std::string& checksum_func_name,
             const std::string& checksum_val,
             const Temperature src_temperature) {
-          if (type == kWalFile && !options_.backup_log_files) {
+          if (type == rocksdb_rs::types::FileType::kWalFile && !options_.backup_log_files) {
             return IOStatus::OK();
           }
           Log(options_.info_log, "add file for backup %s", fname.c_str());
           uint64_t size_bytes = 0;
           IOStatus io_st;
-          if (type == kTableFile || type == kBlobFile) {
+          if (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile) {
             io_st = db_fs_->GetFileSize(src_dirname + "/" + fname, io_options_,
                                         &size_bytes, nullptr);
             if (!io_st.ok()) {
@@ -1449,19 +1449,19 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
           }
           EnvOptions src_env_options;
           switch (type) {
-            case kWalFile:
+            case rocksdb_rs::types::FileType::kWalFile:
               src_env_options =
                   db_env_->OptimizeForLogRead(src_raw_env_options);
               break;
-            case kTableFile:
+            case rocksdb_rs::types::FileType::kTableFile:
               src_env_options = db_env_->OptimizeForCompactionTableRead(
                   src_raw_env_options, ImmutableDBOptions(db_options));
               break;
-            case kDescriptorFile:
+            case rocksdb_rs::types::FileType::kDescriptorFile:
               src_env_options =
                   db_env_->OptimizeForManifestRead(src_raw_env_options);
               break;
-            case kBlobFile:
+            case rocksdb_rs::types::FileType::kBlobFile:
               src_env_options = db_env_->OptimizeForBlobFileRead(
                   src_raw_env_options, ImmutableDBOptions(db_options));
               break;
@@ -1476,17 +1476,17 @@ IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
               live_dst_paths, backup_items_to_finish,
               maybe_exclude_items ? &excludable_items : nullptr, new_backup_id,
               options_.share_table_files &&
-                  (type == kTableFile || type == kBlobFile),
+                  (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile),
               src_dirname, fname, src_env_options, rate_limiter, type,
               size_bytes, db_options.statistics.get(), size_limit_bytes,
               options_.share_files_with_checksum &&
-                  (type == kTableFile || type == kBlobFile),
+                  (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile),
               options.progress_callback, "" /* contents */, checksum_func_name,
               checksum_val, src_temperature);
           return io_st;
         } /* copy_file_cb */,
         [&](const std::string& fname, const std::string& contents,
-            FileType type) {
+            rocksdb_rs::types::FileType type) {
           Log(options_.info_log, "add file for backup %s", fname.c_str());
           return AddBackupFileWorkItem(
               live_dst_paths, backup_items_to_finish,
@@ -1779,8 +1779,8 @@ void BackupEngineImpl::SetBackupInfoFromBackupMeta(
       finfo.size = file_ptr->size;
       finfo.directory = dir;
       uint64_t number;
-      FileType type;
-      bool ok = ParseFileName(file_ptr->filename, &number, &type);
+      rocksdb_rs::types::FileType type;
+      bool ok = rocksdb_rs::filename::ParseFileName(file_ptr->filename, &number, &type);
       if (ok) {
         finfo.file_number = number;
         finfo.file_type = type;
@@ -1796,7 +1796,7 @@ void BackupEngineImpl::SetBackupInfoFromBackupMeta(
   }
 }
 
-Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
+rocksdb_rs::status::Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
                                        BackupInfo* backup_info,
                                        bool include_file_details) const {
   assert(initialized_);
@@ -1806,20 +1806,20 @@ Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
   }
   auto corrupt_itr = corrupt_backups_.find(backup_id);
   if (corrupt_itr != corrupt_backups_.end()) {
-    return Status_Corruption(corrupt_itr->second.first.ToString());
+    return rocksdb_rs::status::Status_Corruption(corrupt_itr->second.first.ToString());
   }
   auto backup_itr = backups_.find(backup_id);
   if (backup_itr == backups_.end()) {
-    return Status_NotFound("Backup not found");
+    return rocksdb_rs::status::Status_NotFound("Backup not found");
   }
   auto& backup = backup_itr->second;
   if (backup->Empty()) {
-    return Status_NotFound("Backup not found");
+    return rocksdb_rs::status::Status_NotFound("Backup not found");
   }
 
   SetBackupInfoFromBackupMeta(backup_id, *backup, backup_info,
                               include_file_details);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BackupEngineImpl::GetBackupInfo(std::vector<BackupInfo>* backup_info,
@@ -1877,16 +1877,16 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
 
   if (options.keep_log_files) {
     // delete files in db_dir, but keep all the log files
-    DeleteChildren(db_dir, 1 << kWalFile);
+    DeleteChildren(db_dir, 1 << static_cast<int>(rocksdb_rs::types::FileType::kWalFile));
     // move all the files from archive dir to wal_dir
-    std::string archive_dir = ArchivalDirectory(wal_dir);
+    std::string archive_dir = static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir));
     std::vector<std::string> archive_files;
     db_fs_->GetChildren(archive_dir, io_options_, &archive_files, nullptr);
     for (const auto& f : archive_files) {
       uint64_t number;
-      FileType type;
-      bool ok = ParseFileName(f, &number, &type);
-      if (ok && type == kWalFile) {
+      rocksdb_rs::types::FileType type;
+      bool ok = rocksdb_rs::filename::ParseFileName(f, &number, &type);
+      if (ok && type == rocksdb_rs::types::FileType::kWalFile) {
         ROCKS_LOG_INFO(options_.info_log,
                        "Moving log file from archive/ to wal_dir: %s",
                        f.c_str());
@@ -1901,7 +1901,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     }
   } else {
     DeleteChildren(wal_dir);
-    DeleteChildren(ArchivalDirectory(wal_dir));
+    DeleteChildren(static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir)));
     DeleteChildren(db_dir);
   }
 
@@ -1955,15 +1955,15 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
 
     // 2. find the filetype
     uint64_t number;
-    FileType type;
-    bool ok = ParseFileName(dst, &number, &type);
+    rocksdb_rs::types::FileType type;
+    bool ok = rocksdb_rs::filename::ParseFileName(dst, &number, &type);
     if (!ok) {
       return IOStatus::Corruption("Backup corrupted: Fail to parse filename " +
                                   dst);
     }
     // 3. Construct the final path
-    // kWalFile lives in wal_dir and all the rest live in db_dir
-    if (type == kWalFile) {
+    // FileType::kWalFile lives in wal_dir and all the rest live in db_dir
+    if (type == rocksdb_rs::types::FileType::kWalFile) {
       dst = wal_dir + "/" + dst;
       if (options_.sync && !wal_dir_for_fsync) {
         io_s = db_fs_->NewDirectory(wal_dir, io_options_, &wal_dir_for_fsync,
@@ -1985,7 +1985,7 @@ IOStatus BackupEngineImpl::RestoreDBFromBackup(
     // For atomicity, initially restore CURRENT file to a temporary name.
     // This is useful even without options_.sync e.g. in case the restore
     // process is interrupted.
-    if (type == kCurrentFile) {
+    if (type == rocksdb_rs::types::FileType::kCurrentFile) {
       final_current_file = dst;
       dst = temporary_current_file = dst + ".tmp";
     }
@@ -2191,7 +2191,7 @@ IOStatus BackupEngineImpl::CopyOrCreateFile(
   Slice data;
   do {
     if (stop_backup_.load(std::memory_order_acquire)) {
-      return status_to_io_status(Status_Incomplete("Backup stopped"));
+      return status_to_io_status(rocksdb_rs::status::Status_Incomplete("Backup stopped"));
     }
     if (!src.empty()) {
       size_t buffer_to_read =
@@ -2270,7 +2270,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
     std::deque<BackupWorkItemPair>* excludable_items, BackupID backup_id,
     bool shared, const std::string& src_dir, const std::string& fname,
     const EnvOptions& src_env_options, RateLimiter* rate_limiter,
-    FileType file_type, uint64_t size_bytes, Statistics* stats,
+    rocksdb_rs::types::FileType file_type, uint64_t size_bytes, Statistics* stats,
     uint64_t size_limit, bool shared_checksum,
     std::function<void()> progress_callback, const std::string& contents,
     const std::string& src_checksum_func_name,
@@ -2299,7 +2299,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
   if (kDbFileChecksumFuncName == src_checksum_func_name) {
     if (src_checksum_str == kUnknownFileChecksum) {
       return status_to_io_status(
-          Status_Aborted("Unknown checksum value for " + fname));
+          rocksdb_rs::status::Status_Aborted("Unknown checksum value for " + fname));
     }
     checksum_hex = ChecksumStrToHex(src_checksum_str);
   }
@@ -2307,7 +2307,7 @@ IOStatus BackupEngineImpl::AddBackupFileWorkItem(
   // Step 1: Prepare the relative path to destination
   if (shared && shared_checksum) {
     if (GetNamingNoFlags() != BackupEngineOptions::kLegacyCrc32cAndFileSize &&
-        file_type != kBlobFile) {
+        file_type != rocksdb_rs::types::FileType::kBlobFile) {
       // Prepare db_session_id to add to the file name
       // Ignore the returned status
       // In the failed cases, db_id and db_session_id will be empty
@@ -2509,7 +2509,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
     const EnvOptions& src_env_options, uint64_t size_limit,
     std::string* checksum_hex, const Temperature src_temperature) const {
   if (checksum_hex == nullptr) {
-    return status_to_io_status(Status_Aborted("Checksum pointer is null"));
+    return status_to_io_status(rocksdb_rs::status::Status_Aborted("Checksum pointer is null"));
   }
   uint32_t checksum_value = 0;
   if (size_limit == 0) {
@@ -2539,7 +2539,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
 
   do {
     if (stop_backup_.load(std::memory_order_acquire)) {
-      return status_to_io_status(Status_Incomplete("Backup stopped"));
+      return status_to_io_status(rocksdb_rs::status::Status_Incomplete("Backup stopped"));
     }
     size_t buffer_to_read =
         (buf_size < size_limit) ? buf_size : static_cast<size_t>(size_limit);
@@ -2558,7 +2558,7 @@ IOStatus BackupEngineImpl::ReadFileAndComputeChecksum(
   return io_s;
 }
 
-Status BackupEngineImpl::GetFileDbIdentities(
+rocksdb_rs::status::Status BackupEngineImpl::GetFileDbIdentities(
     Env* src_env, const EnvOptions& src_env_options,
     const std::string& file_path, Temperature file_temp,
     RateLimiter* rate_limiter, std::string* db_id, std::string* db_session_id) {
@@ -2575,7 +2575,7 @@ Status BackupEngineImpl::GetFileDbIdentities(
 
   const TableProperties* table_properties = nullptr;
   std::shared_ptr<const TableProperties> tp;
-  Status s = sst_reader.getStatus();
+  rocksdb_rs::status::Status s = sst_reader.getStatus();
 
   if (s.ok()) {
     // Try to get table properties from the table reader of sst_reader
@@ -2606,14 +2606,14 @@ Status BackupEngineImpl::GetFileDbIdentities(
     if (db_session_id != nullptr) {
       db_session_id->assign(table_properties->db_session_id);
       if (db_session_id->empty()) {
-        s = Status_NotFound("DB session identity not found in " + file_path);
+        s = rocksdb_rs::status::Status_NotFound("DB session identity not found in " + file_path);
         ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString()->c_str());
         return s;
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
-    s = Status_Corruption("Table properties missing in " + file_path);
+    s = rocksdb_rs::status::Status_Corruption("Table properties missing in " + file_path);
     ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString()->c_str());
     return s;
   }
@@ -2642,9 +2642,9 @@ void BackupEngineImpl::DeleteChildren(const std::string& dir,
 
   for (const auto& f : children) {
     uint64_t number;
-    FileType type;
-    bool ok = ParseFileName(f, &number, &type);
-    if (ok && (file_type_filter & (1 << type))) {
+    rocksdb_rs::types::FileType type;
+    bool ok = rocksdb_rs::filename::ParseFileName(f, &number, &type);
+    if (ok && (file_type_filter & (1 << static_cast<int>(type)))) {
       // don't delete this file
       continue;
     }

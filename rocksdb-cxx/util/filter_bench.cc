@@ -148,7 +148,7 @@ using rocksdb::BloomLikeFilterPolicy;
 using rocksdb::BuiltinFilterBitsBuilder;
 using rocksdb::CachableEntry;
 using rocksdb::Cache;
-using rocksdb::CacheEntryRole;
+using rocksdb_rs::cache::CacheEntryRole;
 using rocksdb::CacheEntryRoleOptions;
 using rocksdb::EncodeFixed32;
 using rocksdb::Env;
@@ -166,7 +166,7 @@ using rocksdb::PlainTableBloomV1;
 using rocksdb::Random32;
 using rocksdb::Slice;
 using rocksdb::static_cast_with_check;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::StderrLogger;
 using rocksdb::mock::MockBlockBasedTableTester;
 
@@ -226,7 +226,7 @@ struct FilterInfo {
   uint32_t filter_id_ = 0;
   std::unique_ptr<const char[]> owner_;
   Slice filter_;
-  Status filter_construction_status = rocksdb::Status_OK();
+  rocksdb_rs::status::Status filter_construction_status = rocksdb_rs::status::Status_OK();
   uint32_t keys_added_ = 0;
   std::unique_ptr<FilterBitsReader> reader_;
   std::unique_ptr<FullFilterBlockReader> full_block_reader_;

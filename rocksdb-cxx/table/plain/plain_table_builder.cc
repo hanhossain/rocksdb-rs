@@ -71,7 +71,7 @@ PlainTableBuilder::PlainTableBuilder(
       file_(file),
       bloom_bits_per_key_(bloom_bits_per_key),
       huge_page_tlb_size_(huge_page_tlb_size),
-      status_(Status_new()),
+      status_(rocksdb_rs::status::Status_new()),
       encoder_(encoding_type, user_key_len, moptions.prefix_extractor.get(),
                index_sparseness),
       store_index_in_file_(store_index_in_file),
@@ -141,7 +141,7 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
     return;
   }
   if (internal_key.type == kTypeRangeDeletion) {
-    status_ = Status_NotSupported("Range deletion unsupported");
+    status_ = rocksdb_rs::status::Status_NotSupported("Range deletion unsupported");
     return;
   }
 
@@ -200,7 +200,7 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
   status_ = io_status_;
 }
 
-Status PlainTableBuilder::Finish() {
+rocksdb_rs::status::Status PlainTableBuilder::Finish() {
   assert(!closed_);
   closed_ = true;
 
@@ -274,7 +274,7 @@ Status PlainTableBuilder::Finish() {
   IOStatus s = WriteBlock(property_block_builder.Finish(), file_, &offset_,
                           &property_block_handle);
   if (!s.ok()) {
-    return static_cast<Status>(s);
+    return static_cast<rocksdb_rs::status::Status>(s);
   }
   meta_index_builer.Add(kPropertiesBlockName, property_block_handle);
 

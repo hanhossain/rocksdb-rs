@@ -62,7 +62,7 @@ class BlobDBTest : public testing::Test {
     mock_env_.reset(new CompositeEnvWrapper(Env::Default(), mock_clock_));
     fault_injection_env_.reset(new FaultInjectionTestEnv(Env::Default()));
 
-    Status s = DestroyBlobDB(dbname_, Options(), BlobDBOptions());
+    rocksdb_rs::status::Status s = DestroyBlobDB(dbname_, Options(), BlobDBOptions());
     assert(s.ok());
   }
 
@@ -71,7 +71,7 @@ class BlobDBTest : public testing::Test {
     Destroy();
   }
 
-  Status TryOpen(BlobDBOptions bdb_options = BlobDBOptions(),
+  rocksdb_rs::status::Status TryOpen(BlobDBOptions bdb_options = BlobDBOptions(),
                  Options options = Options()) {
     options.create_if_missing = true;
     if (options.env == mock_env_.get()) {
@@ -122,9 +122,9 @@ class BlobDBTest : public testing::Test {
     return reinterpret_cast<BlobDBImpl *>(blob_db_);
   }
 
-  Status Put(const Slice &key, const Slice &value,
+  rocksdb_rs::status::Status Put(const Slice &key, const Slice &value,
              std::map<std::string, std::string> *data = nullptr) {
-    Status s = blob_db_->Put(WriteOptions(), key, value);
+    rocksdb_rs::status::Status s = blob_db_->Put(WriteOptions(), key, value);
     if (data != nullptr) {
       (*data)[key.ToString()] = value.ToString();
     }
@@ -139,16 +139,16 @@ class BlobDBTest : public testing::Test {
     }
   }
 
-  Status PutWithTTL(const Slice &key, const Slice &value, uint64_t ttl,
+  rocksdb_rs::status::Status PutWithTTL(const Slice &key, const Slice &value, uint64_t ttl,
                     std::map<std::string, std::string> *data = nullptr) {
-    Status s = blob_db_->PutWithTTL(WriteOptions(), key, value, ttl);
+    rocksdb_rs::status::Status s = blob_db_->PutWithTTL(WriteOptions(), key, value, ttl);
     if (data != nullptr) {
       (*data)[key.ToString()] = value.ToString();
     }
     return s;
   }
 
-  Status PutUntil(const Slice &key, const Slice &value, uint64_t expiration) {
+  rocksdb_rs::status::Status PutUntil(const Slice &key, const Slice &value, uint64_t expiration) {
     return blob_db_->PutUntil(WriteOptions(), key, value, expiration);
   }
 
@@ -436,8 +436,8 @@ TEST_F(BlobDBTest, GetIOError) {
   ColumnFamilyHandle *column_family = blob_db_->DefaultColumnFamily();
   PinnableSlice value;
   ASSERT_OK(Put("foo", "bar"));
-  fault_injection_env_->SetFilesystemActive(false, Status_IOError());
-  Status s = blob_db_->Get(ReadOptions(), column_family, "foo", &value);
+  fault_injection_env_->SetFilesystemActive(false, rocksdb_rs::status::Status_IOError());
+  rocksdb_rs::status::Status s = blob_db_->Get(ReadOptions(), column_family, "foo", &value);
   ASSERT_TRUE(s.IsIOError());
   // Reactivate file system to allow test to close DB.
   fault_injection_env_->SetFilesystemActive(true);
@@ -450,9 +450,9 @@ TEST_F(BlobDBTest, PutIOError) {
   bdb_options.min_blob_size = 0;  // Make sure value write to blob file
   bdb_options.disable_background_tasks = true;
   Open(bdb_options, options);
-  fault_injection_env_->SetFilesystemActive(false, Status_IOError());
+  fault_injection_env_->SetFilesystemActive(false, rocksdb_rs::status::Status_IOError());
   ASSERT_TRUE(Put("foo", "v1").IsIOError());
-  fault_injection_env_->SetFilesystemActive(true, Status_IOError());
+  fault_injection_env_->SetFilesystemActive(true, rocksdb_rs::status::Status_IOError());
   ASSERT_OK(Put("bar", "v1"));
 }
 
@@ -532,7 +532,7 @@ TEST_F(BlobDBTest, Compression) {
   BlobDBOptions bdb_options;
   bdb_options.min_blob_size = 0;
   bdb_options.disable_background_tasks = true;
-  bdb_options.compression = CompressionType::kSnappyCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   Open(bdb_options);
   std::map<std::string, std::string> data;
   for (size_t i = 0; i < 100; i++) {
@@ -554,14 +554,14 @@ TEST_F(BlobDBTest, DecompressAfterReopen) {
   BlobDBOptions bdb_options;
   bdb_options.min_blob_size = 0;
   bdb_options.disable_background_tasks = true;
-  bdb_options.compression = CompressionType::kSnappyCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   Open(bdb_options);
   std::map<std::string, std::string> data;
   for (size_t i = 0; i < 100; i++) {
     PutRandom("put-key" + std::to_string(i), &rnd, &data);
   }
   VerifyDB(data);
-  bdb_options.compression = CompressionType::kNoCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Reopen(bdb_options);
   VerifyDB(data);
 }
@@ -585,7 +585,7 @@ TEST_F(BlobDBTest, EnableDisableCompressionGC) {
   ASSERT_EQ(kSnappyCompression, blob_files[0]->GetCompressionType());
 
   // disable compression
-  bdb_options.compression = CompressionType::kNoCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Reopen(bdb_options);
 
   // Add more data with new compression type
@@ -1057,7 +1057,7 @@ TEST_F(BlobDBTest, MigrateFromPlainRocksDB) {
   std::string value;
   for (size_t i = 0; i < kNumKey; i++) {
     std::string key = "key" + std::to_string(i);
-    Status s = db->Get(ReadOptions(), key, &value);
+    rocksdb_rs::status::Status s = db->Get(ReadOptions(), key, &value);
     if (data.count(key) == 0) {
       ASSERT_TRUE(s.IsNotFound());
     } else if (is_blob[i]) {
@@ -1089,7 +1089,7 @@ TEST_F(BlobDBTest, OutOfSpace) {
 
   // Putting another blob should fail as ading it would exceed the max_db_size
   // limit.
-  Status s = blob_db_->PutWithTTL(WriteOptions(), "key2", value, 60);
+  rocksdb_rs::status::Status s = blob_db_->PutWithTTL(WriteOptions(), "key2", value, 60);
   ASSERT_TRUE(s.IsIOError());
   ASSERT_TRUE(s.IsNoSpace());
 }
@@ -1251,7 +1251,7 @@ TEST_F(BlobDBTest, FIFOEviction_TriggerOnSSTSizeChange) {
   options.env = mock_env_.get();
   auto statistics = CreateDBStatistics();
   options.statistics = statistics;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Open(bdb_options, options);
 
   SyncPoint::GetInstance()->LoadDependency(
@@ -1385,7 +1385,7 @@ TEST_F(BlobDBTest, UserCompactionFilter) {
   bdb_options.blob_file_size = kMaxValueSize * 10;
   bdb_options.disable_background_tasks = true;
   if (Snappy_Supported()) {
-    bdb_options.compression = CompressionType::kSnappyCompression;
+    bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   }
   // case_num == 0: Test user defined compaction filter
   // case_num == 1: Test user defined compaction filter factory
@@ -1466,7 +1466,7 @@ TEST_F(BlobDBTest, UserCompactionFilter_BlobIOError) {
   bdb_options.min_blob_size = 0;
   bdb_options.blob_file_size = kValueSize * 10;
   bdb_options.disable_background_tasks = true;
-  bdb_options.compression = CompressionType::kNoCompression;
+  bdb_options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   std::vector<std::string> io_failure_cases = {
       "BlobDBImpl::CreateBlobFileAndWriter",
@@ -1501,7 +1501,7 @@ TEST_F(BlobDBTest, UserCompactionFilter_BlobIOError) {
 
     SyncPoint::GetInstance()->SetCallBack(
         io_failure_cases[case_num], [&](void * /*arg*/) {
-          fault_injection_env_->SetFilesystemActive(false, Status_IOError());
+          fault_injection_env_->SetFilesystemActive(false, rocksdb_rs::status::Status_IOError());
         });
     SyncPoint::GetInstance()->EnableProcessing();
     auto s = blob_db_->CompactRange(CompactRangeOptions(), nullptr, nullptr);
@@ -1946,7 +1946,7 @@ TEST_F(BlobDBTest, GarbageCollectionFailure) {
   // blob file.
   std::string blob_index;
   BlobIndex::EncodeBlob(&blob_index, /* file_number */ 1000, /* offset */ 1234,
-                        /* size */ 5678, CompressionType::kNoCompression);
+                        /* size */ 5678, rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
   WriteBatch batch;
   ASSERT_OK(WriteBatchInternal::PutBlobIndex(
@@ -2219,7 +2219,7 @@ TEST_F(BlobDBTest, MaintainBlobFileToSstMapping) {
     info.input_file_infos.emplace_back(CompactionFileInfo{1, 7, 2});
     info.input_file_infos.emplace_back(CompactionFileInfo{2, 22, 5});
     info.output_file_infos.emplace_back(CompactionFileInfo{2, 25, 3});
-    info.status = Status_Corruption();
+    info.status = rocksdb_rs::status::Status_Corruption();
 
     blob_db_impl()->TEST_ProcessCompactionJobInfo(info);
 
@@ -2406,11 +2406,11 @@ TEST_F(BlobDBTest, SyncBlobFileBeforeCloseIOError) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "BlobLogWriter::Sync", [this](void * /* arg */) {
-        fault_injection_env_->SetFilesystemActive(false, Status_IOError());
+        fault_injection_env_->SetFilesystemActive(false, rocksdb_rs::status::Status_IOError());
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  const Status s = blob_db_impl()->TEST_CloseBlobFile(blob_files[0]);
+  const rocksdb_rs::status::Status s = blob_db_impl()->TEST_CloseBlobFile(blob_files[0]);
 
   fault_injection_env_->SetFilesystemActive(true);
   SyncPoint::GetInstance()->DisableProcessing();

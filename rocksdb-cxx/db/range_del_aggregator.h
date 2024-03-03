@@ -295,7 +295,7 @@ class RangeDelAggregator {
   bool ShouldDelete(const Slice& ikey, RangeDelPositioningMode mode) {
     ParsedInternalKey parsed;
 
-    Status pik_status =
+    rocksdb_rs::status::Status pik_status =
         ParseInternalKey(ikey, &parsed, false /* log_err_key */);  // TODO
     assert(pik_status.ok());
     if (!pik_status.ok()) {

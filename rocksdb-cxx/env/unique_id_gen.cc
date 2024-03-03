@@ -131,7 +131,7 @@ void GenerateRawUniqueIdImpl(uint64_t* a, uint64_t* b,
   e.Populate(opts);
   uint64_t upper;
   uint64_t lower;
-  hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(&e), sizeof(e)), upper, lower);
+  rocksdb_rs::hash::hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(&e), sizeof(e)), upper, lower);
   *a = upper;
   *b = lower;
 }
@@ -213,7 +213,7 @@ void UnpredictableUniqueIdGen::GenerateNextWithEntropy(uint64_t* upper,
   uint64_t b = extra_entropy;
   // Invoking the hash function several times avoids copying all the inputs
   // to a contiguous, non-atomic buffer.
-  bijective_hash2x64(a, b, a, b);  // Based on XXH128
+  rocksdb_rs::hash::bijective_hash2x64(a, b, a, b);  // Based on XXH128
 
   // In hashing the rest of the pool with that, we don't need to worry about
   // races, but use atomic operations for sanitizer-friendliness.
@@ -221,7 +221,7 @@ void UnpredictableUniqueIdGen::GenerateNextWithEntropy(uint64_t* upper,
     assert(i + 1 < pool_.size());
     a ^= pool_[i].load(std::memory_order_relaxed);
     b ^= pool_[i + 1].load(std::memory_order_relaxed);
-    bijective_hash2x64(a, b, a, b);  // Based on XXH128
+    rocksdb_rs::hash::bijective_hash2x64(a, b, a, b);  // Based on XXH128
   }
 
   // Return result

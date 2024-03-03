@@ -52,7 +52,7 @@ class MockTableFactory : public TableFactory {
   static const char* kClassName() { return "MockTable"; }
   const char* Name() const override { return kClassName(); }
   using TableFactory::NewTableReader;
-  Status NewTableReader(
+  rocksdb_rs::status::Status NewTableReader(
       const ReadOptions& ro, const TableReaderOptions& table_reader_options,
       std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
       std::unique_ptr<TableReader>* table_reader,
@@ -64,7 +64,7 @@ class MockTableFactory : public TableFactory {
   // This function will directly create mock table instead of going through
   // MockTableBuilder. file_contents has to have a format of <internal_key,
   // value>. Those key-value pairs will then be inserted into the mock table.
-  Status CreateMockTable(Env* env, const std::string& fname,
+  rocksdb_rs::status::Status CreateMockTable(Env* env, const std::string& fname,
                          KVVector file_contents);
 
   virtual std::string GetPrintableOptions() const override {
@@ -80,8 +80,8 @@ class MockTableFactory : public TableFactory {
   void AssertLatestFiles(const std::vector<KVVector>& files_contents);
 
  private:
-  Status GetAndWriteNextID(WritableFileWriter* file, uint32_t* id) const;
-  Status GetIDFromFile(RandomAccessFileReader* file, uint32_t* id) const;
+  rocksdb_rs::status::Status GetAndWriteNextID(WritableFileWriter* file, uint32_t* id) const;
+  rocksdb_rs::status::Status GetIDFromFile(RandomAccessFileReader* file, uint32_t* id) const;
 
   mutable MockTableFileSystem file_system_;
   mutable std::atomic<uint32_t> next_id_;

@@ -25,10 +25,13 @@
 #include "table/unique_id_impl.h"
 #include "trace_replay/block_cache_tracer.h"
 
+namespace rocksdb::status {
+    struct Status;
+}
+
 namespace rocksdb {
 
 class Slice;
-struct Status;
 
 struct TableReaderOptions {
   // @param skip_filters Disables loading/accessing the filter block
@@ -42,7 +45,7 @@ struct TableReaderOptions {
       int _level = -1, BlockCacheTracer* const _block_cache_tracer = nullptr,
       size_t _max_file_size_for_l0_meta_pin = 0,
       const std::string& _cur_db_session_id = "", uint64_t _cur_file_num = 0,
-      UniqueId64x2 _unique_id = {}, SequenceNumber _largest_seqno = 0,
+      rocksdb_rs::unique_id::UniqueId64x2 _unique_id = {}, SequenceNumber _largest_seqno = 0,
       uint64_t _tail_size = 0, bool _user_defined_timestamps_persisted = true)
       : ioptions(_ioptions),
         prefix_extractor(_prefix_extractor),
@@ -89,7 +92,7 @@ struct TableReaderOptions {
   uint64_t cur_file_num;
 
   // Known unique_id or {}, UniqueId64x2_null() means unknown
-  UniqueId64x2 unique_id;
+  rocksdb_rs::unique_id::UniqueId64x2 unique_id;
 
   uint8_t block_protection_bytes_per_key;
 
@@ -104,7 +107,7 @@ struct TableBuilderOptions {
       const ImmutableOptions& _ioptions, const MutableCFOptions& _moptions,
       const InternalKeyComparator& _internal_comparator,
       const IntTblPropCollectorFactories* _int_tbl_prop_collector_factories,
-      CompressionType _compression_type,
+      rocksdb_rs::compression_type::CompressionType _compression_type,
       const CompressionOptions& _compression_opts, uint32_t _column_family_id,
       const std::string& _column_family_name, int _level,
       bool _is_bottommost = false,
@@ -135,7 +138,7 @@ struct TableBuilderOptions {
   const MutableCFOptions& moptions;
   const InternalKeyComparator& internal_comparator;
   const IntTblPropCollectorFactories* int_tbl_prop_collector_factories;
-  const CompressionType compression_type;
+  const rocksdb_rs::compression_type::CompressionType compression_type;
   const CompressionOptions& compression_opts;
   const uint32_t column_family_id;
   const std::string& column_family_name;
@@ -175,14 +178,14 @@ class TableBuilder {
   virtual void Add(const Slice& key, const Slice& value) = 0;
 
   // Return non-ok iff some error has been detected.
-  virtual Status status() const = 0;
+  virtual rocksdb_rs::status::Status status() const = 0;
 
   // Return non-ok iff some error happens during IO.
   virtual IOStatus io_status() const = 0;
 
   // Finish building the table.
   // REQUIRES: Finish(), Abandon() have not been called
-  virtual Status Finish() = 0;
+  virtual rocksdb_rs::status::Status Finish() = 0;
 
   // Indicate that the contents of this builder should be abandoned.
   // If the caller is not going to call Finish(), it must call Abandon()

@@ -37,7 +37,7 @@ PersistentCache::StatsType VolatileCacheTier::Stats() {
   return out;
 }
 
-Status VolatileCacheTier::Insert(const Slice& page_key, const char* data,
+rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key, const char* data,
                                  const size_t size) {
   // precondition
   assert(data);
@@ -53,7 +53,7 @@ Status VolatileCacheTier::Insert(const Slice& page_key, const char* data,
       // latency
       assert(size_ >= size);
       size_ -= size;
-      return Status_TryAgain("Unable to evict any data");
+      return rocksdb_rs::status::Status_TryAgain("Unable to evict any data");
     }
   }
 
@@ -70,15 +70,15 @@ Status VolatileCacheTier::Insert(const Slice& page_key, const char* data,
     assert(size_ >= size);
     size_ -= size;
     // failed to insert to cache, block already in cache
-    return Status_TryAgain("key already exists in volatile cache");
+    return rocksdb_rs::status::Status_TryAgain("key already exists in volatile cache");
   }
 
   cache_data.release();
   stats_.cache_inserts_++;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status VolatileCacheTier::Lookup(const Slice& page_key,
+rocksdb_rs::status::Status VolatileCacheTier::Lookup(const Slice& page_key,
                                  std::unique_ptr<char[]>* result,
                                  size_t* size) {
   CacheData key(std::move(page_key.ToString()));
@@ -93,7 +93,7 @@ Status VolatileCacheTier::Lookup(const Slice& page_key,
     kv->refs_--;
     // update stats
     stats_.cache_hits_++;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   stats_.cache_misses_++;
@@ -102,7 +102,7 @@ Status VolatileCacheTier::Lookup(const Slice& page_key,
     return next_tier()->Lookup(page_key, result, size);
   }
 
-  return Status_NotFound("key not found in volatile cache");
+  return rocksdb_rs::status::Status_NotFound("key not found in volatile cache");
 }
 
 bool VolatileCacheTier::Erase(const Slice& /*key*/) {
@@ -122,7 +122,7 @@ bool VolatileCacheTier::Evict() {
   // push the evicted object to the next level
   if (next_tier()) {
     // TODO: Should the insert error be ignored?
-    Status s = next_tier()->Insert(Slice(edata->key), edata->value.c_str(),
+    rocksdb_rs::status::Status s = next_tier()->Insert(Slice(edata->key), edata->value.c_str(),
                                    edata->value.size());
   }
 

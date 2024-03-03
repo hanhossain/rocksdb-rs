@@ -107,8 +107,8 @@ class MockFileSystem : public FileSystem {
     return IOStatus::NotSupported("IsDirectory");
   }
 
-  Status CorruptBuffer(const std::string& fname);
-  Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status CorruptBuffer(const std::string& fname);
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
 
  private:
   bool RenameFileInternal(const std::string& src, const std::string& dest);
@@ -135,7 +135,7 @@ class MockEnv : public CompositeEnvWrapper {
   static const char* kClassName() { return "MockEnv"; }
   const char* Name() const override { return kClassName(); }
 
-  Status CorruptBuffer(const std::string& fname);
+  rocksdb_rs::status::Status CorruptBuffer(const std::string& fname);
 
  private:
   MockEnv(Env* env, const std::shared_ptr<FileSystem>& fs,

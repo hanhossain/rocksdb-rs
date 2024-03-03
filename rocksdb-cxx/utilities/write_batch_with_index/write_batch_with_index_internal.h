@@ -51,8 +51,8 @@ class BaseDeltaIterator : public Iterator {
   void Prev() override;
   Slice key() const override;
   Slice value() const override;
-  Status status() const override;
-  void Invalidate(Status s);
+  rocksdb_rs::status::Status status() const override;
+  void Invalidate(rocksdb_rs::status::Status s);
 
  private:
   void AssertInvariants();
@@ -67,7 +67,7 @@ class BaseDeltaIterator : public Iterator {
   bool forward_;
   bool current_at_base_;
   bool equal_keys_;
-  mutable Status status_;
+  mutable rocksdb_rs::status::Status status_;
   std::unique_ptr<Iterator> base_iterator_;
   std::unique_ptr<WBWIIteratorImpl> delta_iterator_;
   const Comparator* comparator_;  // not owned
@@ -144,7 +144,7 @@ class ReadableWriteBatch : public WriteBatch {
                    default_cf_ts_sz) {}
   // Retrieve some information from a write entry in the write batch, given
   // the start offset of the write entry.
-  Status GetEntryFromDataOffset(size_t data_offset, WriteType* type, Slice* Key,
+  rocksdb_rs::status::Status GetEntryFromDataOffset(size_t data_offset, WriteType* type, Slice* Key,
                                 Slice* value, Slice* blob, Slice* xid) const;
 };
 
@@ -253,10 +253,10 @@ class WBWIIteratorImpl : public WBWIIterator {
 
   WriteEntry Entry() const override;
 
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     // this is in-memory data structure, so the only way status can be non-ok is
     // through memory corruption
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const WriteBatchIndexEntry* GetRawEntry() const {
@@ -316,18 +316,18 @@ class WriteBatchWithIndexInternal {
   // Else, return kError on error with error Status stored in *s.
   WBWIIteratorImpl::Result GetFromBatch(WriteBatchWithIndex* batch,
                                         const Slice& key, std::string* value,
-                                        Status* s) {
+                                        rocksdb_rs::status::Status* s) {
     return GetFromBatch(batch, key, &merge_context_, value, s);
   }
   WBWIIteratorImpl::Result GetFromBatch(WriteBatchWithIndex* batch,
                                         const Slice& key,
                                         MergeContext* merge_context,
-                                        std::string* value, Status* s);
-  Status MergeKey(const Slice& key, const Slice* value,
+                                        std::string* value, rocksdb_rs::status::Status* s);
+  rocksdb_rs::status::Status MergeKey(const Slice& key, const Slice* value,
                   std::string* result) const {
     return MergeKey(key, value, merge_context_, result);
   }
-  Status MergeKey(const Slice& key, const Slice* value,
+  rocksdb_rs::status::Status MergeKey(const Slice& key, const Slice* value,
                   const MergeContext& context, std::string* result) const;
   size_t GetNumOperands() const { return merge_context_.GetNumOperands(); }
   MergeContext* GetMergeContext() { return &merge_context_; }

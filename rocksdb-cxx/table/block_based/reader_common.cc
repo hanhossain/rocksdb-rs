@@ -23,7 +23,7 @@ void ForceReleaseCachedEntry(void* arg, void* h) {
 }
 
 // WART: this is specific to block-based table
-Status VerifyBlockChecksum(ChecksumType type, const char* data,
+rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type, const char* data,
                            size_t block_size, const std::string& file_name,
                            uint64_t offset) {
   PERF_TIMER_GUARD(block_checksum_time);
@@ -35,14 +35,14 @@ Status VerifyBlockChecksum(ChecksumType type, const char* data,
 
   uint32_t computed = ComputeBuiltinChecksum(type, data, len);
   if (stored == computed) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // Unmask for people who might look for reference crc value
     if (type == kCRC32c) {
       stored = crc32c::Unmask(stored);
       computed = crc32c::Unmask(computed);
     }
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "block checksum mismatch: stored = " + std::to_string(stored) +
         ", computed = " + std::to_string(computed) +
         ", type = " + std::to_string(type) + "  in " + file_name + " offset " +

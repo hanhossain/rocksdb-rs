@@ -245,18 +245,18 @@ class ValidatedConfigurable : public SimpleConfigurable {
     }
   }
 
-  Status PrepareOptions(const ConfigOptions& config_options) override {
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override {
     if (++prepared <= 0) {
-      return Status_InvalidArgument("Cannot prepare option");
+      return rocksdb_rs::status::Status_InvalidArgument("Cannot prepare option");
     } else {
       return SimpleConfigurable::PrepareOptions(config_options);
     }
   }
 
-  Status ValidateOptions(const DBOptions& db_opts,
+  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                          const ColumnFamilyOptions& cf_opts) const override {
     if (!validated) {
-      return Status_InvalidArgument("Not Validated");
+      return rocksdb_rs::status::Status_InvalidArgument("Not Validated");
     } else {
       return SimpleConfigurable::ValidateOptions(db_opts, cf_opts);
     }
@@ -320,11 +320,11 @@ TEST_F(ConfigurableTest, CopyObjectTest) {
   class CopyConfigurable : public Configurable {
    public:
     CopyConfigurable() : prepared_(0), validated_(0) {}
-    Status PrepareOptions(const ConfigOptions& options) override {
+    rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override {
       prepared_++;
       return Configurable::PrepareOptions(options);
     }
-    Status ValidateOptions(const DBOptions& db_opts,
+    rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                            const ColumnFamilyOptions& cf_opts) const override {
       validated_++;
       return Configurable::ValidateOptions(db_opts, cf_opts);
@@ -760,7 +760,7 @@ void ConfigurableParamTest::TestConfigureOptions(
   bool found_one = false;
   for (auto name : names) {
     std::string value;
-    Status s = base->GetOption(config_options, name, &value);
+    rocksdb_rs::status::Status s = base->GetOption(config_options, name, &value);
     if (s.ok()) {
       s = copy->ConfigureOption(config_options, name, value);
       if (s.ok() || s.IsNotSupported()) {

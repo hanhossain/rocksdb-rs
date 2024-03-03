@@ -108,7 +108,7 @@ class Aggregator {
 // It's currently not thread safe to run concurrently with the aggregation
 // merge operator. It is recommended that all the aggregation function
 // is added before calling CreateAggMergeOperator().
-Status AddAggregator(const std::string& function_name,
+rocksdb_rs::status::Status AddAggregator(const std::string& function_name,
                      std::unique_ptr<Aggregator>&& agg);
 
 // Get the singleton instance of merge operator for aggregation.
@@ -119,7 +119,7 @@ std::shared_ptr<MergeOperator> GetAggMergeOperator();
 
 // Encode aggregation function and payload that can be consumed by aggregation
 // merge operator.
-Status EncodeAggFuncAndPayload(const Slice& function_name, const Slice& payload,
+rocksdb_rs::status::Status EncodeAggFuncAndPayload(const Slice& function_name, const Slice& payload,
                                std::string& output);
 // Helper function to extract aggregation function name and payload.
 // Return false if it fails to decode.

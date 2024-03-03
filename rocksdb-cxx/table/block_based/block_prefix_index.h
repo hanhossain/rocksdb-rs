@@ -38,7 +38,7 @@ class BlockPrefixIndex {
   // underlying prefix extractor
   // @params prefixes: a sequence of prefixes.
   // @params prefix_meta: contains the "metadata" to of the prefixes.
-  static Status Create(const SliceTransform* hash_key_extractor,
+  static rocksdb_rs::status::Status Create(const SliceTransform* hash_key_extractor,
                        const Slice& prefixes, const Slice& prefix_meta,
                        BlockPrefixIndex** prefix_index);
 

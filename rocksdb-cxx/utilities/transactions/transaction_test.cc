@@ -194,7 +194,7 @@ TEST_P(TransactionTest, SwitchMemtableDuringPrepareAndCommit_WC) {
 
   delete db;
   db = nullptr;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (use_stackable_db_ == false) {
     s = TransactionDB::Open(options, txn_db_options, dbname, &db);
   } else {
@@ -222,7 +222,7 @@ TEST_P(TransactionTest, AssumeExclusiveTracked) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TransactionOptions txn_options;
   txn_options.lock_timeout = 1;
   const bool EXCLUSIVE = true;
@@ -330,7 +330,7 @@ TEST_P(TransactionTest, WaitingTxn) {
   ReadOptions read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   txn_options.lock_timeout = 1;
   s = db->Put(write_options, Slice("foo"), Slice("bar"));
@@ -423,7 +423,7 @@ TEST_P(TransactionTest, SharedLocks) {
   WriteOptions write_options;
   ReadOptions read_options;
   TransactionOptions txn_options;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   txn_options.lock_timeout = 1;
   s = db->Put(write_options, Slice("foo"), Slice("bar"));
@@ -927,7 +927,7 @@ TEST_P(TransactionTest, CommitTimeBatchFailTest) {
   TransactionOptions txn_options;
 
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
   ASSERT_TRUE(txn1);
@@ -939,7 +939,7 @@ TEST_P(TransactionTest, CommitTimeBatchFailTest) {
 
   // fails due to non-empty commit-time batch
   s = txn1->Commit();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   delete txn1;
 }
@@ -991,7 +991,7 @@ TEST_P(TransactionTest, SimpleTwoPhaseTransactionTest) {
     txn_options.use_only_the_last_commit_time_batch_for_recovery = cwb4recovery;
 
     std::string value;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     DBImpl* db_impl = static_cast_with_check<DBImpl>(db->GetRootDB());
 
@@ -1056,7 +1056,7 @@ TEST_P(TransactionTest, SimpleTwoPhaseTransactionTest) {
 
     // we already committed
     s = txn->Commit();
-    ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+    ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
     // no longer is prepared results
     db->GetAllPreparedTransactions(&prepared_trans);
@@ -1117,7 +1117,7 @@ TEST_P(TransactionTest, SimpleTwoPhaseTransactionTest) {
 }
 
 TEST_P(TransactionTest, TwoPhaseNameTest) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   WriteOptions write_options;
   TransactionOptions txn_options;
@@ -1129,15 +1129,15 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant prepare txn without name
   s = txn1->Prepare();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // name too short
   s = txn1->SetName("");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // name too long
   s = txn1->SetName(std::string(513, 'x'));
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // valid set name
   s = txn1->SetName("name1");
@@ -1145,11 +1145,11 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant have duplicate name
   s = txn2->SetName("name1");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // shouldn't be able to prepare
   s = txn2->Prepare();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // valid name set
   s = txn2->SetName("name2");
@@ -1157,7 +1157,7 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // cant reset name
   s = txn2->SetName("name3");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   ASSERT_EQ(txn1->GetName(), "name1");
   ASSERT_EQ(txn2->GetName(), "name2");
@@ -1167,7 +1167,7 @@ TEST_P(TransactionTest, TwoPhaseNameTest) {
 
   // can't rename after prepare
   s = txn1->SetName("name4");
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   ASSERT_OK(txn1->Rollback());
   ASSERT_OK(txn2->Rollback());
@@ -1182,7 +1182,7 @@ TEST_P(TransactionTest, TwoPhaseEmptyWriteTest) {
         continue;
       }
       ASSERT_OK(ReOpen());
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       std::string value;
 
       WriteOptions write_options;
@@ -1245,7 +1245,7 @@ TEST_P(TransactionTest, TwoPhaseEmptyWriteTest) {
 
 #if !defined(ROCKSDB_VALGRIND_RUN) || defined(ROCKSDB_FULL_VALGRIND_RUN)
 TEST_P(TransactionStressTest, TwoPhaseExpirationTest) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   WriteOptions write_options;
   TransactionOptions txn_options;
@@ -1270,7 +1270,7 @@ TEST_P(TransactionStressTest, TwoPhaseExpirationTest) {
   ASSERT_OK(s);
 
   s = txn2->Prepare();
-  ASSERT_TRUE(s.eq(Status_Expired()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_Expired()));
 
   delete txn1;
   delete txn2;
@@ -1283,7 +1283,7 @@ TEST_P(TransactionTest, TwoPhaseRollbackTest) {
   TransactionOptions txn_options;
 
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   DBImpl* db_impl = static_cast_with_check<DBImpl>(db->GetRootDB());
   Transaction* txn = db->BeginTransaction(write_options, txn_options);
@@ -1336,11 +1336,11 @@ TEST_P(TransactionTest, TwoPhaseRollbackTest) {
 
   // make commit
   s = txn->Commit();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // try rollback again
   s = txn->Rollback();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   delete txn;
 }
@@ -1354,7 +1354,7 @@ TEST_P(TransactionTest, PersistentTwoPhaseTransactionTest) {
   TransactionOptions txn_options;
 
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   DBImpl* db_impl = static_cast_with_check<DBImpl>(db->GetRootDB());
 
@@ -1435,7 +1435,7 @@ TEST_P(TransactionTest, PersistentTwoPhaseTransactionTest) {
 
   // we already committed
   s = txn->Commit();
-  ASSERT_TRUE(s.eq(Status_InvalidArgument()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_InvalidArgument()));
 
   // no longer is prepared results
   prepared_trans.clear();
@@ -1553,7 +1553,7 @@ TEST_P(TransactionTest, DISABLED_TwoPhaseMultiThreadTest) {
 
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (uint32_t t = 0; t < NUM_TXN_THREADS; t++) {
     TransactionName name("xid_" + std::string(1, 'A' + static_cast<char>(t)));
     for (int i = 0; i < 10; i++) {
@@ -1574,7 +1574,7 @@ TEST_P(TransactionStressTest, TwoPhaseLongPrepareTest) {
   TransactionOptions txn_options;
 
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options, txn_options);
   s = txn->SetName("bob");
@@ -1616,7 +1616,7 @@ TEST_P(TransactionStressTest, TwoPhaseLongPrepareTest) {
 
   // verify data txn data
   s = db->Get(read_options, "foo", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar");
 
   // verify non txn data
@@ -1624,7 +1624,7 @@ TEST_P(TransactionStressTest, TwoPhaseLongPrepareTest) {
     std::string key(i, 'k');
     std::string val(1000, 'v');
     s = db->Get(read_options, key, &value);
-    ASSERT_TRUE(s.eq(Status_OK()));
+    ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
     ASSERT_EQ(value, val);
   }
 
@@ -1640,7 +1640,7 @@ TEST_P(TransactionTest, TwoPhaseSequenceTest) {
   TransactionOptions txn_options;
 
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options, txn_options);
   s = txn->SetName("xid");
@@ -1673,7 +1673,7 @@ TEST_P(TransactionTest, TwoPhaseSequenceTest) {
 
   // value is now available
   s = db->Get(read_options, "foo4", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar4");
 }
 #endif  // !defined(ROCKSDB_VALGRIND_RUN) || defined(ROCKSDB_FULL_VALGRIND_RUN)
@@ -1687,7 +1687,7 @@ TEST_P(TransactionTest, TwoPhaseDoubleRecoveryTest) {
   TransactionOptions txn_options;
 
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options, txn_options);
   s = txn->SetName("a");
@@ -1716,7 +1716,7 @@ TEST_P(TransactionTest, TwoPhaseDoubleRecoveryTest) {
   ASSERT_OK(s);
 
   s = db->Get(read_options, "foo", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar");
 
   delete txn;
@@ -1743,18 +1743,18 @@ TEST_P(TransactionTest, TwoPhaseDoubleRecoveryTest) {
 
   // value is now available
   s = db->Get(read_options, "foo", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar");
 
   s = db->Get(read_options, "foo2", &value);
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(value, "bar2");
 }
 
 TEST_P(TransactionTest, TwoPhaseLogRollingTest) {
   DBImpl* db_impl = static_cast_with_check<DBImpl>(db->GetRootDB());
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string v;
   ColumnFamilyHandle *cfa, *cfb;
 
@@ -1906,7 +1906,7 @@ TEST_P(TransactionTest, TwoPhaseLogRollingTest) {
 TEST_P(TransactionTest, TwoPhaseLogRollingTest2) {
   DBImpl* db_impl = static_cast_with_check<DBImpl>(db->GetRootDB());
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   ColumnFamilyHandle *cfa, *cfb;
 
   ColumnFamilyOptions cf_options;
@@ -2058,7 +2058,7 @@ TEST_P(TransactionTest, TwoPhaseOutOfOrderDelete) {
   TransactionOptions txn_options;
 
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn1 = db->BeginTransaction(wal_on, txn_options);
 
@@ -2109,7 +2109,7 @@ TEST_P(TransactionTest, FirstWriteTest) {
   // Test conflict checking against the very first write to a db.
   // The transaction's snapshot will have seq 1 and the following write
   // will have sequence 1.
-  Status s = db->Put(write_options, "A", "a");
+  rocksdb_rs::status::Status s = db->Put(write_options, "A", "a");
 
   Transaction* txn = db->BeginTransaction(write_options);
   txn->SetSnapshot();
@@ -2131,7 +2131,7 @@ TEST_P(TransactionTest, FirstWriteTest2) {
   // Test conflict checking against the very first write to a db.
   // The transaction's snapshot is a seq 0 while the following write
   // will have sequence 1.
-  Status s = db->Put(write_options, "A", "a");
+  rocksdb_rs::status::Status s = db->Put(write_options, "A", "a");
   ASSERT_OK(s);
 
   s = txn->Put("A", "b");
@@ -2162,7 +2162,7 @@ TEST_P(TransactionTest, WriteConflictTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ASSERT_OK(db->Put(write_options, "foo", "A"));
   ASSERT_OK(db->Put(write_options, "foo2", "B"));
@@ -2199,7 +2199,7 @@ TEST_P(TransactionTest, WriteConflictTest2) {
   ReadOptions read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ASSERT_OK(db->Put(write_options, "foo", "bar"));
 
@@ -2247,7 +2247,7 @@ TEST_P(TransactionTest, ReadConflictTest) {
   ReadOptions read_options, snapshot_read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ASSERT_OK(db->Put(write_options, "foo", "bar"));
   ASSERT_OK(db->Put(write_options, "foo2", "bar"));
@@ -2285,7 +2285,7 @@ TEST_P(TransactionTest, TxnOnlyTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options);
   ASSERT_TRUE(txn);
@@ -2303,7 +2303,7 @@ TEST_P(TransactionTest, FlushTest) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ASSERT_OK(db->Put(write_options, Slice("foo"), Slice("bar")));
   ASSERT_OK(db->Put(write_options, Slice("foo2"), Slice("bar")));
@@ -2359,7 +2359,7 @@ TEST_P(TransactionTest, FlushTest2) {
       }
     }
 
-    Status s = ReOpen();
+    rocksdb_rs::status::Status s = ReOpen();
     ASSERT_OK(s);
     assert(db != nullptr);
 
@@ -2493,7 +2493,7 @@ TEST_P(TransactionTest, FlushTest2) {
 }
 
 TEST_P(TransactionTest, WaitForCompactAbortOnPause) {
-  Status s = ReOpen();
+  rocksdb_rs::status::Status s = ReOpen();
   ASSERT_OK(s);
   assert(db != nullptr);
 
@@ -2514,7 +2514,7 @@ TEST_P(TransactionTest, NoSnapshotTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ASSERT_OK(db->Put(write_options, "AAA", "bar"));
 
@@ -2544,7 +2544,7 @@ TEST_P(TransactionTest, MultipleSnapshotTest) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ASSERT_OK(db->Put(write_options, "AAA", "bar"));
   ASSERT_OK(db->Put(write_options, "BBB", "bar"));
@@ -2662,7 +2662,7 @@ TEST_P(TransactionTest, ColumnFamiliesTest) {
   ReadOptions read_options, snapshot_read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ColumnFamilyHandle *cfa, *cfb;
   ColumnFamilyOptions cf_options;
@@ -2765,7 +2765,7 @@ TEST_P(TransactionTest, ColumnFamiliesTest) {
                                                    handles[0], handles[2]};
   std::vector<Slice> multiget_keys = {"AAA", "AAAZZZ", "foo", "foo"};
   std::vector<std::string> values(4);
-  rust::Vec<Status> results = txn->MultiGetForUpdate(
+  rust::Vec<rocksdb_rs::status::Status> results = txn->MultiGetForUpdate(
       snapshot_read_options, multiget_cfh, multiget_keys, &values);
   ASSERT_OK(results[0]);
   ASSERT_OK(results[1]);
@@ -2829,7 +2829,7 @@ TEST_P(TransactionTest, MultiGetBatchedTest) {
   ReadOptions read_options, snapshot_read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ColumnFamilyHandle* cf;
   ColumnFamilyOptions cf_options;
@@ -2886,7 +2886,7 @@ TEST_P(TransactionTest, MultiGetBatchedTest) {
 
   std::vector<Slice> keys = {"aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg"};
   std::vector<PinnableSlice> values(keys.size());
-  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   txn->MultiGet(snapshot_read_options, handles[1], keys.size(), keys.data(),
                 values.data(), statuses.data());
@@ -2919,7 +2919,7 @@ TEST_P(TransactionTest, MultiGetLargeBatchedTest) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ColumnFamilyHandle* cf;
   ColumnFamilyOptions cf_options;
@@ -2981,7 +2981,7 @@ TEST_P(TransactionTest, MultiGetLargeBatchedTest) {
     keys.emplace_back(key_str[i]);
   }
   std::vector<PinnableSlice> values(keys.size());
-  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   wb.MultiGetFromBatchAndDB(db, snapshot_read_options, handles[1], keys.size(),
                             keys.data(), values.data(), statuses.data(), false);
@@ -3014,7 +3014,7 @@ TEST_P(TransactionTest, MultiGetSnapshot) {
 
   Slice key = "foo";
 
-  Status s = txn1->Put(key, "bar");
+  rocksdb_rs::status::Status s = txn1->Put(key, "bar");
   ASSERT_OK(s);
 
   s = txn1->SetName("test");
@@ -3037,7 +3037,7 @@ TEST_P(TransactionTest, MultiGetSnapshot) {
 
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values(1);
-  rust::Vec<Status> statuses = Status_new().create_vec(1);
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(1);
   keys.push_back(key);
   auto cfd = db->DefaultColumnFamily();
   txn2->MultiGet(read_options, cfd, 1, keys.data(), values.data(),
@@ -3052,7 +3052,7 @@ TEST_P(TransactionTest, ColumnFamiliesTest2) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ColumnFamilyHandle *one, *two;
   ColumnFamilyOptions cf_options;
@@ -3128,7 +3128,7 @@ TEST_P(TransactionTest, EmptyTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   s = db->Put(write_options, "aaa", "aaa");
   ASSERT_OK(s);
@@ -3171,7 +3171,7 @@ TEST_P(TransactionTest, PredicateManyPreceders) {
   ReadOptions read_options1, read_options2;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   txn_options.set_snapshot = true;
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
@@ -3184,7 +3184,7 @@ TEST_P(TransactionTest, PredicateManyPreceders) {
   std::vector<Slice> multiget_keys = {"1", "2", "3"};
   std::vector<std::string> multiget_values;
 
-  rust::Vec<Status> results =
+  rust::Vec<rocksdb_rs::status::Status> results =
       txn1->MultiGetForUpdate(read_options1, multiget_keys, &multiget_values);
   ASSERT_EQ(results.size(), 3);
   ASSERT_TRUE(results[0].IsNotFound());
@@ -3239,7 +3239,7 @@ TEST_P(TransactionTest, LostUpdate) {
   ReadOptions read_options, read_options1, read_options2;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Test 2 transactions writing to the same key in multiple orders and
   // with/without snapshots
@@ -3370,7 +3370,7 @@ TEST_P(TransactionTest, UntrackedWrites) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Verify transaction rollback works for untracked keys.
   Transaction* txn = db->BeginTransaction(write_options);
@@ -3415,7 +3415,7 @@ TEST_P(TransactionTest, ExpiredTransaction) {
   ReadOptions read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Set txn expiration timeout to 0 microseconds (expires instantly)
   txn_options.expiration = 0;
@@ -3461,7 +3461,7 @@ TEST_P(TransactionTest, ReinitializeTest) {
   ReadOptions read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Set txn expiration timeout to 0 microseconds (expires instantly)
   txn_options.expiration = 0;
@@ -3567,7 +3567,7 @@ TEST_P(TransactionTest, Rollback) {
   ReadOptions read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
 
@@ -3604,7 +3604,7 @@ TEST_P(TransactionTest, LockLimitTest) {
   ReadOptions read_options, snapshot_read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   delete db;
   db = nullptr;
@@ -3715,7 +3715,7 @@ TEST_P(TransactionTest, IteratorTest) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Write some keys to the db
   s = db->Put(write_options, "A", "a");
@@ -3843,7 +3843,7 @@ TEST_P(TransactionTest, DisableIndexingTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options);
   ASSERT_TRUE(txn);
@@ -3905,7 +3905,7 @@ TEST_P(TransactionTest, SavepointTest) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options);
   ASSERT_TRUE(txn);
@@ -4098,7 +4098,7 @@ TEST_P(TransactionTest, SavepointTest2) {
   WriteOptions write_options;
   ReadOptions read_options;
   TransactionOptions txn_options;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   txn_options.lock_timeout = 1;  // 1 ms
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
@@ -4196,7 +4196,7 @@ TEST_P(TransactionTest, SavepointTest3) {
   WriteOptions write_options;
   ReadOptions read_options;
   TransactionOptions txn_options;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   txn_options.lock_timeout = 1;  // 1 ms
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
@@ -4269,7 +4269,7 @@ TEST_P(TransactionTest, SavepointTest4) {
   WriteOptions write_options;
   ReadOptions read_options;
   TransactionOptions txn_options;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   txn_options.lock_timeout = 1;  // 1 ms
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
@@ -4322,7 +4322,7 @@ TEST_P(TransactionTest, UndoGetForUpdateTest) {
   ReadOptions read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   txn_options.lock_timeout = 1;  // 1 ms
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
@@ -4466,7 +4466,7 @@ TEST_P(TransactionTest, UndoGetForUpdateTest2) {
   ReadOptions read_options;
   TransactionOptions txn_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   s = db->Put(write_options, "A", "");
   ASSERT_OK(s);
@@ -4671,7 +4671,7 @@ TEST_P(TransactionTest, TimeoutTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   delete db;
   db = nullptr;
@@ -4808,7 +4808,7 @@ TEST_P(TransactionTest, SingleDeleteTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options);
   ASSERT_TRUE(txn);
@@ -4906,7 +4906,7 @@ TEST_P(TransactionTest, MergeTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(write_options, TransactionOptions());
   ASSERT_TRUE(txn);
@@ -4977,7 +4977,7 @@ TEST_P(TransactionTest, DeleteRangeSupportTest) {
       TransactionDBWriteOptimizations flags;
       flags.skip_concurrency_control = skip_concurrency_control;
       flags.skip_duplicate_key_check = skip_duplicate_key_check;
-      Status s = db->Write(WriteOptions(), flags, &wb);
+      rocksdb_rs::status::Status s = db->Write(WriteOptions(), flags, &wb);
       std::string value;
       switch (txn_db_options.write_policy) {
         case WRITE_COMMITTED:
@@ -5014,7 +5014,7 @@ TEST_P(TransactionTest, DeferSnapshotTest) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   s = db->Put(write_options, "A", "a0");
   ASSERT_OK(s);
@@ -5065,7 +5065,7 @@ TEST_P(TransactionTest, DeferSnapshotTest2) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn1 = db->BeginTransaction(write_options);
 
@@ -5122,7 +5122,7 @@ TEST_P(TransactionTest, DeferSnapshotSavePointTest) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn1 = db->BeginTransaction(write_options);
 
@@ -5246,7 +5246,7 @@ TEST_P(TransactionTest, SetSnapshotOnNextOperationWithNotification) {
 
   std::shared_ptr<Notifier> notifier =
       std::make_shared<Notifier>(&read_options.snapshot);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   s = db->Put(write_options, "B", "0");
   ASSERT_OK(s);
@@ -5289,7 +5289,7 @@ TEST_P(TransactionTest, ClearSnapshotTest) {
   WriteOptions write_options;
   ReadOptions read_options, snapshot_read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   s = db->Put(write_options, "foo", "0");
   ASSERT_OK(s);
@@ -5333,7 +5333,7 @@ TEST_P(TransactionTest, ClearSnapshotTest) {
 }
 
 TEST_P(TransactionTest, ToggleAutoCompactionTest) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ColumnFamilyHandle *cfa, *cfb;
   ColumnFamilyOptions cf_options;
@@ -5405,7 +5405,7 @@ TEST_P(TransactionStressTest, ExpiredTransactionDataRace1) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 
         Transaction* txn2 = db->BeginTransaction(write_options, txn_options);
-        Status s = Status_new();
+        rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
         s = txn2->Put("X", "2");
         ASSERT_TRUE(s.IsTimedOut());
         s = txn2->Commit();
@@ -5421,7 +5421,7 @@ TEST_P(TransactionStressTest, ExpiredTransactionDataRace1) {
   txn_options.expiration = 1000;  // 1 second
   Transaction* txn1 = db->BeginTransaction(write_options, txn_options);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   s = txn1->Put("X", "1");
   ASSERT_OK(s);
   s = txn1->Commit();
@@ -5441,7 +5441,7 @@ TEST_P(TransactionStressTest, ExpiredTransactionDataRace1) {
 namespace {
 // cmt_delay_ms is the delay between prepare and commit
 // first_id is the id of the first transaction
-Status TransactionStressTestInserter(
+rocksdb_rs::status::Status TransactionStressTestInserter(
     TransactionDB* db, const size_t num_transactions, const size_t num_sets,
     const size_t num_keys_per_set, Random64* rand,
     const uint64_t cmt_delay_ms = 0, const uint64_t first_id = 0) {
@@ -5471,12 +5471,12 @@ Status TransactionStressTestInserter(
   // some failed due to write-conflicts.
   if (num_transactions != 1 &&
       inserter.GetFailureCount() > num_transactions / 2) {
-    return Status_TryAgain("Too many transactions failed! " +
+    return rocksdb_rs::status::Status_TryAgain("Too many transactions failed! " +
                             std::to_string(inserter.GetFailureCount()) + " / " +
                             std::to_string(num_transactions));
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace
 
@@ -5528,7 +5528,7 @@ TEST_P(MySQLStyleTransactionTest, TransactionStressTest) {
     // Verify that data is consistent
     while (finished < num_workers) {
       uint64_t delay_ms = rand.Uniform(100) + 1;
-      Status s = RandomTransactionInserter::Verify(
+      rocksdb_rs::status::Status s = RandomTransactionInserter::Verify(
           db, num_sets, num_keys_per_set, TAKE_SNAPSHOT, &rand, delay_ms);
       ASSERT_OK(s);
     }
@@ -5566,7 +5566,7 @@ TEST_P(MySQLStyleTransactionTest, TransactionStressTest) {
   }
 
   // Verify that data is consistent
-  Status s = RandomTransactionInserter::Verify(db, num_sets, num_keys_per_set,
+  rocksdb_rs::status::Status s = RandomTransactionInserter::Verify(db, num_sets, num_keys_per_set,
                                                !TAKE_SNAPSHOT);
   ASSERT_OK(s);
 }
@@ -5580,7 +5580,7 @@ TEST_P(TransactionTest, MemoryLimitTest) {
   // and can hit the memory limit.
   txn_options.write_batch_flush_threshold = 0;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   Transaction* txn = db->BeginTransaction(WriteOptions(), txn_options);
   ASSERT_TRUE(txn);
@@ -6063,7 +6063,7 @@ TEST_P(TransactionTest, DuplicateKeys) {
     ReadOptions ropt;
     Transaction* txn0;
     PinnableSlice pinnable_val;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     std::unique_ptr<const Comparator> comp_gc(new ThreeBytewiseComparator());
     cf_options.comparator = comp_gc.get();
@@ -6435,7 +6435,7 @@ TEST_P(TransactionTest, OpenAndEnableU64Timestamp) {
   cf_opts.comparator = test::BytewiseComparatorWithU64TsWrapper();
   {
     ColumnFamilyHandle* cfh = nullptr;
-    const Status s = db->CreateColumnFamily(cf_opts, test_cf_name, &cfh);
+    const rocksdb_rs::status::Status s = db->CreateColumnFamily(cf_opts, test_cf_name, &cfh);
     if (txn_db_options.write_policy == WRITE_COMMITTED) {
       ASSERT_OK(s);
       delete cfh;
@@ -6459,7 +6459,7 @@ TEST_P(TransactionTest, OpenAndEnableU64Timestamp) {
     cf_descs.emplace_back(kDefaultColumnFamilyName, options);
     cf_descs.emplace_back(test_cf_name, cf_opts);
     std::vector<ColumnFamilyHandle*> handles;
-    const Status s = ReOpenNoDelete(cf_descs, &handles);
+    const rocksdb_rs::status::Status s = ReOpenNoDelete(cf_descs, &handles);
     if (txn_db_options.write_policy == WRITE_COMMITTED) {
       ASSERT_OK(s);
       for (auto* h : handles) {
@@ -6584,7 +6584,7 @@ TEST_P(TransactionTest, LockWal) {
   });
   ASSERT_OK(db->LockWAL());
   // txn0 cannot prepare
-  Status s = txn0->Prepare();
+  rocksdb_rs::status::Status s = txn0->Prepare();
   ASSERT_TRUE(s.IsIncomplete());
   // txn1 cannot commit
   s = txn1->Commit();

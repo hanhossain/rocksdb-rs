@@ -51,7 +51,7 @@ class MergeOperator : public Customizable {
  public:
   virtual ~MergeOperator() {}
   static const char* Type() { return "MergeOperator"; }
-  static Status CreateFromString(const ConfigOptions& opts,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
                                  const std::string& id,
                                  std::shared_ptr<MergeOperator>* result);
 

@@ -42,7 +42,7 @@ class ForwardLevelIterator : public InternalIterator {
         files_(files),
         valid_(false),
         file_index_(std::numeric_limits<uint32_t>::max()),
-        status_(Status_new()),
+        status_(rocksdb_rs::status::Status_new()),
         file_iter_(nullptr),
         pinned_iters_mgr_(nullptr),
         prefix_extractor_(prefix_extractor),
@@ -61,7 +61,7 @@ class ForwardLevelIterator : public InternalIterator {
 
   void SetFileIndex(uint32_t file_index) {
     assert(file_index < files_.size());
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     if (file_index != file_index_) {
       file_index_ = file_index;
       Reset();
@@ -93,16 +93,16 @@ class ForwardLevelIterator : public InternalIterator {
     file_iter_->SetPinnedItersMgr(pinned_iters_mgr_);
     valid_ = false;
     if (!range_del_agg.IsEmpty()) {
-      status_ = Status_NotSupported(
+      status_ = rocksdb_rs::status::Status_NotSupported(
           "Range tombstones unsupported with ForwardIterator");
     }
   }
   void SeekToLast() override {
-    status_ = Status_NotSupported("ForwardLevelIterator::SeekToLast()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::SeekToLast()");
     valid_ = false;
   }
   void Prev() override {
-    status_ = Status_NotSupported("ForwardLevelIterator::Prev()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::Prev()");
     valid_ = false;
   }
   bool Valid() const override { return valid_; }
@@ -132,7 +132,7 @@ class ForwardLevelIterator : public InternalIterator {
     valid_ = file_iter_->Valid();
   }
   void SeekForPrev(const Slice& /*internal_key*/) override {
-    status_ = Status_NotSupported("ForwardLevelIterator::SeekForPrev()");
+    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::SeekForPrev()");
     valid_ = false;
   }
   void Next() override {
@@ -167,13 +167,13 @@ class ForwardLevelIterator : public InternalIterator {
     assert(valid_);
     return file_iter_->value();
   }
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     if (!status_.ok()) {
       return status_.Clone();
     } else if (file_iter_) {
       return file_iter_->status();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   bool PrepareValue() override {
     assert(valid_);
@@ -207,7 +207,7 @@ class ForwardLevelIterator : public InternalIterator {
 
   bool valid_;
   uint32_t file_index_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   InternalIterator* file_iter_;
   PinnedIteratorsManager* pinned_iters_mgr_;
   // Kept alive by ForwardIterator::sv_->mutable_cf_options
@@ -231,8 +231,8 @@ ForwardIterator::ForwardIterator(DBImpl* db, const ReadOptions& read_options,
       mutable_iter_(nullptr),
       current_(nullptr),
       valid_(false),
-      status_(Status_OK()),
-      immutable_status_(Status_OK()),
+      status_(rocksdb_rs::status::Status_OK()),
+      immutable_status_(rocksdb_rs::status::Status_OK()),
       has_iter_trimmed_for_upper_bound_(false),
       current_over_upper_bound_(false),
       is_prev_set_(false),
@@ -391,7 +391,7 @@ void ForwardIterator::SeekInternal(const Slice& internal_key,
   if (seek_to_first || seek_after_async_io ||
       NeedToSeekImmutable(internal_key)) {
     if (!seek_after_async_io) {
-      immutable_status_ = Status_OK();
+      immutable_status_ = rocksdb_rs::status::Status_OK();
       if (has_iter_trimmed_for_upper_bound_ &&
           (
               // prev_ is not set yet
@@ -611,7 +611,7 @@ Slice ForwardIterator::value() const {
   return current_->value();
 }
 
-Status ForwardIterator::status() const {
+rocksdb_rs::status::Status ForwardIterator::status() const {
   if (!status_.ok()) {
     return status_.Clone();
   } else if (!mutable_iter_->status().ok()) {
@@ -637,13 +637,13 @@ bool ForwardIterator::PrepareValue() {
   return false;
 }
 
-Status ForwardIterator::GetProperty(std::string prop_name, std::string* prop) {
+rocksdb_rs::status::Status ForwardIterator::GetProperty(std::string prop_name, std::string* prop) {
   assert(prop != nullptr);
   if (prop_name == "rocksdb.iterator.super-version-number") {
     *prop = std::to_string(sv_->version_number);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
-  return Status_InvalidArgument();
+  return rocksdb_rs::status::Status_InvalidArgument();
 }
 
 void ForwardIterator::SetPinnedItersMgr(
@@ -708,7 +708,7 @@ void ForwardIterator::RebuildIterators(bool refresh_sv) {
             false /* immutable_memtable */));
     range_del_agg.AddTombstones(std::move(range_del_iter));
     // Always return Status_OK().
-    Status temp_s = sv_->imm->AddRangeTombstoneIterators(read_options_, &arena_,
+    rocksdb_rs::status::Status temp_s = sv_->imm->AddRangeTombstoneIterators(read_options_, &arena_,
                                                          &range_del_agg);
     assert(temp_s.ok());
   }
@@ -745,7 +745,7 @@ void ForwardIterator::RebuildIterators(bool refresh_sv) {
 
   UpdateChildrenPinnedItersMgr();
   if (!range_del_agg.IsEmpty()) {
-    status_ = Status_NotSupported(
+    status_ = rocksdb_rs::status::Status_NotSupported(
         "Range tombstones unsupported with ForwardIterator");
     valid_ = false;
   }
@@ -775,7 +775,7 @@ void ForwardIterator::RenewIterators() {
             false /* immutable_memtable */));
     range_del_agg.AddTombstones(std::move(range_del_iter));
     // Always return Status_OK().
-    Status temp_s = svnew->imm->AddRangeTombstoneIterators(
+    rocksdb_rs::status::Status temp_s = svnew->imm->AddRangeTombstoneIterators(
         read_options_, &arena_, &range_del_agg);
     assert(temp_s.ok());
   }
@@ -840,7 +840,7 @@ void ForwardIterator::RenewIterators() {
 
   UpdateChildrenPinnedItersMgr();
   if (!range_del_agg.IsEmpty()) {
-    status_ = Status_NotSupported(
+    status_ = rocksdb_rs::status::Status_NotSupported(
         "Range tombstones unsupported with ForwardIterator");
     valid_ = false;
   }
@@ -924,7 +924,7 @@ void ForwardIterator::UpdateCurrent() {
   }
   valid_ = current_ != nullptr && immutable_status_.ok();
   if (!status_.ok()) {
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
   }
 
   // Upper bound doesn't apply to the memtable iterator. We want Valid() to

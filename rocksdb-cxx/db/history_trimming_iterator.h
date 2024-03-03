@@ -76,7 +76,7 @@ class HistoryTrimmingIterator : public InternalIterator {
 
   Slice value() const override { return input_->value(); }
 
-  Status status() const override { return input_->status(); }
+  rocksdb_rs::status::Status status() const override { return input_->status(); }
 
   bool IsKeyPinned() const override { return input_->IsKeyPinned(); }
 

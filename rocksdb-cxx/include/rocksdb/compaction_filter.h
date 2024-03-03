@@ -167,7 +167,7 @@ class CompactionFilter : public Customizable {
 
   virtual ~CompactionFilter() {}
   static const char* Type() { return "CompactionFilter"; }
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& name,
                                  const CompactionFilter** result);
 
@@ -338,7 +338,7 @@ class CompactionFilterFactory : public Customizable {
  public:
   virtual ~CompactionFilterFactory() {}
   static const char* Type() { return "CompactionFilterFactory"; }
-  static Status CreateFromString(
+  static rocksdb_rs::status::Status CreateFromString(
       const ConfigOptions& config_options, const std::string& name,
       std::shared_ptr<CompactionFilterFactory>* result);
 

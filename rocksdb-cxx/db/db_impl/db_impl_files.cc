@@ -21,6 +21,16 @@
 #include "util/autovector.h"
 #include "util/defer.h"
 
+using rocksdb_rs::filename::BlobFileName;
+using rocksdb_rs::filename::IdentityFileName;
+using rocksdb_rs::filename::InfoLogPrefix;
+using rocksdb_rs::filename::InfoLogPrefix_new;
+using rocksdb_rs::filename::LogFileName;
+using rocksdb_rs::filename::MakeTableFileName;
+using rocksdb_rs::filename::NormalizePath;
+using rocksdb_rs::filename::ParseFileName;
+using rocksdb_rs::filename::TableFileName;
+
 namespace rocksdb {
 
 uint64_t DBImpl::MinLogNumberToKeep() {
@@ -40,8 +50,8 @@ uint64_t DBImpl::GetObsoleteSstFilesSize() {
   return versions_->GetObsoleteSstFilesSize();
 }
 
-Status DBImpl::DisableFileDeletions() {
-  Status s = Status_new();
+rocksdb_rs::status::Status DBImpl::DisableFileDeletions() {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   int my_disable_delete_obsolete_files;
   {
     InstrumentedMutexLock l(&mutex_);
@@ -60,13 +70,13 @@ Status DBImpl::DisableFileDeletions() {
 
 // FIXME: can be inconsistent with DisableFileDeletions in cases like
 // DBImplReadOnly
-Status DBImpl::DisableFileDeletionsWithLock() {
+rocksdb_rs::status::Status DBImpl::DisableFileDeletionsWithLock() {
   mutex_.AssertHeld();
   ++disable_delete_obsolete_files_;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::EnableFileDeletions(bool force) {
+rocksdb_rs::status::Status DBImpl::EnableFileDeletions(bool force) {
   // Job id == 0 means that this is not our background process, but rather
   // user thread
   JobContext job_context(0);
@@ -97,7 +107,7 @@ Status DBImpl::EnableFileDeletions(bool force) {
   }
   job_context.Clean();
   LogFlush(immutable_db_options_.info_log);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool DBImpl::IsFileDeletionsEnabled() const {
@@ -174,7 +184,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
 
   if (doing_the_full_scan) {
     versions_->AddLiveFiles(&job_context->sst_live, &job_context->blob_live);
-    InfoLogPrefix info_log_prefix(!immutable_db_options_.db_log_dir.empty(),
+    rocksdb_rs::filename::InfoLogPrefix info_log_prefix = rocksdb_rs::filename::InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
                                   dbname_);
     std::set<std::string> paths;
     for (size_t path_id = 0; path_id < immutable_db_options_.db_paths.size();
@@ -204,11 +214,11 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       // set of all files in the directory. We'll exclude files that are still
       // alive in the subsequent processings.
       std::vector<std::string> files;
-      Status s = immutable_db_options_.fs->GetChildren(
+      rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           path, io_opts, &files, /*IODebugContext*=*/nullptr);
       for (const std::string& file : files) {
         uint64_t number;
-        FileType type;
+        rocksdb_rs::types::FileType type;
         // 1. If we cannot parse the file name, we skip;
         // 2. If the file with file_number equals number has already been
         // grabbed for purge by another compaction job, or it has already been
@@ -230,7 +240,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
     // Add log files in wal_dir
     if (!immutable_db_options_.IsWalDirSameAsDBPath(dbname_)) {
       std::vector<std::string> log_files;
-      Status s = immutable_db_options_.fs->GetChildren(
+      rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.wal_dir, io_opts, &log_files,
           /*IODebugContext*=*/nullptr);
       for (const std::string& log_file : log_files) {
@@ -243,7 +253,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
     if (!immutable_db_options_.db_log_dir.empty() &&
         immutable_db_options_.db_log_dir != dbname_) {
       std::vector<std::string> info_log_files;
-      Status s = immutable_db_options_.fs->GetChildren(
+      rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.db_log_dir, io_opts, &info_log_files,
           /*IODebugContext*=*/nullptr);
       for (std::string& log_file : info_log_files) {
@@ -351,17 +361,17 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
 // Delete obsolete files and log status and information of file deletion
 void DBImpl::DeleteObsoleteFileImpl(int job_id, const std::string& fname,
                                     const std::string& path_to_sync,
-                                    FileType type, uint64_t number) {
+                                    rocksdb_rs::types::FileType type, uint64_t number) {
   TEST_SYNC_POINT_CALLBACK("DBImpl::DeleteObsoleteFileImpl::BeforeDeletion",
                            const_cast<std::string*>(&fname));
 
-  Status file_deletion_status = Status_new();
-  if (type == kTableFile || type == kBlobFile || type == kWalFile) {
+  rocksdb_rs::status::Status file_deletion_status = rocksdb_rs::status::Status_new();
+  if (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile || type == rocksdb_rs::types::FileType::kWalFile) {
     // Rate limit WAL deletion only if its in the DB dir
     file_deletion_status = DeleteDBFile(
         &immutable_db_options_, fname, path_to_sync,
         /*force_bg=*/false,
-        /*force_fg=*/(type == kWalFile) ? !wal_in_db_path_ : false);
+        /*force_fg=*/(type == rocksdb_rs::types::FileType::kWalFile) ? !wal_in_db_path_ : false);
   } else {
     file_deletion_status = env_->DeleteFile(fname);
   }
@@ -370,27 +380,27 @@ void DBImpl::DeleteObsoleteFileImpl(int job_id, const std::string& fname,
   if (file_deletion_status.ok()) {
     ROCKS_LOG_DEBUG(immutable_db_options_.info_log,
                     "[JOB %d] Delete %s type=%d #%" PRIu64 " -- %s\n", job_id,
-                    fname.c_str(), type, number,
+                    fname.c_str(), static_cast<int>(type), number,
                     file_deletion_status.ToString()->c_str());
   } else if (env_->FileExists(fname).IsNotFound()) {
     ROCKS_LOG_INFO(
         immutable_db_options_.info_log,
         "[JOB %d] Tried to delete a non-existing file %s type=%d #%" PRIu64
         " -- %s\n",
-        job_id, fname.c_str(), type, number,
+        job_id, fname.c_str(), static_cast<int>(type), number,
         file_deletion_status.ToString()->c_str());
   } else {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                     "[JOB %d] Failed to delete %s type=%d #%" PRIu64 " -- %s\n",
-                    job_id, fname.c_str(), type, number,
+                    job_id, fname.c_str(), static_cast<int>(type), number,
                     file_deletion_status.ToString()->c_str());
   }
-  if (type == kTableFile) {
+  if (type == rocksdb_rs::types::FileType::kTableFile) {
     EventHelpers::LogAndNotifyTableFileDeletion(
         &event_logger_, job_id, number, fname, file_deletion_status, GetName(),
         immutable_db_options_.listeners);
   }
-  if (type == kBlobFile) {
+  if (type == rocksdb_rs::types::FileType::kBlobFile) {
     EventHelpers::LogAndNotifyBlobFileDeletion(
         &event_logger_, immutable_db_options_.listeners, job_id, number, fname,
         file_deletion_status, GetName());
@@ -476,7 +486,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
   }
 
   std::vector<std::string> old_info_log_files;
-  InfoLogPrefix info_log_prefix(!immutable_db_options_.db_log_dir.empty(),
+  InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
                                 dbname_);
 
   // File numbers of most recent two OPTIONS file in candidate_files (found in
@@ -488,9 +498,9 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
   for (const auto& candidate_file : candidate_files) {
     const std::string& fname = candidate_file.file_name;
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     if (!ParseFileName(fname, &number, info_log_prefix.prefix, &type) ||
-        type != kOptionsFile) {
+        type != rocksdb_rs::types::FileType::kOptionsFile) {
       continue;
     }
     if (number > optsfile_num1) {
@@ -512,7 +522,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
   for (const auto& candidate_file : candidate_files) {
     const std::string& to_delete = candidate_file.file_name;
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     // Ignore file if we cannot recognize it.
     if (!ParseFileName(to_delete, &number, info_log_prefix.prefix, &type)) {
       continue;
@@ -520,18 +530,18 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
 
     bool keep = true;
     switch (type) {
-      case kWalFile:
+      case rocksdb_rs::types::FileType::kWalFile:
         keep = ((number >= state.log_number) ||
                 (number == state.prev_log_number) ||
                 (log_recycle_files_set.find(number) !=
                  log_recycle_files_set.end()));
         break;
-      case kDescriptorFile:
+      case rocksdb_rs::types::FileType::kDescriptorFile:
         // Keep my manifest file, and any newer incarnations'
         // (can happen during manifest roll)
         keep = (number >= state.manifest_file_number);
         break;
-      case kTableFile:
+      case rocksdb_rs::types::FileType::kTableFile:
         // If the second condition is not there, this makes
         // DontDeletePendingOutputs fail
         keep = (sst_live_set.find(number) != sst_live_set.end()) ||
@@ -540,14 +550,14 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
           files_to_del.insert(number);
         }
         break;
-      case kBlobFile:
+      case rocksdb_rs::types::FileType::kBlobFile:
         keep = number >= state.min_pending_output ||
                (blob_live_set.find(number) != blob_live_set.end());
         if (!keep) {
           files_to_del.insert(number);
         }
         break;
-      case kTempFile:
+      case rocksdb_rs::types::FileType::kTempFile:
         // Any temp files that are currently being written to must
         // be recorded in pending_outputs_, which is inserted into "live".
         // Also, SetCurrentFile creates a temp file when writing out new
@@ -561,19 +571,19 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
                (number == state.pending_manifest_file_number) ||
                (to_delete.find(kOptionsFileNamePrefix) != std::string::npos);
         break;
-      case kInfoLogFile:
+      case rocksdb_rs::types::FileType::kInfoLogFile:
         keep = true;
         if (number != 0) {
           old_info_log_files.push_back(to_delete);
         }
         break;
-      case kOptionsFile:
+      case rocksdb_rs::types::FileType::kOptionsFile:
         keep = (number >= optsfile_num2);
         break;
-      case kCurrentFile:
-      case kDBLockFile:
-      case kIdentityFile:
-      case kMetaDatabase:
+      case rocksdb_rs::types::FileType::kCurrentFile:
+      case rocksdb_rs::types::FileType::kDBLockFile:
+      case rocksdb_rs::types::FileType::kIdentityFile:
+      case rocksdb_rs::types::FileType::kMetaDatabase:
         keep = true;
         break;
     }
@@ -584,16 +594,16 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
 
     std::string fname;
     std::string dir_to_sync;
-    if (type == kTableFile) {
+    if (type == rocksdb_rs::types::FileType::kTableFile) {
       // evict from cache
       TableCache::Evict(table_cache_.get(), number);
-      fname = MakeTableFileName(candidate_file.file_path, number);
+      fname = static_cast<std::string>(MakeTableFileName(candidate_file.file_path, number));
       dir_to_sync = candidate_file.file_path;
-    } else if (type == kBlobFile) {
-      fname = BlobFileName(candidate_file.file_path, number);
+    } else if (type == rocksdb_rs::types::FileType::kBlobFile) {
+      fname = static_cast<std::string>(BlobFileName(candidate_file.file_path, number));
       dir_to_sync = candidate_file.file_path;
     } else {
-      dir_to_sync = (type == kWalFile) ? wal_dir : dbname_;
+      dir_to_sync = (type == rocksdb_rs::types::FileType::kWalFile) ? wal_dir : dbname_;
       fname = dir_to_sync +
               ((!dir_to_sync.empty() && dir_to_sync.back() == '/') ||
                        (!to_delete.empty() && to_delete.front() == '/')
@@ -602,7 +612,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
               to_delete;
     }
 
-    if (type == kWalFile && (immutable_db_options_.WAL_ttl_seconds > 0 ||
+    if (type == rocksdb_rs::types::FileType::kWalFile && (immutable_db_options_.WAL_ttl_seconds > 0 ||
                              immutable_db_options_.WAL_size_limit_MB > 0)) {
       wal_manager_.ArchiveWALFile(fname, number);
       continue;
@@ -653,7 +663,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "[JOB %d] Delete info log file %s\n", state.job_id,
                      full_path_to_delete.c_str());
-      Status s = env_->DeleteFile(full_path_to_delete);
+      rocksdb_rs::status::Status s = env_->DeleteFile(full_path_to_delete);
       if (!s.ok()) {
         if (env_->FileExists(full_path_to_delete).IsNotFound()) {
           ROCKS_LOG_INFO(
@@ -914,12 +924,12 @@ void DBImpl::SetDBId(std::string&& id, bool read_only,
   }
 }
 
-Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
-  Status s = Status_new();
+rocksdb_rs::status::Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Check for the IDENTITY file and create it if not there or
   // broken or not matching manifest
   std::string db_id_in_file;
-  s = fs_->FileExists(IdentityFileName(dbname_), IOOptions(), nullptr);
+  s = fs_->FileExists(static_cast<std::string>(IdentityFileName(dbname_)), IOOptions(), nullptr);
   if (s.ok()) {
     s = GetDbIdentityFromIdentityFile(&db_id_in_file);
     if (s.ok() && !db_id_in_file.empty()) {
@@ -934,7 +944,7 @@ Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
     }
   }
   if (s.IsNotFound()) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   if (!s.ok()) {
     assert(s.IsIOError());
@@ -952,18 +962,18 @@ Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
   return s;
 }
 
-Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
+rocksdb_rs::status::Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
   mutex_.AssertHeld();
   std::vector<std::string> paths;
-  paths.push_back(NormalizePath(dbname_ + std::string(1, kFilePathSeparator)));
+  paths.push_back(static_cast<std::string>(NormalizePath(dbname_ + std::string(1, kFilePathSeparator))));
   for (const auto& db_path : immutable_db_options_.db_paths) {
     paths.push_back(
-        NormalizePath(db_path.path + std::string(1, kFilePathSeparator)));
+        static_cast<std::string>(NormalizePath(db_path.path + std::string(1, kFilePathSeparator))));
   }
   for (const auto* cfd : *versions_->GetColumnFamilySet()) {
     for (const auto& cf_path : cfd->ioptions()->cf_paths) {
       paths.push_back(
-          NormalizePath(cf_path.path + std::string(1, kFilePathSeparator)));
+          static_cast<std::string>(NormalizePath(cf_path.path + std::string(1, kFilePathSeparator))));
     }
   }
   // Dedup paths
@@ -972,7 +982,7 @@ Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
 
   uint64_t next_file_number = versions_->current_next_file_number();
   uint64_t largest_file_number = next_file_number;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (const auto& path : paths) {
     std::vector<std::string> files;
     s = env_->GetChildren(path, &files);
@@ -981,14 +991,14 @@ Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx) {
     }
     for (const auto& fname : files) {
       uint64_t number = 0;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       if (!ParseFileName(fname, &number, &type)) {
         continue;
       }
       // path ends with '/' or '\\'
       const std::string normalized_fpath = path + fname;
       largest_file_number = std::max(largest_file_number, number);
-      if (type == kTableFile && number >= next_file_number &&
+      if (type == rocksdb_rs::types::FileType::kTableFile && number >= next_file_number &&
           recovery_ctx->files_to_delete_.find(normalized_fpath) ==
               recovery_ctx->files_to_delete_.end()) {
         recovery_ctx->files_to_delete_.emplace(normalized_fpath);

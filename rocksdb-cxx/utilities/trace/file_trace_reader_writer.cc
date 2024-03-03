@@ -26,22 +26,22 @@ FileTraceReader::~FileTraceReader() {
   delete[] buffer_;
 }
 
-Status FileTraceReader::Close() {
+rocksdb_rs::status::Status FileTraceReader::Close() {
   file_reader_.reset();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status FileTraceReader::Reset() {
+rocksdb_rs::status::Status FileTraceReader::Reset() {
   if (file_reader_ == nullptr) {
-    return Status_IOError("TraceReader is closed.");
+    return rocksdb_rs::status::Status_IOError("TraceReader is closed.");
   }
   offset_ = 0;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status FileTraceReader::Read(std::string* data) {
+rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
   assert(file_reader_ != nullptr);
-  Status s = file_reader_->Read(IOOptions(), offset_, kTraceMetadataSize,
+  rocksdb_rs::status::Status s = file_reader_->Read(IOOptions(), offset_, kTraceMetadataSize,
                                 &result_, buffer_, nullptr,
                                 Env::IO_TOTAL /* rate_limiter_priority */);
   if (!s.ok()) {
@@ -51,10 +51,10 @@ Status FileTraceReader::Read(std::string* data) {
     // No more data to read
     // Todo: Come up with a better way to indicate end of data. May be this
     // could be avoided once footer is introduced.
-    return Status_Incomplete();
+    return rocksdb_rs::status::Status_Incomplete();
   }
   if (result_.size() < kTraceMetadataSize) {
-    return Status_Corruption("Corrupted trace file.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file.");
   }
   *data = result_.ToString();
   offset_ += kTraceMetadataSize;
@@ -73,7 +73,7 @@ Status FileTraceReader::Read(std::string* data) {
       return s;
     }
     if (result_.size() < to_read) {
-      return Status_Corruption("Corrupted trace file.");
+      return rocksdb_rs::status::Status_Corruption("Corrupted trace file.");
     }
     data->append(result_.data(), result_.size());
 
@@ -91,22 +91,22 @@ FileTraceWriter::FileTraceWriter(
 
 FileTraceWriter::~FileTraceWriter() { Close(); }
 
-Status FileTraceWriter::Close() {
+rocksdb_rs::status::Status FileTraceWriter::Close() {
   file_writer_.reset();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status FileTraceWriter::Write(const Slice& data) {
+rocksdb_rs::status::Status FileTraceWriter::Write(const Slice& data) {
   return file_writer_->Append(data);
 }
 
 uint64_t FileTraceWriter::GetFileSize() { return file_writer_->GetFileSize(); }
 
-Status NewFileTraceReader(Env* env, const EnvOptions& env_options,
+rocksdb_rs::status::Status NewFileTraceReader(Env* env, const EnvOptions& env_options,
                           const std::string& trace_filename,
                           std::unique_ptr<TraceReader>* trace_reader) {
   std::unique_ptr<RandomAccessFileReader> file_reader;
-  Status s = RandomAccessFileReader::Create(
+  rocksdb_rs::status::Status s = RandomAccessFileReader::Create(
       env->GetFileSystem(), trace_filename, FileOptions(env_options),
       &file_reader, nullptr);
   if (!s.ok()) {
@@ -116,11 +116,11 @@ Status NewFileTraceReader(Env* env, const EnvOptions& env_options,
   return s;
 }
 
-Status NewFileTraceWriter(Env* env, const EnvOptions& env_options,
+rocksdb_rs::status::Status NewFileTraceWriter(Env* env, const EnvOptions& env_options,
                           const std::string& trace_filename,
                           std::unique_ptr<TraceWriter>* trace_writer) {
   std::unique_ptr<WritableFileWriter> file_writer;
-  Status s = WritableFileWriter::Create(env->GetFileSystem(), trace_filename,
+  rocksdb_rs::status::Status s = WritableFileWriter::Create(env->GetFileSystem(), trace_filename,
                                         FileOptions(env_options), &file_writer,
                                         nullptr);
   if (!s.ok()) {

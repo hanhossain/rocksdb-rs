@@ -168,17 +168,17 @@ class PlainTableDBTest : public testing::Test,
     ASSERT_OK(DestroyDB(dbname_, *options));
   }
 
-  Status PureReopen(Options* options, DB** db) {
+  rocksdb_rs::status::Status PureReopen(Options* options, DB** db) {
     return DB::Open(*options, dbname_, db);
   }
 
-  Status ReopenForReadOnly(Options* options) {
+  rocksdb_rs::status::Status ReopenForReadOnly(Options* options) {
     delete db_;
     db_ = nullptr;
     return DB::OpenForReadOnly(*options, dbname_, &db_);
   }
 
-  Status TryReopen(Options* options = nullptr) {
+  rocksdb_rs::status::Status TryReopen(Options* options = nullptr) {
     delete db_;
     db_ = nullptr;
     Options opts;
@@ -193,17 +193,17 @@ class PlainTableDBTest : public testing::Test,
     return DB::Open(opts, dbname_, &db_);
   }
 
-  Status Put(const Slice& k, const Slice& v) {
+  rocksdb_rs::status::Status Put(const Slice& k, const Slice& v) {
     return db_->Put(WriteOptions(), k, v);
   }
 
-  Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
+  rocksdb_rs::status::Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
 
   std::string Get(const std::string& k, const Snapshot* snapshot = nullptr) {
     ReadOptions options;
     options.snapshot = snapshot;
     std::string result;
-    Status s = db_->Get(options, k, &result);
+    rocksdb_rs::status::Status s = db_->Get(options, k, &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -269,7 +269,7 @@ class TestPlainTableReader : public PlainTableReader {
                          encoding_type, file_size, props.get(),
                          prefix_extractor),
         expect_bloom_not_match_(expect_bloom_not_match) {
-    Status s = MmapDataIfNeeded();
+    rocksdb_rs::status::Status s = MmapDataIfNeeded();
     EXPECT_TRUE(s.ok());
 
     s = PopulateIndex(props.get(), bloom_bits_per_key, hash_table_ratio,
@@ -324,7 +324,7 @@ class TestPlainTableFactory : public PlainTableFactory {
         column_family_name_(std::move(column_family_name)) {}
 
   using PlainTableFactory::NewTableReader;
-  Status NewTableReader(
+  rocksdb_rs::status::Status NewTableReader(
       const ReadOptions& /*ro*/, const TableReaderOptions& table_reader_options,
       std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
       std::unique_ptr<TableReader>* table,
@@ -420,7 +420,7 @@ TEST_P(PlainTableDBTest, BadOptions2) {
   ASSERT_NOK(dbfull()->TEST_FlushMemTable());
 
   // Bad attempt to re-open with hash_table_ratio > 0 and no prefix extractor
-  Status s = TryReopen(&options);
+  rocksdb_rs::status::Status s = TryReopen(&options);
   ASSERT_EQ(
       "Not implemented: PlainTable requires a prefix extractor enable prefix "
       "hash mode.",

@@ -59,7 +59,7 @@ void deserialize_endpoint(const DBT* dbt, EndpointStruct* endp) {
 }
 
 // Get a range lock on [start_key; end_key] range
-Status RangeTreeLockManager::TryLock(PessimisticTransaction* txn,
+rocksdb_rs::status::Status RangeTreeLockManager::TryLock(PessimisticTransaction* txn,
                                      uint32_t column_family_id,
                                      const Endpoint& start_endp,
                                      const Endpoint& end_endp, Env*,
@@ -128,21 +128,21 @@ Status RangeTreeLockManager::TryLock(PessimisticTransaction* txn,
     case 0:
       break;  // fall through
     case DB_LOCK_NOTGRANTED:
-      return Status_TimedOut(SubCode::kLockTimeout);
+      return rocksdb_rs::status::Status_TimedOut(rocksdb_rs::status::SubCode::kLockTimeout);
     case TOKUDB_OUT_OF_LOCKS:
-      return Status_Busy(SubCode::kLockLimit);
+      return rocksdb_rs::status::Status_Busy(rocksdb_rs::status::SubCode::kLockLimit);
     case DB_LOCK_DEADLOCK: {
       std::reverse(di_path.begin(), di_path.end());
       dlock_buffer_.AddNewPath(
           RangeDeadlockPath(di_path, request.get_start_time()));
-      return Status_Busy(SubCode::kDeadlock);
+      return rocksdb_rs::status::Status_Busy(rocksdb_rs::status::SubCode::kDeadlock);
     }
     default:
       assert(0);
-      return Status_Busy(SubCode::kLockLimit);
+      return rocksdb_rs::status::Status_Busy(rocksdb_rs::status::SubCode::kLockLimit);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Wait callback that locktree library will call to inform us about

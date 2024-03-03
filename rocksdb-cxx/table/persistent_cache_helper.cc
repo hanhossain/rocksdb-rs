@@ -41,7 +41,7 @@ void PersistentCacheHelper::InsertUncompressed(
   ;
 }
 
-Status PersistentCacheHelper::LookupSerialized(
+rocksdb_rs::status::Status PersistentCacheHelper::LookupSerialized(
     const PersistentCacheOptions& cache_options, const BlockHandle& handle,
     std::unique_ptr<char[]>* out_data, const size_t expected_data_size) {
 #ifdef NDEBUG
@@ -54,7 +54,7 @@ Status PersistentCacheHelper::LookupSerialized(
       BlockBasedTable::GetCacheKey(cache_options.base_cache_key, handle);
 
   size_t size;
-  Status s =
+  rocksdb_rs::status::Status s =
       cache_options.persistent_cache->Lookup(key.AsSlice(), out_data, &size);
   if (!s.ok()) {
     // cache miss
@@ -68,10 +68,10 @@ Status PersistentCacheHelper::LookupSerialized(
          handle.size() + BlockBasedTable::kBlockTrailerSize);
   assert(size == expected_data_size);
   RecordTick(cache_options.statistics, PERSISTENT_CACHE_HIT);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status PersistentCacheHelper::LookupUncompressed(
+rocksdb_rs::status::Status PersistentCacheHelper::LookupUncompressed(
     const PersistentCacheOptions& cache_options, const BlockHandle& handle,
     BlockContents* contents) {
   assert(cache_options.persistent_cache);
@@ -79,7 +79,7 @@ Status PersistentCacheHelper::LookupUncompressed(
   if (!contents) {
     // We shouldn't lookup in the cache. Either
     // (1) Nowhere to store
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   CacheKey key =
@@ -87,7 +87,7 @@ Status PersistentCacheHelper::LookupUncompressed(
 
   std::unique_ptr<char[]> data;
   size_t size;
-  Status s =
+  rocksdb_rs::status::Status s =
       cache_options.persistent_cache->Lookup(key.AsSlice(), &data, &size);
   if (!s.ok()) {
     // cache miss
@@ -103,7 +103,7 @@ Status PersistentCacheHelper::LookupUncompressed(
   RecordTick(cache_options.statistics, PERSISTENT_CACHE_HIT);
   // construct result and return
   *contents = BlockContents(std::move(data), size);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

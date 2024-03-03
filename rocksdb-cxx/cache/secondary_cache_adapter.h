@@ -19,7 +19,7 @@ class CacheWithSecondaryAdapter : public CacheWrapper {
 
   ~CacheWithSecondaryAdapter() override;
 
-  Status Insert(const Slice& key, ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, ObjectPtr value,
                 const CacheItemHelper* helper, size_t charge,
                 Handle** handle = nullptr,
                 Priority priority = Priority::LOW) override;

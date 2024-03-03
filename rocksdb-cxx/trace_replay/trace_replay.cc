@@ -32,10 +32,10 @@ void DecodeCFAndKey(std::string& buffer, uint32_t* cf_id, Slice* key) {
 }
 }  // namespace
 
-Status TracerHelper::ParseVersionStr(std::string& v_string, int* v_num) {
+rocksdb_rs::status::Status TracerHelper::ParseVersionStr(std::string& v_string, int* v_num) {
   if (v_string.find_first_of('.') == std::string::npos ||
       v_string.find_first_of('.') != v_string.find_last_of('.')) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted trace file. Incorrect version format.");
   }
   int tmp_num = 0;
@@ -45,15 +45,15 @@ Status TracerHelper::ParseVersionStr(std::string& v_string, int* v_num) {
     } else if (isdigit(v_string[i])) {
       tmp_num = tmp_num * 10 + (v_string[i] - '0');
     } else {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Corrupted trace file. Incorrect version format");
     }
   }
   *v_num = tmp_num;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
+rocksdb_rs::status::Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
                                       int* db_version) {
   std::vector<std::string> s_vec;
   int begin = 0, end;
@@ -71,8 +71,8 @@ Status TracerHelper::ParseTraceHeader(const Trace& header, int* trace_version,
   assert(s_vec[2].find("RocksDB Version: ") != std::string::npos);
   db_v_str = s_vec[2].substr(17);
 
-  Status s = ParseVersionStr(t_v_str, trace_version);
-  if (!s.eq(Status_OK())) {
+  rocksdb_rs::status::Status s = ParseVersionStr(t_v_str, trace_version);
+  if (!s.eq(rocksdb_rs::status::Status_OK())) {
     return s;
   }
   s = ParseVersionStr(db_v_str, db_version);
@@ -87,31 +87,31 @@ void TracerHelper::EncodeTrace(const Trace& trace, std::string* encoded_trace) {
   encoded_trace->append(trace.payload);
 }
 
-Status TracerHelper::DecodeTrace(const std::string& encoded_trace,
+rocksdb_rs::status::Status TracerHelper::DecodeTrace(const std::string& encoded_trace,
                                  Trace* trace) {
   assert(trace != nullptr);
   Slice enc_slice = Slice(encoded_trace);
   if (!GetFixed64(&enc_slice, &trace->ts)) {
-    return Status_Incomplete("Decode trace string failed");
+    return rocksdb_rs::status::Status_Incomplete("Decode trace string failed");
   }
   if (enc_slice.size() < kTraceTypeSize + kTracePayloadLengthSize) {
-    return Status_Incomplete("Decode trace string failed");
+    return rocksdb_rs::status::Status_Incomplete("Decode trace string failed");
   }
   trace->type = static_cast<TraceType>(enc_slice[0]);
   enc_slice.remove_prefix(kTraceTypeSize + kTracePayloadLengthSize);
   trace->payload = enc_slice.ToString();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status TracerHelper::DecodeHeader(const std::string& encoded_trace,
+rocksdb_rs::status::Status TracerHelper::DecodeHeader(const std::string& encoded_trace,
                                   Trace* header) {
-  Status s = TracerHelper::DecodeTrace(encoded_trace, header);
+  rocksdb_rs::status::Status s = TracerHelper::DecodeTrace(encoded_trace, header);
 
   if (header->type != kTraceBegin) {
-    return Status_Corruption("Corrupted trace file. Incorrect header.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect header.");
   }
   if (header->payload.substr(0, kTraceMagic.length()) != kTraceMagic) {
-    return Status_Corruption("Corrupted trace file. Incorrect magic.");
+    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect magic.");
   }
 
   return s;
@@ -125,7 +125,7 @@ bool TracerHelper::SetPayloadMap(uint64_t& payload_map,
   return old_state != payload_map;
 }
 
-Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
+rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
                                        std::unique_ptr<TraceRecord>* record) {
   assert(trace != nullptr);
 
@@ -167,7 +167,7 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
         record->reset(new WriteQueryTraceRecord(std::move(rep), trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // Get
     case kTraceGet: {
@@ -208,7 +208,7 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
         record->reset(new GetQueryTraceRecord(cf_id, std::move(ps), trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // Iterator Seek and SeekForPrev
     case kTraceIteratorSeek:
@@ -267,12 +267,12 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
             trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // MultiGet
     case kTraceMultiGet: {
       if (trace_file_version < 2) {
-        return Status_Corruption("MultiGet is not supported.");
+        return rocksdb_rs::status::Status_Corruption("MultiGet is not supported.");
       }
 
       uint32_t multiget_size = 0;
@@ -309,7 +309,7 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
         payload_map &= (payload_map - 1);
       }
       if (multiget_size == 0) {
-        return Status_InvalidArgument("Empty MultiGet cf_ids or keys.");
+        return rocksdb_rs::status::Status_InvalidArgument("Empty MultiGet cf_ids or keys.");
       }
 
       // Decode the cfids_payload and keys_payload
@@ -332,10 +332,10 @@ Status TracerHelper::DecodeTraceRecord(Trace* trace, int trace_file_version,
             std::move(cf_ids), std::move(multiget_keys), trace->ts));
       }
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     default:
-      return Status_NotSupported("Unsupported trace type.");
+      return rocksdb_rs::status::Status_NotSupported("Unsupported trace type.");
   }
 }
 
@@ -351,10 +351,10 @@ Tracer::Tracer(SystemClock* clock, const TraceOptions& trace_options,
 
 Tracer::~Tracer() { trace_writer_.reset(); }
 
-Status Tracer::Write(WriteBatch* write_batch) {
+rocksdb_rs::status::Status Tracer::Write(WriteBatch* write_batch) {
   TraceType trace_type = kTraceWrite;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -366,10 +366,10 @@ Status Tracer::Write(WriteBatch* write_batch) {
   return WriteTrace(trace);
 }
 
-Status Tracer::Get(ColumnFamilyHandle* column_family, const Slice& key) {
+rocksdb_rs::status::Status Tracer::Get(ColumnFamilyHandle* column_family, const Slice& key) {
   TraceType trace_type = kTraceGet;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -385,11 +385,11 @@ Status Tracer::Get(ColumnFamilyHandle* column_family, const Slice& key) {
   return WriteTrace(trace);
 }
 
-Status Tracer::IteratorSeek(const uint32_t& cf_id, const Slice& key,
+rocksdb_rs::status::Status Tracer::IteratorSeek(const uint32_t& cf_id, const Slice& key,
                             const Slice& lower_bound, const Slice upper_bound) {
   TraceType trace_type = kTraceIteratorSeek;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -420,12 +420,12 @@ Status Tracer::IteratorSeek(const uint32_t& cf_id, const Slice& key,
   return WriteTrace(trace);
 }
 
-Status Tracer::IteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
+rocksdb_rs::status::Status Tracer::IteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
                                    const Slice& lower_bound,
                                    const Slice upper_bound) {
   TraceType trace_type = kTraceIteratorSeekForPrev;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = clock_->NowMicros();
@@ -456,11 +456,11 @@ Status Tracer::IteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
   return WriteTrace(trace);
 }
 
-Status Tracer::MultiGet(const size_t num_keys,
+rocksdb_rs::status::Status Tracer::MultiGet(const size_t num_keys,
                         ColumnFamilyHandle** column_families,
                         const Slice* keys) {
   if (num_keys == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   std::vector<ColumnFamilyHandle*> v_column_families;
   std::vector<Slice> v_keys;
@@ -473,10 +473,10 @@ Status Tracer::MultiGet(const size_t num_keys,
   return MultiGet(v_column_families, v_keys);
 }
 
-Status Tracer::MultiGet(const size_t num_keys,
+rocksdb_rs::status::Status Tracer::MultiGet(const size_t num_keys,
                         ColumnFamilyHandle* column_family, const Slice* keys) {
   if (num_keys == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   std::vector<ColumnFamilyHandle*> column_families;
   std::vector<Slice> v_keys;
@@ -489,14 +489,14 @@ Status Tracer::MultiGet(const size_t num_keys,
   return MultiGet(column_families, v_keys);
 }
 
-Status Tracer::MultiGet(const std::vector<ColumnFamilyHandle*>& column_families,
+rocksdb_rs::status::Status Tracer::MultiGet(const std::vector<ColumnFamilyHandle*>& column_families,
                         const std::vector<Slice>& keys) {
   if (column_families.size() != keys.size()) {
-    return Status_Corruption("the CFs size and keys size does not match!");
+    return rocksdb_rs::status::Status_Corruption("the CFs size and keys size does not match!");
   }
   TraceType trace_type = kTraceMultiGet;
   if (ShouldSkipTrace(trace_type)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   uint32_t multiget_size = static_cast<uint32_t>(keys.size());
   Trace trace;
@@ -584,7 +584,7 @@ bool Tracer::IsTraceFileOverMax() {
   return (trace_file_size > trace_options_.max_trace_file_size);
 }
 
-Status Tracer::WriteHeader() {
+rocksdb_rs::status::Status Tracer::WriteHeader() {
   std::ostringstream s;
   s << kTraceMagic << "\t"
     << "Trace Version: " << kTraceFileMajorVersion << "."
@@ -600,7 +600,7 @@ Status Tracer::WriteHeader() {
   return WriteTrace(trace);
 }
 
-Status Tracer::WriteFooter() {
+rocksdb_rs::status::Status Tracer::WriteFooter() {
   Trace trace;
   trace.ts = clock_->NowMicros();
   trace.type = kTraceEnd;
@@ -610,12 +610,12 @@ Status Tracer::WriteFooter() {
   return WriteTrace(trace);
 }
 
-Status Tracer::WriteTrace(const Trace& trace) {
+rocksdb_rs::status::Status Tracer::WriteTrace(const Trace& trace) {
   std::string encoded_trace;
   TracerHelper::EncodeTrace(trace, &encoded_trace);
   return trace_writer_->Write(Slice(encoded_trace));
 }
 
-Status Tracer::Close() { return WriteFooter(); }
+rocksdb_rs::status::Status Tracer::Close() { return WriteFooter(); }
 
 }  // namespace rocksdb

@@ -25,13 +25,13 @@ struct UncompressionDict;
 // in the cache or not.
 class UncompressionDictReader {
  public:
-  static Status Create(
+  static rocksdb_rs::status::Status Create(
       const BlockBasedTable* table, const ReadOptions& ro,
       FilePrefetchBuffer* prefetch_buffer, bool use_cache, bool prefetch,
       bool pin, BlockCacheLookupContext* lookup_context,
       std::unique_ptr<UncompressionDictReader>* uncompression_dict_reader);
 
-  Status GetOrReadUncompressionDictionary(
+  rocksdb_rs::status::Status GetOrReadUncompressionDictionary(
       FilePrefetchBuffer* prefetch_buffer, const ReadOptions& ro, bool no_io,
       bool verify_checksums, GetContext* get_context,
       BlockCacheLookupContext* lookup_context,
@@ -48,7 +48,7 @@ class UncompressionDictReader {
 
   bool cache_dictionary_blocks() const;
 
-  static Status ReadUncompressionDictionary(
+  static rocksdb_rs::status::Status ReadUncompressionDictionary(
       const BlockBasedTable* table, FilePrefetchBuffer* prefetch_buffer,
       const ReadOptions& read_options, bool use_cache, GetContext* get_context,
       BlockCacheLookupContext* lookup_context,

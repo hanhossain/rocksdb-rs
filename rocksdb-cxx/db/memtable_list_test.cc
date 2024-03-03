@@ -45,7 +45,7 @@ class MemTableListTest : public testing::Test {
       ColumnFamilyOptions cf_options;
       std::vector<ColumnFamilyDescriptor> cf_descs;
       cf_descs.emplace_back(kDefaultColumnFamilyName, cf_options);
-      Status s = DB::Open(options, dbname, cf_descs, &handles, &db);
+      rocksdb_rs::status::Status s = DB::Open(options, dbname, cf_descs, &handles, &db);
       EXPECT_OK(s);
 
       ColumnFamilyOptions cf_opt1, cf_opt2;
@@ -85,7 +85,7 @@ class MemTableListTest : public testing::Test {
 
   // Calls MemTableList::TryInstallMemtableFlushResults() and sets up all
   // structures needed to call this function.
-  Status Mock_InstallMemtableFlushResults(
+  rocksdb_rs::status::Status Mock_InstallMemtableFlushResults(
       MemTableList* list, const MutableCFOptions& mutable_cf_options,
       const autovector<MemTable*>& m, autovector<MemTable*>* to_delete) {
     // Create a mock Logger
@@ -124,7 +124,7 @@ class MemTableListTest : public testing::Test {
     InstrumentedMutex mutex;
     InstrumentedMutexLock l(&mutex);
     std::list<std::unique_ptr<FlushJobInfo>> flush_jobs_info;
-    Status s = list->TryInstallMemtableFlushResults(
+    rocksdb_rs::status::Status s = list->TryInstallMemtableFlushResults(
         cfd, mutable_cf_options, m, &dummy_prep_tracker, &versions, &mutex,
         file_num, to_delete, nullptr, &log_buffer, &flush_jobs_info);
     EXPECT_OK(io_s);
@@ -133,7 +133,7 @@ class MemTableListTest : public testing::Test {
 
   // Calls MemTableList::InstallMemtableFlushResults() and sets up all
   // structures needed to call this function.
-  Status Mock_InstallMemtableAtomicFlushResults(
+  rocksdb_rs::status::Status Mock_InstallMemtableAtomicFlushResults(
       autovector<MemTableList*>& lists, const autovector<uint32_t>& cf_ids,
       const autovector<const MutableCFOptions*>& mutable_cf_options_list,
       const autovector<const autovector<MemTable*>*>& mems_list,
@@ -232,7 +232,7 @@ TEST_F(MemTableListTest, GetTest) {
 
   SequenceNumber seq = 1;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   MergeContext merge_context;
   InternalKeyComparator ikey_cmp(options.comparator);
   SequenceNumber max_covering_tombstone_seq = 0;
@@ -367,7 +367,7 @@ TEST_F(MemTableListTest, GetFromHistoryTest) {
 
   SequenceNumber seq = 1;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   MergeContext merge_context;
   InternalKeyComparator ikey_cmp(options.comparator);
   SequenceNumber max_covering_tombstone_seq = 0;
@@ -585,7 +585,7 @@ TEST_F(MemTableListTest, GetFromHistoryTest) {
 TEST_F(MemTableListTest, FlushPendingTest) {
   const int num_tables = 6;
   SequenceNumber seq = 1;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   auto factory = std::make_shared<SkipListFactory>();
   options.memtable_factory = factory;
@@ -875,7 +875,7 @@ TEST_F(MemTableListTest, EmptyAtomicFlusTest) {
   autovector<const MutableCFOptions*> options_list;
   autovector<const autovector<MemTable*>*> to_flush;
   autovector<MemTable*> to_delete;
-  Status s = Mock_InstallMemtableAtomicFlushResults(lists, cf_ids, options_list,
+  rocksdb_rs::status::Status s = Mock_InstallMemtableAtomicFlushResults(lists, cf_ids, options_list,
                                                     to_flush, &to_delete);
   ASSERT_OK(s);
   ASSERT_TRUE(to_delete.empty());
@@ -991,7 +991,7 @@ TEST_F(MemTableListTest, AtomicFlusTest) {
       tmp_options_list.push_back(mutable_cf_options_list[i]);
     }
   }
-  Status s = Mock_InstallMemtableAtomicFlushResults(
+  rocksdb_rs::status::Status s = Mock_InstallMemtableAtomicFlushResults(
       tmp_lists, tmp_cf_ids, tmp_options_list, to_flush, &to_delete);
   ASSERT_OK(s);
 

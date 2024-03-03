@@ -19,7 +19,7 @@ using rocksdb::DB;
 using rocksdb::Env;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::WriteOptions;
 
 #if defined(OS_WIN)
@@ -38,7 +38,7 @@ int main() {
   options.create_if_missing = true;
 
   // open DB
-  Status s = DB::Open(options, kDBPath, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, kDBPath, &db);
   assert(s.ok());
 
   // Put key-value

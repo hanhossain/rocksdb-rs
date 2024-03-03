@@ -25,7 +25,7 @@ class BlockBasedTable::IndexReaderCommon : public BlockBasedTable::IndexReader {
   }
 
  protected:
-  static Status ReadIndexBlock(const BlockBasedTable* table,
+  static rocksdb_rs::status::Status ReadIndexBlock(const BlockBasedTable* table,
                                FilePrefetchBuffer* prefetch_buffer,
                                const ReadOptions& read_options, bool use_cache,
                                GetContext* get_context,
@@ -71,7 +71,7 @@ class BlockBasedTable::IndexReaderCommon : public BlockBasedTable::IndexReader {
     return table_->get_rep()->user_defined_timestamps_persisted;
   }
 
-  Status GetOrReadIndexBlock(bool no_io, GetContext* get_context,
+  rocksdb_rs::status::Status GetOrReadIndexBlock(bool no_io, GetContext* get_context,
                              BlockCacheLookupContext* lookup_context,
                              CachableEntry<Block>* index_block,
                              const ReadOptions& read_options) const;

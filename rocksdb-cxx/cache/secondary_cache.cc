@@ -16,25 +16,25 @@ size_t SliceSize(Cache::ObjectPtr obj) {
   return static_cast<Slice*>(obj)->size();
 }
 
-Status SliceSaveTo(Cache::ObjectPtr from_obj, size_t from_offset, size_t length,
+rocksdb_rs::status::Status SliceSaveTo(Cache::ObjectPtr from_obj, size_t from_offset, size_t length,
                    char* out) {
   const Slice& slice = *static_cast<Slice*>(from_obj);
   std::memcpy(out, slice.data() + from_offset, length);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status FailCreate(const Slice&, Cache::CreateContext*, MemoryAllocator*,
+rocksdb_rs::status::Status FailCreate(const Slice&, Cache::CreateContext*, MemoryAllocator*,
                   Cache::ObjectPtr*, size_t*) {
-  return Status_NotSupported("Only for dumping data into SecondaryCache");
+  return rocksdb_rs::status::Status_NotSupported("Only for dumping data into SecondaryCache");
 }
 
 }  // namespace
 
-Status SecondaryCache::InsertSaved(const Slice& key, const Slice& saved) {
-  static Cache::CacheItemHelper helper_no_secondary{CacheEntryRole::kMisc,
+rocksdb_rs::status::Status SecondaryCache::InsertSaved(const Slice& key, const Slice& saved) {
+  static Cache::CacheItemHelper helper_no_secondary{rocksdb_rs::cache::CacheEntryRole::kMisc,
                                                     &NoopDelete};
   static Cache::CacheItemHelper helper{
-      CacheEntryRole::kMisc, &NoopDelete, &SliceSize,
+      rocksdb_rs::cache::CacheEntryRole::kMisc, &NoopDelete, &SliceSize,
       &SliceSaveTo,          &FailCreate, &helper_no_secondary};
   // NOTE: depends on Insert() being synchronous, not keeping pointer `&saved`
   return Insert(key, const_cast<Slice*>(&saved), &helper);

@@ -125,7 +125,7 @@ struct LevelDBOptions {
   // worth switching to kNoCompression.  Even if the input data is
   // incompressible, the kSnappyCompression implementation will
   // efficiently detect that and will switch to uncompressed mode.
-  CompressionType compression;
+  rocksdb_rs::compression_type::CompressionType compression;
 
   // If non-NULL, use the specified filter policy to reduce disk reads.
   // Many applications will benefit from passing the result of

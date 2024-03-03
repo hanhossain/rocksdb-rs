@@ -230,7 +230,7 @@ extern const size_t kPageSize;
 
 using ThreadId = pid_t;
 
-extern void SetCpuPriority(ThreadId id, CpuPriority priority);
+extern void SetCpuPriority(ThreadId id, rocksdb_rs::port_defs::CpuPriority priority);
 
 int64_t GetProcessID();
 

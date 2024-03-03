@@ -76,7 +76,7 @@ class SimCache : public CacheWrapper {
   // a file located at activity_log_file, max_logging_size option can be used to
   // stop logging to the file automatically after reaching a specific size in
   // bytes, a values of 0 disable this feature
-  virtual Status StartActivityLogging(const std::string& activity_log_file,
+  virtual rocksdb_rs::status::Status StartActivityLogging(const std::string& activity_log_file,
                                       Env* env,
                                       uint64_t max_logging_size = 0) = 0;
 
@@ -84,7 +84,7 @@ class SimCache : public CacheWrapper {
   virtual void StopActivityLogging() = 0;
 
   // Status of cache logging happening in background
-  virtual Status GetActivityLoggingStatus() = 0;
+  virtual rocksdb_rs::status::Status GetActivityLoggingStatus() = 0;
 
  private:
   SimCache(const SimCache&);

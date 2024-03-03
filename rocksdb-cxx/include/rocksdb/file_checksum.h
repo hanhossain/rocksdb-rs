@@ -77,7 +77,7 @@ class FileChecksumGenFactory : public Customizable {
  public:
   ~FileChecksumGenFactory() override {}
   static const char* Type() { return "FileChecksumGenFactory"; }
-  static Status CreateFromString(
+  static rocksdb_rs::status::Status CreateFromString(
       const ConfigOptions& options, const std::string& value,
       std::shared_ptr<FileChecksumGenFactory>* result);
 
@@ -112,23 +112,23 @@ class FileChecksumList {
   // Return all the file checksum information being stored in a unordered_map.
   // File_number is the key, the first part of the value is checksum value,
   // and the second part of the value is checksum function name.
-  virtual Status GetAllFileChecksums(
+  virtual rocksdb_rs::status::Status GetAllFileChecksums(
       std::vector<uint64_t>* file_numbers, std::vector<std::string>* checksums,
       std::vector<std::string>* checksum_func_names) = 0;
 
   // Given the file_number, it searches if the file checksum information is
   // stored.
-  virtual Status SearchOneFileChecksum(uint64_t file_number,
+  virtual rocksdb_rs::status::Status SearchOneFileChecksum(uint64_t file_number,
                                        std::string* checksum,
                                        std::string* checksum_func_name) = 0;
 
   // Insert the checksum information of one file to the FileChecksumList.
-  virtual Status InsertOneFileChecksum(
+  virtual rocksdb_rs::status::Status InsertOneFileChecksum(
       uint64_t file_number, const std::string& checksum,
       const std::string& checksum_func_name) = 0;
 
   // Remove the checksum information of one SST file.
-  virtual Status RemoveOneFileChecksum(uint64_t file_number) = 0;
+  virtual rocksdb_rs::status::Status RemoveOneFileChecksum(uint64_t file_number) = 0;
 };
 
 // Create a new file checksum list.

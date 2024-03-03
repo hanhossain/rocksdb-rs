@@ -209,7 +209,7 @@ class CountUniqueFilterBitsBuilderWrapper : public FilterBitsBuilder {
 
   Slice Finish(std::unique_ptr<const char[]>* buf) override {
     Slice rv = b_->Finish(buf);
-    Status s_dont_care = b_->MaybePostVerify(rv);
+    rocksdb_rs::status::Status s_dont_care = b_->MaybePostVerify(rv);
     uniq_.clear();
     return rv;
   }
@@ -274,7 +274,7 @@ TEST_F(FullFilterBlockTest, SingleChunk) {
   // "box" only counts once
   ASSERT_EQ(4, builder.EstimateEntriesAdded());
   ASSERT_FALSE(builder.IsEmpty());
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Slice slice = builder.Finish(BlockHandle(), &s);
   ASSERT_OK(s);
 

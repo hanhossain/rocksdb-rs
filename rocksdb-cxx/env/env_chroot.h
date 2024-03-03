@@ -24,7 +24,7 @@ class ChrootFileSystem : public RemapFileSystem {
   IOStatus GetTestDirectory(const IOOptions& options, std::string* path,
                             IODebugContext* dbg) override;
 
-  Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
 
  protected:
   // Returns status and expanded absolute path including the chroot directory.

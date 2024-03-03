@@ -8,12 +8,12 @@
 
 namespace rocksdb {
 
-Status CollectColumnFamilyIdsFromWriteBatch(
+rocksdb_rs::status::Status CollectColumnFamilyIdsFromWriteBatch(
     const WriteBatch& batch, std::vector<uint32_t>* column_family_ids) {
   assert(column_family_ids != nullptr);
   column_family_ids->clear();
   ColumnFamilyCollector handler;
-  Status s = batch.Iterate(&handler);
+  rocksdb_rs::status::Status s = batch.Iterate(&handler);
   if (s.ok()) {
     for (const auto& cf : handler.column_families()) {
       column_family_ids->push_back(cf);

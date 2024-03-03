@@ -24,6 +24,8 @@
 #include "test_util/testutil.h"
 #include "util/string_util.h"
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 
 // TODO(icanadi) mock out VersionSet
@@ -42,7 +44,7 @@ class WalManagerTest : public testing::Test {
 
   void Init() {
     ASSERT_OK(env_->CreateDirIfMissing(dbname_));
-    ASSERT_OK(env_->CreateDirIfMissing(ArchivalDirectory(dbname_)));
+    ASSERT_OK(env_->CreateDirIfMissing(static_cast<std::string>(ArchivalDirectory(dbname_))));
     db_options_.db_paths.emplace_back(dbname_,
                                       std::numeric_limits<uint64_t>::max());
     db_options_.wal_dir = dbname_;
@@ -82,7 +84,7 @@ class WalManagerTest : public testing::Test {
   // NOT thread safe
   void RollTheLog(bool /*archived*/) {
     current_log_number_++;
-    std::string fname = ArchivedLogFileName(dbname_, current_log_number_);
+    std::string fname = static_cast<std::string>(ArchivedLogFileName(dbname_, current_log_number_));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
     ASSERT_OK(WritableFileWriter::Create(fs, fname, env_options_, &file_writer,
@@ -103,7 +105,7 @@ class WalManagerTest : public testing::Test {
   std::unique_ptr<TransactionLogIterator> OpenTransactionLogIter(
       const SequenceNumber seq) {
     std::unique_ptr<TransactionLogIterator> iter;
-    Status status = wal_manager_->GetUpdatesSince(
+    rocksdb_rs::status::Status status = wal_manager_->GetUpdatesSince(
         seq, &iter, TransactionLogIterator::ReadOptions(), versions_.get());
     EXPECT_OK(status);
     return iter;
@@ -135,7 +137,7 @@ TEST_F(WalManagerTest, ReadFirstRecordCache) {
   ASSERT_EQ(s, 0U);
 
   ASSERT_OK(
-      wal_manager_->TEST_ReadFirstRecord(kAliveLogFile, 1 /* number */, &s));
+      wal_manager_->TEST_ReadFirstRecord(rocksdb_rs::transaction_log::WalFileType::kAliveLogFile, 1 /* number */, &s));
   ASSERT_EQ(s, 0U);
 
   std::unique_ptr<WritableFileWriter> file_writer(
@@ -153,13 +155,13 @@ TEST_F(WalManagerTest, ReadFirstRecordCache) {
   // sequential_read_counter_ sanity test
   // ASSERT_EQ(env_->sequential_read_counter_.Read(), 0);
 
-  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(kAliveLogFile, 1, &s));
+  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(rocksdb_rs::transaction_log::WalFileType::kAliveLogFile, 1, &s));
   ASSERT_EQ(s, 10U);
   // did a read
   // TODO(icanadi) move SpecialEnv outside of db_test, so we can reuse it here
   // ASSERT_EQ(env_->sequential_read_counter_.Read(), 1);
 
-  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(kAliveLogFile, 1, &s));
+  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(rocksdb_rs::transaction_log::WalFileType::kAliveLogFile, 1, &s));
   ASSERT_EQ(s, 10U);
   // no new reads since the value is cached
   // TODO(icanadi) move SpecialEnv outside of db_test, so we can reuse it here
@@ -173,8 +175,8 @@ uint64_t GetLogDirSize(std::string dir_path, Env* env) {
   EXPECT_OK(env->GetChildren(dir_path, &files));
   for (auto& f : files) {
     uint64_t number;
-    FileType type;
-    if (ParseFileName(f, &number, &type) && type == kWalFile) {
+    rocksdb_rs::types::FileType type;
+    if (ParseFileName(f, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
       std::string const file_path = dir_path + "/" + f;
       uint64_t file_size;
       EXPECT_OK(env->GetFileSize(file_path, &file_size));
@@ -184,11 +186,11 @@ uint64_t GetLogDirSize(std::string dir_path, Env* env) {
   return dir_size;
 }
 std::vector<std::uint64_t> ListSpecificFiles(
-    Env* env, const std::string& path, const FileType expected_file_type) {
+    Env* env, const std::string& path, const rocksdb_rs::types::FileType expected_file_type) {
   std::vector<std::string> files;
   std::vector<uint64_t> file_numbers;
   uint64_t number;
-  FileType type;
+  rocksdb_rs::types::FileType type;
   EXPECT_OK(env->GetChildren(path, &files));
   for (size_t i = 0; i < files.size(); ++i) {
     if (ParseFileName(files[i], &number, &type)) {
@@ -232,11 +234,11 @@ TEST_F(WalManagerTest, WALArchivalSizeLimit) {
   // Set ttl and time_to_check_ to small values. Re-open db.
   // Assert that there are no archived logs left.
 
-  std::string archive_dir = ArchivalDirectory(dbname_);
+  std::string archive_dir = static_cast<std::string>(ArchivalDirectory(dbname_));
   CreateArchiveLogs(20, 5000);
 
   std::vector<std::uint64_t> log_files =
-      ListSpecificFiles(env_.get(), archive_dir, kWalFile);
+      ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_EQ(log_files.size(), 20U);
 
   db_options_.WAL_size_limit_MB = 8;
@@ -251,7 +253,7 @@ TEST_F(WalManagerTest, WALArchivalSizeLimit) {
   Reopen();
   wal_manager_->PurgeObsoleteWALFiles();
 
-  log_files = ListSpecificFiles(env_.get(), archive_dir, kWalFile);
+  log_files = ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_TRUE(log_files.empty());
 }
 
@@ -265,11 +267,11 @@ TEST_F(WalManagerTest, WALArchivalTtl) {
   // Reopen db with small ttl.
   // Assert that all archived logs was removed.
 
-  std::string archive_dir = ArchivalDirectory(dbname_);
+  std::string archive_dir = static_cast<std::string>(ArchivalDirectory(dbname_));
   CreateArchiveLogs(20, 5000);
 
   std::vector<uint64_t> log_files =
-      ListSpecificFiles(env_.get(), archive_dir, kWalFile);
+      ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_GT(log_files.size(), 0U);
 
   db_options_.WAL_ttl_seconds = 1;
@@ -277,7 +279,7 @@ TEST_F(WalManagerTest, WALArchivalTtl) {
   Reopen();
   wal_manager_->PurgeObsoleteWALFiles();
 
-  log_files = ListSpecificFiles(env_.get(), archive_dir, kWalFile);
+  log_files = ListSpecificFiles(env_.get(), archive_dir, rocksdb_rs::types::FileType::kWalFile);
   ASSERT_TRUE(log_files.empty());
 }
 

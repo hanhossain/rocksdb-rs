@@ -79,7 +79,7 @@ class Writer {
   explicit Writer(std::unique_ptr<WritableFileWriter>&& dest,
                   uint64_t log_number, bool recycle_log_files,
                   bool manual_flush = false,
-                  CompressionType compressionType = CompressionType::kNoCompression);
+                  rocksdb_rs::compression_type::CompressionType compressionType = rocksdb_rs::compression_type::CompressionType::kNoCompression);
   // No copying allowed
   Writer(const Writer&) = delete;
   void operator=(const Writer&) = delete;
@@ -130,7 +130,7 @@ class Writer {
   bool manual_flush_;
 
   // Compression Type
-  CompressionType compression_type_;
+  rocksdb_rs::compression_type::CompressionType compression_type_;
   StreamingCompress* compress_;
   // Reusable compressed output buffer
   std::unique_ptr<char[]> compressed_buffer_;

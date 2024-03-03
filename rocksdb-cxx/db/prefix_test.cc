@@ -175,7 +175,7 @@ std::string Get(DB* db, const ReadOptions& read_options, uint64_t prefix,
   Slice key = TestKeyToSlice(s2, test_key);
 
   std::string result;
-  Status s = db->Get(read_options, key, &result);
+  rocksdb_rs::status::Status s = db->Get(read_options, key, &result);
   if (s.IsNotFound()) {
     result = kNotFoundResult;
   } else if (!s.ok()) {
@@ -236,7 +236,7 @@ class PrefixTest : public testing::Test {
     options.table_factory.reset(NewBlockBasedTableFactory(bbto));
     options.allow_concurrent_memtable_write = false;
 
-    Status s = DB::Open(options, kDbName, &db);
+    rocksdb_rs::status::Status s = DB::Open(options, kDbName, &db);
     EXPECT_OK(s);
     return std::shared_ptr<DB>(db);
   }

@@ -72,7 +72,7 @@ class MemoryTest : public testing::Test {
     }
   }
 
-  Status GetApproximateMemoryUsageByType(
+  rocksdb_rs::status::Status GetApproximateMemoryUsageByType(
       const std::vector<DB*>& dbs,
       std::map<MemoryUtil::UsageType, uint64_t>* usage_by_type) {
     std::unordered_set<const Cache*> cache_set;

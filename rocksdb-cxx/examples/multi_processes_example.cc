@@ -46,7 +46,7 @@ using rocksdb::Iterator;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Slice;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::WriteOptions;
 
 const std::string kDBPath = "/tmp/rocksdb_multi_processes_example";
@@ -140,7 +140,7 @@ static bool ShouldCloseDB() { return true; }
 void CreateDB() {
   long my_pid = static_cast<long>(getpid());
   Options options;
-  Status s = rocksdb::DestroyDB(kDBPath, options);
+  rocksdb_rs::status::Status s = rocksdb::DestroyDB(kDBPath, options);
   if (!s.ok()) {
     fprintf(stderr, "[process %ld] Failed to destroy DB: %s\n", my_pid,
             s.ToString().c_str());
@@ -193,7 +193,7 @@ void RunPrimary() {
   char val_buf[kMaxValueLength] = {0};
   uint64_t curr_key = 0;
   while (curr_key < kMaxKey) {
-    Status s;
+    rocksdb_rs::status::Status s;
     if (nullptr == db) {
       s = DB::Open(options, kDBPath, column_families, &handles, &db);
       if (!s.ok()) {
@@ -266,7 +266,7 @@ void RunSecondary() {
   Options options;
   options.create_if_missing = false;
   options.max_open_files = -1;
-  Status s = DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db);
+  rocksdb_rs::status::Status s = DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db);
   if (!s.ok()) {
     fprintf(stderr, "[process %ld] Failed to open in secondary mode: %s\n",
             my_pid, s.ToString().c_str());

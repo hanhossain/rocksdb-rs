@@ -457,7 +457,7 @@ void IndexBlockIter::SeekImpl(const Slice& target) {
   if (raw_key_.IsUserKey()) {
     seek_key = ExtractUserKey(target);
   }
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   uint32_t index = 0;
   bool skip_linear_scan = false;
   bool ok = false;
@@ -469,7 +469,7 @@ void IndexBlockIter::SeekImpl(const Slice& target) {
       // and when key is larger than the last key, which both set Valid() to
       // false.
       current_ = restarts_;
-      status_ = Status_NotFound();
+      status_ = rocksdb_rs::status::Status_NotFound();
     }
     // restart interval must be one when hash search is enabled so the binary
     // search simply lands at the right place.
@@ -565,7 +565,7 @@ void IndexBlockIter::SeekToFirstImpl() {
   if (data_ == nullptr) {  // Not init yet
     return;
   }
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   SeekToRestartPoint(0);
   ParseNextIndexKey();
   cur_entry_idx_ = 0;
@@ -604,7 +604,7 @@ void IndexBlockIter::SeekToLastImpl() {
   if (data_ == nullptr) {  // Not init yet
     return;
   }
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   SeekToRestartPoint(num_restarts_ - 1);
   cur_entry_idx_ = (num_restarts_ - 1) * block_restart_interval_;
   while (ParseNextIndexKey() && NextEntryOffset() < restarts_) {
@@ -717,7 +717,7 @@ bool IndexBlockIter::ParseNextIndexKey() {
 void IndexBlockIter::DecodeCurrentValue(bool is_shared) {
   Slice v(value_.data(), data_ + restarts_ - value_.data());
   // Delta encoding is used if `shared` != 0.
-  Status decode_s __attribute__((__unused__)) = decoded_value_.DecodeFrom(
+  rocksdb_rs::status::Status decode_s __attribute__((__unused__)) = decoded_value_.DecodeFrom(
       &v, have_first_key_,
       (value_delta_encoded_ && is_shared) ? &decoded_value_.handle : nullptr);
   assert(decode_s.ok());
@@ -1214,11 +1214,11 @@ void Block::InitializeMetaIndexBlockProtectionInfo(
 MetaBlockIter* Block::NewMetaIterator(bool block_contents_pinned) {
   MetaBlockIter* iter = new MetaBlockIter();
   if (size_ < 2 * sizeof(uint32_t)) {
-    iter->Invalidate(Status_Corruption("bad block contents"));
+    iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
     return iter;
   } else if (num_restarts_ == 0) {
     // Empty block.
-    iter->Invalidate(Status_OK());
+    iter->Invalidate(rocksdb_rs::status::Status_OK());
   } else {
     iter->Initialize(data_, restart_offset_, num_restarts_,
                      block_contents_pinned, protection_bytes_per_key_,
@@ -1239,12 +1239,12 @@ DataBlockIter* Block::NewDataIterator(const Comparator* raw_ucmp,
     ret_iter = new DataBlockIter;
   }
   if (size_ < 2 * sizeof(uint32_t)) {
-    ret_iter->Invalidate(Status_Corruption("bad block contents"));
+    ret_iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
     return ret_iter;
   }
   if (num_restarts_ == 0) {
     // Empty block.
-    ret_iter->Invalidate(Status_OK());
+    ret_iter->Invalidate(rocksdb_rs::status::Status_OK());
     return ret_iter;
   } else {
     ret_iter->Initialize(
@@ -1277,12 +1277,12 @@ IndexBlockIter* Block::NewIndexIterator(
     ret_iter = new IndexBlockIter;
   }
   if (size_ < 2 * sizeof(uint32_t)) {
-    ret_iter->Invalidate(Status_Corruption("bad block contents"));
+    ret_iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
     return ret_iter;
   }
   if (num_restarts_ == 0) {
     // Empty block.
-    ret_iter->Invalidate(Status_OK());
+    ret_iter->Invalidate(rocksdb_rs::status::Status_OK());
     return ret_iter;
   } else {
     BlockPrefixIndex* prefix_index_ptr =

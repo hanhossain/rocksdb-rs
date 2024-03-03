@@ -16,7 +16,7 @@ InMemoryStatsHistoryIterator::~InMemoryStatsHistoryIterator() {}
 
 bool InMemoryStatsHistoryIterator::Valid() const { return valid_; }
 
-Status InMemoryStatsHistoryIterator::status() const { return status_.Clone(); }
+rocksdb_rs::status::Status InMemoryStatsHistoryIterator::status() const { return status_.Clone(); }
 
 // Because of garbage collection, the next stats snapshot may or may not be
 // right after the current one. When reading from DBImpl::stats_history_, this

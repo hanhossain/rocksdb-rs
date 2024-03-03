@@ -32,6 +32,7 @@
 #include "test_util/testutil.h"
 #include "util/string_util.h"
 #include "utilities/merge_operators.h"
+using namespace rocksdb_rs::filename;
 
 namespace rocksdb {
 
@@ -253,7 +254,7 @@ class CompactionJobTestBase : public testing::Test {
     std::vector<DbPath> db_paths;
     db_paths.emplace_back(dbname_, std::numeric_limits<uint64_t>::max());
     meta.fd = FileDescriptor(file_number, 0, 0);
-    return TableFileName(db_paths, meta.fd.GetNumber(), meta.fd.GetPathId());
+    return static_cast<std::string>(TableFileName(db_paths, meta.fd.GetNumber(), meta.fd.GetPathId()));
   }
 
   std::string KeyStr(const std::string& user_key, const SequenceNumber seq_num,
@@ -266,7 +267,7 @@ class CompactionJobTestBase : public testing::Test {
                              uint64_t size) {
     std::string blob_index;
     BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                          CompressionType::kNoCompression);
+                          rocksdb_rs::compression_type::CompressionType::kNoCompression);
     return blob_index;
   }
 
@@ -274,7 +275,7 @@ class CompactionJobTestBase : public testing::Test {
                                 uint64_t size, uint64_t expiration) {
     std::string blob_index;
     BlobIndex::EncodeBlobTTL(&blob_index, expiration, blob_file_number, offset,
-                             size, CompressionType::kNoCompression);
+                             size, rocksdb_rs::compression_type::CompressionType::kNoCompression);
     return blob_index;
   }
 
@@ -289,7 +290,7 @@ class CompactionJobTestBase : public testing::Test {
   void CreateTable(const std::string& table_name,
                    const mock::KVVector& contents, uint64_t& file_size) {
     std::unique_ptr<WritableFileWriter> file_writer;
-    Status s = WritableFileWriter::Create(fs_, table_name, FileOptions(),
+    rocksdb_rs::status::Status s = WritableFileWriter::Create(fs_, table_name, FileOptions(),
                                           &file_writer, nullptr);
     ASSERT_OK(s);
     std::unique_ptr<TableBuilder> table_builder(
@@ -297,7 +298,7 @@ class CompactionJobTestBase : public testing::Test {
             TableBuilderOptions(*cfd_->ioptions(), mutable_cf_options_,
                                 cfd_->internal_comparator(),
                                 cfd_->int_tbl_prop_collector_factories(),
-                                CompressionType::kNoCompression,
+                                rocksdb_rs::compression_type::CompressionType::kNoCompression,
                                 CompressionOptions(), 0 /* column_family_id */,
                                 kDefaultColumnFamilyName, -1 /* level */),
             file_writer.get()));
@@ -326,7 +327,7 @@ class CompactionJobTestBase : public testing::Test {
       std::string skey;
       std::string value;
       std::tie(skey, value) = kv;
-      const Status pik_status =
+      const rocksdb_rs::status::Status pik_status =
           ParseInternalKey(skey, &key, true /* log_err_key */);
 
       smallest_seqno = std::min(smallest_seqno, key.sequence);
@@ -347,7 +348,7 @@ class CompactionJobTestBase : public testing::Test {
 
       if (pik_status.ok() && key.type == kTypeBlobIndex) {
         BlobIndex blob_index;
-        const Status s = blob_index.DecodeFrom(value);
+        const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value);
         if (!s.ok()) {
           continue;
         }
@@ -384,7 +385,7 @@ class CompactionJobTestBase : public testing::Test {
         oldest_blob_file_number, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime,
         versions_->GetColumnFamilySet()->GetDefault()->NewEpochNumber(),
-        kUnknownFileChecksum, kUnknownFileChecksumFuncName, UniqueId64x2_null(),
+        kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
         /*compensated_range_deletion_size=*/0, /*tail_size=*/0,
         /*user_defined_timestamps_persisted=*/true);
 
@@ -451,7 +452,7 @@ class CompactionJobTestBase : public testing::Test {
       std::unique_ptr<TableReader> table_reader;
       uint64_t file_size = output_file->fd.GetFileSize();
       ReadOptions read_opts;
-      Status s = cf_options_.table_factory->NewTableReader(
+      rocksdb_rs::status::Status s = cf_options_.table_factory->NewTableReader(
           read_opts,
           TableReaderOptions(*cfd->ioptions(), nullptr, FileOptions(),
                              cfd_->internal_comparator(),
@@ -535,7 +536,7 @@ class CompactionJobTestBase : public testing::Test {
 
     std::shared_ptr<Logger> info_log;
     DBOptions db_opts = BuildDBOptions(db_options_, mutable_db_options_);
-    Status s = CreateLoggerFromOptions(dbname_, db_opts, &info_log);
+    rocksdb_rs::status::Status s = CreateLoggerFromOptions(dbname_, db_opts, &info_log);
     ASSERT_OK(s);
     db_options_.info_log = info_log;
 
@@ -552,7 +553,7 @@ class CompactionJobTestBase : public testing::Test {
     new_db.SetNextFile(2);
     new_db.SetLastSequence(0);
 
-    const std::string manifest = DescriptorFileName(dbname_, 1);
+    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     std::unique_ptr<WritableFileWriter> file_writer;
     const auto& fs = env_->GetFileSystem();
     s = WritableFileWriter::Create(fs, manifest,
@@ -640,7 +641,7 @@ class CompactionJobTestBase : public testing::Test {
         *cfd->GetLatestMutableCFOptions(), mutable_db_options_,
         compaction_input_files, output_level,
         mutable_cf_options_.target_file_size_base,
-        mutable_cf_options_.max_compaction_bytes, 0, CompressionType::kNoCompression,
+        mutable_cf_options_.max_compaction_bytes, 0, rocksdb_rs::compression_type::CompressionType::kNoCompression,
         cfd->GetLatestMutableCFOptions()->compression_opts,
         Temperature::kUnknown, max_subcompactions, grandparents, true);
     compaction.SetInputVersion(cfd->current());
@@ -668,7 +669,7 @@ class CompactionJobTestBase : public testing::Test {
 
     compaction_job.Prepare();
     mutex_.Unlock();
-    Status s = compaction_job.Run();
+    rocksdb_rs::status::Status s = compaction_job.Run();
     ASSERT_OK(s);
     ASSERT_OK(compaction_job.io_status());
     mutex_.Lock();
@@ -1559,7 +1560,7 @@ TEST_F(CompactionJobTest, InputSerialization) {
   input.column_family.options.max_bytes_for_level_base =
       rnd64.Uniform(UINT64_MAX);
   input.column_family.options.disable_auto_compactions = rnd.OneIn(2);
-  input.column_family.options.compression = CompressionType::kZSTD;
+  input.column_family.options.compression = rocksdb_rs::compression_type::CompressionType::kZSTD;
   input.column_family.options.compression_opts.level = 4;
   input.db_options.max_background_flushes = 10;
   input.db_options.paranoid_checks = rnd.OneIn(2);
@@ -1633,7 +1634,7 @@ TEST_F(CompactionJobTest, InputSerialization) {
   char buf[kDataVersionSize];
   EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
   output.replace(0, kDataVersionSize, buf, kDataVersionSize);
-  Status s = CompactionServiceInput::Read(output, &deserialized3);
+  rocksdb_rs::status::Status s = CompactionServiceInput::Read(output, &deserialized3);
   ASSERT_TRUE(s.IsNotSupported());
 }
 
@@ -1643,15 +1644,15 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   const int kStrMaxLen = 1000;
   Random rnd(static_cast<uint32_t>(time(nullptr)));
   Random64 rnd64(time(nullptr));
-  std::vector<Status> status_list;
-  status_list.push_back(Status_OK());
-  status_list.push_back(Status_InvalidArgument("invalid option"));
-  status_list.push_back(Status_Aborted("failed to run"));
-  status_list.push_back(Status_NotSupported("not supported option"));
+  std::vector<rocksdb_rs::status::Status> status_list;
+  status_list.push_back(rocksdb_rs::status::Status_OK());
+  status_list.push_back(rocksdb_rs::status::Status_InvalidArgument("invalid option"));
+  status_list.push_back(rocksdb_rs::status::Status_Aborted("failed to run"));
+  status_list.push_back(rocksdb_rs::status::Status_NotSupported("not supported option"));
   result.status.copy_from(
       status_list.at(rnd.Uniform(static_cast<int>(status_list.size()))));
   while (!rnd.OneIn(10)) {
-    UniqueId64x2 id{rnd64.Uniform(UINT64_MAX), rnd64.Uniform(UINT64_MAX)};
+    rocksdb_rs::unique_id::UniqueId64x2 id{rnd64.Uniform(UINT64_MAX), rnd64.Uniform(UINT64_MAX)};
     result.output_files.emplace_back(
         rnd.RandomString(rnd.Uniform(kStrMaxLen)), rnd64.Uniform(UINT64_MAX),
         rnd64.Uniform(UINT64_MAX),
@@ -1730,7 +1731,7 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   char buf[kDataVersionSize];
   EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
   output.replace(0, kDataVersionSize, buf, kDataVersionSize);
-  Status s = CompactionServiceResult::Read(output, &deserialized3);
+  rocksdb_rs::status::Status s = CompactionServiceResult::Read(output, &deserialized3);
   ASSERT_TRUE(s.IsNotSupported());
 }
 

@@ -12,10 +12,13 @@
 
 #include "rocksdb/wide_columns.h"
 
+namespace rocksdb_rs::status {
+    struct Status;
+}
+
 namespace rocksdb {
 
 class Slice;
-struct Status;
 class ColumnFamilyHandle;
 class WriteBatch;
 struct SliceParts;
@@ -28,76 +31,76 @@ class WriteBatchBase {
   virtual ~WriteBatchBase() {}
 
   // Store the mapping "key->value" in the database.
-  virtual Status Put(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& value) = 0;
-  virtual Status Put(const Slice& key, const Slice& value) = 0;
-  virtual Status Put(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Put(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& ts, const Slice& value) = 0;
 
   // Variant of Put() that gathers output like writev(2).  The key and value
   // that will be written to the database are concatenations of arrays of
   // slices.
-  virtual Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
                      const SliceParts& value);
-  virtual Status Put(const SliceParts& key, const SliceParts& value);
+  virtual rocksdb_rs::status::Status Put(const SliceParts& key, const SliceParts& value);
 
   // Store the mapping "key->{column1:value1, column2:value2, ...}" in the
   // column family specified by "column_family".
-  virtual Status PutEntity(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status PutEntity(ColumnFamilyHandle* column_family, const Slice& key,
                            const WideColumns& columns) = 0;
 
   // Merge "value" with the existing value of "key" in the database.
   // "key->merge(existing, value)"
-  virtual Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& value) = 0;
-  virtual Status Merge(const Slice& key, const Slice& value) = 0;
-  virtual Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& ts, const Slice& value) = 0;
 
   // variant that takes SliceParts
-  virtual Status Merge(ColumnFamilyHandle* column_family, const SliceParts& key,
+  virtual rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const SliceParts& key,
                        const SliceParts& value);
-  virtual Status Merge(const SliceParts& key, const SliceParts& value);
+  virtual rocksdb_rs::status::Status Merge(const SliceParts& key, const SliceParts& value);
 
   // If the database contains a mapping for "key", erase it.  Else do nothing.
-  virtual Status Delete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
                         const Slice& key) = 0;
-  virtual Status Delete(const Slice& key) = 0;
-  virtual Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Delete(const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
                         const Slice& ts) = 0;
 
   // variant that takes SliceParts
-  virtual Status Delete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
                         const SliceParts& key);
-  virtual Status Delete(const SliceParts& key);
+  virtual rocksdb_rs::status::Status Delete(const SliceParts& key);
 
   // If the database contains a mapping for "key", erase it. Expects that the
   // key was not overwritten. Else do nothing.
-  virtual Status SingleDelete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                               const Slice& key) = 0;
-  virtual Status SingleDelete(const Slice& key) = 0;
-  virtual Status SingleDelete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status SingleDelete(const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                               const Slice& key, const Slice& ts) = 0;
 
   // variant that takes SliceParts
-  virtual Status SingleDelete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                               const SliceParts& key);
-  virtual Status SingleDelete(const SliceParts& key);
+  virtual rocksdb_rs::status::Status SingleDelete(const SliceParts& key);
 
   // If the database contains mappings in the range ["begin_key", "end_key"),
   // erase them. Else do nothing.
-  virtual Status DeleteRange(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family,
                              const Slice& begin_key, const Slice& end_key) = 0;
-  virtual Status DeleteRange(const Slice& begin_key, const Slice& end_key) = 0;
-  virtual Status DeleteRange(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key) = 0;
+  virtual rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family,
                              const Slice& begin_key, const Slice& end_key,
                              const Slice& ts) = 0;
 
   // variant that takes SliceParts
-  virtual Status DeleteRange(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family,
                              const SliceParts& begin_key,
                              const SliceParts& end_key);
-  virtual Status DeleteRange(const SliceParts& begin_key,
+  virtual rocksdb_rs::status::Status DeleteRange(const SliceParts& begin_key,
                              const SliceParts& end_key);
 
   // Append a blob of arbitrary size to the records in this batch. The blob will
@@ -110,7 +113,7 @@ class WriteBatchBase {
   //
   // Example application: add timestamps to the transaction log for use in
   // replication.
-  virtual Status PutLogData(const Slice& blob) = 0;
+  virtual rocksdb_rs::status::Status PutLogData(const Slice& blob) = 0;
 
   // Clear all updates buffered in this batch.
   virtual void Clear() = 0;
@@ -128,13 +131,13 @@ class WriteBatchBase {
   // most recent call to SetSavePoint() and removes the most recent save point.
   // If there is no previous call to SetSavePoint(), behaves the same as
   // Clear().
-  virtual Status RollbackToSavePoint() = 0;
+  virtual rocksdb_rs::status::Status RollbackToSavePoint() = 0;
 
   // Pop the most recent save point.
   // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
   // Otherwise returns Status_OK().
-  virtual Status PopSavePoint() = 0;
+  virtual rocksdb_rs::status::Status PopSavePoint() = 0;
 
   // Sets the maximum size of the write batch in bytes. 0 means no limit.
   virtual void SetMaxBytes(size_t max_bytes) = 0;

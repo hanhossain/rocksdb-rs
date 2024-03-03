@@ -51,7 +51,7 @@ class MergeHelper {
   // - Corruption: Merge operator reported unsuccessful merge. The scope of the
   //   damage will be stored in `*op_failure_scope` when `op_failure_scope` is
   //   not nullptr
-  static Status TimedFullMerge(const MergeOperator* merge_operator,
+  static rocksdb_rs::status::Status TimedFullMerge(const MergeOperator* merge_operator,
                                const Slice& key, const Slice* value,
                                const std::vector<Slice>& operands,
                                std::string* result, Logger* logger,
@@ -59,7 +59,7 @@ class MergeHelper {
                                Slice* result_operand, bool update_num_ops_stats,
                                MergeOperator::OpFailureScope* op_failure_scope);
 
-  static Status TimedFullMergeWithEntity(
+  static rocksdb_rs::status::Status TimedFullMergeWithEntity(
       const MergeOperator* merge_operator, const Slice& key, Slice base_entity,
       const std::vector<Slice>& operands, std::string* result, Logger* logger,
       Statistics* statistics, SystemClock* clock, bool update_num_ops_stats,
@@ -101,7 +101,7 @@ class MergeHelper {
   // - ShutdownInProgress: interrupted by shutdown (*shutting_down == true).
   //
   // REQUIRED: The first key in the input is not corrupted.
-  Status MergeUntil(InternalIterator* iter,
+  rocksdb_rs::status::Status MergeUntil(InternalIterator* iter,
                     CompactionRangeDelAggregator* range_del_agg,
                     const SequenceNumber stop_before, const bool at_bottom,
                     const bool allow_data_in_errors,

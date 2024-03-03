@@ -29,30 +29,30 @@ uint64_t TraceExecutionResult::GetEndTimestamp() const { return ts_end_; }
 
 // StatusOnlyTraceExecutionResult
 StatusOnlyTraceExecutionResult::StatusOnlyTraceExecutionResult(
-    Status status, uint64_t start_timestamp, uint64_t end_timestamp,
+    rocksdb_rs::status::Status status, uint64_t start_timestamp, uint64_t end_timestamp,
     TraceType trace_type)
     : TraceExecutionResult(start_timestamp, end_timestamp, trace_type),
       status_(std::move(status)) {}
 
-const Status& StatusOnlyTraceExecutionResult::GetStatus() const {
+const rocksdb_rs::status::Status& StatusOnlyTraceExecutionResult::GetStatus() const {
   return status_;
 }
 
-Status StatusOnlyTraceExecutionResult::Accept(Handler* handler) {
+rocksdb_rs::status::Status StatusOnlyTraceExecutionResult::Accept(Handler* handler) {
   assert(handler != nullptr);
   return handler->Handle(*this);
 }
 
 // SingleValueTraceExecutionResult
 SingleValueTraceExecutionResult::SingleValueTraceExecutionResult(
-    Status status, const std::string& value, uint64_t start_timestamp,
+    rocksdb_rs::status::Status status, const std::string& value, uint64_t start_timestamp,
     uint64_t end_timestamp, TraceType trace_type)
     : TraceExecutionResult(start_timestamp, end_timestamp, trace_type),
       status_(std::move(status)),
       value_(value) {}
 
 SingleValueTraceExecutionResult::SingleValueTraceExecutionResult(
-    Status status, std::string&& value, uint64_t start_timestamp,
+    rocksdb_rs::status::Status status, std::string&& value, uint64_t start_timestamp,
     uint64_t end_timestamp, TraceType trace_type)
     : TraceExecutionResult(start_timestamp, end_timestamp, trace_type),
       status_(std::move(status)),
@@ -62,7 +62,7 @@ SingleValueTraceExecutionResult::~SingleValueTraceExecutionResult() {
   value_.clear();
 }
 
-const Status& SingleValueTraceExecutionResult::GetStatus() const {
+const rocksdb_rs::status::Status& SingleValueTraceExecutionResult::GetStatus() const {
   return status_;
 }
 
@@ -70,14 +70,14 @@ const std::string& SingleValueTraceExecutionResult::GetValue() const {
   return value_;
 }
 
-Status SingleValueTraceExecutionResult::Accept(Handler* handler) {
+rocksdb_rs::status::Status SingleValueTraceExecutionResult::Accept(Handler* handler) {
   assert(handler != nullptr);
   return handler->Handle(*this);
 }
 
 // MultiValuesTraceExecutionResult
 MultiValuesTraceExecutionResult::MultiValuesTraceExecutionResult(
-    rust::Vec<Status> multi_status, std::vector<std::string> values,
+    rust::Vec<rocksdb_rs::status::Status> multi_status, std::vector<std::string> values,
     uint64_t start_timestamp, uint64_t end_timestamp, TraceType trace_type)
     : TraceExecutionResult(start_timestamp, end_timestamp, trace_type),
       multi_status_(std::move(multi_status)),
@@ -88,7 +88,7 @@ MultiValuesTraceExecutionResult::~MultiValuesTraceExecutionResult() {
   values_.clear();
 }
 
-const rust::Vec<Status>& MultiValuesTraceExecutionResult::GetMultiStatus()
+const rust::Vec<rocksdb_rs::status::Status>& MultiValuesTraceExecutionResult::GetMultiStatus()
     const {
   return multi_status_;
 }
@@ -98,14 +98,14 @@ const std::vector<std::string>& MultiValuesTraceExecutionResult::GetValues()
   return values_;
 }
 
-Status MultiValuesTraceExecutionResult::Accept(Handler* handler) {
+rocksdb_rs::status::Status MultiValuesTraceExecutionResult::Accept(Handler* handler) {
   assert(handler != nullptr);
   return handler->Handle(*this);
 }
 
 // IteratorTraceExecutionResult
 IteratorTraceExecutionResult::IteratorTraceExecutionResult(
-    bool valid, Status status, PinnableSlice&& key, PinnableSlice&& value,
+    bool valid, rocksdb_rs::status::Status status, PinnableSlice&& key, PinnableSlice&& value,
     uint64_t start_timestamp, uint64_t end_timestamp, TraceType trace_type)
     : TraceExecutionResult(start_timestamp, end_timestamp, trace_type),
       valid_(valid),
@@ -114,7 +114,7 @@ IteratorTraceExecutionResult::IteratorTraceExecutionResult(
       value_(std::move(value)) {}
 
 IteratorTraceExecutionResult::IteratorTraceExecutionResult(
-    bool valid, Status status, const std::string& key, const std::string& value,
+    bool valid, rocksdb_rs::status::Status status, const std::string& key, const std::string& value,
     uint64_t start_timestamp, uint64_t end_timestamp, TraceType trace_type)
     : TraceExecutionResult(start_timestamp, end_timestamp, trace_type),
       valid_(valid),
@@ -130,7 +130,7 @@ IteratorTraceExecutionResult::~IteratorTraceExecutionResult() {
 
 bool IteratorTraceExecutionResult::GetValid() const { return valid_; }
 
-const Status& IteratorTraceExecutionResult::GetStatus() const {
+const rocksdb_rs::status::Status& IteratorTraceExecutionResult::GetStatus() const {
   return status_;
 }
 
@@ -138,7 +138,7 @@ Slice IteratorTraceExecutionResult::GetKey() const { return Slice(key_); }
 
 Slice IteratorTraceExecutionResult::GetValue() const { return Slice(value_); }
 
-Status IteratorTraceExecutionResult::Accept(Handler* handler) {
+rocksdb_rs::status::Status IteratorTraceExecutionResult::Accept(Handler* handler) {
   assert(handler != nullptr);
   return handler->Handle(*this);
 }

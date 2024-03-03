@@ -122,7 +122,7 @@ extern SstFileManager* NewSstFileManager(
     Env* env, std::shared_ptr<FileSystem> fs,
     std::shared_ptr<Logger> info_log = nullptr,
     const std::string& trash_dir = "", int64_t rate_bytes_per_sec = 0,
-    bool delete_existing_trash = true, Status* status = nullptr,
+    bool delete_existing_trash = true, rocksdb_rs::status::Status* status = nullptr,
     double max_trash_db_ratio = 0.25,
     uint64_t bytes_max_delete_chunk = 64 * 1024 * 1024);
 
@@ -131,7 +131,7 @@ extern SstFileManager* NewSstFileManager(
 extern SstFileManager* NewSstFileManager(
     Env* env, std::shared_ptr<Logger> info_log = nullptr,
     std::string trash_dir = "", int64_t rate_bytes_per_sec = 0,
-    bool delete_existing_trash = true, Status* status = nullptr,
+    bool delete_existing_trash = true, rocksdb_rs::status::Status* status = nullptr,
     double max_trash_db_ratio = 0.25,
     uint64_t bytes_max_delete_chunk = 64 * 1024 * 1024);
 

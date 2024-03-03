@@ -128,7 +128,7 @@ class BlockCacheFile : public LRUElement<BlockCacheFile> {
   // get block information
   std::list<BlockInfo*>& block_infos() { return block_infos_; }
   // delete file and return the size of the file
-  virtual Status Delete(uint64_t* size);
+  virtual rocksdb_rs::status::Status Delete(uint64_t* size);
 
  protected:
   port::RWMutex rwlock_;               // synchronization mutex

@@ -12,24 +12,12 @@
 #include "rocksdb/write_batch.h"
 
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb-rs/src/transaction_log.rs.h"
 
 namespace rocksdb {
 
 class LogFile;
 using VectorLogPtr = std::vector<std::unique_ptr<LogFile>>;
-
-enum WalFileType {
-  /* Indicates that WAL file is in archive directory. WAL files are moved from
-   * the main db directory to archive directory once they are not live and stay
-   * there until cleaned up. Files are cleaned depending on archive size
-   * (Options::WAL_size_limit_MB) and time since last cleaning
-   * (Options::WAL_ttl_seconds).
-   */
-  kArchivedLogFile = 0,
-
-  /* Indicates that WAL file is live and resides in the main db directory */
-  kAliveLogFile = 1
-};
 
 class LogFile {
  public:
@@ -46,7 +34,7 @@ class LogFile {
   virtual uint64_t LogNumber() const = 0;
 
   // Log file can be either alive or archived
-  virtual WalFileType Type() const = 0;
+  virtual rocksdb_rs::transaction_log::WalFileType Type() const = 0;
 
   // Starting sequence number of writebatch written in this log file
   virtual SequenceNumber StartSequence() const = 0;
@@ -100,7 +88,7 @@ class TransactionLogIterator {
 
   // Returns ok if the iterator is valid.
   // Returns the Error when something has gone wrong.
-  virtual Status status() = 0;
+  virtual rocksdb_rs::status::Status status() = 0;
 
   // If valid return's the current write_batch and the sequence number of the
   // earliest transaction contained in the batch.

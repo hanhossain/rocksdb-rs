@@ -48,7 +48,7 @@ size_t EncodeSize(PlainTableEntryType type, uint32_t key_size,
 }  // namespace
 
 // Fill bytes_read with number of bytes read.
-inline Status PlainTableKeyDecoder::DecodeSize(uint32_t start_offset,
+inline rocksdb_rs::status::Status PlainTableKeyDecoder::DecodeSize(uint32_t start_offset,
                                                PlainTableEntryType* entry_type,
                                                uint32_t* key_size,
                                                uint32_t* bytes_read) {
@@ -64,7 +64,7 @@ inline Status PlainTableKeyDecoder::DecodeSize(uint32_t start_offset,
   if (inline_key_size < kSizeInlineLimit) {
     *key_size = inline_key_size;
     *bytes_read = 1;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     uint32_t extra_size;
     uint32_t tmp_bytes_read;
@@ -76,7 +76,7 @@ inline Status PlainTableKeyDecoder::DecodeSize(uint32_t start_offset,
     assert(tmp_bytes_read > 0);
     *key_size = kSizeInlineLimit + extra_size;
     *bytes_read = tmp_bytes_read + 1;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 
@@ -85,7 +85,7 @@ IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key,
                                          uint64_t* offset, char* meta_bytes_buf,
                                          size_t* meta_bytes_buf_size) {
   ParsedInternalKey parsed_key;
-  Status pik_status =
+  rocksdb_rs::status::Status pik_status =
       ParseInternalKey(key, &parsed_key, false /* log_err_key */);  // TODO
   if (!pik_status.ok()) {
     return IOStatus::Corruption(*pik_status.getState());
@@ -213,7 +213,7 @@ bool PlainTableFileReader::ReadNonMmap(uint32_t file_offset, uint32_t len,
   }
   Slice read_result;
   // TODO: rate limit plain table reads.
-  Status s =
+  rocksdb_rs::status::Status s =
       file_info_->file->Read(IOOptions(), file_offset, size_to_read,
                              &read_result, new_buffer->buf.get(), nullptr,
                              Env::IO_TOTAL /* rate_limiter_priority */);
@@ -262,7 +262,7 @@ bool PlainTableFileReader::ReadVarint32NonMmap(uint32_t offset, uint32_t* out,
   return true;
 }
 
-Status PlainTableKeyDecoder::ReadInternalKey(
+rocksdb_rs::status::Status PlainTableKeyDecoder::ReadInternalKey(
     uint32_t file_offset, uint32_t user_key_size, ParsedInternalKey* parsed_key,
     uint32_t* bytes_read, bool* internal_key_valid, Slice* internal_key) {
   Slice tmp_slice;
@@ -283,25 +283,25 @@ Status PlainTableKeyDecoder::ReadInternalKey(
       return file_reader_.status();
     }
     *internal_key_valid = true;
-    Status pik_status = ParseInternalKey(*internal_key, parsed_key,
+    rocksdb_rs::status::Status pik_status = ParseInternalKey(*internal_key, parsed_key,
                                          false /* log_err_key */);  // TODO
     if (!pik_status.ok()) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           Slice("Corrupted key found during next key read. "),
           *pik_status.getState());
     }
     *bytes_read += user_key_size + 8;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t start_offset,
+rocksdb_rs::status::Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t start_offset,
                                                   ParsedInternalKey* parsed_key,
                                                   Slice* internal_key,
                                                   uint32_t* bytes_read,
                                                   bool* /*seekable*/) {
   uint32_t user_key_size = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (fixed_user_key_len_ != kPlainTableVariableLength) {
     user_key_size = fixed_user_key_len_;
   } else {
@@ -341,16 +341,16 @@ Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t start_offset,
       *internal_key = cur_key_.GetInternalKey();
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status PlainTableKeyDecoder::NextPrefixEncodingKey(
+rocksdb_rs::status::Status PlainTableKeyDecoder::NextPrefixEncodingKey(
     uint32_t start_offset, ParsedInternalKey* parsed_key, Slice* internal_key,
     uint32_t* bytes_read, bool* seekable) {
   PlainTableEntryType entry_type;
 
   bool expect_suffix = false;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   do {
     uint32_t size = 0;
     // dummy initial value to avoid compiler complain
@@ -362,7 +362,7 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
       return s;
     }
     if (my_bytes_read == 0) {
-      return Status_Corruption("Unexpected EOF when reading size of the key");
+      return rocksdb_rs::status::Status_Corruption("Unexpected EOF when reading size of the key");
     }
     *bytes_read += my_bytes_read;
 
@@ -449,18 +449,18 @@ Status PlainTableKeyDecoder::NextPrefixEncodingKey(
         break;
       }
       default:
-        return Status_Corruption("Un-identified size flag.");
+        return rocksdb_rs::status::Status_Corruption("Un-identified size flag.");
     }
   } while (expect_suffix);  // Another round if suffix is expected.
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,
+rocksdb_rs::status::Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,
                                      ParsedInternalKey* parsed_key,
                                      Slice* internal_key, Slice* value,
                                      uint32_t* bytes_read, bool* seekable) {
   assert(value != nullptr);
-  Status s = NextKeyNoValue(start_offset, parsed_key, internal_key, bytes_read,
+  rocksdb_rs::status::Status s = NextKeyNoValue(start_offset, parsed_key, internal_key, bytes_read,
                             seekable);
   if (s.ok()) {
     assert(bytes_read != nullptr);
@@ -472,7 +472,7 @@ Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,
       return file_reader_.status();
     }
     if (value_size_bytes == 0) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Unexpected EOF when reading the next value's size.");
     }
     *bytes_read += value_size_bytes;
@@ -485,7 +485,7 @@ Status PlainTableKeyDecoder::NextKey(uint32_t start_offset,
   return s;
 }
 
-Status PlainTableKeyDecoder::NextKeyNoValue(uint32_t start_offset,
+rocksdb_rs::status::Status PlainTableKeyDecoder::NextKeyNoValue(uint32_t start_offset,
                                             ParsedInternalKey* parsed_key,
                                             Slice* internal_key,
                                             uint32_t* bytes_read,

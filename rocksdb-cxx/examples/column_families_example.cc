@@ -24,7 +24,7 @@ using rocksdb::DBOptions;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Slice;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::WriteBatch;
 using rocksdb::WriteOptions;
 
@@ -33,7 +33,7 @@ int main() {
   Options options;
   options.create_if_missing = true;
   DB* db;
-  Status s = DB::Open(options, kDBPath, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, kDBPath, &db);
   assert(s.ok());
 
   // create column family

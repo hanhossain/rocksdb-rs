@@ -46,7 +46,7 @@ static int RegisterBuiltinFileSystems(ObjectLibrary& library,
       EncryptedFileSystem::kClassName(),
       [](const std::string& /*uri*/, std::unique_ptr<FileSystem>* guard,
          std::string* errmsg) {
-        Status s = NewEncryptedFileSystemImpl(nullptr, nullptr, guard);
+        rocksdb_rs::status::Status s = NewEncryptedFileSystemImpl(nullptr, nullptr, guard);
         if (!s.ok()) {
           *errmsg = *s.ToString();
         }
@@ -79,13 +79,13 @@ static int RegisterBuiltinFileSystems(ObjectLibrary& library,
   return static_cast<int>(library.GetFactoryCount(&num_types));
 }
 
-Status FileSystem::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status FileSystem::CreateFromString(const ConfigOptions& config_options,
                                     const std::string& value,
                                     std::shared_ptr<FileSystem>* result) {
   auto default_fs = FileSystem::Default();
   if (default_fs->IsInstanceOf(value)) {
     *result = default_fs;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     static std::once_flag once;
     std::call_once(once, [&]() {
@@ -236,7 +236,7 @@ FileSystemWrapper::FileSystemWrapper(const std::shared_ptr<FileSystem>& t)
   RegisterOptions("", &target_, &fs_wrapper_type_info);
 }
 
-Status FileSystemWrapper::PrepareOptions(const ConfigOptions& options) {
+rocksdb_rs::status::Status FileSystemWrapper::PrepareOptions(const ConfigOptions& options) {
   if (target_ == nullptr) {
     target_ = FileSystem::Default();
   }

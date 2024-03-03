@@ -33,7 +33,7 @@ class ExternalSSTFileBasicTest
     assert(env_->NewWritableFile(file_path, &wfile, EnvOptions()).ok());
     wfile.reset();
     std::unique_ptr<RandomRWFile> rwfile;
-    Status s = env_->NewRandomRWFile(file_path, &rwfile, EnvOptions());
+    rocksdb_rs::status::Status s = env_->NewRandomRWFile(file_path, &rwfile, EnvOptions());
     if (s.IsNotSupported()) {
       random_rwfile_supported_ = false;
     } else {
@@ -49,7 +49,7 @@ class ExternalSSTFileBasicTest
     ASSERT_OK(env_->CreateDir(sst_files_dir_));
   }
 
-  Status DeprecatedAddFile(const std::vector<std::string>& files,
+  rocksdb_rs::status::Status DeprecatedAddFile(const std::vector<std::string>& files,
                            bool move_files = false,
                            bool skip_snapshot_check = false) {
     IngestExternalFileOptions opts;
@@ -60,7 +60,7 @@ class ExternalSSTFileBasicTest
     return db_->IngestExternalFile(files, opts);
   }
 
-  Status AddFileWithFileChecksum(
+  rocksdb_rs::status::Status AddFileWithFileChecksum(
       const std::vector<std::string>& files,
       const std::vector<std::string>& files_checksums,
       const std::vector<std::string>& files_checksum_func_names,
@@ -83,7 +83,7 @@ class ExternalSSTFileBasicTest
     return db_->IngestExternalFiles({arg});
   }
 
-  Status GenerateAndAddExternalFile(
+  rocksdb_rs::status::Status GenerateAndAddExternalFile(
       const Options options, std::vector<int> keys,
       const std::vector<ValueType>& value_types,
       std::vector<std::pair<int, int>> range_deletions, int file_id,
@@ -93,7 +93,7 @@ class ExternalSSTFileBasicTest
     std::string file_path = sst_files_dir_ + std::to_string(file_id);
     SstFileWriter sst_file_writer(EnvOptions(), options);
 
-    Status s = sst_file_writer.Open(file_path);
+    rocksdb_rs::status::Status s = sst_file_writer.Open(file_path);
     if (!s.ok()) {
       return s;
     }
@@ -141,7 +141,7 @@ class ExternalSSTFileBasicTest
           true_data->erase(key);
           break;
         default:
-          return Status_InvalidArgument("Value type is not supported");
+          return rocksdb_rs::status::Status_InvalidArgument("Value type is not supported");
       }
       if (!s.ok()) {
         sst_file_writer.Finish();
@@ -160,7 +160,7 @@ class ExternalSSTFileBasicTest
     return s;
   }
 
-  Status GenerateAndAddExternalFile(
+  rocksdb_rs::status::Status GenerateAndAddExternalFile(
       const Options options, std::vector<int> keys,
       const std::vector<ValueType>& value_types, int file_id,
       bool write_global_seqno, bool verify_checksums_before_ingest,
@@ -170,7 +170,7 @@ class ExternalSSTFileBasicTest
         verify_checksums_before_ingest, true_data);
   }
 
-  Status GenerateAndAddExternalFile(
+  rocksdb_rs::status::Status GenerateAndAddExternalFile(
       const Options options, std::vector<int> keys, const ValueType value_type,
       int file_id, bool write_global_seqno, bool verify_checksums_before_ingest,
       std::map<std::string, std::string>* true_data) {
@@ -205,7 +205,7 @@ TEST_F(ExternalSSTFileBasicTest, Basic) {
     ASSERT_OK(sst_file_writer.Put(Key(k), Key(k) + "_val"));
   }
   ExternalSstFileInfo file1_info;
-  Status s = sst_file_writer.Finish(&file1_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file1_info);
   ASSERT_OK(s) << *s.ToString();
 
   // Current file size should be non-zero after success write.
@@ -246,10 +246,10 @@ class ChecksumVerifyHelper {
   ChecksumVerifyHelper(Options& options) : options_(options) {}
   ~ChecksumVerifyHelper() {}
 
-  Status GetSingleFileChecksumAndFuncName(
+  rocksdb_rs::status::Status GetSingleFileChecksumAndFuncName(
       const std::string& file_path, std::string* file_checksum,
       std::string* file_checksum_func_name) {
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     EnvOptions soptions;
     std::unique_ptr<SequentialFile> file_reader;
     s = options_.env->NewSequentialFile(file_path, &file_reader, soptions);
@@ -263,7 +263,7 @@ class ChecksumVerifyHelper {
     if (file_checksum_gen_factory == nullptr) {
       *file_checksum = kUnknownFileChecksum;
       *file_checksum_func_name = kUnknownFileChecksumFuncName;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       FileChecksumGenContext gen_context;
       std::unique_ptr<FileChecksumGenerator> file_checksum_gen =
@@ -283,7 +283,7 @@ class ChecksumVerifyHelper {
       file_checksum_gen->Finalize();
       *file_checksum = file_checksum_gen->GetChecksum();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 
@@ -305,7 +305,7 @@ TEST_F(ExternalSSTFileBasicTest, BasicWithFileChecksumCrc32c) {
     ASSERT_OK(sst_file_writer.Put(Key(k), Key(k) + "_val"));
   }
   ExternalSstFileInfo file1_info;
-  Status s = sst_file_writer.Finish(&file1_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file1_info);
   ASSERT_OK(s) << *s.ToString();
   std::string file_checksum, file_checksum_func_name;
   ASSERT_OK(checksum_helper.GetSingleFileChecksumAndFuncName(
@@ -357,7 +357,7 @@ TEST_F(ExternalSSTFileBasicTest, IngestFileWithFileChecksum) {
     ASSERT_OK(sst_file_writer.Put(Key(k), Key(k) + "_val"));
   }
   ExternalSstFileInfo file1_info;
-  Status s = sst_file_writer.Finish(&file1_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file1_info);
   ASSERT_OK(s) << *s.ToString();
   ASSERT_EQ(file1_info.file_path, file1);
   ASSERT_EQ(file1_info.num_entries, 100);
@@ -636,7 +636,7 @@ TEST_F(ExternalSSTFileBasicTest, NoCopy) {
     ASSERT_OK(sst_file_writer.Put(Key(k), Key(k) + "_val"));
   }
   ExternalSstFileInfo file1_info;
-  Status s = sst_file_writer.Finish(&file1_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file1_info);
   ASSERT_OK(s) << *s.ToString();
   ASSERT_EQ(file1_info.file_path, file1);
   ASSERT_EQ(file1_info.num_entries, 100);
@@ -673,7 +673,7 @@ TEST_F(ExternalSSTFileBasicTest, NoCopy) {
 
   s = DeprecatedAddFile({file1}, true /* move file */);
   ASSERT_OK(s) << *s.ToString();
-  ASSERT_TRUE(Status_NotFound().eq(env_->FileExists(file1)));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(env_->FileExists(file1)));
 
   s = DeprecatedAddFile({file2}, false /* copy file */);
   ASSERT_OK(s) << *s.ToString();
@@ -1150,7 +1150,7 @@ TEST_F(ExternalSSTFileBasicTest, SyncFailure) {
     if (i == 0) {
       SyncPoint::GetInstance()->SetCallBack(
           "ExternalSstFileIngestionJob::Prepare:Reopen", [&](void* s) {
-            Status* status = static_cast<Status*>(s);
+            rocksdb_rs::status::Status* status = static_cast<rocksdb_rs::status::Status*>(s);
             if (status->IsNotSupported()) {
               no_sync = true;
             }
@@ -1159,7 +1159,7 @@ TEST_F(ExternalSSTFileBasicTest, SyncFailure) {
     if (i == 2) {
       SyncPoint::GetInstance()->SetCallBack(
           "ExternalSstFileIngestionJob::NewRandomRWFile", [&](void* s) {
-            Status* status = static_cast<Status*>(s);
+            rocksdb_rs::status::Status* status = static_cast<rocksdb_rs::status::Status*>(s);
             if (status->IsNotSupported()) {
               no_sync = true;
             }
@@ -1191,7 +1191,7 @@ TEST_F(ExternalSSTFileBasicTest, SyncFailure) {
     if (i == 2) {
       ingest_opt.write_global_seqno = true;
     }
-    Status s = db_->IngestExternalFile({file_name}, ingest_opt);
+    rocksdb_rs::status::Status s = db_->IngestExternalFile({file_name}, ingest_opt);
     if (no_sync) {
       ASSERT_OK(s);
     } else {
@@ -1212,8 +1212,8 @@ TEST_F(ExternalSSTFileBasicTest, ReopenNotSupported) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "ExternalSstFileIngestionJob::Prepare:Reopen", [&](void* arg) {
-        Status* s = static_cast<Status*>(arg);
-        *s = Status_NotSupported();
+        rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(arg);
+        *s = rocksdb_rs::status::Status_NotSupported();
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1431,7 +1431,7 @@ TEST_F(ExternalSSTFileBasicTest, AdjacentRangeDeletionTombstones) {
   ASSERT_OK(sst_file_writer.Open(file8));
   ASSERT_OK(sst_file_writer.DeleteRange(Key(300), Key(400)));
   ExternalSstFileInfo file8_info;
-  Status s = sst_file_writer.Finish(&file8_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file8_info);
   ASSERT_OK(s) << *s.ToString();
   ASSERT_EQ(file8_info.file_path, file8);
   ASSERT_EQ(file8_info.num_entries, 0);
@@ -1536,7 +1536,7 @@ TEST_F(ExternalSSTFileBasicTest, RangeDeletionEndComesBeforeStart) {
   ASSERT_OK(sst_file_writer.DeleteRange(Key(300), Key(300)));
   ASSERT_OK(sst_file_writer.DeleteRange(Key(300), Key(400)));
   ExternalSstFileInfo file_info;
-  Status s = sst_file_writer.Finish(&file_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file_info);
   ASSERT_OK(s) << *s.ToString();
   ASSERT_EQ(file_info.file_path, file);
   ASSERT_EQ(file_info.num_entries, 0);
@@ -1570,7 +1570,7 @@ TEST_P(ExternalSSTFileBasicTest, IngestFileWithBadBlockChecksum) {
     Options options = CurrentOptions();
     DestroyAndReopen(options);
     std::map<std::string, std::string> true_data;
-    Status s = GenerateAndAddExternalFile(
+    rocksdb_rs::status::Status s = GenerateAndAddExternalFile(
         options, {1, 2, 3, 4, 5, 6}, ValueType::kTypeValue, file_id++,
         write_global_seqno, verify_checksums_before_ingest, &true_data);
     if (verify_checksums_before_ingest) {
@@ -1594,7 +1594,7 @@ TEST_P(ExternalSSTFileBasicTest, IngestFileWithFirstByteTampered) {
     Options options = CurrentOptions();
     std::string file_path = sst_files_dir_ + std::to_string(file_id++);
     SstFileWriter sst_file_writer(env_options, options);
-    Status s = sst_file_writer.Open(file_path);
+    rocksdb_rs::status::Status s = sst_file_writer.Open(file_path);
     ASSERT_OK(s);
     for (int i = 0; i != 100; ++i) {
       std::string key = Key(i);
@@ -1666,7 +1666,7 @@ TEST_P(ExternalSSTFileBasicTest, IngestExternalFileWithCorruptedPropsBlock) {
     std::string file_path = sst_files_dir_ + std::to_string(file_id++);
     Options options = CurrentOptions();
     SstFileWriter sst_file_writer(EnvOptions(), options);
-    Status s = sst_file_writer.Open(file_path);
+    rocksdb_rs::status::Status s = sst_file_writer.Open(file_path);
     ASSERT_OK(s);
     for (int i = 0; i != 100; ++i) {
       std::string key = Key(i);
@@ -1763,7 +1763,7 @@ TEST_F(ExternalSSTFileBasicTest, IngestFileAfterDBPut) {
   ASSERT_OK(sst_file_writer.Put("k", "b"));
 
   ExternalSstFileInfo file1_info;
-  Status s = sst_file_writer.Finish(&file1_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file1_info);
   ASSERT_OK(s) << *s.ToString();
 
   // Current file size should be non-zero after success write.
@@ -1799,7 +1799,7 @@ TEST_F(ExternalSSTFileBasicTest, IngestWithTemperature) {
     ASSERT_OK(sst_file_writer.Put(Key(k), Key(k) + "_val"));
   }
   ExternalSstFileInfo file1_info;
-  Status s = sst_file_writer.Finish(&file1_info);
+  rocksdb_rs::status::Status s = sst_file_writer.Finish(&file1_info);
   ASSERT_OK(s);
   ASSERT_EQ(file1_info.file_path, file1);
   ASSERT_EQ(file1_info.num_entries, 100);
@@ -1894,7 +1894,7 @@ TEST_F(ExternalSSTFileBasicTest, FailIfNotBottommostLevel) {
     IngestExternalFileOptions ifo;
     ifo.fail_if_not_bottommost_level = true;
     ifo.snapshot_consistency = true;
-    const Status s = db_->IngestExternalFile({file_path}, ifo);
+    const rocksdb_rs::status::Status s = db_->IngestExternalFile({file_path}, ifo);
     ASSERT_TRUE(s.IsTryAgain());
   }
 
@@ -1917,7 +1917,7 @@ TEST_F(ExternalSSTFileBasicTest, FailIfNotBottommostLevel) {
 
     IngestExternalFileOptions ifo;
     ifo.fail_if_not_bottommost_level = true;
-    const Status s = db_->IngestExternalFile({file_path}, ifo);
+    const rocksdb_rs::status::Status s = db_->IngestExternalFile({file_path}, ifo);
     ASSERT_TRUE(s.IsTryAgain());
   }
 }

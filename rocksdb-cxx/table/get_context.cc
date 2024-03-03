@@ -470,13 +470,13 @@ void GetContext::Merge(const Slice* value) {
   std::string result;
   // `op_failure_scope` (an output parameter) is not provided (set to nullptr)
   // since a failure must be propagated regardless of its value.
-  const Status s = MergeHelper::TimedFullMerge(
+  const rocksdb_rs::status::Status s = MergeHelper::TimedFullMerge(
       merge_operator_, user_key_, value, merge_context_->GetOperands(), &result,
       logger_, statistics_, clock_, /* result_operand */ nullptr,
       /* update_num_ops_stats */ true,
       /* op_failure_scope */ nullptr);
   if (!s.ok()) {
-    if (s.subcode() == SubCode::kMergeOperatorFailed) {
+    if (s.subcode() == rocksdb_rs::status::SubCode::kMergeOperatorFailed) {
       state_ = kMergeOperatorFailed;
     } else {
       state_ = kCorrupt;
@@ -502,7 +502,7 @@ void GetContext::MergeWithEntity(Slice entity) {
     Slice value_of_default;
 
     {
-      const Status s = WideColumnSerialization::GetValueOfDefaultColumn(
+      const rocksdb_rs::status::Status s = WideColumnSerialization::GetValueOfDefaultColumn(
           entity, value_of_default);
       if (!s.ok()) {
         state_ = kCorrupt;
@@ -513,14 +513,14 @@ void GetContext::MergeWithEntity(Slice entity) {
     {
       // `op_failure_scope` (an output parameter) is not provided (set to
       // nullptr) since a failure must be propagated regardless of its value.
-      const Status s = MergeHelper::TimedFullMerge(
+      const rocksdb_rs::status::Status s = MergeHelper::TimedFullMerge(
           merge_operator_, user_key_, &value_of_default,
           merge_context_->GetOperands(), pinnable_val_->GetSelf(), logger_,
           statistics_, clock_, /* result_operand */ nullptr,
           /* update_num_ops_stats */ true,
           /* op_failure_scope */ nullptr);
       if (!s.ok()) {
-        if (s.subcode() == SubCode::kMergeOperatorFailed) {
+        if (s.subcode() == rocksdb_rs::status::SubCode::kMergeOperatorFailed) {
           state_ = kMergeOperatorFailed;
         } else {
           state_ = kCorrupt;
@@ -538,12 +538,12 @@ void GetContext::MergeWithEntity(Slice entity) {
   {
     // `op_failure_scope` (an output parameter) is not provided (set to nullptr)
     // since a failure must be propagated regardless of its value.
-    const Status s = MergeHelper::TimedFullMergeWithEntity(
+    const rocksdb_rs::status::Status s = MergeHelper::TimedFullMergeWithEntity(
         merge_operator_, user_key_, entity, merge_context_->GetOperands(),
         &result, logger_, statistics_, clock_, /* update_num_ops_stats */ true,
         /* op_failure_scope */ nullptr);
     if (!s.ok()) {
-      if (s.subcode() == SubCode::kMergeOperatorFailed) {
+      if (s.subcode() == rocksdb_rs::status::SubCode::kMergeOperatorFailed) {
         state_ = kMergeOperatorFailed;
       } else {
         state_ = kCorrupt;
@@ -554,7 +554,7 @@ void GetContext::MergeWithEntity(Slice entity) {
 
   {
     assert(columns_);
-    const Status s = columns_->SetWideColumnValue(std::move(result));
+    const rocksdb_rs::status::Status s = columns_->SetWideColumnValue(std::move(result));
     if (!s.ok()) {
       state_ = kCorrupt;
       return;
@@ -567,7 +567,7 @@ bool GetContext::GetBlobValue(const Slice& user_key, const Slice& blob_index,
   constexpr FilePrefetchBuffer* prefetch_buffer = nullptr;
   constexpr uint64_t* bytes_read = nullptr;
 
-  Status status = blob_fetcher_->FetchBlob(
+  rocksdb_rs::status::Status status = blob_fetcher_->FetchBlob(
       user_key, blob_index, prefetch_buffer, blob_value, bytes_read);
   if (!status.ok()) {
     if (status.IsIncomplete()) {

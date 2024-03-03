@@ -112,7 +112,7 @@ class FilterPolicy : public Customizable {
   //   "bloomfilter:[bits_per_key]",
   //   e.g. ""bloomfilter:4"
   //   The above string is equivalent to calling NewBloomFilterPolicy(4).
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& value,
                                  std::shared_ptr<const FilterPolicy>* result);
 

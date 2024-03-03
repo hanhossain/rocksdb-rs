@@ -80,12 +80,12 @@ uint32_t Hash(const char* data, size_t n, uint32_t seed) {
 // bundling hash functions specialized for particular lengths with
 // the prefix extractors.
 uint64_t Hash64(const char* data, size_t n, uint64_t seed) {
-  return hash64_with_seed(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), seed);
+  return rocksdb_rs::hash::hash64_with_seed(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), seed);
 }
 
 uint64_t Hash64(const char* data, size_t n) {
   // Same as seed = 0
-  return hash64(rust::Slice(reinterpret_cast<const uint8_t*>(data), n));
+  return rocksdb_rs::hash::hash64(rust::Slice(reinterpret_cast<const uint8_t*>(data), n));
 }
 
 uint64_t GetSlicePartsNPHash64(const SliceParts& data, uint64_t seed) {
@@ -106,7 +106,7 @@ uint64_t GetSlicePartsNPHash64(const SliceParts& data, uint64_t seed) {
 Unsigned128 Hash128(const char* data, size_t n, uint64_t seed) {
   uint64_t h;
   uint64_t l;
-  hash2x64_with_seed(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), seed, h, l);
+  rocksdb_rs::hash::hash2x64_with_seed(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), seed, h, l);
   return Unsigned128(l, h);
 }
 
@@ -114,7 +114,7 @@ Unsigned128 Hash128(const char* data, size_t n) {
   // Same as seed = 0
   uint64_t h;
   uint64_t l;
-  hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), h, l);
+  rocksdb_rs::hash::hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(data), n), h, l);
   return Unsigned128(l, h);
 }
 }  // namespace rocksdb

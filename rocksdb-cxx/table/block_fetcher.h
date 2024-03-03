@@ -72,7 +72,7 @@ class BlockFetcher {
   IOStatus ReadBlockContents();
   IOStatus ReadAsyncBlockContents();
 
-  inline CompressionType get_compression_type() const {
+  inline rocksdb_rs::compression_type::CompressionType get_compression_type() const {
     return compression_type_;
   }
   inline size_t GetBlockSizeWithTrailer() const {
@@ -120,7 +120,7 @@ class BlockFetcher {
   CacheAllocationPtr compressed_buf_;
   char stack_buf_[kDefaultStackBufferSize];
   bool got_from_prefetch_buffer_ = false;
-  CompressionType compression_type_;
+  rocksdb_rs::compression_type::CompressionType compression_type_;
   bool for_compaction_ = false;
 
   // return true if found

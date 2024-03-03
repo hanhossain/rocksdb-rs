@@ -20,11 +20,11 @@ class DBStatisticsTest : public DBTestBase {
 };
 
 TEST_F(DBStatisticsTest, CompressionStatsTest) {
-  for (CompressionType type : GetSupportedCompressions()) {
-    if (type == CompressionType::kNoCompression) {
+  for (rocksdb_rs::compression_type::CompressionType type : GetSupportedCompressions()) {
+    if (type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       continue;
     }
-    if (type == CompressionType::kBZip2Compression) {
+    if (type == rocksdb_rs::compression_type::CompressionType::kBZip2Compression) {
       // Weird behavior in this test
       continue;
     }
@@ -106,7 +106,7 @@ TEST_F(DBStatisticsTest, CompressionStatsTest) {
     EXPECT_EQ(0, PopStat(BYTES_DECOMPRESSED_TO));
 
     // Check when compression is disabled.
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     DestroyAndReopen(options);
 
     for (int i = 0; i < kNumKeysWritten; ++i) {
@@ -219,7 +219,7 @@ TEST_F(DBStatisticsTest, VerifyChecksumReadStat) {
   ASSERT_OK(Flush());
   std::unordered_map<std::string, uint64_t> table_files;
   uint64_t table_files_size = 0;
-  GetAllDataFiles(kTableFile, &table_files, &table_files_size);
+  GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &table_files, &table_files_size);
 
   {
     // Scenario 1: Table verified in `VerifyFileChecksums()`. This should read
@@ -269,7 +269,7 @@ TEST_F(DBStatisticsTest, BlockChecksumStats) {
   // Scenario 2: Corrupted table verified in `VerifyChecksum()`. The corruption
   // is in the fourth and final verified block, i.e., the data block.
   std::unordered_map<std::string, uint64_t> table_files;
-  ASSERT_OK(GetAllDataFiles(kTableFile, &table_files));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &table_files));
   ASSERT_EQ(1, table_files.size());
   std::string table_name = table_files.begin()->first;
   // Assumes the data block starts at offset zero.

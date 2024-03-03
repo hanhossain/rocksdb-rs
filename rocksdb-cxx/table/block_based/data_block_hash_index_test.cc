@@ -566,7 +566,7 @@ void TestBoundary(InternalKey& ik1, std::string& v1, InternalKey& ik2,
   builder->Add(ik2.Encode().ToString(), v2);
   EXPECT_TRUE(builder->status().ok());
 
-  Status s = builder->Finish();
+  rocksdb_rs::status::Status s = builder->Finish();
   ASSERT_OK(file_writer->Flush());
   EXPECT_TRUE(s.ok()) << *s.ToString();
 

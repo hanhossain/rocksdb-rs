@@ -83,7 +83,7 @@ struct ImmutableDBOptions {
   bool allow_ingest_behind;
   bool two_write_queues;
   bool manual_wal_flush;
-  CompressionType wal_compression;
+  rocksdb_rs::compression_type::CompressionType wal_compression;
   bool atomic_flush;
   bool avoid_unnecessary_blocking_io;
   bool persist_stats_to_disk;
@@ -137,11 +137,11 @@ struct MutableDBOptions {
   int max_background_flushes;
 };
 
-Status GetStringFromMutableDBOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromMutableDBOptions(const ConfigOptions& config_options,
                                      const MutableDBOptions& mutable_opts,
                                      std::string* opt_string);
 
-Status GetMutableDBOptionsFromStrings(
+rocksdb_rs::status::Status GetMutableDBOptionsFromStrings(
     const MutableDBOptions& base_options,
     const std::unordered_map<std::string, std::string>& options_map,
     MutableDBOptions* new_options);

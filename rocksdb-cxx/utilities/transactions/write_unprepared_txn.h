@@ -117,30 +117,30 @@ class WriteUnpreparedTxn : public WritePreparedTxn {
   virtual ~WriteUnpreparedTxn();
 
   using TransactionBaseImpl::Put;
-  virtual Status Put(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& value,
                      const bool assume_tracked = false) override;
-  virtual Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
                      const SliceParts& value,
                      const bool assume_tracked = false) override;
 
   using TransactionBaseImpl::Merge;
-  virtual Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& value,
                        const bool assume_tracked = false) override;
 
   using TransactionBaseImpl::Delete;
-  virtual Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
                         const bool assume_tracked = false) override;
-  virtual Status Delete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
                         const SliceParts& key,
                         const bool assume_tracked = false) override;
 
   using TransactionBaseImpl::SingleDelete;
-  virtual Status SingleDelete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                               const Slice& key,
                               const bool assume_tracked = false) override;
-  virtual Status SingleDelete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                               const SliceParts& key,
                               const bool assume_tracked = false) override;
 
@@ -153,7 +153,7 @@ class WriteUnpreparedTxn : public WritePreparedTxn {
   // validate all values larger than snap_seq. Otherwise, we should return
   // Status_NotSupported for untracked writes.
 
-  virtual Status RebuildFromWriteBatch(WriteBatch*) override;
+  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(WriteBatch*) override;
 
   virtual uint64_t GetLastLogNumber() const override {
     return last_log_number_;
@@ -168,23 +168,23 @@ class WriteUnpreparedTxn : public WritePreparedTxn {
  protected:
   void Initialize(const TransactionOptions& txn_options) override;
 
-  Status PrepareInternal() override;
+  rocksdb_rs::status::Status PrepareInternal() override;
 
-  Status CommitWithoutPrepareInternal() override;
-  Status CommitInternal() override;
+  rocksdb_rs::status::Status CommitWithoutPrepareInternal() override;
+  rocksdb_rs::status::Status CommitInternal() override;
 
-  Status RollbackInternal() override;
+  rocksdb_rs::status::Status RollbackInternal() override;
 
   void Clear() override;
 
   void SetSavePoint() override;
-  Status RollbackToSavePoint() override;
-  Status PopSavePoint() override;
+  rocksdb_rs::status::Status RollbackToSavePoint() override;
+  rocksdb_rs::status::Status PopSavePoint() override;
 
   // Get and GetIterator needs to be overridden so that a ReadCallback to
   // handle read-your-own-write is used.
   using Transaction::Get;
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) override;
 
@@ -192,7 +192,7 @@ class WriteUnpreparedTxn : public WritePreparedTxn {
   virtual void MultiGet(const ReadOptions& options,
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
-                        PinnableSlice* values, Status* statuses,
+                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                         const bool sorted_input = false) override;
 
   using Transaction::GetIterator;
@@ -200,7 +200,7 @@ class WriteUnpreparedTxn : public WritePreparedTxn {
   virtual Iterator* GetIterator(const ReadOptions& options,
                                 ColumnFamilyHandle* column_family) override;
 
-  virtual Status ValidateSnapshot(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status ValidateSnapshot(ColumnFamilyHandle* column_family,
                                   const Slice& key,
                                   SequenceNumber* tracked_at_seq) override;
 
@@ -211,16 +211,16 @@ class WriteUnpreparedTxn : public WritePreparedTxn {
   friend class WriteUnpreparedTxnDB;
 
   const std::map<SequenceNumber, size_t>& GetUnpreparedSequenceNumbers();
-  Status WriteRollbackKeys(const LockTracker& tracked_keys,
+  rocksdb_rs::status::Status WriteRollbackKeys(const LockTracker& tracked_keys,
                            WriteBatchWithIndex* rollback_batch,
                            ReadCallback* callback, const ReadOptions& roptions);
 
-  Status MaybeFlushWriteBatchToDB();
-  Status FlushWriteBatchToDB(bool prepared);
-  Status FlushWriteBatchToDBInternal(bool prepared);
-  Status FlushWriteBatchWithSavePointToDB();
-  Status RollbackToSavePointInternal();
-  Status HandleWrite(std::function<Status()> do_write);
+  rocksdb_rs::status::Status MaybeFlushWriteBatchToDB();
+  rocksdb_rs::status::Status FlushWriteBatchToDB(bool prepared);
+  rocksdb_rs::status::Status FlushWriteBatchToDBInternal(bool prepared);
+  rocksdb_rs::status::Status FlushWriteBatchWithSavePointToDB();
+  rocksdb_rs::status::Status RollbackToSavePointInternal();
+  rocksdb_rs::status::Status HandleWrite(std::function<rocksdb_rs::status::Status()> do_write);
 
   // For write unprepared, we check on every writebatch append to see if
   // write_batch_flush_threshold_ has been exceeded, and then call

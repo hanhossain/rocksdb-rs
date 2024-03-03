@@ -55,7 +55,7 @@ PlainTableFactory::PlainTableFactory(const PlainTableOptions& options)
   RegisterOptions(&table_options_, &plain_table_type_info);
 }
 
-Status PlainTableFactory::NewTableReader(
+rocksdb_rs::status::Status PlainTableFactory::NewTableReader(
     const ReadOptions& /*ro*/, const TableReaderOptions& table_reader_options,
     std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
     std::unique_ptr<TableReader>* table,
@@ -122,12 +122,12 @@ std::string PlainTableFactory::GetPrintableOptions() const {
   return ret;
 }
 
-Status GetPlainTableOptionsFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetPlainTableOptionsFromString(const ConfigOptions& config_options,
                                       const PlainTableOptions& table_options,
                                       const std::string& opts_str,
                                       PlainTableOptions* new_table_options) {
   std::unordered_map<std::string, std::string> opts_map;
-  Status s = StringToMap(opts_str, &opts_map);
+  rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
     return s;
   }
@@ -138,7 +138,7 @@ Status GetPlainTableOptionsFromString(const ConfigOptions& config_options,
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
   } else {
-    return Status_InvalidArgument(s.getState());
+    return rocksdb_rs::status::Status_InvalidArgument(s.getState());
   }
 }
 
@@ -219,7 +219,7 @@ static int RegisterBuiltinMemTableRepFactory(ObjectLibrary& library,
   return static_cast<int>(library.GetFactoryCount(&num_types));
 }
 
-Status GetMemTableRepFactoryFromString(
+rocksdb_rs::status::Status GetMemTableRepFactoryFromString(
     const std::string& opts_str, std::unique_ptr<MemTableRepFactory>* result) {
   ConfigOptions config_options;
   config_options.ignore_unsupported_options = false;
@@ -227,7 +227,7 @@ Status GetMemTableRepFactoryFromString(
   return MemTableRepFactory::CreateFromString(config_options, opts_str, result);
 }
 
-Status MemTableRepFactory::CreateFromString(
+rocksdb_rs::status::Status MemTableRepFactory::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::unique_ptr<MemTableRepFactory>* result) {
   static std::once_flag once;
@@ -236,16 +236,16 @@ Status MemTableRepFactory::CreateFromString(
   });
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  Status status = Customizable::GetOptionsMap(config_options, result->get(),
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
                                               value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else if (value.empty()) {
     // No Id and no options.  Clear the object
     result->reset();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (id.empty()) {  // We have no Id but have options.  Not good
-    return Status_NotSupported("Cannot reset object ", id);
+    return rocksdb_rs::status::Status_NotSupported("Cannot reset object ", id);
   } else {
     status = NewUniqueObject<MemTableRepFactory>(config_options, id, opt_map,
                                                  result);
@@ -253,24 +253,24 @@ Status MemTableRepFactory::CreateFromString(
   return status;
 }
 
-Status MemTableRepFactory::CreateFromString(
+rocksdb_rs::status::Status MemTableRepFactory::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::shared_ptr<MemTableRepFactory>* result) {
   std::unique_ptr<MemTableRepFactory> factory;
-  Status s = CreateFromString(config_options, value, &factory);
+  rocksdb_rs::status::Status s = CreateFromString(config_options, value, &factory);
   if (factory && s.ok()) {
     result->reset(factory.release());
   }
   return s;
 }
 
-Status GetPlainTableOptionsFromMap(
+rocksdb_rs::status::Status GetPlainTableOptionsFromMap(
     const ConfigOptions& config_options, const PlainTableOptions& table_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     PlainTableOptions* new_table_options) {
   assert(new_table_options);
   PlainTableFactory ptf(table_options);
-  Status s = ptf.ConfigureFromMap(config_options, opts_map);
+  rocksdb_rs::status::Status s = ptf.ConfigureFromMap(config_options, opts_map);
   if (s.ok()) {
     *new_table_options = *(ptf.GetOptions<PlainTableOptions>());
   } else {

@@ -20,7 +20,7 @@ class PostMemTableCallback {
  public:
   virtual ~PostMemTableCallback() {}
 
-  virtual Status operator()(SequenceNumber seq, bool disable_memtable) = 0;
+  virtual rocksdb_rs::status::Status operator()(SequenceNumber seq, bool disable_memtable) = 0;
 };
 
 }  // namespace rocksdb

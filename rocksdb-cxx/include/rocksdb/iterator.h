@@ -106,13 +106,13 @@ class Iterator : public Cleanable {
   // If an error has occurred, return it.  Else return an ok status.
   // If non-blocking IO is requested and this operation cannot be
   // satisfied without doing some IO, then this returns Status_Incomplete().
-  virtual Status status() const = 0;
+  virtual rocksdb_rs::status::Status status() const = 0;
 
   // If supported, renew the iterator to represent the latest state. The
   // iterator will be invalidated after the call. Not supported if
   // ReadOptions.snapshot is given when creating the iterator.
-  virtual Status Refresh() {
-    return Status_NotSupported("Refresh() is not supported");
+  virtual rocksdb_rs::status::Status Refresh() {
+    return rocksdb_rs::status::Status_NotSupported("Refresh() is not supported");
   }
 
   // Property "rocksdb.iterator.is-key-pinned":
@@ -128,7 +128,7 @@ class Iterator : public Cleanable {
   // Property "rocksdb.iterator.internal-key":
   //   Get the user-key portion of the internal key at which the iteration
   //   stopped.
-  virtual Status GetProperty(std::string prop_name, std::string* prop);
+  virtual rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop);
 
   virtual Slice timestamp() const {
     assert(false);
@@ -140,6 +140,6 @@ class Iterator : public Cleanable {
 extern Iterator* NewEmptyIterator();
 
 // Return an empty iterator with the specified status.
-extern Iterator* NewErrorIterator(const Status& status);
+extern Iterator* NewErrorIterator(const rocksdb_rs::status::Status& status);
 
 }  // namespace rocksdb

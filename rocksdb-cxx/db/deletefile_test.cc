@@ -108,11 +108,11 @@ class DeleteFileTest : public DBTestBase {
     int log_cnt = 0, sst_cnt = 0, manifest_cnt = 0;
     for (auto file : filenames) {
       uint64_t number;
-      FileType type;
+      rocksdb_rs::types::FileType type;
       if (ParseFileName(file, &number, &type)) {
-        log_cnt += (type == kWalFile);
-        sst_cnt += (type == kTableFile);
-        manifest_cnt += (type == kDescriptorFile);
+        log_cnt += (type == rocksdb_rs::types::FileType::kWalFile);
+        sst_cnt += (type == rocksdb_rs::types::FileType::kTableFile);
+        manifest_cnt += (type == rocksdb_rs::types::FileType::kDescriptorFile);
       }
     }
     if (required_log >= 0) {
@@ -176,7 +176,7 @@ TEST_F(DeleteFileTest, AddKeysAndQueryLevels) {
   ASSERT_EQ(level1keycount, 50000);
   ASSERT_EQ(level2keycount, 50000);
 
-  Status status = db_->DeleteFile("0.sst");
+  rocksdb_rs::status::Status status = db_->DeleteFile("0.sst");
   ASSERT_TRUE(status.IsInvalidArgument());
 
   // intermediate level files cannot be deleted.
@@ -478,7 +478,7 @@ TEST_F(DeleteFileTest, DeleteFileWithIterator) {
     level2file = metadata[0].name;
   }
 
-  Status status = db_->DeleteFile(level2file);
+  rocksdb_rs::status::Status status = db_->DeleteFile(level2file);
   fprintf(stdout, "Deletion status %s: %s\n", level2file.c_str(),
           status.ToString()->c_str());
   ASSERT_OK(status);
@@ -506,7 +506,7 @@ TEST_F(DeleteFileTest, DeleteLogFiles) {
   // Take the last log file which is expected to be alive and try to delete it
   // Should not succeed because live logs are not allowed to be deleted
   std::unique_ptr<LogFile> alive_log = std::move(logfiles.back());
-  ASSERT_EQ(alive_log->Type(), kAliveLogFile);
+  ASSERT_EQ(alive_log->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
   ASSERT_OK(env_->FileExists(wal_dir_ + "/" + alive_log->PathName()));
   fprintf(stdout, "Deleting alive log file %s\n",
           alive_log->PathName().c_str());
@@ -524,7 +524,7 @@ TEST_F(DeleteFileTest, DeleteLogFiles) {
   ASSERT_OK(db_->GetSortedWalFiles(logfiles));
   ASSERT_GT(logfiles.size(), 0UL);
   std::unique_ptr<LogFile> archived_log = std::move(logfiles.front());
-  ASSERT_EQ(archived_log->Type(), kArchivedLogFile);
+  ASSERT_EQ(archived_log->Type(), rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile);
   ASSERT_OK(env_->FileExists(wal_dir_ + "/" + archived_log->PathName()));
   fprintf(stdout, "Deleting archived log file %s\n",
           archived_log->PathName().c_str());

@@ -61,7 +61,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   BlobFileGarbage blob_file_garbage;
 
   {
-    const Status s = blob_file_garbage.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "blob file number"));
   }
@@ -71,7 +71,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_garbage.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "garbage blob count"));
   }
@@ -81,7 +81,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_garbage.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "garbage blob bytes"));
   }
@@ -91,7 +91,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_garbage.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field tag"));
   }
@@ -101,7 +101,7 @@ TEST_F(BlobFileGarbageTest, DecodeErrors) {
   slice = str;
 
   {
-    const Status s = blob_file_garbage.DecodeFrom(&slice);
+    const rocksdb_rs::status::Status s = blob_file_garbage.DecodeFrom(&slice);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "custom field value"));
   }
@@ -156,7 +156,7 @@ TEST_F(BlobFileGarbageTest, ForwardIncompatibleCustomField) {
 
   BlobFileGarbage decoded_blob_file_addition;
   Slice input(encoded);
-  const Status s = decoded_blob_file_addition.DecodeFrom(&input);
+  const rocksdb_rs::status::Status s = decoded_blob_file_addition.DecodeFrom(&input);
 
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Forward incompatible"));

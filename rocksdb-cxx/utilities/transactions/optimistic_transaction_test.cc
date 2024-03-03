@@ -65,7 +65,7 @@ class OptimisticTransactionTest
     column_families.push_back(
         ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
     OptimisticTransactionDB* raw_txn_db = nullptr;
-    Status s = OptimisticTransactionDB::Open(
+    rocksdb_rs::status::Status s = OptimisticTransactionDB::Open(
         options, occ_opts, dbname, column_families, &handles, &raw_txn_db);
     ASSERT_OK(s);
     ASSERT_NE(raw_txn_db, nullptr);
@@ -125,7 +125,7 @@ TEST_P(OptimisticTransactionTest, WriteConflictTest) {
   ASSERT_EQ(value, "barz");
   ASSERT_EQ(1, txn->GetNumKeys());
 
-  Status s = txn->Commit();
+  rocksdb_rs::status::Status s = txn->Commit();
   ASSERT_TRUE(s.IsBusy());  // Txn should not commit
 
   // Verify that transaction did not write anything
@@ -159,7 +159,7 @@ TEST_P(OptimisticTransactionTest, WriteConflictTest2) {
   ASSERT_OK(txn_db->Get(read_options, "foo", &value));
   ASSERT_EQ(value, "barz");
 
-  Status s = txn->Commit();
+  rocksdb_rs::status::Status s = txn->Commit();
   ASSERT_TRUE(s.IsBusy());  // Txn should not commit
 
   // Verify that transaction did not write anything
@@ -189,7 +189,7 @@ TEST_P(OptimisticTransactionTest, WriteConflictTest3) {
 
   ASSERT_EQ(1, txn->GetNumKeys());
 
-  Status s = txn->Commit();
+  rocksdb_rs::status::Status s = txn->Commit();
   EXPECT_TRUE(s.IsBusy());  // Txn should not commit
 
   // Verify that transaction did not write anything
@@ -215,7 +215,7 @@ TEST_P(OptimisticTransactionTest, WriteConflict4) {
   auto* dbimpl = static_cast_with_check<DBImpl>(txn_db->GetRootDB());
   ColumnFamilyHandle* default_cf = dbimpl->DefaultColumnFamily();
   ASSERT_OK(dbimpl->DeleteRange(WriteOptions(), default_cf, "foo", "foo1"));
-  Status s = txn_db->Get(ReadOptions(), "foo", &value);
+  rocksdb_rs::status::Status s = txn_db->Get(ReadOptions(), "foo", &value);
   ASSERT_TRUE(s.IsNotFound());
 
   ASSERT_EQ(1, txn->GetNumKeys());
@@ -255,7 +255,7 @@ TEST_P(OptimisticTransactionTest, ReadConflictTest) {
   ASSERT_OK(txn_db->Get(read_options, "foo", &value));
   ASSERT_EQ(value, "barz");
 
-  Status s = txn->Commit();
+  rocksdb_rs::status::Status s = txn->Commit();
   ASSERT_TRUE(s.IsBusy());  // Txn should not commit
 
   // Verify that transaction did not write anything
@@ -363,7 +363,7 @@ TEST_P(OptimisticTransactionTest, FlushTest2) {
   // the first memtable to get purged from the MemtableList history.
   ASSERT_OK(txn_db->Flush(flush_ops));
 
-  Status s = txn->Commit();
+  rocksdb_rs::status::Status s = txn->Commit();
   // txn should not commit since MemTableList History is not large enough
   ASSERT_TRUE(s.IsTryAgain());
 
@@ -453,7 +453,7 @@ TEST_P(OptimisticTransactionTest, CheckKeySkipOldMemtable) {
     SetPerfLevel(PerfLevel::kEnableCount);
 
     get_perf_context()->Reset();
-    Status s = txn->Commit();
+    rocksdb_rs::status::Status s = txn->Commit();
     // We should have checked two memtables
     ASSERT_EQ(2, get_perf_context()->get_from_memtable_count);
     // txn should fail because of conflict, even if the memtable
@@ -601,7 +601,7 @@ TEST_P(OptimisticTransactionTest, MultipleSnapshotTest) {
   // This will conflict since the snapshot is earlier than another write to ZZZ
   ASSERT_OK(txn2->Put("ZZZ", "xxxxx"));
 
-  Status s = txn2->Commit();
+  rocksdb_rs::status::Status s = txn2->Commit();
   ASSERT_TRUE(s.IsBusy());
 
   delete txn2;
@@ -666,7 +666,7 @@ TEST_P(OptimisticTransactionTest, ColumnFamiliesTest) {
   // These keys do no conflict with existing writes since they're in
   // different column families
   ASSERT_OK(txn->Delete("AAA"));
-  Status s =
+  rocksdb_rs::status::Status s =
       txn->GetForUpdate(snapshot_read_options, handles[1], "foo", &value);
   ASSERT_TRUE(s.IsNotFound());
   Slice key_slice("AAAZZZ");
@@ -716,7 +716,7 @@ TEST_P(OptimisticTransactionTest, ColumnFamiliesTest) {
   std::vector<Slice> multiget_keys = {"AAA", "AAAZZZ", "foo", "foo"};
   std::vector<std::string> values(4);
 
-  rust::Vec<Status> results = txn->MultiGetForUpdate(
+  rust::Vec<rocksdb_rs::status::Status> results = txn->MultiGetForUpdate(
       snapshot_read_options, multiget_cfh, multiget_keys, &values);
   ASSERT_OK(results[0]);
   ASSERT_OK(results[1]);
@@ -948,7 +948,7 @@ TEST_P(OptimisticTransactionTest, EmptyTest) {
   ASSERT_EQ(value, "aaa");
 
   ASSERT_OK(txn_db->Put(write_options, "aaa", "xxx"));
-  Status s = txn->Commit();
+  rocksdb_rs::status::Status s = txn->Commit();
   ASSERT_TRUE(s.IsBusy());
   delete txn;
 }
@@ -970,7 +970,7 @@ TEST_P(OptimisticTransactionTest, PredicateManyPreceders) {
   std::vector<Slice> multiget_keys = {"1", "2", "3"};
   std::vector<std::string> multiget_values;
 
-  rust::Vec<Status> results =
+  rust::Vec<rocksdb_rs::status::Status> results =
       txn1->MultiGetForUpdate(read_options1, multiget_keys, &multiget_values);
   ASSERT_TRUE(results[0].IsNotFound());
   ASSERT_TRUE(results[1].IsNotFound());
@@ -988,7 +988,7 @@ TEST_P(OptimisticTransactionTest, PredicateManyPreceders) {
   ASSERT_TRUE(results[2].IsNotFound());
 
   // should not commit since txn2 wrote a key txn has read
-  Status s = txn1->Commit();
+  rocksdb_rs::status::Status s = txn1->Commit();
   ASSERT_TRUE(s.IsBusy());
 
   delete txn1;
@@ -1035,7 +1035,7 @@ TEST_P(OptimisticTransactionTest, LostUpdate) {
 
   ASSERT_OK(txn1->Commit());
 
-  Status s = txn2->Commit();
+  rocksdb_rs::status::Status s = txn2->Commit();
   ASSERT_TRUE(s.IsBusy());
 
   delete txn1;
@@ -1111,7 +1111,7 @@ TEST_P(OptimisticTransactionTest, UntrackedWrites) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Verify transaction rollback works for untracked keys.
   Transaction* txn = txn_db->BeginTransaction(write_options);
@@ -1243,7 +1243,7 @@ TEST_P(OptimisticTransactionTest, IteratorTest) {
   ASSERT_EQ("h", iter->value().ToString());
 
   // key "C" was modified in the db after txn's snapshot.  txn will not commit.
-  Status s = txn->Commit();
+  rocksdb_rs::status::Status s = txn->Commit();
   ASSERT_TRUE(s.IsBusy());
 
   delete iter;
@@ -1270,7 +1270,7 @@ TEST_P(OptimisticTransactionTest, SavepointTest) {
   Transaction* txn = txn_db->BeginTransaction(write_options);
   ASSERT_NE(txn, nullptr);
 
-  Status s = txn->RollbackToSavePoint();
+  rocksdb_rs::status::Status s = txn->RollbackToSavePoint();
   ASSERT_TRUE(s.IsNotFound());
 
   txn->SetSavePoint();  // 1
@@ -1420,7 +1420,7 @@ TEST_P(OptimisticTransactionTest, UndoGetForUpdateTest) {
   delete txn2;
 
   // Verify that txn1 cannot commit since A will still be conflict checked
-  Status s = txn1->Commit();
+  rocksdb_rs::status::Status s = txn1->Commit();
   ASSERT_TRUE(s.IsBusy());
   delete txn1;
 
@@ -1515,7 +1515,7 @@ TEST_P(OptimisticTransactionTest, UndoGetForUpdateTest) {
 }
 
 namespace {
-Status OptimisticTransactionStressTestInserter(OptimisticTransactionDB* db,
+rocksdb_rs::status::Status OptimisticTransactionStressTestInserter(OptimisticTransactionDB* db,
                                                const size_t num_transactions,
                                                const size_t num_sets,
                                                const size_t num_keys_per_set) {
@@ -1543,12 +1543,12 @@ Status OptimisticTransactionStressTestInserter(OptimisticTransactionDB* db,
   // Make sure at least some of the transactions succeeded.  It's ok if
   // some failed due to write-conflicts.
   if (inserter.GetFailureCount() > num_transactions / 2) {
-    return Status_TryAgain("Too many transactions failed! " +
+    return rocksdb_rs::status::Status_TryAgain("Too many transactions failed! " +
                             std::to_string(inserter.GetFailureCount()) + " / " +
                             std::to_string(num_transactions));
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace
 
@@ -1579,7 +1579,7 @@ TEST_P(OptimisticTransactionTest, OptimisticTransactionStressTest) {
   }
 
   // Verify that data is consistent
-  Status s = RandomTransactionInserter::Verify(txn_db.get(), num_sets);
+  rocksdb_rs::status::Status s = RandomTransactionInserter::Verify(txn_db.get(), num_sets);
   ASSERT_OK(s);
 }
 
@@ -1589,7 +1589,7 @@ TEST_P(OptimisticTransactionTest, SequenceNumberAfterRecoverTest) {
 
   Transaction* transaction(
       txn_db->BeginTransaction(write_options, transaction_options));
-  Status s = transaction->Put("foo", "val");
+  rocksdb_rs::status::Status s = transaction->Put("foo", "val");
   ASSERT_OK(s);
   s = transaction->Put("foo2", "val");
   ASSERT_OK(s);
@@ -1614,7 +1614,7 @@ TEST_P(OptimisticTransactionTest, SequenceNumberAfterRecoverTest) {
 TEST_P(OptimisticTransactionTest, TimestampedSnapshotMissingCommitTs) {
   std::unique_ptr<Transaction> txn(txn_db->BeginTransaction(WriteOptions()));
   ASSERT_OK(txn->Put("a", "v"));
-  Status s = txn->CommitAndTryCreateSnapshot();
+  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot();
   ASSERT_TRUE(s.IsInvalidArgument());
 }
 
@@ -1622,7 +1622,7 @@ TEST_P(OptimisticTransactionTest, TimestampedSnapshotSetCommitTs) {
   std::unique_ptr<Transaction> txn(txn_db->BeginTransaction(WriteOptions()));
   ASSERT_OK(txn->Put("a", "v"));
   std::shared_ptr<const Snapshot> snapshot;
-  Status s = txn->CommitAndTryCreateSnapshot(nullptr, /*ts=*/100, &snapshot);
+  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot(nullptr, /*ts=*/100, &snapshot);
   ASSERT_TRUE(s.IsNotSupported());
 }
 

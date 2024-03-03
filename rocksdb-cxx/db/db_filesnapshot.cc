@@ -28,19 +28,19 @@
 
 namespace rocksdb {
 
-Status DBImpl::FlushForGetLiveFiles() {
+rocksdb_rs::status::Status DBImpl::FlushForGetLiveFiles() {
   return DBImpl::FlushAllColumnFamilies(FlushOptions(),
                                         FlushReason::kGetLiveFiles);
 }
 
-Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
+rocksdb_rs::status::Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
                             uint64_t* manifest_file_size, bool flush_memtable) {
   *manifest_file_size = 0;
 
   mutex_.Lock();
 
   if (flush_memtable) {
-    Status status = FlushForGetLiveFiles();
+    rocksdb_rs::status::Status status = FlushForGetLiveFiles();
     if (!status.ok()) {
       mutex_.Unlock();
       ROCKS_LOG_ERROR(immutable_db_options_.info_log, "Cannot Flush data %s\n",
@@ -66,32 +66,32 @@ Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
   // create names of the live files. The names are not absolute
   // paths, instead they are relative to dbname_.
   for (const auto& table_file_number : live_table_files) {
-    ret.emplace_back(MakeTableFileName("", table_file_number));
+    ret.emplace_back(rocksdb_rs::filename::MakeTableFileName("", table_file_number));
   }
 
   for (const auto& blob_file_number : live_blob_files) {
-    ret.emplace_back(BlobFileName("", blob_file_number));
+    ret.emplace_back(rocksdb_rs::filename::BlobFileName("", blob_file_number));
   }
 
-  ret.emplace_back(CurrentFileName(""));
-  ret.emplace_back(DescriptorFileName("", versions_->manifest_file_number()));
+  ret.emplace_back(rocksdb_rs::filename::CurrentFileName(""));
+  ret.emplace_back(rocksdb_rs::filename::DescriptorFileName("", versions_->manifest_file_number()));
   // The OPTIONS file number is zero in read-write mode when OPTIONS file
   // writing failed and the DB was configured with
   // `fail_if_options_file_error == false`. In read-only mode the OPTIONS file
   // number is zero when no OPTIONS file exist at all. In those cases we do not
   // record any OPTIONS file in the live file list.
   if (versions_->options_file_number() != 0) {
-    ret.emplace_back(OptionsFileName("", versions_->options_file_number()));
+    ret.emplace_back(rocksdb_rs::filename::OptionsFileName("", versions_->options_file_number()));
   }
 
   // find length of manifest file while holding the mutex lock
   *manifest_file_size = versions_->manifest_file_size();
 
   mutex_.Unlock();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
+rocksdb_rs::status::Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
   // Record tracked WALs as a (minimum) cross-check for directory scan
   std::vector<uint64_t> required_by_manifest;
 
@@ -102,7 +102,7 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
   // long as deletions are disabled (so the below loop must terminate).
   // Also note that we disable deletions anyway to avoid the case where a
   // file is deleted in the middle of the scan, causing IO error.
-  Status deletions_disabled = DisableFileDeletions();
+  rocksdb_rs::status::Status deletions_disabled = DisableFileDeletions();
   {
     InstrumentedMutexLock l(&mutex_);
     while (pending_purge_obsolete_files_ > 0 || bg_purge_scheduled_ > 0) {
@@ -117,11 +117,11 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
     }
   }
 
-  Status s = wal_manager_.GetSortedWalFiles(files);
+  rocksdb_rs::status::Status s = wal_manager_.GetSortedWalFiles(files);
 
   // DisableFileDeletions / EnableFileDeletions not supported in read-only DB
   if (deletions_disabled.ok()) {
-    Status s2 = EnableFileDeletions(/*force*/ false);
+    rocksdb_rs::status::Status s2 = EnableFileDeletions(/*force*/ false);
     assert(s2.ok());
   } else {
     assert(deletions_disabled.IsNotSupported());
@@ -136,7 +136,7 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
     while (required != required_by_manifest.end()) {
       if (included == files.end() || *required < (*included)->LogNumber()) {
         // FAIL - did not find
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "WAL file " + std::to_string(*required) +
             " required by manifest but not in directory list");
       }
@@ -153,7 +153,7 @@ Status DBImpl::GetSortedWalFiles(VectorLogPtr& files) {
   return s;
 }
 
-Status DBImpl::GetCurrentWalFile(std::unique_ptr<LogFile>* current_log_file) {
+rocksdb_rs::status::Status DBImpl::GetCurrentWalFile(std::unique_ptr<LogFile>* current_log_file) {
   uint64_t current_logfile_number;
   {
     InstrumentedMutexLock l(&mutex_);
@@ -163,7 +163,7 @@ Status DBImpl::GetCurrentWalFile(std::unique_ptr<LogFile>* current_log_file) {
   return wal_manager_.GetLiveWalFile(current_logfile_number, current_log_file);
 }
 
-Status DBImpl::GetLiveFilesStorageInfo(
+rocksdb_rs::status::Status DBImpl::GetLiveFilesStorageInfo(
     const LiveFilesStorageInfoOptions& opts,
     std::vector<LiveFileStorageInfo>* files) {
   // To avoid returning partial results, only move results to files on success.
@@ -173,7 +173,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
   // NOTE: This implementation was largely migrated from Checkpoint.
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   VectorLogPtr live_wal_files;
   bool flush_memtable = true;
   if (!immutable_db_options_.allow_2pc) {
@@ -205,7 +205,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
   // metadata.
   mutex_.Lock();
   if (flush_memtable) {
-    Status status = FlushForGetLiveFiles();
+    rocksdb_rs::status::Status status = FlushForGetLiveFiles();
     if (!status.ok()) {
       mutex_.Unlock();
       ROCKS_LOG_ERROR(immutable_db_options_.info_log, "Cannot Flush data %s\n",
@@ -240,10 +240,10 @@ Status DBImpl::GetLiveFilesStorageInfo(
         results.emplace_back();
         LiveFileStorageInfo& info = results.back();
 
-        info.relative_filename = MakeTableFileName(meta->fd.GetNumber());
+        info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName(meta->fd.GetNumber()));
         info.directory = GetDir(meta->fd.GetPathId());
         info.file_number = meta->fd.GetNumber();
-        info.file_type = kTableFile;
+        info.file_type = rocksdb_rs::types::FileType::kTableFile;
         info.size = meta->fd.GetFileSize();
         if (opts.include_checksum_info) {
           info.file_checksum_func_name = meta->file_checksum_func_name;
@@ -263,10 +263,10 @@ Status DBImpl::GetLiveFilesStorageInfo(
       results.emplace_back();
       LiveFileStorageInfo& info = results.back();
 
-      info.relative_filename = BlobFileName(meta->GetBlobFileNumber());
+      info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::BlobFileName(meta->GetBlobFileNumber()));
       info.directory = GetDir(/* path_id */ 0);
       info.file_number = meta->GetBlobFileNumber();
-      info.file_type = kBlobFile;
+      info.file_type = rocksdb_rs::types::FileType::kBlobFile;
       info.size = meta->GetBlobFileSize();
       if (opts.include_checksum_info) {
         info.file_checksum_func_name = meta->GetChecksumMethod();
@@ -289,7 +289,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
   mutex_.Unlock();
 
-  std::string manifest_fname = DescriptorFileName(manifest_number);
+  std::string manifest_fname = static_cast<std::string>(rocksdb_rs::filename::DescriptorFileName(manifest_number));
   {  // MANIFEST
     results.emplace_back();
     LiveFileStorageInfo& info = results.back();
@@ -297,7 +297,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     info.relative_filename = manifest_fname;
     info.directory = GetName();
     info.file_number = manifest_number;
-    info.file_type = kDescriptorFile;
+    info.file_type = rocksdb_rs::types::FileType::kDescriptorFile;
     info.size = manifest_size;
     info.trim_to_size = true;
     if (opts.include_checksum_info) {
@@ -312,7 +312,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
     info.relative_filename = kCurrentFileName;
     info.directory = GetName();
-    info.file_type = kCurrentFile;
+    info.file_type = rocksdb_rs::types::FileType::kCurrentFile;
     // CURRENT could be replaced so we have to record the contents as needed.
     info.replacement_contents = manifest_fname + "\n";
     info.size = manifest_fname.size() + 1;
@@ -331,10 +331,10 @@ Status DBImpl::GetLiveFilesStorageInfo(
     results.emplace_back();
     LiveFileStorageInfo& info = results.back();
 
-    info.relative_filename = OptionsFileName(options_number);
+    info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::OptionsFileName(options_number));
     info.directory = GetName();
     info.file_number = options_number;
-    info.file_type = kOptionsFile;
+    info.file_type = rocksdb_rs::types::FileType::kOptionsFile;
     info.size = options_size;
     if (opts.include_checksum_info) {
       info.file_checksum_func_name = kUnknownFileChecksumFuncName;
@@ -354,7 +354,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     s = FlushWAL(
         immutable_db_options_.track_and_verify_wals_in_manifest /* sync */);
     if (s.IsNotSupported()) {  // read-only DB or similar
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
   }
 
@@ -378,7 +378,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
   // that has changes after the last flush.
   auto wal_dir = immutable_db_options_.GetWalDir();
   for (size_t i = 0; s.ok() && i < wal_size; ++i) {
-    if ((live_wal_files[i]->Type() == kAliveLogFile) &&
+    if ((live_wal_files[i]->Type() == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) &&
         (!flush_memtable || live_wal_files[i]->LogNumber() >= min_log_num)) {
       results.emplace_back();
       LiveFileStorageInfo& info = results.back();
@@ -387,7 +387,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
       info.relative_filename = f.substr(1);
       info.directory = wal_dir;
       info.file_number = live_wal_files[i]->LogNumber();
-      info.file_type = kWalFile;
+      info.file_type = rocksdb_rs::types::FileType::kWalFile;
       info.size = live_wal_files[i]->SizeFileBytes();
       // Only last should need to be trimmed
       info.trim_to_size = (i + 1 == wal_size);

@@ -51,7 +51,7 @@ class CuckooBuilderTest : public testing::Test {
     uint64_t num_deletions = 0;
     for (const auto& key : keys) {
       ParsedInternalKey parsed;
-      Status pik_status =
+      rocksdb_rs::status::Status pik_status =
           ParseInternalKey(key, &parsed, true /* log_err_key */);
       if (pik_status.ok() && parsed.type == kTypeDeletion) {
         num_deletions++;

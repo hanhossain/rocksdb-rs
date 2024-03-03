@@ -71,7 +71,7 @@ static int RegisterSstPartitionerFactories(ObjectLibrary& library,
 }
 }  // namespace
 
-Status SstPartitionerFactory::CreateFromString(
+rocksdb_rs::status::Status SstPartitionerFactory::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<SstPartitionerFactory>* result) {
   static std::once_flag once;

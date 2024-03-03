@@ -14,13 +14,13 @@ ChargedCache::ChargedCache(std::shared_ptr<Cache> cache,
     : CacheWrapper(cache),
       cache_res_mgr_(std::make_shared<ConcurrentCacheReservationManager>(
           std::make_shared<
-              CacheReservationManagerImpl<CacheEntryRole::kBlobCache>>(
+              CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kBlobCache>>(
               block_cache))) {}
 
-Status ChargedCache::Insert(const Slice& key, ObjectPtr obj,
+rocksdb_rs::status::Status ChargedCache::Insert(const Slice& key, ObjectPtr obj,
                             const CacheItemHelper* helper, size_t charge,
                             Handle** handle, Priority priority) {
-  Status s = target_->Insert(key, obj, helper, charge, handle, priority);
+  rocksdb_rs::status::Status s = target_->Insert(key, obj, helper, charge, handle, priority);
   if (s.ok()) {
     // Insert may cause the cache entry eviction if the cache is full. So we
     // directly call the reservation manager to update the total memory used

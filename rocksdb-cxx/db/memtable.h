@@ -217,7 +217,7 @@ class MemTable {
       const ReadOptions& read_options, SequenceNumber read_seq,
       bool immutable_memtable);
 
-  Status VerifyEncodedEntry(Slice encoded,
+  rocksdb_rs::status::Status VerifyEncodedEntry(Slice encoded,
                             const ProtectionInfoKVOS64& kv_prot_info);
 
   // Add an entry into memtable that maps key to value at the
@@ -230,7 +230,7 @@ class MemTable {
   // Returns `Status_TryAgain` if the `seq`, `key` combination already exists
   // in the memtable and `MemTableRepFactory::CanHandleDuplicatedKey()` is true.
   // The next attempt should try a larger value for `seq`.
-  Status Add(SequenceNumber seq, ValueType type, const Slice& key,
+  rocksdb_rs::status::Status Add(SequenceNumber seq, ValueType type, const Slice& key,
              const Slice& value, const ProtectionInfoKVOS64* kv_prot_info,
              bool allow_concurrent = false,
              MemTablePostProcessInfo* post_process_info = nullptr,
@@ -260,7 +260,7 @@ class MemTable {
   // internally by NewRangeTombstoneIterator(). See comment above
   // NewRangeTombstoneIterator() for more detail.
   bool Get(const LookupKey& key, std::string* value,
-           PinnableWideColumns* columns, std::string* timestamp, Status* s,
+           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
            MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq, SequenceNumber* seq,
            const ReadOptions& read_opts, bool immutable_memtable,
@@ -268,7 +268,7 @@ class MemTable {
            bool do_merge = true);
 
   bool Get(const LookupKey& key, std::string* value,
-           PinnableWideColumns* columns, std::string* timestamp, Status* s,
+           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
            MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq,
            const ReadOptions& read_opts, bool immutable_memtable,
@@ -296,7 +296,7 @@ class MemTable {
   //
   // REQUIRES: external synchronization to prevent simultaneous
   // operations on the same MemTable.
-  Status Update(SequenceNumber seq, ValueType value_type, const Slice& key,
+  rocksdb_rs::status::Status Update(SequenceNumber seq, ValueType value_type, const Slice& key,
                 const Slice& value, const ProtectionInfoKVOS64* kv_prot_info);
 
   // If `key` exists in current memtable with type `kTypeValue` and the existing
@@ -313,7 +313,7 @@ class MemTable {
   //
   // REQUIRES: external synchronization to prevent simultaneous
   // operations on the same MemTable.
-  Status UpdateCallback(SequenceNumber seq, const Slice& key,
+  rocksdb_rs::status::Status UpdateCallback(SequenceNumber seq, const Slice& key,
                         const Slice& delta,
                         const ProtectionInfoKVOS64* kv_prot_info);
 
@@ -528,7 +528,7 @@ class MemTable {
   }
 
   // Returns Corruption status if verification fails.
-  static Status VerifyEntryChecksum(const char* entry,
+  static rocksdb_rs::status::Status VerifyEntryChecksum(const char* entry,
                                     uint32_t protection_bytes_per_key,
                                     bool allow_data_in_errors = false);
 
@@ -626,7 +626,7 @@ class MemTable {
                     SequenceNumber max_covering_tombstone_seq, bool do_merge,
                     ReadCallback* callback, bool* is_blob_index,
                     std::string* value, PinnableWideColumns* columns,
-                    std::string* timestamp, Status* s,
+                    std::string* timestamp, rocksdb_rs::status::Status* s,
                     MergeContext* merge_context, SequenceNumber* seq,
                     bool* found_final_value, bool* merge_in_progress);
 

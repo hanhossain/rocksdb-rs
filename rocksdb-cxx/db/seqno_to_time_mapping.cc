@@ -172,20 +172,20 @@ void SeqnoToTimeMapping::Encode(std::string& dest, const SequenceNumber start,
   }
 }
 
-Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
+rocksdb_rs::status::Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
   Slice input(seqno_time_mapping_str);
   if (input.empty()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   uint64_t size;
   if (!GetVarint64(&input, &size)) {
-    return Status_Corruption("Invalid sequence number time size");
+    return rocksdb_rs::status::Status_Corruption("Invalid sequence number time size");
   }
   is_sorted_ = false;
   SeqnoTimePair base;
   for (uint64_t i = 0; i < size; i++) {
     SeqnoTimePair val;
-    Status s = val.Decode(input);
+    rocksdb_rs::status::Status s = val.Decode(input);
     if (!s.ok()) {
       return s;
     }
@@ -193,21 +193,21 @@ Status SeqnoToTimeMapping::Add(const std::string& seqno_time_mapping_str) {
     seqno_time_mapping_.emplace_back(val);
     base = val;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void SeqnoToTimeMapping::SeqnoTimePair::Encode(std::string& dest) const {
   PutVarint64Varint64(&dest, seqno, time);
 }
 
-Status SeqnoToTimeMapping::SeqnoTimePair::Decode(Slice& input) {
+rocksdb_rs::status::Status SeqnoToTimeMapping::SeqnoTimePair::Decode(Slice& input) {
   if (!GetVarint64(&input, &seqno)) {
-    return Status_Corruption("Invalid sequence number");
+    return rocksdb_rs::status::Status_Corruption("Invalid sequence number");
   }
   if (!GetVarint64(&input, &time)) {
-    return Status_Corruption("Invalid time");
+    return rocksdb_rs::status::Status_Corruption("Invalid time");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool SeqnoToTimeMapping::Append(SequenceNumber seqno, uint64_t time) {
@@ -254,13 +254,13 @@ bool SeqnoToTimeMapping::Resize(uint64_t min_time_duration,
   return true;
 }
 
-Status SeqnoToTimeMapping::Sort() {
+rocksdb_rs::status::Status SeqnoToTimeMapping::Sort() {
   if (is_sorted_) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   if (seqno_time_mapping_.empty()) {
     is_sorted_ = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   std::deque<SeqnoTimePair> copy = std::move(seqno_time_mapping_);
@@ -293,7 +293,7 @@ Status SeqnoToTimeMapping::Sort() {
   seqno_time_mapping_.emplace_back(prev);
 
   is_sorted_ = true;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::string SeqnoToTimeMapping::ToHumanString() const {

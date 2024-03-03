@@ -113,7 +113,7 @@ IOStatus CreateFile(FileSystem* fs, const std::string& destination,
   return dest_writer->Sync(use_fsync);
 }
 
-Status DeleteDBFile(const ImmutableDBOptions* db_options,
+rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_options,
                     const std::string& fname, const std::string& dir_to_sync,
                     const bool force_bg, const bool force_fg) {
   SstFileManagerImpl* sfm =
@@ -230,8 +230,8 @@ IOStatus GenerateOneFileChecksum(
   return IOStatus::OK();
 }
 
-Status DestroyDir(Env* env, const std::string& dir) {
-  Status s = Status_new();
+rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (env->FileExists(dir).IsNotFound()) {
     return s;
   }
@@ -249,13 +249,13 @@ Status DestroyDir(Env* env, const std::string& dir) {
           s = env->DeleteFile(path);
         }
       } else if (s.IsNotSupported()) {
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
       if (!s.ok()) {
         // IsDirectory, etc. might not report NotFound
         if (s.IsNotFound() || env->FileExists(path).IsNotFound()) {
           // Allow files to be deleted externally
-          s = Status_OK();
+          s = rocksdb_rs::status::Status_OK();
         } else {
           break;
         }
@@ -268,7 +268,7 @@ Status DestroyDir(Env* env, const std::string& dir) {
     // DeleteDir might or might not report NotFound
     if (!s.ok() && (s.IsNotFound() || env->FileExists(dir).IsNotFound())) {
       // Allow to be deleted externally
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
   }
   return s;

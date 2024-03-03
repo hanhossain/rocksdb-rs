@@ -12,11 +12,14 @@
 
 #include "db/blob/blob_constants.h"
 
+namespace rocksdb_rs::status {
+    struct Status;
+}
+
 namespace rocksdb {
 
 class JSONWriter;
 class Slice;
-struct Status;
 
 class BlobFileAddition {
  public:
@@ -40,7 +43,7 @@ class BlobFileAddition {
   const std::string& GetChecksumValue() const { return checksum_value_; }
 
   void EncodeTo(std::string* output) const;
-  Status DecodeFrom(Slice* input);
+  rocksdb_rs::status::Status DecodeFrom(Slice* input);
 
   std::string DebugString() const;
   std::string DebugJSON() const;

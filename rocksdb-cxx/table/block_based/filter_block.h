@@ -59,7 +59,7 @@ class FilterBlockBuilder {
   virtual size_t EstimateEntriesAdded() = 0;
   Slice Finish() {  // Generate Filter
     const BlockHandle empty_handle;
-    Status dont_care_status = Status_new();
+    rocksdb_rs::status::Status dont_care_status = rocksdb_rs::status::Status_new();
     auto ret = Finish(empty_handle, &dont_care_status);
     assert(dont_care_status.ok());
     return ret;
@@ -72,7 +72,7 @@ class FilterBlockBuilder {
       const BlockHandle& tmp /* only used in PartitionedFilterBlock as
                                 last_partition_block_handle */
       ,
-      Status* status, std::unique_ptr<const char[]>* filter_data = nullptr) = 0;
+      rocksdb_rs::status::Status* status, std::unique_ptr<const char[]>* filter_data = nullptr) = 0;
 
   // This is called when finishes using the FilterBitsBuilder
   // in order to release memory usage and cache charge
@@ -82,8 +82,8 @@ class FilterBlockBuilder {
   // To optionally post-verify the filter returned from
   // FilterBlockBuilder::Finish.
   // Return Status_OK() if skipped.
-  virtual Status MaybePostVerifyFilter(const Slice& /* filter_content */) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status MaybePostVerifyFilter(const Slice& /* filter_content */) {
+    return rocksdb_rs::status::Status_OK();
   }
 };
 
@@ -163,10 +163,10 @@ class FilterBlockReader {
     return error_msg;
   }
 
-  virtual Status CacheDependencies(
+  virtual rocksdb_rs::status::Status CacheDependencies(
       const ReadOptions& /*ro*/, bool /*pin*/,
       FilePrefetchBuffer* /* tail_prefetch_buffer */) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual bool RangeMayExist(const Slice* /*iterate_upper_bound*/,

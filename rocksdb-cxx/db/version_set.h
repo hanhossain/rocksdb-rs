@@ -797,7 +797,7 @@ struct ObsoleteFileInfo {
   }
   void DeleteMetadata() {
     if (file_metadata_cache_res_mgr) {
-      Status s = file_metadata_cache_res_mgr->UpdateCacheReservation(
+      rocksdb_rs::status::Status s = file_metadata_cache_res_mgr->UpdateCacheReservation(
           metadata->ApproximateMemoryUsage(), false /* increase */);
     }
     delete metadata;
@@ -842,7 +842,7 @@ class Version {
                             MergeIteratorBuilder* merger_iter_builder,
                             int level, bool allow_unprepared_value);
 
-  Status OverlapWithLevelIterator(const ReadOptions&, const FileOptions&,
+  rocksdb_rs::status::Status OverlapWithLevelIterator(const ReadOptions&, const FileOptions&,
                                   const Slice& smallest_user_key,
                                   const Slice& largest_user_key, int level,
                                   bool* overlap);
@@ -870,7 +870,7 @@ class Version {
   // REQUIRES: lock is not held
   // REQUIRES: pinned_iters_mgr != nullptr
   void Get(const ReadOptions&, const LookupKey& key, PinnableSlice* value,
-           PinnableWideColumns* columns, std::string* timestamp, Status* status,
+           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* status,
            MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq,
            PinnedIteratorsManager* pinned_iters_mgr,
@@ -885,14 +885,14 @@ class Version {
   // corresponding blob file is part of this Version) retrieves the blob and
   // saves it in *value.
   // REQUIRES: blob_index_slice stores an encoded blob reference
-  Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
+  rocksdb_rs::status::Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
                  const Slice& blob_index_slice,
                  FilePrefetchBuffer* prefetch_buffer, PinnableSlice* value,
                  uint64_t* bytes_read) const;
 
   // Retrieves a blob using a blob reference and saves it in *value,
   // assuming the corresponding blob file is part of this Version.
-  Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
+  rocksdb_rs::status::Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
                  const BlobIndex& blob_index,
                  FilePrefetchBuffer* prefetch_buffer, PinnableSlice* value,
                  uint64_t* bytes_read) const;
@@ -944,7 +944,7 @@ class Version {
   // specified in "file_meta".  If the file name of "file_meta" is
   // known ahead, passing it by a non-null "fname" can save a
   // file-name conversion.
-  Status GetTableProperties(const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetTableProperties(const ReadOptions& read_options,
                             std::shared_ptr<const TableProperties>* tp,
                             const FileMetaData* file_meta,
                             const std::string* fname = nullptr) const;
@@ -953,23 +953,23 @@ class Version {
   // On success, *props will be populated with all SSTables' table properties.
   // The keys of `props` are the sst file name, the values of `props` are the
   // tables' properties, represented as std::shared_ptr.
-  Status GetPropertiesOfAllTables(const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetPropertiesOfAllTables(const ReadOptions& read_options,
                                   TablePropertiesCollection* props);
-  Status GetPropertiesOfAllTables(const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetPropertiesOfAllTables(const ReadOptions& read_options,
                                   TablePropertiesCollection* props, int level);
-  Status GetPropertiesOfTablesInRange(const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetPropertiesOfTablesInRange(const ReadOptions& read_options,
                                       const Range* range, std::size_t n,
                                       TablePropertiesCollection* props) const;
 
   // Print summary of range delete tombstones in SST files into out_str,
   // with maximum max_entries_to_print entries printed out.
-  Status TablesRangeTombstoneSummary(int max_entries_to_print,
+  rocksdb_rs::status::Status TablesRangeTombstoneSummary(int max_entries_to_print,
                                      std::string* out_str);
 
   // REQUIRES: lock is held
   // On success, "tp" will contains the aggregated table property among
   // the table properties of all sst files in this version.
-  Status GetAggregatedTableProperties(
+  rocksdb_rs::status::Status GetAggregatedTableProperties(
       const ReadOptions& read_options,
       std::shared_ptr<const TableProperties>* tp, int level = -1);
 
@@ -1041,7 +1041,7 @@ class Version {
   void UpdateAccumulatedStats(const ReadOptions& read_options);
 
   DECLARE_SYNC_AND_ASYNC(
-      /* ret_type */ Status, /* func_name */ MultiGetFromSST,
+      /* ret_type */ rocksdb_rs::status::Status, /* func_name */ MultiGetFromSST,
       const ReadOptions& read_options, MultiGetRange file_range,
       int hit_file_level, bool skip_filters, bool skip_range_deletions,
       FdWithKeyRange* f,
@@ -1052,7 +1052,7 @@ class Version {
 #ifdef USE_COROUTINES
   // MultiGet using async IO to read data blocks from SST files in parallel
   // within and across levels
-  Status MultiGetAsync(
+  rocksdb_rs::status::Status MultiGetAsync(
       const ReadOptions& options, MultiGetRange* range,
       std::unordered_map<uint64_t, BlobReadContexts>* blob_ctxs);
 
@@ -1060,9 +1060,9 @@ class Version {
   // queue coroutine tasks to mget_tasks. It may also split the input batch
   // by creating a new batch with keys definitely not in this level and
   // enqueuing it to to_process.
-  Status ProcessBatch(
+  rocksdb_rs::status::Status ProcessBatch(
       const ReadOptions& read_options, FilePickerMultiGet* batch,
-      std::vector<folly::coro::Task<Status>>& mget_tasks,
+      std::vector<folly::coro::Task<rocksdb_rs::status::Status>>& mget_tasks,
       std::unordered_map<uint64_t, BlobReadContexts>* blob_ctxs,
       autovector<FilePickerMultiGet, 4>& batches, std::deque<size_t>& waiting,
       std::deque<size_t>& to_process, unsigned int& num_tasks_queued,
@@ -1112,7 +1112,7 @@ class BaseReferencedVersionBuilder;
 class AtomicGroupReadBuffer {
  public:
   AtomicGroupReadBuffer() = default;
-  Status AddEdit(VersionEdit* edit);
+  rocksdb_rs::status::Status AddEdit(VersionEdit* edit);
   void Clear();
   bool IsFull() const;
   bool IsEmpty() const;
@@ -1145,7 +1145,7 @@ class VersionSet {
 
   virtual ~VersionSet();
 
-  Status LogAndApplyToDefaultColumnFamily(
+  rocksdb_rs::status::Status LogAndApplyToDefaultColumnFamily(
       const ReadOptions& read_options, VersionEdit* edit, InstrumentedMutex* mu,
       FSDirectory* dir_contains_current_file, bool new_descriptor_log = false,
       const ColumnFamilyOptions* column_family_options = nullptr) {
@@ -1163,7 +1163,7 @@ class VersionSet {
   // column_family_options has to be set if edit is column family add
   // REQUIRES: *mu is held on entry.
   // REQUIRES: no other thread concurrently calls LogAndApply()
-  Status LogAndApply(
+  rocksdb_rs::status::Status LogAndApply(
       ColumnFamilyData* column_family_data,
       const MutableCFOptions& mutable_cf_options,
       const ReadOptions& read_options, VersionEdit* edit, InstrumentedMutex* mu,
@@ -1183,14 +1183,14 @@ class VersionSet {
   }
   // The batch version. If edit_list.size() > 1, caller must ensure that
   // no edit in the list column family add or drop
-  Status LogAndApply(
+  rocksdb_rs::status::Status LogAndApply(
       ColumnFamilyData* column_family_data,
       const MutableCFOptions& mutable_cf_options,
       const ReadOptions& read_options,
       const autovector<VersionEdit*>& edit_list, InstrumentedMutex* mu,
       FSDirectory* dir_contains_current_file, bool new_descriptor_log = false,
       const ColumnFamilyOptions* column_family_options = nullptr,
-      const std::function<void(const Status&)>& manifest_wcb = {}) {
+      const std::function<void(const rocksdb_rs::status::Status&)>& manifest_wcb = {}) {
     autovector<ColumnFamilyData*> cfds;
     cfds.emplace_back(column_family_data);
     autovector<const MutableCFOptions*> mutable_cf_options_list;
@@ -1205,7 +1205,7 @@ class VersionSet {
   // The across-multi-cf batch version. If edit_lists contain more than
   // 1 version edits, caller must ensure that no edit in the []list is column
   // family manipulation.
-  virtual Status LogAndApply(
+  virtual rocksdb_rs::status::Status LogAndApply(
       const autovector<ColumnFamilyData*>& cfds,
       const autovector<const MutableCFOptions*>& mutable_cf_options_list,
       const ReadOptions& read_options,
@@ -1213,10 +1213,10 @@ class VersionSet {
       InstrumentedMutex* mu, FSDirectory* dir_contains_current_file,
       bool new_descriptor_log = false,
       const ColumnFamilyOptions* new_cf_options = nullptr,
-      const std::vector<std::function<void(const Status&)>>& manifest_wcbs =
+      const std::vector<std::function<void(const rocksdb_rs::status::Status&)>>& manifest_wcbs =
           {});
 
-  static Status GetCurrentManifestPath(const std::string& dbname,
+  static rocksdb_rs::status::Status GetCurrentManifestPath(const std::string& dbname,
                                        FileSystem* fs,
                                        std::string* manifest_filename,
                                        uint64_t* manifest_file_number);
@@ -1225,18 +1225,18 @@ class VersionSet {
   // Recover the last saved descriptor (MANIFEST) from persistent storage.
   // If read_only == true, Recover() will not complain if some column families
   // are not opened
-  Status Recover(const std::vector<ColumnFamilyDescriptor>& column_families,
+  rocksdb_rs::status::Status Recover(const std::vector<ColumnFamilyDescriptor>& column_families,
                  bool read_only = false, std::string* db_id = nullptr,
                  bool no_error_if_files_missing = false);
 
-  Status TryRecover(const std::vector<ColumnFamilyDescriptor>& column_families,
+  rocksdb_rs::status::Status TryRecover(const std::vector<ColumnFamilyDescriptor>& column_families,
                     bool read_only,
                     const std::vector<std::string>& files_in_dbname,
                     std::string* db_id, bool* has_missing_table_file);
 
   // Try to recover the version set to the most recent consistent state
   // recorded in the specified manifest.
-  Status TryRecoverFromOneManifest(
+  rocksdb_rs::status::Status TryRecoverFromOneManifest(
       const std::string& manifest_path,
       const std::vector<ColumnFamilyDescriptor>& column_families,
       bool read_only, std::string* db_id, bool* has_missing_table_file);
@@ -1247,9 +1247,9 @@ class VersionSet {
 
   // Reads a manifest file and returns a list of column families in
   // column_families.
-  static Status ListColumnFamilies(std::vector<std::string>* column_families,
+  static rocksdb_rs::status::Status ListColumnFamilies(std::vector<std::string>* column_families,
                                    const std::string& dbname, FileSystem* fs);
-  static Status ListColumnFamiliesFromManifest(
+  static rocksdb_rs::status::Status ListColumnFamiliesFromManifest(
       const std::string& manifest_path, FileSystem* fs,
       std::vector<std::string>* column_families);
 
@@ -1262,16 +1262,16 @@ class VersionSet {
   // For example, a db currently has 7 levels [0-6], and a call to
   // to reduce to 5 [0-4] can only be executed when only one level
   // among [4-6] contains files.
-  static Status ReduceNumberOfLevels(const std::string& dbname,
+  static rocksdb_rs::status::Status ReduceNumberOfLevels(const std::string& dbname,
                                      const Options* options,
                                      const FileOptions& file_options,
                                      int new_levels);
 
   // Get the checksum information of all live files
-  Status GetLiveFilesChecksumInfo(FileChecksumList* checksum_list);
+  rocksdb_rs::status::Status GetLiveFilesChecksumInfo(FileChecksumList* checksum_list);
 
   // printf contents (for debugging)
-  Status DumpManifest(Options& options, std::string& manifestFileName,
+  rocksdb_rs::status::Status DumpManifest(Options& options, std::string& manifestFileName,
                       bool verbose, bool hex = false, bool json = false,
                       const std::vector<ColumnFamilyDescriptor>& cf_descs = {});
 
@@ -1448,7 +1448,7 @@ class VersionSet {
   // Return the size of the current manifest file
   uint64_t manifest_file_size() const { return manifest_file_size_; }
 
-  Status GetMetadataForFile(uint64_t number, int* filelevel,
+  rocksdb_rs::status::Status GetMetadataForFile(uint64_t number, int* filelevel,
                             FileMetaData** metadata, ColumnFamilyData** cfd);
 
   // This function doesn't support leveldb SST filenames
@@ -1533,8 +1533,8 @@ class VersionSet {
   friend class DBImplReadOnly;
 
   struct LogReporter : public log::Reader::Reporter {
-    Status* status;
-    virtual void Corruption(size_t /*bytes*/, const Status& s) override {
+    rocksdb_rs::status::Status* status;
+    virtual void Corruption(size_t /*bytes*/, const rocksdb_rs::status::Status& s) override {
       if (status->ok()) {
         status->copy_from(s);
       }
@@ -1564,7 +1564,7 @@ class VersionSet {
   };
 
   // Save current contents to *log
-  Status WriteCurrentStateToManifest(
+  rocksdb_rs::status::Status WriteCurrentStateToManifest(
       const std::unordered_map<uint32_t, MutableCFState>& curr_state,
       const VersionEdit& wal_additions, log::Writer* log, IOStatus& io_s);
 
@@ -1574,7 +1574,7 @@ class VersionSet {
                                        const ReadOptions& read_options,
                                        const VersionEdit* edit);
 
-  Status VerifyFileMetadata(const ReadOptions& read_options,
+  rocksdb_rs::status::Status VerifyFileMetadata(const ReadOptions& read_options,
                             ColumnFamilyData* cfd, const std::string& fpath,
                             int level, const FileMetaData& meta);
 
@@ -1647,7 +1647,7 @@ class VersionSet {
 
  private:
   // REQUIRES db mutex at beginning. may release and re-acquire db mutex
-  Status ProcessManifestWrites(std::deque<ManifestWriter>& writers,
+  rocksdb_rs::status::Status ProcessManifestWrites(std::deque<ManifestWriter>& writers,
                                InstrumentedMutex* mu,
                                FSDirectory* dir_contains_current_file,
                                bool new_descriptor_log,
@@ -1656,7 +1656,7 @@ class VersionSet {
 
   void LogAndApplyCFHelper(VersionEdit* edit,
                            SequenceNumber* max_last_sequence);
-  Status LogAndApplyHelper(ColumnFamilyData* cfd, VersionBuilder* b,
+  rocksdb_rs::status::Status LogAndApplyHelper(ColumnFamilyData* cfd, VersionBuilder* b,
                            VersionEdit* edit, SequenceNumber* max_last_sequence,
                            InstrumentedMutex* mu);
 };
@@ -1676,16 +1676,16 @@ class ReactiveVersionSet : public VersionSet {
 
   ~ReactiveVersionSet() override;
 
-  Status ReadAndApply(
+  rocksdb_rs::status::Status ReadAndApply(
       InstrumentedMutex* mu,
       std::unique_ptr<log::FragmentBufferedReader>* manifest_reader,
-      Status* manifest_read_status,
+      rocksdb_rs::status::Status* manifest_read_status,
       std::unordered_set<ColumnFamilyData*>* cfds_changed);
 
-  Status Recover(const std::vector<ColumnFamilyDescriptor>& column_families,
+  rocksdb_rs::status::Status Recover(const std::vector<ColumnFamilyDescriptor>& column_families,
                  std::unique_ptr<log::FragmentBufferedReader>* manifest_reader,
                  std::unique_ptr<log::Reader::Reporter>* manifest_reporter,
-                 std::unique_ptr<Status>* manifest_reader_status);
+                 std::unique_ptr<rocksdb_rs::status::Status>* manifest_reader_status);
 #ifndef NDEBUG
   uint64_t TEST_read_edits_in_atomic_group() const;
 #endif  //! NDEBUG
@@ -1694,11 +1694,11 @@ class ReactiveVersionSet : public VersionSet {
 
  protected:
   // REQUIRES db mutex
-  Status ApplyOneVersionEditToBuilder(
+  rocksdb_rs::status::Status ApplyOneVersionEditToBuilder(
       VersionEdit& edit, std::unordered_set<ColumnFamilyData*>* cfds_changed,
       VersionEdit* version_edit);
 
-  Status MaybeSwitchManifest(
+  rocksdb_rs::status::Status MaybeSwitchManifest(
       log::Reader::Reporter* reporter,
       std::unique_ptr<log::FragmentBufferedReader>* manifest_reader);
 
@@ -1709,16 +1709,16 @@ class ReactiveVersionSet : public VersionSet {
   using VersionSet::LogAndApply;
   using VersionSet::Recover;
 
-  Status LogAndApply(
+  rocksdb_rs::status::Status LogAndApply(
       const autovector<ColumnFamilyData*>& /*cfds*/,
       const autovector<const MutableCFOptions*>& /*mutable_cf_options_list*/,
       const ReadOptions& /* read_options */,
       const autovector<autovector<VersionEdit*>>& /*edit_lists*/,
       InstrumentedMutex* /*mu*/, FSDirectory* /*dir_contains_current_file*/,
       bool /*new_descriptor_log*/, const ColumnFamilyOptions* /*new_cf_option*/,
-      const std::vector<std::function<void(const Status&)>>& /*manifest_wcbs*/)
+      const std::vector<std::function<void(const rocksdb_rs::status::Status&)>>& /*manifest_wcbs*/)
       override {
-    return Status_NotSupported("not supported in reactive mode");
+    return rocksdb_rs::status::Status_NotSupported("not supported in reactive mode");
   }
 
   // No copy allowed

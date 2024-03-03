@@ -23,7 +23,7 @@ TEST(BlobGarbageMeterTest, MeasureGarbage) {
     uint64_t blob_file_number;
     uint64_t offset;
     uint64_t size;
-    CompressionType compression_type;
+    rocksdb_rs::compression_type::CompressionType compression_type;
     bool has_in_flow;
     bool has_out_flow;
 
@@ -38,13 +38,13 @@ TEST(BlobGarbageMeterTest, MeasureGarbage) {
   // additional garbage. Blob file 6 is a newly written file (i.e. no inflow,
   // only outflow) and is thus not tracked by the meter.
   std::vector<BlobDescriptor> blobs{
-      {"key", 4, 1234, 555, CompressionType::kLZ4Compression, true, true},
-      {"other_key", 4, 6789, 101010, CompressionType::kLZ4Compression, true, true},
-      {"yet_another_key", 5, 22222, 3456, CompressionType::kLZ4Compression, true, true},
-      {"foo_key", 5, 77777, 8888, CompressionType::kLZ4Compression, true, true},
-      {"bar_key", 5, 999999, 1212, CompressionType::kLZ4Compression, true, false},
-      {"baz_key", 5, 1234567, 890, CompressionType::kLZ4Compression, true, false},
-      {"new_key", 6, 7777, 9999, CompressionType::kNoCompression, false, true}};
+      {"key", 4, 1234, 555, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true, true},
+      {"other_key", 4, 6789, 101010, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true, true},
+      {"yet_another_key", 5, 22222, 3456, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true, true},
+      {"foo_key", 5, 77777, 8888, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true, true},
+      {"bar_key", 5, 999999, 1212, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true, false},
+      {"baz_key", 5, 1234567, 890, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true, false},
+      {"new_key", 6, 7777, 9999, rocksdb_rs::compression_type::CompressionType::kNoCompression, false, true}};
 
   for (const auto& blob : blobs) {
     constexpr SequenceNumber seq = 123;

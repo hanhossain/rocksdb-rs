@@ -255,19 +255,19 @@ void MemTable::UpdateOldestKeyTime() {
   }
 }
 
-Status MemTable::VerifyEntryChecksum(const char* entry,
+rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
                                      uint32_t protection_bytes_per_key,
                                      bool allow_data_in_errors) {
   if (protection_bytes_per_key == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   uint32_t key_length;
   const char* key_ptr = GetVarint32Ptr(entry, entry + 5, &key_length);
   if (key_ptr == nullptr) {
-    return Status_Corruption("Unable to parse internal key length");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key length");
   }
   if (key_length < 8) {
-    return Status_Corruption("Memtable entry internal key length too short.");
+    return rocksdb_rs::status::Status_Corruption("Memtable entry internal key length too short.");
   }
   Slice user_key = Slice(key_ptr, key_length - 8);
 
@@ -280,7 +280,7 @@ Status MemTable::VerifyEntryChecksum(const char* entry,
   const char* value_ptr = GetVarint32Ptr(
       key_ptr + key_length, key_ptr + key_length + 5, &value_length);
   if (value_ptr == nullptr) {
-    return Status_Corruption("Unable to parse internal key value");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key value");
   }
   Slice value = Slice(value_ptr, value_length);
 
@@ -300,9 +300,9 @@ Status MemTable::VerifyEntryChecksum(const char* entry,
       msg.append("User key: " + user_key.ToString(/*hex=*/true) + ". ");
       msg.append("seq: " + std::to_string(seq) + ".");
     }
-    return Status_Corruption(msg.c_str());
+    return rocksdb_rs::status::Status_Corruption(msg.c_str());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 int MemTable::KeyComparator::operator()(const char* prefix_len_key1,
@@ -356,7 +356,7 @@ class MemTableIterator : public InternalIterator {
         value_pinned_(
             !mem.GetImmutableMemTableOptions()->inplace_update_support),
         protection_bytes_per_key_(mem.moptions_.protection_bytes_per_key),
-        status_(Status_OK()),
+        status_(rocksdb_rs::status::Status_OK()),
         logger_(mem.moptions_.info_log) {
     if (use_range_del_table) {
       iter_ = mem.range_del_table_->GetIterator(arena);
@@ -488,7 +488,7 @@ class MemTableIterator : public InternalIterator {
     return GetLengthPrefixedSlice(key_slice.data() + key_slice.size());
   }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   bool IsKeyPinned() const override {
     // memtable data is always pinned
@@ -509,7 +509,7 @@ class MemTableIterator : public InternalIterator {
   bool arena_mode_;
   bool value_pinned_;
   uint32_t protection_bytes_per_key_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   Logger* logger_;
 
   void VerifyEntryChecksum() {
@@ -618,18 +618,18 @@ MemTable::MemTableStats MemTable::ApproximateStats(const Slice& start_ikey,
   return {entry_count * (data_size / n), entry_count};
 }
 
-Status MemTable::VerifyEncodedEntry(Slice encoded,
+rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(Slice encoded,
                                     const ProtectionInfoKVOS64& kv_prot_info) {
   uint32_t ikey_len = 0;
   if (!GetVarint32(&encoded, &ikey_len)) {
-    return Status_Corruption("Unable to parse internal key length");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key length");
   }
   size_t ts_sz = GetInternalKeyComparator().user_comparator()->timestamp_size();
   if (ikey_len < 8 + ts_sz) {
-    return Status_Corruption("Internal key length too short");
+    return rocksdb_rs::status::Status_Corruption("Internal key length too short");
   }
   if (ikey_len > encoded.size()) {
-    return Status_Corruption("Internal key length too long");
+    return rocksdb_rs::status::Status_Corruption("Internal key length too long");
   }
   uint32_t value_len = 0;
   const size_t user_key_len = ikey_len - 8;
@@ -643,13 +643,13 @@ Status MemTable::VerifyEncodedEntry(Slice encoded,
   encoded.remove_prefix(8);
 
   if (!GetVarint32(&encoded, &value_len)) {
-    return Status_Corruption("Unable to parse value length");
+    return rocksdb_rs::status::Status_Corruption("Unable to parse value length");
   }
   if (value_len < encoded.size()) {
-    return Status_Corruption("Value length too short");
+    return rocksdb_rs::status::Status_Corruption("Value length too short");
   }
   if (value_len > encoded.size()) {
-    return Status_Corruption("Value length too long");
+    return rocksdb_rs::status::Status_Corruption("Value length too long");
   }
   Slice value(encoded.data(), value_len);
 
@@ -678,7 +678,7 @@ void MemTable::UpdateEntryChecksum(const ProtectionInfoKVOS64* kv_prot_info,
   }
 }
 
-Status MemTable::Add(SequenceNumber s, ValueType type,
+rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
                      const Slice& key, /* user key */
                      const Slice& value,
                      const ProtectionInfoKVOS64* kv_prot_info,
@@ -718,7 +718,7 @@ Status MemTable::Add(SequenceNumber s, ValueType type,
   Slice encoded(buf, encoded_len - moptions_.protection_bytes_per_key);
   if (kv_prot_info != nullptr) {
     TEST_SYNC_POINT_CALLBACK("MemTable::Add:Encoded", &encoded);
-    Status status = VerifyEncodedEntry(encoded, *kv_prot_info);
+    rocksdb_rs::status::Status status = VerifyEncodedEntry(encoded, *kv_prot_info);
     if (!status.ok()) {
       return status;
     }
@@ -734,12 +734,12 @@ Status MemTable::Add(SequenceNumber s, ValueType type,
       Slice prefix = insert_with_hint_prefix_extractor_->Transform(key_slice);
       bool res = table->InsertKeyWithHint(handle, &insert_hints_[prefix]);
       if (UNLIKELY(!res)) {
-        return Status_TryAgain("key+seq exists");
+        return rocksdb_rs::status::Status_TryAgain("key+seq exists");
       }
     } else {
       bool res = table->InsertKey(handle);
       if (UNLIKELY(!res)) {
-        return Status_TryAgain("key+seq exists");
+        return rocksdb_rs::status::Status_TryAgain("key+seq exists");
       }
     }
 
@@ -781,7 +781,7 @@ Status MemTable::Add(SequenceNumber s, ValueType type,
                    ? table->InsertKeyConcurrently(handle)
                    : table->InsertKeyWithHintConcurrently(handle, hint);
     if (UNLIKELY(!res)) {
-      return Status_TryAgain("key+seq exists");
+      return rocksdb_rs::status::Status_TryAgain("key+seq exists");
     }
 
     assert(post_process_info != nullptr);
@@ -842,14 +842,14 @@ Status MemTable::Add(SequenceNumber s, ValueType type,
   UpdateOldestKeyTime();
 
   TEST_SYNC_POINT_CALLBACK("MemTable::Add:BeforeReturn:Encoded", &encoded);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Callback from MemTable::Get()
 namespace {
 
 struct Saver {
-  Status* status;
+  rocksdb_rs::status::Status* status;
   const LookupKey* key;
   bool* found_final_value;  // Is value set correctly? Used by KeyMayExist
   bool* merge_in_progress;
@@ -966,14 +966,14 @@ static bool SaveValue(void* arg, const char* entry) {
     switch (type) {
       case kTypeBlobIndex: {
         if (!s->do_merge) {
-          *(s->status) = Status_NotSupported(
+          *(s->status) = rocksdb_rs::status::Status_NotSupported(
               "GetMergeOperands not supported by stacked BlobDB");
           *(s->found_final_value) = true;
           return false;
         }
 
         if (*(s->merge_in_progress)) {
-          *(s->status) = Status_NotSupported(
+          *(s->status) = rocksdb_rs::status::Status_NotSupported(
               "Merge operator not supported by stacked BlobDB");
           *(s->found_final_value) = true;
           return false;
@@ -981,7 +981,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         if (s->is_blob_index == nullptr) {
           ROCKS_LOG_ERROR(s->logger, "Encountered unexpected blob index.");
-          *(s->status) = Status_NotSupported(
+          *(s->status) = rocksdb_rs::status::Status_NotSupported(
               "Encountered unexpected blob index. Please open DB with "
               "rocksdb::blob_db::BlobDB.");
           *(s->found_final_value) = true;
@@ -994,7 +994,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         Slice v = GetLengthPrefixedSlice(key_ptr + key_length);
 
-        *(s->status) = Status_OK();
+        *(s->status) = rocksdb_rs::status::Status_OK();
 
         if (s->value) {
           s->value->assign(v.data(), v.size());
@@ -1018,7 +1018,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         Slice v = GetLengthPrefixedSlice(key_ptr + key_length);
 
-        *(s->status) = Status_OK();
+        *(s->status) = rocksdb_rs::status::Status_OK();
 
         if (!s->do_merge) {
           // Preserve the value with the goal of returning it as part of
@@ -1077,7 +1077,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
         Slice v = GetLengthPrefixedSlice(key_ptr + key_length);
 
-        *(s->status) = Status_OK();
+        *(s->status) = rocksdb_rs::status::Status_OK();
 
         if (!s->do_merge) {
           // Preserve the value with the goal of returning it as part of
@@ -1177,17 +1177,17 @@ static bool SaveValue(void* arg, const char* entry) {
             // We have found a final value (a base deletion) and have newer
             // merge operands that we do not intend to merge. Nothing remains
             // to be done so assign status to OK.
-            *(s->status) = Status_OK();
+            *(s->status) = rocksdb_rs::status::Status_OK();
           }
         } else {
-          *(s->status) = Status_NotFound();
+          *(s->status) = rocksdb_rs::status::Status_NotFound();
         }
         *(s->found_final_value) = true;
         return false;
       }
       case kTypeMerge: {
         if (!merge_operator) {
-          *(s->status) = Status_InvalidArgument(
+          *(s->status) = rocksdb_rs::status::Status_InvalidArgument(
               "merge_operator is not properly initialized.");
           // Normally we continue the loop (return true) when we see a merge
           // operand.  But in case of an error, we should stop the loop
@@ -1240,7 +1240,7 @@ static bool SaveValue(void* arg, const char* entry) {
                      ". ");
           msg.append("seq: " + std::to_string(seq) + ".");
         }
-        *(s->status) = Status_Corruption(msg.c_str());
+        *(s->status) = rocksdb_rs::status::Status_Corruption(msg.c_str());
         return false;
       }
     }
@@ -1252,7 +1252,7 @@ static bool SaveValue(void* arg, const char* entry) {
 
 bool MemTable::Get(const LookupKey& key, std::string* value,
                    PinnableWideColumns* columns, std::string* timestamp,
-                   Status* s, MergeContext* merge_context,
+                   rocksdb_rs::status::Status* s, MergeContext* merge_context,
                    SequenceNumber* max_covering_tombstone_seq,
                    SequenceNumber* seq, const ReadOptions& read_opts,
                    bool immutable_memtable, ReadCallback* callback,
@@ -1320,7 +1320,7 @@ bool MemTable::Get(const LookupKey& key, std::string* value,
   // No change to value, since we have not yet found a Put/Delete
   // Propagate corruption error
   if (!found_final_value && merge_in_progress && !s->IsCorruption()) {
-    *s = Status_MergeInProgress();
+    *s = rocksdb_rs::status::Status_MergeInProgress();
   }
   PERF_COUNTER_ADD(get_from_memtable_count, 1);
   return found_final_value;
@@ -1331,7 +1331,7 @@ void MemTable::GetFromTable(const LookupKey& key,
                             bool do_merge, ReadCallback* callback,
                             bool* is_blob_index, std::string* value,
                             PinnableWideColumns* columns,
-                            std::string* timestamp, Status* s,
+                            std::string* timestamp, rocksdb_rs::status::Status* s,
                             MergeContext* merge_context, SequenceNumber* seq,
                             bool* found_final_value, bool* merge_in_progress) {
   Saver saver;
@@ -1430,7 +1430,7 @@ void MemTable::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
                  &found_final_value, &merge_in_progress);
 
     if (!found_final_value && merge_in_progress) {
-      *(iter->s) = Status_MergeInProgress();
+      *(iter->s) = rocksdb_rs::status::Status_MergeInProgress();
     }
 
     if (found_final_value) {
@@ -1449,7 +1449,7 @@ void MemTable::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
         for (auto range_iter = range->begin(); range_iter != range->end();
              ++range_iter) {
           range->MarkKeyDone(range_iter);
-          *(range_iter->s) = Status_Aborted();
+          *(range_iter->s) = rocksdb_rs::status::Status_Aborted();
         }
         break;
       }
@@ -1458,7 +1458,7 @@ void MemTable::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
   PERF_COUNTER_ADD(get_from_memtable_count, 1);
 }
 
-Status MemTable::Update(SequenceNumber seq, ValueType value_type,
+rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_type,
                         const Slice& key, const Slice& value,
                         const ProtectionInfoKVOS64* kv_prot_info) {
   LookupKey lkey(key, seq);
@@ -1511,7 +1511,7 @@ Status MemTable::Update(SequenceNumber seq, ValueType value_type,
             UpdateEntryChecksum(nullptr, key, value, type, existing_seq,
                                 p + value.size());
           }
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       }
     }
@@ -1521,7 +1521,7 @@ Status MemTable::Update(SequenceNumber seq, ValueType value_type,
   return Add(seq, value_type, key, value, kv_prot_info);
 }
 
-Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
+rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
                                 const Slice& delta,
                                 const ProtectionInfoKVOS64* kv_prot_info) {
   LookupKey lkey(key, seq);
@@ -1586,9 +1586,9 @@ Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
             UpdateEntryChecksum(nullptr, key, new_value, type, existing_seq,
                                 prev_buffer + new_prev_size);
           }
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         } else if (status == UpdateStatus::UPDATED) {
-          Status s = Status_new();
+          rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
           if (kv_prot_info != nullptr) {
             ProtectionInfoKVOS64 updated_kv_prot_info(*kv_prot_info);
             updated_kv_prot_info.UpdateV(delta, str_value);
@@ -1605,13 +1605,13 @@ Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
           // `UPDATE_FAILED` is named incorrectly. It indicates no update
           // happened. It does not indicate a failure happened.
           UpdateFlushState();
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       }
     }
   }
   // The latest value is not `kTypeValue` or key doesn't exist
-  return Status_NotFound();
+  return rocksdb_rs::status::Status_NotFound();
 }
 
 size_t MemTable::CountSuccessiveMergeEntries(const LookupKey& key) {

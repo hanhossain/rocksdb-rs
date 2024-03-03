@@ -16,7 +16,7 @@ using rocksdb::OptimisticTransactionOptions;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Snapshot;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::Transaction;
 using rocksdb::WriteOptions;
 
@@ -33,7 +33,7 @@ int main() {
   DB* db;
   OptimisticTransactionDB* txn_db;
 
-  Status s = OptimisticTransactionDB::Open(options, kDBPath, &txn_db);
+  rocksdb_rs::status::Status s = OptimisticTransactionDB::Open(options, kDBPath, &txn_db);
   assert(s.ok());
   db = txn_db->GetBaseDB();
 

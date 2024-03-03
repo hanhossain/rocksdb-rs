@@ -162,9 +162,9 @@ std::string TableProperties::ToString(const std::string& prop_delim,
 
   // Unique ID, when available
   std::string id;
-  Status s = GetUniqueIdFromTableProperties(*this, id);
+  rocksdb_rs::status::Status s = GetUniqueIdFromTableProperties(*this, id);
   AppendProperty(result, "unique ID",
-                 s.ok() ? UniqueIdToHumanString(id) : "N/A", prop_delim,
+                 s.ok() ? rocksdb_rs::unique_id::UniqueIdToHumanString(id) : "N/A", prop_delim,
                  kv_delim);
 
   SeqnoToTimeMapping seq_time_mapping;

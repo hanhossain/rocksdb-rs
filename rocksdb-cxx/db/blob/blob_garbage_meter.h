@@ -85,15 +85,15 @@ class BlobGarbageMeter {
     BlobStats out_flow_;
   };
 
-  Status ProcessInFlow(const Slice& key, const Slice& value);
-  Status ProcessOutFlow(const Slice& key, const Slice& value);
+  rocksdb_rs::status::Status ProcessInFlow(const Slice& key, const Slice& value);
+  rocksdb_rs::status::Status ProcessOutFlow(const Slice& key, const Slice& value);
 
   const std::unordered_map<uint64_t, BlobInOutFlow>& flows() const {
     return flows_;
   }
 
  private:
-  static Status Parse(const Slice& key, const Slice& value,
+  static rocksdb_rs::status::Status Parse(const Slice& key, const Slice& value,
                       uint64_t* blob_file_number, uint64_t* bytes);
 
   std::unordered_map<uint64_t, BlobInOutFlow> flows_;

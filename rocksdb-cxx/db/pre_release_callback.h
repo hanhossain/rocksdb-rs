@@ -31,7 +31,7 @@ class PreReleaseCallback {
   // total > index specifies the total number of callbacks in the same write
   // thread. Together with index, could be used to reduce the redundant
   // operations among the callbacks.
-  virtual Status Callback(SequenceNumber seq, bool is_mem_disabled,
+  virtual rocksdb_rs::status::Status Callback(SequenceNumber seq, bool is_mem_disabled,
                           uint64_t log_number, size_t index, size_t total) = 0;
 };
 

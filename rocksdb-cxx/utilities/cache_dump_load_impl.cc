@@ -16,14 +16,16 @@
 #include "util/crc32c.h"
 #include "utilities/cache_dump_load_impl.h"
 
+using rocksdb_rs::cache::CacheEntryRole;
+
 namespace rocksdb {
 
 // Set the dump filter with a list of DBs. Block cache may be shared by multipe
 // DBs and we may only want to dump out the blocks belonging to certain DB(s).
 // Therefore, a filter is need to decide if the key of the block satisfy the
 // requirement.
-Status CacheDumperImpl::SetDumpFilter(std::vector<DB*> db_list) {
-  Status s = Status_OK();
+rocksdb_rs::status::Status CacheDumperImpl::SetDumpFilter(std::vector<DB*> db_list) {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   for (size_t i = 0; i < db_list.size(); i++) {
     assert(i < db_list.size());
     TablePropertiesCollection ptc;
@@ -150,7 +152,7 @@ CacheDumperImpl::DumpOneBlockCallBack(std::string& buf) {
     // FIXME: reduce copying
     size_t len = helper->size_cb(value);
     buf.assign(len, '\0');
-    Status s = helper->saveto_cb(value, /*start*/ 0, len, buf.data());
+    rocksdb_rs::status::Status s = helper->saveto_cb(value, /*start*/ 0, len, buf.data());
 
     if (s.ok()) {
       // Write it out
@@ -272,7 +274,7 @@ IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
     // (There is no block trailer here compatible with block-based SST file.)
     Slice content =
         Slice(static_cast<char*>(dump_unit.value), dump_unit.value_len);
-    Status s = secondary_cache_->InsertSaved(dump_unit.key, content);
+    rocksdb_rs::status::Status s = secondary_cache_->InsertSaved(dump_unit.key, content);
     if (!s.ok()) {
       io_s = status_to_io_status(std::move(s));
     }

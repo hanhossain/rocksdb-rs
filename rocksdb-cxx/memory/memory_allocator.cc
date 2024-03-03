@@ -66,7 +66,7 @@ MemoryAllocatorWrapper::MemoryAllocatorWrapper(
   RegisterOptions("", &target_, &ma_wrapper_type_info);
 }
 
-Status MemoryAllocator::CreateFromString(
+rocksdb_rs::status::Status MemoryAllocator::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<MemoryAllocator>* result) {
   static std::once_flag once;

@@ -79,7 +79,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, IteratorAndGetReadTimestampSizeMismatch) {
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -120,7 +120,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -163,7 +163,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -207,7 +207,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, IteratorAndGet) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
+      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
                           "value" + std::to_string(i));
       ASSERT_OK(s);
     }
@@ -305,7 +305,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, Iterators) {
   const std::string read_timestamp = Timestamp(2, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -351,7 +351,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, IteratorsReadTimestampSizeMismatch) {
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -386,7 +386,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -423,7 +423,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(key));
     ASSERT_OK(s);
   }
@@ -458,7 +458,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, CompactedDBGetReadTimestampSizeMismatch) {
   std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(0));
     ASSERT_OK(s);
   }
@@ -498,7 +498,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(0));
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(0));
     ASSERT_OK(s);
   }
   ASSERT_OK(db_->Flush(FlushOptions()));
@@ -540,7 +540,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(0));
     ASSERT_OK(s);
   }
@@ -583,7 +583,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, CompactedDBGetWithOnlyOneL0File) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
+      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
                           "value" + std::to_string(i));
       ASSERT_OK(s);
     }
@@ -637,7 +637,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
+      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
                           "value" + std::to_string(i));
       ASSERT_OK(s);
     }
@@ -687,7 +687,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(0));
     ASSERT_OK(s);
   }
@@ -715,7 +715,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   }
   std::vector<std::string> values;
   std::vector<std::string> timestamps;
-  rust::Vec<Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
+  rust::Vec<rocksdb_rs::status::Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
   for (const auto& status : status_list) {
     ASSERT_TRUE(status.IsInvalidArgument());
   }
@@ -735,7 +735,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(0));
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(0));
     ASSERT_OK(s);
   }
   ASSERT_OK(db_->Flush(FlushOptions()));
@@ -761,7 +761,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   }
   std::vector<std::string> values;
   std::vector<std::string> timestamps;
-  rust::Vec<Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
+  rust::Vec<rocksdb_rs::status::Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
   for (const auto& status : status_list) {
     ASSERT_TRUE(status.IsInvalidArgument());
   }
@@ -785,7 +785,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    Status s = db_->Put(write_opts, Key1(key), write_timestamp,
+    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
                         "value" + std::to_string(0));
     ASSERT_OK(s);
   }
@@ -808,7 +808,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
     keys.emplace_back(key_str);
   }
   std::vector<std::string> values;
-  rust::Vec<Status> status_list = db_->MultiGet(read_opts, keys, &values);
+  rust::Vec<rocksdb_rs::status::Status> status_list = db_->MultiGet(read_opts, keys, &values);
   for (const auto& status : status_list) {
     ASSERT_TRUE(status.IsInvalidArgument());
   }
@@ -836,7 +836,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, CompactedDBMultiGetWithOnlyOneL0File) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
+      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
                           "value" + std::to_string(i));
       ASSERT_OK(s);
     }
@@ -865,7 +865,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, CompactedDBMultiGetWithOnlyOneL0File) {
     size_t batch_size = kMaxKey - start_keys[i] + 1;
     std::vector<std::string> values;
     std::vector<std::string> timestamps;
-    rust::Vec<Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
+    rust::Vec<rocksdb_rs::status::Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
     ASSERT_EQ(batch_size, values.size());
     ASSERT_EQ(batch_size, timestamps.size());
     for (uint64_t idx = 0; idx < values.size(); ++idx) {
@@ -900,7 +900,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
+      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
                           "value" + std::to_string(i));
       ASSERT_OK(s);
     }
@@ -930,7 +930,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
     size_t batch_size = kMaxKey - start_keys[i] + 1;
     std::vector<std::string> values;
     std::vector<std::string> timestamps;
-    rust::Vec<Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
+    rust::Vec<rocksdb_rs::status::Status> status_list = db_->MultiGet(read_opts, keys, &values, &timestamps);
     ASSERT_EQ(batch_size, values.size());
     ASSERT_EQ(batch_size, timestamps.size());
     for (uint64_t idx = 0; idx < values.size(); ++idx) {

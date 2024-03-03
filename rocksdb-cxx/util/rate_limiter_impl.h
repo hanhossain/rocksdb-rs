@@ -75,7 +75,7 @@ class GenericRateLimiter : public RateLimiter {
     return total_requests_[pri];
   }
 
-  virtual Status GetTotalPendingRequests(
+  virtual rocksdb_rs::status::Status GetTotalPendingRequests(
       int64_t* total_pending_requests,
       const Env::IOPriority pri = Env::IO_TOTAL) const override {
     assert(total_pending_requests != nullptr);
@@ -89,7 +89,7 @@ class GenericRateLimiter : public RateLimiter {
     } else {
       *total_pending_requests = static_cast<int64_t>(queue_[pri].size());
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual int64_t GetBytesPerSecond() const override {
@@ -106,7 +106,7 @@ class GenericRateLimiter : public RateLimiter {
   void RefillBytesAndGrantRequestsLocked();
   std::vector<Env::IOPriority> GeneratePriorityIterationOrderLocked();
   int64_t CalculateRefillBytesPerPeriodLocked(int64_t rate_bytes_per_sec);
-  Status TuneLocked();
+  rocksdb_rs::status::Status TuneLocked();
   void SetBytesPerSecondLocked(int64_t bytes_per_second);
 
   uint64_t NowMicrosMonotonicLocked() {

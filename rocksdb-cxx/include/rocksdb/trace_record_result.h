@@ -36,17 +36,17 @@ class TraceRecordResult {
    public:
     virtual ~Handler() = default;
 
-    virtual Status Handle(const StatusOnlyTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(const StatusOnlyTraceExecutionResult& result) = 0;
 
-    virtual Status Handle(const SingleValueTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(const SingleValueTraceExecutionResult& result) = 0;
 
-    virtual Status Handle(const MultiValuesTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(const MultiValuesTraceExecutionResult& result) = 0;
 
-    virtual Status Handle(const IteratorTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(const IteratorTraceExecutionResult& result) = 0;
   };
 
   // Accept the handler.
-  virtual Status Accept(Handler* handler) = 0;
+  virtual rocksdb_rs::status::Status Accept(Handler* handler) = 0;
 
  private:
   TraceType trace_type_;
@@ -83,44 +83,44 @@ class TraceExecutionResult : public TraceRecordResult {
 // Example operation: DB::Write()
 class StatusOnlyTraceExecutionResult : public TraceExecutionResult {
  public:
-  StatusOnlyTraceExecutionResult(Status status, uint64_t start_timestamp,
+  StatusOnlyTraceExecutionResult(rocksdb_rs::status::Status status, uint64_t start_timestamp,
                                  uint64_t end_timestamp, TraceType trace_type);
 
   virtual ~StatusOnlyTraceExecutionResult() override = default;
 
   // Return value of DB::Write(), etc.
-  virtual const Status& GetStatus() const;
+  virtual const rocksdb_rs::status::Status& GetStatus() const;
 
-  virtual Status Accept(Handler* handler) override;
+  virtual rocksdb_rs::status::Status Accept(Handler* handler) override;
 
  private:
-  Status status_;
+  rocksdb_rs::status::Status status_;
 };
 
 // Result for operations that return a Status and a value.
 // Example operation: DB::Get()
 class SingleValueTraceExecutionResult : public TraceExecutionResult {
  public:
-  SingleValueTraceExecutionResult(Status status, const std::string& value,
+  SingleValueTraceExecutionResult(rocksdb_rs::status::Status status, const std::string& value,
                                   uint64_t start_timestamp,
                                   uint64_t end_timestamp, TraceType trace_type);
 
-  SingleValueTraceExecutionResult(Status status, std::string&& value,
+  SingleValueTraceExecutionResult(rocksdb_rs::status::Status status, std::string&& value,
                                   uint64_t start_timestamp,
                                   uint64_t end_timestamp, TraceType trace_type);
 
   virtual ~SingleValueTraceExecutionResult() override;
 
   // Return status of DB::Get().
-  virtual const Status& GetStatus() const;
+  virtual const rocksdb_rs::status::Status& GetStatus() const;
 
   // Value for the searched key.
   virtual const std::string& GetValue() const;
 
-  virtual Status Accept(Handler* handler) override;
+  virtual rocksdb_rs::status::Status Accept(Handler* handler) override;
 
  private:
-  Status status_;
+  rocksdb_rs::status::Status status_;
   std::string value_;
 };
 
@@ -128,7 +128,7 @@ class SingleValueTraceExecutionResult : public TraceExecutionResult {
 // Example operation: DB::MultiGet()
 class MultiValuesTraceExecutionResult : public TraceExecutionResult {
  public:
-  MultiValuesTraceExecutionResult(rust::Vec<Status> multi_status,
+  MultiValuesTraceExecutionResult(rust::Vec<rocksdb_rs::status::Status> multi_status,
                                   std::vector<std::string> values,
                                   uint64_t start_timestamp,
                                   uint64_t end_timestamp, TraceType trace_type);
@@ -136,15 +136,15 @@ class MultiValuesTraceExecutionResult : public TraceExecutionResult {
   virtual ~MultiValuesTraceExecutionResult() override;
 
   // Returned Status(es) of DB::MultiGet().
-  virtual const rust::Vec<Status>& GetMultiStatus() const;
+  virtual const rust::Vec<rocksdb_rs::status::Status>& GetMultiStatus() const;
 
   // Returned values for the searched keys.
   virtual const std::vector<std::string>& GetValues() const;
 
-  virtual Status Accept(Handler* handler) override;
+  virtual rocksdb_rs::status::Status Accept(Handler* handler) override;
 
  private:
-  rust::Vec<Status> multi_status_;
+  rust::Vec<rocksdb_rs::status::Status> multi_status_;
   std::vector<std::string> values_;
 };
 
@@ -152,11 +152,11 @@ class MultiValuesTraceExecutionResult : public TraceExecutionResult {
 // Example operations: Iterator::Seek(), Iterator::SeekForPrev()
 class IteratorTraceExecutionResult : public TraceExecutionResult {
  public:
-  IteratorTraceExecutionResult(bool valid, Status status, PinnableSlice&& key,
+  IteratorTraceExecutionResult(bool valid, rocksdb_rs::status::Status status, PinnableSlice&& key,
                                PinnableSlice&& value, uint64_t start_timestamp,
                                uint64_t end_timestamp, TraceType trace_type);
 
-  IteratorTraceExecutionResult(bool valid, Status status,
+  IteratorTraceExecutionResult(bool valid, rocksdb_rs::status::Status status,
                                const std::string& key, const std::string& value,
                                uint64_t start_timestamp, uint64_t end_timestamp,
                                TraceType trace_type);
@@ -167,7 +167,7 @@ class IteratorTraceExecutionResult : public TraceExecutionResult {
   virtual bool GetValid() const;
 
   // Return the status of the Iterator.
-  virtual const Status& GetStatus() const;
+  virtual const rocksdb_rs::status::Status& GetStatus() const;
 
   // Key of the current iterating entry, empty if GetValid() is false.
   virtual Slice GetKey() const;
@@ -175,11 +175,11 @@ class IteratorTraceExecutionResult : public TraceExecutionResult {
   // Value of the current iterating entry, empty if GetValid() is false.
   virtual Slice GetValue() const;
 
-  virtual Status Accept(Handler* handler) override;
+  virtual rocksdb_rs::status::Status Accept(Handler* handler) override;
 
  private:
   bool valid_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   PinnableSlice key_;
   PinnableSlice value_;
 };

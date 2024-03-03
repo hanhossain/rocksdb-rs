@@ -17,7 +17,7 @@ void ReleaseCacheHandleCleanup(void* arg1, void* arg2) {
   cache->Release(cache_handle);
 }
 
-Status WarmInCache(Cache* cache, const Slice& key, const Slice& saved,
+rocksdb_rs::status::Status WarmInCache(Cache* cache, const Slice& key, const Slice& saved,
                    Cache::CreateContext* create_context,
                    const Cache::CacheItemHelper* helper,
                    Cache::Priority priority, size_t* out_charge) {
@@ -25,7 +25,7 @@ Status WarmInCache(Cache* cache, const Slice& key, const Slice& saved,
   assert(helper->create_cb);
   Cache::ObjectPtr value;
   size_t charge;
-  Status st = helper->create_cb(saved, create_context,
+  rocksdb_rs::status::Status st = helper->create_cb(saved, create_context,
                                 cache->memory_allocator(), &value, &charge);
   if (st.ok()) {
     st =

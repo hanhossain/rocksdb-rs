@@ -41,7 +41,7 @@ class ConfigurableHelper {
   // @return InvalidArgument If any of the values cannot be successfully
   //       parsed.  This can also be returned if PrepareOptions encounters an
   //       error.
-  static Status ConfigureOptions(
+  static rocksdb_rs::status::Status ConfigureOptions(
       const ConfigOptions& config_options, Configurable& configurable,
       const std::unordered_map<std::string, std::string>& options,
       std::unordered_map<std::string, std::string>* unused);
@@ -60,7 +60,7 @@ class ConfigurableHelper {
   // @return NotFound If an option name was not found in type_mape
   // @return NotSupported If the option was found but no rule for converting
   //       the value could be found.
-  static Status ConfigureSomeOptions(
+  static rocksdb_rs::status::Status ConfigureSomeOptions(
       const ConfigOptions& config_options, Configurable& configurable,
       const std::unordered_map<std::string, OptionTypeInfo>& type_map,
       std::unordered_map<std::string, std::string>* options, void* opt_ptr);
@@ -81,7 +81,7 @@ class ConfigurableHelper {
   //      equivalent.
   // @param value The new value for this option.
   // @param See ConfigureOptions for the possible return values
-  static Status ConfigureSingleOption(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status ConfigureSingleOption(const ConfigOptions& config_options,
                                       Configurable& configurable,
                                       const std::string& name,
                                       const std::string& value);
@@ -101,7 +101,7 @@ class ConfigurableHelper {
   //      equivalent.
   // @param value The new value for this option.
   // @param See ConfigureOptions for the possible return values
-  static Status ConfigureOption(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status ConfigureOption(const ConfigOptions& config_options,
                                 Configurable& configurable,
                                 const OptionTypeInfo& opt_info,
                                 const std::string& opt_name,
@@ -120,7 +120,7 @@ class ConfigurableHelper {
   // @return NotFound If the name is not valid for this object.
   // @param InvalidArgument If the name is valid for this object but
   //      its value cannot be serialized.
-  static Status GetOption(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status GetOption(const ConfigOptions& config_options,
                           const Configurable& configurable,
                           const std::string& name, std::string* value);
 
@@ -133,7 +133,7 @@ class ConfigurableHelper {
   // @return OK If the options for this object wer successfully serialized.
   // @return InvalidArgument If one or more of the options could not be
   // serialized.
-  static Status SerializeOptions(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status SerializeOptions(const ConfigOptions& config_options,
                                  const Configurable& configurable,
                                  const std::string& prefix,
                                  std::string* result);
@@ -141,7 +141,7 @@ class ConfigurableHelper {
   // Internal method to list the option names for this object.
   // Classes may override this value to change its behavior.
   // @see ListOptions for more details
-  static Status ListOptions(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status ListOptions(const ConfigOptions& config_options,
                             const Configurable& configurable,
                             const std::string& prefix,
                             std::unordered_set<std::string>* result);
@@ -176,7 +176,7 @@ class ConfigurableHelper {
       const std::vector<Configurable::RegisteredOptions>& options,
       const std::string& name, std::string* opt_name, void** opt_ptr);
 
-  static Status ConfigureCustomizableOption(
+  static rocksdb_rs::status::Status ConfigureCustomizableOption(
       const ConfigOptions& config_options, Configurable& configurable,
       const OptionTypeInfo& opt_info, const std::string& opt_name,
       const std::string& name, const std::string& value, void* opt_ptr);

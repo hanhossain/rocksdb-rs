@@ -34,11 +34,11 @@ class SanityTest {
   virtual std::string Name() const = 0;
   virtual Options GetOptions() const = 0;
 
-  Status Create() {
+  rocksdb_rs::status::Status Create() {
     Options options = GetOptions();
     options.create_if_missing = true;
     std::string dbname = path_ + Name();
-    Status s = DestroyDB(dbname, options);
+    rocksdb_rs::status::Status s = DestroyDB(dbname, options);
     if (!s.ok()) {
       return s;
     }
@@ -58,10 +58,10 @@ class SanityTest {
     }
     return db->Flush(FlushOptions());
   }
-  Status Verify() {
+  rocksdb_rs::status::Status Verify() {
     DB* db = nullptr;
     std::string dbname = path_ + Name();
-    Status s = DB::Open(GetOptions(), dbname, &db);
+    rocksdb_rs::status::Status s = DB::Open(GetOptions(), dbname, &db);
     std::unique_ptr<DB> db_guard(db);
     if (!s.ok()) {
       return s;
@@ -75,10 +75,10 @@ class SanityTest {
         return s;
       }
       if (result != v) {
-        return Status_Corruption("Unexpected value for key " + k);
+        return rocksdb_rs::status::Status_Corruption("Unexpected value for key " + k);
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -131,7 +131,7 @@ class SanityTestZlibCompression : public SanityTest {
  public:
   explicit SanityTestZlibCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = CompressionType::kZlibCompression;
+    options_.compression = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "ZlibCompression"; }
@@ -144,7 +144,7 @@ class SanityTestZlibCompressionVersion2 : public SanityTest {
  public:
   explicit SanityTestZlibCompressionVersion2(const std::string& path)
       : SanityTest(path) {
-    options_.compression = CompressionType::kZlibCompression;
+    options_.compression = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
     BlockBasedTableOptions table_options;
 #if ROCKSDB_MAJOR > 3 || (ROCKSDB_MAJOR == 3 && ROCKSDB_MINOR >= 10)
     table_options.format_version = 2;
@@ -164,7 +164,7 @@ class SanityTestLZ4Compression : public SanityTest {
  public:
   explicit SanityTestLZ4Compression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = CompressionType::kLZ4Compression;
+    options_.compression = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "LZ4Compression"; }
@@ -177,7 +177,7 @@ class SanityTestLZ4HCCompression : public SanityTest {
  public:
   explicit SanityTestLZ4HCCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = CompressionType::kLZ4HCCompression;
+    options_.compression = rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "LZ4HCCompression"; }
@@ -190,7 +190,7 @@ class SanityTestZSTDCompression : public SanityTest {
  public:
   explicit SanityTestZSTDCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = CompressionType::kZSTD;
+    options_.compression = rocksdb_rs::compression_type::CompressionType::kZSTD;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "ZSTDCompression"; }
@@ -252,7 +252,7 @@ bool RunSanityTests(const std::string& command, const std::string& path) {
     fprintf(stderr, "Verifying...\n");
   }
   for (auto sanity_test : sanity_tests) {
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     fprintf(stderr, "%s -- ", sanity_test->Name().c_str());
     if (command == "create") {
       s = sanity_test->Create();

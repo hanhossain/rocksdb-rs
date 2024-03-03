@@ -85,7 +85,7 @@ Slice SubcompactionState::LargestUserKey() const {
   }
 }
 
-Status SubcompactionState::AddToOutput(
+rocksdb_rs::status::Status SubcompactionState::AddToOutput(
     const CompactionIterator& iter,
     const CompactionFileOpenFunc& open_file_func,
     const CompactionFileCloseFunc& close_file_func) {

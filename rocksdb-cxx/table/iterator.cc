@@ -15,21 +15,21 @@
 
 namespace rocksdb {
 
-Status Iterator::GetProperty(std::string prop_name, std::string* prop) {
+rocksdb_rs::status::Status Iterator::GetProperty(std::string prop_name, std::string* prop) {
   if (prop == nullptr) {
-    return Status_InvalidArgument("prop is nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("prop is nullptr");
   }
   if (prop_name == "rocksdb.iterator.is-key-pinned") {
     *prop = "0";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
-  return Status_InvalidArgument("Unidentified property.");
+  return rocksdb_rs::status::Status_InvalidArgument("Unidentified property.");
 }
 
 namespace {
 class EmptyIterator : public Iterator {
  public:
-  explicit EmptyIterator(const Status& s) : status_(s.Clone()) {}
+  explicit EmptyIterator(const rocksdb_rs::status::Status& s) : status_(s.Clone()) {}
   bool Valid() const override { return false; }
   void Seek(const Slice& /*target*/) override {}
   void SeekForPrev(const Slice& /*target*/) override {}
@@ -45,16 +45,16 @@ class EmptyIterator : public Iterator {
     assert(false);
     return Slice();
   }
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
  private:
-  Status status_;
+  rocksdb_rs::status::Status status_;
 };
 
 template <class TValue = Slice>
 class EmptyInternalIterator : public InternalIteratorBase<TValue> {
  public:
-  explicit EmptyInternalIterator(const Status& s) : status_(s.Clone()) {}
+  explicit EmptyInternalIterator(const rocksdb_rs::status::Status& s) : status_(s.Clone()) {}
   bool Valid() const override { return false; }
   void Seek(const Slice& /*target*/) override {}
   void SeekForPrev(const Slice& /*target*/) override {}
@@ -70,30 +70,30 @@ class EmptyInternalIterator : public InternalIteratorBase<TValue> {
     assert(false);
     return TValue();
   }
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
  private:
-  Status status_;
+  rocksdb_rs::status::Status status_;
 };
 }  // namespace
 
-Iterator* NewEmptyIterator() { return new EmptyIterator(Status_OK()); }
+Iterator* NewEmptyIterator() { return new EmptyIterator(rocksdb_rs::status::Status_OK()); }
 
-Iterator* NewErrorIterator(const Status& status) {
+Iterator* NewErrorIterator(const rocksdb_rs::status::Status& status) {
   return new EmptyIterator(status);
 }
 
 template <class TValue>
-InternalIteratorBase<TValue>* NewErrorInternalIterator(const Status& status) {
+InternalIteratorBase<TValue>* NewErrorInternalIterator(const rocksdb_rs::status::Status& status) {
   return new EmptyInternalIterator<TValue>(status);
 }
 template InternalIteratorBase<IndexValue>* NewErrorInternalIterator(
-    const Status& status);
+    const rocksdb_rs::status::Status& status);
 template InternalIteratorBase<Slice>* NewErrorInternalIterator(
-    const Status& status);
+    const rocksdb_rs::status::Status& status);
 
 template <class TValue>
-InternalIteratorBase<TValue>* NewErrorInternalIterator(const Status& status,
+InternalIteratorBase<TValue>* NewErrorInternalIterator(const rocksdb_rs::status::Status& status,
                                                        Arena* arena) {
   if (arena == nullptr) {
     return NewErrorInternalIterator<TValue>(status);
@@ -103,13 +103,13 @@ InternalIteratorBase<TValue>* NewErrorInternalIterator(const Status& status,
   }
 }
 template InternalIteratorBase<IndexValue>* NewErrorInternalIterator(
-    const Status& status, Arena* arena);
+    const rocksdb_rs::status::Status& status, Arena* arena);
 template InternalIteratorBase<Slice>* NewErrorInternalIterator(
-    const Status& status, Arena* arena);
+    const rocksdb_rs::status::Status& status, Arena* arena);
 
 template <class TValue>
 InternalIteratorBase<TValue>* NewEmptyInternalIterator() {
-  return new EmptyInternalIterator<TValue>(Status_OK());
+  return new EmptyInternalIterator<TValue>(rocksdb_rs::status::Status_OK());
 }
 template InternalIteratorBase<IndexValue>* NewEmptyInternalIterator();
 template InternalIteratorBase<Slice>* NewEmptyInternalIterator();
@@ -120,7 +120,7 @@ InternalIteratorBase<TValue>* NewEmptyInternalIterator(Arena* arena) {
     return NewEmptyInternalIterator<TValue>();
   } else {
     auto mem = arena->AllocateAligned(sizeof(EmptyInternalIterator<TValue>));
-    return new (mem) EmptyInternalIterator<TValue>(Status_OK());
+    return new (mem) EmptyInternalIterator<TValue>(rocksdb_rs::status::Status_OK());
   }
 }
 template InternalIteratorBase<IndexValue>* NewEmptyInternalIterator(

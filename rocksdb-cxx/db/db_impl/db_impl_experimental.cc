@@ -21,7 +21,7 @@
 
 namespace rocksdb {
 
-Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
                                    const Slice* begin, const Slice* end) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
@@ -51,20 +51,20 @@ Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
     SchedulePendingCompaction(cfd);
     MaybeScheduleFlushOrCompaction();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
+rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
   assert(column_family);
 
   if (target_level < 1) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "PromoteL0 FAILED. Invalid target level %d\n", target_level);
-    return Status_InvalidArgument("Invalid target level");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid target level");
   }
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   VersionEdit edit;
   JobContext job_context(next_job_id_.fetch_add(1), true);
   {
@@ -77,7 +77,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
                      "PromoteL0 FAILED. Target level %d does not exist\n",
                      target_level);
       job_context.Clean();
-      status = Status_InvalidArgument("Target level does not exist");
+      status = rocksdb_rs::status::Status_InvalidArgument("Target level does not exist");
       return status;
     }
 
@@ -99,7 +99,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
                        f->fd.GetNumber());
         job_context.Clean();
         status =
-            Status_InvalidArgument("PromoteL0 called during L0 compaction");
+            rocksdb_rs::status::Status_InvalidArgument("PromoteL0 called during L0 compaction");
         return status;
       }
 
@@ -111,7 +111,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
                        " have overlapping ranges\n",
                        prev_f->fd.GetNumber(), f->fd.GetNumber());
         job_context.Clean();
-        status = Status_InvalidArgument("L0 has overlapping files");
+        status = rocksdb_rs::status::Status_InvalidArgument("L0 has overlapping files");
         return status;
       }
     }
@@ -122,7 +122,7 @@ Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
         ROCKS_LOG_INFO(immutable_db_options_.info_log,
                        "PromoteL0 FAILED. Level %d not empty\n", level);
         job_context.Clean();
-        status = Status_InvalidArgument(
+        status = rocksdb_rs::status::Status_InvalidArgument(
             "All levels up to target_level "
             "must be empty");
         return status;

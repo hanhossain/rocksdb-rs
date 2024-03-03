@@ -396,7 +396,7 @@ TEST_F(OptionsSettableTest, ColumnFamilyOptionsAllFieldsSettable) {
                 memtable_insert_with_hint_prefix_extractor),
        sizeof(std::shared_ptr<const SliceTransform>)},
       {offsetof(struct ColumnFamilyOptions, compression_per_level),
-       sizeof(std::vector<CompressionType>)},
+       sizeof(std::vector<rocksdb_rs::compression_type::CompressionType>)},
       {offsetof(struct ColumnFamilyOptions,
                 max_bytes_for_level_multiplier_additional),
        sizeof(std::vector<int>)},
@@ -600,7 +600,7 @@ TEST_F(OptionsSettableTest, ColumnFamilyOptionsAllFieldsSettable) {
       {offsetof(struct MutableCFOptions, compaction_options_fifo),
        sizeof(struct CompactionOptionsFIFO)},
       {offsetof(struct MutableCFOptions, compression_per_level),
-       sizeof(std::vector<CompressionType>)},
+       sizeof(std::vector<rocksdb_rs::compression_type::CompressionType>)},
       {offsetof(struct MutableCFOptions, max_file_size),
        sizeof(std::vector<uint64_t>)},
   };

@@ -20,6 +20,8 @@
 #include "util/gflags_compat.h"
 #include "util/random.h"
 
+using namespace rocksdb_rs::filename;
+
 DECLARE_int32(compact_files_one_in);
 
 namespace rocksdb {
@@ -134,7 +136,7 @@ class DbStressListener : public EventListener {
   }
 
   void OnBackgroundError(BackgroundErrorReason /* reason */,
-                         Status* /* bg_error */) override {
+                         rocksdb_rs::status::Status* /* bg_error */) override {
     RandomSleep();
   }
 
@@ -174,12 +176,12 @@ class DbStressListener : public EventListener {
   }
 
   void OnErrorRecoveryBegin(BackgroundErrorReason /* reason */,
-                            Status /* bg_error */,
+                            rocksdb_rs::status::Status /* bg_error */,
                             bool* /* auto_recovery */) override {
     RandomSleep();
   }
 
-  void OnErrorRecoveryCompleted(Status /* old_bg_error */) override {
+  void OnErrorRecoveryCompleted(rocksdb_rs::status::Status /* old_bg_error */) override {
     RandomSleep();
   }
 
@@ -223,10 +225,10 @@ class DbStressListener : public EventListener {
   void VerifyFileName(const std::string& file_name) {
 #ifndef NDEBUG
     uint64_t file_number;
-    FileType file_type;
+    rocksdb_rs::types::FileType file_type;
     bool result = ParseFileName(file_name, &file_number, &file_type);
     assert(result);
-    assert(file_type == kTableFile);
+    assert(file_type == rocksdb_rs::types::FileType::kTableFile);
 #else
     (void)file_name;
 #endif  // !NDEBUG

@@ -113,12 +113,12 @@ BlockCacheTraceWriterImpl::BlockCacheTraceWriterImpl(
       trace_options_(trace_options),
       trace_writer_(std::move(trace_writer)) {}
 
-Status BlockCacheTraceWriterImpl::WriteBlockAccess(
+rocksdb_rs::status::Status BlockCacheTraceWriterImpl::WriteBlockAccess(
     const BlockCacheTraceRecord& record, const Slice& block_key,
     const Slice& cf_name, const Slice& referenced_key) {
   uint64_t trace_file_size = trace_writer_->GetFileSize();
   if (trace_file_size > trace_options_.max_trace_file_size) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Trace trace;
   trace.ts = record.access_timestamp;
@@ -148,7 +148,7 @@ Status BlockCacheTraceWriterImpl::WriteBlockAccess(
   return trace_writer_->Write(encoded_trace);
 }
 
-Status BlockCacheTraceWriterImpl::WriteHeader() {
+rocksdb_rs::status::Status BlockCacheTraceWriterImpl::WriteHeader() {
   Trace trace;
   trace.ts = clock_->NowMicros();
   trace.type = TraceType::kTraceBegin;
@@ -164,10 +164,10 @@ BlockCacheTraceReader::BlockCacheTraceReader(
     std::unique_ptr<TraceReader>&& reader)
     : trace_reader_(std::move(reader)) {}
 
-Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHeader* header) {
+rocksdb_rs::status::Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHeader* header) {
   assert(header != nullptr);
   std::string encoded_trace;
-  Status s = trace_reader_->Read(&encoded_trace);
+  rocksdb_rs::status::Status s = trace_reader_->Read(&encoded_trace);
   if (!s.ok()) {
     return s;
   }
@@ -180,36 +180,36 @@ Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHeader* header) {
   Slice enc_slice = Slice(trace.payload);
   Slice magnic_number;
   if (!GetLengthPrefixedSlice(&enc_slice, &magnic_number)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read the magic number.");
   }
   if (magnic_number.ToString() != kTraceMagic) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Magic number does not match.");
   }
   if (!GetFixed32(&enc_slice, &header->rocksdb_major_version)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb major "
         "version number.");
   }
   if (!GetFixed32(&enc_slice, &header->rocksdb_minor_version)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb minor "
         "version number.");
   }
   // We should have retrieved all information in the header.
   if (!enc_slice.empty()) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: The length of header is too "
         "long.");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
+rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
   assert(record);
   std::string encoded_trace;
-  Status s = trace_reader_->Read(&encoded_trace);
+  rocksdb_rs::status::Status s = trace_reader_->Read(&encoded_trace);
   if (!s.ok()) {
     return s;
   }
@@ -226,57 +226,57 @@ Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
 
   Slice block_key;
   if (!GetLengthPrefixedSlice(&enc_slice, &block_key)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read block key.");
   }
   record->block_key = block_key.ToString();
   if (!GetFixed64(&enc_slice, &record->block_size)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read block size.");
   }
   if (!GetFixed64(&enc_slice, &record->cf_id)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read column family ID.");
   }
   Slice cf_name;
   if (!GetLengthPrefixedSlice(&enc_slice, &cf_name)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read column family name.");
   }
   record->cf_name = cf_name.ToString();
   if (!GetFixed32(&enc_slice, &record->level)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read level.");
   }
   if (!GetFixed64(&enc_slice, &record->sst_fd_number)) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read SST file number.");
   }
   if (enc_slice.empty()) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read caller.");
   }
   record->caller = static_cast<TableReaderCaller>(enc_slice[0]);
   enc_slice.remove_prefix(kCharSize);
   if (enc_slice.empty()) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read is_cache_hit.");
   }
   record->is_cache_hit = static_cast<char>(enc_slice[0]);
   enc_slice.remove_prefix(kCharSize);
   if (enc_slice.empty()) {
-    return Status_Incomplete(
+    return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read no_insert.");
   }
   record->no_insert = static_cast<char>(enc_slice[0]);
   enc_slice.remove_prefix(kCharSize);
   if (BlockCacheTraceHelper::IsGetOrMultiGet(record->caller)) {
     if (!GetFixed64(&enc_slice, &record->get_id)) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read the get id.");
     }
     if (enc_slice.empty()) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read "
           "get_from_user_specified_snapshot.");
     }
@@ -284,7 +284,7 @@ Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
     enc_slice.remove_prefix(kCharSize);
     Slice referenced_key;
     if (!GetLengthPrefixedSlice(&enc_slice, &referenced_key)) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read the referenced key.");
     }
     record->referenced_key = referenced_key.ToString();
@@ -292,22 +292,22 @@ Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceRecord* record) {
   if (BlockCacheTraceHelper::IsGetOrMultiGetOnDataBlock(record->block_type,
                                                         record->caller)) {
     if (!GetFixed64(&enc_slice, &record->referenced_data_size)) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read the referenced data size.");
     }
     if (!GetFixed64(&enc_slice, &record->num_keys_in_block)) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read the number of keys in the "
           "block.");
     }
     if (enc_slice.empty()) {
-      return Status_Incomplete(
+      return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read "
           "referenced_key_exist_in_block.");
     }
     record->referenced_key_exist_in_block = static_cast<char>(enc_slice[0]);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 BlockCacheHumanReadableTraceWriter::~BlockCacheHumanReadableTraceWriter() {
@@ -317,22 +317,22 @@ BlockCacheHumanReadableTraceWriter::~BlockCacheHumanReadableTraceWriter() {
   }
 }
 
-Status BlockCacheHumanReadableTraceWriter::NewWritableFile(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceWriter::NewWritableFile(
     const std::string& human_readable_trace_file_path,
     rocksdb::Env* env) {
   if (human_readable_trace_file_path.empty()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "The provided human_readable_trace_file_path is null.");
   }
   return env->NewWritableFile(human_readable_trace_file_path,
                               &human_readable_trace_file_writer_, EnvOptions());
 }
 
-Status BlockCacheHumanReadableTraceWriter::WriteHumanReadableTraceRecord(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceWriter::WriteHumanReadableTraceRecord(
     const BlockCacheTraceRecord& access, uint64_t block_id,
     uint64_t get_key_id) {
   if (!human_readable_trace_file_writer_) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   int ret = snprintf(
       trace_record_buffer_, sizeof(trace_record_buffer_),
@@ -350,7 +350,7 @@ Status BlockCacheHumanReadableTraceWriter::WriteHumanReadableTraceRecord(
       static_cast<uint64_t>(access.referenced_key.size()),
       BlockCacheTraceHelper::GetBlockOffsetInFile(access));
   if (ret < 0) {
-    return Status_IOError("failed to format the output");
+    return rocksdb_rs::status::Status_IOError("failed to format the output");
   }
   std::string printout(trace_record_buffer_);
   return human_readable_trace_file_writer_->Append(printout);
@@ -366,16 +366,16 @@ BlockCacheHumanReadableTraceReader::~BlockCacheHumanReadableTraceReader() {
   human_readable_trace_reader_.close();
 }
 
-Status BlockCacheHumanReadableTraceReader::ReadHeader(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadHeader(
     BlockCacheTraceHeader* /*header*/) {
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status BlockCacheHumanReadableTraceReader::ReadAccess(
+rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadAccess(
     BlockCacheTraceRecord* record) {
   std::string line;
   if (!std::getline(human_readable_trace_reader_, line)) {
-    return Status_Incomplete("No more records to read.");
+    return rocksdb_rs::status::Status_Incomplete("No more records to read.");
   }
   std::stringstream ss(line);
   std::vector<std::string> record_strs;
@@ -385,7 +385,7 @@ Status BlockCacheHumanReadableTraceReader::ReadAccess(
     record_strs.push_back(substr);
   }
   if (record_strs.size() != 21) {
-    return Status_Incomplete("Records format is wrong.");
+    return rocksdb_rs::status::Status_Incomplete("Records format is wrong.");
   }
 
   record->access_timestamp = ParseUint64(record_strs[0]);
@@ -443,19 +443,19 @@ Status BlockCacheHumanReadableTraceReader::ReadAccess(
     }
     record->referenced_key += tmp_get_key;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 BlockCacheTracer::BlockCacheTracer() { writer_.store(nullptr); }
 
 BlockCacheTracer::~BlockCacheTracer() { EndTrace(); }
 
-Status BlockCacheTracer::StartTrace(
+rocksdb_rs::status::Status BlockCacheTracer::StartTrace(
     const BlockCacheTraceOptions& trace_options,
     std::unique_ptr<BlockCacheTraceWriter>&& trace_writer) {
   InstrumentedMutexLock lock_guard(&trace_writer_mutex_);
   if (writer_.load()) {
-    return Status_Busy();
+    return rocksdb_rs::status::Status_Busy();
   }
   get_id_counter_.store(1);
   trace_options_ = trace_options;
@@ -472,16 +472,16 @@ void BlockCacheTracer::EndTrace() {
   writer_.store(nullptr);
 }
 
-Status BlockCacheTracer::WriteBlockAccess(const BlockCacheTraceRecord& record,
+rocksdb_rs::status::Status BlockCacheTracer::WriteBlockAccess(const BlockCacheTraceRecord& record,
                                           const Slice& block_key,
                                           const Slice& cf_name,
                                           const Slice& referenced_key) {
   if (!writer_.load() || !ShouldTrace(block_key, trace_options_)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   InstrumentedMutexLock lock_guard(&trace_writer_mutex_);
   if (!writer_.load()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return writer_.load()->WriteBlockAccess(record, block_key, cf_name,
                                           referenced_key);

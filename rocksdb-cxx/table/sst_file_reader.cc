@@ -38,9 +38,9 @@ SstFileReader::SstFileReader(const Options& options) : rep_(new Rep(options)) {}
 
 SstFileReader::~SstFileReader() {}
 
-Status SstFileReader::Open(const std::string& file_path) {
+rocksdb_rs::status::Status SstFileReader::Open(const std::string& file_path) {
   auto r = rep_.get();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   uint64_t file_size = 0;
   std::unique_ptr<FSRandomAccessFile> file;
   std::unique_ptr<RandomAccessFileReader> file_reader;
@@ -92,7 +92,7 @@ std::shared_ptr<const TableProperties> SstFileReader::GetTableProperties()
   return rep_->table_reader->GetTableProperties();
 }
 
-Status SstFileReader::VerifyChecksum(const ReadOptions& read_options) {
+rocksdb_rs::status::Status SstFileReader::VerifyChecksum(const ReadOptions& read_options) {
   assert(read_options.io_activity == Env::IOActivity::kUnknown);
   return rep_->table_reader->VerifyChecksum(read_options,
                                             TableReaderCaller::kSSTFileReader);

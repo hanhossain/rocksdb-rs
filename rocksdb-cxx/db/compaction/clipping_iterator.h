@@ -146,7 +146,7 @@ class ClippingIterator : public InternalIterator {
     return iter_->value();
   }
 
-  Status status() const override { return iter_->status(); }
+  rocksdb_rs::status::Status status() const override { return iter_->status(); }
 
   bool PrepareValue() override {
     assert(valid_);
@@ -184,7 +184,7 @@ class ClippingIterator : public InternalIterator {
     return iter_->IsValuePinned();
   }
 
-  Status GetProperty(std::string prop_name, std::string* prop) override {
+  rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override {
     return iter_->GetProperty(prop_name, prop);
   }
 

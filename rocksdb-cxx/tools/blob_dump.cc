@@ -11,7 +11,7 @@
 
 #include "utilities/blob_db/blob_dump_tool.h"
 
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::blob_db::BlobDumpTool;
 
 int main(int argc, char** argv) {
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     }
   }
   BlobDumpTool tool;
-  Status s =
+  rocksdb_rs::status::Status s =
       tool.Run(file, show_key, show_blob, show_uncompressed_blob, show_summary);
   if (!s.ok()) {
     fprintf(stderr, "Failed: %s\n", s.ToString().c_str());

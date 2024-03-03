@@ -207,7 +207,7 @@ class BlockCacheTraceSimulator {
   BlockCacheTraceSimulator(BlockCacheTraceSimulator&&) = delete;
   BlockCacheTraceSimulator& operator=(BlockCacheTraceSimulator&&) = delete;
 
-  Status InitializeCaches();
+  rocksdb_rs::status::Status InitializeCaches();
 
   void Access(const BlockCacheTraceRecord& access);
 

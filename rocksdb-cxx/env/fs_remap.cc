@@ -17,7 +17,7 @@ std::pair<IOStatus, std::string> RemapFileSystem::EncodePathWithNewBasename(
   return EncodePath(path);
 }
 
-Status RemapFileSystem::RegisterDbPaths(const std::vector<std::string>& paths) {
+rocksdb_rs::status::Status RemapFileSystem::RegisterDbPaths(const std::vector<std::string>& paths) {
   std::vector<std::string> encoded_paths;
   encoded_paths.reserve(paths.size());
   for (auto& path : paths) {
@@ -30,7 +30,7 @@ Status RemapFileSystem::RegisterDbPaths(const std::vector<std::string>& paths) {
   return FileSystemWrapper::RegisterDbPaths(encoded_paths);
 }
 
-Status RemapFileSystem::UnregisterDbPaths(
+rocksdb_rs::status::Status RemapFileSystem::UnregisterDbPaths(
     const std::vector<std::string>& paths) {
   std::vector<std::string> encoded_paths;
   encoded_paths.reserve(paths.size());

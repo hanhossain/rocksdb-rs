@@ -26,7 +26,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
 
   auto* env = options.env;
   uint64_t number = 0;
-  FileType type = kInfoLogFile;
+  rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kInfoLogFile;
 
   std::vector<std::string> files;
   uint64_t file_num = 0;
@@ -37,24 +37,24 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
   Header(options.info_log, "DB Session ID:  %s\n", session_id.c_str());
 
   // Get files in dbname dir
-  Status s = env->GetChildren(dbname, &files);
+  rocksdb_rs::status::Status s = env->GetChildren(dbname, &files);
   if (!s.ok()) {
     Error(options.info_log, "Error when reading %s dir %s\n", dbname.c_str(),
           s.ToString()->c_str());
   }
   std::sort(files.begin(), files.end());
   for (const std::string& file : files) {
-    if (!ParseFileName(file, &number, &type)) {
+    if (!rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
       continue;
     }
     switch (type) {
-      case kCurrentFile:
+      case rocksdb_rs::types::FileType::kCurrentFile:
         Header(options.info_log, "CURRENT file:  %s\n", file.c_str());
         break;
-      case kIdentityFile:
+      case rocksdb_rs::types::FileType::kIdentityFile:
         Header(options.info_log, "IDENTITY file:  %s\n", file.c_str());
         break;
-      case kDescriptorFile:
+      case rocksdb_rs::types::FileType::kDescriptorFile:
         s = env->GetFileSize(dbname + "/" + file, &file_size);
         if (s.ok()) {
           Header(options.info_log,
@@ -66,7 +66,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
                 file.c_str(), s.ToString()->c_str());
         }
         break;
-      case kWalFile:
+      case rocksdb_rs::types::FileType::kWalFile:
         s = env->GetFileSize(dbname + "/" + file, &file_size);
         if (s.ok()) {
           wal_info.append(file)
@@ -78,7 +78,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
                 dbname.c_str(), file.c_str(), s.ToString()->c_str());
         }
         break;
-      case kTableFile:
+      case rocksdb_rs::types::FileType::kTableFile:
         if (++file_num < 10) {
           file_info.append(file).append(" ");
         }
@@ -99,8 +99,8 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       }
       std::sort(files.begin(), files.end());
       for (const std::string& file : files) {
-        if (ParseFileName(file, &number, &type)) {
-          if (type == kTableFile && ++file_num < 10) {
+        if (rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
+          if (type == rocksdb_rs::types::FileType::kTableFile && ++file_num < 10) {
             file_info.append(file).append(" ");
           }
         }
@@ -124,8 +124,8 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
     }
     wal_info.clear();
     for (const std::string& file : files) {
-      if (ParseFileName(file, &number, &type)) {
-        if (type == kWalFile) {
+      if (rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
+        if (type == rocksdb_rs::types::FileType::kWalFile) {
           s = env->GetFileSize(wal_dir + "/" + file, &file_size);
           if (s.ok()) {
             wal_info.append(file)

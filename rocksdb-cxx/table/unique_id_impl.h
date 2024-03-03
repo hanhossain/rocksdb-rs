@@ -18,10 +18,10 @@ namespace rocksdb {
 // the full 192 bits.
 // This transformation must be long term stable to ensure
 // GetUniqueIdFromTableProperties is long term stable.
-void InternalUniqueIdToExternal(UniqueIdPtr in_out);
+void InternalUniqueIdToExternal(rocksdb_rs::unique_id::UniqueIdPtr in_out);
 
 // Reverse of InternalUniqueIdToExternal mostly for testing purposes
 // (demonstrably 1-to-1 on the first 128 bits and on the full 192 bits).
-void ExternalUniqueIdToInternal(UniqueIdPtr in_out);
+void ExternalUniqueIdToInternal(rocksdb_rs::unique_id::UniqueIdPtr in_out);
 
 }  // namespace rocksdb

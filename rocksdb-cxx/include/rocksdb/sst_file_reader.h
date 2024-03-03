@@ -22,7 +22,7 @@ class SstFileReader {
   ~SstFileReader();
 
   // Prepares to read from the file located at "file_path".
-  Status Open(const std::string& file_path);
+  rocksdb_rs::status::Status Open(const std::string& file_path);
 
   // Returns a new iterator over the table contents.
   // Most read options provide the same control as we read from DB.
@@ -32,9 +32,9 @@ class SstFileReader {
   std::shared_ptr<const TableProperties> GetTableProperties() const;
 
   // Verifies whether there is corruption in this table.
-  Status VerifyChecksum(const ReadOptions& /*read_options*/);
+  rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& /*read_options*/);
 
-  Status VerifyChecksum() { return VerifyChecksum(ReadOptions()); }
+  rocksdb_rs::status::Status VerifyChecksum() { return VerifyChecksum(ReadOptions()); }
 
  private:
   struct Rep;

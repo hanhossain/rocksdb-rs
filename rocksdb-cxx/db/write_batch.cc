@@ -93,68 +93,68 @@ enum class ContentFlags : uint32_t {
 struct BatchContentClassifier : public WriteBatch::Handler {
   uint32_t content_flags = 0;
 
-  Status PutCF(uint32_t, const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status PutCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_PUT;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status PutEntityCF(uint32_t /* column_family_id */, const Slice& /* key */,
+  rocksdb_rs::status::Status PutEntityCF(uint32_t /* column_family_id */, const Slice& /* key */,
                      const Slice& /* entity */) override {
     content_flags |= (uint32_t)ContentFlags::HAS_PUT_ENTITY;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status DeleteCF(uint32_t, const Slice&) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_DELETE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status SingleDeleteCF(uint32_t, const Slice&) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_SINGLE_DELETE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status DeleteRangeCF(uint32_t, const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_DELETE_RANGE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MergeCF(uint32_t, const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_MERGE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status PutBlobIndexCF(uint32_t, const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t, const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_BLOB_INDEX;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkBeginPrepare(bool unprepare) override {
+  rocksdb_rs::status::Status MarkBeginPrepare(bool unprepare) override {
     content_flags |= (uint32_t)ContentFlags::HAS_BEGIN_PREPARE;
     if (unprepare) {
       content_flags |= (uint32_t)ContentFlags::HAS_BEGIN_UNPREPARE;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkEndPrepare(const Slice&) override {
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_END_PREPARE;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkCommit(const Slice&) override {
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_COMMIT;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_COMMIT;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkRollback(const Slice&) override {
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override {
     content_flags |= (uint32_t)ContentFlags::HAS_ROLLBACK;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 };
 
@@ -356,7 +356,7 @@ bool WriteBatch::HasRollback() const {
   return (ComputeContentFlags() & (uint32_t)ContentFlags::HAS_ROLLBACK) != 0;
 }
 
-Status ReadRecordFromWriteBatch(Slice* input, char* tag,
+rocksdb_rs::status::Status ReadRecordFromWriteBatch(Slice* input, char* tag,
                                 uint32_t* column_family, Slice* key,
                                 Slice* value, Slice* blob, Slice* xid) {
   assert(key != nullptr && value != nullptr);
@@ -366,65 +366,65 @@ Status ReadRecordFromWriteBatch(Slice* input, char* tag,
   switch (*tag) {
     case kTypeColumnFamilyValue:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch Put");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Put");
       }
       FALLTHROUGH_INTENDED;
     case kTypeValue:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch Put");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Put");
       }
       break;
     case kTypeColumnFamilyDeletion:
     case kTypeColumnFamilySingleDeletion:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch Delete");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Delete");
       }
       FALLTHROUGH_INTENDED;
     case kTypeDeletion:
     case kTypeSingleDeletion:
       if (!GetLengthPrefixedSlice(input, key)) {
-        return Status_Corruption("bad WriteBatch Delete");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Delete");
       }
       break;
     case kTypeColumnFamilyRangeDeletion:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch DeleteRange");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch DeleteRange");
       }
       FALLTHROUGH_INTENDED;
     case kTypeRangeDeletion:
       // for range delete, "key" is begin_key, "value" is end_key
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch DeleteRange");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch DeleteRange");
       }
       break;
     case kTypeColumnFamilyMerge:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch Merge");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Merge");
       }
       FALLTHROUGH_INTENDED;
     case kTypeMerge:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch Merge");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Merge");
       }
       break;
     case kTypeColumnFamilyBlobIndex:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch BlobIndex");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch BlobIndex");
       }
       FALLTHROUGH_INTENDED;
     case kTypeBlobIndex:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch BlobIndex");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch BlobIndex");
       }
       break;
     case kTypeLogData:
       assert(blob != nullptr);
       if (!GetLengthPrefixedSlice(input, blob)) {
-        return Status_Corruption("bad WriteBatch Blob");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch Blob");
       }
       break;
     case kTypeNoop:
@@ -437,55 +437,55 @@ Status ReadRecordFromWriteBatch(Slice* input, char* tag,
       break;
     case kTypeEndPrepareXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status_Corruption("bad EndPrepare XID");
+        return rocksdb_rs::status::Status_Corruption("bad EndPrepare XID");
       }
       break;
     case kTypeCommitXIDAndTimestamp:
       if (!GetLengthPrefixedSlice(input, key)) {
-        return Status_Corruption("bad commit timestamp");
+        return rocksdb_rs::status::Status_Corruption("bad commit timestamp");
       }
       FALLTHROUGH_INTENDED;
     case kTypeCommitXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status_Corruption("bad Commit XID");
+        return rocksdb_rs::status::Status_Corruption("bad Commit XID");
       }
       break;
     case kTypeRollbackXID:
       if (!GetLengthPrefixedSlice(input, xid)) {
-        return Status_Corruption("bad Rollback XID");
+        return rocksdb_rs::status::Status_Corruption("bad Rollback XID");
       }
       break;
     case kTypeColumnFamilyWideColumnEntity:
       if (!GetVarint32(input, column_family)) {
-        return Status_Corruption("bad WriteBatch PutEntity");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch PutEntity");
       }
       FALLTHROUGH_INTENDED;
     case kTypeWideColumnEntity:
       if (!GetLengthPrefixedSlice(input, key) ||
           !GetLengthPrefixedSlice(input, value)) {
-        return Status_Corruption("bad WriteBatch PutEntity");
+        return rocksdb_rs::status::Status_Corruption("bad WriteBatch PutEntity");
       }
       break;
     default:
-      return Status_Corruption("unknown WriteBatch tag");
+      return rocksdb_rs::status::Status_Corruption("unknown WriteBatch tag");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatch::Iterate(Handler* handler) const {
+rocksdb_rs::status::Status WriteBatch::Iterate(Handler* handler) const {
   if (rep_.size() < WriteBatchInternal::kHeader) {
-    return Status_Corruption("malformed WriteBatch (too small)");
+    return rocksdb_rs::status::Status_Corruption("malformed WriteBatch (too small)");
   }
 
   return WriteBatchInternal::Iterate(this, handler, WriteBatchInternal::kHeader,
                                      rep_.size());
 }
 
-Status WriteBatchInternal::Iterate(const WriteBatch* wb,
+rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
                                    WriteBatch::Handler* handler, size_t begin,
                                    size_t end) {
   if (begin > wb->rep_.size() || end > wb->rep_.size() || end < begin) {
-    return Status_Corruption("Invalid start/end bounds for Iterate");
+    return rocksdb_rs::status::Status_Corruption("Invalid start/end bounds for Iterate");
   }
   assert(begin <= end);
   Slice input(wb->rep_.data() + begin, static_cast<size_t>(end - begin));
@@ -500,7 +500,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
   // before seeing the next Noop.
   bool empty_batch = true;
   uint32_t found = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   char tag = 0;
   uint32_t column_family = 0;  // default
   bool last_was_try_again = false;
@@ -525,12 +525,12 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
       assert(s.IsTryAgain());
       assert(!last_was_try_again);  // to detect infinite loop bugs
       if (UNLIKELY(last_was_try_again)) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "two consecutive TryAgain in WriteBatch handler; this is either a "
             "software bug or data corruption.");
       }
       last_was_try_again = true;
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     }
 
     switch (tag) {
@@ -606,7 +606,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kDisabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteCommitted txn tag when write_after_commit_ is disabled (in "
               "WritePrepared/WriteUnprepared mode). If it is not due to "
               "corruption, the WAL must be emptied before changing the "
@@ -614,7 +614,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         }
         if (handler->WriteBeforePrepare() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteCommitted txn tag when write_before_prepare_ is enabled "
               "(in WriteUnprepared mode). If it is not due to corruption, the "
               "WAL must be emptied before changing the WritePolicy.");
@@ -628,7 +628,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WritePrepared/WriteUnprepared txn tag when write_after_commit_ "
               "is enabled (in default WriteCommitted mode). If it is not due "
               "to corruption, the WAL must be emptied before changing the "
@@ -643,14 +643,14 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         empty_batch = false;
         if (handler->WriteAfterCommit() ==
             WriteBatch::Handler::OptionState::kEnabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteUnprepared txn tag when write_after_commit_ is enabled (in "
               "default WriteCommitted mode). If it is not due to corruption, "
               "the WAL must be emptied before changing the WritePolicy.");
         }
         if (handler->WriteBeforePrepare() ==
             WriteBatch::Handler::OptionState::kDisabled) {
-          s = Status_NotSupported(
+          s = rocksdb_rs::status::Status_NotSupported(
               "WriteUnprepared txn tag when write_before_prepare_ is disabled "
               "(in WriteCommitted/WritePrepared mode). If it is not due to "
               "corruption, the WAL must be emptied before changing the "
@@ -704,7 +704,7 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
         }
         break;
       default:
-        return Status_Corruption("unknown WriteBatch tag");
+        return rocksdb_rs::status::Status_Corruption("unknown WriteBatch tag");
     }
   }
   if (!s.ok()) {
@@ -712,9 +712,9 @@ Status WriteBatchInternal::Iterate(const WriteBatch* wb,
   }
   if (handler_continue && whole_batch &&
       found != WriteBatchInternal::Count(wb)) {
-    return Status_Corruption("WriteBatch has wrong count");
+    return rocksdb_rs::status::Status_Corruption("WriteBatch has wrong count");
   } else {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 
@@ -746,18 +746,18 @@ size_t WriteBatchInternal::GetFirstOffset(WriteBatch* /*b*/) {
   return WriteBatchInternal::kHeader;
 }
 
-std::tuple<Status, uint32_t, size_t>
+std::tuple<rocksdb_rs::status::Status, uint32_t, size_t>
 WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(
     WriteBatch* b, ColumnFamilyHandle* column_family) {
   uint32_t cf_id = GetColumnFamilyID(column_family);
   size_t ts_sz = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (column_family) {
     const Comparator* const ucmp = column_family->GetComparator();
     if (ucmp) {
       ts_sz = ucmp->timestamp_size();
       if (0 == cf_id && b->default_cf_ts_sz_ != ts_sz) {
-        s = Status_InvalidArgument("Default cf timestamp size mismatch");
+        s = rocksdb_rs::status::Status_InvalidArgument("Default cf timestamp size mismatch");
       }
     }
   } else if (b->default_cf_ts_sz_ > 0) {
@@ -767,31 +767,31 @@ WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(
 }
 
 namespace {
-Status CheckColumnFamilyTimestampSize(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status CheckColumnFamilyTimestampSize(ColumnFamilyHandle* column_family,
                                       const Slice& ts) {
   if (!column_family) {
-    return Status_InvalidArgument("column family handle cannot be null");
+    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be null");
   }
   const Comparator* const ucmp = column_family->GetComparator();
   assert(ucmp);
   size_t cf_ts_sz = ucmp->timestamp_size();
   if (0 == cf_ts_sz) {
-    return Status_InvalidArgument("timestamp disabled");
+    return rocksdb_rs::status::Status_InvalidArgument("timestamp disabled");
   }
   if (cf_ts_sz != ts.size()) {
-    return Status_InvalidArgument("timestamp size mismatch");
+    return rocksdb_rs::status::Status_InvalidArgument("timestamp size mismatch");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // anonymous namespace
 
-Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
                                const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
   if (value.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("value is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("value is too large");
   }
 
   LocalSavePoint save(b);
@@ -821,11 +821,11 @@ Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
+rocksdb_rs::status::Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -847,9 +847,9 @@ Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
                                  SliceParts(&value, 1));
 }
 
-Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
+rocksdb_rs::status::Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& ts, const Slice& value) {
-  const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
+  const rocksdb_rs::status::Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -861,14 +861,14 @@ Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
                                  SliceParts(&value, 1));
 }
 
-Status WriteBatchInternal::CheckSlicePartsLength(const SliceParts& key,
+rocksdb_rs::status::Status WriteBatchInternal::CheckSlicePartsLength(const SliceParts& key,
                                                  const SliceParts& value) {
   size_t total_key_bytes = 0;
   for (int i = 0; i < key.num_parts; ++i) {
     total_key_bytes += key.parts[i].size();
   }
   if (total_key_bytes >= size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
 
   size_t total_value_bytes = 0;
@@ -876,14 +876,14 @@ Status WriteBatchInternal::CheckSlicePartsLength(const SliceParts& key,
     total_value_bytes += value.parts[i].size();
   }
   if (total_value_bytes >= size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("value is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("value is too large");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
                                const SliceParts& key, const SliceParts& value) {
-  Status s = CheckSlicePartsLength(key, value);
+  rocksdb_rs::status::Status s = CheckSlicePartsLength(key, value);
   if (!s.ok()) {
     return s;
   }
@@ -911,11 +911,11 @@ Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::Put(ColumnFamilyHandle* column_family, const SliceParts& key,
+rocksdb_rs::status::Status WriteBatch::Put(ColumnFamilyHandle* column_family, const SliceParts& key,
                        const SliceParts& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -929,17 +929,17 @@ Status WriteBatch::Put(ColumnFamilyHandle* column_family, const SliceParts& key,
     return WriteBatchInternal::Put(this, cf_id, key, value);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
-Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
                                      const Slice& key,
                                      const WideColumns& columns) {
   assert(b);
 
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
 
   WideColumns sorted_columns(columns);
@@ -949,13 +949,13 @@ Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
             });
 
   std::string entity;
-  const Status s = WideColumnSerialization::Serialize(sorted_columns, entity);
+  const rocksdb_rs::status::Status s = WideColumnSerialization::Serialize(sorted_columns, entity);
   if (!s.ok()) {
     return s.Clone();
   }
 
   if (entity.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("wide column entity is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("wide column entity is too large");
   }
 
   LocalSavePoint save(b);
@@ -986,14 +986,14 @@ Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::PutEntity(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::PutEntity(ColumnFamilyHandle* column_family,
                              const Slice& key, const WideColumns& columns) {
   if (!column_family) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call this method without a column family handle");
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   uint32_t cf_id = 0;
   size_t ts_sz = 0;
 
@@ -1006,19 +1006,19 @@ Status WriteBatch::PutEntity(ColumnFamilyHandle* column_family,
   }
 
   if (ts_sz) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call this method on column family enabling timestamp");
   }
 
   return WriteBatchInternal::PutEntity(this, cf_id, key, columns);
 }
 
-Status WriteBatchInternal::InsertNoop(WriteBatch* b) {
+rocksdb_rs::status::Status WriteBatchInternal::InsertNoop(WriteBatch* b) {
   b->rep_.push_back(static_cast<char>(kTypeNoop));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::MarkEndPrepare(WriteBatch* b, const Slice& xid,
+rocksdb_rs::status::Status WriteBatchInternal::MarkEndPrepare(WriteBatch* b, const Slice& xid,
                                           bool write_after_commit,
                                           bool unprepared_batch) {
   // a manually constructed batch can only contain one prepare section
@@ -1047,19 +1047,19 @@ Status WriteBatchInternal::MarkEndPrepare(WriteBatch* b, const Slice& xid,
                                     (uint32_t)ContentFlags::HAS_BEGIN_UNPREPARE,
                             std::memory_order_relaxed);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::MarkCommit(WriteBatch* b, const Slice& xid) {
+rocksdb_rs::status::Status WriteBatchInternal::MarkCommit(WriteBatch* b, const Slice& xid) {
   b->rep_.push_back(static_cast<char>(kTypeCommitXID));
   PutLengthPrefixedSlice(&b->rep_, xid);
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_COMMIT,
                           std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::MarkCommitWithTimestamp(WriteBatch* b,
+rocksdb_rs::status::Status WriteBatchInternal::MarkCommitWithTimestamp(WriteBatch* b,
                                                    const Slice& xid,
                                                    const Slice& commit_ts) {
   assert(!commit_ts.empty());
@@ -1069,19 +1069,19 @@ Status WriteBatchInternal::MarkCommitWithTimestamp(WriteBatch* b,
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_COMMIT,
                           std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::MarkRollback(WriteBatch* b, const Slice& xid) {
+rocksdb_rs::status::Status WriteBatchInternal::MarkRollback(WriteBatch* b, const Slice& xid) {
   b->rep_.push_back(static_cast<char>(kTypeRollbackXID));
   PutLengthPrefixedSlice(&b->rep_, xid);
   b->content_flags_.store(b->content_flags_.load(std::memory_order_relaxed) |
                                   (uint32_t)ContentFlags::HAS_ROLLBACK,
                           std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
                                   const Slice& key) {
   LocalSavePoint save(b);
   WriteBatchInternal::SetCount(b, WriteBatchInternal::Count(b) + 1);
@@ -1106,10 +1106,10 @@ Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key) {
+rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1131,9 +1131,9 @@ Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key) {
                                     SliceParts(key_with_ts.data(), 2));
 }
 
-Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key,
+rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key,
                           const Slice& ts) {
-  const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
+  const rocksdb_rs::status::Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -1145,7 +1145,7 @@ Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key,
                                     SliceParts(key_with_ts.data(), 2));
 }
 
-Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
                                   const SliceParts& key) {
   LocalSavePoint save(b);
   WriteBatchInternal::SetCount(b, WriteBatchInternal::Count(b) + 1);
@@ -1172,11 +1172,11 @@ Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
                           const SliceParts& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1190,11 +1190,11 @@ Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::Delete(this, cf_id, key);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
-Status WriteBatchInternal::SingleDelete(WriteBatch* b,
+rocksdb_rs::status::Status WriteBatchInternal::SingleDelete(WriteBatch* b,
                                         uint32_t column_family_id,
                                         const Slice& key) {
   LocalSavePoint save(b);
@@ -1220,11 +1220,11 @@ Status WriteBatchInternal::SingleDelete(WriteBatch* b,
   return save.commit();
 }
 
-Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
                                 const Slice& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1246,9 +1246,9 @@ Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
                                           SliceParts(key_with_ts.data(), 2));
 }
 
-Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
                                 const Slice& key, const Slice& ts) {
-  const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
+  const rocksdb_rs::status::Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -1260,7 +1260,7 @@ Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
                                           SliceParts(key_with_ts.data(), 2));
 }
 
-Status WriteBatchInternal::SingleDelete(WriteBatch* b,
+rocksdb_rs::status::Status WriteBatchInternal::SingleDelete(WriteBatch* b,
                                         uint32_t column_family_id,
                                         const SliceParts& key) {
   LocalSavePoint save(b);
@@ -1289,11 +1289,11 @@ Status WriteBatchInternal::SingleDelete(WriteBatch* b,
   return save.commit();
 }
 
-Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
                                 const SliceParts& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1307,11 +1307,11 @@ Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::SingleDelete(this, cf_id, key);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
-Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
                                        const Slice& begin_key,
                                        const Slice& end_key) {
   LocalSavePoint save(b);
@@ -1339,11 +1339,11 @@ Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
                                const Slice& begin_key, const Slice& end_key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1367,10 +1367,10 @@ Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
       SliceParts(end_key_with_ts.data(), 2));
 }
 
-Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
                                const Slice& begin_key, const Slice& end_key,
                                const Slice& ts) {
-  const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
+  const rocksdb_rs::status::Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -1384,7 +1384,7 @@ Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
                                          SliceParts(end_key_with_ts.data(), 2));
 }
 
-Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
                                        const SliceParts& begin_key,
                                        const SliceParts& end_key) {
   LocalSavePoint save(b);
@@ -1412,12 +1412,12 @@ Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
                                const SliceParts& begin_key,
                                const SliceParts& end_key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1431,17 +1431,17 @@ Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::DeleteRange(this, cf_id, begin_key, end_key);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
-Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
                                  const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("key is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("key is too large");
   }
   if (value.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
-    return Status_InvalidArgument("value is too large");
+    return rocksdb_rs::status::Status_InvalidArgument("value is too large");
   }
 
   LocalSavePoint save(b);
@@ -1467,11 +1467,11 @@ Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::Merge(ColumnFamilyHandle* column_family, const Slice& key,
+rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family, const Slice& key,
                          const Slice& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1494,9 +1494,9 @@ Status WriteBatch::Merge(ColumnFamilyHandle* column_family, const Slice& key,
       this, cf_id, SliceParts(key_with_ts.data(), 2), SliceParts(&value, 1));
 }
 
-Status WriteBatch::Merge(ColumnFamilyHandle* column_family, const Slice& key,
+rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family, const Slice& key,
                          const Slice& ts, const Slice& value) {
-  const Status s = CheckColumnFamilyTimestampSize(column_family, ts);
+  const rocksdb_rs::status::Status s = CheckColumnFamilyTimestampSize(column_family, ts);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -1508,10 +1508,10 @@ Status WriteBatch::Merge(ColumnFamilyHandle* column_family, const Slice& key,
       this, cf_id, SliceParts(key_with_ts.data(), 2), SliceParts(&value, 1));
 }
 
-Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
                                  const SliceParts& key,
                                  const SliceParts& value) {
-  Status s = CheckSlicePartsLength(key, value);
+  rocksdb_rs::status::Status s = CheckSlicePartsLength(key, value);
   if (!s.ok()) {
     return s;
   }
@@ -1539,11 +1539,11 @@ Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
   return save.commit();
 }
 
-Status WriteBatch::Merge(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family,
                          const SliceParts& key, const SliceParts& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1557,11 +1557,11 @@ Status WriteBatch::Merge(ColumnFamilyHandle* column_family,
     return WriteBatchInternal::Merge(this, cf_id, key, value);
   }
 
-  return Status_InvalidArgument(
+  return rocksdb_rs::status::Status_InvalidArgument(
       "Cannot call this method on column family enabling timestamp");
 }
 
-Status WriteBatchInternal::PutBlobIndex(WriteBatch* b,
+rocksdb_rs::status::Status WriteBatchInternal::PutBlobIndex(WriteBatch* b,
                                         uint32_t column_family_id,
                                         const Slice& key, const Slice& value) {
   LocalSavePoint save(b);
@@ -1588,7 +1588,7 @@ Status WriteBatchInternal::PutBlobIndex(WriteBatch* b,
   return save.commit();
 }
 
-Status WriteBatch::PutLogData(const Slice& blob) {
+rocksdb_rs::status::Status WriteBatch::PutLogData(const Slice& blob) {
   LocalSavePoint save(this);
   rep_.push_back(static_cast<char>(kTypeLogData));
   PutLengthPrefixedSlice(&rep_, blob);
@@ -1604,9 +1604,9 @@ void WriteBatch::SetSavePoint() {
       GetDataSize(), Count(), content_flags_.load(std::memory_order_relaxed)));
 }
 
-Status WriteBatch::RollbackToSavePoint() {
+rocksdb_rs::status::Status WriteBatch::RollbackToSavePoint() {
   if (save_points_ == nullptr || save_points_->stack.size() == 0) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   // Pop the most recent savepoint off the stack
@@ -1630,41 +1630,41 @@ Status WriteBatch::RollbackToSavePoint() {
     content_flags_.store(savepoint.content_flags, std::memory_order_relaxed);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatch::PopSavePoint() {
+rocksdb_rs::status::Status WriteBatch::PopSavePoint() {
   if (save_points_ == nullptr || save_points_->stack.size() == 0) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   // Pop the most recent savepoint off the stack
   save_points_->stack.pop();
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatch::UpdateTimestamps(
+rocksdb_rs::status::Status WriteBatch::UpdateTimestamps(
     const Slice& ts, std::function<size_t(uint32_t)> ts_sz_func) {
   TimestampUpdater<decltype(ts_sz_func)> ts_updater(prot_info_.get(),
                                                     std::move(ts_sz_func), ts);
-  const Status s = Iterate(&ts_updater);
+  const rocksdb_rs::status::Status s = Iterate(&ts_updater);
   if (s.ok()) {
     needs_in_place_update_ts_ = false;
   }
   return s.Clone();
 }
 
-Status WriteBatch::VerifyChecksum() const {
+rocksdb_rs::status::Status WriteBatch::VerifyChecksum() const {
   if (prot_info_ == nullptr) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   Slice input(rep_.data() + WriteBatchInternal::kHeader,
               rep_.size() - WriteBatchInternal::kHeader);
   Slice key, value, blob, xid;
   char tag = 0;
   uint32_t column_family = 0;  // default
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   size_t prot_info_idx = 0;
   bool checksum_protected = true;
   while (!input.empty() && prot_info_idx < prot_info_->entries_.size()) {
@@ -1725,7 +1725,7 @@ Status WriteBatch::VerifyChecksum() const {
         tag = kTypeWideColumnEntity;
         break;
       default:
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "unknown WriteBatch tag",
             std::to_string(static_cast<unsigned int>(tag)));
     }
@@ -1741,10 +1741,10 @@ Status WriteBatch::VerifyChecksum() const {
   }
 
   if (prot_info_idx != WriteBatchInternal::Count(this)) {
-    return Status_Corruption("WriteBatch has wrong count");
+    return rocksdb_rs::status::Status_Corruption("WriteBatch has wrong count");
   }
   assert(WriteBatchInternal::Count(this) == prot_info_->entries_.size());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -1951,7 +1951,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
   }
 
-  bool SeekToColumnFamily(uint32_t column_family_id, Status* s) {
+  bool SeekToColumnFamily(uint32_t column_family_id, rocksdb_rs::status::Status* s) {
     // If we are in a concurrent mode, it is the caller's responsibility
     // to clone the original ColumnFamilyMemTables so that each thread
     // has its own instance.  Otherwise, it must be guaranteed that there
@@ -1959,9 +1959,9 @@ class MemTableInserter : public WriteBatch::Handler {
     bool found = cf_mems_->Seek(column_family_id);
     if (!found) {
       if (ignore_missing_column_families_) {
-        *s = Status_OK();
+        *s = rocksdb_rs::status::Status_OK();
       } else {
-        *s = Status_InvalidArgument(
+        *s = rocksdb_rs::status::Status_InvalidArgument(
             "Invalid column family specified in write batch");
       }
       return false;
@@ -1975,7 +1975,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // column family already contains updates from this log. We can't apply
       // updates twice because of update-in-place or merge workloads -- ignore
       // the update
-      *s = Status_OK();
+      *s = rocksdb_rs::status::Status_OK();
       return false;
     }
 
@@ -1990,7 +1990,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return true;
   }
 
-  Status PutCFImpl(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCFImpl(uint32_t column_family_id, const Slice& key,
                    const Slice& value, ValueType value_type,
                    const ProtectionInfoKVOS64* kv_prot_info) {
     // optimize for non-recovery mode
@@ -2001,7 +2001,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2053,7 +2053,7 @@ class MemTableInserter : public WriteBatch::Handler {
         std::string merged_value;
 
         auto cf_handle = cf_mems_->GetColumnFamilyHandle();
-        Status get_status = Status_NotSupported();
+        rocksdb_rs::status::Status get_status = rocksdb_rs::status::Status_NotSupported();
         if (db_ != nullptr && recovering_log_number_ == 0) {
           if (cf_handle == nullptr) {
             cf_handle = db_->DefaultColumnFamily();
@@ -2065,7 +2065,7 @@ class MemTableInserter : public WriteBatch::Handler {
         if (!get_status.ok() && !get_status.IsNotFound()) {
           ret_status.copy_from(get_status);
         } else {
-          ret_status = Status_OK();
+          ret_status = rocksdb_rs::status::Status_OK();
         }
         if (ret_status.ok()) {
           UpdateStatus update_status;
@@ -2139,10 +2139,10 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  Status PutCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
                const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (kv_prot_info != nullptr) {
       // Memtable needs seqno, doesn't need CF ID
       auto mem_kv_prot_info =
@@ -2163,11 +2163,11 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  Status PutEntityCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id, const Slice& key,
                      const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (kv_prot_info) {
       // Memtable needs seqno, doesn't need CF ID
       auto mem_kv_prot_info =
@@ -2186,10 +2186,10 @@ class MemTableInserter : public WriteBatch::Handler {
     return s;
   }
 
-  Status DeleteImpl(uint32_t /*column_family_id*/, const Slice& key,
+  rocksdb_rs::status::Status DeleteImpl(uint32_t /*column_family_id*/, const Slice& key,
                     const Slice& value, ValueType delete_type,
                     const ProtectionInfoKVOS64* kv_prot_info) {
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     MemTable* mem = cf_mems_->GetMemTable();
     ret_status =
         mem->Add(sequence_, delete_type, key, value, kv_prot_info,
@@ -2206,7 +2206,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
     if (UNLIKELY(write_after_commit_ && rebuilding_trx_ != nullptr)) {
@@ -2215,7 +2215,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2270,7 +2270,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
     if (UNLIKELY(write_after_commit_ && rebuilding_trx_ != nullptr)) {
@@ -2280,7 +2280,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2328,7 +2328,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
                        const Slice& end_key) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
@@ -2339,7 +2339,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2370,7 +2370,7 @@ class MemTableInserter : public WriteBatch::Handler {
           static_cast_with_check<ColumnFamilyHandleImpl>(cf_handle)->cfd();
       if (!cfd->is_delete_range_supported()) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             std::string("DeleteRange not supported for table type ") +
             cfd->ioptions()->table_factory->Name() + " in CF " +
             cfd->GetName());
@@ -2381,11 +2381,11 @@ class MemTableInserter : public WriteBatch::Handler {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
         // It's an empty range where endpoints appear mistaken. Don't bother
         // applying it to the DB, and return an error to the user.
-        return Status_InvalidArgument("end key comes before start key");
+        return rocksdb_rs::status::Status_InvalidArgument("end key comes before start key");
       } else if (cmp == 0) {
         // TODO(ajkr): refactor `SeekToColumnFamily()` so it returns a `Status`.
         // It's an empty range. Don't bother applying it to the DB.
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
     }
 
@@ -2415,7 +2415,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  Status MergeCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
                  const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
@@ -2426,7 +2426,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2451,7 +2451,7 @@ class MemTableInserter : public WriteBatch::Handler {
     MemTable* mem = cf_mems_->GetMemTable();
     auto* moptions = mem->GetImmutableMemTableOptions();
     if (moptions->merge_operator == nullptr) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Merge requires `ColumnFamilyOptions::merge_operator != nullptr`");
     }
     bool perform_merge = false;
@@ -2492,7 +2492,7 @@ class MemTableInserter : public WriteBatch::Handler {
       if (cf_handle == nullptr) {
         cf_handle = db_->DefaultColumnFamily();
       }
-      Status get_status = db_->Get(read_options, cf_handle, key, &get_value);
+      rocksdb_rs::status::Status get_status = db_->Get(read_options, cf_handle, key, &get_value);
       if (!get_status.ok()) {
         // Failed to read a key we know exists. Store the delta in memtable.
         perform_merge = false;
@@ -2506,7 +2506,7 @@ class MemTableInserter : public WriteBatch::Handler {
         std::string new_value;
         // `op_failure_scope` (an output parameter) is not provided (set to
         // nullptr) since a failure must be propagated regardless of its value.
-        Status merge_status = MergeHelper::TimedFullMerge(
+        rocksdb_rs::status::Status merge_status = MergeHelper::TimedFullMerge(
             merge_operator, key, &get_value_slice, {value}, &new_value,
             moptions->info_log, moptions->statistics,
             SystemClock::Default().get(), /* result_operand */ nullptr,
@@ -2576,10 +2576,10 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  Status PutBlobIndexCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t column_family_id, const Slice& key,
                         const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
-    Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (kv_prot_info != nullptr) {
       // Memtable needs seqno, doesn't need CF ID
       auto mem_kv_prot_info =
@@ -2639,7 +2639,7 @@ class MemTableInserter : public WriteBatch::Handler {
 
   // The write batch handler calls MarkBeginPrepare with unprepare set to true
   // if it encounters the kTypeBeginUnprepareXID marker.
-  Status MarkBeginPrepare(bool unprepare) override {
+  rocksdb_rs::status::Status MarkBeginPrepare(bool unprepare) override {
     assert(rebuilding_trx_ == nullptr);
     assert(db_);
 
@@ -2648,7 +2648,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // during recovery we rebuild a hollow transaction
       // from all encountered prepare sections of the wal
       if (db_->allow_2pc() == false) {
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             "WAL contains prepared transactions. Open with "
             "TransactionDB::Open().");
       }
@@ -2667,10 +2667,10 @@ class MemTableInserter : public WriteBatch::Handler {
       }
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkEndPrepare(const Slice& name) override {
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice& name) override {
     assert(db_);
     assert((rebuilding_trx_ != nullptr) == (recovering_log_number_ != 0));
 
@@ -2692,10 +2692,10 @@ class MemTableInserter : public WriteBatch::Handler {
     const bool batch_boundry = true;
     MaybeAdvanceSeq(batch_boundry);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkNoop(bool empty_batch) override {
+  rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
     if (recovering_log_number_ != 0) {
       db_->mutex()->AssertHeld();
     }
@@ -2708,13 +2708,13 @@ class MemTableInserter : public WriteBatch::Handler {
       const bool batch_boundry = true;
       MaybeAdvanceSeq(batch_boundry);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkCommit(const Slice& name) override {
+  rocksdb_rs::status::Status MarkCommit(const Slice& name) override {
     assert(db_);
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     if (recovering_log_number_ != 0) {
       // We must hold db mutex in recovery.
@@ -2766,11 +2766,11 @@ class MemTableInserter : public WriteBatch::Handler {
     return s;
   }
 
-  Status MarkCommitWithTimestamp(const Slice& name,
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& name,
                                  const Slice& commit_ts) override {
     assert(db_);
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     if (recovering_log_number_ != 0) {
       // In recovery, db mutex must be held.
@@ -2837,7 +2837,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return s;
   }
 
-  Status MarkRollback(const Slice& name) override {
+  rocksdb_rs::status::Status MarkRollback(const Slice& name) override {
     assert(db_);
 
     if (recovering_log_number_ != 0) {
@@ -2856,7 +2856,7 @@ class MemTableInserter : public WriteBatch::Handler {
     const bool batch_boundry = true;
     MaybeAdvanceSeq(batch_boundry);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -2876,7 +2876,7 @@ class MemTableInserter : public WriteBatch::Handler {
 // 2) During Write(), in a single-threaded write thread
 // 3) During Write(), in a concurrent context where memtables has been cloned
 // The reason is that it calls memtables->Seek(), which has a stateful cache
-Status WriteBatchInternal::InsertInto(
+rocksdb_rs::status::Status WriteBatchInternal::InsertInto(
     WriteThread::WriteGroup& write_group, SequenceNumber sequence,
     ColumnFamilyMemTables* memtables, FlushScheduler* flush_scheduler,
     TrimHistoryScheduler* trim_history_scheduler,
@@ -2907,10 +2907,10 @@ Status WriteBatchInternal::InsertInto(
     assert(!seq_per_batch || w->batch_cnt != 0);
     assert(!seq_per_batch || inserter.sequence() - w->sequence == w->batch_cnt);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::InsertInto(
+rocksdb_rs::status::Status WriteBatchInternal::InsertInto(
     WriteThread::Writer* writer, SequenceNumber sequence,
     ColumnFamilyMemTables* memtables, FlushScheduler* flush_scheduler,
     TrimHistoryScheduler* trim_history_scheduler,
@@ -2930,7 +2930,7 @@ Status WriteBatchInternal::InsertInto(
   SetSequence(writer->batch, sequence);
   inserter.set_log_number_ref(writer->log_ref);
   inserter.set_prot_info(writer->batch->prot_info_.get());
-  Status s = writer->batch->Iterate(&inserter);
+  rocksdb_rs::status::Status s = writer->batch->Iterate(&inserter);
   assert(!seq_per_batch || batch_cnt != 0);
   assert(!seq_per_batch || inserter.sequence() - sequence == batch_cnt);
   if (concurrent_memtable_writes) {
@@ -2939,7 +2939,7 @@ Status WriteBatchInternal::InsertInto(
   return s;
 }
 
-Status WriteBatchInternal::InsertInto(
+rocksdb_rs::status::Status WriteBatchInternal::InsertInto(
     const WriteBatch* batch, ColumnFamilyMemTables* memtables,
     FlushScheduler* flush_scheduler,
     TrimHistoryScheduler* trim_history_scheduler,
@@ -2951,7 +2951,7 @@ Status WriteBatchInternal::InsertInto(
                             ignore_missing_column_families, log_number, db,
                             concurrent_memtable_writes, batch->prot_info_.get(),
                             has_valid_writes, seq_per_batch, batch_per_txn);
-  Status s = batch->Iterate(&inserter);
+  rocksdb_rs::status::Status s = batch->Iterate(&inserter);
   if (next_seq != nullptr) {
     *next_seq = inserter.sequence();
   }
@@ -2971,64 +2971,64 @@ class ProtectionInfoUpdater : public WriteBatch::Handler {
 
   ~ProtectionInfoUpdater() override {}
 
-  Status PutCF(uint32_t cf, const Slice& key, const Slice& val) override {
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& val) override {
     return UpdateProtInfo(cf, key, val, kTypeValue);
   }
 
-  Status PutEntityCF(uint32_t cf, const Slice& key,
+  rocksdb_rs::status::Status PutEntityCF(uint32_t cf, const Slice& key,
                      const Slice& entity) override {
     return UpdateProtInfo(cf, key, entity, kTypeWideColumnEntity);
   }
 
-  Status DeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
     return UpdateProtInfo(cf, key, "", kTypeDeletion);
   }
 
-  Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
     return UpdateProtInfo(cf, key, "", kTypeSingleDeletion);
   }
 
-  Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
                        const Slice& end_key) override {
     return UpdateProtInfo(cf, begin_key, end_key, kTypeRangeDeletion);
   }
 
-  Status MergeCF(uint32_t cf, const Slice& key, const Slice& val) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& val) override {
     return UpdateProtInfo(cf, key, val, kTypeMerge);
   }
 
-  Status PutBlobIndexCF(uint32_t cf, const Slice& key,
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t cf, const Slice& key,
                         const Slice& val) override {
     return UpdateProtInfo(cf, key, val, kTypeBlobIndex);
   }
 
-  Status MarkBeginPrepare(bool /* unprepare */) override {
-    return Status_OK();
+  rocksdb_rs::status::Status MarkBeginPrepare(bool /* unprepare */) override {
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkEndPrepare(const Slice& /* xid */) override {
-    return Status_OK();
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice& /* xid */) override {
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkCommit(const Slice& /* xid */) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice& /* xid */) override { return rocksdb_rs::status::Status_OK(); }
 
-  Status MarkCommitWithTimestamp(const Slice& /* xid */,
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& /* xid */,
                                  const Slice& /* ts */) override {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkRollback(const Slice& /* xid */) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice& /* xid */) override { return rocksdb_rs::status::Status_OK(); }
 
-  Status MarkNoop(bool /* empty_batch */) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /* empty_batch */) override { return rocksdb_rs::status::Status_OK(); }
 
  private:
-  Status UpdateProtInfo(uint32_t cf, const Slice& key, const Slice& val,
+  rocksdb_rs::status::Status UpdateProtInfo(uint32_t cf, const Slice& key, const Slice& val,
                         const ValueType op_type) {
     if (prot_info_) {
       prot_info_->entries_.emplace_back(
           ProtectionInfo64().ProtectKVO(key, val, op_type).ProtectC(cf));
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // No copy or move.
@@ -3042,16 +3042,16 @@ class ProtectionInfoUpdater : public WriteBatch::Handler {
 
 }  // anonymous namespace
 
-Status WriteBatchInternal::SetContents(WriteBatch* b, const Slice& contents) {
+rocksdb_rs::status::Status WriteBatchInternal::SetContents(WriteBatch* b, const Slice& contents) {
   assert(contents.size() >= WriteBatchInternal::kHeader);
   assert(b->prot_info_ == nullptr);
 
   b->rep_.assign(contents.data(), contents.size());
   b->content_flags_.store((uint32_t)ContentFlags::DEFERRED, std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
+rocksdb_rs::status::Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
                                   const bool wal_only) {
   assert(dst->Count() == 0 ||
          (dst->prot_info_ == nullptr) == (src->prot_info_ == nullptr));
@@ -3059,7 +3059,7 @@ Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
        src->prot_info_->entries_.size() != src->Count()) ||
       (dst->prot_info_ != nullptr &&
        dst->prot_info_->entries_.size() != dst->Count())) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "Write batch has inconsistent count and number of checksums");
   }
 
@@ -3098,7 +3098,7 @@ Status WriteBatchInternal::Append(WriteBatch* dst, const WriteBatch* src,
   dst->content_flags_.store(
       dst->content_flags_.load(std::memory_order_relaxed) | src_flags,
       std::memory_order_relaxed);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 size_t WriteBatchInternal::AppendedByteSize(size_t leftByteSize,
@@ -3110,35 +3110,35 @@ size_t WriteBatchInternal::AppendedByteSize(size_t leftByteSize,
   }
 }
 
-Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* wb,
+rocksdb_rs::status::Status WriteBatchInternal::UpdateProtectionInfo(WriteBatch* wb,
                                                 size_t bytes_per_key,
                                                 uint64_t* checksum) {
   if (bytes_per_key == 0) {
     if (wb->prot_info_ != nullptr) {
       wb->prot_info_.reset();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       // Already not protected.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   } else if (bytes_per_key == 8) {
     if (wb->prot_info_ == nullptr) {
       wb->prot_info_.reset(new WriteBatch::ProtectionInfo());
       ProtectionInfoUpdater prot_info_updater(wb->prot_info_.get());
-      Status s = wb->Iterate(&prot_info_updater);
+      rocksdb_rs::status::Status s = wb->Iterate(&prot_info_updater);
       if (s.ok() && checksum != nullptr) {
         uint64_t expected_hash = XXH3_64bits(wb->rep_.data(), wb->rep_.size());
         if (expected_hash != *checksum) {
-          return Status_Corruption("Write batch content corrupted.");
+          return rocksdb_rs::status::Status_Corruption("Write batch content corrupted.");
         }
       }
       return s;
     } else {
       // Already protected.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
-  return Status_NotSupported(
+  return rocksdb_rs::status::Status_NotSupported(
       "WriteBatch protection info must be zero or eight bytes/key");
 }
 

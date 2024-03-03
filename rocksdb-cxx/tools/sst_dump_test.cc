@@ -63,7 +63,7 @@ class SSTDumpToolTest : public testing::Test {
   SSTDumpToolTest() : env_(Env::Default()) {
     EXPECT_OK(test::CreateEnvFromSystem(ConfigOptions(), &env_, &env_guard_));
     test_dir_ = test::PerThreadDBPath(env_, "sst_dump_test_db");
-    Status s = env_->CreateDirIfMissing(test_dir_);
+    rocksdb_rs::status::Status s = env_->CreateDirIfMissing(test_dir_);
     EXPECT_OK(s);
   }
 
@@ -113,7 +113,7 @@ class SSTDumpToolTest : public testing::Test {
     tb.reset(opts.table_factory->NewTableBuilder(
         TableBuilderOptions(
             imoptions, moptions, ikc, &int_tbl_prop_collector_factories,
-            CompressionType::kNoCompression, CompressionOptions(),
+            rocksdb_rs::compression_type::CompressionType::kNoCompression, CompressionOptions(),
             TablePropertiesCollectorFactory::Context::kUnknownColumnFamily,
             column_family_name, unknown_level),
         file_writer.get()));

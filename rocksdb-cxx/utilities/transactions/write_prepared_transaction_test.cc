@@ -930,7 +930,7 @@ TEST_P(WritePreparedTransactionTest, CheckKeySkipOldMemtable) {
 // snapshot
 TEST_P(WritePreparedTransactionTest, DoubleSnapshot) {
   TransactionOptions txn_options;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Insert initial value
   ASSERT_OK(db->Put(WriteOptions(), "key", "value1"));
@@ -2186,9 +2186,9 @@ TEST_P(WritePreparedTransactionTest, IsInSnapshot) {
   }
 }
 
-void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const Status& exp_s,
+void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const rocksdb_rs::status::Status& exp_s,
                  PinnableSlice& exp_v, Slice key) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   PinnableSlice v;
   s = db->Get(roptions, db->DefaultColumnFamily(), key, &v);
   ASSERT_TRUE(exp_s.eq(s));
@@ -2211,7 +2211,7 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const Status& exp_s,
   }
 }
 
-void ASSERT_SAME(TransactionDB* db, const Status& exp_s, PinnableSlice& exp_v,
+void ASSERT_SAME(TransactionDB* db, const rocksdb_rs::status::Status& exp_s, PinnableSlice& exp_v,
                  Slice key) {
   ASSERT_SAME(ReadOptions(), db, exp_s, exp_v, key);
 }
@@ -2383,7 +2383,7 @@ TEST_P(WritePreparedTransactionTest, CompactionShouldKeepUncommittedKeys) {
   // Keep track of expected sequence number.
   SequenceNumber expected_seq = 0;
 
-  auto add_key = [&](std::function<Status()> func) {
+  auto add_key = [&](std::function<rocksdb_rs::status::Status()> func) {
     ASSERT_OK(func());
     expected_seq++;
     if (options.two_write_queues) {
@@ -4015,7 +4015,7 @@ TEST_P(WritePreparedTransactionTest, BasicRollbackDeletionTypeCb) {
 
     {
       std::string value;
-      const Status s = db->Get(ReadOptions(), "a", &value);
+      const rocksdb_rs::status::Status s = db->Get(ReadOptions(), "a", &value);
       ASSERT_TRUE(s.IsNotFound());
     }
   };

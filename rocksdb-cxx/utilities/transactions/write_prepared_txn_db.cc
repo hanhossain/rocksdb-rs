@@ -39,7 +39,7 @@ extern "C" bool rocksdb_write_prepared_TEST_ShouldClearCommitCache(void)
 
 namespace rocksdb {
 
-Status WritePreparedTxnDB::Initialize(
+rocksdb_rs::status::Status WritePreparedTxnDB::Initialize(
     const std::vector<size_t>& compaction_enabled_cf_indices,
     const std::vector<ColumnFamilyHandle*>& handles) {
   auto dbimpl = static_cast_with_check<DBImpl>(GetRootDB());
@@ -80,12 +80,12 @@ Status WritePreparedTxnDB::Initialize(
    public:
     explicit CommitSubBatchPreReleaseCallback(WritePreparedTxnDB* db)
         : db_(db) {}
-    Status Callback(SequenceNumber commit_seq,
+    rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
                     bool is_mem_disabled __attribute__((__unused__)), uint64_t,
                     size_t /*index*/, size_t /*total*/) override {
       assert(!is_mem_disabled);
       db_->AddCommitted(commit_seq, commit_seq);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
    private:
@@ -99,18 +99,18 @@ Status WritePreparedTxnDB::Initialize(
   return s;
 }
 
-Status WritePreparedTxnDB::VerifyCFOptions(
+rocksdb_rs::status::Status WritePreparedTxnDB::VerifyCFOptions(
     const ColumnFamilyOptions& cf_options) {
-  Status s = PessimisticTransactionDB::VerifyCFOptions(cf_options);
+  rocksdb_rs::status::Status s = PessimisticTransactionDB::VerifyCFOptions(cf_options);
   if (!s.ok()) {
     return s;
   }
   if (!cf_options.memtable_factory->CanHandleDuplicatedKey()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "memtable_factory->CanHandleDuplicatedKey() cannot be false with "
         "WritePrpeared transactions");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 Transaction* WritePreparedTxnDB::BeginTransaction(
@@ -124,7 +124,7 @@ Transaction* WritePreparedTxnDB::BeginTransaction(
   }
 }
 
-Status WritePreparedTxnDB::Write(const WriteOptions& opts,
+rocksdb_rs::status::Status WritePreparedTxnDB::Write(const WriteOptions& opts,
                                  WriteBatch* updates) {
   if (txn_db_options_.skip_concurrency_control) {
     // Skip locking the rows
@@ -136,7 +136,7 @@ Status WritePreparedTxnDB::Write(const WriteOptions& opts,
   }
 }
 
-Status WritePreparedTxnDB::Write(
+rocksdb_rs::status::Status WritePreparedTxnDB::Write(
     const WriteOptions& opts,
     const TransactionDBWriteOptimizations& optimizations, WriteBatch* updates) {
   if (optimizations.skip_concurrency_control) {
@@ -155,7 +155,7 @@ Status WritePreparedTxnDB::Write(
   }
 }
 
-Status WritePreparedTxnDB::WriteInternal(const WriteOptions& write_options_orig,
+rocksdb_rs::status::Status WritePreparedTxnDB::WriteInternal(const WriteOptions& write_options_orig,
                                          WriteBatch* batch, size_t batch_cnt,
                                          WritePreparedTxn* txn) {
   ROCKS_LOG_DETAILS(db_impl_->immutable_db_options().info_log,
@@ -163,7 +163,7 @@ Status WritePreparedTxnDB::WriteInternal(const WriteOptions& write_options_orig,
   if (batch->Count() == 0) {
     // Otherwise our 1 seq per batch logic will break since there is no seq
     // increased for this batch.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (write_options_orig.protection_bytes_per_key > 0) {
@@ -247,11 +247,11 @@ Status WritePreparedTxnDB::WriteInternal(const WriteOptions& write_options_orig,
   return s;
 }
 
-Status WritePreparedTxnDB::Get(const ReadOptions& options,
+rocksdb_rs::status::Status WritePreparedTxnDB::Get(const ReadOptions& options,
                                ColumnFamilyHandle* column_family,
                                const Slice& key, PinnableSlice* value) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -272,7 +272,7 @@ Status WritePreparedTxnDB::Get(const ReadOptions& options,
     return res;
   } else {
     WPRecordTick(TXN_GET_TRY_AGAIN);
-    return Status_TryAgain();
+    return rocksdb_rs::status::Status_TryAgain();
   }
 }
 
@@ -312,7 +312,7 @@ void WritePreparedTxnDB::UpdateCFComparatorMap(ColumnFamilyHandle* h) {
   handle_map_.reset(handle_map);
 }
 
-rust::Vec<Status> WritePreparedTxnDB::MultiGet(
+rust::Vec<rocksdb_rs::status::Status> WritePreparedTxnDB::MultiGet(
     const ReadOptions& options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
@@ -320,7 +320,7 @@ rust::Vec<Status> WritePreparedTxnDB::MultiGet(
   size_t num_keys = keys.size();
   values->resize(num_keys);
 
-  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list = rocksdb_rs::status::Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = this->Get(options, column_family[i], keys[i], &(*values)[i]);
   }
@@ -348,7 +348,7 @@ static void CleanupWritePreparedTxnDBIterator(void* arg1, void* /*arg2*/) {
 Iterator* WritePreparedTxnDB::NewIterator(const ReadOptions& options,
                                           ColumnFamilyHandle* column_family) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -383,7 +383,7 @@ Iterator* WritePreparedTxnDB::NewIterator(const ReadOptions& options,
   return db_iter;
 }
 
-Status WritePreparedTxnDB::NewIterators(
+rocksdb_rs::status::Status WritePreparedTxnDB::NewIterators(
     const ReadOptions& options,
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
@@ -419,7 +419,7 @@ Status WritePreparedTxnDB::NewIterators(
     db_iter->RegisterCleanup(CleanupWritePreparedTxnDBIterator, state, nullptr);
     iterators->push_back(db_iter);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void WritePreparedTxnDB::Init(const TransactionDBOptions& txn_db_opts) {
@@ -770,7 +770,7 @@ void WritePreparedTxnDB::AdvanceSeqByOne() {
   char name[64];
   snprintf(name, 64, "txn%" ROCKSDB_PRIszt, hasher(std::this_thread::get_id()));
   assert(strlen(name) < 64 - 1);
-  Status s = txn0->SetName(name);
+  rocksdb_rs::status::Status s = txn0->SetName(name);
   assert(s.ok());
   if (s.ok()) {
     // Without prepare it would simply skip the commit

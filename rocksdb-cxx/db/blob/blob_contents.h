@@ -36,7 +36,7 @@ class BlobContents {
 
   // For TypedCacheInterface
   const Slice& ContentSlice() const { return data_; }
-  static constexpr CacheEntryRole kCacheEntryRole = CacheEntryRole::kBlobValue;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kBlobValue;
 
  private:
   CacheAllocationPtr allocation_;

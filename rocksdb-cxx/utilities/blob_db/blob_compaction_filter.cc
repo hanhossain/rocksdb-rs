@@ -43,7 +43,7 @@ CompactionFilter::Decision BlobIndexCompactionFilterBase::FilterV2(
     return decision;
   }
   BlobIndex blob_index;
-  Status s = blob_index.DecodeFrom(value);
+  rocksdb_rs::status::Status s = blob_index.DecodeFrom(value);
   if (!s.ok()) {
     // Unable to decode blob index. Keeping the value.
     return Decision::kKeep;
@@ -96,7 +96,7 @@ CompactionFilter::Decision BlobIndexCompactionFilterBase::FilterV2(
     }
     // Read value from blob file.
     PinnableSlice blob;
-    CompressionType compression_type = CompressionType::kNoCompression;
+    rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     constexpr bool need_decompress = true;
     if (!ReadBlobFromOldFile(ikey.user_key, blob_index, &blob, need_decompress,
                              &compression_type)) {
@@ -126,7 +126,7 @@ CompactionFilter::Decision BlobIndexCompactionFilterBase::HandleValueChange(
   }
   Slice new_blob_value(*new_value);
   std::string compression_output;
-  if (blob_db_impl->bdb_options_.compression != CompressionType::kNoCompression) {
+  if (blob_db_impl->bdb_options_.compression != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     new_blob_value =
         blob_db_impl->GetCompressedSlice(new_blob_value, &compression_output);
   }
@@ -181,7 +181,7 @@ bool BlobIndexCompactionFilterBase::OpenNewBlobFileIfNeeded() const {
   BlobDBImpl* const blob_db_impl = context_.blob_db_impl;
   assert(blob_db_impl);
 
-  const Status s = blob_db_impl->CreateBlobFileAndWriter(
+  const rocksdb_rs::status::Status s = blob_db_impl->CreateBlobFileAndWriter(
       /* has_ttl */ false, ExpirationRange(), "compaction/GC", &blob_file_,
       &writer_);
   if (!s.ok()) {
@@ -202,11 +202,11 @@ bool BlobIndexCompactionFilterBase::OpenNewBlobFileIfNeeded() const {
 
 bool BlobIndexCompactionFilterBase::ReadBlobFromOldFile(
     const Slice& key, const BlobIndex& blob_index, PinnableSlice* blob,
-    bool need_decompress, CompressionType* compression_type) const {
+    bool need_decompress, rocksdb_rs::compression_type::CompressionType* compression_type) const {
   BlobDBImpl* const blob_db_impl = context_.blob_db_impl;
   assert(blob_db_impl);
 
-  Status s = blob_db_impl->GetRawBlobFromFile(
+  rocksdb_rs::status::Status s = blob_db_impl->GetRawBlobFromFile(
       key, blob_index.file_number(), blob_index.offset(), blob_index.size(),
       blob, compression_type);
 
@@ -221,7 +221,7 @@ bool BlobIndexCompactionFilterBase::ReadBlobFromOldFile(
     return false;
   }
 
-  if (need_decompress && *compression_type != CompressionType::kNoCompression) {
+  if (need_decompress && *compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     s = blob_db_impl->DecompressSlice(static_cast<const Slice&>(*blob), *compression_type, blob);
     if (!s.ok()) {
       ROCKS_LOG_ERROR(
@@ -251,7 +251,7 @@ bool BlobIndexCompactionFilterBase::WriteBlobToNewFile(
 
   assert(writer_);
   uint64_t new_key_offset = 0;
-  const Status s = writer_->AddRecord(key, blob, kNoExpiration, &new_key_offset,
+  const rocksdb_rs::status::Status s = writer_->AddRecord(key, blob, kNoExpiration, &new_key_offset,
                                       new_blob_offset);
 
   if (!s.ok()) {
@@ -297,7 +297,7 @@ bool BlobIndexCompactionFilterBase::CloseAndRegisterNewBlobFile() const {
   assert(blob_db_impl);
   assert(blob_file_);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   {
     WriteLock wl(&blob_db_impl->mutex_);
@@ -334,7 +334,7 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
   assert(blob_db_impl->bdb_options_.enable_garbage_collection);
 
   BlobIndex blob_index;
-  const Status s = blob_index.DecodeFrom(existing_value);
+  const rocksdb_rs::status::Status s = blob_index.DecodeFrom(existing_value);
   if (!s.ok()) {
     gc_stats_.SetError();
     return BlobDecision::kCorruption;
@@ -366,7 +366,7 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
   }
 
   PinnableSlice blob;
-  CompressionType compression_type = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   std::string compression_output;
   if (!ReadBlobFromOldFile(key, blob_index, &blob, false, &compression_type)) {
     gc_stats_.SetError();
@@ -376,15 +376,15 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
   // If the compression_type is changed, re-compress it with the new compression
   // type.
   if (compression_type != blob_db_impl->bdb_options_.compression) {
-    if (compression_type != CompressionType::kNoCompression) {
-      const Status status =
+    if (compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+      const rocksdb_rs::status::Status status =
           blob_db_impl->DecompressSlice(static_cast<const Slice&>(blob), compression_type, &blob);
       if (!status.ok()) {
         gc_stats_.SetError();
         return BlobDecision::kCorruption;
       }
     }
-    if (blob_db_impl->bdb_options_.compression != CompressionType::kNoCompression) {
+    if (blob_db_impl->bdb_options_.compression != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       blob_db_impl->GetCompressedSlice(static_cast<const Slice&>(blob), &compression_output);
       blob = PinnableSlice(&compression_output);
       blob.PinSelf();
@@ -439,7 +439,7 @@ BlobIndexCompactionFilterFactory::CreateCompactionFilter(
   assert(clock());
 
   int64_t current_time = 0;
-  Status s = clock()->GetCurrentTime(&current_time);
+  rocksdb_rs::status::Status s = clock()->GetCurrentTime(&current_time);
   if (!s.ok()) {
     return nullptr;
   }
@@ -464,7 +464,7 @@ BlobIndexCompactionFilterFactoryGC::CreateCompactionFilter(
   assert(clock());
 
   int64_t current_time = 0;
-  Status s = clock()->GetCurrentTime(&current_time);
+  rocksdb_rs::status::Status s = clock()->GetCurrentTime(&current_time);
   if (!s.ok()) {
     return nullptr;
   }

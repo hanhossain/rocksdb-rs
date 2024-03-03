@@ -40,7 +40,7 @@ class TimestampCompatibleCompactionTest : public DBTestBase {
     Slice ts_slice = ts_str;
     read_opts.timestamp = &ts_slice;
     std::string value;
-    Status s = db_->Get(read_opts, key, &value);
+    rocksdb_rs::status::Status s = db_->Get(read_opts, key, &value);
     if (s.IsNotFound()) {
       value.assign("NOT_FOUND");
     } else if (!s.ok()) {
@@ -228,9 +228,9 @@ TEST_F(TimestampCompatibleCompactionTest, CompactFilesRangeCheckL0) {
     ASSERT_OK(env_->GetChildren(dbname_, &files));
     for (const auto& f : files) {
       uint64_t file_num = 0;
-      FileType file_type = FileType::kWalFile;
+      rocksdb_rs::types::FileType file_type = rocksdb_rs::types::FileType::kWalFile;
       if (!ParseFileName(f, &file_num, &file_type) ||
-          file_type != FileType::kTableFile) {
+          file_type != rocksdb_rs::types::FileType::kTableFile) {
         continue;
       }
       input_files.emplace_back(f);

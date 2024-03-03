@@ -25,20 +25,20 @@ class CompositeSequentialFileWrapper : public SequentialFile {
       std::unique_ptr<FSSequentialFile>& target)
       : target_(std::move(target)) {}
 
-  Status Read(size_t n, Slice* result, char* scratch) override {
+  rocksdb_rs::status::Status Read(size_t n, Slice* result, char* scratch) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Read(n, io_opts, result, scratch, &dbg);
   }
-  Status Skip(uint64_t n) override { return target_->Skip(n); }
+  rocksdb_rs::status::Status Skip(uint64_t n) override { return target_->Skip(n); }
   bool use_direct_io() const override { return target_->use_direct_io(); }
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
-  Status PositionedRead(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status PositionedRead(uint64_t offset, size_t n, Slice* result,
                         char* scratch) override {
     IOOptions io_opts;
     IODebugContext dbg;
@@ -55,17 +55,17 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
       std::unique_ptr<FSRandomAccessFile>& target)
       : target_(std::move(target)) {}
 
-  Status Read(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Read(offset, n, io_opts, result, scratch, &dbg);
   }
-  Status MultiRead(ReadRequest* reqs, size_t num_reqs) override {
+  rocksdb_rs::status::Status MultiRead(ReadRequest* reqs, size_t num_reqs) override {
     IOOptions io_opts;
     IODebugContext dbg;
     std::vector<FSReadRequest> fs_reqs;
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
 
     fs_reqs.resize(num_reqs);
     for (size_t i = 0; i < num_reqs; ++i) {
@@ -81,7 +81,7 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
     }
     return status;
   }
-  Status Prefetch(uint64_t offset, size_t n) override {
+  rocksdb_rs::status::Status Prefetch(uint64_t offset, size_t n) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Prefetch(offset, n, io_opts, &dbg);
@@ -96,7 +96,7 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
 
@@ -109,23 +109,23 @@ class CompositeWritableFileWrapper : public WritableFile {
   explicit CompositeWritableFileWrapper(std::unique_ptr<FSWritableFile>& t)
       : target_(std::move(t)) {}
 
-  Status Append(const Slice& data) override {
+  rocksdb_rs::status::Status Append(const Slice& data) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Append(data, io_opts, &dbg);
   }
-  Status Append(const Slice& data,
+  rocksdb_rs::status::Status Append(const Slice& data,
                 const DataVerificationInfo& verification_info) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Append(data, io_opts, verification_info, &dbg);
   }
-  Status PositionedAppend(const Slice& data, uint64_t offset) override {
+  rocksdb_rs::status::Status PositionedAppend(const Slice& data, uint64_t offset) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->PositionedAppend(data, offset, io_opts, &dbg);
   }
-  Status PositionedAppend(
+  rocksdb_rs::status::Status PositionedAppend(
       const Slice& data, uint64_t offset,
       const DataVerificationInfo& verification_info) override {
     IOOptions io_opts;
@@ -133,27 +133,27 @@ class CompositeWritableFileWrapper : public WritableFile {
     return target_->PositionedAppend(data, offset, io_opts, verification_info,
                                      &dbg);
   }
-  Status Truncate(uint64_t size) override {
+  rocksdb_rs::status::Status Truncate(uint64_t size) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Truncate(size, io_opts, &dbg);
   }
-  Status Close() override {
+  rocksdb_rs::status::Status Close() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Close(io_opts, &dbg);
   }
-  Status Flush() override {
+  rocksdb_rs::status::Status Flush() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Flush(io_opts, &dbg);
   }
-  Status Sync() override {
+  rocksdb_rs::status::Status Sync() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Sync(io_opts, &dbg);
   }
-  Status Fsync() override {
+  rocksdb_rs::status::Status Fsync() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Fsync(io_opts, &dbg);
@@ -193,11 +193,11 @@ class CompositeWritableFileWrapper : public WritableFile {
     return target_->GetUniqueId(id, max_size);
   }
 
-  Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
 
-  Status RangeSync(uint64_t offset, uint64_t nbytes) override {
+  rocksdb_rs::status::Status RangeSync(uint64_t offset, uint64_t nbytes) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->RangeSync(offset, nbytes, io_opts, &dbg);
@@ -209,7 +209,7 @@ class CompositeWritableFileWrapper : public WritableFile {
     target_->PrepareWrite(offset, len, io_opts, &dbg);
   }
 
-  Status Allocate(uint64_t offset, uint64_t len) override {
+  rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t len) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Allocate(offset, len, io_opts, &dbg);
@@ -230,33 +230,33 @@ class CompositeRandomRWFileWrapper : public RandomRWFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  Status Write(uint64_t offset, const Slice& data) override {
+  rocksdb_rs::status::Status Write(uint64_t offset, const Slice& data) override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Write(offset, data, io_opts, &dbg);
   }
-  Status Read(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Read(offset, n, io_opts, result, scratch, &dbg);
   }
-  Status Flush() override {
+  rocksdb_rs::status::Status Flush() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Flush(io_opts, &dbg);
   }
-  Status Sync() override {
+  rocksdb_rs::status::Status Sync() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Sync(io_opts, &dbg);
   }
-  Status Fsync() override {
+  rocksdb_rs::status::Status Fsync() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Fsync(io_opts, &dbg);
   }
-  Status Close() override {
+  rocksdb_rs::status::Status Close() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Close(io_opts, &dbg);
@@ -271,13 +271,13 @@ class CompositeDirectoryWrapper : public Directory {
   explicit CompositeDirectoryWrapper(std::unique_ptr<FSDirectory>& target)
       : target_(std::move(target)) {}
 
-  Status Fsync() override {
+  rocksdb_rs::status::Status Fsync() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->FsyncWithDirOptions(io_opts, &dbg, DirFsyncOptions());
   }
 
-  Status Close() override {
+  rocksdb_rs::status::Status Close() override {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->Close(io_opts, &dbg);
@@ -292,12 +292,12 @@ class CompositeDirectoryWrapper : public Directory {
 };
 }  // namespace
 
-Status CompositeEnv::NewSequentialFile(const std::string& f,
+rocksdb_rs::status::Status CompositeEnv::NewSequentialFile(const std::string& f,
                                        std::unique_ptr<SequentialFile>* r,
                                        const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSSequentialFile> file;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status =
       file_system_->NewSequentialFile(f, FileOptions(options), &file, &dbg);
   if (status.ok()) {
@@ -306,12 +306,12 @@ Status CompositeEnv::NewSequentialFile(const std::string& f,
   return status;
 }
 
-Status CompositeEnv::NewRandomAccessFile(const std::string& f,
+rocksdb_rs::status::Status CompositeEnv::NewRandomAccessFile(const std::string& f,
                                          std::unique_ptr<RandomAccessFile>* r,
                                          const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSRandomAccessFile> file;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status =
       file_system_->NewRandomAccessFile(f, FileOptions(options), &file, &dbg);
   if (status.ok()) {
@@ -320,12 +320,12 @@ Status CompositeEnv::NewRandomAccessFile(const std::string& f,
   return status;
 }
 
-Status CompositeEnv::NewWritableFile(const std::string& f,
+rocksdb_rs::status::Status CompositeEnv::NewWritableFile(const std::string& f,
                                      std::unique_ptr<WritableFile>* r,
                                      const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSWritableFile> file;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status = file_system_->NewWritableFile(f, FileOptions(options), &file, &dbg);
   if (status.ok()) {
     r->reset(new CompositeWritableFileWrapper(file));
@@ -333,11 +333,11 @@ Status CompositeEnv::NewWritableFile(const std::string& f,
   return status;
 }
 
-Status CompositeEnv::ReopenWritableFile(const std::string& fname,
+rocksdb_rs::status::Status CompositeEnv::ReopenWritableFile(const std::string& fname,
                                         std::unique_ptr<WritableFile>* result,
                                         const EnvOptions& options) {
   IODebugContext dbg;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::unique_ptr<FSWritableFile> file;
   status = file_system_->ReopenWritableFile(fname, FileOptions(options), &file,
                                             &dbg);
@@ -347,12 +347,12 @@ Status CompositeEnv::ReopenWritableFile(const std::string& fname,
   return status;
 }
 
-Status CompositeEnv::ReuseWritableFile(const std::string& fname,
+rocksdb_rs::status::Status CompositeEnv::ReuseWritableFile(const std::string& fname,
                                        const std::string& old_fname,
                                        std::unique_ptr<WritableFile>* r,
                                        const EnvOptions& options) {
   IODebugContext dbg;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::unique_ptr<FSWritableFile> file;
   status = file_system_->ReuseWritableFile(fname, old_fname,
                                            FileOptions(options), &file, &dbg);
@@ -362,12 +362,12 @@ Status CompositeEnv::ReuseWritableFile(const std::string& fname,
   return status;
 }
 
-Status CompositeEnv::NewRandomRWFile(const std::string& fname,
+rocksdb_rs::status::Status CompositeEnv::NewRandomRWFile(const std::string& fname,
                                      std::unique_ptr<RandomRWFile>* result,
                                      const EnvOptions& options) {
   IODebugContext dbg;
   std::unique_ptr<FSRandomRWFile> file;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status =
       file_system_->NewRandomRWFile(fname, FileOptions(options), &file, &dbg);
   if (status.ok()) {
@@ -376,12 +376,12 @@ Status CompositeEnv::NewRandomRWFile(const std::string& fname,
   return status;
 }
 
-Status CompositeEnv::NewDirectory(const std::string& name,
+rocksdb_rs::status::Status CompositeEnv::NewDirectory(const std::string& name,
                                   std::unique_ptr<Directory>* result) {
   IOOptions io_opts;
   IODebugContext dbg;
   std::unique_ptr<FSDirectory> dir;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status = file_system_->NewDirectory(name, io_opts, &dir, &dbg);
   if (status.ok()) {
     result->reset(new CompositeDirectoryWrapper(dir));
@@ -427,7 +427,7 @@ static std::unordered_map<std::string, OptionTypeInfo> env_wrapper_type_info = {
                              const std::string& /*name*/, const void* addr) {
            const auto target = static_cast<const EnvWrapper::Target*>(addr);
            if (target->env == nullptr) {
-             return Status_InvalidArgument("Target Env not specified");
+             return rocksdb_rs::status::Status_InvalidArgument("Target Env not specified");
            } else {
              return target->env->ValidateOptions(db_opts, cf_opts);
            }
@@ -471,7 +471,7 @@ CompositeEnvWrapper::CompositeEnvWrapper(const std::shared_ptr<Env>& env,
   RegisterOptions("", &system_clock_, &composite_clock_wrapper_type_info);
 }
 
-Status CompositeEnvWrapper::PrepareOptions(const ConfigOptions& options) {
+rocksdb_rs::status::Status CompositeEnvWrapper::PrepareOptions(const ConfigOptions& options) {
   target_.Prepare();
   if (file_system_ == nullptr) {
     file_system_ = target_.env->GetFileSystem();
@@ -506,7 +506,7 @@ EnvWrapper::EnvWrapper(const std::shared_ptr<Env>& t) : target_(t) {
 
 EnvWrapper::~EnvWrapper() {}
 
-Status EnvWrapper::PrepareOptions(const ConfigOptions& options) {
+rocksdb_rs::status::Status EnvWrapper::PrepareOptions(const ConfigOptions& options) {
   target_.Prepare();
   return Env::PrepareOptions(options);
 }

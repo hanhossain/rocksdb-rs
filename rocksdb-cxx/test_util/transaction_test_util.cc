@@ -33,7 +33,7 @@ RandomTransactionInserter::RandomTransactionInserter(
       read_options_(read_options),
       num_keys_(num_keys),
       num_sets_(num_sets),
-      last_status_(Status_new()),
+      last_status_(rocksdb_rs::status::Status_new()),
       txn_id_(first_id),
       cmt_delay_ms_(cmt_delay_ms) {}
 
@@ -83,11 +83,11 @@ bool RandomTransactionInserter::DBInsert(DB* db) {
   return DoInsert(db, nullptr, false);
 }
 
-Status RandomTransactionInserter::DBGet(
+rocksdb_rs::status::Status RandomTransactionInserter::DBGet(
     DB* db, Transaction* txn, ReadOptions& read_options, uint16_t set_i,
     uint64_t ikey, bool get_for_update, uint64_t* int_value,
     std::string* full_key, bool* unexpected_error) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Five digits (since the largest uint16_t is 65535) plus the NUL
   // end char.
   char prefix_buf[6] = {0};
@@ -117,19 +117,19 @@ Status RandomTransactionInserter::DBGet(
     if (*int_value == 0 || *int_value == ULONG_MAX) {
       *unexpected_error = true;
       fprintf(stderr, "Get returned unexpected value: %s\n", value.c_str());
-      s = Status_Corruption();
+      s = rocksdb_rs::status::Status_Corruption();
     }
   } else if (s.IsNotFound()) {
     // Have not yet written to this key, so assume its value is 0
     *int_value = 0;
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   return s;
 }
 
 bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
                                          bool is_optimistic) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatch batch;
 
   // pick a random number to use to increment a key in each set
@@ -290,7 +290,7 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
 }
 
 // Verify that the sum of the keys in each set are equal
-Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
+rocksdb_rs::status::Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
                                          uint64_t num_keys_per_set,
                                          bool take_snapshot, Random64* rand,
                                          uint64_t delay_ms) {
@@ -332,7 +332,7 @@ Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
         uint64_t int_value = 0;
         bool unexpected_error = false;
         const bool FOR_UPDATE = false;
-        Status s = DBGet(db, nullptr, roptions, set_i, k, FOR_UPDATE,
+        rocksdb_rs::status::Status s = DBGet(db, nullptr, roptions, set_i, k, FOR_UPDATE,
                          &int_value, &dont_care, &unexpected_error);
         assert(s.ok());
         assert(!unexpected_error);
@@ -351,7 +351,7 @@ Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
         if (int_value == 0 || int_value == ULONG_MAX) {
           fprintf(stderr, "Iter returned unexpected value: %s\n",
                   value.ToString().c_str());
-          return Status_Corruption();
+          return rocksdb_rs::status::Status_Corruption();
         }
         ROCKS_LOG_DEBUG(
             db->GetDBOptions().info_log,
@@ -376,7 +376,7 @@ Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
               use_point_lookup, prev_i, prev_total, set_i, total,
               roptions.snapshot ? roptions.snapshot->GetSequenceNumber() : 0ul);
       fflush(stdout);
-      return Status_Corruption();
+      return rocksdb_rs::status::Status_Corruption();
     } else {
       ROCKS_LOG_DEBUG(
           db->GetDBOptions().info_log,
@@ -393,7 +393,7 @@ Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
     db->ReleaseSnapshot(roptions.snapshot);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

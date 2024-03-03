@@ -177,7 +177,7 @@ TEST(WideColumnSerializationTest, DeserializeVersionError) {
   Slice input(buf);
   WideColumns columns;
 
-  const Status s = WideColumnSerialization::Deserialize(input, columns);
+  const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "version"));
 }
@@ -192,7 +192,7 @@ TEST(WideColumnSerializationTest, DeserializeUnsupportedVersion) {
   Slice input(buf);
   WideColumns columns;
 
-  const Status s = WideColumnSerialization::Deserialize(input, columns);
+  const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsNotSupported());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "version"));
 }
@@ -206,7 +206,7 @@ TEST(WideColumnSerializationTest, DeserializeNumberOfColumnsError) {
   Slice input(buf);
   WideColumns columns;
 
-  const Status s = WideColumnSerialization::Deserialize(input, columns);
+  const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "number"));
 }
@@ -224,7 +224,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
     Slice input(buf);
     WideColumns columns;
 
-    const Status s = WideColumnSerialization::Deserialize(input, columns);
+    const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "name"));
   }
@@ -237,7 +237,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
     Slice input(buf);
     WideColumns columns;
 
-    const Status s = WideColumnSerialization::Deserialize(input, columns);
+    const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "value size"));
   }
@@ -250,7 +250,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
     Slice input(buf);
     WideColumns columns;
 
-    const Status s = WideColumnSerialization::Deserialize(input, columns);
+    const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "name"));
   }
@@ -263,7 +263,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
     Slice input(buf);
     WideColumns columns;
 
-    const Status s = WideColumnSerialization::Deserialize(input, columns);
+    const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "value size"));
   }
@@ -276,7 +276,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
     Slice input(buf);
     WideColumns columns;
 
-    const Status s = WideColumnSerialization::Deserialize(input, columns);
+    const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "payload"));
   }
@@ -288,7 +288,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsError) {
     Slice input(buf);
     WideColumns columns;
 
-    const Status s = WideColumnSerialization::Deserialize(input, columns);
+    const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "payload"));
   }
@@ -324,7 +324,7 @@ TEST(WideColumnSerializationTest, DeserializeColumnsOutOfOrder) {
   Slice input(buf);
   WideColumns columns;
 
-  const Status s = WideColumnSerialization::Deserialize(input, columns);
+  const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(input, columns);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "order"));
 }

@@ -95,7 +95,7 @@ FlushJob::FlushJob(
     SequenceNumber earliest_write_conflict_snapshot,
     SnapshotChecker* snapshot_checker, JobContext* job_context,
     FlushReason flush_reason, LogBuffer* log_buffer, FSDirectory* db_directory,
-    FSDirectory* output_file_directory, CompressionType output_compression,
+    FSDirectory* output_file_directory, rocksdb_rs::compression_type::CompressionType output_compression,
     Statistics* stats, EventLogger* event_logger, bool measure_io_stats,
     const bool sync_output_directory, const bool write_manifest,
     Env::Priority thread_pri, const std::shared_ptr<IOTracer>& io_tracer,
@@ -211,7 +211,7 @@ void FlushJob::PickMemTable() {
   base_->Ref();  // it is likely that we do not need this reference
 }
 
-Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
+rocksdb_rs::status::Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
                      bool* switched_to_mempurge) {
   TEST_SYNC_POINT("FlushJob::Start");
   db_mutex_->AssertHeld();
@@ -227,7 +227,7 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
   if (mems_.empty()) {
     ROCKS_LOG_BUFFER(log_buffer_, "[%s] Nothing in memtable to flush",
                      cfd_->GetName().c_str());
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // I/O measurement variables
@@ -248,7 +248,7 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
     prev_cpu_write_nanos = IOSTATS(cpu_write_nanos);
     prev_cpu_read_nanos = IOSTATS(cpu_read_nanos);
   }
-  Status mempurge_s = Status_NotFound("No MemPurge.");
+  rocksdb_rs::status::Status mempurge_s = rocksdb_rs::status::Status_NotFound("No MemPurge.");
   if ((mempurge_threshold > 0.0) &&
       (flush_reason_ == FlushReason::kWriteBufferFull) && (!mems_.empty()) &&
       MemPurgeDecider(mempurge_threshold) && !(db_options_.atomic_flush)) {
@@ -278,21 +278,21 @@ Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, FileMetaData* file_meta,
       }
     }
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (mempurge_s.ok()) {
     base_->Unref();
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   } else {
     // This will release and re-acquire the mutex.
     s = WriteLevel0Table();
   }
 
   if (s.ok() && cfd_->IsDropped()) {
-    s = Status_ColumnFamilyDropped("Column family dropped during compaction");
+    s = rocksdb_rs::status::Status_ColumnFamilyDropped("Column family dropped during compaction");
   }
   if ((s.ok() || s.IsColumnFamilyDropped()) &&
       shutting_down_->load(std::memory_order_acquire)) {
-    s = Status_ShutdownInProgress("Database shutdown");
+    s = rocksdb_rs::status::Status_ShutdownInProgress("Database shutdown");
   }
 
   if (!s.ok()) {
@@ -365,8 +365,8 @@ void FlushJob::Cancel() {
   base_->Unref();
 }
 
-Status FlushJob::MemPurge() {
-  Status s = Status_new();
+rocksdb_rs::status::Status FlushJob::MemPurge() {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   db_mutex_->AssertHeld();
   db_mutex_->Unlock();
   assert(!mems_.empty());
@@ -451,7 +451,7 @@ Status FlushJob::MemPurge() {
           ioptions->compaction_filter_factory->CreateCompactionFilter(ctx);
       if (compaction_filter != nullptr &&
           !compaction_filter->IgnoreSnapshots()) {
-        s = Status_NotSupported(
+        s = rocksdb_rs::status::Status_NotSupported(
             "CompactionFilter::IgnoreSnapshots() = false is not supported "
             "anymore.");
         return s;
@@ -525,7 +525,7 @@ Status FlushJob::MemPurge() {
       // then rollback to regular flush operation,
       // and destroy new_mem.
       if (new_mem->ApproximateMemoryUsage() > maxSize) {
-        s = Status_Aborted("Mempurge filled more than one memtable.");
+        s = rocksdb_rs::status::Status_Aborted("Mempurge filled more than one memtable.");
         new_mem_capacity = 1.0;
         break;
       }
@@ -568,7 +568,7 @@ Status FlushJob::MemPurge() {
         // then rollback to regular flush operation,
         // and destroy new_mem.
         if (new_mem->ApproximateMemoryUsage() > maxSize) {
-          s = Status_Aborted(Slice("Mempurge filled more than one memtable."));
+          s = rocksdb_rs::status::Status_Aborted(Slice("Mempurge filled more than one memtable."));
           new_mem_capacity = 1.0;
           break;
         }
@@ -606,7 +606,7 @@ Status FlushJob::MemPurge() {
         mems_[0]->SetFlushJobInfo(GetFlushJobInfo());
         db_mutex_->Unlock();
       } else {
-        s = Status_Aborted(Slice("Mempurge filled more than one memtable."));
+        s = rocksdb_rs::status::Status_Aborted(Slice("Mempurge filled more than one memtable."));
         new_mem_capacity = 1.0;
         if (new_mem) {
           job_context_->memtables_to_free.push_back(new_mem);
@@ -661,8 +661,8 @@ bool FlushJob::MemPurgeDecider(double threshold) {
   ParsedInternalKey res;
   SnapshotImpl min_snapshot;
   std::string vget;
-  Status mget_s = Status_new();
-  Status parse_s = Status_new();
+  rocksdb_rs::status::Status mget_s = rocksdb_rs::status::Status_new();
+  rocksdb_rs::status::Status parse_s = rocksdb_rs::status::Status_new();
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0, sqno = 0,
                  min_seqno_snapshot = 0;
@@ -815,13 +815,13 @@ bool FlushJob::MemPurgeDecider(double threshold) {
           threshold);
 }
 
-Status FlushJob::WriteLevel0Table() {
+rocksdb_rs::status::Status FlushJob::WriteLevel0Table() {
   AutoThreadOperationStageUpdater stage_updater(
       ThreadStatus::STAGE_FLUSH_WRITE_L0);
   db_mutex_->AssertHeld();
   const uint64_t start_micros = clock_->NowMicros();
   const uint64_t start_cpu_micros = clock_->CPUMicros();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   SequenceNumber smallest_seqno = mems_.front()->GetEarliestSequenceNumber();
   if (!db_impl_seqno_time_mapping_.Empty()) {
@@ -960,7 +960,7 @@ Status FlushJob::WriteLevel0Table() {
                        cfd_->GetName().c_str(), job_context_->job_id,
                        msg.c_str());
         if (db_options_.flush_verify_memtable_count) {
-          s = Status_Corruption(msg);
+          s = rocksdb_rs::status::Status_Corruption(msg);
         }
       }
       if (tboptions.reason == TableFileCreationReason::kFlush) {
@@ -1072,7 +1072,7 @@ std::unique_ptr<FlushJobInfo> FlushJob::GetFlushJobInfo() const {
 
   const uint64_t file_number = meta_.fd.GetNumber();
   info->file_path =
-      MakeTableFileName(cfd_->ioptions()->cf_paths[0].path, file_number);
+      static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName(cfd_->ioptions()->cf_paths[0].path, file_number));
   info->file_number = file_number;
   info->oldest_blob_file_number = meta_.oldest_blob_file_number;
   info->thread_id = db_options_.env->GetThreadID();
@@ -1086,7 +1086,7 @@ std::unique_ptr<FlushJobInfo> FlushJob::GetFlushJobInfo() const {
   // Update BlobFilesInfo.
   for (const auto& blob_file : edit_->GetBlobFileAdditions()) {
     BlobFileAdditionInfo blob_file_addition_info(
-        BlobFileName(cfd_->ioptions()->cf_paths.front().path,
+        rocksdb_rs::filename::BlobFileName(cfd_->ioptions()->cf_paths.front().path,
                      blob_file.GetBlobFileNumber()) /*blob_file_path*/,
         blob_file.GetBlobFileNumber(), blob_file.GetTotalBlobCount(),
         blob_file.GetTotalBlobBytes());

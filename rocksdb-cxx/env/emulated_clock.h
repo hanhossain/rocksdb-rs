@@ -71,8 +71,8 @@ class EmulatedSystemClock : public SystemClockWrapper {
 
   int GetSleepCounter() const { return sleep_counter_.load(); }
 
-  virtual Status GetCurrentTime(int64_t* unix_time) override {
-    Status s = Status_new();
+  virtual rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (time_elapse_only_sleep_) {
       *unix_time = maybe_starting_time_;
     } else {

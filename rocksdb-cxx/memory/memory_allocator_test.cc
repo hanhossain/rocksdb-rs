@@ -27,7 +27,7 @@ class MemoryAllocatorTest
  public:
   MemoryAllocatorTest() {
     std::tie(id_, supported_) = GetParam();
-    Status s =
+    rocksdb_rs::status::Status s =
         MemoryAllocator::CreateFromString(ConfigOptions(), id_, &allocator_);
     EXPECT_EQ(supported_, s.ok());
   }
@@ -56,7 +56,7 @@ TEST_P(MemoryAllocatorTest, CreateAllocator) {
   config_options.ignore_unknown_options = false;
   config_options.ignore_unsupported_options = false;
   std::shared_ptr<MemoryAllocator> orig, copy;
-  Status s = MemoryAllocator::CreateFromString(config_options, id_, &orig);
+  rocksdb_rs::status::Status s = MemoryAllocator::CreateFromString(config_options, id_, &orig);
   if (!IsSupported()) {
     ASSERT_TRUE(s.IsNotSupported());
   } else {
@@ -84,7 +84,7 @@ TEST_P(MemoryAllocatorTest, DatabaseBlockCache) {
   table_options.block_cache = cache;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   DB* db = nullptr;
-  Status s = DB::Open(options, dbname, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, dbname, &db);
   ASSERT_OK(s);
   ASSERT_NE(db, nullptr);
   ASSERT_LE(cache->GetUsage(), 104);  // Cache will contain stats
@@ -131,7 +131,7 @@ class CreateMemoryAllocatorTest : public testing::Test {
 TEST_F(CreateMemoryAllocatorTest, JemallocOptionsTest) {
   std::shared_ptr<MemoryAllocator> allocator;
   std::string id = std::string("id=") + JemallocNodumpAllocator::kClassName();
-  Status s = MemoryAllocator::CreateFromString(config_options_, id, &allocator);
+  rocksdb_rs::status::Status s = MemoryAllocator::CreateFromString(config_options_, id, &allocator);
   if (!JemallocNodumpAllocator::IsSupported()) {
     ASSERT_NOK(s);
     ROCKSDB_GTEST_BYPASS("JEMALLOC not supported");
@@ -182,7 +182,7 @@ TEST_F(CreateMemoryAllocatorTest, NewJemallocNodumpAllocator) {
   jopts.tcache_size_upper_bound = 1024;
 
   ASSERT_NOK(NewJemallocNodumpAllocator(jopts, nullptr));
-  Status s = NewJemallocNodumpAllocator(jopts, &allocator);
+  rocksdb_rs::status::Status s = NewJemallocNodumpAllocator(jopts, &allocator);
   std::string msg;
   if (!JemallocNodumpAllocator::IsSupported(&msg)) {
     ASSERT_NOK(s);

@@ -21,16 +21,16 @@ class CompactedDBImpl : public DBImpl {
 
   ~CompactedDBImpl() override;
 
-  static Status Open(const Options& options, const std::string& dbname,
+  static rocksdb_rs::status::Status Open(const Options& options, const std::string& dbname,
                      DB** dbptr);
 
   // Implementations of the DB interface
   using DB::Get;
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) override;
 
-  Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
              const Slice& key, PinnableSlice* value,
              std::string* timestamp) override;
 
@@ -38,117 +38,117 @@ class CompactedDBImpl : public DBImpl {
   // Note that CompactedDBImpl::MultiGet is not the optimized version of
   // MultiGet to use.
   // TODO: optimize CompactedDBImpl::MultiGet, see DBImpl::MultiGet for details.
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options, const std::vector<ColumnFamilyHandle*>&,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
-  rust::Vec<Status> MultiGet(const ReadOptions& options,
+  rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
                                const std::vector<ColumnFamilyHandle*>&,
                                const std::vector<Slice>& keys,
                                std::vector<std::string>* values,
                                std::vector<std::string>* timestamps) override;
 
   using DBImpl::Put;
-  virtual Status Put(const WriteOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Put(const WriteOptions& /*options*/,
                      ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*key*/, const Slice& /*value*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
   using DBImpl::PutEntity;
-  Status PutEntity(const WriteOptions& /* options */,
+  rocksdb_rs::status::Status PutEntity(const WriteOptions& /* options */,
                    ColumnFamilyHandle* /* column_family */,
                    const Slice& /* key */,
                    const WideColumns& /* columns */) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
   using DBImpl::Merge;
-  virtual Status Merge(const WriteOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Merge(const WriteOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/,
                        const Slice& /*key*/, const Slice& /*value*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
   using DBImpl::Delete;
-  virtual Status Delete(const WriteOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Delete(const WriteOptions& /*options*/,
                         ColumnFamilyHandle* /*column_family*/,
                         const Slice& /*key*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
-  virtual Status Write(const WriteOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& /*options*/,
                        WriteBatch* /*updates*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
   using DBImpl::CompactRange;
-  virtual Status CompactRange(const CompactRangeOptions& /*options*/,
+  virtual rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& /*options*/,
                               ColumnFamilyHandle* /*column_family*/,
                               const Slice* /*begin*/,
                               const Slice* /*end*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
-  virtual Status DisableFileDeletions() override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+  virtual rocksdb_rs::status::Status DisableFileDeletions() override {
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
-  virtual Status EnableFileDeletions(bool /*force*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+  virtual rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override {
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
-  virtual Status GetLiveFiles(std::vector<std::string>& ret,
+  virtual rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>& ret,
                               uint64_t* manifest_file_size,
                               bool /*flush_memtable*/) override {
     return DBImpl::GetLiveFiles(ret, manifest_file_size,
                                 false /* flush_memtable */);
   }
   using DBImpl::Flush;
-  virtual Status Flush(const FlushOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Flush(const FlushOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
-  virtual Status SyncWAL() override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+  virtual rocksdb_rs::status::Status SyncWAL() override {
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
   using DB::IngestExternalFile;
-  virtual Status IngestExternalFile(
+  virtual rocksdb_rs::status::Status IngestExternalFile(
       ColumnFamilyHandle* /*column_family*/,
       const std::vector<std::string>& /*external_files*/,
       const IngestExternalFileOptions& /*ingestion_options*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
   using DB::CreateColumnFamilyWithImport;
-  virtual Status CreateColumnFamilyWithImport(
+  virtual rocksdb_rs::status::Status CreateColumnFamilyWithImport(
       const ColumnFamilyOptions& /*options*/,
       const std::string& /*column_family_name*/,
       const ImportColumnFamilyOptions& /*import_options*/,
       const std::vector<const ExportImportFilesMetaData*>& /*metadatas*/,
       ColumnFamilyHandle** /*handle*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
   using DB::ClipColumnFamily;
-  virtual Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
+  virtual rocksdb_rs::status::Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
                                   const Slice& /*begin*/,
                                   const Slice& /*end*/) override {
-    return Status_NotSupported("Not supported in compacted db mode.");
+    return rocksdb_rs::status::Status_NotSupported("Not supported in compacted db mode.");
   }
 
   // FIXME: some missing overrides for more "write" functions
   // Share with DBImplReadOnly?
 
  protected:
-  Status FlushForGetLiveFiles() override {
+  rocksdb_rs::status::Status FlushForGetLiveFiles() override {
     // No-op for read-only DB
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
   friend class DB;
   inline size_t FindFile(const Slice& key);
-  Status Init(const Options& options);
+  rocksdb_rs::status::Status Init(const Options& options);
 
   ColumnFamilyData* cfd_;
   Version* version_;

@@ -29,7 +29,7 @@ TEST_F(LogicalBlockSizeCacheTest, Cache) {
   auto get_dir_block_size = [&](const std::string& dir, size_t* size) {
     ncall++;
     *size = dir_fds[dir];
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   };
   LogicalBlockSizeCache cache(get_fd_block_size, get_dir_block_size);
   ASSERT_EQ(0, ncall);
@@ -95,7 +95,7 @@ TEST_F(LogicalBlockSizeCacheTest, Ref) {
   auto get_dir_block_size = [&](const std::string& dir, size_t* size) {
     ncall++;
     *size = dir_fds[dir];
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   };
   LogicalBlockSizeCache cache(get_fd_block_size, get_dir_block_size);
 

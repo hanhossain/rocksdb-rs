@@ -107,43 +107,43 @@ class SstFileWriter {
   ~SstFileWriter();
 
   // Prepare SstFileWriter to write into file located at "file_path".
-  Status Open(const std::string& file_path);
+  rocksdb_rs::status::Status Open(const std::string& file_path);
 
   // Add a Put key with value to currently opened file (deprecated)
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
   // REQUIRES: comparator is *not* timestamp-aware.
-  ROCKSDB_DEPRECATED_FUNC Status Add(const Slice& user_key, const Slice& value);
+  ROCKSDB_DEPRECATED_FUNC rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& value);
 
   // Add a Put key with value to currently opened file
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
   // REQUIRES: comparator is *not* timestamp-aware.
-  Status Put(const Slice& user_key, const Slice& value);
+  rocksdb_rs::status::Status Put(const Slice& user_key, const Slice& value);
 
   // Add a Put (key with timestamp, value) to the currently opened file
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
   // REQUIRES: timestamp's size is equal to what is expected by the comparator.
-  Status Put(const Slice& user_key, const Slice& timestamp, const Slice& value);
+  rocksdb_rs::status::Status Put(const Slice& user_key, const Slice& timestamp, const Slice& value);
 
   // Add a Merge key with value to currently opened file
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
   // REQUIRES: comparator is *not* timestamp-aware.
-  Status Merge(const Slice& user_key, const Slice& value);
+  rocksdb_rs::status::Status Merge(const Slice& user_key, const Slice& value);
 
   // Add a deletion key to currently opened file
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
   // REQUIRES: comparator is *not* timestamp-aware.
-  Status Delete(const Slice& user_key);
+  rocksdb_rs::status::Status Delete(const Slice& user_key);
 
   // Add a deletion key with timestamp to the currently opened file
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
   // REQUIRES: timestamp's size is equal to what is expected by the comparator.
-  Status Delete(const Slice& user_key, const Slice& timestamp);
+  rocksdb_rs::status::Status Delete(const Slice& user_key, const Slice& timestamp);
 
   // Add a range deletion tombstone to currently opened file. Such a range
   // deletion tombstone does NOT delete point (Put/Merge/Delete) keys in the
@@ -155,7 +155,7 @@ class SstFileWriter {
   //
   // REQUIRES: The comparator orders `begin_key` at or before `end_key`
   // REQUIRES: comparator is *not* timestamp-aware.
-  Status DeleteRange(const Slice& begin_key, const Slice& end_key);
+  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key);
 
   // Add a range deletion tombstone to currently opened file. Such a range
   // deletion tombstone does NOT delete point (Put/Merge/Delete) keys in the
@@ -168,14 +168,14 @@ class SstFileWriter {
   // REQUIRES: begin_key and end_key are user keys without timestamp.
   // REQUIRES: The comparator orders `begin_key` at or before `end_key`
   // REQUIRES: timestamp's size is equal to what is expected by the comparator.
-  Status DeleteRange(const Slice& begin_key, const Slice& end_key,
+  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key,
                      const Slice& timestamp);
 
   // Finalize writing to sst file and close file.
   //
   // An optional ExternalSstFileInfo pointer can be passed to the function
   // which will be populated with information about the created sst file.
-  Status Finish(ExternalSstFileInfo* file_info = nullptr);
+  rocksdb_rs::status::Status Finish(ExternalSstFileInfo* file_info = nullptr);
 
   // Return the current file size.
   uint64_t FileSize();

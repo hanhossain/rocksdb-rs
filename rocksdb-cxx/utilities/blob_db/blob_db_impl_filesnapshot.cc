@@ -15,9 +15,9 @@
 namespace rocksdb {
 namespace blob_db {
 
-Status BlobDBImpl::DisableFileDeletions() {
+rocksdb_rs::status::Status BlobDBImpl::DisableFileDeletions() {
   // Disable base DB file deletions.
-  Status s = db_impl_->DisableFileDeletions();
+  rocksdb_rs::status::Status s = db_impl_->DisableFileDeletions();
   if (!s.ok()) {
     return s;
   }
@@ -32,12 +32,12 @@ Status BlobDBImpl::DisableFileDeletions() {
 
   ROCKS_LOG_INFO(db_options_.info_log,
                  "Disabled blob file deletions. count: %d", count);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status BlobDBImpl::EnableFileDeletions(bool force) {
+rocksdb_rs::status::Status BlobDBImpl::EnableFileDeletions(bool force) {
   // Enable base DB file deletions.
-  Status s = db_impl_->EnableFileDeletions(force);
+  rocksdb_rs::status::Status s = db_impl_->EnableFileDeletions(force);
   if (!s.ok()) {
     return s;
   }
@@ -57,19 +57,19 @@ Status BlobDBImpl::EnableFileDeletions(bool force) {
                  count);
   // Consider trigger DeleteobsoleteFiles once after re-enabled, if we are to
   // make DeleteobsoleteFiles re-run interval configuration.
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
+rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
                                 uint64_t* manifest_file_size,
                                 bool flush_memtable) {
   if (!bdb_options_.path_relative) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Not able to get relative blob file path from absolute blob_dir.");
   }
   // Hold a lock in the beginning to avoid updates to base DB during the call
   ReadLock rl(&mutex_);
-  Status s = db_->GetLiveFiles(ret, manifest_file_size, flush_memtable);
+  rocksdb_rs::status::Status s = db_->GetLiveFiles(ret, manifest_file_size, flush_memtable);
   if (!s.ok()) {
     return s;
   }
@@ -78,9 +78,9 @@ Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
     auto blob_file = bfile_pair.second;
     // Path should be relative to db_name, but begin with slash.
     ret.emplace_back(
-        BlobFileName("", bdb_options_.blob_dir, blob_file->BlobFileNumber()));
+        rocksdb_rs::filename::BlobFileName("", bdb_options_.blob_dir, blob_file->BlobFileNumber()));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlobDBImpl::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
@@ -95,7 +95,7 @@ void BlobDBImpl::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
     filemetadata.size = blob_file->GetFileSize();
     const uint64_t file_number = blob_file->BlobFileNumber();
     // Path should be relative to db_name, but begin with slash.
-    filemetadata.name = BlobFileName("", bdb_options_.blob_dir, file_number);
+    filemetadata.name = static_cast<std::string>(rocksdb_rs::filename::BlobFileName("", bdb_options_.blob_dir, file_number));
     filemetadata.file_number = file_number;
     if (blob_file->HasTTL()) {
       filemetadata.oldest_ancester_time = blob_file->GetExpirationRange().first;

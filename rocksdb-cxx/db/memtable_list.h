@@ -58,14 +58,14 @@ class MemTableListVersion {
   // will be stored in *seq on success (regardless of whether true/false is
   // returned).  Otherwise, *seq will be set to kMaxSequenceNumber.
   bool Get(const LookupKey& key, std::string* value,
-           PinnableWideColumns* columns, std::string* timestamp, Status* s,
+           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
            MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq, SequenceNumber* seq,
            const ReadOptions& read_opts, ReadCallback* callback = nullptr,
            bool* is_blob_index = nullptr);
 
   bool Get(const LookupKey& key, std::string* value,
-           PinnableWideColumns* columns, std::string* timestamp, Status* s,
+           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
            MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq,
            const ReadOptions& read_opts, ReadCallback* callback = nullptr,
@@ -81,7 +81,7 @@ class MemTableListVersion {
 
   // Returns all the merge operands corresponding to the key by searching all
   // memtables starting from the most recent one.
-  bool GetMergeOperands(const LookupKey& key, Status* s,
+  bool GetMergeOperands(const LookupKey& key, rocksdb_rs::status::Status* s,
                         MergeContext* merge_context,
                         SequenceNumber* max_covering_tombstone_seq,
                         const ReadOptions& read_opts);
@@ -92,13 +92,13 @@ class MemTableListVersion {
   // writes that are also present in the SST files.
   bool GetFromHistory(const LookupKey& key, std::string* value,
                       PinnableWideColumns* columns, std::string* timestamp,
-                      Status* s, MergeContext* merge_context,
+                      rocksdb_rs::status::Status* s, MergeContext* merge_context,
                       SequenceNumber* max_covering_tombstone_seq,
                       SequenceNumber* seq, const ReadOptions& read_opts,
                       bool* is_blob_index = nullptr);
   bool GetFromHistory(const LookupKey& key, std::string* value,
                       PinnableWideColumns* columns, std::string* timestamp,
-                      Status* s, MergeContext* merge_context,
+                      rocksdb_rs::status::Status* s, MergeContext* merge_context,
                       SequenceNumber* max_covering_tombstone_seq,
                       const ReadOptions& read_opts,
                       bool* is_blob_index = nullptr) {
@@ -108,7 +108,7 @@ class MemTableListVersion {
                           is_blob_index);
   }
 
-  Status AddRangeTombstoneIterators(const ReadOptions& read_opts, Arena* arena,
+  rocksdb_rs::status::Status AddRangeTombstoneIterators(const ReadOptions& read_opts, Arena* arena,
                                     RangeDelAggregator* range_del_agg);
 
   void AddIterators(const ReadOptions& options,
@@ -140,7 +140,7 @@ class MemTableListVersion {
  private:
   friend class MemTableList;
 
-  friend Status InstallMemtableAtomicFlushResults(
+  friend rocksdb_rs::status::Status InstallMemtableAtomicFlushResults(
       const autovector<MemTableList*>* imm_lists,
       const autovector<ColumnFamilyData*>& cfds,
       const autovector<const MutableCFOptions*>& mutable_cf_options_list,
@@ -162,7 +162,7 @@ class MemTableListVersion {
 
   bool GetFromList(std::list<MemTable*>* list, const LookupKey& key,
                    std::string* value, PinnableWideColumns* columns,
-                   std::string* timestamp, Status* s,
+                   std::string* timestamp, rocksdb_rs::status::Status* s,
                    MergeContext* merge_context,
                    SequenceNumber* max_covering_tombstone_seq,
                    SequenceNumber* seq, const ReadOptions& read_opts,
@@ -276,7 +276,7 @@ class MemTableList {
 
   // Try commit a successful flush in the manifest file. It might just return
   // Status_OK letting a concurrent flush to do the actual the recording.
-  Status TryInstallMemtableFlushResults(
+  rocksdb_rs::status::Status TryInstallMemtableFlushResults(
       ColumnFamilyData* cfd, const MutableCFOptions& mutable_cf_options,
       const autovector<MemTable*>& m, LogsWithPrepTracker* prep_tracker,
       VersionSet* vset, InstrumentedMutex* mu, uint64_t file_number,
@@ -405,7 +405,7 @@ class MemTableList {
                           autovector<MemTable*>* to_delete);
 
  private:
-  friend Status InstallMemtableAtomicFlushResults(
+  friend rocksdb_rs::status::Status InstallMemtableAtomicFlushResults(
       const autovector<MemTableList*>* imm_lists,
       const autovector<ColumnFamilyData*>& cfds,
       const autovector<const MutableCFOptions*>& mutable_cf_options_list,
@@ -422,7 +422,7 @@ class MemTableList {
 
   // DB mutex held
   // Called after writing to MANIFEST
-  void RemoveMemTablesOrRestoreFlags(const Status& s, ColumnFamilyData* cfd,
+  void RemoveMemTablesOrRestoreFlags(const rocksdb_rs::status::Status& s, ColumnFamilyData* cfd,
                                      size_t batch_count, LogBuffer* log_buffer,
                                      autovector<MemTable*>* to_delete,
                                      InstrumentedMutex* mu);
@@ -457,7 +457,7 @@ class MemTableList {
 // installs flush results for external immutable memtable lists other than the
 // cfds' own immutable memtable lists, e.g. MemTableLIstTest. In this case,
 // imm_lists parameter is not nullptr.
-extern Status InstallMemtableAtomicFlushResults(
+extern rocksdb_rs::status::Status InstallMemtableAtomicFlushResults(
     const autovector<MemTableList*>* imm_lists,
     const autovector<ColumnFamilyData*>& cfds,
     const autovector<const MutableCFOptions*>& mutable_cf_options_list,

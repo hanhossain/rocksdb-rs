@@ -40,7 +40,7 @@ class MemoryUtil {
   // only report the usage of the input "cache_set" without
   // including those Cache usage inside the input list "dbs"
   // of DBs.
-  static Status GetApproximateMemoryUsageByType(
+  static rocksdb_rs::status::Status GetApproximateMemoryUsageByType(
       const std::vector<DB*>& dbs,
       const std::unordered_set<const Cache*> cache_set,
       std::map<MemoryUtil::UsageType, uint64_t>* usage_by_type);

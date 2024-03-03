@@ -21,8 +21,8 @@ class TraceWriter {
  public:
   virtual ~TraceWriter() = default;
 
-  virtual Status Write(const Slice& data) = 0;
-  virtual Status Close() = 0;
+  virtual rocksdb_rs::status::Status Write(const Slice& data) = 0;
+  virtual rocksdb_rs::status::Status Close() = 0;
   virtual uint64_t GetFileSize() = 0;
 };
 
@@ -32,20 +32,20 @@ class TraceReader {
  public:
   virtual ~TraceReader() = default;
 
-  virtual Status Read(std::string* data) = 0;
-  virtual Status Close() = 0;
+  virtual rocksdb_rs::status::Status Read(std::string* data) = 0;
+  virtual rocksdb_rs::status::Status Close() = 0;
 
   // Seek back to the trace header. Replayer can call this method to restart
   // replaying. Note this method may fail if the reader is already closed.
-  virtual Status Reset() = 0;
+  virtual rocksdb_rs::status::Status Reset() = 0;
 };
 
 // Factory methods to write/read traces to/from a file.
 // The implementations may not be thread-safe.
-Status NewFileTraceWriter(Env* env, const EnvOptions& env_options,
+rocksdb_rs::status::Status NewFileTraceWriter(Env* env, const EnvOptions& env_options,
                           const std::string& trace_filename,
                           std::unique_ptr<TraceWriter>* trace_writer);
-Status NewFileTraceReader(Env* env, const EnvOptions& env_options,
+rocksdb_rs::status::Status NewFileTraceReader(Env* env, const EnvOptions& env_options,
                           const std::string& trace_filename,
                           std::unique_ptr<TraceReader>* trace_reader);
 

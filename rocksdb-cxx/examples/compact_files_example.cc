@@ -20,7 +20,7 @@ using rocksdb::EventListener;
 using rocksdb::FlushJobInfo;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
-using rocksdb::Status;
+using rocksdb_rs::status::Status;
 using rocksdb::WriteOptions;
 
 #if defined(OS_WIN)
@@ -121,7 +121,7 @@ class FullCompactor : public Compactor {
         reinterpret_cast<CompactionTask*>(arg));
     assert(task);
     assert(task->db);
-    Status s = task->db->CompactFiles(
+    rocksdb_rs::status::Status s = task->db->CompactFiles(
         task->compact_options, task->input_file_names, task->output_level);
     printf("CompactFiles() finished with status %s\n", s.ToString()->c_str());
     if (!s.ok() && !s.IsIOError() && task->retry_on_fail) {
@@ -152,7 +152,7 @@ int main() {
 
   DB* db = nullptr;
   rocksdb::DestroyDB(kDBPath, options);
-  Status s = DB::Open(options, kDBPath, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, kDBPath, &db);
   assert(s.ok());
   assert(db);
 

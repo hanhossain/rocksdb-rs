@@ -97,11 +97,11 @@ CompactionIterator::CompactionIterator(
       enforce_single_del_contracts_(enforce_single_del_contracts),
       timestamp_size_(cmp_ ? cmp_->timestamp_size() : 0),
       full_history_ts_low_(full_history_ts_low),
-      status_(Status_new()),
+      status_(rocksdb_rs::status::Status_new()),
       current_user_key_sequence_(0),
       current_user_key_snapshot_(0),
       merge_out_iter_(merge_helper_),
-      merge_until_status_(Status_new()),
+      merge_until_status_(rocksdb_rs::status::Status_new()),
       blob_garbage_collection_cutoff_file_number_(
           ComputeBlobGarbageCollectionCutoffFileNumber(compaction_.get())),
       blob_fetcher_(CreateBlobFetcherIfNeeded(compaction_.get())),
@@ -161,7 +161,7 @@ void CompactionIterator::Next() {
     if (merge_out_iter_.Valid()) {
       key_ = merge_out_iter_.key();
       value_ = merge_out_iter_.value();
-      Status s = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
+      rocksdb_rs::status::Status s = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
       // MergeUntil stops when it encounters a corrupt key and does not
       // include them in the result, so we expect the keys here to be valid.
       if (!s.ok()) {
@@ -265,7 +265,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
           !compaction_filter_->IsStackedBlobDbInternalCompactionFilter()) {
         if (!compaction_) {
           status_ =
-              Status_Corruption("Unexpected blob index outside of compaction");
+              rocksdb_rs::status::Status_Corruption("Unexpected blob index outside of compaction");
           validity_info_.Invalidate();
           return false;
         }
@@ -278,7 +278,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
         // For Stacked BlobDB impl, the corresponding CompactionFilter's
         // FilterV2 method should read the blob value.
         BlobIndex blob_index;
-        Status s = blob_index.DecodeFrom(value_);
+        rocksdb_rs::status::Status s = blob_index.DecodeFrom(value_);
         if (!s.ok()) {
           status_.copy_from(s);
           validity_info_.Invalidate();
@@ -324,7 +324,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
         }
       } else {
         Slice value_copy = value_;
-        const Status s =
+        const rocksdb_rs::status::Status s =
             WideColumnSerialization::Deserialize(value_copy, existing_columns);
 
         if (!s.ok()) {
@@ -349,7 +349,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
   if (decision == CompactionFilter::Decision::kUndetermined) {
     // Should not reach here, since FilterV2/FilterV3 should never return
     // kUndetermined.
-    status_ = Status_NotSupported(
+    status_ = rocksdb_rs::status::Status_NotSupported(
         "FilterV2/FilterV3 should never return kUndetermined");
     validity_info_.Invalidate();
     return false;
@@ -397,7 +397,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
     // in the integrated BlobDB impl is made in subsequent call to
     // PrepareOutput() and its callees.
     if (!compaction_filter_->IsStackedBlobDbInternalCompactionFilter()) {
-      status_ = Status_NotSupported(
+      status_ = rocksdb_rs::status::Status_NotSupported(
           "Only stacked BlobDB's internal compaction filter can return "
           "kChangeBlobIndex.");
       validity_info_.Invalidate();
@@ -412,13 +412,13 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
     value_ = compaction_filter_value_;
   } else if (decision == CompactionFilter::Decision::kIOError) {
     if (!compaction_filter_->IsStackedBlobDbInternalCompactionFilter()) {
-      status_ = Status_NotSupported(
+      status_ = rocksdb_rs::status::Status_NotSupported(
           "CompactionFilter for integrated BlobDB should not return kIOError");
       validity_info_.Invalidate();
       return false;
     }
 
-    status_ = Status_IOError("Failed to access blob during compaction filter");
+    status_ = rocksdb_rs::status::Status_IOError("Failed to access blob during compaction filter");
     validity_info_.Invalidate();
     return false;
   } else if (decision == CompactionFilter::Decision::kChangeWideColumnEntity) {
@@ -435,7 +435,7 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
               });
 
     {
-      const Status s = WideColumnSerialization::Serialize(
+      const rocksdb_rs::status::Status s = WideColumnSerialization::Serialize(
           sorted_columns, compaction_filter_value_);
       if (!s.ok()) {
         status_.copy_from(s);
@@ -467,7 +467,7 @@ void CompactionIterator::NextFromInput() {
     iter_stats_.num_input_records++;
     is_range_del_ = input_.IsDeleteRangeSentinelKey();
 
-    Status pik_status = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
+    rocksdb_rs::status::Status pik_status = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
     if (!pik_status.ok()) {
       iter_stats_.num_input_corrupt_records++;
 
@@ -774,7 +774,7 @@ void CompactionIterator::NextFromInput() {
             if (enforce_single_del_contracts_) {
               ROCKS_LOG_ERROR(info_log_, "%s", oss.str().c_str());
               validity_info_.Invalidate();
-              status_ = Status_Corruption(oss.str());
+              status_ = rocksdb_rs::status::Status_Corruption(oss.str());
               return;
             }
             ROCKS_LOG_WARN(info_log_, "%s", oss.str().c_str());
@@ -972,7 +972,7 @@ void CompactionIterator::NextFromInput() {
       }
     } else if (ikey_.type == kTypeMerge) {
       if (!merge_helper_->HasOperator()) {
-        status_ = Status_InvalidArgument(
+        status_ = rocksdb_rs::status::Status_InvalidArgument(
             "merge_operator is not properly initialized.");
         return;
       }
@@ -1053,11 +1053,11 @@ void CompactionIterator::NextFromInput() {
   }
 
   if (!Valid() && IsShuttingDown()) {
-    status_ = Status_ShutdownInProgress();
+    status_ = rocksdb_rs::status::Status_ShutdownInProgress();
   }
 
   if (IsPausingManualCompaction()) {
-    status_ = Status_Incomplete(SubCode::kManualCompactionPaused);
+    status_ = rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
 
   // Propagate corruption status from memtable itereator
@@ -1072,7 +1072,7 @@ bool CompactionIterator::ExtractLargeValueIfNeededImpl() {
   }
 
   blob_index_.clear();
-  const Status s = blob_file_builder_->Add(user_key(), value_, &blob_index_);
+  const rocksdb_rs::status::Status s = blob_file_builder_->Add(user_key(), value_, &blob_index_);
 
   if (!s.ok()) {
     status_.copy_from(s);
@@ -1117,7 +1117,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
     BlobIndex blob_index;
 
     {
-      const Status s = blob_index.DecodeFrom(value_);
+      const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value_);
 
       if (!s.ok()) {
         status_.copy_from(s);
@@ -1142,7 +1142,7 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
     {
       assert(blob_fetcher_);
 
-      const Status s = blob_fetcher_->FetchBlob(
+      const rocksdb_rs::status::Status s = blob_fetcher_->FetchBlob(
           user_key(), blob_index, prefetch_buffer, &blob_value_, &bytes_read);
 
       if (!s.ok()) {
@@ -1179,14 +1179,14 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
 
     if (blob_decision == CompactionFilter::BlobDecision::kCorruption) {
       status_ =
-          Status_Corruption("Corrupted blob reference encountered during GC");
+          rocksdb_rs::status::Status_Corruption("Corrupted blob reference encountered during GC");
       validity_info_.Invalidate();
 
       return;
     }
 
     if (blob_decision == CompactionFilter::BlobDecision::kIOError) {
-      status_ = Status_IOError("Could not relocate blob during GC");
+      status_ = rocksdb_rs::status::Status_IOError("Could not relocate blob during GC");
       validity_info_.Invalidate();
 
       return;
@@ -1242,7 +1242,7 @@ void CompactionIterator::DecideOutputLevel() {
       // We will migrate the feature to `last_level_temperature` and maybe make
       // it not dynamically changeable.
       if (ikey_.sequence > earliest_snapshot_) {
-        status_ = Status_Corruption(
+        status_ = rocksdb_rs::status::Status_Corruption(
             "Unsafe to store Seq later than snapshot in the last level if "
             "per_key_placement is enabled");
       }

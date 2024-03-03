@@ -171,7 +171,7 @@ class ColumnFamilyHandleImpl : public ColumnFamilyHandle {
 
   virtual uint32_t GetID() const override;
   virtual const std::string& GetName() const override;
-  virtual Status GetDescriptor(ColumnFamilyDescriptor* desc) override;
+  virtual rocksdb_rs::status::Status GetDescriptor(ColumnFamilyDescriptor* desc) override;
   virtual const Comparator* GetComparator() const override;
 
  private:
@@ -245,12 +245,12 @@ struct SuperVersion {
   autovector<MemTable*> to_delete;
 };
 
-extern Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options);
+extern rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options);
 
-extern Status CheckConcurrentWritesSupported(
+extern rocksdb_rs::status::Status CheckConcurrentWritesSupported(
     const ColumnFamilyOptions& cf_options);
 
-extern Status CheckCFPathsSupported(const DBOptions& db_options,
+extern rocksdb_rs::status::Status CheckCFPathsSupported(const DBOptions& db_options,
                                     const ColumnFamilyOptions& cf_options);
 
 extern ColumnFamilyOptions SanitizeOptions(const ImmutableDBOptions& db_options,
@@ -333,10 +333,10 @@ class ColumnFamilyData {
   bool is_delete_range_supported() { return is_delete_range_supported_; }
 
   // Validate CF options against DB options
-  static Status ValidateOptions(const DBOptions& db_options,
+  static rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_options,
                                 const ColumnFamilyOptions& cf_options);
   // REQUIRES: DB mutex held
-  Status SetOptions(
+  rocksdb_rs::status::Status SetOptions(
       const DBOptions& db_options,
       const std::unordered_map<std::string, std::string>& options_map);
 
@@ -395,7 +395,7 @@ class ColumnFamilyData {
   //    duration of this function.
   //
   // Thread-safe
-  Status RangesOverlapWithMemtables(const autovector<Range>& ranges,
+  rocksdb_rs::status::Status RangesOverlapWithMemtables(const autovector<Range>& ranges,
                                     SuperVersion* super_version,
                                     bool allow_data_in_errors, bool* overlap);
 
@@ -486,7 +486,7 @@ class ColumnFamilyData {
 
   // created_dirs remembers directory created, so that we don't need to call
   // the same data creation operation again.
-  Status AddDirectories(
+  rocksdb_rs::status::Status AddDirectories(
       std::map<std::string, std::shared_ptr<FSDirectory>>* created_dirs);
 
   FSDirectory* GetDataDir(size_t path_id) const;

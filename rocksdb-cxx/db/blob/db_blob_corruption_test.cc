@@ -14,12 +14,12 @@ class DBBlobCorruptionTest : public DBTestBase {
   DBBlobCorruptionTest()
       : DBTestBase("db_blob_corruption_test", /* env_do_fsync */ false) {}
 
-  void Corrupt(FileType filetype, int offset, int bytes_to_corrupt) {
+  void Corrupt(rocksdb_rs::types::FileType filetype, int offset, int bytes_to_corrupt) {
     // Pick file to corrupt
     std::vector<std::string> filenames;
     ASSERT_OK(env_->GetChildren(dbname_, &filenames));
     uint64_t number;
-    FileType type;
+    rocksdb_rs::types::FileType type;
     std::string fname;
     uint64_t picked_number = kInvalidBlobFileNumber;
     for (size_t i = 0; i < filenames.size(); i++) {
@@ -29,7 +29,7 @@ class DBBlobCorruptionTest : public DBTestBase {
         picked_number = number;
       }
     }
-    ASSERT_TRUE(!fname.empty()) << filetype;
+    ASSERT_TRUE(!fname.empty()) << static_cast<int>(filetype);
     ASSERT_OK(test::CorruptFile(env_, fname, offset, bytes_to_corrupt));
   }
 };
@@ -50,14 +50,14 @@ TEST_F(DBBlobCorruptionTest, VerifyWholeBlobFileChecksum) {
   ASSERT_OK(db_->VerifyFileChecksums(ReadOptions()));
   Close();
 
-  Corrupt(kBlobFile, 0, 2);
+  Corrupt(rocksdb_rs::types::FileType::kBlobFile, 0, 2);
 
   ASSERT_OK(TryReopen(options));
 
   int count{0};
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::VerifyFullFileChecksum:mismatch", [&](void* arg) {
-        const Status* s = static_cast<Status*>(arg);
+        const rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_NE(s, nullptr);
         ++count;
         ASSERT_NOK(*s);

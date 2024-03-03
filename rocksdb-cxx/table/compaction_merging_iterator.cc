@@ -17,7 +17,7 @@ class CompactionMergingIterator : public InternalIterator {
       : is_arena_mode_(is_arena_mode),
         comparator_(comparator),
         current_(nullptr),
-        status_(Status_new()),
+        status_(rocksdb_rs::status::Status_new()),
         minHeap_(CompactionHeapItemComparator(comparator_)),
         pinned_iters_mgr_(nullptr) {
     children_.resize(n);
@@ -41,7 +41,7 @@ class CompactionMergingIterator : public InternalIterator {
     }
   }
 
-  void considerStatus(const Status& s) {
+  void considerStatus(const rocksdb_rs::status::Status& s) {
     if (!s.ok() && status_.ok()) {
       status_.copy_from(s);
     }
@@ -60,7 +60,7 @@ class CompactionMergingIterator : public InternalIterator {
 
   bool Valid() const override { return current_ != nullptr && status_.ok(); }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   void SeekToFirst() override;
 
@@ -207,7 +207,7 @@ class CompactionMergingIterator : public InternalIterator {
   // top of minHeap_
   HeapItem* current_;
   // If any of the children have non-ok status, this is one of them.
-  Status status_;
+  rocksdb_rs::status::Status status_;
   CompactionMinHeap minHeap_;
   PinnedIteratorsManager* pinned_iters_mgr_;
   // Process a child that is not in the min heap.
@@ -229,7 +229,7 @@ class CompactionMergingIterator : public InternalIterator {
 
 void CompactionMergingIterator::SeekToFirst() {
   minHeap_.clear();
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   for (auto& child : children_) {
     child.iter.SeekToFirst();
     AddToMinHeapOrCheckStatus(&child);
@@ -248,7 +248,7 @@ void CompactionMergingIterator::SeekToFirst() {
 
 void CompactionMergingIterator::Seek(const Slice& target) {
   minHeap_.clear();
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   for (auto& child : children_) {
     child.iter.Seek(target);
     AddToMinHeapOrCheckStatus(&child);

@@ -52,7 +52,7 @@ class BlobFile {
   uint32_t column_family_id_{std::numeric_limits<uint32_t>::max()};
 
   // Compression type of blobs in the file
-  CompressionType compression_{CompressionType::kNoCompression};
+  rocksdb_rs::compression_type::CompressionType compression_{rocksdb_rs::compression_type::CompressionType::kNoCompression};
 
   // If true, the keys in this file all has TTL. Otherwise all keys don't
   // have TTL.
@@ -109,7 +109,7 @@ class BlobFile {
 
   BlobFile(const BlobDBImpl* parent, const std::string& bdir, uint64_t fnum,
            Logger* info_log, uint32_t column_family_id,
-           CompressionType compression, bool has_ttl,
+           rocksdb_rs::compression_type::CompressionType compression, bool has_ttl,
            const ExpirationRange& expiration_range);
 
   ~BlobFile();
@@ -180,7 +180,7 @@ class BlobFile {
     return obsolete_sequence_;
   }
 
-  Status Fsync();
+  rocksdb_rs::status::Status Fsync();
 
   uint64_t GetFileSize() const {
     return file_size_.load(std::memory_order_acquire);
@@ -201,30 +201,30 @@ class BlobFile {
 
   void SetHasTTL(bool has_ttl) { has_ttl_ = has_ttl; }
 
-  CompressionType GetCompressionType() const { return compression_; }
+  rocksdb_rs::compression_type::CompressionType GetCompressionType() const { return compression_; }
 
   std::shared_ptr<BlobLogWriter> GetWriter() const { return log_writer_; }
 
   // Read blob file header and footer. Return corruption if file header is
   // malform or incomplete. If footer is malform or incomplete, set
   // footer_valid_ to false and return Status_OK.
-  Status ReadMetadata(const std::shared_ptr<FileSystem>& fs,
+  rocksdb_rs::status::Status ReadMetadata(const std::shared_ptr<FileSystem>& fs,
                       const FileOptions& file_options);
 
-  Status GetReader(Env* env, const FileOptions& file_options,
+  rocksdb_rs::status::Status GetReader(Env* env, const FileOptions& file_options,
                    std::shared_ptr<RandomAccessFileReader>* reader,
                    bool* fresh_open);
 
  private:
-  Status ReadFooter(BlobLogFooter* footer);
+  rocksdb_rs::status::Status ReadFooter(BlobLogFooter* footer);
 
-  Status WriteFooterAndCloseLocked(SequenceNumber sequence);
+  rocksdb_rs::status::Status WriteFooterAndCloseLocked(SequenceNumber sequence);
 
   void CloseRandomAccessLocked();
 
   // this is used, when you are reading only the footer of a
   // previously closed file
-  Status SetFromFooterLocked(const BlobLogFooter& footer);
+  rocksdb_rs::status::Status SetFromFooterLocked(const BlobLogFooter& footer);
 
   void set_expiration_range(const ExpirationRange& expiration_range) {
     expiration_range_ = expiration_range;

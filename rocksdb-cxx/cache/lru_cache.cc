@@ -368,8 +368,8 @@ void LRUCacheShard::SetStrictCapacityLimit(bool strict_capacity_limit) {
   strict_capacity_limit_ = strict_capacity_limit;
 }
 
-Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
-  Status s = Status_OK();
+rocksdb_rs::status::Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   autovector<LRUHandle*> last_reference_list;
 
   {
@@ -390,7 +390,7 @@ Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
         free(e);
         e = nullptr;
         *handle = nullptr;
-        s = Status_MemoryLimit("Insert failed due to LRU cache being full.");
+        s = rocksdb_rs::status::Status_MemoryLimit("Insert failed due to LRU cache being full.");
       }
     } else {
       // Insert into the cache. Note that the cache might get larger than its
@@ -398,7 +398,7 @@ Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
       LRUHandle* old = table_.Insert(e);
       usage_ += e->total_charge;
       if (old != nullptr) {
-        s = Status_OkOverwritten();
+        s = rocksdb_rs::status::Status_OkOverwritten();
         assert(old->InCache());
         old->SetInCache(false);
         if (!old->HasRefs()) {
@@ -543,7 +543,7 @@ LRUHandle* LRUCacheShard::CreateHandle(const Slice& key, uint32_t hash,
   return e;
 }
 
-Status LRUCacheShard::Insert(const Slice& key, uint32_t hash,
+rocksdb_rs::status::Status LRUCacheShard::Insert(const Slice& key, uint32_t hash,
                              Cache::ObjectPtr value,
                              const Cache::CacheItemHelper* helper,
                              size_t charge, LRUHandle** handle,

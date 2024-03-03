@@ -49,10 +49,10 @@ class VolatileCacheTier : public PersistentCacheTier {
   virtual ~VolatileCacheTier();
 
   // insert to cache
-  Status Insert(const Slice& page_key, const char* data,
+  rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
                 const size_t size) override;
   // lookup key in cache
-  Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
+  rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
                 size_t* size) override;
 
   // is compressed cache ?

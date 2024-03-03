@@ -38,7 +38,7 @@ using FactoryFunc =
 using RegistrarFunc = std::function<int(ObjectLibrary&, const std::string&)>;
 
 template <typename T>
-using ConfigureFunc = std::function<Status(T*)>;
+using ConfigureFunc = std::function<rocksdb_rs::status::Status(T*)>;
 
 class ObjectLibrary {
  private:
@@ -315,7 +315,7 @@ class ObjectRegistry {
   // Returns NotSupported if no factory is found
   // Returns InvalidArgument if a factory is found but the factory failed.
   template <typename T>
-  Status NewObject(const std::string& target, T** object,
+  rocksdb_rs::status::Status NewObject(const std::string& target, T** object,
                    std::unique_ptr<T>* guard) {
     assert(guard != nullptr);
     guard->reset();
@@ -324,15 +324,15 @@ class ObjectRegistry {
       std::string errmsg;
       *object = factory(target, guard, &errmsg);
       if (*object != nullptr) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else if (errmsg.empty()) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             std::string("Could not load ") + T::Type(), target);
       } else {
-        return Status_InvalidArgument(errmsg, target);
+        return rocksdb_rs::status::Status_InvalidArgument(errmsg, target);
       }
     } else {
-      return Status_NotSupported(std::string("Could not load ") + T::Type(),
+      return rocksdb_rs::status::Status_NotSupported(std::string("Could not load ") + T::Type(),
                                   target);
     }
   }
@@ -342,18 +342,18 @@ class ObjectRegistry {
   // Returns InvalidArgument if the factory return an unguarded object
   //                      (meaning it cannot be managed by a unique ptr)
   template <typename T>
-  Status NewUniqueObject(const std::string& target,
+  rocksdb_rs::status::Status NewUniqueObject(const std::string& target,
                          std::unique_ptr<T>* result) {
     T* ptr = nullptr;
     std::unique_ptr<T> guard;
-    Status s = NewObject(target, &ptr, &guard);
+    rocksdb_rs::status::Status s = NewObject(target, &ptr, &guard);
     if (!s.ok()) {
       return s;
     } else if (guard) {
       result->reset(guard.release());
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
-      return Status_InvalidArgument(std::string("Cannot make a unique ") +
+      return rocksdb_rs::status::Status_InvalidArgument(std::string("Cannot make a unique ") +
                                          T::Type() + " from unguarded one ",
                                      target);
     }
@@ -365,18 +365,18 @@ class ObjectRegistry {
   // Returns InvalidArgument if the factory return an unguarded object
   //                      (meaning it cannot be managed by a shared ptr)
   template <typename T>
-  Status NewSharedObject(const std::string& target,
+  rocksdb_rs::status::Status NewSharedObject(const std::string& target,
                          std::shared_ptr<T>* result) {
     std::unique_ptr<T> guard;
     T* ptr = nullptr;
-    Status s = NewObject(target, &ptr, &guard);
+    rocksdb_rs::status::Status s = NewObject(target, &ptr, &guard);
     if (!s.ok()) {
       return s;
     } else if (guard) {
       result->reset(guard.release());
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
-      return Status_InvalidArgument(std::string("Cannot make a shared ") +
+      return rocksdb_rs::status::Status_InvalidArgument(std::string("Cannot make a shared ") +
                                          T::Type() + " from unguarded one ",
                                      target);
     }
@@ -388,19 +388,19 @@ class ObjectRegistry {
   // Returns InvalidArgument if the factory return a guarded object
   //                      (meaning it is managed by a unique ptr)
   template <typename T>
-  Status NewStaticObject(const std::string& target, T** result) {
+  rocksdb_rs::status::Status NewStaticObject(const std::string& target, T** result) {
     std::unique_ptr<T> guard;
     T* ptr = nullptr;
-    Status s = NewObject(target, &ptr, &guard);
+    rocksdb_rs::status::Status s = NewObject(target, &ptr, &guard);
     if (!s.ok()) {
       return s;
     } else if (guard.get()) {
-      return Status_InvalidArgument(std::string("Cannot make a static ") +
+      return rocksdb_rs::status::Status_InvalidArgument(std::string("Cannot make a static ") +
                                          T::Type() + " from a guarded one ",
                                      target);
     } else {
       *result = ptr;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   }
 
@@ -409,13 +409,13 @@ class ObjectRegistry {
   // is returned. If the registry contains a different object, an error is
   // returned. If the registry contains the input object, OK is returned.
   template <typename T>
-  Status SetManagedObject(const std::shared_ptr<T>& object) {
+  rocksdb_rs::status::Status SetManagedObject(const std::shared_ptr<T>& object) {
     assert(object != nullptr);
     return SetManagedObject(object->GetId(), object);
   }
 
   template <typename T>
-  Status SetManagedObject(const std::string& id,
+  rocksdb_rs::status::Status SetManagedObject(const std::string& id,
                           const std::shared_ptr<T>& object) {
     const auto c = std::static_pointer_cast<Customizable>(object);
     return SetManagedObject(T::Type(), id, c);
@@ -436,11 +436,11 @@ class ObjectRegistry {
   // objects) If the input id is empty, then all objects of that type (all Cache
   // objects)
   template <typename T>
-  Status ListManagedObjects(const std::string& id,
+  rocksdb_rs::status::Status ListManagedObjects(const std::string& id,
                             std::vector<std::shared_ptr<T>>* results) const {
     std::vector<std::shared_ptr<Customizable>> customizables;
     results->clear();
-    Status s = ListManagedObjects(T::Type(), id, &customizables);
+    rocksdb_rs::status::Status s = ListManagedObjects(T::Type(), id, &customizables);
     if (s.ok()) {
       for (const auto& c : customizables) {
         results->push_back(std::static_pointer_cast<T>(c));
@@ -450,7 +450,7 @@ class ObjectRegistry {
   }
 
   template <typename T>
-  Status ListManagedObjects(std::vector<std::shared_ptr<T>>* results) const {
+  rocksdb_rs::status::Status ListManagedObjects(std::vector<std::shared_ptr<T>>* results) const {
     return ListManagedObjects("", results);
   }
 
@@ -463,14 +463,14 @@ class ObjectRegistry {
   // If a new object is created (using the object factories), the cfunc
   // parameter will be invoked to configure the new object.
   template <typename T>
-  Status GetOrCreateManagedObject(const std::string& id,
+  rocksdb_rs::status::Status GetOrCreateManagedObject(const std::string& id,
                                   std::shared_ptr<T>* result,
                                   const ConfigureFunc<T>& cfunc = nullptr) {
     if (parent_ != nullptr) {
       auto object = parent_->GetManagedObject(T::Type(), id);
       if (object != nullptr) {
         *result = std::static_pointer_cast<T>(object);
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
     }
     {
@@ -481,11 +481,11 @@ class ObjectRegistry {
         auto object = iter->second.lock();
         if (object != nullptr) {
           *result = std::static_pointer_cast<T>(object);
-          return Status_OK();
+          return rocksdb_rs::status::Status_OK();
         }
       }
       std::shared_ptr<T> object;
-      Status s = NewSharedObject(id, &object);
+      rocksdb_rs::status::Status s = NewSharedObject(id, &object);
       if (s.ok() && cfunc != nullptr) {
         s = cfunc(object.get());
       }
@@ -537,14 +537,14 @@ class ObjectRegistry {
   // If not found, nullptr is returned.
   std::shared_ptr<Customizable> GetManagedObject(const std::string& type,
                                                  const std::string& id) const;
-  Status ListManagedObjects(
+  rocksdb_rs::status::Status ListManagedObjects(
       const std::string& type, const std::string& pattern,
       std::vector<std::shared_ptr<Customizable>>* results) const;
   // Sets the managed object associated with the key (Type/ID) to c.
   // If the named managed object does not exist, the object is added and OK is
   // returned If the object exists and is the same as c, OK is returned
   // Otherwise, an error status is returned.
-  Status SetManagedObject(const std::string& type, const std::string& id,
+  rocksdb_rs::status::Status SetManagedObject(const std::string& type, const std::string& id,
                           const std::shared_ptr<Customizable>& c);
 
   // Searches (from back to front) the libraries looking for the

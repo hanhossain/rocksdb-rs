@@ -56,11 +56,11 @@ class BlockCacheTier : public PersistentCacheTier {
     assert(!insert_th_.joinable());
   }
 
-  Status Insert(const Slice& key, const char* data, const size_t size) override;
-  Status Lookup(const Slice& key, std::unique_ptr<char[]>* data,
+  rocksdb_rs::status::Status Insert(const Slice& key, const char* data, const size_t size) override;
+  rocksdb_rs::status::Status Lookup(const Slice& key, std::unique_ptr<char[]>* data,
                 size_t* size) override;
-  Status Open() override;
-  Status Close() override;
+  rocksdb_rs::status::Status Open() override;
+  rocksdb_rs::status::Status Close() override;
   bool Erase(const Slice& key) override;
   bool Reserve(const size_t size) override;
 
@@ -105,13 +105,13 @@ class BlockCacheTier : public PersistentCacheTier {
   // entry point for insert thread
   void InsertMain();
   // insert implementation
-  Status InsertImpl(const Slice& key, const Slice& data);
+  rocksdb_rs::status::Status InsertImpl(const Slice& key, const Slice& data);
   // Create a new cache file
-  Status NewCacheFile();
+  rocksdb_rs::status::Status NewCacheFile();
   // Get cache directory path
   std::string GetCachePath() const { return opt_.path + "/cache"; }
   // Cleanup folder
-  Status CleanupCacheFolder(const std::string& folder);
+  rocksdb_rs::status::Status CleanupCacheFolder(const std::string& folder);
 
   // Statistics
   struct Statistics {

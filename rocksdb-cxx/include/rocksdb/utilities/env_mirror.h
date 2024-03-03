@@ -43,29 +43,29 @@ class EnvMirror : public EnvWrapper {
     if (free_b_) delete b_;
   }
 
-  Status NewSequentialFile(const std::string& f,
+  rocksdb_rs::status::Status NewSequentialFile(const std::string& f,
                            std::unique_ptr<SequentialFile>* r,
                            const EnvOptions& options) override;
-  Status NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::status::Status NewRandomAccessFile(const std::string& f,
                              std::unique_ptr<RandomAccessFile>* r,
                              const EnvOptions& options) override;
-  Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
+  rocksdb_rs::status::Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
                          const EnvOptions& options) override;
-  Status ReuseWritableFile(const std::string& fname,
+  rocksdb_rs::status::Status ReuseWritableFile(const std::string& fname,
                            const std::string& old_fname,
                            std::unique_ptr<WritableFile>* r,
                            const EnvOptions& options) override;
-  virtual Status NewDirectory(const std::string& name,
+  virtual rocksdb_rs::status::Status NewDirectory(const std::string& name,
                               std::unique_ptr<Directory>* result) override {
     std::unique_ptr<Directory> br;
-    Status as = a_->NewDirectory(name, result);
-    Status bs = b_->NewDirectory(name, &br);
+    rocksdb_rs::status::Status as = a_->NewDirectory(name, result);
+    rocksdb_rs::status::Status bs = b_->NewDirectory(name, &br);
     assert(as.eq(bs));
     return as;
   }
-  Status FileExists(const std::string& f) override {
-    Status as = a_->FileExists(f);
-    Status bs = b_->FileExists(f);
+  rocksdb_rs::status::Status FileExists(const std::string& f) override {
+    rocksdb_rs::status::Status as = a_->FileExists(f);
+    rocksdb_rs::status::Status bs = b_->FileExists(f);
     assert(as.eq(bs));
     return as;
   }
@@ -74,11 +74,11 @@ class EnvMirror : public EnvWrapper {
 // logical operation on address of string constant
 #pragma warning(disable : 4130)
 #endif
-  Status GetChildren(const std::string& dir,
+  rocksdb_rs::status::Status GetChildren(const std::string& dir,
                      std::vector<std::string>* r) override {
     std::vector<std::string> ar, br;
-    Status as = a_->GetChildren(dir, &ar);
-    Status bs = b_->GetChildren(dir, &br);
+    rocksdb_rs::status::Status as = a_->GetChildren(dir, &ar);
+    rocksdb_rs::status::Status bs = b_->GetChildren(dir, &br);
     assert(as.eq(bs));
     std::sort(ar.begin(), ar.end());
     std::sort(br.begin(), br.end());
@@ -91,61 +91,61 @@ class EnvMirror : public EnvWrapper {
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif
-  Status DeleteFile(const std::string& f) override {
-    Status as = a_->DeleteFile(f);
-    Status bs = b_->DeleteFile(f);
+  rocksdb_rs::status::Status DeleteFile(const std::string& f) override {
+    rocksdb_rs::status::Status as = a_->DeleteFile(f);
+    rocksdb_rs::status::Status bs = b_->DeleteFile(f);
     assert(as.eq(bs));
     return as;
   }
-  Status CreateDir(const std::string& d) override {
-    Status as = a_->CreateDir(d);
-    Status bs = b_->CreateDir(d);
+  rocksdb_rs::status::Status CreateDir(const std::string& d) override {
+    rocksdb_rs::status::Status as = a_->CreateDir(d);
+    rocksdb_rs::status::Status bs = b_->CreateDir(d);
     assert(as.eq(bs));
     return as;
   }
-  Status CreateDirIfMissing(const std::string& d) override {
-    Status as = a_->CreateDirIfMissing(d);
-    Status bs = b_->CreateDirIfMissing(d);
+  rocksdb_rs::status::Status CreateDirIfMissing(const std::string& d) override {
+    rocksdb_rs::status::Status as = a_->CreateDirIfMissing(d);
+    rocksdb_rs::status::Status bs = b_->CreateDirIfMissing(d);
     assert(as.eq(bs));
     return as;
   }
-  Status DeleteDir(const std::string& d) override {
-    Status as = a_->DeleteDir(d);
-    Status bs = b_->DeleteDir(d);
+  rocksdb_rs::status::Status DeleteDir(const std::string& d) override {
+    rocksdb_rs::status::Status as = a_->DeleteDir(d);
+    rocksdb_rs::status::Status bs = b_->DeleteDir(d);
     assert(as.eq(bs));
     return as;
   }
-  Status GetFileSize(const std::string& f, uint64_t* s) override {
+  rocksdb_rs::status::Status GetFileSize(const std::string& f, uint64_t* s) override {
     uint64_t asize, bsize;
-    Status as = a_->GetFileSize(f, &asize);
-    Status bs = b_->GetFileSize(f, &bsize);
+    rocksdb_rs::status::Status as = a_->GetFileSize(f, &asize);
+    rocksdb_rs::status::Status bs = b_->GetFileSize(f, &bsize);
     assert(as.eq(bs));
     assert(!as.ok() || asize == bsize);
     *s = asize;
     return as;
   }
 
-  Status GetFileModificationTime(const std::string& fname,
+  rocksdb_rs::status::Status GetFileModificationTime(const std::string& fname,
                                  uint64_t* file_mtime) override {
     uint64_t amtime, bmtime;
-    Status as = a_->GetFileModificationTime(fname, &amtime);
-    Status bs = b_->GetFileModificationTime(fname, &bmtime);
+    rocksdb_rs::status::Status as = a_->GetFileModificationTime(fname, &amtime);
+    rocksdb_rs::status::Status bs = b_->GetFileModificationTime(fname, &bmtime);
     assert(as.eq(bs));
     assert(!as.ok() || amtime - bmtime < 10000 || bmtime - amtime < 10000);
     *file_mtime = amtime;
     return as;
   }
 
-  Status RenameFile(const std::string& s, const std::string& t) override {
-    Status as = a_->RenameFile(s, t);
-    Status bs = b_->RenameFile(s, t);
+  rocksdb_rs::status::Status RenameFile(const std::string& s, const std::string& t) override {
+    rocksdb_rs::status::Status as = a_->RenameFile(s, t);
+    rocksdb_rs::status::Status bs = b_->RenameFile(s, t);
     assert(as.eq(bs));
     return as;
   }
 
-  Status LinkFile(const std::string& s, const std::string& t) override {
-    Status as = a_->LinkFile(s, t);
-    Status bs = b_->LinkFile(s, t);
+  rocksdb_rs::status::Status LinkFile(const std::string& s, const std::string& t) override {
+    rocksdb_rs::status::Status as = a_->LinkFile(s, t);
+    rocksdb_rs::status::Status bs = b_->LinkFile(s, t);
     assert(as.eq(bs));
     return as;
   }
@@ -156,19 +156,19 @@ class EnvMirror : public EnvWrapper {
     FileLockMirror(FileLock* a, FileLock* b) : a_(a), b_(b) {}
   };
 
-  Status LockFile(const std::string& f, FileLock** l) override {
+  rocksdb_rs::status::Status LockFile(const std::string& f, FileLock** l) override {
     FileLock *al, *bl;
-    Status as = a_->LockFile(f, &al);
-    Status bs = b_->LockFile(f, &bl);
+    rocksdb_rs::status::Status as = a_->LockFile(f, &al);
+    rocksdb_rs::status::Status bs = b_->LockFile(f, &bl);
     assert(as.eq(bs));
     if (as.ok()) *l = new FileLockMirror(al, bl);
     return as;
   }
 
-  Status UnlockFile(FileLock* l) override {
+  rocksdb_rs::status::Status UnlockFile(FileLock* l) override {
     FileLockMirror* ml = static_cast<FileLockMirror*>(l);
-    Status as = a_->UnlockFile(ml->a_);
-    Status bs = b_->UnlockFile(ml->b_);
+    rocksdb_rs::status::Status as = a_->UnlockFile(ml->a_);
+    rocksdb_rs::status::Status bs = b_->UnlockFile(ml->b_);
     assert(as.eq(bs));
     delete ml;
     return as;

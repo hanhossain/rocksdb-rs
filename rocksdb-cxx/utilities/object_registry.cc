@@ -237,7 +237,7 @@ std::shared_ptr<ObjectRegistry> ObjectRegistry::NewInstance(
   return std::make_shared<ObjectRegistry>(parent);
 }
 
-Status ObjectRegistry::SetManagedObject(
+rocksdb_rs::status::Status ObjectRegistry::SetManagedObject(
     const std::string &type, const std::string &id,
     const std::shared_ptr<Customizable> &object) {
   std::string object_key = ToManagedObjectKey(type, id);
@@ -252,7 +252,7 @@ Status ObjectRegistry::SetManagedObject(
     if (iter != managed_objects_.end()) {  // The object exists
       curr = iter->second.lock();
       if (curr != nullptr && curr != object) {
-        return Status_InvalidArgument("Object already exists: ", object_key);
+        return rocksdb_rs::status::Status_InvalidArgument("Object already exists: ", object_key);
       } else {
         iter->second = object;
       }
@@ -261,9 +261,9 @@ Status ObjectRegistry::SetManagedObject(
       managed_objects_[object_key] = object;
     }
   } else if (curr != object) {
-    return Status_InvalidArgument("Object already exists: ", object_key);
+    return rocksdb_rs::status::Status_InvalidArgument("Object already exists: ", object_key);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::shared_ptr<Customizable> ObjectRegistry::GetManagedObject(
@@ -282,7 +282,7 @@ std::shared_ptr<Customizable> ObjectRegistry::GetManagedObject(
   }
 }
 
-Status ObjectRegistry::ListManagedObjects(
+rocksdb_rs::status::Status ObjectRegistry::ListManagedObjects(
     const std::string &type, const std::string &name,
     std::vector<std::shared_ptr<Customizable>> *results) const {
   {
@@ -302,7 +302,7 @@ Status ObjectRegistry::ListManagedObjects(
   if (parent_ != nullptr) {
     return parent_->ListManagedObjects(type, name, results);
   } else {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 

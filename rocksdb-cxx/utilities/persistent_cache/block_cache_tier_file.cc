@@ -23,16 +23,16 @@ namespace rocksdb {
 //
 // File creation factories
 //
-Status NewWritableCacheFile(Env* const env, const std::string& filepath,
+rocksdb_rs::status::Status NewWritableCacheFile(Env* const env, const std::string& filepath,
                             std::unique_ptr<WritableFile>* file,
                             const bool use_direct_writes = false) {
   EnvOptions opt;
   opt.use_direct_writes = use_direct_writes;
-  Status s = env->NewWritableFile(filepath, file, opt);
+  rocksdb_rs::status::Status s = env->NewWritableFile(filepath, file, opt);
   return s;
 }
 
-Status NewRandomAccessCacheFile(const std::shared_ptr<FileSystem>& fs,
+rocksdb_rs::status::Status NewRandomAccessCacheFile(const std::shared_ptr<FileSystem>& fs,
                                 const std::string& filepath,
                                 std::unique_ptr<FSRandomAccessFile>* file,
                                 const bool use_direct_reads = true) {
@@ -46,10 +46,10 @@ Status NewRandomAccessCacheFile(const std::shared_ptr<FileSystem>& fs,
 //
 // BlockCacheFile
 //
-Status BlockCacheFile::Delete(uint64_t* size) {
+rocksdb_rs::status::Status BlockCacheFile::Delete(uint64_t* size) {
   assert(env_);
 
-  Status status = env_->GetFileSize(Path(), size);
+  rocksdb_rs::status::Status status = env_->GetFileSize(Path(), size);
   if (!status.ok()) {
     return status;
   }
@@ -211,7 +211,7 @@ bool RandomAccessCacheFile::OpenImpl(const bool enable_direct_reads) {
   assert(env_);
 
   std::unique_ptr<FSRandomAccessFile> file;
-  Status status = NewRandomAccessCacheFile(env_->GetFileSystem(), Path(), &file,
+  rocksdb_rs::status::Status status = NewRandomAccessCacheFile(env_->GetFileSystem(), Path(), &file,
                                            enable_direct_reads);
   if (!status.ok()) {
     Error(log_, "Error opening random access file %s. %s", Path().c_str(),
@@ -235,7 +235,7 @@ bool RandomAccessCacheFile::Read(const LBA& lba, Slice* key, Slice* val,
   }
 
   Slice result;
-  Status s = freader_->Read(IOOptions(), lba.off_, lba.size_, &result, scratch,
+  rocksdb_rs::status::Status s = freader_->Read(IOOptions(), lba.off_, lba.size_, &result, scratch,
                             nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
   if (!s.ok()) {
     Error(log_, "Error reading from file %s. %s", Path().c_str(),
@@ -296,7 +296,7 @@ bool WriteableCacheFile::Create(const bool /*enable_direct_writes*/,
 
   assert(env_);
 
-  Status s = env_->FileExists(Path());
+  rocksdb_rs::status::Status s = env_->FileExists(Path());
   if (s.ok()) {
     ROCKS_LOG_WARN(log_, "File %s already exists. %s", Path().c_str(),
                    s.ToString()->c_str());
@@ -592,7 +592,7 @@ void ThreadedWriter::DispatchIO(const IO& io) {
   size_t written = 0;
   while (written < io.buf_->Used()) {
     Slice data(io.buf_->Data() + written, io_size_);
-    Status s = io.file_->Append(data);
+    rocksdb_rs::status::Status s = io.file_->Append(data);
     assert(s.ok());
     if (!s.ok()) {
       // That is definite IO error to device. There is not much we can

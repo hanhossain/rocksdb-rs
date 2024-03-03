@@ -36,7 +36,7 @@ class PersistentCacheTierTest : public testing::Test {
   PersistentCacheTierTest();
   virtual ~PersistentCacheTierTest() {
     if (cache_) {
-      Status s = cache_->Close();
+      rocksdb_rs::status::Status s = cache_->Close();
       assert(s.ok());
     }
   }
@@ -134,7 +134,7 @@ class PersistentCacheTierTest : public testing::Test {
       auto k = prefix + PaddedNumber(i, /*count=*/8);
       Slice key(k);
       while (true) {
-        Status status = cache_->Insert(key, data, sizeof(data));
+        rocksdb_rs::status::Status status = cache_->Insert(key, data, sizeof(data));
         if (status.ok()) {
           break;
         }

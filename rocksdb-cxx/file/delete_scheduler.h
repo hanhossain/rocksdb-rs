@@ -52,7 +52,7 @@ class DeleteScheduler {
   // Mark file as trash directory and schedule its deletion. If force_bg is
   // set, it forces the file to always be deleted in the background thread,
   // except when rate limiting is disabled
-  Status DeleteFile(const std::string& fname, const std::string& dir_to_sync,
+  rocksdb_rs::status::Status DeleteFile(const std::string& fname, const std::string& dir_to_sync,
                     const bool force_bg = false);
 
   // Wait for all files being deleteing in the background to finish or for
@@ -61,7 +61,7 @@ class DeleteScheduler {
 
   // Return a map containing errors that happened in BackgroundEmptyTrash
   // file_path => error status
-  const std::map<std::string, Status> GetBackgroundErrors();
+  const std::map<std::string, rocksdb_rs::status::Status> GetBackgroundErrors();
 
   uint64_t GetTotalTrashSize() { return total_trash_size_.load(); }
 
@@ -79,7 +79,7 @@ class DeleteScheduler {
 
   // Check if there are any .trash files in path, and schedule their deletion
   // Or delete immediately if sst_file_manager is nullptr
-  static Status CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
+  static rocksdb_rs::status::Status CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
                                  const std::string& path);
 
   void SetStatisticsPtr(const std::shared_ptr<Statistics>& stats) {
@@ -88,9 +88,9 @@ class DeleteScheduler {
   }
 
  private:
-  Status MarkAsTrash(const std::string& file_path, std::string* path_in_trash);
+  rocksdb_rs::status::Status MarkAsTrash(const std::string& file_path, std::string* path_in_trash);
 
-  Status DeleteTrashFile(const std::string& path_in_trash,
+  rocksdb_rs::status::Status DeleteTrashFile(const std::string& path_in_trash,
                          const std::string& dir_to_sync,
                          uint64_t* deleted_bytes, bool* is_complete);
 
@@ -120,7 +120,7 @@ class DeleteScheduler {
   int32_t pending_files_;
   uint64_t bytes_max_delete_chunk_;
   // Errors that happened in BackgroundEmptyTrash (file_path => error)
-  std::map<std::string, Status> bg_errors_;
+  std::map<std::string, rocksdb_rs::status::Status> bg_errors_;
 
   bool num_link_error_printed_ = false;
   // Set to true in ~DeleteScheduler() to force BackgroundEmptyTrash to stop

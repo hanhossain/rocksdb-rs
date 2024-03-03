@@ -72,9 +72,9 @@ TEST_F(DBTestDynamicLevel, DynamicLevelMaxBytesBase) {
       options.num_levels = 5;
 
       options.compression_per_level.resize(3);
-      options.compression_per_level[0] = CompressionType::kNoCompression;
-      options.compression_per_level[1] = CompressionType::kLZ4Compression;
-      options.compression_per_level[2] = CompressionType::kSnappyCompression;
+      options.compression_per_level[0] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      options.compression_per_level[1] = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+      options.compression_per_level[2] = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
       options.env = env_;
 
       DestroyAndReopen(options);
@@ -127,7 +127,7 @@ TEST_F(DBTestDynamicLevel, DynamicLevelMaxBytesBase2) {
   int kMaxKey = 1000000;
 
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.write_buffer_size = 20480;
   options.max_write_buffer_number = 2;

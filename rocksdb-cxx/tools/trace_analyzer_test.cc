@@ -92,7 +92,7 @@ class TraceAnalyzerTest : public testing::Test {
     keys.push_back("gege");
     keys.push_back("hjhjhj");
     std::vector<std::string> values;
-    rust::Vec<Status> ss = db_->MultiGet(ro, keys, &values);
+    rust::Vec<rocksdb_rs::status::Status> ss = db_->MultiGet(ro, keys, &values);
     ASSERT_GE(ss.size(), 0);
     ASSERT_OK(ss[0]);
     ASSERT_NOK(ss[2]);
@@ -195,7 +195,7 @@ class TraceAnalyzerTest : public testing::Test {
     for (auto& para : paras_diff) {
       paras.push_back(para);
     }
-    Status s = env_->FileExists(trace_path);
+    rocksdb_rs::status::Status s = env_->FileExists(trace_path);
     if (!s.ok()) {
       GenerateTrace(trace_path);
     }

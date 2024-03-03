@@ -13,7 +13,7 @@ const Slice kDefaultWideColumnName;
 
 const WideColumns kNoWideColumns;
 
-Status PinnableWideColumns::CreateIndexForWideColumns() {
+rocksdb_rs::status::Status PinnableWideColumns::CreateIndexForWideColumns() {
   Slice value_copy = static_cast<const Slice&>(value_);
 
   return WideColumnSerialization::Deserialize(value_copy, columns_);

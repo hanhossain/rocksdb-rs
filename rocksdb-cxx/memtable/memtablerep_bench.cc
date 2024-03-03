@@ -600,7 +600,7 @@ int main(int argc, char** argv) {
     rocksdb::ConfigOptions config_options;
     config_options.ignore_unsupported_options = false;
 
-    rocksdb::Status s =
+    rocksdb_rs::status::Status s =
         rocksdb::MemTableRepFactory::CreateFromString(
             config_options, FLAGS_memtablerep, &factory);
     if (!s.ok()) {

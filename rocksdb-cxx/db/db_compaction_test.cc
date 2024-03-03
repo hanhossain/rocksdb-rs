@@ -276,7 +276,7 @@ static const int kCDTValueSize = 1000;
 static const int kCDTKeysPerBuffer = 4;
 static const int kCDTNumLevels = 8;
 Options DeletionTriggerOptions(Options options) {
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.write_buffer_size = kCDTKeysPerBuffer * (kCDTValueSize + 24);
   options.min_write_buffer_number_to_merge = 1;
   options.max_write_buffer_size_to_maintain = 0;
@@ -1166,7 +1166,7 @@ TEST_F(DBCompactionTest, ZeroSeqIdCompaction) {
 
   // compaction options
   CompactionOptions compact_opt;
-  compact_opt.compression = CompressionType::kNoCompression;
+  compact_opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   compact_opt.output_file_size_limit = 4096;
   const size_t key_len =
       static_cast<size_t>(compact_opt.output_file_size_limit) / 5;
@@ -1246,7 +1246,7 @@ TEST_F(DBCompactionTest, ManualCompactionUnknownOutputSize) {
 
   // note CompactionOptions::output_file_size_limit is unset.
   CompactionOptions compact_opt;
-  compact_opt.compression = CompressionType::kNoCompression;
+  compact_opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   ASSERT_OK(dbfull()->CompactFiles(compact_opt, input_filenames, 1));
 }
 
@@ -1933,7 +1933,7 @@ TEST_F(DBCompactionTest, DeleteFileRange) {
     } else {
       ReadOptions roptions;
       std::string result;
-      Status s = db_->Get(roptions, Key(i), &result);
+      rocksdb_rs::status::Status s = db_->Get(roptions, Key(i), &result);
       ASSERT_TRUE(s.IsNotFound() || s.ok());
       if (s.IsNotFound()) {
         deleted_count++;
@@ -2543,7 +2543,7 @@ TEST_P(DBCompactionTestWithParam, LevelCompactionCFPathUse) {
     ASSERT_OK(db_->GetLiveFilesStorageInfo(lfsio, &new_infos));
     std::unordered_map<std::string, int> live_sst_by_dir;
     for (auto& info : new_infos) {
-      if (info.file_type == kTableFile) {
+      if (info.file_type == rocksdb_rs::types::FileType::kTableFile) {
         live_sst_by_dir[info.directory]++;
         // Verify file on disk (no directory confusion)
         uint64_t size;
@@ -2604,7 +2604,7 @@ TEST_P(DBCompactionTestWithParam, ConvertCompactionStyle) {
   options.compaction_style = kCompactionStyleUniversal;
   options.num_levels = 1;
   options = CurrentOptions(options);
-  Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_TRUE(s.IsInvalidArgument());
 
   // Stage 3: compact into a single file and move the file to level 0
@@ -2937,7 +2937,7 @@ TEST_P(DBCompactionTestWithParam, DISABLED_CompactFilesOnLevelCompaction) {
   options.max_bytes_for_level_base = options.target_file_size_base * 2;
   options.level0_stop_writes_trigger = 2;
   options.max_bytes_for_level_multiplier = 2;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_subcompactions = max_subcompactions_;
   options = CurrentOptions(options);
   CreateAndReopenWithCF({"pikachu"}, options);
@@ -2995,7 +2995,7 @@ TEST_P(DBCompactionTestWithParam, PartialCompactionFailure) {
       options.level0_file_num_compaction_trigger *
       options.target_file_size_base;
   options.max_bytes_for_level_multiplier = 2;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_subcompactions = max_subcompactions_;
 
   env_->SetBackgroundThreads(1, Env::HIGH);
@@ -3158,8 +3158,8 @@ TEST_P(DBCompactionTestWithParam, CompressLevelCompaction) {
   // First two levels have no compression, so that a trivial move between
   // them will be allowed. Level 2 has Zlib compression so that a trivial
   // move to level 3 will not be allowed
-  options.compression_per_level = {CompressionType::kNoCompression, CompressionType::kNoCompression,
-                                   CompressionType::kZlibCompression};
+  options.compression_per_level = {rocksdb_rs::compression_type::CompressionType::kNoCompression, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                                   rocksdb_rs::compression_type::CompressionType::kZlibCompression};
   int matches = 0, didnt_match = 0, trivial_move = 0, non_trivial = 0;
 
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
@@ -3282,7 +3282,7 @@ TEST_F(DBCompactionTest, SuggestCompactRangeNoTwoLevel0Compactions) {
   options.arena_block_size = 4 << 10;
   options.level0_file_num_compaction_trigger = 4;
   options.num_levels = 4;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 450 << 10;
   options.target_file_size_base = 98 << 10;
   options.max_write_buffer_number = 2;
@@ -3347,7 +3347,7 @@ TEST_P(DBCompactionWaitForCompactTest,
   int compaction_finished = 0;
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "CompactionJob::Run():EndStatusSet", [&](void* arg) {
-        auto status = static_cast<Status*>(arg);
+        auto status = static_cast<rocksdb_rs::status::Status*>(arg);
         if (status->ok()) {
           compaction_finished++;
         }
@@ -3403,7 +3403,7 @@ TEST_P(DBCompactionWaitForCompactTest, WaitForCompactAbortOnPause) {
     ASSERT_OK(dbfull()->ContinueBackgroundWork());
   }
 
-  Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
+  rocksdb_rs::status::Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
   if (abort_on_pause_) {
     ASSERT_NOK(s);
     ASSERT_TRUE(s.IsAborted());
@@ -3436,7 +3436,7 @@ TEST_P(DBCompactionWaitForCompactTest, WaitForCompactShutdownWhileWaiting) {
 
   // Wait for Compaction in another thread
   auto waiting_for_compaction_thread = port::Thread([this]() {
-    Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
+    rocksdb_rs::status::Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
     ASSERT_NOK(s);
     ASSERT_TRUE(s.IsShutdownInProgress());
   });
@@ -3620,7 +3620,7 @@ TEST_P(DBCompactionTestWithParam, ForceBottommostLevelCompaction) {
 
 TEST_P(DBCompactionTestWithParam, IntraL0Compaction) {
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 5;
   options.max_background_compactions = 2;
   options.max_subcompactions = max_subcompactions_;
@@ -3699,7 +3699,7 @@ TEST_P(DBCompactionTestWithParam, IntraL0CompactionDoesNotObsoleteDeletions) {
   // regression test for issue #2722: L0->L0 compaction can resurrect deleted
   // keys from older L0 files if L1+ files' key-ranges do not include the key.
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 5;
   options.max_background_compactions = 2;
   options.max_subcompactions = max_subcompactions_;
@@ -4016,7 +4016,7 @@ TEST_F(DBCompactionTest, CompactBottomLevelFilesWithDeletions) {
   const int kNumLevelFiles = 4;
   const int kValueSize = 128;
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = kNumLevelFiles;
   // inflate it a bit to account for key/metadata overhead
   options.target_file_size_base = 120 * kNumKeysPerFile * kValueSize / 100;
@@ -4090,7 +4090,7 @@ TEST_F(DBCompactionTest, NoCompactBottomLevelFilesWithDeletions) {
   const int kNumLevelFiles = 4;
   const int kValueSize = 128;
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.disable_auto_compactions = true;
   options.level0_file_num_compaction_trigger = kNumLevelFiles;
   // inflate it a bit to account for key/metadata overhead
@@ -4152,7 +4152,7 @@ TEST_F(DBCompactionTest, NoCompactBottomLevelFilesWithDeletions) {
 
 TEST_F(DBCompactionTest, RoundRobinTtlCompactionNormal) {
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 20;
   options.ttl = 24 * 60 * 60;  // 24 hours
   options.compaction_pri = kRoundRobin;
@@ -4305,7 +4305,7 @@ TEST_F(DBCompactionTest, RoundRobinTtlCompactionUnsortedTime) {
   // to the oldest file, RoundRobin compaction should still compact the file
   // after cursor until all expired files are compacted.
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 20;
   options.ttl = 24 * 60 * 60;  // 24 hours
   options.compaction_pri = kRoundRobin;
@@ -4392,7 +4392,7 @@ TEST_F(DBCompactionTest, LevelCompactExpiredTtlFiles) {
   const int kValueSize = 1024;
 
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.ttl = 24 * 60 * 60;  // 24 hours
   options.max_open_files = -1;
   env_->SetMockSleep();
@@ -4502,7 +4502,7 @@ TEST_F(DBCompactionTest, LevelTtlCompactionOutputCuttingIteractingWithOther) {
   // TTL states were not being updated for keys that ShouldStopBefore() would
   // return true for reasons other than TTL.
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.ttl = 24 * 60 * 60;  // 24 hours
   options.max_open_files = -1;
   options.compaction_pri = kMinOverlappingRatio;
@@ -4576,7 +4576,7 @@ TEST_F(DBCompactionTest, LevelTtlCascadingCompactions) {
   for (bool if_restart : {false, true}) {
     for (bool if_open_all_files : {false, true}) {
       Options options = CurrentOptions();
-      options.compression = CompressionType::kNoCompression;
+      options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       options.ttl = 24 * 60 * 60;  // 24 hours
       if (if_open_all_files) {
         options.max_open_files = -1;
@@ -5525,7 +5525,7 @@ TEST_F(DBCompactionTest, SubcompactionEvent) {
 
   CompactRangeOptions comp_opts;
   comp_opts.max_subcompactions = 4;
-  Status s = dbfull()->CompactRange(comp_opts, nullptr, nullptr);
+  rocksdb_rs::status::Status s = dbfull()->CompactRange(comp_opts, nullptr, nullptr);
   ASSERT_OK(s);
   ASSERT_OK(dbfull()->TEST_WaitForCompact());
   // make sure there's no running compaction
@@ -5868,7 +5868,7 @@ TEST_P(CompactionPriTest, Test) {
   options.hard_pending_compaction_bytes_limit = 256 * 1024;
   options.max_bytes_for_level_base = 64 * 1024;
   options.max_bytes_for_level_multiplier = 4;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   DestroyAndReopen(options);
 
@@ -5907,7 +5907,7 @@ TEST_F(DBCompactionTest, PersistRoundRobinCompactCursor) {
   options.compaction_pri = CompactionPri::kRoundRobin;
   options.max_bytes_for_level_multiplier = 4;
   options.num_levels = 3;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   DestroyAndReopen(options);
 
@@ -6220,7 +6220,7 @@ TEST_P(DBCompactionTestWithParam, RoundRobinWithoutAdditionalResources) {
 TEST_F(DBCompactionTest, RoundRobinCutOutputAtCompactCursor) {
   Options options = CurrentOptions();
   options.num_levels = 3;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.write_buffer_size = 4 * 1024;
   options.max_bytes_for_level_base = 64 * 1024;
   options.max_bytes_for_level_multiplier = 4;
@@ -6292,7 +6292,7 @@ TEST_F(DBCompactionTest, PartialManualCompaction) {
   Options opts = CurrentOptions();
   opts.num_levels = 3;
   opts.level0_file_num_compaction_trigger = 10;
-  opts.compression = CompressionType::kNoCompression;
+  opts.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   opts.merge_operator.reset(new NoopMergeOperator());
   opts.target_file_size_base = 10240;
   DestroyAndReopen(opts);
@@ -6365,7 +6365,7 @@ TEST_F(DBCompactionTest, ManualCompactionBottomLevelOptimized) {
   Options opts = CurrentOptions();
   opts.num_levels = 3;
   opts.level0_file_num_compaction_trigger = 5;
-  opts.compression = CompressionType::kNoCompression;
+  opts.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   opts.merge_operator.reset(new NoopMergeOperator());
   opts.target_file_size_base = 1024;
   opts.max_bytes_for_level_multiplier = 2;
@@ -6491,7 +6491,7 @@ TEST_F(DBCompactionTest, ManualCompactionMax) {
   DestroyAndReopen(opts);
   generate_sst_func();
   total_size = (l1_avg_size * 10) + (l2_avg_size * 100);
-  Status s = db_->SetOptions(
+  rocksdb_rs::status::Status s = db_->SetOptions(
       {{"max_compaction_bytes", std::to_string(total_size / num_split)},
        {"target_file_size_base", std::to_string(total_size / num_split)}});
   ASSERT_OK(s);
@@ -6525,7 +6525,7 @@ TEST_F(DBCompactionTest, CompactionDuringShutdown) {
       "DBImpl::BackgroundCompaction:NonTrivial:BeforeRun",
       [&](void* /*arg*/) { dbfull()->shutting_down_.store(true); });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
-  Status s = dbfull()->CompactRange(CompactRangeOptions(), nullptr, nullptr);
+  rocksdb_rs::status::Status s = dbfull()->CompactRange(CompactRangeOptions(), nullptr, nullptr);
   ASSERT_TRUE(s.ok() || s.IsShutdownInProgress());
   ASSERT_OK(dbfull()->error_handler_.GetBGError());
 }
@@ -6590,7 +6590,7 @@ TEST_P(DBCompactionTestWithParam, FixFileIngestionCompactionDeadlock) {
   // deadlock can happen.
   port::Thread ingestion_thr([&]() {
     IngestExternalFileOptions ifo;
-    Status s = db_->IngestExternalFile({sst_file_path}, ifo);
+    rocksdb_rs::status::Status s = db_->IngestExternalFile({sst_file_path}, ifo);
     ASSERT_OK(s);
   });
 
@@ -6696,7 +6696,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       ResumeCompactionThread();
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
-      Status s = dbfull()->TEST_WaitForCompact();
+      rocksdb_rs::status::Status s = dbfull()->TEST_WaitForCompact();
       EXPECT_OK(s);
     } else if (compaction_path_to_test_ == "NonRefitLevelCompactRange") {
       CompactRangeOptions cro;
@@ -6708,7 +6708,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       TEST_SYNC_POINT("PreCompaction");
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
-      Status s = dbfull()->CompactRange(cro, &start, &end);
+      rocksdb_rs::status::Status s = dbfull()->CompactRange(cro, &start, &end);
       EXPECT_OK(s);
     } else if (compaction_path_to_test_ == "RefitLevelCompactRange") {
       CompactRangeOptions cro;
@@ -6719,7 +6719,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       std::string end_key = "k4";
       Slice end(end_key);
       TEST_SYNC_POINT("PreCompaction");
-      Status s = dbfull()->CompactRange(cro, &start, &end);
+      rocksdb_rs::status::Status s = dbfull()->CompactRange(cro, &start, &end);
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
       // To see this, remove the fix AND replace
@@ -6737,7 +6737,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
         input_files.push_back(file.name);
       }
       TEST_SYNC_POINT("PreCompaction");
-      Status s = db_->CompactFiles(CompactionOptions(), input_files, 1);
+      rocksdb_rs::status::Status s = db_->CompactFiles(CompactionOptions(), input_files, 1);
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
       EXPECT_TRUE(s.IsAborted());
@@ -6845,7 +6845,7 @@ TEST_F(DBCompactionTest, ConsistencyFailTest) {
 
   for (int k = 0; k < 2; ++k) {
     ASSERT_OK(Put("foo", "bar"));
-    Status s = Flush();
+    rocksdb_rs::status::Status s = Flush();
     if (k < 1) {
       ASSERT_OK(s);
     } else {
@@ -6889,7 +6889,7 @@ TEST_F(DBCompactionTest, ConsistencyFailTest2) {
   ASSERT_OK(Flush());
   ASSERT_OK(Put("foo2", value));
   ASSERT_OK(Put("z", ""));
-  Status s = Flush();
+  rocksdb_rs::status::Status s = Flush();
   ASSERT_TRUE(s.ok() || s.IsCorruption());
 
   // This probably returns non-OK, but we rely on the next Put()
@@ -6924,7 +6924,7 @@ class DBCompactionTestL0FilesMisorderCorruption : public DBCompactionTest {
                     const std::string& compaction_path_to_test = "") {
     options_ = CurrentOptions();
     options_.create_if_missing = true;
-    options_.compression = CompressionType::kNoCompression;
+    options_.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
     options_.force_consistency_checks = true;
     options_.compaction_style = compaciton_style;
@@ -7467,7 +7467,7 @@ TEST_P(DBCompactionTestL0FilesMisorderCorruptionWithParam,
   }
   ASSERT_EQ(input_files.size(), 3);
 
-  Status s = db_->CompactFiles(CompactionOptions(), input_files, 0);
+  rocksdb_rs::status::Status s = db_->CompactFiles(CompactionOptions(), input_files, 0);
   // After compaction, we have LSM tree:
   //
   // memtable: m1 [                 k2:new@4, k1:new@3]
@@ -8121,10 +8121,10 @@ TEST_P(DBCompactionTestBlobError, CompactionError) {
   Reopen(options);
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    Status* const s = static_cast<Status*>(arg);
+    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
-    (*s) = Status_IOError(sync_point_);
+    (*s) = rocksdb_rs::status::Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -8493,7 +8493,7 @@ TEST_F(DBCompactionTest, CompactionWithBlobGCError_IndexWithInvalidFileNumber) {
   constexpr uint64_t size = 5678;
 
   BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                        CompressionType::kNoCompression);
+                        rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
   WriteBatch batch;
   ASSERT_OK(
@@ -8522,20 +8522,20 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   options.num_levels = 3;
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
-  options.checksum_handoff_file_types.Add(FileType::kTableFile);
-  Status s = Status_new();
+  options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kTableFile);
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Reopen(options);
 
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
   Reopen(options);
 
@@ -8546,7 +8546,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8557,10 +8557,10 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -8571,12 +8571,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // Each write will be similated as corrupted.
   // Since the file system returns IOStatus::Corruption, it is an
@@ -8585,7 +8585,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8595,10 +8595,10 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -8617,19 +8617,19 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   options.num_levels = 3;
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Reopen(options);
 
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
   Reopen(options);
 
@@ -8637,7 +8637,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8648,9 +8648,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -8661,19 +8661,19 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // options is not set, the checksum handoff will not be triggered
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8683,9 +8683,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   Destroy(options);
 }
@@ -8703,20 +8703,20 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   options.num_levels = 3;
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
-  options.checksum_handoff_file_types.Add(FileType::kDescriptorFile);
-  Status s = Status_new();
+  options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   Reopen(options);
 
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
   Reopen(options);
 
@@ -8727,7 +8727,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8738,9 +8738,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
 }
@@ -8758,8 +8758,8 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   options.num_levels = 3;
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
-  options.checksum_handoff_file_types.Add(FileType::kDescriptorFile);
-  Status s = Status_new();
+  options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kNoChecksum);
   Reopen(options);
 
@@ -8768,12 +8768,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // Each write will be similated as corrupted.
   // Since the file system returns IOStatus::Corruption, it is mapped to
@@ -8782,7 +8782,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8792,9 +8792,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -9396,7 +9396,7 @@ TEST_F(DBCompactionTest, TurnOnLevelCompactionDynamicLevelBytes) {
   options.allow_ingest_behind = false;
   options.level_compaction_dynamic_level_bytes = false;
   options.num_levels = 6;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 1 << 20;
   options.max_bytes_for_level_multiplier = 10;
   DestroyAndReopen(options);
@@ -9499,7 +9499,7 @@ TEST_F(DBCompactionTest, DrainUnnecessaryLevelsAfterMultiplierChanged) {
   const int kValueBytes = 1 << 10;  // 1KB
 
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level_compaction_dynamic_level_bytes = true;
   options.max_bytes_for_level_base = kBaseLevelBytes;
   options.max_bytes_for_level_multiplier = kInitMultiplier;
@@ -9555,7 +9555,7 @@ TEST_F(DBCompactionTest, DrainUnnecessaryLevelsAfterDBBecomesSmall) {
   const int kDeleteFileNum = 8;
 
   Options options = CurrentOptions();
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level_compaction_dynamic_level_bytes = true;
   options.max_bytes_for_level_base = kBaseLevelBytes;
   options.max_bytes_for_level_multiplier = kMultiplier;
@@ -9636,7 +9636,7 @@ TEST_F(DBCompactionTest, ManualCompactionCompactAllKeysInRange) {
   options.compaction_style = kCompactionStyleLevel;
   options.max_bytes_for_level_base = kBaseLevelBytes;
   options.max_bytes_for_level_multiplier = kMultiplier;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.target_file_size_base = 2 * kBaseLevelBytes;
 
   DestroyAndReopen(options);
@@ -9698,7 +9698,7 @@ TEST_F(DBCompactionTest,
   options.compaction_style = kCompactionStyleLevel;
   options.max_bytes_for_level_base = kBaseLevelBytes;
   options.max_bytes_for_level_multiplier = kMultiplier;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.target_file_size_base = 2 * kBaseLevelBytes;
   DestroyAndReopen(options);
 
@@ -9763,7 +9763,7 @@ TEST_F(DBCompactionTest, NumberOfSubcompactions) {
   };
   Options options = CurrentOptions();
   options.compaction_style = kCompactionStyleLevel;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   const int kFileSize = 100 << 10;  // 100KB
   options.target_file_size_base = kFileSize;
   const int kLevel0CompactTrigger = 2;

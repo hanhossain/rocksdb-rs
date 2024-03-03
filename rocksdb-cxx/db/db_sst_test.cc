@@ -120,7 +120,7 @@ TEST_F(DBSSTTest, SSTsWithLdbSuffixHandling) {
       continue;
     }
     std::string const rdb_name = dbname_ + "/" + filenames[i];
-    std::string const ldb_name = Rocks2LevelTableFileName(rdb_name);
+    std::string const ldb_name = static_cast<std::string>(Rocks2LevelTableFileName(rdb_name));
     ASSERT_TRUE(env_->RenameFile(rdb_name, ldb_name).ok());
     ++num_ldb_files;
   }
@@ -274,7 +274,7 @@ TEST_F(DBSSTTest, DeleteObsoleteFilesPendingOutputs) {
   ASSERT_EQ(metadata.size(), 2U);
 
   // This file should have been deleted during last compaction
-  ASSERT_TRUE(Status_NotFound().eq(env_->FileExists(dbname_ + file_on_L2)));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(env_->FileExists(dbname_ + file_on_L2)));
   listener->VerifyMatchedCount(1);
 }
 
@@ -358,14 +358,14 @@ TEST_F(DBSSTTest, DBWithSstFileManager) {
     ASSERT_OK(dbfull()->TEST_WaitForCompact());
     // Verify that we are tracking all sst files in dbname_
     std::unordered_map<std::string, uint64_t> files_in_db;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db));
     ASSERT_EQ(sfm->GetTrackedFiles(), files_in_db);
   }
   ASSERT_OK(db_->CompactRange(CompactRangeOptions(), nullptr, nullptr));
   ASSERT_OK(dbfull()->TEST_WaitForCompact());
 
   std::unordered_map<std::string, uint64_t> files_in_db;
-  ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db));
   // Verify that we are tracking all sst files in dbname_
   ASSERT_EQ(sfm->GetTrackedFiles(), files_in_db);
   // Verify the total files size
@@ -455,8 +455,8 @@ TEST_F(DBSSTTest, DBWithSstFileManagerForBlobFiles) {
 
     // Verify that we are tracking all sst and blob files in dbname_
     std::unordered_map<std::string, uint64_t> files_in_db;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db));
-    ASSERT_OK(GetAllDataFiles(kBlobFile, &files_in_db));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kBlobFile, &files_in_db));
     ASSERT_EQ(sfm->GetTrackedFiles(), files_in_db);
   }
 
@@ -472,8 +472,8 @@ TEST_F(DBSSTTest, DBWithSstFileManagerForBlobFiles) {
   ASSERT_OK(dbfull()->TEST_WaitForCompact());
 
   std::unordered_map<std::string, uint64_t> files_in_db;
-  ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db));
-  ASSERT_OK(GetAllDataFiles(kBlobFile, &files_in_db));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kBlobFile, &files_in_db));
 
   // Verify that we are tracking all sst and blob files in dbname_
   ASSERT_EQ(sfm->GetTrackedFiles(), files_in_db);
@@ -596,8 +596,8 @@ TEST_F(DBSSTTest, DBWithSstFileManagerForBlobFilesWithGC) {
   {
     // Verify that we are tracking all sst and blob files in dbname_
     std::unordered_map<std::string, uint64_t> files_in_db;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db));
-    ASSERT_OK(GetAllDataFiles(kBlobFile, &files_in_db));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kBlobFile, &files_in_db));
     ASSERT_EQ(sfm->GetTrackedFiles(), files_in_db);
   }
 
@@ -642,8 +642,8 @@ TEST_F(DBSSTTest, DBWithSstFileManagerForBlobFilesWithGC) {
   {
     // Verify that we are tracking all sst and blob files in dbname_
     std::unordered_map<std::string, uint64_t> files_in_db;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db));
-    ASSERT_OK(GetAllDataFiles(kBlobFile, &files_in_db));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kBlobFile, &files_in_db));
     ASSERT_EQ(sfm->GetTrackedFiles(), files_in_db);
   }
 
@@ -713,7 +713,7 @@ TEST_P(DBSSTTestRateLimit, RateLimitedDelete) {
   }
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -782,11 +782,11 @@ TEST_F(DBSSTTest, RateLimitedWALDelete) {
 
   Options options = CurrentOptions();
   options.disable_auto_compactions = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.env = env_;
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -843,9 +843,9 @@ TEST_P(DBWALTestWithParam, WALTrashCleanupOnOpen) {
    public:
     MyEnv(Env* t) : EnvWrapper(t), fake_log_delete(false) {}
     const char* Name() const override { return "MyEnv"; }
-    Status DeleteFile(const std::string& fname) override {
+    rocksdb_rs::status::Status DeleteFile(const std::string& fname) override {
       if (fname.find(".log.trash") != std::string::npos && fake_log_delete) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
 
       return target()->DeleteFile(fname);
@@ -864,12 +864,12 @@ TEST_P(DBWALTestWithParam, WALTrashCleanupOnOpen) {
 
   Options options = CurrentOptions();
   options.disable_auto_compactions = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.env = env.get();
   options.wal_dir = dbname_ + wal_dir_;
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -981,7 +981,7 @@ TEST_F(DBSSTTest, DeleteSchedulerMultipleDBPaths) {
   options.env = env_;
 
   int64_t rate_bytes_per_sec = 1024 * 1024;  // 1 Mb / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", rate_bytes_per_sec, false, &s,
                         /* max_trash_db_ratio= */ 1.1));
@@ -1048,7 +1048,7 @@ TEST_F(DBSSTTest, DestroyDBWithRateLimitedDelete) {
       [&](void* /*arg*/) { bg_delete_file++; });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Options options = CurrentOptions();
   options.disable_auto_compactions = true;
   options.env = env_;
@@ -1112,7 +1112,7 @@ TEST_F(DBSSTTest, DBWithMaxSpaceAllowed) {
 
   uint64_t first_file_size = 0;
   std::unordered_map<std::string, uint64_t> files_in_db;
-  ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db, &first_file_size));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db, &first_file_size));
   ASSERT_EQ(sfm->GetTotalSize(), first_file_size);
 
   // Set the maximum allowed space usage to the current total size
@@ -1145,11 +1145,11 @@ TEST_F(DBSSTTest, DBWithMaxSpaceAllowedWithBlobFiles) {
   uint64_t total_files_size = 0;
   std::unordered_map<std::string, uint64_t> files_in_db;
 
-  ASSERT_OK(GetAllDataFiles(kBlobFile, &files_in_db, &files_size));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kBlobFile, &files_in_db, &files_size));
   // Make sure blob files are considered by SSTFileManage in size limits.
   ASSERT_GT(files_size, 0);
   total_files_size = files_size;
-  ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db, &files_size));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db, &files_size));
   total_files_size += files_size;
   ASSERT_EQ(sfm->GetTotalSize(), total_files_size);
 
@@ -1215,7 +1215,7 @@ TEST_F(DBSSTTest, CancellingCompactionsWorks) {
   ASSERT_OK(Flush());
   uint64_t total_file_size = 0;
   std::unordered_map<std::string, uint64_t> files_in_db;
-  ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db, &total_file_size));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db, &total_file_size));
   // Set the maximum allowed space usage to the current total size
   sfm->SetMaxAllowedSpaceUsage(2 * total_file_size + 1);
 
@@ -1265,7 +1265,7 @@ TEST_F(DBSSTTest, CancellingManualCompactionsWorks) {
   ASSERT_OK(Flush());
   uint64_t total_file_size = 0;
   std::unordered_map<std::string, uint64_t> files_in_db;
-  ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db, &total_file_size));
+  ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db, &total_file_size));
   // Set the maximum allowed space usage to the current total size
   sfm->SetMaxAllowedSpaceUsage(2 * total_file_size + 1);
 
@@ -1336,11 +1336,11 @@ TEST_F(DBSSTTest, DBWithMaxSpaceAllowedRandomized) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::FlushMemTableToOutputFile:MaxAllowedSpaceReached",
       [&](void* arg) {
-        Status* bg_error = static_cast<Status*>(arg);
+        rocksdb_rs::status::Status* bg_error = static_cast<rocksdb_rs::status::Status*>(arg);
         bg_error_set = true;
         reached_max_space_on_flush++;
         // clear error to ensure compaction callback is called
-        *bg_error = Status_OK();
+        *bg_error = rocksdb_rs::status::Status_OK();
       });
 
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
@@ -1382,7 +1382,7 @@ TEST_F(DBSSTTest, DBWithMaxSpaceAllowedRandomized) {
     ASSERT_TRUE(bg_error_set);
     uint64_t total_sst_files_size = 0;
     std::unordered_map<std::string, uint64_t> files_in_db;
-    ASSERT_OK(GetAllDataFiles(kTableFile, &files_in_db, &total_sst_files_size));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &files_in_db, &total_sst_files_size));
     ASSERT_GE(total_sst_files_size, limit_mb * 1024 * 1024);
     rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   }
@@ -1491,7 +1491,7 @@ TEST_F(DBSSTTest, OpenDBWithInfiniteMaxOpenFilesSubjectToMemoryLimit) {
       Close();
 
       table_options.cache_usage_options.options_overrides.insert(
-          {CacheEntryRole::kBlockBasedTableReader,
+          {rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader,
            {/*.charged = */ charge_table_reader}});
       table_options.block_cache =
           NewLRUCache(1024 /* capacity */, 0 /* num_shard_bits */,
@@ -1500,12 +1500,12 @@ TEST_F(DBSSTTest, OpenDBWithInfiniteMaxOpenFilesSubjectToMemoryLimit) {
 
       // Reopening the DB will try to load all existing files, conditionally
       // subject to memory limit
-      Status s = TryReopen(options);
+      rocksdb_rs::status::Status s = TryReopen(options);
 
       if (charge_table_reader == CacheEntryRoleOptions::Decision::kEnabled) {
         EXPECT_TRUE(s.IsMemoryLimit());
         EXPECT_TRUE(s.ToString()->find(static_cast<std::string>(
-          CacheEntryRole_ToCamelString(CacheEntryRole::kBlockBasedTableReader))) != std::string::npos);
+          CacheEntryRole_ToCamelString(rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader))) != std::string::npos);
         EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                     std::string::npos);
 
@@ -1532,7 +1532,7 @@ TEST_F(DBSSTTest, GetTotalSstFilesSize) {
 
   Options options = CurrentOptions();
   options.disable_auto_compactions = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   DestroyAndReopen(options);
   // Generate 5 files in L0
   for (int i = 0; i < 5; i++) {
@@ -1632,7 +1632,7 @@ TEST_F(DBSSTTest, OpenDBWithoutGetFileSizeInvocations) {
   std::unique_ptr<MockEnv> env{MockEnv::Create(Env::Default())};
   options.env = env.get();
   options.disable_auto_compactions = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.enable_blob_files = true;
   options.blob_file_size = 32;  // create one blob per file
   options.skip_checking_sst_file_sizes_on_db_open = true;
@@ -1669,7 +1669,7 @@ TEST_F(DBSSTTest, OpenDBWithoutGetFileSizeInvocations) {
 TEST_F(DBSSTTest, GetTotalSstFilesSizeVersionsFilesShared) {
   Options options = CurrentOptions();
   options.disable_auto_compactions = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   DestroyAndReopen(options);
   // Generate 5 files in L0
   for (int i = 0; i < 5; i++) {
