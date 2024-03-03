@@ -64,9 +64,15 @@ fn main() -> anyhow::Result<()> {
     let mut counter = 0;
     println!("Files with missing include paths:");
     for (path, mappings) in path_mappings {
-        if mappings.values().any(|m| m.path.is_none()) {
-            counter += 1;
-            println!("{counter} - {:?}", path);
+        let mut printed_file = false;
+
+        for include_mapping in mappings.values().filter(|m| m.path.is_none()) {
+            if !printed_file {
+                printed_file = true;
+                counter += 1;
+                println!("{counter} - {:?}", path);
+            }
+            println!("    {:?}", include_mapping.include);
         }
     }
 
