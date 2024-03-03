@@ -19,6 +19,8 @@ enum Commands {
     MissingIncludePaths,
     /// Show files in order of number of dependencies
     Dependencies,
+    /// Show files which have self references
+    SelfReferences,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -54,9 +56,27 @@ fn main() -> anyhow::Result<()> {
         Commands::Dependencies => {
             show_order_of_dependencies(&path_mappings);
         }
+        Commands::SelfReferences => {
+            show_self_references(&path_mappings);
+        }
     }
 
     Ok(())
+}
+
+fn show_self_references(path_mappings: &HashMap<PathBuf, HashSet<IncludeMapping>>) {
+    println!("Files with self references:");
+
+    for (path, mappings) in path_mappings {
+        for mapping in mappings {
+            if let Some(mapping_path) = &mapping.path {
+                if path == mapping_path {
+                    println!("{:?}", path);
+                    println!("    {:?}", mapping.include);
+                }
+            }
+        }
+    }
 }
 
 fn show_order_of_dependencies(path_mappings: &HashMap<PathBuf, HashSet<IncludeMapping>>) {
