@@ -2,6 +2,7 @@ use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb")]
 pub(crate) mod ffi {
+    #[namespace = "rocksdb_rs::status"]
     #[derive(Debug)]
     enum Code {
         kOk = 0,

@@ -7347,7 +7347,7 @@ TEST_F(DBTest, ShuttingDownNotBlockStalledWrites) {
 
   std::thread thd([&]() {
     Status s = Put("key_" + std::to_string(101), "101");
-    ASSERT_EQ(s.code(), Code::kShutdownInProgress);
+    ASSERT_EQ(s.code(), rocksdb_rs::status::Code::kShutdownInProgress);
   });
 
   TEST_SYNC_POINT("DBTest::ShuttingDownNotBlockStalledWrites");

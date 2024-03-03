@@ -49,7 +49,7 @@ class ErrorHandler {
   void EnableAutoRecovery() { auto_recovery_ = true; }
 
   Severity GetErrorSeverity(BackgroundErrorReason reason,
-                                    Code code, SubCode subcode);
+                                    rocksdb_rs::status::Code code, SubCode subcode);
 
   const Status& SetBGError(const Status& bg_err, BackgroundErrorReason reason);
 
