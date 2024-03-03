@@ -576,7 +576,7 @@ class Env : public Customizable {
 
   // Lower CPU priority for threads from the specified pool.
   virtual Status LowerThreadPoolCPUPriority(Priority /*pool*/,
-                                            CpuPriority /*pri*/) {
+                                            rocksdb_rs::port_defs::CpuPriority /*pri*/) {
     return Status_NotSupported(
         "Env::LowerThreadPoolCPUPriority(Priority, CpuPriority) not supported");
   }
@@ -1630,7 +1630,7 @@ class EnvWrapper : public Env {
     target_.env->LowerThreadPoolCPUPriority(pool);
   }
 
-  Status LowerThreadPoolCPUPriority(Priority pool, CpuPriority pri) override {
+  Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
     return target_.env->LowerThreadPoolCPUPriority(pool, pri);
   }
 

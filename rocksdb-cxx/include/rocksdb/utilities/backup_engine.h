@@ -335,7 +335,7 @@ struct CreateBackupOptions {
   // The initial priority of the threads is CpuPriority::kNormal,
   // so you can decrease to priorities lower than kNormal.
   bool decrease_background_thread_cpu_priority = false;
-  CpuPriority background_thread_cpu_priority = CpuPriority::kNormal;
+  rocksdb_rs::port_defs::CpuPriority background_thread_cpu_priority = rocksdb_rs::port_defs::CpuPriority::kNormal;
 };
 
 struct RestoreOptions {
