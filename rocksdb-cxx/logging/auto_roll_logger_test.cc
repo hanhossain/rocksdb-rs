@@ -224,7 +224,7 @@ TEST_F(AutoRollLoggerTest, RollLogFileByTime) {
 
   InitTestDb();
   // -- Test the existence of file during the server restart.
-  ASSERT_TRUE(Status_NotFound().eq(default_env->FileExists(kLogFile)));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(default_env->FileExists(kLogFile)));
   AutoRollLogger logger(default_env->GetFileSystem(), nsc, kTestDir, "",
                         log_size, time, keep_log_file_num);
   ASSERT_OK(default_env->FileExists(kLogFile));

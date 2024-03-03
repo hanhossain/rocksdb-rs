@@ -1810,11 +1810,11 @@ rocksdb_rs::status::Status BackupEngineImpl::GetBackupInfo(BackupID backup_id,
   }
   auto backup_itr = backups_.find(backup_id);
   if (backup_itr == backups_.end()) {
-    return Status_NotFound("Backup not found");
+    return rocksdb_rs::status::Status_NotFound("Backup not found");
   }
   auto& backup = backup_itr->second;
   if (backup->Empty()) {
-    return Status_NotFound("Backup not found");
+    return rocksdb_rs::status::Status_NotFound("Backup not found");
   }
 
   SetBackupInfoFromBackupMeta(backup_id, *backup, backup_info,
@@ -2606,7 +2606,7 @@ rocksdb_rs::status::Status BackupEngineImpl::GetFileDbIdentities(
     if (db_session_id != nullptr) {
       db_session_id->assign(table_properties->db_session_id);
       if (db_session_id->empty()) {
-        s = Status_NotFound("DB session identity not found in " + file_path);
+        s = rocksdb_rs::status::Status_NotFound("DB session identity not found in " + file_path);
         ROCKS_LOG_INFO(options_.info_log, "%s", s.ToString()->c_str());
         return s;
       }

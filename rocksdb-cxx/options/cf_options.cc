@@ -725,7 +725,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             } else if (old_opts != nullptr) {
               return table_factory->get()->ConfigureOption(opts, name, value);
             } else {
-              return Status_NotFound("Mismatched table option: ", name);
+              return rocksdb_rs::status::Status_NotFound("Mismatched table option: ", name);
             }
           }}},
         {"plain_table_factory",
@@ -756,7 +756,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             } else if (old_opts != nullptr) {
               return table_factory->get()->ConfigureOption(opts, name, value);
             } else {
-              return Status_NotFound("Mismatched table option: ", name);
+              return rocksdb_rs::status::Status_NotFound("Mismatched table option: ", name);
             }
           }}},
         {"table_properties_collectors",

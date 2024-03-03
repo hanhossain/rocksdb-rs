@@ -260,7 +260,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureOptions(
   if (config_options.ignore_unknown_options) {
     s = rocksdb_rs::status::Status_OK();
   } else if (s.ok() && unused == nullptr && !remaining.empty()) {
-    s = Status_NotFound("Could not find option: ", remaining.begin()->first);
+    s = rocksdb_rs::status::Status_NotFound("Could not find option: ", remaining.begin()->first);
   }
   return s;
 }
@@ -345,7 +345,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureSingleOption(
   const auto opt_info =
       FindOption(configurable.options_, opt_name, &elem_name, &opt_ptr);
   if (opt_info == nullptr) {
-    return Status_NotFound("Could not find option: ", name);
+    return rocksdb_rs::status::Status_NotFound("Could not find option: ", name);
   } else {
     return ConfigureOption(config_options, configurable, *opt_info, opt_name,
                            elem_name, value, opt_ptr);
@@ -441,7 +441,7 @@ rocksdb_rs::status::Status ConfigurableHelper::ConfigureOption(
     return configurable.ParseOption(config_options, opt_info, name, value,
                                     opt_ptr);
   } else {
-    return Status_NotFound("Could not find option: ", name);
+    return rocksdb_rs::status::Status_NotFound("Could not find option: ", name);
   }
 }
 
@@ -511,7 +511,7 @@ rocksdb_rs::status::Status ConfigurableHelper::GetOption(const ConfigOptions& co
       }
     }
   }
-  return Status_NotFound("Cannot find option: ", short_name);
+  return rocksdb_rs::status::Status_NotFound("Cannot find option: ", short_name);
 }
 
 rocksdb_rs::status::Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,

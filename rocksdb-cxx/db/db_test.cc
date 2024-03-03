@@ -6992,7 +6992,7 @@ TEST_F(DBTest, ReusePinnableSlice) {
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
     std::vector<rocksdb_rs::status::Status> statuses;
-    statuses.push_back(Status_NotFound());
+    statuses.push_back(rocksdb_rs::status::Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, dbfull()->DefaultColumnFamily(),
                        multiget_keys.size(), multiget_keys.data(),
@@ -7020,7 +7020,7 @@ TEST_F(DBTest, ReusePinnableSlice) {
     multiget_keys.push_back("foo");
     std::vector<PinnableSlice> multiget_values(1);
     std::vector<rocksdb_rs::status::Status> statuses;
-    statuses.push_back(Status_NotFound());
+    statuses.push_back(rocksdb_rs::status::Status_NotFound());
     ReadOptions ropt;
     dbfull()->MultiGet(ropt, multiget_keys.size(), multiget_cfs.data(),
                        multiget_keys.data(), multiget_values.data(),

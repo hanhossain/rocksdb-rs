@@ -747,7 +747,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadS
   assert(it);
   it->Seek(old_sk_prefix);
   if (!it->Valid()) {
-    s = Status_NotFound();
+    s = rocksdb_rs::status::Status_NotFound();
     return s;
   }
   auto* wb = txn->GetWriteBatch();

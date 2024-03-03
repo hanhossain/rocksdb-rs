@@ -115,7 +115,7 @@ class PosixDynamicLibrary : public DynamicLibrary {
       return rocksdb_rs::status::Status_OK();
     } else {
       char* err = dlerror();
-      return Status_NotFound("Error finding symbol: " + sym_name, err);
+      return rocksdb_rs::status::Status_NotFound("Error finding symbol: " + sym_name, err);
     }
   }
 

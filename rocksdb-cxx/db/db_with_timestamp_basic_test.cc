@@ -595,7 +595,7 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   // Trim data whose version > Timestamp(5, 0), read(k1, ts(7)) <- NOT_FOUND.
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(5, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), Status_NotFound(), "",
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_NotFound(), "",
                     Timestamp(5, 0));
   Close();
 
@@ -609,7 +609,7 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   Reopen(options);
   ASSERT_OK(db_->DeleteRange(WriteOptions(), db_->DefaultColumnFamily(), "k1",
                              "k3", Timestamp(7, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(8, 0), Status_NotFound(), "",
+  check_value_by_ts(db_, "k1", Timestamp(8, 0), rocksdb_rs::status::Status_NotFound(), "",
                     Timestamp(7, 0));
   Close();
   // Trim data whose timestamp > Timestamp(6, 0), read(k1, ts(8)) <- v2
@@ -3650,9 +3650,9 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_opts.snapshot = before_tombstone;
   std::vector<rocksdb_rs::status::Status> expected_status;
   expected_status.push_back(rocksdb_rs::status::Status_OK());
-  expected_status.push_back(Status_NotFound());
-  expected_status.push_back(Status_NotFound());
-  expected_status.push_back(Status_NotFound());
+  expected_status.push_back(rocksdb_rs::status::Status_NotFound());
+  expected_status.push_back(rocksdb_rs::status::Status_NotFound());
+  expected_status.push_back(rocksdb_rs::status::Status_NotFound());
   std::vector<std::string> expected_values(kNum);
   expected_values[0] = "val" + std::to_string(0);
   std::vector<std::string> expected_timestamps(kNum);
@@ -3732,7 +3732,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_ts = read_ts_str;
   read_opts.timestamp = &read_ts;
   read_opts.snapshot = after_tombstone;
-  expected_status[1] = Status_NotFound();
+  expected_status[1] = rocksdb_rs::status::Status_NotFound();
   expected_timestamps[1].clear();
   expected_values[1].clear();
   verify();
@@ -3744,7 +3744,7 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   read_opts.snapshot = after_tombstone;
   for (int i = 0; i < kNum; ++i) {
     if (i == kRangeBegin) {
-      expected_status[i] = Status_NotFound();
+      expected_status[i] = rocksdb_rs::status::Status_NotFound();
       expected_values[i].clear();
     } else {
       expected_status[i] = rocksdb_rs::status::Status_OK();

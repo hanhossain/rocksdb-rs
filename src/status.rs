@@ -116,22 +116,16 @@ pub(crate) mod ffi {
         #[cxx_name = "Status_OkOverwritten"]
         fn status_ok_overwritten() -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found() -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found1(msg: SubCode) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found2(msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found3(msg: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found4(subcode: SubCode, msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_NotFound"]
         fn status_not_found5(subcode: SubCode, msg: &Slice) -> Status;
 

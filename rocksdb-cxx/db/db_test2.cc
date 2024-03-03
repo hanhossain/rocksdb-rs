@@ -2378,7 +2378,7 @@ class MockPersistentCache : public PersistentCache {
     MutexLock _(&lock_);
     auto it = data_.find(page_key.ToString());
     if (it == data_.end()) {
-      return Status_NotFound();
+      return rocksdb_rs::status::Status_NotFound();
     }
 
     assert(page_key.ToString() == it->first);

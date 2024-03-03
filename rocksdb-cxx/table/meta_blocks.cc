@@ -440,7 +440,7 @@ rocksdb_rs::status::Status ReadTableProperties(RandomAccessFileReader* file, uin
                                   prefetch_buffer, footer, ioptions, properties,
                                   memory_allocator);
   } else {
-    s = Status_NotFound();
+    s = rocksdb_rs::status::Status_NotFound();
   }
   return s;
 }

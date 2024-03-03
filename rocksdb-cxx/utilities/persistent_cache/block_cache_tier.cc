@@ -270,7 +270,7 @@ rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_
   if (!status) {
     stats_.cache_misses_++;
     stats_.read_miss_latency_.Add(timer.ElapsedNanos() / 1000);
-    return Status_NotFound("blockcache: key not found");
+    return rocksdb_rs::status::Status_NotFound("blockcache: key not found");
   }
 
   BlockCacheFile* const file = metadata_.Lookup(lba.cache_id_);
@@ -279,7 +279,7 @@ rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_
     // different, and the cache file might be removed between the two lookups
     stats_.cache_misses_++;
     stats_.read_miss_latency_.Add(timer.ElapsedNanos() / 1000);
-    return Status_NotFound("blockcache: cache file not found");
+    return rocksdb_rs::status::Status_NotFound("blockcache: cache file not found");
   }
 
   assert(file->refs_);
@@ -294,7 +294,7 @@ rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_
     stats_.cache_misses_++;
     stats_.cache_errors_++;
     stats_.read_miss_latency_.Add(timer.ElapsedNanos() / 1000);
-    return Status_NotFound("blockcache: error reading data");
+    return rocksdb_rs::status::Status_NotFound("blockcache: error reading data");
   }
 
   assert(blk_key == key);

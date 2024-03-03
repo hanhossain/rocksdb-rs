@@ -1426,7 +1426,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetBlobValue(const Slice& key, const Slic
   }
 
   if (blob_index.HasTTL() && blob_index.expiration() <= EpochNow()) {
-    return Status_NotFound("Key expired");
+    return rocksdb_rs::status::Status_NotFound("Key expired");
   }
 
   if (expiration != nullptr) {
@@ -1497,7 +1497,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
                       key.ToString(/* output_hex */ true).c_str());
     }
 
-    return Status_NotFound("Invalid blob offset");
+    return rocksdb_rs::status::Status_NotFound("Invalid blob offset");
   }
 
   std::shared_ptr<BlobFile> blob_file;
@@ -1508,7 +1508,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
 
     // file was deleted
     if (it == blob_files_.end()) {
-      return Status_NotFound("Blob Not Found as blob file missing");
+      return rocksdb_rs::status::Status_NotFound("Blob Not Found as blob file missing");
     }
 
     blob_file = it->second;

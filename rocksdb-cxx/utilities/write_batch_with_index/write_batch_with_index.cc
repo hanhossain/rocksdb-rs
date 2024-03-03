@@ -440,7 +440,7 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatch(ColumnFamilyHandle*
       break;
     case WBWIIteratorImpl::kDeleted:
     case WBWIIteratorImpl::kNotFound:
-      s = Status_NotFound();
+      s = rocksdb_rs::status::Status_NotFound();
       break;
     case WBWIIteratorImpl::kMergeInProgress:
       s = Status_MergeInProgress();
@@ -524,7 +524,7 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
   } else if (!s.ok() || result == WBWIIteratorImpl::kError) {
     return s;
   } else if (result == WBWIIteratorImpl::kDeleted) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
   assert(result == WBWIIteratorImpl::kMergeInProgress ||
          result == WBWIIteratorImpl::kNotFound);
@@ -608,7 +608,7 @@ void WriteBatchWithIndex::MultiGetFromBatchAndDB(
       continue;
     }
     if (result == WBWIIteratorImpl::kDeleted) {
-      *s = Status_NotFound();
+      *s = rocksdb_rs::status::Status_NotFound();
       continue;
     }
     if (result == WBWIIteratorImpl::kError) {

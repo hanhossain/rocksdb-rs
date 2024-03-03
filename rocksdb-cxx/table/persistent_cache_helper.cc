@@ -79,7 +79,7 @@ rocksdb_rs::status::Status PersistentCacheHelper::LookupUncompressed(
   if (!contents) {
     // We shouldn't lookup in the cache. Either
     // (1) Nowhere to store
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   CacheKey key =

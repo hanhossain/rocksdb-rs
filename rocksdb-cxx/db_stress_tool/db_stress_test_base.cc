@@ -1618,7 +1618,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
     backup_engine->GetBackupInfo(&backup_info,
                                  /*include_file_details*/ inplace_not_restore);
     if (backup_info.empty()) {
-      s = Status_NotFound("no backups found");
+      s = rocksdb_rs::status::Status_NotFound("no backups found");
       from = "BackupEngine::GetBackupInfo";
     }
   }

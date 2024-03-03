@@ -67,7 +67,7 @@ rocksdb_rs::status::Status BlobSource::GetBlobFromCache(
 
   RecordTick(statistics_, BLOB_DB_CACHE_MISS);
 
-  return Status_NotFound("Blob not found in cache");
+  return rocksdb_rs::status::Status_NotFound("Blob not found in cache");
 }
 
 rocksdb_rs::status::Status BlobSource::PutBlobIntoCache(

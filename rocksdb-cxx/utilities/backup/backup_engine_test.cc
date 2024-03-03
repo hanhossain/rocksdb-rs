@@ -419,7 +419,7 @@ class FileManager : public EnvWrapper {
     if (!s.ok()) {
       return s;
     } else if (children.size() <= 2) {  // . and ..
-      return Status_NotFound("Empty directory: " + dir);
+      return rocksdb_rs::status::Status_NotFound("Empty directory: " + dir);
     }
     assert(fname != nullptr);
     while (true) {
@@ -430,7 +430,7 @@ class FileManager : public EnvWrapper {
     }
     // should never get here
     assert(false);
-    return Status_NotFound("");
+    return rocksdb_rs::status::Status_NotFound("");
   }
 
   rocksdb_rs::status::Status DeleteRandomFileInDir(const std::string& dir) {
@@ -445,7 +445,7 @@ class FileManager : public EnvWrapper {
     }
     // should never get here
     assert(false);
-    return Status_NotFound("");
+    return rocksdb_rs::status::Status_NotFound("");
   }
 
   rocksdb_rs::status::Status AppendToRandomFileInDir(const std::string& dir,
@@ -461,7 +461,7 @@ class FileManager : public EnvWrapper {
     }
     // should never get here
     assert(false);
-    return Status_NotFound("");
+    return rocksdb_rs::status::Status_NotFound("");
   }
 
   rocksdb_rs::status::Status CorruptFile(const std::string& fname, uint64_t bytes_to_corrupt) {
@@ -901,7 +901,7 @@ class BackupEngineTest : public testing::Test {
       return s;
     }
     if (files.empty()) {
-      return Status_NotFound("");
+      return rocksdb_rs::status::Status_NotFound("");
     }
     size_t i = rnd.Uniform(static_cast<int>(files.size()));
     *fname_out = dbname_ + "/" + files[i].name;
@@ -1274,7 +1274,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00010.sst"));
 
   // 00011.sst was only in backup 1, should be deleted
-  ASSERT_TRUE(Status_NotFound().eq(
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(
             test_backup_env_->FileExists(backupdir_ + "/shared/00011.sst")));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00015.sst"));
 
@@ -1311,7 +1311,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
 
   // Make sure dangling sst file has been removed (somewhere along this
   // process). GarbageCollect should not be needed.
-  ASSERT_TRUE(Status_NotFound().eq(
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(
             test_backup_env_->FileExists(backupdir_ + "/shared/00015.sst")));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00017.sst"));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00019.sst"));
@@ -1319,7 +1319,7 @@ TEST_F(BackupEngineTest, NoDoubleCopy_And_AutoGC) {
   // Now actually purge a good one
   ASSERT_OK(backup_engine_->PurgeOldBackups(1));
 
-  ASSERT_TRUE(Status_NotFound().eq(
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(
             test_backup_env_->FileExists(backupdir_ + "/shared/00017.sst")));
   ASSERT_OK(test_backup_env_->FileExists(backupdir_ + "/shared/00019.sst"));
 
@@ -1407,14 +1407,14 @@ TEST_F(BackupEngineTest, CorruptionsTest) {
   ASSERT_OK(backup_engine_->DeleteBackup(2));
   // Should not be needed anymore with auto-GC on DeleteBackup
   //(void)backup_engine_->GarbageCollect();
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/5")));
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/5")));
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/4")));
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/4")));
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/3")));
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/3")));
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/2")));
-  ASSERT_TRUE(Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/2")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/5")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/5")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/4")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/4")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/3")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/3")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/meta/2")));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(file_manager_->FileExists(backupdir_ + "/private/2")));
   CloseBackupEngine();
   AssertBackupConsistency(0, 0, keys_iteration * 1, keys_iteration * 5);
 
@@ -2560,7 +2560,7 @@ TEST_F(BackupEngineTest, DeleteTmpFiles) {
       }
       CloseDBAndBackupEngine();
       for (std::string file_or_dir : tmp_files_and_dirs) {
-        if (!file_manager_->FileExists(file_or_dir).eq(Status_NotFound())) {
+        if (!file_manager_->FileExists(file_or_dir).eq(rocksdb_rs::status::Status_NotFound())) {
           FAIL() << file_or_dir << " was expected to be deleted." << cleanup_fn;
         }
       }

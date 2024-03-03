@@ -2562,8 +2562,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeDelInL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 2);
-  ASSERT_TRUE(statuses[0].eq(Status_NotFound()));
-  ASSERT_TRUE(statuses[1].eq(Status_NotFound()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_NotFound()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_NotFound()));
 
   // Bloom filters in L0/L1 will avoid the coroutine calls in those levels
   ASSERT_EQ(statistics()->getTickerCount(MULTIGET_COROUTINE_COUNT), 2);
@@ -2593,10 +2593,10 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2WithRangeDelInL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), keys.size());
-  ASSERT_TRUE(statuses[0].eq(Status_NotFound()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_NotFound()));
   ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(144));
-  ASSERT_TRUE(statuses[2].eq(Status_NotFound()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_NotFound()));
 
   // Bloom filters in L0/L1 will avoid the coroutine calls in those levels
   ASSERT_EQ(statistics()->getTickerCount(MULTIGET_COROUTINE_COUNT), 3);

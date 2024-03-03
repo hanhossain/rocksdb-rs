@@ -463,7 +463,7 @@ rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(size_t dat
 
   if (data_offset == GetDataSize()) {
     // reached end of batch.
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   if (data_offset > GetDataSize()) {

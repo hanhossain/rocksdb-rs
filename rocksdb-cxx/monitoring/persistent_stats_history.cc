@@ -46,7 +46,7 @@ rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsV
   std::string result;
   rocksdb_rs::status::Status s = db->Get(options, db->PersistentStatsColumnFamily(), key, &result);
   if (!s.ok() || result.empty()) {
-    return Status_NotFound("Persistent stats version key " + key +
+    return rocksdb_rs::status::Status_NotFound("Persistent stats version key " + key +
                             " not found.");
   }
 

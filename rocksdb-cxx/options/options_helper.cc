@@ -877,7 +877,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_opt
                                        : value;
 
     if (opt_ptr == nullptr) {
-      return Status_NotFound("Could not find option", opt_name);
+      return rocksdb_rs::status::Status_NotFound("Could not find option", opt_name);
     } else if (parse_func_ != nullptr) {
       ConfigOptions copy = config_options;
       copy.invoke_prepare_options = false;
@@ -891,7 +891,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_opt
       if (opt_value.empty()) {
         return rocksdb_rs::status::Status_OK();
       } else if (config == nullptr) {
-        return Status_NotFound("Could not find configurable: ", opt_name);
+        return rocksdb_rs::status::Status_NotFound("Could not find configurable: ", opt_name);
       } else {
         ConfigOptions copy = config_options;
         copy.ignore_unknown_options = false;
@@ -944,7 +944,7 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseType(
     } else if (unused != nullptr) {
       (*unused)[opts_iter.first] = opts_iter.second;
     } else if (!config_options.ignore_unknown_options) {
-      return Status_NotFound("Unrecognized option", opts_iter.first);
+      return rocksdb_rs::status::Status_NotFound("Unrecognized option", opts_iter.first);
     }
   }
   return rocksdb_rs::status::Status_OK();
@@ -1369,7 +1369,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Prepare(const ConfigOptions& config_o
       if (config != nullptr) {
         return config->PrepareOptions(config_options);
       } else if (!CanBeNull()) {
-        return Status_NotFound("Missing configurable object", name);
+        return rocksdb_rs::status::Status_NotFound("Missing configurable object", name);
       }
     }
   }
@@ -1389,7 +1389,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Validate(const DBOptions& db_opts,
       if (config != nullptr) {
         return config->ValidateOptions(db_opts, cf_opts);
       } else if (!CanBeNull()) {
-        return Status_NotFound("Missing configurable object", name);
+        return rocksdb_rs::status::Status_NotFound("Missing configurable object", name);
       }
     }
   }

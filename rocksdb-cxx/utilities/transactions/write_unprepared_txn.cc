@@ -867,7 +867,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RollbackToSavePoint() {
     return RollbackToSavePointInternal();
   }
 
-  return Status_NotFound();
+  return rocksdb_rs::status::Status_NotFound();
 }
 
 rocksdb_rs::status::Status WriteUnpreparedTxn::RollbackToSavePointInternal() {
@@ -940,7 +940,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::PopSavePoint() {
     return s;
   }
 
-  return Status_NotFound();
+  return rocksdb_rs::status::Status_NotFound();
 }
 
 void WriteUnpreparedTxn::MultiGet(const ReadOptions& options,

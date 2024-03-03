@@ -143,7 +143,7 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
         continue;
       case GetContext::kDeleted:
         // Use empty error message for speed
-        *status = Status_NotFound();
+        *status = rocksdb_rs::status::Status_NotFound();
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kCorrupt:

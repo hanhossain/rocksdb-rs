@@ -262,7 +262,7 @@ void TransactionLogIteratorImpl::UpdateCurrentWriteBatch(const Slice& record) {
     // currentStatus_ will be set to Ok if reseek succeeds
     // Note: this is still ok in seq_pre_batch_ && two_write_queuesp_ mode
     // that allows gaps in the WAL since it will still skip over the gap.
-    current_status_ = Status_NotFound("Gap in sequence numbers");
+    current_status_ = rocksdb_rs::status::Status_NotFound("Gap in sequence numbers");
     // In seq_per_batch_ mode, gaps in the seq are possible so the strict mode
     // should be disabled
     return SeekToStartSequence(current_file_index_, !seq_per_batch_);

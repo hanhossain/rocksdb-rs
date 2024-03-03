@@ -2477,7 +2477,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
         return;
       case GetContext::kDeleted:
         // Use empty error message for speed
-        *status = Status_NotFound();
+        *status = rocksdb_rs::status::Status_NotFound();
         return;
       case GetContext::kCorrupt:
         *status = Status_Corruption("corrupted key for ", user_key);
@@ -2532,7 +2532,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
     if (key_exists != nullptr) {
       *key_exists = false;
     }
-    *status = Status_NotFound();  // Use an empty error message for speed
+    *status = rocksdb_rs::status::Status_NotFound();  // Use an empty error message for speed
   }
 }
 
@@ -2787,7 +2787,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
       }
     } else {
       range->MarkKeyDone(iter);
-      *status = Status_NotFound();  // Use an empty error message for speed
+      *status = rocksdb_rs::status::Status_NotFound();  // Use an empty error message for speed
     }
   }
 
@@ -6958,7 +6958,7 @@ rocksdb_rs::status::Status VersionSet::GetMetadataForFile(uint64_t number, int* 
       }
     }
   }
-  return Status_NotFound("File not present in any level");
+  return rocksdb_rs::status::Status_NotFound("File not present in any level");
 }
 
 void VersionSet::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {

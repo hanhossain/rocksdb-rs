@@ -1606,7 +1606,7 @@ void WriteBatch::SetSavePoint() {
 
 rocksdb_rs::status::Status WriteBatch::RollbackToSavePoint() {
   if (save_points_ == nullptr || save_points_->stack.size() == 0) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   // Pop the most recent savepoint off the stack
@@ -1635,7 +1635,7 @@ rocksdb_rs::status::Status WriteBatch::RollbackToSavePoint() {
 
 rocksdb_rs::status::Status WriteBatch::PopSavePoint() {
   if (save_points_ == nullptr || save_points_->stack.size() == 0) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   // Pop the most recent savepoint off the stack

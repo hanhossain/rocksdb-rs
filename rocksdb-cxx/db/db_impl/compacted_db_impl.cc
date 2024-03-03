@@ -86,7 +86,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, Colu
           ExtractUserKeyAndStripTimestamp(f.smallest_key,
                                           user_comparator_->timestamp_size()),
           /*b_has_ts=*/false) < 0) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
   rocksdb_rs::status::Status s = f.fd.table_reader->Get(options, lkey.internal_key(), &get_context,
                                     nullptr);
@@ -96,7 +96,7 @@ rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, Colu
   if (get_context.State() == GetContext::kFound) {
     return rocksdb_rs::status::Status_OK();
   }
-  return Status_NotFound();
+  return rocksdb_rs::status::Status_NotFound();
 }
 
 rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
@@ -149,7 +149,7 @@ rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
       reader_list.push_back(f.fd.table_reader);
     }
   }
-  rust::Vec<rocksdb_rs::status::Status> statuses = Status_NotFound().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_NotFound().create_vec(num_keys);
   values->resize(num_keys);
   if (timestamps) {
     timestamps->resize(num_keys);

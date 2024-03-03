@@ -248,7 +248,7 @@ rocksdb_rs::status::Status FlushJob::Run(LogsWithPrepTracker* prep_tracker, File
     prev_cpu_write_nanos = IOSTATS(cpu_write_nanos);
     prev_cpu_read_nanos = IOSTATS(cpu_read_nanos);
   }
-  rocksdb_rs::status::Status mempurge_s = Status_NotFound("No MemPurge.");
+  rocksdb_rs::status::Status mempurge_s = rocksdb_rs::status::Status_NotFound("No MemPurge.");
   if ((mempurge_threshold > 0.0) &&
       (flush_reason_ == FlushReason::kWriteBufferFull) && (!mems_.empty()) &&
       MemPurgeDecider(mempurge_threshold) && !(db_options_.atomic_flush)) {

@@ -4268,7 +4268,7 @@ rocksdb_rs::status::Status DBImpl::GetUpdatesSince(
         "transactions");
   }
   if (seq > versions_->LastSequence()) {
-    return Status_NotFound("Requested sequence not yet written in the db");
+    return rocksdb_rs::status::Status_NotFound("Requested sequence not yet written in the db");
   }
   return wal_manager_.GetUpdatesSince(seq, iter, read_options, versions_.get());
 }

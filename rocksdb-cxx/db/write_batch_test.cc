@@ -439,7 +439,7 @@ TEST_F(WriteBatchTest, PrepareCommit) {
   batch.SetSavePoint();
   ASSERT_OK(WriteBatchInternal::MarkEndPrepare(&batch, Slice("xid1")));
   rocksdb_rs::status::Status s = batch.RollbackToSavePoint();
-  ASSERT_TRUE(s.eq(Status_NotFound()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_NotFound()));
   ASSERT_OK(WriteBatchInternal::MarkCommit(&batch, Slice("xid1")));
   ASSERT_OK(WriteBatchInternal::MarkRollback(&batch, Slice("xid1")));
   ASSERT_EQ(2u, batch.Count());

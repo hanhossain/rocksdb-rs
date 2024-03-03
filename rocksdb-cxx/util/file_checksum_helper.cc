@@ -48,7 +48,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::SearchOneFileChecksum(
 
   auto it = checksum_map_.find(file_number);
   if (it == checksum_map_.end()) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   } else {
     *checksum = it->second.first;
     *checksum_func_name = it->second.second;
@@ -73,7 +73,7 @@ rocksdb_rs::status::Status FileChecksumListImpl::InsertOneFileChecksum(
 rocksdb_rs::status::Status FileChecksumListImpl::RemoveOneFileChecksum(uint64_t file_number) {
   auto it = checksum_map_.find(file_number);
   if (it == checksum_map_.end()) {
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   } else {
     checksum_map_.erase(it);
   }

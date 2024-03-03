@@ -358,7 +358,7 @@ class TimestampUpdater : public WriteBatch::Handler {
       return rocksdb_rs::status::Status_OK();
     } else if (std::numeric_limits<size_t>::max() == cf_ts_sz) {
       // Column family timestamp info not found.
-      return Status_NotFound();
+      return rocksdb_rs::status::Status_NotFound();
     } else if (cf_ts_sz != timestamp_.size()) {
       return Status_InvalidArgument("timestamp size mismatch");
     }

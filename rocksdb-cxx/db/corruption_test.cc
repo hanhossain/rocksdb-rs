@@ -1331,7 +1331,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
       // Since  it's corrupting second last wal, below key is not found.
       v.clear();
       ASSERT_TRUE(db_->Get(ReadOptions(), "key" + std::to_string(1), &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {
@@ -1506,7 +1506,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
       std::string v;
       // Key not visible since it's not committed.
       ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo", &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
 
       v.clear();
       ASSERT_OK(txn_db->Get(ReadOptions(), "key" + std::to_string(0), &v));
@@ -1515,10 +1515,10 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
       // Last WAL is corrupted which contains two keys below.
       v.clear();
       ASSERT_TRUE(txn_db->Get(ReadOptions(), "key" + std::to_string(1), &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
       v.clear();
       ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo1", &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {
@@ -1667,7 +1667,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
       // Since it's corrupting last wal after Flush, below key is not found.
       v.clear();
       ASSERT_TRUE(db_->Get(ReadOptions(), handles[1], "dontcare", &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {

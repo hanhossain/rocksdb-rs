@@ -1327,7 +1327,7 @@ rocksdb_rs::status::Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& 
                                                  const std::string& key) {
   if (type_second >= kTaTypeNum) {
     fprintf(stderr, "Unknown Type Id: %u\n", type_second);
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   for (int type_first = 0; type_first < kTaTypeNum; type_first++) {

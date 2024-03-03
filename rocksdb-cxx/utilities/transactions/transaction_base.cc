@@ -202,7 +202,7 @@ rocksdb_rs::status::Status TransactionBaseImpl::RollbackToSavePoint() {
     return s;
   } else {
     assert(write_batch_.RollbackToSavePoint().IsNotFound());
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 }
 
@@ -210,7 +210,7 @@ rocksdb_rs::status::Status TransactionBaseImpl::PopSavePoint() {
   if (save_points_ == nullptr || save_points_->empty()) {
     // No SavePoint yet.
     assert(write_batch_.PopSavePoint().IsNotFound());
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   assert(!save_points_->empty());

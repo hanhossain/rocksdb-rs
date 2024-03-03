@@ -102,7 +102,7 @@ rocksdb_rs::status::Status VolatileCacheTier::Lookup(const Slice& page_key,
     return next_tier()->Lookup(page_key, result, size);
   }
 
-  return Status_NotFound("key not found in volatile cache");
+  return rocksdb_rs::status::Status_NotFound("key not found in volatile cache");
 }
 
 bool VolatileCacheTier::Erase(const Slice& /*key*/) {

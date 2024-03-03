@@ -50,7 +50,7 @@ rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, E
   std::vector<std::string> file_names;
   s = env->GetChildren(dbpath, &file_names);
   if (s.IsNotFound()) {
-    return Status_NotFound(rocksdb_rs::status::SubCode::kPathNotFound,
+    return rocksdb_rs::status::Status_NotFound(rocksdb_rs::status::SubCode::kPathNotFound,
                             "No options files found in the DB directory.",
                             dbpath);
   } else if (!s.ok()) {
@@ -67,7 +67,7 @@ rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, E
     }
   }
   if (latest_file_name.size() == 0) {
-    return Status_NotFound(rocksdb_rs::status::SubCode::kPathNotFound,
+    return rocksdb_rs::status::Status_NotFound(rocksdb_rs::status::SubCode::kPathNotFound,
                             "No options files found in the DB directory.",
                             dbpath);
   }

@@ -100,7 +100,7 @@ class NonBatchedOpsStressTest : public StressTest {
             const int diff = iter->key().compare(k);
 
             if (diff > 0) {
-              s = Status_NotFound();
+              s = rocksdb_rs::status::Status_NotFound();
             } else if (diff == 0) {
               if (!VerifyWideColumns(iter->value(), iter->columns())) {
                 VerificationAbort(shared, static_cast<int>(cf), i,
@@ -118,7 +118,7 @@ class NonBatchedOpsStressTest : public StressTest {
           } else {
             // The iterator found no value for the key in question, so do not
             // move to the next item in the iterator
-            s = Status_NotFound();
+            s = rocksdb_rs::status::Status_NotFound();
           }
 
           VerifyOrSyncValue(static_cast<int>(cf), i, options, shared, from_db,

@@ -269,7 +269,7 @@ class PersistentCacheFromCache : public PersistentCache {
       cache_.Release(handle);
       return rocksdb_rs::status::Status_OK();
     } else {
-      return Status_NotFound();
+      return rocksdb_rs::status::Status_NotFound();
     }
   }
 

@@ -469,7 +469,7 @@ void IndexBlockIter::SeekImpl(const Slice& target) {
       // and when key is larger than the last key, which both set Valid() to
       // false.
       current_ = restarts_;
-      status_ = Status_NotFound();
+      status_ = rocksdb_rs::status::Status_NotFound();
     }
     // restart interval must be one when hash search is enabled so the binary
     // search simply lands at the right place.

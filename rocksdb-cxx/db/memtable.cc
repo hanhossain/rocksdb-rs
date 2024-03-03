@@ -1180,7 +1180,7 @@ static bool SaveValue(void* arg, const char* entry) {
             *(s->status) = rocksdb_rs::status::Status_OK();
           }
         } else {
-          *(s->status) = Status_NotFound();
+          *(s->status) = rocksdb_rs::status::Status_NotFound();
         }
         *(s->found_final_value) = true;
         return false;
@@ -1611,7 +1611,7 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
     }
   }
   // The latest value is not `kTypeValue` or key doesn't exist
-  return Status_NotFound();
+  return rocksdb_rs::status::Status_NotFound();
 }
 
 size_t MemTable::CountSuccessiveMergeEntries(const LookupKey& key) {

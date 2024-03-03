@@ -442,7 +442,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
     if (!immutable_db_options_.best_efforts_recovery) {
       s = env_->FileExists(current_fname);
     } else {
-      s = Status_NotFound();
+      s = rocksdb_rs::status::Status_NotFound();
       IOOptions io_opts;
       io_opts.do_not_recurse = true;
       rocksdb_rs::status::Status io_s = immutable_db_options_.fs->GetChildren(
