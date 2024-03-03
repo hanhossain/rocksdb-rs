@@ -376,7 +376,7 @@ rocksdb_rs::status::Status DBWithTTL::Open(
   }
   DB* db;
 
-  rocksdb_rs::status::Status st = Status_new();
+  rocksdb_rs::status::Status st = rocksdb_rs::status::Status_new();
   if (read_only) {
     st = DB::OpenForReadOnly(db_options, dbname, column_families_sanitized,
                              handles, &db);

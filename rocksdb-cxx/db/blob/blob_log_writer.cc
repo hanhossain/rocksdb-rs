@@ -68,7 +68,7 @@ rocksdb_rs::status::Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
   std::string str;
   footer.EncodeTo(&str);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (dest_->seen_error()) {
     return Status_IOError("Seen Error. Skip closing.");
   } else {

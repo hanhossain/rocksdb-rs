@@ -139,7 +139,7 @@ bool DeleteScheduler::IsTrashFile(const std::string& file_path) {
 
 rocksdb_rs::status::Status DeleteScheduler::CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
                                          const std::string& path) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Check if there are any files marked as trash in this path
   std::vector<std::string> files_in_path;
   const auto& fs = env->GetFileSystem();
@@ -156,7 +156,7 @@ rocksdb_rs::status::Status DeleteScheduler::CleanupDirectory(Env* env, SstFileMa
       continue;
     }
 
-    rocksdb_rs::status::Status file_delete = Status_new();
+    rocksdb_rs::status::Status file_delete = rocksdb_rs::status::Status_new();
     std::string trash_file = path + "/" + current_file;
     if (sfm) {
       // We have an SstFileManager that will schedule the file delete
@@ -193,7 +193,7 @@ rocksdb_rs::status::Status DeleteScheduler::MarkAsTrash(const std::string& file_
   // TODO(tec) : Implement Env::RenameFileIfNotExist and remove
   //             file_move_mu mutex.
   int cnt = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   InstrumentedMutexLock l(&file_move_mu_);
   while (true) {
     s = fs_->FileExists(*trash_file, IOOptions(), nullptr);

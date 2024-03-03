@@ -252,7 +252,7 @@ bool RunSanityTests(const std::string& command, const std::string& path) {
     fprintf(stderr, "Verifying...\n");
   }
   for (auto sanity_test : sanity_tests) {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     fprintf(stderr, "%s -- ", sanity_test->Name().c_str());
     if (command == "create") {
       s = sanity_test->Create();

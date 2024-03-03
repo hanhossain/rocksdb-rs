@@ -59,8 +59,8 @@ class ErrorHandlerFSListener : public EventListener {
         file_creation_started_(false),
         override_bg_error_(false),
         file_count_(0),
-        bg_error_(Status_new()),
-        new_bg_error_(Status_new()),
+        bg_error_(rocksdb_rs::status::Status_new()),
+        new_bg_error_(rocksdb_rs::status::Status_new()),
         fault_fs_(nullptr) {}
 
   void OnTableFileCreationStarted(
@@ -156,7 +156,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -203,7 +203,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoSpaceError) {
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -246,7 +246,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteRetryableError) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -319,7 +319,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -403,7 +403,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWALWriteRetryableError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
@@ -448,7 +448,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWALAtomicWriteRetryableError) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
   options.atomic_flush = true;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
@@ -494,7 +494,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableError1) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -549,7 +549,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError2) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -593,7 +593,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError3) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -635,7 +635,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteError) {
   options.env = fault_env_.get();
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -677,7 +677,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -720,7 +720,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteFileScopeError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -766,7 +766,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -810,7 +810,7 @@ TEST_F(DBErrorHandlingFSTest, DoubleManifestWriteError) {
   options.env = fault_env_.get();
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -863,7 +863,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteError) {
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = 2;
   options.listeners.emplace_back(listener);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
   std::atomic<bool> fail_manifest(false);
@@ -934,7 +934,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   options.level0_file_num_compaction_trigger = 2;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
   std::atomic<bool> fail_manifest(false);
@@ -949,7 +949,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -1005,7 +1005,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = 2;
   options.listeners.emplace_back(listener);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DestroyAndReopen(options);
 
   ASSERT_OK(Put(Key(0), "va;"));
@@ -1014,7 +1014,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   ASSERT_OK(s);
 
   listener->OverrideBGError(
-      Status_new(Status_NoSpace(), rocksdb_rs::status::Severity::kHardError));
+      rocksdb_rs::status::Status_new(Status_NoSpace(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1048,7 +1048,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteRetryableError) {
   options.level0_file_num_compaction_trigger = 2;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DestroyAndReopen(options);
 
   IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
@@ -1059,7 +1059,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1095,7 +1095,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   options.level0_file_num_compaction_trigger = 2;
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DestroyAndReopen(options);
 
   IOStatus error_msg = IOStatus::IOError("File Scope Data Loss Error");
@@ -1109,7 +1109,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -1142,7 +1142,7 @@ TEST_F(DBErrorHandlingFSTest, CorruptionError) {
   options.env = fault_env_.get();
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = 2;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DestroyAndReopen(options);
 
   ASSERT_OK(Put(Key(0), "va;"));
@@ -1186,7 +1186,7 @@ TEST_F(DBErrorHandlingFSTest, AutoRecoverFlushError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery();
   DestroyAndReopen(options);
@@ -1230,7 +1230,7 @@ TEST_F(DBErrorHandlingFSTest, FailRecoverFlushError) {
   options.env = fault_env_.get();
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery();
   DestroyAndReopen(options);
@@ -1260,7 +1260,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteError) {
   options.create_if_missing = true;
   options.writable_file_max_buffer_size = 32768;
   options.listeners.emplace_back(listener);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Random rnd(301);
 
   listener->EnableAutoRecovery();
@@ -1764,7 +1764,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover1) {
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -1834,7 +1834,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover2) {
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -1894,7 +1894,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAutoRecover1) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -1936,7 +1936,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAutoRecover2) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -1987,7 +1987,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableErrorAutoRecover) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -2040,7 +2040,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableErrorAutoRecover) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -2096,7 +2096,7 @@ TEST_F(DBErrorHandlingFSTest,
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
   std::atomic<bool> fail_manifest(false);
@@ -2110,7 +2110,7 @@ TEST_F(DBErrorHandlingFSTest,
   ASSERT_OK(Put(Key(2), "val"));
   ASSERT_OK(Flush());
 
-  listener->OverrideBGError(Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -2184,7 +2184,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = 2;
   options.listeners.emplace_back(listener);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::atomic<bool> fail_first(false);
   std::atomic<bool> fail_second(true);
   DestroyAndReopen(options);
@@ -2197,7 +2197,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2241,7 +2241,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableErrorAutoRecover1) {
   options.paranoid_checks = true;
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Random rnd(301);
 
   DestroyAndReopen(options);
@@ -2344,7 +2344,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableErrorAutoRecover2) {
   options.paranoid_checks = true;
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Random rnd(301);
 
   DestroyAndReopen(options);
@@ -2445,7 +2445,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAbortRecovery) {
   options.listeners.emplace_back(listener);
   options.max_bgerror_resume_count = 2;
   options.bgerror_resume_retry_interval = 100000;  // 0.1 second
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -2477,7 +2477,7 @@ TEST_F(DBErrorHandlingFSTest, FlushReadError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
@@ -2524,7 +2524,7 @@ TEST_F(DBErrorHandlingFSTest, AtomicFlushReadError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(false);
   options.atomic_flush = true;
@@ -2574,7 +2574,7 @@ TEST_F(DBErrorHandlingFSTest, AtomicFlushNoSpaceError) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.statistics = CreateDBStatistics();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(true);
   options.atomic_flush = true;
@@ -2624,7 +2624,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   BlockBasedTableOptions table_options;
   table_options.no_block_cache = true;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::atomic<bool> fail_first(false);
   std::atomic<bool> fail_second(true);
   Random rnd(301);
@@ -2639,7 +2639,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2684,7 +2684,7 @@ TEST_P(DBErrorHandlingFencingTest, FLushWriteFenced) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.paranoid_checks = GetParam();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   listener->EnableAutoRecovery(true);
   DestroyAndReopen(options);
@@ -2712,7 +2712,7 @@ TEST_P(DBErrorHandlingFencingTest, ManifestWriteFenced) {
   options.create_if_missing = true;
   options.listeners.emplace_back(listener);
   options.paranoid_checks = GetParam();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string old_manifest;
   std::string new_manifest;
 
@@ -2748,7 +2748,7 @@ TEST_P(DBErrorHandlingFencingTest, CompactionWriteFenced) {
   options.level0_file_num_compaction_trigger = 2;
   options.listeners.emplace_back(listener);
   options.paranoid_checks = GetParam();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DestroyAndReopen(options);
 
   ASSERT_OK(Put(Key(0), "va;"));
@@ -2789,7 +2789,7 @@ TEST_P(DBErrorHandlingFencingTest, WALWriteFenced) {
   options.writable_file_max_buffer_size = 32768;
   options.listeners.emplace_back(listener);
   options.paranoid_checks = GetParam();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Random rnd(301);
 
   listener->EnableAutoRecovery(true);

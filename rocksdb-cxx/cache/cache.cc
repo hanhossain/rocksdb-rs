@@ -72,7 +72,7 @@ rocksdb_rs::status::Status SecondaryCache::CreateFromString(
   if (value.find("compressed_secondary_cache://") == 0) {
     std::string args = value;
     args.erase(0, std::strlen("compressed_secondary_cache://"));
-    rocksdb_rs::status::Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     std::shared_ptr<SecondaryCache> sec_cache;
 
     CompressedSecondaryCacheOptions sec_cache_opts;
@@ -96,7 +96,7 @@ rocksdb_rs::status::Status SecondaryCache::CreateFromString(
 rocksdb_rs::status::Status Cache::CreateFromString(const ConfigOptions& config_options,
                                const std::string& value,
                                std::shared_ptr<Cache>* result) {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::shared_ptr<Cache> cache;
   if (value.find('=') == std::string::npos) {
     cache = NewLRUCache(ParseSizeT(value));

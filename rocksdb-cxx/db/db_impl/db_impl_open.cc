@@ -224,7 +224,7 @@ namespace {
 rocksdb_rs::status::Status ValidateOptionsByTable(
     const DBOptions& db_opts,
     const std::vector<ColumnFamilyDescriptor>& column_families) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto& cf : column_families) {
     s = ValidateOptions(db_opts, cf.options);
     if (!s.ok()) {
@@ -238,7 +238,7 @@ rocksdb_rs::status::Status ValidateOptionsByTable(
 rocksdb_rs::status::Status DBImpl::ValidateOptions(
     const DBOptions& db_options,
     const std::vector<ColumnFamilyDescriptor>& column_families) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto& cfd : column_families) {
     s = ColumnFamilyData::ValidateOptions(db_options, cfd.options);
     if (!s.ok()) {
@@ -525,7 +525,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
     assert(s.ok());
   }
   assert(db_id_.empty());
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool missing_table_file = false;
   if (!immutable_db_options_.best_efforts_recovery) {
     s = versions_->Recover(column_families, read_only, &db_id_);
@@ -825,7 +825,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
 
 rocksdb_rs::status::Status DBImpl::PersistentStatsProcessFormatVersion() {
   mutex_.AssertHeld();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // persist version when stats CF doesn't exist
   bool should_persist_format_version = !persistent_stats_cfd_exists_;
   mutex_.Unlock();
@@ -911,7 +911,7 @@ rocksdb_rs::status::Status DBImpl::InitPersistStatsColumnFamily() {
           kPersistentStatsColumnFamilyName);
   persistent_stats_cfd_exists_ = persistent_stats_cfd != nullptr;
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (persistent_stats_cfd != nullptr) {
     // We are recovering from a DB which already contains persistent stats CF,
     // the CF is already created in VersionSet::ApplyOneVersionEdit, but
@@ -1084,7 +1084,7 @@ rocksdb_rs::status::Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& 
   };
 
   mutex_.AssertHeld();
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::unordered_map<int, VersionEdit> version_edits;
   // no need to refcount because iteration is under mutex
   for (auto cfd : *versions_->GetColumnFamilySet()) {
@@ -1516,7 +1516,7 @@ rocksdb_rs::status::Status DBImpl::GetLogSizeAndMaybeTruncate(uint64_t wal_numbe
   LogFileNumberSize log(wal_number);
   std::string fname =
       static_cast<std::string>(LogFileName(immutable_db_options_.GetWalDir(), wal_number));
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // This gets the appear size of the wals, not including preallocated space.
   s = env_->GetFileSize(fname, &log.size);
   TEST_SYNC_POINT_CALLBACK("DBImpl::GetLogSizeAndMaybeTruncate:0", /*arg=*/&s);
@@ -1551,7 +1551,7 @@ rocksdb_rs::status::Status DBImpl::RestoreAliveLogFiles(const std::vector<uint64
   if (wal_numbers.empty()) {
     return Status_OK();
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   mutex_.AssertHeld();
   assert(immutable_db_options_.avoid_flush_during_recovery);
   // Mark these as alive so they'll be considered for deletion later by
@@ -1603,7 +1603,7 @@ rocksdb_rs::status::Status DBImpl::WriteLevel0TableForRecovery(int job_id, Colum
   ro.total_order_seek = true;
   ro.io_activity = Env::IOActivity::kDBOpen;
   Arena arena;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableProperties table_properties;
   {
     ScopedArenaIterator iter(mem->NewIterator(ro, &arena));
@@ -2094,7 +2094,7 @@ rocksdb_rs::status::Status DBImpl::Open(const DBOptions& db_options, const std::
     }
   }
   TEST_SYNC_POINT("DBImpl::Open:Opened");
-  rocksdb_rs::status::Status persist_options_status = Status_new();
+  rocksdb_rs::status::Status persist_options_status = rocksdb_rs::status::Status_new();
   if (s.ok()) {
     // Persist RocksDB Options before scheduling the compaction.
     // The WriteOptionsFile() will release and lock the mutex internally.

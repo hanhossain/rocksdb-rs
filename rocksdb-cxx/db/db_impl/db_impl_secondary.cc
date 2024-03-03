@@ -38,7 +38,7 @@ rocksdb_rs::status::Status DBImplSecondary::Recover(
   mutex_.AssertHeld();
 
   JobContext job_context(0);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   s = static_cast<ReactiveVersionSet*>(versions_.get())
           ->Recover(column_families, &manifest_reader_, &manifest_reporter_,
                     &manifest_reader_status_);
@@ -82,7 +82,7 @@ rocksdb_rs::status::Status DBImplSecondary::FindAndRecoverLogFiles(
     JobContext* job_context) {
   assert(nullptr != cfds_changed);
   assert(nullptr != job_context);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::vector<uint64_t> logs;
   s = FindNewLogNumbers(&logs);
   if (s.ok() && !logs.empty()) {
@@ -96,7 +96,7 @@ rocksdb_rs::status::Status DBImplSecondary::FindAndRecoverLogFiles(
 rocksdb_rs::status::Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
   assert(logs != nullptr);
   std::vector<std::string> filenames;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   IOOptions io_opts;
   io_opts.do_not_recurse = true;
   s = immutable_db_options_.fs->GetChildren(immutable_db_options_.GetWalDir(),
@@ -186,7 +186,7 @@ rocksdb_rs::status::Status DBImplSecondary::RecoverLogFiles(
   assert(nullptr != cfds_changed);
   assert(nullptr != job_context);
   mutex_.AssertHeld();
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   for (auto log_number : log_numbers) {
     log::FragmentBufferedReader* reader = nullptr;
     status = MaybeInitLogReader(log_number, &reader);
@@ -398,7 +398,7 @@ rocksdb_rs::status::Status DBImplSecondary::GetImpl(const ReadOptions& read_opti
   GetWithTimestampReadCallback read_cb(snapshot);
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   LookupKey lkey(key, snapshot, read_options.timestamp);
   PERF_TIMER_STOP(get_snapshot_time);
 
@@ -623,7 +623,7 @@ rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
 rocksdb_rs::status::Status DBImplSecondary::TryCatchUpWithPrimary() {
   assert(versions_.get() != nullptr);
   assert(manifest_reader_.get() != nullptr);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // read the manifest and apply new changes to the secondary instance
   std::unordered_set<ColumnFamilyData*> cfds_changed;
   JobContext job_context(0, true /*create_superversion*/);
@@ -713,7 +713,7 @@ rocksdb_rs::status::Status DB::OpenAsSecondary(
   *dbptr = nullptr;
 
   DBOptions tmp_opts(db_options);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (nullptr == tmp_opts.info_log) {
     s = CreateLoggerFromOptions(secondary_path, tmp_opts, &tmp_opts.info_log);
     if (!s.ok()) {

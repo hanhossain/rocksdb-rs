@@ -33,7 +33,7 @@ RandomTransactionInserter::RandomTransactionInserter(
       read_options_(read_options),
       num_keys_(num_keys),
       num_sets_(num_sets),
-      last_status_(Status_new()),
+      last_status_(rocksdb_rs::status::Status_new()),
       txn_id_(first_id),
       cmt_delay_ms_(cmt_delay_ms) {}
 
@@ -87,7 +87,7 @@ rocksdb_rs::status::Status RandomTransactionInserter::DBGet(
     DB* db, Transaction* txn, ReadOptions& read_options, uint16_t set_i,
     uint64_t ikey, bool get_for_update, uint64_t* int_value,
     std::string* full_key, bool* unexpected_error) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Five digits (since the largest uint16_t is 65535) plus the NUL
   // end char.
   char prefix_buf[6] = {0};
@@ -129,7 +129,7 @@ rocksdb_rs::status::Status RandomTransactionInserter::DBGet(
 
 bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
                                          bool is_optimistic) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatch batch;
 
   // pick a random number to use to increment a key in each set

@@ -223,7 +223,7 @@ rocksdb_rs::status::Status TransactionDB::Open(
     const std::string& dbname,
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles, TransactionDB** dbptr) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DB* db = nullptr;
   if (txn_db_options.write_policy == WRITE_COMMITTED &&
       db_options.unordered_write) {

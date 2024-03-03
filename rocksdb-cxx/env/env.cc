@@ -152,7 +152,7 @@ class LegacyRandomAccessFileWrapper : public FSRandomAccessFile {
                      const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
     std::vector<ReadRequest> reqs;
-    rocksdb_rs::status::Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
 
     reqs.reserve(num_reqs);
     for (size_t i = 0; i < num_reqs; ++i) {

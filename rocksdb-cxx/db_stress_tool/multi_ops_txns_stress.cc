@@ -504,7 +504,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestCustomOperations(
   // Randomly choose from 0, 1, and 2.
   // TODO (yanqin) allow user to configure probability of each operation.
   uint32_t rand = thread->rand.Uniform(3);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (0 == rand) {
     // Update primary key.
     uint32_t old_a = 0;
@@ -1355,7 +1355,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(T
 
 rocksdb_rs::status::Status MultiOpsTxnsStressTest::CommitAndCreateTimestampedSnapshotIfNeeded(
     ThreadState* thread, Transaction& txn) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (FLAGS_create_timestamped_snapshot_one_in > 0 &&
       thread->rand.OneInOpt(FLAGS_create_timestamped_snapshot_one_in)) {
     uint64_t ts = db_stress_env->NowNanos();

@@ -311,7 +311,7 @@ TEST_P(WriteCallbackPTest, WriteWithCallbackTest) {
         ASSERT_OK(WriteBatchInternal::UpdateProtectionInfo(
             &write_op.write_batch_, woptions.protection_bytes_per_key));
       }
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       if (seq_per_batch_) {
         class PublishSeqCallback : public PreReleaseCallback {
          public:

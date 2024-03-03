@@ -40,7 +40,7 @@ SstFileReader::~SstFileReader() {}
 
 rocksdb_rs::status::Status SstFileReader::Open(const std::string& file_path) {
   auto r = rep_.get();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   uint64_t file_size = 0;
   std::unique_ptr<FSRandomAccessFile> file;
   std::unique_ptr<RandomAccessFileReader> file_reader;

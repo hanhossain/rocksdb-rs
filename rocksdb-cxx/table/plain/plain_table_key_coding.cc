@@ -301,7 +301,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::NextPlainEncodingKey(uint32_t s
                                                   uint32_t* bytes_read,
                                                   bool* /*seekable*/) {
   uint32_t user_key_size = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (fixed_user_key_len_ != kPlainTableVariableLength) {
     user_key_size = fixed_user_key_len_;
   } else {
@@ -350,7 +350,7 @@ rocksdb_rs::status::Status PlainTableKeyDecoder::NextPrefixEncodingKey(
   PlainTableEntryType entry_type;
 
   bool expect_suffix = false;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   do {
     uint32_t size = 0;
     // dummy initial value to avoid compiler complain

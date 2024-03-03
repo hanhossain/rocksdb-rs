@@ -44,7 +44,7 @@ rocksdb_rs::status::Status LoadOptionsFromFile(const ConfigOptions& config_optio
 
 rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
                                 std::string* options_file_name) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string latest_file_name;
   uint64_t latest_time_stamp = 0;
   std::vector<std::string> file_names;

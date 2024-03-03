@@ -59,7 +59,7 @@ class FilterBlockBuilder {
   virtual size_t EstimateEntriesAdded() = 0;
   Slice Finish() {  // Generate Filter
     const BlockHandle empty_handle;
-    rocksdb_rs::status::Status dont_care_status = Status_new();
+    rocksdb_rs::status::Status dont_care_status = rocksdb_rs::status::Status_new();
     auto ret = Finish(empty_handle, &dont_care_status);
     assert(dont_care_status.ok());
     return ret;

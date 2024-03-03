@@ -424,7 +424,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::EndSection(
     const ConfigOptions& config_options, const OptionSection section,
     const std::string& section_title, const std::string& section_arg,
     const std::unordered_map<std::string, std::string>& opt_map) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (section == kOptionSectionDBOptions) {
     s = GetDBOptionsFromMap(config_options, DBOptions(), opt_map, &db_opt_);
     if (!s.ok()) {

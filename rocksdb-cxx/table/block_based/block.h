@@ -320,7 +320,7 @@ class Block {
 template <class TValue>
 class BlockIter : public InternalIteratorBase<TValue> {
  public:
-    BlockIter() : data_(nullptr), status_(Status_new()) {}
+    BlockIter() : data_(nullptr), status_(rocksdb_rs::status::Status_new()) {}
 
   // Makes Valid() return false, status() return `s`, and Seek()/Prev()/etc do
   // nothing. Calls cleanup functions.

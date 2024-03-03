@@ -398,7 +398,7 @@ rocksdb_rs::status::Status LogicalBlockSizeCache::RefAndCacheLogicalBlockSize(
     }
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto& dir_size : dir_sizes) {
     s = get_logical_block_size_of_directory_(dir_size.first, &dir_size.second);
     if (!s.ok()) {

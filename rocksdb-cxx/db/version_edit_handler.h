@@ -20,7 +20,7 @@ struct FileMetaData;
 class VersionEditHandlerBase {
  public:
   explicit VersionEditHandlerBase(const ReadOptions& read_options)
-      : status_(Status_new()),
+      : status_(rocksdb_rs::status::Status_new()),
         read_options_(read_options),
         max_manifest_read_size_(std::numeric_limits<uint64_t>::max()) {}
 
@@ -35,7 +35,7 @@ class VersionEditHandlerBase {
  protected:
   explicit VersionEditHandlerBase(const ReadOptions& read_options,
                                   uint64_t max_read_size)
-      : status_(Status_new()), read_options_(read_options), max_manifest_read_size_(max_read_size) {}
+      : status_(rocksdb_rs::status::Status_new()), read_options_(read_options), max_manifest_read_size_(max_read_size) {}
   virtual rocksdb_rs::status::Status Initialize() { return Status_OK(); }
 
   virtual rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit,

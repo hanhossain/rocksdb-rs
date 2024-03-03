@@ -801,7 +801,7 @@ rocksdb_rs::status::Status VersionEdit::DecodeFrom(const Slice& src) {
     msg = "invalid tag";
   }
 
-  rocksdb_rs::status::Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
   if (msg != nullptr) {
     result = Status_Corruption("VersionEdit", msg);
   }

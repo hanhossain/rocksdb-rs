@@ -1588,7 +1588,7 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
           }
           return Status_OK();
         } else if (status == UpdateStatus::UPDATED) {
-          rocksdb_rs::status::Status s = Status_new();
+          rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
           if (kv_prot_info != nullptr) {
             ProtectionInfoKVOS64 updated_kv_prot_info(*kv_prot_info);
             updated_kv_prot_info.UpdateV(delta, str_value);

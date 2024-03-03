@@ -755,7 +755,7 @@ class SequentialFile {
 
 // A read IO request structure for use in MultiRead
 struct ReadRequest {
-    ReadRequest() : status(Status_new()) {}
+    ReadRequest() : status(rocksdb_rs::status::Status_new()) {}
 
   // File offset in bytes
   uint64_t offset;

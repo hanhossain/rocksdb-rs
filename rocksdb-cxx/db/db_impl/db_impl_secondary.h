@@ -23,7 +23,7 @@ class LogReaderContainer {
                      std::string fname,
                      std::unique_ptr<SequentialFileReader>&& file_reader,
                      uint64_t log_number) {
-    status_ = std::make_unique<rocksdb_rs::status::Status>(Status_new());
+    status_ = std::make_unique<rocksdb_rs::status::Status>(rocksdb_rs::status::Status_new());
     LogReporter* reporter = new LogReporter(status_);
     reporter->env = env;
     reporter->info_log = info_log.get();

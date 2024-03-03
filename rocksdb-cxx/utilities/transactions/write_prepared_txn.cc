@@ -312,7 +312,7 @@ rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
           roptions_(_roptions) {}
 
     rocksdb_rs::status::Status Rollback(uint32_t cf, const Slice& key) {
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       CFKeys& cf_keys = keys_[cf];
       if (cf_keys.size() == 0) {  // just inserted
         auto cmp = comparators_[cf];

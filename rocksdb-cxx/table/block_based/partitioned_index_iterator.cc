@@ -93,7 +93,7 @@ void PartitionedIndexIterator::InitPartitionedIndexBlock() {
         rep, partitioned_index_handle, read_options_.readahead_size,
         is_for_compaction, /*no_sequential_checking=*/false,
         read_options_.rate_limiter_priority);
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     table_->NewDataBlockIterator<IndexBlockIter>(
         read_options_, partitioned_index_handle, &block_iter_,
         BlockType::kIndex,

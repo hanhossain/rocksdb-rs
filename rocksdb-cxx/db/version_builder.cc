@@ -516,7 +516,7 @@ class VersionBuilder::Rep {
       }
     }
 
-    rocksdb_rs::status::Status ret_s = Status_new();
+    rocksdb_rs::status::Status ret_s = rocksdb_rs::status::Status_new();
     TEST_SYNC_POINT_CALLBACK("VersionBuilder::CheckConsistencyBeforeReturn",
                              &ret_s);
     return ret_s;
@@ -1227,7 +1227,7 @@ class VersionBuilder::Rep {
 
   // Save the current state in *vstorage.
   rocksdb_rs::status::Status SaveTo(VersionStorageInfo* vstorage) const {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
 #ifndef NDEBUG
     // The same check is done within Apply() so we skip it in release mode.
@@ -1346,7 +1346,7 @@ class VersionBuilder::Rep {
     for (auto& t : threads) {
       t.join();
     }
-    rocksdb_rs::status::Status ret = Status_new();
+    rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_new();
     for (const auto& s : statuses) {
       if (!s.ok()) {
         if (ret.ok()) {

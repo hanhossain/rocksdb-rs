@@ -500,7 +500,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Iterate(const WriteBatch* wb,
   // before seeing the next Noop.
   bool empty_batch = true;
   uint32_t found = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   char tag = 0;
   uint32_t column_family = 0;  // default
   bool last_was_try_again = false;
@@ -751,7 +751,7 @@ WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(
     WriteBatch* b, ColumnFamilyHandle* column_family) {
   uint32_t cf_id = GetColumnFamilyID(column_family);
   size_t ts_sz = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (column_family) {
     const Comparator* const ucmp = column_family->GetComparator();
     if (ucmp) {
@@ -825,7 +825,7 @@ rocksdb_rs::status::Status WriteBatch::Put(ColumnFamilyHandle* column_family, co
                        const Slice& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -915,7 +915,7 @@ rocksdb_rs::status::Status WriteBatch::Put(ColumnFamilyHandle* column_family, co
                        const SliceParts& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -993,7 +993,7 @@ rocksdb_rs::status::Status WriteBatch::PutEntity(ColumnFamilyHandle* column_fami
         "Cannot call this method without a column family handle");
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   uint32_t cf_id = 0;
   size_t ts_sz = 0;
 
@@ -1109,7 +1109,7 @@ rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t co
 rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family, const Slice& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1176,7 +1176,7 @@ rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
                           const SliceParts& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1224,7 +1224,7 @@ rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_f
                                 const Slice& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1293,7 +1293,7 @@ rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_f
                                 const SliceParts& key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1343,7 +1343,7 @@ rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_fa
                                const Slice& begin_key, const Slice& end_key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1417,7 +1417,7 @@ rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_fa
                                const SliceParts& end_key) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1471,7 +1471,7 @@ rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family, 
                          const Slice& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1543,7 +1543,7 @@ rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family,
                          const SliceParts& key, const SliceParts& value) {
   size_t ts_sz = 0;
   uint32_t cf_id = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::tie(s, cf_id, ts_sz) =
       WriteBatchInternal::GetColumnFamilyIdAndTimestampSize(this,
@@ -1664,7 +1664,7 @@ rocksdb_rs::status::Status WriteBatch::VerifyChecksum() const {
   Slice key, value, blob, xid;
   char tag = 0;
   uint32_t column_family = 0;  // default
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   size_t prot_info_idx = 0;
   bool checksum_protected = true;
   while (!input.empty() && prot_info_idx < prot_info_->entries_.size()) {
@@ -2001,7 +2001,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2142,7 +2142,7 @@ class MemTableInserter : public WriteBatch::Handler {
   rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
                const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (kv_prot_info != nullptr) {
       // Memtable needs seqno, doesn't need CF ID
       auto mem_kv_prot_info =
@@ -2167,7 +2167,7 @@ class MemTableInserter : public WriteBatch::Handler {
                      const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
 
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (kv_prot_info) {
       // Memtable needs seqno, doesn't need CF ID
       auto mem_kv_prot_info =
@@ -2189,7 +2189,7 @@ class MemTableInserter : public WriteBatch::Handler {
   rocksdb_rs::status::Status DeleteImpl(uint32_t /*column_family_id*/, const Slice& key,
                     const Slice& value, ValueType delete_type,
                     const ProtectionInfoKVOS64* kv_prot_info) {
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     MemTable* mem = cf_mems_->GetMemTable();
     ret_status =
         mem->Add(sequence_, delete_type, key, value, kv_prot_info,
@@ -2215,7 +2215,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2280,7 +2280,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2339,7 +2339,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2426,7 +2426,7 @@ class MemTableInserter : public WriteBatch::Handler {
       // else insert the values to the memtable right away
     }
 
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
@@ -2579,7 +2579,7 @@ class MemTableInserter : public WriteBatch::Handler {
   rocksdb_rs::status::Status PutBlobIndexCF(uint32_t column_family_id, const Slice& key,
                         const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
-    rocksdb_rs::status::Status ret_status = Status_new();
+    rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
     if (kv_prot_info != nullptr) {
       // Memtable needs seqno, doesn't need CF ID
       auto mem_kv_prot_info =
@@ -2714,7 +2714,7 @@ class MemTableInserter : public WriteBatch::Handler {
   rocksdb_rs::status::Status MarkCommit(const Slice& name) override {
     assert(db_);
 
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     if (recovering_log_number_ != 0) {
       // We must hold db mutex in recovery.
@@ -2770,7 +2770,7 @@ class MemTableInserter : public WriteBatch::Handler {
                                  const Slice& commit_ts) override {
     assert(db_);
 
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     if (recovering_log_number_ != 0) {
       // In recovery, db mutex must be held.

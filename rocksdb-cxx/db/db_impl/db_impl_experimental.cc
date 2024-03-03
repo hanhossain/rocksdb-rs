@@ -64,7 +64,7 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
   }
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   VersionEdit edit;
   JobContext job_context(next_job_id_.fetch_add(1), true);
   {

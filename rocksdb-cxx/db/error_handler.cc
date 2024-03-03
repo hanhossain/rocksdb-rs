@@ -286,7 +286,7 @@ const rocksdb_rs::status::Status& ErrorHandler::HandleKnownErrors(const rocksdb_
 
   bool paranoid = db_options_.paranoid_checks;
   rocksdb_rs::status::Severity sev = rocksdb_rs::status::Severity::kFatalError;
-  rocksdb_rs::status::Status new_bg_err = Status_new();
+  rocksdb_rs::status::Status new_bg_err = rocksdb_rs::status::Status_new();
   DBRecoverContext context;
   bool found = false;
 
@@ -315,7 +315,7 @@ const rocksdb_rs::status::Status& ErrorHandler::HandleKnownErrors(const rocksdb_
     }
   }
 
-  new_bg_err = Status_new(bg_err, sev);
+  new_bg_err = rocksdb_rs::status::Status_new(bg_err, sev);
 
   // Check if recovery is currently in progress. If it is, we will save this
   // error so we can check it at the end to see if recovery succeeded or not
@@ -413,7 +413,7 @@ const rocksdb_rs::status::Status& ErrorHandler::SetBGError(const rocksdb_rs::sta
     // First, data loss (non file scope) is treated as unrecoverable error. So
     // it can directly overwrite any existing bg_error_.
     bool auto_recovery = false;
-    rocksdb_rs::status::Status bg_err = Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kUnrecoverableError);
+    rocksdb_rs::status::Status bg_err = rocksdb_rs::status::Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kUnrecoverableError);
     CheckAndSetRecoveryAndBGError(bg_err);
     if (bg_error_stats_ != nullptr) {
       RecordTick(bg_error_stats_.get(), ERROR_HANDLER_BG_ERROR_COUNT);
@@ -482,14 +482,14 @@ const rocksdb_rs::status::Status& ErrorHandler::SetBGError(const rocksdb_rs::sta
       // continues to receive writes when BG error is soft error, to avoid
       // to many small memtable being generated during auto resume, the flush
       // reason is set to kErrorRecoveryRetryFlush.
-      rocksdb_rs::status::Status bg_err = Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kSoftError);
+      rocksdb_rs::status::Status bg_err = rocksdb_rs::status::Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kSoftError);
       CheckAndSetRecoveryAndBGError(bg_err);
       soft_error_no_bg_work_ = true;
       context.flush_reason = FlushReason::kErrorRecoveryRetryFlush;
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
     } else {
-      rocksdb_rs::status::Status bg_err = Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kHardError);
+      rocksdb_rs::status::Status bg_err = rocksdb_rs::status::Status_new(new_bg_io_err, rocksdb_rs::status::Severity::kHardError);
       CheckAndSetRecoveryAndBGError(bg_err);
       recover_context_ = context;
       return StartRecoverFromRetryableBGIOError(bg_io_err);
@@ -522,7 +522,7 @@ rocksdb_rs::status::Status ErrorHandler::OverrideNoSpaceError(const rocksdb_rs::
     // be inconsistent, and it may be needed for 2PC. If 2PC is not enabled,
     // we can just flush the memtable and discard the log
     *auto_recovery = false;
-    return Status_new(bg_error, rocksdb_rs::status::Severity::kFatalError);
+    return rocksdb_rs::status::Status_new(bg_error, rocksdb_rs::status::Severity::kFatalError);
   }
 
   {

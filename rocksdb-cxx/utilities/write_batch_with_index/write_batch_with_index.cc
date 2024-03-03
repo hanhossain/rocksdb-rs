@@ -182,7 +182,7 @@ void WriteBatchWithIndex::Rep::ClearIndex() {
 }
 
 rocksdb_rs::status::Status WriteBatchWithIndex::Rep::ReBuildIndex() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   ClearIndex();
 
@@ -429,7 +429,7 @@ void WriteBatchWithIndex::Clear() { rep->Clear(); }
 rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatch(ColumnFamilyHandle* column_family,
                                          const DBOptions& options,
                                          const Slice& key, std::string* value) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatchWithIndexInternal wbwii(&options, column_family);
   auto result = wbwii.GetFromBatch(this, key, value, &s);
 
@@ -509,7 +509,7 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
     return Status_InvalidArgument("Must specify timestamp");
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatchWithIndexInternal wbwii(db, column_family);
 
   // Since the lifetime of the WriteBatch is the same as that of the transaction

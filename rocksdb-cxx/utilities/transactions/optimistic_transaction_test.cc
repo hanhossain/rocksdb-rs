@@ -1111,7 +1111,7 @@ TEST_P(OptimisticTransactionTest, UntrackedWrites) {
   WriteOptions write_options;
   ReadOptions read_options;
   std::string value;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Verify transaction rollback works for untracked keys.
   Transaction* txn = txn_db->BeginTransaction(write_options);

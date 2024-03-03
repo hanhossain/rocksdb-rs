@@ -447,7 +447,7 @@ struct CompactionServiceResult {
   uint64_t bytes_written = 0;
   CompactionJobStats stats;
 
-  CompactionServiceResult() : status(Status_new()) {}
+  CompactionServiceResult() : status(rocksdb_rs::status::Status_new()) {}
 
   // serialization interface to read and write the object
   static rocksdb_rs::status::Status Read(const std::string& data_str, CompactionServiceResult* obj);

@@ -22,7 +22,7 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, TableCache::MultiGet)
  HistogramImpl* file_read_hist, bool skip_filters, bool skip_range_deletions,
  int level, TypedHandle* handle) {
   auto& fd = file_meta.fd;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;
   MultiGetRange table_range(*mget_range, mget_range->begin(),
                             mget_range->end());

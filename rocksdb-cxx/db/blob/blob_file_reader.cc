@@ -253,7 +253,7 @@ rocksdb_rs::status::Status BlobFileReader::ReadFromFile(const RandomAccessFileRe
 
   RecordTick(statistics, BLOB_DB_BLOB_FILE_BYTES_READ, read_size);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   IOOptions io_options;
   s = file_reader->PrepareIOOptions(read_options, io_options);
@@ -451,7 +451,7 @@ void BlobFileReader::MultiGetBlob(
   Buffer buf;
   AlignedBuf aligned_buf;
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool direct_io = file_reader_->use_direct_io();
   if (direct_io) {
     for (size_t i = 0; i < read_reqs.size(); ++i) {

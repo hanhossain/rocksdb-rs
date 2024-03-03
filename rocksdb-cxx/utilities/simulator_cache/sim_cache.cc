@@ -22,7 +22,7 @@ namespace {
 class CacheActivityLogger {
  public:
   CacheActivityLogger()
-      : activity_logging_enabled_(false), max_logging_size_(0), bg_status_(Status_new()) {}
+      : activity_logging_enabled_(false), max_logging_size_(0), bg_status_(rocksdb_rs::status::Status_new()) {}
 
   ~CacheActivityLogger() {
     MutexLock l(&mutex_);
@@ -35,7 +35,7 @@ class CacheActivityLogger {
     assert(activity_log_file != "");
     assert(env != nullptr);
 
-    rocksdb_rs::status::Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     FileOptions file_opts;
 
     MutexLock l(&mutex_);

@@ -148,7 +148,7 @@ rocksdb_rs::status::Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* ha
     cf_options_.disable_auto_compactions = true;
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // Create info log.
   if (db_options_.info_log == nullptr) {
@@ -999,7 +999,7 @@ rocksdb_rs::status::Status BlobDBImpl::Write(const WriteOptions& options, WriteB
   uint32_t default_cf_id =
       static_cast_with_check<ColumnFamilyHandleImpl>(DefaultColumnFamily())
           ->GetID();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   BlobInserter blob_inserter(options, this, default_cf_id);
   {
     // Release write_mutex_ before DB write to avoid race condition with
@@ -1030,7 +1030,7 @@ rocksdb_rs::status::Status BlobDBImpl::PutUntil(const WriteOptions& options, con
                             const Slice& value, uint64_t expiration) {
   StopWatch write_sw(clock_, statistics_, BLOB_DB_WRITE_MICROS);
   RecordTick(statistics_, BLOB_DB_NUM_PUT);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatch batch;
   {
     // Release write_mutex_ before DB write to avoid race condition with
@@ -1049,7 +1049,7 @@ rocksdb_rs::status::Status BlobDBImpl::PutBlobValue(const WriteOptions& /*option
                                 const Slice& key, const Slice& value,
                                 uint64_t expiration, WriteBatch* batch) {
   write_mutex_.AssertHeld();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string index_entry;
   uint32_t column_family_id =
       static_cast_with_check<ColumnFamilyHandleImpl>(DefaultColumnFamily())
@@ -1341,7 +1341,7 @@ rocksdb_rs::status::Status BlobDBImpl::AppendBlob(const std::shared_ptr<BlobFile
                               const std::string& headerbuf, const Slice& key,
                               const Slice& value, uint64_t expiration,
                               std::string* index_entry) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   uint64_t blob_offset = 0;
   uint64_t key_offset = 0;
   {
@@ -1639,7 +1639,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetImpl(const ReadOptions& read_options,
   bool snapshot_created = SetSnapshotIfNeeded(&ro);
 
   PinnableSlice index_entry;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool is_blob_index = false;
   DBImpl::GetImplOptions get_impl_options;
   get_impl_options.column_family = column_family;
@@ -1904,7 +1904,7 @@ rocksdb_rs::status::Status BlobDBImpl::SyncBlobFiles() {
     }
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto& blob_file : process_files) {
     s = blob_file->Fsync();
     if (!s.ok()) {
@@ -2064,7 +2064,7 @@ rocksdb_rs::status::Status DestroyBlobDB(const std::string& dbname, const Option
   const ImmutableDBOptions soptions(SanitizeOptions(dbname, options));
   Env* env = soptions.env;
 
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::string blobdir;
   blobdir = (bdb_options.path_relative) ? dbname + "/" + bdb_options.blob_dir
                                         : bdb_options.blob_dir;

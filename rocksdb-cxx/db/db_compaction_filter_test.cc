@@ -866,7 +866,7 @@ TEST_F(DBTestCompactionFilter, SkipUntilWithBloomFilter) {
   EXPECT_OK(db_->CompactRange(CompactRangeOptions(), nullptr, nullptr));
   EXPECT_EQ(1, cfilter_skips);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string val;
 
   s = db_->Get(ReadOptions(), "0000000010", &val);

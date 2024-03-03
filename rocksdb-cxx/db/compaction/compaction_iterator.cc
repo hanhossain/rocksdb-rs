@@ -97,11 +97,11 @@ CompactionIterator::CompactionIterator(
       enforce_single_del_contracts_(enforce_single_del_contracts),
       timestamp_size_(cmp_ ? cmp_->timestamp_size() : 0),
       full_history_ts_low_(full_history_ts_low),
-      status_(Status_new()),
+      status_(rocksdb_rs::status::Status_new()),
       current_user_key_sequence_(0),
       current_user_key_snapshot_(0),
       merge_out_iter_(merge_helper_),
-      merge_until_status_(Status_new()),
+      merge_until_status_(rocksdb_rs::status::Status_new()),
       blob_garbage_collection_cutoff_file_number_(
           ComputeBlobGarbageCollectionCutoffFileNumber(compaction_.get())),
       blob_fetcher_(CreateBlobFetcherIfNeeded(compaction_.get())),

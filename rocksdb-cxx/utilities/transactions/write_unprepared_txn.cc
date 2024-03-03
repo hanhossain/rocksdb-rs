@@ -100,7 +100,7 @@ void WriteUnpreparedTxn::Initialize(const TransactionOptions& txn_options) {
 }
 
 rocksdb_rs::status::Status WriteUnpreparedTxn::HandleWrite(std::function<rocksdb_rs::status::Status()> do_write) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (active_iterators_.empty()) {
     s = MaybeFlushWriteBatchToDB();
     if (!s.ok()) {
@@ -248,7 +248,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch*
 
 rocksdb_rs::status::Status WriteUnpreparedTxn::MaybeFlushWriteBatchToDB() {
   const bool kPrepared = true;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (write_batch_flush_threshold_ > 0 &&
       write_batch_.GetWriteBatch()->Count() > 0 &&
       write_batch_.GetDataSize() >
@@ -725,7 +725,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RollbackInternal() {
       write_options_.protection_bytes_per_key);
   assert(GetId() != kMaxSequenceNumber);
   assert(GetId() > 0);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   auto read_at_seq = kMaxSequenceNumber;
   ReadOptions roptions;
   // to prevent callback's seq to be overrriden inside DBImpk::Get
@@ -871,7 +871,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RollbackToSavePoint() {
 }
 
 rocksdb_rs::status::Status WriteUnpreparedTxn::RollbackToSavePointInternal() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   const bool kClear = true;
   TransactionBaseImpl::InitWriteBatch(kClear);

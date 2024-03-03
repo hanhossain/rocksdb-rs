@@ -21,7 +21,7 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
   bool timer_enabled = GetPerfLevel() >= PerfLevel::kEnableTimeExceptForMutex &&
                        get_perf_context()->per_level_perf_context_enabled;
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   StopWatchNano timer(clock_, timer_enabled /* auto_start */);
   s = CO_AWAIT(table_cache_->MultiGet)(
       read_options, *internal_comparator(), *f->file_metadata, &file_range,
@@ -103,7 +103,7 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
 
         if (iter->is_blob_index) {
           BlobIndex blob_index;
-          rocksdb_rs::status::Status tmp_s = Status_new();
+          rocksdb_rs::status::Status tmp_s = rocksdb_rs::status::Status_new();
 
           if (iter->value) {
             TEST_SYNC_POINT_CALLBACK("Version::MultiGet::TamperWithBlobIndex",

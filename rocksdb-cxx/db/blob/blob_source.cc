@@ -163,7 +163,7 @@ rocksdb_rs::status::Status BlobSource::GetBlob(const ReadOptions& read_options,
                            PinnableSlice* value, uint64_t* bytes_read) {
   assert(value);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   const CacheKey cache_key = GetCacheKey(file_number, file_size, offset);
 

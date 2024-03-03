@@ -217,7 +217,7 @@ class FaultInjectionTest
                 ExpectedVerifResult expected) const {
     std::string val;
     std::string value_space;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     for (int i = start_idx; i < start_idx + num_vals && s.ok(); i++) {
       Value(i, &value_space);
       s = ReadValue(i, &val);
@@ -591,7 +591,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
     ASSERT_OK(s);
     std::unique_ptr<SequentialFileReader> freader(
         new SequentialFileReader(std::move(file), file_name));
-    rocksdb_rs::status::Status log_read_s = Status_new();
+    rocksdb_rs::status::Status log_read_s = rocksdb_rs::status::Status_new();
     class LogReporter : public log::Reader::Reporter {
      public:
       rocksdb_rs::status::Status* status_;

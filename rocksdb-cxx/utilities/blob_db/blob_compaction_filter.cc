@@ -297,7 +297,7 @@ bool BlobIndexCompactionFilterBase::CloseAndRegisterNewBlobFile() const {
   assert(blob_db_impl);
   assert(blob_file_);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   {
     WriteLock wl(&blob_db_impl->mutex_);

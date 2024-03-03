@@ -217,7 +217,7 @@ TEST_P(TransactionTest, CreateSnapshot) {
     ASSERT_EQ(nullptr, snapshot.get());
   }
   constexpr TxnTimestamp timestamp = 100;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::shared_ptr<const Snapshot> ts_snap0;
   std::tie(s, ts_snap0) = db->CreateTimestampedSnapshot(timestamp);
   ASSERT_OK(s);
@@ -257,7 +257,7 @@ TEST_P(TransactionTest, CreateSnapshot) {
 }
 
 TEST_P(TransactionTest, SequenceAndTsOrder) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::shared_ptr<const Snapshot> snapshot;
   std::tie(s, snapshot) = db->CreateTimestampedSnapshot(100);
   ASSERT_OK(s);

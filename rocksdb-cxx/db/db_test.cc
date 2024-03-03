@@ -2762,7 +2762,7 @@ static void MTThreadBody(void* arg) {
                                 &values);
       } else {
         std::vector<PinnableSlice> pin_values(keys.size());
-        statuses = Status_new().create_vec(keys.size());
+        statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
         const Snapshot* snapshot = db->GetSnapshot();
         ReadOptions ro;
         ro.snapshot = snapshot;
@@ -3117,13 +3117,13 @@ class ModelDB : public DB {
   rocksdb_rs::status::Status GetPropertiesOfAllTables(
       ColumnFamilyHandle* /*column_family*/,
       TablePropertiesCollection* /*props*/) override {
-    return Status_new();
+    return rocksdb_rs::status::Status_new();
   }
 
   rocksdb_rs::status::Status GetPropertiesOfTablesInRange(
       ColumnFamilyHandle* /*column_family*/, const Range* /*range*/,
       std::size_t /*n*/, TablePropertiesCollection* /*props*/) override {
-    return Status_new();
+    return rocksdb_rs::status::Status_new();
   }
 
   using DB::KeyMayExist;
@@ -3296,7 +3296,7 @@ class ModelDB : public DB {
   using DB::Flush;
   rocksdb_rs::status::Status Flush(const rocksdb::FlushOptions& /*options*/,
                ColumnFamilyHandle* /*column_family*/) override {
-    rocksdb_rs::status::Status ret = Status_new();
+    rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_new();
     return ret;
   }
   rocksdb_rs::status::Status Flush(
@@ -6255,7 +6255,7 @@ TEST_F(DBTest, PromoteL0Failure) {
   ASSERT_OK(Put(Key(1), ""));
   ASSERT_OK(Flush());
 
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   // Fails because L0 has overlapping files.
   status = experimental::PromoteL0(db_, db_->DefaultColumnFamily());
   ASSERT_TRUE(status.IsInvalidArgument());

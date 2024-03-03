@@ -23,7 +23,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeyForConflicts(
     DBImpl* db_impl, ColumnFamilyHandle* column_family, const std::string& key,
     SequenceNumber snap_seq, const std::string* const read_ts, bool cache_only,
     ReadCallback* snap_checker, SequenceNumber min_uncommitted) {
-  rocksdb_rs::status::Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
 
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
@@ -60,7 +60,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersi
   // So `snap_checker` must be provided.
   assert(min_uncommitted == kMaxSequenceNumber || snap_checker != nullptr);
 
-  rocksdb_rs::status::Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
   bool need_to_read_sst = false;
 
   // Since it would be too slow to check the SST files, we will only use
@@ -153,7 +153,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersi
 rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_impl,
                                               const LockTracker& tracker,
                                               bool cache_only) {
-  rocksdb_rs::status::Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
 
   std::unique_ptr<LockTracker::ColumnFamilyIterator> cf_it(
       tracker.GetColumnFamilyIterator());

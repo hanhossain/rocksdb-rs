@@ -390,7 +390,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::Operate(ColumnFamilyHandle* column
                                   const TKey& key, const bool do_validate,
                                   const bool assume_tracked,
                                   TOperation&& operation) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if constexpr (std::is_same_v<Slice, TKey>) {
     s = TryLock(column_family, key, /*read_only=*/false, /*exclusive=*/true,
                 do_validate, assume_tracked);
@@ -496,7 +496,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Prepare() {
     return Status_Expired();
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool can_prepare = false;
 
   if (expiration_time_ > 0) {
@@ -608,7 +608,7 @@ rocksdb_rs::status::Status PessimisticTransaction::Commit() {
     }
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (commit_without_prepare) {
     assert(!commit_prepared);
     if (WriteBatchInternal::Count(GetCommitTimeWriteBatch()) > 0) {
@@ -745,7 +745,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitInternal() {
   // The Memtable will ignore the Commit marker in non-recovery mode
   WriteBatch* working_batch = GetCommitTimeWriteBatch();
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!needs_ts) {
     s = WriteBatchInternal::MarkCommit(working_batch, name_);
   } else {
@@ -807,7 +807,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitInternal() {
 }
 
 rocksdb_rs::status::Status PessimisticTransaction::Rollback() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (txn_state_ == PREPARED) {
     txn_state_.store(AWAITING_ROLLBACK);
 
@@ -965,7 +965,7 @@ rocksdb_rs::status::Status PessimisticTransaction::TryLock(ColumnFamilyHandle* c
                                        bool exclusive, const bool do_validate,
                                        const bool assume_tracked) {
   assert(!assume_tracked || !do_validate);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (UNLIKELY(skip_concurrency_control_)) {
     return s;
   }
@@ -1156,7 +1156,7 @@ void PessimisticTransaction::UnlockGetForUpdate(
 }
 
 rocksdb_rs::status::Status PessimisticTransaction::SetName(const TransactionName& name) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (txn_state_ == STARTED) {
     if (name_.length()) {
       s = Status_InvalidArgument("Transaction has already been named.");

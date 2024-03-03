@@ -182,7 +182,7 @@ TEST_F(ObjRegistryTest, FailingFactory) {
   std::unique_ptr<Env> unique;
   std::shared_ptr<Env> shared;
   Env* pointer = nullptr;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   s = registry->NewUniqueObject<Env>("failing", &unique);
   ASSERT_TRUE(s.IsInvalidArgument());
   s = registry->NewSharedObject<Env>("failing", &shared);

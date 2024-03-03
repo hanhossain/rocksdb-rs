@@ -133,7 +133,7 @@ class FileChecksumTestHelper {
     std::string cur_checksum;
     std::string checksum_func_name;
 
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     EnvOptions soptions;
     std::unique_ptr<SequentialFile> file_reader;
     std::string file_path = dbname_ + "/" + file_meta.name;
@@ -209,7 +209,7 @@ class FileChecksumTestHelper {
     VersionSet versions(dbname_, &immutable_db_options, sopt, tc.get(), &wb,
                         &wc, nullptr, nullptr, "", "");
     std::vector<std::string> cf_name_list;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     s = versions.ListColumnFamilies(&cf_name_list, dbname_,
                                     immutable_db_options.fs.get());
     if (s.ok()) {
@@ -261,7 +261,7 @@ class FileChecksumTestHelper {
     EXPECT_OK(db_->DisableFileDeletions());
     std::vector<LiveFileMetaData> live_files;
     db_->GetLiveFilesMetaData(&live_files);
-    rocksdb_rs::status::Status cs = Status_new();
+    rocksdb_rs::status::Status cs = rocksdb_rs::status::Status_new();
     for (auto a_file : live_files) {
       cs = VerifyChecksum(a_file);
       if (!cs.ok()) {

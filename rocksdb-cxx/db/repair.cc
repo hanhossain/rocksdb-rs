@@ -689,7 +689,7 @@ class Repairer {
           cfd->NumberLevels(), cfd->ioptions()->compaction_style,
           nullptr /* src_vstorage */, cfd->ioptions()->force_consistency_checks,
           EpochNumberRequirement::kMightMissing);
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       VersionEdit dummy_edit;
       for (const auto* table : cf_id_and_tables.second) {
         // TODO(opt): separate out into multiple levels

@@ -47,7 +47,7 @@ class BlobFileCompletionCallback {
                              const std::string& checksum_value,
                              const std::string& checksum_method,
                              uint64_t blob_count, uint64_t blob_bytes) {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     auto sfm = static_cast<SstFileManagerImpl*>(sst_file_manager_);
     if (sfm) {

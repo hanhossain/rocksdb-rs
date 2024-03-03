@@ -232,7 +232,7 @@ TEST_F(MemTableListTest, GetTest) {
 
   SequenceNumber seq = 1;
   std::string value;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   MergeContext merge_context;
   InternalKeyComparator ikey_cmp(options.comparator);
   SequenceNumber max_covering_tombstone_seq = 0;
@@ -367,7 +367,7 @@ TEST_F(MemTableListTest, GetFromHistoryTest) {
 
   SequenceNumber seq = 1;
   std::string value;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   MergeContext merge_context;
   InternalKeyComparator ikey_cmp(options.comparator);
   SequenceNumber max_covering_tombstone_seq = 0;
@@ -585,7 +585,7 @@ TEST_F(MemTableListTest, GetFromHistoryTest) {
 TEST_F(MemTableListTest, FlushPendingTest) {
   const int num_tables = 6;
   SequenceNumber seq = 1;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   auto factory = std::make_shared<SkipListFactory>();
   options.memtable_factory = factory;

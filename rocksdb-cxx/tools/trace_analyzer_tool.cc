@@ -360,7 +360,7 @@ TraceAnalyzer::~TraceAnalyzer() {}
 // Prepare the processing
 // Initiate the global trace reader and writer here
 rocksdb_rs::status::Status TraceAnalyzer::PrepareProcessing() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Prepare the trace reader
   if (trace_reader_ == nullptr) {
     s = NewFileTraceReader(env_, env_options_, trace_name_, &trace_reader_);
@@ -450,7 +450,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReadTraceRecord(Trace* trace) {
 // to different operation type handler. With different race
 // format, this function can be changed
 rocksdb_rs::status::Status TraceAnalyzer::StartProcessing() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Trace header;
   s = ReadTraceHeader(&header);
   if (!s.ok()) {
@@ -510,7 +510,7 @@ rocksdb_rs::status::Status TraceAnalyzer::StartProcessing() {
 // distribution, these data structures are re-processed here.
 rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
   int ret;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (int type = 0; type < kTaTypeNum; type++) {
     if (!ta_[type].enabled) {
       continue;
@@ -650,7 +650,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
 // prefix of the accessed keys if required
 rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceStats& stats) {
   int ret;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string prefix = "0";
   uint64_t prefix_access = 0;
   uint64_t prefix_count = 0;
@@ -780,7 +780,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
   uint32_t duration =
       static_cast<uint32_t>((end_time_ - begin_time_) / 1000000);
   int ret;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::vector<std::vector<uint32_t>> type_qps(
       duration, std::vector<uint32_t>(kTaTypeNum + 1, 0));
   std::vector<uint64_t> qps_sum(kTaTypeNum + 1, 0);
@@ -992,7 +992,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
 // also, we output the top k accessed keys here
 rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
   int ret;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto& cf_it : cfs_) {
     uint32_t cf_id = cf_it.first;
 
@@ -1150,7 +1150,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
 
 // End the processing, print the requested results
 rocksdb_rs::status::Status TraceAnalyzer::EndProcessing() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (trace_sequence_f_) {
     s = trace_sequence_f_->Close();
   }
@@ -1171,7 +1171,7 @@ rocksdb_rs::status::Status TraceAnalyzer::KeyStatsInsertion(const uint32_t& type
                                         const std::string& key,
                                         const size_t value_size,
                                         const uint64_t ts) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   StatsUnit unit;
   unit.key_id = 0;
   unit.cf_id = cf_id;
@@ -1365,7 +1365,7 @@ rocksdb_rs::status::Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& 
 // the trace analyzer options
 rocksdb_rs::status::Status TraceAnalyzer::OpenStatsOutputFiles(const std::string& type,
                                            TraceStats& new_stats) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (FLAGS_output_key_stats) {
     s = CreateOutputFile(type, new_stats.cf_name, "accessed_key_stats.txt",
                          &new_stats.a_key_f);
@@ -1432,7 +1432,7 @@ rocksdb_rs::status::Status TraceAnalyzer::CreateOutputFile(
   std::string path;
   path = output_path_ + "/" + FLAGS_output_prefix + "-" + type + "-" + cf_name +
          "-" + ending;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   s = env_->NewWritableFile(path, f_ptr, env_options_);
   if (!s.ok()) {
     fprintf(stderr, "Cannot open file: %s\n", path.c_str());
@@ -1443,7 +1443,7 @@ rocksdb_rs::status::Status TraceAnalyzer::CreateOutputFile(
 
 // Close the output files in the TraceStats if they are opened
 rocksdb_rs::status::Status TraceAnalyzer::CloseOutputFiles() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (int type = 0; type < kTaTypeNum; type++) {
     if (!ta_[type].enabled) {
       continue;
@@ -1626,7 +1626,7 @@ rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationTyp
   assert(cf_ids.size() == keys.size());
   assert(cf_ids.size() == value_sizes.size());
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   if (FLAGS_convert_to_human_readable_trace && trace_sequence_f_) {
     // DeleteRane only writes the begin_key.

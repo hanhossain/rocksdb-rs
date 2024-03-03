@@ -120,7 +120,7 @@ rocksdb_rs::status::Status DBImpl::TEST_SwitchMemtable(ColumnFamilyData* cfd) {
     cfd = default_cf_handle_->cfd();
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   void* writer = TEST_BeginWrite();
   if (two_write_queues_) {
     WriteThread::Writer nonmem_w;

@@ -822,7 +822,7 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
   }
 
   rocksdb_rs::status::Status SetupTestEnv() {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     FileOptions fopts;
     auto fs = env_->GetFileSystem();
     s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr);

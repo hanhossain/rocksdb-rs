@@ -320,7 +320,7 @@ rust::Vec<rocksdb_rs::status::Status> WritePreparedTxnDB::MultiGet(
   size_t num_keys = keys.size();
   values->resize(num_keys);
 
-  rust::Vec<rocksdb_rs::status::Status> stat_list = Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list = rocksdb_rs::status::Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = this->Get(options, column_family[i], keys[i], &(*values)[i]);
   }

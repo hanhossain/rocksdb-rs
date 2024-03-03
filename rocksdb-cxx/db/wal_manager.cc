@@ -48,7 +48,7 @@ rocksdb_rs::status::Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
   // First get sorted files in db dir, then get sorted files from archived
   // dir, to avoid a race condition where a log file is moved to archived
   // dir in between.
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // list wal files in main db dir.
   VectorLogPtr logs;
   s = GetSortedWalsOfType(wal_dir_, logs, rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
@@ -390,7 +390,7 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
       return Status_OK();
     }
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (type == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
     std::string fname = static_cast<std::string>(rocksdb_rs::filename::LogFileName(wal_dir_, number));
     s = ReadFirstLine(fname, number, sequence);

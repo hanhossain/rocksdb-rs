@@ -70,7 +70,7 @@ CuckooTableBuilder::CuckooTableBuilder(
       value_size_(0),
       num_entries_(0),
       num_values_(0),
-      status_(Status_new()),
+      status_(rocksdb_rs::status::Status_new()),
       ucomp_(user_comparator),
       use_module_hash_(use_module_hash),
       identity_as_first_hash_(identity_as_first_hash),

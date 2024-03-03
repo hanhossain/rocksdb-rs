@@ -647,7 +647,7 @@ struct StatusSerializationAdapter {
   }
 
   rocksdb_rs::status::Status GetStatus() const {
-    return Status_new(static_cast<rocksdb_rs::status::Code>(code),
+    return rocksdb_rs::status::Status_new(static_cast<rocksdb_rs::status::Code>(code),
                   static_cast<rocksdb_rs::status::SubCode>(subcode),
                   static_cast<rocksdb_rs::status::Severity>(severity),
                   message);

@@ -526,7 +526,7 @@ TEST_F(ClockCacheTest, Limits) {
     {
       size_t n = shard_->GetTableAddressCount() + 1;
       std::unique_ptr<HandleImpl* []> ha { new HandleImpl* [n] {} };
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       for (size_t i = 0; i < n && s.ok(); ++i) {
         hkey.data[1] = i;
         s = shard_->Insert(TestKey(hkey), hkey, nullptr /*value*/,
@@ -980,7 +980,7 @@ class TestSecondaryCache : public SecondaryCache {
     CheckCacheKeyCommonPrefix(key);
     size_t size;
     char* buf;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     num_inserts_++;
     size = (*helper->size_cb)(value);
@@ -1017,7 +1017,7 @@ class TestSecondaryCache : public SecondaryCache {
     if (handle) {
       Cache::ObjectPtr value = nullptr;
       size_t charge = 0;
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       if (type != ResultType::DEFER_AND_FAIL) {
         char* ptr = cache_.Value(handle);
         size_t size = DecodeFixed64(ptr);
@@ -1968,7 +1968,7 @@ TEST_P(DBSecondaryCacheTest, TestSecondaryCacheMultiGet) {
   std::vector<std::string> mget_keys(
       {Key(0), Key(1), Key(2), Key(3), Key(4), Key(5), Key(6), Key(7)});
   std::vector<PinnableSlice> values(mget_keys.size());
-  rust::Vec<rocksdb_rs::status::Status> s = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
   std::vector<Slice> key_slices;
   for (const std::string& key : mget_keys) {
     key_slices.emplace_back(key);

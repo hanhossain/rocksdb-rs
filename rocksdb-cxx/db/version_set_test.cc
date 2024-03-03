@@ -1349,7 +1349,7 @@ class VersionSetTestBase {
     new_cf.SetColumnFamily(new_id);
     new_cf.SetLogNumber(0);
     new_cf.SetComparatorName(cf_options.comparator->Name());
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     mutex_.Lock();
     s = versions_->LogAndApply(/*column_family_data=*/nullptr,
                                MutableCFOptions(cf_options), read_options_,
@@ -2245,7 +2245,7 @@ class VersionSetWithTimestampTest : public VersionSetTest {
 
     GenVersionEditsToSetFullHistoryTsLow(ts_lbs);
 
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     mutex_.Lock();
     s = versions_->LogAndApply(cfd_, *(cfd_->GetLatestMutableCFOptions()),
                                read_options_, edits_, &mutex_, nullptr);
@@ -2929,7 +2929,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest1) {
   VersionEdit new_cf1;
   new_cf1.AddColumnFamily(VersionSetTestBase::kColumnFamilyName1);
   new_cf1.SetColumnFamily(1);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     std::string record;
     new_cf1.EncodeTo(&record);
@@ -2973,7 +2973,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromInCompleteManifest2) {
       kDefaultColumnFamilyName, kColumnFamilyName1, kColumnFamilyName2,
       kColumnFamilyName3};
   uint32_t cf_id = 1;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (size_t i = 1; i != all_cf_names.size(); ++i) {
     VersionEdit new_cf;
     new_cf.AddColumnFamily(all_cf_names[i]);
@@ -3020,7 +3020,7 @@ TEST_P(VersionSetTestEmptyDb, OpenManifestWithUnknownCF) {
       kDefaultColumnFamilyName, kColumnFamilyName1, kColumnFamilyName2,
       kColumnFamilyName3};
   uint32_t cf_id = 1;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (size_t i = 1; i != all_cf_names.size(); ++i) {
     VersionEdit new_cf;
     new_cf.AddColumnFamily(all_cf_names[i]);
@@ -3078,7 +3078,7 @@ TEST_P(VersionSetTestEmptyDb, OpenCompleteManifest) {
       kDefaultColumnFamilyName, kColumnFamilyName1, kColumnFamilyName2,
       kColumnFamilyName3};
   uint32_t cf_id = 1;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (size_t i = 1; i != all_cf_names.size(); ++i) {
     VersionEdit new_cf;
     new_cf.AddColumnFamily(all_cf_names[i]);

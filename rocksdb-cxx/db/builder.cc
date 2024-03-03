@@ -87,7 +87,7 @@ rocksdb_rs::status::Status BuildTable(
       /*enable_order_check=*/
       mutable_cf_options.check_flush_compaction_key_order,
       /*enable_hash=*/paranoid_file_checks);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   meta->fd.file_size = 0;
   iter->SeekToFirst();
   std::unique_ptr<CompactionRangeDelAggregator> range_del_agg(

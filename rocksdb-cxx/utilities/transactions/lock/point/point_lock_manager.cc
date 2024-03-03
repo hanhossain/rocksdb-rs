@@ -254,7 +254,7 @@ rocksdb_rs::status::Status PointLockManager::AcquireWithTimeout(
     PessimisticTransaction* txn, LockMap* lock_map, LockMapStripe* stripe,
     ColumnFamilyId column_family_id, const std::string& key, Env* env,
     int64_t timeout, const LockInfo& lock_info) {
-  rocksdb_rs::status::Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
   uint64_t end_time = 0;
 
   if (timeout > 0) {
@@ -479,7 +479,7 @@ rocksdb_rs::status::Status PointLockManager::AcquireLocked(LockMap* lock_map, Lo
                                        autovector<TransactionID>* txn_ids) {
   assert(txn_lock_info.txn_ids.size() == 1);
 
-  rocksdb_rs::status::Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
   // Check if this key is already locked
   auto stripe_iter = stripe->keys.find(key);
   if (stripe_iter != stripe->keys.end()) {

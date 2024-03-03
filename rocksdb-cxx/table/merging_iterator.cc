@@ -60,7 +60,7 @@ class MergingIterator : public InternalIterator {
         direction_(Direction::kForward),
         comparator_(comparator),
         current_(nullptr),
-        status_(Status_new()),
+        status_(rocksdb_rs::status::Status_new()),
         minHeap_(MinHeapItemComparator(comparator_)),
         pinned_iters_mgr_(nullptr),
         iterate_upper_bound_(iterate_upper_bound) {

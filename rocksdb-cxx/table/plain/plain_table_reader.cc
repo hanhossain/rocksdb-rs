@@ -97,7 +97,7 @@ PlainTableReader::PlainTableReader(
     const SliceTransform* prefix_extractor)
     : internal_comparator_(icomparator),
       encoding_type_(encoding_type),
-      status_(Status_new()),
+      status_(rocksdb_rs::status::Status_new()),
       full_scan_mode_(false),
       user_key_len_(static_cast<uint32_t>(table_properties->fixed_key_len)),
       prefix_extractor_(prefix_extractor),
@@ -635,7 +635,7 @@ PlainTableIterator::PlainTableIterator(PlainTableReader* table,
       decoder_(&table_->file_info_, table_->encoding_type_,
                table_->user_key_len_, table_->prefix_extractor_),
       use_prefix_seek_(use_prefix_seek),
-      status_(Status_new()) {
+      status_(rocksdb_rs::status::Status_new()) {
   next_offset_ = offset_ = table_->file_info_.data_end_offset;
 }
 

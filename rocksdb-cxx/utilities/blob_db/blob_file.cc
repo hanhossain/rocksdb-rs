@@ -110,7 +110,7 @@ rocksdb_rs::status::Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   Slice result;
   std::string buf;
   AlignedBuf aligned_buf;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // TODO: rate limit reading footers from blob files.
   if (ra_file_reader_->use_direct_io()) {
     s = ra_file_reader_->Read(IOOptions(), footer_offset, BlobLogFooter::kSize,
@@ -140,7 +140,7 @@ rocksdb_rs::status::Status BlobFile::SetFromFooterLocked(const BlobLogFooter& fo
 }
 
 rocksdb_rs::status::Status BlobFile::Fsync() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (log_writer_.get()) {
     s = log_writer_->Sync();
   }
@@ -162,7 +162,7 @@ rocksdb_rs::status::Status BlobFile::GetReader(Env* env, const FileOptions& file
   if (env->GetCurrentTime(&current_time).ok()) {
     last_access_.store(current_time);
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   {
     ReadLock lockbfile_r(&mutex_);

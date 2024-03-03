@@ -18,7 +18,7 @@ namespace rocksdb {
 bool DbDumpTool::Run(const DumpOptions& dump_options,
                      rocksdb::Options options) {
   rocksdb::DB* dbptr;
-  rocksdb_rs::status::Status status = rocksdb::Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::unique_ptr<rocksdb::WritableFile> dumpfile;
   char hostname[1024];
   int64_t timesec = 0;
@@ -133,7 +133,7 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
 bool DbUndumpTool::Run(const UndumpOptions& undump_options,
                        rocksdb::Options options) {
   rocksdb::DB* dbptr;
-  rocksdb_rs::status::Status status = rocksdb::Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   rocksdb::Env* env;
   std::unique_ptr<rocksdb::SequentialFile> dumpfile;
   rocksdb::Slice slice;

@@ -33,8 +33,8 @@ class ErrorHandler {
                InstrumentedMutex* db_mutex)
       : db_(db),
         db_options_(db_options),
-        bg_error_(Status_new()),
-        recovery_error_(Status_new()),
+        bg_error_(rocksdb_rs::status::Status_new()),
+        recovery_error_(rocksdb_rs::status::Status_new()),
         cv_(db_mutex),
         end_recovery_(false),
         recovery_thread_(nullptr),

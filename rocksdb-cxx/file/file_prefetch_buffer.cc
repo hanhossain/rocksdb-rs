@@ -330,7 +330,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::HandleOverlappingData(
     size_t length, size_t readahead_size,
     Env::IOPriority /*rate_limiter_priority*/, bool& copy_to_third_buffer,
     uint64_t& tmp_offset, size_t& tmp_length) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
   uint32_t second;
 
@@ -422,7 +422,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsyncInternal(
   TEST_SYNC_POINT("FilePrefetchBuffer::PrefetchAsyncInternal:Start");
 
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   uint64_t tmp_offset = offset;
   size_t tmp_length = length;
 
@@ -642,7 +642,7 @@ bool FilePrefetchBuffer::TryReadFromCacheUntracked(
                            &readahead_size_);
   if (offset + n > bufs_[curr_].offset_ + bufs_[curr_].buffer_.CurrentSize()) {
     if (readahead_size_ > 0) {
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       assert(reader != nullptr);
       assert(max_readahead_size_ >= readahead_size_);
       if (for_compaction) {
@@ -738,7 +738,7 @@ bool FilePrefetchBuffer::TryReadFromCacheAsyncUntracked(
        offset + n >
            bufs_[curr_].offset_ + bufs_[curr_].buffer_.CurrentSize())) {
     if (readahead_size_ > 0) {
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       assert(reader != nullptr);
       assert(max_readahead_size_ >= readahead_size_);
 
@@ -869,7 +869,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& op
   }
   bufs_[second].buffer_.Clear();
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   size_t alignment = reader->file()->GetRequiredBufferAlignment();
   size_t prefetch_size = is_eligible_for_prefetching ? readahead_size_ / 2 : 0;
   size_t offset_to_read = static_cast<size_t>(offset);

@@ -81,7 +81,7 @@ class TransactionTestBase : public ::testing::Test {
     // Write unprepared requires all transactions to be named. This setting
     // autogenerates the name so that existing tests can pass.
     txn_db_options.autogenerate_name = true;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, &db);
     } else {
@@ -111,7 +111,7 @@ class TransactionTestBase : public ::testing::Test {
     fault_fs->AssertNoOpenFile();
     fault_fs->DropUnsyncedFileData();
     fault_fs->ResetState();
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db_ == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, &db);
     } else {
@@ -132,7 +132,7 @@ class TransactionTestBase : public ::testing::Test {
     fault_fs->AssertNoOpenFile();
     fault_fs->DropUnsyncedFileData();
     fault_fs->ResetState();
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db_ == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, cfs, handles,
                               &db);
@@ -147,7 +147,7 @@ class TransactionTestBase : public ::testing::Test {
     delete db;
     db = nullptr;
     DestroyDB(dbname, options);
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db_ == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, &db);
     } else {

@@ -271,7 +271,7 @@ class ConcurrentCacheReservationManager
                                        bool increase) override {
     std::lock_guard<std::mutex> lock(cache_res_mgr_mu_);
     std::size_t total_mem_used = cache_res_mgr_->GetTotalMemoryUsed();
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (!increase) {
       assert(total_mem_used >= memory_used_delta);
       s = cache_res_mgr_->UpdateCacheReservation(total_mem_used -
@@ -289,7 +289,7 @@ class ConcurrentCacheReservationManager
       override {
     std::unique_ptr<CacheReservationManager::CacheReservationHandle>
         wrapped_handle;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     {
       std::lock_guard<std::mutex> lock(cache_res_mgr_mu_);
       s = cache_res_mgr_->MakeCacheReservation(incremental_memory_used,

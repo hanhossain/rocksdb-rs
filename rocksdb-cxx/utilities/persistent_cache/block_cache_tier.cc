@@ -20,7 +20,7 @@ namespace rocksdb {
 // BlockCacheImpl
 //
 rocksdb_rs::status::Status BlockCacheTier::Open() {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
 
   WriteLock _(&lock_);
 
@@ -194,7 +194,7 @@ void BlockCacheTier::InsertMain() {
     }
 
     size_t retry = 0;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     while ((s = InsertImpl(Slice(op.key_), Slice(op.data_))).IsTryAgain()) {
       if (retry > kMaxRetry) {
         break;

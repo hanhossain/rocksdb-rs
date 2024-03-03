@@ -231,7 +231,7 @@ IOStatus GenerateOneFileChecksum(
 }
 
 rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (env->FileExists(dir).IsNotFound()) {
     return s;
   }

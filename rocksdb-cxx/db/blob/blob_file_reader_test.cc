@@ -199,7 +199,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     bytes_read = 0;
     size_t total_size = 0;
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -313,7 +313,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
         blob_offsets[1] - (keys[1].size() - key_refs[1].get().size()),
         blob_offsets[2]};
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -358,7 +358,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     Slice wrong_key_slice(incorrect_key, sizeof(incorrect_key) - 1);
     key_refs[2] = std::cref(wrong_key_slice);
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -400,7 +400,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
       key_refs.emplace_back(std::cref(key_ref));
     }
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
 
     requests_buf[0] =

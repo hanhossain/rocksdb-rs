@@ -56,7 +56,7 @@ rocksdb_rs::status::Status Configurable::PrepareOptions(const ConfigOptions& opt
 
 rocksdb_rs::status::Status Configurable::ValidateOptions(const DBOptions& db_opts,
                                      const ColumnFamilyOptions& cf_opts) const {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   for (auto opt_iter : options_) {
     if (opt_iter.type_map != nullptr) {
       for (auto map_iter : *(opt_iter.type_map)) {
@@ -134,7 +134,7 @@ rocksdb_rs::status::Status Configurable::ConfigureOptions(
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   std::string curr_opts;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!opts_map.empty()) {
     // There are options in the map.
     // Save the current configuration in curr_opts and then configure the
@@ -173,7 +173,7 @@ rocksdb_rs::status::Status Configurable::ParseStringOptions(const ConfigOptions&
 
 rocksdb_rs::status::Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
                                          const std::string& opts_str) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!opts_str.empty()) {
     if (opts_str.find(';') != std::string::npos ||
         opts_str.find('=') != std::string::npos) {
@@ -526,7 +526,7 @@ rocksdb_rs::status::Status ConfigurableHelper::SerializeOptions(const ConfigOpti
         const auto& opt_info = map_iter.second;
         if (opt_info.ShouldSerialize()) {
           std::string value;
-          rocksdb_rs::status::Status s = Status_new();
+          rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
           if (!config_options.mutable_options_only) {
             s = opt_info.Serialize(config_options, prefix + opt_name,
                                    opt_iter.opt_ptr, &value);
@@ -574,7 +574,7 @@ rocksdb_rs::status::Status Configurable::GetOptionNames(
 rocksdb_rs::status::Status ConfigurableHelper::ListOptions(
     const ConfigOptions& config_options, const Configurable& configurable,
     const std::string& prefix, std::unordered_set<std::string>* result) {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   for (auto const& opt_iter : configurable.options_) {
     if (opt_iter.type_map != nullptr) {
       for (const auto& map_iter : *(opt_iter.type_map)) {
@@ -677,7 +677,7 @@ rocksdb_rs::status::Status Configurable::GetOptionsMap(
     std::unordered_map<std::string, std::string>* props) {
   assert(id);
   assert(props);
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (value.empty() || value == kNullptrString) {
     *id = default_id;
   } else if (value.find('=') == std::string::npos) {

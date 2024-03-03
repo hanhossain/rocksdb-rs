@@ -93,7 +93,7 @@ void IOTraceRecordParser::PrintHumanReadableIOTraceRecord(
 }
 
 int IOTraceRecordParser::ReadIOTraceRecords() {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   Env* env(Env::Default());
   std::unique_ptr<TraceReader> trace_reader;
   std::unique_ptr<IOTraceReader> io_trace_reader;

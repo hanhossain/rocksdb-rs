@@ -842,7 +842,7 @@ std::vector<std::string> DBTestBase::MultiGet(std::vector<int> cfs,
   } else {
     std::vector<PinnableSlice> pin_values(cfs.size());
     result.resize(cfs.size());
-    rust::Vec<rocksdb_rs::status::Status> s = Status_new().create_vec(cfs.size());
+    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(cfs.size());
     db_->MultiGet(options, cfs.size(), handles.data(), keys.data(),
                   pin_values.data(), s.data());
     for (size_t i = 0; i < s.size(); ++i) {
@@ -870,7 +870,7 @@ std::vector<std::string> DBTestBase::MultiGet(const std::vector<std::string>& k,
   options.async_io = async;
   std::vector<Slice> keys;
   std::vector<std::string> result(k.size());
-  rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(k.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(k.size());
   std::vector<PinnableSlice> pin_values(k.size());
 
   for (size_t i = 0; i < k.size(); ++i) {
@@ -1549,7 +1549,7 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
   size_t total_reads = 0;
 
   for (auto& kv : true_data) {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     std::map<std::string, rocksdb_rs::status::Status>::iterator it = status.find(kv.first);
     if (it != status.end()) {
       s.copy_from(it->second);
@@ -1574,10 +1574,10 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     // Verify Iterator::Next()
     iter_cnt = 0;
     auto data_iter = true_data.begin();
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     for (iter->SeekToFirst(); iter->Valid(); iter->Next(), data_iter++) {
       ASSERT_EQ(iter->key().ToString(), data_iter->first);
-      rocksdb_rs::status::Status current_status = Status_new();
+      rocksdb_rs::status::Status current_status = rocksdb_rs::status::Status_new();
       std::map<std::string, rocksdb_rs::status::Status>::iterator it = status.find(data_iter->first);
       if (it != status.end()) {
         current_status.copy_from(it->second);
@@ -1606,7 +1606,7 @@ void DBTestBase::VerifyDBFromMap(std::map<std::string, std::string> true_data,
     auto data_rev = true_data.rbegin();
     for (iter->SeekToLast(); iter->Valid(); iter->Prev(), data_rev++) {
       ASSERT_EQ(iter->key().ToString(), data_rev->first);
-      rocksdb_rs::status::Status current_status = Status_new();
+      rocksdb_rs::status::Status current_status = rocksdb_rs::status::Status_new();
       std::map<std::string, rocksdb_rs::status::Status>::iterator it = status.find(data_rev->first);
       if (it != status.end()) {
         current_status.copy_from(it->second);

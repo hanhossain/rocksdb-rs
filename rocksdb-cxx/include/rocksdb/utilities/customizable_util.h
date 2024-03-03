@@ -98,7 +98,7 @@ static rocksdb_rs::status::Status NewManagedObject(
     const ConfigOptions& config_options, const std::string& id,
     const std::unordered_map<std::string, std::string>& opt_map,
     std::shared_ptr<T>* result) {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (!id.empty()) {
     status = config_options.registry->GetOrCreateManagedObject<T>(
         id, result, [config_options, opt_map](T* object) {
@@ -217,7 +217,7 @@ static rocksdb_rs::status::Status NewUniqueObject(
     const std::unordered_map<std::string, std::string>& opt_map,
     std::unique_ptr<T>* result) {
   if (!id.empty()) {
-    rocksdb_rs::status::Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     status = config_options.registry->NewUniqueObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
       status = Status_OK();
@@ -278,7 +278,7 @@ static rocksdb_rs::status::Status NewStaticObject(
     const ConfigOptions& config_options, const std::string& id,
     const std::unordered_map<std::string, std::string>& opt_map, T** result) {
   if (!id.empty()) {
-    rocksdb_rs::status::Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     status = config_options.registry->NewStaticObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
       status = Status_OK();

@@ -370,7 +370,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE> block_handles;
     std::array<CachableEntry<Block_kData>, MultiGetContext::MAX_BATCH_SIZE>
         results;
-    rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(MultiGetContext::MAX_BATCH_SIZE);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(MultiGetContext::MAX_BATCH_SIZE);
     // Empty data_lookup_contexts means "unused," when block cache tracing is
     // disabled. (Limited options as element type is not default contructible.)
     std::vector<BlockCacheLookupContext> data_lookup_contexts;
@@ -388,7 +388,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
       MultiGetRange data_block_range(sst_file_range, sst_file_range.begin(),
                                      sst_file_range.end());
       CachableEntry<UncompressionDict> uncompression_dict;
-      rocksdb_rs::status::Status uncompression_dict_status = Status_new();
+      rocksdb_rs::status::Status uncompression_dict_status = rocksdb_rs::status::Status_new();
       bool uncompression_dict_inited = false;
       size_t total_len = 0;
 
@@ -573,7 +573,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     SharedCleanablePtr shared_cleanable;
     for (auto miter = sst_file_range.begin(); miter != sst_file_range.end();
          ++miter) {
-      rocksdb_rs::status::Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       GetContext* get_context = miter->get_context;
       const Slice& key = miter->ikey;
       bool matched = false;  // if such user key matched a key in SST
@@ -622,7 +622,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
           }
 
           next_biter.Invalidate(Status_OK());
-          rocksdb_rs::status::Status tmp_s = Status_new();
+          rocksdb_rs::status::Status tmp_s = rocksdb_rs::status::Status_new();
           NewDataBlockIterator<DataBlockIter>(
               read_options, iiter->value().handle, &next_biter,
               BlockType::kData, get_context, lookup_data_block_context,

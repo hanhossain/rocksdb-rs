@@ -28,7 +28,7 @@ class BlobDBIterator : public Iterator {
         blob_db_(blob_db),
         clock_(clock),
         statistics_(statistics),
-        status_(Status_new()) {}
+        status_(rocksdb_rs::status::Status_new()) {}
 
   virtual ~BlobDBIterator() = default;
 

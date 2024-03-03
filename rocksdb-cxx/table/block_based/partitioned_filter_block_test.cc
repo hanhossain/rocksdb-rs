@@ -166,7 +166,7 @@ class PartitionedFilterBlockTest
   PartitionedFilterBlockReader* NewReader(
       PartitionedFilterBlockBuilder* builder, PartitionedIndexBuilder* pib) {
     BlockHandle bh;
-    rocksdb_rs::status::Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     Slice slice;
     std::unique_ptr<const char[]> filter_data;
     do {
@@ -324,7 +324,7 @@ class PartitionedFilterBlockTest
   int CountNumOfIndexPartitions(PartitionedIndexBuilder* builder) {
     IndexBuilder::IndexBlocks dont_care_ib;
     BlockHandle dont_care_bh(10, 10);
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     int cnt = 0;
     do {
       s = builder->Finish(&dont_care_ib, dont_care_bh);

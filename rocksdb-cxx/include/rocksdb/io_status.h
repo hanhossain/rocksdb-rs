@@ -163,7 +163,7 @@ class IOStatus {
   friend IOStatus status_to_io_status(rocksdb_rs::status::Status&&);
 
   explicit IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode = rocksdb_rs::status::SubCode::kNone)
-    : status_(Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem)) {}
+    : status_(rocksdb_rs::status::Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem)) {}
 
   IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode, const Slice& msg, const Slice& msg2);
   IOStatus(rocksdb_rs::status::Code _code, const Slice& msg, const Slice& msg2)
@@ -171,7 +171,7 @@ class IOStatus {
 };
 
 inline IOStatus::IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode, const Slice& msg, const Slice& msg2)
-    : status_(Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem)) {
+    : status_(rocksdb_rs::status::Status_new(_code, _subcode, false, false, kIOErrorScopeFileSystem)) {
     assert(status_.code_ != rocksdb_rs::status::Code::kOk);
     assert(status_.subcode_ != rocksdb_rs::status::SubCode::kMaxSubCode);
     const size_t len1 = msg.size();
@@ -189,7 +189,7 @@ inline IOStatus::IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::Su
 }
 
 inline IOStatus::IOStatus(const IOStatus& s)
-    : status_(Status_new(
+    : status_(rocksdb_rs::status::Status_new(
         s.status_.code_,
         s.status_.subcode_,
         s.status_.retryable,

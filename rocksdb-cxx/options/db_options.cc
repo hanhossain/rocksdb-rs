@@ -504,7 +504,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             ConfigOptions embedded = opts;
             embedded.ignore_unsupported_options = true;
             std::vector<std::shared_ptr<EventListener>> listeners;
-            rocksdb_rs::status::Status s = Status_new();
+            rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
             for (size_t start = 0, end = 0;
                  s.ok() && start < value.size() && end != std::string::npos;
                  start = end + 1) {

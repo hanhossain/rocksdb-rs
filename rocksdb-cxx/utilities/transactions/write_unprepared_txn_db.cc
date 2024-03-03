@@ -87,7 +87,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
             rollback_merge_operands_(rollback_merge_operands) {}
 
       rocksdb_rs::status::Status Rollback(uint32_t cf, const Slice& key) {
-        rocksdb_rs::status::Status s = Status_new();
+        rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
         CFKeys& cf_keys = keys_[cf];
         if (cf_keys.size() == 0) {  // just inserted
           auto cmp = comparators_[cf];
@@ -330,7 +330,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::Initialize(
     db_impl_->versions_->SetLastPublishedSequence(last_seq + 1);
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Rollback unprepared transactions.
   for (auto rtxn : rtxns) {
     auto recovered_trx = rtxn.second;

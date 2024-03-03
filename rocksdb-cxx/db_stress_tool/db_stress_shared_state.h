@@ -71,7 +71,7 @@ class SharedState {
         expected_state_manager_(nullptr),
         printing_verification_results_(false),
         start_timestamp_(Env::Default()->NowNanos()) {
-    rocksdb_rs::status::Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     // TODO: We should introduce a way to explicitly disable verification
     // during shutdown. When that is disabled and FLAGS_expected_values_dir
     // is empty (disabling verification at startup), we can skip tracking

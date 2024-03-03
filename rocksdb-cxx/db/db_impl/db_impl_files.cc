@@ -51,7 +51,7 @@ uint64_t DBImpl::GetObsoleteSstFilesSize() {
 }
 
 rocksdb_rs::status::Status DBImpl::DisableFileDeletions() {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   int my_disable_delete_obsolete_files;
   {
     InstrumentedMutexLock l(&mutex_);
@@ -365,7 +365,7 @@ void DBImpl::DeleteObsoleteFileImpl(int job_id, const std::string& fname,
   TEST_SYNC_POINT_CALLBACK("DBImpl::DeleteObsoleteFileImpl::BeforeDeletion",
                            const_cast<std::string*>(&fname));
 
-  rocksdb_rs::status::Status file_deletion_status = Status_new();
+  rocksdb_rs::status::Status file_deletion_status = rocksdb_rs::status::Status_new();
   if (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile || type == rocksdb_rs::types::FileType::kWalFile) {
     // Rate limit WAL deletion only if its in the DB dir
     file_deletion_status = DeleteDBFile(
@@ -925,7 +925,7 @@ void DBImpl::SetDBId(std::string&& id, bool read_only,
 }
 
 rocksdb_rs::status::Status DBImpl::SetupDBId(bool read_only, RecoveryContext* recovery_ctx) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Check for the IDENTITY file and create it if not there or
   // broken or not matching manifest
   std::string db_id_in_file;
@@ -982,7 +982,7 @@ rocksdb_rs::status::Status DBImpl::DeleteUnreferencedSstFiles(RecoveryContext* r
 
   uint64_t next_file_number = versions_->current_next_file_number();
   uint64_t largest_file_number = next_file_number;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (const auto& path : paths) {
     std::vector<std::string> files;
     s = env_->GetChildren(path, &files);

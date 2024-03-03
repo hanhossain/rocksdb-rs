@@ -32,7 +32,7 @@ rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, Displa
                          DisplayType show_uncompressed_blob,
                          bool show_summary) {
   constexpr size_t kReadaheadSize = 2 * 1024 * 1024;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   const auto fs = FileSystem::Default();
   IOOptions io_opts;
   s = fs->FileExists(filename, io_opts, nullptr);

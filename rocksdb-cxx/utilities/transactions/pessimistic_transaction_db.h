@@ -70,7 +70,7 @@ class PessimisticTransactionDB : public TransactionDB {
   virtual rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override;
   inline rocksdb_rs::status::Status WriteWithConcurrencyControl(const WriteOptions& opts,
                                             WriteBatch* updates) {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (opts.protection_bytes_per_key > 0) {
       s = WriteBatchInternal::UpdateProtectionInfo(
           updates, opts.protection_bytes_per_key);
@@ -295,7 +295,7 @@ class SnapshotCreationCallback : public PostMemTableCallback {
         commit_ts_(commit_ts),
         snapshot_notifier_(notifier),
         snapshot_(snapshot),
-        snapshot_creation_status_(Status_new()) {
+        snapshot_creation_status_(rocksdb_rs::status::Status_new()) {
     assert(db_impl_);
   }
 

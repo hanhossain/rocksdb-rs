@@ -363,7 +363,7 @@ rocksdb_rs::status::Status ReadFooterFromFile(const IOOptions& opts, RandomAcces
   uint64_t read_offset = (file_size > Footer::kMaxEncodedLength)
                              ? file_size - Footer::kMaxEncodedLength
                              : 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // TODO: Need to pass appropriate deadline to TryReadFromCache(). Right now,
   // there is no readahead for point lookups, so TryReadFromCache will fail if
   // the required data is not in the prefetch buffer. Once deadline is enabled

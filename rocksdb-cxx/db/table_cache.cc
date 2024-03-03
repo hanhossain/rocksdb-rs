@@ -224,7 +224,7 @@ InternalIterator* TableCache::NewIterator(
     TruncatedRangeDelIterator** range_del_iter) {
   PERF_TIMER_GUARD(new_table_iterator_nanos);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* table_reader = nullptr;
   TypedHandle* handle = nullptr;
   if (table_reader_ptr != nullptr) {
@@ -321,7 +321,7 @@ rocksdb_rs::status::Status TableCache::GetRangeTombstoneIterator(
     std::unique_ptr<FragmentedRangeTombstoneIterator>* out_iter) {
   assert(out_iter);
   const FileDescriptor& fd = file_meta.fd;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;
   TypedHandle* handle = nullptr;
   if (t == nullptr) {
@@ -433,7 +433,7 @@ rocksdb_rs::status::Status TableCache::Get(
       row_cache_entry = &row_cache_entry_buffer;
     }
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;
   TypedHandle* handle = nullptr;
   if (!done) {
@@ -535,7 +535,7 @@ rocksdb_rs::status::Status TableCache::MultiGetFilter(
   if (ioptions_.row_cache && !first_key.get_context->NeedToReadSequence()) {
     return Status_NotSupported();
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;
   TypedHandle* handle = nullptr;
   MultiGetContext::Range tombstone_range(*mget_range, mget_range->begin(),
@@ -603,7 +603,7 @@ rocksdb_rs::status::Status TableCache::ApproximateKeyAnchors(
     const ReadOptions& ro, const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta, uint8_t block_protection_bytes_per_key,
     std::vector<TableReader::Anchor>& anchors) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = file_meta.fd.table_reader;
   TypedHandle* handle = nullptr;
   if (t == nullptr) {

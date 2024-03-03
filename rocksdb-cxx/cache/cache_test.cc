@@ -737,7 +737,7 @@ TEST_P(LRUCacheTest, SetStrictCapacityLimit) {
   // all go through.
   SharedCache cache{NewCache(5, 0, false)};
   std::vector<TypedHandle*> handles(10);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (int i = 0; i < 10; i++) {
     std::string key = EncodeKey(i + 1);
     s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);

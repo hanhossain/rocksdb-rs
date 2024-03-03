@@ -60,7 +60,7 @@ std::unique_ptr<SecondaryCacheResultHandle> CompressedSecondaryCache::Lookup(
   }
   MemoryAllocator* allocator = cache_options_.memory_allocator.get();
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Cache::ObjectPtr value{nullptr};
   size_t charge{0};
   if (cache_options_.compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression ||

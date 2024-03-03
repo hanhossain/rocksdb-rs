@@ -215,7 +215,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
       cfd->GetFullHistoryTsLow(), &blob_callback_);
   FileMetaData file_meta;
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool need_cancel = false;
   IOStatus log_io_s = IOStatus::OK();
   if (needs_to_sync_closed_wals) {
@@ -471,7 +471,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   // Use of deque<bool> because vector<bool>
   // is specific and doesn't allow &v[i].
   std::deque<bool> switched_to_mempurge(num_cfs, false);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   IOStatus log_io_s = IOStatus::OK();
   assert(num_cfs == static_cast<int>(jobs.size()));
 
@@ -548,7 +548,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         switched_to_mempurge.empty() ? nullptr : &(switched_to_mempurge.at(0)));
     exec_status[0].first = true;
 
-    rocksdb_rs::status::Status error_status = Status_new();
+    rocksdb_rs::status::Status error_status = rocksdb_rs::status::Status_new();
     for (const auto& e : exec_status) {
       if (!e.second.ok()) {
         s.copy_from(e.second);
@@ -1019,7 +1019,7 @@ rocksdb_rs::status::Status DBImpl::CompactRangeInternal(const CompactRangeOption
     }
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (begin != nullptr && end != nullptr) {
     // TODO(ajkr): We could also optimize away the flush in certain cases where
     // one/both sides of the interval are unbounded. But it requires more
@@ -1296,7 +1296,7 @@ rocksdb_rs::status::Status DBImpl::CompactFiles(const CompactionOptions& compact
       static_cast_with_check<ColumnFamilyHandleImpl>(column_family)->cfd();
   assert(cfd);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   JobContext job_context(next_job_id_.fetch_add(1), true);
   LogBuffer log_buffer(InfoLogLevel::INFO_LEVEL,
                        immutable_db_options_.info_log.get());
@@ -1823,7 +1823,7 @@ int DBImpl::Level0StopWriteTrigger(ColumnFamilyHandle* column_family) {
 rocksdb_rs::status::Status DBImpl::FlushAllColumnFamilies(const FlushOptions& flush_options,
                                       FlushReason flush_reason) {
   mutex_.AssertHeld();
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (immutable_db_options_.atomic_flush) {
     mutex_.Unlock();
     status = AtomicFlushMemTables(flush_options, flush_reason);
@@ -1856,7 +1856,7 @@ rocksdb_rs::status::Status DBImpl::Flush(const FlushOptions& flush_options,
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   ROCKS_LOG_INFO(immutable_db_options_.info_log, "[%s] Manual flush start.",
                  cfh->GetName().c_str());
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (immutable_db_options_.atomic_flush) {
     s = AtomicFlushMemTables(flush_options, FlushReason::kManualFlush,
                              {cfh->cfd()});
@@ -1872,7 +1872,7 @@ rocksdb_rs::status::Status DBImpl::Flush(const FlushOptions& flush_options,
 
 rocksdb_rs::status::Status DBImpl::Flush(const FlushOptions& flush_options,
                      const std::vector<ColumnFamilyHandle*>& column_families) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!immutable_db_options_.atomic_flush) {
     for (auto cfh : column_families) {
       s = Flush(flush_options, cfh);
@@ -2159,7 +2159,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTable(ColumnFamilyData* cfd,
            "Please try again later after writes are resumed";
     return Status_TryAgain(oss.str());
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!flush_options.allow_write_stall) {
     bool flush_needed = true;
     s = WaitUntilFlushWouldNotStallWrites(cfd, &flush_needed);
@@ -2305,7 +2305,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTables(
            "Please try again later after writes are resumed";
     return Status_TryAgain(oss.str());
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   autovector<ColumnFamilyData*> candidate_cfds;
   if (provided_candidate_cfds.empty()) {
     // Generate candidate cfds if not provided
@@ -2526,7 +2526,7 @@ rocksdb_rs::status::Status DBImpl::WaitForFlushMemTables(
   int num = static_cast<int>(cfds.size());
   // Wait until the compaction completes
   InstrumentedMutexLock l(&mutex_);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // If the caller is trying to resume from bg error, then
   // error_handler_.IsDBStopped() is true.
   while (resuming_from_bg_err || !error_handler_.IsDBStopped()) {
@@ -2584,7 +2584,7 @@ rocksdb_rs::status::Status DBImpl::WaitForFlushMemTables(
 
 rocksdb_rs::status::Status DBImpl::EnableAutoCompaction(
     const std::vector<ColumnFamilyHandle*>& column_family_handles) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto cf_ptr : column_family_handles) {
     rocksdb_rs::status::Status status =
         this->SetOptions(cf_ptr, {{"disable_auto_compactions", "false"}});
@@ -2940,7 +2940,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundFlush(bool* made_progress, JobConte
                                Env::Priority thread_pri) {
   mutex_.AssertHeld();
 
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   *reason = FlushReason::kOthers;
   // If BG work is stopped due to an error, but a recovery is in progress,
   // that means this flush is part of the recovery. So allow it to go through
@@ -3260,7 +3260,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
       is_manual && manual_compaction->disallow_trivial_move;
 
   CompactionJobStats compaction_job_stats;
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (!error_handler_.IsBGWorkStopped()) {
     if (shutting_down_.load(std::memory_order_acquire)) {
       status = Status_ShutdownInProgress();

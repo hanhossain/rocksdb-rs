@@ -165,7 +165,7 @@ rocksdb_rs::status::Status BlockPrefixIndex::Create(const SliceTransform* prefix
                                 BlockPrefixIndex** prefix_index) {
   uint64_t pos = 0;
   auto meta_pos = prefix_meta;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Builder builder;
 
   while (!meta_pos.empty()) {

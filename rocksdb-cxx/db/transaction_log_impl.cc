@@ -31,7 +31,7 @@ TransactionLogIteratorImpl::TransactionLogIteratorImpl(
       io_tracer_(io_tracer),
       started_(false),
       is_valid_(false),
-      current_status_(Status_new()),
+      current_status_(rocksdb_rs::status::Status_new()),
       current_file_index_(0),
       current_batch_seq_(0),
       current_last_seq_(0) {
@@ -49,7 +49,7 @@ rocksdb_rs::status::Status TransactionLogIteratorImpl::OpenLogFile(
   FileSystemPtr fs(options_->fs, io_tracer_);
   std::unique_ptr<FSSequentialFile> file;
   std::string fname;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   EnvOptions optimized_env_options = fs->OptimizeForLogRead(soptions_);
   if (log_file->Type() == rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
     fname = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(dir_, log_file->LogNumber()));

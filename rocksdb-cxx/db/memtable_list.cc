@@ -481,7 +481,7 @@ rocksdb_rs::status::Status MemTableList::TryInstallMemtableFlushResults(
   }
 
   // if some other thread is already committing, then return
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (commit_in_progress_) {
     TEST_SYNC_POINT("MemTableList::TryInstallMemtableFlushResults:InProgress");
     return s;
@@ -834,7 +834,7 @@ rocksdb_rs::status::Status InstallMemtableAtomicFlushResults(
     }
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   autovector<autovector<VersionEdit*>> edit_lists;
   uint32_t num_entries = 0;

@@ -106,7 +106,7 @@ rocksdb_rs::status::Status TransactionDBCondVarImpl::Wait(
 
 rocksdb_rs::status::Status TransactionDBCondVarImpl::WaitFor(
     std::shared_ptr<TransactionDBMutex> mutex, int64_t timeout_time) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   auto mutex_impl = reinterpret_cast<TransactionDBMutexImpl*>(mutex.get());
   std::unique_lock<std::mutex> lock(mutex_impl->mutex_, std::adopt_lock);

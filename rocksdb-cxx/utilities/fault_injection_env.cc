@@ -311,7 +311,7 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::ReopenWritableFile(
   }
 
   bool exists;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   rocksdb_rs::status::Status exists_s = target()->FileExists(fname);
   if (exists_s.IsNotFound()) {
     exists = false;
@@ -494,7 +494,7 @@ void FaultInjectionTestEnv::WritableFileAppended(const FileState& state) {
 // FileState of the file as the parameter.
 rocksdb_rs::status::Status FaultInjectionTestEnv::DropFileData(
     std::function<rocksdb_rs::status::Status(Env*, FileState)> func) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FileState>::const_iterator it =
            db_file_state_.begin();

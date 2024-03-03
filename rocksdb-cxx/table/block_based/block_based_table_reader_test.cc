@@ -287,7 +287,7 @@ TEST_P(BlockBasedTableReaderTest, MultiGet) {
         keys_without_timestamps.emplace_back(it->first);
       }
       values.emplace_back();
-      statuses.push_back(Status_new());
+      statuses.push_back(rocksdb_rs::status::Status_new());
       std::advance(it, step);
     }
   }
@@ -517,7 +517,7 @@ class ChargeTableReaderTest
     CreateTable(table_name, ioptions, compression_type_, kv_);
 
     std::unique_ptr<BlockBasedTable> table;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     NewBlockBasedTableReader(
         FileOptions(), ImmutableOptions(options_),
         InternalKeyComparator(options_.comparator), table_name, &table,

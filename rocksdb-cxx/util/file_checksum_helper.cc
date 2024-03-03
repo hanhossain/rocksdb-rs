@@ -101,7 +101,7 @@ rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std:
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   checksum_list->reset();
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::unique_ptr<SequentialFileReader> file_reader;
   {

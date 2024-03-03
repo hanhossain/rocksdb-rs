@@ -148,7 +148,7 @@ class TestDirectory : public Directory {
 class FaultInjectionTestEnv : public EnvWrapper {
  public:
   explicit FaultInjectionTestEnv(Env* base)
-      : EnvWrapper(base), filesystem_active_(true), error_(Status_new()) {}
+      : EnvWrapper(base), filesystem_active_(true), error_(rocksdb_rs::status::Status_new()) {}
 
   static const char* kClassName() { return "FaultInjectionTestEnv"; }
   const char* Name() const override { return kClassName(); }

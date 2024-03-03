@@ -593,7 +593,7 @@ TEST_P(DBWriteTest, IOErrorOnSwitchMemtable) {
   options.manual_wal_flush = true;
   Reopen(options);
   mock_env->SetFilesystemActive(false, Status_IOError("Not active"));
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (int i = 0; i < 4 * 512; ++i) {
     s = Put(Key(i), rnd.RandomString(1024));
     if (!s.ok()) {

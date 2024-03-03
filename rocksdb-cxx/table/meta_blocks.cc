@@ -491,7 +491,7 @@ rocksdb_rs::status::Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file
                                 Footer* footer_out) {
   Footer footer;
   IOOptions opts;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   s = file->PrepareIOOptions(read_options, opts);
   if (!s.ok()) {
     return s;

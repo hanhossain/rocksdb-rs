@@ -61,9 +61,9 @@ struct TableFileCreationBriefInfo : public FileCreationBriefInfo {
 };
 
 struct TableFileCreationInfo : public TableFileCreationBriefInfo {
-  TableFileCreationInfo() : status(Status_new()) {}
+  TableFileCreationInfo() : status(rocksdb_rs::status::Status_new()) {}
   explicit TableFileCreationInfo(TableProperties&& prop)
-      : table_properties(prop), status(Status_new()) {}
+      : table_properties(prop), status(rocksdb_rs::status::Status_new()) {}
   TableFileCreationInfo& operator=(const TableFileCreationInfo& t) {
     TableFileCreationBriefInfo::operator=(t);
     file_size = t.file_size;
@@ -219,7 +219,7 @@ struct WriteStallInfo {
 
 
 struct FileDeletionInfo {
-  FileDeletionInfo() : status(Status_new()) {}
+  FileDeletionInfo() : status(rocksdb_rs::status::Status_new()) {}
 
   FileDeletionInfo(const std::string& _db_name, const std::string& _file_path,
                    int _job_id, rocksdb_rs::status::Status _status)
@@ -433,11 +433,11 @@ struct SubcompactionJobInfo {
   // Compression algorithm used for blob output files.
   rocksdb_rs::compression_type::CompressionType blob_compression_type;
 
-  SubcompactionJobInfo() : status(Status_new()) {}
+  SubcompactionJobInfo() : status(rocksdb_rs::status::Status_new()) {}
 };
 
 struct CompactionJobInfo {
-    CompactionJobInfo() : status(Status_new()) {}
+    CompactionJobInfo() : status(rocksdb_rs::status::Status_new()) {}
   // the id of the column family where the compaction happened.
   uint32_t cf_id;
   // the name of the column family where the compaction happened.
@@ -536,7 +536,7 @@ struct BackgroundErrorRecoveryInfo {
   // the recovery was successful and the database is fully operational.
   rocksdb_rs::status::Status new_bg_error;
 
-  BackgroundErrorRecoveryInfo() : old_bg_error(Status_new()), new_bg_error(Status_new()) {}
+  BackgroundErrorRecoveryInfo() : old_bg_error(rocksdb_rs::status::Status_new()), new_bg_error(rocksdb_rs::status::Status_new()) {}
 };
 
 struct IOErrorInfo {

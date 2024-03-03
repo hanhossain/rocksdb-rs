@@ -713,7 +713,7 @@ TEST_P(DBSSTTestRateLimit, RateLimitedDelete) {
   }
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -786,7 +786,7 @@ TEST_F(DBSSTTest, RateLimitedWALDelete) {
   options.env = env_;
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -869,7 +869,7 @@ TEST_P(DBWALTestWithParam, WALTrashCleanupOnOpen) {
   options.wal_dir = dbname_ + wal_dir_;
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -981,7 +981,7 @@ TEST_F(DBSSTTest, DeleteSchedulerMultipleDBPaths) {
   options.env = env_;
 
   int64_t rate_bytes_per_sec = 1024 * 1024;  // 1 Mb / Sec
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", rate_bytes_per_sec, false, &s,
                         /* max_trash_db_ratio= */ 1.1));
@@ -1048,7 +1048,7 @@ TEST_F(DBSSTTest, DestroyDBWithRateLimitedDelete) {
       [&](void* /*arg*/) { bg_delete_file++; });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Options options = CurrentOptions();
   options.disable_auto_compactions = true;
   options.env = env_;

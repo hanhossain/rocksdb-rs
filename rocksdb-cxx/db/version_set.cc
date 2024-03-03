@@ -1595,7 +1595,7 @@ rocksdb_rs::status::Status Version::GetTableProperties(const ReadOptions& read_o
 
 rocksdb_rs::status::Status Version::GetPropertiesOfAllTables(const ReadOptions& read_options,
                                          TablePropertiesCollection* props) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (int level = 0; level < storage_info_.num_levels_; level++) {
     s = GetPropertiesOfAllTables(read_options, props, level);
     if (!s.ok()) {
@@ -1724,7 +1724,7 @@ rocksdb_rs::status::Status Version::GetAggregatedTableProperties(
     const ReadOptions& read_options, std::shared_ptr<const TableProperties>* tp,
     int level) {
   TablePropertiesCollection props;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (level < 0) {
     s = GetPropertiesOfAllTables(read_options, &props);
   } else {
@@ -2054,7 +2054,7 @@ rocksdb_rs::status::Status Version::OverlapWithLevelIterator(const ReadOptions& 
   auto ucmp = icmp.user_comparator();
 
   Arena arena;
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   ReadRangeDelAggregator range_del_agg(&icmp,
                                        kMaxSequenceNumber /* upper_bound */);
 
@@ -2577,7 +2577,7 @@ void Version::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
     iter->get_context = &(get_ctx[get_ctx_index]);
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // blob_file => [[blob_idx, it], ...]
   std::unordered_map<uint64_t, BlobReadContexts> blob_ctxs;
   MultiGetRange keys_with_blobs_range(*range, range->begin(), range->end());
@@ -4932,7 +4932,7 @@ struct VersionSet::ManifestWriter {
       InstrumentedMutex* mu, ColumnFamilyData* _cfd,
       const MutableCFOptions& cf_options, const autovector<VersionEdit*>& e,
       const std::function<void(const rocksdb_rs::status::Status&)>& manifest_wcb)
-      : status(Status_new()),
+      : status(rocksdb_rs::status::Status_new()),
         done(false),
         cv(mu),
         cfd(_cfd),
@@ -5331,7 +5331,7 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
   }
 
   uint64_t new_manifest_file_size = 0;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   IOStatus io_s;
   IOStatus manifest_io_status;
   {
@@ -5875,7 +5875,7 @@ rocksdb_rs::status::Status VersionSet::Recover(
   uint64_t log_number = 0;
   {
     VersionSet::LogReporter reporter;
-    rocksdb_rs::status::Status log_read_status = Status_new();
+    rocksdb_rs::status::Status log_read_status = rocksdb_rs::status::Status_new();
     reporter.status = &log_read_status;
     log::Reader reader(nullptr, std::move(manifest_file_reader), &reporter,
                        true /* checksum */, 0 /* log_number */);
@@ -6010,7 +6010,7 @@ rocksdb_rs::status::Status VersionSet::TryRecover(
   if (!manifest_picker.Valid()) {
     return Status_Corruption("Cannot locate MANIFEST file in " + dbname_);
   }
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string manifest_path =
       manifest_picker.GetNextManifest(&manifest_file_number_, nullptr);
   while (!manifest_path.empty()) {
@@ -6034,7 +6034,7 @@ rocksdb_rs::status::Status VersionSet::TryRecoverFromOneManifest(
   ROCKS_LOG_INFO(db_options_->info_log, "Trying to recover from manifest: %s\n",
                  manifest_path.c_str());
   std::unique_ptr<SequentialFileReader> manifest_file_reader;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     std::unique_ptr<FSSequentialFile> manifest_file;
     s = fs_->NewSequentialFile(manifest_path,
@@ -6101,7 +6101,7 @@ rocksdb_rs::status::Status VersionSet::ListColumnFamiliesFromManifest(
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   std::unique_ptr<SequentialFileReader> file_reader;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     std::unique_ptr<FSSequentialFile> file;
     // these are just for performance reasons, not correctness,
@@ -6155,7 +6155,7 @@ rocksdb_rs::status::Status VersionSet::ReduceNumberOfLevels(const std::string& d
                       nullptr /*BlockCacheTracer*/, nullptr /*IOTracer*/,
                       /*db_id*/ "",
                       /*db_session_id*/ "");
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
 
   std::vector<ColumnFamilyDescriptor> dummy;
   ColumnFamilyDescriptor dummy_descriptor(kDefaultColumnFamilyName,
@@ -6243,7 +6243,7 @@ rocksdb_rs::status::Status VersionSet::ReduceNumberOfLevels(const std::string& d
 // metadata from Manifest to VersionSet before calling this function.
 rocksdb_rs::status::Status VersionSet::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
   // Clean the previously stored checksum information if any.
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (checksum_list == nullptr) {
     s = Status_InvalidArgument("checksum_list is nullptr");
     return s;
@@ -7205,7 +7205,7 @@ rocksdb_rs::status::Status ReactiveVersionSet::Recover(
   assert(manifest_reporter != nullptr);
   assert(manifest_reader_status != nullptr);
 
-  *manifest_reader_status = std::make_unique<rocksdb_rs::status::Status>(Status_new());
+  *manifest_reader_status = std::make_unique<rocksdb_rs::status::Status>(rocksdb_rs::status::Status_new());
   manifest_reporter->reset(new LogReporter());
   static_cast_with_check<LogReporter>(manifest_reporter->get())->status =
       manifest_reader_status->get();
@@ -7238,7 +7238,7 @@ rocksdb_rs::status::Status ReactiveVersionSet::ReadAndApply(
   assert(cfds_changed != nullptr);
   mu->AssertHeld();
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   log::Reader* reader = manifest_reader->get();
   assert(reader);
   s = MaybeSwitchManifest(reader->GetReporter(), manifest_reader);
@@ -7258,7 +7258,7 @@ rocksdb_rs::status::Status ReactiveVersionSet::MaybeSwitchManifest(
     log::Reader::Reporter* reporter,
     std::unique_ptr<log::FragmentBufferedReader>* manifest_reader) {
   assert(manifest_reader != nullptr);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string manifest_path;
   s = GetCurrentManifestPath(dbname_, fs_.get(), &manifest_path,
                              &manifest_file_number_);

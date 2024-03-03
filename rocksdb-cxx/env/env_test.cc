@@ -2413,7 +2413,7 @@ class EnvTest : public testing::Test {
 TEST_F(EnvTest, Close) {
   TestEnv* env = new TestEnv();
   std::shared_ptr<Logger> logger;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   s = env->NewLogger("", &logger);
   ASSERT_OK(s);

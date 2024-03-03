@@ -42,7 +42,7 @@ PartitionedFilterBlockBuilder::PartitionedFilterBlockBuilder(
           BlockBasedTableOptions::kDataBlockBinarySearch /* index_type */,
           0.75 /* data_block_hash_table_util_ratio */, ts_sz,
           persist_user_defined_timestamps, true /* is_user_key */),
-      partitioned_filters_construction_status_(Status_new()),
+      partitioned_filters_construction_status_(rocksdb_rs::status::Status_new()),
       p_index_builder_(p_index_builder),
       keys_added_to_partition_(0),
       total_added_in_built_(0) {

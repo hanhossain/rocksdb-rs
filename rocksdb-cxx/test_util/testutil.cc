@@ -431,7 +431,7 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
   env_options.use_mmap_writes = false;
   env_options.use_direct_writes = true;
   std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     std::unique_ptr<WritableFile> file;
     s = env->NewWritableFile(tmp, &file, env_options);

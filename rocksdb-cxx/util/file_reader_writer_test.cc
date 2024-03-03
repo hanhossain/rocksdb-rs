@@ -108,7 +108,7 @@ TEST_F(WritableFileWriterTest, RangeSync) {
   std::unique_ptr<WritableFileWriter> writer(
       new WritableFileWriter(std::move(wf), "" /* don't care */, env_options));
   Random r(301);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::unique_ptr<char[]> large_buf(new char[10 * kMb]);
   for (int i = 0; i < 1000; i++) {
     int skew_limit = (i < 700) ? 10 : 15;
@@ -1032,7 +1032,7 @@ TEST_F(WritableFileWriterIOPriorityTest, BasicOp) {
   std::unique_ptr<WritableFileWriter> writer(
       new WritableFileWriter(std::move(wf), "" /* don't care */, env_options));
   Random r(301);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::unique_ptr<char[]> large_buf(new char[10 * kMb]);
   for (int i = 0; i < 1000; i++) {
     int skew_limit = (i < 700) ? 10 : 15;

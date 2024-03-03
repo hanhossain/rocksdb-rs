@@ -403,7 +403,7 @@ class ColumnFamilyTestBase : public testing::Test {
     env_->SleepForMicroseconds(micros_wait_for_log_deletion);
     int ret = 0;
     VectorLogPtr wal_files;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     // GetSortedWalFiles is a flakey function -- it gets all the wal_dir
     // children files and then later checks for their existence. if some of the
     // log files doesn't exist anymore, it reports an error. it does all of this

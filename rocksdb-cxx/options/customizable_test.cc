@@ -444,7 +444,7 @@ TEST_F(CustomizableTest, FailingFactoryTest) {
   std::unique_ptr<Configurable> c1(new SimpleConfigurable());
   ConfigOptions ignore = config_options_;
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   ignore.registry->AddLibrary("failing")->AddFactory<TestCustomizable>(
       "failing",
       [](const std::string& /*uri*/,
@@ -1573,7 +1573,7 @@ class LoadCustomizableTest : public testing::Test {
     std::vector<std::string> builtins;
     ObjectLibrary::Default()->GetFactoryNames(T::Type(), &builtins);
     factories.insert(builtins.begin(), builtins.end());
-    rocksdb_rs::status::Status result = Status_new();
+    rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
     int created = 0;
     for (const auto& name : factories) {
       created++;
@@ -1662,7 +1662,7 @@ class LoadCustomizableTest : public testing::Test {
     ObjectLibrary::Default()->GetFactoryNames(T::Type(), &builtins);
     factories.insert(builtins.begin(), builtins.end());
     int created = 0;
-    rocksdb_rs::status::Status result = Status_new();
+    rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
     for (const auto& name : factories) {
       created++;
       s = TestCreateStatic<T>(name, object, delete_objects);

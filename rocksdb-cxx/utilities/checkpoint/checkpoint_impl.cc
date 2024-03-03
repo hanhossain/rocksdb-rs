@@ -231,7 +231,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
   bool same_fs = true;
 
   for (auto& info : infos) {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (!info.replacement_contents.empty()) {
       // Currently should only be used for CURRENT file.
       assert(info.file_type == rocksdb_rs::types::FileType::kCurrentFile);
@@ -422,7 +422,7 @@ rocksdb_rs::status::Status CheckpointImpl::ExportFilesInMetaData(
     std::function<rocksdb_rs::status::Status(const std::string& src_dirname,
                          const std::string& src_fname)>
         copy_file_cb) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   auto hardlink_file = true;
 
   // Copy/hard link files in metadata.

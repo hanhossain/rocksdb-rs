@@ -144,7 +144,7 @@ rocksdb_rs::status::Status WalSet::AddWal(const WalAddition& wal) {
 }
 
 rocksdb_rs::status::Status WalSet::AddWals(const WalAdditions& wals) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (const WalAddition& wal : wals) {
     s = AddWal(wal);
     if (!s.ok()) {
@@ -172,7 +172,7 @@ rocksdb_rs::status::Status WalSet::CheckWals(
     const std::unordered_map<WalNumber, std::string>& logs_on_disk) const {
   assert(env != nullptr);
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (const auto& wal : wals_) {
     const uint64_t log_number = wal.first;
     const WalMetadata& wal_meta = wal.second;

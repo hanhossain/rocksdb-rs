@@ -258,7 +258,7 @@ TEST_F(DBMemTableTest, ConcurrentMergeWrite) {
   write_thread1.join();
   write_thread2.join();
 
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   ReadOptions roptions;
   SequenceNumber max_covering_tombstone_seq = 0;
   LookupKey lkey("key", kMaxSequenceNumber);

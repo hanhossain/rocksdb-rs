@@ -69,7 +69,6 @@ pub(crate) mod ffi {
     }
 
     extern "Rust" {
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new(
             code: Code,
@@ -80,16 +79,12 @@ pub(crate) mod ffi {
             scope: u8,
             state: UniquePtr<CxxString>,
         ) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new1() -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new2(code: Code) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new3(code: Code, subcode: SubCode) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new4(
             code: Code,
@@ -98,7 +93,6 @@ pub(crate) mod ffi {
             data_loss: bool,
             scope: u8,
         ) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new5(
             code: Code,
@@ -107,16 +101,12 @@ pub(crate) mod ffi {
             msg2: &Slice,
             sev: Severity,
         ) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new6(code: Code, msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new7(code: Code, subcode: SubCode, msg: &Slice, msg2: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new8(code: Code, subcode: SubCode, sev: Severity, msg: &Slice) -> Status;
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_new"]
         fn status_new9(status: &Status, severity: Severity) -> Status;
 

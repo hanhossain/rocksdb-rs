@@ -574,7 +574,7 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
 
   std::string expected_value = get_value(1, 0) + "," + get_value(1, 1) + "," +
                                get_value(1, 2) + "," + get_value(1, 3);
-  rocksdb_rs::status::Status expected_status = Status_new();
+  rocksdb_rs::status::Status expected_status = rocksdb_rs::status::Status_new();
   verify(1, expected_status.Clone(), expected_value);
 
   // Test DBIter::FindValueForCurrentKeyUsingSeek flow.

@@ -54,7 +54,7 @@ std::shared_ptr<DB> OpenDb(bool read_only = false) {
     options.memtable_factory.reset(NewHashSkipListRepFactory());
   }
 
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!read_only) {
     s = DB::Open(options, kDbName, &db);
   } else {
@@ -1046,7 +1046,7 @@ TEST_F(PerfContextTest, MergeOperandCount) {
       // MultiGet
       {
         std::vector<PinnableSlice> results(num_keys);
-        rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(num_keys);
+        rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
 
         db->MultiGet(ReadOptions(), db->DefaultColumnFamily(), num_keys,
                      &key_slices[0], &results[0], &statuses[0]);
@@ -1064,7 +1064,7 @@ TEST_F(PerfContextTest, MergeOperandCount) {
       // MultiGetEntity
       {
         std::vector<PinnableWideColumns> results(num_keys);
-        rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(num_keys);
+        rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
 
         db->MultiGetEntity(ReadOptions(), db->DefaultColumnFamily(), num_keys,
                            &key_slices[0], &results[0], &statuses[0]);

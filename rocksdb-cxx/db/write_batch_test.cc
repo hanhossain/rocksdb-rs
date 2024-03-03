@@ -796,7 +796,7 @@ TEST_F(WriteBatchTest, ColumnFamiliesBatchWithIndexTest) {
 }
 
 TEST_F(WriteBatchTest, SavePointTest) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatch batch;
   batch.SetSavePoint();
 
@@ -914,7 +914,7 @@ TEST_F(WriteBatchTest, SavePointTest) {
 }
 
 TEST_F(WriteBatchTest, MemoryLimitTest) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // The header size is 12 bytes. The two Puts take 8 bytes which gives total
   // of 12 + 8 * 2 = 28 bytes.
   WriteBatch batch(0, 28);

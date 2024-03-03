@@ -5125,7 +5125,7 @@ TEST_F(DBTest2, TraceWithFilter) {
   // Count the number of records in the trace file;
   int count = 0;
   std::string data;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   while (true) {
     s = trace_reader3->Read(&data);
     if (!s.ok()) {
@@ -5380,13 +5380,13 @@ TEST_F(DBTest2, TestCompactFiles) {
   GetSstFiles(env_, dbname_, &files);
   ASSERT_EQ(files.size(), 2);
 
-  rocksdb_rs::status::Status user_thread1_status = Status_new();
+  rocksdb_rs::status::Status user_thread1_status = rocksdb_rs::status::Status_new();
   port::Thread user_thread1([&]() {
     user_thread1_status =
         db_->CompactFiles(CompactionOptions(), handle, files, 1);
   });
 
-  rocksdb_rs::status::Status user_thread2_status = Status_new();
+  rocksdb_rs::status::Status user_thread2_status = rocksdb_rs::status::Status_new();
   port::Thread user_thread2([&]() {
     user_thread2_status = db_->IngestExternalFile(handle, {external_file2},
                                                   IngestExternalFileOptions());

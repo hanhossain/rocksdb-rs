@@ -197,7 +197,7 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableSlice> values(batch_size);
-          rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(batch_size);
+          rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -235,7 +235,7 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableWideColumns> results(batch_size);
-          rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(batch_size);
+          rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -569,7 +569,7 @@ class NonBatchedOpsStressTest : public StressTest {
     key_str.reserve(num_keys);
     keys.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
     // When Flags_use_txn is enabled, we also do a read your write check.
     std::vector<std::optional<ExpectedValue>> ryw_expected_values;
     ryw_expected_values.reserve(num_keys);
@@ -630,7 +630,7 @@ class NonBatchedOpsStressTest : public StressTest {
         // keys and exercise some corner cases in the code
         if (thread->rand.OneIn(10)) {
           int op = thread->rand.Uniform(2);
-          rocksdb_rs::status::Status s = Status_new();
+          rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
           assert(txn);
           switch (op) {
             case 0:
@@ -772,7 +772,7 @@ class NonBatchedOpsStressTest : public StressTest {
       // If test use transaction, after consistency check, also do a read your
       // own write check.
       if (do_consistency_check && !error_count && (s.ok() || s.IsNotFound())) {
-        rocksdb_rs::status::Status tmp_s = Status_new();
+        rocksdb_rs::status::Status tmp_s = rocksdb_rs::status::Status_new();
         std::string value;
 
         if (use_txn) {
@@ -999,7 +999,7 @@ class NonBatchedOpsStressTest : public StressTest {
     }
 
     std::vector<PinnableWideColumns> results(num_keys);
-    rust::Vec<rocksdb_rs::status::Status> statuses = Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
 
     if (fault_fs_guard) {
       fault_fs_guard->EnableErrorInjection();
@@ -1152,7 +1152,7 @@ class NonBatchedOpsStressTest : public StressTest {
     std::unique_ptr<Iterator> iter(db_->NewIterator(ro_copy, cfh));
 
     uint64_t count = 0;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     if (fault_fs_guard) {
       fault_fs_guard->EnableErrorInjection();
@@ -1267,7 +1267,7 @@ class NonBatchedOpsStressTest : public StressTest {
     const Slice v(value, sz);
 
 
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     if (FLAGS_use_merge) {
       if (!FLAGS_use_txn) {
@@ -1352,7 +1352,7 @@ class NonBatchedOpsStressTest : public StressTest {
 
     // Use delete if the key may be overwritten and a single deletion
     // otherwise.
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (shared->AllowsOverwrite(rand_key)) {
       PendingExpectedValue pending_expected_value =
           shared->PrepareDelete(rand_column_family, rand_key);
@@ -1465,7 +1465,7 @@ class NonBatchedOpsStressTest : public StressTest {
     Slice end_key = end_keystr;
     std::string write_ts_str;
     Slice write_ts;
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (FLAGS_user_timestamp_size) {
       write_ts_str = GetNowNanos();
       write_ts = write_ts_str;
@@ -1501,7 +1501,7 @@ class NonBatchedOpsStressTest : public StressTest {
                               const std::vector<int64_t>& rand_keys) override {
     const std::string sst_filename =
         FLAGS_db + "/." + std::to_string(thread->tid) + ".sst";
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (db_stress_env->FileExists(sst_filename).ok()) {
       // Maybe we terminated abnormally before, so cleanup to give this file
       // ingestion a clean slate

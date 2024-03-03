@@ -8523,7 +8523,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
   options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kTableFile);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Reopen(options);
 
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
@@ -8617,7 +8617,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   options.num_levels = 3;
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Reopen(options);
 
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
@@ -8704,7 +8704,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
   options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   Reopen(options);
 
@@ -8759,7 +8759,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
   options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kNoChecksum);
   Reopen(options);
 

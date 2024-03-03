@@ -74,7 +74,7 @@ rocksdb_rs::status::Status OptimisticTransactionDB::Open(
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles,
     OptimisticTransactionDB** dbptr) {
-  rocksdb_rs::status::Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DB* db;
 
   std::vector<ColumnFamilyDescriptor> column_families_copy = column_families;

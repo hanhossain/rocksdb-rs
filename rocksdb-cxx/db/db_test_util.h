@@ -213,7 +213,7 @@ class SpecialEnv : public EnvWrapper {
         while (env_->delay_sstable_sync_.load(std::memory_order_acquire)) {
           env_->SleepForMicroseconds(100000);
         }
-        rocksdb_rs::status::Status s = Status_new();
+        rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
         if (!env_->skip_fsync_) {
           s = base_->Sync();
         }
@@ -288,7 +288,7 @@ class SpecialEnv : public EnvWrapper {
 #if !(defined NDEBUG) || !defined(OS_WIN)
         TEST_SYNC_POINT("SpecialEnv::WalFile::Append:1");
 #endif
-        rocksdb_rs::status::Status s = Status_new();
+        rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
         if (env_->log_write_error_.load(std::memory_order_acquire)) {
           s = Status_IOError("simulated writer error");
         } else {
@@ -551,7 +551,7 @@ class SpecialEnv : public EnvWrapper {
   }
 
   virtual rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
-    rocksdb_rs::status::Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (time_elapse_only_sleep_) {
       *unix_time = maybe_starting_time_;
     } else {

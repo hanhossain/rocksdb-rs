@@ -94,7 +94,7 @@ rocksdb_rs::status::Status Customizable::GetOptionsMap(
     const ConfigOptions& config_options, const Customizable* customizable,
     const std::string& value, std::string* id,
     std::unordered_map<std::string, std::string>* props) {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (value.empty() || value == kNullptrString) {
     *id = "";
     props->clear();
@@ -123,7 +123,7 @@ rocksdb_rs::status::Status Customizable::GetOptionsMap(
 rocksdb_rs::status::Status Customizable::ConfigureNewObject(
     const ConfigOptions& config_options, Customizable* object,
     const std::unordered_map<std::string, std::string>& opt_map) {
-  rocksdb_rs::status::Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (object != nullptr) {
     status = object->ConfigureFromMap(config_options, opt_map);
   } else if (!opt_map.empty()) {
