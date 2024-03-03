@@ -195,7 +195,7 @@ inline IOStatus::IOStatus(const IOStatus& s)
         s.status_.retryable,
         s.status_.data_loss,
         s.status_.scope)) {
-    status_.state = s.status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.state);
+    status_.state = s.status_.state == nullptr ? nullptr : rocksdb_rs::status::Status_CopyState(*s.status_.state);
 }
 
 inline IOStatus& IOStatus::operator=(const IOStatus& s) {
@@ -207,7 +207,7 @@ inline IOStatus& IOStatus::operator=(const IOStatus& s) {
     status_.retryable = s.status_.retryable;
     status_.data_loss = s.status_.data_loss;
     status_.scope = s.status_.scope;
-      status_.state = s.status_.state == nullptr ? nullptr : Status_CopyState(*s.status_.state);
+      status_.state = s.status_.state == nullptr ? nullptr : rocksdb_rs::status::Status_CopyState(*s.status_.state);
   }
   return *this;
 }

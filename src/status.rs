@@ -379,7 +379,6 @@ pub(crate) mod ffi {
         #[cxx_name = "Status_TxnNotPrepared"]
         fn status_txn_not_prepared3() -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CopyState"]
         fn status_copy_state(s: &CxxString) -> UniquePtr<CxxString>;
 
