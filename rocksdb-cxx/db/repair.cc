@@ -191,7 +191,7 @@ class Repairer {
   ~Repairer() { Close(); }
 
   Status Run() {
-    Status status = env_->LockFile(static_cast<std::string>(LockFileName(dbname_)), &db_lock_);
+    Status status = env_->LockFile(static_cast<std::string>(rocksdb_rs::filename::LockFileName(dbname_)), &db_lock_);
     if (!status.ok()) {
       return status;
     }
@@ -307,7 +307,7 @@ class Repairer {
       uint64_t number;
       FileType type;
       for (size_t i = 0; i < filenames.size(); i++) {
-        if (ParseFileName(filenames[i], &number, &type)) {
+        if (rocksdb_rs::filename::ParseFileName(filenames[i], &number, &type)) {
           if (type == FileType::kDescriptorFile) {
             manifests_.push_back(filenames[i]);
           } else {
@@ -337,7 +337,7 @@ class Repairer {
     for (size_t i = 0; i < logs_.size(); i++) {
       // we should use LogFileName(wal_dir, logs_[i]) here. user might uses
       // wal_dir option.
-      rust::String logname = LogFileName(wal_dir, logs_[i]);
+      rust::String logname = rocksdb_rs::filename::LogFileName(wal_dir, logs_[i]);
       Status status = ConvertLogToTable(wal_dir, logs_[i]);
       if (!status.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
@@ -364,7 +364,7 @@ class Repairer {
     const ReadOptions read_options;
 
     // Open the log file
-    std::string logname = static_cast<std::string>(LogFileName(wal_dir, log));
+    std::string logname = static_cast<std::string>(rocksdb_rs::filename::LogFileName(wal_dir, log));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<SequentialFileReader> lfile_reader;
     Status status = SequentialFileReader::Create(
@@ -463,7 +463,7 @@ class Repairer {
       TableBuilderOptions tboptions(
           *cfd->ioptions(), *cfd->GetLatestMutableCFOptions(),
           cfd->internal_comparator(), cfd->int_tbl_prop_collector_factories(),
-          CompressionType::kNoCompression, default_compression, cfd->GetID(), cfd->GetName(),
+          rocksdb_rs::compression_type::CompressionType::kNoCompression, default_compression, cfd->GetID(), cfd->GetName(),
           -1 /* level */, false /* is_bottommost */,
           TableFileCreationReason::kRecovery, 0 /* oldest_key_time */,
           0 /* file_creation_time */, "DB Repairer" /* db_id */, db_session_id_,
@@ -501,9 +501,9 @@ class Repairer {
       t.meta.fd = table_fds_[i];
       Status status = ScanTable(&t);
       if (!status.ok()) {
-        std::string fname = static_cast<std::string>(TableFileName(
+        std::string fname = static_cast<std::string>(rocksdb_rs::filename::TableFileName(
             db_options_.db_paths, t.meta.fd.GetNumber(), t.meta.fd.GetPathId()));
-        rust::String file_num = FormatFileNumber(t.meta.fd.GetNumber(), t.meta.fd.GetPathId());
+        rust::String file_num = rocksdb_rs::filename::FormatFileNumber(t.meta.fd.GetNumber(), t.meta.fd.GetPathId());
         ROCKS_LOG_WARN(db_options_.info_log, "Table #%s: ignoring %s",
                        file_num.c_str(), status.ToString()->c_str());
         ArchiveFile(fname);
@@ -514,7 +514,7 @@ class Repairer {
   }
 
   Status ScanTable(TableInfo* t) {
-    std::string fname = static_cast<std::string>(TableFileName(
+    std::string fname = static_cast<std::string>(rocksdb_rs::filename::TableFileName(
         db_options_.db_paths, t->meta.fd.GetNumber(), t->meta.fd.GetPathId()));
     int counter = 0;
     uint64_t file_size;

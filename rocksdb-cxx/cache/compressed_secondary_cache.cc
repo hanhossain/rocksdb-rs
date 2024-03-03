@@ -21,7 +21,7 @@ CompressedSecondaryCache::CompressedSecondaryCache(
     : cache_(opts.LRUCacheOptions::MakeSharedCache()),
       cache_options_(opts),
       cache_res_mgr_(std::make_shared<ConcurrentCacheReservationManager>(
-          std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+          std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
               cache_))) {}
 
 CompressedSecondaryCache::~CompressedSecondaryCache() {
@@ -63,7 +63,7 @@ std::unique_ptr<SecondaryCacheResultHandle> CompressedSecondaryCache::Lookup(
   Status s = Status_new();
   Cache::ObjectPtr value{nullptr};
   size_t charge{0};
-  if (cache_options_.compression_type == CompressionType::kNoCompression ||
+  if (cache_options_.compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression ||
       cache_options_.do_not_compress_roles.Contains(helper->role)) {
     s = helper->create_cb(Slice(ptr->get(), handle_value_charge),
                           create_context, allocator, &value, &charge);
@@ -135,7 +135,7 @@ Status CompressedSecondaryCache::Insert(const Slice& key,
   Slice val(ptr.get(), size);
 
   std::string compressed_val;
-  if (cache_options_.compression_type != CompressionType::kNoCompression &&
+  if (cache_options_.compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
       !cache_options_.do_not_compress_roles.Contains(helper->role)) {
     PERF_COUNTER_ADD(compressed_sec_cache_uncompressed_bytes, size);
     CompressionOptions compression_opts;
@@ -207,7 +207,7 @@ std::string CompressedSecondaryCache::GetPrintableOptions() const {
 
 CompressedSecondaryCache::CacheValueChunk*
 CompressedSecondaryCache::SplitValueIntoChunks(const Slice& value,
-                                               CompressionType compression_type,
+                                               rocksdb_rs::compression_type::CompressionType compression_type,
                                                size_t& charge) {
   assert(!value.empty());
   const char* src_ptr = value.data();
@@ -229,7 +229,7 @@ CompressedSecondaryCache::SplitValueIntoChunks(const Slice& value,
     if (upper == malloc_bin_sizes_.begin() ||
         upper == malloc_bin_sizes_.end() ||
         *upper - predicted_chunk_size < malloc_bin_sizes_.front() ||
-        compression_type == CompressionType::kNoCompression) {
+        compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       tmp_size = predicted_chunk_size;
     } else {
       tmp_size = *(--upper);
@@ -279,7 +279,7 @@ const Cache::CacheItemHelper* CompressedSecondaryCache::GetHelper(
     bool enable_custom_split_merge) const {
   if (enable_custom_split_merge) {
     static const Cache::CacheItemHelper kHelper{
-        CacheEntryRole::kMisc,
+        rocksdb_rs::cache::CacheEntryRole::kMisc,
         [](Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
           CacheValueChunk* chunks_head = static_cast<CacheValueChunk*>(obj);
           while (chunks_head != nullptr) {
@@ -292,7 +292,7 @@ const Cache::CacheItemHelper* CompressedSecondaryCache::GetHelper(
     return &kHelper;
   } else {
     static const Cache::CacheItemHelper kHelper{
-        CacheEntryRole::kMisc,
+        rocksdb_rs::cache::CacheEntryRole::kMisc,
         [](Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
           delete static_cast<CacheAllocationPtr*>(obj);
           obj = nullptr;

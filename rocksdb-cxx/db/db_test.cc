@@ -1311,7 +1311,7 @@ TEST_F(DBTest, MetaDataTest) {
     // Add a single blob reference to each file
     std::string blob_index;
     BlobIndex::EncodeBlob(&blob_index, /* blob_file_number */ i + 1000,
-                          /* offset */ 1234, /* size */ 5678, CompressionType::kNoCompression);
+                          /* offset */ 1234, /* size */ 5678, rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     WriteBatch batch;
     ASSERT_OK(WriteBatchInternal::PutBlobIndex(&batch, 0, Key(key_index),
@@ -1428,7 +1428,7 @@ void MinLevelHelper(DBTest* self, Options& options) {
 }
 
 // returns false if the calling-Test should be skipped
-bool MinLevelToCompress(CompressionType& type, Options& options, int wbits,
+bool MinLevelToCompress(rocksdb_rs::compression_type::CompressionType& type, Options& options, int wbits,
                         int lev, int strategy) {
   fprintf(stderr,
           "Test with compression options : window_bits = %d, level =  %d, "
@@ -1441,22 +1441,22 @@ bool MinLevelToCompress(CompressionType& type, Options& options, int wbits,
   options.create_if_missing = true;
 
   if (Snappy_Supported()) {
-    type = CompressionType::kSnappyCompression;
+    type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
     fprintf(stderr, "using snappy\n");
   } else if (Zlib_Supported()) {
-    type = CompressionType::kZlibCompression;
+    type = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
     fprintf(stderr, "using zlib\n");
   } else if (BZip2_Supported()) {
-    type = CompressionType::kBZip2Compression;
+    type = rocksdb_rs::compression_type::CompressionType::kBZip2Compression;
     fprintf(stderr, "using bzip2\n");
   } else if (LZ4_Supported()) {
-    type = CompressionType::kLZ4Compression;
+    type = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
     fprintf(stderr, "using lz4\n");
   } else if (XPRESS_Supported()) {
-    type = CompressionType::kXpressCompression;
+    type = rocksdb_rs::compression_type::CompressionType::kXpressCompression;
     fprintf(stderr, "using xpress\n");
   } else if (ZSTD_Supported()) {
-    type = CompressionType::kZSTD;
+    type = rocksdb_rs::compression_type::CompressionType::kZSTD;
     fprintf(stderr, "using ZSTD\n");
   } else {
     fprintf(stderr, "skipping test, compression disabled\n");
@@ -1466,7 +1466,7 @@ bool MinLevelToCompress(CompressionType& type, Options& options, int wbits,
 
   // do not compress L0
   for (int i = 0; i < 1; i++) {
-    options.compression_per_level[i] = CompressionType::kNoCompression;
+    options.compression_per_level[i] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   for (int i = 1; i < options.num_levels; i++) {
     options.compression_per_level[i] = type;
@@ -1477,7 +1477,7 @@ bool MinLevelToCompress(CompressionType& type, Options& options, int wbits,
 
 TEST_F(DBTest, MinLevelToCompress1) {
   Options options = CurrentOptions();
-  CompressionType type = CompressionType::kSnappyCompression;
+  rocksdb_rs::compression_type::CompressionType type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   if (!MinLevelToCompress(type, options, -14, -1, 0)) {
     return;
   }
@@ -1486,7 +1486,7 @@ TEST_F(DBTest, MinLevelToCompress1) {
 
   // do not compress L0 and L1
   for (int i = 0; i < 2; i++) {
-    options.compression_per_level[i] = CompressionType::kNoCompression;
+    options.compression_per_level[i] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   for (int i = 2; i < options.num_levels; i++) {
     options.compression_per_level[i] = type;
@@ -1497,7 +1497,7 @@ TEST_F(DBTest, MinLevelToCompress1) {
 
 TEST_F(DBTest, MinLevelToCompress2) {
   Options options = CurrentOptions();
-  CompressionType type = CompressionType::kSnappyCompression;
+  rocksdb_rs::compression_type::CompressionType type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   if (!MinLevelToCompress(type, options, 15, -1, 0)) {
     return;
   }
@@ -1506,7 +1506,7 @@ TEST_F(DBTest, MinLevelToCompress2) {
 
   // do not compress L0 and L1
   for (int i = 0; i < 2; i++) {
-    options.compression_per_level[i] = CompressionType::kNoCompression;
+    options.compression_per_level[i] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   for (int i = 2; i < options.num_levels; i++) {
     options.compression_per_level[i] = type;
@@ -1552,7 +1552,7 @@ static bool Between(uint64_t val, uint64_t low, uint64_t high) {
 TEST_F(DBTest, ApproximateSizesMemTable) {
   Options options = CurrentOptions();
   options.write_buffer_size = 100000000;  // Large write buffer
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   DestroyAndReopen(options);
   auto default_cf = db_->DefaultColumnFamily();
@@ -1699,7 +1699,7 @@ TEST_F(DBTest, ApproximateSizesFilesWithErrorMargin) {
   Options options = CurrentOptions();
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   options.write_buffer_size = 24 * 1024;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.target_file_size_base = 24 * 1024;
   DestroyAndReopen(options);
@@ -1772,7 +1772,7 @@ TEST_F(DBTest, ApproximateSizesFilesWithErrorMargin) {
 TEST_F(DBTest, GetApproximateMemTableStats) {
   Options options = CurrentOptions();
   options.write_buffer_size = 100000000;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   DestroyAndReopen(options);
 
@@ -1826,7 +1826,7 @@ TEST_F(DBTest, ApproximateSizes) {
   do {
     Options options = CurrentOptions();
     options.write_buffer_size = 100000000;  // Large write buffer
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.create_if_missing = true;
     DestroyAndReopen(options);
     CreateAndReopenWithCF({"pikachu"}, options);
@@ -1888,7 +1888,7 @@ TEST_F(DBTest, ApproximateSizes) {
 TEST_F(DBTest, ApproximateSizes_MixOfSmallAndLarge) {
   do {
     Options options = CurrentOptions();
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     CreateAndReopenWithCF({"pikachu"}, options);
 
     Random rnd(301);
@@ -3751,7 +3751,7 @@ TEST_P(DBTestWithParam, FIFOCompactionTest) {
     options.write_buffer_size = 100 << 10;  // 100KB
     options.arena_block_size = 4096;
     options.compaction_options_fifo.max_table_files_size = 500 << 10;  // 500KB
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.create_if_missing = true;
     options.max_subcompactions = max_subcompactions_;
     if (iter == 1) {
@@ -3792,7 +3792,7 @@ TEST_F(DBTest, FIFOCompactionTestWithCompaction) {
   options.compaction_options_fifo.max_table_files_size = 1500 << 10;  // 1MB
   options.compaction_options_fifo.allow_compaction = true;
   options.level0_file_num_compaction_trigger = 6;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options = CurrentOptions(options);
   DestroyAndReopen(options);
@@ -3834,7 +3834,7 @@ TEST_F(DBTest, FIFOCompactionStyleWithCompactionAndDelete) {
   options.compaction_options_fifo.max_table_files_size = 1500 << 10;  // 1MB
   options.compaction_options_fifo.allow_compaction = true;
   options.level0_file_num_compaction_trigger = 3;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options = CurrentOptions(options);
   DestroyAndReopen(options);
@@ -3911,7 +3911,7 @@ TEST_F(DBTest, FIFOCompactionWithTTLTest) {
   options.compaction_style = kCompactionStyleFIFO;
   options.write_buffer_size = 10 << 10;  // 10KB
   options.arena_block_size = 4096;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   env_->SetMockSleep();
   options.env = env_;
@@ -4125,7 +4125,7 @@ TEST_F(DBTest, DISABLED_RateLimitingTest) {
   options.target_file_size_base = 1 << 20;     // 1MB
   options.max_bytes_for_level_base = 4 << 20;  // 4MB
   options.max_bytes_for_level_multiplier = 4;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.env = env_;
   options.statistics = rocksdb::CreateDBStatistics();
@@ -4454,7 +4454,7 @@ TEST_F(DBTest, DynamicMemtableOptions) {
   Options options;
   options.env = env_;
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_background_compactions = 1;
   options.write_buffer_size = k64KB;
   options.arena_block_size = 16 * 1024;
@@ -4752,7 +4752,7 @@ TEST_P(DBTestWithParam, ThreadStatusSingleCompaction) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base = options.target_file_size_base * 2;
   options.max_bytes_for_level_multiplier = 2;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options = CurrentOptions(options);
   options.env = env_;
   options.enable_thread_tracking = true;
@@ -4890,7 +4890,7 @@ TEST_P(DBTestWithParam, PreShutdownMultipleCompaction) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base =
       options.target_file_size_base * kNumL0Files;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options = CurrentOptions(options);
   options.env = env_;
   options.enable_thread_tracking = true;
@@ -4979,7 +4979,7 @@ TEST_P(DBTestWithParam, PreShutdownCompactionMiddle) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base =
       options.target_file_size_base * kNumL0Files;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options = CurrentOptions(options);
   options.env = env_;
   options.enable_thread_tracking = true;
@@ -5085,9 +5085,9 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel) {
   options.num_levels = 5;
 
   options.compression_per_level.resize(3);
-  options.compression_per_level[0] = CompressionType::kNoCompression;
-  options.compression_per_level[1] = CompressionType::kNoCompression;
-  options.compression_per_level[2] = CompressionType::kSnappyCompression;
+  options.compression_per_level[0] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression_per_level[1] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression_per_level[2] = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
 
   OnFileDeletionListener* listener = new OnFileDeletionListener();
   options.listeners.emplace_back(listener);
@@ -5173,9 +5173,9 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel2) {
   options.table_factory = mtf;
 
   options.compression_per_level.resize(3);
-  options.compression_per_level[0] = CompressionType::kNoCompression;
-  options.compression_per_level[1] = CompressionType::kLZ4Compression;
-  options.compression_per_level[2] = CompressionType::kZlibCompression;
+  options.compression_per_level[0] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression_per_level[1] = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+  options.compression_per_level[2] = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
 
   DestroyAndReopen(options);
   // When base level is L4, L4 is LZ4.
@@ -5186,14 +5186,14 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel2) {
       "LevelCompactionPicker::PickCompaction:Return", [&](void* arg) {
         Compaction* compaction = reinterpret_cast<Compaction*>(arg);
         if (compaction->output_level() == 4) {
-          ASSERT_TRUE(compaction->output_compression() == CompressionType::kLZ4Compression);
+          ASSERT_TRUE(compaction->output_compression() == rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
           num_lz4.fetch_add(1);
         }
       });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "FlushJob::WriteLevel0Table:output_compression", [&](void* arg) {
-        auto* compression = reinterpret_cast<CompressionType*>(arg);
-        ASSERT_TRUE(*compression == CompressionType::kNoCompression);
+        auto* compression = reinterpret_cast<rocksdb_rs::compression_type::CompressionType*>(arg);
+        ASSERT_TRUE(*compression == rocksdb_rs::compression_type::CompressionType::kNoCompression);
         num_no.fetch_add(1);
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -5228,17 +5228,17 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel2) {
       "LevelCompactionPicker::PickCompaction:Return", [&](void* arg) {
         Compaction* compaction = reinterpret_cast<Compaction*>(arg);
         if (compaction->output_level() == 4 && compaction->start_level() == 3) {
-          ASSERT_TRUE(compaction->output_compression() == CompressionType::kZlibCompression);
+          ASSERT_TRUE(compaction->output_compression() == rocksdb_rs::compression_type::CompressionType::kZlibCompression);
           num_zlib.fetch_add(1);
         } else {
-          ASSERT_TRUE(compaction->output_compression() == CompressionType::kLZ4Compression);
+          ASSERT_TRUE(compaction->output_compression() == rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
           num_lz4.fetch_add(1);
         }
       });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "FlushJob::WriteLevel0Table:output_compression", [&](void* arg) {
-        auto* compression = reinterpret_cast<CompressionType*>(arg);
-        ASSERT_TRUE(*compression == CompressionType::kNoCompression);
+        auto* compression = reinterpret_cast<rocksdb_rs::compression_type::CompressionType*>(arg);
+        ASSERT_TRUE(*compression == rocksdb_rs::compression_type::CompressionType::kNoCompression);
         num_no.fetch_add(1);
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -5274,7 +5274,7 @@ TEST_F(DBTest, DynamicCompactionOptions) {
   options.level_compaction_dynamic_level_bytes = false;
   options.env = env_;
   options.create_if_missing = true;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.soft_pending_compaction_bytes_limit = 1024 * 1024;
   options.write_buffer_size = k64KB;
   options.arena_block_size = 4 * k4KB;
@@ -5671,7 +5671,7 @@ TEST_F(DBTest, DynamicMiscOptions) {
   options.env = env_;
   options.create_if_missing = true;
   options.max_sequential_skip_in_iterations = 16;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.statistics = rocksdb::CreateDBStatistics();
   DestroyAndReopen(options);
 
@@ -5734,13 +5734,13 @@ TEST_F(DBTest, DynamicMiscOptions) {
   ASSERT_OK(dbfull()->SetOptions({{"compression", "kNoCompression"}}));
   ASSERT_OK(dbfull()->TEST_GetLatestMutableCFOptions(handles_[0],
                                                      &mutable_cf_options));
-  ASSERT_EQ(CompressionType::kNoCompression, mutable_cf_options.compression);
+  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kNoCompression, mutable_cf_options.compression);
 
   if (Snappy_Supported()) {
     ASSERT_OK(dbfull()->SetOptions({{"compression", "kSnappyCompression"}}));
     ASSERT_OK(dbfull()->TEST_GetLatestMutableCFOptions(handles_[0],
                                                        &mutable_cf_options));
-    ASSERT_EQ(CompressionType::kSnappyCompression,
+    ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
               mutable_cf_options.compression);
   }
 
@@ -5807,9 +5807,9 @@ TEST_F(DBTest, EncodeDecompressedBlockSizeTest) {
   // iter 2 -- lz4
   // iter 3 -- lz4HC
   // iter 4 -- xpress
-  CompressionType compressions[] = {CompressionType::kZlibCompression, CompressionType::kBZip2Compression,
-                                    CompressionType::kLZ4Compression, CompressionType::kLZ4HCCompression,
-                                    CompressionType::kXpressCompression};
+  rocksdb_rs::compression_type::CompressionType compressions[] = {rocksdb_rs::compression_type::CompressionType::kZlibCompression, rocksdb_rs::compression_type::CompressionType::kBZip2Compression,
+                                    rocksdb_rs::compression_type::CompressionType::kLZ4Compression, rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
+                                    rocksdb_rs::compression_type::CompressionType::kXpressCompression};
   for (auto comp : compressions) {
     if (!CompressionTypeSupported(comp)) {
       continue;
@@ -6094,7 +6094,7 @@ TEST_F(DBTest, SuggestCompactRangeTest) {
   options.arena_block_size = 4 << 10;
   options.level0_file_num_compaction_trigger = 4;
   options.num_levels = 4;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 450 << 10;
   options.target_file_size_base = 98 << 10;
   options.max_compaction_bytes = static_cast<uint64_t>(1) << 60;  // inf
@@ -6159,7 +6159,7 @@ TEST_F(DBTest, SuggestCompactRangeUniversal) {
   options.arena_block_size = 4 << 10;
   options.level0_file_num_compaction_trigger = 4;
   options.num_levels = 4;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 450 << 10;
   options.target_file_size_base = 98 << 10;
   options.max_compaction_bytes = static_cast<uint64_t>(1) << 60;  // inf
@@ -6456,7 +6456,7 @@ TEST_F(DBTest, FlushesInParallelWithCompactRange) {
     options.write_buffer_size = 110 << 10;
     options.level0_file_num_compaction_trigger = 4;
     options.num_levels = 4;
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.max_bytes_for_level_base = 450 << 10;
     options.target_file_size_base = 98 << 10;
     options.max_write_buffer_number = 2;
@@ -6650,7 +6650,7 @@ TEST_F(DBTest, SoftLimit) {
   options.max_bytes_for_level_base = 50000;
   options.max_bytes_for_level_multiplier = 10;
   options.max_background_compactions = 1;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   WriteStallListener* listener = new WriteStallListener();
   options.listeners.emplace_back(listener);
 
@@ -6832,7 +6832,7 @@ TEST_F(DBTest, LastWriteBufferDelay) {
   options.write_buffer_size = 100000;
   options.max_write_buffer_number = 4;
   options.delayed_write_rate = 20000;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.disable_auto_compactions = true;
   int kNumKeysPerMemtable = 3;
   options.memtable_factory.reset(
@@ -6863,9 +6863,9 @@ TEST_F(DBTest, LastWriteBufferDelay) {
 #endif  // !defined(ROCKSDB_DISABLE_STALL_NOTIFICATION)
 
 TEST_F(DBTest, FailWhenCompressionNotSupportedTest) {
-  CompressionType compressions[] = {CompressionType::kZlibCompression, CompressionType::kBZip2Compression,
-                                    CompressionType::kLZ4Compression, CompressionType::kLZ4HCCompression,
-                                    CompressionType::kXpressCompression};
+  rocksdb_rs::compression_type::CompressionType compressions[] = {rocksdb_rs::compression_type::CompressionType::kZlibCompression, rocksdb_rs::compression_type::CompressionType::kBZip2Compression,
+                                    rocksdb_rs::compression_type::CompressionType::kLZ4Compression, rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
+                                    rocksdb_rs::compression_type::CompressionType::kXpressCompression};
   for (auto comp : compressions) {
     if (!CompressionTypeSupported(comp)) {
       // not supported, we should fail the Open()
@@ -6873,7 +6873,7 @@ TEST_F(DBTest, FailWhenCompressionNotSupportedTest) {
       options.compression = comp;
       ASSERT_TRUE(!TryReopen(options).ok());
       // Try if CreateColumnFamily also fails
-      options.compression = CompressionType::kNoCompression;
+      options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       ASSERT_OK(TryReopen(options));
       ColumnFamilyOptions cf_options(options);
       cf_options.compression = comp;
@@ -7052,7 +7052,7 @@ TEST_F(DBTest, DeletingOldWalAfterDrop) {
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   Options options = CurrentOptions();
   options.max_total_wal_size = 8192;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.write_buffer_size = 1 << 20;
   options.level0_file_num_compaction_trigger = (1 << 30);
   options.level0_slowdown_writes_trigger = (1 << 30);

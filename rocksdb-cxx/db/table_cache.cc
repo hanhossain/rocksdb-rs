@@ -96,7 +96,7 @@ Status TableCache::GetTableReader(
     const std::shared_ptr<const SliceTransform>& prefix_extractor,
     bool skip_filters, int level, bool prefetch_index_and_filter_in_cache,
     size_t max_file_size_for_l0_meta_pin, Temperature file_temperature) {
-  std::string fname = static_cast<std::string>(TableFileName(
+  std::string fname = static_cast<std::string>(rocksdb_rs::filename::TableFileName(
       ioptions_.cf_paths, file_meta.fd.GetNumber(), file_meta.fd.GetPathId()));
   std::unique_ptr<FSRandomAccessFile> file;
   FileOptions fopts = file_options;
@@ -110,7 +110,7 @@ Status TableCache::GetTableReader(
   if (s.ok()) {
     RecordTick(ioptions_.stats, NO_FILE_OPENS);
   } else if (s.IsPathNotFound()) {
-    fname = static_cast<std::string>(Rocks2LevelTableFileName(fname));
+    fname = static_cast<std::string>(rocksdb_rs::filename::Rocks2LevelTableFileName(fname));
     // If this file is also not found, we want to use the error message
     // that contains the table file name which is less confusing.
     Status temp_s =

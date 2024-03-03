@@ -34,7 +34,7 @@ WriteBufferManager::WriteBufferManager(size_t _buffer_size,
     // therefore we set delayed_decrease = true to save some dummy entry
     // insertion on memory increase right after memory decrease
     cache_res_mgr_ = std::make_shared<
-        CacheReservationManagerImpl<CacheEntryRole::kWriteBuffer>>(
+        CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kWriteBuffer>>(
         cache, true /* delayed_decrease */);
   }
 }

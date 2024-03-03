@@ -13,6 +13,8 @@
 #include "port/port.h"
 #include "test_util/testharness.h"
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 
 class FileNameTest : public testing::Test {};

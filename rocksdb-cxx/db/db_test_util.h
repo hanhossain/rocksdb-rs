@@ -52,6 +52,8 @@
 // In case defined by Windows headers
 #undef small
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 class MockEnv;
 
@@ -921,7 +923,7 @@ class TestPutOperator : public MergeOperator {
 };
 
 /*
- * A cache wrapper that tracks certain CacheEntryRole's cache charge, its
+ * A cache wrapper that tracks certain rocksdb_rs::cache::CacheEntryRole's cache charge, its
  * peaks and increments
  *
  *        p0
@@ -932,7 +934,7 @@ class TestPutOperator : public MergeOperator {
  * peaks = {p0, p1}
  * increments = {p1-a, p2-b}
  */
-template <CacheEntryRole R>
+template <rocksdb_rs::cache::CacheEntryRole R>
 class TargetCacheChargeTrackingCache : public CacheWrapper {
  public:
   explicit TargetCacheChargeTrackingCache(std::shared_ptr<Cache> target);

@@ -69,7 +69,7 @@ struct BlobDBOptions {
   uint64_t blob_file_size = 256 * 1024 * 1024;
 
   // what compression to use for Blob's
-  CompressionType compression = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // If enabled, BlobDB cleans up stale blobs in non-TTL files during compaction
   // by rewriting the remaining live blobs to new files.

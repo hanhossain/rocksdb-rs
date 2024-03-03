@@ -44,7 +44,7 @@ class BlobFileReader {
 
   Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
                  uint64_t offset, uint64_t value_size,
-                 CompressionType compression_type,
+                 rocksdb_rs::compression_type::CompressionType compression_type,
                  FilePrefetchBuffer* prefetch_buffer,
                  MemoryAllocator* allocator,
                  std::unique_ptr<BlobContents>* result,
@@ -57,13 +57,13 @@ class BlobFileReader {
           blob_reqs,
       uint64_t* bytes_read) const;
 
-  CompressionType GetCompressionType() const { return compression_type_; }
+  rocksdb_rs::compression_type::CompressionType GetCompressionType() const { return compression_type_; }
 
   uint64_t GetFileSize() const { return file_size_; }
 
  private:
   BlobFileReader(std::unique_ptr<RandomAccessFileReader>&& file_reader,
-                 uint64_t file_size, CompressionType compression_type,
+                 uint64_t file_size, rocksdb_rs::compression_type::CompressionType compression_type,
                  SystemClock* clock, Statistics* statistics);
 
   static Status OpenFile(const ImmutableOptions& immutable_options,
@@ -77,7 +77,7 @@ class BlobFileReader {
   static Status ReadHeader(const RandomAccessFileReader* file_reader,
                            const ReadOptions& read_options,
                            uint32_t column_family_id, Statistics* statistics,
-                           CompressionType* compression_type);
+                           rocksdb_rs::compression_type::CompressionType* compression_type);
 
   static Status ReadFooter(const RandomAccessFileReader* file_reader,
                            const ReadOptions& read_options, uint64_t file_size,
@@ -96,7 +96,7 @@ class BlobFileReader {
                            uint64_t value_size);
 
   static Status UncompressBlobIfNeeded(const Slice& value_slice,
-                                       CompressionType compression_type,
+                                       rocksdb_rs::compression_type::CompressionType compression_type,
                                        MemoryAllocator* allocator,
                                        SystemClock* clock,
                                        Statistics* statistics,
@@ -104,7 +104,7 @@ class BlobFileReader {
 
   std::unique_ptr<RandomAccessFileReader> file_reader_;
   uint64_t file_size_;
-  CompressionType compression_type_;
+  rocksdb_rs::compression_type::CompressionType compression_type_;
   SystemClock* clock_;
   Statistics* statistics_;
 };

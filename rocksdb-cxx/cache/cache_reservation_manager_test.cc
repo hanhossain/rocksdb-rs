@@ -21,7 +21,7 @@ namespace rocksdb {
 class CacheReservationManagerTest : public ::testing::Test {
  protected:
   static constexpr std::size_t kSizeDummyEntry =
-      CacheReservationManagerImpl<CacheEntryRole::kMisc>::GetDummyEntrySize();
+      CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>::GetDummyEntrySize();
   static constexpr std::size_t kCacheCapacity = 4096 * kSizeDummyEntry;
   static constexpr int kNumShardBits = 0;  // 2^0 shard
   static constexpr std::size_t kMetaDataChargeOverhead = 10000;
@@ -31,7 +31,7 @@ class CacheReservationManagerTest : public ::testing::Test {
 
   CacheReservationManagerTest() {
     test_cache_rev_mng =
-        std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+        std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
             cache);
   }
 };
@@ -130,7 +130,7 @@ TEST(CacheReservationManagerIncreaseReservcationOnFullCacheTest,
      IncreaseCacheReservationOnFullCache) {
   ;
   constexpr std::size_t kSizeDummyEntry =
-      CacheReservationManagerImpl<CacheEntryRole::kMisc>::GetDummyEntrySize();
+      CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>::GetDummyEntrySize();
   constexpr std::size_t kSmallCacheCapacity = 4 * kSizeDummyEntry;
   constexpr std::size_t kBigCacheCapacity = 4096 * kSizeDummyEntry;
   constexpr std::size_t kMetaDataChargeOverhead = 10000;
@@ -141,7 +141,7 @@ TEST(CacheReservationManagerIncreaseReservcationOnFullCacheTest,
   lo.strict_capacity_limit = true;
   std::shared_ptr<Cache> cache = NewLRUCache(lo);
   std::shared_ptr<CacheReservationManager> test_cache_rev_mng =
-      std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+      std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
           cache);
 
   std::size_t new_mem_used = kSmallCacheCapacity + 1;
@@ -294,7 +294,7 @@ TEST_F(CacheReservationManagerTest,
 TEST(CacheReservationManagerWithDelayedDecreaseTest,
      DecreaseCacheReservationWithDelayedDecrease) {
   constexpr std::size_t kSizeDummyEntry =
-      CacheReservationManagerImpl<CacheEntryRole::kMisc>::GetDummyEntrySize();
+      CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>::GetDummyEntrySize();
   constexpr std::size_t kCacheCapacity = 4096 * kSizeDummyEntry;
   constexpr std::size_t kMetaDataChargeOverhead = 10000;
 
@@ -303,7 +303,7 @@ TEST(CacheReservationManagerWithDelayedDecreaseTest,
   lo.num_shard_bits = 0;
   std::shared_ptr<Cache> cache = NewLRUCache(lo);
   std::shared_ptr<CacheReservationManager> test_cache_rev_mng =
-      std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+      std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
           cache, true /* delayed_decrease */);
 
   std::size_t new_mem_used = 8 * kSizeDummyEntry;
@@ -366,7 +366,7 @@ TEST(CacheReservationManagerWithDelayedDecreaseTest,
 TEST(CacheReservationManagerDestructorTest,
      ReleaseRemainingDummyEntriesOnDestruction) {
   constexpr std::size_t kSizeDummyEntry =
-      CacheReservationManagerImpl<CacheEntryRole::kMisc>::GetDummyEntrySize();
+      CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>::GetDummyEntrySize();
   constexpr std::size_t kCacheCapacity = 4096 * kSizeDummyEntry;
   constexpr std::size_t kMetaDataChargeOverhead = 10000;
 
@@ -376,7 +376,7 @@ TEST(CacheReservationManagerDestructorTest,
   std::shared_ptr<Cache> cache = NewLRUCache(lo);
   {
     std::shared_ptr<CacheReservationManager> test_cache_rev_mng =
-        std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+        std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
             cache);
     std::size_t new_mem_used = 1 * kSizeDummyEntry;
     Status s = test_cache_rev_mng->UpdateCacheReservation(new_mem_used);
@@ -401,7 +401,7 @@ TEST(CacheReservationHandleTest, HandleTest) {
   std::shared_ptr<Cache> cache = NewLRUCache(lo);
 
   std::shared_ptr<CacheReservationManager> test_cache_rev_mng(
-      std::make_shared<CacheReservationManagerImpl<CacheEntryRole::kMisc>>(
+      std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
           cache));
 
   std::size_t mem_used = 0;

@@ -28,7 +28,7 @@ struct BlobReadRequest {
   size_t len = 0;
 
   // Blob compression type
-  CompressionType compression = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Output parameter set by MultiGetBlob() to point to the data buffer, and
   // the number of valid bytes
@@ -38,7 +38,7 @@ struct BlobReadRequest {
   Status* status = nullptr;
 
   BlobReadRequest(const Slice& _user_key, uint64_t _offset, size_t _len,
-                  CompressionType _compression, PinnableSlice* _result,
+                  rocksdb_rs::compression_type::CompressionType _compression, PinnableSlice* _result,
                   Status* _status)
       : user_key(&_user_key),
         offset(_offset),

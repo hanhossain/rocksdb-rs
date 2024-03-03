@@ -103,8 +103,8 @@ Status BuildTable(
     range_del_agg->AddTombstones(std::move(range_del_iter));
   }
 
-  std::string fname = static_cast<std::string>(TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
-                                    meta->fd.GetPathId()));
+  std::string fname = static_cast<std::string>(rocksdb_rs::filename::TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
+                                                                                   meta->fd.GetPathId()));
   std::vector<std::string> blob_file_paths;
   std::string file_checksum = kUnknownFileChecksum;
   std::string file_checksum_func_name = kUnknownFileChecksumFuncName;

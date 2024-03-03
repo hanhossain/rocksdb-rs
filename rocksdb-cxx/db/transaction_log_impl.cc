@@ -52,15 +52,15 @@ Status TransactionLogIteratorImpl::OpenLogFile(
   Status s = Status_new();
   EnvOptions optimized_env_options = fs->OptimizeForLogRead(soptions_);
   if (log_file->Type() == WalFileType::kArchivedLogFile) {
-    fname = static_cast<std::string>(ArchivedLogFileName(dir_, log_file->LogNumber()));
+    fname = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(dir_, log_file->LogNumber()));
     s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr);
   } else {
-    fname = static_cast<std::string>(LogFileName(dir_, log_file->LogNumber()));
+    fname = static_cast<std::string>(rocksdb_rs::filename::LogFileName(dir_, log_file->LogNumber()));
     s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr);
     if (!s.ok()) {
       //  If cannot open file in DB directory.
       //  Try the archive dir, as it could have moved in the meanwhile.
-      fname = static_cast<std::string>(ArchivedLogFileName(dir_, log_file->LogNumber()));
+      fname = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(dir_, log_file->LogNumber()));
       s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr);
     }
   }

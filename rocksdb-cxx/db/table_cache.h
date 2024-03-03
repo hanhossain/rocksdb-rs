@@ -59,12 +59,12 @@ class TableCache {
 
   // Cache interface for table cache
   using CacheInterface =
-      BasicTypedCacheInterface<TableReader, CacheEntryRole::kMisc>;
+      BasicTypedCacheInterface<TableReader, rocksdb_rs::cache::CacheEntryRole::kMisc>;
   using TypedHandle = CacheInterface::TypedHandle;
 
   // Cache interface for row cache
   using RowCacheInterface =
-      BasicTypedCacheInterface<std::string, CacheEntryRole::kMisc>;
+      BasicTypedCacheInterface<std::string, rocksdb_rs::cache::CacheEntryRole::kMisc>;
   using RowHandle = RowCacheInterface::TypedHandle;
 
   // Return an iterator for the specified file number (the corresponding

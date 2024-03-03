@@ -20,11 +20,11 @@ class DBStatisticsTest : public DBTestBase {
 };
 
 TEST_F(DBStatisticsTest, CompressionStatsTest) {
-  for (CompressionType type : GetSupportedCompressions()) {
-    if (type == CompressionType::kNoCompression) {
+  for (rocksdb_rs::compression_type::CompressionType type : GetSupportedCompressions()) {
+    if (type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       continue;
     }
-    if (type == CompressionType::kBZip2Compression) {
+    if (type == rocksdb_rs::compression_type::CompressionType::kBZip2Compression) {
       // Weird behavior in this test
       continue;
     }
@@ -106,7 +106,7 @@ TEST_F(DBStatisticsTest, CompressionStatsTest) {
     EXPECT_EQ(0, PopStat(BYTES_DECOMPRESSED_TO));
 
     // Check when compression is disabled.
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     DestroyAndReopen(options);
 
     for (int i = 0; i < kNumKeysWritten; ++i) {

@@ -22,6 +22,7 @@
 #include "rocksdb/statistics.h"
 #include "test_util/sync_point.h"
 #include "test_util/testharness.h"
+using namespace rocksdb_rs::filename;
 
 namespace rocksdb {
 
@@ -54,7 +55,7 @@ void WriteBlobFile(uint32_t column_family_id,
   constexpr bool has_ttl = false;
   constexpr ExpirationRange expiration_range;
 
-  BlobLogHeader header(column_family_id, CompressionType::kNoCompression, has_ttl,
+  BlobLogHeader header(column_family_id, rocksdb_rs::compression_type::CompressionType::kNoCompression, has_ttl,
                        expiration_range);
 
   ASSERT_OK(blob_log_writer.WriteHeader(header));

@@ -23,7 +23,7 @@ namespace log {
 
 Writer::Writer(std::unique_ptr<WritableFileWriter>&& dest, uint64_t log_number,
                bool recycle_log_files, bool manual_flush,
-               CompressionType compression_type)
+               rocksdb_rs::compression_type::CompressionType compression_type)
     : dest_(std::move(dest)),
       block_offset_(0),
       log_number_(log_number),
@@ -163,7 +163,7 @@ IOStatus Writer::AddCompressionTypeRecord() {
   // Should be the first record
   assert(block_offset_ == 0);
 
-  if (compression_type_ == CompressionType::kNoCompression) {
+  if (compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     // No need to add a record
     return IOStatus::OK();
   }
@@ -191,7 +191,7 @@ IOStatus Writer::AddCompressionTypeRecord() {
     assert(compressed_buffer_);
   } else {
     // Disable compression if the record could not be added.
-    compression_type_ = CompressionType::kNoCompression;
+    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   return s;
 }

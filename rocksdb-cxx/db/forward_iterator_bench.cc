@@ -329,7 +329,7 @@ int main(int argc, char** argv) {
   fprintf(stderr, "db path is %s\n", path.c_str());
   rocksdb::Options options;
   options.create_if_missing = true;
-  options.compression = rocksdb::CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.compaction_style =
       rocksdb::CompactionStyle::kCompactionStyleNone;
   options.level0_slowdown_writes_trigger = 99999;

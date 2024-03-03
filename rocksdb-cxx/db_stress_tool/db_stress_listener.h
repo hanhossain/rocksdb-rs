@@ -20,6 +20,8 @@
 #include "util/gflags_compat.h"
 #include "util/random.h"
 
+using namespace rocksdb_rs::filename;
+
 DECLARE_int32(compact_files_one_in);
 
 namespace rocksdb {

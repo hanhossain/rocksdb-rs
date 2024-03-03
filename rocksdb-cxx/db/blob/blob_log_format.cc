@@ -46,7 +46,7 @@ Status BlobLogHeader::DecodeFrom(Slice src) {
     return Status_Corruption(kErrorMessage, "Unknown header version");
   }
   flags = src.data()[0];
-  compression = static_cast<CompressionType>(src.data()[1]);
+  compression = static_cast<rocksdb_rs::compression_type::CompressionType>(src.data()[1]);
   has_ttl = (flags & 1) == 1;
   src.remove_prefix(2);
   if (!GetFixed64(&src, &expiration_range.first) ||

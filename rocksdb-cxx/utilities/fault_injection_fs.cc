@@ -1010,7 +1010,7 @@ bool FaultInjectionTestFS::TryParseFileName(const std::string& file_name,
                                             uint64_t* number, FileType* type) {
   std::size_t found = file_name.find_last_of("/");
   std::string file = file_name.substr(found);
-  return ParseFileName(file, number, type);
+  return rocksdb_rs::filename::ParseFileName(file, number, type);
 }
 
 IOStatus FaultInjectionTestFS::InjectWriteError(const std::string& file_name) {

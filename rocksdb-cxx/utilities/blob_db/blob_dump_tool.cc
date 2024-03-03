@@ -56,7 +56,7 @@ Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
   reader_.reset(new RandomAccessFileReader(std::move(file), filename));
   uint64_t offset = 0;
   uint64_t footer_offset = 0;
-  CompressionType compression = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   s = DumpBlobLogHeader(&offset, &compression);
   if (!s.ok()) {
     return s;
@@ -84,7 +84,7 @@ Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
     fprintf(stdout, "  total records: %" PRIu64 "\n", total_records);
     fprintf(stdout, "  total key size: %" PRIu64 "\n", total_key_size);
     fprintf(stdout, "  total blob size: %" PRIu64 "\n", total_blob_size);
-    if (compression != CompressionType::kNoCompression) {
+    if (compression != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       fprintf(stdout, "  total raw blob size: %" PRIu64 "\n",
               total_uncompressed_blob_size);
     }
@@ -114,7 +114,7 @@ Status BlobDumpTool::Read(uint64_t offset, size_t size, Slice* result) {
 }
 
 Status BlobDumpTool::DumpBlobLogHeader(uint64_t* offset,
-                                       CompressionType* compression) {
+                                       rocksdb_rs::compression_type::CompressionType* compression) {
   Slice slice;
   Status s = Read(0, BlobLogHeader::kSize, &slice);
   if (!s.ok()) {
@@ -173,7 +173,7 @@ Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
 
 Status BlobDumpTool::DumpRecord(DisplayType show_key, DisplayType show_blob,
                                 DisplayType show_uncompressed_blob,
-                                bool show_summary, CompressionType compression,
+                                bool show_summary, rocksdb_rs::compression_type::CompressionType compression,
                                 uint64_t* offset, uint64_t* total_records,
                                 uint64_t* total_key_size,
                                 uint64_t* total_blob_size,
@@ -206,7 +206,7 @@ Status BlobDumpTool::DumpRecord(DisplayType show_key, DisplayType show_blob,
   }
   // Decompress value
   std::string uncompressed_value;
-  if (compression != CompressionType::kNoCompression &&
+  if (compression != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
       (show_uncompressed_blob != DisplayType::kNone || show_summary)) {
     BlockContents contents;
     UncompressionContext context(compression);

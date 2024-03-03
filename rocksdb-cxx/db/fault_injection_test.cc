@@ -32,6 +32,8 @@
 #include "utilities/fault_injection_fs.h"
 #endif
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 
 static const int kValueSize = 1000;

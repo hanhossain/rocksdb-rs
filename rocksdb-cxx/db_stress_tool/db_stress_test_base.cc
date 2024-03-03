@@ -3032,27 +3032,27 @@ void InitializeOptionsFromFlags(
   block_based_options.checksum = checksum_type_e;
   block_based_options.block_size = FLAGS_block_size;
   block_based_options.cache_usage_options.options_overrides.insert(
-      {CacheEntryRole::kCompressionDictionaryBuildingBuffer,
+      {rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer,
        {/*.charged = */ FLAGS_charge_compression_dictionary_building_buffer
             ? CacheEntryRoleOptions::Decision::kEnabled
             : CacheEntryRoleOptions::Decision::kDisabled}});
   block_based_options.cache_usage_options.options_overrides.insert(
-      {CacheEntryRole::kFilterConstruction,
+      {rocksdb_rs::cache::CacheEntryRole::kFilterConstruction,
        {/*.charged = */ FLAGS_charge_filter_construction
             ? CacheEntryRoleOptions::Decision::kEnabled
             : CacheEntryRoleOptions::Decision::kDisabled}});
   block_based_options.cache_usage_options.options_overrides.insert(
-      {CacheEntryRole::kBlockBasedTableReader,
+      {rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader,
        {/*.charged = */ FLAGS_charge_table_reader
             ? CacheEntryRoleOptions::Decision::kEnabled
             : CacheEntryRoleOptions::Decision::kDisabled}});
   block_based_options.cache_usage_options.options_overrides.insert(
-      {CacheEntryRole::kFileMetadata,
+      {rocksdb_rs::cache::CacheEntryRole::kFileMetadata,
        {/*.charged = */ FLAGS_charge_file_metadata
             ? CacheEntryRoleOptions::Decision::kEnabled
             : CacheEntryRoleOptions::Decision::kDisabled}});
   block_based_options.cache_usage_options.options_overrides.insert(
-      {CacheEntryRole::kBlobCache,
+      {rocksdb_rs::cache::CacheEntryRole::kBlobCache,
        {/*.charged = */ FLAGS_charge_blob_cache
             ? CacheEntryRoleOptions::Decision::kEnabled
             : CacheEntryRoleOptions::Decision::kDisabled}});

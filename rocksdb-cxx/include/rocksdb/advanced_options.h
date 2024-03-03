@@ -553,7 +553,7 @@ struct AdvancedColumnFamilyOptions {
   // {kNoCompression, kSnappyCompression, kSnappyCompression}
   //
   // Dynamically changeable through SetOptions() API
-  std::vector<CompressionType> compression_per_level;
+  std::vector<rocksdb_rs::compression_type::CompressionType> compression_per_level;
 
   // Number of levels for this database
   int num_levels = 7;
@@ -1012,7 +1012,7 @@ struct AdvancedColumnFamilyOptions {
   // Default: no compression
   //
   // Dynamically changeable through the SetOptions() API
-  CompressionType blob_compression_type = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType blob_compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Enables garbage collection of blobs. Blob GC is performed as part of
   // compaction. Valid blobs residing in blob files older than a cutoff get

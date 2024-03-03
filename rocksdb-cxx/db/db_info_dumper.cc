@@ -44,7 +44,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
   }
   std::sort(files.begin(), files.end());
   for (const std::string& file : files) {
-    if (!ParseFileName(file, &number, &type)) {
+    if (!rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
       continue;
     }
     switch (type) {
@@ -99,7 +99,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       }
       std::sort(files.begin(), files.end());
       for (const std::string& file : files) {
-        if (ParseFileName(file, &number, &type)) {
+        if (rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
           if (type == FileType::kTableFile && ++file_num < 10) {
             file_info.append(file).append(" ");
           }
@@ -124,7 +124,7 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
     }
     wal_info.clear();
     for (const std::string& file : files) {
-      if (ParseFileName(file, &number, &type)) {
+      if (rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
         if (type == FileType::kWalFile) {
           s = env->GetFileSize(wal_dir + "/" + file, &file_size);
           if (s.ok()) {

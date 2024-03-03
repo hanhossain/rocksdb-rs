@@ -117,7 +117,7 @@ bool GoodCompressionRatio(size_t compressed_size, size_t uncomp_size,
 
 // format_version is the block format as defined in include/rocksdb/table.h
 Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
-                    CompressionType* type, uint32_t format_version,
+                    rocksdb_rs::compression_type::CompressionType* type, uint32_t format_version,
                     bool allow_sample, std::string* compressed_output,
                     std::string* sampled_output_fast,
                     std::string* sampled_output_slow) {
@@ -135,8 +135,8 @@ Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
           static_cast<int>(info.SampleForCompression()))) {
     // Sampling with a fast compression algorithm
     if (sampled_output_fast && (LZ4_Supported() || Snappy_Supported())) {
-      CompressionType c =
-          LZ4_Supported() ? CompressionType::kLZ4Compression : CompressionType::kSnappyCompression;
+      rocksdb_rs::compression_type::CompressionType c =
+          LZ4_Supported() ? rocksdb_rs::compression_type::CompressionType::kLZ4Compression : rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
       CompressionContext context(c);
       CompressionOptions options;
       CompressionInfo info_tmp(options, context,
@@ -150,7 +150,7 @@ Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
 
     // Sampling with a slow but high-compression algorithm
     if (sampled_output_slow && (ZSTD_Supported() || Zlib_Supported())) {
-      CompressionType c = ZSTD_Supported() ? CompressionType::kZSTD : CompressionType::kZlibCompression;
+      rocksdb_rs::compression_type::CompressionType c = ZSTD_Supported() ? rocksdb_rs::compression_type::CompressionType::kZSTD : rocksdb_rs::compression_type::CompressionType::kZlibCompression;
       CompressionContext context(c);
       CompressionOptions options;
       CompressionInfo info_tmp(options, context,
@@ -164,8 +164,8 @@ Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
   }
 
   int max_compressed_bytes_per_kb = info.options().max_compressed_bytes_per_kb;
-  if (info.type() == CompressionType::kNoCompression || max_compressed_bytes_per_kb <= 0) {
-    *type = CompressionType::kNoCompression;
+  if (info.type() == rocksdb_rs::compression_type::CompressionType::kNoCompression || max_compressed_bytes_per_kb <= 0) {
+    *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     return uncompressed_data;
   }
 
@@ -174,7 +174,7 @@ Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
   if (!CompressData(uncompressed_data, info,
                     GetCompressFormatForVersion(format_version),
                     compressed_output)) {
-    *type = CompressionType::kNoCompression;
+    *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     return uncompressed_data;
   }
 
@@ -182,7 +182,7 @@ Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
   // uncompressed
   if (!GoodCompressionRatio(compressed_output->size(), uncompressed_data.size(),
                             max_compressed_bytes_per_kb)) {
-    *type = CompressionType::kNoCompression;
+    *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     return uncompressed_data;
   }
 
@@ -295,7 +295,7 @@ struct BlockBasedTableBuilder::Rep {
 
   std::string last_key;
   const Slice* first_key_in_next_block = nullptr;
-  CompressionType compression_type;
+  rocksdb_rs::compression_type::CompressionType compression_type;
   uint64_t sample_for_compression;
   std::atomic<uint64_t> compressible_input_data_bytes;
   std::atomic<uint64_t> uncompressible_input_data_bytes;
@@ -477,8 +477,8 @@ struct BlockBasedTableBuilder::Rep {
             table_options.flush_block_policy_factory->NewFlushBlockPolicy(
                 table_options, data_block)),
         create_context(&table_options, ioptions.stats,
-                       compression_type == CompressionType::kZSTD ||
-                           compression_type == CompressionType::kZSTDNotFinalCompression,
+                       compression_type == rocksdb_rs::compression_type::CompressionType::kZSTD ||
+                           compression_type == rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression,
                        tbo.moptions.block_protection_bytes_per_key,
                        tbo.internal_comparator.user_comparator(),
                        !use_delta_encoding_for_index_values,
@@ -499,7 +499,7 @@ struct BlockBasedTableBuilder::Rep {
 
     const auto compress_dict_build_buffer_charged =
         table_options.cache_usage_options.options_overrides
-            .at(CacheEntryRole::kCompressionDictionaryBuildingBuffer)
+            .at(rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer)
             .charged;
     if (table_options.block_cache &&
         (compress_dict_build_buffer_charged ==
@@ -508,7 +508,7 @@ struct BlockBasedTableBuilder::Rep {
              CacheEntryRoleOptions::Decision::kFallback)) {
       compression_dict_buffer_cache_res_mgr =
           std::make_shared<CacheReservationManagerImpl<
-              CacheEntryRole::kCompressionDictionaryBuildingBuffer>>(
+              rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer>>(
               table_options.block_cache);
     } else {
       compression_dict_buffer_cache_res_mgr = nullptr;
@@ -656,7 +656,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
     Slice compressed_contents;
     std::unique_ptr<std::string> data;
     std::unique_ptr<std::string> compressed_data;
-    CompressionType compression_type;
+    rocksdb_rs::compression_type::CompressionType compression_type;
     std::unique_ptr<std::string> first_key_in_next_block;
     std::unique_ptr<Keys> keys;
     std::unique_ptr<BlockRepSlot> slot;
@@ -828,7 +828,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
       block_rep_buf[i].compressed_contents = Slice();
       block_rep_buf[i].data.reset(new std::string());
       block_rep_buf[i].compressed_data.reset(new std::string());
-      block_rep_buf[i].compression_type = CompressionType();
+      block_rep_buf[i].compression_type = rocksdb_rs::compression_type::CompressionType();
       block_rep_buf[i].first_key_in_next_block.reset(new std::string());
       block_rep_buf[i].keys.reset(new Keys());
       block_rep_buf[i].slot.reset(new BlockRepSlot());
@@ -841,7 +841,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
 
   // Make a block prepared to be emitted to compression thread
   // Used in non-buffered mode
-  BlockRep* PrepareBlock(CompressionType compression_type,
+  BlockRep* PrepareBlock(rocksdb_rs::compression_type::CompressionType compression_type,
                          const Slice* first_key_in_next_block,
                          BlockBuilder* data_block) {
     BlockRep* block_rep =
@@ -855,7 +855,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
   }
 
   // Used in EnterUnbuffered
-  BlockRep* PrepareBlock(CompressionType compression_type,
+  BlockRep* PrepareBlock(rocksdb_rs::compression_type::CompressionType compression_type,
                          const Slice* first_key_in_next_block,
                          std::string* data_block,
                          std::vector<std::string>* keys) {
@@ -901,7 +901,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
   }
 
  private:
-  BlockRep* PrepareBlockInternal(CompressionType compression_type,
+  BlockRep* PrepareBlockInternal(rocksdb_rs::compression_type::CompressionType compression_type,
                                  const Slice* first_key_in_next_block) {
     BlockRep* block_rep = nullptr;
     block_rep_pool.pop(block_rep);
@@ -1112,7 +1112,7 @@ void BlockBasedTableBuilder::WriteBlock(const Slice& uncompressed_block_data,
   Rep* r = rep_;
   assert(r->state == Rep::State::kUnbuffered);
   Slice block_contents;
-  CompressionType type;
+  rocksdb_rs::compression_type::CompressionType type;
   Status compress_status = Status_new();
   bool is_data_block = block_type == BlockType::kData;
   CompressAndVerifyBlock(uncompressed_block_data, is_data_block,
@@ -1152,7 +1152,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
     const Slice& uncompressed_block_data, bool is_data_block,
     const CompressionContext& compression_ctx, UncompressionContext* verify_ctx,
     std::string* compressed_output, Slice* block_contents,
-    CompressionType* type, Status* out_status) {
+    rocksdb_rs::compression_type::CompressionType* type, Status* out_status) {
   Rep* r = rep_;
   bool is_status_ok = ok();
   if (!r->IsParallelCompressionEnabled()) {
@@ -1204,7 +1204,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
     // Some of the compression algorithms are known to be unreliable. If
     // the verify_compression flag is set then try to de-compress the
     // compressed data and compare to the input.
-    if (*type != CompressionType::kNoCompression && r->table_options.verify_compression) {
+    if (*type != rocksdb_rs::compression_type::CompressionType::kNoCompression && r->table_options.verify_compression) {
       // Retrieve the uncompressed contents into a new buffer
       const UncompressionDict* verify_dict;
       if (!is_data_block || r->verify_dict == nullptr) {
@@ -1228,13 +1228,13 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
               "Decompressed block did not match pre-compression block";
           ROCKS_LOG_ERROR(r->ioptions.logger, "%s", msg);
           *out_status = Status_Corruption(msg);
-          *type = CompressionType::kNoCompression;
+          *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
         }
       } else {
         // Decompression reported an error. abort.
         *out_status = Status_Corruption(std::string("Could not decompress: ") +
                                          *uncompress_status.getState());
-        *type = CompressionType::kNoCompression;
+        *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
     }
     if (timer.IsStarted()) {
@@ -1247,7 +1247,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
       r->uncompressible_input_data_bytes.fetch_add(
           uncompressed_block_data.size(), std::memory_order_relaxed);
     }
-    *type = CompressionType::kNoCompression;
+    *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   if (is_data_block) {
     r->uncompressible_input_data_bytes.fetch_add(kBlockTrailerSize,
@@ -1256,7 +1256,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
 
   // Abort compression if the block is too big, or did not pass
   // verification.
-  if (*type == CompressionType::kNoCompression) {
+  if (*type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     *block_contents = uncompressed_block_data;
     bool compression_attempted = !compressed_output->empty();
     RecordTick(r->ioptions.stats, compression_attempted
@@ -1276,7 +1276,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
 }
 
 void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
-    const Slice& block_contents, CompressionType comp_type, BlockHandle* handle,
+    const Slice& block_contents, rocksdb_rs::compression_type::CompressionType comp_type, BlockHandle* handle,
     BlockType block_type, const Slice* uncompressed_block_data) {
   // File format contains a sequence of blocks where each block has:
   //    block_data: uint8[n]
@@ -1292,7 +1292,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
   assert(io_status().ok());
   if (uncompressed_block_data == nullptr) {
     uncompressed_block_data = &block_contents;
-    assert(comp_type == CompressionType::kNoCompression);
+    assert(comp_type == rocksdb_rs::compression_type::CompressionType::kNoCompression);
   }
 
   {
@@ -1522,7 +1522,7 @@ void BlockBasedTableBuilder::WriteFilterBlock(
       BlockType btype = is_partitioned_filter && /* last */ s.ok()
                             ? BlockType::kFilterPartitionIndex
                             : BlockType::kFilter;
-      WriteMaybeCompressedBlock(filter_content, CompressionType::kNoCompression,
+      WriteMaybeCompressedBlock(filter_content, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                                 &filter_block_handle, btype);
     }
     rep_->filter_builder->ResetFilterBitsBuilder();
@@ -1569,7 +1569,7 @@ void BlockBasedTableBuilder::WriteIndexBlock(
                  BlockType::kIndex);
     } else {
       WriteMaybeCompressedBlock(index_blocks.index_block_contents,
-                                CompressionType::kNoCompression, index_block_handle,
+                                rocksdb_rs::compression_type::CompressionType::kNoCompression, index_block_handle,
                                 BlockType::kIndex);
     }
   }
@@ -1595,7 +1595,7 @@ void BlockBasedTableBuilder::WriteIndexBlock(
                    BlockType::kIndex);
       } else {
         WriteMaybeCompressedBlock(index_blocks.index_block_contents,
-                                  CompressionType::kNoCompression, index_block_handle,
+                                  rocksdb_rs::compression_type::CompressionType::kNoCompression, index_block_handle,
                                   BlockType::kIndex);
       }
       // The last index_block_handle will be for the partition index block
@@ -1686,7 +1686,7 @@ void BlockBasedTableBuilder::WritePropertiesBlock(
     Slice block_data = property_block_builder.Finish();
     TEST_SYNC_POINT_CALLBACK(
         "BlockBasedTableBuilder::WritePropertiesBlock:BlockData", &block_data);
-    WriteMaybeCompressedBlock(block_data, CompressionType::kNoCompression,
+    WriteMaybeCompressedBlock(block_data, rocksdb_rs::compression_type::CompressionType::kNoCompression,
                               &properties_block_handle, BlockType::kProperties);
   }
   if (ok()) {
@@ -1718,7 +1718,7 @@ void BlockBasedTableBuilder::WriteCompressionDictBlock(
     BlockHandle compression_dict_block_handle;
     if (ok()) {
       WriteMaybeCompressedBlock(rep_->compression_dict->GetRawDict(),
-                                CompressionType::kNoCompression, &compression_dict_block_handle,
+                                rocksdb_rs::compression_type::CompressionType::kNoCompression, &compression_dict_block_handle,
                                 BlockType::kCompressionDictionary);
 #ifndef NDEBUG
       Slice compression_dict = rep_->compression_dict->GetRawDict();
@@ -1738,7 +1738,7 @@ void BlockBasedTableBuilder::WriteRangeDelBlock(
     MetaIndexBuilder* meta_index_builder) {
   if (ok() && !rep_->range_del_block.empty()) {
     BlockHandle range_del_block_handle;
-    WriteMaybeCompressedBlock(rep_->range_del_block.Finish(), CompressionType::kNoCompression,
+    WriteMaybeCompressedBlock(rep_->range_del_block.Finish(), rocksdb_rs::compression_type::CompressionType::kNoCompression,
                               &range_del_block_handle,
                               BlockType::kRangeDeletion);
     meta_index_builder->Add(kRangeDelBlockName, range_del_block_handle);
@@ -1833,8 +1833,8 @@ void BlockBasedTableBuilder::EnterUnbuffered() {
   r->compression_dict.reset(new CompressionDict(dict, r->compression_type,
                                                 r->compression_opts.level));
   r->verify_dict.reset(new UncompressionDict(
-      dict, r->compression_type == CompressionType::kZSTD ||
-                r->compression_type == CompressionType::kZSTDNotFinalCompression));
+      dict, r->compression_type == rocksdb_rs::compression_type::CompressionType::kZSTD ||
+                r->compression_type == rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression));
 
   auto get_iterator_for_block = [&r](size_t i) {
     auto& data_block = r->data_block_buffers[i];
@@ -1963,7 +1963,7 @@ Status BlockBasedTableBuilder::Finish() {
   WritePropertiesBlock(&meta_index_builder);
   if (ok()) {
     // flush the meta index block
-    WriteMaybeCompressedBlock(meta_index_builder.Finish(), CompressionType::kNoCompression,
+    WriteMaybeCompressedBlock(meta_index_builder.Finish(), rocksdb_rs::compression_type::CompressionType::kNoCompression,
                               &metaindex_block_handle, BlockType::kMetaIndex);
   }
   if (ok()) {

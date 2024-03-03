@@ -503,7 +503,7 @@ Status UncompressBlockData(const UncompressionInfo& uncompression_info,
                            MemoryAllocator* allocator) {
   Status ret = Status_OK();
 
-  assert(uncompression_info.type() != CompressionType::kNoCompression &&
+  assert(uncompression_info.type() != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
          "Invalid compression type");
 
   StopWatchNano timer(ioptions.clock,
@@ -550,7 +550,7 @@ Status UncompressSerializedBlock(const UncompressionInfo& uncompression_info,
                                  uint32_t format_version,
                                  const ImmutableOptions& ioptions,
                                  MemoryAllocator* allocator) {
-  assert(data[size] != static_cast<char>(CompressionType::kNoCompression));
+  assert(data[size] != static_cast<char>(rocksdb_rs::compression_type::CompressionType::kNoCompression));
   assert(data[size] == static_cast<char>(uncompression_info.type()));
   return UncompressBlockData(uncompression_info, data, size, out_contents,
                              format_version, ioptions, allocator);

@@ -328,17 +328,17 @@ DEFINE_bool(cache_index_and_filter_blocks, false,
 DEFINE_bool(charge_compression_dictionary_building_buffer, false,
             "Setting for "
             "CacheEntryRoleOptions::charged of "
-            "CacheEntryRole::kCompressionDictionaryBuildingBuffer");
+            "rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer");
 
 DEFINE_bool(charge_filter_construction, false,
             "Setting for "
             "CacheEntryRoleOptions::charged of "
-            "CacheEntryRole::kFilterConstruction");
+            "rocksdb_rs::cache::CacheEntryRole::kFilterConstruction");
 
 DEFINE_bool(charge_table_reader, false,
             "Setting for "
             "CacheEntryRoleOptions::charged of "
-            "CacheEntryRole::kBlockBasedTableReader");
+            "rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader");
 
 DEFINE_bool(charge_file_metadata, false,
             "Setting for "

@@ -431,7 +431,7 @@ Status CheckpointImpl::ExportFilesInMetaData(
     for (const auto& file_metadata : level_metadata.files) {
       uint64_t number;
       FileType type;
-      const auto ok = ParseFileName(file_metadata.name, &number, &type);
+      const auto ok = rocksdb_rs::filename::ParseFileName(file_metadata.name, &number, &type);
       if (!ok) {
         s = Status_Corruption("Could not parse file name");
         break;

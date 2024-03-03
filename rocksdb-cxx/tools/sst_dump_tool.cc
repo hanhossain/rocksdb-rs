@@ -17,22 +17,22 @@
 
 namespace rocksdb {
 
-static const std::vector<std::pair<CompressionType, const char*>>
+static const std::vector<std::pair<rocksdb_rs::compression_type::CompressionType, const char*>>
     kCompressions = {
-        {CompressionType::kNoCompression, "kNoCompression"},
-        {CompressionType::kSnappyCompression, "kSnappyCompression"},
-        {CompressionType::kZlibCompression, "kZlibCompression"},
-        {CompressionType::kBZip2Compression, "kBZip2Compression"},
-        {CompressionType::kLZ4Compression, "kLZ4Compression"},
-        {CompressionType::kLZ4HCCompression, "kLZ4HCCompression"},
-        {CompressionType::kXpressCompression, "kXpressCompression"},
-        {CompressionType::kZSTD, "kZSTD"}};
+        {rocksdb_rs::compression_type::CompressionType::kNoCompression, "kNoCompression"},
+        {rocksdb_rs::compression_type::CompressionType::kSnappyCompression, "kSnappyCompression"},
+        {rocksdb_rs::compression_type::CompressionType::kZlibCompression, "kZlibCompression"},
+        {rocksdb_rs::compression_type::CompressionType::kBZip2Compression, "kBZip2Compression"},
+        {rocksdb_rs::compression_type::CompressionType::kLZ4Compression, "kLZ4Compression"},
+        {rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, "kLZ4HCCompression"},
+        {rocksdb_rs::compression_type::CompressionType::kXpressCompression, "kXpressCompression"},
+        {rocksdb_rs::compression_type::CompressionType::kZSTD, "kZSTD"}};
 
 namespace {
 
 void print_help(bool to_stderr) {
   std::string supported_compressions;
-  for (CompressionType ct : GetSupportedCompressions()) {
+  for (rocksdb_rs::compression_type::CompressionType ct : GetSupportedCompressions()) {
     if (!supported_compressions.empty()) {
       supported_compressions += ", ";
     }
@@ -95,7 +95,7 @@ void print_help(bool to_stderr) {
       Can be combined with --command=recompress to set the block size that will
       be used when trying different compression algorithms
 
-    --compression_types=<comma-separated list of CompressionType members, e.g.,
+    --compression_types=<comma-separated list of rocksdb_rs::compression_type::CompressionType members, e.g.,
       kSnappyCompression>
       Can be combined with --command=recompress to run recompression for this
       list of compression types
@@ -176,7 +176,7 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
   std::string compression_level_to_str;
   size_t block_size = 0;
   size_t readahead_size = 2 * 1024 * 1024;
-  std::vector<std::pair<CompressionType, const char*>> compression_types;
+  std::vector<std::pair<rocksdb_rs::compression_type::CompressionType, const char*>> compression_types;
   uint64_t total_num_files = 0;
   uint64_t total_num_data_blocks = 0;
   uint64_t total_data_block_size = 0;
@@ -243,11 +243,11 @@ int SSTDumpTool::Run(int argc, char const* const* argv, Options options) {
       while (std::getline(iss, compression_type, ',')) {
         auto iter = std::find_if(
             kCompressions.begin(), kCompressions.end(),
-            [&compression_type](std::pair<CompressionType, const char*> curr) {
+            [&compression_type](std::pair<rocksdb_rs::compression_type::CompressionType, const char*> curr) {
               return curr.second == compression_type;
             });
         if (iter == kCompressions.end()) {
-          fprintf(stderr, "%s is not a valid CompressionType\n",
+          fprintf(stderr, "%s is not a valid rocksdb_rs::compression_type::CompressionType\n",
                   compression_type.c_str());
           exit(1);
         }

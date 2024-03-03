@@ -64,7 +64,7 @@ Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
 
   files.clear();
   // list wal files in archive dir.
-  std::string archivedir = static_cast<std::string>(ArchivalDirectory(wal_dir_));
+  std::string archivedir = static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir_));
   Status exists = env_->FileExists(archivedir);
   if (exists.ok()) {
     s = GetSortedWalsOfType(archivedir, files, WalFileType::kArchivedLogFile);
@@ -163,7 +163,7 @@ void WalManager::PurgeObsoleteWALFiles() {
 
   purge_wal_files_last_run_ = now_seconds;
 
-  std::string archival_dir = static_cast<std::string>(ArchivalDirectory(wal_dir_));
+  std::string archival_dir = static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir_));
   std::vector<std::string> files;
   s = env_->GetChildren(archival_dir, &files);
   if (!s.ok()) {
@@ -178,7 +178,7 @@ void WalManager::PurgeObsoleteWALFiles() {
   for (auto& f : files) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
+    if (rocksdb_rs::filename::ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
       std::string const file_path = archival_dir + "/" + f;
       if (ttl_enabled) {
         uint64_t file_m_time;
@@ -275,7 +275,7 @@ void WalManager::PurgeObsoleteWALFiles() {
 }
 
 void WalManager::ArchiveWALFile(const std::string& fname, uint64_t number) {
-  auto archived_log_name = static_cast<std::string>(ArchivedLogFileName(wal_dir_, number));
+  auto archived_log_name = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(wal_dir_, number));
   // The sync point below is used in (DBTest,TransactionLogIteratorRace)
   TEST_SYNC_POINT("WalManager::PurgeObsoleteFiles:1");
   Status s = env_->RenameFile(fname, archived_log_name);
@@ -298,7 +298,7 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
   for (const auto& f : all_files) {
     uint64_t number;
     FileType type;
-    if (ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
+    if (rocksdb_rs::filename::ParseFileName(f, &number, &type) && type == FileType::kWalFile) {
       SequenceNumber sequence;
       Status s = ReadFirstRecord(log_type, number, &sequence);
       if (!s.ok()) {
@@ -316,10 +316,10 @@ Status WalManager::GetSortedWalsOfType(const std::string& path,
       TEST_SYNC_POINT("WalManager::GetSortedWalsOfType:2");
 
       uint64_t size_bytes;
-      s = env_->GetFileSize(LogFileName(path, number), &size_bytes);
+      s = env_->GetFileSize(rocksdb_rs::filename::LogFileName(path, number), &size_bytes);
       // re-try in case the alive log file has been moved to archive.
       if (!s.ok() && log_type == WalFileType::kAliveLogFile) {
-        std::string archived_file = static_cast<std::string>(ArchivedLogFileName(path, number));
+        std::string archived_file = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(path, number));
         if (env_->FileExists(archived_file).ok()) {
           s = env_->GetFileSize(archived_file, &size_bytes);
           if (!s.ok() && env_->FileExists(archived_file).IsNotFound()) {
@@ -392,7 +392,7 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
   }
   Status s = Status_new();
   if (type == WalFileType::kAliveLogFile) {
-    std::string fname = static_cast<std::string>(LogFileName(wal_dir_, number));
+    std::string fname = static_cast<std::string>(rocksdb_rs::filename::LogFileName(wal_dir_, number));
     s = ReadFirstLine(fname, number, sequence);
     if (!s.ok() && env_->FileExists(fname).ok()) {
       // return any error that is not caused by non-existing file
@@ -402,7 +402,7 @@ Status WalManager::ReadFirstRecord(const WalFileType type,
 
   if (type == WalFileType::kArchivedLogFile || !s.ok()) {
     //  check if the file got moved to archive.
-    std::string archived_file = static_cast<std::string>(ArchivedLogFileName(wal_dir_, number));
+    std::string archived_file = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(wal_dir_, number));
     s = ReadFirstLine(archived_file, number, sequence);
     // maybe the file was deleted from archive dir. If that's the case, return
     // Status_OK(). The caller with identify this as empty file because
@@ -430,7 +430,7 @@ Status WalManager::GetLiveWalFile(uint64_t number,
   }
 
   uint64_t size_bytes;
-  Status s = env_->GetFileSize(LogFileName(wal_dir_, number), &size_bytes);
+  Status s = env_->GetFileSize(rocksdb_rs::filename::LogFileName(wal_dir_, number), &size_bytes);
 
   if (!s.ok()) {
     return s;

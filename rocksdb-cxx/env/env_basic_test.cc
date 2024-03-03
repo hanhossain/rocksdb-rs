@@ -149,7 +149,7 @@ INSTANTIATE_TEST_CASE_P(CustomEnv, EnvMoreTestWithParam,
                         ::testing::ValuesIn(GetCustomEnvs()));
 
 TEST_P(EnvBasicTestWithParam, RustIntegration) {
-  CommonRustData common = {.value = "integration"};
+  rocksdb_rs::env::CommonRustData common = {.value = "integration"};
   ASSERT_EQ(common.value, "integration");
 
   rust::String value = hello_common(common);

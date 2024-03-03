@@ -244,10 +244,10 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
       //
       // In all other cases, the serialized block is either uncompressed into a
       // heap buffer or there is no cache at all.
-      CompressionType compression_type =
+      rocksdb_rs::compression_type::CompressionType compression_type =
           GetBlockCompressionType(serialized_block);
       if ((use_fs_scratch || use_shared_buffer) &&
-          compression_type == CompressionType::kNoCompression) {
+          compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
         Slice serialized =
             Slice(req.result.data() + req_offset, BlockSizeWithTrailer(handle));
         serialized_block = BlockContents(
@@ -281,10 +281,10 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
         }
       }
 
-      CompressionType compression_type =
+      rocksdb_rs::compression_type::CompressionType compression_type =
           GetBlockCompressionType(serialized_block);
       BlockContents contents;
-      if (compression_type != CompressionType::kNoCompression) {
+      if (compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
         UncompressionContext context(compression_type);
         UncompressionInfo info(context, uncompression_dict, compression_type);
         s = UncompressSerializedBlock(

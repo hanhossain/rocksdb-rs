@@ -209,7 +209,7 @@ Compaction::Compaction(
     const MutableDBOptions& _mutable_db_options,
     std::vector<CompactionInputFiles> _inputs, int _output_level,
     uint64_t _target_file_size, uint64_t _max_compaction_bytes,
-    uint32_t _output_path_id, CompressionType _compression,
+    uint32_t _output_path_id, rocksdb_rs::compression_type::CompressionType _compression,
     CompressionOptions _compression_opts, Temperature _output_temperature,
     uint32_t _max_subcompactions, std::vector<FileMetaData*> _grandparents,
     bool _manual_compaction, const std::string& _trim_ts, double _score,

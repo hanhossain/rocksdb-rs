@@ -379,7 +379,7 @@ struct FlushJobInfo {
   FlushReason flush_reason;
 
   // Compression algorithm used for blob output files
-  CompressionType blob_compression_type;
+  rocksdb_rs::compression_type::CompressionType blob_compression_type;
 
   // Information about blob files created during flush in Integrated BlobDB.
   std::vector<BlobFileAdditionInfo> blob_file_addition_infos;
@@ -422,13 +422,13 @@ struct SubcompactionJobInfo {
   CompactionReason compaction_reason;
 
   // Compression algorithm used for output files
-  CompressionType compression;
+  rocksdb_rs::compression_type::CompressionType compression;
 
   // Statistics and other additional details on the compaction
   CompactionJobStats stats;
 
   // Compression algorithm used for blob output files.
-  CompressionType blob_compression_type;
+  rocksdb_rs::compression_type::CompressionType blob_compression_type;
 
   SubcompactionJobInfo() : status(Status_new()) {}
 };
@@ -477,13 +477,13 @@ struct CompactionJobInfo {
   CompactionReason compaction_reason;
 
   // Compression algorithm used for output files
-  CompressionType compression;
+  rocksdb_rs::compression_type::CompressionType compression;
 
   // Statistics and other additional details on the compaction
   CompactionJobStats stats;
 
   // Compression algorithm used for blob output files.
-  CompressionType blob_compression_type;
+  rocksdb_rs::compression_type::CompressionType blob_compression_type;
 
   // Information about blob files created during compaction in Integrated
   // BlobDB.

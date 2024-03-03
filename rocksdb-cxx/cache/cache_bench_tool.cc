@@ -259,14 +259,14 @@ void DeleteFn(Cache::ObjectPtr value, MemoryAllocator* /*alloc*/) {
   delete[] static_cast<char*>(value);
 }
 
-Cache::CacheItemHelper helper1_wos(CacheEntryRole::kDataBlock, DeleteFn);
-Cache::CacheItemHelper helper1(CacheEntryRole::kDataBlock, DeleteFn, SizeFn,
+Cache::CacheItemHelper helper1_wos(rocksdb_rs::cache::CacheEntryRole::kDataBlock, DeleteFn);
+Cache::CacheItemHelper helper1(rocksdb_rs::cache::CacheEntryRole::kDataBlock, DeleteFn, SizeFn,
                                SaveToFn, CreateFn, &helper1_wos);
-Cache::CacheItemHelper helper2_wos(CacheEntryRole::kIndexBlock, DeleteFn);
-Cache::CacheItemHelper helper2(CacheEntryRole::kIndexBlock, DeleteFn, SizeFn,
+Cache::CacheItemHelper helper2_wos(rocksdb_rs::cache::CacheEntryRole::kIndexBlock, DeleteFn);
+Cache::CacheItemHelper helper2(rocksdb_rs::cache::CacheEntryRole::kIndexBlock, DeleteFn, SizeFn,
                                SaveToFn, CreateFn, &helper2_wos);
-Cache::CacheItemHelper helper3_wos(CacheEntryRole::kFilterBlock, DeleteFn);
-Cache::CacheItemHelper helper3(CacheEntryRole::kFilterBlock, DeleteFn, SizeFn,
+Cache::CacheItemHelper helper3_wos(rocksdb_rs::cache::CacheEntryRole::kFilterBlock, DeleteFn);
+Cache::CacheItemHelper helper3(rocksdb_rs::cache::CacheEntryRole::kFilterBlock, DeleteFn, SizeFn,
                                SaveToFn, CreateFn, &helper3_wos);
 }  // namespace
 

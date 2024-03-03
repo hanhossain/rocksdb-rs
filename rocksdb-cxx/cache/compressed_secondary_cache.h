@@ -122,7 +122,7 @@ class CompressedSecondaryCache : public SecondaryCache {
   // are stored in CacheValueChunk and extra charge is needed for each chunk,
   // so the cache charge is recalculated here.
   CacheValueChunk* SplitValueIntoChunks(const Slice& value,
-                                        CompressionType compression_type,
+                                        rocksdb_rs::compression_type::CompressionType compression_type,
                                         size_t& charge);
 
   // After merging chunks, the extra charge for each chunk is removed, so

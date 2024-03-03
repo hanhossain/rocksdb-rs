@@ -578,20 +578,20 @@ CompactionJobStats NewManualCompactionJobStats(
   return stats;
 }
 
-CompressionType GetAnyCompression() {
+rocksdb_rs::compression_type::CompressionType GetAnyCompression() {
   if (Snappy_Supported()) {
-    return CompressionType::kSnappyCompression;
+    return rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   } else if (Zlib_Supported()) {
-    return CompressionType::kZlibCompression;
+    return rocksdb_rs::compression_type::CompressionType::kZlibCompression;
   } else if (BZip2_Supported()) {
-    return CompressionType::kBZip2Compression;
+    return rocksdb_rs::compression_type::CompressionType::kBZip2Compression;
   } else if (LZ4_Supported()) {
-    return CompressionType::kLZ4Compression;
+    return rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   } else if (XPRESS_Supported()) {
-    return CompressionType::kXpressCompression;
+    return rocksdb_rs::compression_type::CompressionType::kXpressCompression;
   }
 
-  return CompressionType::kNoCompression;
+  return rocksdb_rs::compression_type::CompressionType::kNoCompression;
 }
 
 }  // namespace
@@ -622,7 +622,7 @@ TEST_P(CompactionJobStatsTest, CompactionJobStatsTest) {
   // just enough setting to hold off auto-compaction.
   options.level0_file_num_compaction_trigger = kTestScale + 1;
   options.num_levels = 3;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_subcompactions = max_subcompactions_;
   options.bytes_per_sync = 512 * 1024;
 
@@ -732,7 +732,7 @@ TEST_P(CompactionJobStatsTest, CompactionJobStatsTest) {
     std::string L1_files(L1_buf);
     ASSERT_EQ(L1_files, FilesPerLevel(1));
     options.compression = GetAnyCompression();
-    if (options.compression == CompressionType::kNoCompression) {
+    if (options.compression == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       break;
     }
     stats_checker->EnableCompression(true);
@@ -821,7 +821,7 @@ TEST_P(CompactionJobStatsTest, DeletionStatsTest) {
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = kTestScale + 1;
   options.num_levels = 3;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_multiplier = 2;
   options.max_subcompactions = max_subcompactions_;
 
@@ -902,7 +902,7 @@ TEST_P(CompactionJobStatsTest, UniversalCompactionTest) {
   options.listeners.emplace_back(stats_checker);
   options.create_if_missing = true;
   options.num_levels = 3;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 2;
   options.target_file_size_base = num_keys_per_table * 1000;
   options.compaction_style = kCompactionStyleUniversal;

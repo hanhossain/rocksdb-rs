@@ -204,16 +204,16 @@ std::string RandomName(Random* rnd, const size_t len) {
   return ss.str();
 }
 
-CompressionType RandomCompressionType(Random* rnd) {
-  auto ret = static_cast<CompressionType>(rnd->Uniform(6));
+rocksdb_rs::compression_type::CompressionType RandomCompressionType(Random* rnd) {
+  auto ret = static_cast<rocksdb_rs::compression_type::CompressionType>(rnd->Uniform(6));
   while (!CompressionTypeSupported(ret)) {
-    ret = static_cast<CompressionType>((static_cast<int>(ret) + 1) % 6);
+    ret = static_cast<rocksdb_rs::compression_type::CompressionType>((static_cast<int>(ret) + 1) % 6);
   }
   return ret;
 }
 
 void RandomCompressionTypeVector(const size_t count,
-                                 std::vector<CompressionType>* types,
+                                 std::vector<rocksdb_rs::compression_type::CompressionType>* types,
                                  Random* rnd) {
   types->clear();
   for (size_t i = 0; i < count; ++i) {
@@ -430,7 +430,7 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
   EnvOptions env_options;
   env_options.use_mmap_writes = false;
   env_options.use_direct_writes = true;
-  std::string tmp = static_cast<std::string>(TempFileName(dir, 999));
+  std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
   Status s = Status_new();
   {
     std::unique_ptr<WritableFile> file;
@@ -445,7 +445,7 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
 bool IsPrefetchSupported(const std::shared_ptr<FileSystem>& fs,
                          const std::string& dir) {
   bool supported = false;
-  std::string tmp = static_cast<std::string>(TempFileName(dir, 999));
+  std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
   Random rnd(301);
   std::string test_string = rnd.RandomString(4096);
   Slice data(test_string);

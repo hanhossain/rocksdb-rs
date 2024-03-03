@@ -89,6 +89,8 @@
 #undef WITH_COROUTINES
 // clang-format on
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 
 namespace {

@@ -22,7 +22,7 @@
 namespace rocksdb {
 namespace {
 using IterPlaceholderCacheInterface =
-    PlaceholderCacheInterface<CacheEntryRole::kMisc>;
+    PlaceholderCacheInterface<rocksdb_rs::cache::CacheEntryRole::kMisc>;
 
 template <typename TBlockIter>
 struct IterTraits {};

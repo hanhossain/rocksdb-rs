@@ -44,7 +44,7 @@ class EventListenerTest : public DBTestBase {
                              uint64_t size) {
     std::string blob_index;
     BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                          CompressionType::kNoCompression);
+                          rocksdb_rs::compression_type::CompressionType::kNoCompression);
     return blob_index;
   }
 
@@ -163,7 +163,7 @@ TEST_F(EventListenerTest, OnSingleDBCompactionTest) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base = options.target_file_size_base * 2;
   options.max_bytes_for_level_multiplier = 2;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifdef ROCKSDB_USING_THREAD_STATUS
   options.enable_thread_tracking = true;
 #endif  // ROCKSDB_USING_THREAD_STATUS
@@ -510,7 +510,7 @@ TEST_F(EventListenerTest, DisableBGCompaction) {
   // BG compaction is disabled.  Number of L0 files will simply keeps
   // increasing in this test.
   options.compaction_style = kCompactionStyleNone;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.write_buffer_size = 100000;  // Small write buffer
   options.table_properties_collector_factories.push_back(
       std::make_shared<TestPropertiesCollectorFactory>());
@@ -1330,7 +1330,7 @@ class BlobDBJobLevelEventListenerTest : public EventListener {
       flushed_files_.push_back(info.file_path);
     }
 
-    EXPECT_EQ(info.blob_compression_type, CompressionType::kNoCompression);
+    EXPECT_EQ(info.blob_compression_type, rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     CheckBlobFileAdditions(info.blob_file_addition_infos);
   }
@@ -1339,7 +1339,7 @@ class BlobDBJobLevelEventListenerTest : public EventListener {
                              const CompactionJobInfo& info) override {
     call_count_++;
 
-    EXPECT_EQ(info.blob_compression_type, CompressionType::kNoCompression);
+    EXPECT_EQ(info.blob_compression_type, rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     CheckBlobFileAdditions(info.blob_file_addition_infos);
 

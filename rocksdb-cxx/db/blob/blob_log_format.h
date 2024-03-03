@@ -45,7 +45,7 @@ struct BlobLogHeader {
   static constexpr size_t kSize = 30;
 
   BlobLogHeader() = default;
-  BlobLogHeader(uint32_t _column_family_id, CompressionType _compression,
+  BlobLogHeader(uint32_t _column_family_id, rocksdb_rs::compression_type::CompressionType _compression,
                 bool _has_ttl, const ExpirationRange& _expiration_range)
       : column_family_id(_column_family_id),
         compression(_compression),
@@ -54,7 +54,7 @@ struct BlobLogHeader {
 
   uint32_t version = kVersion1;
   uint32_t column_family_id = 0;
-  CompressionType compression = CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   bool has_ttl = false;
   ExpirationRange expiration_range;
 

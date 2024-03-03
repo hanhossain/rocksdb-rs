@@ -799,7 +799,7 @@ class VersionBuilder::Rep {
         s = Status_MemoryLimit(
             "Can't allocate " +
             static_cast<std::string>(CacheEntryRole_ToCamelString(
-                CacheEntryRole::kFileMetadata)) +
+                rocksdb_rs::cache::CacheEntryRole::kFileMetadata)) +
             " due to exceeding the memory limit "
             "based on "
             "cache capacity");

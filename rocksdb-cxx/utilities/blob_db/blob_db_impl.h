@@ -229,13 +229,13 @@ class BlobDBImpl : public BlobDB {
   Status GetRawBlobFromFile(const Slice& key, uint64_t file_number,
                             uint64_t offset, uint64_t size,
                             PinnableSlice* value,
-                            CompressionType* compression_type);
+                            rocksdb_rs::compression_type::CompressionType* compression_type);
 
   Slice GetCompressedSlice(const Slice& raw,
                            std::string* compression_output) const;
 
   Status DecompressSlice(const Slice& compressed_value,
-                         CompressionType compression_type,
+                         rocksdb_rs::compression_type::CompressionType compression_type,
                          PinnableSlice* value_output) const;
 
   // Close a file by appending a footer, and removes file from open files list.

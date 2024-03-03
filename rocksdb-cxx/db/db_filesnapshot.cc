@@ -66,22 +66,22 @@ Status DBImpl::GetLiveFiles(std::vector<std::string>& ret,
   // create names of the live files. The names are not absolute
   // paths, instead they are relative to dbname_.
   for (const auto& table_file_number : live_table_files) {
-    ret.emplace_back(MakeTableFileName("", table_file_number));
+    ret.emplace_back(rocksdb_rs::filename::MakeTableFileName("", table_file_number));
   }
 
   for (const auto& blob_file_number : live_blob_files) {
-    ret.emplace_back(BlobFileName("", blob_file_number));
+    ret.emplace_back(rocksdb_rs::filename::BlobFileName("", blob_file_number));
   }
 
-  ret.emplace_back(CurrentFileName(""));
-  ret.emplace_back(DescriptorFileName("", versions_->manifest_file_number()));
+  ret.emplace_back(rocksdb_rs::filename::CurrentFileName(""));
+  ret.emplace_back(rocksdb_rs::filename::DescriptorFileName("", versions_->manifest_file_number()));
   // The OPTIONS file number is zero in read-write mode when OPTIONS file
   // writing failed and the DB was configured with
   // `fail_if_options_file_error == false`. In read-only mode the OPTIONS file
   // number is zero when no OPTIONS file exist at all. In those cases we do not
   // record any OPTIONS file in the live file list.
   if (versions_->options_file_number() != 0) {
-    ret.emplace_back(OptionsFileName("", versions_->options_file_number()));
+    ret.emplace_back(rocksdb_rs::filename::OptionsFileName("", versions_->options_file_number()));
   }
 
   // find length of manifest file while holding the mutex lock
@@ -240,7 +240,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
         results.emplace_back();
         LiveFileStorageInfo& info = results.back();
 
-        info.relative_filename = static_cast<std::string>(MakeTableFileName(meta->fd.GetNumber()));
+        info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName(meta->fd.GetNumber()));
         info.directory = GetDir(meta->fd.GetPathId());
         info.file_number = meta->fd.GetNumber();
         info.file_type = FileType::kTableFile;
@@ -263,7 +263,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
       results.emplace_back();
       LiveFileStorageInfo& info = results.back();
 
-      info.relative_filename = static_cast<std::string>(BlobFileName(meta->GetBlobFileNumber()));
+      info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::BlobFileName(meta->GetBlobFileNumber()));
       info.directory = GetDir(/* path_id */ 0);
       info.file_number = meta->GetBlobFileNumber();
       info.file_type = FileType::kBlobFile;
@@ -289,7 +289,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
 
   mutex_.Unlock();
 
-  std::string manifest_fname = static_cast<std::string>(DescriptorFileName(manifest_number));
+  std::string manifest_fname = static_cast<std::string>(rocksdb_rs::filename::DescriptorFileName(manifest_number));
   {  // MANIFEST
     results.emplace_back();
     LiveFileStorageInfo& info = results.back();
@@ -331,7 +331,7 @@ Status DBImpl::GetLiveFilesStorageInfo(
     results.emplace_back();
     LiveFileStorageInfo& info = results.back();
 
-    info.relative_filename = static_cast<std::string>(OptionsFileName(options_number));
+    info.relative_filename = static_cast<std::string>(rocksdb_rs::filename::OptionsFileName(options_number));
     info.directory = GetName();
     info.file_number = options_number;
     info.file_type = FileType::kOptionsFile;

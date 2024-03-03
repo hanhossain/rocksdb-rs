@@ -24,6 +24,8 @@
 #include "test_util/testutil.h"
 #include "util/string_util.h"
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 
 // TODO(icanadi) mock out VersionSet

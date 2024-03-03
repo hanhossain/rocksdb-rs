@@ -258,7 +258,7 @@ Status SstFileDumper::CalculateCompressedTableSize(
 
 Status SstFileDumper::ShowAllCompressionSizes(
     size_t block_size,
-    const std::vector<std::pair<CompressionType, const char*>>&
+    const std::vector<std::pair<rocksdb_rs::compression_type::CompressionType, const char*>>&
         compression_types,
     int32_t compress_level_from, int32_t compress_level_to,
     uint32_t max_dict_bytes, uint32_t zstd_max_train_bytes,
@@ -288,7 +288,7 @@ Status SstFileDumper::ShowAllCompressionSizes(
 }
 
 Status SstFileDumper::ShowCompressionSize(
-    size_t block_size, CompressionType compress_type,
+    size_t block_size, rocksdb_rs::compression_type::CompressionType compress_type,
     const CompressionOptions& compress_opt) {
   Options opts;
   opts.statistics = rocksdb::CreateDBStatistics();

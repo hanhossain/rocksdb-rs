@@ -30,6 +30,8 @@
 #include "utilities/fault_injection_env.h"
 #include "utilities/fault_injection_fs.h"
 
+using namespace rocksdb_rs::filename;
+
 namespace rocksdb {
 class CheckpointTest : public testing::Test {
  protected:

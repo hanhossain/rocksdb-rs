@@ -1,6 +1,6 @@
 use crate::cache::ffi::CacheEntryRole;
 
-#[cxx::bridge(namespace = "rocksdb")]
+#[cxx::bridge(namespace = "rocksdb_rs::cache")]
 pub mod ffi {
     /// Classifications of block cache entries.
     ///

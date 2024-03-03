@@ -830,10 +830,10 @@ class ChanglingCompactionFilterFactory : public CompactionFilterFactory {
 // number of entries exceeds a threshold.
 extern MemTableRepFactory* NewSpecialSkipListFactory(int num_entries_per_flush);
 
-CompressionType RandomCompressionType(Random* rnd);
+rocksdb_rs::compression_type::CompressionType RandomCompressionType(Random* rnd);
 
 void RandomCompressionTypeVector(const size_t count,
-                                 std::vector<CompressionType>* types,
+                                 std::vector<rocksdb_rs::compression_type::CompressionType>* types,
                                  Random* rnd);
 
 CompactionFilterFactory* RandomCompactionFilterFactory(Random* rnd);

@@ -74,7 +74,7 @@ TEST_F(CompactFilesTest, L0ConflictsFiles) {
   options.level0_stop_writes_trigger = 20;
   options.write_buffer_size = kWriteBufferSize;
   options.level0_file_num_compaction_trigger = kLevel0Trigger;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
@@ -205,7 +205,7 @@ TEST_F(CompactFilesTest, ObsoleteFiles) {
   options.level0_stop_writes_trigger = (1 << 30);
   options.write_buffer_size = kWriteBufferSize;
   options.max_write_buffer_number = 2;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Add listener
   FlushedFileCollector* collector = new FlushedFileCollector();
@@ -243,7 +243,7 @@ TEST_F(CompactFilesTest, NotCutOutputOnLevel0) {
   options.level0_stop_writes_trigger = 1000;
   options.write_buffer_size = 65536;
   options.max_write_buffer_number = 2;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_compaction_bytes = 5000;
 
   // Add listener
@@ -396,7 +396,7 @@ TEST_F(CompactFilesTest, SentinelCompressionType) {
     fprintf(stderr, "snappy compression not supported, skip this test\n");
     return;
   }
-  // Check that passing `CompressionType::kDisableCompressionOption` to
+  // Check that passing `rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption` to
   // `CompactFiles` causes it to use the column family compression options.
   for (auto compaction_style : {CompactionStyle::kCompactionStyleLevel,
                                 CompactionStyle::kCompactionStyleUniversal,
@@ -406,9 +406,9 @@ TEST_F(CompactFilesTest, SentinelCompressionType) {
     options.level_compaction_dynamic_level_bytes = false;
     options.compaction_style = compaction_style;
     // L0: Snappy, L1: ZSTD, L2: Snappy
-    options.compression_per_level = {CompressionType::kSnappyCompression,
-                                     CompressionType::kZlibCompression,
-                                     CompressionType::kSnappyCompression};
+    options.compression_per_level = {rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+                                     rocksdb_rs::compression_type::CompressionType::kZlibCompression,
+                                     rocksdb_rs::compression_type::CompressionType::kSnappyCompression};
     options.create_if_missing = true;
     FlushedFileCollector* collector = new FlushedFileCollector();
     options.listeners.emplace_back(collector);
@@ -426,13 +426,13 @@ TEST_F(CompactFilesTest, SentinelCompressionType) {
 
     // L0->L1 compaction, so output should be ZSTD-compressed
     CompactionOptions compaction_opts;
-    compaction_opts.compression = CompressionType::kDisableCompressionOption;
+    compaction_opts.compression = rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
     ASSERT_OK(db->CompactFiles(compaction_opts, l0_files, 1));
 
     rocksdb::TablePropertiesCollection all_tables_props;
     ASSERT_OK(db->GetPropertiesOfAllTables(&all_tables_props));
     for (const auto& name_and_table_props : all_tables_props) {
-      ASSERT_EQ(CompressionTypeToString(CompressionType::kZlibCompression),
+      ASSERT_EQ(CompressionTypeToString(rocksdb_rs::compression_type::CompressionType::kZlibCompression),
                 name_and_table_props.second->compression_name);
     }
     delete db;
@@ -448,7 +448,7 @@ TEST_F(CompactFilesTest, GetCompactionJobInfo) {
   options.level0_stop_writes_trigger = 1000;
   options.write_buffer_size = 65536;
   options.max_write_buffer_number = 2;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_compaction_bytes = 5000;
 
   // Add listener
@@ -469,7 +469,7 @@ TEST_F(CompactFilesTest, GetCompactionJobInfo) {
   ASSERT_OK(static_cast_with_check<DBImpl>(db)->TEST_WaitForFlushMemTable());
   auto l0_files_1 = collector->GetFlushedFiles();
   CompactionOptions co;
-  co.compression = CompressionType::kLZ4Compression;
+  co.compression = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   CompactionJobInfo compaction_job_info{};
   ASSERT_OK(
       db->CompactFiles(co, l0_files_1, 0, -1, nullptr, &compaction_job_info));
@@ -478,7 +478,7 @@ TEST_F(CompactFilesTest, GetCompactionJobInfo) {
   ASSERT_EQ(compaction_job_info.cf_name, db->DefaultColumnFamily()->GetName());
   ASSERT_EQ(compaction_job_info.compaction_reason,
             CompactionReason::kManualCompaction);
-  ASSERT_EQ(compaction_job_info.compression, CompressionType::kLZ4Compression);
+  ASSERT_EQ(compaction_job_info.compression, rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
   ASSERT_EQ(compaction_job_info.output_level, 0);
   ASSERT_OK(compaction_job_info.status);
   // no assertion failure

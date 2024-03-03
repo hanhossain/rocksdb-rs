@@ -33,7 +33,7 @@ BlobSource::BlobSource(const ImmutableOptions* immutable_options,
   auto bbto =
       immutable_options->table_factory->GetOptions<BlockBasedTableOptions>();
   if (bbto &&
-      bbto->cache_usage_options.options_overrides.at(CacheEntryRole::kBlobCache)
+      bbto->cache_usage_options.options_overrides.at(rocksdb_rs::cache::CacheEntryRole::kBlobCache)
               .charged == CacheEntryRoleOptions::Decision::kEnabled) {
     blob_cache_ = SharedCacheInterface{std::make_shared<ChargedCache>(
         immutable_options->blob_cache, bbto->block_cache)};
@@ -158,7 +158,7 @@ Status BlobSource::GetBlob(const ReadOptions& read_options,
                            const Slice& user_key, uint64_t file_number,
                            uint64_t offset, uint64_t file_size,
                            uint64_t value_size,
-                           CompressionType compression_type,
+                           rocksdb_rs::compression_type::CompressionType compression_type,
                            FilePrefetchBuffer* prefetch_buffer,
                            PinnableSlice* value, uint64_t* bytes_read) {
   assert(value);

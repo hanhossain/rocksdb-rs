@@ -103,6 +103,7 @@ using GFLAGS_NAMESPACE::ParseCommandLineFlags;
 using GFLAGS_NAMESPACE::RegisterFlagValidator;
 using GFLAGS_NAMESPACE::SetUsageMessage;
 using GFLAGS_NAMESPACE::SetVersionString;
+using rocksdb_rs::cache::CacheEntryRole;
 
 DEFINE_string(
     benchmarks,
@@ -590,9 +591,9 @@ DEFINE_double(compressed_secondary_cache_low_pri_pool_ratio, 0.0,
 DEFINE_string(compressed_secondary_cache_compression_type, "lz4",
               "The compression algorithm to use for large "
               "values stored in CompressedSecondaryCache.");
-static enum rocksdb::CompressionType
+static enum rocksdb_rs::compression_type::CompressionType
     FLAGS_compressed_secondary_cache_compression_type_e =
-        rocksdb::CompressionType::kLZ4Compression;
+        rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
 
 DEFINE_uint32(
     compressed_secondary_cache_compress_format_version, 2,
@@ -824,8 +825,8 @@ DEFINE_bool(manual_wal_flush, false,
 
 DEFINE_string(wal_compression, "none",
               "Algorithm to use for WAL compression. none to disable.");
-static enum rocksdb::CompressionType FLAGS_wal_compression_e =
-    rocksdb::CompressionType::kNoCompression;
+static enum rocksdb_rs::compression_type::CompressionType FLAGS_wal_compression_e =
+    rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
 DEFINE_string(wal_dir, "", "If not empty, use the given dir for WAL");
 
@@ -1038,8 +1039,8 @@ DEFINE_uint64(blob_db_file_size,
 DEFINE_string(
     blob_db_compression_type, "snappy",
     "[Stacked BlobDB] Algorithm to use to compress blobs in blob files.");
-static enum rocksdb::CompressionType
-    FLAGS_blob_db_compression_type_e = rocksdb::CompressionType::kSnappyCompression;
+static enum rocksdb_rs::compression_type::CompressionType
+    FLAGS_blob_db_compression_type_e = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
 
 
 // Integrated BlobDB options
@@ -1243,26 +1244,26 @@ DEFINE_uint64(
     "num_file_reads_for_auto_readahead indicates after how many sequential "
     "reads into that file internal auto prefetching should be start.");
 
-static enum rocksdb::CompressionType StringToCompressionType(
+static enum rocksdb_rs::compression_type::CompressionType StringToCompressionType(
     const char* ctype) {
   assert(ctype);
 
   if (!strcasecmp(ctype, "none"))
-    return rocksdb::CompressionType::kNoCompression;
+    return rocksdb_rs::compression_type::CompressionType::kNoCompression;
   else if (!strcasecmp(ctype, "snappy"))
-    return rocksdb::CompressionType::kSnappyCompression;
+    return rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   else if (!strcasecmp(ctype, "zlib"))
-    return rocksdb::CompressionType::kZlibCompression;
+    return rocksdb_rs::compression_type::CompressionType::kZlibCompression;
   else if (!strcasecmp(ctype, "bzip2"))
-    return rocksdb::CompressionType::kBZip2Compression;
+    return rocksdb_rs::compression_type::CompressionType::kBZip2Compression;
   else if (!strcasecmp(ctype, "lz4"))
-    return rocksdb::CompressionType::kLZ4Compression;
+    return rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   else if (!strcasecmp(ctype, "lz4hc"))
-    return rocksdb::CompressionType::kLZ4HCCompression;
+    return rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression;
   else if (!strcasecmp(ctype, "xpress"))
-    return rocksdb::CompressionType::kXpressCompression;
+    return rocksdb_rs::compression_type::CompressionType::kXpressCompression;
   else if (!strcasecmp(ctype, "zstd"))
-    return rocksdb::CompressionType::kZSTD;
+    return rocksdb_rs::compression_type::CompressionType::kZSTD;
   else {
     fprintf(stderr, "Cannot parse compression type '%s'\n", ctype);
     exit(1);
@@ -1281,8 +1282,8 @@ static std::string ColumnFamilyName(size_t i) {
 
 DEFINE_string(compression_type, "snappy",
               "Algorithm to use to compress the database");
-static enum rocksdb::CompressionType FLAGS_compression_type_e =
-    rocksdb::CompressionType::kSnappyCompression;
+static enum rocksdb_rs::compression_type::CompressionType FLAGS_compression_type_e =
+    rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
 
 DEFINE_int64(sample_for_compression, 0, "Sample every N block for compression");
 
@@ -2827,7 +2828,7 @@ class Benchmark {
     fprintf(stdout,
             "WARNING: Assertions are enabled; benchmarks unnecessarily slow\n");
 #endif
-    if (FLAGS_compression_type_e != rocksdb::CompressionType::kNoCompression) {
+    if (FLAGS_compression_type_e != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       // The test string should not be too small.
       const int len = FLAGS_block_size;
       std::string input_str(len, 'y');
@@ -4483,7 +4484,7 @@ class Benchmark {
       assert(FLAGS_min_level_to_compress <= FLAGS_num_levels);
       options.compression_per_level.resize(FLAGS_num_levels);
       for (int i = 0; i < FLAGS_min_level_to_compress; i++) {
-        options.compression_per_level[i] = CompressionType::kNoCompression;
+        options.compression_per_level[i] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
       for (int i = FLAGS_min_level_to_compress; i < FLAGS_num_levels; i++) {
         options.compression_per_level[i] = FLAGS_compression_type_e;
@@ -8209,7 +8210,7 @@ class Benchmark {
 
     rocksdb::CompactionOptions options;
     // Lets RocksDB use the configured compression for this level
-    options.compression = rocksdb::CompressionType::kDisableCompressionOption;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
 
     rocksdb::ColumnFamilyDescriptor cfDesc;
     db_with_cfh.db->DefaultColumnFamily()->GetDescriptor(&cfDesc);

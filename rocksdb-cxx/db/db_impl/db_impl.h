@@ -2730,7 +2730,7 @@ extern DBOptions SanitizeOptions(const std::string& db, const DBOptions& src,
                                  bool read_only = false,
                                  Status* logger_creation_s = nullptr);
 
-extern CompressionType GetCompressionFlush(
+extern rocksdb_rs::compression_type::CompressionType GetCompressionFlush(
     const ImmutableCFOptions& ioptions,
     const MutableCFOptions& mutable_cf_options);
 

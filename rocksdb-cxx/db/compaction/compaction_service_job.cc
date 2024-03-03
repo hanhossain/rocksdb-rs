@@ -16,6 +16,9 @@
 #include "options/options_helper.h"
 #include "rocksdb/utilities/options_type.h"
 
+using rocksdb_rs::filename::MakeTableFileName;
+using rocksdb_rs::filename::TableFileName;
+
 namespace rocksdb {
 class SubcompactionState;
 

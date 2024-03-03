@@ -48,6 +48,10 @@
 #include "utilities/merge_operators.h"
 #include "utilities/ttl/db_ttl_impl.h"
 
+using rocksdb_rs::filename::CurrentFileName;
+using rocksdb_rs::filename::NormalizePath;
+using rocksdb_rs::filename::ParseFileName;
+
 namespace rocksdb {
 
 class FileChecksumGenCrc32c;
@@ -668,34 +672,34 @@ bool LDBCommand::ParseStringOption(
  */
 bool LDBCommand::ParseCompressionTypeOption(
     const std::map<std::string, std::string>& /*options*/,
-    const std::string& option, CompressionType& value,
+    const std::string& option, rocksdb_rs::compression_type::CompressionType& value,
     LDBCommandExecuteResult& exec_state) {
   auto itr = option_map_.find(option);
   if (itr != option_map_.end()) {
     const std::string& comp = itr->second;
     if (comp == "no") {
-      value = CompressionType::kNoCompression;
+      value = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       return true;
     } else if (comp == "snappy") {
-      value = CompressionType::kSnappyCompression;
+      value = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
       return true;
     } else if (comp == "zlib") {
-      value = CompressionType::kZlibCompression;
+      value = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
       return true;
     } else if (comp == "bzip2") {
-      value = CompressionType::kBZip2Compression;
+      value = rocksdb_rs::compression_type::CompressionType::kBZip2Compression;
       return true;
     } else if (comp == "lz4") {
-      value = CompressionType::kLZ4Compression;
+      value = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
       return true;
     } else if (comp == "lz4hc") {
-      value = CompressionType::kLZ4HCCompression;
+      value = rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression;
       return true;
     } else if (comp == "xpress") {
-      value = CompressionType::kXpressCompression;
+      value = rocksdb_rs::compression_type::CompressionType::kXpressCompression;
       return true;
     } else if (comp == "zstd") {
-      value = CompressionType::kZSTD;
+      value = rocksdb_rs::compression_type::CompressionType::kZSTD;
       return true;
     } else {
       // Unknown compression.
@@ -856,13 +860,13 @@ void LDBCommand::OverrideBaseCFOptions(ColumnFamilyOptions* cf_opts) {
     cf_opts->disable_auto_compactions = !StringToBool(itr->second);
   }
 
-  CompressionType compression_type;
+  rocksdb_rs::compression_type::CompressionType compression_type;
   if (ParseCompressionTypeOption(option_map_, ARG_COMPRESSION_TYPE,
                                  compression_type, exec_state_)) {
     cf_opts->compression = compression_type;
   }
 
-  CompressionType blob_compression_type;
+  rocksdb_rs::compression_type::CompressionType blob_compression_type;
   if (ParseCompressionTypeOption(option_map_, ARG_BLOB_COMPRESSION_TYPE,
                                  blob_compression_type, exec_state_)) {
     cf_opts->blob_compression_type = blob_compression_type;

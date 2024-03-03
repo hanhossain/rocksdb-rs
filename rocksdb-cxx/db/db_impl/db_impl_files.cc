@@ -21,6 +21,16 @@
 #include "util/autovector.h"
 #include "util/defer.h"
 
+using rocksdb_rs::filename::BlobFileName;
+using rocksdb_rs::filename::IdentityFileName;
+using rocksdb_rs::filename::InfoLogPrefix;
+using rocksdb_rs::filename::InfoLogPrefix_new;
+using rocksdb_rs::filename::LogFileName;
+using rocksdb_rs::filename::MakeTableFileName;
+using rocksdb_rs::filename::NormalizePath;
+using rocksdb_rs::filename::ParseFileName;
+using rocksdb_rs::filename::TableFileName;
+
 namespace rocksdb {
 
 uint64_t DBImpl::MinLogNumberToKeep() {
@@ -174,7 +184,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
 
   if (doing_the_full_scan) {
     versions_->AddLiveFiles(&job_context->sst_live, &job_context->blob_live);
-    InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
+    rocksdb_rs::filename::InfoLogPrefix info_log_prefix = rocksdb_rs::filename::InfoLogPrefix_new(!immutable_db_options_.db_log_dir.empty(),
                                   dbname_);
     std::set<std::string> paths;
     for (size_t path_id = 0; path_id < immutable_db_options_.db_paths.size();

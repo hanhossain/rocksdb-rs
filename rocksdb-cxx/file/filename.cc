@@ -20,6 +20,14 @@
 #include "util/stop_watch.h"
 #include "util/string_util.h"
 
+using rocksdb_rs::filename::CurrentFileName;
+using rocksdb_rs::filename::DescriptorFileName;
+using rocksdb_rs::filename::IdentityFileName;
+using rocksdb_rs::filename::InfoLogPrefix;
+using rocksdb_rs::filename::InfoLogPrefix_new;
+using rocksdb_rs::filename::ParseFileName;
+using rocksdb_rs::filename::TempFileName;
+
 namespace rocksdb {
 
 const std::string kCurrentFileName = "CURRENT";

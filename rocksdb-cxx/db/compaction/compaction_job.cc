@@ -794,7 +794,7 @@ Status CompactionJob::Run() {
   for (const auto& state : compact_->sub_compact_states) {
     for (const auto& output : state.GetOutputs()) {
       auto fn =
-          static_cast<std::string>(TableFileName(state.compaction->immutable_options()->cf_paths,
+          static_cast<std::string>(rocksdb_rs::filename::TableFileName(state.compaction->immutable_options()->cf_paths,
                         output.meta.fd.GetNumber(), output.meta.fd.GetPathId()));
       tp[fn] = output.table_properties;
     }
@@ -1546,7 +1546,7 @@ Status CompactionJob::FinishCompactionOutputFile(
     // This happens when the output level is bottom level, at the same time
     // the sub_compact output nothing.
     std::string fname =
-        static_cast<std::string>(TableFileName(sub_compact->compaction->immutable_options()->cf_paths,
+        static_cast<std::string>(rocksdb_rs::filename::TableFileName(sub_compact->compaction->immutable_options()->cf_paths,
                       meta->fd.GetNumber(), meta->fd.GetPathId()));
 
     // TODO(AR) it is not clear if there are any larger implications if
@@ -2014,7 +2014,7 @@ void CompactionJob::LogCompaction() {
 }
 
 std::string CompactionJob::GetTableFileName(uint64_t file_number) {
-  return static_cast<std::string>(TableFileName(compact_->compaction->immutable_options()->cf_paths,
+  return static_cast<std::string>(rocksdb_rs::filename::TableFileName(compact_->compaction->immutable_options()->cf_paths,
                        file_number, compact_->compaction->output_path_id()));
 }
 

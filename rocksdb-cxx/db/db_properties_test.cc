@@ -320,7 +320,7 @@ TEST_F(DBPropertiesTest, AggregatedTableProperties) {
 
     Options options = CurrentOptions();
     options.level0_file_num_compaction_trigger = 8;
-    options.compression = CompressionType::kNoCompression;
+    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.create_if_missing = true;
     options.merge_operator.reset(new TestPutOperator());
 
@@ -381,7 +381,7 @@ TEST_F(DBPropertiesTest, ReadLatencyHistogramByLevel) {
   options.write_buffer_size = 110 << 10;
   options.level0_file_num_compaction_trigger = 6;
   options.num_levels = 4;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 4500 << 10;
   options.target_file_size_base = 98 << 10;
   options.max_write_buffer_number = 2;
@@ -513,7 +513,7 @@ TEST_F(DBPropertiesTest, AggregatedTablePropertiesAtLevel) {
   Random rnd(301);
   Options options = CurrentOptions();
   options.level0_file_num_compaction_trigger = 8;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = 2;
   options.target_file_size_base = 8192;
@@ -889,7 +889,7 @@ TEST_F(DBPropertiesTest, ApproximateMemoryUsage) {
   Options options;
   options.write_buffer_size = 1000;  // small write buffer
   options.min_write_buffer_number_to_merge = 4;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options = CurrentOptions(options);
   DestroyAndReopen(options);
@@ -1048,8 +1048,8 @@ TEST_F(DBPropertiesTest, EstimateCompressionRatio) {
       {{"compression_per_level", "kNoCompression:kSnappyCompression"}}));
   auto opts = db_->GetOptions();
   ASSERT_EQ(opts.compression_per_level.size(), 2);
-  ASSERT_EQ(opts.compression_per_level[0], CompressionType::kNoCompression);
-  ASSERT_EQ(opts.compression_per_level[1], CompressionType::kSnappyCompression);
+  ASSERT_EQ(opts.compression_per_level[0], rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  ASSERT_EQ(opts.compression_per_level[1], rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
 
   // compression ratio is -1.0 when no open files at level
   ASSERT_EQ(CompressionRatioAtLevel(0), -1.0);
@@ -1536,18 +1536,18 @@ TEST_P(CompressionSamplingDBPropertiesTest,
   if (fast_) {
     // One of the following light compression libraries must be present.
     if (LZ4_Supported()) {
-      options.compression = CompressionType::kLZ4Compression;
+      options.compression = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
     } else if (Snappy_Supported()) {
-      options.compression = CompressionType::kSnappyCompression;
+      options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
     } else {
       return;
     }
   } else {
     // One of the following heavy compression libraries must be present.
     if (ZSTD_Supported()) {
-      options.compression = CompressionType::kZSTD;
+      options.compression = rocksdb_rs::compression_type::CompressionType::kZSTD;
     } else if (Zlib_Supported()) {
-      options.compression = CompressionType::kZlibCompression;
+      options.compression = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
     } else {
       return;
     }
@@ -2069,24 +2069,24 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
   ASSERT_TRUE(
       db_->GetMapProperty(DB::Properties::kBlockCacheEntryStats, &values));
 
-  ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheId())) !=
+  ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheId())) !=
               values.end());
-  ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_CacheCapacityBytes())) !=
+  ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheCapacityBytes())) !=
               values.end());
   ASSERT_TRUE(
       values.find(
-          static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
+          static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
       values.end());
   ASSERT_TRUE(
-      values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())) !=
+      values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())) !=
       values.end());
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    CacheEntryRole role = static_cast<CacheEntryRole>(i);
-    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_EntryCount(role))) !=
+    rocksdb_rs::cache::CacheEntryRole role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
+    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))) !=
                 values.end());
-    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedBytes(role))) !=
+    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedBytes(role))) !=
                 values.end());
-    ASSERT_TRUE(values.find(static_cast<std::string>(BlockCacheEntryStatsMapKeys_UsedPercent(role))) !=
+    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedPercent(role))) !=
                 values.end());
   }
 

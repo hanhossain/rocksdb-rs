@@ -223,7 +223,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   options.write_buffer_size = kFileSize;
   options.target_file_size_base = kFileSize;
   options.max_bytes_for_level_base = 1 << 30;
-  options.compression = CompressionType::kNoCompression;
+  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Reopen(options);
   // 1 L0 file, use CompactedDB if max_open_files = -1
   ASSERT_OK(Put("aaa", DummyString(kFileSize / 2, '1')));
@@ -3455,18 +3455,18 @@ class DBBasicTestMultiGet : public DBTestBase {
     BlockBasedTableOptions table_options;
 
     if (compression_enabled_) {
-      std::vector<CompressionType> compression_types;
+      std::vector<rocksdb_rs::compression_type::CompressionType> compression_types;
       compression_types = GetSupportedCompressions();
       // Not every platform may have compression libraries available, so
       // dynamically pick based on what's available
-      CompressionType tmp_type = CompressionType::kNoCompression;
+      rocksdb_rs::compression_type::CompressionType tmp_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       for (auto c_type : compression_types) {
-        if (c_type != CompressionType::kNoCompression) {
+        if (c_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
           tmp_type = c_type;
           break;
         }
       }
-      if (tmp_type != CompressionType::kNoCompression) {
+      if (tmp_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
         options.compression = tmp_type;
       } else {
         compression_enabled_ = false;
@@ -3483,7 +3483,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         new MyFlushBlockPolicyFactory());
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
     if (!compression_enabled_) {
-      options.compression = CompressionType::kNoCompression;
+      options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
     } else {
       options.compression_opts.parallel_threads = compression_parallel_threads;
     }

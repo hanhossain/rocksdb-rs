@@ -154,7 +154,7 @@ struct ConfigOptions {
 // * Enums:
 //   The valid values of each enum are identical to the names of its constants.
 //   [Example]:
-//   - CompressionType: valid values are "kNoCompression",
+//   - rocksdb_rs::compression_type::CompressionType: valid values are "kNoCompression",
 //     "kSnappyCompression", "kZlibCompression", "kBZip2Compression", ...
 //   - CompactionStyle: valid values are "kCompactionStyleLevel",
 //     "kCompactionStyleUniversal", "kCompactionStyleFIFO", and
@@ -406,9 +406,9 @@ Status GetStringFromColumnFamilyOptions(std::string* opts_str,
                                         const ColumnFamilyOptions& cf_options,
                                         const std::string& delimiter = ";  ");
 Status GetStringFromCompressionType(std::string* compression_str,
-                                    CompressionType compression_type);
+                                    rocksdb_rs::compression_type::CompressionType compression_type);
 
-std::vector<CompressionType> GetSupportedCompressions();
+std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedCompressions();
 
 Status GetBlockBasedTableOptionsFromString(
     const ConfigOptions& config_options,

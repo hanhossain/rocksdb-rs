@@ -1235,7 +1235,7 @@ Status SystemClock::CreateFromString(const ConfigOptions& config_options,
 }
 
 rust::String HelloCommonFromCpp() {
-  const CommonRustData rust_data = {.value = "c++"};
+  const rocksdb_rs::env::CommonRustData rust_data = {.value = "c++"};
   return hello_common(rust_data);
 }
 

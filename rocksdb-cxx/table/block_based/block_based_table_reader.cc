@@ -671,9 +671,9 @@ Status BlockBasedTable::Open(
   bool blocks_definitely_zstd_compressed =
       rep->table_properties &&
       (rep->table_properties->compression_name ==
-           CompressionTypeToString(CompressionType::kZSTD) ||
+           CompressionTypeToString(rocksdb_rs::compression_type::CompressionType::kZSTD) ||
        rep->table_properties->compression_name ==
-           CompressionTypeToString(CompressionType::kZSTDNotFinalCompression));
+           CompressionTypeToString(rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression));
   rep->create_context = BlockCreateContext(
       &rep->table_options, rep->ioptions.stats,
       blocks_definitely_zstd_compressed, block_protection_bytes_per_key,
@@ -790,7 +790,7 @@ Status BlockBasedTable::Open(
     if (s.IsMemoryLimit()) {
       s = Status_MemoryLimit(
           "Can't allocate " +
-          static_cast<std::string>(CacheEntryRole_ToCamelString(CacheEntryRole::kBlockBasedTableReader)) +
+          static_cast<std::string>(CacheEntryRole_ToCamelString(rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader)) +
           " due to memory limit based on "
           "cache capacity for memory allocation");
     }
@@ -914,7 +914,7 @@ Status BlockBasedTable::ReadPropertiesBlock(
       rep_->table_properties = std::move(table_properties);
       rep_->blocks_maybe_compressed =
           rep_->table_properties->compression_name !=
-          CompressionTypeToString(CompressionType::kNoCompression);
+          CompressionTypeToString(rocksdb_rs::compression_type::CompressionType::kNoCompression);
     }
   } else {
     ROCKS_LOG_ERROR(rep_->ioptions.logger,
@@ -1348,7 +1348,7 @@ template <typename TBlocklike>
 WithBlocklikeCheck<Status, TBlocklike> BlockBasedTable::PutDataBlockToCache(
     const Slice& cache_key, BlockCacheInterface<TBlocklike> block_cache,
     CachableEntry<TBlocklike>* out_parsed_block, BlockContents&& block_contents,
-    CompressionType block_comp_type,
+    rocksdb_rs::compression_type::CompressionType block_comp_type,
     const UncompressionDict& uncompression_dict,
     MemoryAllocator* memory_allocator, GetContext* get_context) const {
   const ImmutableOptions& ioptions = rep_->ioptions;
@@ -1360,7 +1360,7 @@ WithBlocklikeCheck<Status, TBlocklike> BlockBasedTable::PutDataBlockToCache(
   Statistics* statistics = ioptions.stats;
 
   std::unique_ptr<TBlocklike> block_holder;
-  if (block_comp_type != CompressionType::kNoCompression) {
+  if (block_comp_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     // Retrieve the uncompressed contents into a new buffer
     BlockContents uncompressed_block_contents;
     UncompressionContext context(block_comp_type);
@@ -1532,7 +1532,7 @@ BlockBasedTable::MaybeReadBlockAndLoadToCache(
           TBlocklike::kBlockType != BlockType::kCompressionDictionary &&
           rep_->blocks_maybe_compressed;
       const bool do_uncompress = maybe_compressed;
-      CompressionType contents_comp_type;
+      rocksdb_rs::compression_type::CompressionType contents_comp_type;
       // Maybe serialized or uncompressed
       BlockContents tmp_contents;
       if (!contents) {
