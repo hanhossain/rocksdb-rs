@@ -34,11 +34,11 @@ class SanityTest {
   virtual std::string Name() const = 0;
   virtual Options GetOptions() const = 0;
 
-  Status Create() {
+  rocksdb_rs::status::Status Create() {
     Options options = GetOptions();
     options.create_if_missing = true;
     std::string dbname = path_ + Name();
-    Status s = DestroyDB(dbname, options);
+    rocksdb_rs::status::Status s = DestroyDB(dbname, options);
     if (!s.ok()) {
       return s;
     }
@@ -58,10 +58,10 @@ class SanityTest {
     }
     return db->Flush(FlushOptions());
   }
-  Status Verify() {
+  rocksdb_rs::status::Status Verify() {
     DB* db = nullptr;
     std::string dbname = path_ + Name();
-    Status s = DB::Open(GetOptions(), dbname, &db);
+    rocksdb_rs::status::Status s = DB::Open(GetOptions(), dbname, &db);
     std::unique_ptr<DB> db_guard(db);
     if (!s.ok()) {
       return s;
@@ -75,10 +75,10 @@ class SanityTest {
         return s;
       }
       if (result != v) {
-        return Status_Corruption("Unexpected value for key " + k);
+        return rocksdb_rs::status::Status_Corruption("Unexpected value for key " + k);
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -252,7 +252,7 @@ bool RunSanityTests(const std::string& command, const std::string& path) {
     fprintf(stderr, "Verifying...\n");
   }
   for (auto sanity_test : sanity_tests) {
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     fprintf(stderr, "%s -- ", sanity_test->Name().c_str());
     if (command == "create") {
       s = sanity_test->Create();

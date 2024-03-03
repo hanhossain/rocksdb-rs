@@ -23,11 +23,11 @@ class BlobFetcher {
   BlobFetcher(const Version* version, const ReadOptions& read_options)
       : version_(version), read_options_(read_options) {}
 
-  Status FetchBlob(const Slice& user_key, const Slice& blob_index_slice,
+  rocksdb_rs::status::Status FetchBlob(const Slice& user_key, const Slice& blob_index_slice,
                    FilePrefetchBuffer* prefetch_buffer,
                    PinnableSlice* blob_value, uint64_t* bytes_read) const;
 
-  Status FetchBlob(const Slice& user_key, const BlobIndex& blob_index,
+  rocksdb_rs::status::Status FetchBlob(const Slice& user_key, const BlobIndex& blob_index,
                    FilePrefetchBuffer* prefetch_buffer,
                    PinnableSlice* blob_value, uint64_t* bytes_read) const;
 

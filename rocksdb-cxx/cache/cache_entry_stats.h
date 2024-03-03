@@ -112,7 +112,7 @@ class CacheEntryStatsCollector {
   // Gets or creates a shared instance of CacheEntryStatsCollector in the
   // cache itself, and saves into `ptr`. This shared_ptr will hold the
   // entry in cache until all refs are destroyed.
-  static Status GetShared(Cache *raw_cache, SystemClock *clock,
+  static rocksdb_rs::status::Status GetShared(Cache *raw_cache, SystemClock *clock,
                           std::shared_ptr<CacheEntryStatsCollector> *ptr) {
     assert(raw_cache);
     BasicTypedCacheInterface<CacheEntryStatsCollector, rocksdb_rs::cache::CacheEntryRole::kMisc>
@@ -134,7 +134,7 @@ class CacheEntryStatsCollector {
         // usage to go flaky. Fix the problem somehow so we can use an
         // accurate charge.
         size_t charge = 0;
-        Status s =
+        rocksdb_rs::status::Status s =
             cache.Insert(cache_key, new_ptr, charge, &h, Cache::Priority::HIGH);
         if (!s.ok()) {
           assert(h == nullptr);
@@ -149,7 +149,7 @@ class CacheEntryStatsCollector {
     // Build an aliasing shared_ptr that keeps `ptr` in cache while there
     // are references.
     *ptr = cache.SharedGuard(h);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:

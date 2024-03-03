@@ -10,7 +10,7 @@
 
 namespace rocksdb {
 
-Status MemoryUtil::GetApproximateMemoryUsageByType(
+rocksdb_rs::status::Status MemoryUtil::GetApproximateMemoryUsageByType(
     const std::vector<DB*>& dbs,
     const std::unordered_set<const Cache*> cache_set,
     std::map<MemoryUtil::UsageType, uint64_t>* usage_by_type) {
@@ -45,6 +45,6 @@ Status MemoryUtil::GetApproximateMemoryUsageByType(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

@@ -218,11 +218,11 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
         whole_key_filtering_(whole_key_filtering),
         prefix_filtering_(prefix_filtering) {}
 
-  Status InternalAdd(const Slice& /*key*/, const Slice& /*value*/,
+  rocksdb_rs::status::Status InternalAdd(const Slice& /*key*/, const Slice& /*value*/,
                      uint64_t /*file_size*/) override {
     // Intentionally left blank. Have no interest in collecting stats for
     // individual key/value pairs.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   virtual void BlockAdd(uint64_t /* block_uncomp_bytes */,
@@ -233,7 +233,7 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
     return;
   }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     std::string val;
     PutFixed32(&val, static_cast<uint32_t>(index_type_));
     properties->insert({BlockBasedTablePropertyNames::kIndexType, val});
@@ -241,7 +241,7 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
                         whole_key_filtering_ ? kPropTrue : kPropFalse});
     properties->insert({BlockBasedTablePropertyNames::kPrefixFiltering,
                         prefix_filtering_ ? kPropTrue : kPropFalse});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // The name of the properties collector can be used for debugging purpose.
@@ -367,18 +367,18 @@ struct BlockBasedTableBuilder::Rep {
     return compression_opts.parallel_threads > 1;
   }
 
-  Status GetStatus() {
+  rocksdb_rs::status::Status GetStatus() {
     // We need to make modifications of status visible when status_ok is set
     // to false, and this is ensured by status_mutex, so no special memory
     // order for status_ok is required.
     if (status_ok.load(std::memory_order_relaxed)) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       return CopyStatus();
     }
   }
 
-  Status CopyStatus() {
+  rocksdb_rs::status::Status CopyStatus() {
     std::lock_guard<std::mutex> lock(status_mutex);
     return status.Clone();
   }
@@ -400,7 +400,7 @@ struct BlockBasedTableBuilder::Rep {
   }
 
   // Never erase an existing status that is not OK.
-  void SetStatus(Status s) {
+  void SetStatus(rocksdb_rs::status::Status s) {
     if (!s.ok() && status_ok.load(std::memory_order_relaxed)) {
       // Locking is an overkill for non compression_opts.parallel_threads
       // case but since it's unlikely that s is not OK, we take this cost
@@ -486,7 +486,7 @@ struct BlockBasedTableBuilder::Rep {
                            BlockBasedTableOptions::kBinarySearchWithFirstKey),
         tail_size(0),
         status_ok(true),
-        status(Status_new()),
+        status(rocksdb_rs::status::Status_new()),
         io_status_ok(true) {
     if (tbo.target_file_size == 0) {
       buffer_limit = compression_opts.max_dict_buffer_bytes;
@@ -607,7 +607,7 @@ struct BlockBasedTableBuilder::Rep {
   // compression thread and write thread in parallel compression.
   std::mutex status_mutex;
   std::atomic<bool> status_ok;
-  Status status;
+  rocksdb_rs::status::Status status;
   std::mutex io_status_mutex;
   std::atomic<bool> io_status_ok;
   IOStatus io_status;
@@ -660,8 +660,8 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
     std::unique_ptr<std::string> first_key_in_next_block;
     std::unique_ptr<Keys> keys;
     std::unique_ptr<BlockRepSlot> slot;
-    Status status;
-    BlockRep() : status(Status_new()) {}
+    rocksdb_rs::status::Status status;
+    BlockRep() : status(rocksdb_rs::status::Status_new()) {}
   };
   // Use a vector of BlockRep as a buffer for a determined number
   // of BlockRep structures. All data referenced by pointers in
@@ -832,7 +832,7 @@ struct BlockBasedTableBuilder::ParallelCompressionRep {
       block_rep_buf[i].first_key_in_next_block.reset(new std::string());
       block_rep_buf[i].keys.reset(new Keys());
       block_rep_buf[i].slot.reset(new BlockRepSlot());
-      block_rep_buf[i].status = Status_OK();
+      block_rep_buf[i].status = rocksdb_rs::status::Status_OK();
       block_rep_pool.push(&block_rep_buf[i]);
     }
   }
@@ -986,7 +986,7 @@ void BlockBasedTableBuilder::Add(const Slice& key, const Slice& value) {
         // and there exists a cache reservation manager
         if (!exceeds_buffer_limit &&
             r->compression_dict_buffer_cache_res_mgr != nullptr) {
-          Status s =
+          rocksdb_rs::status::Status s =
               r->compression_dict_buffer_cache_res_mgr->UpdateCacheReservation(
                   r->data_begin_offset);
           exceeds_global_block_cache_limit = s.IsMemoryLimit();
@@ -1113,7 +1113,7 @@ void BlockBasedTableBuilder::WriteBlock(const Slice& uncompressed_block_data,
   assert(r->state == Rep::State::kUnbuffered);
   Slice block_contents;
   rocksdb_rs::compression_type::CompressionType type;
-  Status compress_status = Status_new();
+  rocksdb_rs::status::Status compress_status = rocksdb_rs::status::Status_new();
   bool is_data_block = block_type == BlockType::kData;
   CompressAndVerifyBlock(uncompressed_block_data, is_data_block,
                          *(r->compression_ctxs[0]), r->verify_ctxs[0].get(),
@@ -1152,7 +1152,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
     const Slice& uncompressed_block_data, bool is_data_block,
     const CompressionContext& compression_ctx, UncompressionContext* verify_ctx,
     std::string* compressed_output, Slice* block_contents,
-    rocksdb_rs::compression_type::CompressionType* type, Status* out_status) {
+    rocksdb_rs::compression_type::CompressionType* type, rocksdb_rs::status::Status* out_status) {
   Rep* r = rep_;
   bool is_status_ok = ok();
   if (!r->IsParallelCompressionEnabled()) {
@@ -1216,7 +1216,7 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
       BlockContents contents;
       UncompressionInfo uncompression_info(*verify_ctx, *verify_dict,
                                            r->compression_type);
-      Status uncompress_status = UncompressBlockData(
+      rocksdb_rs::status::Status uncompress_status = UncompressBlockData(
           uncompression_info, block_contents->data(), block_contents->size(),
           &contents, r->table_options.format_version, r->ioptions);
 
@@ -1227,12 +1227,12 @@ void BlockBasedTableBuilder::CompressAndVerifyBlock(
           const char* const msg =
               "Decompressed block did not match pre-compression block";
           ROCKS_LOG_ERROR(r->ioptions.logger, "%s", msg);
-          *out_status = Status_Corruption(msg);
+          *out_status = rocksdb_rs::status::Status_Corruption(msg);
           *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
         }
       } else {
         // Decompression reported an error. abort.
-        *out_status = Status_Corruption(std::string("Could not decompress: ") +
+        *out_status = rocksdb_rs::status::Status_Corruption(std::string("Could not decompress: ") +
                                          *uncompress_status.getState());
         *type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
@@ -1310,7 +1310,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
       /*last_byte*/ static_cast<char>(comp_type));
 
   if (block_type == BlockType::kFilter) {
-    Status s = r->filter_builder->MaybePostVerifyFilter(block_contents);
+    rocksdb_rs::status::Status s = r->filter_builder->MaybePostVerifyFilter(block_contents);
     if (!s.ok()) {
       r->SetStatus(s.Clone());
       return;
@@ -1344,7 +1344,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
         warm_cache = false;
     }
     if (warm_cache) {
-      Status s = InsertBlockInCacheHelper(*uncompressed_block_data, handle,
+      rocksdb_rs::status::Status s = InsertBlockInCacheHelper(*uncompressed_block_data, handle,
                                           block_type);
       if (!s.ok()) {
         r->SetStatus(s.Clone());
@@ -1390,7 +1390,7 @@ void BlockBasedTableBuilder::BGWorkWriteMaybeCompressedBlock() {
       r->SetStatus(block_rep->status.Clone());
       // Reap block so that blocked Flush() can finish
       // if there is one, and Flush() will notice !ok() next time.
-      block_rep->status = Status_OK();
+      block_rep->status = rocksdb_rs::status::Status_OK();
       r->pc_rep->ReapBlock(block_rep);
       continue;
     }
@@ -1454,18 +1454,18 @@ void BlockBasedTableBuilder::StopParallelCompression() {
   rep_->pc_rep->write_thread->join();
 }
 
-Status BlockBasedTableBuilder::status() const { return rep_->GetStatus(); }
+rocksdb_rs::status::Status BlockBasedTableBuilder::status() const { return rep_->GetStatus(); }
 
 IOStatus BlockBasedTableBuilder::io_status() const {
   return rep_->GetIOStatus();
 }
 
-Status BlockBasedTableBuilder::InsertBlockInCacheHelper(
+rocksdb_rs::status::Status BlockBasedTableBuilder::InsertBlockInCacheHelper(
     const Slice& block_contents, const BlockHandle* handle,
     BlockType block_type) {
 
   Cache* block_cache = rep_->table_options.block_cache.get();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   auto helper =
       GetCacheItemHelper(block_type, rep_->ioptions.lowest_used_cache_tier);
   if (block_cache && helper && helper->create_cb) {
@@ -1497,7 +1497,7 @@ void BlockBasedTableBuilder::WriteFilterBlock(
   if (ok()) {
     rep_->props.num_filter_entries +=
         rep_->filter_builder->EstimateEntriesAdded();
-    Status s = Status_Incomplete();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_Incomplete();
     while (ok() && s.IsIncomplete()) {
       // filter_data is used to store the transferred filter data payload from
       // FilterBlockBuilder and deallocate the payload by going out of scope.
@@ -1577,7 +1577,7 @@ void BlockBasedTableBuilder::WriteIndexBlock(
   if (index_builder_status.IsIncomplete()) {
     bool index_building_finished = false;
     while (ok() && !index_building_finished) {
-      Status s =
+      rocksdb_rs::status::Status s =
           rep_->index_builder->Finish(&index_blocks, *index_block_handle);
       if (s.ok()) {
         index_building_finished = true;
@@ -1914,12 +1914,12 @@ void BlockBasedTableBuilder::EnterUnbuffered() {
   r->data_begin_offset = 0;
   // Release all reserved cache for data block buffers
   if (r->compression_dict_buffer_cache_res_mgr != nullptr) {
-    Status s = r->compression_dict_buffer_cache_res_mgr->UpdateCacheReservation(
+    rocksdb_rs::status::Status s = r->compression_dict_buffer_cache_res_mgr->UpdateCacheReservation(
         r->data_begin_offset);
   }
 }
 
-Status BlockBasedTableBuilder::Finish() {
+rocksdb_rs::status::Status BlockBasedTableBuilder::Finish() {
   Rep* r = rep_;
   assert(r->state != Rep::State::kClosed);
   bool empty_data_block = r->data_block.empty();
@@ -1971,7 +1971,7 @@ Status BlockBasedTableBuilder::Finish() {
   }
   r->state = Rep::State::kClosed;
   r->SetStatus(r->CopyIOStatus());
-  Status ret_status = r->CopyStatus();
+  rocksdb_rs::status::Status ret_status = r->CopyStatus();
   assert(!ret_status.ok() || io_status().ok());
   r->tail_size = r->offset - r->props.tail_start_offset;
   return ret_status;

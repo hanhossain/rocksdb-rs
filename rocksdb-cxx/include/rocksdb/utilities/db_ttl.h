@@ -45,15 +45,15 @@ namespace rocksdb {
 
 class DBWithTTL : public StackableDB {
  public:
-  virtual Status CreateColumnFamilyWithTtl(
+  virtual rocksdb_rs::status::Status CreateColumnFamilyWithTtl(
       const ColumnFamilyOptions& options, const std::string& column_family_name,
       ColumnFamilyHandle** handle, int ttl) = 0;
 
-  static Status Open(const Options& options, const std::string& dbname,
+  static rocksdb_rs::status::Status Open(const Options& options, const std::string& dbname,
                      DBWithTTL** dbptr, int32_t ttl = 0,
                      bool read_only = false);
 
-  static Status Open(const DBOptions& db_options, const std::string& dbname,
+  static rocksdb_rs::status::Status Open(const DBOptions& db_options, const std::string& dbname,
                      const std::vector<ColumnFamilyDescriptor>& column_families,
                      std::vector<ColumnFamilyHandle*>* handles,
                      DBWithTTL** dbptr, const std::vector<int32_t>& ttls,

@@ -11,11 +11,14 @@
 
 #include "db/blob/blob_constants.h"
 
+namespace rocksdb_rs::status {
+    struct Status;
+}
+
 namespace rocksdb {
 
 class JSONWriter;
 class Slice;
-struct Status;
 
 class BlobFileGarbage {
  public:
@@ -32,7 +35,7 @@ class BlobFileGarbage {
   uint64_t GetGarbageBlobBytes() const { return garbage_blob_bytes_; }
 
   void EncodeTo(std::string* output) const;
-  Status DecodeFrom(Slice* input);
+  rocksdb_rs::status::Status DecodeFrom(Slice* input);
 
   std::string DebugString() const;
   std::string DebugJSON() const;

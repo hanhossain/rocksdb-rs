@@ -144,7 +144,7 @@ const Comparator* Uint64Comparator() {
 const Comparator* BytewiseComparatorWithU64TsWrapper() {
   ConfigOptions config_options;
   const Comparator* user_comparator = nullptr;
-  Status s = Comparator::CreateFromString(
+  rocksdb_rs::status::Status s = Comparator::CreateFromString(
       config_options, "leveldb.BytewiseComparator.u64ts", &user_comparator);
   return user_comparator;
 }
@@ -431,7 +431,7 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
   env_options.use_mmap_writes = false;
   env_options.use_direct_writes = true;
   std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     std::unique_ptr<WritableFile> file;
     s = env->NewWritableFile(tmp, &file, env_options);
@@ -449,7 +449,7 @@ bool IsPrefetchSupported(const std::shared_ptr<FileSystem>& fs,
   Random rnd(301);
   std::string test_string = rnd.RandomString(4096);
   Slice data(test_string);
-  Status s = WriteStringToFile(fs.get(), data, tmp, true);
+  rocksdb_rs::status::Status s = WriteStringToFile(fs.get(), data, tmp, true);
   if (s.ok()) {
     std::unique_ptr<FSRandomAccessFile> file;
     auto io_s = fs->NewRandomAccessFile(tmp, FileOptions(), &file, nullptr);
@@ -479,10 +479,10 @@ size_t GetLinesCount(const std::string& fname, const std::string& pattern) {
   return count;
 }
 
-Status CorruptFile(Env* env, const std::string& fname, int offset,
+rocksdb_rs::status::Status CorruptFile(Env* env, const std::string& fname, int offset,
                    int bytes_to_corrupt, bool verify_checksum /*=true*/) {
   uint64_t size;
-  Status s = env->GetFileSize(fname, &size);
+  rocksdb_rs::status::Status s = env->GetFileSize(fname, &size);
   if (!s.ok()) {
     return s;
   } else if (offset < 0) {
@@ -513,15 +513,15 @@ Status CorruptFile(Env* env, const std::string& fname, int offset,
     Options options;
     options.env = env;
     EnvOptions env_options;
-    Status v = VerifySstFileChecksum(options, env_options, fname);
+    rocksdb_rs::status::Status v = VerifySstFileChecksum(options, env_options, fname);
     assert(!v.ok());
   }
   return s;
 }
 
-Status TruncateFile(Env* env, const std::string& fname, uint64_t new_length) {
+rocksdb_rs::status::Status TruncateFile(Env* env, const std::string& fname, uint64_t new_length) {
   uint64_t old_length;
-  Status s = env->GetFileSize(fname, &old_length);
+  rocksdb_rs::status::Status s = env->GetFileSize(fname, &old_length);
   if (!s.ok() || new_length == old_length) {
     return s;
   }
@@ -535,14 +535,14 @@ Status TruncateFile(Env* env, const std::string& fname, uint64_t new_length) {
   return s;
 }
 
-Status TruncateFile(Env* env, const rust::String& fname, uint64_t new_length) {
+rocksdb_rs::status::Status TruncateFile(Env* env, const rust::String& fname, uint64_t new_length) {
   return TruncateFile(env, static_cast<std::string>(fname), new_length);
 }
 
 // Try and delete a directory if it exists
-Status TryDeleteDir(Env* env, const std::string& dirname) {
+rocksdb_rs::status::Status TryDeleteDir(Env* env, const std::string& dirname) {
   bool is_dir = false;
-  Status s = env->IsDirectory(dirname, &is_dir);
+  rocksdb_rs::status::Status s = env->IsDirectory(dirname, &is_dir);
   if (s.ok() && is_dir) {
     s = env->DeleteDir(dirname);
   }
@@ -554,7 +554,7 @@ void DeleteDir(Env* env, const std::string& dirname) {
   TryDeleteDir(env, dirname);
 }
 
-Status CreateEnvFromSystem(const ConfigOptions& config_options, Env** result,
+rocksdb_rs::status::Status CreateEnvFromSystem(const ConfigOptions& config_options, Env** result,
                            std::shared_ptr<Env>* guard) {
   const char* env_uri = getenv("TEST_ENV_URI");
   const char* fs_uri = getenv("TEST_FS_URI");
@@ -566,7 +566,7 @@ Status CreateEnvFromSystem(const ConfigOptions& config_options, Env** result,
     // Neither specified.  Use the default
     *result = config_options.env;
     guard->reset();
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 }
 namespace {

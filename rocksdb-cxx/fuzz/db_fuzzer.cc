@@ -34,7 +34,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   rocksdb::DB* db;
   rocksdb::Options options;
   options.create_if_missing = true;
-  rocksdb::Status status =
+  rocksdb_rs::status::Status status =
       rocksdb::DB::Open(options, db_path, &db);
   if (!status.ok()) {
     return 0;
@@ -99,7 +99,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       }
       case kColumn: {
         rocksdb::ColumnFamilyHandle* cf;
-        rocksdb::Status s;
+        rocksdb_rs::status::Status s;
         s = db->CreateColumnFamily(rocksdb::ColumnFamilyOptions(),
                                    "new_cf", &cf);
         s = db->DestroyColumnFamilyHandle(cf);
@@ -149,7 +149,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         rocksdb::Slice begin(slice_start);
         rocksdb::Slice end(slice_end);
         rocksdb::CompactRangeOptions options;
-        rocksdb::Status s = db->CompactRange(options, &begin, &end);
+        rocksdb_rs::status::Status s = db->CompactRange(options, &begin, &end);
         break;
       }
       case kSeekForPrev: {

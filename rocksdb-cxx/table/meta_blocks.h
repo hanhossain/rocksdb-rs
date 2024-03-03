@@ -105,7 +105,7 @@ bool NotifyCollectTableCollectorsOnFinish(
 // @returns a status to indicate if the operation succeeded. On success,
 //          *table_properties will point to a heap-allocated TableProperties
 //          object, otherwise value of `table_properties` will not be modified.
-Status ReadTablePropertiesHelper(
+rocksdb_rs::status::Status ReadTablePropertiesHelper(
     const ReadOptions& ro, const BlockHandle& handle,
     RandomAccessFileReader* file, FilePrefetchBuffer* prefetch_buffer,
     const Footer& footer, const ImmutableOptions& ioptions,
@@ -116,7 +116,7 @@ Status ReadTablePropertiesHelper(
 // @returns a status to indicate if the operation succeeded. On success,
 //          *table_properties will point to a heap-allocated TableProperties
 //          object, otherwise value of `table_properties` will not be modified.
-Status ReadTableProperties(RandomAccessFileReader* file, uint64_t file_size,
+rocksdb_rs::status::Status ReadTableProperties(RandomAccessFileReader* file, uint64_t file_size,
                            uint64_t table_magic_number,
                            const ImmutableOptions& ioptions,
                            const ReadOptions& read_options,
@@ -126,18 +126,18 @@ Status ReadTableProperties(RandomAccessFileReader* file, uint64_t file_size,
 
 // Find the meta block from the meta index block. Returns OK and
 // block_handle->IsNull() if not found.
-Status FindOptionalMetaBlock(InternalIterator* meta_index_iter,
+rocksdb_rs::status::Status FindOptionalMetaBlock(InternalIterator* meta_index_iter,
                              const std::string& meta_block_name,
                              BlockHandle* block_handle);
 
 // Find the meta block from the meta index block. Returns Corruption if not
 // found.
-Status FindMetaBlock(InternalIterator* meta_index_iter,
+rocksdb_rs::status::Status FindMetaBlock(InternalIterator* meta_index_iter,
                      const std::string& meta_block_name,
                      BlockHandle* block_handle);
 
 // Find the meta block
-Status FindMetaBlockInFile(RandomAccessFileReader* file, uint64_t file_size,
+rocksdb_rs::status::Status FindMetaBlockInFile(RandomAccessFileReader* file, uint64_t file_size,
                            uint64_t table_magic_number,
                            const ImmutableOptions& ioptions,
                            const ReadOptions& read_options,
@@ -148,7 +148,7 @@ Status FindMetaBlockInFile(RandomAccessFileReader* file, uint64_t file_size,
                            Footer* footer_out = nullptr);
 
 // Read meta block contents
-Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file,
+rocksdb_rs::status::Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file,
                                 uint64_t file_size, uint64_t table_magic_number,
                                 const ImmutableOptions& ioptions,
                                 const ReadOptions& read_options,
@@ -160,7 +160,7 @@ Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file,
 // Read the specified meta block with name meta_block_name
 // from `file` and initialize `contents` with contents of this block.
 // Return Status_OK in case of success.
-Status ReadMetaBlock(RandomAccessFileReader* file,
+rocksdb_rs::status::Status ReadMetaBlock(RandomAccessFileReader* file,
                      FilePrefetchBuffer* prefetch_buffer, uint64_t file_size,
                      uint64_t table_magic_number,
                      const ImmutableOptions& ioptions,

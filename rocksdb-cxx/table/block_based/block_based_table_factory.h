@@ -60,7 +60,7 @@ class BlockBasedTableFactory : public TableFactory {
   const char* Name() const override { return kBlockBasedTableName(); }
 
   using TableFactory::NewTableReader;
-  Status NewTableReader(
+  rocksdb_rs::status::Status NewTableReader(
       const ReadOptions& ro, const TableReaderOptions& table_reader_options,
       std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
       std::unique_ptr<TableReader>* table_reader,
@@ -71,9 +71,9 @@ class BlockBasedTableFactory : public TableFactory {
       WritableFileWriter* file) const override;
 
   // Valdates the specified DB Options.
-  Status ValidateOptions(const DBOptions& db_opts,
+  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                          const ColumnFamilyOptions& cf_opts) const override;
-  Status PrepareOptions(const ConfigOptions& opts) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& opts) override;
 
   std::string GetPrintableOptions() const override;
 
@@ -83,7 +83,7 @@ class BlockBasedTableFactory : public TableFactory {
 
  protected:
   const void* GetOptionsPtr(const std::string& name) const override;
-  Status ParseOption(const ConfigOptions& config_options,
+  rocksdb_rs::status::Status ParseOption(const ConfigOptions& config_options,
                      const OptionTypeInfo& opt_info,
                      const std::string& opt_name, const std::string& opt_value,
                      void* opt_ptr) override;

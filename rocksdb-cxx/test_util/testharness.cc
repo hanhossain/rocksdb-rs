@@ -24,7 +24,7 @@ std::string GetPidStr() { return std::to_string(GetCurrentProcessId()); }
 std::string GetPidStr() { return std::to_string(getpid()); }
 #endif
 
-::testing::AssertionResult AssertStatus(const char* s_expr, const Status& s) {
+::testing::AssertionResult AssertStatus(const char* s_expr, const rocksdb_rs::status::Status& s) {
   if (s.ok()) {
     return ::testing::AssertionSuccess();
   } else {
@@ -34,7 +34,7 @@ std::string GetPidStr() { return std::to_string(getpid()); }
 
 std::string TmpDir(Env* env) {
   std::string dir;
-  Status s = env->GetTestDirectory(&dir);
+  rocksdb_rs::status::Status s = env->GetTestDirectory(&dir);
   EXPECT_OK(s);
   return dir;
 }

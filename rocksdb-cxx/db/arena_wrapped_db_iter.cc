@@ -19,14 +19,14 @@
 
 namespace rocksdb {
 
-Status ArenaWrappedDBIter::GetProperty(std::string prop_name,
+rocksdb_rs::status::Status ArenaWrappedDBIter::GetProperty(std::string prop_name,
                                        std::string* prop) {
   if (prop_name == "rocksdb.iterator.super-version-number") {
     // First try to pass the value returned from inner iterator.
     if (!db_iter_->GetProperty(prop_name, prop).ok()) {
       *prop = std::to_string(sv_number_);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   return db_iter_->GetProperty(prop_name, prop);
 }
@@ -54,9 +54,9 @@ void ArenaWrappedDBIter::Init(
   }
 }
 
-Status ArenaWrappedDBIter::Refresh() {
+rocksdb_rs::status::Status ArenaWrappedDBIter::Refresh() {
   if (cfd_ == nullptr || db_impl_ == nullptr || !allow_refresh_) {
-    return Status_NotSupported("Creating renew iterator is not allowed.");
+    return rocksdb_rs::status::Status_NotSupported("Creating renew iterator is not allowed.");
   }
   assert(db_iter_ != nullptr);
   // TODO(yiwu): For last_seq_same_as_publish_seq_==false, this is not the
@@ -142,7 +142,7 @@ Status ArenaWrappedDBIter::Refresh() {
       break;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 ArenaWrappedDBIter* NewArenaWrappedDbIterator(

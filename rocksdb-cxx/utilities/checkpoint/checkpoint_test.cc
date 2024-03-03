@@ -137,7 +137,7 @@ class CheckpointTest : public testing::Test {
     ASSERT_OK(TryReopenWithColumnFamilies(cfs, options));
   }
 
-  Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                      const std::vector<Options>& options) {
     Close();
     EXPECT_EQ(cfs.size(), options.size());
@@ -149,7 +149,7 @@ class CheckpointTest : public testing::Test {
     return DB::Open(db_opts, dbname_, column_families, &handles_, &db_);
   }
 
-  Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                      const Options& options) {
     Close();
     std::vector<Options> v_opts(cfs.size(), options);
@@ -184,11 +184,11 @@ class CheckpointTest : public testing::Test {
     ASSERT_OK(DestroyDB(dbname_, options));
   }
 
-  Status ReadOnlyReopen(const Options& options) {
+  rocksdb_rs::status::Status ReadOnlyReopen(const Options& options) {
     return DB::OpenForReadOnly(options, dbname_, &db_);
   }
 
-  Status ReadOnlyReopenWithColumnFamilies(const std::vector<std::string>& cfs,
+  rocksdb_rs::status::Status ReadOnlyReopenWithColumnFamilies(const std::vector<std::string>& cfs,
                                           const Options& options) {
     std::vector<ColumnFamilyDescriptor> column_families;
     for (const auto& cf : cfs) {
@@ -198,13 +198,13 @@ class CheckpointTest : public testing::Test {
                                &db_);
   }
 
-  Status TryReopen(const Options& options) {
+  rocksdb_rs::status::Status TryReopen(const Options& options) {
     Close();
     last_options_ = options;
     return DB::Open(options, dbname_, &db_);
   }
 
-  Status Flush(int cf = 0) {
+  rocksdb_rs::status::Status Flush(int cf = 0) {
     if (cf == 0) {
       return db_->Flush(FlushOptions());
     } else {
@@ -212,18 +212,18 @@ class CheckpointTest : public testing::Test {
     }
   }
 
-  Status Put(const Slice& k, const Slice& v, WriteOptions wo = WriteOptions()) {
+  rocksdb_rs::status::Status Put(const Slice& k, const Slice& v, WriteOptions wo = WriteOptions()) {
     return db_->Put(wo, k, v);
   }
 
-  Status Put(int cf, const Slice& k, const Slice& v,
+  rocksdb_rs::status::Status Put(int cf, const Slice& k, const Slice& v,
              WriteOptions wo = WriteOptions()) {
     return db_->Put(wo, handles_[cf], k, v);
   }
 
-  Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
+  rocksdb_rs::status::Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
 
-  Status Delete(int cf, const std::string& k) {
+  rocksdb_rs::status::Status Delete(int cf, const std::string& k) {
     return db_->Delete(WriteOptions(), handles_[cf], k);
   }
 
@@ -232,7 +232,7 @@ class CheckpointTest : public testing::Test {
     options.verify_checksums = true;
     options.snapshot = snapshot;
     std::string result;
-    Status s = db_->Get(options, k, &result);
+    rocksdb_rs::status::Status s = db_->Get(options, k, &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -247,7 +247,7 @@ class CheckpointTest : public testing::Test {
     options.verify_checksums = true;
     options.snapshot = snapshot;
     std::string result;
-    Status s = db_->Get(options, handles_[cf], k, &result);
+    rocksdb_rs::status::Status s = db_->Get(options, handles_[cf], k, &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -446,13 +446,13 @@ TEST_F(CheckpointTest, ExportColumnFamilyNegativeTest) {
   // Export onto existing directory
   ASSERT_OK(env_->CreateDirIfMissing(export_path_));
   ASSERT_TRUE(checkpoint->ExportColumnFamily(db_->DefaultColumnFamily(), export_path_, &metadata_).eq(
-            Status_InvalidArgument("Specified export_dir exists")));
+            rocksdb_rs::status::Status_InvalidArgument("Specified export_dir exists")));
   ASSERT_OK(DestroyDir(env_, export_path_));
 
   // Export with invalid directory specification
   export_path_ = "";
   ASSERT_TRUE(checkpoint->ExportColumnFamily(db_->DefaultColumnFamily(), export_path_, &metadata_).eq(
-            Status_InvalidArgument("Specified export_dir invalid")));
+            rocksdb_rs::status::Status_InvalidArgument("Specified export_dir invalid")));
   delete checkpoint;
 }
 
@@ -636,7 +636,7 @@ TEST_F(CheckpointTest, CurrentFileModifiedWhileCheckpointing2PC) {
   // options.allow_2pc = true;
   TransactionDBOptions txn_db_options;
   TransactionDB* txdb;
-  Status s = TransactionDB::Open(options, txn_db_options, dbname, &txdb);
+  rocksdb_rs::status::Status s = TransactionDB::Open(options, txn_db_options, dbname, &txdb);
   ASSERT_OK(s);
   ColumnFamilyHandle* cfa;
   ColumnFamilyHandle* cfb;
@@ -886,7 +886,7 @@ TEST_F(CheckpointTest, CheckpointReadOnlyDBWithMultipleColumnFamilies) {
     ASSERT_OK(Flush(i));
   }
   Close();
-  Status s = ReadOnlyReopenWithColumnFamilies(
+  rocksdb_rs::status::Status s = ReadOnlyReopenWithColumnFamilies(
       {kDefaultColumnFamilyName, "pikachu", "eevee"}, options);
   ASSERT_OK(s);
   Checkpoint* checkpoint = nullptr;

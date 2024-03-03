@@ -39,22 +39,22 @@ class BlobFileCompletionCallback {
                                                 job_id, creation_reason);
   }
 
-  Status OnBlobFileCompleted(const std::string& file_name,
+  rocksdb_rs::status::Status OnBlobFileCompleted(const std::string& file_name,
                              const std::string& column_family_name, int job_id,
                              uint64_t file_number,
                              BlobFileCreationReason creation_reason,
-                             const Status& report_status,
+                             const rocksdb_rs::status::Status& report_status,
                              const std::string& checksum_value,
                              const std::string& checksum_method,
                              uint64_t blob_count, uint64_t blob_bytes) {
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     auto sfm = static_cast<SstFileManagerImpl*>(sst_file_manager_);
     if (sfm) {
       // Report new blob files to SstFileManagerImpl
       s = sfm->OnAddFile(file_name);
       if (sfm->IsMaxAllowedSpaceReached()) {
-        s = Status_SpaceLimit("Max allowed space was reached");
+        s = rocksdb_rs::status::Status_SpaceLimit("Max allowed space was reached");
         TEST_SYNC_POINT(
             "BlobFileCompletionCallback::CallBack::MaxAllowedSpaceReached");
         InstrumentedMutexLock l(mutex_);

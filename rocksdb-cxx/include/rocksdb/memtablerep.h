@@ -297,10 +297,10 @@ class MemTableRepFactory : public Customizable {
   ~MemTableRepFactory() override {}
 
   static const char* Type() { return "MemTableRepFactory"; }
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& id,
                                  std::unique_ptr<MemTableRepFactory>* factory);
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& id,
                                  std::shared_ptr<MemTableRepFactory>* factory);
 

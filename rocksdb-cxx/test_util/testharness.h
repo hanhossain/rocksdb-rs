@@ -77,7 +77,7 @@ std::string PerThreadDBPath(std::string dir, std::string name);
 // runs may be able to vary the seed.
 int RandomSeed();
 
-::testing::AssertionResult AssertStatus(const char* s_expr, const Status& s);
+::testing::AssertionResult AssertStatus(const char* s_expr, const rocksdb_rs::status::Status& s);
 
 #define ASSERT_OK(s) \
   ASSERT_PRED_FORMAT1(rocksdb::test::AssertStatus, s)

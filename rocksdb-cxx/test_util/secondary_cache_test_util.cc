@@ -20,35 +20,35 @@ size_t SizeCallback(Cache::ObjectPtr obj) {
   return static_cast<TestItem*>(obj)->Size();
 }
 
-Status SaveToCallback(Cache::ObjectPtr from_obj, size_t from_offset,
+rocksdb_rs::status::Status SaveToCallback(Cache::ObjectPtr from_obj, size_t from_offset,
                       size_t length, char* out) {
   auto item = static_cast<TestItem*>(from_obj);
   const char* buf = item->Buf();
   EXPECT_EQ(length, item->Size());
   EXPECT_EQ(from_offset, 0);
   memcpy(out, buf, length);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DeletionCallback(Cache::ObjectPtr obj, MemoryAllocator* /*alloc*/) {
   delete static_cast<TestItem*>(obj);
 }
 
-Status SaveToCallbackFail(Cache::ObjectPtr /*obj*/, size_t /*offset*/,
+rocksdb_rs::status::Status SaveToCallbackFail(Cache::ObjectPtr /*obj*/, size_t /*offset*/,
                           size_t /*size*/, char* /*out*/) {
-  return Status_NotSupported();
+  return rocksdb_rs::status::Status_NotSupported();
 }
 
-Status CreateCallback(const Slice& data, Cache::CreateContext* context,
+rocksdb_rs::status::Status CreateCallback(const Slice& data, Cache::CreateContext* context,
                       MemoryAllocator* /*allocator*/, Cache::ObjectPtr* out_obj,
                       size_t* out_charge) {
   auto t = static_cast<TestCreateContext*>(context);
   if (t->fail_create_) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   *out_obj = new TestItem(data.data(), data.size());
   *out_charge = data.size();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // If helpers without_secondary are provided, returns helpers with secondary

@@ -130,7 +130,7 @@ class LogTest
     std::string message_;
 
     ReportCollector() : dropped_bytes_(0) {}
-    void Corruption(size_t bytes, const Status& status) override {
+    void Corruption(size_t bytes, const rocksdb_rs::status::Status& status) override {
       dropped_bytes_ += bytes;
       message_.append(*status.ToString());
     }
@@ -787,7 +787,7 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     std::string message_;
 
     ReportCollector() : dropped_bytes_(0) {}
-    void Corruption(size_t bytes, const Status& status) override {
+    void Corruption(size_t bytes, const rocksdb_rs::status::Status& status) override {
       dropped_bytes_ += bytes;
       message_.append(*status.ToString());
     }
@@ -821,8 +821,8 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     log_writer_.reset(new Writer(std::move(wfw), 123, GetParam()));
   }
 
-  Status SetupTestEnv() {
-    Status s = Status_new();
+  rocksdb_rs::status::Status SetupTestEnv() {
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     FileOptions fopts;
     auto fs = env_->GetFileSystem();
     s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr);
@@ -991,7 +991,7 @@ INSTANTIATE_TEST_CASE_P(bool, RetriableLogTest, ::testing::Values(0, 2));
 
 class CompressionLogTest : public LogTest {
  public:
-  Status SetupTestEnv() { return writer_->AddCompressionTypeRecord(); }
+  rocksdb_rs::status::Status SetupTestEnv() { return writer_->AddCompressionTypeRecord(); }
 };
 
 TEST_P(CompressionLogTest, Empty) {

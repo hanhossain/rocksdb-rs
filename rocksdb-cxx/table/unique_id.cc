@@ -44,10 +44,10 @@ void ExternalUniqueIdToInternal(rocksdb_rs::unique_id::UniqueIdPtr in_out) {
 }
 
 template <typename ID>
-Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
+rocksdb_rs::status::Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
                                             std::string& out_id) {
   ID tmp{};
-  Status s = tmp.get_sst_internal_unique_id(props.db_id, props.db_session_id, props.orig_file_number, false);
+  rocksdb_rs::status::Status s = tmp.get_sst_internal_unique_id(props.db_id, props.db_session_id, props.orig_file_number, false);
   if (s.ok()) {
     InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
     out_id = *tmp.encode_bytes();
@@ -57,12 +57,12 @@ Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
   return s;
 }
 
-Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
+rocksdb_rs::status::Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
                                               std::string& out_id) {
   return GetUniqueIdFromTablePropertiesHelper<rocksdb_rs::unique_id::UniqueId64x3>(props, out_id);
 }
 
-Status GetUniqueIdFromTableProperties(const TableProperties &props,
+rocksdb_rs::status::Status GetUniqueIdFromTableProperties(const TableProperties &props,
                                       std::string& out_id) {
   return GetUniqueIdFromTablePropertiesHelper<rocksdb_rs::unique_id::UniqueId64x2>(props, out_id);
 }

@@ -27,7 +27,7 @@ class SequentialFileReader {
       uint64_t offset, size_t length,
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
-      const Status& status) const {
+      const rocksdb_rs::status::Status& status) const {
     FileOperationInfo info(FileOperationType::kRead, file_name_, start_ts,
                            finish_ts, status);
     info.offset = offset;

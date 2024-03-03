@@ -14,7 +14,7 @@
 namespace rocksdb {
 namespace blob_db {
 
-Status BlobDB::Open(const Options& options, const BlobDBOptions& bdb_options,
+rocksdb_rs::status::Status BlobDB::Open(const Options& options, const BlobDBOptions& bdb_options,
                     const std::string& dbname, BlobDB** blob_db) {
   *blob_db = nullptr;
   DBOptions db_options(options);
@@ -23,7 +23,7 @@ Status BlobDB::Open(const Options& options, const BlobDBOptions& bdb_options,
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
-  Status s = BlobDB::Open(db_options, bdb_options, dbname, column_families,
+  rocksdb_rs::status::Status s = BlobDB::Open(db_options, bdb_options, dbname, column_families,
                           &handles, blob_db);
   if (s.ok()) {
     assert(handles.size() == 1);
@@ -34,7 +34,7 @@ Status BlobDB::Open(const Options& options, const BlobDBOptions& bdb_options,
   return s;
 }
 
-Status BlobDB::Open(const DBOptions& db_options,
+rocksdb_rs::status::Status BlobDB::Open(const DBOptions& db_options,
                     const BlobDBOptions& bdb_options, const std::string& dbname,
                     const std::vector<ColumnFamilyDescriptor>& column_families,
                     std::vector<ColumnFamilyHandle*>* handles,
@@ -43,13 +43,13 @@ Status BlobDB::Open(const DBOptions& db_options,
 
   if (column_families.size() != 1 ||
       column_families[0].name != kDefaultColumnFamilyName) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Blob DB doesn't support non-default column family.");
   }
 
   BlobDBImpl* blob_db_impl = new BlobDBImpl(dbname, bdb_options, db_options,
                                             column_families[0].options);
-  Status s = blob_db_impl->Open(handles);
+  rocksdb_rs::status::Status s = blob_db_impl->Open(handles);
   if (s.ok()) {
     *blob_db = static_cast<BlobDB*>(blob_db_impl);
   } else {

@@ -74,7 +74,7 @@ class WBWIIterator {
   // WriteBatchWithIndex
   virtual WriteEntry Entry() const = 0;
 
-  virtual Status status() const = 0;
+  virtual rocksdb_rs::status::Status status() const = 0;
 };
 
 // A WriteBatchWithIndex with a binary searchable index built for all the keys
@@ -105,70 +105,70 @@ class WriteBatchWithIndex : public WriteBatchBase {
   WriteBatchWithIndex& operator=(WriteBatchWithIndex&&);
 
   using WriteBatchBase::Put;
-  Status Put(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
              const Slice& value) override;
 
-  Status Put(const Slice& key, const Slice& value) override;
+  rocksdb_rs::status::Status Put(const Slice& key, const Slice& value) override;
 
-  Status Put(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
              const Slice& ts, const Slice& value) override;
 
-  Status PutEntity(ColumnFamilyHandle* column_family, const Slice& /* key */,
+  rocksdb_rs::status::Status PutEntity(ColumnFamilyHandle* column_family, const Slice& /* key */,
                    const WideColumns& /* columns */) override {
     if (!column_family) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Cannot call this method without a column family handle");
     }
 
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "PutEntity not supported by WriteBatchWithIndex");
   }
 
   using WriteBatchBase::Merge;
-  Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
                const Slice& value) override;
 
-  Status Merge(const Slice& key, const Slice& value) override;
-  Status Merge(ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
+  rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) override;
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
                const Slice& /*ts*/, const Slice& /*value*/) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Merge does not support user-defined timestamp");
   }
 
   using WriteBatchBase::Delete;
-  Status Delete(ColumnFamilyHandle* column_family, const Slice& key) override;
-  Status Delete(const Slice& key) override;
-  Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key) override;
+  rocksdb_rs::status::Status Delete(const Slice& key) override;
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
                 const Slice& ts) override;
 
   using WriteBatchBase::SingleDelete;
-  Status SingleDelete(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                       const Slice& key) override;
-  Status SingleDelete(const Slice& key) override;
-  Status SingleDelete(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status SingleDelete(const Slice& key) override;
+  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const Slice& key,
                       const Slice& ts) override;
 
   using WriteBatchBase::DeleteRange;
-  Status DeleteRange(ColumnFamilyHandle* /* column_family */,
+  rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* /* column_family */,
                      const Slice& /* begin_key */,
                      const Slice& /* end_key */) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
-  Status DeleteRange(const Slice& /* begin_key */,
+  rocksdb_rs::status::Status DeleteRange(const Slice& /* begin_key */,
                      const Slice& /* end_key */) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
-  Status DeleteRange(ColumnFamilyHandle* /*column_family*/,
+  rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*begin_key*/, const Slice& /*end_key*/,
                      const Slice& /*ts*/) override {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "DeleteRange unsupported in WriteBatchWithIndex");
   }
 
   using WriteBatchBase::PutLogData;
-  Status PutLogData(const Slice& blob) override;
+  rocksdb_rs::status::Status PutLogData(const Slice& blob) override;
 
   using WriteBatchBase::Clear;
   void Clear() override;
@@ -211,14 +211,14 @@ class WriteBatchWithIndex : public WriteBatchBase {
   // Similar to DB::Get() but will only read the key from this batch.
   // If the batch does not have enough data to resolve Merge operations,
   // MergeInProgress status may be returned.
-  Status GetFromBatch(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status GetFromBatch(ColumnFamilyHandle* column_family,
                       const DBOptions& options, const Slice& key,
                       std::string* value);
 
   // Similar to previous function but does not require a column_family.
   // Note:  An InvalidArgument status will be returned if there are any Merge
   // operators for this key.  Use previous method instead.
-  Status GetFromBatch(const DBOptions& options, const Slice& key,
+  rocksdb_rs::status::Status GetFromBatch(const DBOptions& options, const Slice& key,
                       std::string* value) {
     return GetFromBatch(nullptr, options, key, value);
   }
@@ -233,26 +233,26 @@ class WriteBatchWithIndex : public WriteBatchBase {
   // but will NOT change which keys are read from the batch (the keys in
   // this batch do not yet belong to any snapshot and will be fetched
   // regardless).
-  Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
                            const Slice& key, std::string* value);
 
   // An overload of the above method that receives a PinnableSlice
-  Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
                            const Slice& key, PinnableSlice* value);
 
-  Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            std::string* value);
 
   // An overload of the above method that receives a PinnableSlice
-  Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            PinnableSlice* value);
 
   void MultiGetFromBatchAndDB(DB* db, const ReadOptions& read_options,
                               ColumnFamilyHandle* column_family,
                               const size_t num_keys, const Slice* keys,
-                              PinnableSlice* values, Status* statuses,
+                              PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                               bool sorted_input);
 
   // Records the state of the batch for future calls to RollbackToSavePoint().
@@ -270,13 +270,13 @@ class WriteBatchWithIndex : public WriteBatchBase {
   // Returns Status_OK() on success,
   //         Status_NotFound() if no previous call to SetSavePoint(),
   //         or other Status on corruption.
-  Status RollbackToSavePoint() override;
+  rocksdb_rs::status::Status RollbackToSavePoint() override;
 
   // Pop the most recent save point.
   // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
   // Otherwise returns Status_OK().
-  Status PopSavePoint() override;
+  rocksdb_rs::status::Status PopSavePoint() override;
 
   void SetMaxBytes(size_t max_bytes) override;
   size_t GetDataSize() const;
@@ -292,13 +292,13 @@ class WriteBatchWithIndex : public WriteBatchBase {
   // last sub-batch.
   size_t SubBatchCnt();
 
-  Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetFromBatchAndDB(DB* db, const ReadOptions& read_options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            PinnableSlice* value, ReadCallback* callback);
   void MultiGetFromBatchAndDB(DB* db, const ReadOptions& read_options,
                               ColumnFamilyHandle* column_family,
                               const size_t num_keys, const Slice* keys,
-                              PinnableSlice* values, Status* statuses,
+                              PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                               bool sorted_input, ReadCallback* callback);
   struct Rep;
   std::unique_ptr<Rep> rep;

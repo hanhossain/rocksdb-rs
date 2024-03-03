@@ -37,7 +37,7 @@
 
 namespace rocksdb {
 
-static Status ParseCompressionOptions(const std::string& value,
+static rocksdb_rs::status::Status ParseCompressionOptions(const std::string& value,
                                       const std::string& name,
                                       CompressionOptions& compression_opts) {
   const char kDelimiter = ':';
@@ -45,19 +45,19 @@ static Status ParseCompressionOptions(const std::string& value,
   std::string field;
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.window_bits = ParseInt(field);
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.level = ParseInt(field);
 
   if (!std::getline(field_stream, field, kDelimiter)) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
   compression_opts.strategy = ParseInt(field);
@@ -65,7 +65,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // max_dict_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.max_dict_bytes = ParseInt(field);
@@ -74,7 +74,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // zstd_max_train_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.zstd_max_train_bytes = ParseInt(field);
@@ -83,7 +83,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // parallel_threads is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     // Since parallel_threads comes before enabled but was added optionally
@@ -101,7 +101,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // enabled is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.enabled = ParseBoolean("", field);
@@ -110,7 +110,7 @@ static Status ParseCompressionOptions(const std::string& value,
   // max_dict_buffer_bytes is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.max_dict_buffer_bytes = ParseUint64(field);
@@ -119,17 +119,17 @@ static Status ParseCompressionOptions(const std::string& value,
   // use_zstd_dict_trainer is optional for backwards compatibility
   if (!field_stream.eof()) {
     if (!std::getline(field_stream, field, kDelimiter)) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "unable to parse the specified CF option " + name);
     }
     compression_opts.use_zstd_dict_trainer = ParseBoolean("", field);
   }
 
   if (!field_stream.eof()) {
-    return Status_InvalidArgument("unable to parse the specified CF option " +
+    return rocksdb_rs::status::Status_InvalidArgument("unable to parse the specified CF option " +
                                    name);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 const std::string kOptNameBMCompOpts = "bottommost_compression_opts";
@@ -418,7 +418,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                  // Old format. Parse just a single uint64_t value.
                  auto options = static_cast<CompactionOptionsFIFO*>(addr);
                  options->max_table_files_size = ParseUint64(value);
-                 return Status_OK();
+                 return rocksdb_rs::status::Status_OK();
                } else {
                  return OptionTypeInfo::ParseStruct(
                      opts, "compaction_options_fifo",
@@ -656,7 +656,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
                      }
                      *value = root_comp->ToString(opts);
                    }
-                   return Status_OK();
+                   return rocksdb_rs::status::Status_OK();
                  })},
         {"memtable_insert_with_hint_prefix_extractor",
          OptionTypeInfo::AsCustomSharedPtr<const SliceTransform>(
@@ -672,7 +672,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             std::unique_ptr<MemTableRepFactory> factory;
             auto* shared =
                 static_cast<std::shared_ptr<MemTableRepFactory>*>(addr);
-            Status s =
+            rocksdb_rs::status::Status s =
                 MemTableRepFactory::CreateFromString(opts, value, shared);
             return s;
           }}},
@@ -685,7 +685,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             std::unique_ptr<MemTableRepFactory> factory;
             auto* shared =
                 static_cast<std::shared_ptr<MemTableRepFactory>*>(addr);
-            Status s =
+            rocksdb_rs::status::Status s =
                 MemTableRepFactory::CreateFromString(opts, value, shared);
             return s;
           }}},
@@ -717,7 +717,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
               } else {
                 new_factory.reset(NewBlockBasedTableFactory());
               }
-              Status s = new_factory->ConfigureFromString(opts, value);
+              rocksdb_rs::status::Status s = new_factory->ConfigureFromString(opts, value);
               if (s.ok()) {
                 table_factory->reset(new_factory.release());
               }
@@ -725,7 +725,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             } else if (old_opts != nullptr) {
               return table_factory->get()->ConfigureOption(opts, name, value);
             } else {
-              return Status_NotFound("Mismatched table option: ", name);
+              return rocksdb_rs::status::Status_NotFound("Mismatched table option: ", name);
             }
           }}},
         {"plain_table_factory",
@@ -748,7 +748,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
               } else {
                 new_factory.reset(NewPlainTableFactory());
               }
-              Status s = new_factory->ConfigureFromString(opts, value);
+              rocksdb_rs::status::Status s = new_factory->ConfigureFromString(opts, value);
               if (s.ok()) {
                 table_factory->reset(new_factory.release());
               }
@@ -756,7 +756,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
             } else if (old_opts != nullptr) {
               return table_factory->get()->ConfigureOption(opts, name, value);
             } else {
-              return Status_NotFound("Mismatched table option: ", name);
+              return rocksdb_rs::status::Status_NotFound("Mismatched table option: ", name);
             }
           }}},
         {"table_properties_collectors",
@@ -833,11 +833,11 @@ class ConfigurableCFOptions : public ConfigurableMutableCFOptions {
   }
 
  protected:
-  Status ConfigureOptions(
+  rocksdb_rs::status::Status ConfigureOptions(
       const ConfigOptions& config_options,
       const std::unordered_map<std::string, std::string>& opts_map,
       std::unordered_map<std::string, std::string>* unused) override {
-    Status s = Configurable::ConfigureOptions(config_options, opts_map, unused);
+    rocksdb_rs::status::Status s = Configurable::ConfigureOptions(config_options, opts_map, unused);
     if (s.ok()) {
       UpdateColumnFamilyOptions(mutable_, &cf_options_);
       UpdateColumnFamilyOptions(immutable_, &cf_options_);
@@ -1170,14 +1170,14 @@ void MutableCFOptions::Dump(Logger* log) const {
 MutableCFOptions::MutableCFOptions(const Options& options)
     : MutableCFOptions(ColumnFamilyOptions(options)) {}
 
-Status GetMutableOptionsFromStrings(
+rocksdb_rs::status::Status GetMutableOptionsFromStrings(
     const MutableCFOptions& base_options,
     const std::unordered_map<std::string, std::string>& options_map,
     Logger* /*info_log*/, MutableCFOptions* new_options) {
   assert(new_options);
   *new_options = base_options;
   ConfigOptions config_options;
-  Status s = OptionTypeInfo::ParseType(
+  rocksdb_rs::status::Status s = OptionTypeInfo::ParseType(
       config_options, options_map, cf_mutable_options_type_info, new_options);
   if (!s.ok()) {
     *new_options = base_options;
@@ -1185,7 +1185,7 @@ Status GetMutableOptionsFromStrings(
   return s;
 }
 
-Status GetStringFromMutableCFOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status GetStringFromMutableCFOptions(const ConfigOptions& config_options,
                                      const MutableCFOptions& mutable_opts,
                                      std::string* opt_string) {
   assert(opt_string);

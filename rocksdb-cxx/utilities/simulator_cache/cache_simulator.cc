@@ -205,7 +205,7 @@ BlockCacheTraceSimulator::BlockCacheTraceSimulator(
       downsample_ratio_(downsample_ratio),
       cache_configurations_(cache_configurations) {}
 
-Status BlockCacheTraceSimulator::InitializeCaches() {
+rocksdb_rs::status::Status BlockCacheTraceSimulator::InitializeCaches() {
   for (auto const& config : cache_configurations_) {
     for (auto cache_capacity : config.cache_capacities) {
       // Scale down the cache capacity since the trace contains accesses on
@@ -249,13 +249,13 @@ Status BlockCacheTraceSimulator::InitializeCaches() {
             /*insert_blocks_upon_row_kvpair_miss=*/false);
       } else {
         // Not supported.
-        return Status_InvalidArgument("Unknown cache name " +
+        return rocksdb_rs::status::Status_InvalidArgument("Unknown cache name " +
                                        config.cache_name);
       }
       sim_caches_[config].push_back(sim_cache);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void BlockCacheTraceSimulator::Access(const BlockCacheTraceRecord& access) {

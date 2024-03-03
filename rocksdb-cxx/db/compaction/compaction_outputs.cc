@@ -18,11 +18,11 @@ void CompactionOutputs::NewBuilder(const TableBuilderOptions& tboptions) {
   builder_.reset(NewTableBuilder(tboptions, file_writer_.get()));
 }
 
-Status CompactionOutputs::Finish(const Status& intput_status,
+rocksdb_rs::status::Status CompactionOutputs::Finish(const rocksdb_rs::status::Status& intput_status,
                                  const SeqnoToTimeMapping& seqno_time_mapping) {
   FileMetaData* meta = GetMetaData();
   assert(meta != nullptr);
-  Status s = intput_status.Clone();
+  rocksdb_rs::status::Status s = intput_status.Clone();
   if (s.ok()) {
     std::string seqno_time_mapping_str;
     seqno_time_mapping.Encode(seqno_time_mapping_str, meta->fd.smallest_seqno,
@@ -34,7 +34,7 @@ Status CompactionOutputs::Finish(const Status& intput_status,
   } else {
     builder_->Abandon();
   }
-  Status io_s = builder_->io_status();
+  rocksdb_rs::status::Status io_s = builder_->io_status();
   if (s.ok()) {
     s.copy_from(io_s);
   }
@@ -53,7 +53,7 @@ Status CompactionOutputs::Finish(const Status& intput_status,
   return s;
 }
 
-IOStatus CompactionOutputs::WriterSyncClose(const Status& input_status,
+IOStatus CompactionOutputs::WriterSyncClose(const rocksdb_rs::status::Status& input_status,
                                             SystemClock* clock,
                                             Statistics* statistics,
                                             bool use_fsync) {
@@ -347,11 +347,11 @@ bool CompactionOutputs::ShouldStopBefore(const CompactionIterator& c_iter) {
   return false;
 }
 
-Status CompactionOutputs::AddToOutput(
+rocksdb_rs::status::Status CompactionOutputs::AddToOutput(
     const CompactionIterator& c_iter,
     const CompactionFileOpenFunc& open_file_func,
     const CompactionFileCloseFunc& close_file_func) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool is_range_del = c_iter.IsDeleteRangeSentinelKey();
   if (is_range_del && compaction_->bottommost_level()) {
     // We don't consider range tombstone for bottommost level since:
@@ -442,7 +442,7 @@ void SetMaxSeqAndTs(InternalKey& internal_key, const Slice& user_key,
 }
 }  // namespace
 
-Status CompactionOutputs::AddRangeDels(
+rocksdb_rs::status::Status CompactionOutputs::AddRangeDels(
     const Slice* comp_start_user_key, const Slice* comp_end_user_key,
     CompactionIterationStats& range_del_out_stats, bool bottommost_level,
     const InternalKeyComparator& icmp, SequenceNumber earliest_snapshot,
@@ -557,7 +557,7 @@ Status CompactionOutputs::AddRangeDels(
     // This can only happen when lower_bound have the same user key as
     // next_table_min_key and that there is no point key in the current
     // compaction output file.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // The end key of the subcompaction must be bigger or equal to the upper
   // bound. If the end of subcompaction is null or the upper bound is null,
@@ -726,7 +726,7 @@ Status CompactionOutputs::AddRangeDels(
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void CompactionOutputs::FillFilesToCutForTtl() {

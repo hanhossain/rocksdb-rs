@@ -1629,21 +1629,21 @@ class CompressionTypeRecord {
     PutFixed32(dst, static_cast<uint32_t>(compression_type_));
   }
 
-  inline Status DecodeFrom(Slice* src) {
+  inline rocksdb_rs::status::Status DecodeFrom(Slice* src) {
     constexpr char class_name[] = "CompressionTypeRecord";
 
     uint32_t val;
     if (!GetFixed32(src, &val)) {
-      return Status_Corruption(class_name,
+      return rocksdb_rs::status::Status_Corruption(class_name,
                                 "Error decoding WAL compression type");
     }
     rocksdb_rs::compression_type::CompressionType compression_type = static_cast<rocksdb_rs::compression_type::CompressionType>(val);
     if (!StreamingCompressionTypeSupported(compression_type)) {
-      return Status_Corruption(class_name,
+      return rocksdb_rs::status::Status_Corruption(class_name,
                                 "WAL compression type not supported");
     }
     compression_type_ = compression_type;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   inline std::string DebugString() const {

@@ -212,7 +212,7 @@ static int RegisterBuiltinSliceTransform(ObjectLibrary& library,
   return static_cast<int>(library.GetFactoryCount(&num_types));
 }
 
-Status SliceTransform::CreateFromString(
+rocksdb_rs::status::Status SliceTransform::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::shared_ptr<const SliceTransform>* result) {
   static std::once_flag once;
@@ -221,7 +221,7 @@ Status SliceTransform::CreateFromString(
   });
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  Status status = Customizable::GetOptionsMap(config_options, result->get(),
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
                                               value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
@@ -230,7 +230,7 @@ Status SliceTransform::CreateFromString(
   } else {
     status = config_options.registry->NewSharedObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else if (status.ok()) {
       SliceTransform* transform = const_cast<SliceTransform*>(result->get());
       status =

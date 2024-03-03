@@ -416,19 +416,19 @@ std::shared_ptr<FileChecksumGenFactory> GetFileChecksumImpl(
   return std::make_shared<DbStressChecksumGenFactory>(internal_name);
 }
 
-Status DeleteFilesInDirectory(const std::string& dirname) {
+rocksdb_rs::status::Status DeleteFilesInDirectory(const std::string& dirname) {
   std::vector<std::string> filenames;
-  Status s = Env::Default()->GetChildren(dirname, &filenames);
+  rocksdb_rs::status::Status s = Env::Default()->GetChildren(dirname, &filenames);
   for (size_t i = 0; s.ok() && i < filenames.size(); ++i) {
     s = Env::Default()->DeleteFile(dirname + "/" + filenames[i]);
   }
   return s;
 }
 
-Status SaveFilesInDirectory(const std::string& src_dirname,
+rocksdb_rs::status::Status SaveFilesInDirectory(const std::string& src_dirname,
                             const std::string& dst_dirname) {
   std::vector<std::string> filenames;
-  Status s = Env::Default()->GetChildren(src_dirname, &filenames);
+  rocksdb_rs::status::Status s = Env::Default()->GetChildren(src_dirname, &filenames);
   for (size_t i = 0; s.ok() && i < filenames.size(); ++i) {
     bool is_dir = false;
     s = Env::Default()->IsDirectory(src_dirname + "/" + filenames[i], &is_dir);
@@ -443,10 +443,10 @@ Status SaveFilesInDirectory(const std::string& src_dirname,
   return s;
 }
 
-Status InitUnverifiedSubdir(const std::string& dirname) {
-  Status s = Env::Default()->FileExists(dirname);
+rocksdb_rs::status::Status InitUnverifiedSubdir(const std::string& dirname) {
+  rocksdb_rs::status::Status s = Env::Default()->FileExists(dirname);
   if (s.IsNotFound()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const std::string kUnverifiedDirname = dirname + "/unverified";
@@ -464,10 +464,10 @@ Status InitUnverifiedSubdir(const std::string& dirname) {
   return s;
 }
 
-Status DestroyUnverifiedSubdir(const std::string& dirname) {
-  Status s = Env::Default()->FileExists(dirname);
+rocksdb_rs::status::Status DestroyUnverifiedSubdir(const std::string& dirname) {
+  rocksdb_rs::status::Status s = Env::Default()->FileExists(dirname);
   if (s.IsNotFound()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const std::string kUnverifiedDirname = dirname + "/unverified";
@@ -475,7 +475,7 @@ Status DestroyUnverifiedSubdir(const std::string& dirname) {
     s = Env::Default()->FileExists(kUnverifiedDirname);
   }
   if (s.IsNotFound()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (s.ok()) {

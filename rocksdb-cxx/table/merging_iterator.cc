@@ -60,7 +60,7 @@ class MergingIterator : public InternalIterator {
         direction_(Direction::kForward),
         comparator_(comparator),
         current_(nullptr),
-        status_(Status_new()),
+        status_(rocksdb_rs::status::Status_new()),
         minHeap_(MinHeapItemComparator(comparator_)),
         pinned_iters_mgr_(nullptr),
         iterate_upper_bound_(iterate_upper_bound) {
@@ -71,7 +71,7 @@ class MergingIterator : public InternalIterator {
     }
   }
 
-  void considerStatus(Status s) {
+  void considerStatus(rocksdb_rs::status::Status s) {
     if (!s.ok() && status_.ok()) {
       status_.copy_from(s);
     }
@@ -137,7 +137,7 @@ class MergingIterator : public InternalIterator {
 
   bool Valid() const override { return current_ != nullptr && status_.ok(); }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   // Add range_tombstone_iters_[level] into min heap.
   // Updates active_ if the end key of a range tombstone is inserted.
@@ -243,7 +243,7 @@ class MergingIterator : public InternalIterator {
 
   void SeekToFirst() override {
     ClearHeaps();
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     for (auto& child : children_) {
       child.iter.SeekToFirst();
       AddToMinHeapOrCheckStatus(&child);
@@ -266,7 +266,7 @@ class MergingIterator : public InternalIterator {
   void SeekToLast() override {
     ClearHeaps();
     InitMaxHeap();
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     for (auto& child : children_) {
       child.iter.SeekToLast();
       AddToMaxHeapOrCheckStatus(&child);
@@ -308,7 +308,7 @@ class MergingIterator : public InternalIterator {
     // holds after this call, and minHeap_.top().iter points to the
     // first key >= target among children_ that is not covered by any range
     // tombstone.
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     SeekImpl(target);
     FindNextVisibleKey();
 
@@ -322,7 +322,7 @@ class MergingIterator : public InternalIterator {
   void SeekForPrev(const Slice& target) override {
     assert(range_tombstone_iters_.empty() ||
            range_tombstone_iters_.size() == children_.size());
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     SeekForPrevImpl(target);
     FindPrevVisibleKey();
 
@@ -627,7 +627,7 @@ class MergingIterator : public InternalIterator {
   // called at the end of each InternalIterator API.
   IteratorWrapper* current_;
   // If any of the children have non-ok status, this is one of them.
-  Status status_;
+  rocksdb_rs::status::Status status_;
   // Invariant: min heap property is maintained (parent is always <= child).
   // This holds by using only BinaryHeap APIs to modify heap. One
   // exception is to modify heap top item directly (by caller iter->Next()), and
@@ -1301,7 +1301,7 @@ void MergingIterator::SwitchToForward() {
       // request for retrieval of data blocks has been submitted. So it should
       // return at this point and Seek should be called again to retrieve the
       // requested block and add the child to min heap.
-      if (child.iter.status().eq(Status_TryAgain())) {
+      if (child.iter.status().eq(rocksdb_rs::status::Status_TryAgain())) {
         continue;
       }
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
@@ -1313,7 +1313,7 @@ void MergingIterator::SwitchToForward() {
   }
 
   for (auto& child : children_) {
-    if (child.iter.status().eq(Status_TryAgain())) {
+    if (child.iter.status().eq(rocksdb_rs::status::Status_TryAgain())) {
       child.iter.Seek(target);
       if (child.iter.Valid() && comparator_->Equal(target, child.iter.key())) {
         assert(child.iter.status().ok());

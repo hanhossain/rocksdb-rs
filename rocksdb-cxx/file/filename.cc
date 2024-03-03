@@ -67,7 +67,7 @@ IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
   return s;
 }
 
-Status SetIdentityFile(Env* env, const std::string& dbname,
+rocksdb_rs::status::Status SetIdentityFile(Env* env, const std::string& dbname,
                        const std::string& db_id) {
   std::string id;
   if (db_id.empty()) {
@@ -79,7 +79,7 @@ Status SetIdentityFile(Env* env, const std::string& dbname,
   // Reserve the filename dbname/000000.dbtmp for the temporary identity file
   std::string tmp = static_cast<std::string>(TempFileName(dbname, 0));
   std::string identify_file_name = static_cast<std::string>(IdentityFileName(dbname));
-  Status s = WriteStringToFile(env, id, tmp, true);
+  rocksdb_rs::status::Status s = WriteStringToFile(env, id, tmp, true);
   if (s.ok()) {
     s = env->RenameFile(tmp, identify_file_name);
   }
@@ -97,7 +97,7 @@ Status SetIdentityFile(Env* env, const std::string& dbname,
   // if it is not impelmented. Detailed explanations can be found in
   // db/db_impl/db_impl.h
   if (s.ok()) {
-    Status temp_s = dir_obj->Close(IOOptions(), nullptr);
+    rocksdb_rs::status::Status temp_s = dir_obj->Close(IOOptions(), nullptr);
     if (!temp_s.ok()) {
       if (!temp_s.IsNotSupported()) {
         s.copy_from(temp_s);
@@ -117,7 +117,7 @@ IOStatus SyncManifest(const ImmutableDBOptions* db_options,
   return file->Sync(db_options->use_fsync);
 }
 
-Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
+rocksdb_rs::status::Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
                        const std::string& db_log_dir, const std::string& dbname,
                        std::string* parent_dir,
                        std::vector<std::string>* info_log_list) {
@@ -135,7 +135,7 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
   InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!db_log_dir.empty(), dbname);
 
   std::vector<std::string> file_names;
-  Status s = fs->GetChildren(*parent_dir, IOOptions(), &file_names, nullptr);
+  rocksdb_rs::status::Status s = fs->GetChildren(*parent_dir, IOOptions(), &file_names, nullptr);
 
   if (!s.ok()) {
     return s;
@@ -147,6 +147,6 @@ Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
       info_log_list->push_back(f);
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

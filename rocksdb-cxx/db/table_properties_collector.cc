@@ -29,11 +29,11 @@ uint64_t GetUint64Property(const UserCollectedProperties& props,
 
 }  // anonymous namespace
 
-Status UserKeyTablePropertiesCollector::InternalAdd(const Slice& key,
+rocksdb_rs::status::Status UserKeyTablePropertiesCollector::InternalAdd(const Slice& key,
                                                     const Slice& value,
                                                     uint64_t file_size) {
   ParsedInternalKey ikey;
-  Status s = ParseInternalKey(key, &ikey, false /* log_err_key */);  // TODO
+  rocksdb_rs::status::Status s = ParseInternalKey(key, &ikey, false /* log_err_key */);  // TODO
   if (!s.ok()) {
     return s;
   }
@@ -49,7 +49,7 @@ void UserKeyTablePropertiesCollector::BlockAdd(
                               block_compressed_bytes_slow);
 }
 
-Status UserKeyTablePropertiesCollector::Finish(
+rocksdb_rs::status::Status UserKeyTablePropertiesCollector::Finish(
     UserCollectedProperties* properties) {
   return collector_->Finish(properties);
 }

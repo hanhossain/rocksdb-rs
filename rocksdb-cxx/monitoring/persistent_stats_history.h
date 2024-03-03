@@ -27,7 +27,7 @@ enum StatsVersionKeyType : uint32_t {
 // Read the version number from persitent stats cf depending on type provided
 // stores the version number in `*version_number`
 // returns Status_OK() on success, or other status code on failure
-Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
+rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
                                           uint64_t* version_number);
 
 // Encode timestamp and stats key into buf
@@ -45,14 +45,14 @@ class PersistentStatsHistoryIterator final : public StatsHistoryIterator {
       : time_(0),
         start_time_(start_time),
         end_time_(end_time),
-        status_(Status_new()),
+        status_(rocksdb_rs::status::Status_new()),
         valid_(true),
         db_impl_(db_impl) {
     AdvanceIteratorByTime(start_time_, end_time_);
   }
   ~PersistentStatsHistoryIterator() override;
   bool Valid() const override;
-  Status status() const override;
+  rocksdb_rs::status::Status status() const override;
 
   void Next() override;
   uint64_t GetStatsTime() const override;
@@ -76,7 +76,7 @@ class PersistentStatsHistoryIterator final : public StatsHistoryIterator {
   uint64_t start_time_;
   uint64_t end_time_;
   std::map<std::string, uint64_t> stats_map_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   bool valid_;
   DBImpl* db_impl_;
 };

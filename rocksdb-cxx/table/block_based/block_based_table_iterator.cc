@@ -282,7 +282,7 @@ void BlockBasedTableIterator::InitDataBlock() {
     block_prefetcher_.PrefetchIfNeeded(
         rep, data_block_handle, read_options_.readahead_size, is_for_compaction,
         /*no_sequential_checking=*/false, read_options_.rate_limiter_priority);
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     table_->NewDataBlockIterator<DataBlockIter>(
         read_options_, data_block_handle, &block_iter_, BlockType::kData,
         /*get_context=*/nullptr, &lookup_context_,
@@ -328,7 +328,7 @@ void BlockBasedTableIterator::AsyncInitDataBlock(bool is_first_pass) {
           is_for_compaction, /*no_sequential_checking=*/read_options_.async_io,
           read_options_.rate_limiter_priority);
 
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       table_->NewDataBlockIterator<DataBlockIter>(
           read_options_, data_block_handle, &block_iter_, BlockType::kData,
           /*get_context=*/nullptr, &lookup_context_,
@@ -343,7 +343,7 @@ void BlockBasedTableIterator::AsyncInitDataBlock(bool is_first_pass) {
   } else {
     // Second pass will call the Poll to get the data block which has been
     // requested asynchronously.
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     table_->NewDataBlockIterator<DataBlockIter>(
         read_options_, data_block_handle, &block_iter_, BlockType::kData,
         /*get_context=*/nullptr, &lookup_context_,
@@ -382,7 +382,7 @@ bool BlockBasedTableIterator::MaterializeCurrentBlock() {
   if (!block_iter_.Valid() ||
       icomp_.Compare(block_iter_.key(),
                      index_iter_->value().first_internal_key) != 0) {
-    block_iter_.Invalidate(Status_Corruption(
+    block_iter_.Invalidate(rocksdb_rs::status::Status_Corruption(
         "first key in index doesn't match first key in block"));
     return false;
   }

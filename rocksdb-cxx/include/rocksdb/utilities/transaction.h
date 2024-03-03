@@ -216,7 +216,7 @@ class Transaction {
   virtual void ClearSnapshot() = 0;
 
   // Prepare the current transaction for 2PC
-  virtual Status Prepare() = 0;
+  virtual rocksdb_rs::status::Status Prepare() = 0;
 
   // Write all batched keys to the db atomically.
   //
@@ -235,7 +235,7 @@ class Transaction {
   // TransactionOptions.expiration. Status::TxnNotPrepared() may be returned if
   // TransactionOptions.skip_prepare is false and Prepare is not called on this
   // transaction before Commit.
-  virtual Status Commit() = 0;
+  virtual rocksdb_rs::status::Status Commit() = 0;
 
   // In addition to Commit(), also creates a snapshot of the db after all
   // writes by this txn are visible to other readers.
@@ -253,14 +253,14 @@ class Transaction {
   // notifier will be notified upon next snapshot creation. Nullable.
   // ret non-null output argument storing a shared_ptr to the newly created
   // snapshot.
-  Status CommitAndTryCreateSnapshot(
+  rocksdb_rs::status::Status CommitAndTryCreateSnapshot(
       std::shared_ptr<TransactionNotifier> notifier =
           std::shared_ptr<TransactionNotifier>(),
       TxnTimestamp ts = kMaxTxnTimestamp,
       std::shared_ptr<const Snapshot>* snapshot = nullptr);
 
   // Discard all batched writes in this transaction.
-  virtual Status Rollback() = 0;
+  virtual rocksdb_rs::status::Status Rollback() = 0;
 
   // Records the state of the transaction for future calls to
   // RollbackToSavePoint().  May be called multiple times to set multiple save
@@ -271,13 +271,13 @@ class Transaction {
   // since the most recent call to SetSavePoint() and removes the most recent
   // SetSavePoint().
   // If there is no previous call to SetSavePoint(), returns Status_NotFound()
-  virtual Status RollbackToSavePoint() = 0;
+  virtual rocksdb_rs::status::Status RollbackToSavePoint() = 0;
 
   // Pop the most recent save point.
   // If there is no previous call to SetSavePoint(), Status_NotFound()
   // will be returned.
   // Otherwise returns Status_OK().
-  virtual Status PopSavePoint() = 0;
+  virtual rocksdb_rs::status::Status PopSavePoint() = 0;
 
   // This function is similar to DB::Get() except it will also read pending
   // changes in this transaction.  Currently, this function will return
@@ -292,13 +292,13 @@ class Transaction {
   // DB but will NOT change which keys are read from this transaction (the keys
   // in this transaction do not yet belong to any snapshot and will be fetched
   // regardless).
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      std::string* value) = 0;
 
   // An overload of the above method that receives a PinnableSlice
   // For backward compatibility a default implementation is provided
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* pinnable_val) {
     assert(pinnable_val != nullptr);
@@ -307,9 +307,9 @@ class Transaction {
     return s;
   }
 
-  virtual Status Get(const ReadOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
                      std::string* value) = 0;
-  virtual Status Get(const ReadOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
                      PinnableSlice* pinnable_val) {
     assert(pinnable_val != nullptr);
     auto s = Get(options, key, pinnable_val->GetSelf());
@@ -317,12 +317,12 @@ class Transaction {
     return s;
   }
 
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values) = 0;
 
-  virtual rust::Vec<Status> MultiGet(const ReadOptions& options,
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
                                        std::vector<std::string>* values) = 0;
 
@@ -332,7 +332,7 @@ class Transaction {
   virtual void MultiGet(const ReadOptions& options,
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
-                        PinnableSlice* values, Status* statuses,
+                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                         const bool /*sorted_input*/ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
       statuses[i] = Get(options, column_family, keys[i], &values[i]);
@@ -367,7 +367,7 @@ class Transaction {
   //  (See max_write_buffer_size_to_maintain)
   // Status_MergeInProgress() if merge operations cannot be resolved.
   // or other errors if this key could not be read.
-  virtual Status GetForUpdate(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
                               ColumnFamilyHandle* column_family,
                               const Slice& key, std::string* value,
                               bool exclusive = true,
@@ -375,7 +375,7 @@ class Transaction {
 
   // An overload of the above method that receives a PinnableSlice
   // For backward compatibility a default implementation is provided
-  virtual Status GetForUpdate(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
                               ColumnFamilyHandle* column_family,
                               const Slice& key, PinnableSlice* pinnable_val,
                               bool exclusive = true,
@@ -393,21 +393,21 @@ class Transaction {
   }
 
   // Get a range lock on [start_endpoint; end_endpoint].
-  virtual Status GetRangeLock(ColumnFamilyHandle*, const Endpoint&,
+  virtual rocksdb_rs::status::Status GetRangeLock(ColumnFamilyHandle*, const Endpoint&,
                               const Endpoint&) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
-  virtual Status GetForUpdate(const ReadOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options, const Slice& key,
                               std::string* value, bool exclusive = true,
                               const bool do_validate = true) = 0;
 
-  virtual rust::Vec<Status> MultiGetForUpdate(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGetForUpdate(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values) = 0;
 
-  virtual rust::Vec<Status> MultiGetForUpdate(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGetForUpdate(
       const ReadOptions& options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) = 0;
 
@@ -449,35 +449,35 @@ class Transaction {
   // Status_TryAgain() if the memtable history size is not large enough
   //  (See max_write_buffer_size_to_maintain)
   // or other errors on unexpected failures.
-  virtual Status Put(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& value, const bool assume_tracked = false) = 0;
-  virtual Status Put(const Slice& key, const Slice& value) = 0;
-  virtual Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
+  virtual rocksdb_rs::status::Status Put(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
                      const SliceParts& value,
                      const bool assume_tracked = false) = 0;
-  virtual Status Put(const SliceParts& key, const SliceParts& value) = 0;
+  virtual rocksdb_rs::status::Status Put(const SliceParts& key, const SliceParts& value) = 0;
 
-  virtual Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& value,
                        const bool assume_tracked = false) = 0;
-  virtual Status Merge(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) = 0;
 
-  virtual Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
                         const bool assume_tracked = false) = 0;
-  virtual Status Delete(const Slice& key) = 0;
-  virtual Status Delete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status Delete(const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
                         const SliceParts& key,
                         const bool assume_tracked = false) = 0;
-  virtual Status Delete(const SliceParts& key) = 0;
+  virtual rocksdb_rs::status::Status Delete(const SliceParts& key) = 0;
 
-  virtual Status SingleDelete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                               const Slice& key,
                               const bool assume_tracked = false) = 0;
-  virtual Status SingleDelete(const Slice& key) = 0;
-  virtual Status SingleDelete(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status SingleDelete(const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
                               const SliceParts& key,
                               const bool assume_tracked = false) = 0;
-  virtual Status SingleDelete(const SliceParts& key) = 0;
+  virtual rocksdb_rs::status::Status SingleDelete(const SliceParts& key) = 0;
 
   // PutUntracked() will write a Put to the batch of operations to be committed
   // in this transaction.  This write will only happen if this transaction
@@ -487,30 +487,30 @@ class Transaction {
   // If this Transaction was created on a PessimisticTransactionDB, this
   // function will still acquire locks necessary to make sure this write doesn't
   // cause conflicts in other transactions and may return Status_Busy().
-  virtual Status PutUntracked(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
                               const Slice& key, const Slice& value) = 0;
-  virtual Status PutUntracked(const Slice& key, const Slice& value) = 0;
-  virtual Status PutUntracked(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status PutUntracked(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
                               const SliceParts& key,
                               const SliceParts& value) = 0;
-  virtual Status PutUntracked(const SliceParts& key,
+  virtual rocksdb_rs::status::Status PutUntracked(const SliceParts& key,
                               const SliceParts& value) = 0;
 
-  virtual Status MergeUntracked(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status MergeUntracked(ColumnFamilyHandle* column_family,
                                 const Slice& key, const Slice& value) = 0;
-  virtual Status MergeUntracked(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status MergeUntracked(const Slice& key, const Slice& value) = 0;
 
-  virtual Status DeleteUntracked(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
                                  const Slice& key) = 0;
 
-  virtual Status DeleteUntracked(const Slice& key) = 0;
-  virtual Status DeleteUntracked(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status DeleteUntracked(const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
                                  const SliceParts& key) = 0;
-  virtual Status DeleteUntracked(const SliceParts& key) = 0;
-  virtual Status SingleDeleteUntracked(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status DeleteUntracked(const SliceParts& key) = 0;
+  virtual rocksdb_rs::status::Status SingleDeleteUntracked(ColumnFamilyHandle* column_family,
                                        const Slice& key) = 0;
 
-  virtual Status SingleDeleteUntracked(const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status SingleDeleteUntracked(const Slice& key) = 0;
 
   // Similar to WriteBatch::PutLogData
   virtual void PutLogData(const Slice& blob) = 0;
@@ -587,7 +587,7 @@ class Transaction {
                                 const Slice& key) = 0;
   virtual void UndoGetForUpdate(const Slice& key) = 0;
 
-  virtual Status RebuildFromWriteBatch(WriteBatch* src_batch) = 0;
+  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(WriteBatch* src_batch) = 0;
 
   // Note: data in the commit-time-write-batch bypasses concurrency control,
   // thus should be used with great caution.
@@ -607,7 +607,7 @@ class Transaction {
 
   virtual uint64_t GetLogNumber() const { return log_number_; }
 
-  virtual Status SetName(const TransactionName& name) = 0;
+  virtual rocksdb_rs::status::Status SetName(const TransactionName& name) = 0;
 
   virtual TransactionName GetName() const { return name_; }
 
@@ -644,12 +644,12 @@ class Transaction {
   // to remain the same across restarts.
   uint64_t GetId() { return id_; }
 
-  virtual Status SetReadTimestampForValidation(TxnTimestamp /*ts*/) {
-    return Status_NotSupported("timestamp not supported");
+  virtual rocksdb_rs::status::Status SetReadTimestampForValidation(TxnTimestamp /*ts*/) {
+    return rocksdb_rs::status::Status_NotSupported("timestamp not supported");
   }
 
-  virtual Status SetCommitTimestamp(TxnTimestamp /*ts*/) {
-    return Status_NotSupported("timestamp not supported");
+  virtual rocksdb_rs::status::Status SetCommitTimestamp(TxnTimestamp /*ts*/) {
+    return rocksdb_rs::status::Status_NotSupported("timestamp not supported");
   }
 
   virtual TxnTimestamp GetCommitTimestamp() const { return kMaxTxnTimestamp; }

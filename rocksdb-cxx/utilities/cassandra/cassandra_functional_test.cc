@@ -58,15 +58,15 @@ class CassandraStore {
     }
   }
 
-  Status Flush() {
-    Status s = dbfull()->TEST_FlushMemTable();
+  rocksdb_rs::status::Status Flush() {
+    rocksdb_rs::status::Status s = dbfull()->TEST_FlushMemTable();
     if (s.ok()) {
       s = dbfull()->TEST_WaitForCompact();
     }
     return s;
   }
 
-  Status Compact() {
+  rocksdb_rs::status::Status Compact() {
     return dbfull()->TEST_CompactRange(0, nullptr, nullptr,
                                        db_->DefaultColumnFamily());
   }

@@ -176,7 +176,7 @@ TEST_F(DeleteFileTest, AddKeysAndQueryLevels) {
   ASSERT_EQ(level1keycount, 50000);
   ASSERT_EQ(level2keycount, 50000);
 
-  Status status = db_->DeleteFile("0.sst");
+  rocksdb_rs::status::Status status = db_->DeleteFile("0.sst");
   ASSERT_TRUE(status.IsInvalidArgument());
 
   // intermediate level files cannot be deleted.
@@ -478,7 +478,7 @@ TEST_F(DeleteFileTest, DeleteFileWithIterator) {
     level2file = metadata[0].name;
   }
 
-  Status status = db_->DeleteFile(level2file);
+  rocksdb_rs::status::Status status = db_->DeleteFile(level2file);
   fprintf(stdout, "Deletion status %s: %s\n", level2file.c_str(),
           status.ToString()->c_str());
   ASSERT_OK(status);

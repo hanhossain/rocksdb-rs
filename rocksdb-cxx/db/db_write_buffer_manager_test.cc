@@ -134,7 +134,7 @@ TEST_P(DBWriteBufferManagerTest, SharedWriteBufferAcrossCFs2) {
   std::function<void(int)> writer = [&](int cf) {
     int a = thread_num.fetch_add(1);
     std::string key = "foo" + std::to_string(a);
-    Status tmp = Put(cf, Slice(key), DummyString(1), wo);
+    rocksdb_rs::status::Status tmp = Put(cf, Slice(key), DummyString(1), wo);
     InstrumentedMutexLock lock(&mutex);
     s = s && tmp.ok();
   };
@@ -250,7 +250,7 @@ TEST_P(DBWriteBufferManagerTest, SharedWriteBufferLimitAcrossDB) {
 
   // Write to DB.
   std::function<void(DB*)> write_db = [&](DB* db) {
-    Status tmp = db->Put(wo, Key(3), DummyString(1));
+    rocksdb_rs::status::Status tmp = db->Put(wo, Key(3), DummyString(1));
     InstrumentedMutexLock lock(&mutex);
     s = s && tmp.ok();
   };
@@ -385,13 +385,13 @@ TEST_P(DBWriteBufferManagerTest, SharedWriteBufferLimitAcrossDB1) {
   bool s1 = true, s2 = true;
   // Write to multiple columns of db_.
   std::function<void(int)> write_cf = [&](int cf) {
-    Status tmp = Put(cf, Key(3), DummyString(1), wo);
+    rocksdb_rs::status::Status tmp = Put(cf, Key(3), DummyString(1), wo);
     InstrumentedMutexLock lock(&mutex);
     s1 = s1 && tmp.ok();
   };
   // Write to multiple DBs.
   std::function<void(DB*)> write_db = [&](DB* db) {
-    Status tmp = db->Put(wo, Key(3), DummyString(1));
+    rocksdb_rs::status::Status tmp = db->Put(wo, Key(3), DummyString(1));
     InstrumentedMutexLock lock(&mutex);
     s2 = s2 && tmp.ok();
   };
@@ -531,7 +531,7 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsSingleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = false;
-    Status tmp = Put(cf, Slice(key), DummyString(1), write_op);
+    rocksdb_rs::status::Status tmp = Put(cf, Slice(key), DummyString(1), write_op);
     InstrumentedMutexLock lock(&mutex);
     s1 = s1 && tmp.ok();
   };
@@ -541,7 +541,7 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsSingleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = true;
-    Status tmp = Put(cf, Slice(key), DummyString(1), write_op);
+    rocksdb_rs::status::Status tmp = Put(cf, Slice(key), DummyString(1), write_op);
     {
       InstrumentedMutexLock lock(&mutex);
       s2 = s2 && !tmp.ok();
@@ -694,7 +694,7 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsMultipleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = false;
-    Status tmp = db->Put(write_op, Slice(key), DummyString(1));
+    rocksdb_rs::status::Status tmp = db->Put(write_op, Slice(key), DummyString(1));
     InstrumentedMutexLock lock(&mutex);
     s1 = s1 && tmp.ok();
   };
@@ -704,7 +704,7 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsMultipleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = true;
-    Status tmp = db->Put(write_op, Slice(key), DummyString(1));
+    rocksdb_rs::status::Status tmp = db->Put(write_op, Slice(key), DummyString(1));
     {
       InstrumentedMutexLock lock(&mutex);
       s2 = s2 && !tmp.ok();
@@ -870,7 +870,7 @@ TEST_F(DBWriteBufferManagerTest, RuntimeChangeableAllowStall) {
   // Assert existence of a write stall
   WriteOptions wo_no_slowdown;
   wo_no_slowdown.no_slowdown = true;
-  Status s = Put(Key(0), DummyString(kBigValue), wo_no_slowdown);
+  rocksdb_rs::status::Status s = Put(Key(0), DummyString(kBigValue), wo_no_slowdown);
   ASSERT_TRUE(s.IsIncomplete());
   ASSERT_TRUE(s.ToString()->find("Write stall") != std::string::npos);
 

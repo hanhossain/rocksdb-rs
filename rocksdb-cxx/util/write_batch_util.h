@@ -19,9 +19,9 @@ namespace rocksdb {
 class ColumnFamilyCollector : public WriteBatch::Handler {
   std::unordered_set<uint32_t> column_family_ids_;
 
-  Status AddColumnFamilyId(uint32_t column_family_id) {
+  rocksdb_rs::status::Status AddColumnFamilyId(uint32_t column_family_id) {
     column_family_ids_.insert(column_family_id);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  public:
@@ -29,53 +29,53 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
 
   ~ColumnFamilyCollector() override {}
 
-  Status PutCF(uint32_t column_family_id, const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice&, const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  Status DeleteCF(uint32_t column_family_id, const Slice&) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  Status SingleDeleteCF(uint32_t column_family_id, const Slice&) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  Status DeleteRangeCF(uint32_t column_family_id, const Slice&,
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice&,
                        const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  Status MergeCF(uint32_t column_family_id, const Slice&,
+  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice&,
                  const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  Status PutBlobIndexCF(uint32_t column_family_id, const Slice&,
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t column_family_id, const Slice&,
                         const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  Status MarkBeginPrepare(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
 
-  Status MarkEndPrepare(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  Status MarkRollback(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  Status MarkCommit(const Slice&) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
 
-  Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
-    return Status_OK();
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkNoop(bool) override { return Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
 
   const std::unordered_set<uint32_t>& column_families() const {
     return column_family_ids_;
   }
 };
 
-Status CollectColumnFamilyIdsFromWriteBatch(
+rocksdb_rs::status::Status CollectColumnFamilyIdsFromWriteBatch(
     const WriteBatch& batch, std::vector<uint32_t>* column_family_ids);
 
 }  // namespace rocksdb

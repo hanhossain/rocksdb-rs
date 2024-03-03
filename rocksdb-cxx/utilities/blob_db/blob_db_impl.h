@@ -99,14 +99,14 @@ class BlobDBImpl : public BlobDB {
   static constexpr double kEvictOldestFileAtSize = 0.9;
 
   using BlobDB::Put;
-  Status Put(const WriteOptions& options, const Slice& key,
+  rocksdb_rs::status::Status Put(const WriteOptions& options, const Slice& key,
              const Slice& value) override;
 
   using BlobDB::Get;
-  Status Get(const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Get(const ReadOptions& read_options, ColumnFamilyHandle* column_family,
              const Slice& key, PinnableSlice* value) override;
 
-  Status Get(const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Get(const ReadOptions& read_options, ColumnFamilyHandle* column_family,
              const Slice& key, PinnableSlice* value,
              uint64_t* expiration) override;
 
@@ -114,33 +114,33 @@ class BlobDBImpl : public BlobDB {
   virtual Iterator* NewIterator(const ReadOptions& read_options) override;
 
   using BlobDB::NewIterators;
-  virtual Status NewIterators(
+  virtual rocksdb_rs::status::Status NewIterators(
       const ReadOptions& /*read_options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_families*/,
       std::vector<Iterator*>* /*iterators*/) override {
-    return Status_NotSupported("Not implemented");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
   }
 
   using BlobDB::MultiGet;
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& read_options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
   using BlobDB::Write;
-  virtual Status Write(const WriteOptions& opts, WriteBatch* updates) override;
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override;
 
-  virtual Status Close() override;
+  virtual rocksdb_rs::status::Status Close() override;
 
   using BlobDB::PutWithTTL;
-  Status PutWithTTL(const WriteOptions& options, const Slice& key,
+  rocksdb_rs::status::Status PutWithTTL(const WriteOptions& options, const Slice& key,
                     const Slice& value, uint64_t ttl) override;
 
   using BlobDB::PutUntil;
-  Status PutUntil(const WriteOptions& options, const Slice& key,
+  rocksdb_rs::status::Status PutUntil(const WriteOptions& options, const Slice& key,
                   const Slice& value, uint64_t expiration) override;
 
   using BlobDB::CompactFiles;
-  Status CompactFiles(
+  rocksdb_rs::status::Status CompactFiles(
       const CompactionOptions& compact_options,
       const std::vector<std::string>& input_file_names, const int output_level,
       const int output_path_id = -1,
@@ -153,20 +153,20 @@ class BlobDBImpl : public BlobDB {
              const DBOptions& db_options,
              const ColumnFamilyOptions& cf_options);
 
-  virtual Status DisableFileDeletions() override;
+  virtual rocksdb_rs::status::Status DisableFileDeletions() override;
 
-  virtual Status EnableFileDeletions(bool force) override;
+  virtual rocksdb_rs::status::Status EnableFileDeletions(bool force) override;
 
-  virtual Status GetLiveFiles(std::vector<std::string>&,
+  virtual rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>&,
                               uint64_t* manifest_file_size,
                               bool flush_memtable = true) override;
   virtual void GetLiveFilesMetaData(std::vector<LiveFileMetaData>*) override;
 
   ~BlobDBImpl();
 
-  Status Open(std::vector<ColumnFamilyHandle*>* handles);
+  rocksdb_rs::status::Status Open(std::vector<ColumnFamilyHandle*>* handles);
 
-  Status SyncBlobFiles() override;
+  rocksdb_rs::status::Status SyncBlobFiles() override;
 
   // Common part of the two GetCompactionContext methods below.
   // REQUIRES: read lock on mutex_
@@ -177,7 +177,7 @@ class BlobDBImpl : public BlobDB {
                             BlobCompactionContextGC* context_gc);
 
 #ifndef NDEBUG
-  Status TEST_GetBlobValue(const Slice& key, const Slice& index_entry,
+  rocksdb_rs::status::Status TEST_GetBlobValue(const Slice& key, const Slice& index_entry,
                            PinnableSlice* value);
 
   void TEST_AddDummyBlobFile(uint64_t blob_file_number,
@@ -189,7 +189,7 @@ class BlobDBImpl : public BlobDB {
 
   std::vector<std::shared_ptr<BlobFile>> TEST_GetObsoleteFiles() const;
 
-  Status TEST_CloseBlobFile(std::shared_ptr<BlobFile>& bfile);
+  rocksdb_rs::status::Status TEST_CloseBlobFile(std::shared_ptr<BlobFile>& bfile);
 
   void TEST_ObsoleteBlobFile(std::shared_ptr<BlobFile>& blob_file,
                              SequenceNumber obsolete_seq = 0,
@@ -219,14 +219,14 @@ class BlobDBImpl : public BlobDB {
   // Return true if a snapshot is created.
   bool SetSnapshotIfNeeded(ReadOptions* read_options);
 
-  Status GetImpl(const ReadOptions& read_options,
+  rocksdb_rs::status::Status GetImpl(const ReadOptions& read_options,
                  ColumnFamilyHandle* column_family, const Slice& key,
                  PinnableSlice* value, uint64_t* expiration = nullptr);
 
-  Status GetBlobValue(const Slice& key, const Slice& index_entry,
+  rocksdb_rs::status::Status GetBlobValue(const Slice& key, const Slice& index_entry,
                       PinnableSlice* value, uint64_t* expiration = nullptr);
 
-  Status GetRawBlobFromFile(const Slice& key, uint64_t file_number,
+  rocksdb_rs::status::Status GetRawBlobFromFile(const Slice& key, uint64_t file_number,
                             uint64_t offset, uint64_t size,
                             PinnableSlice* value,
                             rocksdb_rs::compression_type::CompressionType* compression_type);
@@ -234,7 +234,7 @@ class BlobDBImpl : public BlobDB {
   Slice GetCompressedSlice(const Slice& raw,
                            std::string* compression_output) const;
 
-  Status DecompressSlice(const Slice& compressed_value,
+  rocksdb_rs::status::Status DecompressSlice(const Slice& compressed_value,
                          rocksdb_rs::compression_type::CompressionType compression_type,
                          PinnableSlice* value_output) const;
 
@@ -244,11 +244,11 @@ class BlobDBImpl : public BlobDB {
   // to a single thread (like in the case of new files written during
   // compaction/GC), the locks on write_mutex_ and the blob file's mutex_ can be
   // avoided.
-  Status CloseBlobFile(std::shared_ptr<BlobFile> bfile);
+  rocksdb_rs::status::Status CloseBlobFile(std::shared_ptr<BlobFile> bfile);
 
   // Close a file if its size exceeds blob_file_size
   // REQUIRES: lock held on write_mutex_.
-  Status CloseBlobFileIfNeeded(std::shared_ptr<BlobFile>& bfile);
+  rocksdb_rs::status::Status CloseBlobFileIfNeeded(std::shared_ptr<BlobFile>& bfile);
 
   // Mark file as obsolete and move the file to obsolete file list.
   //
@@ -256,17 +256,17 @@ class BlobDBImpl : public BlobDB {
   void ObsoleteBlobFile(std::shared_ptr<BlobFile> blob_file,
                         SequenceNumber obsolete_seq, bool update_size);
 
-  Status PutBlobValue(const WriteOptions& options, const Slice& key,
+  rocksdb_rs::status::Status PutBlobValue(const WriteOptions& options, const Slice& key,
                       const Slice& value, uint64_t expiration,
                       WriteBatch* batch);
 
-  Status AppendBlob(const std::shared_ptr<BlobFile>& bfile,
+  rocksdb_rs::status::Status AppendBlob(const std::shared_ptr<BlobFile>& bfile,
                     const std::string& headerbuf, const Slice& key,
                     const Slice& value, uint64_t expiration,
                     std::string* index_entry);
 
   // Create a new blob file and associated writer.
-  Status CreateBlobFileAndWriter(bool has_ttl,
+  rocksdb_rs::status::Status CreateBlobFileAndWriter(bool has_ttl,
                                  const ExpirationRange& expiration_range,
                                  const std::string& reason,
                                  std::shared_ptr<BlobFile>* blob_file,
@@ -274,11 +274,11 @@ class BlobDBImpl : public BlobDB {
 
   // Get the open non-TTL blob log file, or create a new one if no such file
   // exists.
-  Status SelectBlobFile(std::shared_ptr<BlobFile>* blob_file);
+  rocksdb_rs::status::Status SelectBlobFile(std::shared_ptr<BlobFile>* blob_file);
 
   // Get the open TTL blob log file for a certain expiration, or create a new
   // one if no such file exists.
-  Status SelectBlobFileTTL(uint64_t expiration,
+  rocksdb_rs::status::Status SelectBlobFileTTL(uint64_t expiration,
                            std::shared_ptr<BlobFile>* blob_file);
 
   std::shared_ptr<BlobFile> FindBlobFileLocked(uint64_t expiration) const;
@@ -314,10 +314,10 @@ class BlobDBImpl : public BlobDB {
   void RegisterBlobFile(std::shared_ptr<BlobFile> blob_file);
 
   // collect all the blob log files from the blob directory
-  Status GetAllBlobFiles(std::set<uint64_t>* file_numbers);
+  rocksdb_rs::status::Status GetAllBlobFiles(std::set<uint64_t>* file_numbers);
 
   // Open all blob files found in blob_dir.
-  Status OpenAllBlobFiles();
+  rocksdb_rs::status::Status OpenAllBlobFiles();
 
   // Link an SST to a blob file. Comes in locking and non-locking varieties
   // (the latter is used during Open).
@@ -364,7 +364,7 @@ class BlobDBImpl : public BlobDB {
 
   void UpdateLiveSSTSize();
 
-  Status GetBlobFileReader(const std::shared_ptr<BlobFile>& blob_file,
+  rocksdb_rs::status::Status GetBlobFileReader(const std::shared_ptr<BlobFile>& blob_file,
                            std::shared_ptr<RandomAccessFileReader>* reader);
 
   // hold write mutex on file and call.
@@ -373,11 +373,11 @@ class BlobDBImpl : public BlobDB {
 
   // hold write mutex on file and call
   // creates a sequential (append) writer for this blobfile
-  Status CreateWriterLocked(const std::shared_ptr<BlobFile>& bfile);
+  rocksdb_rs::status::Status CreateWriterLocked(const std::shared_ptr<BlobFile>& bfile);
 
   // returns a BlobLogWriter object for the file. If writer is not
   // already present, creates one. Needs Write Mutex to be held
-  Status CheckOrCreateWriterLocked(const std::shared_ptr<BlobFile>& blob_file,
+  rocksdb_rs::status::Status CheckOrCreateWriterLocked(const std::shared_ptr<BlobFile>& blob_file,
                                    std::shared_ptr<BlobLogWriter>* writer);
 
   // checks if there is no snapshot which is referencing the
@@ -393,7 +393,7 @@ class BlobDBImpl : public BlobDB {
   // If is_fifo = true, FIFO eviction will be triggered to make room for the
   // new blob. If force_evict = true, FIFO eviction will evict blob files
   // even eviction will not make enough room for the new blob.
-  Status CheckSizeAndEvictBlobFiles(uint64_t blob_size,
+  rocksdb_rs::status::Status CheckSizeAndEvictBlobFiles(uint64_t blob_size,
                                     bool force_evict = false);
 
   // name of the database directory

@@ -66,7 +66,7 @@ class IteratorWrapperBase {
     return iter_->value();
   }
   // Methods below require iter() != nullptr
-  Status status() const {
+  rocksdb_rs::status::Status status() const {
     assert(iter_);
     return iter_->status();
   }

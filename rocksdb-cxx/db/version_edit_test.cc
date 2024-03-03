@@ -32,7 +32,7 @@ static void TestEncodeDecode(const VersionEdit& edit) {
   std::string encoded, encoded2;
   edit.EncodeTo(&encoded, 0 /* ts_sz */);
   VersionEdit parsed;
-  Status s = parsed.DecodeFrom(encoded);
+  rocksdb_rs::status::Status s = parsed.DecodeFrom(encoded);
   ASSERT_TRUE(s.ok()) << *s.ToString();
   parsed.EncodeTo(&encoded2, 0 /* ts_sz */);
   ASSERT_EQ(encoded, encoded2);
@@ -103,7 +103,7 @@ TEST_F(VersionEditTest, EncodeDecodeNewFile4) {
   std::string encoded, encoded2;
   edit.EncodeTo(&encoded, 0 /* ts_sz */);
   VersionEdit parsed;
-  Status s = parsed.DecodeFrom(encoded);
+  rocksdb_rs::status::Status s = parsed.DecodeFrom(encoded);
   ASSERT_TRUE(s.ok()) << *s.ToString();
   auto& new_files = parsed.GetNewFiles();
   ASSERT_TRUE(new_files[0].second.marked_for_compaction);
@@ -160,7 +160,7 @@ TEST_F(VersionEditTest, EncodeDecodeNewFile4HandleFileBoundary) {
   std::string encoded;
   edit.EncodeTo(&encoded, ts_sz);
   VersionEdit parsed;
-  Status s = parsed.DecodeFrom(encoded);
+  rocksdb_rs::status::Status s = parsed.DecodeFrom(encoded);
   ASSERT_TRUE(s.ok()) << *s.ToString();
   auto& new_files = parsed.GetNewFiles();
   ASSERT_TRUE(new_files.size() == 2);
@@ -221,7 +221,7 @@ TEST_F(VersionEditTest, ForwardCompatibleNewFile4) {
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   VersionEdit parsed;
-  Status s = parsed.DecodeFrom(encoded);
+  rocksdb_rs::status::Status s = parsed.DecodeFrom(encoded);
   ASSERT_TRUE(s.ok()) << *s.ToString();
   ASSERT_TRUE(!first);
   auto& new_files = parsed.GetNewFiles();
@@ -261,7 +261,7 @@ TEST_F(VersionEditTest, NewFile4NotSupportedField) {
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 
   VersionEdit parsed;
-  Status s = parsed.DecodeFrom(encoded);
+  rocksdb_rs::status::Status s = parsed.DecodeFrom(encoded);
   ASSERT_NOK(s);
 }
 
@@ -414,7 +414,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadLogNumber) {
     // No log number.
     std::string encoded_edit = PrefixEncodedWalAdditionWithLength(encoded);
     VersionEdit edit;
-    Status s = edit.DecodeFrom(encoded_edit);
+    rocksdb_rs::status::Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding WAL log number") !=
                 std::string::npos)
@@ -431,7 +431,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadLogNumber) {
 
     std::string encoded_edit = PrefixEncodedWalAdditionWithLength(encoded);
     VersionEdit edit;
-    Status s = edit.DecodeFrom(encoded_edit);
+    rocksdb_rs::status::Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding WAL log number") !=
                 std::string::npos)
@@ -450,7 +450,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadTag) {
     // No tag.
     std::string encoded_edit = PrefixEncodedWalAdditionWithLength(encoded);
     VersionEdit edit;
-    Status s = edit.DecodeFrom(encoded_edit);
+    rocksdb_rs::status::Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
         << *s.ToString();
@@ -466,7 +466,7 @@ TEST_F(VersionEditTest, AddWalDecodeBadTag) {
     std::string encoded_edit =
         PrefixEncodedWalAdditionWithLength(encoded_with_size);
     VersionEdit edit;
-    Status s = edit.DecodeFrom(encoded_edit);
+    rocksdb_rs::status::Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)
         << *s.ToString();
@@ -500,7 +500,7 @@ TEST_F(VersionEditTest, AddWalDecodeNoSize) {
     // Without terminate tag.
     std::string encoded_edit = PrefixEncodedWalAdditionWithLength(encoded);
     VersionEdit edit;
-    Status s = edit.DecodeFrom(encoded_edit);
+    rocksdb_rs::status::Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("Error decoding WAL file size") !=
                 std::string::npos)
@@ -513,7 +513,7 @@ TEST_F(VersionEditTest, AddWalDecodeNoSize) {
 
     std::string encoded_edit = PrefixEncodedWalAdditionWithLength(encoded);
     VersionEdit edit;
-    Status s = edit.DecodeFrom(encoded_edit);
+    rocksdb_rs::status::Status s = edit.DecodeFrom(encoded_edit);
     ASSERT_TRUE(s.IsCorruption());
     // The terminate tag is misunderstood as the size.
     ASSERT_TRUE(s.ToString()->find("Error decoding tag") != std::string::npos)

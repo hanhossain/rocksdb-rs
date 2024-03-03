@@ -9,7 +9,7 @@
 #include "table/block_based/binary_search_index_reader.h"
 
 namespace rocksdb {
-Status BinarySearchIndexReader::Create(
+rocksdb_rs::status::Status BinarySearchIndexReader::Create(
     const BlockBasedTable* table, const ReadOptions& ro,
     FilePrefetchBuffer* prefetch_buffer, bool use_cache, bool prefetch,
     bool pin, BlockCacheLookupContext* lookup_context,
@@ -21,7 +21,7 @@ Status BinarySearchIndexReader::Create(
 
   CachableEntry<Block> index_block;
   if (prefetch || !use_cache) {
-    const Status s =
+    const rocksdb_rs::status::Status s =
         ReadIndexBlock(table, prefetch_buffer, ro, use_cache,
                        /*get_context=*/nullptr, lookup_context, &index_block);
     if (!s.ok()) {
@@ -36,7 +36,7 @@ Status BinarySearchIndexReader::Create(
   index_reader->reset(
       new BinarySearchIndexReader(table, std::move(index_block)));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIteratorBase<IndexValue>* BinarySearchIndexReader::NewIterator(
@@ -46,7 +46,7 @@ InternalIteratorBase<IndexValue>* BinarySearchIndexReader::NewIterator(
   const BlockBasedTable::Rep* rep = table()->get_rep();
   const bool no_io = (read_options.read_tier == kBlockCacheTier);
   CachableEntry<Block> index_block;
-  const Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
+  const rocksdb_rs::status::Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
                                        &index_block, read_options);
   if (!s.ok()) {
     if (iter != nullptr) {

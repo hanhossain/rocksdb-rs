@@ -81,7 +81,7 @@ class TransactionTestBase : public ::testing::Test {
     // Write unprepared requires all transactions to be named. This setting
     // autogenerates the name so that existing tests can pass.
     txn_db_options.autogenerate_name = true;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, &db);
     } else {
@@ -105,13 +105,13 @@ class TransactionTestBase : public ::testing::Test {
     }
   }
 
-  Status ReOpenNoDelete() {
+  rocksdb_rs::status::Status ReOpenNoDelete() {
     delete db;
     db = nullptr;
     fault_fs->AssertNoOpenFile();
     fault_fs->DropUnsyncedFileData();
     fault_fs->ResetState();
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db_ == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, &db);
     } else {
@@ -121,7 +121,7 @@ class TransactionTestBase : public ::testing::Test {
     return s;
   }
 
-  Status ReOpenNoDelete(std::vector<ColumnFamilyDescriptor>& cfs,
+  rocksdb_rs::status::Status ReOpenNoDelete(std::vector<ColumnFamilyDescriptor>& cfs,
                         std::vector<ColumnFamilyHandle*>* handles) {
     for (auto h : *handles) {
       delete h;
@@ -132,7 +132,7 @@ class TransactionTestBase : public ::testing::Test {
     fault_fs->AssertNoOpenFile();
     fault_fs->DropUnsyncedFileData();
     fault_fs->ResetState();
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db_ == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, cfs, handles,
                               &db);
@@ -143,11 +143,11 @@ class TransactionTestBase : public ::testing::Test {
     return s;
   }
 
-  Status ReOpen() {
+  rocksdb_rs::status::Status ReOpen() {
     delete db;
     db = nullptr;
     DestroyDB(dbname, options);
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (use_stackable_db_ == false) {
       s = TransactionDB::Open(options, txn_db_options, dbname, &db);
     } else {
@@ -157,7 +157,7 @@ class TransactionTestBase : public ::testing::Test {
     return s;
   }
 
-  Status OpenWithStackableDB(std::vector<ColumnFamilyDescriptor>& cfs,
+  rocksdb_rs::status::Status OpenWithStackableDB(std::vector<ColumnFamilyDescriptor>& cfs,
                              std::vector<ColumnFamilyHandle*>* handles) {
     std::vector<size_t> compaction_enabled_cf_indices;
     TransactionDB::PrepareWrap(&options, &cfs, &compaction_enabled_cf_indices);
@@ -169,7 +169,7 @@ class TransactionTestBase : public ::testing::Test {
     const bool use_batch_per_txn =
         txn_db_options.write_policy == WRITE_COMMITTED ||
         txn_db_options.write_policy == WRITE_PREPARED;
-    Status s = DBImpl::Open(options_copy, dbname, cfs, handles, &root_db,
+    rocksdb_rs::status::Status s = DBImpl::Open(options_copy, dbname, cfs, handles, &root_db,
                             use_seq_per_batch, use_batch_per_txn);
     auto stackable_db = std::make_unique<StackableDB>(root_db);
     if (s.ok()) {
@@ -183,7 +183,7 @@ class TransactionTestBase : public ::testing::Test {
     return s;
   }
 
-  Status OpenWithStackableDB() {
+  rocksdb_rs::status::Status OpenWithStackableDB() {
     std::vector<size_t> compaction_enabled_cf_indices;
     std::vector<ColumnFamilyDescriptor> column_families{ColumnFamilyDescriptor(
         kDefaultColumnFamilyName, ColumnFamilyOptions(options))};
@@ -199,7 +199,7 @@ class TransactionTestBase : public ::testing::Test {
     const bool use_batch_per_txn =
         txn_db_options.write_policy == WRITE_COMMITTED ||
         txn_db_options.write_policy == WRITE_PREPARED;
-    Status s = DBImpl::Open(options_copy, dbname, column_families, &handles,
+    rocksdb_rs::status::Status s = DBImpl::Open(options_copy, dbname, column_families, &handles,
                             &root_db, use_seq_per_batch, use_batch_per_txn);
     if (!s.ok()) {
       delete root_db;
@@ -531,7 +531,7 @@ class WriteCommittedTxnWithTsTest
     }
   }
 
-  Status GetFromDb(ReadOptions read_opts, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status GetFromDb(ReadOptions read_opts, ColumnFamilyHandle* column_family,
                    const Slice& key, TxnTimestamp ts, std::string* value) {
     std::string ts_buf;
     PutFixed64(&ts_buf, ts);

@@ -42,9 +42,9 @@ struct FileState {
 
   bool IsFullySynced() const { return pos_ <= 0 || pos_ == pos_at_last_sync_; }
 
-  Status DropUnsyncedData(Env* env) const;
+  rocksdb_rs::status::Status DropUnsyncedData(Env* env) const;
 
-  Status DropRandomUnsyncedData(Env* env, Random* rand) const;
+  rocksdb_rs::status::Status DropRandomUnsyncedData(Env* env, Random* rand) const;
 };
 
 class TestRandomAccessFile : public RandomAccessFile {
@@ -52,12 +52,12 @@ class TestRandomAccessFile : public RandomAccessFile {
   TestRandomAccessFile(std::unique_ptr<RandomAccessFile>&& target,
                        FaultInjectionTestEnv* env);
 
-  Status Read(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override;
 
-  Status Prefetch(uint64_t offset, size_t n) override;
+  rocksdb_rs::status::Status Prefetch(uint64_t offset, size_t n) override;
 
-  Status MultiRead(ReadRequest* reqs, size_t num_reqs) override;
+  rocksdb_rs::status::Status MultiRead(ReadRequest* reqs, size_t num_reqs) override;
 
  private:
   std::unique_ptr<RandomAccessFile> target_;
@@ -72,23 +72,23 @@ class TestWritableFile : public WritableFile {
                             std::unique_ptr<WritableFile>&& f,
                             FaultInjectionTestEnv* env);
   virtual ~TestWritableFile();
-  virtual Status Append(const Slice& data) override;
-  virtual Status Append(
+  virtual rocksdb_rs::status::Status Append(const Slice& data) override;
+  virtual rocksdb_rs::status::Status Append(
       const Slice& data,
       const DataVerificationInfo& /*verification_info*/) override {
     return Append(data);
   }
-  virtual Status Truncate(uint64_t size) override {
+  virtual rocksdb_rs::status::Status Truncate(uint64_t size) override {
     return target_->Truncate(size);
   }
-  virtual Status Close() override;
-  virtual Status Flush() override;
-  virtual Status Sync() override;
+  virtual rocksdb_rs::status::Status Close() override;
+  virtual rocksdb_rs::status::Status Flush() override;
+  virtual rocksdb_rs::status::Status Sync() override;
   virtual bool IsSyncThreadSafe() const override { return true; }
-  virtual Status PositionedAppend(const Slice& data, uint64_t offset) override {
+  virtual rocksdb_rs::status::Status PositionedAppend(const Slice& data, uint64_t offset) override {
     return target_->PositionedAppend(data, offset);
   }
-  virtual Status PositionedAppend(
+  virtual rocksdb_rs::status::Status PositionedAppend(
       const Slice& data, uint64_t offset,
       const DataVerificationInfo& /*verification_info*/) override {
     return PositionedAppend(data, offset);
@@ -112,12 +112,12 @@ class TestRandomRWFile : public RandomRWFile {
                             std::unique_ptr<RandomRWFile>&& f,
                             FaultInjectionTestEnv* env);
   virtual ~TestRandomRWFile();
-  Status Write(uint64_t offset, const Slice& data) override;
-  Status Read(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status Write(uint64_t offset, const Slice& data) override;
+  rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override;
-  Status Close() override;
-  Status Flush() override;
-  Status Sync() override;
+  rocksdb_rs::status::Status Close() override;
+  rocksdb_rs::status::Status Flush() override;
+  rocksdb_rs::status::Status Sync() override;
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
@@ -136,8 +136,8 @@ class TestDirectory : public Directory {
       : env_(env), dirname_(dirname), dir_(dir) {}
   ~TestDirectory() {}
 
-  virtual Status Fsync() override;
-  virtual Status Close() override;
+  virtual rocksdb_rs::status::Status Fsync() override;
+  virtual rocksdb_rs::status::Status Close() override;
 
  private:
   FaultInjectionTestEnv* env_;
@@ -148,45 +148,45 @@ class TestDirectory : public Directory {
 class FaultInjectionTestEnv : public EnvWrapper {
  public:
   explicit FaultInjectionTestEnv(Env* base)
-      : EnvWrapper(base), filesystem_active_(true), error_(Status_new()) {}
+      : EnvWrapper(base), filesystem_active_(true), error_(rocksdb_rs::status::Status_new()) {}
 
   static const char* kClassName() { return "FaultInjectionTestEnv"; }
   const char* Name() const override { return kClassName(); }
 
-  Status NewDirectory(const std::string& name,
+  rocksdb_rs::status::Status NewDirectory(const std::string& name,
                       std::unique_ptr<Directory>* result) override;
 
-  Status NewWritableFile(const std::string& fname,
+  rocksdb_rs::status::Status NewWritableFile(const std::string& fname,
                          std::unique_ptr<WritableFile>* result,
                          const EnvOptions& soptions) override;
 
-  Status ReopenWritableFile(const std::string& fname,
+  rocksdb_rs::status::Status ReopenWritableFile(const std::string& fname,
                             std::unique_ptr<WritableFile>* result,
                             const EnvOptions& soptions) override;
 
-  Status NewRandomRWFile(const std::string& fname,
+  rocksdb_rs::status::Status NewRandomRWFile(const std::string& fname,
                          std::unique_ptr<RandomRWFile>* result,
                          const EnvOptions& soptions) override;
 
-  Status NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::status::Status NewRandomAccessFile(const std::string& fname,
                              std::unique_ptr<RandomAccessFile>* result,
                              const EnvOptions& soptions) override;
 
-  virtual Status DeleteFile(const std::string& f) override;
+  virtual rocksdb_rs::status::Status DeleteFile(const std::string& f) override;
 
-  virtual Status RenameFile(const std::string& s,
+  virtual rocksdb_rs::status::Status RenameFile(const std::string& s,
                             const std::string& t) override;
 
-  virtual Status LinkFile(const std::string& s, const std::string& t) override;
+  virtual rocksdb_rs::status::Status LinkFile(const std::string& s, const std::string& t) override;
 
 // Undef to eliminate clash on Windows
 #undef GetFreeSpace
-  virtual Status GetFreeSpace(const std::string& path,
+  virtual rocksdb_rs::status::Status GetFreeSpace(const std::string& path,
                               uint64_t* disk_free) override {
     if (!IsFilesystemActive() &&
-        error_.subcode() == SubCode::kNoSpace) {
+        error_.subcode() == rocksdb_rs::status::SubCode::kNoSpace) {
       *disk_free = 0;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
       return target()->GetFreeSpace(path, disk_free);
     }
@@ -200,13 +200,13 @@ class FaultInjectionTestEnv : public EnvWrapper {
 
   // For every file that is not fully synced, make a call to `func` with
   // FileState of the file as the parameter.
-  Status DropFileData(std::function<Status(Env*, FileState)> func);
+  rocksdb_rs::status::Status DropFileData(std::function<rocksdb_rs::status::Status(Env*, FileState)> func);
 
-  Status DropUnsyncedFileData();
+  rocksdb_rs::status::Status DropUnsyncedFileData();
 
-  Status DropRandomUnsyncedFileData(Random* rnd);
+  rocksdb_rs::status::Status DropRandomUnsyncedFileData(Random* rnd);
 
-  Status DeleteFilesCreatedAfterLastDirSync();
+  rocksdb_rs::status::Status DeleteFilesCreatedAfterLastDirSync();
 
   void ResetState();
 
@@ -226,19 +226,19 @@ class FaultInjectionTestEnv : public EnvWrapper {
     return filesystem_active_;
   }
   void SetFilesystemActiveNoLock(
-      bool active, Status error = Status_Corruption("Not active")) {
+      bool active, rocksdb_rs::status::Status error = rocksdb_rs::status::Status_Corruption("Not active")) {
     filesystem_active_ = active;
     if (!active) {
       error_.copy_from(error);
     }
   }
   void SetFilesystemActive(bool active,
-                           Status error = Status_Corruption("Not active")) {
+                           rocksdb_rs::status::Status error = rocksdb_rs::status::Status_Corruption("Not active")) {
     MutexLock l(&mutex_);
     SetFilesystemActiveNoLock(active, error.Clone());
   }
   void AssertNoOpenFile() { assert(open_managed_files_.empty()); }
-  Status GetError() { return error_.Clone(); }
+  rocksdb_rs::status::Status GetError() { return error_.Clone(); }
 
  private:
   port::Mutex mutex_;
@@ -247,7 +247,7 @@ class FaultInjectionTestEnv : public EnvWrapper {
   std::unordered_map<std::string, std::set<std::string>>
       dir_to_new_files_since_last_sync_;
   bool filesystem_active_;  // Record flushes, syncs, writes
-  Status error_;
+  rocksdb_rs::status::Status error_;
 };
 
 }  // namespace rocksdb

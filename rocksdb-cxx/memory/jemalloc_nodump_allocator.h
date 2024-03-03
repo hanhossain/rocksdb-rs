@@ -44,7 +44,7 @@ class JemallocNodumpAllocator : public BaseMemoryAllocator {
   static bool IsSupported(std::string* why);
   bool IsMutable() const { return !init_; }
 
-  Status PrepareOptions(const ConfigOptions& config_options) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override;
 
 #ifdef ROCKSDB_JEMALLOC_NODUMP_ALLOCATOR
   void* Allocate(size_t size) override;
@@ -54,7 +54,7 @@ class JemallocNodumpAllocator : public BaseMemoryAllocator {
 
  private:
 #ifdef ROCKSDB_JEMALLOC_NODUMP_ALLOCATOR
-  Status InitializeArenas();
+  rocksdb_rs::status::Status InitializeArenas();
 
   uint32_t GetArenaIndex() const;
 
@@ -64,7 +64,7 @@ class JemallocNodumpAllocator : public BaseMemoryAllocator {
                      unsigned arena_ind);
 
   // Destroy arena on destruction of the allocator, or on failure.
-  static Status DestroyArena(uint32_t arena_index);
+  static rocksdb_rs::status::Status DestroyArena(uint32_t arena_index);
 
   // Destroy tcache on destruction of the allocator, or thread exit.
   static void DestroyThreadSpecificCache(void* ptr);

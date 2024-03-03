@@ -1249,7 +1249,7 @@ class VersionSetTestBase {
     std::unique_ptr<WritableFileWriter> file_writer;
     const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
-    Status s = WritableFileWriter::Create(
+    rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
         nullptr);
     ASSERT_OK(s);
@@ -1281,7 +1281,7 @@ class VersionSetTestBase {
     PrepareManifest(&column_families_, &last_seqno, &log_writer);
     log_writer.reset();
     // Make "CURRENT" file point to the new manifest file.
-    Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+    rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
     ASSERT_OK(s);
 
     EXPECT_OK(versions_->Recover(column_families_, false));
@@ -1301,29 +1301,29 @@ class VersionSetTestBase {
   void VerifyManifest(std::string* manifest_path) const {
     assert(manifest_path != nullptr);
     uint64_t manifest_file_number = 0;
-    Status s = versions_->GetCurrentManifestPath(
+    rocksdb_rs::status::Status s = versions_->GetCurrentManifestPath(
         dbname_, fs_.get(), manifest_path, &manifest_file_number);
     ASSERT_OK(s);
     ASSERT_EQ(1, manifest_file_number);
   }
 
-  Status LogAndApplyToDefaultCF(VersionEdit& edit) {
+  rocksdb_rs::status::Status LogAndApplyToDefaultCF(VersionEdit& edit) {
     mutex_.Lock();
-    Status s = versions_->LogAndApply(
+    rocksdb_rs::status::Status s = versions_->LogAndApply(
         versions_->GetColumnFamilySet()->GetDefault(), mutable_cf_options_,
         read_options_, &edit, &mutex_, nullptr);
     mutex_.Unlock();
     return s;
   }
 
-  Status LogAndApplyToDefaultCF(
+  rocksdb_rs::status::Status LogAndApplyToDefaultCF(
       const autovector<std::unique_ptr<VersionEdit>>& edits) {
     autovector<VersionEdit*> vedits;
     for (auto& e : edits) {
       vedits.push_back(e.get());
     }
     mutex_.Lock();
-    Status s = versions_->LogAndApply(
+    rocksdb_rs::status::Status s = versions_->LogAndApply(
         versions_->GetColumnFamilySet()->GetDefault(), mutable_cf_options_,
         read_options_, vedits, &mutex_, nullptr);
     mutex_.Unlock();
@@ -1349,7 +1349,7 @@ class VersionSetTestBase {
     new_cf.SetColumnFamily(new_id);
     new_cf.SetLogNumber(0);
     new_cf.SetComparatorName(cf_options.comparator->Name());
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     mutex_.Lock();
     s = versions_->LogAndApply(/*column_family_data=*/nullptr,
                                MutableCFOptions(cf_options), read_options_,
@@ -1427,7 +1427,7 @@ TEST_F(VersionSetTest, SameColumnFamilyGroupCommit) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
   mutex_.Lock();
-  Status s = versions_->LogAndApply(cfds, all_mutable_cf_options, read_options,
+  rocksdb_rs::status::Status s = versions_->LogAndApply(cfds, all_mutable_cf_options, read_options,
                                     edit_lists, &mutex_, nullptr);
   mutex_.Unlock();
   EXPECT_OK(s);
@@ -1628,7 +1628,7 @@ TEST_F(VersionSetTest, ObsoleteBlobFile) {
   edit.AddBlobFileGarbage(blob_file_number, total_blob_count, total_blob_bytes);
 
   mutex_.Lock();
-  Status s = versions_->LogAndApply(
+  rocksdb_rs::status::Status s = versions_->LogAndApply(
       versions_->GetColumnFamilySet()->GetDefault(), mutable_cf_options_,
       read_options_, &edit, &mutex_, nullptr);
   mutex_.Unlock();
@@ -1981,7 +1981,7 @@ TEST_F(VersionSetTest, WalCreateTwice) {
 
   ASSERT_OK(LogAndApplyToDefaultCF(edit));
 
-  Status s = LogAndApplyToDefaultCF(edit);
+  rocksdb_rs::status::Status s = LogAndApplyToDefaultCF(edit);
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(s.ToString()->find("WAL 10 is created more than once") !=
               std::string::npos)
@@ -2009,7 +2009,7 @@ TEST_F(VersionSetTest, WalCreateAfterClose) {
     VersionEdit edit;
     edit.AddWal(kLogNumber);
 
-    Status s = LogAndApplyToDefaultCF(edit);
+    rocksdb_rs::status::Status s = LogAndApplyToDefaultCF(edit);
     ASSERT_TRUE(s.IsCorruption());
     ASSERT_TRUE(s.ToString()->find("WAL 10 is created more than once") !=
                 std::string::npos)
@@ -2042,7 +2042,7 @@ TEST_F(VersionSetTest, AddWalWithSmallerSize) {
     WalMetadata wal(kSizeInBytes / 2);
     edit.AddWal(kLogNumber, wal);
 
-    Status s = LogAndApplyToDefaultCF(edit);
+    rocksdb_rs::status::Status s = LogAndApplyToDefaultCF(edit);
     ASSERT_OK(s);
   }
   const std::map<WalNumber, WalMetadata> wals2 =
@@ -2245,7 +2245,7 @@ class VersionSetWithTimestampTest : public VersionSetTest {
 
     GenVersionEditsToSetFullHistoryTsLow(ts_lbs);
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     mutex_.Lock();
     s = versions_->LogAndApply(cfd_, *(cfd_->GetLatestMutableCFOptions()),
                                read_options_, edits_, &mutex_, nullptr);
@@ -2438,7 +2438,7 @@ TEST_F(VersionSetAtomicGroupTest,
   AddNewEditsToLog(kAtomicGroupSize);
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   EXPECT_OK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                         &manifest_reporter,
                                         &manifest_reader_status));
@@ -2458,7 +2458,7 @@ TEST_F(VersionSetAtomicGroupTest,
   SetupValidAtomicGroup(kAtomicGroupSize);
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   EXPECT_OK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                         &manifest_reporter,
                                         &manifest_reader_status));
@@ -2501,7 +2501,7 @@ TEST_F(VersionSetAtomicGroupTest,
   AddNewEditsToLog(kNumberOfPersistedVersionEdits);
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   EXPECT_OK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                         &manifest_reporter,
                                         &manifest_reader_status));
@@ -2538,7 +2538,7 @@ TEST_F(VersionSetAtomicGroupTest,
   SetupIncompleteTrailingAtomicGroup(kAtomicGroupSize);
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   // No edits in an atomic group.
   EXPECT_OK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                         &manifest_reporter,
@@ -2582,7 +2582,7 @@ TEST_F(VersionSetAtomicGroupTest,
   AddNewEditsToLog(kAtomicGroupSize);
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   EXPECT_NOK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                          &manifest_reporter,
                                          &manifest_reader_status));
@@ -2600,7 +2600,7 @@ TEST_F(VersionSetAtomicGroupTest,
   std::unordered_set<ColumnFamilyData*> cfds_changed;
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   EXPECT_OK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                         &manifest_reporter,
                                         &manifest_reader_status));
@@ -2633,7 +2633,7 @@ TEST_F(VersionSetAtomicGroupTest,
   AddNewEditsToLog(kAtomicGroupSize);
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   EXPECT_NOK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                          &manifest_reporter,
                                          &manifest_reader_status));
@@ -2651,7 +2651,7 @@ TEST_F(VersionSetAtomicGroupTest,
   std::unordered_set<ColumnFamilyData*> cfds_changed;
   std::unique_ptr<log::FragmentBufferedReader> manifest_reader;
   std::unique_ptr<log::Reader::Reporter> manifest_reporter;
-  std::unique_ptr<Status> manifest_reader_status;
+  std::unique_ptr<rocksdb_rs::status::Status> manifest_reader_status;
   EXPECT_OK(reactive_versions_->Recover(column_families_, &manifest_reader,
                                         &manifest_reporter,
                                         &manifest_reader_status));
@@ -2695,7 +2695,7 @@ TEST_P(VersionSetTestDropOneCF, HandleDroppedColumnFamilyInAtomicGroup) {
   SequenceNumber last_seqno;
   std::unique_ptr<log::Writer> log_writer;
   PrepareManifest(&column_families, &last_seqno, &log_writer);
-  Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
   ASSERT_OK(s);
 
   EXPECT_OK(versions_->Recover(column_families, false /* read_only */));
@@ -2797,7 +2797,7 @@ class EmptyDefaultCfNewManifest : public VersionSetTestBase,
     const std::string manifest_path = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
-    Status s = WritableFileWriter::Create(
+    rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest_path, fs->OptimizeForManifestWrite(env_options_),
         &file_writer, nullptr);
     ASSERT_OK(s);
@@ -2828,7 +2828,7 @@ class EmptyDefaultCfNewManifest : public VersionSetTestBase,
 TEST_F(EmptyDefaultCfNewManifest, Recover) {
   PrepareManifest(nullptr, nullptr, &log_writer_);
   log_writer_.reset();
-  Status s =
+  rocksdb_rs::status::Status s =
       SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
   ASSERT_OK(s);
   std::string manifest_path;
@@ -2870,7 +2870,7 @@ class VersionSetTestEmptyDb
     const std::string manifest_path = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
-    Status s = WritableFileWriter::Create(
+    rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest_path, fs->OptimizeForManifestWrite(env_options_),
         &file_writer, nullptr);
     ASSERT_OK(s);
@@ -2892,7 +2892,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest0) {
   db_options_.write_dbid_to_manifest = std::get<0>(GetParam());
   PrepareManifest(nullptr, nullptr, &log_writer_);
   log_writer_.reset();
-  Status s =
+  rocksdb_rs::status::Status s =
       SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
   ASSERT_OK(s);
 
@@ -2929,7 +2929,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest1) {
   VersionEdit new_cf1;
   new_cf1.AddColumnFamily(VersionSetTestBase::kColumnFamilyName1);
   new_cf1.SetColumnFamily(1);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     std::string record;
     new_cf1.EncodeTo(&record);
@@ -2973,7 +2973,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromInCompleteManifest2) {
       kDefaultColumnFamilyName, kColumnFamilyName1, kColumnFamilyName2,
       kColumnFamilyName3};
   uint32_t cf_id = 1;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (size_t i = 1; i != all_cf_names.size(); ++i) {
     VersionEdit new_cf;
     new_cf.AddColumnFamily(all_cf_names[i]);
@@ -3020,7 +3020,7 @@ TEST_P(VersionSetTestEmptyDb, OpenManifestWithUnknownCF) {
       kDefaultColumnFamilyName, kColumnFamilyName1, kColumnFamilyName2,
       kColumnFamilyName3};
   uint32_t cf_id = 1;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (size_t i = 1; i != all_cf_names.size(); ++i) {
     VersionEdit new_cf;
     new_cf.AddColumnFamily(all_cf_names[i]);
@@ -3078,7 +3078,7 @@ TEST_P(VersionSetTestEmptyDb, OpenCompleteManifest) {
       kDefaultColumnFamilyName, kColumnFamilyName1, kColumnFamilyName2,
       kColumnFamilyName3};
   uint32_t cf_id = 1;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (size_t i = 1; i != all_cf_names.size(); ++i) {
     VersionEdit new_cf;
     new_cf.AddColumnFamily(all_cf_names[i]);
@@ -3183,7 +3183,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
-    Status s = WritableFileWriter::Create(
+    rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
         nullptr);
     ASSERT_OK(s);
@@ -3272,7 +3272,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       uint64_t file_num = info.file_number;
       std::string fname = static_cast<std::string>(MakeTableFileName(dbname_, file_num));
       std::unique_ptr<FSWritableFile> file;
-      Status s = fs_->NewWritableFile(fname, FileOptions(), &file, nullptr);
+      rocksdb_rs::status::Status s = fs_->NewWritableFile(fname, FileOptions(), &file, nullptr);
       ASSERT_OK(s);
       std::unique_ptr<WritableFileWriter> fwriter(new WritableFileWriter(
           std::move(file), fname, FileOptions(), env_->GetSystemClock().get()));
@@ -3321,7 +3321,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     assert(log_writer_.get() != nullptr);
     std::string record;
     ASSERT_TRUE(edit.EncodeTo(&record, 0 /* ts_sz */));
-    Status s = log_writer_->AddRecord(record);
+    rocksdb_rs::status::Status s = log_writer_->AddRecord(record);
     ASSERT_OK(s);
   }
 
@@ -3366,7 +3366,7 @@ TEST_F(VersionSetTestMissingFiles, ManifestFarBehindSst) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, std::vector<std::pair<int, FileMetaData>>(), deleted_files);
   log_writer_.reset();
-  Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3424,7 +3424,7 @@ TEST_F(VersionSetTestMissingFiles, ManifestAheadofSst) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, added_files, std::vector<std::pair<int, uint64_t>>());
   log_writer_.reset();
-  Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3478,7 +3478,7 @@ TEST_F(VersionSetTestMissingFiles, NoFileMissing) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, std::vector<std::pair<int, FileMetaData>>(), deleted_files);
   log_writer_.reset();
-  Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3643,7 +3643,7 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   Reopen(options);
   ASSERT_OK(Put(std::string(1024, 'a'), "va"));
   ASSERT_OK(Put("b", "vb"));
-  Status s = Flush();
+  rocksdb_rs::status::Status s = Flush();
   if (charge_file_metadata == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_TRUE(s.IsMemoryLimit());
     EXPECT_TRUE(s.ToString()->find(

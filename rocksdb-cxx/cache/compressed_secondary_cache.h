@@ -77,7 +77,7 @@ class CompressedSecondaryCache : public SecondaryCache {
 
   const char* Name() const override { return "CompressedSecondaryCache"; }
 
-  Status Insert(const Slice& key, Cache::ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const Cache::CacheItemHelper* helper) override;
 
   std::unique_ptr<SecondaryCacheResultHandle> Lookup(
@@ -91,13 +91,13 @@ class CompressedSecondaryCache : public SecondaryCache {
 
   void WaitAll(std::vector<SecondaryCacheResultHandle*> /*handles*/) override {}
 
-  Status SetCapacity(size_t capacity) override;
+  rocksdb_rs::status::Status SetCapacity(size_t capacity) override;
 
-  Status GetCapacity(size_t& capacity) override;
+  rocksdb_rs::status::Status GetCapacity(size_t& capacity) override;
 
-  Status Deflate(size_t decrease) override;
+  rocksdb_rs::status::Status Deflate(size_t decrease) override;
 
-  Status Inflate(size_t increase) override;
+  rocksdb_rs::status::Status Inflate(size_t increase) override;
 
   std::string GetPrintableOptions() const override;
 

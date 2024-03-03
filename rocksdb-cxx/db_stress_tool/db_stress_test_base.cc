@@ -76,7 +76,7 @@ StressTest::StressTest()
     Options options;
     options.env = db_stress_env;
     // Remove files without preserving manfiest files
-    const Status s = !FLAGS_use_blob_db
+    const rocksdb_rs::status::Status s = !FLAGS_use_blob_db
                          ? DestroyDB(FLAGS_db, options)
                          : blob_db::DestroyBlobDB(FLAGS_db, options,
                                                   blob_db::BlobDBOptions());
@@ -111,7 +111,7 @@ std::shared_ptr<Cache> StressTest::NewCache(size_t capacity,
 
   std::shared_ptr<SecondaryCache> secondary_cache;
   if (!FLAGS_secondary_cache_uri.empty()) {
-    Status s = SecondaryCache::CreateFromString(
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(
         config_options, FLAGS_secondary_cache_uri, &secondary_cache);
     if (secondary_cache == nullptr) {
       fprintf(stderr,
@@ -294,7 +294,7 @@ void StressTest::FinishInitDb(SharedState* shared) {
     // previous run mutating the DB had all its operations traced, in which case
     // we should always be able to `Restore()` the expected values to match the
     // `db_`'s current seqno.
-    Status s = shared->Restore(db_);
+    rocksdb_rs::status::Status s = shared->Restore(db_);
     if (!s.ok()) {
       fprintf(stderr, "Error restoring historical expected values: %s\n",
               s.ToString()->c_str());
@@ -332,7 +332,7 @@ void StressTest::TrackExpectedState(SharedState* shared) {
   if ((FLAGS_sync_fault_injection || FLAGS_disable_wal ||
        FLAGS_manual_wal_flush_one_in > 0) &&
       IsStateTracked()) {
-    Status s = shared->SaveAtAndAfter(db_);
+    rocksdb_rs::status::Status s = shared->SaveAtAndAfter(db_);
     if (!s.ok()) {
       fprintf(stderr, "Error enabling history tracing: %s\n",
               s.ToString()->c_str());
@@ -341,9 +341,9 @@ void StressTest::TrackExpectedState(SharedState* shared) {
   }
 }
 
-Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
+rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
                               ThreadState::SnapshotState& snap_state) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (cf->GetName() != snap_state.cf_at_name) {
     return s;
   }
@@ -364,7 +364,7 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
     return s;
   }
   if (!snap_state.status.eq(s)) {
-    return Status_Corruption(
+    return rocksdb_rs::status::Status_Corruption(
         "The snapshot gave inconsistent results for key " +
         std::to_string(Hash(snap_state.key.c_str(), snap_state.key.size(), 0)) +
         " in cf " + cf->GetName() + ": (" + *snap_state.status.ToString() +
@@ -372,7 +372,7 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
   }
   if (s.ok()) {
     if (exp_v.as_slice() != v.as_slice()) {
-      return Status_Corruption("The snapshot gave inconsistent values: (" +
+      return rocksdb_rs::status::Status_Corruption("The snapshot gave inconsistent values: (" +
                                 exp_v.ToString() + ") vs. (" + v.ToString() +
                                 ")");
     }
@@ -392,14 +392,14 @@ Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
     }
     if (!std::equal(snap_state.key_vec->begin(), snap_state.key_vec->end(),
                     tmp_bitvec.get()->begin())) {
-      return Status_Corruption("Found inconsistent keys at this snapshot");
+      return rocksdb_rs::status::Status_Corruption("Found inconsistent keys at this snapshot");
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void StressTest::VerificationAbort(SharedState* shared, std::string msg,
-                                   const Status& s) const {
+                                   const rocksdb_rs::status::Status& s) const {
   fprintf(stderr, "Verification failed: %s. Status is %s\n", msg.c_str(),
           s.ToString()->c_str());
   shared->SetVerificationFailure();
@@ -478,7 +478,7 @@ void StressTest::PreloadDbAndReopenAsReadOnly(int64_t number_of_keys,
   }
   char value[100];
   int cf_idx = 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto cfh : column_families_) {
     for (int64_t k = 0; k != number_of_keys; ++k) {
       const std::string key = Key(k);
@@ -570,7 +570,7 @@ void StressTest::PreloadDbAndReopenAsReadOnly(int64_t number_of_keys,
   }
 }
 
-Status StressTest::SetOptions(ThreadState* thread) {
+rocksdb_rs::status::Status StressTest::SetOptions(ThreadState* thread) {
   assert(FLAGS_set_options_one_in > 0);
   std::unordered_map<std::string, std::string> opts;
   std::string name =
@@ -621,23 +621,23 @@ void StressTest::ProcessRecoveredPreparedTxnsHelper(Transaction* txn,
     }
   }
   if (rand.OneIn(2)) {
-    Status s = txn->Commit();
+    rocksdb_rs::status::Status s = txn->Commit();
     assert(s.ok());
   } else {
-    Status s = txn->Rollback();
+    rocksdb_rs::status::Status s = txn->Rollback();
     assert(s.ok());
   }
 }
 
-Status StressTest::NewTxn(WriteOptions& write_opts, Transaction** txn) {
+rocksdb_rs::status::Status StressTest::NewTxn(WriteOptions& write_opts, Transaction** txn) {
   if (!FLAGS_use_txn) {
-    return Status_InvalidArgument("NewTxn when FLAGS_use_txn is not set");
+    return rocksdb_rs::status::Status_InvalidArgument("NewTxn when FLAGS_use_txn is not set");
   }
   write_opts.disableWAL = FLAGS_disable_wal;
   static std::atomic<uint64_t> txn_id = {0};
   if (FLAGS_use_optimistic_txn) {
     *txn = optimistic_txn_db_->BeginTransaction(write_opts);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     TransactionOptions txn_options;
     txn_options.use_only_the_last_commit_time_batch_for_recovery =
@@ -646,16 +646,16 @@ Status StressTest::NewTxn(WriteOptions& write_opts, Transaction** txn) {
     txn_options.deadlock_detect = true;
     *txn = txn_db_->BeginTransaction(write_opts, txn_options);
     auto istr = std::to_string(txn_id.fetch_add(1));
-    Status s = (*txn)->SetName("xid" + istr);
+    rocksdb_rs::status::Status s = (*txn)->SetName("xid" + istr);
     return s;
   }
 }
 
-Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
+rocksdb_rs::status::Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
   if (!FLAGS_use_txn) {
-    return Status_InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
+    return rocksdb_rs::status::Status_InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
   }
-  Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (FLAGS_use_optimistic_txn) {
     assert(optimistic_txn_db_);
     s = txn->Commit();
@@ -670,9 +670,9 @@ Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
         s = txn->CommitAndTryCreateSnapshot(/*notifier=*/nullptr, ts,
                                             &timestamped_snapshot);
 
-        Status a = Status_new();
+        rocksdb_rs::status::Status a = rocksdb_rs::status::Status_new();
         std::shared_ptr<const Snapshot> b;
-        std::pair<Status, std::shared_ptr<const Snapshot>> res(a.Clone(),b);
+        std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>> res(a.Clone(),b);
         if (thread->tid == 0) {
           uint64_t now = db_stress_env->NowNanos();
           res = txn_db_->CreateTimestampedSnapshot(now);
@@ -702,13 +702,13 @@ Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
   return s;
 }
 
-Status StressTest::RollbackTxn(Transaction* txn) {
+rocksdb_rs::status::Status StressTest::RollbackTxn(Transaction* txn) {
   if (!FLAGS_use_txn) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "RollbackTxn when FLAGS_use_txn is not"
         " set");
   }
-  Status s = txn->Rollback();
+  rocksdb_rs::status::Status s = txn->Rollback();
   delete txn;
   return s;
 }
@@ -817,7 +817,7 @@ void StressTest::OperateDb(ThreadState* thread) {
 
       if (thread->rand.OneInOpt(FLAGS_manual_wal_flush_one_in)) {
         bool sync = thread->rand.OneIn(2) ? true : false;
-        Status s = db_->FlushWAL(sync);
+        rocksdb_rs::status::Status s = db_->FlushWAL(sync);
         if (!s.ok() && !(sync && s.IsNotSupported())) {
           fprintf(stderr, "FlushWAL(sync=%s) failed: %s\n",
                   (sync ? "true" : "false"), s.ToString()->c_str());
@@ -825,7 +825,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       }
 
       if (thread->rand.OneInOpt(FLAGS_lock_wal_one_in)) {
-        Status s = db_->LockWAL();
+        rocksdb_rs::status::Status s = db_->LockWAL();
         if (!s.ok()) {
           fprintf(stderr, "LockWAL() failed: %s\n", s.ToString()->c_str());
         } else {
@@ -850,7 +850,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       }
 
       if (thread->rand.OneInOpt(FLAGS_sync_wal_one_in)) {
-        Status s = db_->SyncWAL();
+        rocksdb_rs::status::Status s = db_->SyncWAL();
         if (!s.ok() && !s.IsNotSupported()) {
           fprintf(stderr, "SyncWAL() failed: %s\n", s.ToString()->c_str());
         }
@@ -878,7 +878,7 @@ void StressTest::OperateDb(ThreadState* thread) {
           GenerateColumnFamilies(FLAGS_column_families, rand_column_family);
 
       if (thread->rand.OneInOpt(FLAGS_flush_one_in)) {
-        Status status = TestFlush(rand_column_families);
+        rocksdb_rs::status::Status status = TestFlush(rand_column_families);
         if (!status.ok()) {
           fprintf(stdout, "Unable to perform Flush(): %s\n",
                   status.ToString()->c_str());
@@ -888,7 +888,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       // Verify GetLiveFiles with a 1 in N chance.
       if (thread->rand.OneInOpt(FLAGS_get_live_files_one_in) &&
           !FLAGS_write_fault_one_in) {
-        Status status = VerifyGetLiveFiles();
+        rocksdb_rs::status::Status status = VerifyGetLiveFiles();
         if (!status.ok()) {
           VerificationAbort(shared, "VerifyGetLiveFiles status not OK", status);
         }
@@ -896,7 +896,7 @@ void StressTest::OperateDb(ThreadState* thread) {
 
       // Verify GetSortedWalFiles with a 1 in N chance.
       if (thread->rand.OneInOpt(FLAGS_get_sorted_wal_files_one_in)) {
-        Status status = VerifyGetSortedWalFiles();
+        rocksdb_rs::status::Status status = VerifyGetSortedWalFiles();
         if (!status.ok()) {
           VerificationAbort(shared, "VerifyGetSortedWalFiles status not OK",
                             status);
@@ -905,7 +905,7 @@ void StressTest::OperateDb(ThreadState* thread) {
 
       // Verify GetCurrentWalFile with a 1 in N chance.
       if (thread->rand.OneInOpt(FLAGS_get_current_wal_file_one_in)) {
-        Status status = VerifyGetCurrentWalFile();
+        rocksdb_rs::status::Status status = VerifyGetCurrentWalFile();
         if (!status.ok()) {
           VerificationAbort(shared, "VerifyGetCurrentWalFile status not OK",
                             status);
@@ -913,7 +913,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       }
 
       if (thread->rand.OneInOpt(FLAGS_pause_background_one_in)) {
-        Status status = TestPauseBackground(thread);
+        rocksdb_rs::status::Status status = TestPauseBackground(thread);
         if (!status.ok()) {
           VerificationAbort(
               shared, "Pause/ContinueBackgroundWork status not OK", status);
@@ -921,7 +921,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       }
 
       if (thread->rand.OneInOpt(FLAGS_verify_checksum_one_in)) {
-        Status status = db_->VerifyChecksum();
+        rocksdb_rs::status::Status status = db_->VerifyChecksum();
         if (!status.ok()) {
           VerificationAbort(shared, "VerifyChecksum status not OK", status);
         }
@@ -950,7 +950,7 @@ void StressTest::OperateDb(ThreadState* thread) {
         }
 
         if (total_size <= FLAGS_backup_max_size) {
-          Status s = TestBackupRestore(thread, rand_column_families, rand_keys);
+          rocksdb_rs::status::Status s = TestBackupRestore(thread, rand_column_families, rand_keys);
           if (!s.ok()) {
             VerificationAbort(shared, "Backup/restore gave inconsistent state",
                               s);
@@ -959,14 +959,14 @@ void StressTest::OperateDb(ThreadState* thread) {
       }
 
       if (thread->rand.OneInOpt(FLAGS_checkpoint_one_in)) {
-        Status s = TestCheckpoint(thread, rand_column_families, rand_keys);
+        rocksdb_rs::status::Status s = TestCheckpoint(thread, rand_column_families, rand_keys);
         if (!s.ok()) {
           VerificationAbort(shared, "Checkpoint gave inconsistent state", s);
         }
       }
 
       if (thread->rand.OneInOpt(FLAGS_approximate_size_one_in)) {
-        Status s =
+        rocksdb_rs::status::Status s =
             TestApproximateSize(thread, i, rand_column_families, rand_keys);
         if (!s.ok()) {
           VerificationAbort(shared, "ApproximateSize Failed", s);
@@ -977,7 +977,7 @@ void StressTest::OperateDb(ThreadState* thread) {
       }
 
       /*always*/ {
-        Status s = MaybeReleaseSnapshots(thread, i);
+        rocksdb_rs::status::Status s = MaybeReleaseSnapshots(thread, i);
         if (!s.ok()) {
           VerificationAbort(shared, "Snapshot gave inconsistent state", s);
         }
@@ -1147,7 +1147,7 @@ std::vector<std::string> StressTest::GetWhiteBoxKeys(ThreadState* thread,
 
 // Given a key K, this creates an iterator which scans to K and then
 // does a random sequence of Next/Prev operations.
-Status StressTest::TestIterate(ThreadState* thread,
+rocksdb_rs::status::Status StressTest::TestIterate(ThreadState* thread,
                                const ReadOptions& read_opts,
                                const std::vector<int>& rand_column_families,
                                const std::vector<int64_t>& rand_keys) {
@@ -1336,24 +1336,24 @@ Status StressTest::TestIterate(ThreadState* thread,
     op_logs += "; ";
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Test the return status of GetLiveFiles.
-Status StressTest::VerifyGetLiveFiles() const {
+rocksdb_rs::status::Status StressTest::VerifyGetLiveFiles() const {
   std::vector<std::string> live_file;
   uint64_t manifest_size = 0;
   return db_->GetLiveFiles(live_file, &manifest_size);
 }
 
 // Test the return status of GetSortedWalFiles.
-Status StressTest::VerifyGetSortedWalFiles() const {
+rocksdb_rs::status::Status StressTest::VerifyGetSortedWalFiles() const {
   VectorLogPtr log_ptr;
   return db_->GetSortedWalFiles(log_ptr);
 }
 
 // Test the return status of GetCurrentWalFile.
-Status StressTest::VerifyGetCurrentWalFile() const {
+rocksdb_rs::status::Status StressTest::VerifyGetCurrentWalFile() const {
   std::unique_ptr<LogFile> cur_wal_file;
   return db_->GetCurrentWalFile(&cur_wal_file);
 }
@@ -1522,7 +1522,7 @@ void StressTest::VerifyIterator(ThreadState* thread,
   }
 }
 
-Status StressTest::TestBackupRestore(
+rocksdb_rs::status::Status StressTest::TestBackupRestore(
     ThreadState* thread, const std::vector<int>& rand_column_families,
     const std::vector<int64_t>& rand_keys) {
   std::vector<std::unique_ptr<MutexLock>> locks;
@@ -1572,7 +1572,7 @@ Status StressTest::TestBackupRestore(
   }
   BackupEngine* backup_engine = nullptr;
   std::string from = "a backup/restore operation";
-  Status s = BackupEngine::Open(db_stress_env, backup_opts, &backup_engine);
+  rocksdb_rs::status::Status s = BackupEngine::Open(db_stress_env, backup_opts, &backup_engine);
   if (!s.ok()) {
     from = "BackupEngine::Open";
   }
@@ -1618,7 +1618,7 @@ Status StressTest::TestBackupRestore(
     backup_engine->GetBackupInfo(&backup_info,
                                  /*include_file_details*/ inplace_not_restore);
     if (backup_info.empty()) {
-      s = Status_NotFound("no backups found");
+      s = rocksdb_rs::status::Status_NotFound("no backups found");
       from = "BackupEngine::GetBackupInfo";
     }
   }
@@ -1720,7 +1720,7 @@ Status StressTest::TestBackupRestore(
       ts = ts_str;
       read_opts.timestamp = &ts;
     }
-    Status get_status = restored_db->Get(
+    rocksdb_rs::status::Status get_status = restored_db->Get(
         read_opts, restored_cf_handles[rand_column_families[i]], key,
         &restored_value);
     bool exists = thread->shared->Exists(rand_column_families[i], rand_keys[0]);
@@ -1729,14 +1729,14 @@ Status StressTest::TestBackupRestore(
         std::ostringstream oss;
         oss << "0x" << key.ToString(true)
             << " exists in restore but not in original db";
-        s = Status_Corruption(oss.str());
+        s = rocksdb_rs::status::Status_Corruption(oss.str());
       }
     } else if (get_status.IsNotFound()) {
       if (exists && from_latest && ShouldAcquireMutexOnKey()) {
         std::ostringstream oss;
         oss << "0x" << key.ToString(true)
             << " exists in original db but not in restore";
-        s = Status_Corruption(oss.str());
+        s = rocksdb_rs::status::Status_Corruption(oss.str());
       }
     } else {
       s.copy_from(get_status);
@@ -1790,7 +1790,7 @@ Status StressTest::TestBackupRestore(
   return s;
 }
 
-Status StressTest::TestApproximateSize(
+rocksdb_rs::status::Status StressTest::TestApproximateSize(
     ThreadState* thread, uint64_t iteration,
     const std::vector<int>& rand_column_families,
     const std::vector<int64_t>& rand_keys) {
@@ -1832,7 +1832,7 @@ Status StressTest::TestApproximateSize(
       sao, column_families_[rand_column_families[0]], &range, 1, &result);
 }
 
-Status StressTest::TestCheckpoint(ThreadState* thread,
+rocksdb_rs::status::Status StressTest::TestCheckpoint(ThreadState* thread,
                                   const std::vector<int>& rand_column_families,
                                   const std::vector<int64_t>& rand_keys) {
   std::vector<std::unique_ptr<MutexLock>> locks;
@@ -1855,14 +1855,14 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
   DestroyDB(checkpoint_dir, tmp_opts);
 
   Checkpoint* checkpoint = nullptr;
-  Status s = Checkpoint::Create(db_, &checkpoint);
+  rocksdb_rs::status::Status s = Checkpoint::Create(db_, &checkpoint);
   if (s.ok()) {
     s = checkpoint->CreateCheckpoint(checkpoint_dir);
     if (!s.ok()) {
       fprintf(stderr, "Fail to create checkpoint to %s\n",
               checkpoint_dir.c_str());
       std::vector<std::string> files;
-      Status my_s = db_stress_env->GetChildren(checkpoint_dir, &files);
+      rocksdb_rs::status::Status my_s = db_stress_env->GetChildren(checkpoint_dir, &files);
       if (my_s.ok()) {
         for (const auto& f : files) {
           fprintf(stderr, " %s\n", f.c_str());
@@ -1913,7 +1913,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
         read_opts.timestamp = &ts;
       }
       std::string value;
-      Status get_status = checkpoint_db->Get(
+      rocksdb_rs::status::Status get_status = checkpoint_db->Get(
           read_opts, cf_handles[rand_column_families[i]], key, &value);
       bool exists =
           thread->shared->Exists(rand_column_families[i], rand_keys[0]);
@@ -1922,7 +1922,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
           std::ostringstream oss;
           oss << "0x" << key.ToString(true) << " exists in checkpoint "
               << checkpoint_dir << " but not in original db";
-          s = Status_Corruption(oss.str());
+          s = rocksdb_rs::status::Status_Corruption(oss.str());
         }
       } else if (get_status.IsNotFound()) {
         if (exists && ShouldAcquireMutexOnKey()) {
@@ -1930,7 +1930,7 @@ Status StressTest::TestCheckpoint(ThreadState* thread,
           oss << "0x" << key.ToString(true)
               << " exists in original db but not in checkpoint "
               << checkpoint_dir;
-          s = Status_Corruption(oss.str());
+          s = rocksdb_rs::status::Status_Corruption(oss.str());
         }
       } else {
         s.copy_from(get_status);
@@ -2082,7 +2082,7 @@ void StressTest::TestCompactFiles(ThreadState* thread,
   }
 }
 
-Status StressTest::TestFlush(const std::vector<int>& rand_column_families) {
+rocksdb_rs::status::Status StressTest::TestFlush(const std::vector<int>& rand_column_families) {
   FlushOptions flush_opts;
   if (FLAGS_atomic_flush) {
     return db_->Flush(flush_opts, column_families_);
@@ -2093,8 +2093,8 @@ Status StressTest::TestFlush(const std::vector<int>& rand_column_families) {
   return db_->Flush(flush_opts, cfhs);
 }
 
-Status StressTest::TestPauseBackground(ThreadState* thread) {
-  Status status = db_->PauseBackgroundWork();
+rocksdb_rs::status::Status StressTest::TestPauseBackground(ThreadState* thread) {
+  rocksdb_rs::status::Status status = db_->PauseBackgroundWork();
   if (!status.ok()) {
     return status;
   }
@@ -2181,7 +2181,7 @@ void StressTest::TestAcquireSnapshot(ThreadState* thread,
   thread->snapshot_queue.emplace(release_at, snap_state);
 }
 
-Status StressTest::MaybeReleaseSnapshots(ThreadState* thread, uint64_t i) {
+rocksdb_rs::status::Status StressTest::MaybeReleaseSnapshots(ThreadState* thread, uint64_t i) {
   while (!thread->snapshot_queue.empty() &&
          i >= thread->snapshot_queue.front().first) {
     auto& snap_state = thread->snapshot_queue.front().second;
@@ -2189,7 +2189,7 @@ Status StressTest::MaybeReleaseSnapshots(ThreadState* thread, uint64_t i) {
     // Note: this is unsafe as the cf might be dropped concurrently. But
     // it is ok since unclean cf drop is cunnrently not supported by write
     // prepared transactions.
-    Status s = AssertSame(db_, column_families_[snap_state.cf_at], snap_state);
+    rocksdb_rs::status::Status s = AssertSame(db_, column_families_[snap_state.cf_at], snap_state);
     db_->ReleaseSnapshot(snap_state.snapshot);
     delete snap_state.key_vec;
     thread->snapshot_queue.pop();
@@ -2197,7 +2197,7 @@ Status StressTest::MaybeReleaseSnapshots(ThreadState* thread, uint64_t i) {
       return s;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void StressTest::TestCompactRange(ThreadState* thread, int64_t rand_key,
@@ -2246,7 +2246,7 @@ void StressTest::TestCompactRange(ThreadState* thread, int64_t rand_key,
         GetRangeHash(thread, pre_snapshot, column_family, start_key, end_key);
   }
 
-  Status status = db_->CompactRange(cro, column_family, &start_key, &end_key);
+  rocksdb_rs::status::Status status = db_->CompactRange(cro, column_family, &start_key, &end_key);
 
   if (!status.ok()) {
     fprintf(stdout, "Unable to perform CompactRange(): %s\n",
@@ -2565,7 +2565,7 @@ void StressTest::Open(SharedState* shared) {
 
   fprintf(stdout, "DB path: [%s]\n", FLAGS_db.c_str());
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   if (FLAGS_ttl == -1) {
     std::vector<std::string> existing_column_families;
@@ -2863,7 +2863,7 @@ void StressTest::Reopen(ThreadState* thread) {
   column_families_.clear();
 
   if (thread->rand.OneIn(2)) {
-    Status s = db_->Close();
+    rocksdb_rs::status::Status s = db_->Close();
     if (!s.ok()) {
       fprintf(stderr, "Non-ok close status: %s\n", s.ToString()->c_str());
       fflush(stderr);
@@ -2886,7 +2886,7 @@ void StressTest::Reopen(ThreadState* thread) {
   if ((FLAGS_sync_fault_injection || FLAGS_disable_wal ||
        FLAGS_manual_wal_flush_one_in > 0) &&
       IsStateTracked()) {
-    Status s = thread->shared->SaveAtAndAfter(db_);
+    rocksdb_rs::status::Status s = thread->shared->SaveAtAndAfter(db_);
     if (!s.ok()) {
       fprintf(stderr, "Error enabling history tracing: %s\n",
               s.ToString()->c_str());
@@ -3001,7 +3001,7 @@ bool InitializeOptionsFromFile(Options& options) {
   config_options.env = db_stress_env;
   std::vector<ColumnFamilyDescriptor> cf_descriptors;
   if (!FLAGS_options_file.empty()) {
-    Status s = LoadOptionsFromFile(config_options, FLAGS_options_file,
+    rocksdb_rs::status::Status s = LoadOptionsFromFile(config_options, FLAGS_options_file,
                                    &db_options, &cf_descriptors);
     if (!s.ok()) {
       fprintf(stderr, "Unable to load options file %s --- %s\n",
@@ -3318,7 +3318,7 @@ void InitializeOptionsGeneral(
 
   if (FLAGS_sst_file_manager_bytes_per_sec > 0 ||
       FLAGS_sst_file_manager_bytes_per_truncate > 0) {
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     options.sst_file_manager.reset(NewSstFileManager(
         db_stress_env, options.info_log, "" /* trash_dir */,
         static_cast<int64_t>(FLAGS_sst_file_manager_bytes_per_sec),

@@ -66,7 +66,7 @@ IOStatus IOError(const std::string& context, const std::string& file_name,
       return s;
     }
     case ESTALE:
-      return IOStatus::IOError(SubCode::kStaleFile);
+      return IOStatus::IOError(rocksdb_rs::status::SubCode::kStaleFile);
     case ENOENT:
       return IOStatus::PathNotFound(IOErrorMsg(context, file_name),
                                     errnoStr(err_number).c_str());
@@ -380,7 +380,7 @@ std::string RemoveTrailingSlash(const std::string& path) {
   return p;
 }
 
-Status LogicalBlockSizeCache::RefAndCacheLogicalBlockSize(
+rocksdb_rs::status::Status LogicalBlockSizeCache::RefAndCacheLogicalBlockSize(
     const std::vector<std::string>& directories) {
   std::vector<std::string> dirs;
   dirs.reserve(directories.size());
@@ -398,7 +398,7 @@ Status LogicalBlockSizeCache::RefAndCacheLogicalBlockSize(
     }
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto& dir_size : dir_sizes) {
     s = get_logical_block_size_of_directory_(dir_size.first, &dir_size.second);
     if (!s.ok()) {
@@ -452,16 +452,16 @@ size_t LogicalBlockSizeCache::GetLogicalBlockSize(const std::string& fname,
 }
 #endif
 
-Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std::string& directory,
+rocksdb_rs::status::Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std::string& directory,
                                                    size_t* size) {
   int fd = open(directory.c_str(), O_DIRECTORY | O_RDONLY);
   if (fd == -1) {
     close(fd);
-    return Status_IOError("Cannot open directory " + directory);
+    return rocksdb_rs::status::Status_IOError("Cannot open directory " + directory);
   }
   *size = PosixHelper::GetLogicalBlockSizeOfFd(fd);
   close(fd);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 size_t PosixHelper::GetLogicalBlockSizeOfFd(int fd) {

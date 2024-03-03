@@ -65,7 +65,7 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "RegularKeysStartWithA"; }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     std::string encoded;
     std::string encoded_num_puts;
     std::string encoded_num_deletes;
@@ -84,10 +84,10 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
         {"NumSingleDeletes", encoded_num_single_deletes},
         {"NumSizeChanges", encoded_num_size_changes},
     };
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status AddUserKey(const Slice& user_key, const Slice& /*value*/,
+  rocksdb_rs::status::Status AddUserKey(const Slice& user_key, const Slice& /*value*/,
                     EntryType type, SequenceNumber /*seq*/,
                     uint64_t file_size) override {
     // simply asssume all user keys are not empty.
@@ -107,7 +107,7 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
       num_size_changes_++;
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {
@@ -131,20 +131,20 @@ class RegularKeysStartWithABackwardCompatible
  public:
   const char* Name() const override { return "RegularKeysStartWithA"; }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     std::string encoded;
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{{"TablePropertiesTest", "Rocksdb"},
                                           {"Count", encoded}};
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status Add(const Slice& user_key, const Slice& /*value*/) override {
+  rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& /*value*/) override {
     // simply asssume all user keys are not empty.
     if (user_key.data()[0] == 'A') {
       ++count_;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   UserCollectedProperties GetReadableProperties() const override {
@@ -159,21 +159,21 @@ class RegularKeysStartWithAInternal : public IntTblPropCollector {
  public:
   const char* Name() const override { return "RegularKeysStartWithA"; }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     std::string encoded;
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{{"TablePropertiesTest", "Rocksdb"},
                                           {"Count", encoded}};
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status InternalAdd(const Slice& user_key, const Slice& /*value*/,
+  rocksdb_rs::status::Status InternalAdd(const Slice& user_key, const Slice& /*value*/,
                      uint64_t /*file_size*/) override {
     // simply asssume all user keys are not empty.
     if (user_key.data()[0] == 'A') {
       ++count_;
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void BlockAdd(uint64_t /* block_uncomp_bytes */,
@@ -293,7 +293,7 @@ void TestCustomizedTablePropertiesCollector(
 
   std::unique_ptr<TableProperties> props;
   const ReadOptions read_options;
-  Status s = ReadTableProperties(fake_file_reader.get(), fwf->contents().size(),
+  rocksdb_rs::status::Status s = ReadTableProperties(fake_file_reader.get(), fwf->contents().size(),
                                  magic_number, ioptions, read_options, &props);
   ASSERT_OK(s);
 
@@ -431,7 +431,7 @@ void TestInternalKeyPropertiesCollector(
 
     std::unique_ptr<TableProperties> props;
     const ReadOptions read_options;
-    Status s =
+    rocksdb_rs::status::Status s =
         ReadTableProperties(reader.get(), fwf->contents().size(), magic_number,
                             ioptions, read_options, &props);
     ASSERT_OK(s);

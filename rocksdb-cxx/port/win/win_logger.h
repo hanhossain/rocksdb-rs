@@ -45,7 +45,7 @@ class WinLogger : public rocksdb::Logger {
   void DebugWriter(const char* str, int len);
 
  protected:
-  Status CloseImpl() override;
+  rocksdb_rs::status::Status CloseImpl() override;
 
  private:
   HANDLE file_;
@@ -55,7 +55,7 @@ class WinLogger : public rocksdb::Logger {
   SystemClock* clock_;
   bool flush_pending_;
 
-  Status CloseInternal();
+  rocksdb_rs::status::Status CloseInternal();
 
   const static uint64_t flush_every_seconds_ = 5;
 };

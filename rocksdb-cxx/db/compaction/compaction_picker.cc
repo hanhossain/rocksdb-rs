@@ -133,7 +133,7 @@ CompactionPicker::CompactionPicker(const ImmutableOptions& ioptions,
 CompactionPicker::~CompactionPicker() {}
 
 // Delete this compaction from the list of running compactions.
-void CompactionPicker::ReleaseCompactionFiles(Compaction* c, Status status) {
+void CompactionPicker::ReleaseCompactionFiles(Compaction* c, rocksdb_rs::status::Status status) {
   UnregisterCompaction(c);
   if (!status.ok()) {
     c->ResetNextCompactionIndex();
@@ -383,12 +383,12 @@ Compaction* CompactionPicker::CompactFiles(
   return c;
 }
 
-Status CompactionPicker::GetCompactionInputsFromFileNumbers(
+rocksdb_rs::status::Status CompactionPicker::GetCompactionInputsFromFileNumbers(
     std::vector<CompactionInputFiles>* input_files,
     std::unordered_set<uint64_t>* input_set, const VersionStorageInfo* vstorage,
     const CompactionOptions& /*compact_options*/) const {
   if (input_set->size() == 0U) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Compaction must include at least one file.");
   }
   assert(input_files);
@@ -420,7 +420,7 @@ Status CompactionPicker::GetCompactionInputsFromFileNumbers(
       message += " ";
       message += std::to_string(fn);
     }
-    return Status_InvalidArgument(message);
+    return rocksdb_rs::status::Status_InvalidArgument(message);
   }
 
   for (int level = first_non_empty_level; level <= last_non_empty_level;
@@ -429,7 +429,7 @@ Status CompactionPicker::GetCompactionInputsFromFileNumbers(
     input_files->emplace_back(std::move(matched_input_files[level]));
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Returns true if any one of the parent files are being compacted
@@ -903,7 +903,7 @@ bool HaveOverlappingKeyRanges(const Comparator* c, const SstFileMetaData& a,
 }
 }  // namespace
 
-Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
+rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
     std::unordered_set<uint64_t>* input_files,
     const ColumnFamilyMetaData& cf_meta, const int output_level) const {
   auto& levels = cf_meta.levels;
@@ -978,7 +978,7 @@ Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
     // include all files between the first and the last compaction input files.
     for (int f = first_included; f <= last_included; ++f) {
       if (current_files[f].being_compacted) {
-        return Status_Aborted("Necessary compaction input file " +
+        return rocksdb_rs::status::Status_Aborted("Necessary compaction input file " +
                                current_files[f].name +
                                " is currently being compacted.");
       }
@@ -1024,7 +1024,7 @@ Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
         if (HaveOverlappingKeyRanges(comparator, aggregated_file_meta,
                                      next_lv_file)) {
           if (next_lv_file.being_compacted) {
-            return Status_Aborted(
+            return rocksdb_rs::status::Status_Aborted(
                 "File " + next_lv_file.name +
                 " that has overlapping key range with one of the compaction "
                 " input file is currently being compacted.");
@@ -1035,42 +1035,42 @@ Status CompactionPicker::SanitizeCompactionInputFilesForAllLevels(
     }
   }
   if (RangeOverlapWithCompaction(smallestkey, largestkey, output_level)) {
-    return Status_Aborted(
+    return rocksdb_rs::status::Status_Aborted(
         "A running compaction is writing to the same output level in an "
         "overlapping key range");
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status CompactionPicker::SanitizeCompactionInputFiles(
+rocksdb_rs::status::Status CompactionPicker::SanitizeCompactionInputFiles(
     std::unordered_set<uint64_t>* input_files,
     const ColumnFamilyMetaData& cf_meta, const int output_level) const {
   assert(static_cast<int>(cf_meta.levels.size()) - 1 ==
          cf_meta.levels[cf_meta.levels.size() - 1].level);
   if (output_level >= static_cast<int>(cf_meta.levels.size())) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Output level for column family " + cf_meta.name +
         " must between [0, " +
         std::to_string(cf_meta.levels[cf_meta.levels.size() - 1].level) + "].");
   }
 
   if (output_level > MaxOutputLevel()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Exceed the maximum output level defined by "
         "the current compaction algorithm --- " +
         std::to_string(MaxOutputLevel()));
   }
 
   if (output_level < 0) {
-    return Status_InvalidArgument("Output level cannot be negative.");
+    return rocksdb_rs::status::Status_InvalidArgument("Output level cannot be negative.");
   }
 
   if (input_files->size() == 0) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "A compaction must contain at least one file.");
   }
 
-  Status s = SanitizeCompactionInputFilesForAllLevels(input_files, cf_meta,
+  rocksdb_rs::status::Status s = SanitizeCompactionInputFilesForAllLevels(input_files, cf_meta,
                                                       output_level);
 
   if (!s.ok()) {
@@ -1086,7 +1086,7 @@ Status CompactionPicker::SanitizeCompactionInputFiles(
       for (const auto& file_meta : level_meta.files) {
         if (file_num == rocksdb_rs::filename::TableFileNameToNumber(file_meta.name)) {
           if (file_meta.being_compacted) {
-            return Status_Aborted("Specified compaction input file " +
+            return rocksdb_rs::status::Status_Aborted("Specified compaction input file " +
                                    static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName("", file_num)) +
                                    " is already being compacted.");
           }
@@ -1100,12 +1100,12 @@ Status CompactionPicker::SanitizeCompactionInputFiles(
       }
     }
     if (!found) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Specified compaction input file " + static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName("", file_num)) +
           " does not exist in column family " + cf_meta.name + ".");
     }
     if (input_file_level > output_level) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Cannot compact file to up level, input file: " +
           static_cast<std::string>(rocksdb_rs::filename::MakeTableFileName("", file_num)) + " level " +
           std::to_string(input_file_level) + " > output level " +
@@ -1113,7 +1113,7 @@ Status CompactionPicker::SanitizeCompactionInputFiles(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void CompactionPicker::RegisterCompaction(Compaction* c) {

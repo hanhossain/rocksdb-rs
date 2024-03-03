@@ -40,7 +40,7 @@ class TimestampCompatibleCompactionTest : public DBTestBase {
     Slice ts_slice = ts_str;
     read_opts.timestamp = &ts_slice;
     std::string value;
-    Status s = db_->Get(read_opts, key, &value);
+    rocksdb_rs::status::Status s = db_->Get(read_opts, key, &value);
     if (s.IsNotFound()) {
       value.assign("NOT_FOUND");
     } else if (!s.ok()) {

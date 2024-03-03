@@ -100,7 +100,7 @@ class TestIterator : public InternalIterator {
     }
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       ParsedInternalKey ikey;
-      Status pik_status =
+      rocksdb_rs::status::Status pik_status =
           ParseInternalKey(it->first, &ikey, true /* log_err_key */);
       assert(pik_status.ok());
       if (!pik_status.ok() || ikey.user_key != _key) {
@@ -200,9 +200,9 @@ class TestIterator : public InternalIterator {
     return data_[iter_].second;
   }
 
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     assert(initialized_);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   bool IsKeyPinned() const override { return true; }

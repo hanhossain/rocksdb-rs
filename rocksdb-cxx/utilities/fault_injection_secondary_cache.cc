@@ -76,12 +76,12 @@ FaultInjectionSecondaryCache::GetErrorContext() {
   return ctx;
 }
 
-Status FaultInjectionSecondaryCache::Insert(
+rocksdb_rs::status::Status FaultInjectionSecondaryCache::Insert(
     const Slice& key, Cache::ObjectPtr value,
     const Cache::CacheItemHelper* helper) {
   ErrorContext* ctx = GetErrorContext();
   if (ctx->rand.OneIn(prob_)) {
-    return Status_IOError();
+    return rocksdb_rs::status::Status_IOError();
   }
 
   return base_->Insert(key, value, helper);

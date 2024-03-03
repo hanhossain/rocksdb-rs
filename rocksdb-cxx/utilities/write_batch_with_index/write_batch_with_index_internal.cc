@@ -26,7 +26,7 @@ BaseDeltaIterator::BaseDeltaIterator(ColumnFamilyHandle* column_family,
     : forward_(true),
       current_at_base_(true),
       equal_keys_(false),
-      status_(Status_OK()),
+      status_(rocksdb_rs::status::Status_OK()),
       base_iterator_(base_iterator),
       delta_iterator_(delta_iterator),
       comparator_(comparator),
@@ -70,7 +70,7 @@ void BaseDeltaIterator::SeekForPrev(const Slice& k) {
 
 void BaseDeltaIterator::Next() {
   if (!Valid()) {
-    status_ = Status_NotSupported("Next() on invalid iterator");
+    status_ = rocksdb_rs::status::Status_NotSupported("Next() on invalid iterator");
     return;
   }
 
@@ -107,7 +107,7 @@ void BaseDeltaIterator::Next() {
 
 void BaseDeltaIterator::Prev() {
   if (!Valid()) {
-    status_ = Status_NotSupported("Prev() on invalid iterator");
+    status_ = rocksdb_rs::status::Status_NotSupported("Prev() on invalid iterator");
     return;
   }
 
@@ -177,7 +177,7 @@ Slice BaseDeltaIterator::value() const {
   }
 }
 
-Status BaseDeltaIterator::status() const {
+rocksdb_rs::status::Status BaseDeltaIterator::status() const {
   if (!status_.ok()) {
     return status_.Clone();
   }
@@ -187,7 +187,7 @@ Status BaseDeltaIterator::status() const {
   return delta_iterator_->status();
 }
 
-void BaseDeltaIterator::Invalidate(Status s) { status_.copy_from(s); }
+void BaseDeltaIterator::Invalidate(rocksdb_rs::status::Status s) { status_.copy_from(s); }
 
 void BaseDeltaIterator::AssertInvariants() {
 #ifndef NDEBUG
@@ -276,7 +276,7 @@ bool BaseDeltaIterator::DeltaValid() const { return delta_iterator_->Valid(); }
 void BaseDeltaIterator::UpdateCurrent() {
 // Suppress false positive clang analyzer warnings.
 #ifndef __clang_analyzer__
-  status_ = Status_OK();
+  status_ = rocksdb_rs::status::Status_OK();
   while (true) {
     auto delta_result = WBWIIteratorImpl::kNotFound;
     WriteEntry delta_entry;
@@ -452,27 +452,27 @@ WBWIIteratorImpl::Result WBWIIteratorImpl::FindLatestUpdate(
   return result;
 }
 
-Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
+rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
                                                   WriteType* type, Slice* Key,
                                                   Slice* value, Slice* blob,
                                                   Slice* xid) const {
   if (type == nullptr || Key == nullptr || value == nullptr ||
       blob == nullptr || xid == nullptr) {
-    return Status_InvalidArgument("Output parameters cannot be null");
+    return rocksdb_rs::status::Status_InvalidArgument("Output parameters cannot be null");
   }
 
   if (data_offset == GetDataSize()) {
     // reached end of batch.
-    return Status_NotFound();
+    return rocksdb_rs::status::Status_NotFound();
   }
 
   if (data_offset > GetDataSize()) {
-    return Status_InvalidArgument("data offset exceed write batch size");
+    return rocksdb_rs::status::Status_InvalidArgument("data offset exceed write batch size");
   }
   Slice input = Slice(rep_.data() + data_offset, rep_.size() - data_offset);
   char tag;
   uint32_t column_family;
-  Status s = ReadRecordFromWriteBatch(&input, &tag, &column_family, Key, value,
+  rocksdb_rs::status::Status s = ReadRecordFromWriteBatch(&input, &tag, &column_family, Key, value,
                                       blob, xid);
   if (!s.ok()) {
     return s;
@@ -512,10 +512,10 @@ Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
       *type = kXIDRecord;
       break;
     default:
-      return Status_Corruption("unknown WriteBatch tag ",
+      return rocksdb_rs::status::Status_Corruption("unknown WriteBatch tag ",
                                 std::to_string(static_cast<unsigned int>(tag)));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // If both of `entry1` and `entry2` point to real entry in write batch, we
@@ -646,7 +646,7 @@ WriteBatchWithIndexInternal::WriteBatchWithIndexInternal(
     const DBOptions* db_options, ColumnFamilyHandle* column_family)
     : db_(nullptr), db_options_(db_options), column_family_(column_family) {}
 
-Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
+rocksdb_rs::status::Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
                                              const Slice* value,
                                              const MergeContext& context,
                                              std::string* result) const {
@@ -654,7 +654,7 @@ Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family_);
     const auto merge_operator = cfh->cfd()->ioptions()->merge_operator.get();
     if (merge_operator == nullptr) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Merge_operator must be set for column_family");
     } else if (db_ != nullptr) {
       const ImmutableDBOptions& immutable_db_options =
@@ -693,14 +693,14 @@ Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
           /* op_failure_scope */ nullptr);
     }
   } else {
-    return Status_InvalidArgument("Must provide a column_family");
+    return rocksdb_rs::status::Status_InvalidArgument("Must provide a column_family");
   }
 }
 
 WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
     WriteBatchWithIndex* batch, const Slice& key, MergeContext* context,
-    std::string* value, Status* s) {
-  *s = Status_OK();
+    std::string* value, rocksdb_rs::status::Status* s) {
+  *s = rocksdb_rs::status::Status_OK();
 
   std::unique_ptr<WBWIIteratorImpl> iter(
       static_cast_with_check<WBWIIteratorImpl>(
@@ -710,7 +710,7 @@ WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
   iter->Seek(key);
   auto result = iter->FindLatestUpdate(key, context);
   if (result == WBWIIteratorImpl::kError) {
-    (*s) = Status_Corruption("Unexpected entry in WriteBatchWithIndex:",
+    (*s) = rocksdb_rs::status::Status_Corruption("Unexpected entry in WriteBatchWithIndex:",
                               std::to_string(iter->Entry().type));
     return result;
   } else if (result == WBWIIteratorImpl::kNotFound) {

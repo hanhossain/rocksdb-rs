@@ -71,7 +71,7 @@ class SharedState {
         expected_state_manager_(nullptr),
         printing_verification_results_(false),
         start_timestamp_(Env::Default()->NowNanos()) {
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     // TODO: We should introduce a way to explicitly disable verification
     // during shutdown. When that is disabled and FLAGS_expected_values_dir
     // is empty (disabling verification at startup), we can skip tracking
@@ -79,12 +79,12 @@ class SharedState {
     // compatibility checks.
     if (!FLAGS_expected_values_dir.empty()) {
       if (!std::atomic<uint32_t>{}.is_lock_free()) {
-        status = Status_InvalidArgument(
+        status = rocksdb_rs::status::Status_InvalidArgument(
             "Cannot use --expected_values_dir on platforms without lock-free "
             "std::atomic<uint32_t>");
       }
       if (status.ok() && FLAGS_clear_column_family_one_in > 0) {
-        status = Status_InvalidArgument(
+        status = rocksdb_rs::status::Status_InvalidArgument(
             "Cannot use --expected_values_dir on when "
             "--clear_column_family_one_in is greater than zero.");
       }
@@ -235,13 +235,13 @@ class SharedState {
     return range_locks;
   }
 
-  Status SaveAtAndAfter(DB* db) {
+  rocksdb_rs::status::Status SaveAtAndAfter(DB* db) {
     return expected_state_manager_->SaveAtAndAfter(db);
   }
 
   bool HasHistory() { return expected_state_manager_->HasHistory(); }
 
-  Status Restore(DB* db) { return expected_state_manager_->Restore(db); }
+  rocksdb_rs::status::Status Restore(DB* db) { return expected_state_manager_->Restore(db); }
 
   // Requires external locking covering all keys in `cf`.
   void ClearColumnFamily(int cf) {
@@ -413,7 +413,7 @@ struct ThreadState {
   Stats stats;
   struct SnapshotState {
     SnapshotState(const Snapshot* snapshot, int cf_at, std::string cf_at_name,
-                  std::string key, const Status& status, std::string value,
+                  std::string key, const rocksdb_rs::status::Status& status, std::string value,
                   std::vector<bool>* key_vec, std::string timestamp)
         : snapshot(snapshot),
           cf_at(cf_at),
@@ -432,7 +432,7 @@ struct ThreadState {
     // The key with which we did a Get at this snapshot
     std::string key;
     // The status of the Get
-    Status status;
+    rocksdb_rs::status::Status status;
     // The value of the Get
     std::string value;
     // optional state of all keys in the db

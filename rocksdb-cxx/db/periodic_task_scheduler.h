@@ -43,15 +43,15 @@ class PeriodicTaskScheduler {
   PeriodicTaskScheduler& operator=(PeriodicTaskScheduler&&) = delete;
 
   // Register a task with its default repeat period
-  Status Register(PeriodicTaskType task_type, const PeriodicTaskFunc& fn);
+  rocksdb_rs::status::Status Register(PeriodicTaskType task_type, const PeriodicTaskFunc& fn);
 
   // Register a task with specified repeat period. 0 is an invalid argument
   // (kInvalidPeriodSec). To stop the task, please use Unregister() specifically
-  Status Register(PeriodicTaskType task_type, const PeriodicTaskFunc& fn,
+  rocksdb_rs::status::Status Register(PeriodicTaskType task_type, const PeriodicTaskFunc& fn,
                   uint64_t repeat_period_seconds);
 
   // Unregister the task
-  Status Unregister(PeriodicTaskType task_type);
+  rocksdb_rs::status::Status Unregister(PeriodicTaskType task_type);
 
 #ifndef NDEBUG
   // Override the timer for the unittest

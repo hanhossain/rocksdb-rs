@@ -98,9 +98,9 @@ class TableReader {
 
   // Now try to return approximately 128 anchor keys.
   // The last one tends to be the largest key.
-  virtual Status ApproximateKeyAnchors(const ReadOptions& /*read_options*/,
+  virtual rocksdb_rs::status::Status ApproximateKeyAnchors(const ReadOptions& /*read_options*/,
                                        std::vector<Anchor>& /*anchors*/) {
-    return Status_NotSupported("ApproximateKeyAnchors() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("ApproximateKeyAnchors() not supported.");
   }
 
   // Set up the table for Compaction. Might change some parameters with
@@ -126,7 +126,7 @@ class TableReader {
   // key is the key to search for
   // skip_filters: disables checking the bloom filters even if they exist. This
   //               option is effective only for block-based table format.
-  virtual Status Get(const ReadOptions& readOptions, const Slice& key,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
                      GetContext* get_context,
                      const SliceTransform* prefix_extractor,
                      bool skip_filters = false) = 0;
@@ -134,10 +134,10 @@ class TableReader {
   // Use bloom filters in the table file, if present, to filter out keys. The
   // mget_range will be updated to skip keys that get a negative result from
   // the filter lookup.
-  virtual Status MultiGetFilter(const ReadOptions& /*readOptions*/,
+  virtual rocksdb_rs::status::Status MultiGetFilter(const ReadOptions& /*readOptions*/,
                                 const SliceTransform* /*prefix_extractor*/,
                                 MultiGetContext::Range* /*mget_range*/) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
   virtual void MultiGet(const ReadOptions& readOptions,
@@ -162,25 +162,25 @@ class TableReader {
   // Prefetch data corresponding to a give range of keys
   // Typically this functionality is required for table implementations that
   // persists the data on a non volatile storage medium like disk/SSD
-  virtual Status Prefetch(const ReadOptions& /* read_options */,
+  virtual rocksdb_rs::status::Status Prefetch(const ReadOptions& /* read_options */,
                           const Slice* begin = nullptr,
                           const Slice* end = nullptr) {
     (void)begin;
     (void)end;
     // Default implementation is NOOP.
     // The child class should implement functionality when applicable
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // convert db file to a human readable form
-  virtual Status DumpTable(WritableFile* /*out_file*/) {
-    return Status_NotSupported("DumpTable() not supported");
+  virtual rocksdb_rs::status::Status DumpTable(WritableFile* /*out_file*/) {
+    return rocksdb_rs::status::Status_NotSupported("DumpTable() not supported");
   }
 
   // check whether there is corruption in this db file
-  virtual Status VerifyChecksum(const ReadOptions& /*read_options*/,
+  virtual rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& /*read_options*/,
                                 TableReaderCaller /*caller*/) {
-    return Status_NotSupported("VerifyChecksum() not supported");
+    return rocksdb_rs::status::Status_NotSupported("VerifyChecksum() not supported");
   }
 };
 

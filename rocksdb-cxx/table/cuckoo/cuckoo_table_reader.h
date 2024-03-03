@@ -37,9 +37,9 @@ class CuckooTableReader : public TableReader {
     return table_props_;
   }
 
-  Status status() const { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const { return status_.Clone(); }
 
-  Status Get(const ReadOptions& readOptions, const Slice& key,
+  rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
              GetContext* get_context, const SliceTransform* prefix_extractor,
              bool skip_filters = false) override;
 
@@ -82,7 +82,7 @@ class CuckooTableReader : public TableReader {
   bool identity_as_first_hash_;
   bool use_module_hash_;
   std::shared_ptr<const TableProperties> table_props_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   uint32_t num_hash_func_;
   std::string unused_key_;
   uint32_t key_length_;

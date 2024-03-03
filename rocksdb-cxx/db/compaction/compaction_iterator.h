@@ -36,7 +36,7 @@ class SequenceIterWrapper : public InternalIterator {
         inner_iter_(iter),
         need_count_entries_(need_count_entries) {}
   bool Valid() const override { return inner_iter_->Valid(); }
-  Status status() const override { return inner_iter_->status(); }
+  rocksdb_rs::status::Status status() const override { return inner_iter_->status(); }
   void Next() override {
     num_itered_++;
     inner_iter_->Next();
@@ -243,7 +243,7 @@ class CompactionIterator {
   // Getters
   const Slice& key() const { return key_; }
   const Slice& value() const { return value_; }
-  const Status& status() const { return status_; }
+  const rocksdb_rs::status::Status& status() const { return status_; }
   const ParsedInternalKey& ikey() const { return ikey_; }
   inline bool Valid() const { return validity_info_.IsValid(); }
   const Slice& user_key() const {
@@ -259,7 +259,7 @@ class CompactionIterator {
   bool output_to_penultimate_level() const {
     return output_to_penultimate_level_;
   }
-  Status InputStatus() const { return input_.status(); }
+  rocksdb_rs::status::Status InputStatus() const { return input_.status(); }
 
   bool IsDeleteRangeSentinelKey() const { return is_range_del_; }
 
@@ -418,7 +418,7 @@ class CompactionIterator {
   Slice value_;
   // The status is OK unless compaction iterator encounters a merge operand
   // while not having a merge operator defined.
-  Status status_;
+  rocksdb_rs::status::Status status_;
   // Stores the user key, sequence number and type of the current compaction
   // iterator output (or current key in the underlying iterator during
   // NextFromInput()).
@@ -444,7 +444,7 @@ class CompactionIterator {
   bool clear_and_output_next_key_ = false;
 
   MergeOutputIterator merge_out_iter_;
-  Status merge_until_status_;
+  rocksdb_rs::status::Status merge_until_status_;
   // PinnedIteratorsManager used to pin input_ Iterator blocks while reading
   // merge operands and then releasing them after consuming them.
   PinnedIteratorsManager pinned_iters_mgr_;

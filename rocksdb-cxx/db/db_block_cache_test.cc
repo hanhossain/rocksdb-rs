@@ -244,21 +244,21 @@ class PersistentCacheFromCache : public PersistentCache {
   PersistentCacheFromCache(std::shared_ptr<Cache> cache, bool read_only)
       : cache_(cache), read_only_(read_only) {}
 
-  Status Insert(const Slice& key, const char* data,
+  rocksdb_rs::status::Status Insert(const Slice& key, const char* data,
                 const size_t size) override {
     if (read_only_) {
-      return Status_NotSupported();
+      return rocksdb_rs::status::Status_NotSupported();
     }
     std::unique_ptr<char[]> copy{new char[size]};
     std::copy_n(data, size, copy.get());
-    Status s = cache_.Insert(key, copy.get(), size);
+    rocksdb_rs::status::Status s = cache_.Insert(key, copy.get(), size);
     if (s.ok()) {
       copy.release();
     }
     return s;
   }
 
-  Status Lookup(const Slice& key, std::unique_ptr<char[]>* data,
+  rocksdb_rs::status::Status Lookup(const Slice& key, std::unique_ptr<char[]>* data,
                 size_t* size) override {
     auto handle = cache_.Lookup(key);
     if (handle) {
@@ -267,9 +267,9 @@ class PersistentCacheFromCache : public PersistentCache {
       data->reset(new char[*size]);
       std::copy_n(ptr, *size, data->get());
       cache_.Release(handle);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
-      return Status_NotFound();
+      return rocksdb_rs::status::Status_NotFound();
     }
   }
 
@@ -292,10 +292,10 @@ class ReadOnlyCacheWrapper : public CacheWrapper {
 
   const char* Name() const override { return "ReadOnlyCacheWrapper"; }
 
-  Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
+  rocksdb_rs::status::Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
                 const CacheItemHelper* /*helper*/, size_t /*charge*/,
                 Handle** /*handle*/, Priority /*priority*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 };
 
@@ -626,7 +626,7 @@ class MockCache : public LRUCache {
 
   using ShardedCache::Insert;
 
-  Status Insert(const Slice& key, Cache::ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const Cache::CacheItemHelper* helper, size_t charge,
                 Handle** handle, Priority priority) override {
     if (priority == Priority::LOW) {
@@ -1231,7 +1231,7 @@ void DummyFillCache(Cache& cache, size_t entry_size,
   for (size_t my_usage = 0; my_usage < capacity;) {
     size_t charge = std::min(entry_size, capacity - my_usage);
     Cache::Handle* handle;
-    Status st = cache.Insert(ck.WithOffset(my_usage).AsSlice(), fake_value,
+    rocksdb_rs::status::Status st = cache.Insert(ck.WithOffset(my_usage).AsSlice(), fake_value,
                              &kNoopCacheItemHelper, charge, &handle);
     ASSERT_OK(st);
     handles.emplace_back(&cache, handle);

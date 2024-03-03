@@ -22,7 +22,7 @@ class BlobCountingIterator : public InternalIterator {
  public:
   BlobCountingIterator(InternalIterator* iter,
                        BlobGarbageMeter* blob_garbage_meter)
-      : iter_(iter), blob_garbage_meter_(blob_garbage_meter), status_(Status_new()) {
+      : iter_(iter), blob_garbage_meter_(blob_garbage_meter), status_(rocksdb_rs::status::Status_new()) {
     assert(iter_);
     assert(blob_garbage_meter_);
 
@@ -88,7 +88,7 @@ class BlobCountingIterator : public InternalIterator {
     return iter_->value();
   }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   bool PrepareValue() override {
     assert(Valid());
@@ -119,7 +119,7 @@ class BlobCountingIterator : public InternalIterator {
     return iter_->IsValuePinned();
   }
 
-  Status GetProperty(std::string prop_name, std::string* prop) override {
+  rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override {
     return iter_->GetProperty(prop_name, prop);
   }
 
@@ -144,7 +144,7 @@ class BlobCountingIterator : public InternalIterator {
 
   InternalIterator* iter_;
   BlobGarbageMeter* blob_garbage_meter_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
 };
 
 }  // namespace rocksdb

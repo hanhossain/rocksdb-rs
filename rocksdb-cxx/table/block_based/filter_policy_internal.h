@@ -50,7 +50,7 @@ class FilterBitsBuilder {
   // WARNING: do not use a filter resulted from a corrupted construction
   // TODO: refactor this to have a better signature, consolidate
   virtual Slice Finish(std::unique_ptr<const char[]>* buf,
-                       Status* /* status */) {
+                       rocksdb_rs::status::Status* /* status */) {
     return Finish(buf);
   }
 
@@ -70,8 +70,8 @@ class FilterBitsBuilder {
   // except for FilterBitsBuilder::Finish resulting a corruption
   // status, which indicates the filter is already in a corrupted state and
   // there is no need to post-verify
-  virtual Status MaybePostVerify(const Slice& /* filter_content */) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status MaybePostVerify(const Slice& /* filter_content */) {
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Approximate the number of keys that can be added and generate a filter

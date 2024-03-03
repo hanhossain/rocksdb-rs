@@ -64,7 +64,7 @@ class StatisticsImpl : public Statistics {
   virtual void recordInHistogram(uint32_t histogram_type,
                                  uint64_t value) override;
 
-  virtual Status Reset() override;
+  virtual rocksdb_rs::status::Status Reset() override;
   virtual std::string ToString() const override;
   virtual bool getTickerMap(std::map<std::string, uint64_t>*) const override;
   virtual bool HistEnabledForType(uint32_t type) const override;

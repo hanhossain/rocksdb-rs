@@ -53,7 +53,7 @@ extern IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
                                FSDirectory* dir_contains_current_file);
 
 // Make the IDENTITY file for the db
-extern Status SetIdentityFile(Env* env, const std::string& dbname,
+extern rocksdb_rs::status::Status SetIdentityFile(Env* env, const std::string& dbname,
                               const std::string& db_id = {});
 
 // Sync manifest file `file`.
@@ -64,7 +64,7 @@ extern IOStatus SyncManifest(const ImmutableDBOptions* db_options,
 // The list only contains file name. The parent directory name is stored
 // in `parent_dir`.
 // `db_log_dir` should be the one as in options.db_log_dir
-extern Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
+extern rocksdb_rs::status::Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
                               const std::string& db_log_dir,
                               const std::string& dbname,
                               std::string* parent_dir,

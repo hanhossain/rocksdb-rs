@@ -46,7 +46,7 @@ WriteQueryTraceRecord::~WriteQueryTraceRecord() { rep_.clear(); }
 
 Slice WriteQueryTraceRecord::GetWriteBatchRep() const { return Slice(rep_); }
 
-Status WriteQueryTraceRecord::Accept(
+rocksdb_rs::status::Status WriteQueryTraceRecord::Accept(
     Handler* handler, std::unique_ptr<TraceRecordResult>* result) {
   assert(handler != nullptr);
   return handler->Handle(*this, result);
@@ -73,7 +73,7 @@ uint32_t GetQueryTraceRecord::GetColumnFamilyID() const { return cf_id_; }
 
 Slice GetQueryTraceRecord::GetKey() const { return Slice(key_); }
 
-Status GetQueryTraceRecord::Accept(Handler* handler,
+rocksdb_rs::status::Status GetQueryTraceRecord::Accept(Handler* handler,
                                    std::unique_ptr<TraceRecordResult>* result) {
   assert(handler != nullptr);
   return handler->Handle(*this, result);
@@ -159,7 +159,7 @@ uint32_t IteratorSeekQueryTraceRecord::GetColumnFamilyID() const {
 
 Slice IteratorSeekQueryTraceRecord::GetKey() const { return Slice(key_); }
 
-Status IteratorSeekQueryTraceRecord::Accept(
+rocksdb_rs::status::Status IteratorSeekQueryTraceRecord::Accept(
     Handler* handler, std::unique_ptr<TraceRecordResult>* result) {
   assert(handler != nullptr);
   return handler->Handle(*this, result);
@@ -198,7 +198,7 @@ std::vector<Slice> MultiGetQueryTraceRecord::GetKeys() const {
   return std::vector<Slice>(keys_.begin(), keys_.end());
 }
 
-Status MultiGetQueryTraceRecord::Accept(
+rocksdb_rs::status::Status MultiGetQueryTraceRecord::Accept(
     Handler* handler, std::unique_ptr<TraceRecordResult>* result) {
   assert(handler != nullptr);
   return handler->Handle(*this, result);

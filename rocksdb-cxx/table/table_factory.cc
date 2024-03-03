@@ -43,7 +43,7 @@ static void RegisterTableFactories(const std::string& /*arg*/) {
   });
 }
 
-Status TableFactory::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status TableFactory::CreateFromString(const ConfigOptions& config_options,
                                       const std::string& value,
                                       std::shared_ptr<TableFactory>* factory) {
   RegisterTableFactories("");

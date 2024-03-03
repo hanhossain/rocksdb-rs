@@ -298,7 +298,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) LRUCacheShard final : public CacheShardBase {
   void SetLowPriorityPoolRatio(double low_pri_pool_ratio);
 
   // Like Cache methods, but with an extra "hash" parameter.
-  Status Insert(const Slice& key, uint32_t hash, Cache::ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, uint32_t hash, Cache::ObjectPtr value,
                 const Cache::CacheItemHelper* helper, size_t charge,
                 LRUHandle** handle, Cache::Priority priority);
 
@@ -354,7 +354,7 @@ class ALIGN_AS(CACHE_LINE_SIZE) LRUCacheShard final : public CacheShardBase {
   // Insert an item into the hash table and, if handle is null, insert into
   // the LRU list. Older items are evicted as necessary. Frees `item` on
   // non-OK status.
-  Status InsertItem(LRUHandle* item, LRUHandle** handle);
+  rocksdb_rs::status::Status InsertItem(LRUHandle* item, LRUHandle** handle);
 
   void LRU_Remove(LRUHandle* e);
   void LRU_Insert(LRUHandle* e);

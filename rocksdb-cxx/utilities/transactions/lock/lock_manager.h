@@ -39,11 +39,11 @@ class LockManager {
 
   // Attempt to lock a key or a key range.  If OK status is returned, the caller
   // is responsible for calling UnLock() on this key.
-  virtual Status TryLock(PessimisticTransaction* txn,
+  virtual rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
                          ColumnFamilyId column_family_id,
                          const std::string& key, Env* env, bool exclusive) = 0;
   // The range [start, end] are inclusive at both sides.
-  virtual Status TryLock(PessimisticTransaction* txn,
+  virtual rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
                          ColumnFamilyId column_family_id, const Endpoint& start,
                          const Endpoint& end, Env* env, bool exclusive) = 0;
 

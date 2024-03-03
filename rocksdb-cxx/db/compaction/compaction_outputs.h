@@ -19,9 +19,9 @@
 namespace rocksdb {
 
 class CompactionOutputs;
-using CompactionFileOpenFunc = std::function<Status(CompactionOutputs&)>;
+using CompactionFileOpenFunc = std::function<rocksdb_rs::status::Status(CompactionOutputs&)>;
 using CompactionFileCloseFunc =
-    std::function<Status(CompactionOutputs&, const Status&, const Slice&)>;
+    std::function<rocksdb_rs::status::Status(CompactionOutputs&, const rocksdb_rs::status::Status&, const Slice&)>;
 
 // Files produced by subcompaction, most of the functions are used by
 // compaction_job Open/Close compaction file functions.
@@ -106,7 +106,7 @@ class CompactionOutputs {
   }
 
   // Finish the current output file
-  Status Finish(const Status& intput_status,
+  rocksdb_rs::status::Status Finish(const rocksdb_rs::status::Status& intput_status,
                 const SeqnoToTimeMapping& seqno_time_mapping);
 
   // Update output table properties from table builder
@@ -115,7 +115,7 @@ class CompactionOutputs {
         std::make_shared<TableProperties>(GetTableProperties());
   }
 
-  IOStatus WriterSyncClose(const Status& intput_status, SystemClock* clock,
+  IOStatus WriterSyncClose(const rocksdb_rs::status::Status& intput_status, SystemClock* clock,
                            Statistics* statistics, bool use_fsync);
 
   TableProperties GetTableProperties() {
@@ -177,7 +177,7 @@ class CompactionOutputs {
   // @param next_table_min_key internal key lower bound for the next compaction
   // output.
   // @param full_history_ts_low used for range tombstone garbage collection.
-  Status AddRangeDels(const Slice* comp_start_user_key,
+  rocksdb_rs::status::Status AddRangeDels(const Slice* comp_start_user_key,
                       const Slice* comp_end_user_key,
                       CompactionIterationStats& range_del_out_stats,
                       bool bottommost_level, const InternalKeyComparator& icmp,
@@ -247,23 +247,23 @@ class CompactionOutputs {
 
   // Add current key from compaction_iterator to the output file. If needed
   // close and open new compaction output with the functions provided.
-  Status AddToOutput(const CompactionIterator& c_iter,
+  rocksdb_rs::status::Status AddToOutput(const CompactionIterator& c_iter,
                      const CompactionFileOpenFunc& open_file_func,
                      const CompactionFileCloseFunc& close_file_func);
 
   // Close the current output. `open_file_func` is needed for creating new file
   // for range-dels only output file.
-  Status CloseOutput(const Status& curr_status,
+  rocksdb_rs::status::Status CloseOutput(const rocksdb_rs::status::Status& curr_status,
                      const CompactionFileOpenFunc& open_file_func,
                      const CompactionFileCloseFunc& close_file_func) {
-    Status status = curr_status.Clone();
+    rocksdb_rs::status::Status status = curr_status.Clone();
     // handle subcompaction containing only range deletions
     if (status.ok() && !HasBuilder() && !HasOutput() && HasRangeDel()) {
       status = open_file_func(*this);
     }
     if (HasBuilder()) {
       const Slice empty_key{};
-      Status s = close_file_func(*this, status, empty_key);
+      rocksdb_rs::status::Status s = close_file_func(*this, status, empty_key);
       if (!s.ok() && status.ok()) {
         status.copy_from(s);
       }

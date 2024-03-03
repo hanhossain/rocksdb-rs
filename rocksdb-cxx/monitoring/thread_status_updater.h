@@ -167,7 +167,7 @@ class ThreadStatusUpdater {
   void ClearThreadState();
 
   // Obtain the status of all active registered threads.
-  Status GetThreadList(std::vector<ThreadStatus>* thread_list);
+  rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* thread_list);
 
   // Create an entry in the global ColumnFamilyInfo table for the
   // specified column family.  This function should be called only

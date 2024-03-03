@@ -40,7 +40,7 @@ extern const uint64_t kBlockBasedTableMagicNumber;
 extern const uint64_t kLegacyBlockBasedTableMagicNumber;
 extern const uint64_t kCuckooTableMagicNumber;
 
-Status AdaptiveTableFactory::NewTableReader(
+rocksdb_rs::status::Status AdaptiveTableFactory::NewTableReader(
     const ReadOptions& ro, const TableReaderOptions& table_reader_options,
     std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
     std::unique_ptr<TableReader>* table,
@@ -66,7 +66,7 @@ Status AdaptiveTableFactory::NewTableReader(
     return cuckoo_table_factory_->NewTableReader(
         table_reader_options, std::move(file), file_size, table);
   } else {
-    return Status_NotSupported("Unidentified table format");
+    return rocksdb_rs::status::Status_NotSupported("Unidentified table format");
   }
 }
 

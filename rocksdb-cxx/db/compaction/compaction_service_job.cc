@@ -57,7 +57,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
       compaction_input.has_end ? sub_compact->end->ToString() : "";
 
   std::string compaction_input_binary;
-  Status s = compaction_input.Write(&compaction_input_binary);
+  rocksdb_rs::status::Status s = compaction_input.Write(&compaction_input_binary);
   if (!s.ok()) {
     sub_compact->status.copy_from(s);
     return CompactionServiceJobStatus::kFailure;
@@ -83,7 +83,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
     case CompactionServiceJobStatus::kSuccess:
       break;
     case CompactionServiceJobStatus::kFailure:
-      sub_compact->status = Status_Incomplete(
+      sub_compact->status = rocksdb_rs::status::Status_Incomplete(
           "CompactionService failed to start compaction job.");
       ROCKS_LOG_WARN(db_options_.info_log,
                      "[%s] [JOB %d] Remote compaction failed to start.",
@@ -122,7 +122,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
   if (compaction_status == CompactionServiceJobStatus::kFailure) {
     if (s.ok()) {
       if (compaction_result.status.ok()) {
-        sub_compact->status = Status_Incomplete(
+        sub_compact->status = rocksdb_rs::status::Status_Incomplete(
             "CompactionService failed to run the compaction job (even though "
             "the internal status is okay).");
       } else {
@@ -131,7 +131,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
         sub_compact->status.copy_from(compaction_result.status);
       }
     } else {
-      sub_compact->status = Status_Incomplete(
+      sub_compact->status = rocksdb_rs::status::Status_Incomplete(
           "CompactionService failed to run the compaction job (and no valid "
           "result is returned).");
     }
@@ -249,7 +249,7 @@ CompactionServiceCompactionJob::CompactionServiceCompactionJob(
       compaction_input_(compaction_service_input),
       compaction_result_(compaction_service_result) {}
 
-Status CompactionServiceCompactionJob::Run() {
+rocksdb_rs::status::Status CompactionServiceCompactionJob::Run() {
   AutoThreadOperationStageUpdater stage_updater(
       ThreadStatus::STAGE_COMPACTION_RUN);
 
@@ -291,7 +291,7 @@ Status CompactionServiceCompactionJob::Run() {
   RecordTimeToHistogram(stats_, COMPACTION_CPU_TIME,
                         compaction_stats_.stats.cpu_micros);
 
-  Status status = sub_compact->status.Clone();
+  rocksdb_rs::status::Status status = sub_compact->status.Clone();
   IOStatus io_s = sub_compact->io_status;
 
   if (io_status_.ok()) {
@@ -632,13 +632,13 @@ namespace {
 // this is a helper struct to serialize and deserialize class Status, because
 // Status's members are not public.
 struct StatusSerializationAdapter {
-  Code code;
-  SubCode subcode;
-  Severity severity;
+  rocksdb_rs::status::Code code;
+  rocksdb_rs::status::SubCode subcode;
+  rocksdb_rs::status::Severity severity;
   std::string message;
 
   StatusSerializationAdapter() = default;
-  explicit StatusSerializationAdapter(const Status& s) {
+  explicit StatusSerializationAdapter(const rocksdb_rs::status::Status& s) {
     code = s.code();
     subcode = s.subcode();
     severity = s.severity();
@@ -646,10 +646,10 @@ struct StatusSerializationAdapter {
     message = msg ? *msg : "";
   }
 
-  Status GetStatus() const {
-    return Status_new(static_cast<Code>(code),
-                  static_cast<SubCode>(subcode),
-                  static_cast<Severity>(severity),
+  rocksdb_rs::status::Status GetStatus() const {
+    return rocksdb_rs::status::Status_new(static_cast<rocksdb_rs::status::Code>(code),
+                  static_cast<rocksdb_rs::status::SubCode>(subcode),
+                  static_cast<rocksdb_rs::status::Severity>(severity),
                   message);
   }
 };
@@ -682,27 +682,27 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_result_type_info = {
       OptionTypeFlags::kNone,
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const std::string& value, void* addr) {
-        auto status_obj = static_cast<Status*>(addr);
+        auto status_obj = static_cast<rocksdb_rs::status::Status*>(addr);
         StatusSerializationAdapter adapter;
-        Status s = OptionTypeInfo::ParseType(
+        rocksdb_rs::status::Status s = OptionTypeInfo::ParseType(
             opts, value, status_adapter_type_info, &adapter);
         *status_obj = adapter.GetStatus();
         return s;
       },
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const void* addr, std::string* value) {
-        const auto status_obj = static_cast<const Status*>(addr);
+        const auto status_obj = static_cast<const rocksdb_rs::status::Status*>(addr);
         StatusSerializationAdapter adapter(*status_obj);
         std::string result;
-        Status s = OptionTypeInfo::SerializeType(opts, status_adapter_type_info,
+        rocksdb_rs::status::Status s = OptionTypeInfo::SerializeType(opts, status_adapter_type_info,
                                                  &adapter, &result);
         *value = "{" + result + "}";
         return s;
       },
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const void* addr1, const void* addr2, std::string* mismatch) {
-        const auto status1 = static_cast<const Status*>(addr1);
-        const auto status2 = static_cast<const Status*>(addr2);
+        const auto status1 = static_cast<const rocksdb_rs::status::Status*>(addr1);
+        const auto status2 = static_cast<const rocksdb_rs::status::Status*>(addr2);
 
         StatusSerializationAdapter adatper1(*status1);
         StatusSerializationAdapter adapter2(*status2);
@@ -745,10 +745,10 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_result_type_info = {
                   OptionVerificationType::kNormal, OptionTypeFlags::kNone)},
 };
 
-Status CompactionServiceInput::Read(const std::string& data_str,
+rocksdb_rs::status::Status CompactionServiceInput::Read(const std::string& data_str,
                                     CompactionServiceInput* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return Status_InvalidArgument("Invalid CompactionServiceInput string");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceInput string");
   }
   auto format_version = DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -759,13 +759,13 @@ Status CompactionServiceInput::Read(const std::string& data_str,
         cf, data_str.substr(sizeof(BinaryFormatVersion)), cs_input_type_info,
         obj);
   } else {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Compaction Service Input data version not supported: " +
         std::to_string(format_version));
   }
 }
 
-Status CompactionServiceInput::Write(std::string* output) {
+rocksdb_rs::status::Status CompactionServiceInput::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
   EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));
@@ -774,10 +774,10 @@ Status CompactionServiceInput::Write(std::string* output) {
   return OptionTypeInfo::SerializeType(cf, cs_input_type_info, this, output);
 }
 
-Status CompactionServiceResult::Read(const std::string& data_str,
+rocksdb_rs::status::Status CompactionServiceResult::Read(const std::string& data_str,
                                      CompactionServiceResult* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return Status_InvalidArgument("Invalid CompactionServiceResult string");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceResult string");
   }
   auto format_version = DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -788,13 +788,13 @@ Status CompactionServiceResult::Read(const std::string& data_str,
         cf, data_str.substr(sizeof(BinaryFormatVersion)), cs_result_type_info,
         obj);
   } else {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Compaction Service Result data version not supported: " +
         std::to_string(format_version));
   }
 }
 
-Status CompactionServiceResult::Write(std::string* output) {
+rocksdb_rs::status::Status CompactionServiceResult::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
   EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));

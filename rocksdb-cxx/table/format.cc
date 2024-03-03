@@ -63,26 +63,26 @@ char* BlockHandle::EncodeTo(char* dst) const {
   return cur;
 }
 
-Status BlockHandle::DecodeFrom(Slice* input) {
+rocksdb_rs::status::Status BlockHandle::DecodeFrom(Slice* input) {
   if (GetVarint64(input, &offset_) && GetVarint64(input, &size_)) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // reset in case failure after partially decoding
     offset_ = 0;
     size_ = 0;
-    return Status_Corruption("bad block handle");
+    return rocksdb_rs::status::Status_Corruption("bad block handle");
   }
 }
 
-Status BlockHandle::DecodeSizeFrom(uint64_t _offset, Slice* input) {
+rocksdb_rs::status::Status BlockHandle::DecodeSizeFrom(uint64_t _offset, Slice* input) {
   if (GetVarint64(input, &size_)) {
     offset_ = _offset;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // reset in case failure after partially decoding
     offset_ = 0;
     size_ = 0;
-    return Status_Corruption("bad block handle");
+    return rocksdb_rs::status::Status_Corruption("bad block handle");
   }
 }
 
@@ -117,19 +117,19 @@ void IndexValue::EncodeTo(std::string* dst, bool have_first_key,
   }
 }
 
-Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
+rocksdb_rs::status::Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
                               const BlockHandle* previous_handle) {
   if (previous_handle) {
     int64_t delta;
     if (!GetVarsignedint64(input, &delta)) {
-      return Status_Corruption("bad delta-encoded index value");
+      return rocksdb_rs::status::Status_Corruption("bad delta-encoded index value");
     }
     // WART: this is specific to Block-based table
     handle = BlockHandle(previous_handle->offset() + previous_handle->size() +
                              BlockBasedTable::kBlockTrailerSize,
                          previous_handle->size() + delta);
   } else {
-    Status s = handle.DecodeFrom(input);
+    rocksdb_rs::status::Status s = handle.DecodeFrom(input);
     if (!s.ok()) {
       return s;
     }
@@ -138,10 +138,10 @@ Status IndexValue::DecodeFrom(Slice* input, bool have_first_key,
   if (!have_first_key) {
     first_internal_key = Slice();
   } else if (!GetLengthPrefixedSlice(input, &first_internal_key)) {
-    return Status_Corruption("bad first key in block info");
+    return rocksdb_rs::status::Status_Corruption("bad first key in block info");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::string IndexValue::ToString(bool hex, bool have_first_key) const {
@@ -258,7 +258,7 @@ void FooterBuilder::Build(uint64_t magic_number, uint32_t format_version,
   }
 }
 
-Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
+rocksdb_rs::status::Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
                           uint64_t enforce_table_magic_number) {
   (void)input_offset;  // Future use
 
@@ -276,7 +276,7 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
     magic = UpconvertLegacyFooterFormat(magic);
   }
   if (enforce_table_magic_number != 0 && enforce_table_magic_number != magic) {
-    return Status_Corruption("Bad table magic number: expected " +
+    return rocksdb_rs::status::Status_Corruption("Bad table magic number: expected " +
                               std::to_string(enforce_table_magic_number) +
                               ", found " + std::to_string(magic));
   }
@@ -294,12 +294,12 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
     const char* part3_ptr = magic_ptr - 4;
     format_version_ = DecodeFixed32(part3_ptr);
     if (!IsSupportedFormatVersion(format_version_)) {
-      return Status_Corruption("Corrupt or unsupported format_version: " +
+      return rocksdb_rs::status::Status_Corruption("Corrupt or unsupported format_version: " +
                                 std::to_string(format_version_));
     }
     // All known format versions >= 1 occupy exactly this many bytes.
     if (input.size() < kNewVersionsEncodedLength) {
-      return Status_Corruption("Input is too short to be an SST file");
+      return rocksdb_rs::status::Status_Corruption("Input is too short to be an SST file");
     }
     uint64_t adjustment = input.size() - kNewVersionsEncodedLength;
     input.remove_prefix(adjustment);
@@ -308,7 +308,7 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
     char chksum = input.data()[0];
     checksum_type_ = lossless_cast<ChecksumType>(chksum);
     if (!IsSupportedChecksumType(checksum_type())) {
-      return Status_Corruption("Corrupt or unsupported checksum type: " +
+      return rocksdb_rs::status::Status_Corruption("Corrupt or unsupported checksum type: " +
                                 std::to_string(lossless_cast<uint8_t>(chksum)));
     }
     // Consume checksum type field
@@ -316,7 +316,7 @@ Status Footer::DecodeFrom(Slice input, uint64_t input_offset,
   }
 
   // Parse Part2
-  Status result = metaindex_handle_.DecodeFrom(&input);
+  rocksdb_rs::status::Status result = metaindex_handle_.DecodeFrom(&input);
   if (result.ok()) {
     result = index_handle_.DecodeFrom(&input);
   }
@@ -345,12 +345,12 @@ std::string Footer::ToString() const {
   return result;
 }
 
-Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
+rocksdb_rs::status::Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
                           FileSystem& fs, FilePrefetchBuffer* prefetch_buffer,
                           uint64_t file_size, Footer* footer,
                           uint64_t enforce_table_magic_number) {
   if (file_size < Footer::kMinEncodedLength) {
-    return Status_Corruption("file is too short (" +
+    return rocksdb_rs::status::Status_Corruption("file is too short (" +
                               std::to_string(file_size) +
                               " bytes) to be an "
                               "sstable: " +
@@ -363,7 +363,7 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
   uint64_t read_offset = (file_size > Footer::kMaxEncodedLength)
                              ? file_size - Footer::kMaxEncodedLength
                              : 0;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // TODO: Need to pass appropriate deadline to TryReadFromCache(). Right now,
   // there is no readahead for point lookups, so TryReadFromCache will fail if
   // the required data is not in the prefetch buffer. Once deadline is enabled
@@ -395,12 +395,12 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
             .ok()) {
       // Similar to CheckConsistency message, but not completely sure the
       // expected size always came from manifest.
-      return Status_Corruption("Sst file size mismatch: " + file->file_name() +
+      return rocksdb_rs::status::Status_Corruption("Sst file size mismatch: " + file->file_name() +
                                 ". Expected " + std::to_string(file_size) +
                                 ", actual size " +
                                 std::to_string(size_on_disk) + "\n");
     } else {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Missing SST footer data in file " + file->file_name() +
           " File too short? Expected size: " + std::to_string(file_size));
     }
@@ -408,10 +408,10 @@ Status ReadFooterFromFile(const IOOptions& opts, RandomAccessFileReader* file,
 
   s = footer->DecodeFrom(footer_input, read_offset, enforce_table_magic_number);
   if (!s.ok()) {
-    s = Status_CopyAppendMessage(s, " in ", file->file_name());
+    s = rocksdb_rs::status::Status_CopyAppendMessage(s, " in ", file->file_name());
     return s;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -496,12 +496,12 @@ uint32_t ComputeBuiltinChecksumWithLastByte(ChecksumType type, const char* data,
   }
 }
 
-Status UncompressBlockData(const UncompressionInfo& uncompression_info,
+rocksdb_rs::status::Status UncompressBlockData(const UncompressionInfo& uncompression_info,
                            const char* data, size_t size,
                            BlockContents* out_contents, uint32_t format_version,
                            const ImmutableOptions& ioptions,
                            MemoryAllocator* allocator) {
-  Status ret = Status_OK();
+  rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_OK();
 
   assert(uncompression_info.type() != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
          "Invalid compression type");
@@ -514,11 +514,11 @@ Status UncompressBlockData(const UncompressionInfo& uncompression_info,
                      GetCompressFormatForVersion(format_version), allocator);
   if (!ubuf) {
     if (!CompressionTypeSupported(uncompression_info.type())) {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Unsupported compression method for this build",
           CompressionTypeToString(uncompression_info.type()));
     } else {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Corrupted compressed block contents",
           CompressionTypeToString(uncompression_info.type()));
     }
@@ -544,7 +544,7 @@ Status UncompressBlockData(const UncompressionInfo& uncompression_info,
   return ret;
 }
 
-Status UncompressSerializedBlock(const UncompressionInfo& uncompression_info,
+rocksdb_rs::status::Status UncompressSerializedBlock(const UncompressionInfo& uncompression_info,
                                  const char* data, size_t size,
                                  BlockContents* out_contents,
                                  uint32_t format_version,
@@ -558,16 +558,16 @@ Status UncompressSerializedBlock(const UncompressionInfo& uncompression_info,
 
 // Replace the contents of db_host_id with the actual hostname, if db_host_id
 // matches the keyword kHostnameForDbHostId
-Status ReifyDbHostIdProperty(Env* env, std::string* db_host_id) {
+rocksdb_rs::status::Status ReifyDbHostIdProperty(Env* env, std::string* db_host_id) {
   assert(db_host_id);
   if (*db_host_id == kHostnameForDbHostId) {
-    Status s = env->GetHostNameString(db_host_id);
+    rocksdb_rs::status::Status s = env->GetHostNameString(db_host_id);
     if (!s.ok()) {
       db_host_id->clear();
     }
     return s;
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb

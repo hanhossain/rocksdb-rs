@@ -20,13 +20,13 @@ namespace rocksdb {
 class IntTblPropCollector {
  public:
   virtual ~IntTblPropCollector() {}
-  virtual Status Finish(UserCollectedProperties* properties) = 0;
+  virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) = 0;
 
   virtual const char* Name() const = 0;
 
   // @params key    the user key that is inserted into the table.
   // @params value  the value that is inserted into the table.
-  virtual Status InternalAdd(const Slice& key, const Slice& value,
+  virtual rocksdb_rs::status::Status InternalAdd(const Slice& key, const Slice& value,
                              uint64_t file_size) = 0;
 
   virtual void BlockAdd(uint64_t block_uncomp_bytes,
@@ -66,14 +66,14 @@ class UserKeyTablePropertiesCollector : public IntTblPropCollector {
 
   virtual ~UserKeyTablePropertiesCollector() {}
 
-  virtual Status InternalAdd(const Slice& key, const Slice& value,
+  virtual rocksdb_rs::status::Status InternalAdd(const Slice& key, const Slice& value,
                              uint64_t file_size) override;
 
   virtual void BlockAdd(uint64_t block_uncomp_bytes,
                         uint64_t block_compressed_bytes_fast,
                         uint64_t block_compressed_bytes_slow) override;
 
-  virtual Status Finish(UserCollectedProperties* properties) override;
+  virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override;
 
   virtual const char* Name() const override { return collector_->Name(); }
 
@@ -122,12 +122,12 @@ class TimestampTablePropertiesCollector : public IntTblPropCollector {
         timestamp_min_(kDisableUserTimestamp),
         timestamp_max_(kDisableUserTimestamp) {}
 
-  Status InternalAdd(const Slice& key, const Slice& /* value */,
+  rocksdb_rs::status::Status InternalAdd(const Slice& key, const Slice& /* value */,
                      uint64_t /* file_size */) override {
     auto user_key = ExtractUserKey(key);
     assert(cmp_ && cmp_->timestamp_size() > 0);
     if (user_key.size() < cmp_->timestamp_size()) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "User key size mismatch when comparing to timestamp size.");
     }
     auto timestamp_in_key =
@@ -140,7 +140,7 @@ class TimestampTablePropertiesCollector : public IntTblPropCollector {
         cmp_->CompareTimestamp(timestamp_min_, timestamp_in_key) > 0) {
       timestamp_min_.assign(timestamp_in_key.data(), timestamp_in_key.size());
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void BlockAdd(uint64_t /* block_uncomp_bytes */,
@@ -149,14 +149,14 @@ class TimestampTablePropertiesCollector : public IntTblPropCollector {
     return;
   }
 
-  Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     // timestamp is empty is table is empty
     assert(timestamp_min_.size() == timestamp_max_.size() &&
            (timestamp_min_.empty() ||
             timestamp_max_.size() == cmp_->timestamp_size()));
     properties->insert({"rocksdb.timestamp_min", timestamp_min_});
     properties->insert({"rocksdb.timestamp_max", timestamp_max_});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   const char* Name() const override {

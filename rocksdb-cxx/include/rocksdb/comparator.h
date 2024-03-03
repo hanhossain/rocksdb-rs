@@ -57,7 +57,7 @@ class Comparator : public Customizable, public CompareInterface {
 
   ~Comparator() override {}
 
-  static Status CreateFromString(const ConfigOptions& opts,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
                                  const std::string& id,
                                  const Comparator** comp);
   static const char* Type() { return "Comparator"; }

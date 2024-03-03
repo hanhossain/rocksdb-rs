@@ -230,7 +230,7 @@ class Compaction {
   // Delete this compaction from the list of running compactions.
   //
   // Requirement: DB mutex held
-  void ReleaseCompactionFiles(Status status);
+  void ReleaseCompactionFiles(rocksdb_rs::status::Status status);
 
   // Returns the summary of the compaction in "output" with maximum "len"
   // in bytes.  The caller is responsible for the memory management of

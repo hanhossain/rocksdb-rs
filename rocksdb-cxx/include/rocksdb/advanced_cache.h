@@ -99,7 +99,7 @@ class Cache {
   // data into a buffer. The secondary cache may decide to not store it in a
   // contiguous buffer, in which case this callback will be called multiple
   // times with increasing offset
-  using SaveToCallback = Status (*)(ObjectPtr from_obj, size_t from_offset,
+  using SaveToCallback = rocksdb_rs::status::Status (*)(ObjectPtr from_obj, size_t from_offset,
                                     size_t length, char* out_buf);
 
   // A function pointer type for destruction of a cache object. This will
@@ -116,7 +116,7 @@ class Cache {
   // provided by Lookup and may be used to follow DB- or CF-specific settings.
   // In case of some error, non-OK is returned and the caller should ignore
   // any result in out_obj. (The implementation must clean up after itself.)
-  using CreateCallback = Status (*)(const Slice& data, CreateContext* context,
+  using CreateCallback = rocksdb_rs::status::Status (*)(const Slice& data, CreateContext* context,
                                     MemoryAllocator* allocator,
                                     ObjectPtr* out_obj, size_t* out_charge);
 
@@ -195,7 +195,7 @@ class Cache {
   // @return OK if the cache was successfully created
   // @return NotFound if an invalid name was specified in the value
   // @return InvalidArgument if either the options were not valid
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& value,
                                  std::shared_ptr<Cache>* result);
 
@@ -245,7 +245,7 @@ class Cache {
   //
   // When the inserted entry is no longer needed, it will be destroyed using
   // helper->del_cb (if non-nullptr).
-  virtual Status Insert(const Slice& key, ObjectPtr obj,
+  virtual rocksdb_rs::status::Status Insert(const Slice& key, ObjectPtr obj,
                         const CacheItemHelper* helper, size_t charge,
                         Handle** handle = nullptr,
                         Priority priority = Priority::LOW) = 0;
@@ -536,7 +536,7 @@ class CacheWrapper : public Cache {
   // Only function that derived class must provide
   // const char* Name() const override { ... }
 
-  Status Insert(const Slice& key, ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, ObjectPtr value,
                 const CacheItemHelper* helper, size_t charge,
                 Handle** handle = nullptr,
                 Priority priority = Priority::LOW) override {

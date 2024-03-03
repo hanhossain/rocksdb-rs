@@ -2440,7 +2440,7 @@ TEST_P(DBIteratorTest, RefreshWithSnapshot) {
   ASSERT_FALSE(iter->Valid());
 
   ASSERT_OK(iter->status());
-  Status s = iter->Refresh();
+  rocksdb_rs::status::Status s = iter->Refresh();
   ASSERT_TRUE(s.IsNotSupported());
   db_->ReleaseSnapshot(snapshot);
   delete iter;
@@ -2449,7 +2449,7 @@ TEST_P(DBIteratorTest, RefreshWithSnapshot) {
 TEST_P(DBIteratorTest, CreationFailure) {
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::NewInternalIterator:StatusCallback", [](void* arg) {
-        *(reinterpret_cast<Status*>(arg)) = Status_Corruption("test status");
+        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) = rocksdb_rs::status::Status_Corruption("test status");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

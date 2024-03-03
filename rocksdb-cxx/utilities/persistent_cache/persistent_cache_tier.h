@@ -99,10 +99,10 @@ struct PersistentCacheConfig {
   // Validate the settings. Our intentions are to catch erroneous settings ahead
   // of time instead going violating invariants or causing dead locks.
   //
-  Status ValidateSettings() const {
+  rocksdb_rs::status::Status ValidateSettings() const {
     // (1) check pre-conditions for variables
     if (!env || path.empty()) {
-      return Status_InvalidArgument("empty or null args");
+      return rocksdb_rs::status::Status_InvalidArgument("empty or null args");
     }
 
     // (2) assert size related invariants
@@ -111,7 +111,7 @@ struct PersistentCacheConfig {
     // - total write buffer size cannot be less than 2X cache file size
     if (cache_size < cache_file_size || write_buffer_size >= cache_file_size ||
         write_buffer_size * write_buffer_count() < 2 * cache_file_size) {
-      return Status_InvalidArgument("invalid cache size");
+      return rocksdb_rs::status::Status_InvalidArgument("invalid cache size");
     }
 
     // (2) check writer settings
@@ -120,10 +120,10 @@ struct PersistentCacheConfig {
     // - dispatch size and buffer size need to be aligned
     if (!writer_qdepth || writer_dispatch_size > write_buffer_size ||
         write_buffer_size % writer_dispatch_size) {
-      return Status_InvalidArgument("invalid writer settings");
+      return rocksdb_rs::status::Status_InvalidArgument("invalid writer settings");
     }
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   //
@@ -240,10 +240,10 @@ class PersistentCacheTier : public PersistentCache {
   virtual ~PersistentCacheTier() {}
 
   // Open the persistent cache tier
-  virtual Status Open();
+  virtual rocksdb_rs::status::Status Open();
 
   // Close the persistent cache tier
-  virtual Status Close();
+  virtual rocksdb_rs::status::Status Close();
 
   // Reserve space up to 'size' bytes
   virtual bool Reserve(const size_t size);
@@ -257,11 +257,11 @@ class PersistentCacheTier : public PersistentCache {
   virtual PersistentCache::StatsType Stats() override;
 
   // Insert to page cache
-  virtual Status Insert(const Slice& page_key, const char* data,
+  virtual rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
                         const size_t size) override = 0;
 
   // Lookup page cache by page identifier
-  virtual Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
+  virtual rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
                         size_t* size) override = 0;
 
   // Does it store compressed data ?
@@ -300,14 +300,14 @@ class PersistentTieredCache : public PersistentCacheTier {
  public:
   virtual ~PersistentTieredCache();
 
-  Status Open() override;
-  Status Close() override;
+  rocksdb_rs::status::Status Open() override;
+  rocksdb_rs::status::Status Close() override;
   bool Erase(const Slice& key) override;
   std::string PrintStats() override;
   PersistentCache::StatsType Stats() override;
-  Status Insert(const Slice& page_key, const char* data,
+  rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
                 const size_t size) override;
-  Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
+  rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
                 size_t* size) override;
   bool IsCompressed() override;
 

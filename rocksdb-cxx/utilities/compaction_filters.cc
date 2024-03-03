@@ -24,7 +24,7 @@ static int RegisterBuiltinCompactionFilters(ObjectLibrary& library,
       });
   return 1;
 }
-Status CompactionFilter::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status CompactionFilter::CreateFromString(const ConfigOptions& config_options,
                                           const std::string& value,
                                           const CompactionFilter** result) {
   static std::once_flag once;
@@ -32,7 +32,7 @@ Status CompactionFilter::CreateFromString(const ConfigOptions& config_options,
     RegisterBuiltinCompactionFilters(*(ObjectLibrary::Default().get()), "");
   });
   CompactionFilter* filter = const_cast<CompactionFilter*>(*result);
-  Status status =
+  rocksdb_rs::status::Status status =
       LoadStaticObject<CompactionFilter>(config_options, value, &filter);
   if (status.ok()) {
     *result = const_cast<CompactionFilter*>(filter);
@@ -40,12 +40,12 @@ Status CompactionFilter::CreateFromString(const ConfigOptions& config_options,
   return status;
 }
 
-Status CompactionFilterFactory::CreateFromString(
+rocksdb_rs::status::Status CompactionFilterFactory::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::shared_ptr<CompactionFilterFactory>* result) {
   // Currently there are no builtin CompactionFilterFactories.
   // If any are introduced, they need to be registered here.
-  Status status =
+  rocksdb_rs::status::Status status =
       LoadSharedObject<CompactionFilterFactory>(config_options, value, result);
   return status;
 }

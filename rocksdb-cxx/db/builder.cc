@@ -54,7 +54,7 @@ TableBuilder* NewTableBuilder(const TableBuilderOptions& tboptions,
   return tboptions.ioptions.table_factory->NewTableBuilder(tboptions, file);
 }
 
-Status BuildTable(
+rocksdb_rs::status::Status BuildTable(
     const std::string& dbname, VersionSet* versions,
     const ImmutableDBOptions& db_options, const TableBuilderOptions& tboptions,
     const FileOptions& file_options, const ReadOptions& read_options,
@@ -87,7 +87,7 @@ Status BuildTable(
       /*enable_order_check=*/
       mutable_cf_options.check_flush_compaction_key_order,
       /*enable_hash=*/paranoid_file_checks);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   meta->fd.file_size = 0;
   iter->SeekToFirst();
   std::unique_ptr<CompactionRangeDelAggregator> range_del_agg(
@@ -132,7 +132,7 @@ Status BuildTable(
           ioptions.compaction_filter_factory->CreateCompactionFilter(context);
       if (compaction_filter != nullptr &&
           !compaction_filter->IgnoreSnapshots()) {
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             "CompactionFilter::IgnoreSnapshots() = false is not supported "
             "anymore.");
       }
@@ -413,7 +413,7 @@ Status BuildTable(
         }
         s = it->status();
         if (s.ok() && !output_validator.CompareValidator(file_validator)) {
-          s = Status_Corruption("Paranoid checksums do not match");
+          s = rocksdb_rs::status::Status_Corruption("Paranoid checksums do not match");
         }
       }
     }
@@ -430,25 +430,25 @@ Status BuildTable(
     constexpr IODebugContext* dbg = nullptr;
 
     if (table_file_created) {
-      Status ignored = fs->DeleteFile(fname, IOOptions(), dbg);
+      rocksdb_rs::status::Status ignored = fs->DeleteFile(fname, IOOptions(), dbg);
     }
 
     assert(blob_file_additions || blob_file_paths.empty());
 
     if (blob_file_additions) {
       for (const std::string& blob_file_path : blob_file_paths) {
-        Status ignored = DeleteDBFile(&db_options, blob_file_path, dbname,
+        rocksdb_rs::status::Status ignored = DeleteDBFile(&db_options, blob_file_path, dbname,
                                       /*force_bg=*/false, /*force_fg=*/false);
         TEST_SYNC_POINT("BuildTable::AfterDeleteFile");
       }
     }
   }
 
-  Status status_for_listener = s.Clone();
+  rocksdb_rs::status::Status status_for_listener = s.Clone();
   if (meta->fd.GetFileSize() == 0) {
     fname = "(nil)";
     if (s.ok()) {
-      status_for_listener = Status_Aborted("Empty SST file not kept");
+      status_for_listener = rocksdb_rs::status::Status_Aborted("Empty SST file not kept");
     }
   }
   // Output to event logger and fire events.

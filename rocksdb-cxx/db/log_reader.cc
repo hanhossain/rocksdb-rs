@@ -177,7 +177,7 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch,
         scratch->clear();
         last_record_offset_ = prospective_record_offset;
         CompressionTypeRecord compression_record(rocksdb_rs::compression_type::CompressionType::kNoCompression);
-        Status s = compression_record.DecodeFrom(&fragment);
+        rocksdb_rs::status::Status s = compression_record.DecodeFrom(&fragment);
         if (!s.ok()) {
           ReportCorruption(fragment.size(),
                            "could not decode SetCompressionType record");
@@ -197,7 +197,7 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch,
         scratch->clear();
         last_record_offset_ = prospective_record_offset;
         UserDefinedTimestampSizeRecord ts_record;
-        Status s = ts_record.DecodeFrom(&fragment);
+        rocksdb_rs::status::Status s = ts_record.DecodeFrom(&fragment);
         if (!s.ok()) {
           ReportCorruption(
               fragment.size(),
@@ -363,7 +363,7 @@ void Reader::UnmarkEOFInternal() {
   // Note that the Read here might overcharge SequentialFileReader's internal
   // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
   // content left until EOF to read.
-  Status status =
+  rocksdb_rs::status::Status status =
       file_->Read(remaining, &read_buffer, backing_store_ + eof_offset_,
                   Env::IO_TOTAL /* rate_limiter_priority */);
 
@@ -397,10 +397,10 @@ void Reader::UnmarkEOFInternal() {
 }
 
 void Reader::ReportCorruption(size_t bytes, const char* reason) {
-  ReportDrop(bytes, Status_Corruption(reason));
+  ReportDrop(bytes, rocksdb_rs::status::Status_Corruption(reason));
 }
 
-void Reader::ReportDrop(size_t bytes, const Status& reason) {
+void Reader::ReportDrop(size_t bytes, const rocksdb_rs::status::Status& reason) {
   if (reporter_ != nullptr) {
     reporter_->Corruption(bytes, reason);
   }
@@ -415,7 +415,7 @@ bool Reader::ReadMore(size_t* drop_size, int* error) {
     // Note that the Read here might overcharge SequentialFileReader's internal
     // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
     // content left until EOF to read.
-    Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
+    rocksdb_rs::status::Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
                                 Env::IO_TOTAL /* rate_limiter_priority */);
     TEST_SYNC_POINT_CALLBACK("LogReader::ReadMore:AfterReadFile", &status);
     end_of_buffer_offset_ += buffer_.size();
@@ -595,24 +595,24 @@ void Reader::InitCompression(const CompressionTypeRecord& compression_record) {
   assert(uncompressed_buffer_);
 }
 
-Status Reader::UpdateRecordedTimestampSize(
+rocksdb_rs::status::Status Reader::UpdateRecordedTimestampSize(
     const std::vector<std::pair<uint32_t, size_t>>& cf_to_ts_sz) {
   for (const auto& [cf, ts_sz] : cf_to_ts_sz) {
     // Zero user-defined timestamp size are not recorded.
     if (ts_sz == 0) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "User-defined timestamp size record contains zero timestamp size.");
     }
     // The user-defined timestamp size record for a column family should not be
     // updated in the same log file.
     if (recorded_cf_to_ts_sz_.count(cf) != 0) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "User-defined timestamp size record contains update to "
           "recorded column family.");
     }
     recorded_cf_to_ts_sz_.insert(std::make_pair(cf, ts_sz));
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool FragmentBufferedReader::ReadRecord(Slice* record, std::string* scratch,
@@ -697,7 +697,7 @@ bool FragmentBufferedReader::ReadRecord(Slice* record, std::string* scratch,
         last_record_offset_ = prospective_record_offset;
         in_fragmented_record_ = false;
         CompressionTypeRecord compression_record(rocksdb_rs::compression_type::CompressionType::kNoCompression);
-        Status s = compression_record.DecodeFrom(&fragment);
+        rocksdb_rs::status::Status s = compression_record.DecodeFrom(&fragment);
         if (!s.ok()) {
           ReportCorruption(fragment.size(),
                            "could not decode SetCompressionType record");
@@ -719,7 +719,7 @@ bool FragmentBufferedReader::ReadRecord(Slice* record, std::string* scratch,
         last_record_offset_ = prospective_record_offset;
         in_fragmented_record_ = false;
         UserDefinedTimestampSizeRecord ts_record;
-        Status s = ts_record.DecodeFrom(&fragment);
+        rocksdb_rs::status::Status s = ts_record.DecodeFrom(&fragment);
         if (!s.ok()) {
           ReportCorruption(
               fragment.size(),
@@ -791,7 +791,7 @@ bool FragmentBufferedReader::TryReadMore(size_t* drop_size, int* error) {
     // Note that the Read here might overcharge SequentialFileReader's internal
     // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
     // content left until EOF to read.
-    Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
+    rocksdb_rs::status::Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
                                 Env::IO_TOTAL /* rate_limiter_priority */);
     end_of_buffer_offset_ += buffer_.size();
     if (!status.ok()) {

@@ -26,9 +26,9 @@
 
 namespace rocksdb {
 
-Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
+rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
                                       SuperVersion* sv) {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::vector<ColumnFamilyIngestFileInfo> cf_ingest_infos;
   for (const auto& metadata_per_cf : metadatas_) {
     // Read the information of files we are importing
@@ -47,13 +47,13 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
       }
 
       if (file_to_import.num_entries == 0) {
-        status = Status_InvalidArgument("File contain no entries");
+        status = rocksdb_rs::status::Status_InvalidArgument("File contain no entries");
         return status;
       }
 
       if (!file_to_import.smallest_internal_key.Valid() ||
           !file_to_import.largest_internal_key.Valid()) {
-        status = Status_Corruption("File has corrupted keys");
+        status = rocksdb_rs::status::Status_Corruption("File has corrupted keys");
         return status;
       }
 
@@ -77,7 +77,7 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
     }
 
     if (num_files == 0) {
-      status = Status_InvalidArgument("The list of files is empty");
+      status = rocksdb_rs::status::Status_InvalidArgument("The list of files is empty");
       return status;
     }
     files_to_import_.push_back(files_to_import_per_cf);
@@ -98,7 +98,7 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
     if (cfd_->user_comparator()->Compare(
             cf_ingest_infos[i].largest_internal_key.user_key(),
             cf_ingest_infos[i + 1].smallest_internal_key.user_key()) >= 0) {
-      status = Status_InvalidArgument("CFs have overlapping ranges");
+      status = rocksdb_rs::status::Status_InvalidArgument("CFs have overlapping ranges");
       return status;
     }
   }
@@ -164,7 +164,7 @@ Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
 
 // REQUIRES: we have become the only writer by entering both write_thread_ and
 // nonmem_write_thread_
-Status ImportColumnFamilyJob::Run() {
+rocksdb_rs::status::Status ImportColumnFamilyJob::Run() {
   // We use the import time as the ancester time. This is the time the data
   // is written to the database.
   int64_t temp_current_time = 0;
@@ -186,7 +186,7 @@ Status ImportColumnFamilyJob::Run() {
       cfd_->NumberLevels(), cfd_->ioptions()->compaction_style,
       nullptr /* src_vstorage */, cfd_->ioptions()->force_consistency_checks,
       EpochNumberRequirement::kMightMissing);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   for (size_t i = 0; s.ok() && i < files_to_import_.size(); ++i) {
     for (size_t j = 0; s.ok() && j < files_to_import_[i].size(); ++j) {
@@ -255,7 +255,7 @@ Status ImportColumnFamilyJob::Run() {
   return s;
 }
 
-void ImportColumnFamilyJob::Cleanup(const Status& status) {
+void ImportColumnFamilyJob::Cleanup(const rocksdb_rs::status::Status& status) {
   if (!status.ok()) {
     // We failed to add files to the database remove all the files we copied.
     for (auto& files_to_import_per_cf : files_to_import_) {
@@ -287,12 +287,12 @@ void ImportColumnFamilyJob::Cleanup(const Status& status) {
   }
 }
 
-Status ImportColumnFamilyJob::GetIngestedFileInfo(
+rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
     const std::string& external_file, uint64_t new_file_number,
     SuperVersion* sv, const LiveFileMetaData& file_meta,
     IngestedFileInfo* file_to_import) {
   file_to_import->external_file_path = external_file;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (file_meta.size > 0) {
     file_to_import->file_size = file_meta.size;
   } else {
@@ -375,10 +375,10 @@ Status ImportColumnFamilyJob::GetIngestedFileInfo(
       range_del_iter->SeekToFirst();
       if (range_del_iter->Valid()) {
         ParsedInternalKey key;
-        Status pik_status = ParseInternalKey(range_del_iter->key(), &key,
+        rocksdb_rs::status::Status pik_status = ParseInternalKey(range_del_iter->key(), &key,
                                              db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
-          return Status_Corruption("Corrupted key in external file. ",
+          return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
                                     pik_status.getState());
         }
         RangeTombstone first_tombstone(key, range_del_iter->value());
@@ -394,7 +394,7 @@ Status ImportColumnFamilyJob::GetIngestedFileInfo(
         pik_status = ParseInternalKey(range_del_iter->key(), &key,
                                       db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
-          return Status_Corruption("Corrupted key in external file. ",
+          return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
                                     pik_status.getState());
         }
         RangeTombstone last_tombstone(key, range_del_iter->value());

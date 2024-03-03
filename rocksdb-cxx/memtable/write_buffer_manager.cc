@@ -74,7 +74,7 @@ void WriteBufferManager::ReserveMemWithCache(size_t mem) {
 
   size_t new_mem_used = memory_used_.load(std::memory_order_relaxed) + mem;
   memory_used_.store(new_mem_used, std::memory_order_relaxed);
-  Status s = cache_res_mgr_->UpdateCacheReservation(new_mem_used);
+  rocksdb_rs::status::Status s = cache_res_mgr_->UpdateCacheReservation(new_mem_used);
 
   // We absorb the error since WriteBufferManager is not able to handle
   // this failure properly. Ideallly we should prevent this allocation
@@ -106,7 +106,7 @@ void WriteBufferManager::FreeMemWithCache(size_t mem) {
   std::lock_guard<std::mutex> lock(cache_res_mgr_mu_);
   size_t new_mem_used = memory_used_.load(std::memory_order_relaxed) - mem;
   memory_used_.store(new_mem_used, std::memory_order_relaxed);
-  Status s = cache_res_mgr_->UpdateCacheReservation(new_mem_used);
+  rocksdb_rs::status::Status s = cache_res_mgr_->UpdateCacheReservation(new_mem_used);
 }
 
 void WriteBufferManager::BeginWriteStall(StallInterface* wbm_stall) {

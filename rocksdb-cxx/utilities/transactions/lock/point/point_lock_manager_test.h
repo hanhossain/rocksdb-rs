@@ -26,8 +26,8 @@ class MockColumnFamilyHandle : public ColumnFamilyHandle {
 
   ColumnFamilyId GetID() const override { return cf_id_; }
 
-  Status GetDescriptor(ColumnFamilyDescriptor*) override {
-    return Status_OK();
+  rocksdb_rs::status::Status GetDescriptor(ColumnFamilyDescriptor*) override {
+    return rocksdb_rs::status::Status_OK();
   }
 
   const Comparator* GetComparator() const override {
@@ -249,7 +249,7 @@ TEST_P(AnyLockManagerTest, Deadlock) {
 
   auto s = locker_->TryLock(txn2, 1, "k1", env_, true);
   ASSERT_TRUE(s.IsBusy());
-  ASSERT_EQ(s.subcode(), SubCode::kDeadlock);
+  ASSERT_EQ(s.subcode(), rocksdb_rs::status::SubCode::kDeadlock);
 
   std::vector<DeadlockPath> deadlock_paths = locker_->GetDeadlockInfoBuffer();
   ASSERT_EQ(deadlock_paths.size(), 1u);

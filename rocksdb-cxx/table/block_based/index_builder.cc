@@ -243,7 +243,7 @@ void PartitionedIndexBuilder::AddIndexEntry(
   }
 }
 
-Status PartitionedIndexBuilder::Finish(
+rocksdb_rs::status::Status PartitionedIndexBuilder::Finish(
     IndexBlocks* index_blocks, const BlockHandle& last_partition_block_handle) {
   if (partition_cnt_ == 0) {
     partition_cnt_ = entries_.size();
@@ -279,7 +279,7 @@ Status PartitionedIndexBuilder::Finish(
     }
     top_level_index_size_ = index_blocks->index_block_contents.size();
     index_size_ += top_level_index_size_;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     // Finish the next partition index in line and Incomplete() to indicate we
     // expect more calls to Finish
@@ -289,7 +289,7 @@ Status PartitionedIndexBuilder::Finish(
     auto s = entry.value->Finish(index_blocks);
     index_size_ += index_blocks->index_block_contents.size();
     finishing_indexes = true;
-    return s.ok() ? Status_Incomplete() : s.Clone();
+    return s.ok() ? rocksdb_rs::status::Status_Incomplete() : s.Clone();
   }
 }
 

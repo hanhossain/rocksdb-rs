@@ -199,7 +199,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     bytes_read = 0;
     size_t total_size = 0;
 
-    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -313,7 +313,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
         blob_offsets[1] - (keys[1].size() - key_refs[1].get().size()),
         blob_offsets[2]};
 
-    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -358,7 +358,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     Slice wrong_key_slice(incorrect_key, sizeof(incorrect_key) - 1);
     key_refs[2] = std::cref(wrong_key_slice);
 
-    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -400,7 +400,7 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
       key_refs.emplace_back(std::cref(key_ref));
     }
 
-    rust::Vec<Status> statuses_buf = Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
 
     requests_buf[0] =
@@ -888,7 +888,7 @@ TEST_P(BlobFileReaderIOErrorTest, IOError) {
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* /* arg */) {
     fault_injection_env_->SetFilesystemActive(false,
-                                              Status_IOError(sync_point_));
+                                              rocksdb_rs::status::Status_IOError(sync_point_));
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -896,7 +896,7 @@ TEST_P(BlobFileReaderIOErrorTest, IOError) {
 
   std::unique_ptr<BlobFileReader> reader;
   const ReadOptions read_options;
-  const Status s = BlobFileReader::Create(
+  const rocksdb_rs::status::Status s = BlobFileReader::Create(
       immutable_options, read_options, FileOptions(), column_family_id,
       blob_file_read_hist, blob_file_number, nullptr /*IOTracer*/, &reader);
 
@@ -984,7 +984,7 @@ TEST_P(BlobFileReaderDecodingErrorTest, DecodingError) {
 
   std::unique_ptr<BlobFileReader> reader;
   const ReadOptions read_options;
-  const Status s = BlobFileReader::Create(
+  const rocksdb_rs::status::Status s = BlobFileReader::Create(
       immutable_options, read_options, FileOptions(), column_family_id,
       blob_file_read_hist, blob_file_number, nullptr /*IOTracer*/, &reader);
 

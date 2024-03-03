@@ -14,7 +14,7 @@
 #include "table/block_based/partitioned_index_iterator.h"
 
 namespace rocksdb {
-Status PartitionIndexReader::Create(
+rocksdb_rs::status::Status PartitionIndexReader::Create(
     const BlockBasedTable* table, const ReadOptions& ro,
     FilePrefetchBuffer* prefetch_buffer, bool use_cache, bool prefetch,
     bool pin, BlockCacheLookupContext* lookup_context,
@@ -26,7 +26,7 @@ Status PartitionIndexReader::Create(
 
   CachableEntry<Block> index_block;
   if (prefetch || !use_cache) {
-    const Status s =
+    const rocksdb_rs::status::Status s =
         ReadIndexBlock(table, prefetch_buffer, ro, use_cache,
                        /*get_context=*/nullptr, lookup_context, &index_block);
     if (!s.ok()) {
@@ -40,7 +40,7 @@ Status PartitionIndexReader::Create(
 
   index_reader->reset(new PartitionIndexReader(table, std::move(index_block)));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIteratorBase<IndexValue>* PartitionIndexReader::NewIterator(
@@ -49,7 +49,7 @@ InternalIteratorBase<IndexValue>* PartitionIndexReader::NewIterator(
     BlockCacheLookupContext* lookup_context) {
   const bool no_io = (read_options.read_tier == kBlockCacheTier);
   CachableEntry<Block> index_block;
-  const Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
+  const rocksdb_rs::status::Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
                                        &index_block, read_options);
   if (!s.ok()) {
     if (iter != nullptr) {
@@ -114,12 +114,12 @@ InternalIteratorBase<IndexValue>* PartitionIndexReader::NewIterator(
   // the first level iter is always on heap and will attempt to delete it
   // in its destructor.
 }
-Status PartitionIndexReader::CacheDependencies(
+rocksdb_rs::status::Status PartitionIndexReader::CacheDependencies(
     const ReadOptions& ro, bool pin, FilePrefetchBuffer* tail_prefetch_buffer) {
   if (!partition_map_.empty()) {
     // The dependencies are already cached since `partition_map_` is filled in
     // an all-or-nothing manner.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // Before read partitions, prefetch them to avoid lots of IOs
   BlockCacheLookupContext lookup_context{TableReaderCaller::kPrefetch};
@@ -130,7 +130,7 @@ Status PartitionIndexReader::CacheDependencies(
 
   CachableEntry<Block> index_block;
   {
-    Status s = GetOrReadIndexBlock(false /* no_io */, nullptr /* get_context */,
+    rocksdb_rs::status::Status s = GetOrReadIndexBlock(false /* no_io */, nullptr /* get_context */,
                                    &lookup_context, &index_block, ro);
     if (!s.ok()) {
       return s;
@@ -172,7 +172,7 @@ Status PartitionIndexReader::CacheDependencies(
         0 /*num_reads_*/, 0 /*num_file_reads_for_auto_readahead*/);
     IOOptions opts;
     {
-      Status s = rep->file->PrepareIOOptions(ro, opts);
+      rocksdb_rs::status::Status s = rep->file->PrepareIOOptions(ro, opts);
       if (s.ok()) {
         s = prefetch_buffer->Prefetch(opts, rep->file.get(), prefetch_off,
                                       static_cast<size_t>(prefetch_len),
@@ -195,7 +195,7 @@ Status PartitionIndexReader::CacheDependencies(
     ++partition_count;
     // TODO: Support counter batch update for partitioned index and
     // filter blocks
-    Status s = table()->MaybeReadBlockAndLoadToCache(
+    rocksdb_rs::status::Status s = table()->MaybeReadBlockAndLoadToCache(
         prefetch_buffer ? prefetch_buffer.get() : tail_prefetch_buffer, ro,
         handle, UncompressionDict::GetEmptyDict(),
         /*for_compaction=*/false, &block.As<Block_kIndex>(),
@@ -216,7 +216,7 @@ Status PartitionIndexReader::CacheDependencies(
       }
     }
   }
-  Status s = biter.status();
+  rocksdb_rs::status::Status s = biter.status();
   // Save (pin) them only if everything checks out
   if (map_in_progress.size() == partition_count && s.ok()) {
     std::swap(partition_map_, map_in_progress);

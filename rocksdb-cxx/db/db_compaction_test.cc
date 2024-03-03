@@ -1933,7 +1933,7 @@ TEST_F(DBCompactionTest, DeleteFileRange) {
     } else {
       ReadOptions roptions;
       std::string result;
-      Status s = db_->Get(roptions, Key(i), &result);
+      rocksdb_rs::status::Status s = db_->Get(roptions, Key(i), &result);
       ASSERT_TRUE(s.IsNotFound() || s.ok());
       if (s.IsNotFound()) {
         deleted_count++;
@@ -2604,7 +2604,7 @@ TEST_P(DBCompactionTestWithParam, ConvertCompactionStyle) {
   options.compaction_style = kCompactionStyleUniversal;
   options.num_levels = 1;
   options = CurrentOptions(options);
-  Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_TRUE(s.IsInvalidArgument());
 
   // Stage 3: compact into a single file and move the file to level 0
@@ -3347,7 +3347,7 @@ TEST_P(DBCompactionWaitForCompactTest,
   int compaction_finished = 0;
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "CompactionJob::Run():EndStatusSet", [&](void* arg) {
-        auto status = static_cast<Status*>(arg);
+        auto status = static_cast<rocksdb_rs::status::Status*>(arg);
         if (status->ok()) {
           compaction_finished++;
         }
@@ -3403,7 +3403,7 @@ TEST_P(DBCompactionWaitForCompactTest, WaitForCompactAbortOnPause) {
     ASSERT_OK(dbfull()->ContinueBackgroundWork());
   }
 
-  Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
+  rocksdb_rs::status::Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
   if (abort_on_pause_) {
     ASSERT_NOK(s);
     ASSERT_TRUE(s.IsAborted());
@@ -3436,7 +3436,7 @@ TEST_P(DBCompactionWaitForCompactTest, WaitForCompactShutdownWhileWaiting) {
 
   // Wait for Compaction in another thread
   auto waiting_for_compaction_thread = port::Thread([this]() {
-    Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
+    rocksdb_rs::status::Status s = dbfull()->WaitForCompact(wait_for_compact_options_);
     ASSERT_NOK(s);
     ASSERT_TRUE(s.IsShutdownInProgress());
   });
@@ -5525,7 +5525,7 @@ TEST_F(DBCompactionTest, SubcompactionEvent) {
 
   CompactRangeOptions comp_opts;
   comp_opts.max_subcompactions = 4;
-  Status s = dbfull()->CompactRange(comp_opts, nullptr, nullptr);
+  rocksdb_rs::status::Status s = dbfull()->CompactRange(comp_opts, nullptr, nullptr);
   ASSERT_OK(s);
   ASSERT_OK(dbfull()->TEST_WaitForCompact());
   // make sure there's no running compaction
@@ -6491,7 +6491,7 @@ TEST_F(DBCompactionTest, ManualCompactionMax) {
   DestroyAndReopen(opts);
   generate_sst_func();
   total_size = (l1_avg_size * 10) + (l2_avg_size * 100);
-  Status s = db_->SetOptions(
+  rocksdb_rs::status::Status s = db_->SetOptions(
       {{"max_compaction_bytes", std::to_string(total_size / num_split)},
        {"target_file_size_base", std::to_string(total_size / num_split)}});
   ASSERT_OK(s);
@@ -6525,7 +6525,7 @@ TEST_F(DBCompactionTest, CompactionDuringShutdown) {
       "DBImpl::BackgroundCompaction:NonTrivial:BeforeRun",
       [&](void* /*arg*/) { dbfull()->shutting_down_.store(true); });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
-  Status s = dbfull()->CompactRange(CompactRangeOptions(), nullptr, nullptr);
+  rocksdb_rs::status::Status s = dbfull()->CompactRange(CompactRangeOptions(), nullptr, nullptr);
   ASSERT_TRUE(s.ok() || s.IsShutdownInProgress());
   ASSERT_OK(dbfull()->error_handler_.GetBGError());
 }
@@ -6590,7 +6590,7 @@ TEST_P(DBCompactionTestWithParam, FixFileIngestionCompactionDeadlock) {
   // deadlock can happen.
   port::Thread ingestion_thr([&]() {
     IngestExternalFileOptions ifo;
-    Status s = db_->IngestExternalFile({sst_file_path}, ifo);
+    rocksdb_rs::status::Status s = db_->IngestExternalFile({sst_file_path}, ifo);
     ASSERT_OK(s);
   });
 
@@ -6696,7 +6696,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       ResumeCompactionThread();
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
-      Status s = dbfull()->TEST_WaitForCompact();
+      rocksdb_rs::status::Status s = dbfull()->TEST_WaitForCompact();
       EXPECT_OK(s);
     } else if (compaction_path_to_test_ == "NonRefitLevelCompactRange") {
       CompactRangeOptions cro;
@@ -6708,7 +6708,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       TEST_SYNC_POINT("PreCompaction");
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
-      Status s = dbfull()->CompactRange(cro, &start, &end);
+      rocksdb_rs::status::Status s = dbfull()->CompactRange(cro, &start, &end);
       EXPECT_OK(s);
     } else if (compaction_path_to_test_ == "RefitLevelCompactRange") {
       CompactRangeOptions cro;
@@ -6719,7 +6719,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
       std::string end_key = "k4";
       Slice end(end_key);
       TEST_SYNC_POINT("PreCompaction");
-      Status s = dbfull()->CompactRange(cro, &start, &end);
+      rocksdb_rs::status::Status s = dbfull()->CompactRange(cro, &start, &end);
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
       // To see this, remove the fix AND replace
@@ -6737,7 +6737,7 @@ class DBCompactionTestWithOngoingFileIngestionParam
         input_files.push_back(file.name);
       }
       TEST_SYNC_POINT("PreCompaction");
-      Status s = db_->CompactFiles(CompactionOptions(), input_files, 1);
+      rocksdb_rs::status::Status s = db_->CompactFiles(CompactionOptions(), input_files, 1);
       // Without proper range conflict check,
       // this would have been `Status_Corruption` about overlapping ranges
       EXPECT_TRUE(s.IsAborted());
@@ -6845,7 +6845,7 @@ TEST_F(DBCompactionTest, ConsistencyFailTest) {
 
   for (int k = 0; k < 2; ++k) {
     ASSERT_OK(Put("foo", "bar"));
-    Status s = Flush();
+    rocksdb_rs::status::Status s = Flush();
     if (k < 1) {
       ASSERT_OK(s);
     } else {
@@ -6889,7 +6889,7 @@ TEST_F(DBCompactionTest, ConsistencyFailTest2) {
   ASSERT_OK(Flush());
   ASSERT_OK(Put("foo2", value));
   ASSERT_OK(Put("z", ""));
-  Status s = Flush();
+  rocksdb_rs::status::Status s = Flush();
   ASSERT_TRUE(s.ok() || s.IsCorruption());
 
   // This probably returns non-OK, but we rely on the next Put()
@@ -7467,7 +7467,7 @@ TEST_P(DBCompactionTestL0FilesMisorderCorruptionWithParam,
   }
   ASSERT_EQ(input_files.size(), 3);
 
-  Status s = db_->CompactFiles(CompactionOptions(), input_files, 0);
+  rocksdb_rs::status::Status s = db_->CompactFiles(CompactionOptions(), input_files, 0);
   // After compaction, we have LSM tree:
   //
   // memtable: m1 [                 k2:new@4, k1:new@3]
@@ -8121,10 +8121,10 @@ TEST_P(DBCompactionTestBlobError, CompactionError) {
   Reopen(options);
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    Status* const s = static_cast<Status*>(arg);
+    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
-    (*s) = Status_IOError(sync_point_);
+    (*s) = rocksdb_rs::status::Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -8523,19 +8523,19 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
   options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kTableFile);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Reopen(options);
 
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
   Reopen(options);
 
@@ -8546,7 +8546,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8557,10 +8557,10 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -8571,12 +8571,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // Each write will be similated as corrupted.
   // Since the file system returns IOStatus::Corruption, it is an
@@ -8585,7 +8585,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8595,10 +8595,10 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -8617,19 +8617,19 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   options.num_levels = 3;
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Reopen(options);
 
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
   Reopen(options);
 
@@ -8637,7 +8637,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8648,9 +8648,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -8661,19 +8661,19 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // options is not set, the checksum handoff will not be triggered
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8683,9 +8683,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff2) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   Destroy(options);
 }
@@ -8704,19 +8704,19 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
   options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   Reopen(options);
 
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
   Reopen(options);
 
@@ -8727,7 +8727,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8738,9 +8738,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
 }
@@ -8759,7 +8759,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   options.env = fault_fs_env.get();
   options.create_if_missing = true;
   options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kNoChecksum);
   Reopen(options);
 
@@ -8768,12 +8768,12 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // Each write will be similated as corrupted.
   // Since the file system returns IOStatus::Corruption, it is mapped to
@@ -8782,7 +8782,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
@@ -8792,9 +8792,9 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put(Key(1), "value3"));
   s = Flush();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   s = dbfull()->TEST_WaitForCompact();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);

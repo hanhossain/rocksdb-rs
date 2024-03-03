@@ -81,7 +81,7 @@ class FlushJobTestBase : public testing::Test {
     const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
-    Status s = WritableFileWriter::Create(
+    rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
         nullptr);
     ASSERT_OK(s);
@@ -438,7 +438,7 @@ TEST_F(FlushJobTest, FlushMemtablesMultipleColumnFamilies) {
     committed_flush_jobs_info.push_back(job->GetCommittedFlushJobsInfo());
   }
 
-  Status s = InstallMemtableAtomicFlushResults(
+  rocksdb_rs::status::Status s = InstallMemtableAtomicFlushResults(
       nullptr /* imm_lists */, all_cfds, mutable_cf_options_list, mems_list,
       versions_.get(), nullptr /* prep_tracker */, &mutex_, file_meta_ptrs,
       committed_flush_jobs_info, &job_context.memtables_to_free,

@@ -929,12 +929,12 @@ class PosixFileSystem : public FileSystem {
     return optimized;
   }
 #ifdef OS_LINUX
-  Status RegisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& paths) override {
     return logical_block_size_cache_.RefAndCacheLogicalBlockSize(paths);
   }
-  Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
     logical_block_size_cache_.UnrefAndTryRemoveCachedLogicalBlockSize(paths);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 #endif
  private:

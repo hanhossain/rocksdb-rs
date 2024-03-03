@@ -180,66 +180,66 @@ class DBImpl : public DB {
   // ---- Implementations of the DB interface ----
 
   using DB::Resume;
-  Status Resume() override;
+  rocksdb_rs::status::Status Resume() override;
 
   using DB::Put;
-  Status Put(const WriteOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Put(const WriteOptions& options, ColumnFamilyHandle* column_family,
              const Slice& key, const Slice& value) override;
-  Status Put(const WriteOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Put(const WriteOptions& options, ColumnFamilyHandle* column_family,
              const Slice& key, const Slice& ts, const Slice& value) override;
 
   using DB::PutEntity;
-  Status PutEntity(const WriteOptions& options,
+  rocksdb_rs::status::Status PutEntity(const WriteOptions& options,
                    ColumnFamilyHandle* column_family, const Slice& key,
                    const WideColumns& columns) override;
 
   using DB::Merge;
-  Status Merge(const WriteOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Merge(const WriteOptions& options, ColumnFamilyHandle* column_family,
                const Slice& key, const Slice& value) override;
-  Status Merge(const WriteOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Merge(const WriteOptions& options, ColumnFamilyHandle* column_family,
                const Slice& key, const Slice& ts, const Slice& value) override;
 
   using DB::Delete;
-  Status Delete(const WriteOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Delete(const WriteOptions& options, ColumnFamilyHandle* column_family,
                 const Slice& key) override;
-  Status Delete(const WriteOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Delete(const WriteOptions& options, ColumnFamilyHandle* column_family,
                 const Slice& key, const Slice& ts) override;
 
   using DB::SingleDelete;
-  Status SingleDelete(const WriteOptions& options,
+  rocksdb_rs::status::Status SingleDelete(const WriteOptions& options,
                       ColumnFamilyHandle* column_family,
                       const Slice& key) override;
-  Status SingleDelete(const WriteOptions& options,
+  rocksdb_rs::status::Status SingleDelete(const WriteOptions& options,
                       ColumnFamilyHandle* column_family, const Slice& key,
                       const Slice& ts) override;
 
   using DB::DeleteRange;
-  Status DeleteRange(const WriteOptions& options,
+  rocksdb_rs::status::Status DeleteRange(const WriteOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& begin_key,
                      const Slice& end_key) override;
-  Status DeleteRange(const WriteOptions& options,
+  rocksdb_rs::status::Status DeleteRange(const WriteOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& begin_key,
                      const Slice& end_key, const Slice& ts) override;
 
   using DB::Write;
-  virtual Status Write(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& options,
                        WriteBatch* updates) override;
 
   using DB::Get;
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) override;
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value, std::string* timestamp) override;
 
   using DB::GetEntity;
-  Status GetEntity(const ReadOptions& options,
+  rocksdb_rs::status::Status GetEntity(const ReadOptions& options,
                    ColumnFamilyHandle* column_family, const Slice& key,
                    PinnableWideColumns* columns) override;
 
   using DB::GetMergeOperands;
-  Status GetMergeOperands(const ReadOptions& options,
+  rocksdb_rs::status::Status GetMergeOperands(const ReadOptions& options,
                           ColumnFamilyHandle* column_family, const Slice& key,
                           PinnableSlice* merge_operands,
                           GetMergeOperandsOptions* get_merge_operands_options,
@@ -254,12 +254,12 @@ class DBImpl : public DB {
   }
 
   using DB::MultiGet;
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values,
@@ -274,20 +274,20 @@ class DBImpl : public DB {
   // by the caller on the stack for small batches
   void MultiGet(const ReadOptions& options, ColumnFamilyHandle* column_family,
                 const size_t num_keys, const Slice* keys, PinnableSlice* values,
-                Status* statuses, const bool sorted_input = false) override;
+                rocksdb_rs::status::Status* statuses, const bool sorted_input = false) override;
   void MultiGet(const ReadOptions& options, ColumnFamilyHandle* column_family,
                 const size_t num_keys, const Slice* keys, PinnableSlice* values,
-                std::string* timestamps, Status* statuses,
+                std::string* timestamps, rocksdb_rs::status::Status* statuses,
                 const bool sorted_input = false) override;
 
   void MultiGet(const ReadOptions& options, const size_t num_keys,
                 ColumnFamilyHandle** column_families, const Slice* keys,
-                PinnableSlice* values, Status* statuses,
+                PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                 const bool sorted_input = false) override;
   void MultiGet(const ReadOptions& options, const size_t num_keys,
                 ColumnFamilyHandle** column_families, const Slice* keys,
                 PinnableSlice* values, std::string* timestamps,
-                Status* statuses, const bool sorted_input = false) override;
+                rocksdb_rs::status::Status* statuses, const bool sorted_input = false) override;
 
   void MultiGetWithCallback(
       const ReadOptions& options, ColumnFamilyHandle* column_family,
@@ -299,25 +299,25 @@ class DBImpl : public DB {
   void MultiGetEntity(const ReadOptions& options,
                       ColumnFamilyHandle* column_family, size_t num_keys,
                       const Slice* keys, PinnableWideColumns* results,
-                      Status* statuses, bool sorted_input) override;
+                      rocksdb_rs::status::Status* statuses, bool sorted_input) override;
 
   void MultiGetEntity(const ReadOptions& options, size_t num_keys,
                       ColumnFamilyHandle** column_families, const Slice* keys,
-                      PinnableWideColumns* results, Status* statuses,
+                      PinnableWideColumns* results, rocksdb_rs::status::Status* statuses,
                       bool sorted_input) override;
 
-  virtual Status CreateColumnFamily(const ColumnFamilyOptions& cf_options,
+  virtual rocksdb_rs::status::Status CreateColumnFamily(const ColumnFamilyOptions& cf_options,
                                     const std::string& column_family,
                                     ColumnFamilyHandle** handle) override;
-  virtual Status CreateColumnFamilies(
+  virtual rocksdb_rs::status::Status CreateColumnFamilies(
       const ColumnFamilyOptions& cf_options,
       const std::vector<std::string>& column_family_names,
       std::vector<ColumnFamilyHandle*>* handles) override;
-  virtual Status CreateColumnFamilies(
+  virtual rocksdb_rs::status::Status CreateColumnFamilies(
       const std::vector<ColumnFamilyDescriptor>& column_families,
       std::vector<ColumnFamilyHandle*>* handles) override;
-  virtual Status DropColumnFamily(ColumnFamilyHandle* column_family) override;
-  virtual Status DropColumnFamilies(
+  virtual rocksdb_rs::status::Status DropColumnFamily(ColumnFamilyHandle* column_family) override;
+  virtual rocksdb_rs::status::Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families) override;
 
   // Returns false if key doesn't exist in the database and true if it may.
@@ -333,7 +333,7 @@ class DBImpl : public DB {
   using DB::NewIterator;
   virtual Iterator* NewIterator(const ReadOptions& options,
                                 ColumnFamilyHandle* column_family) override;
-  virtual Status NewIterators(
+  virtual rocksdb_rs::status::Status NewIterators(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families,
       std::vector<Iterator*>* iterators) override;
@@ -344,12 +344,12 @@ class DBImpl : public DB {
   // readers. If any of them uses it for write conflict checking, then
   // is_write_conflict_boundary is true. For simplicity, set it to true by
   // default.
-  std::pair<Status, std::shared_ptr<const Snapshot>> CreateTimestampedSnapshot(
+  std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>> CreateTimestampedSnapshot(
       SequenceNumber snapshot_seq, uint64_t ts);
   std::shared_ptr<const SnapshotImpl> GetTimestampedSnapshot(uint64_t ts) const;
   void ReleaseTimestampedSnapshotsOlderThan(
       uint64_t ts, size_t* remaining_total_ss = nullptr);
-  Status GetTimestampedSnapshots(uint64_t ts_lb, uint64_t ts_ub,
+  rocksdb_rs::status::Status GetTimestampedSnapshots(uint64_t ts_lb, uint64_t ts_ub,
                                  std::vector<std::shared_ptr<const Snapshot>>&
                                      timestamped_snapshots) const;
 
@@ -367,7 +367,7 @@ class DBImpl : public DB {
   virtual bool GetAggregatedIntProperty(const Slice& property,
                                         uint64_t* aggregated_value) override;
   using DB::GetApproximateSizes;
-  virtual Status GetApproximateSizes(const SizeApproximationOptions& options,
+  virtual rocksdb_rs::status::Status GetApproximateSizes(const SizeApproximationOptions& options,
                                      ColumnFamilyHandle* column_family,
                                      const Range* range, int n,
                                      uint64_t* sizes) override;
@@ -377,12 +377,12 @@ class DBImpl : public DB {
                                            uint64_t* const count,
                                            uint64_t* const size) override;
   using DB::CompactRange;
-  virtual Status CompactRange(const CompactRangeOptions& options,
+  virtual rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& options,
                               ColumnFamilyHandle* column_family,
                               const Slice* begin, const Slice* end) override;
 
   using DB::CompactFiles;
-  virtual Status CompactFiles(
+  virtual rocksdb_rs::status::Status CompactFiles(
       const CompactionOptions& compact_options,
       ColumnFamilyHandle* column_family,
       const std::vector<std::string>& input_file_names, const int output_level,
@@ -390,21 +390,21 @@ class DBImpl : public DB {
       std::vector<std::string>* const output_file_names = nullptr,
       CompactionJobInfo* compaction_job_info = nullptr) override;
 
-  virtual Status PauseBackgroundWork() override;
-  virtual Status ContinueBackgroundWork() override;
+  virtual rocksdb_rs::status::Status PauseBackgroundWork() override;
+  virtual rocksdb_rs::status::Status ContinueBackgroundWork() override;
 
-  virtual Status EnableAutoCompaction(
+  virtual rocksdb_rs::status::Status EnableAutoCompaction(
       const std::vector<ColumnFamilyHandle*>& column_family_handles) override;
 
   virtual void EnableManualCompaction() override;
   virtual void DisableManualCompaction() override;
 
   using DB::SetOptions;
-  Status SetOptions(
+  rocksdb_rs::status::Status SetOptions(
       ColumnFamilyHandle* column_family,
       const std::unordered_map<std::string, std::string>& options_map) override;
 
-  virtual Status SetDBOptions(
+  virtual rocksdb_rs::status::Status SetDBOptions(
       const std::unordered_map<std::string, std::string>& options_map) override;
 
   using DB::NumberLevels;
@@ -422,79 +422,79 @@ class DBImpl : public DB {
   using DB::GetDBOptions;
   virtual DBOptions GetDBOptions() const override;
   using DB::Flush;
-  virtual Status Flush(const FlushOptions& options,
+  virtual rocksdb_rs::status::Status Flush(const FlushOptions& options,
                        ColumnFamilyHandle* column_family) override;
-  virtual Status Flush(
+  virtual rocksdb_rs::status::Status Flush(
       const FlushOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families) override;
-  virtual Status FlushWAL(bool sync) override;
+  virtual rocksdb_rs::status::Status FlushWAL(bool sync) override;
   bool WALBufferIsEmpty();
-  virtual Status SyncWAL() override;
-  virtual Status LockWAL() override;
-  virtual Status UnlockWAL() override;
+  virtual rocksdb_rs::status::Status SyncWAL() override;
+  virtual rocksdb_rs::status::Status LockWAL() override;
+  virtual rocksdb_rs::status::Status UnlockWAL() override;
 
   virtual SequenceNumber GetLatestSequenceNumber() const override;
 
   // IncreaseFullHistoryTsLow(ColumnFamilyHandle*, std::string) will acquire
   // and release db_mutex
-  Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
                                   std::string ts_low) override;
 
   // GetFullHistoryTsLow(ColumnFamilyHandle*, std::string*) will acquire and
   // release db_mutex
-  Status GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
                              std::string* ts_low) override;
 
-  virtual Status GetDbIdentity(std::string& identity) const override;
+  virtual rocksdb_rs::status::Status GetDbIdentity(std::string& identity) const override;
 
-  virtual Status GetDbIdentityFromIdentityFile(std::string* identity) const;
+  virtual rocksdb_rs::status::Status GetDbIdentityFromIdentityFile(std::string* identity) const;
 
-  virtual Status GetDbSessionId(std::string& session_id) const override;
+  virtual rocksdb_rs::status::Status GetDbSessionId(std::string& session_id) const override;
 
   ColumnFamilyHandle* DefaultColumnFamily() const override;
 
   ColumnFamilyHandle* PersistentStatsColumnFamily() const;
 
-  virtual Status Close() override;
+  virtual rocksdb_rs::status::Status Close() override;
 
-  virtual Status DisableFileDeletions() override;
+  virtual rocksdb_rs::status::Status DisableFileDeletions() override;
 
-  virtual Status EnableFileDeletions(bool force) override;
+  virtual rocksdb_rs::status::Status EnableFileDeletions(bool force) override;
 
   virtual bool IsFileDeletionsEnabled() const;
 
-  Status GetStatsHistory(
+  rocksdb_rs::status::Status GetStatsHistory(
       uint64_t start_time, uint64_t end_time,
       std::unique_ptr<StatsHistoryIterator>* stats_iterator) override;
 
   using DB::ResetStats;
-  virtual Status ResetStats() override;
+  virtual rocksdb_rs::status::Status ResetStats() override;
   // All the returned filenames start with "/"
-  virtual Status GetLiveFiles(std::vector<std::string>&,
+  virtual rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>&,
                               uint64_t* manifest_file_size,
                               bool flush_memtable = true) override;
-  virtual Status GetSortedWalFiles(VectorLogPtr& files) override;
-  virtual Status GetCurrentWalFile(
+  virtual rocksdb_rs::status::Status GetSortedWalFiles(VectorLogPtr& files) override;
+  virtual rocksdb_rs::status::Status GetCurrentWalFile(
       std::unique_ptr<LogFile>* current_log_file) override;
-  virtual Status GetCreationTimeOfOldestFile(
+  virtual rocksdb_rs::status::Status GetCreationTimeOfOldestFile(
       uint64_t* creation_time) override;
 
-  virtual Status GetUpdatesSince(
+  virtual rocksdb_rs::status::Status GetUpdatesSince(
       SequenceNumber seq_number, std::unique_ptr<TransactionLogIterator>* iter,
       const TransactionLogIterator::ReadOptions& read_options =
           TransactionLogIterator::ReadOptions()) override;
-  virtual Status DeleteFile(std::string name) override;
-  Status DeleteFilesInRanges(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status DeleteFile(std::string name) override;
+  rocksdb_rs::status::Status DeleteFilesInRanges(ColumnFamilyHandle* column_family,
                              const RangePtr* ranges, size_t n,
                              bool include_end = true);
 
   virtual void GetLiveFilesMetaData(
       std::vector<LiveFileMetaData>* metadata) override;
 
-  virtual Status GetLiveFilesChecksumInfo(
+  virtual rocksdb_rs::status::Status GetLiveFilesChecksumInfo(
       FileChecksumList* checksum_list) override;
 
-  virtual Status GetLiveFilesStorageInfo(
+  virtual rocksdb_rs::status::Status GetLiveFilesStorageInfo(
       const LiveFilesStorageInfoOptions& opts,
       std::vector<LiveFileStorageInfo>* files) override;
 
@@ -506,39 +506,39 @@ class DBImpl : public DB {
   void GetAllColumnFamilyMetaData(
       std::vector<ColumnFamilyMetaData>* metadata) override;
 
-  Status SuggestCompactRange(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status SuggestCompactRange(ColumnFamilyHandle* column_family,
                              const Slice* begin, const Slice* end) override;
 
-  Status PromoteL0(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status PromoteL0(ColumnFamilyHandle* column_family,
                    int target_level) override;
 
   using DB::IngestExternalFile;
-  virtual Status IngestExternalFile(
+  virtual rocksdb_rs::status::Status IngestExternalFile(
       ColumnFamilyHandle* column_family,
       const std::vector<std::string>& external_files,
       const IngestExternalFileOptions& ingestion_options) override;
 
   using DB::IngestExternalFiles;
-  virtual Status IngestExternalFiles(
+  virtual rocksdb_rs::status::Status IngestExternalFiles(
       const std::vector<IngestExternalFileArg>& args) override;
 
   using DB::CreateColumnFamilyWithImport;
-  virtual Status CreateColumnFamilyWithImport(
+  virtual rocksdb_rs::status::Status CreateColumnFamilyWithImport(
       const ColumnFamilyOptions& options, const std::string& column_family_name,
       const ImportColumnFamilyOptions& import_options,
       const std::vector<const ExportImportFilesMetaData*>& metadatas,
       ColumnFamilyHandle** handle) override;
 
   using DB::ClipColumnFamily;
-  virtual Status ClipColumnFamily(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status ClipColumnFamily(ColumnFamilyHandle* column_family,
                                   const Slice& begin_key,
                                   const Slice& end_key) override;
 
   using DB::VerifyFileChecksums;
-  Status VerifyFileChecksums(const ReadOptions& read_options) override;
+  rocksdb_rs::status::Status VerifyFileChecksums(const ReadOptions& read_options) override;
 
   using DB::VerifyChecksum;
-  virtual Status VerifyChecksum(const ReadOptions& /*read_options*/) override;
+  virtual rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& /*read_options*/) override;
   // Verify the checksums of files in db. Currently only tables are checked.
   //
   // read_options: controls file I/O behavior, e.g. read ahead size while
@@ -550,52 +550,52 @@ class DBImpl : public DB {
   //                    recomputed by reading all table files.
   //
   // Returns: OK if there is no file whose file or block checksum mismatches.
-  Status VerifyChecksumInternal(const ReadOptions& read_options,
+  rocksdb_rs::status::Status VerifyChecksumInternal(const ReadOptions& read_options,
                                 bool use_file_checksum);
 
-  Status VerifyFullFileChecksum(const std::string& file_checksum_expected,
+  rocksdb_rs::status::Status VerifyFullFileChecksum(const std::string& file_checksum_expected,
                                 const std::string& func_name_expected,
                                 const std::string& fpath,
                                 const ReadOptions& read_options);
 
   using DB::StartTrace;
-  virtual Status StartTrace(
+  virtual rocksdb_rs::status::Status StartTrace(
       const TraceOptions& options,
       std::unique_ptr<TraceWriter>&& trace_writer) override;
 
   using DB::EndTrace;
-  virtual Status EndTrace() override;
+  virtual rocksdb_rs::status::Status EndTrace() override;
 
   using DB::NewDefaultReplayer;
-  virtual Status NewDefaultReplayer(
+  virtual rocksdb_rs::status::Status NewDefaultReplayer(
       const std::vector<ColumnFamilyHandle*>& handles,
       std::unique_ptr<TraceReader>&& reader,
       std::unique_ptr<Replayer>* replayer) override;
 
   using DB::StartBlockCacheTrace;
-  Status StartBlockCacheTrace(
+  rocksdb_rs::status::Status StartBlockCacheTrace(
       const TraceOptions& trace_options,
       std::unique_ptr<TraceWriter>&& trace_writer) override;
 
-  Status StartBlockCacheTrace(
+  rocksdb_rs::status::Status StartBlockCacheTrace(
       const BlockCacheTraceOptions& options,
       std::unique_ptr<BlockCacheTraceWriter>&& trace_writer) override;
 
   using DB::EndBlockCacheTrace;
-  Status EndBlockCacheTrace() override;
+  rocksdb_rs::status::Status EndBlockCacheTrace() override;
 
   using DB::StartIOTrace;
-  Status StartIOTrace(const TraceOptions& options,
+  rocksdb_rs::status::Status StartIOTrace(const TraceOptions& options,
                       std::unique_ptr<TraceWriter>&& trace_writer) override;
 
   using DB::EndIOTrace;
-  Status EndIOTrace() override;
+  rocksdb_rs::status::Status EndIOTrace() override;
 
   using DB::GetPropertiesOfAllTables;
-  virtual Status GetPropertiesOfAllTables(
+  virtual rocksdb_rs::status::Status GetPropertiesOfAllTables(
       ColumnFamilyHandle* column_family,
       TablePropertiesCollection* props) override;
-  virtual Status GetPropertiesOfTablesInRange(
+  virtual rocksdb_rs::status::Status GetPropertiesOfTablesInRange(
       ColumnFamilyHandle* column_family, const Range* range, std::size_t n,
       TablePropertiesCollection* props) override;
 
@@ -629,7 +629,7 @@ class DBImpl : public DB {
   // get_impl_options.key via get_impl_options.value
   // If get_impl_options.get_value = false get merge operands associated with
   // get_impl_options.key via get_impl_options.merge_operands
-  Status GetImpl(const ReadOptions& options, const Slice& key,
+  rocksdb_rs::status::Status GetImpl(const ReadOptions& options, const Slice& key,
                  GetImplOptions& get_impl_options);
 
   // If `snapshot` == kMaxSequenceNumber, set a recent one inside the file.
@@ -658,7 +658,7 @@ class DBImpl : public DB {
 
   // Similar to Write() but will call the callback once on the single write
   // thread to determine whether it is safe to perform the write.
-  virtual Status WriteWithCallback(const WriteOptions& write_options,
+  virtual rocksdb_rs::status::Status WriteWithCallback(const WriteOptions& write_options,
                                    WriteBatch* my_batch,
                                    WriteCallback* callback);
 
@@ -708,16 +708,16 @@ class DBImpl : public DB {
   // Returns OK or NotFound on success,
   // other status on unexpected error.
   // TODO(andrewkr): this API need to be aware of range deletion operations
-  Status GetLatestSequenceForKey(SuperVersion* sv, const Slice& key,
+  rocksdb_rs::status::Status GetLatestSequenceForKey(SuperVersion* sv, const Slice& key,
                                  bool cache_only,
                                  SequenceNumber lower_bound_seq,
                                  SequenceNumber* seq, std::string* timestamp,
                                  bool* found_record_for_key,
                                  bool* is_blob_index);
 
-  Status TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
+  rocksdb_rs::status::Status TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
                            const Slice& lower_bound, const Slice upper_bound);
-  Status TraceIteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
+  rocksdb_rs::status::Status TraceIteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
                                   const Slice& lower_bound,
                                   const Slice upper_bound);
 
@@ -729,7 +729,7 @@ class DBImpl : public DB {
 
   // checks if all live files exist on file system and that their file sizes
   // match to our in-memory records
-  virtual Status CheckConsistency();
+  virtual rocksdb_rs::status::Status CheckConsistency();
 
   // max_file_num_to_ignore allows bottom level compaction to filter out newly
   // compacted SST files. Setting max_file_num_to_ignore to kMaxUint64 will
@@ -737,7 +737,7 @@ class DBImpl : public DB {
   // If `final_output_level` is not nullptr, it is set to manual compaction's
   // output level if returned status is OK, and it may or may not be set to
   // manual compaction's output level if returned status is not OK.
-  Status RunManualCompaction(ColumnFamilyData* cfd, int input_level,
+  rocksdb_rs::status::Status RunManualCompaction(ColumnFamilyData* cfd, int input_level,
                              int output_level,
                              const CompactRangeOptions& compact_range_options,
                              const Slice* begin, const Slice* end,
@@ -1028,10 +1028,10 @@ class DBImpl : public DB {
 
   // Initialize a brand new DB. The DB directory is expected to be empty before
   // calling it. Push new manifest file name into `new_filenames`.
-  Status NewDB(std::vector<std::string>* new_filenames);
+  rocksdb_rs::status::Status NewDB(std::vector<std::string>* new_filenames);
 
   // This is to be used only by internal rocksdb classes.
-  static Status Open(const DBOptions& db_options, const std::string& name,
+  static rocksdb_rs::status::Status Open(const DBOptions& db_options, const std::string& name,
                      const std::vector<ColumnFamilyDescriptor>& column_families,
                      std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
                      const bool seq_per_batch, const bool batch_per_txn);
@@ -1049,22 +1049,22 @@ class DBImpl : public DB {
   // Print information of all tombstones of all iterators to the std::string
   // This is only used by ldb. The output might be capped. Tombstones
   // printed out are not guaranteed to be in any order.
-  Status TablesRangeTombstoneSummary(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status TablesRangeTombstoneSummary(ColumnFamilyHandle* column_family,
                                      int max_entries_to_print,
                                      std::string* out_str);
 
   VersionSet* GetVersionSet() const { return versions_.get(); }
 
-  Status WaitForCompact(
+  rocksdb_rs::status::Status WaitForCompact(
       const WaitForCompactOptions& wait_for_compact_options) override;
 
 #ifndef NDEBUG
   // Compact any files in the named level that overlap [*begin, *end]
-  Status TEST_CompactRange(int level, const Slice* begin, const Slice* end,
+  rocksdb_rs::status::Status TEST_CompactRange(int level, const Slice* begin, const Slice* end,
                            ColumnFamilyHandle* column_family = nullptr,
                            bool disallow_trivial_move = false);
 
-  Status TEST_SwitchWAL();
+  rocksdb_rs::status::Status TEST_SwitchWAL();
 
   bool TEST_UnableToReleaseOldestLog() { return unable_to_release_oldest_log_; }
 
@@ -1072,38 +1072,38 @@ class DBImpl : public DB {
     return alive_log_files_.begin()->getting_flushed;
   }
 
-  Status TEST_SwitchMemtable(ColumnFamilyData* cfd = nullptr);
+  rocksdb_rs::status::Status TEST_SwitchMemtable(ColumnFamilyData* cfd = nullptr);
 
   // Force current memtable contents to be flushed.
-  Status TEST_FlushMemTable(bool wait = true, bool allow_write_stall = false,
+  rocksdb_rs::status::Status TEST_FlushMemTable(bool wait = true, bool allow_write_stall = false,
                             ColumnFamilyHandle* cfh = nullptr);
 
-  Status TEST_FlushMemTable(ColumnFamilyData* cfd,
+  rocksdb_rs::status::Status TEST_FlushMemTable(ColumnFamilyData* cfd,
                             const FlushOptions& flush_opts);
 
   // Flush (multiple) ColumnFamilyData without using ColumnFamilyHandle. This
   // is because in certain cases, we can flush column families, wait for the
   // flush to complete, but delete the column family handle before the wait
   // finishes. For example in CompactRange.
-  Status TEST_AtomicFlushMemTables(
+  rocksdb_rs::status::Status TEST_AtomicFlushMemTables(
       const autovector<ColumnFamilyData*>& provided_candidate_cfds,
       const FlushOptions& flush_opts);
 
   // Wait for background threads to complete scheduled work.
-  Status TEST_WaitForBackgroundWork();
+  rocksdb_rs::status::Status TEST_WaitForBackgroundWork();
 
   // Wait for memtable compaction
-  Status TEST_WaitForFlushMemTable(ColumnFamilyHandle* column_family = nullptr);
+  rocksdb_rs::status::Status TEST_WaitForFlushMemTable(ColumnFamilyHandle* column_family = nullptr);
 
-  Status TEST_WaitForCompact();
-  Status TEST_WaitForCompact(
+  rocksdb_rs::status::Status TEST_WaitForCompact();
+  rocksdb_rs::status::Status TEST_WaitForCompact(
       const WaitForCompactOptions& wait_for_compact_options);
 
   // Wait for any background purge
-  Status TEST_WaitForPurge();
+  rocksdb_rs::status::Status TEST_WaitForPurge();
 
   // Get the background error status
-  Status TEST_GetBGError();
+  rocksdb_rs::status::Status TEST_GetBGError();
 
   // Return the maximum overlapping data (in bytes) at next level for any
   // file at a level >= 1.
@@ -1148,11 +1148,11 @@ class DBImpl : public DB {
   uint64_t TEST_total_log_size() const { return total_log_size_; }
 
   // Returns column family name to ImmutableCFOptions map.
-  Status TEST_GetAllImmutableCFOptions(
+  rocksdb_rs::status::Status TEST_GetAllImmutableCFOptions(
       std::unordered_map<std::string, const ImmutableCFOptions*>* iopts_map);
 
   // Return the lastest MutableCFOptions of a column family
-  Status TEST_GetLatestMutableCFOptions(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status TEST_GetLatestMutableCFOptions(ColumnFamilyHandle* column_family,
                                         MutableCFOptions* mutable_cf_options);
 
   Cache* TEST_table_cache() { return table_cache_.get(); }
@@ -1264,7 +1264,7 @@ class DBImpl : public DB {
   std::unique_ptr<VersionSet> versions_;
   // Flag to check whether we allocated and own the info log file
   bool own_info_log_;
-  Status init_logger_creation_s_;
+  rocksdb_rs::status::Status init_logger_creation_s_;
   const DBOptions initial_db_options_;
   Env* const env_;
   std::shared_ptr<IOTracer> io_tracer_;
@@ -1372,9 +1372,9 @@ class DBImpl : public DB {
   // Persist options to options file.
   // If need_mutex_lock = false, the method will lock DB mutex.
   // If need_enter_write_thread = false, the method will enter write thread.
-  Status WriteOptionsFile(bool need_mutex_lock, bool need_enter_write_thread);
+  rocksdb_rs::status::Status WriteOptionsFile(bool need_mutex_lock, bool need_enter_write_thread);
 
-  Status CompactRangeInternal(const CompactRangeOptions& options,
+  rocksdb_rs::status::Status CompactRangeInternal(const CompactRangeOptions& options,
                               ColumnFamilyHandle* column_family,
                               const Slice* begin, const Slice* end,
                               const std::string& trim_ts);
@@ -1382,8 +1382,8 @@ class DBImpl : public DB {
   // The following two functions can only be called when:
   // 1. WriteThread::Writer::EnterUnbatched() is used.
   // 2. db_mutex is NOT held
-  Status RenameTempFileToOptionsFile(const std::string& file_name);
-  Status DeleteObsoleteOptionsFiles();
+  rocksdb_rs::status::Status RenameTempFileToOptionsFile(const std::string& file_name);
+  rocksdb_rs::status::Status DeleteObsoleteOptionsFiles();
 
   void NotifyOnFlushBegin(ColumnFamilyData* cfd, FileMetaData* file_meta,
                           const MutableCFOptions& mutable_cf_options,
@@ -1394,11 +1394,11 @@ class DBImpl : public DB {
       std::list<std::unique_ptr<FlushJobInfo>>* flush_jobs_info);
 
   void NotifyOnCompactionBegin(ColumnFamilyData* cfd, Compaction* c,
-                               const Status& st,
+                               const rocksdb_rs::status::Status& st,
                                const CompactionJobStats& job_stats, int job_id);
 
   void NotifyOnCompactionCompleted(ColumnFamilyData* cfd, Compaction* c,
-                                   const Status& st,
+                                   const rocksdb_rs::status::Status& st,
                                    const CompactionJobStats& job_stats,
                                    int job_id);
   void NotifyOnMemTableSealed(ColumnFamilyData* cfd,
@@ -1407,10 +1407,10 @@ class DBImpl : public DB {
   void NotifyOnExternalFileIngested(
       ColumnFamilyData* cfd, const ExternalSstFileIngestionJob& ingestion_job);
 
-  Status FlushAllColumnFamilies(const FlushOptions& flush_options,
+  rocksdb_rs::status::Status FlushAllColumnFamilies(const FlushOptions& flush_options,
                                 FlushReason flush_reason);
 
-  virtual Status FlushForGetLiveFiles();
+  virtual rocksdb_rs::status::Status FlushForGetLiveFiles();
 
   void NewThreadStatusCfInfo(ColumnFamilyData* cfd) const;
 
@@ -1433,7 +1433,7 @@ class DBImpl : public DB {
   // batch_cnt is expected to be non-zero in seq_per_batch mode and
   // indicates the number of sub-patches. A sub-patch is a subset of the write
   // batch that does not have duplicate keys.
-  Status WriteImpl(const WriteOptions& options, WriteBatch* updates,
+  rocksdb_rs::status::Status WriteImpl(const WriteOptions& options, WriteBatch* updates,
                    WriteCallback* callback = nullptr,
                    uint64_t* log_used = nullptr, uint64_t log_ref = 0,
                    bool disable_memtable = false, uint64_t* seq_used = nullptr,
@@ -1441,14 +1441,14 @@ class DBImpl : public DB {
                    PreReleaseCallback* pre_release_callback = nullptr,
                    PostMemTableCallback* post_memtable_callback = nullptr);
 
-  Status PipelinedWriteImpl(const WriteOptions& options, WriteBatch* updates,
+  rocksdb_rs::status::Status PipelinedWriteImpl(const WriteOptions& options, WriteBatch* updates,
                             WriteCallback* callback = nullptr,
                             uint64_t* log_used = nullptr, uint64_t log_ref = 0,
                             bool disable_memtable = false,
                             uint64_t* seq_used = nullptr);
 
   // Write only to memtables without joining any write queue
-  Status UnorderedWriteMemtable(const WriteOptions& write_options,
+  rocksdb_rs::status::Status UnorderedWriteMemtable(const WriteOptions& write_options,
                                 WriteBatch* my_batch, WriteCallback* callback,
                                 uint64_t log_ref, SequenceNumber seq,
                                 const size_t sub_batch_cnt);
@@ -1467,7 +1467,7 @@ class DBImpl : public DB {
   // of the write batch that does not have duplicate keys. When seq_per_batch is
   // not set, each key is a separate sub_batch. Otherwise each duplicate key
   // marks start of a new sub-batch.
-  Status WriteImplWALOnly(
+  rocksdb_rs::status::Status WriteImplWALOnly(
       WriteThread* write_thread, const WriteOptions& options,
       WriteBatch* updates, WriteCallback* callback, uint64_t* log_used,
       const uint64_t log_ref, uint64_t* seq_used, const size_t sub_batch_cnt,
@@ -1476,10 +1476,10 @@ class DBImpl : public DB {
 
   // write cached_recoverable_state_ to memtable if it is not empty
   // The writer must be the leader in write_thread_ and holding mutex_
-  Status WriteRecoverableState();
+  rocksdb_rs::status::Status WriteRecoverableState();
 
   // Actual implementation of Close()
-  Status CloseImpl();
+  rocksdb_rs::status::Status CloseImpl();
 
   // Recover the descriptor from persistent storage.  May do a significant
   // amount of work to recover recently logged updates.  Any changes to
@@ -1488,7 +1488,7 @@ class DBImpl : public DB {
   // skipped.
   // recovery_ctx stores the context about version edits and all those
   // edits are persisted to new Manifest after successfully syncing the new WAL.
-  virtual Status Recover(
+  virtual rocksdb_rs::status::Status Recover(
       const std::vector<ColumnFamilyDescriptor>& column_families,
       bool read_only = false, bool error_if_wal_file_exists = false,
       bool error_if_data_exists_in_wals = false,
@@ -1498,7 +1498,7 @@ class DBImpl : public DB {
   virtual bool OwnTablesAndLogs() const { return true; }
 
   // Setup DB identity file, and write DB ID to manifest if necessary.
-  Status SetupDBId(bool read_only, RecoveryContext* recovery_ctx);
+  rocksdb_rs::status::Status SetupDBId(bool read_only, RecoveryContext* recovery_ctx);
   // Assign db_id_ and write DB ID to manifest if necessary.
   void SetDBId(std::string&& id, bool read_only, RecoveryContext* recovery_ctx);
 
@@ -1517,14 +1517,14 @@ class DBImpl : public DB {
   // recovery_ctx stores the context about version edits and files to be
   // deleted. All those edits are persisted to new Manifest after successfully
   // syncing the new WAL.
-  Status DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx);
+  rocksdb_rs::status::Status DeleteUnreferencedSstFiles(RecoveryContext* recovery_ctx);
 
   // SetDbSessionId() should be called in the constuctor DBImpl()
   // to ensure that db_session_id_ gets updated every time the DB is opened
   void SetDbSessionId();
 
-  Status FailIfCfHasTs(const ColumnFamilyHandle* column_family) const;
-  Status FailIfTsMismatchCf(ColumnFamilyHandle* column_family, const Slice& ts,
+  rocksdb_rs::status::Status FailIfCfHasTs(const ColumnFamilyHandle* column_family) const;
+  rocksdb_rs::status::Status FailIfTsMismatchCf(ColumnFamilyHandle* column_family, const Slice& ts,
                             bool ts_for_read) const;
 
   // recovery_ctx stores the context about version edits and
@@ -1533,7 +1533,7 @@ class DBImpl : public DB {
   // LogAndApplyForRecovery should be called only once during recovery and it
   // should be called when RocksDB writes to a first new MANIFEST since this
   // recovery.
-  Status LogAndApplyForRecovery(const RecoveryContext& recovery_ctx);
+  rocksdb_rs::status::Status LogAndApplyForRecovery(const RecoveryContext& recovery_ctx);
 
   void InvokeWalFilterIfNeededOnColumnFamilyToWalNumberMap();
 
@@ -1542,7 +1542,7 @@ class DBImpl : public DB {
   bool InvokeWalFilterIfNeededOnWalRecord(uint64_t wal_number,
                                           const std::string& wal_fname,
                                           log::Reader::Reporter& reporter,
-                                          Status& status, bool& stop_replay,
+                                          rocksdb_rs::status::Status& status, bool& stop_replay,
                                           WriteBatch& batch);
 
  private:
@@ -1612,8 +1612,8 @@ class DBImpl : public DB {
       writer = nullptr;
       return w;
     }
-    Status ClearWriter() {
-      Status s = writer->WriteBuffer();
+    rocksdb_rs::status::Status ClearWriter() {
+      rocksdb_rs::status::Status s = writer->WriteBuffer();
       delete writer;
       writer = nullptr;
       return s;
@@ -1719,7 +1719,7 @@ class DBImpl : public DB {
           input_level(_input_level),
           output_level(_output_level),
           output_path_id(_output_path_id),
-          status(Status_new()),
+          status(rocksdb_rs::status::Status_new()),
           exclusive(_exclusive),
           disallow_trivial_move(_disallow_trivial_move),
           canceled(_canceled ? *_canceled : canceled_internal_storage) {}
@@ -1732,7 +1732,7 @@ class DBImpl : public DB {
     int input_level;
     int output_level;
     uint32_t output_path_id;
-    Status status;
+    rocksdb_rs::status::Status status;
     bool done = false;
     bool in_progress = false;    // compaction request being processed?
     bool incomplete = false;     // only part of requested range compacted
@@ -1773,7 +1773,7 @@ class DBImpl : public DB {
   // create a new column family and column family handle or just a column family
   // handle.
   // Required: DB mutex held
-  Status InitPersistStatsColumnFamily();
+  rocksdb_rs::status::Status InitPersistStatsColumnFamily();
 
   // Persistent Stats column family has two format version key which are used
   // for compatibility check. Write format version if it's created for the
@@ -1781,19 +1781,19 @@ class DBImpl : public DB {
   // from disk. This function requires DB mutex held at entrance but may
   // release and re-acquire DB mutex in the process.
   // Required: DB mutex held
-  Status PersistentStatsProcessFormatVersion();
+  rocksdb_rs::status::Status PersistentStatsProcessFormatVersion();
 
-  Status ResumeImpl(DBRecoverContext context);
+  rocksdb_rs::status::Status ResumeImpl(DBRecoverContext context);
 
-  void MaybeIgnoreError(Status* s) const;
+  void MaybeIgnoreError(rocksdb_rs::status::Status* s) const;
 
-  const Status CreateArchivalDirectory();
+  const rocksdb_rs::status::Status CreateArchivalDirectory();
 
-  Status CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
+  rocksdb_rs::status::Status CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
                                 const std::string& cf_name,
                                 ColumnFamilyHandle** handle);
 
-  Status DropColumnFamilyImpl(ColumnFamilyHandle* column_family);
+  rocksdb_rs::status::Status DropColumnFamilyImpl(ColumnFamilyHandle* column_family);
 
   // Delete any unneeded files and stale in-memory entries.
   void DeleteObsoleteFiles();
@@ -1827,7 +1827,7 @@ class DBImpl : public DB {
   // Flush the in-memory write buffer to storage.  Switches to a new
   // log-file/memtable and writes a new descriptor iff successful. Then
   // installs a new super version for the column family.
-  Status FlushMemTableToOutputFile(
+  rocksdb_rs::status::Status FlushMemTableToOutputFile(
       ColumnFamilyData* cfd, const MutableCFOptions& mutable_cf_options,
       bool* madeProgress, JobContext* job_context, FlushReason flush_reason,
       SuperVersionContext* superversion_context,
@@ -1838,17 +1838,17 @@ class DBImpl : public DB {
 
   // Flush the memtables of (multiple) column families to multiple files on
   // persistent storage.
-  Status FlushMemTablesToOutputFiles(
+  rocksdb_rs::status::Status FlushMemTablesToOutputFiles(
       const autovector<BGFlushArg>& bg_flush_args, bool* made_progress,
       JobContext* job_context, LogBuffer* log_buffer, Env::Priority thread_pri);
 
-  Status AtomicFlushMemTablesToOutputFiles(
+  rocksdb_rs::status::Status AtomicFlushMemTablesToOutputFiles(
       const autovector<BGFlushArg>& bg_flush_args, bool* made_progress,
       JobContext* job_context, LogBuffer* log_buffer, Env::Priority thread_pri);
 
   // REQUIRES: log_numbers are sorted in ascending order
   // corrupted_log_found is set to true if we recover from a corrupted log file.
-  Status RecoverLogFiles(const std::vector<uint64_t>& log_numbers,
+  rocksdb_rs::status::Status RecoverLogFiles(const std::vector<uint64_t>& log_numbers,
                          SequenceNumber* next_sequence, bool read_only,
                          bool* corrupted_log_found,
                          RecoveryContext* recovery_ctx);
@@ -1858,41 +1858,41 @@ class DBImpl : public DB {
   // database is opened) and is heavyweight because it holds the mutex
   // for the entire period. The second method WriteLevel0Table supports
   // concurrent flush memtables to storage.
-  Status WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
+  rocksdb_rs::status::Status WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
                                      MemTable* mem, VersionEdit* edit);
 
   // Get the size of a log file and, if truncate is true, truncate the
   // log file to its actual size, thereby freeing preallocated space.
   // Return success even if truncate fails
-  Status GetLogSizeAndMaybeTruncate(uint64_t wal_number, bool truncate,
+  rocksdb_rs::status::Status GetLogSizeAndMaybeTruncate(uint64_t wal_number, bool truncate,
                                     LogFileNumberSize* log);
 
   // Restore alive_log_files_ and total_log_size_ after recovery.
   // It needs to run only when there's no flush during recovery
   // (e.g. avoid_flush_during_recovery=true). May also trigger flush
   // in case total_log_size > max_total_wal_size.
-  Status RestoreAliveLogFiles(const std::vector<uint64_t>& log_numbers);
+  rocksdb_rs::status::Status RestoreAliveLogFiles(const std::vector<uint64_t>& log_numbers);
 
   // num_bytes: for slowdown case, delay time is calculated based on
   //            `num_bytes` going through.
-  Status DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
+  rocksdb_rs::status::Status DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
                     const WriteOptions& write_options);
 
   // Begin stalling of writes when memory usage increases beyond a certain
   // threshold.
   void WriteBufferManagerStallWrites();
 
-  Status ThrottleLowPriWritesIfNeeded(const WriteOptions& write_options,
+  rocksdb_rs::status::Status ThrottleLowPriWritesIfNeeded(const WriteOptions& write_options,
                                       WriteBatch* my_batch);
 
   // REQUIRES: mutex locked and in write thread.
-  Status ScheduleFlushes(WriteContext* context);
+  rocksdb_rs::status::Status ScheduleFlushes(WriteContext* context);
 
   void MaybeFlushStatsCF(autovector<ColumnFamilyData*>* cfds);
 
-  Status TrimMemtableHistory(WriteContext* context);
+  rocksdb_rs::status::Status TrimMemtableHistory(WriteContext* context);
 
-  Status SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context);
+  rocksdb_rs::status::Status SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context);
 
   // Select and output column families qualified for atomic flush in
   // `selected_cfds`. If `provided_candidate_cfds` is non-empty, it will be used
@@ -1905,20 +1905,20 @@ class DBImpl : public DB {
       const autovector<ColumnFamilyData*>& provided_candidate_cfds = {});
 
   // Force current memtable contents to be flushed.
-  Status FlushMemTable(ColumnFamilyData* cfd, const FlushOptions& options,
+  rocksdb_rs::status::Status FlushMemTable(ColumnFamilyData* cfd, const FlushOptions& options,
                        FlushReason flush_reason,
                        bool entered_write_thread = false);
 
   // Atomic-flush memtables from quanlified CFs among `provided_candidate_cfds`
   // (if non-empty) or amomg all column families and atomically record the
   // result to the MANIFEST.
-  Status AtomicFlushMemTables(
+  rocksdb_rs::status::Status AtomicFlushMemTables(
       const FlushOptions& options, FlushReason flush_reason,
       const autovector<ColumnFamilyData*>& provided_candidate_cfds = {},
       bool entered_write_thread = false);
 
   // Wait until flushing this column family won't stall writes
-  Status WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
+  rocksdb_rs::status::Status WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
                                            bool* flush_needed);
 
   // Wait for memtable flushed.
@@ -1927,14 +1927,14 @@ class DBImpl : public DB {
   // memtable pending flush.
   // resuming_from_bg_err indicates whether the caller is attempting to resume
   // from background error.
-  Status WaitForFlushMemTable(ColumnFamilyData* cfd,
+  rocksdb_rs::status::Status WaitForFlushMemTable(ColumnFamilyData* cfd,
                               const uint64_t* flush_memtable_id = nullptr,
                               bool resuming_from_bg_err = false) {
     return WaitForFlushMemTables({cfd}, {flush_memtable_id},
                                  resuming_from_bg_err);
   }
   // Wait for memtables to be flushed for multiple column families.
-  Status WaitForFlushMemTables(
+  rocksdb_rs::status::Status WaitForFlushMemTables(
       const autovector<ColumnFamilyData*>& cfds,
       const autovector<const uint64_t*>& flush_memtable_ids,
       bool resuming_from_bg_err);
@@ -1989,19 +1989,19 @@ class DBImpl : public DB {
   void AssignAtomicFlushSeq(const autovector<ColumnFamilyData*>& cfds);
 
   // REQUIRES: mutex locked and in write thread.
-  Status SwitchWAL(WriteContext* write_context);
+  rocksdb_rs::status::Status SwitchWAL(WriteContext* write_context);
 
   // REQUIRES: mutex locked and in write thread.
-  Status HandleWriteBufferManagerFlush(WriteContext* write_context);
+  rocksdb_rs::status::Status HandleWriteBufferManagerFlush(WriteContext* write_context);
 
   // REQUIRES: mutex locked
-  Status PreprocessWrite(const WriteOptions& write_options,
+  rocksdb_rs::status::Status PreprocessWrite(const WriteOptions& write_options,
                          LogContext* log_context, WriteContext* write_context);
 
   // Merge write batches in the write group into merged_batch.
   // Returns OK if merge is successful.
   // Returns Corruption if corruption in write batch is detected.
-  Status MergeBatch(const WriteThread::WriteGroup& write_group,
+  rocksdb_rs::status::Status MergeBatch(const WriteThread::WriteGroup& write_group,
                     WriteBatch* tmp_batch, WriteBatch** merged_batch,
                     size_t* write_with_wal, WriteBatch** to_be_cached_state);
 
@@ -2025,19 +2025,19 @@ class DBImpl : public DB {
 
   // Used by WriteImpl to update bg_error_ if paranoid check is enabled.
   // Caller must hold mutex_.
-  void WriteStatusCheckOnLocked(const Status& status);
+  void WriteStatusCheckOnLocked(const rocksdb_rs::status::Status& status);
 
   // Used by WriteImpl to update bg_error_ if paranoid check is enabled.
-  void WriteStatusCheck(const Status& status);
+  void WriteStatusCheck(const rocksdb_rs::status::Status& status);
 
   // Used by WriteImpl to update bg_error_ when IO error happens, e.g., write
   // WAL, sync WAL fails, if paranoid check is enabled.
   void IOStatusCheck(const IOStatus& status);
 
   // Used by WriteImpl to update bg_error_ in case of memtable insert error.
-  void MemTableInsertStatusCheck(const Status& memtable_insert_status);
+  void MemTableInsertStatusCheck(const rocksdb_rs::status::Status& memtable_insert_status);
 
-  Status CompactFilesImpl(const CompactionOptions& compact_options,
+  rocksdb_rs::status::Status CompactFilesImpl(const CompactionOptions& compact_options,
                           ColumnFamilyData* cfd, Version* version,
                           const std::vector<std::string>& input_file_names,
                           std::vector<std::string>* const output_file_names,
@@ -2081,11 +2081,11 @@ class DBImpl : public DB {
                                 Env::Priority thread_pri);
   void BackgroundCallFlush(Env::Priority thread_pri);
   void BackgroundCallPurge();
-  Status BackgroundCompaction(bool* madeProgress, JobContext* job_context,
+  rocksdb_rs::status::Status BackgroundCompaction(bool* madeProgress, JobContext* job_context,
                               LogBuffer* log_buffer,
                               PrepickedCompaction* prepicked_compaction,
                               Env::Priority thread_pri);
-  Status BackgroundFlush(bool* madeProgress, JobContext* job_context,
+  rocksdb_rs::status::Status BackgroundFlush(bool* madeProgress, JobContext* job_context,
                          LogBuffer* log_buffer, FlushReason* reason,
                          Env::Priority thread_pri);
 
@@ -2100,9 +2100,9 @@ class DBImpl : public DB {
                               LogBuffer* log_buffer);
 
   // Schedule background tasks
-  Status StartPeriodicTaskScheduler();
+  rocksdb_rs::status::Status StartPeriodicTaskScheduler();
 
-  Status RegisterRecordSeqnoTimeWorker();
+  rocksdb_rs::status::Status RegisterRecordSeqnoTimeWorker();
 
   void PrintStatistics();
 
@@ -2117,7 +2117,7 @@ class DBImpl : public DB {
   // Move the files in the input level to the target level.
   // If target_level < 0, automatically calculate the minimum level that could
   // hold the data set.
-  Status ReFitLevel(ColumnFamilyData* cfd, int level, int target_level = -1);
+  rocksdb_rs::status::Status ReFitLevel(ColumnFamilyData* cfd, int level, int target_level = -1);
 
   // helper functions for adding and removing from flush & compaction queues
   void AddToCompactionQueue(ColumnFamilyData* cfd);
@@ -2130,7 +2130,7 @@ class DBImpl : public DB {
 
   // helper function to call after some of the logs_ were synced
   void MarkLogsSynced(uint64_t up_to, bool synced_dir, VersionEdit* edit);
-  Status ApplyWALToManifest(const ReadOptions& read_options, VersionEdit* edit);
+  rocksdb_rs::status::Status ApplyWALToManifest(const ReadOptions& read_options, VersionEdit* edit);
   // WALs with log number up to up_to are not synced successfully.
   void MarkLogsNotSynced(uint64_t up_to);
 
@@ -2145,7 +2145,7 @@ class DBImpl : public DB {
   // the WAL.
   // If snapshot_seq == kMaxSequenceNumber, this function is called by a caller
   // ensuring no writes to the database.
-  std::pair<Status, std::shared_ptr<const SnapshotImpl>>
+  std::pair<rocksdb_rs::status::Status, std::shared_ptr<const SnapshotImpl>>
   CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
                                 bool lock = true);
 
@@ -2153,9 +2153,9 @@ class DBImpl : public DB {
 
   FSDirectory* GetDataDir(ColumnFamilyData* cfd, size_t path_id) const;
 
-  Status MaybeReleaseTimestampedSnapshotsAndCheck();
+  rocksdb_rs::status::Status MaybeReleaseTimestampedSnapshotsAndCheck();
 
-  Status CloseHelper();
+  rocksdb_rs::status::Status CloseHelper();
 
   void WaitForBackgroundWork();
 
@@ -2183,14 +2183,14 @@ class DBImpl : public DB {
   bool HaveManualCompaction(ColumnFamilyData* cfd);
   bool MCOverlap(ManualCompactionState* m, ManualCompactionState* m1);
   void BuildCompactionJobInfo(const ColumnFamilyData* cfd, Compaction* c,
-                              const Status& st,
+                              const rocksdb_rs::status::Status& st,
                               const CompactionJobStats& compaction_job_stats,
                               const int job_id, const Version* current,
                               CompactionJobInfo* compaction_job_info) const;
   // Reserve the next 'num' file numbers for to-be-ingested external SST files,
   // and return the current file_number in 'next_file_number'.
   // Write a version edit to the MANIFEST.
-  Status ReserveFileNumbersBeforeIngestion(
+  rocksdb_rs::status::Status ReserveFileNumbersBeforeIngestion(
       ColumnFamilyData* cfd, uint64_t num,
       std::unique_ptr<std::list<uint64_t>::iterator>& pending_output_elem,
       uint64_t* next_file_number);
@@ -2205,9 +2205,9 @@ class DBImpl : public DB {
                      size_t preallocate_block_size, log::Writer** new_log);
 
   // Validate self-consistency of DB options
-  static Status ValidateOptions(const DBOptions& db_options);
+  static rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_options);
   // Validate self-consistency of DB options and its consistency with cf options
-  static Status ValidateOptions(
+  static rocksdb_rs::status::Status ValidateOptions(
       const DBOptions& db_options,
       const std::vector<ColumnFamilyDescriptor>& column_families);
 
@@ -2221,12 +2221,12 @@ class DBImpl : public DB {
                       ColumnFamilyHandle* column_family, const size_t num_keys,
                       const Slice* keys, PinnableSlice* values,
                       PinnableWideColumns* columns, std::string* timestamps,
-                      Status* statuses, bool sorted_input);
+                      rocksdb_rs::status::Status* statuses, bool sorted_input);
 
   void MultiGetCommon(const ReadOptions& options, const size_t num_keys,
                       ColumnFamilyHandle** column_families, const Slice* keys,
                       PinnableSlice* values, PinnableWideColumns* columns,
-                      std::string* timestamps, Status* statuses,
+                      std::string* timestamps, rocksdb_rs::status::Status* statuses,
                       bool sorted_input);
 
   // A structure to hold the information required to process MultiGet of keys
@@ -2292,14 +2292,14 @@ class DBImpl : public DB {
   // to have acquired the SuperVersion and pass in a snapshot sequence number
   // in order to construct the LookupKeys. The start_key and num_keys specify
   // the range of keys in the sorted_keys vector for a single column family.
-  Status MultiGetImpl(
+  rocksdb_rs::status::Status MultiGetImpl(
       const ReadOptions& read_options, size_t start_key, size_t num_keys,
       autovector<KeyContext*, MultiGetContext::MAX_BATCH_SIZE>* sorted_keys,
       SuperVersion* sv, SequenceNumber snap_seqnum, ReadCallback* callback);
 
-  Status DisableFileDeletionsWithLock();
+  rocksdb_rs::status::Status DisableFileDeletionsWithLock();
 
-  Status IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
+  rocksdb_rs::status::Status IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
                                       std::string ts_low);
 
   bool ShouldReferenceSuperVersion(const MergeContext& merge_context);
@@ -2676,7 +2676,7 @@ class DBImpl : public DB {
   // Flag to check whether Close() has been called on this DB
   bool closed_;
   // save the closing status, for re-calling the close()
-  Status closing_status_;
+  rocksdb_rs::status::Status closing_status_;
   // mutex for DB::Close()
   InstrumentedMutex closing_mutex_;
 
@@ -2724,11 +2724,11 @@ class GetWithTimestampReadCallback : public ReadCallback {
 
 extern Options SanitizeOptions(const std::string& db, const Options& src,
                                bool read_only = false,
-                               Status* logger_creation_s = nullptr);
+                               rocksdb_rs::status::Status* logger_creation_s = nullptr);
 
 extern DBOptions SanitizeOptions(const std::string& db, const DBOptions& src,
                                  bool read_only = false,
-                                 Status* logger_creation_s = nullptr);
+                                 rocksdb_rs::status::Status* logger_creation_s = nullptr);
 
 extern rocksdb_rs::compression_type::CompressionType GetCompressionFlush(
     const ImmutableCFOptions& ioptions,
@@ -2779,7 +2779,7 @@ static void ClipToRange(T* ptr, V minvalue, V maxvalue) {
   if (static_cast<V>(*ptr) < minvalue) *ptr = minvalue;
 }
 
-inline Status DBImpl::FailIfCfHasTs(
+inline rocksdb_rs::status::Status DBImpl::FailIfCfHasTs(
     const ColumnFamilyHandle* column_family) const {
   column_family = column_family ? column_family : DefaultColumnFamily();
   assert(column_family);
@@ -2789,16 +2789,16 @@ inline Status DBImpl::FailIfCfHasTs(
     std::ostringstream oss;
     oss << "cannot call this method on column family "
         << column_family->GetName() << " that enables timestamp";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
+inline rocksdb_rs::status::Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
                                          const Slice& ts,
                                          bool ts_for_read) const {
   if (!column_family) {
-    return Status_InvalidArgument("column family handle cannot be null");
+    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be null");
   }
   assert(column_family);
   const Comparator* const ucmp = column_family->GetComparator();
@@ -2807,14 +2807,14 @@ inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
     std::stringstream oss;
     oss << "cannot call this method on column family "
         << column_family->GetName() << " that does not enable timestamp";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   const size_t ts_sz = ts.size();
   if (ts_sz != ucmp->timestamp_size()) {
     std::stringstream oss;
     oss << "Timestamp sizes mismatch: expect " << ucmp->timestamp_size() << ", "
         << ts_sz << " given";
-    return Status_InvalidArgument(oss.str());
+    return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   if (ts_for_read) {
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
@@ -2826,10 +2826,10 @@ inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
       oss << "Read timestamp: " << ts.ToString(true)
           << " is smaller than full_history_ts_low: "
           << Slice(current_ts_low).ToString(true) << std::endl;
-      return Status_InvalidArgument(oss.str());
+      return rocksdb_rs::status::Status_InvalidArgument(oss.str());
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

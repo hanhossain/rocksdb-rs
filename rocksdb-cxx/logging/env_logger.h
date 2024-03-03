@@ -89,16 +89,16 @@ class EnvLogger : public Logger {
     FlushLocked();
   }
 
-  Status CloseImpl() override { return CloseHelper(); }
+  rocksdb_rs::status::Status CloseImpl() override { return CloseHelper(); }
 
-  Status CloseHelper() {
+  rocksdb_rs::status::Status CloseHelper() {
     FileOpGuard guard(*this);
     const auto close_status = file_.Close();
 
     if (close_status.ok()) {
       return close_status;
     }
-    return Status_IOError("Close of log file failed with error:" +
+    return rocksdb_rs::status::Status_IOError("Close of log file failed with error:" +
                            (close_status.getState()
                                 ? std::string(close_status.getState())
                                 : std::string()));

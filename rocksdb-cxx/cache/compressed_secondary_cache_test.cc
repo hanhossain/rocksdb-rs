@@ -148,7 +148,7 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
       std::shared_ptr<MemoryAllocator> allocator;
       std::string msg;
       if (JemallocNodumpAllocator::IsSupported(&msg)) {
-        Status s = NewJemallocNodumpAllocator(jopts, &allocator);
+        rocksdb_rs::status::Status s = NewJemallocNodumpAllocator(jopts, &allocator);
         if (s.ok()) {
           opts.memory_allocator = allocator;
         }
@@ -618,7 +618,7 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     std::shared_ptr<MemoryAllocator> allocator;
     std::string msg;
     if (JemallocNodumpAllocator::IsSupported(&msg)) {
-      Status s = NewJemallocNodumpAllocator(jopts, &allocator);
+      rocksdb_rs::status::Status s = NewJemallocNodumpAllocator(jopts, &allocator);
       if (!s.ok()) {
         ROCKSDB_GTEST_BYPASS("JEMALLOC not supported");
       }
@@ -702,7 +702,7 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     std::shared_ptr<MemoryAllocator> allocator;
     std::string msg;
     if (JemallocNodumpAllocator::IsSupported(&msg)) {
-      Status s = NewJemallocNodumpAllocator(jopts, &allocator);
+      rocksdb_rs::status::Status s = NewJemallocNodumpAllocator(jopts, &allocator);
       if (!s.ok()) {
         ROCKSDB_GTEST_BYPASS("JEMALLOC not supported");
       }
@@ -793,14 +793,14 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam, BasicTestFromString) {
           "capacity=2048;num_shard_bits=0;compression_type=kNoCompression";
       sec_cache_is_compressed_ = false;
     }
-    Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
                                                 &sec_cache);
     EXPECT_OK(s);
   } else {
     sec_cache_uri =
         "compressed_secondary_cache://"
         "capacity=2048;num_shard_bits=0;compression_type=kNoCompression";
-    Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
                                                 &sec_cache);
     EXPECT_OK(s);
   }
@@ -825,7 +825,7 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam,
           "enable_custom_split_merge=true";
       sec_cache_is_compressed_ = false;
     }
-    Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
                                                 &sec_cache);
     EXPECT_OK(s);
   } else {
@@ -833,7 +833,7 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam,
         "compressed_secondary_cache://"
         "capacity=2048;num_shard_bits=0;compression_type=kNoCompression;"
         "enable_custom_split_merge=true";
-    Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
                                                 &sec_cache);
     EXPECT_OK(s);
   }

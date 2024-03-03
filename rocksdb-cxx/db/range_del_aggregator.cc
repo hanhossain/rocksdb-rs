@@ -35,7 +35,7 @@ TruncatedRangeDelIterator::TruncatedRangeDelIterator(
   if (smallest != nullptr) {
     pinned_bounds_.emplace_back();
     auto& parsed_smallest = pinned_bounds_.back();
-    Status pik_status = ParseInternalKey(smallest->Encode(), &parsed_smallest,
+    rocksdb_rs::status::Status pik_status = ParseInternalKey(smallest->Encode(), &parsed_smallest,
                                          false /* log_err_key */);  // TODO
     parsed_smallest.type = kTypeMaxValid;
     assert(pik_status.ok());
@@ -45,7 +45,7 @@ TruncatedRangeDelIterator::TruncatedRangeDelIterator(
     pinned_bounds_.emplace_back();
     auto& parsed_largest = pinned_bounds_.back();
 
-    Status pik_status = ParseInternalKey(largest->Encode(), &parsed_largest,
+    rocksdb_rs::status::Status pik_status = ParseInternalKey(largest->Encode(), &parsed_largest,
                                          false /* log_err_key */);  // TODO
     assert(pik_status.ok());
 
@@ -442,7 +442,7 @@ class TruncatedRangeDelMergingIter : public InternalIterator {
   bool Valid() const override {
     return !heap_.empty() && !AfterEndKey(heap_.top());
   }
-  Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
   void SeekToFirst() override {
     heap_.clear();

@@ -84,13 +84,13 @@ class TestCustomizable : public Customizable {
 
   const char* Name() const override { return name_.c_str(); }
   static const char* Type() { return "test.custom"; }
-  static Status CreateFromString(const ConfigOptions& opts,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
                                  const std::string& value,
                                  std::unique_ptr<TestCustomizable>* result);
-  static Status CreateFromString(const ConfigOptions& opts,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
                                  const std::string& value,
                                  std::shared_ptr<TestCustomizable>* result);
-  static Status CreateFromString(const ConfigOptions& opts,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
                                  const std::string& value,
                                  TestCustomizable** result);
   bool IsInstanceOf(const std::string& name) const override {
@@ -242,19 +242,19 @@ static void GetMapFromProperties(
 }
 }  // namespace
 
-Status TestCustomizable::CreateFromString(
+rocksdb_rs::status::Status TestCustomizable::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::shared_ptr<TestCustomizable>* result) {
   return LoadSharedObject<TestCustomizable>(config_options, value, result);
 }
 
-Status TestCustomizable::CreateFromString(
+rocksdb_rs::status::Status TestCustomizable::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::unique_ptr<TestCustomizable>* result) {
   return LoadUniqueObject<TestCustomizable>(config_options, value, result);
 }
 
-Status TestCustomizable::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status TestCustomizable::CreateFromString(const ConfigOptions& config_options,
                                           const std::string& value,
                                           TestCustomizable** result) {
   return LoadStaticObject<TestCustomizable>(config_options, value, result);
@@ -444,7 +444,7 @@ TEST_F(CustomizableTest, FailingFactoryTest) {
   std::unique_ptr<Configurable> c1(new SimpleConfigurable());
   ConfigOptions ignore = config_options_;
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   ignore.registry->AddLibrary("failing")->AddFactory<TestCustomizable>(
       "failing",
       [](const std::string& /*uri*/,
@@ -545,9 +545,9 @@ TEST_F(CustomizableTest, PrepareOptionsTest) {
       RegisterOptions("Prepare", &can_prepare_, &p_option_info);
     }
 
-    Status PrepareOptions(const ConfigOptions& opts) override {
+    rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& opts) override {
       if (!can_prepare_) {
-        return Status_InvalidArgument("Cannot Prepare");
+        return rocksdb_rs::status::Status_InvalidArgument("Cannot Prepare");
       } else {
         return TestCustomizable::PrepareOptions(opts);
       }
@@ -744,11 +744,11 @@ TEST_F(CustomizableTest, CopyObjectTest) {
     CopyCustomizable() : prepared_(0), validated_(0) {}
     const char* Name() const override { return "CopyCustomizable"; }
 
-    Status PrepareOptions(const ConfigOptions& options) override {
+    rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override {
       prepared_++;
       return Customizable::PrepareOptions(options);
     }
-    Status ValidateOptions(const DBOptions& db_opts,
+    rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                            const ColumnFamilyOptions& cf_opts) const override {
       validated_++;
       return Customizable::ValidateOptions(db_opts, cf_opts);
@@ -1124,7 +1124,7 @@ TEST_F(CustomizableTest, CreateManagedObjects) {
     const char* Name() const override { return kClassName(); }
     std::string GetId() const override { return id_; }
     ManagedCustomizable() { id_ = GenerateIndividualId(); }
-    static Status CreateFromString(
+    static rocksdb_rs::status::Status CreateFromString(
         const ConfigOptions& opts, const std::string& value,
         std::shared_ptr<ManagedCustomizable>* result) {
       return LoadManagedObject<ManagedCustomizable>(opts, value, result);
@@ -1229,9 +1229,9 @@ class TestSecondaryCache : public SecondaryCache {
  public:
   static const char* kClassName() { return "Test"; }
   const char* Name() const override { return kClassName(); }
-  Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
+  rocksdb_rs::status::Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
                 const Cache::CacheItemHelper* /*helper*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
   std::unique_ptr<SecondaryCacheResultHandle> Lookup(
       const Slice& /*key*/, const Cache::CacheItemHelper* /*helper*/,
@@ -1296,28 +1296,28 @@ class MockEncryptionProvider : public EncryptionProvider {
   static const char* kClassName() { return "Mock"; }
   const char* Name() const override { return kClassName(); }
   size_t GetPrefixLength() const override { return 0; }
-  Status CreateNewPrefix(const std::string& /*fname*/, char* /*prefix*/,
+  rocksdb_rs::status::Status CreateNewPrefix(const std::string& /*fname*/, char* /*prefix*/,
                          size_t /*prefixLength*/) const override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
-  Status AddCipher(const std::string& /*descriptor*/, const char* /*cipher*/,
+  rocksdb_rs::status::Status AddCipher(const std::string& /*descriptor*/, const char* /*cipher*/,
                    size_t /*len*/, bool /*for_write*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
 
-  Status CreateCipherStream(
+  rocksdb_rs::status::Status CreateCipherStream(
       const std::string& /*fname*/, const EnvOptions& /*options*/,
       Slice& /*prefix*/,
       std::unique_ptr<BlockAccessCipherStream>* /*result*/) override {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
-  Status ValidateOptions(const DBOptions& db_opts,
+  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
                          const ColumnFamilyOptions& cf_opts) const override {
     if (EndsWith(id_, "://test")) {
       return EncryptionProvider::ValidateOptions(db_opts, cf_opts);
     } else {
-      return Status_InvalidArgument("MockProvider not initialized");
+      return rocksdb_rs::status::Status_InvalidArgument("MockProvider not initialized");
     }
   }
 
@@ -1329,8 +1329,8 @@ class MockCipher : public BlockCipher {
  public:
   const char* Name() const override { return "Mock"; }
   size_t BlockSize() override { return 0; }
-  Status Encrypt(char* /*data*/) override { return Status_NotSupported(); }
-  Status Decrypt(char* data) override { return Encrypt(data); }
+  rocksdb_rs::status::Status Encrypt(char* /*data*/) override { return rocksdb_rs::status::Status_NotSupported(); }
+  rocksdb_rs::status::Status Decrypt(char* data) override { return Encrypt(data); }
 };
 
 class DummyFileSystem : public FileSystemWrapper {
@@ -1532,9 +1532,9 @@ class LoadCustomizableTest : public testing::Test {
   }
 
   template <typename T, typename U>
-  Status TestCreateStatic(const std::string& name, U** result,
+  rocksdb_rs::status::Status TestCreateStatic(const std::string& name, U** result,
                           bool delete_result = false) {
-    Status s = T::CreateFromString(config_options_, name, result);
+    rocksdb_rs::status::Status s = T::CreateFromString(config_options_, name, result);
     if (s.ok()) {
       EXPECT_NE(*result, nullptr);
       EXPECT_TRUE(*result != nullptr && (*result)->IsInstanceOf(name));
@@ -1562,18 +1562,18 @@ class LoadCustomizableTest : public testing::Test {
   }
 
   template <typename T, typename U>
-  Status TestExpectedBuiltins(
+  rocksdb_rs::status::Status TestExpectedBuiltins(
       const std::string& mock, const std::unordered_set<std::string>& expected,
       std::shared_ptr<U>* object, std::vector<std::string>* failed,
       const std::function<std::vector<std::string>(const std::string&)>& alt =
           nullptr) {
     std::unordered_set<std::string> factories = expected;
-    Status s = T::CreateFromString(config_options_, mock, object);
+    rocksdb_rs::status::Status s = T::CreateFromString(config_options_, mock, object);
     EXPECT_NOK(s);
     std::vector<std::string> builtins;
     ObjectLibrary::Default()->GetFactoryNames(T::Type(), &builtins);
     factories.insert(builtins.begin(), builtins.end());
-    Status result = Status_new();
+    rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
     int created = 0;
     for (const auto& name : factories) {
       created++;
@@ -1632,7 +1632,7 @@ class LoadCustomizableTest : public testing::Test {
   }
 
   template <typename T>
-  Status TestSharedBuiltins(const std::string& mock,
+  rocksdb_rs::status::Status TestSharedBuiltins(const std::string& mock,
                             const std::string& expected,
                             std::vector<std::string>* failed = nullptr) {
     std::unordered_set<std::string> values;
@@ -1644,25 +1644,25 @@ class LoadCustomizableTest : public testing::Test {
       return TestExpectedBuiltins<T>(mock, values, &object, failed);
     } else {
       std::vector<std::string> failures;
-      Status s = TestExpectedBuiltins<T>(mock, values, &object, &failures);
+      rocksdb_rs::status::Status s = TestExpectedBuiltins<T>(mock, values, &object, &failures);
       EXPECT_EQ(0U, failures.size());
       return s;
     }
   }
 
   template <typename T, typename U>
-  Status TestStaticBuiltins(const std::string& mock, U** object,
+  rocksdb_rs::status::Status TestStaticBuiltins(const std::string& mock, U** object,
                             const std::unordered_set<std::string>& expected,
                             std::vector<std::string>* failed,
                             bool delete_objects = false) {
     std::unordered_set<std::string> factories = expected;
-    Status s = TestCreateStatic<T>(mock, object, delete_objects);
+    rocksdb_rs::status::Status s = TestCreateStatic<T>(mock, object, delete_objects);
     EXPECT_NOK(s);
     std::vector<std::string> builtins;
     ObjectLibrary::Default()->GetFactoryNames(T::Type(), &builtins);
     factories.insert(builtins.begin(), builtins.end());
     int created = 0;
-    Status result = Status_new();
+    rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
     for (const auto& name : factories) {
       created++;
       s = TestCreateStatic<T>(name, object, delete_objects);
@@ -1864,7 +1864,7 @@ TEST_F(LoadCustomizableTest, LoadMemTableRepFactoryTest) {
 
   std::vector<std::string> failures;
   std::shared_ptr<MemTableRepFactory> factory;
-  Status s = TestExpectedBuiltins<MemTableRepFactory>(
+  rocksdb_rs::status::Status s = TestExpectedBuiltins<MemTableRepFactory>(
       "SpecialSkipListFactory", expected, &factory, &failures);
   // There is a "cuckoo" factory registered that we expect to fail.  Ignore the
   // error if this is the one
@@ -1974,7 +1974,7 @@ TEST_F(LoadCustomizableTest, LoadSystemClockTest) {
 
 TEST_F(LoadCustomizableTest, LoadMemoryAllocatorTest) {
   std::vector<std::string> failures;
-  Status s = TestSharedBuiltins<MemoryAllocator>(
+  rocksdb_rs::status::Status s = TestSharedBuiltins<MemoryAllocator>(
       MockMemoryAllocator::kClassName(), DefaultMemoryAllocator::kClassName(),
       &failures);
   if (failures.empty()) {

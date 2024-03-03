@@ -187,7 +187,7 @@ TEST_P(WriteUnpreparedSnapshotTest, ReadYourOwnWrite) {
       // keys have value >= snapshot.
       int64_t snapshot_num = counter.fetch_add(1);
 
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       for (const auto& key : keys) {
         buf[0] = counter.fetch_add(1);
         s = txn->Put(key, Slice((const char*)buf, sizeof(buf)));

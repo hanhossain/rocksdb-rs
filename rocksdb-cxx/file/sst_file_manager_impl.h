@@ -35,17 +35,17 @@ class SstFileManagerImpl : public SstFileManager {
   ~SstFileManagerImpl();
 
   // DB will call OnAddFile whenever a new sst/blob file is added.
-  Status OnAddFile(const std::string& file_path);
+  rocksdb_rs::status::Status OnAddFile(const std::string& file_path);
 
   // Overload where size of the file is provided by the caller rather than
   // queried from the filesystem. This is an optimization.
-  Status OnAddFile(const std::string& file_path, uint64_t file_size);
+  rocksdb_rs::status::Status OnAddFile(const std::string& file_path, uint64_t file_size);
 
   // DB will call OnDeleteFile whenever a sst/blob file is deleted.
-  Status OnDeleteFile(const std::string& file_path);
+  rocksdb_rs::status::Status OnDeleteFile(const std::string& file_path);
 
   // DB will call OnMoveFile whenever a sst/blob file is move to a new path.
-  Status OnMoveFile(const std::string& old_path, const std::string& new_path,
+  rocksdb_rs::status::Status OnMoveFile(const std::string& old_path, const std::string& new_path,
                     uint64_t* file_size = nullptr);
 
   // Update the maximum allowed space that should be used by RocksDB, if
@@ -75,7 +75,7 @@ class SstFileManagerImpl : public SstFileManager {
   // the full compaction size).
   bool EnoughRoomForCompaction(ColumnFamilyData* cfd,
                                const std::vector<CompactionInputFiles>& inputs,
-                               const Status& bg_error);
+                               const rocksdb_rs::status::Status& bg_error);
 
   // Bookkeeping so total_file_sizes_ goes back to normal after compaction
   // finishes
@@ -110,7 +110,7 @@ class SstFileManagerImpl : public SstFileManager {
 
   // Set a flag upon encountering disk full. May enqueue the ErrorHandler
   // instance for background polling and recovery
-  void StartErrorRecovery(ErrorHandler* db, Status bg_error);
+  void StartErrorRecovery(ErrorHandler* db, rocksdb_rs::status::Status bg_error);
 
   // Remove the given Errorhandler instance from the recovery queue. Its
   // not guaranteed
@@ -119,7 +119,7 @@ class SstFileManagerImpl : public SstFileManager {
   // Mark file as trash and schedule it's deletion. If force_bg is set, it
   // forces the file to be deleting in the background regardless of DB size,
   // except when rate limited delete is disabled
-  virtual Status ScheduleFileDeletion(const std::string& file_path,
+  virtual rocksdb_rs::status::Status ScheduleFileDeletion(const std::string& file_path,
                                       const std::string& dir_to_sync,
                                       const bool force_bg = false);
 
@@ -146,7 +146,7 @@ class SstFileManagerImpl : public SstFileManager {
 
   void ClearError();
   bool CheckFreeSpace() {
-    return bg_err_.severity() == Severity::kSoftError;
+    return bg_err_.severity() == rocksdb_rs::status::Severity::kSoftError;
   }
 
   std::shared_ptr<SystemClock> clock_;
@@ -177,7 +177,7 @@ class SstFileManagerImpl : public SstFileManager {
   // calling Env::GetFreeSpace. Posix requires a path in the filesystem
   std::string path_;
   // Save the current background error
-  Status bg_err_;
+  rocksdb_rs::status::Status bg_err_;
   // Amount of free disk headroom before allowing recovery from hard errors
   uint64_t reserved_disk_buffer_;
   // For soft errors, amount of free disk space before we can allow

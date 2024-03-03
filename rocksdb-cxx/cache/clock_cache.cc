@@ -367,7 +367,7 @@ typename Table::HandleImpl* BaseClockTable::CreateStandalone(
 
   const size_t total_charge = proto.GetTotalCharge();
   if (strict_capacity_limit) {
-    Status s = ChargeUsageMaybeEvictStrict<Table>(
+    rocksdb_rs::status::Status s = ChargeUsageMaybeEvictStrict<Table>(
         total_charge, capacity,
         /*need_evict_for_occupancy=*/false, state);
     if (!s.ok()) {
@@ -392,11 +392,11 @@ typename Table::HandleImpl* BaseClockTable::CreateStandalone(
 }
 
 template <class Table>
-Status BaseClockTable::ChargeUsageMaybeEvictStrict(
+rocksdb_rs::status::Status BaseClockTable::ChargeUsageMaybeEvictStrict(
     size_t total_charge, size_t capacity, bool need_evict_for_occupancy,
     typename Table::InsertState& state) {
   if (total_charge > capacity) {
-    return Status_MemoryLimit(
+    return rocksdb_rs::status::Status_MemoryLimit(
         "Cache entry too large for a single cache shard: " +
         std::to_string(total_charge) + " > " + std::to_string(capacity));
   }
@@ -435,11 +435,11 @@ Status BaseClockTable::ChargeUsageMaybeEvictStrict(
       usage_.fetch_sub(evicted_charge + (new_usage - old_usage),
                        std::memory_order_relaxed);
       if (evicted_charge < need_evict_charge) {
-        return Status_MemoryLimit(
+        return rocksdb_rs::status::Status_MemoryLimit(
             "Insert failed because unable to evict entries to stay within "
             "capacity limit.");
       } else {
-        return Status_MemoryLimit(
+        return rocksdb_rs::status::Status_MemoryLimit(
             "Insert failed because unable to evict entries to stay within "
             "table occupancy limit.");
       }
@@ -448,7 +448,7 @@ Status BaseClockTable::ChargeUsageMaybeEvictStrict(
     // evicted something.
     assert(evicted_count > 0);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 template <class Table>
@@ -512,7 +512,7 @@ inline bool BaseClockTable::ChargeUsageMaybeEvictNonStrict(
 }
 
 template <class Table>
-Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
+rocksdb_rs::status::Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
                               typename Table::HandleImpl** handle,
                               Cache::Priority priority, size_t capacity,
                               bool strict_capacity_limit) {
@@ -534,7 +534,7 @@ Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
   bool use_standalone_insert = false;
   const size_t total_charge = proto.GetTotalCharge();
   if (strict_capacity_limit) {
-    Status s = ChargeUsageMaybeEvictStrict<Table>(
+    rocksdb_rs::status::Status s = ChargeUsageMaybeEvictStrict<Table>(
         total_charge, capacity, need_evict_for_occupancy, state);
     if (!s.ok()) {
       // Revert occupancy
@@ -552,7 +552,7 @@ Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
         // Don't insert the entry but still return ok, as if the entry
         // inserted into cache and evicted immediately.
         proto.FreeData(allocator_);
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         // Need to track usage of fallback standalone insert
         usage_.fetch_add(total_charge, std::memory_order_relaxed);
@@ -581,7 +581,7 @@ Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
       if (handle) {
         *handle = e;
       }
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
     // Not inserted
     // Revert occupancy
@@ -594,7 +594,7 @@ Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
       assert(usage_.load(std::memory_order_relaxed) < SIZE_MAX / 2);
       // As if unrefed entry immdiately evicted
       proto.FreeData(allocator_);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     use_standalone_insert = true;
@@ -610,7 +610,7 @@ Status BaseClockTable::Insert(const ClockHandleBasicData& proto,
   // insertions, but we instead are probably interested in how many insertions
   // didn't go into the table (instead "standalone"), which could be redundant
   // Insert or some other reason (use_standalone_insert reasons above).
-  return Status_OkOverwritten();
+  return rocksdb_rs::status::Status_OkOverwritten();
 }
 
 void BaseClockTable::Ref(ClockHandle& h) {
@@ -1214,14 +1214,14 @@ void ClockCacheShard<Table>::SetStrictCapacityLimit(
 }
 
 template <class Table>
-Status ClockCacheShard<Table>::Insert(const Slice& key,
+rocksdb_rs::status::Status ClockCacheShard<Table>::Insert(const Slice& key,
                                       const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                                       Cache::ObjectPtr value,
                                       const Cache::CacheItemHelper* helper,
                                       size_t charge, HandleImpl** handle,
                                       Cache::Priority priority) {
   if (UNLIKELY(key.size() != kCacheKeySize)) {
-    return Status_NotSupported("ClockCache only supports key size " +
+    return rocksdb_rs::status::Status_NotSupported("ClockCache only supports key size " +
                                 std::to_string(kCacheKeySize) + "B");
   }
   ClockHandleBasicData proto;

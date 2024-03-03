@@ -35,7 +35,7 @@ CompactOnDeletionCollector::CompactOnDeletionCollector(
 // @params key    the user key that is inserted into the table.
 // @params value  the value that is inserted into the table.
 // @params file_size  file size up to now
-Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
+rocksdb_rs::status::Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
                                               const Slice& /*value*/,
                                               EntryType type,
                                               SequenceNumber /*seq*/,
@@ -43,12 +43,12 @@ Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
   assert(!finished_);
   if (!bucket_size_ && !deletion_ratio_enabled_) {
     // This collector is effectively disabled
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (need_compaction_) {
     // If the output file already needs to be compacted, skip the check.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (deletion_ratio_enabled_) {
@@ -85,17 +85,17 @@ Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status CompactOnDeletionCollector::Finish(
+rocksdb_rs::status::Status CompactOnDeletionCollector::Finish(
     UserCollectedProperties* /*properties*/) {
   if (!need_compaction_ && deletion_ratio_enabled_ && total_entries_ > 0) {
     double ratio = static_cast<double>(deletion_entries_) / total_entries_;
     need_compaction_ = ratio >= deletion_ratio_;
   }
   finished_ = true;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 static std::unordered_map<std::string, OptionTypeInfo>
     on_deletion_collector_type_info = {
@@ -107,14 +107,14 @@ static std::unordered_map<std::string, OptionTypeInfo>
             auto* factory =
                 static_cast<CompactOnDeletionCollectorFactory*>(addr);
             factory->SetWindowSize(ParseSizeT(value));
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           },
           [](const ConfigOptions&, const std::string&, const void* addr,
              std::string* value) {
             const auto* factory =
                 static_cast<const CompactOnDeletionCollectorFactory*>(addr);
             *value = std::to_string(factory->GetWindowSize());
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           },
           nullptr}},
         {"deletion_trigger",
@@ -125,14 +125,14 @@ static std::unordered_map<std::string, OptionTypeInfo>
             auto* factory =
                 static_cast<CompactOnDeletionCollectorFactory*>(addr);
             factory->SetDeletionTrigger(ParseSizeT(value));
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           },
           [](const ConfigOptions&, const std::string&, const void* addr,
              std::string* value) {
             const auto* factory =
                 static_cast<const CompactOnDeletionCollectorFactory*>(addr);
             *value = std::to_string(factory->GetDeletionTrigger());
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           },
           nullptr}},
         {"deletion_ratio",
@@ -143,14 +143,14 @@ static std::unordered_map<std::string, OptionTypeInfo>
             auto* factory =
                 static_cast<CompactOnDeletionCollectorFactory*>(addr);
             factory->SetDeletionRatio(ParseDouble(value));
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           },
           [](const ConfigOptions&, const std::string&, const void* addr,
              std::string* value) {
             const auto* factory =
                 static_cast<const CompactOnDeletionCollectorFactory*>(addr);
             *value = std::to_string(factory->GetDeletionRatio());
-            return Status_OK();
+            return rocksdb_rs::status::Status_OK();
           },
           nullptr}},
 
@@ -206,7 +206,7 @@ static int RegisterTablePropertiesCollectorFactories(
 }
 }  // namespace
 
-Status TablePropertiesCollectorFactory::CreateFromString(
+rocksdb_rs::status::Status TablePropertiesCollectorFactory::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<TablePropertiesCollectorFactory>* result) {
   static std::once_flag once;

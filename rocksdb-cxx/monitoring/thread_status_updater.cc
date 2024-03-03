@@ -171,7 +171,7 @@ void ThreadStatusUpdater::ClearThreadState() {
                          std::memory_order_relaxed);
 }
 
-Status ThreadStatusUpdater::GetThreadList(
+rocksdb_rs::status::Status ThreadStatusUpdater::GetThreadList(
     std::vector<ThreadStatus>* thread_list) {
   thread_list->clear();
   std::vector<std::shared_ptr<ThreadStatusData>> valid_list;
@@ -216,7 +216,7 @@ Status ThreadStatusUpdater::GetThreadList(
         op_elapsed_micros, op_stage, op_props, state_type);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 ThreadStatusData* ThreadStatusUpdater::GetLocalThreadStatus() {
@@ -303,9 +303,9 @@ void ThreadStatusUpdater::SetThreadState(
 
 void ThreadStatusUpdater::ClearThreadState() {}
 
-Status ThreadStatusUpdater::GetThreadList(
+rocksdb_rs::status::Status ThreadStatusUpdater::GetThreadList(
     std::vector<ThreadStatus>* /*thread_list*/) {
-  return Status_NotSupported(
+  return rocksdb_rs::status::Status_NotSupported(
       "GetThreadList is not supported in the current running environment.");
 }
 

@@ -34,10 +34,10 @@ void Configurable::RegisterOptions(
 //
 //*************************************************************************
 
-Status Configurable::PrepareOptions(const ConfigOptions& opts) {
+rocksdb_rs::status::Status Configurable::PrepareOptions(const ConfigOptions& opts) {
   // We ignore the invoke_prepare_options here intentionally,
   // as if you are here, you must have called PrepareOptions explicitly.
-  Status status = Status_OK();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_OK();
   for (auto opt_iter : options_) {
     if (opt_iter.type_map != nullptr) {
       for (auto map_iter : *(opt_iter.type_map)) {
@@ -54,9 +54,9 @@ Status Configurable::PrepareOptions(const ConfigOptions& opts) {
   return status;
 }
 
-Status Configurable::ValidateOptions(const DBOptions& db_opts,
+rocksdb_rs::status::Status Configurable::ValidateOptions(const DBOptions& db_opts,
                                      const ColumnFamilyOptions& cf_opts) const {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   for (auto opt_iter : options_) {
     if (opt_iter.type_map != nullptr) {
       for (auto map_iter : *(opt_iter.type_map)) {
@@ -115,26 +115,26 @@ const OptionTypeInfo* ConfigurableHelper::FindOption(
 //
 //*************************************************************************
 
-Status Configurable::ConfigureFromMap(
+rocksdb_rs::status::Status Configurable::ConfigureFromMap(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opts_map) {
-  Status s = ConfigureFromMap(config_options, opts_map, nullptr);
+  rocksdb_rs::status::Status s = ConfigureFromMap(config_options, opts_map, nullptr);
   return s;
 }
 
-Status Configurable::ConfigureFromMap(
+rocksdb_rs::status::Status Configurable::ConfigureFromMap(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   return ConfigureOptions(config_options, opts_map, unused);
 }
 
-Status Configurable::ConfigureOptions(
+rocksdb_rs::status::Status Configurable::ConfigureOptions(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   std::string curr_opts;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!opts_map.empty()) {
     // There are options in the map.
     // Save the current configuration in curr_opts and then configure the
@@ -166,14 +166,14 @@ Status Configurable::ConfigureOptions(
   return s;
 }
 
-Status Configurable::ParseStringOptions(const ConfigOptions& /*config_options*/,
+rocksdb_rs::status::Status Configurable::ParseStringOptions(const ConfigOptions& /*config_options*/,
                                         const std::string& /*opts_str*/) {
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
                                          const std::string& opts_str) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!opts_str.empty()) {
     if (opts_str.find(';') != std::string::npos ||
         opts_str.find('=') != std::string::npos) {
@@ -191,7 +191,7 @@ Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
   } else if (config_options.invoke_prepare_options) {
     s = PrepareOptions(config_options);
   } else {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   return s;
 }
@@ -200,7 +200,7 @@ Status Configurable::ConfigureFromString(const ConfigOptions& config_options,
  * Sets the value of the named property to the input value, returning OK on
  * succcess.
  */
-Status Configurable::ConfigureOption(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Configurable::ConfigureOption(const ConfigOptions& config_options,
                                      const std::string& name,
                                      const std::string& value) {
   return ConfigurableHelper::ConfigureSingleOption(config_options, *this, name,
@@ -214,7 +214,7 @@ Status Configurable::ConfigureOption(const ConfigOptions& config_options,
  * status should be returned.
  */
 
-Status Configurable::ParseOption(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Configurable::ParseOption(const ConfigOptions& config_options,
                                  const OptionTypeInfo& opt_info,
                                  const std::string& opt_name,
                                  const std::string& opt_value, void* opt_ptr) {
@@ -228,19 +228,19 @@ Status Configurable::ParseOption(const ConfigOptions& config_options,
       return opt_info.Parse(config_options, opt_name, opt_value, opt_ptr);
     }
   } else if (config_options.mutable_options_only) {
-    return Status_InvalidArgument("Option not changeable: " + opt_name);
+    return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
   } else {
     return opt_info.Parse(config_options, opt_name, opt_value, opt_ptr);
   }
 }
 
 
-Status ConfigurableHelper::ConfigureOptions(
+rocksdb_rs::status::Status ConfigurableHelper::ConfigureOptions(
     const ConfigOptions& config_options, Configurable& configurable,
     const std::unordered_map<std::string, std::string>& opts_map,
     std::unordered_map<std::string, std::string>* unused) {
   std::unordered_map<std::string, std::string> remaining = opts_map;
-  Status s = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (!opts_map.empty()) {
     for (const auto& iter : configurable.options_) {
       if (iter.type_map != nullptr) {
@@ -258,9 +258,9 @@ Status ConfigurableHelper::ConfigureOptions(
     unused->insert(remaining.begin(), remaining.end());
   }
   if (config_options.ignore_unknown_options) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   } else if (s.ok() && unused == nullptr && !remaining.empty()) {
-    s = Status_NotFound("Could not find option: ", remaining.begin()->first);
+    s = rocksdb_rs::status::Status_NotFound("Could not find option: ", remaining.begin()->first);
   }
   return s;
 }
@@ -277,12 +277,12 @@ Status ConfigurableHelper::ConfigureOptions(
  is OFF
  * - OK, if no option was invalid or not supported (or ignored)
  */
-Status ConfigurableHelper::ConfigureSomeOptions(
+rocksdb_rs::status::Status ConfigurableHelper::ConfigureSomeOptions(
     const ConfigOptions& config_options, Configurable& configurable,
     const std::unordered_map<std::string, OptionTypeInfo>& type_map,
     std::unordered_map<std::string, std::string>* options, void* opt_ptr) {
-  Status result = Status_OK();  // The last non-OK result (if any)
-  Status notsup = Status_OK();  // The last NotSupported result (if any)
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_OK();  // The last non-OK result (if any)
+  rocksdb_rs::status::Status notsup = rocksdb_rs::status::Status_OK();  // The last NotSupported result (if any)
   std::string elem_name;
   int found = 1;
   std::unordered_set<std::string> unsupported;
@@ -290,7 +290,7 @@ Status ConfigurableHelper::ConfigureSomeOptions(
   // go through the remaining unused properties and attempt to configure them.
   while (found > 0 && !options->empty()) {
     found = 0;
-    notsup = Status_OK();
+    notsup = rocksdb_rs::status::Status_OK();
     for (auto it = options->begin(); it != options->end();) {
       const std::string& opt_name = configurable.GetOptionName(it->first);
       const std::string& opt_value = it->second;
@@ -299,7 +299,7 @@ Status ConfigurableHelper::ConfigureSomeOptions(
       if (opt_info == nullptr) {  // Did not find the option.  Skip it
         ++it;
       } else {
-        Status s = ConfigureOption(config_options, configurable, *opt_info,
+        rocksdb_rs::status::Status s = ConfigureOption(config_options, configurable, *opt_info,
                                    opt_name, elem_name, opt_value, opt_ptr);
         if (s.IsNotFound()) {
           ++it;
@@ -326,17 +326,17 @@ Status ConfigurableHelper::ConfigureSomeOptions(
     }
   }
   if (config_options.ignore_unknown_options) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (!result.ok()) {
     return result;
   } else if (config_options.ignore_unsupported_options) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
     return notsup;
   }
 }
 
-Status ConfigurableHelper::ConfigureSingleOption(
+rocksdb_rs::status::Status ConfigurableHelper::ConfigureSingleOption(
     const ConfigOptions& config_options, Configurable& configurable,
     const std::string& name, const std::string& value) {
   const std::string& opt_name = configurable.GetOptionName(name);
@@ -345,13 +345,13 @@ Status ConfigurableHelper::ConfigureSingleOption(
   const auto opt_info =
       FindOption(configurable.options_, opt_name, &elem_name, &opt_ptr);
   if (opt_info == nullptr) {
-    return Status_NotFound("Could not find option: ", name);
+    return rocksdb_rs::status::Status_NotFound("Could not find option: ", name);
   } else {
     return ConfigureOption(config_options, configurable, *opt_info, opt_name,
                            elem_name, value, opt_ptr);
   }
 }
-Status ConfigurableHelper::ConfigureCustomizableOption(
+rocksdb_rs::status::Status ConfigurableHelper::ConfigureCustomizableOption(
     const ConfigOptions& config_options, Configurable& configurable,
     const OptionTypeInfo& opt_info, const std::string& opt_name,
     const std::string& name, const std::string& value, void* opt_ptr) {
@@ -368,7 +368,7 @@ Status ConfigurableHelper::ConfigureCustomizableOption(
         EndsWith(opt_name, OptionTypeInfo::kIdPropSuffix())) {
       return configurable.ParseOption(copy, opt_info, name, value, opt_ptr);
     } else if (value.empty()) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else if (custom == nullptr || !StartsWith(name, custom->GetId() + ".")) {
       return configurable.ParseOption(copy, opt_info, name, value, opt_ptr);
     } else if (value.find("=") != std::string::npos) {
@@ -384,18 +384,18 @@ Status ConfigurableHelper::ConfigureCustomizableOption(
       // We do not have a Customizable to configure.  This is OK if the
       // value is empty (nothing being configured) but an error otherwise
       if (value.empty()) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
-        return Status_InvalidArgument("Option not changeable: " + opt_name);
+        return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
       }
     } else if (EndsWith(opt_name, OptionTypeInfo::kIdPropSuffix()) ||
                name == OptionTypeInfo::kIdPropName()) {
       // We have a property of the form "id=value" or "table.id=value"
       // This is OK if we ID/value matches the current customizable object
       if (custom->GetId() == value) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
-        return Status_InvalidArgument("Option not changeable: " + opt_name);
+        return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
       }
     } else if (opt_name == name) {
       // The properties are of one of forms:
@@ -408,14 +408,14 @@ Status ConfigurableHelper::ConfigureCustomizableOption(
       // map
       std::unordered_map<std::string, std::string> props;
       std::string id;
-      Status s =
+      rocksdb_rs::status::Status s =
           Configurable::GetOptionsMap(value, custom->GetId(), &id, &props);
       if (!s.ok()) {
         return s;
       } else if (custom->GetId() != id) {
-        return Status_InvalidArgument("Option not changeable: " + opt_name);
+        return rocksdb_rs::status::Status_InvalidArgument("Option not changeable: " + opt_name);
       } else if (props.empty()) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       } else {
         return custom->ConfigureFromMap(copy, props);
       }
@@ -427,7 +427,7 @@ Status ConfigurableHelper::ConfigureCustomizableOption(
   }
 }
 
-Status ConfigurableHelper::ConfigureOption(
+rocksdb_rs::status::Status ConfigurableHelper::ConfigureOption(
     const ConfigOptions& config_options, Configurable& configurable,
     const OptionTypeInfo& opt_info, const std::string& opt_name,
     const std::string& name, const std::string& value, void* opt_ptr) {
@@ -441,7 +441,7 @@ Status ConfigurableHelper::ConfigureOption(
     return configurable.ParseOption(config_options, opt_info, name, value,
                                     opt_ptr);
   } else {
-    return Status_NotFound("Could not find option: ", name);
+    return rocksdb_rs::status::Status_NotFound("Could not find option: ", name);
   }
 }
 
@@ -451,7 +451,7 @@ Status ConfigurableHelper::ConfigureOption(
 //
 //*******************************************************************************
 
-Status Configurable::GetOptionString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Configurable::GetOptionString(const ConfigOptions& config_options,
                                      std::string* result) const {
   assert(result);
   result->clear();
@@ -472,20 +472,20 @@ std::string Configurable::ToString(const ConfigOptions& config_options,
 std::string Configurable::SerializeOptions(const ConfigOptions& config_options,
                                            const std::string& header) const {
   std::string result;
-  Status s = ConfigurableHelper::SerializeOptions(config_options, *this, header,
+  rocksdb_rs::status::Status s = ConfigurableHelper::SerializeOptions(config_options, *this, header,
                                                   &result);
   assert(s.ok());
   return result;
 }
 
-Status Configurable::GetOption(const ConfigOptions& config_options,
+rocksdb_rs::status::Status Configurable::GetOption(const ConfigOptions& config_options,
                                const std::string& name,
                                std::string* value) const {
   return ConfigurableHelper::GetOption(config_options, *this,
                                        GetOptionName(name), value);
 }
 
-Status ConfigurableHelper::GetOption(const ConfigOptions& config_options,
+rocksdb_rs::status::Status ConfigurableHelper::GetOption(const ConfigOptions& config_options,
                                      const Configurable& configurable,
                                      const std::string& short_name,
                                      std::string* value) {
@@ -511,10 +511,10 @@ Status ConfigurableHelper::GetOption(const ConfigOptions& config_options,
       }
     }
   }
-  return Status_NotFound("Cannot find option: ", short_name);
+  return rocksdb_rs::status::Status_NotFound("Cannot find option: ", short_name);
 }
 
-Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
                                             const Configurable& configurable,
                                             const std::string& prefix,
                                             std::string* result) {
@@ -526,7 +526,7 @@ Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
         const auto& opt_info = map_iter.second;
         if (opt_info.ShouldSerialize()) {
           std::string value;
-          Status s = Status_new();
+          rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
           if (!config_options.mutable_options_only) {
             s = opt_info.Serialize(config_options, prefix + opt_name,
                                    opt_iter.opt_ptr, &value);
@@ -556,7 +556,7 @@ Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
       }
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 //********************************************************************************
@@ -564,17 +564,17 @@ Status ConfigurableHelper::SerializeOptions(const ConfigOptions& config_options,
 // Methods for listing the options from Configurables
 //
 //********************************************************************************
-Status Configurable::GetOptionNames(
+rocksdb_rs::status::Status Configurable::GetOptionNames(
     const ConfigOptions& config_options,
     std::unordered_set<std::string>* result) const {
   assert(result);
   return ConfigurableHelper::ListOptions(config_options, *this, "", result);
 }
 
-Status ConfigurableHelper::ListOptions(
+rocksdb_rs::status::Status ConfigurableHelper::ListOptions(
     const ConfigOptions& config_options, const Configurable& configurable,
     const std::string& prefix, std::unordered_set<std::string>* result) {
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   for (auto const& opt_iter : configurable.options_) {
     if (opt_iter.type_map != nullptr) {
       for (const auto& map_iter : *(opt_iter.type_map)) {
@@ -672,12 +672,12 @@ bool ConfigurableHelper::AreEquivalent(const ConfigOptions& config_options,
   return true;
 }
 
-Status Configurable::GetOptionsMap(
+rocksdb_rs::status::Status Configurable::GetOptionsMap(
     const std::string& value, const std::string& default_id, std::string* id,
     std::unordered_map<std::string, std::string>* props) {
   assert(id);
   assert(props);
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (value.empty() || value == kNullptrString) {
     *id = default_id;
   } else if (value.find('=') == std::string::npos) {
@@ -687,7 +687,7 @@ Status Configurable::GetOptionsMap(
     if (!status.ok()) {       // There was an error creating the map.
       *id = value;            // Treat the value as id
       props->clear();         // Clear the properties
-      status = Status_OK();  // and ignore the error
+      status = rocksdb_rs::status::Status_OK();  // and ignore the error
     } else {
       auto iter = props->find(OptionTypeInfo::kIdPropName());
       if (iter != props->end()) {

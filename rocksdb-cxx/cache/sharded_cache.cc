@@ -33,7 +33,7 @@ uint32_t DetermineSeed(int32_t hash_seed_option) {
   static SemiStructuredUniqueIdGen gen;
   if (hash_seed_option == ShardedCacheOptions::kHostHashSeed) {
     std::string hostname;
-    Status s = Env::Default()->GetHostNameString(&hostname);
+    rocksdb_rs::status::Status s = Env::Default()->GetHostNameString(&hostname);
     if (s.ok()) {
       return GetSliceHash(hostname) & kSeedMask;
     } else {

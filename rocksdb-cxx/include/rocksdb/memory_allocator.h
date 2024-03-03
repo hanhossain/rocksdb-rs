@@ -20,7 +20,7 @@ namespace rocksdb {
 class MemoryAllocator : public Customizable {
  public:
   static const char* Type() { return "MemoryAllocator"; }
-  static Status CreateFromString(const ConfigOptions& options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
                                  const std::string& value,
                                  std::shared_ptr<MemoryAllocator>* result);
 
@@ -81,7 +81,7 @@ struct JemallocAllocatorOptions {
 // (thread-local cache) is enabled to cache unused allocations for future use.
 // The tcache normally incurs 0.5M extra memory usage per-thread. The usage
 // can be reduced by limiting allocation sizes to cache.
-extern Status NewJemallocNodumpAllocator(
+extern rocksdb_rs::status::Status NewJemallocNodumpAllocator(
     JemallocAllocatorOptions& options,
     std::shared_ptr<MemoryAllocator>* memory_allocator);
 

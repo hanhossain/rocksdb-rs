@@ -35,21 +35,21 @@
 
 namespace rocksdb {
 
-Status Checkpoint::Create(DB* db, Checkpoint** checkpoint_ptr) {
+rocksdb_rs::status::Status Checkpoint::Create(DB* db, Checkpoint** checkpoint_ptr) {
   *checkpoint_ptr = new CheckpointImpl(db);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status Checkpoint::CreateCheckpoint(const std::string& /*checkpoint_dir*/,
+rocksdb_rs::status::Status Checkpoint::CreateCheckpoint(const std::string& /*checkpoint_dir*/,
                                     uint64_t /*log_size_for_flush*/,
                                     uint64_t* /*sequence_number_ptr*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
 void CheckpointImpl::CleanStagingDirectory(const std::string& full_private_path,
                                            Logger* info_log) {
   std::vector<std::string> subchildren;
-  Status s = db_->GetEnv()->FileExists(full_private_path);
+  rocksdb_rs::status::Status s = db_->GetEnv()->FileExists(full_private_path);
   if (s.IsNotFound()) {
     return;
   }
@@ -70,21 +70,21 @@ void CheckpointImpl::CleanStagingDirectory(const std::string& full_private_path,
                  s.ToString()->c_str());
 }
 
-Status Checkpoint::ExportColumnFamily(
+rocksdb_rs::status::Status Checkpoint::ExportColumnFamily(
     ColumnFamilyHandle* /*handle*/, const std::string& /*export_dir*/,
     ExportImportFilesMetaData** /*metadata*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
 // Builds an openable snapshot of RocksDB
-Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
+rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
                                         uint64_t log_size_for_flush,
                                         uint64_t* sequence_number_ptr) {
   DBOptions db_options = db_->GetDBOptions();
 
-  Status s = db_->GetEnv()->FileExists(checkpoint_dir);
+  rocksdb_rs::status::Status s = db_->GetEnv()->FileExists(checkpoint_dir);
   if (s.ok()) {
-    return Status_InvalidArgument("Directory exists");
+    return rocksdb_rs::status::Status_InvalidArgument("Directory exists");
   } else if (!s.IsNotFound()) {
     assert(s.IsIOError());
     return s;
@@ -101,7 +101,7 @@ Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
     // directory, but it shouldn't be because we verified above the directory
     // doesn't exist.
     assert(checkpoint_dir.empty());
-    return Status_InvalidArgument("invalid checkpoint directory name");
+    return rocksdb_rs::status::Status_InvalidArgument("invalid checkpoint directory name");
   }
 
   std::string full_private_path =
@@ -148,7 +148,7 @@ Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
 
       // we copied all the files, enable file deletions
       if (disabled_file_deletions) {
-        Status ss = db_->EnableFileDeletions(false);
+        rocksdb_rs::status::Status ss = db_->EnableFileDeletions(false);
         assert(ss.ok());
       }
     }
@@ -186,17 +186,17 @@ Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
   return s;
 }
 
-Status CheckpointImpl::CreateCustomCheckpoint(
-    std::function<Status(const std::string& src_dirname,
+rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
+    std::function<rocksdb_rs::status::Status(const std::string& src_dirname,
                          const std::string& src_fname, rocksdb_rs::types::FileType type)>
         link_file_cb,
     std::function<
-        Status(const std::string& src_dirname, const std::string& src_fname,
+        rocksdb_rs::status::Status(const std::string& src_dirname, const std::string& src_fname,
                uint64_t size_limit_bytes, rocksdb_rs::types::FileType type,
                const std::string& checksum_func_name,
                const std::string& checksum_val, const Temperature temperature)>
         copy_file_cb,
-    std::function<Status(const std::string& fname, const std::string& contents,
+    std::function<rocksdb_rs::status::Status(const std::string& fname, const std::string& contents,
                          rocksdb_rs::types::FileType type)>
         create_file_cb,
     uint64_t* sequence_number, uint64_t log_size_for_flush,
@@ -209,7 +209,7 @@ Status CheckpointImpl::CreateCustomCheckpoint(
 
   std::vector<LiveFileStorageInfo> infos;
   {
-    Status s = db_->GetLiveFilesStorageInfo(opts, &infos);
+    rocksdb_rs::status::Status s = db_->GetLiveFilesStorageInfo(opts, &infos);
     if (!s.ok()) {
       return s;
     }
@@ -224,20 +224,20 @@ Status CheckpointImpl::CreateCustomCheckpoint(
     }
   }
   if (dirs.size() > 1) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "db_paths / cf_paths not supported for Checkpoint nor BackupEngine");
   }
 
   bool same_fs = true;
 
   for (auto& info : infos) {
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (!info.replacement_contents.empty()) {
       // Currently should only be used for CURRENT file.
       assert(info.file_type == rocksdb_rs::types::FileType::kCurrentFile);
 
       if (info.size != info.replacement_contents.size()) {
-        s = Status_Corruption("Inconsistent size metadata for " +
+        s = rocksdb_rs::status::Status_Corruption("Inconsistent size metadata for " +
                                info.relative_filename);
       } else {
         s = create_file_cb(info.relative_filename, info.replacement_contents,
@@ -249,7 +249,7 @@ Status CheckpointImpl::CreateCustomCheckpoint(
                          info.file_type);
         if (s.IsNotSupported()) {
           same_fs = false;
-          s = Status_OK();
+          s = rocksdb_rs::status::Status_OK();
         }
       }
       if (!same_fs || info.trim_to_size) {
@@ -273,12 +273,12 @@ Status CheckpointImpl::CreateCustomCheckpoint(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Exports all live SST files of a specified Column Family onto export_dir,
 // returning SST files information in metadata.
-Status CheckpointImpl::ExportColumnFamily(
+rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
     ColumnFamilyHandle* handle, const std::string& export_dir,
     ExportImportFilesMetaData** metadata) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(handle);
@@ -289,7 +289,7 @@ Status CheckpointImpl::ExportColumnFamily(
   assert(*metadata == nullptr);
   auto s = db_->GetEnv()->FileExists(export_dir);
   if (s.ok()) {
-    return Status_InvalidArgument("Specified export_dir exists");
+    return rocksdb_rs::status::Status_InvalidArgument("Specified export_dir exists");
   } else if (!s.IsNotFound()) {
     assert(s.IsIOError());
     return s;
@@ -297,7 +297,7 @@ Status CheckpointImpl::ExportColumnFamily(
 
   const auto final_nonslash_idx = export_dir.find_last_not_of('/');
   if (final_nonslash_idx == std::string::npos) {
-    return Status_InvalidArgument("Specified export_dir invalid");
+    return rocksdb_rs::status::Status_InvalidArgument("Specified export_dir invalid");
   }
   ROCKS_LOG_INFO(db_options.info_log,
                  "[%s] export column family onto export directory %s",
@@ -414,15 +414,15 @@ Status CheckpointImpl::ExportColumnFamily(
   return s;
 }
 
-Status CheckpointImpl::ExportFilesInMetaData(
+rocksdb_rs::status::Status CheckpointImpl::ExportFilesInMetaData(
     const DBOptions& db_options, const ColumnFamilyMetaData& metadata,
-    std::function<Status(const std::string& src_dirname,
+    std::function<rocksdb_rs::status::Status(const std::string& src_dirname,
                          const std::string& src_fname)>
         link_file_cb,
-    std::function<Status(const std::string& src_dirname,
+    std::function<rocksdb_rs::status::Status(const std::string& src_dirname,
                          const std::string& src_fname)>
         copy_file_cb) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   auto hardlink_file = true;
 
   // Copy/hard link files in metadata.
@@ -433,7 +433,7 @@ Status CheckpointImpl::ExportFilesInMetaData(
       rocksdb_rs::types::FileType type;
       const auto ok = rocksdb_rs::filename::ParseFileName(file_metadata.name, &number, &type);
       if (!ok) {
-        s = Status_Corruption("Could not parse file name");
+        s = rocksdb_rs::status::Status_Corruption("Could not parse file name");
         break;
       }
 
@@ -448,7 +448,7 @@ Status CheckpointImpl::ExportFilesInMetaData(
         if (num_files == 1 && s.IsNotSupported()) {
           // Fallback to copy if link failed due to cross-device directories.
           hardlink_file = false;
-          s = Status_OK();
+          s = rocksdb_rs::status::Status_OK();
         }
       }
       if (!hardlink_file) {

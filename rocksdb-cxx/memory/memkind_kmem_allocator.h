@@ -29,7 +29,7 @@ class MemkindKmemAllocator : public BaseMemoryAllocator {
     return false;
 #endif
   }
-  Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
 
 #ifdef MEMKIND
   void* Allocate(size_t size) override;

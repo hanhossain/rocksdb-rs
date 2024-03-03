@@ -120,7 +120,7 @@ class InternalIteratorBase : public Cleanable {
   // If an error has occurred, return it.  Else return an ok status.
   // If non-blocking IO is requested and this operation cannot be
   // satisfied without doing some IO, then this returns Status_Incomplete().
-  virtual Status status() const = 0;
+  virtual rocksdb_rs::status::Status status() const = 0;
 
   // For some types of iterators, sometimes Seek()/Next()/SeekForPrev()/etc may
   // load key but not value (to avoid the IO cost of reading the value from disk
@@ -171,8 +171,8 @@ class InternalIteratorBase : public Cleanable {
   // REQUIRES: Same as for value().
   virtual bool IsValuePinned() const { return false; }
 
-  virtual Status GetProperty(std::string /*prop_name*/, std::string* /*prop*/) {
-    return Status_NotSupported("");
+  virtual rocksdb_rs::status::Status GetProperty(std::string /*prop_name*/, std::string* /*prop*/) {
+    return rocksdb_rs::status::Status_NotSupported("");
   }
 
   // When iterator moves from one file to another file at same level, new file's
@@ -215,11 +215,11 @@ extern InternalIteratorBase<TValue>* NewEmptyInternalIterator();
 // Return an empty iterator with the specified status.
 template <class TValue = Slice>
 extern InternalIteratorBase<TValue>* NewErrorInternalIterator(
-    const Status& status);
+    const rocksdb_rs::status::Status& status);
 
 // Return an empty iterator with the specified status, allocated arena.
 template <class TValue = Slice>
 extern InternalIteratorBase<TValue>* NewErrorInternalIterator(
-    const Status& status, Arena* arena);
+    const rocksdb_rs::status::Status& status, Arena* arena);
 
 }  // namespace rocksdb

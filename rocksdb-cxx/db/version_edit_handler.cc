@@ -21,14 +21,14 @@
 namespace rocksdb {
 
 void VersionEditHandlerBase::Iterate(log::Reader& reader,
-                                     Status* log_read_status) {
+                                     rocksdb_rs::status::Status* log_read_status) {
   Slice record;
   std::string scratch;
   assert(log_read_status);
   assert(log_read_status->ok());
 
   [[maybe_unused]] size_t recovered_edits = 0;
-  Status s = Initialize();
+  rocksdb_rs::status::Status s = Initialize();
   while (reader.LastRecordEnd() < max_manifest_read_size_ && s.ok() &&
          reader.ReadRecord(&record, &scratch) && log_read_status->ok()) {
     VersionEdit edit;
@@ -89,7 +89,7 @@ void VersionEditHandlerBase::Iterate(log::Reader& reader,
       message << " The file " << reader.file()->file_name()
               << " may be corrupted.";
       // overwrite the status with the extended status
-      s = Status_new(s.code(), s.subcode(), s.severity(), message.str());
+      s = rocksdb_rs::status::Status_new(s.code(), s.subcode(), s.severity(), message.str());
     }
     status_.copy_from(s);
   }
@@ -97,13 +97,13 @@ void VersionEditHandlerBase::Iterate(log::Reader& reader,
                            &recovered_edits);
 }
 
-Status ListColumnFamiliesHandler::ApplyVersionEdit(
+rocksdb_rs::status::Status ListColumnFamiliesHandler::ApplyVersionEdit(
     VersionEdit& edit, ColumnFamilyData** /*unused*/) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (edit.is_column_family_add_) {
     if (column_family_names_.find(edit.column_family_) !=
         column_family_names_.end()) {
-      s = Status_Corruption("Manifest adding the same column family twice");
+      s = rocksdb_rs::status::Status_Corruption("Manifest adding the same column family twice");
     } else {
       column_family_names_.insert(
           {edit.column_family_, edit.column_family_name_});
@@ -111,7 +111,7 @@ Status ListColumnFamiliesHandler::ApplyVersionEdit(
   } else if (edit.is_column_family_drop_) {
     if (column_family_names_.find(edit.column_family_) ==
         column_family_names_.end()) {
-      s = Status_Corruption("Manifest - dropping non-existing column family");
+      s = rocksdb_rs::status::Status_Corruption("Manifest - dropping non-existing column family");
     } else {
       column_family_names_.erase(edit.column_family_);
     }
@@ -119,16 +119,16 @@ Status ListColumnFamiliesHandler::ApplyVersionEdit(
   return s;
 }
 
-Status FileChecksumRetriever::ApplyVersionEdit(VersionEdit& edit,
+rocksdb_rs::status::Status FileChecksumRetriever::ApplyVersionEdit(VersionEdit& edit,
                                                ColumnFamilyData** /*unused*/) {
   for (const auto& deleted_file : edit.GetDeletedFiles()) {
-    Status s = file_checksum_list_.RemoveOneFileChecksum(deleted_file.second);
+    rocksdb_rs::status::Status s = file_checksum_list_.RemoveOneFileChecksum(deleted_file.second);
     if (!s.ok()) {
       return s;
     }
   }
   for (const auto& new_file : edit.GetNewFiles()) {
-    Status s = file_checksum_list_.InsertOneFileChecksum(
+    rocksdb_rs::status::Status s = file_checksum_list_.InsertOneFileChecksum(
         new_file.second.fd.GetNumber(), new_file.second.file_checksum,
         new_file.second.file_checksum_func_name);
     if (!s.ok()) {
@@ -143,13 +143,13 @@ Status FileChecksumRetriever::ApplyVersionEdit(VersionEdit& edit,
       checksum_value = kUnknownFileChecksum;
       checksum_method = kUnknownFileChecksumFuncName;
     }
-    Status s = file_checksum_list_.InsertOneFileChecksum(
+    rocksdb_rs::status::Status s = file_checksum_list_.InsertOneFileChecksum(
         new_blob_file.GetBlobFileNumber(), checksum_value, checksum_method);
     if (!s.ok()) {
       return s;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 VersionEditHandler::VersionEditHandler(
@@ -171,15 +171,15 @@ VersionEditHandler::VersionEditHandler(
   assert(version_set_ != nullptr);
 }
 
-Status VersionEditHandler::Initialize() {
-  Status s = Status_new();
+rocksdb_rs::status::Status VersionEditHandler::Initialize() {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!initialized_) {
     for (const auto& cf_desc : column_families_) {
       name_to_options_.emplace(cf_desc.name, cf_desc.options);
     }
     auto default_cf_iter = name_to_options_.find(kDefaultColumnFamilyName);
     if (default_cf_iter == name_to_options_.end()) {
-      s = Status_InvalidArgument("Default column family not specified");
+      s = rocksdb_rs::status::Status_InvalidArgument("Default column family not specified");
     }
     if (s.ok()) {
       VersionEdit default_cf_edit;
@@ -197,9 +197,9 @@ Status VersionEditHandler::Initialize() {
   return s;
 }
 
-Status VersionEditHandler::ApplyVersionEdit(VersionEdit& edit,
+rocksdb_rs::status::Status VersionEditHandler::ApplyVersionEdit(VersionEdit& edit,
                                             ColumnFamilyData** cfd) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (edit.is_column_family_add_) {
     s = OnColumnFamilyAdd(edit, cfd);
   } else if (edit.is_column_family_drop_) {
@@ -218,7 +218,7 @@ Status VersionEditHandler::ApplyVersionEdit(VersionEdit& edit,
   return s;
 }
 
-Status VersionEditHandler::OnColumnFamilyAdd(VersionEdit& edit,
+rocksdb_rs::status::Status VersionEditHandler::OnColumnFamilyAdd(VersionEdit& edit,
                                              ColumnFamilyData** cfd) {
   bool cf_in_not_found = false;
   bool cf_in_builders = false;
@@ -226,9 +226,9 @@ Status VersionEditHandler::OnColumnFamilyAdd(VersionEdit& edit,
 
   assert(cfd != nullptr);
   *cfd = nullptr;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (cf_in_builders || cf_in_not_found) {
-    s = Status_Corruption("MANIFEST adding the same column family twice: " +
+    s = rocksdb_rs::status::Status_Corruption("MANIFEST adding the same column family twice: " +
                            edit.column_family_name_);
   }
   if (s.ok()) {
@@ -256,7 +256,7 @@ Status VersionEditHandler::OnColumnFamilyAdd(VersionEdit& edit,
   return s;
 }
 
-Status VersionEditHandler::OnColumnFamilyDrop(VersionEdit& edit,
+rocksdb_rs::status::Status VersionEditHandler::OnColumnFamilyDrop(VersionEdit& edit,
                                               ColumnFamilyData** cfd) {
   bool cf_in_not_found = false;
   bool cf_in_builders = false;
@@ -265,30 +265,30 @@ Status VersionEditHandler::OnColumnFamilyDrop(VersionEdit& edit,
   assert(cfd != nullptr);
   *cfd = nullptr;
   ColumnFamilyData* tmp_cfd = nullptr;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (cf_in_builders) {
     tmp_cfd = DestroyCfAndCleanup(edit);
   } else if (cf_in_not_found) {
     column_families_not_found_.erase(edit.column_family_);
   } else {
-    s = Status_Corruption("MANIFEST - dropping non-existing column family");
+    s = rocksdb_rs::status::Status_Corruption("MANIFEST - dropping non-existing column family");
   }
   *cfd = tmp_cfd;
   return s;
 }
 
-Status VersionEditHandler::OnWalAddition(VersionEdit& edit) {
+rocksdb_rs::status::Status VersionEditHandler::OnWalAddition(VersionEdit& edit) {
   assert(edit.IsWalAddition());
   return version_set_->wals_.AddWals(edit.GetWalAdditions());
 }
 
-Status VersionEditHandler::OnWalDeletion(VersionEdit& edit) {
+rocksdb_rs::status::Status VersionEditHandler::OnWalDeletion(VersionEdit& edit) {
   assert(edit.IsWalDeletion());
   return version_set_->wals_.DeleteWalsBefore(
       edit.GetWalDeletion().GetLogNumber());
 }
 
-Status VersionEditHandler::OnNonCfOperation(VersionEdit& edit,
+rocksdb_rs::status::Status VersionEditHandler::OnNonCfOperation(VersionEdit& edit,
                                             ColumnFamilyData** cfd) {
   bool cf_in_not_found = false;
   bool cf_in_builders = false;
@@ -296,10 +296,10 @@ Status VersionEditHandler::OnNonCfOperation(VersionEdit& edit,
 
   assert(cfd != nullptr);
   *cfd = nullptr;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!cf_in_not_found) {
     if (!cf_in_builders) {
-      s = Status_Corruption(
+      s = rocksdb_rs::status::Status_Corruption(
           "MANIFEST record referencing unknown column family");
     }
     ColumnFamilyData* tmp_cfd = nullptr;
@@ -373,7 +373,7 @@ void VersionEditHandler::CheckColumnFamilyId(const VersionEdit& edit,
 }
 
 void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
-                                              Status* s) {
+                                              rocksdb_rs::status::Status* s) {
   assert(s != nullptr);
   if (!s->ok()) {
     // Do nothing here.
@@ -392,7 +392,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
     }
     msg = msg.substr(0, msg.size() - 2);
     msg.append(" entry in MANIFEST");
-    *s = Status_Corruption(msg);
+    *s = rocksdb_rs::status::Status_Corruption(msg);
   }
   // There were some column families in the MANIFEST that weren't specified
   // in the argument. This is OK in read_only mode
@@ -404,7 +404,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       msg.append(cf.second);
     }
     msg = msg.substr(2);
-    *s = Status_InvalidArgument("Column families not opened: " + msg);
+    *s = rocksdb_rs::status::Status_InvalidArgument("Column families not opened: " + msg);
   }
   if (s->ok()) {
     version_set_->GetColumnFamilySet()->UpdateMaxColumnFamily(
@@ -421,7 +421,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       assert(builder_iter != builders_.end());
       auto* builder = builder_iter->second->version_builder();
       if (!builder->CheckConsistencyForNumLevels()) {
-        *s = Status_InvalidArgument(
+        *s = rocksdb_rs::status::Status_InvalidArgument(
             "db has more levels than options.num_levels");
         break;
       }
@@ -440,7 +440,7 @@ void VersionEditHandler::CheckIterationResult(const log::Reader& reader,
       if (!s->ok()) {
         // If s is IOError::PathNotFound, then we mark the db as corrupted.
         if (s->IsPathNotFound()) {
-          *s = Status_Corruption("Corruption: " + *s->ToString());
+          *s = rocksdb_rs::status::Status_Corruption("Corruption: " + *s->ToString());
         }
         break;
       }
@@ -534,11 +534,11 @@ ColumnFamilyData* VersionEditHandler::DestroyCfAndCleanup(
   return ret;
 }
 
-Status VersionEditHandler::MaybeCreateVersion(const VersionEdit& /*edit*/,
+rocksdb_rs::status::Status VersionEditHandler::MaybeCreateVersion(const VersionEdit& /*edit*/,
                                               ColumnFamilyData* cfd,
                                               bool force_create_version) {
   assert(cfd->initialized());
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (force_create_version) {
     auto builder_iter = builders_.find(cfd->GetID());
     assert(builder_iter != builders_.end());
@@ -561,7 +561,7 @@ Status VersionEditHandler::MaybeCreateVersion(const VersionEdit& /*edit*/,
   return s;
 }
 
-Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
                                       bool prefetch_index_and_filter_in_cache,
                                       bool is_initial_load) {
   bool skip_load_table_files = skip_load_table_files_;
@@ -569,7 +569,7 @@ Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
       "VersionEditHandler::LoadTables:skip_load_table_files",
       &skip_load_table_files);
   if (skip_load_table_files) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   assert(cfd != nullptr);
   assert(!cfd->IsDropped());
@@ -579,24 +579,24 @@ Status VersionEditHandler::LoadTables(ColumnFamilyData* cfd,
   VersionBuilder* builder = builder_iter->second->version_builder();
   assert(builder);
   const MutableCFOptions* moptions = cfd->GetLatestMutableCFOptions();
-  Status s = builder->LoadTableHandlers(
+  rocksdb_rs::status::Status s = builder->LoadTableHandlers(
       cfd->internal_stats(),
       version_set_->db_options_->max_file_opening_threads,
       prefetch_index_and_filter_in_cache, is_initial_load,
       moptions->prefix_extractor, MaxFileSizeForL0MetaPin(*moptions),
       read_options_, moptions->block_protection_bytes_per_key);
   if ((s.IsPathNotFound() || s.IsCorruption()) && no_error_if_files_missing_) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   if (!s.ok() && !version_set_->db_options_->paranoid_checks) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
   return s;
 }
 
-Status VersionEditHandler::ExtractInfoFromVersionEdit(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status VersionEditHandler::ExtractInfoFromVersionEdit(ColumnFamilyData* cfd,
                                                       const VersionEdit& edit) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (edit.has_db_id_) {
     version_set_->db_id_ = edit.GetDbId();
     version_edit_params_.SetDBId(edit.db_id_);
@@ -616,7 +616,7 @@ Status VersionEditHandler::ExtractInfoFromVersionEdit(ColumnFamilyData* cfd,
     if (edit.has_comparator_ &&
         edit.comparator_ != cfd->user_comparator()->Name()) {
       if (!cf_to_cmp_names_) {
-        s = Status_InvalidArgument(
+        s = rocksdb_rs::status::Status_InvalidArgument(
             cfd->user_comparator()->Name(),
             "does not match existing comparator " + edit.comparator_);
       } else {
@@ -659,16 +659,16 @@ Status VersionEditHandler::ExtractInfoFromVersionEdit(ColumnFamilyData* cfd,
   return s;
 }
 
-Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
+rocksdb_rs::status::Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
     VersionEdit& edit, const ColumnFamilyData* cfd) {
   if (edit.GetNewFiles().empty()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   auto ucmp = cfd->user_comparator();
   assert(ucmp);
   size_t ts_sz = ucmp->timestamp_size();
   if (ts_sz == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   VersionEdit::NewFiles& new_files = edit.GetMutableNewFiles();
@@ -682,7 +682,7 @@ Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
       // at the time when the SST file was created. As a result, all added SST
       // files in one `VersionEdit` should have the same value for it.
       if (file_boundaries_need_handling) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "New files in one VersionEdit has different "
             "user_defined_timestamps_persisted value.");
       }
@@ -697,7 +697,7 @@ Status VersionEditHandler::MaybeHandleFileBoundariesForNewFiles(
     meta.smallest.DecodeFrom(smallest_buf);
     meta.largest.DecodeFrom(largest_buf);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 VersionEditHandlerPointInTime::VersionEditHandlerPointInTime(
@@ -718,7 +718,7 @@ VersionEditHandlerPointInTime::~VersionEditHandlerPointInTime() {
 }
 
 void VersionEditHandlerPointInTime::CheckIterationResult(
-    const log::Reader& reader, Status* s) {
+    const log::Reader& reader, rocksdb_rs::status::Status* s) {
   VersionEditHandler::CheckIterationResult(reader, s);
   assert(s != nullptr);
   if (s->ok()) {
@@ -754,7 +754,7 @@ ColumnFamilyData* VersionEditHandlerPointInTime::DestroyCfAndCleanup(
   return cfd;
 }
 
-Status VersionEditHandlerPointInTime::MaybeCreateVersion(
+rocksdb_rs::status::Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     const VersionEdit& edit, ColumnFamilyData* cfd, bool force_create_version) {
   assert(cfd != nullptr);
   if (!force_create_version) {
@@ -795,7 +795,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
   }
 
   assert(!cfd->ioptions()->cf_paths.empty());
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (const auto& elem : edit.GetNewFiles()) {
     int level = elem.first;
     const FileMetaData& meta = elem.second;
@@ -806,7 +806,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     s = VerifyFile(cfd, fpath, level, meta);
     if (s.IsPathNotFound() || s.IsNotFound() || s.IsCorruption()) {
       missing_files.insert(file_num);
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     } else if (!s.ok()) {
       break;
     }
@@ -818,7 +818,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     s = VerifyBlobFile(cfd, file_num, elem);
     if (s.IsPathNotFound() || s.IsNotFound() || s.IsCorruption()) {
       missing_blob_file_num = std::max(missing_blob_file_num, file_num);
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
     } else if (!s.ok()) {
       break;
     }
@@ -878,7 +878,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
     if (!s.ok()) {
       delete version;
       if (s.IsCorruption()) {
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
       return s;
     }
@@ -901,7 +901,7 @@ Status VersionEditHandlerPointInTime::MaybeCreateVersion(
   return s;
 }
 
-Status VersionEditHandlerPointInTime::VerifyFile(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status VersionEditHandlerPointInTime::VerifyFile(ColumnFamilyData* cfd,
                                                  const std::string& fpath,
                                                  int level,
                                                  const FileMetaData& fmeta) {
@@ -909,14 +909,14 @@ Status VersionEditHandlerPointInTime::VerifyFile(ColumnFamilyData* cfd,
                                           fmeta);
 }
 
-Status VersionEditHandlerPointInTime::VerifyBlobFile(
+rocksdb_rs::status::Status VersionEditHandlerPointInTime::VerifyBlobFile(
     ColumnFamilyData* cfd, uint64_t blob_file_num,
     const BlobFileAddition& blob_addition) {
   BlobSource* blob_source = cfd->blob_source();
   assert(blob_source);
   CacheHandleGuard<BlobFileReader> blob_file_reader;
 
-  Status s = blob_source->GetBlobFileReader(read_options_, blob_file_num,
+  rocksdb_rs::status::Status s = blob_source->GetBlobFileReader(read_options_, blob_file_num,
                                             &blob_file_reader);
   if (!s.ok()) {
     return s;
@@ -926,18 +926,18 @@ Status VersionEditHandlerPointInTime::VerifyBlobFile(
   return s;
 }
 
-Status VersionEditHandlerPointInTime::LoadTables(
+rocksdb_rs::status::Status VersionEditHandlerPointInTime::LoadTables(
     ColumnFamilyData* /*cfd*/, bool /*prefetch_index_and_filter_in_cache*/,
     bool /*is_initial_load*/) {
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status ManifestTailer::Initialize() {
+rocksdb_rs::status::Status ManifestTailer::Initialize() {
   if (Mode::kRecovery == mode_) {
     return VersionEditHandler::Initialize();
   }
   assert(Mode::kCatchUp == mode_);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!initialized_) {
     ColumnFamilySet* cfd_set = version_set_->GetColumnFamilySet();
     assert(cfd_set);
@@ -960,9 +960,9 @@ Status ManifestTailer::Initialize() {
   return s;
 }
 
-Status ManifestTailer::ApplyVersionEdit(VersionEdit& edit,
+rocksdb_rs::status::Status ManifestTailer::ApplyVersionEdit(VersionEdit& edit,
                                         ColumnFamilyData** cfd) {
-  Status s = VersionEditHandler::ApplyVersionEdit(edit, cfd);
+  rocksdb_rs::status::Status s = VersionEditHandler::ApplyVersionEdit(edit, cfd);
   if (s.ok()) {
     assert(cfd);
     if (*cfd) {
@@ -972,7 +972,7 @@ Status ManifestTailer::ApplyVersionEdit(VersionEdit& edit,
   return s;
 }
 
-Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
+rocksdb_rs::status::Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
                                          ColumnFamilyData** cfd) {
   if (Mode::kRecovery == mode_) {
     return VersionEditHandler::OnColumnFamilyAdd(edit, cfd);
@@ -985,7 +985,7 @@ Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
   *cfd = tmp_cfd;
   if (!tmp_cfd) {
     // For now, ignore new column families created after Recover() succeeds.
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   auto builder_iter = builders_.find(edit.GetColumnFamily());
   assert(builder_iter != builders_.end());
@@ -1003,11 +1003,11 @@ Status ManifestTailer::OnColumnFamilyAdd(VersionEdit& edit,
   auto version_iter = versions_.find(edit.GetColumnFamily());
   assert(version_iter == versions_.end());
 #endif  // !NDEBUG
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void ManifestTailer::CheckIterationResult(const log::Reader& reader,
-                                          Status* s) {
+                                          rocksdb_rs::status::Status* s) {
   VersionEditHandlerPointInTime::CheckIterationResult(reader, s);
   assert(s);
   if (s->ok()) {
@@ -1019,10 +1019,10 @@ void ManifestTailer::CheckIterationResult(const log::Reader& reader,
   }
 }
 
-Status ManifestTailer::VerifyFile(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status ManifestTailer::VerifyFile(ColumnFamilyData* cfd,
                                   const std::string& fpath, int level,
                                   const FileMetaData& fmeta) {
-  Status s =
+  rocksdb_rs::status::Status s =
       VersionEditHandlerPointInTime::VerifyFile(cfd, fpath, level, fmeta);
   // TODO: Open file or create hard link to prevent the file from being
   // deleted.
@@ -1030,7 +1030,7 @@ Status ManifestTailer::VerifyFile(ColumnFamilyData* cfd,
 }
 
 void DumpManifestHandler::CheckIterationResult(const log::Reader& reader,
-                                               Status* s) {
+                                               rocksdb_rs::status::Status* s) {
   VersionEditHandler::CheckIterationResult(reader, s);
   if (!s->ok()) {
     fprintf(stdout, "%s\n", s->ToString()->c_str());

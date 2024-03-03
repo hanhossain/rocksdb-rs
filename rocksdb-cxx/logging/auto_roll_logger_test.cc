@@ -85,7 +85,7 @@ class AutoRollLoggerTest : public testing::Test {
   std::vector<std::string> GetLogFiles() {
     std::vector<std::string> ret;
     std::vector<std::string> files;
-    Status s = default_env->GetChildren(kTestDir, &files);
+    rocksdb_rs::status::Status s = default_env->GetChildren(kTestDir, &files);
     // Should call ASSERT_OK() here but it doesn't compile. It's not
     // worth the time figuring out why.
     EXPECT_TRUE(s.ok());
@@ -224,7 +224,7 @@ TEST_F(AutoRollLoggerTest, RollLogFileByTime) {
 
   InitTestDb();
   // -- Test the existence of file during the server restart.
-  ASSERT_TRUE(Status_NotFound().eq(default_env->FileExists(kLogFile)));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(default_env->FileExists(kLogFile)));
   AutoRollLogger logger(default_env->GetFileSystem(), nsc, kTestDir, "",
                         log_size, time, keep_log_file_num);
   ASSERT_OK(default_env->FileExists(kLogFile));
@@ -560,7 +560,7 @@ TEST_F(AutoRollLoggerTest, Close) {
     ROCKS_LOG_FATAL(&logger, "%s", kSampleMessage.c_str());
     log_lines += InfoLogLevel::HEADER_LEVEL - log_level + 1;
   }
-  ASSERT_TRUE(logger.Close().eq(Status_OK()));
+  ASSERT_TRUE(logger.Close().eq(rocksdb_rs::status::Status_OK()));
 
   std::ifstream inFile(AutoRollLoggerTest::kLogFile.c_str());
   size_t lines = std::count(std::istreambuf_iterator<char>(inFile),

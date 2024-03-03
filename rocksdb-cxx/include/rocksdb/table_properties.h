@@ -97,8 +97,8 @@ class TablePropertiesCollector {
   // Add() will be called when a new key/value pair is inserted into the table.
   // @params key    the user key that is inserted into the table.
   // @params value  the value that is inserted into the table.
-  virtual Status Add(const Slice& /*key*/, const Slice& /*value*/) {
-    return Status_InvalidArgument(
+  virtual rocksdb_rs::status::Status Add(const Slice& /*key*/, const Slice& /*value*/) {
+    return rocksdb_rs::status::Status_InvalidArgument(
         "TablePropertiesCollector::Add() deprecated.");
   }
 
@@ -106,7 +106,7 @@ class TablePropertiesCollector {
   // table.
   // @params key    the user key that is inserted into the table.
   // @params value  the value that is inserted into the table.
-  virtual Status AddUserKey(const Slice& key, const Slice& value,
+  virtual rocksdb_rs::status::Status AddUserKey(const Slice& key, const Slice& value,
                             EntryType /*type*/, SequenceNumber /*seq*/,
                             uint64_t /*file_size*/) {
     // For backwards-compatibility.
@@ -125,7 +125,7 @@ class TablePropertiesCollector {
   // for writing the properties block.
   // @params properties  User will add their collected statistics to
   // `properties`.
-  virtual Status Finish(UserCollectedProperties* properties) = 0;
+  virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) = 0;
 
   // Return the human-readable properties, where the key is property name and
   // the value is the human-readable form of value.
@@ -157,7 +157,7 @@ class TablePropertiesCollectorFactory : public Customizable {
 
   ~TablePropertiesCollectorFactory() override {}
   static const char* Type() { return "TablePropertiesCollectorFactory"; }
-  static Status CreateFromString(
+  static rocksdb_rs::status::Status CreateFromString(
       const ConfigOptions& options, const std::string& value,
       std::shared_ptr<TablePropertiesCollectorFactory>* result);
 

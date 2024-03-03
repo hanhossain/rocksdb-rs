@@ -72,7 +72,7 @@ int db_stress_tool(int argc, char** argv) {
     exit(1);
   }
 
-  Status s = Env::CreateFromUri(ConfigOptions(), FLAGS_env_uri, FLAGS_fs_uri,
+  rocksdb_rs::status::Status s = Env::CreateFromUri(ConfigOptions(), FLAGS_env_uri, FLAGS_fs_uri,
                                 &raw_env, &env_guard);
   if (!s.ok()) {
     fprintf(stderr, "Error Creating Env URI: %s: %s\n", FLAGS_env_uri.c_str(),

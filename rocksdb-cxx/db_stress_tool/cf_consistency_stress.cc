@@ -20,7 +20,7 @@ class CfConsistencyStressTest : public StressTest {
 
   bool IsStateTracked() const override { return false; }
 
-  Status TestPut(ThreadState* thread, WriteOptions& write_opts,
+  rocksdb_rs::status::Status TestPut(ThreadState* thread, WriteOptions& write_opts,
                  const ReadOptions& /* read_opts */,
                  const std::vector<int>& rand_column_families,
                  const std::vector<int64_t>& rand_keys,
@@ -53,7 +53,7 @@ class CfConsistencyStressTest : public StressTest {
       }
     }
 
-    Status s = db_->Write(write_opts, &batch);
+    rocksdb_rs::status::Status s = db_->Write(write_opts, &batch);
 
     if (!s.ok()) {
       fprintf(stderr, "multi put or merge error: %s\n", s.ToString()->c_str());
@@ -66,7 +66,7 @@ class CfConsistencyStressTest : public StressTest {
     return s;
   }
 
-  Status TestDelete(ThreadState* thread, WriteOptions& write_opts,
+  rocksdb_rs::status::Status TestDelete(ThreadState* thread, WriteOptions& write_opts,
                     const std::vector<int>& rand_column_families,
                     const std::vector<int64_t>& rand_keys) override {
     std::string key_str = Key(rand_keys[0]);
@@ -76,7 +76,7 @@ class CfConsistencyStressTest : public StressTest {
       ColumnFamilyHandle* cfh = column_families_[cf];
       batch.Delete(cfh, key);
     }
-    Status s = db_->Write(write_opts, &batch);
+    rocksdb_rs::status::Status s = db_->Write(write_opts, &batch);
     if (!s.ok()) {
       fprintf(stderr, "multidel error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
@@ -86,7 +86,7 @@ class CfConsistencyStressTest : public StressTest {
     return s;
   }
 
-  Status TestDeleteRange(ThreadState* thread, WriteOptions& write_opts,
+  rocksdb_rs::status::Status TestDeleteRange(ThreadState* thread, WriteOptions& write_opts,
                          const std::vector<int>& rand_column_families,
                          const std::vector<int64_t>& rand_keys) override {
     int64_t rand_key = rand_keys[0];
@@ -105,7 +105,7 @@ class CfConsistencyStressTest : public StressTest {
       ColumnFamilyHandle* cfh = column_families_[rand_column_families[cf]];
       batch.DeleteRange(cfh, key, end_key);
     }
-    Status s = db_->Write(write_opts, &batch);
+    rocksdb_rs::status::Status s = db_->Write(write_opts, &batch);
     if (!s.ok()) {
       fprintf(stderr, "multi del range error: %s\n", s.ToString()->c_str());
       thread->stats.AddErrors(1);
@@ -127,12 +127,12 @@ class CfConsistencyStressTest : public StressTest {
     std::terminate();
   }
 
-  Status TestGet(ThreadState* thread, const ReadOptions& readoptions,
+  rocksdb_rs::status::Status TestGet(ThreadState* thread, const ReadOptions& readoptions,
                  const std::vector<int>& rand_column_families,
                  const std::vector<int64_t>& rand_keys) override {
     std::string key_str = Key(rand_keys[0]);
     Slice key = key_str;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     bool is_consistent = true;
 
     if (thread->rand.OneIn(2)) {
@@ -213,7 +213,7 @@ class CfConsistencyStressTest : public StressTest {
     return s;
   }
 
-  rust::Vec<Status> TestMultiGet(
+  rust::Vec<rocksdb_rs::status::Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& read_opts,
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
@@ -223,7 +223,7 @@ class CfConsistencyStressTest : public StressTest {
     keys.reserve(num_keys);
     key_str.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    rust::Vec<Status> statuses = Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
     ColumnFamilyHandle* cfh = column_families_[rand_column_families[0]];
     ReadOptions readoptionscopy = read_opts;
     readoptionscopy.rate_limiter_priority =
@@ -260,7 +260,7 @@ class CfConsistencyStressTest : public StressTest {
 
     const std::string key = Key(rand_keys[0]);
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     bool is_consistent = true;
 
     if (thread->rand.OneIn(2)) {
@@ -427,7 +427,7 @@ class CfConsistencyStressTest : public StressTest {
 
       std::vector<Slice> key_slices(num_cfs, key);
       std::vector<PinnableWideColumns> results(num_cfs);
-      rust::Vec<Status> statuses = Status_new().create_vec(num_cfs);
+      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_cfs);
 
       db_->MultiGetEntity(read_opts_copy, num_cfs, cfhs.data(),
                           key_slices.data(), results.data(), statuses.data());
@@ -435,8 +435,8 @@ class CfConsistencyStressTest : public StressTest {
       bool is_consistent = true;
 
       for (size_t j = 0; j < num_cfs; ++j) {
-        const Status& s = statuses[j];
-        const Status& cmp_s = statuses[0];
+        const rocksdb_rs::status::Status& s = statuses[j];
+        const rocksdb_rs::status::Status& cmp_s = statuses[0];
         const WideColumns& columns = results[j].columns();
         const WideColumns& cmp_columns = results[0].columns();
 
@@ -514,7 +514,7 @@ class CfConsistencyStressTest : public StressTest {
     }
   }
 
-  Status TestPrefixScan(ThreadState* thread, const ReadOptions& readoptions,
+  rocksdb_rs::status::Status TestPrefixScan(ThreadState* thread, const ReadOptions& readoptions,
                         const std::vector<int>& rand_column_families,
                         const std::vector<int64_t>& rand_keys) override {
     assert(!rand_column_families.empty());
@@ -547,14 +547,14 @@ class CfConsistencyStressTest : public StressTest {
     std::unique_ptr<Iterator> iter(db_->NewIterator(ro_copy, cfh));
 
     uint64_t count = 0;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     for (iter->Seek(prefix); iter->Valid() && iter->key().starts_with(prefix);
          iter->Next()) {
       ++count;
 
       if (!VerifyWideColumns(iter->value(), iter->columns())) {
-        s = Status_Corruption("Value and columns inconsistent",
+        s = rocksdb_rs::status::Status_Corruption("Value and columns inconsistent",
                                DebugString(iter->value(), iter->columns()));
         break;
       }
@@ -576,7 +576,7 @@ class CfConsistencyStressTest : public StressTest {
 
     thread->stats.AddPrefixes(1, count);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ColumnFamilyHandle* GetControlCfh(ThreadState* thread,
@@ -613,7 +613,7 @@ class CfConsistencyStressTest : public StressTest {
       iters.back()->SeekToFirst();
     }
 
-    rust::Vec<Status> statuses = Status_OK().create_vec(num);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_OK().create_vec(num);
 
     assert(thread);
 
@@ -634,7 +634,7 @@ class CfConsistencyStressTest : public StressTest {
         if (iter->Valid()) {
           if (!VerifyWideColumns(iter->value(), iter->columns())) {
             statuses[i] =
-                Status_Corruption("Value and columns inconsistent",
+                rocksdb_rs::status::Status_Corruption("Value and columns inconsistent",
                                    DebugString(iter->value(), iter->columns()));
           } else {
             ++valid_cnt;
@@ -738,7 +738,7 @@ class CfConsistencyStressTest : public StressTest {
             constexpr size_t kMaxNumIKeys = 8;
 
             std::vector<KeyVersion> versions;
-            const Status s = GetAllKeyVersions(db_, cfh, begin_key, end_key,
+            const rocksdb_rs::status::Status s = GetAllKeyVersions(db_, cfh, begin_key, end_key,
                                                kMaxNumIKeys, &versions);
             if (!s.ok()) {
               fprintf(stderr, "%s\n", s.ToString()->c_str());
@@ -782,7 +782,7 @@ class CfConsistencyStressTest : public StressTest {
 
   void ContinuouslyVerifyDb(ThreadState* thread) const override {
     assert(thread);
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
 
     DB* db_ptr = cmp_db_ ? cmp_db_ : db_;
     const auto& cfhs = cmp_db_ ? cmp_cfhs_ : column_families_;
@@ -805,7 +805,7 @@ class CfConsistencyStressTest : public StressTest {
     }
 
     const auto checksum_column_family = [](Iterator* iter,
-                                           uint32_t* checksum) -> Status {
+                                           uint32_t* checksum) -> rocksdb_rs::status::Status {
       assert(nullptr != checksum);
 
       uint32_t ret = 0;

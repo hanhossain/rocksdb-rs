@@ -89,7 +89,7 @@ class ColumnFamilyHandle {
   // options cannot be referenced any longer than the original options exist.
   //
   // Note that this function is not supported in RocksDBLite.
-  virtual Status GetDescriptor(ColumnFamilyDescriptor* desc) = 0;
+  virtual rocksdb_rs::status::Status GetDescriptor(ColumnFamilyDescriptor* desc) = 0;
   // Returns the comparator of the column family associated with the
   // current handle.
   virtual const Comparator* GetComparator() const = 0;
@@ -156,7 +156,7 @@ class DB {
   // this guarantee in a custom Env implementation.)
   //
   // Caller must delete *dbptr when it is no longer needed.
-  static Status Open(const Options& options, const std::string& name,
+  static rocksdb_rs::status::Status Open(const Options& options, const std::string& name,
                      DB** dbptr);
 
   // Open DB with column families.
@@ -173,7 +173,7 @@ class DB {
   // will use to operate on column family column_family[i].
   // Before delete DB, you have to close All column families by calling
   // DestroyColumnFamilyHandle() with all the handles.
-  static Status Open(const DBOptions& db_options, const std::string& name,
+  static rocksdb_rs::status::Status Open(const DBOptions& db_options, const std::string& name,
                      const std::vector<ColumnFamilyDescriptor>& column_families,
                      std::vector<ColumnFamilyHandle*>* handles, DB** dbptr);
 
@@ -191,7 +191,7 @@ class DB {
 
   // Open the database for read only.
   //
-  static Status OpenForReadOnly(const Options& options, const std::string& name,
+  static rocksdb_rs::status::Status OpenForReadOnly(const Options& options, const std::string& name,
                                 DB** dbptr,
                                 bool error_if_wal_file_exists = false);
 
@@ -202,7 +202,7 @@ class DB {
   // to specify default column family. The default column family name is
   // 'default' and it's stored in rocksdb::kDefaultColumnFamilyName
   //
-  static Status OpenForReadOnly(
+  static rocksdb_rs::status::Status OpenForReadOnly(
       const DBOptions& db_options, const std::string& name,
       const std::vector<ColumnFamilyDescriptor>& column_families,
       std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
@@ -232,7 +232,7 @@ class DB {
   // delete it after use.
   //
   // Return OK on success, non-OK on failures.
-  static Status OpenAsSecondary(const Options& options, const std::string& name,
+  static rocksdb_rs::status::Status OpenAsSecondary(const Options& options, const std::string& name,
                                 const std::string& secondary_path, DB** dbptr);
 
   // Open DB as secondary instance with specified column families
@@ -267,7 +267,7 @@ class DB {
   // delete the pointers stored in handles vector.
   //
   // Return OK on success, non-OK on failures.
-  static Status OpenAsSecondary(
+  static rocksdb_rs::status::Status OpenAsSecondary(
       const DBOptions& db_options, const std::string& name,
       const std::string& secondary_path,
       const std::vector<ColumnFamilyDescriptor>& column_families,
@@ -278,12 +278,12 @@ class DB {
   // will be output to the `output_directory`. The API should only be used with
   // `options.CompactionService` to run compaction triggered by
   // `CompactionService`.
-  static Status OpenAndCompact(
+  static rocksdb_rs::status::Status OpenAndCompact(
       const std::string& name, const std::string& output_directory,
       const std::string& input, std::string* output,
       const CompactionServiceOptionsOverride& override_options);
 
-  static Status OpenAndCompact(
+  static rocksdb_rs::status::Status OpenAndCompact(
       const OpenAndCompactOptions& options, const std::string& name,
       const std::string& output_directory, const std::string& input,
       std::string* output,
@@ -296,7 +296,7 @@ class DB {
   // If some input column families do not support timestamp, nothing will
   // be happened to them. The data with timestamp > trim_ts
   // will be removed after this API returns successfully.
-  static Status OpenAndTrimHistory(
+  static rocksdb_rs::status::Status OpenAndTrimHistory(
       const DBOptions& db_options, const std::string& dbname,
       const std::vector<ColumnFamilyDescriptor>& column_families,
       std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
@@ -314,7 +314,7 @@ class DB {
   // auto-resume is in progress, without waiting for it to complete.
   // See DBOptions::max_bgerror_resume_count and
   // EventListener::OnErrorRecoveryBegin
-  virtual Status Resume() { return Status_NotSupported(); }
+  virtual rocksdb_rs::status::Status Resume() { return rocksdb_rs::status::Status_NotSupported(); }
 
   // Close the DB by releasing resources, closing files etc. This should be
   // called before calling the destructor so that the caller can get back a
@@ -328,13 +328,13 @@ class DB {
   // other status, re-calling Close() will be no-op and return the original
   // close status. If the return status is NotSupported(), then the DB
   // implementation does cleanup in the destructor
-  virtual Status Close() { return Status_NotSupported(); }
+  virtual rocksdb_rs::status::Status Close() { return rocksdb_rs::status::Status_NotSupported(); }
 
   // ListColumnFamilies will open the DB specified by argument name
   // and return the list of all column families in that DB
   // through column_families argument. The ordering of
   // column families in column_families is unspecified.
-  static Status ListColumnFamilies(const DBOptions& db_options,
+  static rocksdb_rs::status::Status ListColumnFamilies(const DBOptions& db_options,
                                    const std::string& name,
                                    std::vector<std::string>* column_families);
 
@@ -348,7 +348,7 @@ class DB {
 
   // Create a column_family and return the handle of column family
   // through the argument handle.
-  virtual Status CreateColumnFamily(const ColumnFamilyOptions& options,
+  virtual rocksdb_rs::status::Status CreateColumnFamily(const ColumnFamilyOptions& options,
                                     const std::string& column_family_name,
                                     ColumnFamilyHandle** handle);
 
@@ -357,7 +357,7 @@ class DB {
   // In case of error, the request may succeed partially, and handles will
   // contain column family handles that it managed to create, and have size
   // equal to the number of created column families.
-  virtual Status CreateColumnFamilies(
+  virtual rocksdb_rs::status::Status CreateColumnFamilies(
       const ColumnFamilyOptions& options,
       const std::vector<std::string>& column_family_names,
       std::vector<ColumnFamilyHandle*>* handles);
@@ -367,20 +367,20 @@ class DB {
   // In case of error, the request may succeed partially, and handles will
   // contain column family handles that it managed to create, and have size
   // equal to the number of created column families.
-  virtual Status CreateColumnFamilies(
+  virtual rocksdb_rs::status::Status CreateColumnFamilies(
       const std::vector<ColumnFamilyDescriptor>& column_families,
       std::vector<ColumnFamilyHandle*>* handles);
 
   // Drop a column family specified by column_family handle. This call
   // only records a drop record in the manifest and prevents the column
   // family from flushing and compacting.
-  virtual Status DropColumnFamily(ColumnFamilyHandle* column_family);
+  virtual rocksdb_rs::status::Status DropColumnFamily(ColumnFamilyHandle* column_family);
 
   // Bulk drop column families. This call only records drop records in the
   // manifest and prevents the column families from flushing and compacting.
   // In case of error, the request may succeed partially. User may call
   // ListColumnFamilies to check the result.
-  virtual Status DropColumnFamilies(
+  virtual rocksdb_rs::status::Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families);
 
   // Release and deallocate a column family handle. A column family is only
@@ -388,23 +388,23 @@ class DB {
   // destroyed (DestroyColumnFamilyHandle). Use this method to destroy
   // column family handles (except for DefaultColumnFamily()!) before closing
   // a DB.
-  virtual Status DestroyColumnFamilyHandle(ColumnFamilyHandle* column_family);
+  virtual rocksdb_rs::status::Status DestroyColumnFamilyHandle(ColumnFamilyHandle* column_family);
 
   // Set the database entry for "key" to "value".
   // If "key" already exists, it will be overwritten.
   // Returns OK on success, and a non-OK status on error.
   // Note: consider setting options.sync = true.
-  virtual Status Put(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Put(const WriteOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& value) = 0;
-  virtual Status Put(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Put(const WriteOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      const Slice& ts, const Slice& value) = 0;
-  virtual Status Put(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Put(const WriteOptions& options, const Slice& key,
                      const Slice& value) {
     return Put(options, DefaultColumnFamily(), key, value);
   }
-  virtual Status Put(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Put(const WriteOptions& options, const Slice& key,
                      const Slice& ts, const Slice& value) {
     return Put(options, DefaultColumnFamily(), key, ts, value);
   }
@@ -414,7 +414,7 @@ class DB {
   // already exists in the column family, it will be overwritten.
   //
   // Returns OK on success, and a non-OK status on error.
-  virtual Status PutEntity(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status PutEntity(const WriteOptions& options,
                            ColumnFamilyHandle* column_family, const Slice& key,
                            const WideColumns& columns);
 
@@ -422,16 +422,16 @@ class DB {
   // success, and a non-OK status on error.  It is not an error if "key"
   // did not exist in the database.
   // Note: consider setting options.sync = true.
-  virtual Status Delete(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Delete(const WriteOptions& options,
                         ColumnFamilyHandle* column_family,
                         const Slice& key) = 0;
-  virtual Status Delete(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Delete(const WriteOptions& options,
                         ColumnFamilyHandle* column_family, const Slice& key,
                         const Slice& ts) = 0;
-  virtual Status Delete(const WriteOptions& options, const Slice& key) {
+  virtual rocksdb_rs::status::Status Delete(const WriteOptions& options, const Slice& key) {
     return Delete(options, DefaultColumnFamily(), key);
   }
-  virtual Status Delete(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Delete(const WriteOptions& options, const Slice& key,
                         const Slice& ts) {
     return Delete(options, DefaultColumnFamily(), key, ts);
   }
@@ -452,16 +452,16 @@ class DB {
   // Merges can result in undefined behavior.
   //
   // Note: consider setting options.sync = true.
-  virtual Status SingleDelete(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& options,
                               ColumnFamilyHandle* column_family,
                               const Slice& key) = 0;
-  virtual Status SingleDelete(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& options,
                               ColumnFamilyHandle* column_family,
                               const Slice& key, const Slice& ts) = 0;
-  virtual Status SingleDelete(const WriteOptions& options, const Slice& key) {
+  virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& options, const Slice& key) {
     return SingleDelete(options, DefaultColumnFamily(), key);
   }
-  virtual Status SingleDelete(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& options, const Slice& key,
                               const Slice& ts) {
     return SingleDelete(options, DefaultColumnFamily(), key, ts);
   }
@@ -480,10 +480,10 @@ class DB {
   // 2) Limiting the maximum number of open files in the presence of range
   // tombstones can degrade read performance. To avoid this problem, set
   // max_open_files to -1 whenever possible.
-  virtual Status DeleteRange(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status DeleteRange(const WriteOptions& options,
                              ColumnFamilyHandle* column_family,
                              const Slice& begin_key, const Slice& end_key);
-  virtual Status DeleteRange(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status DeleteRange(const WriteOptions& options,
                              ColumnFamilyHandle* column_family,
                              const Slice& begin_key, const Slice& end_key,
                              const Slice& ts);
@@ -492,14 +492,14 @@ class DB {
   // and a non-OK status on error. The semantics of this operation is
   // determined by the user provided merge_operator when opening DB.
   // Note: consider setting options.sync = true.
-  virtual Status Merge(const WriteOptions& options,
+  virtual rocksdb_rs::status::Status Merge(const WriteOptions& options,
                        ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& value) = 0;
-  virtual Status Merge(const WriteOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Merge(const WriteOptions& options, const Slice& key,
                        const Slice& value) {
     return Merge(options, DefaultColumnFamily(), key, value);
   }
-  virtual Status Merge(const WriteOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Merge(const WriteOptions& /*options*/,
                        ColumnFamilyHandle* /*column_family*/,
                        const Slice& /*key*/, const Slice& /*ts*/,
                        const Slice& /*value*/);
@@ -509,7 +509,7 @@ class DB {
   // options.sync=true.
   // Returns OK on success, non-OK on failure.
   // Note: consider setting options.sync = true.
-  virtual Status Write(const WriteOptions& options, WriteBatch* updates) = 0;
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& options, WriteBatch* updates) = 0;
 
   // If the column family specified by "column_family" contains an entry for
   // "key", return the corresponding value in "*value". If the entry is a plain
@@ -522,7 +522,7 @@ class DB {
   //
   // Returns OK on success. Returns NotFound and an empty value in "*value" if
   // there is no entry for "key". Returns some other non-OK status on error.
-  virtual inline Status Get(const ReadOptions& options,
+  virtual inline rocksdb_rs::status::Status Get(const ReadOptions& options,
                             ColumnFamilyHandle* column_family, const Slice& key,
                             std::string* value) {
     assert(value != nullptr);
@@ -534,17 +534,17 @@ class DB {
     }  // else value is already assigned
     return s;
   }
-  virtual Status Get(const ReadOptions& options,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
                      ColumnFamilyHandle* column_family, const Slice& key,
                      PinnableSlice* value) = 0;
-  virtual Status Get(const ReadOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
                      std::string* value) {
     return Get(options, DefaultColumnFamily(), key, value);
   }
 
   // Get() methods that return timestamp. Derived DB classes don't need to worry
   // about this group of methods if they don't care about timestamp feature.
-  virtual inline Status Get(const ReadOptions& options,
+  virtual inline rocksdb_rs::status::Status Get(const ReadOptions& options,
                             ColumnFamilyHandle* column_family, const Slice& key,
                             std::string* value, std::string* timestamp) {
     assert(value != nullptr);
@@ -556,14 +556,14 @@ class DB {
     }  // else value is already assigned
     return s;
   }
-  virtual Status Get(const ReadOptions& /*options*/,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& /*options*/,
                      ColumnFamilyHandle* /*column_family*/,
                      const Slice& /*key*/, PinnableSlice* /*value*/,
                      std::string* /*timestamp*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Get() that returns timestamp is not implemented.");
   }
-  virtual Status Get(const ReadOptions& options, const Slice& key,
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
                      std::string* value, std::string* timestamp) {
     return Get(options, DefaultColumnFamily(), key, value, timestamp);
   }
@@ -577,11 +577,11 @@ class DB {
   // Returns OK on success. Returns NotFound and an empty wide-column entity in
   // "*columns" if there is no entry for "key". Returns some other non-OK status
   // on error.
-  virtual Status GetEntity(const ReadOptions& /* options */,
+  virtual rocksdb_rs::status::Status GetEntity(const ReadOptions& /* options */,
                            ColumnFamilyHandle* /* column_family */,
                            const Slice& /* key */,
                            PinnableWideColumns* /* columns */) {
-    return Status_NotSupported("GetEntity not supported");
+    return rocksdb_rs::status::Status_NotSupported("GetEntity not supported");
   }
 
   // Populates the `merge_operands` array with all the merge operands in the DB
@@ -602,7 +602,7 @@ class DB {
   // The caller should delete or `Reset()` the `merge_operands` entries when
   // they are no longer needed. All `merge_operands` entries must be destroyed
   // or `Reset()` before this DB is closed or destroyed.
-  virtual Status GetMergeOperands(
+  virtual rocksdb_rs::status::Status GetMergeOperands(
       const ReadOptions& options, ColumnFamilyHandle* column_family,
       const Slice& key, PinnableSlice* merge_operands,
       GetMergeOperandsOptions* get_merge_operands_options,
@@ -623,11 +623,11 @@ class DB {
   // Similarly, the number of returned statuses will be the number of keys.
   // Note: keys will not be "de-duplicated". Duplicate keys will return
   // duplicate values in order.
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values) = 0;
-  virtual rust::Vec<Status> MultiGet(const ReadOptions& options,
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
                                        std::vector<std::string>* values) {
     return MultiGet(
@@ -636,14 +636,14 @@ class DB {
         keys, values);
   }
 
-  virtual rust::Vec<Status> MultiGet(
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& /*options*/,
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys, std::vector<std::string>* /*values*/,
       std::vector<std::string>* /*timestamps*/) {
-    return Status_NotSupported("MultiGet() returning timestamps not implemented.").create_vec(keys.size());
+    return rocksdb_rs::status::Status_NotSupported("MultiGet() returning timestamps not implemented.").create_vec(keys.size());
   }
-  virtual rust::Vec<Status> MultiGet(const ReadOptions& options,
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
                                        const std::vector<Slice>& keys,
                                        std::vector<std::string>* values,
                                        std::vector<std::string>* timestamps) {
@@ -675,7 +675,7 @@ class DB {
   virtual void MultiGet(const ReadOptions& options,
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
-                        PinnableSlice* values, Status* statuses,
+                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                         const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
@@ -685,7 +685,7 @@ class DB {
       cf.emplace_back(column_family);
       user_keys.emplace_back(keys[i]);
     }
-    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals);
+    rust::Vec<rocksdb_rs::status::Status> status = MultiGet(options, cf, user_keys, &vals);
     for (auto& s : status) {
       statuses->copy_from(s);
       statuses++;
@@ -700,7 +700,7 @@ class DB {
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
                         PinnableSlice* values, std::string* timestamps,
-                        Status* statuses, const bool /*sorted_input*/ = false) {
+                        rocksdb_rs::status::Status* statuses, const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
     std::vector<std::string> vals;
@@ -710,7 +710,7 @@ class DB {
       cf.emplace_back(column_family);
       user_keys.emplace_back(keys[i]);
     }
-    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
+    rust::Vec<rocksdb_rs::status::Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
     for (auto& s : status) {
       statuses->copy_from(s);
       statuses++;
@@ -743,7 +743,7 @@ class DB {
   //                modified
   virtual void MultiGet(const ReadOptions& options, const size_t num_keys,
                         ColumnFamilyHandle** column_families, const Slice* keys,
-                        PinnableSlice* values, Status* statuses,
+                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                         const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
@@ -753,7 +753,7 @@ class DB {
       cf.emplace_back(column_families[i]);
       user_keys.emplace_back(keys[i]);
     }
-    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals);
+    rust::Vec<rocksdb_rs::status::Status> status = MultiGet(options, cf, user_keys, &vals);
     for (auto& s : status) {
       statuses->copy_from(s);
       statuses++;
@@ -766,7 +766,7 @@ class DB {
   virtual void MultiGet(const ReadOptions& options, const size_t num_keys,
                         ColumnFamilyHandle** column_families, const Slice* keys,
                         PinnableSlice* values, std::string* timestamps,
-                        Status* statuses, const bool /*sorted_input*/ = false) {
+                        rocksdb_rs::status::Status* statuses, const bool /*sorted_input*/ = false) {
     std::vector<ColumnFamilyHandle*> cf;
     std::vector<Slice> user_keys;
     std::vector<std::string> vals;
@@ -776,7 +776,7 @@ class DB {
       cf.emplace_back(column_families[i]);
       user_keys.emplace_back(keys[i]);
     }
-    rust::Vec<Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
+    rust::Vec<rocksdb_rs::status::Status> status = MultiGet(options, cf, user_keys, &vals, &tss);
     for (auto& s : status) {
       statuses->copy_from(s);
       statuses++;
@@ -811,10 +811,10 @@ class DB {
                               ColumnFamilyHandle* /* column_family */,
                               size_t num_keys, const Slice* /* keys */,
                               PinnableWideColumns* /* results */,
-                              Status* statuses,
+                              rocksdb_rs::status::Status* statuses,
                               bool /* sorted_input */ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status_NotSupported("MultiGetEntity not supported");
+      statuses[i] = rocksdb_rs::status::Status_NotSupported("MultiGetEntity not supported");
     }
   }
 
@@ -843,10 +843,10 @@ class DB {
                               ColumnFamilyHandle** /* column_families */,
                               const Slice* /* keys */,
                               PinnableWideColumns* /* results */,
-                              Status* statuses,
+                              rocksdb_rs::status::Status* statuses,
                               bool /* sorted_input */ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = Status_NotSupported("MultiGetEntity not supported");
+      statuses[i] = rocksdb_rs::status::Status_NotSupported("MultiGetEntity not supported");
     }
   }
 
@@ -901,7 +901,7 @@ class DB {
   // Returns iterators from a consistent database state across multiple
   // column families. Iterators are heap allocated and need to be deleted
   // before the db is deleted
-  virtual Status NewIterators(
+  virtual rocksdb_rs::status::Status NewIterators(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families,
       std::vector<Iterator*>* iterators) = 0;
@@ -1281,8 +1281,8 @@ class DB {
   // Reset internal stats for DB and all column families.
   // Note this doesn't reset options.statistics as it is not owned by
   // DB.
-  virtual Status ResetStats() {
-    return Status_NotSupported("Not implemented");
+  virtual rocksdb_rs::status::Status ResetStats() {
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
   }
 
   // Same as GetIntProperty(), but this one returns the aggregated int
@@ -1305,7 +1305,7 @@ class DB {
   // Note that the returned sizes measure file system space usage, so
   // if the user data compresses by a factor of ten, the returned
   // sizes will be one-tenth the size of the corresponding user data size.
-  virtual Status GetApproximateSizes(const SizeApproximationOptions& options,
+  virtual rocksdb_rs::status::Status GetApproximateSizes(const SizeApproximationOptions& options,
                                      ColumnFamilyHandle* column_family,
                                      const Range* ranges, int n,
                                      uint64_t* sizes) = 0;
@@ -1313,13 +1313,13 @@ class DB {
   // Simpler versions of the GetApproximateSizes() method above.
   // The include_flags argument must of type DB::SizeApproximationFlags
   // and can not be NONE.
-  virtual Status GetApproximateSizes(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status GetApproximateSizes(ColumnFamilyHandle* column_family,
                                      const Range* ranges, int n,
                                      uint64_t* sizes,
                                      SizeApproximationFlags include_flags =
                                          SizeApproximationFlags::INCLUDE_FILES);
 
-  virtual Status GetApproximateSizes(
+  virtual rocksdb_rs::status::Status GetApproximateSizes(
       const Range* ranges, int n, uint64_t* sizes,
       SizeApproximationFlags include_flags =
           SizeApproximationFlags::INCLUDE_FILES) {
@@ -1358,10 +1358,10 @@ class DB {
   // the files. In this case, client could set options.change_level to true, to
   // move the files back to the minimum level capable of holding the data set
   // or a given level (specified by non-negative options.target_level).
-  virtual Status CompactRange(const CompactRangeOptions& options,
+  virtual rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& options,
                               ColumnFamilyHandle* column_family,
                               const Slice* begin, const Slice* end) = 0;
-  virtual Status CompactRange(const CompactRangeOptions& options,
+  virtual rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& options,
                               const Slice* begin, const Slice* end) {
     return CompactRange(options, DefaultColumnFamily(), begin, end);
   }
@@ -1384,13 +1384,13 @@ class DB {
   //  s = db->SetOptions(cfh, {{"ttl", "36000"}});
   //  s = db->SetOptions(cfh, {{"block_based_table_factory",
   //                            "{prepopulate_block_cache=kDisable;}"}});
-  virtual Status SetOptions(
+  virtual rocksdb_rs::status::Status SetOptions(
       ColumnFamilyHandle* /*column_family*/,
       const std::unordered_map<std::string, std::string>& /*opts_map*/) {
-    return Status_NotSupported("Not implemented");
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
   }
   // Shortcut for SetOptions on the default column family handle.
-  virtual Status SetOptions(
+  virtual rocksdb_rs::status::Status SetOptions(
       const std::unordered_map<std::string, std::string>& new_options) {
     return SetOptions(DefaultColumnFamily(), new_options);
   }
@@ -1404,7 +1404,7 @@ class DB {
   //  s = db->SetDBOptions({{"max_subcompactions", "2"}});
   //  s = db->SetDBOptions({{"stats_dump_period_sec", "0"},
   //                        {"stats_persist_period_sec", "0"}});
-  virtual Status SetDBOptions(
+  virtual rocksdb_rs::status::Status SetDBOptions(
       const std::unordered_map<std::string, std::string>& new_options) = 0;
 
   // CompactFiles() inputs a list of files specified by file numbers and
@@ -1414,7 +1414,7 @@ class DB {
   //
   // @see GetDataBaseMetaData
   // @see GetColumnFamilyMetaData
-  virtual Status CompactFiles(
+  virtual rocksdb_rs::status::Status CompactFiles(
       const CompactionOptions& compact_options,
       ColumnFamilyHandle* column_family,
       const std::vector<std::string>& input_file_names, const int output_level,
@@ -1422,7 +1422,7 @@ class DB {
       std::vector<std::string>* const output_file_names = nullptr,
       CompactionJobInfo* compaction_job_info = nullptr) = 0;
 
-  virtual Status CompactFiles(
+  virtual rocksdb_rs::status::Status CompactFiles(
       const CompactionOptions& compact_options,
       const std::vector<std::string>& input_file_names, const int output_level,
       const int output_path_id = -1,
@@ -1437,8 +1437,8 @@ class DB {
   // finish. After it returns, no background process will be run until
   // ContinueBackgroundWork is called, once for each preceding OK-returning
   // call to PauseBackgroundWork.
-  virtual Status PauseBackgroundWork() = 0;
-  virtual Status ContinueBackgroundWork() = 0;
+  virtual rocksdb_rs::status::Status PauseBackgroundWork() = 0;
+  virtual rocksdb_rs::status::Status ContinueBackgroundWork() = 0;
 
   // This function will enable automatic compactions for the given column
   // families if they were previously disabled. The function will first set the
@@ -1449,7 +1449,7 @@ class DB {
   // does NOT schedule a flush/compaction afterwards, and only changes the
   // parameter itself within the column family option.
   //
-  virtual Status EnableAutoCompaction(
+  virtual rocksdb_rs::status::Status EnableAutoCompaction(
       const std::vector<ColumnFamilyHandle*>& column_family_handles) = 0;
 
   // After this function call, CompactRange() or CompactFiles() will not
@@ -1472,7 +1472,7 @@ class DB {
   // keeps flush and compaction going without stopping. The user would have to
   // cease all the writes to DB to make this eventually return in a stable
   // state.
-  virtual Status WaitForCompact(
+  virtual rocksdb_rs::status::Status WaitForCompact(
       const WaitForCompactOptions& /* wait_for_compact_options */) = 0;
 
   // Number of levels used for this DB.
@@ -1517,9 +1517,9 @@ class DB {
   // Flush all memtable data.
   // Flush a single column family, even when atomic flush is enabled. To flush
   // multiple column families, use Flush(options, column_families).
-  virtual Status Flush(const FlushOptions& options,
+  virtual rocksdb_rs::status::Status Flush(const FlushOptions& options,
                        ColumnFamilyHandle* column_family) = 0;
-  virtual Status Flush(const FlushOptions& options) {
+  virtual rocksdb_rs::status::Status Flush(const FlushOptions& options) {
     return Flush(options, DefaultColumnFamily());
   }
   // Flushes memtables of multiple column families.
@@ -1530,7 +1530,7 @@ class DB {
   // number at the time when flush is requested.
   // Note that RocksDB 5.15 and earlier may not be able to open later versions
   // with atomic flush enabled.
-  virtual Status Flush(
+  virtual rocksdb_rs::status::Status Flush(
       const FlushOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families) = 0;
 
@@ -1538,8 +1538,8 @@ class DB {
   // of WAL data to the file, so that the data can survive process crash or be
   // included in a Checkpoint or Backup. Without manual_wal_flush, there is no
   // such internal buffer. If sync is true, it calls SyncWAL() afterwards.
-  virtual Status FlushWAL(bool /*sync*/) {
-    return Status_NotSupported("FlushWAL not implemented");
+  virtual rocksdb_rs::status::Status FlushWAL(bool /*sync*/) {
+    return rocksdb_rs::status::Status_NotSupported("FlushWAL not implemented");
   }
 
   // Ensure all WAL writes have been synced to storage, so that (assuming OS
@@ -1551,7 +1551,7 @@ class DB {
   // Note that Write() followed by SyncWAL() is not exactly the same as Write()
   // with sync=true: in the latter case the changes won't be visible until the
   // sync is done.
-  virtual Status SyncWAL() = 0;
+  virtual rocksdb_rs::status::Status SyncWAL() = 0;
 
   // Freezes the logical state of the DB (by stopping writes), and if WAL is
   // enabled, ensures that state has been flushed to DB files (as in
@@ -1562,15 +1562,15 @@ class DB {
   // followed by a corresponding call to UnlockWAL(). Where supported, non-OK
   // status is generally only possible with some kind of corruption or I/O
   // error.
-  virtual Status LockWAL() {
-    return Status_NotSupported("LockWAL not implemented");
+  virtual rocksdb_rs::status::Status LockWAL() {
+    return rocksdb_rs::status::Status_NotSupported("LockWAL not implemented");
   }
 
   // Unfreeze the DB state from a successful LockWAL().
   // The write stop on the database will be cleared when UnlockWAL() have been
   // called for each successful LockWAL().
-  virtual Status UnlockWAL() {
-    return Status_NotSupported("UnlockWAL not implemented");
+  virtual rocksdb_rs::status::Status UnlockWAL() {
+    return rocksdb_rs::status::Status_NotSupported("UnlockWAL not implemented");
   }
 
   // The sequence number of the most recent transaction.
@@ -1579,17 +1579,17 @@ class DB {
   // Prevent file deletions. Compactions will continue to occur,
   // but no obsolete files will be deleted. Calling this multiple
   // times have the same effect as calling it once.
-  virtual Status DisableFileDeletions() = 0;
+  virtual rocksdb_rs::status::Status DisableFileDeletions() = 0;
 
   // Increase the full_history_ts of column family. The new ts_low value should
   // be newer than current full_history_ts value.
   // If another thread updates full_history_ts_low concurrently to a higher
   // timestamp than the requested ts_low, a try again error will be returned.
-  virtual Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
                                           std::string ts_low) = 0;
 
   // Get current full_history_ts value.
-  virtual Status GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
                                      std::string* ts_low) = 0;
 
   // Allow compactions to delete obsolete files.
@@ -1601,7 +1601,7 @@ class DB {
   // enabling the two methods to be called by two threads concurrently without
   // synchronization -- i.e., file deletions will be enabled only after both
   // threads call EnableFileDeletions()
-  virtual Status EnableFileDeletions(bool force = true) = 0;
+  virtual rocksdb_rs::status::Status EnableFileDeletions(bool force = true) = 0;
 
   // Retrieves the creation time of the oldest file in the DB.
   // This API only works if max_open_files = -1, if it is not then
@@ -1613,7 +1613,7 @@ class DB {
   // and may not have file_creation_time property. In both the cases
   // file_creation_time is considered 0 which means this API will return
   // creation_time = 0 as there wouldn't be a timestamp lower than 0.
-  virtual Status GetCreationTimeOfOldestFile(uint64_t* creation_time) = 0;
+  virtual rocksdb_rs::status::Status GetCreationTimeOfOldestFile(uint64_t* creation_time) = 0;
 
   // Note: this API is not yet consistent with WritePrepared transactions.
   //
@@ -1627,7 +1627,7 @@ class DB {
   // use this api, else the WAL files will get
   // cleared aggressively and the iterator might keep getting invalid before
   // an update is read.
-  virtual Status GetUpdatesSince(
+  virtual rocksdb_rs::status::Status GetUpdatesSince(
       SequenceNumber seq_number, std::unique_ptr<TransactionLogIterator>* iter,
       const TransactionLogIterator::ReadOptions& read_options =
           TransactionLogIterator::ReadOptions()) = 0;
@@ -1645,7 +1645,7 @@ class DB {
   // Delete the file name from the db directory and update the internal state to
   // reflect that. Supports deletion of sst and log files only. 'name' must be
   // path relative to the db directory. eg. 000001.sst, /archive/000003.log
-  virtual Status DeleteFile(std::string name) = 0;
+  virtual rocksdb_rs::status::Status DeleteFile(std::string name) = 0;
 
   // Obtains a list of all live table (SST) files and how they fit into the
   // LSM-trees, such as column family, level, key range, etc.
@@ -1658,14 +1658,14 @@ class DB {
   // Note: This function might be of limited use because it cannot be
   // synchronized with other "live files" APIs. GetLiveFilesStorageInfo()
   // is recommended instead.
-  virtual Status GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) = 0;
+  virtual rocksdb_rs::status::Status GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) = 0;
 
   // Get information about all live files that make up a DB, for making
   // live copies (Checkpoint, backups, etc.) or other storage-related purposes.
   // If creating a live copy, use DisableFileDeletions() before and
   // EnableFileDeletions() after to prevent deletions.
   // For LSM-tree metadata, use Get*MetaData() functions instead.
-  virtual Status GetLiveFilesStorageInfo(
+  virtual rocksdb_rs::status::Status GetLiveFilesStorageInfo(
       const LiveFilesStorageInfoOptions& opts,
       std::vector<LiveFileStorageInfo>* files) = 0;
 
@@ -1700,12 +1700,12 @@ class DB {
   // a lossless backup, GetLiveFilesStorageInfo() is strongly recommended
   // instead, because it ensures a single consistent view of all files is
   // captured in one call.
-  virtual Status GetLiveFiles(std::vector<std::string>&,
+  virtual rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>&,
                               uint64_t* manifest_file_size,
                               bool flush_memtable = true) = 0;
 
   // Retrieve the sorted list of all wal files with earliest file first
-  virtual Status GetSortedWalFiles(VectorLogPtr& files) = 0;
+  virtual rocksdb_rs::status::Status GetSortedWalFiles(VectorLogPtr& files) = 0;
 
   // Retrieve information about the current wal file
   //
@@ -1714,7 +1714,7 @@ class DB {
   //
   // Additionally, for the sake of optimization current_log_file->StartSequence
   // would always be set to 0
-  virtual Status GetCurrentWalFile(
+  virtual rocksdb_rs::status::Status GetCurrentWalFile(
       std::unique_ptr<LogFile>* current_log_file) = 0;
 
   // IngestExternalFile() will load a list of external SST files (1) into the DB
@@ -1739,12 +1739,12 @@ class DB {
   //     the files cannot be ingested to the bottommost level, and it is the
   //     user's responsibility to clear the bottommost level in the overlapping
   //     range before re-attempting the ingestion.
-  virtual Status IngestExternalFile(
+  virtual rocksdb_rs::status::Status IngestExternalFile(
       ColumnFamilyHandle* column_family,
       const std::vector<std::string>& external_files,
       const IngestExternalFileOptions& options) = 0;
 
-  virtual Status IngestExternalFile(
+  virtual rocksdb_rs::status::Status IngestExternalFile(
       const std::vector<std::string>& external_files,
       const IngestExternalFileOptions& options) {
     return IngestExternalFile(DefaultColumnFamily(), external_files, options);
@@ -1765,7 +1765,7 @@ class DB {
   //
   // REQUIRES: each arg corresponds to a different column family: namely, for
   // 0 <= i < j < len(args), args[i].column_family != args[j].column_family.
-  virtual Status IngestExternalFiles(
+  virtual rocksdb_rs::status::Status IngestExternalFiles(
       const std::vector<IngestExternalFileArg>& args) = 0;
 
   // CreateColumnFamilyWithImport() will create a new column family with
@@ -1785,7 +1785,7 @@ class DB {
   // On error return, column family handle returned will be nullptr.
   // ColumnFamily will be present on successful return and will not be present
   // on error return. ColumnFamily may be present on any crash during this call.
-  virtual Status CreateColumnFamilyWithImport(
+  virtual rocksdb_rs::status::Status CreateColumnFamilyWithImport(
       const ColumnFamilyOptions& options, const std::string& column_family_name,
       const ImportColumnFamilyOptions& import_options,
       const ExportImportFilesMetaData& metadata, ColumnFamilyHandle** handle) {
@@ -1800,7 +1800,7 @@ class DB {
   // ColumnFamily by importing multiple ColumnFamilies.
   // It should be noticed that if the user keys of the imported column families
   // overlap with each other, an error will be returned.
-  virtual Status CreateColumnFamilyWithImport(
+  virtual rocksdb_rs::status::Status CreateColumnFamilyWithImport(
       const ColumnFamilyOptions& options, const std::string& column_family_name,
       const ImportColumnFamilyOptions& import_options,
       const std::vector<const ExportImportFilesMetaData*>& metadatas,
@@ -1818,102 +1818,102 @@ class DB {
   // This feature is mainly used to ensure that there is no overlapping Key when
   // calling CreateColumnFamilyWithImport() to import multiple CFs.
   // Note that: concurrent updates cannot be performed during Clip.
-  virtual Status ClipColumnFamily(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status ClipColumnFamily(ColumnFamilyHandle* column_family,
                                   const Slice& begin_key,
                                   const Slice& end_key) = 0;
 
   // Verify the checksums of files in db. Currently the whole-file checksum of
   // table files are checked.
-  virtual Status VerifyFileChecksums(const ReadOptions& /*read_options*/) {
-    return Status_NotSupported("File verification not supported");
+  virtual rocksdb_rs::status::Status VerifyFileChecksums(const ReadOptions& /*read_options*/) {
+    return rocksdb_rs::status::Status_NotSupported("File verification not supported");
   }
 
   // Verify the block checksums of files in db. The block checksums of table
   // files are checked.
-  virtual Status VerifyChecksum(const ReadOptions& read_options) = 0;
+  virtual rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& read_options) = 0;
 
-  virtual Status VerifyChecksum() { return VerifyChecksum(ReadOptions()); }
+  virtual rocksdb_rs::status::Status VerifyChecksum() { return VerifyChecksum(ReadOptions()); }
 
 
   // Returns the unique ID which is read from IDENTITY file during the opening
   // of database by setting in the identity variable
   // Returns Status_OK if identity could be set properly
-  virtual Status GetDbIdentity(std::string& identity) const = 0;
+  virtual rocksdb_rs::status::Status GetDbIdentity(std::string& identity) const = 0;
 
   // Return a unique identifier for each DB object that is opened
   // This DB session ID should be unique among all open DB instances on all
   // hosts, and should be unique among re-openings of the same or other DBs.
   // (Two open DBs have the same identity from other function GetDbIdentity when
   // one is physically copied from the other.)
-  virtual Status GetDbSessionId(std::string& session_id) const = 0;
+  virtual rocksdb_rs::status::Status GetDbSessionId(std::string& session_id) const = 0;
 
   // Returns default column family handle
   virtual ColumnFamilyHandle* DefaultColumnFamily() const = 0;
 
 
-  virtual Status GetPropertiesOfAllTables(ColumnFamilyHandle* column_family,
+  virtual rocksdb_rs::status::Status GetPropertiesOfAllTables(ColumnFamilyHandle* column_family,
                                           TablePropertiesCollection* props) = 0;
-  virtual Status GetPropertiesOfAllTables(TablePropertiesCollection* props) {
+  virtual rocksdb_rs::status::Status GetPropertiesOfAllTables(TablePropertiesCollection* props) {
     return GetPropertiesOfAllTables(DefaultColumnFamily(), props);
   }
-  virtual Status GetPropertiesOfTablesInRange(
+  virtual rocksdb_rs::status::Status GetPropertiesOfTablesInRange(
       ColumnFamilyHandle* column_family, const Range* range, std::size_t n,
       TablePropertiesCollection* props) = 0;
 
-  virtual Status SuggestCompactRange(ColumnFamilyHandle* /*column_family*/,
+  virtual rocksdb_rs::status::Status SuggestCompactRange(ColumnFamilyHandle* /*column_family*/,
                                      const Slice* /*begin*/,
                                      const Slice* /*end*/) {
-    return Status_NotSupported("SuggestCompactRange() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("SuggestCompactRange() is not implemented.");
   }
 
-  virtual Status PromoteL0(ColumnFamilyHandle* /*column_family*/,
+  virtual rocksdb_rs::status::Status PromoteL0(ColumnFamilyHandle* /*column_family*/,
                            int /*target_level*/) {
-    return Status_NotSupported("PromoteL0() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("PromoteL0() is not implemented.");
   }
 
   // Trace DB operations. Use EndTrace() to stop tracing.
-  virtual Status StartTrace(const TraceOptions& /*options*/,
+  virtual rocksdb_rs::status::Status StartTrace(const TraceOptions& /*options*/,
                             std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartTrace() is not implemented.");
   }
 
-  virtual Status EndTrace() {
-    return Status_NotSupported("EndTrace() is not implemented.");
+  virtual rocksdb_rs::status::Status EndTrace() {
+    return rocksdb_rs::status::Status_NotSupported("EndTrace() is not implemented.");
   }
 
   // IO Tracing operations. Use EndIOTrace() to stop tracing.
-  virtual Status StartIOTrace(const TraceOptions& /*options*/,
+  virtual rocksdb_rs::status::Status StartIOTrace(const TraceOptions& /*options*/,
                               std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartIOTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartIOTrace() is not implemented.");
   }
 
-  virtual Status EndIOTrace() {
-    return Status_NotSupported("EndIOTrace() is not implemented.");
+  virtual rocksdb_rs::status::Status EndIOTrace() {
+    return rocksdb_rs::status::Status_NotSupported("EndIOTrace() is not implemented.");
   }
 
   // Trace block cache accesses. Use EndBlockCacheTrace() to stop tracing.
-  virtual Status StartBlockCacheTrace(
+  virtual rocksdb_rs::status::Status StartBlockCacheTrace(
       const TraceOptions& /*trace_options*/,
       std::unique_ptr<TraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartBlockCacheTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartBlockCacheTrace() is not implemented.");
   }
 
-  virtual Status StartBlockCacheTrace(
+  virtual rocksdb_rs::status::Status StartBlockCacheTrace(
       const BlockCacheTraceOptions& /*options*/,
       std::unique_ptr<BlockCacheTraceWriter>&& /*trace_writer*/) {
-    return Status_NotSupported("StartBlockCacheTrace() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("StartBlockCacheTrace() is not implemented.");
   }
 
-  virtual Status EndBlockCacheTrace() {
-    return Status_NotSupported("EndBlockCacheTrace() is not implemented.");
+  virtual rocksdb_rs::status::Status EndBlockCacheTrace() {
+    return rocksdb_rs::status::Status_NotSupported("EndBlockCacheTrace() is not implemented.");
   }
 
   // Create a default trace replayer.
-  virtual Status NewDefaultReplayer(
+  virtual rocksdb_rs::status::Status NewDefaultReplayer(
       const std::vector<ColumnFamilyHandle*>& /*handles*/,
       std::unique_ptr<TraceReader>&& /*reader*/,
       std::unique_ptr<Replayer>* /*replayer*/) {
-    return Status_NotSupported("NewDefaultReplayer() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("NewDefaultReplayer() is not implemented.");
   }
 
 
@@ -1923,10 +1923,10 @@ class DB {
   // Given a window [start_time, end_time), setup a StatsHistoryIterator
   // to access stats history. Note the start_time and end_time are epoch
   // time measured in seconds, and end_time is an exclusive bound.
-  virtual Status GetStatsHistory(
+  virtual rocksdb_rs::status::Status GetStatsHistory(
       uint64_t /*start_time*/, uint64_t /*end_time*/,
       std::unique_ptr<StatsHistoryIterator>* /*stats_iterator*/) {
-    return Status_NotSupported("GetStatsHistory() is not implemented.");
+    return rocksdb_rs::status::Status_NotSupported("GetStatsHistory() is not implemented.");
   }
 
   // Make the secondary instance catch up with the primary by tailing and
@@ -1939,8 +1939,8 @@ class DB {
   // secondary instance does not delete the corresponding column family
   // handles, the data of the column family is still accessible to the
   // secondary.
-  virtual Status TryCatchUpWithPrimary() {
-    return Status_NotSupported("Supported only by secondary instance");
+  virtual rocksdb_rs::status::Status TryCatchUpWithPrimary() {
+    return rocksdb_rs::status::Status_NotSupported("Supported only by secondary instance");
   }
 };
 
@@ -1974,7 +1974,7 @@ inline DB::SizeApproximationFlags operator|(DB::SizeApproximationFlags lhs,
                                                  static_cast<uint8_t>(rhs));
 }
 
-inline Status DB::GetApproximateSizes(ColumnFamilyHandle* column_family,
+inline rocksdb_rs::status::Status DB::GetApproximateSizes(ColumnFamilyHandle* column_family,
                                       const Range* ranges, int n,
                                       uint64_t* sizes,
                                       SizeApproximationFlags include_flags) {
@@ -1990,7 +1990,7 @@ inline Status DB::GetApproximateSizes(ColumnFamilyHandle* column_family,
 
 // Destroy the contents of the specified database.
 // Be very careful using this method.
-Status DestroyDB(const std::string& name, const Options& options,
+rocksdb_rs::status::Status DestroyDB(const std::string& name, const Options& options,
                  const std::vector<ColumnFamilyDescriptor>& column_families =
                      std::vector<ColumnFamilyDescriptor>());
 
@@ -2003,18 +2003,18 @@ Status DestroyDB(const std::string& name, const Options& options,
 // specified in column_families.
 //
 // @param column_families Descriptors for known column families
-Status RepairDB(const std::string& dbname, const DBOptions& db_options,
+rocksdb_rs::status::Status RepairDB(const std::string& dbname, const DBOptions& db_options,
                 const std::vector<ColumnFamilyDescriptor>& column_families);
 
 // @param unknown_cf_opts Options for column families encountered during the
 //                        repair that were not specified in column_families.
-Status RepairDB(const std::string& dbname, const DBOptions& db_options,
+rocksdb_rs::status::Status RepairDB(const std::string& dbname, const DBOptions& db_options,
                 const std::vector<ColumnFamilyDescriptor>& column_families,
                 const ColumnFamilyOptions& unknown_cf_opts);
 
 // @param options These options will be used for the database and for ALL column
 //                families encountered during the repair
-Status RepairDB(const std::string& dbname, const Options& options);
+rocksdb_rs::status::Status RepairDB(const std::string& dbname, const Options& options);
 
 
 }  // namespace rocksdb

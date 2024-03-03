@@ -80,10 +80,10 @@ struct StressTestIterator : public InternalIterator {
   bool trace = false;
 
   int iter = -1;
-  Status status_;
+  rocksdb_rs::status::Status status_;
 
   StressTestIterator(Data* _data, Random64* _rnd, const Comparator* _cmp)
-      : data(_data), rnd(_rnd), cmp(_cmp), status_(Status_new()) {}
+      : data(_data), rnd(_rnd), cmp(_cmp), status_(rocksdb_rs::status::Status_new()) {}
 
   bool Valid() const override {
     if (iter >= 0 && iter < (int)data->entries.size()) {
@@ -93,7 +93,7 @@ struct StressTestIterator : public InternalIterator {
     return false;
   }
 
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   bool MaybeFail() {
     if (rnd->Next() >=
@@ -102,9 +102,9 @@ struct StressTestIterator : public InternalIterator {
       return false;
     }
     if (rnd->Next() % 2) {
-      status_ = Status_Incomplete("test");
+      status_ = rocksdb_rs::status::Status_Incomplete("test");
     } else {
-      status_ = Status_IOError("test");
+      status_ = rocksdb_rs::status::Status_IOError("test");
     }
     if (trace) {
       std::cout << "injecting " << *status_.ToString() << std::endl;
@@ -180,7 +180,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     iter = 0;
     SkipForward();
   }
@@ -188,7 +188,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     iter = (int)data->entries.size() - 1;
     SkipBackward();
   }
@@ -197,7 +197,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     // Binary search.
     auto it = std::partition_point(
         data->entries.begin(), data->entries.end(),
@@ -209,7 +209,7 @@ struct StressTestIterator : public InternalIterator {
     if (MaybeFail()) return;
     MaybeMutate();
 
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     // Binary search.
     auto it = std::partition_point(
         data->entries.begin(), data->entries.end(),

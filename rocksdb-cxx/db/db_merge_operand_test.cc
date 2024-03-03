@@ -161,7 +161,7 @@ TEST_F(DBMergeOperandTest, GetMergeOperandsBasic) {
   // expected_max_number_of_operands is less than number of merge operands so
   // status should be Incomplete.
   merge_operands_info.expected_max_number_of_operands = num_records - 1;
-  Status status = db_->GetMergeOperands(
+  rocksdb_rs::status::Status status = db_->GetMergeOperands(
       ReadOptions(), db_->DefaultColumnFamily(), "k1", values.data(),
       &merge_operands_info, &number_of_operands);
   ASSERT_EQ(status.IsIncomplete(), true);
@@ -332,7 +332,7 @@ TEST_F(DBMergeOperandTest, BlobDBGetMergeOperandsBasic) {
   // expected_max_number_of_operands is less than number of merge operands so
   // status should be Incomplete.
   merge_operands_info.expected_max_number_of_operands = num_records - 1;
-  Status status = db_->GetMergeOperands(
+  rocksdb_rs::status::Status status = db_->GetMergeOperands(
       ReadOptions(), db_->DefaultColumnFamily(), "k1", values.data(),
       &merge_operands_info, &number_of_operands);
   ASSERT_EQ(status.IsIncomplete(), true);

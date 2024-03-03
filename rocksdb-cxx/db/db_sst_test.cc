@@ -274,7 +274,7 @@ TEST_F(DBSSTTest, DeleteObsoleteFilesPendingOutputs) {
   ASSERT_EQ(metadata.size(), 2U);
 
   // This file should have been deleted during last compaction
-  ASSERT_TRUE(Status_NotFound().eq(env_->FileExists(dbname_ + file_on_L2)));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(env_->FileExists(dbname_ + file_on_L2)));
   listener->VerifyMatchedCount(1);
 }
 
@@ -713,7 +713,7 @@ TEST_P(DBSSTTestRateLimit, RateLimitedDelete) {
   }
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -786,7 +786,7 @@ TEST_F(DBSSTTest, RateLimitedWALDelete) {
   options.env = env_;
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -843,9 +843,9 @@ TEST_P(DBWALTestWithParam, WALTrashCleanupOnOpen) {
    public:
     MyEnv(Env* t) : EnvWrapper(t), fake_log_delete(false) {}
     const char* Name() const override { return "MyEnv"; }
-    Status DeleteFile(const std::string& fname) override {
+    rocksdb_rs::status::Status DeleteFile(const std::string& fname) override {
       if (fname.find(".log.trash") != std::string::npos && fake_log_delete) {
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
 
       return target()->DeleteFile(fname);
@@ -869,7 +869,7 @@ TEST_P(DBWALTestWithParam, WALTrashCleanupOnOpen) {
   options.wal_dir = dbname_ + wal_dir_;
 
   int64_t rate_bytes_per_sec = 1024 * 10;  // 10 Kbs / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", 0, false, &s, 0));
   ASSERT_OK(s);
@@ -981,7 +981,7 @@ TEST_F(DBSSTTest, DeleteSchedulerMultipleDBPaths) {
   options.env = env_;
 
   int64_t rate_bytes_per_sec = 1024 * 1024;  // 1 Mb / Sec
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   options.sst_file_manager.reset(
       NewSstFileManager(env_, nullptr, "", rate_bytes_per_sec, false, &s,
                         /* max_trash_db_ratio= */ 1.1));
@@ -1048,7 +1048,7 @@ TEST_F(DBSSTTest, DestroyDBWithRateLimitedDelete) {
       [&](void* /*arg*/) { bg_delete_file++; });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   Options options = CurrentOptions();
   options.disable_auto_compactions = true;
   options.env = env_;
@@ -1336,11 +1336,11 @@ TEST_F(DBSSTTest, DBWithMaxSpaceAllowedRandomized) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::FlushMemTableToOutputFile:MaxAllowedSpaceReached",
       [&](void* arg) {
-        Status* bg_error = static_cast<Status*>(arg);
+        rocksdb_rs::status::Status* bg_error = static_cast<rocksdb_rs::status::Status*>(arg);
         bg_error_set = true;
         reached_max_space_on_flush++;
         // clear error to ensure compaction callback is called
-        *bg_error = Status_OK();
+        *bg_error = rocksdb_rs::status::Status_OK();
       });
 
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
@@ -1500,7 +1500,7 @@ TEST_F(DBSSTTest, OpenDBWithInfiniteMaxOpenFilesSubjectToMemoryLimit) {
 
       // Reopening the DB will try to load all existing files, conditionally
       // subject to memory limit
-      Status s = TryReopen(options);
+      rocksdb_rs::status::Status s = TryReopen(options);
 
       if (charge_table_reader == CacheEntryRoleOptions::Decision::kEnabled) {
         EXPECT_TRUE(s.IsMemoryLimit());

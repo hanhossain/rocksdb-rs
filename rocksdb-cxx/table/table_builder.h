@@ -25,10 +25,13 @@
 #include "table/unique_id_impl.h"
 #include "trace_replay/block_cache_tracer.h"
 
+namespace rocksdb::status {
+    struct Status;
+}
+
 namespace rocksdb {
 
 class Slice;
-struct Status;
 
 struct TableReaderOptions {
   // @param skip_filters Disables loading/accessing the filter block
@@ -175,14 +178,14 @@ class TableBuilder {
   virtual void Add(const Slice& key, const Slice& value) = 0;
 
   // Return non-ok iff some error has been detected.
-  virtual Status status() const = 0;
+  virtual rocksdb_rs::status::Status status() const = 0;
 
   // Return non-ok iff some error happens during IO.
   virtual IOStatus io_status() const = 0;
 
   // Finish building the table.
   // REQUIRES: Finish(), Abandon() have not been called
-  virtual Status Finish() = 0;
+  virtual rocksdb_rs::status::Status Finish() = 0;
 
   // Indicate that the contents of this builder should be abandoned.
   // If the caller is not going to call Finish(), it must call Abandon()

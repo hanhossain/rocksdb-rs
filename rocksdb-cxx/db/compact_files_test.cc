@@ -78,7 +78,7 @@ TEST_F(CompactFilesTest, L0ConflictsFiles) {
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
-  Status s = DB::Open(options, db_name_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, db_name_, &db);
   assert(s.ok());
   assert(db);
 
@@ -131,7 +131,7 @@ TEST_F(CompactFilesTest, MultipleLevel) {
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
-  Status s = DB::Open(options, db_name_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, db_name_, &db);
   ASSERT_OK(s);
   ASSERT_NE(db, nullptr);
 
@@ -213,7 +213,7 @@ TEST_F(CompactFilesTest, ObsoleteFiles) {
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
-  Status s = DB::Open(options, db_name_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, db_name_, &db);
   ASSERT_OK(s);
   ASSERT_NE(db, nullptr);
 
@@ -229,7 +229,7 @@ TEST_F(CompactFilesTest, ObsoleteFiles) {
 
   // verify all compaction input files are deleted
   for (auto fname : l0_files) {
-    ASSERT_TRUE(Status_NotFound().eq(env_->FileExists(fname)));
+    ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(env_->FileExists(fname)));
   }
   delete db;
 }
@@ -252,7 +252,7 @@ TEST_F(CompactFilesTest, NotCutOutputOnLevel0) {
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
-  Status s = DB::Open(options, db_name_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, db_name_, &db);
   assert(s.ok());
   assert(db);
 
@@ -290,7 +290,7 @@ TEST_F(CompactFilesTest, CapturingPendingFiles) {
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
-  Status s = DB::Open(options, db_name_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, db_name_, &db);
   ASSERT_OK(s);
   assert(db);
 
@@ -366,7 +366,7 @@ TEST_F(CompactFilesTest, CompactionFilterWithGetSv) {
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
-  Status s = DB::Open(options, db_name_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, db_name_, &db);
   ASSERT_OK(s);
 
   cf->SetDB(db);
@@ -457,7 +457,7 @@ TEST_F(CompactFilesTest, GetCompactionJobInfo) {
 
   DB* db = nullptr;
   ASSERT_OK(DestroyDB(db_name_, options));
-  Status s = DB::Open(options, db_name_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, db_name_, &db);
   ASSERT_OK(s);
   assert(db);
 

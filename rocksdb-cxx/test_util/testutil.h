@@ -852,20 +852,20 @@ bool IsPrefetchSupported(const std::shared_ptr<FileSystem>& fs,
 // Return the number of lines where a given pattern was found in a file.
 size_t GetLinesCount(const std::string& fname, const std::string& pattern);
 
-Status CorruptFile(Env* env, const std::string& fname, int offset,
+rocksdb_rs::status::Status CorruptFile(Env* env, const std::string& fname, int offset,
                    int bytes_to_corrupt, bool verify_checksum = true);
-Status TruncateFile(Env* env, const std::string& fname, uint64_t length);
-Status TruncateFile(Env* env, const rust::String& fname, uint64_t length);
+rocksdb_rs::status::Status TruncateFile(Env* env, const std::string& fname, uint64_t length);
+rocksdb_rs::status::Status TruncateFile(Env* env, const rust::String& fname, uint64_t length);
 
 // Try and delete a directory if it exists
-Status TryDeleteDir(Env* env, const std::string& dirname);
+rocksdb_rs::status::Status TryDeleteDir(Env* env, const std::string& dirname);
 
 // Delete a directory if it exists
 void DeleteDir(Env* env, const std::string& dirname);
 
 // Creates an Env from the system environment by looking at the system
 // environment variables.
-Status CreateEnvFromSystem(const ConfigOptions& options, Env** result,
+rocksdb_rs::status::Status CreateEnvFromSystem(const ConfigOptions& options, Env** result,
                            std::shared_ptr<Env>* guard);
 
 // Registers the testutil classes with the ObjectLibrary

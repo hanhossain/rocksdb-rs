@@ -90,7 +90,7 @@ static int RegisterBuiltinMergeOperators(ObjectLibrary& library,
   return static_cast<int>(library.GetFactoryCount(&num_types));
 }
 
-Status MergeOperator::CreateFromString(const ConfigOptions& config_options,
+rocksdb_rs::status::Status MergeOperator::CreateFromString(const ConfigOptions& config_options,
                                        const std::string& value,
                                        std::shared_ptr<MergeOperator>* result) {
   static std::once_flag once;
@@ -103,7 +103,7 @@ Status MergeOperator::CreateFromString(const ConfigOptions& config_options,
 std::shared_ptr<MergeOperator> MergeOperators::CreateFromStringId(
     const std::string& id) {
   std::shared_ptr<MergeOperator> result;
-  Status s = MergeOperator::CreateFromString(ConfigOptions(), id, &result);
+  rocksdb_rs::status::Status s = MergeOperator::CreateFromString(ConfigOptions(), id, &result);
   if (s.ok()) {
     return result;
   } else {

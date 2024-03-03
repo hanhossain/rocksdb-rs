@@ -62,7 +62,7 @@ class PlainTableBuilder : public TableBuilder {
   void Add(const Slice& key, const Slice& value) override;
 
   // Return non-ok iff some error has been detected.
-  Status status() const override { return status_.Clone(); }
+  rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   // Return non-ok iff some error happens during IO.
   IOStatus io_status() const override { return io_status_; }
@@ -70,7 +70,7 @@ class PlainTableBuilder : public TableBuilder {
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.
   // REQUIRES: Finish(), Abandon() have not been called
-  Status Finish() override;
+  rocksdb_rs::status::Status Finish() override;
 
   // Indicate that the contents of this builder should be abandoned.  Stops
   // using the file passed to the constructor after this function returns.
@@ -122,7 +122,7 @@ class PlainTableBuilder : public TableBuilder {
   uint64_t offset_ = 0;
   uint32_t bloom_bits_per_key_;
   size_t huge_page_tlb_size_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   IOStatus io_status_;
   TableProperties properties_;
   PlainTableKeyEncoder encoder_;

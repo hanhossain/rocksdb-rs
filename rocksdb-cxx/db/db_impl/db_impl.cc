@@ -159,7 +159,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
                bool read_only)
     : dbname_(dbname),
       own_info_log_(options.info_log == nullptr),
-      init_logger_creation_s_(Status_new()),
+      init_logger_creation_s_(rocksdb_rs::status::Status_new()),
       initial_db_options_(SanitizeOptions(dbname, options, read_only,
                                           &init_logger_creation_s_)),
       env_(initial_db_options_.env),
@@ -243,7 +243,7 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
       shutdown_initiated_(false),
       own_sfm_(options.sst_file_manager == nullptr),
       closed_(false),
-      closing_status_(Status_new()),
+      closing_status_(rocksdb_rs::status::Status_new()),
       atomic_flush_install_cv_(&mutex_),
       blob_callback_(immutable_db_options_.sst_file_manager.get(), &mutex_,
                      &error_handler_, &event_logger_,
@@ -299,23 +299,23 @@ DBImpl::DBImpl(const DBOptions& options, const std::string& dbname,
   }
 }
 
-Status DBImpl::Resume() {
+rocksdb_rs::status::Status DBImpl::Resume() {
   ROCKS_LOG_INFO(immutable_db_options_.info_log, "Resuming DB");
 
   InstrumentedMutexLock db_mutex(&mutex_);
 
   if (!error_handler_.IsDBStopped() && !error_handler_.IsBGWorkStopped()) {
     // Nothing to do
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   if (error_handler_.IsRecoveryInProgress()) {
     // Don't allow a mix of manual and automatic recovery
-    return Status_Busy();
+    return rocksdb_rs::status::Status_Busy();
   }
 
   mutex_.Unlock();
-  Status s = error_handler_.RecoverFromBGError(true);
+  rocksdb_rs::status::Status s = error_handler_.RecoverFromBGError(true);
   mutex_.Lock();
   return s;
 }
@@ -332,23 +332,23 @@ Status DBImpl::Resume() {
 // 4. Schedule compactions if needed for all the CFs. This is needed as the
 //    flush in the prior step might have been a no-op for some CFs, which
 //    means a new super version wouldn't have been installed
-Status DBImpl::ResumeImpl(DBRecoverContext context) {
+rocksdb_rs::status::Status DBImpl::ResumeImpl(DBRecoverContext context) {
   mutex_.AssertHeld();
 
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   WaitForBackgroundWork();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (shutdown_initiated_) {
     // Returning shutdown status to SFM during auto recovery will cause it
     // to abort the recovery and allow the shutdown to progress
-    s = Status_ShutdownInProgress();
+    s = rocksdb_rs::status::Status_ShutdownInProgress();
   }
 
   if (s.ok()) {
-    Status bg_error = error_handler_.GetBGError();
-    if (bg_error.severity() > Severity::kHardError) {
+    rocksdb_rs::status::Status bg_error = error_handler_.GetBGError();
+    if (bg_error.severity() > rocksdb_rs::status::Severity::kHardError) {
       ROCKS_LOG_INFO(
           immutable_db_options_.info_log,
           "DB resume requested but failed due to Fatal/Unrecoverable error");
@@ -469,7 +469,7 @@ Status DBImpl::ResumeImpl(DBRecoverContext context) {
   // Check for shutdown again before scheduling further compactions,
   // since we released and re-acquired the lock above
   if (shutdown_initiated_) {
-    s = Status_ShutdownInProgress();
+    s = rocksdb_rs::status::Status_ShutdownInProgress();
   }
   if (s.ok()) {
     for (auto cfd : *versions_->GetColumnFamilySet()) {
@@ -501,7 +501,7 @@ void DBImpl::CancelAllBackgroundWork(bool wait) {
 
   for (uint8_t task_type = 0;
        task_type < static_cast<uint8_t>(PeriodicTaskType::kMax); task_type++) {
-    Status s = periodic_task_scheduler_.Unregister(
+    rocksdb_rs::status::Status s = periodic_task_scheduler_.Unregister(
         static_cast<PeriodicTaskType>(task_type));
     if (!s.ok()) {
       ROCKS_LOG_WARN(immutable_db_options_.info_log,
@@ -516,13 +516,13 @@ void DBImpl::CancelAllBackgroundWork(bool wait) {
       !mutable_db_options_.avoid_flush_during_shutdown) {
     if (immutable_db_options_.atomic_flush) {
       mutex_.Unlock();
-      Status s = AtomicFlushMemTables(FlushOptions(), FlushReason::kShutDown);
+      rocksdb_rs::status::Status s = AtomicFlushMemTables(FlushOptions(), FlushReason::kShutDown);
       mutex_.Lock();
     } else {
       for (auto cfd : versions_->GetRefedColumnFamilySet()) {
         if (!cfd->IsDropped() && cfd->initialized() && !cfd->mem()->IsEmpty()) {
           InstrumentedMutexUnlock u(&mutex_);
-          Status s = FlushMemTable(cfd, FlushOptions(), FlushReason::kShutDown);
+          rocksdb_rs::status::Status s = FlushMemTable(cfd, FlushOptions(), FlushReason::kShutDown);
         }
       }
     }
@@ -536,20 +536,20 @@ void DBImpl::CancelAllBackgroundWork(bool wait) {
   WaitForBackgroundWork();
 }
 
-Status DBImpl::MaybeReleaseTimestampedSnapshotsAndCheck() {
+rocksdb_rs::status::Status DBImpl::MaybeReleaseTimestampedSnapshotsAndCheck() {
   size_t num_snapshots = 0;
   ReleaseTimestampedSnapshotsOlderThan(std::numeric_limits<uint64_t>::max(),
                                        &num_snapshots);
 
   // If there is unreleased snapshot, fail the close call
   if (num_snapshots > 0) {
-    return Status_Aborted("Cannot close DB with unreleased snapshot.");
+    return rocksdb_rs::status::Status_Aborted("Cannot close DB with unreleased snapshot.");
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::CloseHelper() {
+rocksdb_rs::status::Status DBImpl::CloseHelper() {
   // Guarantee that there is no background error recovery in progress before
   // continuing with the shutdown
   mutex_.Lock();
@@ -582,7 +582,7 @@ Status DBImpl::CloseHelper() {
     env_->UnSchedule(GetTaskTag(i), Env::Priority::HIGH);
   }
 
-  Status ret = Status_OK();
+  rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_OK();
 
   // Wait for background work to finish
   while (bg_bottom_compaction_scheduled_ || bg_compaction_scheduled_ ||
@@ -653,7 +653,7 @@ Status DBImpl::CloseHelper() {
     }
     for (auto& log : logs_) {
       uint64_t log_number = log.writer->get_log_number();
-      Status s = log.ClearWriter();
+      rocksdb_rs::status::Status s = log.ClearWriter();
       if (!s.ok()) {
         ROCKS_LOG_WARN(
             immutable_db_options_.info_log,
@@ -710,7 +710,7 @@ Status DBImpl::CloseHelper() {
   }
 
   if (immutable_db_options_.info_log && own_info_log_) {
-    Status s = immutable_db_options_.info_log->Close();
+    rocksdb_rs::status::Status s = immutable_db_options_.info_log->Close();
     if (!s.ok() && !s.IsNotSupported() && ret.ok()) {
       ret.copy_from(s);
     }
@@ -728,13 +728,13 @@ Status DBImpl::CloseHelper() {
     // Reserve IsAborted() error for those where users didn't release
     // certain resource and they can release them and come back and
     // retry. In this case, we wrap this exception to something else.
-    return Status_Incomplete(*ret.ToString());
+    return rocksdb_rs::status::Status_Incomplete(*ret.ToString());
   }
 
   return ret;
 }
 
-Status DBImpl::CloseImpl() { return CloseHelper(); }
+rocksdb_rs::status::Status DBImpl::CloseImpl() { return CloseHelper(); }
 
 DBImpl::~DBImpl() {
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
@@ -745,30 +745,30 @@ DBImpl::~DBImpl() {
   closed_ = true;
 
   {
-    const Status s = MaybeReleaseTimestampedSnapshotsAndCheck();
+    const rocksdb_rs::status::Status s = MaybeReleaseTimestampedSnapshotsAndCheck();
   }
 
   closing_status_ = CloseImpl();
 }
 
-void DBImpl::MaybeIgnoreError(Status* s) const {
+void DBImpl::MaybeIgnoreError(rocksdb_rs::status::Status* s) const {
   if (s->ok() || immutable_db_options_.paranoid_checks) {
     // No change needed
   } else {
     ROCKS_LOG_WARN(immutable_db_options_.info_log, "Ignoring error %s",
                    s->ToString()->c_str());
-    *s = Status_OK();
+    *s = rocksdb_rs::status::Status_OK();
   }
 }
 
-const Status DBImpl::CreateArchivalDirectory() {
+const rocksdb_rs::status::Status DBImpl::CreateArchivalDirectory() {
   if (immutable_db_options_.WAL_ttl_seconds > 0 ||
       immutable_db_options_.WAL_size_limit_MB > 0) {
     std::string archivalPath =
         static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(immutable_db_options_.GetWalDir()));
     return env_->CreateDirIfMissing(archivalPath);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::PrintStatistics() {
@@ -779,7 +779,7 @@ void DBImpl::PrintStatistics() {
   }
 }
 
-Status DBImpl::StartPeriodicTaskScheduler() {
+rocksdb_rs::status::Status DBImpl::StartPeriodicTaskScheduler() {
 
 #ifndef NDEBUG
   // It only used by test to disable scheduler
@@ -788,7 +788,7 @@ Status DBImpl::StartPeriodicTaskScheduler() {
       "DBImpl::StartPeriodicTaskScheduler:DisableScheduler",
       &disable_scheduler);
   if (disable_scheduler) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   {
@@ -799,7 +799,7 @@ Status DBImpl::StartPeriodicTaskScheduler() {
 
 #endif  // !NDEBUG
   if (mutable_db_options_.stats_dump_period_sec > 0) {
-    Status s = periodic_task_scheduler_.Register(
+    rocksdb_rs::status::Status s = periodic_task_scheduler_.Register(
         PeriodicTaskType::kDumpStats,
         periodic_task_functions_.at(PeriodicTaskType::kDumpStats),
         mutable_db_options_.stats_dump_period_sec);
@@ -808,7 +808,7 @@ Status DBImpl::StartPeriodicTaskScheduler() {
     }
   }
   if (mutable_db_options_.stats_persist_period_sec > 0) {
-    Status s = periodic_task_scheduler_.Register(
+    rocksdb_rs::status::Status s = periodic_task_scheduler_.Register(
         PeriodicTaskType::kPersistStats,
         periodic_task_functions_.at(PeriodicTaskType::kPersistStats),
         mutable_db_options_.stats_persist_period_sec);
@@ -817,14 +817,14 @@ Status DBImpl::StartPeriodicTaskScheduler() {
     }
   }
 
-  Status s = periodic_task_scheduler_.Register(
+  rocksdb_rs::status::Status s = periodic_task_scheduler_.Register(
       PeriodicTaskType::kFlushInfoLog,
       periodic_task_functions_.at(PeriodicTaskType::kFlushInfoLog));
 
   return s;
 }
 
-Status DBImpl::RegisterRecordSeqnoTimeWorker() {
+rocksdb_rs::status::Status DBImpl::RegisterRecordSeqnoTimeWorker() {
   uint64_t min_time_duration = std::numeric_limits<uint64_t>::max();
   uint64_t max_time_duration = std::numeric_limits<uint64_t>::min();
   {
@@ -856,7 +856,7 @@ Status DBImpl::RegisterRecordSeqnoTimeWorker() {
         SeqnoToTimeMapping::kMaxSeqnoTimePairsPerCF;
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (seqno_time_cadence == 0) {
     s = periodic_task_scheduler_.Unregister(PeriodicTaskType::kRecordSeqnoTime);
   } else {
@@ -913,7 +913,7 @@ void DBImpl::PersistStats() {
 
   if (immutable_db_options_.persist_stats_to_disk) {
     WriteBatch batch;
-    Status s = Status_OK();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
     if (stats_slice_initialized_) {
       ROCKS_LOG_INFO(immutable_db_options_.info_log,
                      "Reading %" ROCKSDB_PRIszt " stats from statistics\n",
@@ -1014,11 +1014,11 @@ bool DBImpl::FindStatsByTime(uint64_t start_time, uint64_t end_time,
   }
 }
 
-Status DBImpl::GetStatsHistory(
+rocksdb_rs::status::Status DBImpl::GetStatsHistory(
     uint64_t start_time, uint64_t end_time,
     std::unique_ptr<StatsHistoryIterator>* stats_iterator) {
   if (!stats_iterator) {
-    return Status_InvalidArgument("stats_iterator not preallocated.");
+    return rocksdb_rs::status::Status_InvalidArgument("stats_iterator not preallocated.");
   }
   if (immutable_db_options_.persist_stats_to_disk) {
     stats_iterator->reset(
@@ -1112,7 +1112,7 @@ void DBImpl::FlushInfoLog() {
   LogFlush(immutable_db_options_.info_log);
 }
 
-Status DBImpl::TablesRangeTombstoneSummary(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::TablesRangeTombstoneSummary(ColumnFamilyHandle* column_family,
                                            int max_entries_to_print,
                                            std::string* out_str) {
   auto* cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
@@ -1121,7 +1121,7 @@ Status DBImpl::TablesRangeTombstoneSummary(ColumnFamilyHandle* column_family,
   SuperVersion* super_version = cfd->GetReferencedSuperVersion(this);
   Version* version = super_version->current;
 
-  Status s =
+  rocksdb_rs::status::Status s =
       version->TablesRangeTombstoneSummary(max_entries_to_print, out_str);
 
   CleanupSuperVersion(super_version);
@@ -1147,7 +1147,7 @@ FSDirectory* DBImpl::GetDataDir(ColumnFamilyData* cfd, size_t path_id) const {
   return ret_dir;
 }
 
-Status DBImpl::SetOptions(
+rocksdb_rs::status::Status DBImpl::SetOptions(
     ColumnFamilyHandle* column_family,
     const std::unordered_map<std::string, std::string>& options_map) {
   // TODO: plumb Env::IOActivity
@@ -1158,12 +1158,12 @@ Status DBImpl::SetOptions(
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "SetOptions() on column family [%s], empty input",
                    cfd->GetName().c_str());
-    return Status_InvalidArgument("empty input");
+    return rocksdb_rs::status::Status_InvalidArgument("empty input");
   }
 
   MutableCFOptions new_options;
-  Status s = Status_new();
-  Status persist_options_status = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
+  rocksdb_rs::status::Status persist_options_status = rocksdb_rs::status::Status_new();
   SuperVersionContext sv_context(/* create_superversion */ true);
   {
     auto db_options = GetDBOptions();
@@ -1210,17 +1210,17 @@ Status DBImpl::SetOptions(
   return s;
 }
 
-Status DBImpl::SetDBOptions(
+rocksdb_rs::status::Status DBImpl::SetDBOptions(
     const std::unordered_map<std::string, std::string>& options_map) {
   if (options_map.empty()) {
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "SetDBOptions(), empty input.");
-    return Status_InvalidArgument("empty input");
+    return rocksdb_rs::status::Status_InvalidArgument("empty input");
   }
 
   MutableDBOptions new_options;
-  Status s = Status_new();
-  Status persist_options_status = Status_OK();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
+  rocksdb_rs::status::Status persist_options_status = rocksdb_rs::status::Status_OK();
   bool wal_changed = false;
   WriteContext write_context;
   {
@@ -1336,7 +1336,7 @@ Status DBImpl::SetDBOptions(
       WriteThread::Writer w;
       write_thread_.EnterUnbatched(&w, &mutex_);
       if (total_log_size_ > GetMaxTotalWalSize() || wal_changed) {
-        Status purge_wal_status = SwitchWAL(&write_context);
+        rocksdb_rs::status::Status purge_wal_status = SwitchWAL(&write_context);
         if (!purge_wal_status.ok()) {
           ROCKS_LOG_WARN(immutable_db_options_.info_log,
                          "Unable to purge WAL files in SetDBOptions() -- %s",
@@ -1361,7 +1361,7 @@ Status DBImpl::SetDBOptions(
     new_options.Dump(immutable_db_options_.info_log.get());
     if (!persist_options_status.ok()) {
       if (immutable_db_options_.fail_if_options_file_error) {
-        s = Status_IOError(
+        s = rocksdb_rs::status::Status_IOError(
             "SetDBOptions() succeeded, but unable to persist options",
             *persist_options_status.ToString());
       }
@@ -1396,7 +1396,7 @@ int DBImpl::FindMinimumEmptyLevelFitting(
   return minimum_level;
 }
 
-Status DBImpl::FlushWAL(bool sync) {
+rocksdb_rs::status::Status DBImpl::FlushWAL(bool sync) {
   if (manual_wal_flush_) {
     IOStatus io_s;
     {
@@ -1412,15 +1412,15 @@ Status DBImpl::FlushWAL(bool sync) {
       // future writes
       IOStatusCheck(io_s);
       // whether sync or not, we should abort the rest of function upon error
-      return static_cast<Status>(io_s);
+      return static_cast<rocksdb_rs::status::Status>(io_s);
     }
     if (!sync) {
       ROCKS_LOG_DEBUG(immutable_db_options_.info_log, "FlushWAL sync=false");
-      return static_cast<Status>(io_s);
+      return static_cast<rocksdb_rs::status::Status>(io_s);
     }
   }
   if (!sync) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // sync = true
   ROCKS_LOG_DEBUG(immutable_db_options_.info_log, "FlushWAL sync=true");
@@ -1434,7 +1434,7 @@ bool DBImpl::WALBufferIsEmpty() {
   return res;
 }
 
-Status DBImpl::SyncWAL() {
+rocksdb_rs::status::Status DBImpl::SyncWAL() {
   TEST_SYNC_POINT("DBImpl::SyncWAL:Begin");
   autovector<log::Writer*, 1> logs_to_sync;
   bool need_log_dir_sync;
@@ -1455,7 +1455,7 @@ Status DBImpl::SyncWAL() {
     for (auto it = logs_.begin();
          it != logs_.end() && it->number <= current_log_number; ++it) {
       if (!it->writer->file()->writable_file()->IsSyncThreadSafe()) {
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             "SyncWAL() is not supported for this implementation of WAL file",
             immutable_db_options_.allow_mmap_writes
                 ? "try setting Options::allow_mmap_writes to false"
@@ -1474,7 +1474,7 @@ Status DBImpl::SyncWAL() {
 
   TEST_SYNC_POINT("DBWALTest::SyncWALNotWaitWrite:1");
   RecordTick(stats_, WAL_FILE_SYNCED);
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   IOStatus io_s;
   for (log::Writer* log : logs_to_sync) {
     io_s = log->file()->SyncWithoutFlush(immutable_db_options_.use_fsync);
@@ -1519,12 +1519,12 @@ Status DBImpl::SyncWAL() {
   return status;
 }
 
-Status DBImpl::ApplyWALToManifest(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImpl::ApplyWALToManifest(const ReadOptions& read_options,
                                   VersionEdit* synced_wals) {
   // not empty, write to MANIFEST.
   mutex_.AssertHeld();
 
-  Status status = versions_->LogAndApplyToDefaultColumnFamily(
+  rocksdb_rs::status::Status status = versions_->LogAndApplyToDefaultColumnFamily(
       read_options, synced_wals, &mutex_, directories_.GetDbDir());
   if (!status.ok() && versions_->io_status().IsIOError()) {
     status.copy_from(error_handler_.SetBGError(versions_->io_status(),
@@ -1533,7 +1533,7 @@ Status DBImpl::ApplyWALToManifest(const ReadOptions& read_options,
   return status;
 }
 
-Status DBImpl::LockWAL() {
+rocksdb_rs::status::Status DBImpl::LockWAL() {
   {
     InstrumentedMutexLock lock(&mutex_);
     if (lock_wal_count_ > 0) {
@@ -1570,7 +1570,7 @@ Status DBImpl::LockWAL() {
     }
   }
   // NOTE: avoid I/O holding DB mutex
-  Status s = FlushWAL(/*sync=*/false);
+  rocksdb_rs::status::Status s = FlushWAL(/*sync=*/false);
   if (!s.ok()) {
     // Non-OK return should not be in locked state
     UnlockWAL();
@@ -1578,14 +1578,14 @@ Status DBImpl::LockWAL() {
   return s;
 }
 
-Status DBImpl::UnlockWAL() {
+rocksdb_rs::status::Status DBImpl::UnlockWAL() {
   bool signal = false;
   uint64_t maybe_stall_begun_count = 0;
   uint64_t nonmem_maybe_stall_begun_count = 0;
   {
     InstrumentedMutexLock lock(&mutex_);
     if (lock_wal_count_ == 0) {
-      return Status_Aborted("No LockWAL() in effect");
+      return rocksdb_rs::status::Status_Aborted("No LockWAL() in effect");
     }
     --lock_wal_count_;
     if (lock_wal_count_ == 0) {
@@ -1613,7 +1613,7 @@ Status DBImpl::UnlockWAL() {
   if (nonmem_maybe_stall_begun_count) {
     nonmem_write_thread_.WaitForStallEndedCount(nonmem_maybe_stall_begun_count);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::MarkLogsSynced(uint64_t up_to, bool synced_dir,
@@ -1669,10 +1669,10 @@ void DBImpl::SetLastPublishedSequence(SequenceNumber seq) {
   versions_->SetLastPublishedSequence(seq);
 }
 
-Status DBImpl::GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
                                    std::string* ts_low) {
   if (ts_low == nullptr) {
-    return Status_InvalidArgument("ts_low is nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("ts_low is nullptr");
   }
   ColumnFamilyData* cfd = nullptr;
   if (column_family == nullptr) {
@@ -1684,13 +1684,13 @@ Status DBImpl::GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
   }
   assert(cfd != nullptr && cfd->user_comparator() != nullptr);
   if (cfd->user_comparator()->timestamp_size() == 0) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Timestamp is not enabled in this column family");
   }
   InstrumentedMutexLock l(&mutex_);
   *ts_low = cfd->GetFullHistoryTsLow();
   assert(cfd->user_comparator()->timestamp_size() == ts_low->size());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIterator* DBImpl::NewInternalIterator(const ReadOptions& read_options,
@@ -1855,7 +1855,7 @@ InternalIterator* DBImpl::NewInternalIterator(
       read_options.iterate_upper_bound);
   // Collect iterator for mutable memtable
   auto mem_iter = super_version->mem->NewIterator(read_options, arena);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!read_options.ignore_range_deletions) {
     TruncatedRangeDelIterator* mem_tombstone_iter = nullptr;
     auto range_del_iter = super_version->mem->NewRangeTombstoneIterator(
@@ -1910,13 +1910,13 @@ ColumnFamilyHandle* DBImpl::PersistentStatsColumnFamily() const {
   return persist_stats_cf_handle_;
 }
 
-Status DBImpl::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImpl::Get(const ReadOptions& read_options,
                    ColumnFamilyHandle* column_family, const Slice& key,
                    PinnableSlice* value) {
   return Get(read_options, column_family, key, value, /*timestamp=*/nullptr);
 }
 
-Status DBImpl::Get(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImpl::Get(const ReadOptions& read_options,
                    ColumnFamilyHandle* column_family, const Slice& key,
                    PinnableSlice* value, std::string* timestamp) {
   assert(value != nullptr);
@@ -1925,25 +1925,25 @@ Status DBImpl::Get(const ReadOptions& read_options,
   get_impl_options.column_family = column_family;
   get_impl_options.value = value;
   get_impl_options.timestamp = timestamp;
-  Status s = GetImpl(read_options, key, get_impl_options);
+  rocksdb_rs::status::Status s = GetImpl(read_options, key, get_impl_options);
   return s;
 }
 
-Status DBImpl::GetEntity(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImpl::GetEntity(const ReadOptions& read_options,
                          ColumnFamilyHandle* column_family, const Slice& key,
                          PinnableWideColumns* columns) {
   if (!column_family) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call GetEntity without a column family handle");
   }
 
   if (!columns) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call GetEntity without a PinnableWideColumns object");
   }
 
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call GetEntity with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -1985,7 +1985,7 @@ bool DBImpl::ShouldReferenceSuperVersion(const MergeContext& merge_context) {
              merge_context.GetOperands().size();
 }
 
-Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
+rocksdb_rs::status::Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
                        GetImplOptions& get_impl_options) {
   assert(get_impl_options.value != nullptr ||
          get_impl_options.merge_operands != nullptr ||
@@ -1994,20 +1994,20 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
   assert(get_impl_options.column_family);
 
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
 
   if (read_options.timestamp) {
-    const Status s = FailIfTsMismatchCf(get_impl_options.column_family,
+    const rocksdb_rs::status::Status s = FailIfTsMismatchCf(get_impl_options.column_family,
                                         *(read_options.timestamp),
                                         /*ts_for_read=*/true);
     if (!s.ok()) {
       return s.Clone();
     }
   } else {
-    const Status s = FailIfCfHasTs(get_impl_options.column_family);
+    const rocksdb_rs::status::Status s = FailIfCfHasTs(get_impl_options.column_family);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -2107,7 +2107,7 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0;
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // First look in the memtable, then in the immutable memtable (if any).
   // s is both in/out. When in, s could either be OK or MergeInProgress.
   // merge_operands will contain the sequence of merges in the latter case.
@@ -2213,8 +2213,8 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
         if (*get_impl_options.number_of_operands >
             get_impl_options.get_merge_operands_options
                 ->expected_max_number_of_operands) {
-          s = Status_Incomplete(
-              SubCode::KMergeOperandsInsufficientCapacity);
+          s = rocksdb_rs::status::Status_Incomplete(
+              rocksdb_rs::status::SubCode::KMergeOperandsInsufficientCapacity);
         } else {
           // Each operand depends on one of the following resources: `sv`,
           // `pinned_iters_mgr`, or `merge_context`. It would be crazy expensive
@@ -2282,7 +2282,7 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
   return s;
 }
 
-rust::Vec<Status> DBImpl::MultiGet(
+rust::Vec<rocksdb_rs::status::Status> DBImpl::MultiGet(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values) {
@@ -2290,7 +2290,7 @@ rust::Vec<Status> DBImpl::MultiGet(
                   /*timestamps=*/nullptr);
 }
 
-rust::Vec<Status> DBImpl::MultiGet(
+rust::Vec<rocksdb_rs::status::Status> DBImpl::MultiGet(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_family,
     const std::vector<Slice>& keys, std::vector<std::string>* values,
@@ -2301,7 +2301,7 @@ rust::Vec<Status> DBImpl::MultiGet(
 
   size_t num_keys = keys.size();
   assert(column_family.size() == num_keys);
-  rust::Vec<Status> stat_list = Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list = rocksdb_rs::status::Status_new().create_vec(num_keys);
 
   bool should_fail = false;
   for (size_t i = 0; i < num_keys; ++i) {
@@ -2323,7 +2323,7 @@ rust::Vec<Status> DBImpl::MultiGet(
   if (should_fail) {
     for (auto& s : stat_list) {
       if (s.ok()) {
-        s = Status_Incomplete(
+        s = rocksdb_rs::status::Status_Incomplete(
             "DB not queried due to invalid argument(s) in the same MultiGet");
       }
     }
@@ -2397,7 +2397,7 @@ rust::Vec<Status> DBImpl::MultiGet(
 
   for (keys_read = 0; keys_read < num_keys; ++keys_read) {
     merge_context.Clear();
-    Status& s = stat_list[keys_read];
+    rocksdb_rs::status::Status& s = stat_list[keys_read];
     std::string* value = &(*values)[keys_read];
     std::string* timestamp = timestamps ? &(*timestamps)[keys_read] : nullptr;
 
@@ -2448,7 +2448,7 @@ rust::Vec<Status> DBImpl::MultiGet(
       curr_value_size += value->size();
       if (curr_value_size > read_options.value_size_soft_limit) {
         while (++keys_read < num_keys) {
-          stat_list[keys_read] = Status_Aborted();
+          stat_list[keys_read] = rocksdb_rs::status::Status_Aborted();
         }
         break;
       }
@@ -2466,7 +2466,7 @@ rust::Vec<Status> DBImpl::MultiGet(
     assert(immutable_db_options_.clock->NowMicros() >
            static_cast<uint64_t>(read_options.deadline.count()));
     for (++keys_read; keys_read < num_keys; ++keys_read) {
-      stat_list[keys_read] = Status_TimedOut();
+      stat_list[keys_read] = rocksdb_rs::status::Status_TimedOut();
     }
   }
 
@@ -2615,7 +2615,7 @@ bool DBImpl::MultiCFSnapshot(
 
 void DBImpl::MultiGet(const ReadOptions& read_options, const size_t num_keys,
                       ColumnFamilyHandle** column_families, const Slice* keys,
-                      PinnableSlice* values, Status* statuses,
+                      PinnableSlice* values, rocksdb_rs::status::Status* statuses,
                       const bool sorted_input) {
   MultiGet(read_options, num_keys, column_families, keys, values,
            /* timestamps */ nullptr, statuses, sorted_input);
@@ -2624,7 +2624,7 @@ void DBImpl::MultiGet(const ReadOptions& read_options, const size_t num_keys,
 void DBImpl::MultiGet(const ReadOptions& read_options, const size_t num_keys,
                       ColumnFamilyHandle** column_families, const Slice* keys,
                       PinnableSlice* values, std::string* timestamps,
-                      Status* statuses, const bool sorted_input) {
+                      rocksdb_rs::status::Status* statuses, const bool sorted_input) {
   MultiGetCommon(read_options, num_keys, column_families, keys, values,
                  /* columns */ nullptr, timestamps, statuses, sorted_input);
 }
@@ -2634,7 +2634,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
                             ColumnFamilyHandle** column_families,
                             const Slice* keys, PinnableSlice* values,
                             PinnableWideColumns* columns,
-                            std::string* timestamps, Status* statuses,
+                            std::string* timestamps, rocksdb_rs::status::Status* statuses,
                             const bool sorted_input) {
   if (num_keys == 0) {
     return;
@@ -2660,7 +2660,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
   if (should_fail) {
     for (size_t i = 0; i < num_keys; ++i) {
       if (statuses[i].ok()) {
-        statuses[i] = Status_Incomplete(
+        statuses[i] = rocksdb_rs::status::Status_Incomplete(
             "DB not queried due to invalid argument(s) in the same MultiGet");
       }
     }
@@ -2741,7 +2741,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
     read_callback = &timestamp_read_callback;
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   auto cf_iter = multiget_cf_data.begin();
   for (; cf_iter != multiget_cf_data.end(); ++cf_iter) {
     s = MultiGetImpl(read_options, cf_iter->start, cf_iter->num_keys,
@@ -2817,7 +2817,7 @@ void DBImpl::PrepareMultiGetKeys(
 void DBImpl::MultiGet(const ReadOptions& read_options,
                       ColumnFamilyHandle* column_family, const size_t num_keys,
                       const Slice* keys, PinnableSlice* values,
-                      Status* statuses, const bool sorted_input) {
+                      rocksdb_rs::status::Status* statuses, const bool sorted_input) {
   MultiGet(read_options, column_family, num_keys, keys, values,
            /* timestamps */ nullptr, statuses, sorted_input);
 }
@@ -2825,7 +2825,7 @@ void DBImpl::MultiGet(const ReadOptions& read_options,
 void DBImpl::MultiGet(const ReadOptions& read_options,
                       ColumnFamilyHandle* column_family, const size_t num_keys,
                       const Slice* keys, PinnableSlice* values,
-                      std::string* timestamps, Status* statuses,
+                      std::string* timestamps, rocksdb_rs::status::Status* statuses,
                       const bool sorted_input) {
   MultiGetCommon(read_options, column_family, num_keys, keys, values,
                  /* columns */ nullptr, timestamps, statuses, sorted_input);
@@ -2835,7 +2835,7 @@ void DBImpl::MultiGetCommon(const ReadOptions& read_options,
                             ColumnFamilyHandle* column_family,
                             const size_t num_keys, const Slice* keys,
                             PinnableSlice* values, PinnableWideColumns* columns,
-                            std::string* timestamps, Status* statuses,
+                            std::string* timestamps, rocksdb_rs::status::Status* statuses,
                             bool sorted_input) {
   if (tracer_) {
     // TODO: This mutex should be removed later, to improve performance when
@@ -2926,7 +2926,7 @@ void DBImpl::MultiGetWithCallback(
     read_callback = &timestamp_read_callback;
   }
 
-  Status s = MultiGetImpl(read_options, 0, num_keys, sorted_keys,
+  rocksdb_rs::status::Status s = MultiGetImpl(read_options, 0, num_keys, sorted_keys,
                           multiget_cf_data[0].super_version, consistent_seqnum,
                           read_callback);
   assert(s.ok() || s.IsTimedOut() || s.IsAborted());
@@ -2943,13 +2943,13 @@ void DBImpl::MultiGetWithCallback(
 // sorted_keys. An overall Status is also returned, with the only possible
 // values being Status_OK() and Status_TimedOut(). The latter indicates
 // that the call exceeded read_options.deadline
-Status DBImpl::MultiGetImpl(
+rocksdb_rs::status::Status DBImpl::MultiGetImpl(
     const ReadOptions& read_options, size_t start_key, size_t num_keys,
     autovector<KeyContext*, MultiGetContext::MAX_BATCH_SIZE>* sorted_keys,
     SuperVersion* super_version, SequenceNumber snapshot,
     ReadCallback* callback) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call MultiGet with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -2971,13 +2971,13 @@ Status DBImpl::MultiGetImpl(
   // s is both in/out. When in, s could either be OK or MergeInProgress.
   // merge_operands will contain the sequence of merges in the latter case.
   size_t keys_left = num_keys;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   uint64_t curr_value_size = 0;
   while (keys_left) {
     if (read_options.deadline.count() &&
         immutable_db_options_.clock->NowMicros() >
             static_cast<uint64_t>(read_options.deadline.count())) {
-      s = Status_TimedOut();
+      s = rocksdb_rs::status::Status_TimedOut();
       break;
     }
 
@@ -2995,7 +2995,7 @@ Status DBImpl::MultiGetImpl(
     for (auto mget_iter = range.begin(); mget_iter != range.end();
          ++mget_iter) {
       mget_iter->merge_context.Clear();
-      *mget_iter->s = Status_OK();
+      *mget_iter->s = rocksdb_rs::status::Status_OK();
     }
 
     bool skip_memtable =
@@ -3019,7 +3019,7 @@ Status DBImpl::MultiGetImpl(
     }
     curr_value_size = range.GetValueSize();
     if (curr_value_size > read_options.value_size_soft_limit) {
-      s = Status_Aborted();
+      s = rocksdb_rs::status::Status_Aborted();
       break;
     }
   }
@@ -3067,7 +3067,7 @@ Status DBImpl::MultiGetImpl(
 void DBImpl::MultiGetEntity(const ReadOptions& options, size_t num_keys,
                             ColumnFamilyHandle** column_families,
                             const Slice* keys, PinnableWideColumns* results,
-                            Status* statuses, bool sorted_input) {
+                            rocksdb_rs::status::Status* statuses, bool sorted_input) {
   MultiGetCommon(options, num_keys, column_families, keys, /* values */ nullptr,
                  results, /* timestamps */ nullptr, statuses, sorted_input);
 }
@@ -3075,16 +3075,16 @@ void DBImpl::MultiGetEntity(const ReadOptions& options, size_t num_keys,
 void DBImpl::MultiGetEntity(const ReadOptions& options,
                             ColumnFamilyHandle* column_family, size_t num_keys,
                             const Slice* keys, PinnableWideColumns* results,
-                            Status* statuses, bool sorted_input) {
+                            rocksdb_rs::status::Status* statuses, bool sorted_input) {
   MultiGetCommon(options, column_family, num_keys, keys, /* values */ nullptr,
                  results, /* timestamps */ nullptr, statuses, sorted_input);
 }
 
-Status DBImpl::CreateColumnFamily(const ColumnFamilyOptions& cf_options,
+rocksdb_rs::status::Status DBImpl::CreateColumnFamily(const ColumnFamilyOptions& cf_options,
                                   const std::string& column_family,
                                   ColumnFamilyHandle** handle) {
   assert(handle != nullptr);
-  Status s = CreateColumnFamilyImpl(cf_options, column_family, handle);
+  rocksdb_rs::status::Status s = CreateColumnFamilyImpl(cf_options, column_family, handle);
   if (s.ok()) {
     s = WriteOptionsFile(true /*need_mutex_lock*/,
                          true /*need_enter_write_thread*/);
@@ -3092,14 +3092,14 @@ Status DBImpl::CreateColumnFamily(const ColumnFamilyOptions& cf_options,
   return s;
 }
 
-Status DBImpl::CreateColumnFamilies(
+rocksdb_rs::status::Status DBImpl::CreateColumnFamilies(
     const ColumnFamilyOptions& cf_options,
     const std::vector<std::string>& column_family_names,
     std::vector<ColumnFamilyHandle*>* handles) {
   assert(handles != nullptr);
   handles->clear();
   size_t num_cf = column_family_names.size();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool success_once = false;
   for (size_t i = 0; i < num_cf; i++) {
     ColumnFamilyHandle* handle;
@@ -3111,7 +3111,7 @@ Status DBImpl::CreateColumnFamilies(
     success_once = true;
   }
   if (success_once) {
-    Status persist_options_status = WriteOptionsFile(
+    rocksdb_rs::status::Status persist_options_status = WriteOptionsFile(
         true /*need_mutex_lock*/, true /*need_enter_write_thread*/);
     if (s.ok() && !persist_options_status.ok()) {
       s.copy_from(persist_options_status);
@@ -3120,13 +3120,13 @@ Status DBImpl::CreateColumnFamilies(
   return s;
 }
 
-Status DBImpl::CreateColumnFamilies(
+rocksdb_rs::status::Status DBImpl::CreateColumnFamilies(
     const std::vector<ColumnFamilyDescriptor>& column_families,
     std::vector<ColumnFamilyHandle*>* handles) {
   assert(handles != nullptr);
   handles->clear();
   size_t num_cf = column_families.size();
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool success_once = false;
   for (size_t i = 0; i < num_cf; i++) {
     ColumnFamilyHandle* handle;
@@ -3139,7 +3139,7 @@ Status DBImpl::CreateColumnFamilies(
     success_once = true;
   }
   if (success_once) {
-    Status persist_options_status = WriteOptionsFile(
+    rocksdb_rs::status::Status persist_options_status = WriteOptionsFile(
         true /*need_mutex_lock*/, true /*need_enter_write_thread*/);
     if (s.ok() && !persist_options_status.ok()) {
       s.copy_from(persist_options_status);
@@ -3148,12 +3148,12 @@ Status DBImpl::CreateColumnFamilies(
   return s;
 }
 
-Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
+rocksdb_rs::status::Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
                                       const std::string& column_family_name,
                                       ColumnFamilyHandle** handle) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   *handle = nullptr;
 
   DBOptions db_options =
@@ -3177,7 +3177,7 @@ Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
 
     if (versions_->GetColumnFamilySet()->GetColumnFamily(column_family_name) !=
         nullptr) {
-      return Status_InvalidArgument("Column family already exists");
+      return rocksdb_rs::status::Status_InvalidArgument("Column family already exists");
     }
     VersionEdit edit;
     edit.AddColumnFamily(column_family_name);
@@ -3242,9 +3242,9 @@ Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
   return s;
 }
 
-Status DBImpl::DropColumnFamily(ColumnFamilyHandle* column_family) {
+rocksdb_rs::status::Status DBImpl::DropColumnFamily(ColumnFamilyHandle* column_family) {
   assert(column_family != nullptr);
-  Status s = DropColumnFamilyImpl(column_family);
+  rocksdb_rs::status::Status s = DropColumnFamilyImpl(column_family);
   if (s.ok()) {
     s = WriteOptionsFile(true /*need_mutex_lock*/,
                          true /*need_enter_write_thread*/);
@@ -3252,9 +3252,9 @@ Status DBImpl::DropColumnFamily(ColumnFamilyHandle* column_family) {
   return s;
 }
 
-Status DBImpl::DropColumnFamilies(
+rocksdb_rs::status::Status DBImpl::DropColumnFamilies(
     const std::vector<ColumnFamilyHandle*>& column_families) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool success_once = false;
   for (auto* handle : column_families) {
     s = DropColumnFamilyImpl(handle);
@@ -3264,7 +3264,7 @@ Status DBImpl::DropColumnFamilies(
     success_once = true;
   }
   if (success_once) {
-    Status persist_options_status = WriteOptionsFile(
+    rocksdb_rs::status::Status persist_options_status = WriteOptionsFile(
         true /*need_mutex_lock*/, true /*need_enter_write_thread*/);
     if (s.ok() && !persist_options_status.ok()) {
       s.copy_from(persist_options_status);
@@ -3273,13 +3273,13 @@ Status DBImpl::DropColumnFamilies(
   return s;
 }
 
-Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
+rocksdb_rs::status::Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
   if (cfd->GetID() == 0) {
-    return Status_InvalidArgument("Can't drop default column family");
+    return rocksdb_rs::status::Status_InvalidArgument("Can't drop default column family");
   }
 
   bool cf_support_snapshot = cfd->mem()->IsSnapshotSupported();
@@ -3288,11 +3288,11 @@ Status DBImpl::DropColumnFamilyImpl(ColumnFamilyHandle* column_family) {
   edit.DropColumnFamily();
   edit.SetColumnFamily(cfd->GetID());
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     InstrumentedMutexLock l(&mutex_);
     if (cfd->IsDropped()) {
-      s = Status_InvalidArgument("Column family already dropped!\n");
+      s = rocksdb_rs::status::Status_InvalidArgument("Column family already dropped!\n");
     }
     if (s.ok()) {
       // we drop column family from a single write thread
@@ -3379,15 +3379,15 @@ Iterator* DBImpl::NewIterator(const ReadOptions& read_options,
                               ColumnFamilyHandle* column_family) {
   if (read_options.managed) {
     return NewErrorIterator(
-        Status_NotSupported("Managed iterator is not supported anymore."));
+        rocksdb_rs::status::Status_NotSupported("Managed iterator is not supported anymore."));
   }
   Iterator* result = nullptr;
   if (read_options.read_tier == kPersistedTier) {
-    return NewErrorIterator(Status_NotSupported(
+    return NewErrorIterator(rocksdb_rs::status::Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators."));
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return NewErrorIterator(Status_InvalidArgument(
+    return NewErrorIterator(rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterator with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`"));
   }
@@ -3395,13 +3395,13 @@ Iterator* DBImpl::NewIterator(const ReadOptions& read_options,
   assert(column_family);
 
   if (read_options.timestamp) {
-    const Status s = FailIfTsMismatchCf(
+    const rocksdb_rs::status::Status s = FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
       return NewErrorIterator(s);
     }
   } else {
-    const Status s = FailIfCfHasTs(column_family);
+    const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
     if (!s.ok()) {
       return NewErrorIterator(s);
     }
@@ -3515,19 +3515,19 @@ ArenaWrappedDBIter* DBImpl::NewIteratorImpl(const ReadOptions& read_options,
   return db_iter;
 }
 
-Status DBImpl::NewIterators(
+rocksdb_rs::status::Status DBImpl::NewIterators(
     const ReadOptions& read_options,
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
   if (read_options.managed) {
-    return Status_NotSupported("Managed iterator is not supported anymore.");
+    return rocksdb_rs::status::Status_NotSupported("Managed iterator is not supported anymore.");
   }
   if (read_options.read_tier == kPersistedTier) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "ReadTier::kPersistedData is not yet supported in iterators.");
   }
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call NewIterators with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -3535,7 +3535,7 @@ Status DBImpl::NewIterators(
   if (read_options.timestamp) {
     for (auto* cf : column_families) {
       assert(cf);
-      const Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
+      const rocksdb_rs::status::Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
                                           /*ts_for_read=*/true);
       if (!s.ok()) {
         return s.Clone();
@@ -3544,7 +3544,7 @@ Status DBImpl::NewIterators(
   } else {
     for (auto* cf : column_families) {
       assert(cf);
-      const Status s = FailIfCfHasTs(cf);
+      const rocksdb_rs::status::Status s = FailIfCfHasTs(cf);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -3582,7 +3582,7 @@ Status DBImpl::NewIterators(
     }
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 const Snapshot* DBImpl::GetSnapshot() { return GetSnapshotImpl(false); }
@@ -3591,7 +3591,7 @@ const Snapshot* DBImpl::GetSnapshotForWriteConflictBoundary() {
   return GetSnapshotImpl(true);
 }
 
-std::pair<Status, std::shared_ptr<const Snapshot>>
+std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>>
 DBImpl::CreateTimestampedSnapshot(SequenceNumber snapshot_seq, uint64_t ts) {
   assert(ts != std::numeric_limits<uint64_t>::max());
 
@@ -3620,17 +3620,17 @@ void DBImpl::ReleaseTimestampedSnapshotsOlderThan(uint64_t ts,
   }
 }
 
-Status DBImpl::GetTimestampedSnapshots(
+rocksdb_rs::status::Status DBImpl::GetTimestampedSnapshots(
     uint64_t ts_lb, uint64_t ts_ub,
     std::vector<std::shared_ptr<const Snapshot>>& timestamped_snapshots) const {
   if (ts_lb >= ts_ub) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "timestamp lower bound must be smaller than upper bound");
   }
   timestamped_snapshots.clear();
   InstrumentedMutexLock lock_guard(&mutex_);
   timestamped_snapshots_.GetSnapshots(ts_lb, ts_ub, timestamped_snapshots);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 SnapshotImpl* DBImpl::GetSnapshotImpl(bool is_write_conflict_boundary,
@@ -3661,7 +3661,7 @@ SnapshotImpl* DBImpl::GetSnapshotImpl(bool is_write_conflict_boundary,
   return snapshot;
 }
 
-std::pair<Status, std::shared_ptr<const SnapshotImpl>>
+std::pair<rocksdb_rs::status::Status, std::shared_ptr<const SnapshotImpl>>
 DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
                                       bool lock) {
   int64_t unix_time = 0;
@@ -3682,7 +3682,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
     }
     delete s;
     return std::make_pair(
-        Status_NotSupported("Memtable does not support snapshot"), nullptr);
+        rocksdb_rs::status::Status_NotSupported("Memtable does not support snapshot"), nullptr);
   }
 
   // Caller is not write thread, thus didn't provide a valid snapshot_seq.
@@ -3701,7 +3701,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
     SequenceNumber latest_snap_seq = latest->GetSequenceNumber();
     assert(latest_snap_seq <= snapshot_seq);
     bool needs_create_snap = true;
-    Status status = Status_new();
+    rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
     std::shared_ptr<const SnapshotImpl> ret;
     if (latest_snap_ts > ts) {
       // A snapshot created later cannot have smaller timestamp than a previous
@@ -3710,7 +3710,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
       std::ostringstream oss;
       oss << "snapshot exists with larger timestamp " << latest_snap_ts << " > "
           << ts;
-      status = Status_InvalidArgument(oss.str());
+      status = rocksdb_rs::status::Status_InvalidArgument(oss.str());
     } else if (latest_snap_ts == ts) {
       if (latest_snap_seq == snapshot_seq) {
         // We are requesting the same sequence number and timestamp, thus can
@@ -3727,7 +3727,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
         oss << "Allocated seq is " << snapshot_seq
             << ", while snapshot exists with smaller seq " << latest_snap_seq
             << " but same timestamp " << ts;
-        status = Status_InvalidArgument(oss.str());
+        status = rocksdb_rs::status::Status_InvalidArgument(oss.str());
       }
     }
     if (!needs_create_snap) {
@@ -3764,7 +3764,7 @@ DBImpl::CreateTimestampedSnapshotImpl(SequenceNumber snapshot_seq, uint64_t ts,
   if (lock) {
     mutex_.Unlock();
   }
-  return std::make_pair(Status_OK(), ret);
+  return std::make_pair(rocksdb_rs::status::Status_OK(), ret);
 }
 
 namespace {
@@ -3833,7 +3833,7 @@ void DBImpl::ReleaseSnapshot(const Snapshot* s) {
   delete casted_s;
 }
 
-Status DBImpl::GetPropertiesOfAllTables(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::GetPropertiesOfAllTables(ColumnFamilyHandle* column_family,
                                         TablePropertiesCollection* props) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
@@ -3856,7 +3856,7 @@ Status DBImpl::GetPropertiesOfAllTables(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status DBImpl::GetPropertiesOfTablesInRange(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::GetPropertiesOfTablesInRange(ColumnFamilyHandle* column_family,
                                             const Range* range, std::size_t n,
                                             TablePropertiesCollection* props) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
@@ -3899,16 +3899,16 @@ SystemClock* DBImpl::GetSystemClock() const {
 }
 
 
-Status DBImpl::StartIOTrace(const TraceOptions& trace_options,
+rocksdb_rs::status::Status DBImpl::StartIOTrace(const TraceOptions& trace_options,
                             std::unique_ptr<TraceWriter>&& trace_writer) {
   assert(trace_writer != nullptr);
   return io_tracer_->StartIOTrace(GetSystemClock(), trace_options,
                                   std::move(trace_writer));
 }
 
-Status DBImpl::EndIOTrace() {
+rocksdb_rs::status::Status DBImpl::EndIOTrace() {
   io_tracer_->EndIOTrace();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 
@@ -4039,14 +4039,14 @@ bool DBImpl::GetPropertyHandleOptionsStatistics(std::string* value) {
   return true;
 }
 
-Status DBImpl::ResetStats() {
+rocksdb_rs::status::Status DBImpl::ResetStats() {
   InstrumentedMutexLock l(&mutex_);
   for (auto* cfd : *versions_->GetColumnFamilySet()) {
     if (cfd->initialized()) {
       cfd->internal_stats()->Clear();
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 bool DBImpl::GetAggregatedIntProperty(const Slice& property,
@@ -4186,11 +4186,11 @@ void DBImpl::GetApproximateMemTableStats(ColumnFamilyHandle* column_family,
   ReturnAndCleanupSuperVersion(cfd, sv);
 }
 
-Status DBImpl::GetApproximateSizes(const SizeApproximationOptions& options,
+rocksdb_rs::status::Status DBImpl::GetApproximateSizes(const SizeApproximationOptions& options,
                                    ColumnFamilyHandle* column_family,
                                    const Range* range, int n, uint64_t* sizes) {
   if (!options.include_memtables && !options.include_files) {
-    return Status_InvalidArgument("Invalid options");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid options");
   }
 
   const Comparator* const ucmp = column_family->GetComparator();
@@ -4236,7 +4236,7 @@ Status DBImpl::GetApproximateSizes(const SizeApproximationOptions& options,
   }
 
   ReturnAndCleanupSuperVersion(cfd, sv);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::list<uint64_t>::iterator
@@ -4258,22 +4258,22 @@ void DBImpl::ReleaseFileNumberFromPendingOutputs(
   }
 }
 
-Status DBImpl::GetUpdatesSince(
+rocksdb_rs::status::Status DBImpl::GetUpdatesSince(
     SequenceNumber seq, std::unique_ptr<TransactionLogIterator>* iter,
     const TransactionLogIterator::ReadOptions& read_options) {
   RecordTick(stats_, GET_UPDATES_SINCE_CALLS);
   if (seq_per_batch_) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "This API is not yet compatible with write-prepared/write-unprepared "
         "transactions");
   }
   if (seq > versions_->LastSequence()) {
-    return Status_NotFound("Requested sequence not yet written in the db");
+    return rocksdb_rs::status::Status_NotFound("Requested sequence not yet written in the db");
   }
   return wal_manager_.GetUpdatesSince(seq, iter, read_options, versions_.get());
 }
 
-Status DBImpl::DeleteFile(std::string name) {
+rocksdb_rs::status::Status DBImpl::DeleteFile(std::string name) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   uint64_t number;
@@ -4283,7 +4283,7 @@ Status DBImpl::DeleteFile(std::string name) {
       (type != rocksdb_rs::types::FileType::kTableFile && type != rocksdb_rs::types::FileType::kWalFile)) {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log, "DeleteFile %s failed.\n",
                     name.c_str());
-    return Status_InvalidArgument("Invalid file name");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid file name");
   }
 
   if (type == rocksdb_rs::types::FileType::kWalFile) {
@@ -4292,9 +4292,9 @@ Status DBImpl::DeleteFile(std::string name) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DeleteFile %s failed - not archived log.\n",
                       name.c_str());
-      return Status_NotSupported("Delete only supported for archived logs");
+      return rocksdb_rs::status::Status_NotSupported("Delete only supported for archived logs");
     }
-    Status status = wal_manager_.DeleteFile(name, number);
+    rocksdb_rs::status::Status status = wal_manager_.DeleteFile(name, number);
     if (!status.ok()) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DeleteFile %s failed -- %s.\n", name.c_str(),
@@ -4303,7 +4303,7 @@ Status DBImpl::DeleteFile(std::string name) {
     return status;
   }
 
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   int level;
   FileMetaData* metadata;
   ColumnFamilyData* cfd;
@@ -4316,7 +4316,7 @@ Status DBImpl::DeleteFile(std::string name) {
       ROCKS_LOG_WARN(immutable_db_options_.info_log,
                      "DeleteFile %s failed. File not found\n", name.c_str());
       job_context.Clean();
-      return Status_InvalidArgument("File not found");
+      return rocksdb_rs::status::Status_InvalidArgument("File not found");
     }
     assert(level < cfd->NumberLevels());
 
@@ -4326,7 +4326,7 @@ Status DBImpl::DeleteFile(std::string name) {
                      "DeleteFile %s Skipped. File about to be compacted\n",
                      name.c_str());
       job_context.Clean();
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     // Only the files in the last level can be deleted externally.
@@ -4339,7 +4339,7 @@ Status DBImpl::DeleteFile(std::string name) {
                        "DeleteFile %s FAILED. File not in last level\n",
                        name.c_str());
         job_context.Clean();
-        return Status_InvalidArgument("File not in last level");
+        return rocksdb_rs::status::Status_InvalidArgument("File not in last level");
       }
     }
     // if level == 0, it has to be the oldest file
@@ -4350,7 +4350,7 @@ Status DBImpl::DeleteFile(std::string name) {
                      " target file in level 0 must be the oldest.",
                      name.c_str());
       job_context.Clean();
-      return Status_InvalidArgument("File in level 0, but not oldest");
+      return rocksdb_rs::status::Status_InvalidArgument("File in level 0, but not oldest");
     }
     edit.SetColumnFamily(cfd->GetID());
     edit.DeleteFile(level, number);
@@ -4375,12 +4375,12 @@ Status DBImpl::DeleteFile(std::string name) {
   return status;
 }
 
-Status DBImpl::DeleteFilesInRanges(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::DeleteFilesInRanges(ColumnFamilyHandle* column_family,
                                    const RangePtr* ranges, size_t n,
                                    bool include_end) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status status = Status_OK();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_OK();
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   ColumnFamilyData* cfd = cfh->cfd();
   VersionEdit edit;
@@ -4474,7 +4474,7 @@ void DBImpl::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
   versions_->GetLiveFilesMetaData(metadata);
 }
 
-Status DBImpl::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
+rocksdb_rs::status::Status DBImpl::GetLiveFilesChecksumInfo(FileChecksumList* checksum_list) {
   InstrumentedMutexLock l(&mutex_);
   return versions_->GetLiveFilesChecksumInfo(checksum_list);
 }
@@ -4512,7 +4512,7 @@ void DBImpl::GetAllColumnFamilyMetaData(
   }
 }
 
-Status DBImpl::CheckConsistency() {
+rocksdb_rs::status::Status DBImpl::CheckConsistency() {
   mutex_.AssertHeld();
   std::vector<LiveFileMetaData> metadata;
   versions_->GetLiveFilesMetaData(&metadata);
@@ -4541,7 +4541,7 @@ Status DBImpl::CheckConsistency() {
     for (const auto& dir_files : files_by_directory) {
       std::string directory = dir_files.first;
       std::vector<std::string> existing_files;
-      Status s = fs_->GetChildren(directory, io_opts, &existing_files,
+      rocksdb_rs::status::Status s = fs_->GetChildren(directory, io_opts, &existing_files,
                                   /*IODebugContext*=*/nullptr);
       if (!s.ok()) {
         corruption_messages +=
@@ -4567,10 +4567,10 @@ Status DBImpl::CheckConsistency() {
 
       uint64_t fsize = 0;
       TEST_SYNC_POINT("DBImpl::CheckConsistency:BeforeGetFileSize");
-      Status s = env_->GetFileSize(file_path, &fsize);
+      rocksdb_rs::status::Status s = env_->GetFileSize(file_path, &fsize);
       if (!s.ok() &&
           env_->GetFileSize(Rocks2LevelTableFileName(file_path), &fsize).ok()) {
-        s = Status_OK();
+        s = rocksdb_rs::status::Status_OK();
       }
       if (!s.ok()) {
         corruption_messages +=
@@ -4585,22 +4585,22 @@ Status DBImpl::CheckConsistency() {
   }
 
   if (corruption_messages.size() == 0) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_Corruption(corruption_messages);
+    return rocksdb_rs::status::Status_Corruption(corruption_messages);
   }
 }
 
-Status DBImpl::GetDbIdentity(std::string& identity) const {
+rocksdb_rs::status::Status DBImpl::GetDbIdentity(std::string& identity) const {
   identity.assign(db_id_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::GetDbIdentityFromIdentityFile(std::string* identity) const {
+rocksdb_rs::status::Status DBImpl::GetDbIdentityFromIdentityFile(std::string* identity) const {
   std::string idfilename = static_cast<std::string>(IdentityFileName(dbname_));
   const FileOptions soptions;
 
-  Status s = ReadFileToString(fs_.get(), idfilename, identity);
+  rocksdb_rs::status::Status s = ReadFileToString(fs_.get(), idfilename, identity);
   if (!s.ok()) {
     return s;
   }
@@ -4613,9 +4613,9 @@ Status DBImpl::GetDbIdentityFromIdentityFile(std::string* identity) const {
   return s;
 }
 
-Status DBImpl::GetDbSessionId(std::string& session_id) const {
+rocksdb_rs::status::Status DBImpl::GetDbSessionId(std::string& session_id) const {
   session_id.assign(db_session_id_);
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -4649,53 +4649,53 @@ void DBImpl::SetDbSessionId() {
 }
 
 // Default implementation -- returns not supported status
-Status DB::CreateColumnFamily(const ColumnFamilyOptions& /*cf_options*/,
+rocksdb_rs::status::Status DB::CreateColumnFamily(const ColumnFamilyOptions& /*cf_options*/,
                               const std::string& /*column_family_name*/,
                               ColumnFamilyHandle** /*handle*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
-Status DB::CreateColumnFamilies(
+rocksdb_rs::status::Status DB::CreateColumnFamilies(
     const ColumnFamilyOptions& /*cf_options*/,
     const std::vector<std::string>& /*column_family_names*/,
     std::vector<ColumnFamilyHandle*>* /*handles*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
-Status DB::CreateColumnFamilies(
+rocksdb_rs::status::Status DB::CreateColumnFamilies(
     const std::vector<ColumnFamilyDescriptor>& /*column_families*/,
     std::vector<ColumnFamilyHandle*>* /*handles*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
-Status DB::DropColumnFamily(ColumnFamilyHandle* /*column_family*/) {
-  return Status_NotSupported("");
+rocksdb_rs::status::Status DB::DropColumnFamily(ColumnFamilyHandle* /*column_family*/) {
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
-Status DB::DropColumnFamilies(
+rocksdb_rs::status::Status DB::DropColumnFamilies(
     const std::vector<ColumnFamilyHandle*>& /*column_families*/) {
-  return Status_NotSupported("");
+  return rocksdb_rs::status::Status_NotSupported("");
 }
 
-Status DB::DestroyColumnFamilyHandle(ColumnFamilyHandle* column_family) {
+rocksdb_rs::status::Status DB::DestroyColumnFamilyHandle(ColumnFamilyHandle* column_family) {
   if (DefaultColumnFamily() == column_family) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot destroy the handle returned by DefaultColumnFamily()");
   }
   delete column_family;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 DB::~DB() {}
 
-Status DBImpl::Close() {
+rocksdb_rs::status::Status DBImpl::Close() {
   InstrumentedMutexLock closing_lock_guard(&closing_mutex_);
   if (closed_) {
     return closing_status_.Clone();
   }
 
   {
-    const Status s = MaybeReleaseTimestampedSnapshotsAndCheck();
+    const rocksdb_rs::status::Status s = MaybeReleaseTimestampedSnapshotsAndCheck();
     if (!s.ok()) {
       return s.Clone();
     }
@@ -4706,7 +4706,7 @@ Status DBImpl::Close() {
   return closing_status_.Clone();
 }
 
-Status DB::ListColumnFamilies(const DBOptions& db_options,
+rocksdb_rs::status::Status DB::ListColumnFamilies(const DBOptions& db_options,
                               const std::string& name,
                               std::vector<std::string>* column_families) {
   const std::shared_ptr<FileSystem>& fs = db_options.env->GetFileSystem();
@@ -4715,7 +4715,7 @@ Status DB::ListColumnFamilies(const DBOptions& db_options,
 
 Snapshot::~Snapshot() {}
 
-Status DestroyDB(const std::string& dbname, const Options& options,
+rocksdb_rs::status::Status DestroyDB(const std::string& dbname, const Options& options,
                  const std::vector<ColumnFamilyDescriptor>& column_families) {
   ImmutableDBOptions soptions(SanitizeOptions(dbname, options));
   Env* env = soptions.env;
@@ -4733,7 +4733,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
 
   FileLock* lock;
   const std::string lockname = static_cast<std::string>(LockFileName(dbname));
-  Status result = env->LockFile(lockname, &lock);
+  rocksdb_rs::status::Status result = env->LockFile(lockname, &lock);
   if (result.ok()) {
     uint64_t number;
     rocksdb_rs::types::FileType type;
@@ -4741,7 +4741,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     for (const auto& fname : filenames) {
       if (ParseFileName(fname, &number, info_log_prefix.prefix, &type) &&
           type != rocksdb_rs::types::FileType::kDBLockFile) {  // Lock file will be deleted at end
-        Status del = Status_new();
+        rocksdb_rs::status::Status del = rocksdb_rs::status::Status_new();
         std::string path_to_delete = dbname + "/" + fname;
         if (type == rocksdb_rs::types::FileType::kMetaDatabase) {
           del = DestroyDB(path_to_delete, options);
@@ -4780,7 +4780,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
               (type == rocksdb_rs::types::FileType::kTableFile ||
                type == rocksdb_rs::types::FileType::kBlobFile)) {  // Lock file will be deleted at end
             std::string file_path = path + "/" + fname;
-            Status del = DeleteDBFile(&soptions, file_path, dbname,
+            rocksdb_rs::status::Status del = DeleteDBFile(&soptions, file_path, dbname,
                                       /*force_bg=*/false, /*force_fg=*/false);
             if (!del.ok() && result.ok()) {
               result.copy_from(del);
@@ -4815,7 +4815,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
       // Delete archival files.
       for (const auto& file : archiveFiles) {
         if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
-          Status del =
+          rocksdb_rs::status::Status del =
               DeleteDBFile(&soptions, archivedir + "/" + file, archivedir,
                            /*force_bg=*/false, /*force_fg=*/!wal_in_db_path);
           if (!del.ok() && result.ok()) {
@@ -4831,7 +4831,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
     if (wal_dir_exists) {
       for (const auto& file : walDirFiles) {
         if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
-          Status del =
+          rocksdb_rs::status::Status del =
               DeleteDBFile(&soptions, static_cast<std::string>(LogFileName(soptions.wal_dir, number)),
                            soptions.wal_dir, /*force_bg=*/false,
                            /*force_fg=*/!wal_in_db_path);
@@ -4859,7 +4859,7 @@ Status DestroyDB(const std::string& dbname, const Options& options,
   return result;
 }
 
-Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
+rocksdb_rs::status::Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
                                 bool need_enter_write_thread) {
   WriteThread::Writer w;
   if (need_mutex_lock) {
@@ -4896,7 +4896,7 @@ Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
 
   std::string file_name =
       static_cast<std::string>(TempOptionsFileName(GetName(), versions_->NewFileNumber()));
-  Status s = PersistRocksDBOptions(db_options, cf_names, cf_opts, file_name,
+  rocksdb_rs::status::Status s = PersistRocksDBOptions(db_options, cf_names, cf_opts, file_name,
                                    fs_.get());
 
   if (s.ok()) {
@@ -4922,11 +4922,11 @@ Status DBImpl::WriteOptionsFile(bool need_mutex_lock,
     ROCKS_LOG_WARN(immutable_db_options_.info_log,
                    "Unnable to persist options -- %s", s.ToString()->c_str());
     if (immutable_db_options_.fail_if_options_file_error) {
-      return Status_IOError("Unable to persist options.",
+      return rocksdb_rs::status::Status_IOError("Unable to persist options.",
                              s.ToString()->c_str());
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 namespace {
@@ -4947,12 +4947,12 @@ void DeleteOptionsFilesHelper(const std::map<uint64_t, std::string>& filenames,
 }
 }  // namespace
 
-Status DBImpl::DeleteObsoleteOptionsFiles() {
+rocksdb_rs::status::Status DBImpl::DeleteObsoleteOptionsFiles() {
   std::vector<std::string> filenames;
   // use ordered map to store keep the filenames sorted from the newest
   // to the oldest.
   std::map<uint64_t, std::string> options_filenames;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   IOOptions io_opts;
   io_opts.do_not_recurse = true;
   s = fs_->GetChildren(GetName(), io_opts, &filenames,
@@ -4974,11 +4974,11 @@ Status DBImpl::DeleteObsoleteOptionsFiles() {
   const size_t kNumOptionsFilesKept = 2;
   DeleteOptionsFilesHelper(options_filenames, kNumOptionsFilesKept,
                            immutable_db_options_.info_log, GetEnv());
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
-  Status s = Status_new();
+rocksdb_rs::status::Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   uint64_t options_file_number = versions_->NewFileNumber();
   std::string options_file_name =
@@ -4997,7 +4997,7 @@ Status DBImpl::RenameTempFileToOptionsFile(const std::string& file_name) {
                                        DirFsyncOptions(options_file_name));
     }
     if (s.ok()) {
-      Status temp_s = dir_obj->Close(IOOptions(), nullptr);
+      rocksdb_rs::status::Status temp_s = dir_obj->Close(IOOptions(), nullptr);
       // The default Close() could return "NotSupproted" and we bypass it
       // if it is not impelmented. Detailed explanations can be found in
       // db/db_impl/db_impl.h
@@ -5080,11 +5080,11 @@ SequenceNumber DBImpl::GetEarliestMemTableSequenceNumber(SuperVersion* sv,
   return earliest_seq;
 }
 
-Status DBImpl::GetLatestSequenceForKey(
+rocksdb_rs::status::Status DBImpl::GetLatestSequenceForKey(
     SuperVersion* sv, const Slice& key, bool cache_only,
     SequenceNumber lower_bound_seq, SequenceNumber* seq, std::string* timestamp,
     bool* found_record_for_key, bool* is_blob_index) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   MergeContext merge_context;
   SequenceNumber max_covering_tombstone_seq = 0;
 
@@ -5135,14 +5135,14 @@ Status DBImpl::GetLatestSequenceForKey(
   if (*seq != kMaxSequenceNumber) {
     // Found a sequence number, no need to check immutable memtables
     *found_record_for_key = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   SequenceNumber lower_bound_in_mem = sv->mem->GetEarliestSequenceNumber();
   if (lower_bound_in_mem != kMaxSequenceNumber &&
       lower_bound_in_mem < lower_bound_seq) {
     *found_record_for_key = false;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Check if there is a record for this key in the immutable memtables
@@ -5167,14 +5167,14 @@ Status DBImpl::GetLatestSequenceForKey(
   if (*seq != kMaxSequenceNumber) {
     // Found a sequence number, no need to check memtable history
     *found_record_for_key = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   SequenceNumber lower_bound_in_imm = sv->imm->GetEarliestSequenceNumber();
   if (lower_bound_in_imm != kMaxSequenceNumber &&
       lower_bound_in_imm < lower_bound_seq) {
     *found_record_for_key = false;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Check if there is a record for this key in the immutable memtables
@@ -5202,7 +5202,7 @@ Status DBImpl::GetLatestSequenceForKey(
     // Found a sequence number, no need to check SST files
     assert(0 == ts_sz || *timestamp != std::string(ts_sz, '\xff'));
     *found_record_for_key = true;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // We could do a sv->imm->GetEarliestSequenceNumber(/*include_history*/ true)
@@ -5231,7 +5231,7 @@ Status DBImpl::GetLatestSequenceForKey(
   return s;
 }
 
-Status DBImpl::IngestExternalFile(
+rocksdb_rs::status::Status DBImpl::IngestExternalFile(
     ColumnFamilyHandle* column_family,
     const std::vector<std::string>& external_files,
     const IngestExternalFileOptions& ingestion_options) {
@@ -5242,20 +5242,20 @@ Status DBImpl::IngestExternalFile(
   return IngestExternalFiles({arg});
 }
 
-Status DBImpl::IngestExternalFiles(
+rocksdb_rs::status::Status DBImpl::IngestExternalFiles(
     const std::vector<IngestExternalFileArg>& args) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   if (args.empty()) {
-    return Status_InvalidArgument("ingestion arg list is empty");
+    return rocksdb_rs::status::Status_InvalidArgument("ingestion arg list is empty");
   }
   {
     std::unordered_set<ColumnFamilyHandle*> unique_cfhs;
     for (const auto& arg : args) {
       if (arg.column_family == nullptr) {
-        return Status_InvalidArgument("column family handle is null");
+        return rocksdb_rs::status::Status_InvalidArgument("column family handle is null");
       } else if (unique_cfhs.count(arg.column_family) > 0) {
-        return Status_InvalidArgument(
+        return rocksdb_rs::status::Status_InvalidArgument(
             "ingestion args have duplicate column families");
       }
       unique_cfhs.insert(arg.column_family);
@@ -5267,14 +5267,14 @@ Status DBImpl::IngestExternalFiles(
     if (args[i].external_files.empty()) {
       char err_msg[128] = {0};
       snprintf(err_msg, 128, "external_files[%zu] is empty", i);
-      return Status_InvalidArgument(err_msg);
+      return rocksdb_rs::status::Status_InvalidArgument(err_msg);
     }
   }
   for (const auto& arg : args) {
     const IngestExternalFileOptions& ingest_opts = arg.options;
     if (ingest_opts.ingest_behind &&
         !immutable_db_options_.allow_ingest_behind) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "can't ingest_behind file in DB with allow_ingest_behind=false");
     }
   }
@@ -5287,7 +5287,7 @@ Status DBImpl::IngestExternalFiles(
     total += arg.external_files.size();
   }
   uint64_t next_file_number = 0;
-  Status status = ReserveFileNumbersBeforeIngestion(
+  rocksdb_rs::status::Status status = ReserveFileNumbersBeforeIngestion(
       static_cast<ColumnFamilyHandleImpl*>(args[0].column_family)->cfd(), total,
       pending_output_elem, &next_file_number);
   if (!status.ok()) {
@@ -5312,7 +5312,7 @@ Status DBImpl::IngestExternalFiles(
     auto* cfd =
         static_cast<ColumnFamilyHandleImpl*>(args[i].column_family)->cfd();
     SuperVersion* super_version = cfd->GetReferencedSuperVersion(this);
-    Status es = ingestion_jobs[i].Prepare(
+    rocksdb_rs::status::Status es = ingestion_jobs[i].Prepare(
         args[i].external_files, args[i].files_checksums,
         args[i].files_checksum_func_names, args[i].file_temperature,
         start_file_number, super_version);
@@ -5328,7 +5328,7 @@ Status DBImpl::IngestExternalFiles(
     auto* cfd =
         static_cast<ColumnFamilyHandleImpl*>(args[0].column_family)->cfd();
     SuperVersion* super_version = cfd->GetReferencedSuperVersion(this);
-    Status es = ingestion_jobs[0].Prepare(
+    rocksdb_rs::status::Status es = ingestion_jobs[0].Prepare(
         args[0].external_files, args[0].files_checksums,
         args[0].files_checksum_func_names, args[0].file_temperature,
         next_file_number, super_version);
@@ -5383,7 +5383,7 @@ Status DBImpl::IngestExternalFiles(
       if (cfd->IsDropped()) {
         // TODO (yanqin) investigate whether we should abort ingestion or
         // proceed with other non-dropped column families.
-        status = Status_InvalidArgument(
+        status = rocksdb_rs::status::Status_InvalidArgument(
             "cannot ingest an external file into a dropped CF");
         break;
       }
@@ -5560,7 +5560,7 @@ Status DBImpl::IngestExternalFiles(
   return status;
 }
 
-Status DBImpl::CreateColumnFamilyWithImport(
+rocksdb_rs::status::Status DBImpl::CreateColumnFamilyWithImport(
     const ColumnFamilyOptions& options, const std::string& column_family_name,
     const ImportColumnFamilyOptions& import_options,
     const std::vector<const ExportImportFilesMetaData*>& metadatas,
@@ -5575,7 +5575,7 @@ Status DBImpl::CreateColumnFamilyWithImport(
   std::vector<std::vector<LiveFileMetaData*>> metadata_files(metadatas.size());
   for (size_t i = 0; i < metadatas.size(); i++) {
     if (cf_comparator_name != metadatas[i]->db_comparator_name) {
-      return Status_InvalidArgument("Comparator name mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument("Comparator name mismatch");
     }
     for (auto& file : metadatas[i]->files) {
       metadata_files[i].push_back((LiveFileMetaData*)&file);
@@ -5688,7 +5688,7 @@ Status DBImpl::CreateColumnFamilyWithImport(
 
   import_job.Cleanup(status);
   if (!status.ok()) {
-    Status temp_s = DropColumnFamily(*handle);
+    rocksdb_rs::status::Status temp_s = DropColumnFamily(*handle);
     if (!temp_s.ok()) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DropColumnFamily failed with error %s",
@@ -5702,10 +5702,10 @@ Status DBImpl::CreateColumnFamilyWithImport(
   return status;
 }
 
-Status DBImpl::ClipColumnFamily(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::ClipColumnFamily(ColumnFamilyHandle* column_family,
                                 const Slice& begin_key, const Slice& end_key) {
   assert(column_family);
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   // Flush memtable
   FlushOptions flush_opts;
   flush_opts.allow_write_stall = true;
@@ -5777,25 +5777,25 @@ Status DBImpl::ClipColumnFamily(ColumnFamilyHandle* column_family,
   return status;
 }
 
-Status DBImpl::VerifyFileChecksums(const ReadOptions& read_options) {
+rocksdb_rs::status::Status DBImpl::VerifyFileChecksums(const ReadOptions& read_options) {
   return VerifyChecksumInternal(read_options, /*use_file_checksum=*/true);
 }
 
-Status DBImpl::VerifyChecksum(const ReadOptions& read_options) {
+rocksdb_rs::status::Status DBImpl::VerifyChecksum(const ReadOptions& read_options) {
   return VerifyChecksumInternal(read_options, /*use_file_checksum=*/false);
 }
 
-Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
+rocksdb_rs::status::Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
                                       bool use_file_checksum) {
   // `bytes_read` stat is enabled based on compile-time support and cannot
   // be dynamically toggled. So we do not need to worry about `PerfLevel`
   // here, unlike many other `IOStatsContext` / `PerfContext` stats.
   uint64_t prev_bytes_read = IOSTATS(bytes_read);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    s = Status_InvalidArgument(
+    s = rocksdb_rs::status::Status_InvalidArgument(
         "Cannot verify file checksum with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
     return s;
@@ -5804,7 +5804,7 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
     FileChecksumGenFactory* const file_checksum_gen_factory =
         immutable_db_options_.file_checksum_gen_factory.get();
     if (!file_checksum_gen_factory) {
-      s = Status_InvalidArgument(
+      s = rocksdb_rs::status::Status_InvalidArgument(
           "Cannot verify file checksum if options.file_checksum_gen_factory is "
           "null");
       return s;
@@ -5909,17 +5909,17 @@ Status DBImpl::VerifyChecksumInternal(const ReadOptions& read_options,
   return s;
 }
 
-Status DBImpl::VerifyFullFileChecksum(const std::string& file_checksum_expected,
+rocksdb_rs::status::Status DBImpl::VerifyFullFileChecksum(const std::string& file_checksum_expected,
                                       const std::string& func_name_expected,
                                       const std::string& fname,
                                       const ReadOptions& read_options) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call VerifyChecksum with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (file_checksum_expected == kUnknownFileChecksum) {
     return s;
   }
@@ -5939,7 +5939,7 @@ Status DBImpl::VerifyFullFileChecksum(const std::string& file_checksum_expected,
       oss << "expecting "
           << Slice(file_checksum_expected).ToString(/*hex=*/true);
       oss << ", but actual " << Slice(file_checksum).ToString(/*hex=*/true);
-      s = Status_Corruption(oss.str());
+      s = rocksdb_rs::status::Status_Corruption(oss.str());
       TEST_SYNC_POINT_CALLBACK("DBImpl::VerifyFullFileChecksum:mismatch", &s);
     }
   }
@@ -5965,35 +5965,35 @@ void DBImpl::NotifyOnExternalFileIngested(
   }
 }
 
-Status DBImpl::StartTrace(const TraceOptions& trace_options,
+rocksdb_rs::status::Status DBImpl::StartTrace(const TraceOptions& trace_options,
                           std::unique_ptr<TraceWriter>&& trace_writer) {
   InstrumentedMutexLock lock(&trace_mutex_);
   tracer_.reset(new Tracer(immutable_db_options_.clock, trace_options,
                            std::move(trace_writer)));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::EndTrace() {
+rocksdb_rs::status::Status DBImpl::EndTrace() {
   InstrumentedMutexLock lock(&trace_mutex_);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (tracer_ != nullptr) {
     s = tracer_->Close();
     tracer_.reset();
   } else {
-    s = Status_IOError("No trace file to close");
+    s = rocksdb_rs::status::Status_IOError("No trace file to close");
   }
   return s;
 }
 
-Status DBImpl::NewDefaultReplayer(
+rocksdb_rs::status::Status DBImpl::NewDefaultReplayer(
     const std::vector<ColumnFamilyHandle*>& handles,
     std::unique_ptr<TraceReader>&& reader,
     std::unique_ptr<Replayer>* replayer) {
   replayer->reset(new ReplayerImpl(this, handles, std::move(reader)));
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::StartBlockCacheTrace(
+rocksdb_rs::status::Status DBImpl::StartBlockCacheTrace(
     const TraceOptions& trace_options,
     std::unique_ptr<TraceWriter>&& trace_writer) {
   BlockCacheTraceOptions block_trace_opts;
@@ -6010,21 +6010,21 @@ Status DBImpl::StartBlockCacheTrace(
                                         std::move(block_cache_trace_writer));
 }
 
-Status DBImpl::StartBlockCacheTrace(
+rocksdb_rs::status::Status DBImpl::StartBlockCacheTrace(
     const BlockCacheTraceOptions& trace_options,
     std::unique_ptr<BlockCacheTraceWriter>&& trace_writer) {
   return block_cache_tracer_.StartTrace(trace_options, std::move(trace_writer));
 }
 
-Status DBImpl::EndBlockCacheTrace() {
+rocksdb_rs::status::Status DBImpl::EndBlockCacheTrace() {
   block_cache_tracer_.EndTrace();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
+rocksdb_rs::status::Status DBImpl::TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
                                  const Slice& lower_bound,
                                  const Slice upper_bound) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (tracer_) {
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
@@ -6034,10 +6034,10 @@ Status DBImpl::TraceIteratorSeek(const uint32_t& cf_id, const Slice& key,
   return s;
 }
 
-Status DBImpl::TraceIteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
+rocksdb_rs::status::Status DBImpl::TraceIteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
                                         const Slice& lower_bound,
                                         const Slice upper_bound) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (tracer_) {
     InstrumentedMutexLock lock(&trace_mutex_);
     if (tracer_) {
@@ -6047,13 +6047,13 @@ Status DBImpl::TraceIteratorSeekForPrev(const uint32_t& cf_id, const Slice& key,
   return s;
 }
 
-Status DBImpl::ReserveFileNumbersBeforeIngestion(
+rocksdb_rs::status::Status DBImpl::ReserveFileNumbersBeforeIngestion(
     ColumnFamilyData* cfd, uint64_t num,
     std::unique_ptr<std::list<uint64_t>::iterator>& pending_output_elem,
     uint64_t* next_file_number) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   SuperVersionContext dummy_sv_ctx(true /* create_superversion */);
   assert(nullptr != next_file_number);
   InstrumentedMutexLock l(&mutex_);
@@ -6079,7 +6079,7 @@ Status DBImpl::ReserveFileNumbersBeforeIngestion(
   return s;
 }
 
-Status DBImpl::GetCreationTimeOfOldestFile(uint64_t* creation_time) {
+rocksdb_rs::status::Status DBImpl::GetCreationTimeOfOldestFile(uint64_t* creation_time) {
   if (mutable_db_options_.max_open_files == -1) {
     uint64_t oldest_time = std::numeric_limits<uint64_t>::max();
     for (auto cfd : *versions_->GetColumnFamilySet()) {
@@ -6101,9 +6101,9 @@ Status DBImpl::GetCreationTimeOfOldestFile(uint64_t* creation_time) {
       }
     }
     *creation_time = oldest_time;
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else {
-    return Status_NotSupported("This API only works if max_open_files = -1");
+    return rocksdb_rs::status::Status_NotSupported("This API only works if max_open_files = -1");
   }
 }
 

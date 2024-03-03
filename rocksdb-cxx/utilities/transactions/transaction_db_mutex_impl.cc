@@ -22,9 +22,9 @@ class TransactionDBMutexImpl : public TransactionDBMutex {
   TransactionDBMutexImpl() {}
   ~TransactionDBMutexImpl() override {}
 
-  Status Lock() override;
+  rocksdb_rs::status::Status Lock() override;
 
-  Status TryLockFor(int64_t timeout_time) override;
+  rocksdb_rs::status::Status TryLockFor(int64_t timeout_time) override;
 
   void UnLock() override { mutex_.unlock(); }
 
@@ -39,9 +39,9 @@ class TransactionDBCondVarImpl : public TransactionDBCondVar {
   TransactionDBCondVarImpl() {}
   ~TransactionDBCondVarImpl() override {}
 
-  Status Wait(std::shared_ptr<TransactionDBMutex> mutex) override;
+  rocksdb_rs::status::Status Wait(std::shared_ptr<TransactionDBMutex> mutex) override;
 
-  Status WaitFor(std::shared_ptr<TransactionDBMutex> mutex,
+  rocksdb_rs::status::Status WaitFor(std::shared_ptr<TransactionDBMutex> mutex,
                  int64_t timeout_time) override;
 
   void Notify() override { cv_.notify_one(); }
@@ -62,12 +62,12 @@ TransactionDBMutexFactoryImpl::AllocateCondVar() {
   return std::shared_ptr<TransactionDBCondVar>(new TransactionDBCondVarImpl());
 }
 
-Status TransactionDBMutexImpl::Lock() {
+rocksdb_rs::status::Status TransactionDBMutexImpl::Lock() {
   mutex_.lock();
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
+rocksdb_rs::status::Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
   bool locked = true;
 
   if (timeout_time == 0) {
@@ -85,13 +85,13 @@ Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
 
   if (!locked) {
     // timeout acquiring mutex
-    return Status_TimedOut(SubCode::kMutexTimeout);
+    return rocksdb_rs::status::Status_TimedOut(rocksdb_rs::status::SubCode::kMutexTimeout);
   }
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status TransactionDBCondVarImpl::Wait(
+rocksdb_rs::status::Status TransactionDBCondVarImpl::Wait(
     std::shared_ptr<TransactionDBMutex> mutex) {
   auto mutex_impl = reinterpret_cast<TransactionDBMutexImpl*>(mutex.get());
 
@@ -101,12 +101,12 @@ Status TransactionDBCondVarImpl::Wait(
   // Make sure unique_lock doesn't unlock mutex when it destructs
   lock.release();
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status TransactionDBCondVarImpl::WaitFor(
+rocksdb_rs::status::Status TransactionDBCondVarImpl::WaitFor(
     std::shared_ptr<TransactionDBMutex> mutex, int64_t timeout_time) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   auto mutex_impl = reinterpret_cast<TransactionDBMutexImpl*>(mutex.get());
   std::unique_lock<std::mutex> lock(mutex_impl->mutex_, std::adopt_lock);
@@ -120,7 +120,7 @@ Status TransactionDBCondVarImpl::WaitFor(
 
     // Check if the wait stopped due to timing out.
     if (cv_status == std::cv_status::timeout) {
-      s = Status_TimedOut(SubCode::kMutexTimeout);
+      s = rocksdb_rs::status::Status_TimedOut(rocksdb_rs::status::SubCode::kMutexTimeout);
     }
   }
 

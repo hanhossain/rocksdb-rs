@@ -87,7 +87,7 @@ TableCache::TableCache(const ImmutableOptions& ioptions,
 
 TableCache::~TableCache() {}
 
-Status TableCache::GetTableReader(
+rocksdb_rs::status::Status TableCache::GetTableReader(
     const ReadOptions& ro, const FileOptions& file_options,
     const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta, bool sequential_mode,
@@ -101,9 +101,9 @@ Status TableCache::GetTableReader(
   std::unique_ptr<FSRandomAccessFile> file;
   FileOptions fopts = file_options;
   fopts.temperature = file_temperature;
-  Status s = PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options);
+  rocksdb_rs::status::Status s = PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options);
   TEST_SYNC_POINT_CALLBACK("TableCache::GetTableReader:BeforeOpenFile",
-                           const_cast<Status*>(&s));
+                           const_cast<rocksdb_rs::status::Status*>(&s));
   if (s.ok()) {
     s = ioptions_.fs->NewRandomAccessFile(fname, fopts, &file, nullptr);
   }
@@ -113,7 +113,7 @@ Status TableCache::GetTableReader(
     fname = static_cast<std::string>(rocksdb_rs::filename::Rocks2LevelTableFileName(fname));
     // If this file is also not found, we want to use the error message
     // that contains the table file name which is less confusing.
-    Status temp_s =
+    rocksdb_rs::status::Status temp_s =
         PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options);
     if (temp_s.ok()) {
       temp_s = ioptions_.fs->NewRandomAccessFile(fname, file_options, &file,
@@ -159,7 +159,7 @@ Status TableCache::GetTableReader(
   return s;
 }
 
-Status TableCache::FindTable(
+rocksdb_rs::status::Status TableCache::FindTable(
     const ReadOptions& ro, const FileOptions& file_options,
     const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta, TypedHandle** handle,
@@ -177,17 +177,17 @@ Status TableCache::FindTable(
 
   if (*handle == nullptr) {
     if (no_io) {
-      return Status_Incomplete("Table not found in table_cache, no_io is set");
+      return rocksdb_rs::status::Status_Incomplete("Table not found in table_cache, no_io is set");
     }
     MutexLock load_lock(&loader_mutex_.Get(key));
     // We check the cache again under loading mutex
     *handle = cache_.Lookup(key);
     if (*handle != nullptr) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     std::unique_ptr<TableReader> table_reader;
-    Status s = GetTableReader(ro, file_options, internal_comparator, file_meta,
+    rocksdb_rs::status::Status s = GetTableReader(ro, file_options, internal_comparator, file_meta,
                               false /* sequential mode */,
                               block_protection_bytes_per_key, file_read_hist,
                               &table_reader, prefix_extractor, skip_filters,
@@ -207,7 +207,7 @@ Status TableCache::FindTable(
     }
     return s;
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 InternalIterator* TableCache::NewIterator(
@@ -224,7 +224,7 @@ InternalIterator* TableCache::NewIterator(
     TruncatedRangeDelIterator** range_del_iter) {
   PERF_TIMER_GUARD(new_table_iterator_nanos);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* table_reader = nullptr;
   TypedHandle* handle = nullptr;
   if (table_reader_ptr != nullptr) {
@@ -314,14 +314,14 @@ InternalIterator* TableCache::NewIterator(
   return result;
 }
 
-Status TableCache::GetRangeTombstoneIterator(
+rocksdb_rs::status::Status TableCache::GetRangeTombstoneIterator(
     const ReadOptions& options,
     const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta, uint8_t block_protection_bytes_per_key,
     std::unique_ptr<FragmentedRangeTombstoneIterator>* out_iter) {
   assert(out_iter);
   const FileDescriptor& fd = file_meta.fd;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;
   TypedHandle* handle = nullptr;
   if (t == nullptr) {
@@ -408,7 +408,7 @@ bool TableCache::GetFromRowCache(const Slice& user_key, IterKey& row_cache_key,
   return found;
 }
 
-Status TableCache::Get(
+rocksdb_rs::status::Status TableCache::Get(
     const ReadOptions& options,
     const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta, const Slice& k, GetContext* get_context,
@@ -433,7 +433,7 @@ Status TableCache::Get(
       row_cache_entry = &row_cache_entry_buffer;
     }
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;
   TypedHandle* handle = nullptr;
   if (!done) {
@@ -474,7 +474,7 @@ Status TableCache::Get(
     } else if (options.read_tier == kBlockCacheTier && s.IsIncomplete()) {
       // Couldn't find Table in cache but treat as kFound if no_io set
       get_context->MarkKeyMayExist();
-      s = Status_OK();
+      s = rocksdb_rs::status::Status_OK();
       done = true;
     }
   }
@@ -516,7 +516,7 @@ void TableCache::UpdateRangeTombstoneSeqnums(
   }
 }
 
-Status TableCache::MultiGetFilter(
+rocksdb_rs::status::Status TableCache::MultiGetFilter(
     const ReadOptions& options,
     const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta,
@@ -533,9 +533,9 @@ Status TableCache::MultiGetFilter(
   // lookup.
   KeyContext& first_key = *mget_range->begin();
   if (ioptions_.row_cache && !first_key.get_context->NeedToReadSequence()) {
-    return Status_NotSupported();
+    return rocksdb_rs::status::Status_NotSupported();
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = fd.table_reader;
   TypedHandle* handle = nullptr;
   MultiGetContext::Range tombstone_range(*mget_range, mget_range->begin(),
@@ -570,7 +570,7 @@ Status TableCache::MultiGetFilter(
   return s;
 }
 
-Status TableCache::GetTableProperties(
+rocksdb_rs::status::Status TableCache::GetTableProperties(
     const FileOptions& file_options, const ReadOptions& read_options,
     const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta,
@@ -582,11 +582,11 @@ Status TableCache::GetTableProperties(
   if (table_reader) {
     *properties = table_reader->GetTableProperties();
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   TypedHandle* table_handle = nullptr;
-  Status s = FindTable(read_options, file_options, internal_comparator,
+  rocksdb_rs::status::Status s = FindTable(read_options, file_options, internal_comparator,
                        file_meta, &table_handle, block_protection_bytes_per_key,
                        prefix_extractor, no_io);
   if (!s.ok()) {
@@ -599,11 +599,11 @@ Status TableCache::GetTableProperties(
   return s;
 }
 
-Status TableCache::ApproximateKeyAnchors(
+rocksdb_rs::status::Status TableCache::ApproximateKeyAnchors(
     const ReadOptions& ro, const InternalKeyComparator& internal_comparator,
     const FileMetaData& file_meta, uint8_t block_protection_bytes_per_key,
     std::vector<TableReader::Anchor>& anchors) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   TableReader* t = file_meta.fd.table_reader;
   TypedHandle* handle = nullptr;
   if (t == nullptr) {
@@ -634,7 +634,7 @@ size_t TableCache::GetMemoryUsageByTableReader(
   }
 
   TypedHandle* table_handle = nullptr;
-  Status s = FindTable(read_options, file_options, internal_comparator,
+  rocksdb_rs::status::Status s = FindTable(read_options, file_options, internal_comparator,
                        file_meta, &table_handle, block_protection_bytes_per_key,
                        prefix_extractor, true /* no_io */);
   if (!s.ok()) {
@@ -661,7 +661,7 @@ uint64_t TableCache::ApproximateOffsetOf(
   TableReader* table_reader = file_meta.fd.table_reader;
   TypedHandle* table_handle = nullptr;
   if (table_reader == nullptr) {
-    Status s =
+    rocksdb_rs::status::Status s =
         FindTable(read_options, file_options_, internal_comparator, file_meta,
                   &table_handle, block_protection_bytes_per_key,
                   prefix_extractor, false /* no_io */);
@@ -690,7 +690,7 @@ uint64_t TableCache::ApproximateSize(
   TableReader* table_reader = file_meta.fd.table_reader;
   TypedHandle* table_handle = nullptr;
   if (table_reader == nullptr) {
-    Status s =
+    rocksdb_rs::status::Status s =
         FindTable(read_options, file_options_, internal_comparator, file_meta,
                   &table_handle, block_protection_bytes_per_key,
                   prefix_extractor, false /* no_io */);

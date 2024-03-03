@@ -85,7 +85,7 @@ void TableReaderBenchmark(Options& opts, EnvOptions& env_options,
   auto* clock = env->GetSystemClock().get();
   TableBuilder* tb = nullptr;
   DB* db = nullptr;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   const ImmutableOptions ioptions(opts);
   const ColumnFamilyOptions cfo(opts);
   const MutableCFOptions moptions(cfo);

@@ -189,9 +189,9 @@ class Env : public Customizable {
   // @return OK If the environment was successfully loaded (and optionally
   // prepared)
   // @return not-OK if the load failed.
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& value, Env** result);
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& value, Env** result,
                                  std::shared_ptr<Env>* guard);
 
@@ -199,7 +199,7 @@ class Env : public Customizable {
   // If both are specified, an error is returned.
   // Otherwise, the environment is created by loading (via CreateFromString)
   // the appropriate env/fs from the corresponding values.
-  static Status CreateFromUri(const ConfigOptions& options,
+  static rocksdb_rs::status::Status CreateFromUri(const ConfigOptions& options,
                               const std::string& env_uri,
                               const std::string& fs_uri, Env** result,
                               std::shared_ptr<Env>* guard);
@@ -212,12 +212,12 @@ class Env : public Customizable {
   static Env* Default();
 
   // See FileSystem::RegisterDbPaths.
-  virtual Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
+    return rocksdb_rs::status::Status_OK();
   }
   // See FileSystem::UnregisterDbPaths.
-  virtual Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Create a brand new sequentially-readable file with the specified name.
@@ -226,7 +226,7 @@ class Env : public Customizable {
   // not exist, returns a non-OK status.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual Status NewSequentialFile(const std::string& fname,
+  virtual rocksdb_rs::status::Status NewSequentialFile(const std::string& fname,
                                    std::unique_ptr<SequentialFile>* result,
                                    const EnvOptions& options) = 0;
 
@@ -237,7 +237,7 @@ class Env : public Customizable {
   // status.
   //
   // The returned file may be concurrently accessed by multiple threads.
-  virtual Status NewRandomAccessFile(const std::string& fname,
+  virtual rocksdb_rs::status::Status NewRandomAccessFile(const std::string& fname,
                                      std::unique_ptr<RandomAccessFile>* result,
                                      const EnvOptions& options) = 0;
   // These values match Linux definition
@@ -258,7 +258,7 @@ class Env : public Customizable {
   // returns non-OK.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual Status NewWritableFile(const std::string& fname,
+  virtual rocksdb_rs::status::Status NewWritableFile(const std::string& fname,
                                  std::unique_ptr<WritableFile>* result,
                                  const EnvOptions& options) = 0;
 
@@ -270,14 +270,14 @@ class Env : public Customizable {
   // failure stores nullptr in *result and returns non-OK.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual Status ReopenWritableFile(const std::string& /*fname*/,
+  virtual rocksdb_rs::status::Status ReopenWritableFile(const std::string& /*fname*/,
                                     std::unique_ptr<WritableFile>* /*result*/,
                                     const EnvOptions& /*options*/) {
-    return Status_NotSupported("Env::ReopenWritableFile() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("Env::ReopenWritableFile() not supported.");
   }
 
   // Reuse an existing file by renaming it and opening it as writable.
-  virtual Status ReuseWritableFile(const std::string& fname,
+  virtual rocksdb_rs::status::Status ReuseWritableFile(const std::string& fname,
                                    const std::string& old_fname,
                                    std::unique_ptr<WritableFile>* result,
                                    const EnvOptions& options);
@@ -287,19 +287,19 @@ class Env : public Customizable {
   // *result and returns OK.  On failure returns non-OK.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual Status NewRandomRWFile(const std::string& /*fname*/,
+  virtual rocksdb_rs::status::Status NewRandomRWFile(const std::string& /*fname*/,
                                  std::unique_ptr<RandomRWFile>* /*result*/,
                                  const EnvOptions& /*options*/) {
-    return Status_NotSupported("RandomRWFile is not implemented in this Env");
+    return rocksdb_rs::status::Status_NotSupported("RandomRWFile is not implemented in this Env");
   }
 
   // Opens `fname` as a memory-mapped file for read and write (in-place updates
   // only, i.e., no appends). On success, stores a raw buffer covering the whole
   // file in `*result`. The file must exist prior to this call.
-  virtual Status NewMemoryMappedFileBuffer(
+  virtual rocksdb_rs::status::Status NewMemoryMappedFileBuffer(
       const std::string& /*fname*/,
       std::unique_ptr<MemoryMappedFileBuffer>* /*result*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "MemoryMappedFileBuffer is not implemented in this Env");
   }
 
@@ -310,7 +310,7 @@ class Env : public Customizable {
   // On success, stores a pointer to the new Directory in
   // *result and returns OK. On failure stores nullptr in *result and
   // returns non-OK.
-  virtual Status NewDirectory(const std::string& name,
+  virtual rocksdb_rs::status::Status NewDirectory(const std::string& name,
                               std::unique_ptr<Directory>* result) = 0;
 
   // Returns OK if the named file exists.
@@ -318,7 +318,7 @@ class Env : public Customizable {
   //                  the calling process does not have permission to determine
   //                  whether this file exists, or if the path is invalid.
   //         IOError if an IO Error was encountered
-  virtual Status FileExists(const std::string& fname) = 0;
+  virtual rocksdb_rs::status::Status FileExists(const std::string& fname) = 0;
 
   // Store in *result the names of the children of the specified directory.
   // The names are relative to "dir", and shall never include the
@@ -328,7 +328,7 @@ class Env : public Customizable {
   //         NotFound if "dir" does not exist, the calling process does not have
   //                  permission to access "dir", or if "dir" is invalid.
   //         IOError if an IO Error was encountered
-  virtual Status GetChildren(const std::string& dir,
+  virtual rocksdb_rs::status::Status GetChildren(const std::string& dir,
                              std::vector<std::string>* result) = 0;
 
   // Store in *result the attributes of the children of the specified directory.
@@ -342,60 +342,60 @@ class Env : public Customizable {
   //         NotFound if "dir" does not exist, the calling process does not have
   //                  permission to access "dir", or if "dir" is invalid.
   //         IOError if an IO Error was encountered
-  virtual Status GetChildrenFileAttributes(const std::string& dir,
+  virtual rocksdb_rs::status::Status GetChildrenFileAttributes(const std::string& dir,
                                            std::vector<FileAttributes>* result);
 
   // Delete the named file.
-  virtual Status DeleteFile(const std::string& fname) = 0;
-  virtual Status DeleteFile(const rust::String& fname) {
+  virtual rocksdb_rs::status::Status DeleteFile(const std::string& fname) = 0;
+  virtual rocksdb_rs::status::Status DeleteFile(const rust::String& fname) {
     return DeleteFile(static_cast<std::string>(fname));
   }
 
   // Truncate the named file to the specified size.
-  virtual Status Truncate(const std::string& /*fname*/, size_t /*size*/) {
-    return Status_NotSupported("Truncate is not supported for this Env");
+  virtual rocksdb_rs::status::Status Truncate(const std::string& /*fname*/, size_t /*size*/) {
+    return rocksdb_rs::status::Status_NotSupported("Truncate is not supported for this Env");
   }
 
   // Create the specified directory. Returns error if directory exists.
-  virtual Status CreateDir(const std::string& dirname) = 0;
+  virtual rocksdb_rs::status::Status CreateDir(const std::string& dirname) = 0;
 
   // Creates directory if missing. Return Ok if it exists, or successful in
   // Creating.
-  virtual Status CreateDirIfMissing(const std::string& dirname) = 0;
+  virtual rocksdb_rs::status::Status CreateDirIfMissing(const std::string& dirname) = 0;
 
   // Delete the specified directory.
   // Many implementations of this function will only delete a directory if it is
   // empty.
-  virtual Status DeleteDir(const std::string& dirname) = 0;
+  virtual rocksdb_rs::status::Status DeleteDir(const std::string& dirname) = 0;
 
   // Store the size of fname in *file_size.
-  virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
-  virtual Status GetFileSize(const rust::String& fname, uint64_t* file_size) {
+  virtual rocksdb_rs::status::Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
+  virtual rocksdb_rs::status::Status GetFileSize(const rust::String& fname, uint64_t* file_size) {
     return GetFileSize(static_cast<std::string>(fname), file_size);
   }
 
   // Store the last modification time of fname in *file_mtime.
-  virtual Status GetFileModificationTime(const std::string& fname,
+  virtual rocksdb_rs::status::Status GetFileModificationTime(const std::string& fname,
                                          uint64_t* file_mtime) = 0;
   // Rename file src to target.
-  virtual Status RenameFile(const std::string& src,
+  virtual rocksdb_rs::status::Status RenameFile(const std::string& src,
                             const std::string& target) = 0;
 
   // Hard Link file src to target.
-  virtual Status LinkFile(const std::string& /*src*/,
+  virtual rocksdb_rs::status::Status LinkFile(const std::string& /*src*/,
                           const std::string& /*target*/) {
-    return Status_NotSupported("LinkFile is not supported for this Env");
+    return rocksdb_rs::status::Status_NotSupported("LinkFile is not supported for this Env");
   }
 
-  virtual Status NumFileLinks(const std::string& /*fname*/,
+  virtual rocksdb_rs::status::Status NumFileLinks(const std::string& /*fname*/,
                               uint64_t* /*count*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Getting number of file links is not supported for this Env");
   }
 
-  virtual Status AreFilesSame(const std::string& /*first*/,
+  virtual rocksdb_rs::status::Status AreFilesSame(const std::string& /*first*/,
                               const std::string& /*second*/, bool* /*res*/) {
-    return Status_NotSupported("AreFilesSame is not supported for this Env");
+    return rocksdb_rs::status::Status_NotSupported("AreFilesSame is not supported for this Env");
   }
 
   // Lock the specified file.  Used to prevent concurrent access to
@@ -412,12 +412,12 @@ class Env : public Customizable {
   // to go away.
   //
   // May create the named file if it does not already exist.
-  virtual Status LockFile(const std::string& fname, FileLock** lock) = 0;
+  virtual rocksdb_rs::status::Status LockFile(const std::string& fname, FileLock** lock) = 0;
 
   // Release the lock acquired by a previous successful call to LockFile.
   // REQUIRES: lock was returned by a successful LockFile() call
   // REQUIRES: lock has not already been unlocked.
-  virtual Status UnlockFile(FileLock* lock) = 0;
+  virtual rocksdb_rs::status::Status UnlockFile(FileLock* lock) = 0;
 
   // Opens `lib_name` as a dynamic library.
   // If the 'search_path' is specified, breaks the path into its components
@@ -425,10 +425,10 @@ class Env : public Customizable {
   // library in those directories.  If 'search path is not specified, uses the
   // default library path search mechanism (such as LD_LIBRARY_PATH). On
   // success, stores a dynamic library in `*result`.
-  virtual Status LoadLibrary(const std::string& /*lib_name*/,
+  virtual rocksdb_rs::status::Status LoadLibrary(const std::string& /*lib_name*/,
                              const std::string& /*search_path */,
                              std::shared_ptr<DynamicLibrary>* /*result*/) {
-    return Status_NotSupported("LoadLibrary is not implemented in this Env");
+    return rocksdb_rs::status::Status_NotSupported("LoadLibrary is not implemented in this Env");
   }
 
   // Priority for scheduling job in thread pool
@@ -513,12 +513,12 @@ class Env : public Customizable {
   // or many not have just been created. The directory may or may not differ
   // between runs of the same process, but subsequent calls will return the
   // same directory.
-  virtual Status GetTestDirectory(std::string* path) = 0;
+  virtual rocksdb_rs::status::Status GetTestDirectory(std::string* path) = 0;
 
   // Create and returns a default logger (an instance of EnvLogger) for storing
   // informational messages. Derived classes can override to provide custom
   // logger.
-  virtual Status NewLogger(const std::string& fname,
+  virtual rocksdb_rs::status::Status NewLogger(const std::string& fname,
                            std::shared_ptr<Logger>* result);
 
   // Returns the number of micro-seconds since some fixed point in time.
@@ -541,19 +541,19 @@ class Env : public Customizable {
 
   // Get the current host name as a null terminated string iff the string
   // length is < len. The hostname should otherwise be truncated to len.
-  virtual Status GetHostName(char* name, uint64_t len) = 0;
+  virtual rocksdb_rs::status::Status GetHostName(char* name, uint64_t len) = 0;
 
   // Get the current hostname from the given env as a std::string in result.
   // The result may be truncated if the hostname is too
   // long
-  virtual Status GetHostNameString(std::string* result);
+  virtual rocksdb_rs::status::Status GetHostNameString(std::string* result);
 
   // Get the number of seconds since the Epoch, 1970-01-01 00:00:00 (UTC).
   // Only overwrites *unix_time on success.
-  virtual Status GetCurrentTime(int64_t* unix_time) = 0;
+  virtual rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) = 0;
 
   // Get full directory name for this db.
-  virtual Status GetAbsolutePath(const std::string& db_path,
+  virtual rocksdb_rs::status::Status GetAbsolutePath(const std::string& db_path,
                                  std::string* output_path) = 0;
 
   // The number of background worker threads of a specific thread pool
@@ -562,8 +562,8 @@ class Env : public Customizable {
   virtual void SetBackgroundThreads(int number, Priority pri = LOW) = 0;
   virtual int GetBackgroundThreads(Priority pri = LOW) = 0;
 
-  virtual Status SetAllowNonOwnerAccess(bool /*allow_non_owner_access*/) {
-    return Status_NotSupported("Env::SetAllowNonOwnerAccess() not supported.");
+  virtual rocksdb_rs::status::Status SetAllowNonOwnerAccess(bool /*allow_non_owner_access*/) {
+    return rocksdb_rs::status::Status_NotSupported("Env::SetAllowNonOwnerAccess() not supported.");
   }
 
   // Enlarge number of background worker threads of a specific thread pool
@@ -575,9 +575,9 @@ class Env : public Customizable {
   virtual void LowerThreadPoolIOPriority(Priority /*pool*/ = LOW) {}
 
   // Lower CPU priority for threads from the specified pool.
-  virtual Status LowerThreadPoolCPUPriority(Priority /*pool*/,
+  virtual rocksdb_rs::status::Status LowerThreadPoolCPUPriority(Priority /*pool*/,
                                             rocksdb_rs::port_defs::CpuPriority /*pri*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Env::LowerThreadPoolCPUPriority(Priority, CpuPriority) not supported");
   }
 
@@ -636,8 +636,8 @@ class Env : public Customizable {
       const ImmutableDBOptions& db_options) const;
 
   // Returns the status of all threads that belong to the current Env.
-  virtual Status GetThreadList(std::vector<ThreadStatus>* /*thread_list*/) {
-    return Status_NotSupported("Env::GetThreadList() not supported.");
+  virtual rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* /*thread_list*/) {
+    return rocksdb_rs::status::Status_NotSupported("Env::GetThreadList() not supported.");
   }
 
   // Returns the pointer to ThreadStatusUpdater.  This function will be
@@ -654,14 +654,14 @@ class Env : public Customizable {
 #undef GetFreeSpace
 
   // Get the amount of free disk space
-  virtual Status GetFreeSpace(const std::string& /*path*/,
+  virtual rocksdb_rs::status::Status GetFreeSpace(const std::string& /*path*/,
                               uint64_t* /*diskfree*/) {
-    return Status_NotSupported("Env::GetFreeSpace() not supported.");
+    return rocksdb_rs::status::Status_NotSupported("Env::GetFreeSpace() not supported.");
   }
 
   // Check whether the specified path is a directory
-  virtual Status IsDirectory(const std::string& /*path*/, bool* /*is_dir*/) {
-    return Status_NotSupported("Env::IsDirectory() not supported.");
+  virtual rocksdb_rs::status::Status IsDirectory(const std::string& /*path*/, bool* /*is_dir*/) {
+    return rocksdb_rs::status::Status_NotSupported("Env::IsDirectory() not supported.");
   }
 
   virtual void SanitizeEnvOptions(EnvOptions* /*env_opts*/) const {}
@@ -714,7 +714,7 @@ class SequentialFile {
   // first result->size() < n.
   //
   // REQUIRES: External synchronization
-  virtual Status Read(size_t n, Slice* result, char* scratch) = 0;
+  virtual rocksdb_rs::status::Status Read(size_t n, Slice* result, char* scratch) = 0;
 
   // Skip "n" bytes from the file. This is guaranteed to be no
   // slower that reading the same data, but may be faster.
@@ -723,7 +723,7 @@ class SequentialFile {
   // file, and Skip will return OK.
   //
   // REQUIRES: External synchronization
-  virtual Status Skip(uint64_t n) = 0;
+  virtual rocksdb_rs::status::Status Skip(uint64_t n) = 0;
 
   // Indicates the upper layers if the current SequentialFile implementation
   // uses direct IO.
@@ -736,16 +736,16 @@ class SequentialFile {
   // Remove any kind of caching of data from the offset to offset+length
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
-  virtual Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status_NotSupported(
+  virtual rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
+    return rocksdb_rs::status::Status_NotSupported(
         "SequentialFile::InvalidateCache not supported.");
   }
 
   // Positioned Read for direct I/O
   // If Direct I/O enabled, offset, n, and scratch should be properly aligned
-  virtual Status PositionedRead(uint64_t /*offset*/, size_t /*n*/,
+  virtual rocksdb_rs::status::Status PositionedRead(uint64_t /*offset*/, size_t /*n*/,
                                 Slice* /*result*/, char* /*scratch*/) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "SequentialFile::PositionedRead() not supported.");
   }
 
@@ -755,7 +755,7 @@ class SequentialFile {
 
 // A read IO request structure for use in MultiRead
 struct ReadRequest {
-    ReadRequest() : status(Status_new()) {}
+    ReadRequest() : status(rocksdb_rs::status::Status_new()) {}
 
   // File offset in bytes
   uint64_t offset;
@@ -773,7 +773,7 @@ struct ReadRequest {
   Slice result;
 
   // Status of read
-  Status status;
+  rocksdb_rs::status::Status status;
 };
 
 // A file abstraction for randomly reading the contents of a file.
@@ -796,12 +796,12 @@ class RandomAccessFile {
   //
   // Safe for concurrent use by multiple threads.
   // If Direct I/O enabled, offset, n, and scratch should be aligned properly.
-  virtual Status Read(uint64_t offset, size_t n, Slice* result,
+  virtual rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
                       char* scratch) const = 0;
 
   // Readahead the file starting from offset by n bytes for caching.
-  virtual Status Prefetch(uint64_t /*offset*/, size_t /*n*/) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status Prefetch(uint64_t /*offset*/, size_t /*n*/) {
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Read a bunch of blocks as described by reqs. The blocks can
@@ -811,13 +811,13 @@ class RandomAccessFile {
   // individual requests will be ignored and return status will be assumed
   // for all read requests. The function return status is only meant for
   // any errors that occur before even processing specific read requests
-  virtual Status MultiRead(ReadRequest* reqs, size_t num_reqs) {
+  virtual rocksdb_rs::status::Status MultiRead(ReadRequest* reqs, size_t num_reqs) {
     assert(reqs != nullptr);
     for (size_t i = 0; i < num_reqs; ++i) {
       ReadRequest& req = reqs[i];
       req.status = Read(req.offset, req.len, &req.result, req.scratch);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Tries to get an unique ID for this file that will be the same each time
@@ -855,8 +855,8 @@ class RandomAccessFile {
   // Remove any kind of caching of data from the offset to offset+length
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
-  virtual Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status_NotSupported(
+  virtual rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
+    return rocksdb_rs::status::Status_NotSupported(
         "RandomAccessFile::InvalidateCache not supported.");
   }
 
@@ -894,7 +894,7 @@ class WritableFile {
   // Append data to the end of the file
   // Note: A WritableFile object must support either Append or
   // PositionedAppend, so the users cannot mix the two.
-  virtual Status Append(const Slice& data) = 0;
+  virtual rocksdb_rs::status::Status Append(const Slice& data) = 0;
 
   // Append data with verification information.
   // Note that this API change is experimental and it might be changed in
@@ -903,7 +903,7 @@ class WritableFile {
   // Expected behavior: if currently ChecksumType::kCRC32C is not supported by
   // WritableFile, the information in DataVerificationInfo can be ignored
   // (i.e. does not perform checksum verification).
-  virtual Status Append(const Slice& data,
+  virtual rocksdb_rs::status::Status Append(const Slice& data,
                         const DataVerificationInfo& /* verification_info */) {
     return Append(data);
   }
@@ -928,9 +928,9 @@ class WritableFile {
   //
   // PositionedAppend() requires aligned buffer to be passed in. The alignment
   // required is queried via GetRequiredBufferAlignment()
-  virtual Status PositionedAppend(const Slice& /* data */,
+  virtual rocksdb_rs::status::Status PositionedAppend(const Slice& /* data */,
                                   uint64_t /* offset */) {
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "WritableFile::PositionedAppend() not supported.");
   }
 
@@ -941,26 +941,26 @@ class WritableFile {
   // Expected behavior: if currently ChecksumType::kCRC32C is not supported by
   // WritableFile, the information in DataVerificationInfo can be ignored
   // (i.e. does not perform checksum verification).
-  virtual Status PositionedAppend(
+  virtual rocksdb_rs::status::Status PositionedAppend(
       const Slice& /* data */, uint64_t /* offset */,
       const DataVerificationInfo& /* verification_info */) {
-    return Status_NotSupported("PositionedAppend");
+    return rocksdb_rs::status::Status_NotSupported("PositionedAppend");
   }
 
   // Truncate is necessary to trim the file to the correct size
   // before closing. It is not always possible to keep track of the file
   // size due to whole pages writes. The behavior is undefined if called
   // with other writes to follow.
-  virtual Status Truncate(uint64_t /*size*/) { return Status_OK(); }
+  virtual rocksdb_rs::status::Status Truncate(uint64_t /*size*/) { return rocksdb_rs::status::Status_OK(); }
 
   // The caller should call Close() before destroying the WritableFile to
   // surface any errors associated with finishing writes to the file.
   // The file is considered closed regardless of return status.
   // (However, implementations must also clean up properly in the destructor
   // even if Close() is not called.)
-  virtual Status Close() = 0;
-  virtual Status Flush() = 0;
-  virtual Status Sync() = 0;  // sync data
+  virtual rocksdb_rs::status::Status Close() = 0;
+  virtual rocksdb_rs::status::Status Flush() = 0;
+  virtual rocksdb_rs::status::Status Sync() = 0;  // sync data
 
   /*
    * Sync data and/or metadata as well.
@@ -968,7 +968,7 @@ class WritableFile {
    * Override this method for environments where we need to sync
    * metadata as well.
    */
-  virtual Status Fsync() { return Sync(); }
+  virtual rocksdb_rs::status::Status Fsync() { return Sync(); }
 
   // true if Sync() and Fsync() are safe to call concurrently with Append()
   // and Flush().
@@ -1032,8 +1032,8 @@ class WritableFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   // This call has no effect on dirty pages in the cache.
-  virtual Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return Status_NotSupported("WritableFile::InvalidateCache not supported.");
+  virtual rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) {
+    return rocksdb_rs::status::Status_NotSupported("WritableFile::InvalidateCache not supported.");
   }
 
   // Sync a file range with disk.
@@ -1042,11 +1042,11 @@ class WritableFile {
   // This asks the OS to initiate flushing the cached data to disk,
   // without waiting for completion.
   // Default implementation does nothing.
-  virtual Status RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/) {
+  virtual rocksdb_rs::status::Status RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/) {
     if (strict_bytes_per_sync_) {
       return Sync();
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // PrepareWrite performs any necessary preparation for a write
@@ -1075,8 +1075,8 @@ class WritableFile {
   }
 
   // Pre-allocates space for a file.
-  virtual Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) {
+    return rocksdb_rs::status::Status_OK();
   }
 
   // If you're adding methods here, remember to add them to
@@ -1118,7 +1118,7 @@ class RandomRWFile {
 
   // Write bytes in `data` at  offset `offset`, Returns Status_OK() on success.
   // Pass aligned buffer when use_direct_io() returns true.
-  virtual Status Write(uint64_t offset, const Slice& data) = 0;
+  virtual rocksdb_rs::status::Status Write(uint64_t offset, const Slice& data) = 0;
 
   // Read up to `n` bytes starting from offset `offset` and store them in
   // result, provided `scratch` size should be at least `n`.
@@ -1128,21 +1128,21 @@ class RandomRWFile {
   // first result->size() < n.
   //
   // Returns Status_OK() on success.
-  virtual Status Read(uint64_t offset, size_t n, Slice* result,
+  virtual rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
                       char* scratch) const = 0;
 
-  virtual Status Flush() = 0;
+  virtual rocksdb_rs::status::Status Flush() = 0;
 
-  virtual Status Sync() = 0;
+  virtual rocksdb_rs::status::Status Sync() = 0;
 
-  virtual Status Fsync() { return Sync(); }
+  virtual rocksdb_rs::status::Status Fsync() { return Sync(); }
 
   // The caller should call Close() before destroying the RandomRWFile to
   // surface any errors associated with finishing writes to the file.
   // The file is considered closed regardless of return status.
   // (However, implementations must also clean up properly in the destructor
   // even if Close() is not called.)
-  virtual Status Close() = 0;
+  virtual rocksdb_rs::status::Status Close() = 0;
 
   // If you're adding methods here, remember to add them to
   // RandomRWFileWrapper too.
@@ -1178,11 +1178,11 @@ class Directory {
   // destructor, when not called already, to ensure resources are released.
   virtual ~Directory() {}
   // Fsync directory. Can be called concurrently from multiple threads.
-  virtual Status Fsync() = 0;
+  virtual rocksdb_rs::status::Status Fsync() = 0;
   // Calling Close() before destroying a Directory is recommended to surface
   // any errors associated with finishing writes (in case of future features).
   // The directory is considered closed regardless of return status.
-  virtual Status Close() { return Status_NotSupported("Close"); }
+  virtual rocksdb_rs::status::Status Close() { return rocksdb_rs::status::Status_NotSupported("Close"); }
 
   virtual size_t GetUniqueId(char* /*id*/, size_t /*max_size*/) const {
     return 0;
@@ -1224,7 +1224,7 @@ class Logger {
   // final errors in finishing outstanding writes. No other functions are
   // supported after calling Close(), and the Logger is considered closed
   // regardless of return status.
-  virtual Status Close();
+  virtual rocksdb_rs::status::Status Close();
 
   // Write a header to the log file with the specified format
   // It is recommended that you log all header information at the start of the
@@ -1262,7 +1262,7 @@ class Logger {
   // If you're adding methods here, remember to add them to LoggerWrapper too.
 
  protected:
-  virtual Status CloseImpl();
+  virtual rocksdb_rs::status::Status CloseImpl();
   bool closed_;
 
  private:
@@ -1293,15 +1293,15 @@ class DynamicLibrary {
   // Loads the symbol for sym_name from the library and updates the input
   // function. Returns the loaded symbol.
   template <typename T>
-  Status LoadFunction(const std::string& sym_name, std::function<T>* function) {
+  rocksdb_rs::status::Status LoadFunction(const std::string& sym_name, std::function<T>* function) {
     assert(nullptr != function);
     void* ptr = nullptr;
-    Status s = LoadSymbol(sym_name, &ptr);
+    rocksdb_rs::status::Status s = LoadSymbol(sym_name, &ptr);
     *function = reinterpret_cast<T*>(ptr);
     return s;
   }
   // Loads and returns the symbol for sym_name from the library.
-  virtual Status LoadSymbol(const std::string& sym_name, void** func) = 0;
+  virtual rocksdb_rs::status::Status LoadSymbol(const std::string& sym_name, void** func) = 0;
 };
 
 extern void LogFlush(const std::shared_ptr<Logger>& info_log);
@@ -1353,12 +1353,12 @@ extern void Fatal(Logger* info_log, const char* format, ...)
     ROCKSDB_PRINTF_FORMAT_ATTR(2, 3);
 
 // A utility routine: write "data" to the named file.
-extern Status WriteStringToFile(Env* env, const Slice& data,
+extern rocksdb_rs::status::Status WriteStringToFile(Env* env, const Slice& data,
                                 const std::string& fname,
                                 bool should_sync = false);
 
 // A utility routine: read contents of named file into *data
-extern Status ReadFileToString(Env* env, const std::string& fname,
+extern rocksdb_rs::status::Status ReadFileToString(Env* env, const std::string& fname,
                                std::string* data);
 
 // Below are helpers for wrapping most of the classes in this file.
@@ -1437,122 +1437,122 @@ class EnvWrapper : public Env {
   const char* Name() const override { return target_.env->Name(); }
 
   // The following text is boilerplate that forwards all methods to target()
-  Status RegisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& paths) override {
     return target_.env->RegisterDbPaths(paths);
   }
 
-  Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
     return target_.env->UnregisterDbPaths(paths);
   }
 
-  Status NewSequentialFile(const std::string& f,
+  rocksdb_rs::status::Status NewSequentialFile(const std::string& f,
                            std::unique_ptr<SequentialFile>* r,
                            const EnvOptions& options) override {
     return target_.env->NewSequentialFile(f, r, options);
   }
-  Status NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::status::Status NewRandomAccessFile(const std::string& f,
                              std::unique_ptr<RandomAccessFile>* r,
                              const EnvOptions& options) override {
     return target_.env->NewRandomAccessFile(f, r, options);
   }
-  Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
+  rocksdb_rs::status::Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
                          const EnvOptions& options) override {
     return target_.env->NewWritableFile(f, r, options);
   }
-  Status ReopenWritableFile(const std::string& fname,
+  rocksdb_rs::status::Status ReopenWritableFile(const std::string& fname,
                             std::unique_ptr<WritableFile>* result,
                             const EnvOptions& options) override {
     return target_.env->ReopenWritableFile(fname, result, options);
   }
-  Status ReuseWritableFile(const std::string& fname,
+  rocksdb_rs::status::Status ReuseWritableFile(const std::string& fname,
                            const std::string& old_fname,
                            std::unique_ptr<WritableFile>* r,
                            const EnvOptions& options) override {
     return target_.env->ReuseWritableFile(fname, old_fname, r, options);
   }
-  Status NewRandomRWFile(const std::string& fname,
+  rocksdb_rs::status::Status NewRandomRWFile(const std::string& fname,
                          std::unique_ptr<RandomRWFile>* result,
                          const EnvOptions& options) override {
     return target_.env->NewRandomRWFile(fname, result, options);
   }
-  Status NewMemoryMappedFileBuffer(
+  rocksdb_rs::status::Status NewMemoryMappedFileBuffer(
       const std::string& fname,
       std::unique_ptr<MemoryMappedFileBuffer>* result) override {
     return target_.env->NewMemoryMappedFileBuffer(fname, result);
   }
-  Status NewDirectory(const std::string& name,
+  rocksdb_rs::status::Status NewDirectory(const std::string& name,
                       std::unique_ptr<Directory>* result) override {
     return target_.env->NewDirectory(name, result);
   }
-  Status FileExists(const std::string& f) override {
+  rocksdb_rs::status::Status FileExists(const std::string& f) override {
     return target_.env->FileExists(f);
   }
-  Status FileExists(const rust::string& f) {
+  rocksdb_rs::status::Status FileExists(const rust::string& f) {
     return target_.env->FileExists(static_cast<std::string>(f));
   }
-  Status GetChildren(const std::string& dir,
+  rocksdb_rs::status::Status GetChildren(const std::string& dir,
                      std::vector<std::string>* r) override {
     return target_.env->GetChildren(dir, r);
   }
-  Status GetChildrenFileAttributes(
+  rocksdb_rs::status::Status GetChildrenFileAttributes(
       const std::string& dir, std::vector<FileAttributes>* result) override {
     return target_.env->GetChildrenFileAttributes(dir, result);
   }
-  Status DeleteFile(const std::string& f) override {
+  rocksdb_rs::status::Status DeleteFile(const std::string& f) override {
     return target_.env->DeleteFile(f);
   }
-  Status DeleteFile(const rust::String& f) override {
+  rocksdb_rs::status::Status DeleteFile(const rust::String& f) override {
     return target_.env->DeleteFile(f);
   }
-  Status Truncate(const std::string& fname, size_t size) override {
+  rocksdb_rs::status::Status Truncate(const std::string& fname, size_t size) override {
     return target_.env->Truncate(fname, size);
   }
-  Status CreateDir(const std::string& d) override {
+  rocksdb_rs::status::Status CreateDir(const std::string& d) override {
     return target_.env->CreateDir(d);
   }
-  Status CreateDirIfMissing(const std::string& d) override {
+  rocksdb_rs::status::Status CreateDirIfMissing(const std::string& d) override {
     return target_.env->CreateDirIfMissing(d);
   }
-  Status DeleteDir(const std::string& d) override {
+  rocksdb_rs::status::Status DeleteDir(const std::string& d) override {
     return target_.env->DeleteDir(d);
   }
-  Status GetFileSize(const std::string& f, uint64_t* s) override {
+  rocksdb_rs::status::Status GetFileSize(const std::string& f, uint64_t* s) override {
     return target_.env->GetFileSize(f, s);
   }
 
-  Status GetFileModificationTime(const std::string& fname,
+  rocksdb_rs::status::Status GetFileModificationTime(const std::string& fname,
                                  uint64_t* file_mtime) override {
     return target_.env->GetFileModificationTime(fname, file_mtime);
   }
 
-  Status RenameFile(const std::string& s, const std::string& t) override {
+  rocksdb_rs::status::Status RenameFile(const std::string& s, const std::string& t) override {
     return target_.env->RenameFile(s, t);
   }
 
-  Status LinkFile(const std::string& s, const std::string& t) override {
+  rocksdb_rs::status::Status LinkFile(const std::string& s, const std::string& t) override {
     return target_.env->LinkFile(s, t);
   }
 
-  Status NumFileLinks(const std::string& fname, uint64_t* count) override {
+  rocksdb_rs::status::Status NumFileLinks(const std::string& fname, uint64_t* count) override {
     return target_.env->NumFileLinks(fname, count);
   }
 
-  Status AreFilesSame(const std::string& first, const std::string& second,
+  rocksdb_rs::status::Status AreFilesSame(const std::string& first, const std::string& second,
                       bool* res) override {
     return target_.env->AreFilesSame(first, second, res);
   }
 
-  Status LockFile(const std::string& f, FileLock** l) override {
+  rocksdb_rs::status::Status LockFile(const std::string& f, FileLock** l) override {
     return target_.env->LockFile(f, l);
   }
 
-  Status UnlockFile(FileLock* l) override { return target_.env->UnlockFile(l); }
+  rocksdb_rs::status::Status UnlockFile(FileLock* l) override { return target_.env->UnlockFile(l); }
 
-  Status IsDirectory(const std::string& path, bool* is_dir) override {
+  rocksdb_rs::status::Status IsDirectory(const std::string& path, bool* is_dir) override {
     return target_.env->IsDirectory(path, is_dir);
   }
 
-  Status LoadLibrary(const std::string& lib_name,
+  rocksdb_rs::status::Status LoadLibrary(const std::string& lib_name,
                      const std::string& search_path,
                      std::shared_ptr<DynamicLibrary>* result) override {
     return target_.env->LoadLibrary(lib_name, search_path, result);
@@ -1583,10 +1583,10 @@ class EnvWrapper : public Env {
     return target_.env->ReleaseThreads(threads_to_be_released, pri);
   }
 
-  Status GetTestDirectory(std::string* path) override {
+  rocksdb_rs::status::Status GetTestDirectory(std::string* path) override {
     return target_.env->GetTestDirectory(path);
   }
-  Status NewLogger(const std::string& fname,
+  rocksdb_rs::status::Status NewLogger(const std::string& fname,
                    std::shared_ptr<Logger>* result) override {
     return target_.env->NewLogger(fname, result);
   }
@@ -1597,13 +1597,13 @@ class EnvWrapper : public Env {
   void SleepForMicroseconds(int micros) override {
     target_.env->SleepForMicroseconds(micros);
   }
-  Status GetHostName(char* name, uint64_t len) override {
+  rocksdb_rs::status::Status GetHostName(char* name, uint64_t len) override {
     return target_.env->GetHostName(name, len);
   }
-  Status GetCurrentTime(int64_t* unix_time) override {
+  rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
     return target_.env->GetCurrentTime(unix_time);
   }
-  Status GetAbsolutePath(const std::string& db_path,
+  rocksdb_rs::status::Status GetAbsolutePath(const std::string& db_path,
                          std::string* output_path) override {
     return target_.env->GetAbsolutePath(db_path, output_path);
   }
@@ -1614,7 +1614,7 @@ class EnvWrapper : public Env {
     return target_.env->GetBackgroundThreads(pri);
   }
 
-  Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
+  rocksdb_rs::status::Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
     return target_.env->SetAllowNonOwnerAccess(allow_non_owner_access);
   }
 
@@ -1630,7 +1630,7 @@ class EnvWrapper : public Env {
     target_.env->LowerThreadPoolCPUPriority(pool);
   }
 
-  Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
+  rocksdb_rs::status::Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
     return target_.env->LowerThreadPoolCPUPriority(pool, pri);
   }
 
@@ -1638,7 +1638,7 @@ class EnvWrapper : public Env {
     return target_.env->TimeToString(time);
   }
 
-  Status GetThreadList(std::vector<ThreadStatus>* thread_list) override {
+  rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* thread_list) override {
     return target_.env->GetThreadList(thread_list);
   }
 
@@ -1683,13 +1683,13 @@ class EnvWrapper : public Env {
       const ImmutableDBOptions& db_options) const override {
     return target_.env->OptimizeForBlobFileRead(env_options, db_options);
   }
-  Status GetFreeSpace(const std::string& path, uint64_t* diskfree) override {
+  rocksdb_rs::status::Status GetFreeSpace(const std::string& path, uint64_t* diskfree) override {
     return target_.env->GetFreeSpace(path, diskfree);
   }
   void SanitizeEnvOptions(EnvOptions* env_opts) const override {
     target_.env->SanitizeEnvOptions(env_opts);
   }
-  Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
   std::string SerializeOptions(const ConfigOptions& config_options,
                                const std::string& header) const override;
 
@@ -1701,18 +1701,18 @@ class SequentialFileWrapper : public SequentialFile {
  public:
   explicit SequentialFileWrapper(SequentialFile* target) : target_(target) {}
 
-  Status Read(size_t n, Slice* result, char* scratch) override {
+  rocksdb_rs::status::Status Read(size_t n, Slice* result, char* scratch) override {
     return target_->Read(n, result, scratch);
   }
-  Status Skip(uint64_t n) override { return target_->Skip(n); }
+  rocksdb_rs::status::Status Skip(uint64_t n) override { return target_->Skip(n); }
   bool use_direct_io() const override { return target_->use_direct_io(); }
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
-  Status PositionedRead(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status PositionedRead(uint64_t offset, size_t n, Slice* result,
                         char* scratch) override {
     return target_->PositionedRead(offset, n, result, scratch);
   }
@@ -1726,14 +1726,14 @@ class RandomAccessFileWrapper : public RandomAccessFile {
   explicit RandomAccessFileWrapper(RandomAccessFile* target)
       : target_(target) {}
 
-  Status Read(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override {
     return target_->Read(offset, n, result, scratch);
   }
-  Status MultiRead(ReadRequest* reqs, size_t num_reqs) override {
+  rocksdb_rs::status::Status MultiRead(ReadRequest* reqs, size_t num_reqs) override {
     return target_->MultiRead(reqs, num_reqs);
   }
-  Status Prefetch(uint64_t offset, size_t n) override {
+  rocksdb_rs::status::Status Prefetch(uint64_t offset, size_t n) override {
     return target_->Prefetch(offset, n);
   }
   size_t GetUniqueId(char* id, size_t max_size) const override {
@@ -1744,7 +1744,7 @@ class RandomAccessFileWrapper : public RandomAccessFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
 
@@ -1756,24 +1756,24 @@ class WritableFileWrapper : public WritableFile {
  public:
   explicit WritableFileWrapper(WritableFile* t) : target_(t) {}
 
-  Status Append(const Slice& data) override { return target_->Append(data); }
-  Status Append(const Slice& data,
+  rocksdb_rs::status::Status Append(const Slice& data) override { return target_->Append(data); }
+  rocksdb_rs::status::Status Append(const Slice& data,
                 const DataVerificationInfo& verification_info) override {
     return target_->Append(data, verification_info);
   }
-  Status PositionedAppend(const Slice& data, uint64_t offset) override {
+  rocksdb_rs::status::Status PositionedAppend(const Slice& data, uint64_t offset) override {
     return target_->PositionedAppend(data, offset);
   }
-  Status PositionedAppend(
+  rocksdb_rs::status::Status PositionedAppend(
       const Slice& data, uint64_t offset,
       const DataVerificationInfo& verification_info) override {
     return target_->PositionedAppend(data, offset, verification_info);
   }
-  Status Truncate(uint64_t size) override { return target_->Truncate(size); }
-  Status Close() override { return target_->Close(); }
-  Status Flush() override { return target_->Flush(); }
-  Status Sync() override { return target_->Sync(); }
-  Status Fsync() override { return target_->Fsync(); }
+  rocksdb_rs::status::Status Truncate(uint64_t size) override { return target_->Truncate(size); }
+  rocksdb_rs::status::Status Close() override { return target_->Close(); }
+  rocksdb_rs::status::Status Flush() override { return target_->Flush(); }
+  rocksdb_rs::status::Status Sync() override { return target_->Sync(); }
+  rocksdb_rs::status::Status Fsync() override { return target_->Fsync(); }
   bool IsSyncThreadSafe() const override { return target_->IsSyncThreadSafe(); }
 
   bool use_direct_io() const override { return target_->use_direct_io(); }
@@ -1811,11 +1811,11 @@ class WritableFileWrapper : public WritableFile {
     return target_->GetUniqueId(id, max_size);
   }
 
-  Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
 
-  Status RangeSync(uint64_t offset, uint64_t nbytes) override {
+  rocksdb_rs::status::Status RangeSync(uint64_t offset, uint64_t nbytes) override {
     return target_->RangeSync(offset, nbytes);
   }
 
@@ -1823,7 +1823,7 @@ class WritableFileWrapper : public WritableFile {
     target_->PrepareWrite(offset, len);
   }
 
-  Status Allocate(uint64_t offset, uint64_t len) override {
+  rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t len) override {
     return target_->Allocate(offset, len);
   }
 
@@ -1839,17 +1839,17 @@ class RandomRWFileWrapper : public RandomRWFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  Status Write(uint64_t offset, const Slice& data) override {
+  rocksdb_rs::status::Status Write(uint64_t offset, const Slice& data) override {
     return target_->Write(offset, data);
   }
-  Status Read(uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override {
     return target_->Read(offset, n, result, scratch);
   }
-  Status Flush() override { return target_->Flush(); }
-  Status Sync() override { return target_->Sync(); }
-  Status Fsync() override { return target_->Fsync(); }
-  Status Close() override { return target_->Close(); }
+  rocksdb_rs::status::Status Flush() override { return target_->Flush(); }
+  rocksdb_rs::status::Status Sync() override { return target_->Sync(); }
+  rocksdb_rs::status::Status Fsync() override { return target_->Fsync(); }
+  rocksdb_rs::status::Status Close() override { return target_->Close(); }
 
  private:
   RandomRWFile* target_;
@@ -1859,8 +1859,8 @@ class DirectoryWrapper : public Directory {
  public:
   explicit DirectoryWrapper(Directory* target) : target_(target) {}
 
-  Status Fsync() override { return target_->Fsync(); }
-  Status Close() override { return target_->Close(); }
+  rocksdb_rs::status::Status Fsync() override { return target_->Fsync(); }
+  rocksdb_rs::status::Status Close() override { return target_->Close(); }
   size_t GetUniqueId(char* id, size_t max_size) const override {
     return target_->GetUniqueId(id, max_size);
   }
@@ -1873,7 +1873,7 @@ class LoggerWrapper : public Logger {
  public:
   explicit LoggerWrapper(Logger* target) : target_(target) {}
 
-  Status Close() override { return target_->Close(); }
+  rocksdb_rs::status::Status Close() override { return target_->Close(); }
   void LogHeader(const char* format, va_list ap) override {
     return target_->LogHeader(format, ap);
   }
@@ -1911,7 +1911,7 @@ Env* NewTimedEnv(Env* base_env);
 // Returns an instance of logger that can be used for storing informational
 // messages.
 // This is a factory method for EnvLogger declared in logging/env_logging.h
-Status NewEnvLogger(const std::string& fname, Env* env,
+rocksdb_rs::status::Status NewEnvLogger(const std::string& fname, Env* env,
                     std::shared_ptr<Logger>* result);
 
 // Creates a new Env based on Env::Default() but modified to use the specified

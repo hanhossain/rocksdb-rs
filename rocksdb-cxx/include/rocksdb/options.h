@@ -1794,7 +1794,7 @@ struct FlushOptions {
 };
 
 // Create a Logger from provided DBOptions
-extern Status CreateLoggerFromOptions(const std::string& dbname,
+extern rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
                                       const DBOptions& options,
                                       std::shared_ptr<Logger>* logger);
 

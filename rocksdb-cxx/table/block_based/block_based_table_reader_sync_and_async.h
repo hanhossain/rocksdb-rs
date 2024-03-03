@@ -32,7 +32,7 @@ namespace rocksdb {
 DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
 (const ReadOptions& options, const MultiGetRange* batch,
  const autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE>* handles,
- Status* statuses, CachableEntry<Block_kData>* results, char* scratch,
+ rocksdb_rs::status::Status* statuses, CachableEntry<Block_kData>* results, char* scratch,
  const UncompressionDict& uncompression_dict, bool use_fs_scratch) const {
   RandomAccessFileReader* file = rep_->file.get();
   const Footer& footer = rep_->footer;
@@ -178,11 +178,11 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
     size_t& req_offset = req_offset_for_block[valid_batch_idx];
     valid_batch_idx++;
     FSReadRequest& req = read_reqs[req_idx];
-    Status s = req.status;
+    rocksdb_rs::status::Status s = req.status;
     if (s.ok()) {
       if ((req.result.size() != req.len) ||
           (req_offset + BlockSizeWithTrailer(handle) > req.result.size())) {
-        s = Status_Corruption("truncated block read from " +
+        s = rocksdb_rs::status::Status_Corruption("truncated block read from " +
                                rep_->file->file_name() + " offset " +
                                std::to_string(handle.offset()) + ", expected " +
                                std::to_string(req.len) + " bytes, got " +
@@ -370,7 +370,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE> block_handles;
     std::array<CachableEntry<Block_kData>, MultiGetContext::MAX_BATCH_SIZE>
         results;
-    rust::Vec<Status> statuses = Status_new().create_vec(MultiGetContext::MAX_BATCH_SIZE);
+    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(MultiGetContext::MAX_BATCH_SIZE);
     // Empty data_lookup_contexts means "unused," when block cache tracing is
     // disabled. (Limited options as element type is not default contructible.)
     std::vector<BlockCacheLookupContext> data_lookup_contexts;
@@ -388,7 +388,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
       MultiGetRange data_block_range(sst_file_range, sst_file_range.begin(),
                                      sst_file_range.end());
       CachableEntry<UncompressionDict> uncompression_dict;
-      Status uncompression_dict_status = Status_new();
+      rocksdb_rs::status::Status uncompression_dict_status = rocksdb_rs::status::Status_new();
       bool uncompression_dict_inited = false;
       size_t total_len = 0;
 
@@ -573,7 +573,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     SharedCleanablePtr shared_cleanable;
     for (auto miter = sst_file_range.begin(); miter != sst_file_range.end();
          ++miter) {
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       GetContext* get_context = miter->get_context;
       const Slice& key = miter->ikey;
       bool matched = false;  // if such user key matched a key in SST
@@ -594,7 +594,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
           handle_present = !block_handles[idx_in_batch].IsNull();
           parsed_block_value = results[idx_in_batch].GetValue();
           if (handle_present || parsed_block_value) {
-            first_biter.Invalidate(Status_OK());
+            first_biter.Invalidate(rocksdb_rs::status::Status_OK());
             NewDataBlockIterator<DataBlockIter>(
                 read_options, results[idx_in_batch].As<Block>(), &first_biter,
                 statuses[idx_in_batch].Clone());
@@ -621,8 +621,8 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
             break;
           }
 
-          next_biter.Invalidate(Status_OK());
-          Status tmp_s = Status_new();
+          next_biter.Invalidate(rocksdb_rs::status::Status_OK());
+          rocksdb_rs::status::Status tmp_s = rocksdb_rs::status::Status_new();
           NewDataBlockIterator<DataBlockIter>(
               read_options, iiter->value().handle, &next_biter,
               BlockType::kData, get_context, lookup_data_block_context,
@@ -700,7 +700,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
         // Call the *saver function on each entry/block until it returns false
         for (; biter->Valid(); biter->Next()) {
           ParsedInternalKey parsed_key;
-          Status pik_status = ParseInternalKey(
+          rocksdb_rs::status::Status pik_status = ParseInternalKey(
               biter->key(), &parsed_key, false /* log_err_key */);  // TODO
           if (!pik_status.ok()) {
             s.copy_from(pik_status);

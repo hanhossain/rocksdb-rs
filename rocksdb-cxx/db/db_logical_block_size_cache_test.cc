@@ -16,13 +16,13 @@ class EnvWithCustomLogicalBlockSizeCache : public EnvWrapper {
   EnvWithCustomLogicalBlockSizeCache(Env* env, LogicalBlockSizeCache* cache)
       : EnvWrapper(env), cache_(cache) {}
 
-  Status RegisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& paths) override {
     return cache_->RefAndCacheLogicalBlockSize(paths);
   }
 
-  Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
     cache_->UnrefAndTryRemoveCachedLogicalBlockSize(paths);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -40,7 +40,7 @@ class DBLogicalBlockSizeCacheTest : public testing::Test {
     auto get_fd_block_size = [&](int fd) { return fd; };
     auto get_dir_block_size = [&](const std::string& /*dir*/, size_t* size) {
       *size = 1024;
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     };
     cache_.reset(
         new LogicalBlockSizeCache(get_fd_block_size, get_dir_block_size));

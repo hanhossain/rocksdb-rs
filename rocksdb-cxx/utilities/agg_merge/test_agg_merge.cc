@@ -20,7 +20,7 @@ std::string EncodeHelper::EncodeFuncAndInt(const Slice& function_name,
   std::string encoded_value;
   PutVarsignedint64(&encoded_value, value);
   std::string ret;
-  Status s = EncodeAggFuncAndPayload(function_name, encoded_value, ret);
+  rocksdb_rs::status::Status s = EncodeAggFuncAndPayload(function_name, encoded_value, ret);
   assert(s.ok());
   return ret;
 }
@@ -34,7 +34,7 @@ std::string EncodeHelper::EncodeInt(int64_t value) {
 std::string EncodeHelper::EncodeFuncAndList(const Slice& function_name,
                                             const std::vector<Slice>& list) {
   std::string ret;
-  Status s = EncodeAggFuncAndPayload(function_name, EncodeList(list), ret);
+  rocksdb_rs::status::Status s = EncodeAggFuncAndPayload(function_name, EncodeList(list), ret);
   assert(s.ok());
   return ret;
 }

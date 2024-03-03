@@ -55,7 +55,7 @@ TEST(WalSet, SmallerSyncedSize) {
   WalSet wals;
   ASSERT_OK(wals.AddWal(WalAddition(kNumber, WalMetadata(kBytes))));
   const auto wals1 = wals.GetWals();
-  Status s = wals.AddWal(WalAddition(kNumber, WalMetadata(0)));
+  rocksdb_rs::status::Status s = wals.AddWal(WalAddition(kNumber, WalMetadata(0)));
   const auto wals2 = wals.GetWals();
   ASSERT_OK(s);
   ASSERT_EQ(wals1, wals2);
@@ -65,7 +65,7 @@ TEST(WalSet, CreateTwice) {
   constexpr WalNumber kNumber = 100;
   WalSet wals;
   ASSERT_OK(wals.AddWal(WalAddition(kNumber)));
-  Status s = wals.AddWal(WalAddition(kNumber));
+  rocksdb_rs::status::Status s = wals.AddWal(WalAddition(kNumber));
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(s.ToString()->find("WAL 100 is created more than once") !=
               std::string::npos);
@@ -135,7 +135,7 @@ class WalSetTest : public DBTestBase {
     ASSERT_OK(wals_.AddWal(WalAddition(number, wal)));
   }
 
-  Status CheckWals() const { return wals_.CheckWals(env_, logs_on_disk_); }
+  rocksdb_rs::status::Status CheckWals() const { return wals_.CheckWals(env_, logs_on_disk_); }
 
  private:
   std::string test_dir_;
@@ -175,7 +175,7 @@ TEST_F(WalSetTest, CheckMissingWals) {
     }
   }
 
-  Status s = CheckWals();
+  rocksdb_rs::status::Status s = CheckWals();
   ASSERT_TRUE(s.IsCorruption()) << *s.ToString();
   // The first log with even number is missing.
   std::stringstream expected_err;
@@ -195,7 +195,7 @@ TEST_F(WalSetTest, CheckWalsWithShrinkedSize) {
     CreateWalOnDisk(number, fname, (number % 2) ? size : size - 1);
   }
 
-  Status s = CheckWals();
+  rocksdb_rs::status::Status s = CheckWals();
   ASSERT_TRUE(s.IsCorruption()) << *s.ToString();
   // The first log with even number has wrong size.
   std::stringstream expected_err;

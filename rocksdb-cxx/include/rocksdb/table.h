@@ -842,7 +842,7 @@ class TableFactory : public Customizable {
   static const char* kCuckooTableName() { return "CuckooTable"; };
 
   // Creates and configures a new TableFactory from the input options and id.
-  static Status CreateFromString(const ConfigOptions& config_options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
                                  const std::string& id,
                                  std::shared_ptr<TableFactory>* factory);
 
@@ -865,7 +865,7 @@ class TableFactory : public Customizable {
   // file is a file handler to handle the file for the table.
   // file_size is the physical file size of the file.
   // table_reader is the output table reader.
-  virtual Status NewTableReader(
+  virtual rocksdb_rs::status::Status NewTableReader(
       const TableReaderOptions& table_reader_options,
       std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
       std::unique_ptr<TableReader>* table_reader,
@@ -877,7 +877,7 @@ class TableFactory : public Customizable {
 
   // Overload of the above function that allows the caller to pass in a
   // ReadOptions
-  virtual Status NewTableReader(
+  virtual rocksdb_rs::status::Status NewTableReader(
       const ReadOptions& ro, const TableReaderOptions& table_reader_options,
       std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
       std::unique_ptr<TableReader>* table_reader,

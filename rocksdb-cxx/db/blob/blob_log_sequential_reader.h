@@ -12,12 +12,15 @@
 
 #define MAX_HEADER_SIZE(a, b, c) (a > b ? (a > c ? a : c) : (b > c ? b : c))
 
+namespace rocksdb_rs::status {
+ struct Status;
+}
+
 namespace rocksdb {
 
 class RandomAccessFileReader;
 class Env;
 class Statistics;
-struct Status;
 class SystemClock;
 
 /**
@@ -46,24 +49,24 @@ class BlobLogSequentialReader {
 
   ~BlobLogSequentialReader();
 
-  Status ReadHeader(BlobLogHeader* header);
+  rocksdb_rs::status::Status ReadHeader(BlobLogHeader* header);
 
   // Read the next record into *record.  Returns true if read
   // successfully, false if we hit end of the input. The contents filled in
   // *record will only be valid until the next mutating operation on this
   // reader.
   // If blob_offset is non-null, return offset of the blob through it.
-  Status ReadRecord(BlobLogRecord* record, ReadLevel level = ReadLevel::kReadHeader,
+  rocksdb_rs::status::Status ReadRecord(BlobLogRecord* record, ReadLevel level = ReadLevel::kReadHeader,
                     uint64_t* blob_offset = nullptr);
 
-  Status ReadFooter(BlobLogFooter* footer);
+  rocksdb_rs::status::Status ReadFooter(BlobLogFooter* footer);
 
   void ResetNextByte() { next_byte_ = 0; }
 
   uint64_t GetNextByte() const { return next_byte_; }
 
  private:
-  Status ReadSlice(uint64_t size, Slice* slice, char* buf);
+  rocksdb_rs::status::Status ReadSlice(uint64_t size, Slice* slice, char* buf);
 
   const std::unique_ptr<RandomAccessFileReader> file_;
   SystemClock* clock_;

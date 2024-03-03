@@ -28,7 +28,7 @@ class BlobDBIterator : public Iterator {
         blob_db_(blob_db),
         clock_(clock),
         statistics_(statistics),
-        status_(Status_new()) {}
+        status_(rocksdb_rs::status::Status_new()) {}
 
   virtual ~BlobDBIterator() = default;
 
@@ -39,7 +39,7 @@ class BlobDBIterator : public Iterator {
     return status_.ok();
   }
 
-  Status status() const override {
+  rocksdb_rs::status::Status status() const override {
     if (!iter_->status().ok()) {
       return iter_->status();
     }
@@ -121,9 +121,9 @@ class BlobDBIterator : public Iterator {
   // Return true if caller should continue to next value.
   bool UpdateBlobValue() {
     value_.Reset();
-    status_ = Status_OK();
+    status_ = rocksdb_rs::status::Status_OK();
     if (iter_->Valid() && iter_->status().ok() && iter_->IsBlob()) {
-      Status s = blob_db_->GetBlobValue(iter_->key(), iter_->value(), &value_);
+      rocksdb_rs::status::Status s = blob_db_->GetBlobValue(iter_->key(), iter_->value(), &value_);
       if (s.IsNotFound()) {
         return true;
       } else {
@@ -142,7 +142,7 @@ class BlobDBIterator : public Iterator {
   BlobDBImpl* blob_db_;
   SystemClock* clock_;
   Statistics* statistics_;
-  Status status_;
+  rocksdb_rs::status::Status status_;
   PinnableSlice value_;
 };
 }  // namespace blob_db

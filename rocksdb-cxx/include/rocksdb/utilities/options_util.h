@@ -67,7 +67,7 @@ struct ConfigOptions;
 //     to the options file itself.
 //
 // @see LoadOptionsFromFile
-Status LoadLatestOptions(const ConfigOptions& config_options,
+rocksdb_rs::status::Status LoadLatestOptions(const ConfigOptions& config_options,
                          const std::string& dbpath, DBOptions* db_options,
                          std::vector<ColumnFamilyDescriptor>* cf_descs,
                          std::shared_ptr<Cache>* cache = {});
@@ -76,14 +76,14 @@ Status LoadLatestOptions(const ConfigOptions& config_options,
 // and ColumnFamilyDescriptors based on the specified RocksDB Options file.
 //
 // @see LoadLatestOptions
-Status LoadOptionsFromFile(const ConfigOptions& config_options,
+rocksdb_rs::status::Status LoadOptionsFromFile(const ConfigOptions& config_options,
                            const std::string& options_file_name,
                            DBOptions* db_options,
                            std::vector<ColumnFamilyDescriptor>* cf_descs,
                            std::shared_ptr<Cache>* cache = {});
 
 // Returns the latest options file name under the specified db path.
-Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
+rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
                                 std::string* options_file_name);
 
 // Returns Status_OK if the input DBOptions and ColumnFamilyDescriptors
@@ -98,7 +98,7 @@ Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
 // * table_factory
 // * merge_operator
 // * persist_user_defined_timestamps
-Status CheckOptionsCompatibility(
+rocksdb_rs::status::Status CheckOptionsCompatibility(
     const ConfigOptions& config_options, const std::string& dbpath,
     const DBOptions& db_options,
     const std::vector<ColumnFamilyDescriptor>& cf_descs);

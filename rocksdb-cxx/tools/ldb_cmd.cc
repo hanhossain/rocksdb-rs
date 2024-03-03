@@ -339,7 +339,7 @@ void LDBCommand::Run() {
 
   if (!options_.env || options_.env == Env::Default()) {
     Env* env = Env::Default();
-    Status s = Env::CreateFromUri(config_options_, env_uri_, fs_uri_, &env,
+    rocksdb_rs::status::Status s = Env::CreateFromUri(config_options_, env_uri_, fs_uri_, &env,
                                   &env_guard_);
     if (!s.ok()) {
       fprintf(stderr, "%s\n", s.ToString()->c_str());
@@ -439,7 +439,7 @@ void LDBCommand::OpenDB() {
     options_.merge_operator = MergeOperators::CreateStringAppendOperator(':');
   }
   // Open the DB.
-  Status st = Status_new();
+  rocksdb_rs::status::Status st = rocksdb_rs::status::Status_new();
   std::vector<ColumnFamilyHandle*> handles_opened;
   if (is_db_ttl_) {
     // ldb doesn't yet support TTL DB with multiple column families
@@ -516,7 +516,7 @@ void LDBCommand::CloseDB() {
     for (auto& pair : cf_handles_) {
       delete pair.second;
     }
-    Status s = db_->Close();
+    rocksdb_rs::status::Status s = db_->Close();
     delete db_;
     db_ = nullptr;
   }
@@ -923,7 +923,7 @@ void LDBCommand::OverrideBaseCFOptions(ColumnFamilyOptions* cf_opts) {
 void LDBCommand::PrepareOptions() {
   if (!create_if_missing_ && try_load_options_) {
     config_options_.env = options_.env;
-    Status s = LoadLatestOptions(config_options_, db_path_, &options_,
+    rocksdb_rs::status::Status s = LoadLatestOptions(config_options_, db_path_, &options_,
                                  &column_families_);
     if (!s.ok() && !s.IsNotFound()) {
       // Option file exists but load option file error.
@@ -964,7 +964,7 @@ void LDBCommand::PrepareOptions() {
     // case, the option overrides from the CLI argument/specific subcommand
     // apply to all column families.
     std::vector<std::string> cf_list;
-    Status st = DB::ListColumnFamilies(options_, db_path_, &cf_list);
+    rocksdb_rs::status::Status st = DB::ListColumnFamilies(options_, db_path_, &cf_list);
     // It is possible the DB doesn't exist yet, for "create if not
     // existing" case. The failure is ignored here. We rely on DB::Open()
     // to give us the correct error message for problem with opening
@@ -1204,7 +1204,7 @@ void CompactorCommand::DoCommand() {
   CompactRangeOptions cro;
   cro.bottommost_level_compaction = BottommostLevelCompaction::kForceOptimized;
 
-  Status s = db_->CompactRange(cro, GetCfHandle(), begin, end);
+  rocksdb_rs::status::Status s = db_->CompactRange(cro, GetCfHandle(), begin, end);
   if (!s.ok()) {
     std::stringstream oss;
     oss << "Compaction failed: " << *s.ToString();
@@ -1274,7 +1274,7 @@ void DBLoaderCommand::DoCommand() {
   // prefer ifstream getline performance vs that from std::cin istream
   std::ifstream ifs_stdin("/dev/stdin");
   std::istream* istream_p = ifs_stdin.is_open() ? &ifs_stdin : &std::cin;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   while (s.ok() && getline(*istream_p, line, '\n')) {
     std::string key;
     std::string value;
@@ -1330,7 +1330,7 @@ void DumpManifestFile(Options options, std::string file, bool verbose, bool hex,
   VersionSet versions(dbname, &immutable_db_options, sopt, tc.get(), &wb, &wc,
                       /*block_cache_tracer=*/nullptr, /*io_tracer=*/nullptr,
                       /*db_id*/ "", /*db_session_id*/ "");
-  Status s = versions.DumpManifest(options, file, verbose, hex, json, cf_descs);
+  rocksdb_rs::status::Status s = versions.DumpManifest(options, file, verbose, hex, json, cf_descs);
   if (!s.ok()) {
     fprintf(stderr, "Error in processing file %s %s\n", file.c_str(),
             s.ToString()->c_str());
@@ -1384,7 +1384,7 @@ void ManifestDumpCommand::DoCommand() {
     // containing the db for files of the form MANIFEST_[0-9]+
 
     std::vector<std::string> files;
-    Status s = options_.env->GetChildren(db_path_, &files);
+    rocksdb_rs::status::Status s = options_.env->GetChildren(db_path_, &files);
     if (!s.ok()) {
       std::string err_msg = *s.ToString();
       err_msg.append(": Failed to list the content of ");
@@ -1453,11 +1453,11 @@ void ManifestDumpCommand::DoCommand() {
 // ----------------------------------------------------------------------------
 namespace {
 
-Status GetLiveFilesChecksumInfoFromVersionSet(Options options,
+rocksdb_rs::status::Status GetLiveFilesChecksumInfoFromVersionSet(Options options,
                                               const std::string& db_path,
                                               FileChecksumList* checksum_list) {
   EnvOptions sopt;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string dbname(db_path);
   std::shared_ptr<Cache> tc(NewLRUCache(options.max_open_files - 10,
                                         options.table_cache_numshardbits));
@@ -1523,7 +1523,7 @@ void FileChecksumDumpCommand::DoCommand() {
   //  ......
 
   std::unique_ptr<FileChecksumList> checksum_list(NewFileChecksumList());
-  Status s = GetLiveFilesChecksumInfoFromVersionSet(options_, db_path_,
+  rocksdb_rs::status::Status s = GetLiveFilesChecksumInfoFromVersionSet(options_, db_path_,
                                                     checksum_list.get());
   if (s.ok() && checksum_list != nullptr) {
     std::vector<uint64_t> file_numbers;
@@ -1622,7 +1622,7 @@ ListColumnFamiliesCommand::ListColumnFamiliesCommand(
 
 void ListColumnFamiliesCommand::DoCommand() {
   std::vector<std::string> column_families;
-  Status s = DB::ListColumnFamilies(options_, db_path_, &column_families);
+  rocksdb_rs::status::Status s = DB::ListColumnFamilies(options_, db_path_, &column_families);
   if (!s.ok()) {
     fprintf(stderr, "Error in processing db %s %s\n", db_path_.c_str(),
             s.ToString()->c_str());
@@ -1666,7 +1666,7 @@ void CreateColumnFamilyCommand::DoCommand() {
     return;
   }
   ColumnFamilyHandle* new_cf_handle = nullptr;
-  Status st = db_->CreateColumnFamily(options_, new_cf_name_, &new_cf_handle);
+  rocksdb_rs::status::Status st = db_->CreateColumnFamily(options_, new_cf_name_, &new_cf_handle);
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
@@ -1709,7 +1709,7 @@ void DropColumnFamilyCommand::DoCommand() {
     return;
   }
   ColumnFamilyHandle* cf_handle_to_drop = iter->second;
-  Status st = db_->DropColumnFamily(cf_handle_to_drop);
+  rocksdb_rs::status::Status st = db_->DropColumnFamily(cf_handle_to_drop);
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
@@ -1835,7 +1835,7 @@ void InternalDumpCommand::DoCommand() {
 
   // Cast as DBImpl to get internal iterator
   std::vector<KeyVersion> key_versions;
-  Status st = GetAllKeyVersions(db_, GetCfHandle(), from_, to_, max_keys_,
+  rocksdb_rs::status::Status st = GetAllKeyVersions(db_, GetCfHandle(), from_, to_, max_keys_,
                                 &key_versions);
   if (!st.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed(*st.ToString());
@@ -1889,7 +1889,7 @@ void InternalDumpCommand::DoCommand() {
       } else {
         BlobIndex blob_index;
 
-        const Status s = blob_index.DecodeFrom(value);
+        const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value);
         if (!s.ok()) {
           fprintf(stderr, "%s => error decoding blob index =>\n", key.c_str());
         } else {
@@ -2085,7 +2085,7 @@ void DBDumperCommand::DoDumpCommand() {
   ReadOptions scan_read_opts;
   scan_read_opts.total_order_seek = true;
   Iterator* iter = db_->NewIterator(scan_read_opts, GetCfHandle());
-  Status st = iter->status();
+  rocksdb_rs::status::Status st = iter->status();
   if (!st.ok()) {
     exec_state_ =
         LDBCommandExecuteResult::Failed("Iterator error." + *st.ToString());
@@ -2263,7 +2263,7 @@ void ReduceDBLevelsCommand::OverrideBaseCFOptions(
   cf_opts->max_bytes_for_level_multiplier = 1;
 }
 
-Status ReduceDBLevelsCommand::GetOldNumOfLevels(Options& opt, int* levels) {
+rocksdb_rs::status::Status ReduceDBLevelsCommand::GetOldNumOfLevels(Options& opt, int* levels) {
   ImmutableDBOptions db_options(opt);
   EnvOptions soptions;
   std::shared_ptr<Cache> tc(
@@ -2281,7 +2281,7 @@ Status ReduceDBLevelsCommand::GetOldNumOfLevels(Options& opt, int* levels) {
   // We rely the VersionSet::Recover to tell us the internal data structures
   // in the db. And the Recover() should never do any change
   // (like LogAndApply) to the manifest file.
-  Status st = versions.Recover(dummy);
+  rocksdb_rs::status::Status st = versions.Recover(dummy);
   if (!st.ok()) {
     return st;
   }
@@ -2304,7 +2304,7 @@ void ReduceDBLevelsCommand::DoCommand() {
     return;
   }
 
-  Status st = Status_new();
+  rocksdb_rs::status::Status st = rocksdb_rs::status::Status_new();
   PrepareOptions();
   int old_level_num = -1;
   st = GetOldNumOfLevels(options_, &old_level_num);
@@ -2446,7 +2446,7 @@ void ChangeCompactionStyleCommand::DoCommand() {
   CompactRangeOptions compact_options;
   compact_options.change_level = true;
   compact_options.target_level = 0;
-  Status s =
+  rocksdb_rs::status::Status s =
       db_->CompactRange(compact_options, GetCfHandle(), nullptr, nullptr);
   if (!s.ok()) {
     std::stringstream oss;
@@ -2498,7 +2498,7 @@ void ChangeCompactionStyleCommand::DoCommand() {
 namespace {
 
 struct StdErrReporter : public log::Reader::Reporter {
-  void Corruption(size_t /*bytes*/, const Status& s) override {
+  void Corruption(size_t /*bytes*/, const rocksdb_rs::status::Status& s) override {
     std::cerr << "Corruption detected in log file " << *s.ToString() << "\n";
   }
 };
@@ -2523,73 +2523,73 @@ class InMemoryHandler : public WriteBatch::Handler {
     }
   }
 
-  Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
     row_ << "PUT(" << cf << ") : ";
     commonPutMerge(key, value);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
     row_ << "MERGE(" << cf << ") : ";
     commonPutMerge(key, value);
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkNoop(bool) override {
+  rocksdb_rs::status::Status MarkNoop(bool) override {
     row_ << "NOOP ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status DeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
     row_ << "DELETE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(key.ToString()) << " ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
     row_ << "SINGLE_DELETE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(key.ToString()) << " ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
                        const Slice& end_key) override {
     row_ << "DELETE_RANGE(" << cf << ") : ";
     row_ << LDBCommand::StringToHex(begin_key.ToString()) << " ";
     row_ << LDBCommand::StringToHex(end_key.ToString()) << " ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkBeginPrepare(bool unprepare) override {
+  rocksdb_rs::status::Status MarkBeginPrepare(bool unprepare) override {
     row_ << "BEGIN_PREPARE(";
     row_ << (unprepare ? "true" : "false") << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkEndPrepare(const Slice& xid) override {
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice& xid) override {
     row_ << "END_PREPARE(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkRollback(const Slice& xid) override {
+  rocksdb_rs::status::Status MarkRollback(const Slice& xid) override {
     row_ << "ROLLBACK(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkCommit(const Slice& xid) override {
+  rocksdb_rs::status::Status MarkCommit(const Slice& xid) override {
     row_ << "COMMIT(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
-  Status MarkCommitWithTimestamp(const Slice& xid,
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& xid,
                                  const Slice& commit_ts) override {
     row_ << "COMMIT_WITH_TIMESTAMP(";
     row_ << LDBCommand::StringToHex(xid.ToString()) << ", ";
     row_ << LDBCommand::StringToHex(commit_ts.ToString()) << ") ";
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   ~InMemoryHandler() override {}
@@ -2612,7 +2612,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
   const auto& fs = options.env->GetFileSystem();
   FileOptions soptions(options);
   std::unique_ptr<SequentialFileReader> wal_file_reader;
-  Status status = SequentialFileReader::Create(
+  rocksdb_rs::status::Status status = SequentialFileReader::Create(
       fs, wal_file, soptions, &wal_file_reader, nullptr /* dbg */,
       nullptr /* rate_limiter */);
   if (!status.ok()) {
@@ -2654,7 +2654,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
       row.str("");
       if (record.size() < WriteBatchInternal::kHeader) {
         reporter.Corruption(record.size(),
-                            Status_Corruption("log record too small"));
+                            rocksdb_rs::status::Status_Corruption("log record too small"));
       } else {
         status = WriteBatchInternal::SetContents(&batch, record);
         if (!status.ok()) {
@@ -2772,7 +2772,7 @@ void GetCommand::DoCommand() {
     return;
   }
   std::string value;
-  Status st = db_->Get(ReadOptions(), GetCfHandle(), key_, &value);
+  rocksdb_rs::status::Status st = db_->Get(ReadOptions(), GetCfHandle(), key_, &value);
   if (st.ok()) {
     fprintf(stdout, "%s\n",
             (is_value_hex_ ? StringToHex(value) : value).c_str());
@@ -2829,7 +2829,7 @@ void ApproxSizeCommand::DoCommand() {
   Range ranges[1];
   ranges[0] = Range(start_key_, end_key_);
   uint64_t sizes[1];
-  Status s = db_->GetApproximateSizes(GetCfHandle(), ranges, 1, sizes);
+  rocksdb_rs::status::Status s = db_->GetApproximateSizes(GetCfHandle(), ranges, 1, sizes);
   if (!s.ok()) {
     std::stringstream oss;
     oss << "ApproximateSize failed: " << *s.ToString();
@@ -2882,7 +2882,7 @@ void BatchPutCommand::DoCommand() {
   }
   WriteBatch batch;
 
-  Status st = Status_new();
+  rocksdb_rs::status::Status st = rocksdb_rs::status::Status_new();
   std::stringstream oss;
   for (std::vector<std::pair<std::string, std::string>>::const_iterator itr =
            key_values_.begin();
@@ -3093,7 +3093,7 @@ void DeleteCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status st = db_->Delete(WriteOptions(), GetCfHandle(), key_);
+  rocksdb_rs::status::Status st = db_->Delete(WriteOptions(), GetCfHandle(), key_);
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
@@ -3129,7 +3129,7 @@ void SingleDeleteCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status st = db_->SingleDelete(WriteOptions(), GetCfHandle(), key_);
+  rocksdb_rs::status::Status st = db_->SingleDelete(WriteOptions(), GetCfHandle(), key_);
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
@@ -3167,7 +3167,7 @@ void DeleteRangeCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status st =
+  rocksdb_rs::status::Status st =
       db_->DeleteRange(WriteOptions(), GetCfHandle(), begin_key_, end_key_);
   if (st.ok()) {
     fprintf(stdout, "OK\n");
@@ -3214,7 +3214,7 @@ void PutCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status st = db_->Put(WriteOptions(), GetCfHandle(), key_, value_);
+  rocksdb_rs::status::Status st = db_->Put(WriteOptions(), GetCfHandle(), key_, value_);
   if (st.ok()) {
     fprintf(stdout, "OK\n");
   } else {
@@ -3267,7 +3267,7 @@ void DBQuerierCommand::DoCommand() {
   std::string line;
   std::string key;
   std::string value;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::stringstream oss;
   while (s.ok() && getline(std::cin, line, '\n')) {
     // Parse line into std::vector<std::string>
@@ -3383,7 +3383,7 @@ void CheckPointCommand::DoCommand() {
     return;
   }
   Checkpoint* checkpoint;
-  Status status = Checkpoint::Create(db_, &checkpoint);
+  rocksdb_rs::status::Status status = Checkpoint::Create(db_, &checkpoint);
   status = checkpoint->CreateCheckpoint(checkpoint_dir_);
   if (status.ok()) {
     fprintf(stdout, "OK\n");
@@ -3418,7 +3418,7 @@ void RepairCommand::OverrideBaseOptions() {
 
 void RepairCommand::DoCommand() {
   PrepareOptions();
-  Status status = RepairDB(db_path_, options_);
+  rocksdb_rs::status::Status status = RepairDB(db_path_, options_);
   if (status.ok()) {
     fprintf(stdout, "OK\n");
   } else {
@@ -3507,7 +3507,7 @@ void BackupCommand::Help(std::string& ret) {
 
 void BackupCommand::DoCommand() {
   BackupEngine* backup_engine;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (!db_) {
     assert(GetExecuteState().IsFailed());
     return;
@@ -3516,7 +3516,7 @@ void BackupCommand::DoCommand() {
 
   Env* custom_env = backup_env_guard_.get();
   if (custom_env == nullptr) {
-    Status s =
+    rocksdb_rs::status::Status s =
         Env::CreateFromUri(config_options_, backup_env_uri_, backup_fs_uri_,
                            &custom_env, &backup_env_guard_);
     if (!s.ok()) {
@@ -3561,7 +3561,7 @@ void RestoreCommand::Help(std::string& ret) {
 void RestoreCommand::DoCommand() {
   Env* custom_env = backup_env_guard_.get();
   if (custom_env == nullptr) {
-    Status s =
+    rocksdb_rs::status::Status s =
         Env::CreateFromUri(config_options_, backup_env_uri_, backup_fs_uri_,
                            &custom_env, &backup_env_guard_);
     if (!s.ok()) {
@@ -3572,7 +3572,7 @@ void RestoreCommand::DoCommand() {
   assert(custom_env != nullptr);
 
   std::unique_ptr<BackupEngineReadOnly> restore_engine;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   {
     BackupEngineOptions opts(backup_dir_, custom_env);
     opts.info_log = logger_.get();
@@ -3612,7 +3612,7 @@ void DumpSstFile(Options options, std::string filename, bool output_hex,
       options, filename, Temperature::kUnknown,
       2 * 1024 * 1024 /* readahead_size */,
       /* verify_checksum */ false, output_hex, decode_blob_index);
-  Status st = dumper.ReadSequential(true, std::numeric_limits<uint64_t>::max(),
+  rocksdb_rs::status::Status st = dumper.ReadSequential(true, std::numeric_limits<uint64_t>::max(),
                                     !from_key.empty(), from_key,
                                     !to_key.empty(), to_key);
   if (!st.ok()) {
@@ -3656,7 +3656,7 @@ void DumpBlobFile(const std::string& filename, bool is_key_hex,
   BlobDumpTool::DisplayType show_key = is_key_hex
                                            ? BlobDumpTool::DisplayType::kHex
                                            : BlobDumpTool::DisplayType::kRaw;
-  Status s = tool.Run(filename, show_key, show_blob, show_uncompressed_blob,
+  rocksdb_rs::status::Status s = tool.Run(filename, show_key, show_blob, show_uncompressed_blob,
                       /* show_summary */ true);
   if (!s.ok()) {
     fprintf(stderr, "Failed: %s\n", s.ToString()->c_str());
@@ -3688,7 +3688,7 @@ void DBFileDumperCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   // TODO: Use --hex, --key_hex, --value_hex flags consistently for
   // dumping manifest file, sst files and blob files.
@@ -3802,7 +3802,7 @@ void DBLiveFilesMetadataDumperCommand::DoCommand() {
     assert(GetExecuteState().IsFailed());
     return;
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   std::vector<ColumnFamilyMetaData> metadata;
   db_->GetAllColumnFamilyMetaData(&metadata);
@@ -3934,7 +3934,7 @@ void WriteExternalSstFilesCommand::DoCommand() {
   }
   ColumnFamilyHandle* cfh = GetCfHandle();
   SstFileWriter sst_file_writer(EnvOptions(), db_->GetOptions(), cfh);
-  Status status = sst_file_writer.Open(output_sst_path_);
+  rocksdb_rs::status::Status status = sst_file_writer.Open(output_sst_path_);
   if (!status.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed("failed to open SST file: " +
                                                   *status.ToString());
@@ -4082,7 +4082,7 @@ void IngestExternalSstFilesCommand::DoCommand() {
   ifo.allow_blocking_flush = allow_blocking_flush_;
   ifo.ingest_behind = ingest_behind_;
   ifo.write_global_seqno = write_global_seqno_;
-  Status status = db_->IngestExternalFile(cfh, {input_sst_path_}, ifo);
+  rocksdb_rs::status::Status status = db_->IngestExternalFile(cfh, {input_sst_path_}, ifo);
   if (!status.ok()) {
     exec_state_ = LDBCommandExecuteResult::Failed(
         "failed to ingest external SST: " + *status.ToString());
@@ -4136,7 +4136,7 @@ void ListFileRangeDeletesCommand::DoCommand() {
 
   std::string out_str;
 
-  Status st =
+  rocksdb_rs::status::Status st =
       db_impl->TablesRangeTombstoneSummary(GetCfHandle(), max_keys_, &out_str);
   if (st.ok()) {
     TEST_SYNC_POINT_CALLBACK(
@@ -4182,7 +4182,7 @@ void UnsafeRemoveSstFileCommand::DoCommand() {
   if (column_families_.empty()) {
     column_families_.emplace_back(kDefaultColumnFamilyName, options_);
   }
-  Status s = w.Recover(column_families_);
+  rocksdb_rs::status::Status s = w.Recover(column_families_);
 
   ColumnFamilyData* cfd = nullptr;
   int level = -1;
@@ -4254,7 +4254,7 @@ void UpdateManifestCommand::DoCommand() {
   if (column_families_.empty()) {
     column_families_.emplace_back(kDefaultColumnFamilyName, options_);
   }
-  Status s = experimental::UpdateManifestForFilesState(options_, db_path_,
+  rocksdb_rs::status::Status s = experimental::UpdateManifestForFilesState(options_, db_path_,
                                                        column_families_);
 
   if (!s.ok()) {

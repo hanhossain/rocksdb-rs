@@ -283,7 +283,7 @@ struct FileMetaData {
 
   // REQUIRED: Keys must be given to the function in sorted order (it expects
   // the last key to be the largest).
-  Status UpdateBoundaries(const Slice& key, const Slice& value,
+  rocksdb_rs::status::Status UpdateBoundaries(const Slice& key, const Slice& value,
                           SequenceNumber seqno, ValueType value_type);
 
   // Unlike UpdateBoundaries, ranges do not need to be presented in any
@@ -653,7 +653,7 @@ class VersionEdit {
   // it's instead added to `VersionEditHandler::OnNonCfOperation`.
   bool EncodeTo(std::string* dst,
                 std::optional<size_t> ts_sz = std::nullopt) const;
-  Status DecodeFrom(const Slice& src);
+  rocksdb_rs::status::Status DecodeFrom(const Slice& src);
 
   std::string DebugString(bool hex_key = false) const;
   std::string DebugJSON(int edit_num, bool hex_key = false) const;

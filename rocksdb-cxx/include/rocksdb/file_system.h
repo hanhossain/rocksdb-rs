@@ -287,7 +287,7 @@ class FileSystem : public Customizable {
   // @param result On success, returns the loaded FileSystem
   // @return OK if the FileSystem was successfully loaded.
   // @return not-OK if the load failed.
-  static Status CreateFromString(const ConfigOptions& options,
+  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
                                  const std::string& value,
                                  std::shared_ptr<FileSystem>* result);
 
@@ -310,8 +310,8 @@ class FileSystem : public Customizable {
   //
   // Different implementations may take different actions.
   // By default, it's a no-op and returns Status_OK.
-  virtual Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
+    return rocksdb_rs::status::Status_OK();
   }
   // Handles the event a DB or a ColumnFamily stops using the specified data
   // paths.
@@ -320,8 +320,8 @@ class FileSystem : public Customizable {
   //
   // Different implementations may take different actions.
   // By default, it's a no-op and returns Status_OK.
-  virtual Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
-    return Status_OK();
+  virtual rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Create a brand new sequentially-readable file with the specified name.
@@ -1589,7 +1589,7 @@ class FileSystemWrapper : public FileSystem {
   }
 
   const Customizable* Inner() const override { return target_.get(); }
-  Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
   std::string SerializeOptions(const ConfigOptions& config_options,
                                const std::string& header) const override;
 

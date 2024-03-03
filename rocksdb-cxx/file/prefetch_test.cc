@@ -159,7 +159,7 @@ TEST_P(PrefetchTest, Basic) {
                                         [&](void*) { buff_prefetch_count++; });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -346,7 +346,7 @@ TEST_P(PrefetchTailTest, Basic) {
   SetBlockBasedTableOptions(bbto);
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (UseDirectIO() && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     ROCKSDB_GTEST_BYPASS("Direct IO is not supported");
@@ -528,7 +528,7 @@ TEST_P(PrefetchTest, ConfigureAutoMaxReadaheadSize) {
 
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
 
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
@@ -656,7 +656,7 @@ TEST_P(PrefetchTest, ConfigureInternalAutoReadaheadSize) {
 
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
 
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
@@ -771,7 +771,7 @@ TEST_P(PrefetchTest, ConfigureNumFilesReadsForReadaheadSize) {
                                         [&](void*) { buff_prefetch_count++; });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -873,7 +873,7 @@ TEST_P(PrefetchTest, PrefetchWhenReseek) {
                                         [&](void*) { buff_prefetch_count++; });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -1137,7 +1137,7 @@ TEST_P(PrefetchTest, PrefetchWhenReseekwithCache) {
                                         [&](void*) { buff_prefetch_count++; });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -1247,7 +1247,7 @@ TEST_P(PrefetchTest, DBIterLevelReadAhead) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -1350,7 +1350,7 @@ TEST_P(PrefetchTest, DBIterLevelReadAheadWithAsyncIO) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -1474,7 +1474,7 @@ TEST_P(PrefetchTest, DBIterAsyncIONoIOUring) {
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
   enable_io_uring = false;
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     enable_io_uring = true;
@@ -1598,7 +1598,7 @@ TEST_P(PrefetchTest1, SeekWithExtraPrefetchAsyncIO) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (GetParam() && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -1698,7 +1698,7 @@ TEST_P(PrefetchTest1, NonSequentialReadsWithAdaptiveReadahead) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (GetParam() && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -1793,7 +1793,7 @@ TEST_P(PrefetchTest1, DecreaseReadAheadIfInCache) {
   table_options.no_block_cache = false;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (GetParam() && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -1930,7 +1930,7 @@ TEST_P(PrefetchTest1, SeekParallelizationTest) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (GetParam() && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -2063,7 +2063,7 @@ TEST_P(PrefetchTest, ReadAsyncWithPosixFS) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -2165,7 +2165,7 @@ TEST_P(PrefetchTest, MultipleSeekWithPosixFS) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -2327,7 +2327,7 @@ TEST_P(PrefetchTest, SeekParallelizationTestWithPosix) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -2439,7 +2439,7 @@ TEST_P(PrefetchTest, TraceReadAsyncWithCallbackWrapper) {
   SetBlockBasedTableOptions(table_options);
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   if (use_direct_io && (s.IsNotSupported() || s.IsInvalidArgument())) {
     // If direct IO is not supported, skip the test
     return;
@@ -2595,7 +2595,7 @@ TEST_F(FilePrefetchBufferTest, SeekWithBlockCacheHit) {
   Slice result;
   // Simulate a seek of 4096 bytes at offset 0. Due to the readahead settings,
   // it will do two reads of 4096+8192 and 8192
-  Status s = fpb.PrefetchAsync(IOOptions(), r.get(), 0, 4096, &result);
+  rocksdb_rs::status::Status s = fpb.PrefetchAsync(IOOptions(), r.get(), 0, 4096, &result);
 
   // Platforms that don't have IO uring may not support async IO.
   if (s.IsNotSupported()) {
@@ -2635,7 +2635,7 @@ TEST_F(FilePrefetchBufferTest, NoSyncWithAsyncIO) {
   Slice async_result;
   // Simulate a seek of 4000 bytes at offset 3000. Due to the readahead
   // settings, it will do two reads of 4000+4096 and 4096
-  Status s = fpb.PrefetchAsync(IOOptions(), r.get(), 3000, 4000, &async_result);
+  rocksdb_rs::status::Status s = fpb.PrefetchAsync(IOOptions(), r.get(), 3000, 4000, &async_result);
 
   // Platforms that don't have IO uring may not support async IO
   if (s.IsNotSupported()) {

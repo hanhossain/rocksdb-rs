@@ -452,7 +452,7 @@ class BackupEngineReadOnlyBase {
   // no good backup exists.
   // Setting include_file_details=true provides information about each
   // backed-up file in BackupInfo::file_details and more.
-  virtual Status GetLatestBackupInfo(
+  virtual rocksdb_rs::status::Status GetLatestBackupInfo(
       BackupInfo* backup_info, bool include_file_details = false) const = 0;
 
   // Returns info about a specific backup in backup_info, or NotFound
@@ -460,7 +460,7 @@ class BackupEngineReadOnlyBase {
   // known corrupt.
   // Setting include_file_details=true provides information about each
   // backed-up file in BackupInfo::file_details and more.
-  virtual Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
+  virtual rocksdb_rs::status::Status GetBackupInfo(BackupID backup_id, BackupInfo* backup_info,
                                bool include_file_details = false) const = 0;
 
   // Returns info about non-corrupt backups in backup_infos.

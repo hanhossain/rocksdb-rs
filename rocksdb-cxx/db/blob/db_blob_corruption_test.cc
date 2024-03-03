@@ -57,7 +57,7 @@ TEST_F(DBBlobCorruptionTest, VerifyWholeBlobFileChecksum) {
   int count{0};
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::VerifyFullFileChecksum:mismatch", [&](void* arg) {
-        const Status* s = static_cast<Status*>(arg);
+        const rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_NE(s, nullptr);
         ++count;
         ASSERT_NOK(*s);

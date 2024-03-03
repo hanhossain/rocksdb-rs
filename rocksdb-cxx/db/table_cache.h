@@ -109,7 +109,7 @@ class TableCache {
   //                       recorded
   // @param skip_filters Disables loading/accessing the filter block
   // @param level The level this table is at, -1 for "not set / don't know"
-  Status Get(
+  rocksdb_rs::status::Status Get(
       const ReadOptions& options,
       const InternalKeyComparator& internal_comparator,
       const FileMetaData& file_meta, const Slice& k, GetContext* get_context,
@@ -120,7 +120,7 @@ class TableCache {
 
   // Return the range delete tombstone iterator of the file specified by
   // `file_meta`.
-  Status GetRangeTombstoneIterator(
+  rocksdb_rs::status::Status GetRangeTombstoneIterator(
       const ReadOptions& options,
       const InternalKeyComparator& internal_comparator,
       const FileMetaData& file_meta, uint8_t block_protection_bytes_per_key,
@@ -131,7 +131,7 @@ class TableCache {
   // If the table cache is looked up to get the table reader, the cache handle
   // is returned in table_handle. This handle should be passed back to
   // MultiGet() so it can be released.
-  Status MultiGetFilter(
+  rocksdb_rs::status::Status MultiGetFilter(
       const ReadOptions& options,
       const InternalKeyComparator& internal_comparator,
       const FileMetaData& file_meta,
@@ -150,7 +150,7 @@ class TableCache {
   // @param skip_filters Disables loading/accessing the filter block
   // @param level The level this table is at, -1 for "not set / don't know"
   DECLARE_SYNC_AND_ASYNC(
-      Status, MultiGet, const ReadOptions& options,
+      rocksdb_rs::status::Status, MultiGet, const ReadOptions& options,
       const InternalKeyComparator& internal_comparator,
       const FileMetaData& file_meta, const MultiGetContext::Range* mget_range,
       uint8_t block_protection_bytes_per_key,
@@ -165,7 +165,7 @@ class TableCache {
   // Find table reader
   // @param skip_filters Disables loading/accessing the filter block
   // @param level == -1 means not specified
-  Status FindTable(
+  rocksdb_rs::status::Status FindTable(
       const ReadOptions& ro, const FileOptions& toptions,
       const InternalKeyComparator& internal_comparator,
       const FileMetaData& file_meta, TypedHandle**,
@@ -183,7 +183,7 @@ class TableCache {
   // @returns: `properties` will be reset on success. Please note that we will
   //            return Status_Incomplete() if table is not present in cache and
   //            we set `no_io` to be true.
-  Status GetTableProperties(
+  rocksdb_rs::status::Status GetTableProperties(
       const FileOptions& toptions, const ReadOptions& read_options,
       const InternalKeyComparator& internal_comparator,
       const FileMetaData& file_meta,
@@ -192,7 +192,7 @@ class TableCache {
       const std::shared_ptr<const SliceTransform>& prefix_extractor = nullptr,
       bool no_io = false);
 
-  Status ApproximateKeyAnchors(const ReadOptions& ro,
+  rocksdb_rs::status::Status ApproximateKeyAnchors(const ReadOptions& ro,
                                const InternalKeyComparator& internal_comparator,
                                const FileMetaData& file_meta,
                                uint8_t block_protection_bytes_per_key,
@@ -239,7 +239,7 @@ class TableCache {
 
  private:
   // Build a table reader
-  Status GetTableReader(
+  rocksdb_rs::status::Status GetTableReader(
       const ReadOptions& ro, const FileOptions& file_options,
       const InternalKeyComparator& internal_comparator,
       const FileMetaData& file_meta, bool sequential_mode,

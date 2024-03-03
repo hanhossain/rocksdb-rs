@@ -1908,10 +1908,10 @@ TEST_F(DBFlushTest, FlushError) {
   ASSERT_OK(Put("key1", "value1"));
   ASSERT_OK(Put("key2", "value2"));
   fault_injection_env->SetFilesystemActive(false);
-  Status s = dbfull()->TEST_SwitchMemtable();
+  rocksdb_rs::status::Status s = dbfull()->TEST_SwitchMemtable();
   fault_injection_env->SetFilesystemActive(true);
   Destroy(options);
-  ASSERT_FALSE(s.eq(Status_OK()));
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
 }
 
 TEST_F(DBFlushTest, ManualFlushFailsInReadOnlyMode) {
@@ -2186,9 +2186,9 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   ASSERT_OK(Put("key3", "value3"));
   ASSERT_OK(Put("key4", "value4"));
   SyncPoint::GetInstance()->EnableProcessing();
-  Status s = Flush();
+  rocksdb_rs::status::Status s = Flush();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -2212,7 +2212,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(),
-            rocksdb::Severity::kUnrecoverableError);
+            rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -2306,8 +2306,8 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest1) {
   ASSERT_OK(Put("key3", "value3"));
   ASSERT_OK(Put("key4", "value4"));
   SyncPoint::GetInstance()->EnableProcessing();
-  Status s = Flush();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  rocksdb_rs::status::Status s = Flush();
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
 }
@@ -2345,8 +2345,8 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest2) {
   ASSERT_OK(Put("key7", "value7"));
   ASSERT_OK(Put("key8", "value8"));
   SyncPoint::GetInstance()->EnableProcessing();
-  Status s = Flush();
-  ASSERT_EQ(s.severity(), rocksdb::Severity::kFatalError);
+  rocksdb_rs::status::Status s = Flush();
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kFatalError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -2420,10 +2420,10 @@ TEST_P(DBFlushTestBlobError, FlushError) {
   ASSERT_OK(Put("key", "blob"));
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    Status* const s = static_cast<Status*>(arg);
+    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
-    (*s) = Status_IOError(sync_point_);
+    (*s) = rocksdb_rs::status::Status_IOError(sync_point_);
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -2538,7 +2538,7 @@ TEST_F(DBFlushTest, TombstoneVisibleInSnapshot) {
   // Using snapshot should not see "foo".
   {
     std::string value;
-    Status s = db_->Get(read_opts, "foo", &value);
+    rocksdb_rs::status::Status s = db_->Get(read_opts, "foo", &value);
     ASSERT_TRUE(s.IsNotFound());
   }
 
@@ -3023,7 +3023,7 @@ TEST_P(DBAtomicFlushTest, RollbackAfterFailToInstallResults) {
       [&](void* /*arg*/) { fault_injection_env->SetFilesystemActive(false); });
   SyncPoint::GetInstance()->EnableProcessing();
   FlushOptions flush_opts;
-  Status s = db_->Flush(flush_opts, handles_);
+  rocksdb_rs::status::Status s = db_->Flush(flush_opts, handles_);
   ASSERT_NOK(s);
   fault_injection_env->SetFilesystemActive(true);
   Close();
@@ -3094,7 +3094,7 @@ TEST_P(DBAtomicFlushTest, BgThreadNoWaitAfterManifestError) {
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::AtomicFlushMemTablesToOutputFiles:WaitToCommit", [&](void* arg) {
         if (std::this_thread::get_id() == bg_flush_thr2) {
-          const auto* ptr = reinterpret_cast<std::pair<Status, bool>*>(arg);
+          const auto* ptr = reinterpret_cast<std::pair<rocksdb_rs::status::Status, bool>*>(arg);
           assert(ptr);
           if (0 == called) {
             // When bg flush thread 2 reaches here for the first time.

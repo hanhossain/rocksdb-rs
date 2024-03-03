@@ -114,7 +114,7 @@ class ExternalSstFileIngestionJob {
   }
 
   // Prepare the job by copying external files into the DB.
-  Status Prepare(const std::vector<std::string>& external_files_paths,
+  rocksdb_rs::status::Status Prepare(const std::vector<std::string>& external_files_paths,
                  const std::vector<std::string>& files_checksums,
                  const std::vector<std::string>& files_checksum_func_names,
                  const Temperature& file_temperature, uint64_t next_file_number,
@@ -128,11 +128,11 @@ class ExternalSstFileIngestionJob {
   //    duration of this function.
   //
   // Thread-safe
-  Status NeedsFlush(bool* flush_needed, SuperVersion* super_version);
+  rocksdb_rs::status::Status NeedsFlush(bool* flush_needed, SuperVersion* super_version);
 
   // Will execute the ingestion job and prepare edit() to be applied.
   // REQUIRES: Mutex held
-  Status Run();
+  rocksdb_rs::status::Status Run();
 
   // Register key range involved in this ingestion job
   // to prevent key range conflict with other ongoing compaction/file ingestion
@@ -148,7 +148,7 @@ class ExternalSstFileIngestionJob {
   void UpdateStats();
 
   // Cleanup after successful/failed job
-  void Cleanup(const Status& status);
+  void Cleanup(const rocksdb_rs::status::Status& status);
 
   VersionEdit* edit() { return &edit_; }
 
@@ -162,7 +162,7 @@ class ExternalSstFileIngestionJob {
  private:
   // Open the external file and populate `file_to_ingest` with all the
   // external information we need to ingest this file.
-  Status GetIngestedFileInfo(const std::string& external_file,
+  rocksdb_rs::status::Status GetIngestedFileInfo(const std::string& external_file,
                              uint64_t new_file_number,
                              IngestedFileInfo* file_to_ingest,
                              SuperVersion* sv);
@@ -170,7 +170,7 @@ class ExternalSstFileIngestionJob {
   // Assign `file_to_ingest` the appropriate sequence number and the lowest
   // possible level that it can be ingested to according to compaction_style.
   // REQUIRES: Mutex held
-  Status AssignLevelAndSeqnoForIngestedFile(SuperVersion* sv,
+  rocksdb_rs::status::Status AssignLevelAndSeqnoForIngestedFile(SuperVersion* sv,
                                             bool force_global_seqno,
                                             CompactionStyle compaction_style,
                                             SequenceNumber last_seqno,
@@ -181,10 +181,10 @@ class ExternalSstFileIngestionJob {
   // we just check that it fits in the level, that DB allows ingest_behind,
   // and that we don't have 0 seqnums at the upper levels.
   // REQUIRES: Mutex held
-  Status CheckLevelForIngestedBehindFile(IngestedFileInfo* file_to_ingest);
+  rocksdb_rs::status::Status CheckLevelForIngestedBehindFile(IngestedFileInfo* file_to_ingest);
 
   // Set the file global sequence number to `seqno`
-  Status AssignGlobalSeqnoForIngestedFile(IngestedFileInfo* file_to_ingest,
+  rocksdb_rs::status::Status AssignGlobalSeqnoForIngestedFile(IngestedFileInfo* file_to_ingest,
                                           SequenceNumber seqno);
   // Generate the file checksum and store in the IngestedFileInfo
   IOStatus GenerateChecksumForIngestedFile(IngestedFileInfo* file_to_ingest);
@@ -196,7 +196,7 @@ class ExternalSstFileIngestionJob {
 
   // Helper method to sync given file.
   template <typename TWritableFile>
-  Status SyncIngestedFile(TWritableFile* file);
+  rocksdb_rs::status::Status SyncIngestedFile(TWritableFile* file);
 
   // Create equivalent `Compaction` objects to this file ingestion job
   // , which will be used to check range conflict with other ongoing

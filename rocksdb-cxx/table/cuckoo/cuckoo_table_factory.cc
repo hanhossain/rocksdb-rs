@@ -13,7 +13,7 @@
 
 namespace rocksdb {
 
-Status CuckooTableFactory::NewTableReader(
+rocksdb_rs::status::Status CuckooTableFactory::NewTableReader(
     const ReadOptions& /*ro*/, const TableReaderOptions& table_reader_options,
     std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
     std::unique_ptr<TableReader>* table,
@@ -21,7 +21,7 @@ Status CuckooTableFactory::NewTableReader(
   std::unique_ptr<CuckooTableReader> new_reader(new CuckooTableReader(
       table_reader_options.ioptions, std::move(file), file_size,
       table_reader_options.internal_comparator.user_comparator(), nullptr));
-  Status s = new_reader->status();
+  rocksdb_rs::status::Status s = new_reader->status();
   if (s.ok()) {
     *table = std::move(new_reader);
   }

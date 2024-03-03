@@ -245,7 +245,7 @@ struct Writer {
         uint64_t seqno = state.last_written.load() + 1;
         Key key(shard, seqno);
         // fprintf(stderr, "Writing (%ld, %ld)\n", shard, seqno);
-        rocksdb::Status status =
+        rocksdb_rs::status::Status status =
             db_->Put(rocksdb::WriteOptions(),
                      rocksdb::Slice((const char*)&key, sizeof(key)),
                      rocksdb::Slice(value));
@@ -323,7 +323,7 @@ int main(int argc, char** argv) {
   GFLAGS_NAMESPACE::ParseCommandLineFlags(&argc, &argv, true);
 
   std::mt19937 rng{std::random_device()()};
-  rocksdb::Status status;
+  rocksdb_rs::status::Status status;
   std::string path =
       rocksdb::test::PerThreadDBPath("forward_iterator_test");
   fprintf(stderr, "db path is %s\n", path.c_str());

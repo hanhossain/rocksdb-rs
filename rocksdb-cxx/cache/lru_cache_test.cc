@@ -400,18 +400,18 @@ class ClockCacheTest : public testing::Test {
               /*allocator*/ nullptr, &eviction_callback_, &hash_seed_, opts);
   }
 
-  Status Insert(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
+  rocksdb_rs::status::Status Insert(const rocksdb_rs::unique_id::UniqueId64x2& hashed_key,
                 Cache::Priority priority = Cache::Priority::LOW) {
     return shard_->Insert(TestKey(hashed_key), hashed_key, nullptr /*value*/,
                           &kNoopCacheItemHelper, 1 /*charge*/,
                           nullptr /*handle*/, priority);
   }
 
-  Status Insert(char key, Cache::Priority priority = Cache::Priority::LOW) {
+  rocksdb_rs::status::Status Insert(char key, Cache::Priority priority = Cache::Priority::LOW) {
     return Insert(TestHashedKey(key), priority);
   }
 
-  Status InsertWithLen(char key, size_t len) {
+  rocksdb_rs::status::Status InsertWithLen(char key, size_t len) {
     std::string skey(len, key);
     return shard_->Insert(skey, TestHashedKey(key), nullptr /*value*/,
                           &kNoopCacheItemHelper, 1 /*charge*/,
@@ -492,7 +492,7 @@ TEST_F(ClockCacheTest, Limits) {
 
     // Single entry charge beyond capacity
     {
-      Status s = shard_->Insert(TestKey(hkey), hkey, nullptr /*value*/,
+      rocksdb_rs::status::Status s = shard_->Insert(TestKey(hkey), hkey, nullptr /*value*/,
                                 &kNoopCacheItemHelper, 5 /*charge*/,
                                 nullptr /*handle*/, Cache::Priority::LOW);
       if (strict_capacity_limit) {
@@ -509,7 +509,7 @@ TEST_F(ClockCacheTest, Limits) {
                                &kNoopCacheItemHelper, 3 /*charge*/, &h,
                                Cache::Priority::LOW));
       // Try to insert more
-      Status s = Insert('a');
+      rocksdb_rs::status::Status s = Insert('a');
       if (strict_capacity_limit) {
         EXPECT_TRUE(s.IsMemoryLimit());
       } else {
@@ -526,7 +526,7 @@ TEST_F(ClockCacheTest, Limits) {
     {
       size_t n = shard_->GetTableAddressCount() + 1;
       std::unique_ptr<HandleImpl* []> ha { new HandleImpl* [n] {} };
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       for (size_t i = 0; i < n && s.ok(); ++i) {
         hkey.data[1] = i;
         s = shard_->Insert(TestKey(hkey), hkey, nullptr /*value*/,
@@ -972,15 +972,15 @@ class TestSecondaryCache : public SecondaryCache {
 
   void ResetInjectFailure() { inject_failure_ = false; }
 
-  Status Insert(const Slice& key, Cache::ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const Cache::CacheItemHelper* helper) override {
     if (inject_failure_) {
-      return Status_Corruption("Insertion Data Corrupted");
+      return rocksdb_rs::status::Status_Corruption("Insertion Data Corrupted");
     }
     CheckCacheKeyCommonPrefix(key);
     size_t size;
     char* buf;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     num_inserts_++;
     size = (*helper->size_cb)(value);
@@ -1017,7 +1017,7 @@ class TestSecondaryCache : public SecondaryCache {
     if (handle) {
       Cache::ObjectPtr value = nullptr;
       size_t charge = 0;
-      Status s = Status_new();
+      rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       if (type != ResultType::DEFER_AND_FAIL) {
         char* ptr = cache_.Value(handle);
         size_t size = DecodeFixed64(ptr);
@@ -1968,7 +1968,7 @@ TEST_P(DBSecondaryCacheTest, TestSecondaryCacheMultiGet) {
   std::vector<std::string> mget_keys(
       {Key(0), Key(1), Key(2), Key(3), Key(4), Key(5), Key(6), Key(7)});
   std::vector<PinnableSlice> values(mget_keys.size());
-  rust::Vec<Status> s = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
   std::vector<Slice> key_slices;
   for (const std::string& key : mget_keys) {
     key_slices.emplace_back(key);
@@ -1993,7 +1993,7 @@ class CacheWithStats : public CacheWrapper {
   static const char* kClassName() { return "CacheWithStats"; }
   const char* Name() const override { return kClassName(); }
 
-  Status Insert(const Slice& key, Cache::ObjectPtr value,
+  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                 const CacheItemHelper* helper, size_t charge,
                 Handle** handle = nullptr,
                 Priority priority = Priority::LOW) override {
@@ -2071,7 +2071,7 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadBasic) {
   cd_options.clock = fault_env_->GetSystemClock().get();
   std::string dump_path = db_->GetName() + "/cache_dump";
   std::unique_ptr<CacheDumpWriter> dump_writer;
-  Status s = NewToFileCacheDumpWriter(fault_fs_, FileOptions(), dump_path,
+  rocksdb_rs::status::Status s = NewToFileCacheDumpWriter(fault_fs_, FileOptions(), dump_path,
                                       &dump_writer);
   ASSERT_OK(s);
   std::unique_ptr<CacheDumper> cache_dumper;
@@ -2227,7 +2227,7 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadWithFilter) {
   cd_options.clock = fault_env_->GetSystemClock().get();
   std::string dump_path = db1->GetName() + "/cache_dump";
   std::unique_ptr<CacheDumpWriter> dump_writer;
-  Status s = NewToFileCacheDumpWriter(fault_fs_, FileOptions(), dump_path,
+  rocksdb_rs::status::Status s = NewToFileCacheDumpWriter(fault_fs_, FileOptions(), dump_path,
                                       &dump_writer);
   ASSERT_OK(s);
   std::unique_ptr<CacheDumper> cache_dumper;

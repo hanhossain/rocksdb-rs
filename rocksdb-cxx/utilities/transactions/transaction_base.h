@@ -42,41 +42,41 @@ class TransactionBaseImpl : public Transaction {
   // returns non-OK, the Put/Merge/Delete/GetForUpdate will be failed.
   // do_validate will be false if called from PutUntracked, DeleteUntracked,
   // MergeUntracked, or GetForUpdate(do_validate=false)
-  virtual Status TryLock(ColumnFamilyHandle* column_family, const Slice& key,
+  virtual rocksdb_rs::status::Status TryLock(ColumnFamilyHandle* column_family, const Slice& key,
                          bool read_only, bool exclusive,
                          const bool do_validate = true,
                          const bool assume_tracked = false) = 0;
 
   void SetSavePoint() override;
 
-  Status RollbackToSavePoint() override;
+  rocksdb_rs::status::Status RollbackToSavePoint() override;
 
-  Status PopSavePoint() override;
+  rocksdb_rs::status::Status PopSavePoint() override;
 
   using Transaction::Get;
-  Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
              const Slice& key, std::string* value) override;
 
-  Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
              const Slice& key, PinnableSlice* value) override;
 
-  Status Get(const ReadOptions& options, const Slice& key,
+  rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
              std::string* value) override {
     return Get(options, db_->DefaultColumnFamily(), key, value);
   }
 
   using Transaction::GetForUpdate;
-  Status GetForUpdate(const ReadOptions& options,
+  rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
                       ColumnFamilyHandle* column_family, const Slice& key,
                       std::string* value, bool exclusive,
                       const bool do_validate) override;
 
-  Status GetForUpdate(const ReadOptions& options,
+  rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
                       ColumnFamilyHandle* column_family, const Slice& key,
                       PinnableSlice* pinnable_val, bool exclusive,
                       const bool do_validate) override;
 
-  Status GetForUpdate(const ReadOptions& options, const Slice& key,
+  rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options, const Slice& key,
                       std::string* value, bool exclusive,
                       const bool do_validate) override {
     return GetForUpdate(options, db_->DefaultColumnFamily(), key, value,
@@ -84,13 +84,13 @@ class TransactionBaseImpl : public Transaction {
   }
 
   using Transaction::MultiGet;
-  rust::Vec<Status> MultiGet(
+  rust::Vec<rocksdb_rs::status::Status> MultiGet(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
-  rust::Vec<Status> MultiGet(const ReadOptions& options,
+  rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
                                const std::vector<Slice>& keys,
                                std::vector<std::string>* values) override {
     return MultiGet(options,
@@ -101,16 +101,16 @@ class TransactionBaseImpl : public Transaction {
 
   void MultiGet(const ReadOptions& options, ColumnFamilyHandle* column_family,
                 const size_t num_keys, const Slice* keys, PinnableSlice* values,
-                Status* statuses, const bool sorted_input = false) override;
+                rocksdb_rs::status::Status* statuses, const bool sorted_input = false) override;
 
   using Transaction::MultiGetForUpdate;
-  rust::Vec<Status> MultiGetForUpdate(
+  rust::Vec<rocksdb_rs::status::Status> MultiGetForUpdate(
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
-  rust::Vec<Status> MultiGetForUpdate(
+  rust::Vec<rocksdb_rs::status::Status> MultiGetForUpdate(
       const ReadOptions& options, const std::vector<Slice>& keys,
       std::vector<std::string>* values) override {
     return MultiGetForUpdate(options,
@@ -123,75 +123,75 @@ class TransactionBaseImpl : public Transaction {
   Iterator* GetIterator(const ReadOptions& read_options,
                         ColumnFamilyHandle* column_family) override;
 
-  Status Put(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
              const Slice& value, const bool assume_tracked = false) override;
-  Status Put(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status Put(const Slice& key, const Slice& value) override {
     return Put(nullptr, key, value);
   }
 
-  Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
              const SliceParts& value,
              const bool assume_tracked = false) override;
-  Status Put(const SliceParts& key, const SliceParts& value) override {
+  rocksdb_rs::status::Status Put(const SliceParts& key, const SliceParts& value) override {
     return Put(nullptr, key, value);
   }
 
-  Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
                const Slice& value, const bool assume_tracked = false) override;
-  Status Merge(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) override {
     return Merge(nullptr, key, value);
   }
 
-  Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
                 const bool assume_tracked = false) override;
-  Status Delete(const Slice& key) override { return Delete(nullptr, key); }
-  Status Delete(ColumnFamilyHandle* column_family, const SliceParts& key,
+  rocksdb_rs::status::Status Delete(const Slice& key) override { return Delete(nullptr, key); }
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const SliceParts& key,
                 const bool assume_tracked = false) override;
-  Status Delete(const SliceParts& key) override { return Delete(nullptr, key); }
+  rocksdb_rs::status::Status Delete(const SliceParts& key) override { return Delete(nullptr, key); }
 
-  Status SingleDelete(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const Slice& key,
                       const bool assume_tracked = false) override;
-  Status SingleDelete(const Slice& key) override {
+  rocksdb_rs::status::Status SingleDelete(const Slice& key) override {
     return SingleDelete(nullptr, key);
   }
-  Status SingleDelete(ColumnFamilyHandle* column_family, const SliceParts& key,
+  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const SliceParts& key,
                       const bool assume_tracked = false) override;
-  Status SingleDelete(const SliceParts& key) override {
+  rocksdb_rs::status::Status SingleDelete(const SliceParts& key) override {
     return SingleDelete(nullptr, key);
   }
 
-  Status PutUntracked(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family, const Slice& key,
                       const Slice& value) override;
-  Status PutUntracked(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status PutUntracked(const Slice& key, const Slice& value) override {
     return PutUntracked(nullptr, key, value);
   }
 
-  Status PutUntracked(ColumnFamilyHandle* column_family, const SliceParts& key,
+  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family, const SliceParts& key,
                       const SliceParts& value) override;
-  Status PutUntracked(const SliceParts& key, const SliceParts& value) override {
+  rocksdb_rs::status::Status PutUntracked(const SliceParts& key, const SliceParts& value) override {
     return PutUntracked(nullptr, key, value);
   }
 
-  Status MergeUntracked(ColumnFamilyHandle* column_family, const Slice& key,
+  rocksdb_rs::status::Status MergeUntracked(ColumnFamilyHandle* column_family, const Slice& key,
                         const Slice& value) override;
-  Status MergeUntracked(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status MergeUntracked(const Slice& key, const Slice& value) override {
     return MergeUntracked(nullptr, key, value);
   }
 
-  Status DeleteUntracked(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
                          const Slice& key) override;
-  Status DeleteUntracked(const Slice& key) override {
+  rocksdb_rs::status::Status DeleteUntracked(const Slice& key) override {
     return DeleteUntracked(nullptr, key);
   }
-  Status DeleteUntracked(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
                          const SliceParts& key) override;
-  Status DeleteUntracked(const SliceParts& key) override {
+  rocksdb_rs::status::Status DeleteUntracked(const SliceParts& key) override {
     return DeleteUntracked(nullptr, key);
   }
 
-  Status SingleDeleteUntracked(ColumnFamilyHandle* column_family,
+  rocksdb_rs::status::Status SingleDeleteUntracked(ColumnFamilyHandle* column_family,
                                const Slice& key) override;
-  Status SingleDeleteUntracked(const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteUntracked(const Slice& key) override {
     return SingleDeleteUntracked(nullptr, key);
   }
 
@@ -254,7 +254,7 @@ class TransactionBaseImpl : public Transaction {
 
   // iterates over the given batch and makes the appropriate inserts.
   // used for rebuilding prepared transactions after recovery.
-  virtual Status RebuildFromWriteBatch(WriteBatch* src_batch) override;
+  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(WriteBatch* src_batch) override;
 
   WriteBatch* GetCommitTimeWriteBatch() override;
 
@@ -372,7 +372,7 @@ class TransactionBaseImpl : public Transaction {
   // a notification through the TransactionNotifier interface
   std::shared_ptr<TransactionNotifier> snapshot_notifier_ = nullptr;
 
-  Status TryLock(ColumnFamilyHandle* column_family, const SliceParts& key,
+  rocksdb_rs::status::Status TryLock(ColumnFamilyHandle* column_family, const SliceParts& key,
                  bool read_only, bool exclusive, const bool do_validate = true,
                  const bool assume_tracked = false);
 

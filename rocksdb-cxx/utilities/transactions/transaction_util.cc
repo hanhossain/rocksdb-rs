@@ -19,18 +19,18 @@
 
 namespace rocksdb {
 
-Status TransactionUtil::CheckKeyForConflicts(
+rocksdb_rs::status::Status TransactionUtil::CheckKeyForConflicts(
     DBImpl* db_impl, ColumnFamilyHandle* column_family, const std::string& key,
     SequenceNumber snap_seq, const std::string* const read_ts, bool cache_only,
     ReadCallback* snap_checker, SequenceNumber min_uncommitted) {
-  Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
 
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
   SuperVersion* sv = db_impl->GetAndRefSuperVersion(cfd);
 
   if (sv == nullptr) {
-    result = Status_InvalidArgument("Could not access column family " +
+    result = rocksdb_rs::status::Status_InvalidArgument("Could not access column family " +
                                      cfh->GetName());
   }
 
@@ -47,7 +47,7 @@ Status TransactionUtil::CheckKeyForConflicts(
   return result;
 }
 
-Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
+rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
                                  SequenceNumber earliest_seq,
                                  SequenceNumber snap_seq,
                                  const std::string& key,
@@ -60,7 +60,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
   // So `snap_checker` must be provided.
   assert(min_uncommitted == kMaxSequenceNumber || snap_checker != nullptr);
 
-  Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
   bool need_to_read_sst = false;
 
   // Since it would be too slow to check the SST files, we will only use
@@ -76,7 +76,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
     need_to_read_sst = true;
 
     if (cache_only) {
-      result = Status_TryAgain(
+      result = rocksdb_rs::status::Status_TryAgain(
           "Transaction could not check for conflicts as the MemTable does not "
           "contain a long enough history to check write at SequenceNumber: ",
           std::to_string(snap_seq));
@@ -100,7 +100,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
                "frequency "
                "of this error.",
                snap_seq, earliest_seq);
-      result = Status_TryAgain(msg);
+      result = rocksdb_rs::status::Status_TryAgain(msg);
     }
   }
 
@@ -119,7 +119,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
     // keys lower than min_uncommitted can be skipped.
     SequenceNumber lower_bound_seq =
         (min_uncommitted == kMaxSequenceNumber) ? snap_seq : min_uncommitted;
-    Status s = db_impl->GetLatestSequenceForKey(
+    rocksdb_rs::status::Status s = db_impl->GetLatestSequenceForKey(
         sv, key, !need_to_read_sst, lower_bound_seq, &seq,
         !read_ts ? nullptr : &timestamp, &found_record_for_key,
         /*is_blob_index=*/nullptr);
@@ -142,7 +142,7 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
         write_conflict = ucmp->CompareTimestamp(*read_ts, timestamp) < 0;
       }
       if (write_conflict) {
-        result = Status_Busy();
+        result = rocksdb_rs::status::Status_Busy();
       }
     }
   }
@@ -150,10 +150,10 @@ Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
   return result;
 }
 
-Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_impl,
+rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_impl,
                                               const LockTracker& tracker,
                                               bool cache_only) {
-  Status result = Status_new();
+  rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
 
   std::unique_ptr<LockTracker::ColumnFamilyIterator> cf_it(
       tracker.GetColumnFamilyIterator());
@@ -163,7 +163,7 @@ Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_impl,
 
     SuperVersion* sv = db_impl->GetAndRefSuperVersion(cf);
     if (sv == nullptr) {
-      result = Status_InvalidArgument("Could not access column family " +
+      result = rocksdb_rs::status::Status_InvalidArgument("Could not access column family " +
                                        std::to_string(cf));
       break;
     }

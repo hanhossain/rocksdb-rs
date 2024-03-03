@@ -34,7 +34,7 @@ CacheReservationManagerImpl<R>::CacheReservationHandle::CacheReservationHandle(
 template <rocksdb_rs::cache::CacheEntryRole R>
 CacheReservationManagerImpl<
     R>::CacheReservationHandle::~CacheReservationHandle() {
-  Status s = cache_res_mgr_->ReleaseCacheReservation(incremental_memory_used_);
+  rocksdb_rs::status::Status s = cache_res_mgr_->ReleaseCacheReservation(incremental_memory_used_);
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
@@ -55,15 +55,15 @@ CacheReservationManagerImpl<R>::~CacheReservationManagerImpl() {
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-Status CacheReservationManagerImpl<R>::UpdateCacheReservation(
+rocksdb_rs::status::Status CacheReservationManagerImpl<R>::UpdateCacheReservation(
     std::size_t new_mem_used) {
   memory_used_ = new_mem_used;
   std::size_t cur_cache_allocated_size =
       cache_allocated_size_.load(std::memory_order_relaxed);
   if (new_mem_used == cur_cache_allocated_size) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   } else if (new_mem_used > cur_cache_allocated_size) {
-    Status s = IncreaseCacheReservation(new_mem_used);
+    rocksdb_rs::status::Status s = IncreaseCacheReservation(new_mem_used);
     return s;
   } else {
     // In delayed decrease mode, we don't decrease cache reservation
@@ -76,20 +76,20 @@ Status CacheReservationManagerImpl<R>::UpdateCacheReservation(
     // which is likely to happen when the memory usage is greater than or equal
     // to 3/4 of what we reserve
     if (delayed_decrease_ && new_mem_used >= cur_cache_allocated_size / 4 * 3) {
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     } else {
-      Status s = DecreaseCacheReservation(new_mem_used);
+      rocksdb_rs::status::Status s = DecreaseCacheReservation(new_mem_used);
       return s;
     }
   }
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-Status CacheReservationManagerImpl<R>::MakeCacheReservation(
+rocksdb_rs::status::Status CacheReservationManagerImpl<R>::MakeCacheReservation(
     std::size_t incremental_memory_used,
     std::unique_ptr<CacheReservationManager::CacheReservationHandle>* handle) {
   assert(handle);
-  Status s =
+  rocksdb_rs::status::Status s =
       UpdateCacheReservation(GetTotalMemoryUsed() + incremental_memory_used);
   (*handle).reset(new CacheReservationManagerImpl::CacheReservationHandle(
       incremental_memory_used,
@@ -99,24 +99,24 @@ Status CacheReservationManagerImpl<R>::MakeCacheReservation(
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-Status CacheReservationManagerImpl<R>::ReleaseCacheReservation(
+rocksdb_rs::status::Status CacheReservationManagerImpl<R>::ReleaseCacheReservation(
     std::size_t incremental_memory_used) {
   assert(GetTotalMemoryUsed() >= incremental_memory_used);
   std::size_t updated_total_mem_used =
       GetTotalMemoryUsed() - incremental_memory_used;
-  Status s = UpdateCacheReservation(updated_total_mem_used);
+  rocksdb_rs::status::Status s = UpdateCacheReservation(updated_total_mem_used);
   return s;
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-Status CacheReservationManagerImpl<R>::IncreaseCacheReservation(
+rocksdb_rs::status::Status CacheReservationManagerImpl<R>::IncreaseCacheReservation(
     std::size_t new_mem_used) {
-  Status return_status = Status_OK();
+  rocksdb_rs::status::Status return_status = rocksdb_rs::status::Status_OK();
   while (new_mem_used > cache_allocated_size_.load(std::memory_order_relaxed)) {
     Cache::Handle* handle = nullptr;
     return_status = cache_.Insert(GetNextCacheKey(), kSizeDummyEntry, &handle);
 
-    if (!return_status.eq(Status_OK())) {
+    if (!return_status.eq(rocksdb_rs::status::Status_OK())) {
       return return_status;
     }
 
@@ -127,9 +127,9 @@ Status CacheReservationManagerImpl<R>::IncreaseCacheReservation(
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-Status CacheReservationManagerImpl<R>::DecreaseCacheReservation(
+rocksdb_rs::status::Status CacheReservationManagerImpl<R>::DecreaseCacheReservation(
     std::size_t new_mem_used) {
-  Status return_status = Status_OK();
+  rocksdb_rs::status::Status return_status = rocksdb_rs::status::Status_OK();
 
   // Decrease to the smallest multiple of kSizeDummyEntry that is greater than
   // or equal to new_mem_used We do addition instead of new_mem_used <=

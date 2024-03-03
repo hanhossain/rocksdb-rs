@@ -37,7 +37,7 @@ class MockTableReader : public TableReader {
                                 size_t compaction_readahead_size = 0,
                                 bool allow_unprepared_value = false) override;
 
-  Status Get(const ReadOptions& readOptions, const Slice& key,
+  rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
              GetContext* get_context, const SliceTransform* prefix_extractor,
              bool skip_filters = false) override;
 
@@ -113,7 +113,7 @@ class MockTableIterator : public InternalIterator {
 
   Slice value() const override { return Slice(itr_->second); }
 
-  Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
  private:
   const KVVector& table_;
@@ -162,15 +162,15 @@ class MockTableBuilder : public TableBuilder {
   }
 
   // Return non-ok iff some error has been detected.
-  Status status() const override { return Status_OK(); }
+  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
   // Return non-ok iff some error happens during IO.
   IOStatus io_status() const override { return IOStatus::OK(); }
 
-  Status Finish() override {
+  rocksdb_rs::status::Status Finish() override {
     MutexLock lock_guard(&file_system_->mutex);
     file_system_->files.insert({id_, table_});
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void Abandon() override {}
@@ -207,14 +207,14 @@ InternalIterator* MockTableReader::NewIterator(
   return new MockTableIterator(table_);
 }
 
-Status MockTableReader::Get(const ReadOptions&, const Slice& key,
+rocksdb_rs::status::Status MockTableReader::Get(const ReadOptions&, const Slice& key,
                             GetContext* get_context,
                             const SliceTransform* /*prefix_extractor*/,
                             bool /*skip_filters*/) {
   std::unique_ptr<MockTableIterator> iter(new MockTableIterator(table_));
   for (iter->Seek(key); iter->Valid(); iter->Next()) {
     ParsedInternalKey parsed_key;
-    Status pik_status =
+    rocksdb_rs::status::Status pik_status =
         ParseInternalKey(iter->key(), &parsed_key, true /* log_err_key */);
     if (!pik_status.ok()) {
       return pik_status;
@@ -225,7 +225,7 @@ Status MockTableReader::Get(const ReadOptions&, const Slice& key,
       break;
     }
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 std::shared_ptr<const TableProperties> MockTableReader::GetTableProperties()
@@ -236,14 +236,14 @@ std::shared_ptr<const TableProperties> MockTableReader::GetTableProperties()
 MockTableFactory::MockTableFactory()
     : next_id_(1), corrupt_mode_(MockTableFactory::kCorruptNone) {}
 
-Status MockTableFactory::NewTableReader(
+rocksdb_rs::status::Status MockTableFactory::NewTableReader(
     const ReadOptions& /*ro*/,
     const TableReaderOptions& /*table_reader_options*/,
     std::unique_ptr<RandomAccessFileReader>&& file, uint64_t /*file_size*/,
     std::unique_ptr<TableReader>* table_reader,
     bool /*prefetch_index_and_filter_in_cache*/) const {
   uint32_t id;
-  Status s = GetIDFromFile(file.get(), &id);
+  rocksdb_rs::status::Status s = GetIDFromFile(file.get(), &id);
   if (!s.ok()) {
     return s;
   }
@@ -252,29 +252,29 @@ Status MockTableFactory::NewTableReader(
 
   auto it = file_system_.files.find(id);
   if (it == file_system_.files.end()) {
-    return Status_IOError("Mock file not found");
+    return rocksdb_rs::status::Status_IOError("Mock file not found");
   }
 
   table_reader->reset(new MockTableReader(it->second));
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 TableBuilder* MockTableFactory::NewTableBuilder(
     const TableBuilderOptions& /*table_builder_options*/,
     WritableFileWriter* file) const {
   uint32_t id;
-  Status s = GetAndWriteNextID(file, &id);
+  rocksdb_rs::status::Status s = GetAndWriteNextID(file, &id);
   assert(s.ok());
 
   return new MockTableBuilder(id, &file_system_, corrupt_mode_,
                               key_value_size_);
 }
 
-Status MockTableFactory::CreateMockTable(Env* env, const std::string& fname,
+rocksdb_rs::status::Status MockTableFactory::CreateMockTable(Env* env, const std::string& fname,
                                          KVVector file_contents) {
   std::unique_ptr<WritableFileWriter> file_writer;
-  Status s = WritableFileWriter::Create(env->GetFileSystem(), fname,
+  rocksdb_rs::status::Status s = WritableFileWriter::Create(env->GetFileSystem(), fname,
                                         FileOptions(), &file_writer, nullptr);
   if (!s.ok()) {
     return s;
@@ -287,7 +287,7 @@ Status MockTableFactory::CreateMockTable(Env* env, const std::string& fname,
   return s;
 }
 
-Status MockTableFactory::GetAndWriteNextID(WritableFileWriter* file,
+rocksdb_rs::status::Status MockTableFactory::GetAndWriteNextID(WritableFileWriter* file,
                                            uint32_t* next_id) const {
   *next_id = next_id_.fetch_add(1);
   char buf[4];
@@ -295,11 +295,11 @@ Status MockTableFactory::GetAndWriteNextID(WritableFileWriter* file,
   return file->Append(Slice(buf, 4));
 }
 
-Status MockTableFactory::GetIDFromFile(RandomAccessFileReader* file,
+rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(RandomAccessFileReader* file,
                                        uint32_t* id) const {
   char buf[4];
   Slice result;
-  Status s = file->Read(IOOptions(), 0, 4, &result, buf, nullptr,
+  rocksdb_rs::status::Status s = file->Read(IOOptions(), 0, 4, &result, buf, nullptr,
                         Env::IO_TOTAL /* rate_limiter_priority */);
   assert(result.size() == 4);
   *id = DecodeFixed32(buf);

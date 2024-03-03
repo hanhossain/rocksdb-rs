@@ -103,7 +103,7 @@ std::shared_ptr<DB> OpenDb(const std::string& dbname, const bool ttl = false,
   options.max_successive_merges = max_successive_merges;
   options.env = EnvMergeTest::GetInstance();
   EXPECT_OK(DestroyDB(dbname, Options()));
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (ttl) {
     DBWithTTL* db_with_ttl;
     s = DBWithTTL::Open(options, dbname, &db_with_ttl);
@@ -394,7 +394,7 @@ void testCountersWithFlushAndCompaction(Counters& counters, DB* db) {
   std::string expected;
   PutFixed64(&expected, 1);
   std::string actual;
-  Status s = db->Get(ReadOptions(), "test-key", &actual);
+  rocksdb_rs::status::Status s = db->Get(ReadOptions(), "test-key", &actual);
   TEST_SYNC_POINT("testCountersWithFlushAndCompaction:AfterGet");
   set_options_thread.join();
   compact_thread.join();

@@ -27,7 +27,7 @@ void BlockPrefetcher::PrefetchIfNeeded(
       if (offset + len <= readahead_limit_) {
         return;
       }
-      Status s = rep->file->Prefetch(offset, len + compaction_readahead_size_,
+      rocksdb_rs::status::Status s = rep->file->Prefetch(offset, len + compaction_readahead_size_,
                                      rate_limiter_priority);
       if (s.ok()) {
         readahead_limit_ = offset + len + compaction_readahead_size_;
@@ -116,7 +116,7 @@ void BlockPrefetcher::PrefetchIfNeeded(
   }
 
   // If prefetch is not supported, fall back to use internal prefetch buffer.
-  Status s = rep->file->Prefetch(
+  rocksdb_rs::status::Status s = rep->file->Prefetch(
       handle.offset(),
       BlockBasedTable::BlockSizeWithTrailer(handle) + readahead_size_,
       rate_limiter_priority);

@@ -234,7 +234,7 @@ bool WriteThread::LinkOne(Writer* w, std::atomic<Writer*>* newest_writer) {
     // immediately
     if (writers == &write_stall_dummy_) {
       if (w->no_slowdown) {
-        w->status = Status_Incomplete("Write stall");
+        w->status = rocksdb_rs::status::Status_Incomplete("Write stall");
         SetState(w, STATE_COMPLETED);
         return false;
       }
@@ -337,7 +337,7 @@ void WriteThread::BeginWriteStall() {
   while (w != nullptr && w->write_group == nullptr) {
     if (w->no_slowdown) {
       prev->link_older = w->link_older;
-      w->status = Status_Incomplete("Write stall");
+      w->status = rocksdb_rs::status::Status_Incomplete("Write stall");
       SetState(w, STATE_COMPLETED);
       // Only update `link_newer` if it's already set.
       // `CreateMissingNewerLinks()` will update the nullptr `link_newer` later,
@@ -658,7 +658,7 @@ void WriteThread::ExitAsBatchGroupFollower(Writer* w) {
 
 static WriteThread::AdaptationContext eabgl_ctx("ExitAsBatchGroupLeader");
 void WriteThread::ExitAsBatchGroupLeader(WriteGroup& write_group,
-                                         Status& status) {
+                                         rocksdb_rs::status::Status& status) {
   TEST_SYNC_POINT_CALLBACK("WriteThread::ExitAsBatchGroupLeader:Start",
                            &write_group);
 

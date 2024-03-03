@@ -43,7 +43,7 @@ class FilterBlockReaderCommon : public FilterBlockReader {
                      const ReadOptions& read_options) override;
 
  protected:
-  static Status ReadFilterBlock(const BlockBasedTable* table,
+  static rocksdb_rs::status::Status ReadFilterBlock(const BlockBasedTable* table,
                                 FilePrefetchBuffer* prefetch_buffer,
                                 const ReadOptions& read_options, bool use_cache,
                                 GetContext* get_context,
@@ -55,7 +55,7 @@ class FilterBlockReaderCommon : public FilterBlockReader {
   bool whole_key_filtering() const;
   bool cache_filter_blocks() const;
 
-  Status GetOrReadFilterBlock(bool no_io, GetContext* get_context,
+  rocksdb_rs::status::Status GetOrReadFilterBlock(bool no_io, GetContext* get_context,
                               BlockCacheLookupContext* lookup_context,
                               CachableEntry<TBlocklike>* filter_block,
                               const ReadOptions& read_options) const;

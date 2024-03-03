@@ -35,7 +35,7 @@ bool DBImpl::EnoughRoomForCompaction(
     // Pass the current bg_error_ to SFM so it can decide what checks to
     // perform. If this DB instance hasn't seen any error yet, the SFM can be
     // optimistic and not do disk space checks
-    Status bg_error = error_handler_.GetBGError();
+    rocksdb_rs::status::Status bg_error = error_handler_.GetBGError();
     enough_room = sfm->EnoughRoomForCompaction(cfd, inputs, bg_error);
     if (enough_room) {
       *sfm_reserved_compact_space = true;
@@ -144,7 +144,7 @@ IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
   return io_s;
 }
 
-Status DBImpl::FlushMemTableToOutputFile(
+rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
     ColumnFamilyData* cfd, const MutableCFOptions& mutable_cf_options,
     bool* made_progress, JobContext* job_context, FlushReason flush_reason,
     SuperVersionContext* superversion_context,
@@ -215,7 +215,7 @@ Status DBImpl::FlushMemTableToOutputFile(
       cfd->GetFullHistoryTsLow(), &blob_callback_);
   FileMetaData file_meta;
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool need_cancel = false;
   IOStatus log_io_s = IOStatus::OK();
   if (needs_to_sync_closed_wals) {
@@ -328,7 +328,7 @@ Status DBImpl::FlushMemTableToOutputFile(
       }
     } else {
       assert(s.eq(log_io_s));
-      Status new_bg_error = s.Clone();
+      rocksdb_rs::status::Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
   }
@@ -349,8 +349,8 @@ Status DBImpl::FlushMemTableToOutputFile(
       // interim.
       sfm->OnAddFile(file_path);
       if (sfm->IsMaxAllowedSpaceReached()) {
-        Status new_bg_error =
-            Status_SpaceLimit("Max allowed space was reached");
+        rocksdb_rs::status::Status new_bg_error =
+            rocksdb_rs::status::Status_SpaceLimit("Max allowed space was reached");
         TEST_SYNC_POINT_CALLBACK(
             "DBImpl::FlushMemTableToOutputFile:MaxAllowedSpaceReached",
             &new_bg_error);
@@ -362,7 +362,7 @@ Status DBImpl::FlushMemTableToOutputFile(
   return s;
 }
 
-Status DBImpl::FlushMemTablesToOutputFiles(
+rocksdb_rs::status::Status DBImpl::FlushMemTablesToOutputFiles(
     const autovector<BGFlushArg>& bg_flush_args, bool* made_progress,
     JobContext* job_context, LogBuffer* log_buffer, Env::Priority thread_pri) {
   if (immutable_db_options_.atomic_flush) {
@@ -382,7 +382,7 @@ Status DBImpl::FlushMemTablesToOutputFiles(
   SuperVersionContext* superversion_context =
       bg_flush_arg.superversion_context_;
   FlushReason flush_reason = bg_flush_arg.flush_reason_;
-  Status s = FlushMemTableToOutputFile(
+  rocksdb_rs::status::Status s = FlushMemTableToOutputFile(
       cfd, mutable_cf_options_copy, made_progress, job_context, flush_reason,
       superversion_context, snapshot_seqs, earliest_write_conflict_snapshot,
       snapshot_checker, log_buffer, thread_pri);
@@ -398,7 +398,7 @@ Status DBImpl::FlushMemTablesToOutputFiles(
  * column families are not flushed successfully, this function does not have
  * any side-effect on the state of the database.
  */
-Status DBImpl::AtomicFlushMemTablesToOutputFiles(
+rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
     const autovector<BGFlushArg>& bg_flush_args, bool* made_progress,
     JobContext* job_context, LogBuffer* log_buffer, Env::Priority thread_pri) {
   mutex_.AssertHeld();
@@ -471,7 +471,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   // Use of deque<bool> because vector<bool>
   // is specific and doesn't allow &v[i].
   std::deque<bool> switched_to_mempurge(num_cfs, false);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   IOStatus log_io_s = IOStatus::OK();
   assert(num_cfs == static_cast<int>(jobs.size()));
 
@@ -510,11 +510,11 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
 
   // exec_status stores the execution status of flush_jobs as
   // <bool /* executed */, Status /* status code */>
-  autovector<std::pair<bool, Status>> exec_status;
+  autovector<std::pair<bool, rocksdb_rs::status::Status>> exec_status;
   std::vector<bool> pick_status;
   for (int i = 0; i != num_cfs; ++i) {
     // Initially all jobs are not executed, with status OK.
-    exec_status.emplace_back(false, Status_OK());
+    exec_status.emplace_back(false, rocksdb_rs::status::Status_OK());
     pick_status.push_back(false);
   }
 
@@ -548,7 +548,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         switched_to_mempurge.empty() ? nullptr : &(switched_to_mempurge.at(0)));
     exec_status[0].first = true;
 
-    Status error_status = Status_new();
+    rocksdb_rs::status::Status error_status = rocksdb_rs::status::Status_new();
     for (const auto& e : exec_status) {
       if (!e.second.ok()) {
         s.copy_from(e.second);
@@ -566,14 +566,14 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   }
 
   if (s.IsColumnFamilyDropped()) {
-    s = Status_OK();
+    s = rocksdb_rs::status::Status_OK();
   }
 
   if (s.ok() || s.IsShutdownInProgress()) {
     // Sync on all distinct output directories.
     for (auto dir : distinct_output_dirs) {
       if (dir != nullptr) {
-        Status error_status = dir->FsyncWithDirOptions(
+        rocksdb_rs::status::Status error_status = dir->FsyncWithDirOptions(
             IOOptions(), nullptr,
             DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced));
         if (!error_status.ok()) {
@@ -603,13 +603,13 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
 
   if (s.ok()) {
     const auto wait_to_install_func =
-        [&]() -> std::pair<Status, bool /*continue to wait*/> {
+        [&]() -> std::pair<rocksdb_rs::status::Status, bool /*continue to wait*/> {
       if (!versions_->io_status().ok()) {
         // Something went wrong elsewhere, we cannot count on waiting for our
         // turn to write/sync to MANIFEST or CURRENT. Just return.
         return std::make_pair(versions_->io_status(), false);
       } else if (shutting_down_.load(std::memory_order_acquire)) {
-        return std::make_pair(Status_ShutdownInProgress(), false);
+        return std::make_pair(rocksdb_rs::status::Status_ShutdownInProgress(), false);
       }
       bool ready = true;
       for (size_t i = 0; i != cfds.size(); ++i) {
@@ -634,7 +634,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
           break;
         }
       }
-      return std::make_pair(Status_OK(), !ready);
+      return std::make_pair(rocksdb_rs::status::Status_OK(), !ready);
     };
 
     bool resuming_from_bg_err =
@@ -643,7 +643,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
          bg_flush_args[0].flush_reason_ ==
              FlushReason::kErrorRecoveryRetryFlush);
     while ((!resuming_from_bg_err || error_handler_.GetRecoveryError().ok())) {
-      std::pair<Status, bool> res = wait_to_install_func();
+      std::pair<rocksdb_rs::status::Status, bool> res = wait_to_install_func();
 
       TEST_SYNC_POINT_CALLBACK(
           "DBImpl::AtomicFlushMemTablesToOutputFiles:WaitToCommit", &res);
@@ -768,8 +768,8 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         sfm->OnAddFile(file_path);
         if (sfm->IsMaxAllowedSpaceReached() &&
             error_handler_.GetBGError().ok()) {
-          Status new_bg_error =
-              Status_SpaceLimit("Max allowed space was reached");
+          rocksdb_rs::status::Status new_bg_error =
+              rocksdb_rs::status::Status_SpaceLimit("Max allowed space was reached");
           error_handler_.SetBGError(new_bg_error,
                                     BackgroundErrorReason::kFlush);
         }
@@ -801,7 +801,7 @@ Status DBImpl::AtomicFlushMemTablesToOutputFiles(
       }
     } else {
       assert(s.eq(log_io_s));
-      Status new_bg_error = s.Clone();
+      rocksdb_rs::status::Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
   }
@@ -889,16 +889,16 @@ void DBImpl::NotifyOnFlushCompleted(
   // flush process.
 }
 
-Status DBImpl::CompactRange(const CompactRangeOptions& options,
+rocksdb_rs::status::Status DBImpl::CompactRange(const CompactRangeOptions& options,
                             ColumnFamilyHandle* column_family,
                             const Slice* begin_without_ts,
                             const Slice* end_without_ts) {
   if (manual_compaction_paused_.load(std::memory_order_acquire) > 0) {
-    return Status_Incomplete(SubCode::kManualCompactionPaused);
+    return rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
 
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return Status_Incomplete(SubCode::kManualCompactionPaused);
+    return rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
 
   const Comparator* const ucmp = column_family->GetComparator();
@@ -931,7 +931,7 @@ Status DBImpl::CompactRange(const CompactRangeOptions& options,
                               end_with_ts, "" /*trim_ts*/);
 }
 
-Status DBImpl::IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status DBImpl::IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
                                         std::string ts_low) {
   ColumnFamilyData* cfd = nullptr;
   if (column_family == nullptr) {
@@ -943,16 +943,16 @@ Status DBImpl::IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
   }
   assert(cfd != nullptr && cfd->user_comparator() != nullptr);
   if (cfd->user_comparator()->timestamp_size() == 0) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Timestamp is not enabled in this column family");
   }
   if (cfd->user_comparator()->timestamp_size() != ts_low.size()) {
-    return Status_InvalidArgument("ts_low size mismatch");
+    return rocksdb_rs::status::Status_InvalidArgument("ts_low size mismatch");
   }
   return IncreaseFullHistoryTsLowImpl(cfd, ts_low);
 }
 
-Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
                                             std::string ts_low) {
   VersionEdit edit;
   edit.SetColumnFamily(cfd->GetID());
@@ -969,10 +969,10 @@ Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
   assert(ucmp->timestamp_size() == ts_low.size() && !ts_low.empty());
   if (!current_ts_low.empty() &&
       ucmp->CompareTimestamp(ts_low, current_ts_low) < 0) {
-    return Status_InvalidArgument("Cannot decrease full_history_ts_low");
+    return rocksdb_rs::status::Status_InvalidArgument("Cannot decrease full_history_ts_low");
   }
 
-  Status s = versions_->LogAndApply(cfd, *cfd->GetLatestMutableCFOptions(),
+  rocksdb_rs::status::Status s = versions_->LogAndApply(cfd, *cfd->GetLatestMutableCFOptions(),
                                     read_options, &edit, &mutex_,
                                     directories_.GetDbDir());
   if (!s.ok()) {
@@ -986,12 +986,12 @@ Status DBImpl::IncreaseFullHistoryTsLowImpl(ColumnFamilyData* cfd,
         << " is set to be higher than the requested "
            "timestamp: "
         << Slice(ts_low).ToString(true) << std::endl;
-    return Status_TryAgain(oss.str());
+    return rocksdb_rs::status::Status_TryAgain(oss.str());
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
+rocksdb_rs::status::Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
                                     ColumnFamilyHandle* column_family,
                                     const Slice* begin, const Slice* end,
                                     const std::string& trim_ts) {
@@ -999,7 +999,7 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
   auto cfd = cfh->cfd();
 
   if (options.target_path_id >= cfd->ioptions()->cf_paths.size()) {
-    return Status_InvalidArgument("Invalid target path ID");
+    return rocksdb_rs::status::Status_InvalidArgument("Invalid target path ID");
   }
 
   bool flush_needed = true;
@@ -1009,17 +1009,17 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
       !options.full_history_ts_low->empty()) {
     std::string ts_low = options.full_history_ts_low->ToString();
     if (begin != nullptr || end != nullptr) {
-      return Status_InvalidArgument(
+      return rocksdb_rs::status::Status_InvalidArgument(
           "Cannot specify compaction range with full_history_ts_low");
     }
-    Status s = IncreaseFullHistoryTsLowImpl(cfd, ts_low);
+    rocksdb_rs::status::Status s = IncreaseFullHistoryTsLowImpl(cfd, ts_low);
     if (!s.ok()) {
       LogFlush(immutable_db_options_.info_log);
       return s;
     }
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (begin != nullptr && end != nullptr) {
     // TODO(ajkr): We could also optimize away the flush in certain cases where
     // one/both sides of the interval are unbounded. But it requires more
@@ -1127,7 +1127,7 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
           }
         }
         if (check_overlap_within_file) {
-          Status status = current_version->OverlapWithLevelIterator(
+          rocksdb_rs::status::Status status = current_version->OverlapWithLevelIterator(
               ro, file_options_, *begin, *end, level, &overlap);
           if (!status.ok()) {
             check_overlap_within_file = false;
@@ -1263,7 +1263,7 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
       s = ReFitLevel(cfd, final_output_level, options.target_level);
       TEST_SYNC_POINT("DBImpl::CompactRange:PostRefitLevel");
       // ContinueBackgroundWork always return Status_OK().
-      Status temp_s = ContinueBackgroundWork();
+      rocksdb_rs::status::Status temp_s = ContinueBackgroundWork();
       assert(temp_s.ok());
     }
     EnableManualCompaction();
@@ -1282,21 +1282,21 @@ Status DBImpl::CompactRangeInternal(const CompactRangeOptions& options,
   return s;
 }
 
-Status DBImpl::CompactFiles(const CompactionOptions& compact_options,
+rocksdb_rs::status::Status DBImpl::CompactFiles(const CompactionOptions& compact_options,
                             ColumnFamilyHandle* column_family,
                             const std::vector<std::string>& input_file_names,
                             const int output_level, const int output_path_id,
                             std::vector<std::string>* const output_file_names,
                             CompactionJobInfo* compaction_job_info) {
   if (column_family == nullptr) {
-    return Status_InvalidArgument("ColumnFamilyHandle must be non-null.");
+    return rocksdb_rs::status::Status_InvalidArgument("ColumnFamilyHandle must be non-null.");
   }
 
   auto cfd =
       static_cast_with_check<ColumnFamilyHandleImpl>(column_family)->cfd();
   assert(cfd);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   JobContext job_context(next_job_id_.fetch_add(1), true);
   LogBuffer log_buffer(InfoLogLevel::INFO_LEVEL,
                        immutable_db_options_.info_log.get());
@@ -1348,7 +1348,7 @@ Status DBImpl::CompactFiles(const CompactionOptions& compact_options,
   return s;
 }
 
-Status DBImpl::CompactFilesImpl(
+rocksdb_rs::status::Status DBImpl::CompactFilesImpl(
     const CompactionOptions& compact_options, ColumnFamilyData* cfd,
     Version* version, const std::vector<std::string>& input_file_names,
     std::vector<std::string>* const output_file_names, const int output_level,
@@ -1357,10 +1357,10 @@ Status DBImpl::CompactFilesImpl(
   mutex_.AssertHeld();
 
   if (shutting_down_.load(std::memory_order_acquire)) {
-    return Status_ShutdownInProgress();
+    return rocksdb_rs::status::Status_ShutdownInProgress();
   }
   if (manual_compaction_paused_.load(std::memory_order_acquire) > 0) {
-    return Status_Incomplete(SubCode::kManualCompactionPaused);
+    return rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
 
   std::unordered_set<uint64_t> input_set;
@@ -1377,7 +1377,7 @@ Status DBImpl::CompactFilesImpl(
     if (cfd->ioptions()->cf_paths.size() == 1U) {
       output_path_id = 0;
     } else {
-      return Status_NotSupported(
+      return rocksdb_rs::status::Status_NotSupported(
           "Automatic output path selection is not "
           "yet supported in CompactFiles()");
     }
@@ -1385,13 +1385,13 @@ Status DBImpl::CompactFilesImpl(
 
   if (cfd->ioptions()->allow_ingest_behind &&
       output_level >= cfd->ioptions()->num_levels - 1) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Exceed the maximum output level defined by "
         "the current compaction algorithm with ingest_behind --- " +
         std::to_string(cfd->ioptions()->num_levels - 1));
   }
 
-  Status s = cfd->compaction_picker()->SanitizeCompactionInputFiles(
+  rocksdb_rs::status::Status s = cfd->compaction_picker()->SanitizeCompactionInputFiles(
       &input_set, cf_meta, output_level);
   TEST_SYNC_POINT("DBImpl::CompactFilesImpl::PostSanitizeCompactionInputFiles");
   if (!s.ok()) {
@@ -1407,7 +1407,7 @@ Status DBImpl::CompactFilesImpl(
 
   for (const auto& inputs : input_files) {
     if (cfd->compaction_picker()->AreFilesInCompaction(inputs.files)) {
-      return Status_Aborted(
+      return rocksdb_rs::status::Status_Aborted(
           "Some of the necessary compaction input "
           "files are already being compacted");
     }
@@ -1420,7 +1420,7 @@ Status DBImpl::CompactFilesImpl(
   if (!enough_room) {
     // m's vars will get set properly at the end of this function,
     // as long as status == CompactionTooLarge
-    return Status_CompactionTooLarge();
+    return rocksdb_rs::status::Status_CompactionTooLarge();
   }
 
   // At this point, CompactFiles will be run.
@@ -1485,7 +1485,7 @@ Status DBImpl::CompactFilesImpl(
   TEST_SYNC_POINT("CompactFilesImpl:3");
   mutex_.Lock();
 
-  Status status = compaction_job.Install(*c->mutable_cf_options());
+  rocksdb_rs::status::Status status = compaction_job.Install(*c->mutable_cf_options());
   if (status.ok()) {
     assert(compaction_job.io_status().ok());
     InstallSuperVersionAndScheduleWork(c->column_family_data(),
@@ -1556,7 +1556,7 @@ Status DBImpl::CompactFilesImpl(
   return status;
 }
 
-Status DBImpl::PauseBackgroundWork() {
+rocksdb_rs::status::Status DBImpl::PauseBackgroundWork() {
   InstrumentedMutexLock guard_lock(&mutex_);
   bg_compaction_paused_++;
   while (bg_bottom_compaction_scheduled_ > 0 || bg_compaction_scheduled_ > 0 ||
@@ -1564,13 +1564,13 @@ Status DBImpl::PauseBackgroundWork() {
     bg_cv_.Wait();
   }
   bg_work_paused_++;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status DBImpl::ContinueBackgroundWork() {
+rocksdb_rs::status::Status DBImpl::ContinueBackgroundWork() {
   InstrumentedMutexLock guard_lock(&mutex_);
   if (bg_work_paused_ == 0) {
-    return Status_InvalidArgument();
+    return rocksdb_rs::status::Status_InvalidArgument();
   }
   assert(bg_work_paused_ > 0);
   assert(bg_compaction_paused_ > 0);
@@ -1581,11 +1581,11 @@ Status DBImpl::ContinueBackgroundWork() {
   if (bg_work_paused_ == 0) {
     MaybeScheduleFlushOrCompaction();
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 void DBImpl::NotifyOnCompactionBegin(ColumnFamilyData* cfd, Compaction* c,
-                                     const Status& st,
+                                     const rocksdb_rs::status::Status& st,
                                      const CompactionJobStats& job_stats,
                                      int job_id) {
   if (immutable_db_options_.listeners.empty()) {
@@ -1618,7 +1618,7 @@ void DBImpl::NotifyOnCompactionBegin(ColumnFamilyData* cfd, Compaction* c,
 }
 
 void DBImpl::NotifyOnCompactionCompleted(
-    ColumnFamilyData* cfd, Compaction* c, const Status& st,
+    ColumnFamilyData* cfd, Compaction* c, const rocksdb_rs::status::Status& st,
     const CompactionJobStats& compaction_job_stats, const int job_id) {
   if (immutable_db_options_.listeners.size() == 0U) {
     return;
@@ -1653,10 +1653,10 @@ void DBImpl::NotifyOnCompactionCompleted(
 
 // REQUIREMENT: block all background work by calling PauseBackgroundWork()
 // before calling this function
-Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
+rocksdb_rs::status::Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
   assert(level < cfd->NumberLevels());
   if (target_level >= cfd->NumberLevels()) {
-    return Status_InvalidArgument("Target level exceeds number of levels");
+    return rocksdb_rs::status::Status_InvalidArgument("Target level exceeds number of levels");
   }
 
   const ReadOptions read_options(Env::IOActivity::kCompaction);
@@ -1667,13 +1667,13 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
 
   auto* vstorage = cfd->current()->storage_info();
   if (vstorage->LevelFiles(level).empty()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
   // only allow one thread refitting
   if (refitting_level_) {
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "[ReFitLevel] another thread is refitting");
-    return Status_NotSupported("another thread is refitting");
+    return rocksdb_rs::status::Status_NotSupported("another thread is refitting");
   }
   refitting_level_ = true;
 
@@ -1697,21 +1697,21 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
     if (to_level > level) {
       if (level == 0) {
         refitting_level_ = false;
-        return Status_NotSupported(
+        return rocksdb_rs::status::Status_NotSupported(
             "Cannot change from level 0 to other levels.");
       }
       // Check levels are empty for a trivial move
       for (int l = level + 1; l <= to_level; l++) {
         if (vstorage->NumLevelFiles(l) > 0) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target are not empty for a move.");
         }
         if (cfd->RangeOverlapWithCompaction(refit_level_smallest.user_key(),
                                             refit_level_largest.user_key(),
                                             l)) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target "
               "will have some ongoing compaction's output.");
         }
@@ -1722,14 +1722,14 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
       for (int l = to_level; l < level; l++) {
         if (vstorage->NumLevelFiles(l) > 0) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target are not empty for a move.");
         }
         if (cfd->RangeOverlapWithCompaction(refit_level_smallest.user_key(),
                                             refit_level_largest.user_key(),
                                             l)) {
           refitting_level_ = false;
-          return Status_NotSupported(
+          return rocksdb_rs::status::Status_NotSupported(
               "Levels between source and target "
               "will have some ongoing compaction's output.");
         }
@@ -1776,7 +1776,7 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
                     "[%s] Apply version edit:\n%s", cfd->GetName().c_str(),
                     edit.DebugString().data());
 
-    Status status =
+    rocksdb_rs::status::Status status =
         versions_->LogAndApply(cfd, mutable_cf_options, read_options, &edit,
                                &mutex_, directories_.GetDbDir());
 
@@ -1800,7 +1800,7 @@ Status DBImpl::ReFitLevel(ColumnFamilyData* cfd, int level, int target_level) {
   }
 
   refitting_level_ = false;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 int DBImpl::NumberLevels(ColumnFamilyHandle* column_family) {
@@ -1820,15 +1820,15 @@ int DBImpl::Level0StopWriteTrigger(ColumnFamilyHandle* column_family) {
       ->mutable_cf_options.level0_stop_writes_trigger;
 }
 
-Status DBImpl::FlushAllColumnFamilies(const FlushOptions& flush_options,
+rocksdb_rs::status::Status DBImpl::FlushAllColumnFamilies(const FlushOptions& flush_options,
                                       FlushReason flush_reason) {
   mutex_.AssertHeld();
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (immutable_db_options_.atomic_flush) {
     mutex_.Unlock();
     status = AtomicFlushMemTables(flush_options, flush_reason);
     if (status.IsColumnFamilyDropped()) {
-      status = Status_OK();
+      status = rocksdb_rs::status::Status_OK();
     }
     mutex_.Lock();
   } else {
@@ -1844,19 +1844,19 @@ Status DBImpl::FlushAllColumnFamilies(const FlushOptions& flush_options,
       if (!status.ok() && !status.IsColumnFamilyDropped()) {
         break;
       } else if (status.IsColumnFamilyDropped()) {
-        status = Status_OK();
+        status = rocksdb_rs::status::Status_OK();
       }
     }
   }
   return status;
 }
 
-Status DBImpl::Flush(const FlushOptions& flush_options,
+rocksdb_rs::status::Status DBImpl::Flush(const FlushOptions& flush_options,
                      ColumnFamilyHandle* column_family) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   ROCKS_LOG_INFO(immutable_db_options_.info_log, "[%s] Manual flush start.",
                  cfh->GetName().c_str());
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (immutable_db_options_.atomic_flush) {
     s = AtomicFlushMemTables(flush_options, FlushReason::kManualFlush,
                              {cfh->cfd()});
@@ -1870,9 +1870,9 @@ Status DBImpl::Flush(const FlushOptions& flush_options,
   return s;
 }
 
-Status DBImpl::Flush(const FlushOptions& flush_options,
+rocksdb_rs::status::Status DBImpl::Flush(const FlushOptions& flush_options,
                      const std::vector<ColumnFamilyHandle*>& column_families) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!immutable_db_options_.atomic_flush) {
     for (auto cfh : column_families) {
       s = Flush(flush_options, cfh);
@@ -1913,7 +1913,7 @@ Status DBImpl::Flush(const FlushOptions& flush_options,
   return s;
 }
 
-Status DBImpl::RunManualCompaction(
+rocksdb_rs::status::Status DBImpl::RunManualCompaction(
     ColumnFamilyData* cfd, int input_level, int output_level,
     const CompactRangeOptions& compact_range_options, const Slice* begin,
     const Slice* end, bool exclusive, bool disallow_trivial_move,
@@ -1962,7 +1962,7 @@ Status DBImpl::RunManualCompaction(
     // to drain. So return immediately.
     TEST_SYNC_POINT("DBImpl::RunManualCompaction:PausedAtStart");
     manual.status =
-        Status_Incomplete(SubCode::kManualCompactionPaused);
+        rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
     manual.done = true;
     return manual.status.Clone();
   }
@@ -1996,7 +1996,7 @@ Status DBImpl::RunManualCompaction(
         // handling code can process it.
         manual.done = true;
         manual.status =
-            Status_Incomplete(SubCode::kManualCompactionPaused);
+            rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
         break;
       }
       TEST_SYNC_POINT("DBImpl::RunManualCompaction:WaitScheduled");
@@ -2038,7 +2038,7 @@ Status DBImpl::RunManualCompaction(
           // compaction so the below cleanup/error handling code can process it.
           manual.done = true;
           manual.status =
-              Status_Incomplete(SubCode::kManualCompactionPaused);
+              rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
         }
       }
       if (!manual.done) {
@@ -2125,7 +2125,7 @@ Status DBImpl::RunManualCompaction(
   // any unscheduled compaction job which was blocked by exclusive manual
   // compaction.
   if (manual.status.IsIncomplete() &&
-      manual.status.subcode() == SubCode::kManualCompactionPaused) {
+      manual.status.subcode() == rocksdb_rs::status::SubCode::kManualCompactionPaused) {
     MaybeScheduleFlushOrCompaction();
   }
   bg_cv_.SignalAll();
@@ -2147,7 +2147,7 @@ void DBImpl::GenerateFlushRequest(const autovector<ColumnFamilyData*>& cfds,
   }
 }
 
-Status DBImpl::FlushMemTable(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status DBImpl::FlushMemTable(ColumnFamilyData* cfd,
                              const FlushOptions& flush_options,
                              FlushReason flush_reason,
                              bool entered_write_thread) {
@@ -2157,9 +2157,9 @@ Status DBImpl::FlushMemTable(ColumnFamilyData* cfd,
     std::ostringstream oss;
     oss << "Writes have been stopped, thus unable to perform manual flush. "
            "Please try again later after writes are resumed";
-    return Status_TryAgain(oss.str());
+    return rocksdb_rs::status::Status_TryAgain(oss.str());
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!flush_options.allow_write_stall) {
     bool flush_needed = true;
     s = WaitUntilFlushWouldNotStallWrites(cfd, &flush_needed);
@@ -2294,7 +2294,7 @@ Status DBImpl::FlushMemTable(ColumnFamilyData* cfd,
   return s;
 }
 
-Status DBImpl::AtomicFlushMemTables(
+rocksdb_rs::status::Status DBImpl::AtomicFlushMemTables(
     const FlushOptions& flush_options, FlushReason flush_reason,
     const autovector<ColumnFamilyData*>& provided_candidate_cfds,
     bool entered_write_thread) {
@@ -2303,9 +2303,9 @@ Status DBImpl::AtomicFlushMemTables(
     std::ostringstream oss;
     oss << "Writes have been stopped, thus unable to perform manual flush. "
            "Please try again later after writes are resumed";
-    return Status_TryAgain(oss.str());
+    return rocksdb_rs::status::Status_TryAgain(oss.str());
   }
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   autovector<ColumnFamilyData*> candidate_cfds;
   if (provided_candidate_cfds.empty()) {
     // Generate candidate cfds if not provided
@@ -2441,7 +2441,7 @@ Status DBImpl::AtomicFlushMemTables(
 // it emulates how the SuperVersion / LSM would change if flush happens, checks
 // it against various constrains and delays flush if it'd cause write stall.
 // Caller should check status and flush_needed to see if flush already happened.
-Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
+rocksdb_rs::status::Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
                                                  bool* flush_needed) {
   {
     *flush_needed = true;
@@ -2466,10 +2466,10 @@ Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
         bg_cv_.Wait();
       }
       if (cfd->IsDropped()) {
-        return Status_ColumnFamilyDropped();
+        return rocksdb_rs::status::Status_ColumnFamilyDropped();
       }
       if (shutting_down_.load(std::memory_order_acquire)) {
-        return Status_ShutdownInProgress();
+        return rocksdb_rs::status::Status_ShutdownInProgress();
       }
 
       uint64_t earliest_memtable_id =
@@ -2478,7 +2478,7 @@ Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
         // We waited so long that the memtable we were originally waiting on was
         // flushed.
         *flush_needed = false;
-        return Status_OK();
+        return rocksdb_rs::status::Status_OK();
       }
 
       const auto& mutable_cf_options = *cfd->GetLatestMutableCFOptions();
@@ -2506,7 +2506,7 @@ Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
                                   .first;
     } while (write_stall_condition != WriteStallCondition::kNormal);
   }
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 // Wait for memtables to be flushed for multiple column families.
@@ -2519,19 +2519,19 @@ Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamilyData* cfd,
 // Finish waiting when ALL column families finish flushing memtables.
 // resuming_from_bg_err indicates whether the caller is trying to resume from
 // background error or in normal processing.
-Status DBImpl::WaitForFlushMemTables(
+rocksdb_rs::status::Status DBImpl::WaitForFlushMemTables(
     const autovector<ColumnFamilyData*>& cfds,
     const autovector<const uint64_t*>& flush_memtable_ids,
     bool resuming_from_bg_err) {
   int num = static_cast<int>(cfds.size());
   // Wait until the compaction completes
   InstrumentedMutexLock l(&mutex_);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // If the caller is trying to resume from bg error, then
   // error_handler_.IsDBStopped() is true.
   while (resuming_from_bg_err || !error_handler_.IsDBStopped()) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      s = Status_ShutdownInProgress();
+      s = rocksdb_rs::status::Status_ShutdownInProgress();
       return s;
     }
     // If an error has occurred during resumption, then no need to wait.
@@ -2544,7 +2544,7 @@ Status DBImpl::WaitForFlushMemTables(
     // If BGWorkStopped, which indicate that there is a BG error and
     // 1) soft error but requires no BG work, 2) no in auto_recovery_
     if (!resuming_from_bg_err && error_handler_.IsBGWorkStopped() &&
-        error_handler_.GetBGError().severity() < Severity::kHardError) {
+        error_handler_.GetBGError().severity() < rocksdb_rs::status::Severity::kHardError) {
       s = error_handler_.GetBGError();
       return s;
     }
@@ -2564,7 +2564,7 @@ Status DBImpl::WaitForFlushMemTables(
       }
     }
     if (1 == num_dropped && 1 == num) {
-      s = Status_ColumnFamilyDropped();
+      s = rocksdb_rs::status::Status_ColumnFamilyDropped();
       return s;
     }
     // Column families involved in this flush request have either been dropped
@@ -2582,11 +2582,11 @@ Status DBImpl::WaitForFlushMemTables(
   return s;
 }
 
-Status DBImpl::EnableAutoCompaction(
+rocksdb_rs::status::Status DBImpl::EnableAutoCompaction(
     const std::vector<ColumnFamilyHandle*>& column_family_handles) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (auto cf_ptr : column_family_handles) {
-    Status status =
+    rocksdb_rs::status::Status status =
         this->SetOptions(cf_ptr, {{"disable_auto_compactions", "false"}});
     if (!status.ok()) {
       s.copy_from(status);
@@ -2910,11 +2910,11 @@ void DBImpl::UnscheduleCompactionCallback(void* arg) {
     if (ca.prepicked_compaction->manual_compaction_state) {
       ca.prepicked_compaction->manual_compaction_state->done = true;
       ca.prepicked_compaction->manual_compaction_state->status =
-          Status_Incomplete(SubCode::kManualCompactionPaused);
+          rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
     }
     if (ca.prepicked_compaction->compaction != nullptr) {
       ca.prepicked_compaction->compaction->ReleaseCompactionFiles(
-          Status_Incomplete(SubCode::kManualCompactionPaused));
+          rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused));
       delete ca.prepicked_compaction->compaction;
     }
     delete ca.prepicked_compaction;
@@ -2935,18 +2935,18 @@ void DBImpl::UnscheduleFlushCallback(void* arg) {
   TEST_SYNC_POINT("DBImpl::UnscheduleFlushCallback");
 }
 
-Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
+rocksdb_rs::status::Status DBImpl::BackgroundFlush(bool* made_progress, JobContext* job_context,
                                LogBuffer* log_buffer, FlushReason* reason,
                                Env::Priority thread_pri) {
   mutex_.AssertHeld();
 
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   *reason = FlushReason::kOthers;
   // If BG work is stopped due to an error, but a recovery is in progress,
   // that means this flush is part of the recovery. So allow it to go through
   if (!error_handler_.IsBGWorkStopped()) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      status = Status_ShutdownInProgress();
+      status = rocksdb_rs::status::Status_ShutdownInProgress();
     }
   } else if (!error_handler_.IsRecoveryInProgress()) {
     status = error_handler_.GetBGError();
@@ -3047,7 +3047,7 @@ void DBImpl::BackgroundCallFlush(Env::Priority thread_pri) {
             CaptureCurrentFileNumberInPendingOutputs()));
     FlushReason reason;
 
-    Status s = BackgroundFlush(&made_progress, &job_context, &log_buffer,
+    rocksdb_rs::status::Status s = BackgroundFlush(&made_progress, &job_context, &log_buffer,
                                &reason, thread_pri);
     if (!s.ok() && !s.IsShutdownInProgress() && !s.IsColumnFamilyDropped() &&
         reason != FlushReason::kErrorRecovery) {
@@ -3128,7 +3128,7 @@ void DBImpl::BackgroundCallCompaction(PrepickedCompaction* prepicked_compaction,
     assert((bg_thread_pri == Env::Priority::BOTTOM &&
             bg_bottom_compaction_scheduled_) ||
            (bg_thread_pri == Env::Priority::LOW && bg_compaction_scheduled_));
-    Status s = BackgroundCompaction(&made_progress, &job_context, &log_buffer,
+    rocksdb_rs::status::Status s = BackgroundCompaction(&made_progress, &job_context, &log_buffer,
                                     prepicked_compaction, bg_thread_pri);
     TEST_SYNC_POINT("BackgroundCallCompaction:1");
     if (s.IsBusy()) {
@@ -3232,7 +3232,7 @@ void DBImpl::BackgroundCallCompaction(PrepickedCompaction* prepicked_compaction,
   }
 }
 
-Status DBImpl::BackgroundCompaction(bool* made_progress,
+rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
                                     JobContext* job_context,
                                     LogBuffer* log_buffer,
                                     PrepickedCompaction* prepicked_compaction,
@@ -3260,13 +3260,13 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       is_manual && manual_compaction->disallow_trivial_move;
 
   CompactionJobStats compaction_job_stats;
-  Status status = Status_new();
+  rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (!error_handler_.IsBGWorkStopped()) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      status = Status_ShutdownInProgress();
+      status = rocksdb_rs::status::Status_ShutdownInProgress();
     } else if (is_manual &&
                manual_compaction->canceled.load(std::memory_order_acquire)) {
-      status = Status_Incomplete(SubCode::kManualCompactionPaused);
+      status = rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
     }
   } else {
     status = error_handler_.GetBGError();
@@ -3327,7 +3327,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
         c.reset();
         // m's vars will get set properly at the end of this function,
         // as long as status == CompactionTooLarge
-        status = Status_CompactionTooLarge();
+        status = rocksdb_rs::status::Status_CompactionTooLarge();
       } else {
         ROCKS_LOG_BUFFER(
             log_buffer,
@@ -3349,7 +3349,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       // Stay in the compaction queue.
       unscheduled_compactions_++;
 
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     auto cfd = PickCompactionFromQueue(&task_token, log_buffer);
@@ -3357,7 +3357,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
       // Can't find any executable task from the compaction queue.
       // All tasks have been throttled by compaction thread limiter.
       ++unscheduled_compactions_;
-      return Status_Busy();
+      return rocksdb_rs::status::Status_Busy();
     }
 
     // We unreference here because the following code will take a Ref() on
@@ -3368,7 +3368,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
     if (cfd->UnrefAndTryDelete()) {
       // This was the last reference of the column family, so no need to
       // compact.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
     // Pick up latest mutable CF Options and use it throughout the
@@ -3404,7 +3404,7 @@ Status DBImpl::BackgroundCompaction(bool* made_progress,
           c.reset();
           // Don't need to sleep here, because BackgroundCallCompaction
           // will sleep if !s.ok()
-          status = Status_CompactionTooLarge();
+          status = rocksdb_rs::status::Status_CompactionTooLarge();
         } else {
           // update statistics
           size_t num_files = 0;
@@ -3822,7 +3822,7 @@ bool DBImpl::MCOverlap(ManualCompactionState* m, ManualCompactionState* m1) {
 }
 
 void DBImpl::BuildCompactionJobInfo(
-    const ColumnFamilyData* cfd, Compaction* c, const Status& st,
+    const ColumnFamilyData* cfd, Compaction* c, const rocksdb_rs::status::Status& st,
     const CompactionJobStats& compaction_job_stats, const int job_id,
     const Version* current, CompactionJobInfo* compaction_job_info) const {
   assert(compaction_job_info != nullptr);
@@ -4000,11 +4000,11 @@ void DBImpl::GetSnapshotContext(
   *snapshot_seqs = snapshots_.GetAll(earliest_write_conflict_snapshot);
 }
 
-Status DBImpl::WaitForCompact(
+rocksdb_rs::status::Status DBImpl::WaitForCompact(
     const WaitForCompactOptions& wait_for_compact_options) {
   InstrumentedMutexLock l(&mutex_);
   if (wait_for_compact_options.flush) {
-    Status s = DBImpl::FlushAllColumnFamilies(FlushOptions(),
+    rocksdb_rs::status::Status s = DBImpl::FlushAllColumnFamilies(FlushOptions(),
                                               FlushReason::kManualFlush);
     if (!s.ok()) {
       return s;
@@ -4013,10 +4013,10 @@ Status DBImpl::WaitForCompact(
   TEST_SYNC_POINT("DBImpl::WaitForCompact:StartWaiting");
   for (;;) {
     if (shutting_down_.load(std::memory_order_acquire)) {
-      return Status_ShutdownInProgress();
+      return rocksdb_rs::status::Status_ShutdownInProgress();
     }
     if (bg_work_paused_ && wait_for_compact_options.abort_on_pause) {
-      return Status_Aborted();
+      return rocksdb_rs::status::Status_Aborted();
     }
     if ((bg_bottom_compaction_scheduled_ || bg_compaction_scheduled_ ||
          bg_flush_scheduled_ || unscheduled_compactions_ ||

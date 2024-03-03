@@ -146,7 +146,7 @@ WriteCommittedTxn::WriteCommittedTxn(TransactionDB* txn_db,
                                      const TransactionOptions& txn_options)
     : PessimisticTransaction(txn_db, write_options, txn_options) {}
 
-Status WriteCommittedTxn::GetForUpdate(const ReadOptions& read_options,
+rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdate(const ReadOptions& read_options,
                                        ColumnFamilyHandle* column_family,
                                        const Slice& key, std::string* value,
                                        bool exclusive, const bool do_validate) {
@@ -154,7 +154,7 @@ Status WriteCommittedTxn::GetForUpdate(const ReadOptions& read_options,
                           do_validate);
 }
 
-Status WriteCommittedTxn::GetForUpdate(const ReadOptions& read_options,
+rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdate(const ReadOptions& read_options,
                                        ColumnFamilyHandle* column_family,
                                        const Slice& key,
                                        PinnableSlice* pinnable_val,
@@ -164,11 +164,11 @@ Status WriteCommittedTxn::GetForUpdate(const ReadOptions& read_options,
 }
 
 template <typename TValue>
-inline Status WriteCommittedTxn::GetForUpdateImpl(
+inline rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdateImpl(
     const ReadOptions& read_options, ColumnFamilyHandle* column_family,
     const Slice& key, TValue* value, bool exclusive, const bool do_validate) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call GetForUpdate with `ReadOptions::io_activity` != "
         "`Env::IOActivity::kUnknown`");
   }
@@ -184,7 +184,7 @@ inline Status WriteCommittedTxn::GetForUpdateImpl(
                                                value, exclusive, do_validate);
     }
   } else {
-    Status s = db_impl_->FailIfTsMismatchCf(
+    rocksdb_rs::status::Status s = db_impl_->FailIfTsMismatchCf(
         column_family, *(read_options.timestamp), /*ts_for_read=*/true);
     if (!s.ok()) {
       return s;
@@ -192,11 +192,11 @@ inline Status WriteCommittedTxn::GetForUpdateImpl(
   }
 
   if (!do_validate) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with read_timestamp is not "
         "defined.");
   } else if (kMaxTxnTimestamp == read_timestamp_) {
-    return Status_InvalidArgument("read_timestamp must be set for validation");
+    return rocksdb_rs::status::Status_InvalidArgument("read_timestamp must be set for validation");
   }
 
   if (!read_options.timestamp) {
@@ -213,19 +213,19 @@ inline Status WriteCommittedTxn::GetForUpdateImpl(
   assert(read_options.timestamp->size() == sizeof(kMaxTxnTimestamp));
   TxnTimestamp ts = DecodeFixed64(ts_buf);
   if (ts != read_timestamp_) {
-    return Status_InvalidArgument("Must read from the same read_timestamp");
+    return rocksdb_rs::status::Status_InvalidArgument("Must read from the same read_timestamp");
   }
   return TransactionBaseImpl::GetForUpdate(read_options, column_family, key,
                                            value, exclusive, do_validate);
 }
 
-Status WriteCommittedTxn::Put(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::Put(ColumnFamilyHandle* column_family,
                               const Slice& key, const Slice& value,
                               const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
   return Operate(column_family, key, do_validate, assume_tracked,
                  [column_family, &key, &value, this]() {
-                   Status s =
+                   rocksdb_rs::status::Status s =
                        GetBatchForWrite()->Put(column_family, key, value);
                    if (s.ok()) {
                      ++num_puts_;
@@ -234,13 +234,13 @@ Status WriteCommittedTxn::Put(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::Put(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::Put(ColumnFamilyHandle* column_family,
                               const SliceParts& key, const SliceParts& value,
                               const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
   return Operate(column_family, key, do_validate, assume_tracked,
                  [column_family, &key, &value, this]() {
-                   Status s =
+                   rocksdb_rs::status::Status s =
                        GetBatchForWrite()->Put(column_family, key, value);
                    if (s.ok()) {
                      ++num_puts_;
@@ -249,12 +249,12 @@ Status WriteCommittedTxn::Put(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::PutUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::PutUntracked(ColumnFamilyHandle* column_family,
                                        const Slice& key, const Slice& value) {
   return Operate(
       column_family, key, /*do_validate=*/false,
       /*assume_tracked=*/false, [column_family, &key, &value, this]() {
-        Status s = GetBatchForWrite()->Put(column_family, key, value);
+        rocksdb_rs::status::Status s = GetBatchForWrite()->Put(column_family, key, value);
         if (s.ok()) {
           ++num_puts_;
         }
@@ -262,13 +262,13 @@ Status WriteCommittedTxn::PutUntracked(ColumnFamilyHandle* column_family,
       });
 }
 
-Status WriteCommittedTxn::PutUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::PutUntracked(ColumnFamilyHandle* column_family,
                                        const SliceParts& key,
                                        const SliceParts& value) {
   return Operate(
       column_family, key, /*do_validate=*/false,
       /*assume_tracked=*/false, [column_family, &key, &value, this]() {
-        Status s = GetBatchForWrite()->Put(column_family, key, value);
+        rocksdb_rs::status::Status s = GetBatchForWrite()->Put(column_family, key, value);
         if (s.ok()) {
           ++num_puts_;
         }
@@ -276,12 +276,12 @@ Status WriteCommittedTxn::PutUntracked(ColumnFamilyHandle* column_family,
       });
 }
 
-Status WriteCommittedTxn::Delete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::Delete(ColumnFamilyHandle* column_family,
                                  const Slice& key, const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
   return Operate(column_family, key, do_validate, assume_tracked,
                  [column_family, &key, this]() {
-                   Status s = GetBatchForWrite()->Delete(column_family, key);
+                   rocksdb_rs::status::Status s = GetBatchForWrite()->Delete(column_family, key);
                    if (s.ok()) {
                      ++num_deletes_;
                    }
@@ -289,13 +289,13 @@ Status WriteCommittedTxn::Delete(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::Delete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::Delete(ColumnFamilyHandle* column_family,
                                  const SliceParts& key,
                                  const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
   return Operate(column_family, key, do_validate, assume_tracked,
                  [column_family, &key, this]() {
-                   Status s = GetBatchForWrite()->Delete(column_family, key);
+                   rocksdb_rs::status::Status s = GetBatchForWrite()->Delete(column_family, key);
                    if (s.ok()) {
                      ++num_deletes_;
                    }
@@ -303,11 +303,11 @@ Status WriteCommittedTxn::Delete(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::DeleteUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::DeleteUntracked(ColumnFamilyHandle* column_family,
                                           const Slice& key) {
   return Operate(column_family, key, /*do_validate=*/false,
                  /*assume_tracked=*/false, [column_family, &key, this]() {
-                   Status s = GetBatchForWrite()->Delete(column_family, key);
+                   rocksdb_rs::status::Status s = GetBatchForWrite()->Delete(column_family, key);
                    if (s.ok()) {
                      ++num_deletes_;
                    }
@@ -315,11 +315,11 @@ Status WriteCommittedTxn::DeleteUntracked(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::DeleteUntracked(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::DeleteUntracked(ColumnFamilyHandle* column_family,
                                           const SliceParts& key) {
   return Operate(column_family, key, /*do_validate=*/false,
                  /*assume_tracked=*/false, [column_family, &key, this]() {
-                   Status s = GetBatchForWrite()->Delete(column_family, key);
+                   rocksdb_rs::status::Status s = GetBatchForWrite()->Delete(column_family, key);
                    if (s.ok()) {
                      ++num_deletes_;
                    }
@@ -327,13 +327,13 @@ Status WriteCommittedTxn::DeleteUntracked(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::SingleDelete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::SingleDelete(ColumnFamilyHandle* column_family,
                                        const Slice& key,
                                        const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
   return Operate(column_family, key, do_validate, assume_tracked,
                  [column_family, &key, this]() {
-                   Status s =
+                   rocksdb_rs::status::Status s =
                        GetBatchForWrite()->SingleDelete(column_family, key);
                    if (s.ok()) {
                      ++num_deletes_;
@@ -342,13 +342,13 @@ Status WriteCommittedTxn::SingleDelete(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::SingleDelete(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::SingleDelete(ColumnFamilyHandle* column_family,
                                        const SliceParts& key,
                                        const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
   return Operate(column_family, key, do_validate, assume_tracked,
                  [column_family, &key, this]() {
-                   Status s =
+                   rocksdb_rs::status::Status s =
                        GetBatchForWrite()->SingleDelete(column_family, key);
                    if (s.ok()) {
                      ++num_deletes_;
@@ -357,11 +357,11 @@ Status WriteCommittedTxn::SingleDelete(ColumnFamilyHandle* column_family,
                  });
 }
 
-Status WriteCommittedTxn::SingleDeleteUntracked(
+rocksdb_rs::status::Status WriteCommittedTxn::SingleDeleteUntracked(
     ColumnFamilyHandle* column_family, const Slice& key) {
   return Operate(column_family, key, /*do_validate=*/false,
                  /*assume_tracked=*/false, [column_family, &key, this]() {
-                   Status s =
+                   rocksdb_rs::status::Status s =
                        GetBatchForWrite()->SingleDelete(column_family, key);
                    if (s.ok()) {
                      ++num_deletes_;
@@ -370,13 +370,13 @@ Status WriteCommittedTxn::SingleDeleteUntracked(
                  });
 }
 
-Status WriteCommittedTxn::Merge(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::Merge(ColumnFamilyHandle* column_family,
                                 const Slice& key, const Slice& value,
                                 const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
   return Operate(column_family, key, do_validate, assume_tracked,
                  [column_family, &key, &value, this]() {
-                   Status s =
+                   rocksdb_rs::status::Status s =
                        GetBatchForWrite()->Merge(column_family, key, value);
                    if (s.ok()) {
                      ++num_merges_;
@@ -386,11 +386,11 @@ Status WriteCommittedTxn::Merge(ColumnFamilyHandle* column_family,
 }
 
 template <typename TKey, typename TOperation>
-Status WriteCommittedTxn::Operate(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status WriteCommittedTxn::Operate(ColumnFamilyHandle* column_family,
                                   const TKey& key, const bool do_validate,
                                   const bool assume_tracked,
                                   TOperation&& operation) {
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if constexpr (std::is_same_v<Slice, TKey>) {
     s = TryLock(column_family, key, /*read_only=*/false, /*exclusive=*/true,
                 do_validate, assume_tracked);
@@ -419,25 +419,25 @@ Status WriteCommittedTxn::Operate(ColumnFamilyHandle* column_family,
   return operation();
 }
 
-Status WriteCommittedTxn::SetReadTimestampForValidation(TxnTimestamp ts) {
+rocksdb_rs::status::Status WriteCommittedTxn::SetReadTimestampForValidation(TxnTimestamp ts) {
   if (read_timestamp_ < kMaxTxnTimestamp && ts < read_timestamp_) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot decrease read timestamp for validation");
   }
   read_timestamp_ = ts;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status WriteCommittedTxn::SetCommitTimestamp(TxnTimestamp ts) {
+rocksdb_rs::status::Status WriteCommittedTxn::SetCommitTimestamp(TxnTimestamp ts) {
   if (read_timestamp_ < kMaxTxnTimestamp && ts <= read_timestamp_) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot commit at timestamp smaller than or equal to read timestamp");
   }
   commit_timestamp_ = ts;
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
+rocksdb_rs::status::Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
   if (batch && WriteBatchInternal::HasKeyWithTimestamp(*batch)) {
     // CommitBatch() needs to lock the keys in the batch.
     // However, the application also needs to specify the timestamp for the
@@ -445,12 +445,12 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
     // This means timestamp order may violate the order of locking, thus
     // violate the sequence number order for the same user key.
     // Therefore, we disallow this operation for now.
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "Batch to commit includes timestamp assigned before locking");
   }
 
   std::unique_ptr<LockTracker> keys_to_unlock(lock_tracker_factory_.Create());
-  Status s = LockBatch(batch, keys_to_unlock.get());
+  rocksdb_rs::status::Status s = LockBatch(batch, keys_to_unlock.get());
 
   if (!s.ok()) {
     return s;
@@ -459,7 +459,7 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
   bool can_commit = false;
 
   if (IsExpired()) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else if (expiration_time_ > 0) {
     TransactionState expected = STARTED;
     can_commit = std::atomic_compare_exchange_strong(&txn_state_, &expected,
@@ -476,9 +476,9 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
       txn_state_.store(COMMITTED);
     }
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else {
-    s = Status_InvalidArgument("Transaction is not in state for commit.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   txn_db_impl_->UnLock(this, *keys_to_unlock);
@@ -486,17 +486,17 @@ Status PessimisticTransaction::CommitBatch(WriteBatch* batch) {
   return s;
 }
 
-Status PessimisticTransaction::Prepare() {
+rocksdb_rs::status::Status PessimisticTransaction::Prepare() {
   if (name_.empty()) {
-    return Status_InvalidArgument(
+    return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot prepare a transaction that has not been named.");
   }
 
   if (IsExpired()) {
-    return Status_Expired();
+    return rocksdb_rs::status::Status_Expired();
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool can_prepare = false;
 
   if (expiration_time_ > 0) {
@@ -522,21 +522,21 @@ Status PessimisticTransaction::Prepare() {
       txn_state_.store(PREPARED);
     }
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else if (txn_state_ == PREPARED) {
-    s = Status_InvalidArgument("Transaction has already been prepared.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been prepared.");
   } else if (txn_state_ == COMMITTED) {
-    s = Status_InvalidArgument("Transaction has already been committed.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been committed.");
   } else if (txn_state_ == ROLLEDBACK) {
-    s = Status_InvalidArgument("Transaction has already been rolledback.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been rolledback.");
   } else {
-    s = Status_InvalidArgument("Transaction is not in state for commit.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   return s;
 }
 
-Status WriteCommittedTxn::PrepareInternal() {
+rocksdb_rs::status::Status WriteCommittedTxn::PrepareInternal() {
   WriteOptions write_options = write_options_;
   write_options.disableWAL = false;
   auto s = WriteBatchInternal::MarkEndPrepare(GetWriteBatch()->GetWriteBatch(),
@@ -548,7 +548,7 @@ Status WriteCommittedTxn::PrepareInternal() {
         : db_(db), two_write_queues_(two_write_queues) {
       (void)two_write_queues_;  // to silence unused private field warning
     }
-    virtual Status Callback(SequenceNumber, bool is_mem_disabled,
+    virtual rocksdb_rs::status::Status Callback(SequenceNumber, bool is_mem_disabled,
                             uint64_t log_number, size_t /*index*/,
                             size_t /*total*/) override {
 #ifdef NDEBUG
@@ -557,7 +557,7 @@ Status WriteCommittedTxn::PrepareInternal() {
       assert(log_number != 0);
       assert(!two_write_queues_ || is_mem_disabled);  // implies the 2nd queue
       db_->logs_with_prep_tracker()->MarkLogAsContainingPrepSection(log_number);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
 
    private:
@@ -578,12 +578,12 @@ Status WriteCommittedTxn::PrepareInternal() {
   return s;
 }
 
-Status PessimisticTransaction::Commit() {
+rocksdb_rs::status::Status PessimisticTransaction::Commit() {
   bool commit_without_prepare = false;
   bool commit_prepared = false;
 
   if (IsExpired()) {
-    return Status_Expired();
+    return rocksdb_rs::status::Status_Expired();
   }
 
   if (expiration_time_ > 0) {
@@ -604,15 +604,15 @@ Status PessimisticTransaction::Commit() {
     if (skip_prepare_) {
       commit_without_prepare = true;
     } else {
-      return Status_TxnNotPrepared();
+      return rocksdb_rs::status::Status_TxnNotPrepared();
     }
   }
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (commit_without_prepare) {
     assert(!commit_prepared);
     if (WriteBatchInternal::Count(GetCommitTimeWriteBatch()) > 0) {
-      s = Status_InvalidArgument(
+      s = rocksdb_rs::status::Status_InvalidArgument(
           "Commit-time batch contains values that will not be committed.");
     } else {
       txn_state_.store(AWAITING_COMMIT);
@@ -651,19 +651,19 @@ Status PessimisticTransaction::Commit() {
     Clear();
     txn_state_.store(COMMITTED);
   } else if (txn_state_ == LOCKS_STOLEN) {
-    s = Status_Expired();
+    s = rocksdb_rs::status::Status_Expired();
   } else if (txn_state_ == COMMITTED) {
-    s = Status_InvalidArgument("Transaction has already been committed.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been committed.");
   } else if (txn_state_ == ROLLEDBACK) {
-    s = Status_InvalidArgument("Transaction has already been rolledback.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been rolledback.");
   } else {
-    s = Status_InvalidArgument("Transaction is not in state for commit.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is not in state for commit.");
   }
 
   return s;
 }
 
-Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
+rocksdb_rs::status::Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
   WriteBatchWithIndex* wbwi = GetWriteBatch();
   assert(wbwi);
   WriteBatch* wb = wbwi->GetWriteBatch();
@@ -671,7 +671,7 @@ Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
 
   const bool needs_ts = WriteBatchInternal::HasKeyWithTimestamp(*wb);
   if (needs_ts && commit_timestamp_ == kMaxTxnTimestamp) {
-    return Status_InvalidArgument("Must assign a commit timestamp");
+    return rocksdb_rs::status::Status_InvalidArgument("Must assign a commit timestamp");
   }
 
   if (needs_ts) {
@@ -680,7 +680,7 @@ Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
     EncodeFixed64(commit_ts_buf, commit_timestamp_);
     Slice commit_ts(commit_ts_buf, sizeof(commit_ts_buf));
 
-    Status s =
+    rocksdb_rs::status::Status s =
         wb->UpdateTimestamps(commit_ts, [wbwi, this](uint32_t cf) -> size_t {
           auto cf_iter = cfs_with_ts_tracked_when_indexing_disabled_.find(cf);
           if (cf_iter != cfs_with_ts_tracked_when_indexing_disabled_.end()) {
@@ -702,7 +702,7 @@ Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
   PostMemTableCallback* post_mem_cb = nullptr;
   if (snapshot_needed_) {
     if (commit_timestamp_ == kMaxTxnTimestamp) {
-      return Status_InvalidArgument("Must set transaction commit timestamp");
+      return rocksdb_rs::status::Status_InvalidArgument("Must set transaction commit timestamp");
     } else {
       post_mem_cb = &snapshot_creation_cb;
     }
@@ -719,7 +719,7 @@ Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
   return s;
 }
 
-Status WriteCommittedTxn::CommitBatchInternal(WriteBatch* batch, size_t) {
+rocksdb_rs::status::Status WriteCommittedTxn::CommitBatchInternal(WriteBatch* batch, size_t) {
   uint64_t seq_used = kMaxSequenceNumber;
   auto s = db_impl_->WriteImpl(write_options_, batch, /*callback*/ nullptr,
                                /*log_used*/ nullptr, /*log_ref*/ 0,
@@ -731,7 +731,7 @@ Status WriteCommittedTxn::CommitBatchInternal(WriteBatch* batch, size_t) {
   return s;
 }
 
-Status WriteCommittedTxn::CommitInternal() {
+rocksdb_rs::status::Status WriteCommittedTxn::CommitInternal() {
   WriteBatchWithIndex* wbwi = GetWriteBatch();
   assert(wbwi);
   WriteBatch* wb = wbwi->GetWriteBatch();
@@ -739,13 +739,13 @@ Status WriteCommittedTxn::CommitInternal() {
 
   const bool needs_ts = WriteBatchInternal::HasKeyWithTimestamp(*wb);
   if (needs_ts && commit_timestamp_ == kMaxTxnTimestamp) {
-    return Status_InvalidArgument("Must assign a commit timestamp");
+    return rocksdb_rs::status::Status_InvalidArgument("Must assign a commit timestamp");
   }
   // We take the commit-time batch and append the Commit marker.
   // The Memtable will ignore the Commit marker in non-recovery mode
   WriteBatch* working_batch = GetCommitTimeWriteBatch();
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (!needs_ts) {
     s = WriteBatchInternal::MarkCommit(working_batch, name_);
   } else {
@@ -788,7 +788,7 @@ Status WriteCommittedTxn::CommitInternal() {
   PostMemTableCallback* post_mem_cb = nullptr;
   if (snapshot_needed_) {
     if (commit_timestamp_ == kMaxTxnTimestamp) {
-      s = Status_InvalidArgument("Must set transaction commit timestamp");
+      s = rocksdb_rs::status::Status_InvalidArgument("Must set transaction commit timestamp");
       return s;
     } else {
       post_mem_cb = &snapshot_creation_cb;
@@ -806,8 +806,8 @@ Status WriteCommittedTxn::CommitInternal() {
   return s;
 }
 
-Status PessimisticTransaction::Rollback() {
-  Status s = Status_new();
+rocksdb_rs::status::Status PessimisticTransaction::Rollback() {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (txn_state_ == PREPARED) {
     txn_state_.store(AWAITING_ROLLBACK);
 
@@ -835,16 +835,16 @@ Status PessimisticTransaction::Rollback() {
     // prepare couldn't have taken place
     Clear();
   } else if (txn_state_ == COMMITTED) {
-    s = Status_InvalidArgument("This transaction has already been committed.");
+    s = rocksdb_rs::status::Status_InvalidArgument("This transaction has already been committed.");
   } else {
-    s = Status_InvalidArgument(
+    s = rocksdb_rs::status::Status_InvalidArgument(
         "Two phase transaction is not in state for rollback.");
   }
 
   return s;
 }
 
-Status WriteCommittedTxn::RollbackInternal() {
+rocksdb_rs::status::Status WriteCommittedTxn::RollbackInternal() {
   WriteBatch rollback_marker;
   auto s = WriteBatchInternal::MarkRollback(&rollback_marker, name_);
   assert(s.ok());
@@ -852,9 +852,9 @@ Status WriteCommittedTxn::RollbackInternal() {
   return s;
 }
 
-Status PessimisticTransaction::RollbackToSavePoint() {
+rocksdb_rs::status::Status PessimisticTransaction::RollbackToSavePoint() {
   if (txn_state_ != STARTED) {
-    return Status_InvalidArgument("Transaction is beyond state for rollback.");
+    return rocksdb_rs::status::Status_InvalidArgument("Transaction is beyond state for rollback.");
   }
 
   if (save_points_ != nullptr && !save_points_->empty()) {
@@ -872,10 +872,10 @@ Status PessimisticTransaction::RollbackToSavePoint() {
 
 // Lock all keys in this batch.
 // On success, caller should unlock keys_to_unlock
-Status PessimisticTransaction::LockBatch(WriteBatch* batch,
+rocksdb_rs::status::Status PessimisticTransaction::LockBatch(WriteBatch* batch,
                                          LockTracker* keys_to_unlock) {
   if (!batch) {
-    return Status_InvalidArgument("batch is nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument("batch is nullptr");
   }
 
   class Handler : public WriteBatch::Handler {
@@ -899,25 +899,25 @@ Status PessimisticTransaction::LockBatch(WriteBatch* batch,
       }
     }
 
-    Status PutCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
                  const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
-    Status MergeCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
                    const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
-    Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
       RecordKey(column_family_id, key);
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   };
 
   // Iterating on this handler will add all keys in this batch into keys
   Handler handler;
-  Status s = batch->Iterate(&handler);
+  rocksdb_rs::status::Status s = batch->Iterate(&handler);
   if (!s.ok()) {
     return s;
   }
@@ -960,12 +960,12 @@ Status PessimisticTransaction::LockBatch(WriteBatch* batch,
 // If check_shapshot is true and this transaction has a snapshot set,
 // this key will only be locked if there have been no writes to this key since
 // the snapshot time.
-Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
                                        const Slice& key, bool read_only,
                                        bool exclusive, const bool do_validate,
                                        const bool assume_tracked) {
   assert(!assume_tracked || !do_validate);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (UNLIKELY(skip_concurrency_control_)) {
     return s;
   }
@@ -1013,7 +1013,7 @@ Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
                        (0 == ts_sz || kMaxTxnTimestamp == read_timestamp_))) {
     if (assume_tracked && !previously_locked &&
         tracked_locks_->IsPointLockSupported()) {
-      s = Status_InvalidArgument(
+      s = rocksdb_rs::status::Status_InvalidArgument(
           "assume_tracked is set but it is not tracked yet");
     }
     // Need to remember the earliest sequence number that we know that this
@@ -1079,14 +1079,14 @@ Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
   return s;
 }
 
-Status PessimisticTransaction::GetRangeLock(ColumnFamilyHandle* column_family,
+rocksdb_rs::status::Status PessimisticTransaction::GetRangeLock(ColumnFamilyHandle* column_family,
                                             const Endpoint& start_endp,
                                             const Endpoint& end_endp) {
   ColumnFamilyHandle* cfh =
       column_family ? column_family : db_impl_->DefaultColumnFamily();
   uint32_t cfh_id = GetColumnFamilyID(cfh);
 
-  Status s = txn_db_impl_->TryRangeLock(this, cfh_id, start_endp, end_endp);
+  rocksdb_rs::status::Status s = txn_db_impl_->TryRangeLock(this, cfh_id, start_endp, end_endp);
 
   if (s.ok()) {
     RangeLockRequest req{cfh_id, start_endp, end_endp};
@@ -1099,7 +1099,7 @@ Status PessimisticTransaction::GetRangeLock(ColumnFamilyHandle* column_family,
 // transaction snapshot_.
 // tracked_at_seq is the global seq at which we either locked the key or already
 // have done ValidateSnapshot.
-Status PessimisticTransaction::ValidateSnapshot(
+rocksdb_rs::status::Status PessimisticTransaction::ValidateSnapshot(
     ColumnFamilyHandle* column_family, const Slice& key,
     SequenceNumber* tracked_at_seq) {
   assert(snapshot_ || read_timestamp_ < kMaxTxnTimestamp);
@@ -1111,7 +1111,7 @@ Status PessimisticTransaction::ValidateSnapshot(
       // If the key has been previous validated (or locked) at a sequence number
       // earlier than the current snapshot's sequence number, we already know it
       // has not been modified aftter snap_seq either.
-      return Status_OK();
+      return rocksdb_rs::status::Status_OK();
     }
   } else {
     snap_seq = db_impl_->GetLatestSequenceNumber();
@@ -1155,22 +1155,22 @@ void PessimisticTransaction::UnlockGetForUpdate(
   txn_db_impl_->UnLock(this, GetColumnFamilyID(column_family), key.ToString());
 }
 
-Status PessimisticTransaction::SetName(const TransactionName& name) {
-  Status s = Status_new();
+rocksdb_rs::status::Status PessimisticTransaction::SetName(const TransactionName& name) {
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (txn_state_ == STARTED) {
     if (name_.length()) {
-      s = Status_InvalidArgument("Transaction has already been named.");
+      s = rocksdb_rs::status::Status_InvalidArgument("Transaction has already been named.");
     } else if (txn_db_impl_->GetTransactionByName(name) != nullptr) {
-      s = Status_InvalidArgument("Transaction name must be unique.");
+      s = rocksdb_rs::status::Status_InvalidArgument("Transaction name must be unique.");
     } else if (name.length() < 1 || name.length() > 512) {
-      s = Status_InvalidArgument(
+      s = rocksdb_rs::status::Status_InvalidArgument(
           "Transaction name length must be between 1 and 512 chars.");
     } else {
       name_ = name;
       txn_db_impl_->RegisterTransaction(this);
     }
   } else {
-    s = Status_InvalidArgument("Transaction is beyond state for naming.");
+    s = rocksdb_rs::status::Status_InvalidArgument("Transaction is beyond state for naming.");
   }
   return s;
 }

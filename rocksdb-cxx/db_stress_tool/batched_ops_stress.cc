@@ -21,7 +21,7 @@ class BatchedOpsStressTest : public StressTest {
   // Given a key K and value V, this puts ("0"+K, V+"0"), ("1"+K, V+"1"), ...,
   // ("9"+K, V+"9") in DB atomically i.e in a single batch.
   // Also refer BatchedOpsStressTest::TestGet
-  Status TestPut(ThreadState* thread, WriteOptions& write_opts,
+  rocksdb_rs::status::Status TestPut(ThreadState* thread, WriteOptions& write_opts,
                  const ReadOptions& /* read_opts */,
                  const std::vector<int>& rand_column_families,
                  const std::vector<int64_t>& rand_keys,
@@ -62,7 +62,7 @@ class BatchedOpsStressTest : public StressTest {
       }
     }
 
-    const Status s = db_->Write(write_opts, &batch);
+    const rocksdb_rs::status::Status s = db_->Write(write_opts, &batch);
 
     if (!s.ok()) {
       fprintf(stderr, "multiput error: %s\n", s.ToString()->c_str());
@@ -77,7 +77,7 @@ class BatchedOpsStressTest : public StressTest {
 
   // Given a key K, this deletes ("0"+K), ("1"+K), ..., ("9"+K)
   // in DB atomically i.e in a single batch. Also refer MultiGet.
-  Status TestDelete(ThreadState* thread, WriteOptions& writeoptions,
+  rocksdb_rs::status::Status TestDelete(ThreadState* thread, WriteOptions& writeoptions,
                     const std::vector<int>& rand_column_families,
                     const std::vector<int64_t>& rand_keys) override {
     std::string keys[10] = {"9", "7", "5", "3", "1", "8", "6", "4", "2", "0"};
@@ -85,7 +85,7 @@ class BatchedOpsStressTest : public StressTest {
     WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                      FLAGS_batch_protection_bytes_per_key,
                      FLAGS_user_timestamp_size);
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     auto cfh = column_families_[rand_column_families[0]];
     std::string key_str = Key(rand_keys[0]);
     for (int i = 0; i < 10; i++) {
@@ -104,12 +104,12 @@ class BatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  Status TestDeleteRange(ThreadState* /* thread */,
+  rocksdb_rs::status::Status TestDeleteRange(ThreadState* /* thread */,
                          WriteOptions& /* write_opts */,
                          const std::vector<int>& /* rand_column_families */,
                          const std::vector<int64_t>& /* rand_keys */) override {
     assert(false);
-    return Status_NotSupported(
+    return rocksdb_rs::status::Status_NotSupported(
         "BatchedOpsStressTest does not support "
         "TestDeleteRange");
   }
@@ -130,7 +130,7 @@ class BatchedOpsStressTest : public StressTest {
   // V+"0", V+"1", ..., V+"9".
   // ASSUMES that BatchedOpsStressTest::TestPut was used to put (K, V) into
   // the DB.
-  Status TestGet(ThreadState* thread, const ReadOptions& readoptions,
+  rocksdb_rs::status::Status TestGet(ThreadState* thread, const ReadOptions& readoptions,
                  const std::vector<int>& rand_column_families,
                  const std::vector<int64_t>& rand_keys) override {
     std::string keys[10] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
@@ -142,7 +142,7 @@ class BatchedOpsStressTest : public StressTest {
     Slice key = key_str;
     auto cfh = column_families_[rand_column_families[0]];
     std::string from_db;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     for (int i = 0; i < 10; i++) {
       keys[i] += key.ToString();
       key_slices[i] = keys[i];
@@ -191,19 +191,19 @@ class BatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  rust::Vec<Status> TestMultiGet(
+  rust::Vec<rocksdb_rs::status::Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& readoptions,
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
     size_t num_keys = rand_keys.size();
-    rust::Vec<Status> ret_status = Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> ret_status = rocksdb_rs::status::Status_new().create_vec(num_keys);
     std::array<std::string, 10> keys = {
         {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}};
     size_t num_prefixes = keys.size();
     for (size_t rand_key = 0; rand_key < num_keys; ++rand_key) {
       std::vector<Slice> key_slices;
       std::vector<PinnableSlice> values(num_prefixes);
-      rust::Vec<Status> statuses = Status_new().create_vec(num_prefixes);
+      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_prefixes);
       ReadOptions readoptionscopy = readoptions;
       readoptionscopy.snapshot = db_->GetSnapshot();
       readoptionscopy.rate_limiter_priority =
@@ -221,7 +221,7 @@ class BatchedOpsStressTest : public StressTest {
       db_->MultiGet(readoptionscopy, cfh, num_prefixes, key_slices.data(),
                     values.data(), statuses.data());
       for (size_t i = 0; i < num_prefixes; i++) {
-        Status s = statuses[i].Clone();
+        rocksdb_rs::status::Status s = statuses[i].Clone();
         if (!s.ok() && !s.IsNotFound()) {
           fprintf(stderr, "multiget error: %s\n", s.ToString()->c_str());
           thread->stats.AddErrors(1);
@@ -295,7 +295,7 @@ class BatchedOpsStressTest : public StressTest {
     for (size_t i = 0; i < num_keys; ++i) {
       const std::string key = std::to_string(i) + key_suffix;
 
-      const Status s = db_->GetEntity(read_opts_copy, cfh, key, &results[i]);
+      const rocksdb_rs::status::Status s = db_->GetEntity(read_opts_copy, cfh, key, &results[i]);
 
       if (!s.ok() && !s.IsNotFound()) {
         fprintf(stderr, "GetEntity error: %s\n", s.ToString()->c_str());
@@ -376,7 +376,7 @@ class BatchedOpsStressTest : public StressTest {
       std::array<std::string, num_prefixes> keys;
       std::array<Slice, num_prefixes> key_slices;
       std::array<PinnableWideColumns, num_prefixes> results;
-      rust::Vec<Status> statuses = Status_new().create_vec(num_prefixes);
+      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_prefixes);
 
       for (size_t j = 0; j < num_prefixes; ++j) {
         keys[j] = std::to_string(j) + key_suffix;
@@ -387,7 +387,7 @@ class BatchedOpsStressTest : public StressTest {
                           results.data(), statuses.data());
 
       for (size_t j = 0; j < num_prefixes; ++j) {
-        const Status& s = statuses[j];
+        const rocksdb_rs::status::Status& s = statuses[j];
 
         if (!s.ok() && !s.IsNotFound()) {
           fprintf(stderr, "MultiGetEntity error: %s\n", s.ToString()->c_str());
@@ -446,7 +446,7 @@ class BatchedOpsStressTest : public StressTest {
   // each series should be the same length, and it is verified for each
   // index i that all the i'th values are of the form V+"0", V+"1", ..., V+"9".
   // ASSUMES that MultiPut was used to put (K, V)
-  Status TestPrefixScan(ThreadState* thread, const ReadOptions& readoptions,
+  rocksdb_rs::status::Status TestPrefixScan(ThreadState* thread, const ReadOptions& readoptions,
                         const std::vector<int>& rand_column_families,
                         const std::vector<int64_t>& rand_keys) override {
     assert(!rand_column_families.empty());
@@ -555,7 +555,7 @@ class BatchedOpsStressTest : public StressTest {
 
     thread->stats.AddPrefixes(1, count);
 
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   void VerifyDb(ThreadState* /* thread */) const override {}

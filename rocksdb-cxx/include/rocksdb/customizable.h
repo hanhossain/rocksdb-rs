@@ -160,7 +160,7 @@ class Customizable : public Configurable {
                      std::string* mismatch) const override;
   // Gets the value of the option associated with the input name
   // @see Configurable::GetOption for more details
-  Status GetOption(const ConfigOptions& config_options, const std::string& name,
+  rocksdb_rs::status::Status GetOption(const ConfigOptions& config_options, const std::string& name,
                    std::string* value) const override;
   // Helper method for getting for parsing the opt_value into the corresponding
   // options for use in potentially creating a new Customizable object (this
@@ -181,7 +181,7 @@ class Customizable : public Configurable {
   //
   // This method returns non-OK if the ID could not be found, or if the
   // opt_value could not be parsed into name-value pairs.
-  static Status GetOptionsMap(
+  static rocksdb_rs::status::Status GetOptionsMap(
       const ConfigOptions& config_options, const Customizable* custom,
       const std::string& opt_value, std::string* id,
       std::unordered_map<std::string, std::string>* options);
@@ -193,7 +193,7 @@ class Customizable : public Configurable {
   // prepared Returns InvalidArgument if the object is nullptr and there are
   // options in the map Returns the result of the ConfigureFromMap or
   // PrepareOptions
-  static Status ConfigureNewObject(
+  static rocksdb_rs::status::Status ConfigureNewObject(
       const ConfigOptions& config_options, Customizable* object,
       const std::unordered_map<std::string, std::string>& options);
 

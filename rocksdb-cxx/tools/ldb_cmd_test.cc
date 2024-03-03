@@ -129,11 +129,11 @@ class FileChecksumTestHelper {
   DB* db_;
   std::string dbname_;
 
-  Status VerifyChecksum(LiveFileMetaData& file_meta) {
+  rocksdb_rs::status::Status VerifyChecksum(LiveFileMetaData& file_meta) {
     std::string cur_checksum;
     std::string checksum_func_name;
 
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     EnvOptions soptions;
     std::unique_ptr<SequentialFile> file_reader;
     std::string file_path = dbname_ + "/" + file_meta.name;
@@ -173,13 +173,13 @@ class FileChecksumTestHelper {
     std::string stored_checksum_func_name = file_meta.file_checksum_func_name;
     if ((cur_checksum != stored_checksum) ||
         (checksum_func_name != stored_checksum_func_name)) {
-      return Status_Corruption(
+      return rocksdb_rs::status::Status_Corruption(
           "Checksum does not match! The file: " + file_meta.name +
           ", checksum name: " + stored_checksum_func_name + " and checksum " +
           stored_checksum + ". However, expected checksum name: " +
           checksum_func_name + " and checksum " + cur_checksum);
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  public:
@@ -188,7 +188,7 @@ class FileChecksumTestHelper {
   ~FileChecksumTestHelper() {}
 
   // Verify the checksum information in Manifest.
-  Status VerifyChecksumInManifest(
+  rocksdb_rs::status::Status VerifyChecksumInManifest(
       const std::vector<LiveFileMetaData>& live_files) {
     // Step 1: verify if the dbname_ is correct
     if (dbname_.back() != '/') {
@@ -209,7 +209,7 @@ class FileChecksumTestHelper {
     VersionSet versions(dbname_, &immutable_db_options, sopt, tc.get(), &wb,
                         &wc, nullptr, nullptr, "", "");
     std::vector<std::string> cf_name_list;
-    Status s = Status_new();
+    rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     s = versions.ListColumnFamilies(&cf_name_list, dbname_,
                                     immutable_db_options.fs.get());
     if (s.ok()) {
@@ -229,7 +229,7 @@ class FileChecksumTestHelper {
 
     // Step 3 verify the checksum
     if (live_files.size() != checksum_list->size()) {
-      return Status_Corruption("The number of files does not match!");
+      return rocksdb_rs::status::Status_Corruption("The number of files does not match!");
     }
     for (size_t i = 0; i < live_files.size(); i++) {
       std::string stored_checksum = "";
@@ -241,7 +241,7 @@ class FileChecksumTestHelper {
       }
       if (live_files[i].file_checksum != stored_checksum ||
           live_files[i].file_checksum_func_name != stored_func_name) {
-        return Status_Corruption(
+        return rocksdb_rs::status::Status_Corruption(
             "Checksum does not match! The file: " +
             std::to_string(live_files[i].file_number) +
             ". In Manifest, checksum name: " + stored_func_name +
@@ -251,17 +251,17 @@ class FileChecksumTestHelper {
             live_files[i].file_checksum);
       }
     }
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Verify the checksum of each file by recalculting the checksum and
   // comparing it with the one being generated when a SST file is created.
-  Status VerifyEachFileChecksum() {
+  rocksdb_rs::status::Status VerifyEachFileChecksum() {
     assert(db_ != nullptr);
     EXPECT_OK(db_->DisableFileDeletions());
     std::vector<LiveFileMetaData> live_files;
     db_->GetLiveFilesMetaData(&live_files);
-    Status cs = Status_new();
+    rocksdb_rs::status::Status cs = rocksdb_rs::status::Status_new();
     for (auto a_file : live_files) {
       cs = VerifyChecksum(a_file);
       if (!cs.ok()) {

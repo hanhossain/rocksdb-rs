@@ -25,13 +25,13 @@ class TraceExecutionHandler : public TraceRecord::Handler {
                         const std::vector<ColumnFamilyHandle*>& handles);
   virtual ~TraceExecutionHandler() override;
 
-  virtual Status Handle(const WriteQueryTraceRecord& record,
+  virtual rocksdb_rs::status::Status Handle(const WriteQueryTraceRecord& record,
                         std::unique_ptr<TraceRecordResult>* result) override;
-  virtual Status Handle(const GetQueryTraceRecord& record,
+  virtual rocksdb_rs::status::Status Handle(const GetQueryTraceRecord& record,
                         std::unique_ptr<TraceRecordResult>* result) override;
-  virtual Status Handle(const IteratorSeekQueryTraceRecord& record,
+  virtual rocksdb_rs::status::Status Handle(const IteratorSeekQueryTraceRecord& record,
                         std::unique_ptr<TraceRecordResult>* result) override;
-  virtual Status Handle(const MultiGetQueryTraceRecord& record,
+  virtual rocksdb_rs::status::Status Handle(const MultiGetQueryTraceRecord& record,
                         std::unique_ptr<TraceRecordResult>* result) override;
 
  private:

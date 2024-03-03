@@ -42,13 +42,13 @@ TEST_F(DBBasicTest, OpenWhenOpen) {
   Options options = CurrentOptions();
   options.env = env_;
   DB* db2 = nullptr;
-  Status s = DB::Open(options, dbname_, &db2);
+  rocksdb_rs::status::Status s = DB::Open(options, dbname_, &db2);
   ASSERT_NOK(s) << [db2]() {
     delete db2;
     return "db2 open: ok";
   }();
-  ASSERT_EQ(Code::kIOError, s.code());
-  ASSERT_EQ(SubCode::kNone, s.subcode());
+  ASSERT_EQ(rocksdb_rs::status::Code::kIOError, s.code());
+  ASSERT_EQ(rocksdb_rs::status::SubCode::kNone, s.subcode());
   ASSERT_TRUE(strstr(s.getState()->c_str(), "lock ") != nullptr);
 
   delete db2;
@@ -230,7 +230,7 @@ TEST_F(DBBasicTest, CompactedDB) {
   ASSERT_OK(Flush());
   Close();
   ASSERT_OK(ReadOnlyReopen(options));
-  Status s = Put("new", "value");
+  rocksdb_rs::status::Status s = Put("new", "value");
   ASSERT_EQ(*s.ToString(),
             "Not implemented: Not supported operation in read only mode.");
   ASSERT_EQ(DummyString(kFileSize / 2, '1'), Get("aaa"));
@@ -312,7 +312,7 @@ TEST_F(DBBasicTest, CompactedDB) {
 
   // MultiGet
   std::vector<std::string> values;
-  rust::Vec<Status> status_list = dbfull()->MultiGet(
+  rust::Vec<rocksdb_rs::status::Status> status_list = dbfull()->MultiGet(
       ReadOptions(),
       std::vector<Slice>({Slice("aaa"), Slice("ccc"), Slice("eee"),
                           Slice("ggg"), Slice("iii"), Slice("kkk")}),
@@ -353,7 +353,7 @@ TEST_F(DBBasicTest, LevelLimitReopen) {
 
   options.num_levels = 1;
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
-  Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
   ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
@@ -451,7 +451,7 @@ TEST_F(DBBasicTest, CheckLock) {
     ASSERT_OK(TryReopen(options));
 
     // second open should fail
-    Status s = DB::Open(options, dbname_, &localdb);
+    rocksdb_rs::status::Status s = DB::Open(options, dbname_, &localdb);
     ASSERT_NOK(s) << [localdb]() {
       delete localdb;
       return "localdb open: ok";
@@ -848,7 +848,7 @@ TEST_F(DBBasicTest, DBOpen_Options) {
   // Does not exist, and create_if_missing == false: error
   DB* db = nullptr;
   options.create_if_missing = false;
-  Status s = DB::Open(options, dbname_, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, dbname_, &db);
   ASSERT_TRUE(strstr(s.ToString()->c_str(), "does not exist") != nullptr);
   ASSERT_TRUE(db == nullptr);
 
@@ -1012,7 +1012,7 @@ TEST_F(DBBasicTest, MultiGetSimple) {
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
 
     get_perf_context()->Reset();
-    rust::Vec<Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
+    rust::Vec<rocksdb_rs::status::Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
     ASSERT_EQ(values.size(), keys.size());
     ASSERT_EQ(values[0], "v1");
     ASSERT_EQ(values[1], "v2");
@@ -1038,7 +1038,7 @@ TEST_F(DBBasicTest, MultiGetEmpty) {
     std::vector<Slice> keys;
     std::vector<std::string> values;
     std::vector<ColumnFamilyHandle*> cfs;
-    rust::Vec<Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
+    rust::Vec<rocksdb_rs::status::Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
     ASSERT_EQ(s.size(), 0U);
 
     // Empty Database, Empty Key Set
@@ -1151,13 +1151,13 @@ class TestEnv : public EnvWrapper {
     void Logv(const char* /*format*/, va_list /*ap*/) override {}
 
    protected:
-    Status CloseImpl() override { return CloseHelper(); }
+    rocksdb_rs::status::Status CloseImpl() override { return CloseHelper(); }
 
    private:
-    Status CloseHelper() {
+    rocksdb_rs::status::Status CloseHelper() {
       env->CloseCountInc();
       ;
-      return Status_IOError();
+      return rocksdb_rs::status::Status_IOError();
     }
     TestEnv* env;
   };
@@ -1166,10 +1166,10 @@ class TestEnv : public EnvWrapper {
 
   int GetCloseCount() { return close_count; }
 
-  Status NewLogger(const std::string& /*fname*/,
+  rocksdb_rs::status::Status NewLogger(const std::string& /*fname*/,
                    std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
  private:
@@ -1186,13 +1186,13 @@ TEST_F(DBBasicTest, DBClose) {
   std::unique_ptr<TestEnv> local_env_guard(env);
   options.create_if_missing = true;
   options.env = env;
-  Status s = DB::Open(options, dbname, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, dbname, &db);
   ASSERT_OK(s);
   ASSERT_TRUE(db != nullptr);
 
   s = db->Close();
   ASSERT_EQ(env->GetCloseCount(), 1);
-  ASSERT_TRUE(s.eq(Status_IOError()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_IOError()));
 
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 1);
@@ -1212,7 +1212,7 @@ TEST_F(DBBasicTest, DBClose) {
   ASSERT_TRUE(db != nullptr);
 
   s = db->Close();
-  ASSERT_TRUE(s.eq(Status_OK()));
+  ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
   delete db;
   ASSERT_EQ(env->GetCloseCount(), 2);
   options.info_log.reset();
@@ -1236,7 +1236,7 @@ TEST_F(DBBasicTest, DBCloseAllDirectoryFDs) {
       std::make_shared<CountedFileSystem>(FileSystem::Default()));
   options.create_if_missing = true;
   options.env = env.get();
-  Status s = DB::Open(options, dbname, &db);
+  rocksdb_rs::status::Status s = DB::Open(options, dbname, &db);
   ASSERT_OK(s);
   ASSERT_TRUE(db != nullptr);
 
@@ -1267,16 +1267,16 @@ TEST_F(DBBasicTest, DBCloseFlushError) {
   ASSERT_OK(dbfull()->TEST_SwitchMemtable());
   ASSERT_OK(Put("key3", "value3"));
   fault_injection_env->SetFilesystemActive(false);
-  Status s = dbfull()->Close();
-  ASSERT_FALSE(s.eq(Status_OK()));
+  rocksdb_rs::status::Status s = dbfull()->Close();
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
   // retry should return the same error
   s = dbfull()->Close();
-  ASSERT_FALSE(s.eq(Status_OK()));
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
   fault_injection_env->SetFilesystemActive(true);
   // retry close() is no-op even the system is back. Could be improved if
   // Close() is retry-able: #9029
   s = dbfull()->Close();
-  ASSERT_FALSE(s.eq(Status_OK()));
+  ASSERT_FALSE(s.eq(rocksdb_rs::status::Status_OK()));
   Destroy(options);
 }
 
@@ -1585,7 +1585,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSimpleUnsorted) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k2", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<Status> s = Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1643,7 +1643,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSortedMultiFile) {
     std::vector<Slice> keys({"k1", "k2", "k3", "k4", "k5", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<Status> s = Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1709,7 +1709,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedDuplicateKeys) {
   std::vector<Slice> keys({"k8", "k8", "k8", "k4", "k4", "k1", "k3"});
   std::vector<PinnableSlice> values(keys.size());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-  rust::Vec<Status> s = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   ReadOptions ro;
   ro.async_io = std::get<1>(GetParam());
@@ -1726,7 +1726,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedDuplicateKeys) {
   ASSERT_EQ(std::string(values[6].data(), values[6].size()), "v3");
   ASSERT_EQ(24, (int)get_perf_context()->multiget_read_bytes);
 
-  for (Status& status : s) {
+  for (rocksdb_rs::status::Status& status : s) {
     ASSERT_OK(status);
   }
 
@@ -1938,7 +1938,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeInMemory) {
   ASSERT_OK(Put(1, "k6", "v_6"));
   std::vector<Slice> keys = {"k1", "k2", "k3", "k4", "k5", "k6"};
   std::vector<PinnableSlice> values(keys.size());
-  rust::Vec<Status> s = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
 
   get_perf_context()->Reset();
@@ -2008,7 +2008,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSize) {
                              "k8", "k9", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<Status> s = Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.value_size_soft_limit = 20;
@@ -2125,7 +2125,7 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeMultiLevelMerge) {
   }
 
   std::vector<PinnableSlice> values(keys_str.size());
-  rust::Vec<Status> statuses = Status_new().create_vec(keys_str.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys_str.size());
   ReadOptions read_options;
   read_options.verify_checksums = true;
   read_options.value_size_soft_limit = 380;
@@ -2269,7 +2269,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL0) {
   std::vector<std::string> key_strs{Key(0), Key(40), Key(80)};
   std::vector<Slice> keys{key_strs[0], key_strs[1], key_strs[2]};
   std::vector<PinnableSlice> values(key_strs.size());
-  std::vector<Status> statuses(key_strs.size());
+  std::vector<rocksdb_rs::status::Status> statuses(key_strs.size());
 
   PrepareDBForTest();
 
@@ -2310,7 +2310,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   key_strs.push_back(Key(33));
   key_strs.push_back(Key(54));
@@ -2329,9 +2329,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(33));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(54));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2355,7 +2355,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   key_strs.push_back(Key(33));
   key_strs.push_back(Key(54));
@@ -2373,8 +2373,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
         // Fail the last table reader open, which is the 6th SST file
         // since 3 overlapping L0 files + 3 L1 files containing the keys
         if (count == 6) {
-          Status* s = static_cast<Status*>(status);
-          *s = Status_IOError();
+          rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
+          *s = rocksdb_rs::status::Status_IOError();
         }
       });
   // DB open will create table readers unless we reduce the table cache
@@ -2400,9 +2400,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
                      keys.data(), values.data(), statuses.data());
   SyncPoint::GetInstance()->DisableProcessing();
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_IOError()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_IOError()));
 
   HistogramData multiget_io_batch_size;
 
@@ -2419,7 +2419,7 @@ TEST_P(DBMultiGetAsyncIOTest, LastKeyInFile) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   // 21 is the last key in the first L1 file
   key_strs.push_back(Key(21));
@@ -2439,9 +2439,9 @@ TEST_P(DBMultiGetAsyncIOTest, LastKeyInFile) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(21));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(54));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2464,7 +2464,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   // 33 and 102 are in L1, and 56 is in L2
   key_strs.push_back(Key(33));
@@ -2484,9 +2484,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l1_" + std::to_string(33));
   ASSERT_EQ(values[1], "val_l2_" + std::to_string(56));
   ASSERT_EQ(values[2], "val_l1_" + std::to_string(102));
@@ -2508,7 +2508,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeOverlapL0L1) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   // 19 and 26 are in L2, but overlap with L0 and L1 file ranges
   key_strs.push_back(Key(19));
@@ -2526,8 +2526,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeOverlapL0L1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 2);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[0], "val_l2_" + std::to_string(19));
   ASSERT_EQ(values[1], "val_l2_" + std::to_string(26));
 
@@ -2544,7 +2544,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeDelInL1) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   // 139 and 163 are in L2, but overlap with a range deletes in L1
   key_strs.push_back(Key(139));
@@ -2562,8 +2562,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL2WithRangeDelInL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 2);
-  ASSERT_TRUE(statuses[0].eq(Status_NotFound()));
-  ASSERT_TRUE(statuses[1].eq(Status_NotFound()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_NotFound()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_NotFound()));
 
   // Bloom filters in L0/L1 will avoid the coroutine calls in those levels
   ASSERT_EQ(statistics()->getTickerCount(MULTIGET_COROUTINE_COUNT), 2);
@@ -2573,7 +2573,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2WithRangeDelInL1) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   // 139 and 163 are in L2, but overlap with a range deletes in L1
   key_strs.push_back(Key(139));
@@ -2593,10 +2593,10 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1AndL2WithRangeDelInL1) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), keys.size());
-  ASSERT_TRUE(statuses[0].eq(Status_NotFound()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_NotFound()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(values[1], "val_l1_" + std::to_string(144));
-  ASSERT_TRUE(statuses[2].eq(Status_NotFound()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_NotFound()));
 
   // Bloom filters in L0/L1 will avoid the coroutine calls in those levels
   ASSERT_EQ(statistics()->getTickerCount(MULTIGET_COROUTINE_COUNT), 3);
@@ -2607,7 +2607,7 @@ TEST_P(DBMultiGetAsyncIOTest, GetNoIOUring) {
   std::vector<std::string> key_strs;
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values;
-  std::vector<Status> statuses;
+  std::vector<rocksdb_rs::status::Status> statuses;
 
   key_strs.push_back(Key(33));
   key_strs.push_back(Key(54));
@@ -2627,9 +2627,9 @@ TEST_P(DBMultiGetAsyncIOTest, GetNoIOUring) {
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data());
   ASSERT_EQ(values.size(), 3);
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_OK()));
-  ASSERT_TRUE(statuses[2].eq(Status_OK()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[2].eq(rocksdb_rs::status::Status_OK()));
 
   HistogramData async_read_bytes;
 
@@ -2666,7 +2666,7 @@ TEST_F(DBBasicTest, MultiGetStats) {
   std::vector<Slice> keys(total_keys);
   static size_t kMultiGetBatchSize = 100;
   std::vector<PinnableSlice> values(kMultiGetBatchSize);
-  rust::Vec<Status> s = Status_new().create_vec(kMultiGetBatchSize);
+  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(kMultiGetBatchSize);
   ReadOptions read_opts;
 
   Random rnd(309);
@@ -2737,8 +2737,8 @@ TEST_F(DBBasicTest, MultiGetStats) {
   for (PinnableSlice& value : values) {
     value.Reset();
   }
-  for (Status& status : s) {
-    status = Status_OK();
+  for (rocksdb_rs::status::Status& status : s) {
+    status = rocksdb_rs::status::Status_OK();
   }
   db_->MultiGet(read_opts, handles_[1], kMultiGetBatchSize, &keys[950],
                 values.data(), s.data(), false);
@@ -2834,7 +2834,7 @@ TEST_P(DBMultiGetRowCacheTest, MultiGetBatched) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<Status> s = Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     bool use_snapshots = GetParam();
@@ -2862,7 +2862,7 @@ TEST_P(DBMultiGetRowCacheTest, MultiGetBatched) {
     keys.assign({"no_key", "k5", "k3", "k2"});
     for (size_t i = 0; i < keys.size(); ++i) {
       values[i].Reset();
-      s[i] = Status_OK();
+      s[i] = rocksdb_rs::status::Status_OK();
     }
     get_perf_context()->Reset();
 
@@ -2979,7 +2979,7 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
     // Make the value compressible. A purely random string doesn't compress
     // and the resultant data block will not be compressed
     std::string value(rnd.RandomString(128) + zero_str);
-    assert(Put(Key(i), value).eq(Status_OK()));
+    assert(Put(Key(i), value).eq(rocksdb_rs::status::Status_OK()));
   }
   ASSERT_OK(Flush());
 
@@ -2995,7 +2995,7 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3049,13 +3049,13 @@ TEST_F(DBBasicTest, BestEffortsRecoveryWithVersionBuildingFailure) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionBuilder::CheckConsistencyBeforeReturn", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
-        *(reinterpret_cast<Status*>(arg)) =
-            Status_Corruption("Inject corruption");
+        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) =
+            rocksdb_rs::status::Status_Corruption("Inject corruption");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
   options.best_efforts_recovery = true;
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   ASSERT_TRUE(s.IsCorruption());
   SyncPoint::GetInstance()->DisableProcessing();
   SyncPoint::GetInstance()->ClearAllCallBacks();
@@ -3251,7 +3251,7 @@ TEST_F(DBBasicTest, RecoverWithNoManifest) {
   }
   options.best_efforts_recovery = true;
   options.create_if_missing = false;
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   ASSERT_TRUE(s.IsInvalidArgument());
   options.create_if_missing = true;
   Reopen(options);
@@ -3352,7 +3352,7 @@ TEST_F(DBBasicTest, ManifestChecksumMismatch) {
 
   WriteOptions write_opts;
   write_opts.disableWAL = true;
-  Status s = db_->Put(write_opts, "foo", "value");
+  rocksdb_rs::status::Status s = db_->Put(write_opts, "foo", "value");
   ASSERT_OK(s);
   ASSERT_OK(Flush());
   SyncPoint::GetInstance()->DisableProcessing();
@@ -3505,7 +3505,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         // and the resultant data block will not be compressed
         values_.emplace_back(rnd.RandomString(128) + zero_str);
         assert(((num_cfs == 1) ? Put(Key(i), values_[i])
-                               : Put(cf, Key(i), values_[i])).eq(Status_OK()));
+                               : Put(cf, Key(i), values_[i])).eq(rocksdb_rs::status::Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3518,7 +3518,7 @@ class DBBasicTestMultiGet : public DBTestBase {
         uncompressable_values_.emplace_back(rnd.RandomString(256) + '\0');
         std::string tmp_key = "a" + Key(i);
         assert(((num_cfs == 1) ? Put(tmp_key, uncompressable_values_[i])
-                               : Put(cf, tmp_key, uncompressable_values_[i])).eq(Status_OK()));
+                               : Put(cf, tmp_key, uncompressable_values_[i])).eq(rocksdb_rs::status::Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3617,7 +3617,7 @@ class DBBasicTestMultiGet : public DBTestBase {
 
     const char* Name() const override { return "MyBlockCache"; }
 
-    Status Insert(const Slice& key, Cache::ObjectPtr value,
+    rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
                   const CacheItemHelper* helper, size_t charge,
                   Handle** handle = nullptr,
                   Priority priority = Priority::LOW) override {
@@ -3684,7 +3684,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3716,12 +3716,12 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(10);
-  Status_new().resize_vec(statuses, 10);
+  rocksdb_rs::status::Status_new().resize_vec(statuses, 10);
   std::vector<int> key_ints{1, 2, 15, 16, 55, 81, 82, 83, 84, 85};
   for (size_t i = 0; i < key_ints.size(); ++i) {
     key_data[i] = Key(key_ints[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status_OK();
+    statuses[i] = rocksdb_rs::status::Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3738,12 +3738,12 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(10);
-  Status_new().resize_vec(statuses, 10);
+  rocksdb_rs::status::Status_new().resize_vec(statuses, 10);
   std::vector<int> key_uncmp{1, 2, 15, 16, 55, 81, 82, 83, 84, 85};
   for (size_t i = 0; i < key_uncmp.size(); ++i) {
     key_data[i] = "a" + Key(key_uncmp[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status_OK();
+    statuses[i] = rocksdb_rs::status::Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3760,12 +3760,12 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   ASSERT_EQ(env_->random_read_counter_.Read(), expected_reads);
 
   keys.resize(5);
-  Status_new().resize_vec(statuses, 5);
+  rocksdb_rs::status::Status_new().resize_vec(statuses, 5);
   std::vector<int> key_tr{1, 2, 15, 16, 55};
   for (size_t i = 0; i < key_tr.size(); ++i) {
     key_data[i] = "a" + Key(key_tr[i]);
     keys[i] = Slice(key_data[i]);
-    statuses[i] = Status_OK();
+    statuses[i] = rocksdb_rs::status::Status_OK();
     values[i].Reset();
   }
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
@@ -3802,14 +3802,14 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetDirectIO) {
     static const char* kClassName() { return "FakeDirectIOEnv"; }
     const char* Name() const override { return kClassName(); }
 
-    Status NewRandomAccessFile(const std::string& fname,
+    rocksdb_rs::status::Status NewRandomAccessFile(const std::string& fname,
                                std::unique_ptr<RandomAccessFile>* result,
                                const EnvOptions& options) override {
       std::unique_ptr<RandomAccessFile> file;
       assert(options.use_direct_reads);
       EnvOptions opts = options;
       opts.use_direct_reads = false;
-      Status s = target()->NewRandomAccessFile(fname, &file, opts);
+      rocksdb_rs::status::Status s = target()->NewRandomAccessFile(fname, &file, opts);
       if (!s.ok()) {
         return s;
       }
@@ -3864,7 +3864,7 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetDirectIO) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3920,10 +3920,10 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "RetrieveMultipleBlocks:VerifyChecksum", [&](void* status) {
-        Status* s = static_cast<Status*>(status);
+        rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
         read_count++;
         if (read_count == 2) {
-          *s = Status_Corruption();
+          *s = rocksdb_rs::status::Status_Corruption();
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();
@@ -3933,14 +3933,14 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
   ASSERT_TRUE(CheckValue(0, values[0].ToString()));
   // ASSERT_TRUE(CheckValue(50, values[1].ToString()));
-  ASSERT_TRUE(statuses[0].eq(Status_OK()));
-  ASSERT_TRUE(statuses[1].eq(Status_Corruption()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_Corruption()));
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
@@ -3956,8 +3956,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "TableCache::MultiGet:FindTable", [&](void* status) {
-        Status* s = static_cast<Status*>(status);
-        *s = Status_IOError();
+        rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
+        *s = rocksdb_rs::status::Status_IOError();
       });
   // DB open will create table readers unless we reduce the table cache
   // capacity.
@@ -3980,12 +3980,12 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<Status> statuses = Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
-  ASSERT_TRUE(statuses[0].eq(Status_IOError()));
-  ASSERT_TRUE(statuses[1].eq(Status_IOError()));
+  ASSERT_TRUE(statuses[0].eq(rocksdb_rs::status::Status_IOError()));
+  ASSERT_TRUE(statuses[1].eq(rocksdb_rs::status::Status_IOError()));
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
@@ -4212,13 +4212,13 @@ class DBBasicTestMultiGetDeadline : public DBBasicTestMultiGet,
             true /*compression enabled*/, true /*ReadOptions.fill_cache*/,
             1 /*# of parallel compression threads*/) {}
 
-  inline void CheckStatus(const rust::Vec<Status>& statuses, size_t num_ok) {
+  inline void CheckStatus(const rust::Vec<rocksdb_rs::status::Status>& statuses, size_t num_ok) {
     for (size_t i = 0; i < statuses.size(); ++i) {
       if (i < num_ok) {
         EXPECT_OK(statuses[i]);
       } else {
-        if (!statuses[i].eq(Status_TimedOut())) {
-          EXPECT_TRUE(statuses[i].eq(Status_TimedOut()));
+        if (!statuses[i].eq(rocksdb_rs::status::Status_TimedOut())) {
+          EXPECT_TRUE(statuses[i].eq(rocksdb_rs::status::Status_TimedOut()));
         }
       }
     }
@@ -4266,7 +4266,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   // Delay the first IO
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 0);
 
-  rust::Vec<Status> statuses = dbfull()->MultiGet(ro, cfs, keys, &values);
+  rust::Vec<rocksdb_rs::status::Status> statuses = dbfull()->MultiGet(ro, cfs, keys, &values);
   // The first key is successful because we check after the lookup, but
   // subsequent keys fail due to deadline exceeded
   CheckStatus(statuses, 1);
@@ -4301,7 +4301,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  Status_new().resize_vec(statuses, keys.size());
+  rocksdb_rs::status::Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 0);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4316,7 +4316,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  Status_new().resize_vec(statuses, keys.size());
+  rocksdb_rs::status::Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 2);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4330,7 +4330,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   cache->SetCapacity(0);
   cache->SetCapacity(1048576);
   statuses.clear();
-  Status_new().resize_vec(statuses, keys.size());
+  rocksdb_rs::status::Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 3);
   dbfull()->MultiGet(ro, keys.size(), cfs.data(), keys.data(),
@@ -4356,7 +4356,7 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
     keys[i] = Slice(key_str[i].data(), key_str[i].size());
   }
   statuses.clear();
-  Status_new().resize_vec(statuses, keys.size());
+  rocksdb_rs::status::Status_new().resize_vec(statuses, keys.size());
   ro.deadline = std::chrono::microseconds{env->NowMicros() + 10000};
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 1);
   dbfull()->MultiGet(ro, handles_[0], keys.size(), keys.data(),
@@ -4381,10 +4381,10 @@ TEST_F(DBBasicTest, ManifestWriteFailure) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::ProcessManifestWrites:AfterSyncManifest", [&](void* arg) {
         ASSERT_NE(nullptr, arg);
-        auto* s = reinterpret_cast<Status*>(arg);
+        auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_OK(*s);
         // Manually overwrite return status
-        *s = Status_IOError();
+        *s = rocksdb_rs::status::Status_IOError();
       });
   SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(Put("key", "value"));
@@ -4431,13 +4431,13 @@ TEST_F(DBBasicTest, FailOpenIfLoggerCreationFail) {
   SyncPoint::GetInstance()->ClearAllCallBacks();
   SyncPoint::GetInstance()->SetCallBack(
       "rocksdb::CreateLoggerFromOptions:AfterGetPath", [&](void* arg) {
-        auto* s = reinterpret_cast<Status*>(arg);
+        auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         assert(s);
-        *s = Status_IOError("Injected");
+        *s = rocksdb_rs::status::Status_IOError("Injected");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
-  Status s = TryReopen(options);
+  rocksdb_rs::status::Status s = TryReopen(options);
   ASSERT_EQ(nullptr, options.info_log);
   ASSERT_TRUE(s.IsIOError());
 
@@ -4559,7 +4559,7 @@ TEST_F(DBBasicTest, DISABLED_ManualWalSync) {
   EXPECT_FALSE(dbfull()->GetVersionSet()->GetWalSet().GetWals().empty());
 
   std::unique_ptr<LogFile> wal;
-  Status s = db_->GetCurrentWalFile(&wal);
+  rocksdb_rs::status::Status s = db_->GetCurrentWalFile(&wal);
   ASSERT_OK(s);
   Close();
 
@@ -4651,9 +4651,9 @@ TEST_P(DBBasicTestDeadline, PointLookupDeadline) {
       block_cache->SetCapacity(1048576);
 
       std::string value;
-      Status s = dbfull()->Get(ro, "k50", &value);
+      rocksdb_rs::status::Status s = dbfull()->Get(ro, "k50", &value);
       if (fs->TimedOut()) {
-        ASSERT_TRUE(s.eq(Status_TimedOut()));
+        ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_TimedOut()));
       } else {
         timedout = false;
         ASSERT_OK(s);
@@ -4740,7 +4740,7 @@ TEST_P(DBBasicTestDeadline, IteratorDeadline) {
       }
       if (fs->TimedOut()) {
         ASSERT_FALSE(iter->Valid());
-        ASSERT_TRUE(iter->status().eq(Status_TimedOut()));
+        ASSERT_TRUE(iter->status().eq(rocksdb_rs::status::Status_TimedOut()));
       } else {
         timedout = false;
         ASSERT_OK(iter->status());

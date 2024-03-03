@@ -11,35 +11,35 @@
 
 namespace rocksdb {
 
-Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
   uint64_t blob_file_number = kInvalidBlobFileNumber;
   uint64_t bytes = 0;
 
-  const Status s = Parse(key, value, &blob_file_number, &bytes);
+  const rocksdb_rs::status::Status s = Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
     return s.Clone();
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   flows_[blob_file_number].AddInFlow(bytes);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
   uint64_t blob_file_number = kInvalidBlobFileNumber;
   uint64_t bytes = 0;
 
-  const Status s = Parse(key, value, &blob_file_number, &bytes);
+  const rocksdb_rs::status::Status s = Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
     return s.Clone();
   }
 
   if (blob_file_number == kInvalidBlobFileNumber) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   // Note: in order to measure the amount of additional garbage, we only need to
@@ -47,15 +47,15 @@ Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
   // (Newly written files would only have outflow.)
   auto it = flows_.find(blob_file_number);
   if (it == flows_.end()) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   it->second.AddOutFlow(bytes);
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
-Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
+rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
                                uint64_t* blob_file_number, uint64_t* bytes) {
   assert(blob_file_number);
   assert(*blob_file_number == kInvalidBlobFileNumber);
@@ -66,27 +66,27 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
 
   {
     constexpr bool log_err_key = false;
-    const Status s = ParseInternalKey(key, &ikey, log_err_key);
+    const rocksdb_rs::status::Status s = ParseInternalKey(key, &ikey, log_err_key);
     if (!s.ok()) {
       return s.Clone();
     }
   }
 
   if (ikey.type != kTypeBlobIndex) {
-    return Status_OK();
+    return rocksdb_rs::status::Status_OK();
   }
 
   BlobIndex blob_index;
 
   {
-    const Status s = blob_index.DecodeFrom(value);
+    const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value);
     if (!s.ok()) {
       return s.Clone();
     }
   }
 
   if (blob_index.IsInlined() || blob_index.HasTTL()) {
-    return Status_Corruption("Unexpected TTL/inlined blob index");
+    return rocksdb_rs::status::Status_Corruption("Unexpected TTL/inlined blob index");
   }
 
   *blob_file_number = blob_index.file_number();
@@ -94,7 +94,7 @@ Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
       blob_index.size() +
       BlobLogRecord::CalculateAdjustmentForRecordHeader(ikey.user_key.size());
 
-  return Status_OK();
+  return rocksdb_rs::status::Status_OK();
 }
 
 }  // namespace rocksdb

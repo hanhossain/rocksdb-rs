@@ -91,7 +91,7 @@ class CorruptionTest : public testing::Test {
     options_.wal_recovery_mode = WALRecoveryMode::kTolerateCorruptedTailRecords;
     options_.env = env_.get();
     dbname_ = test::PerThreadDBPath(env_.get(), "corruption_test");
-    Status s = DestroyDB(dbname_, options_);
+    rocksdb_rs::status::Status s = DestroyDB(dbname_, options_);
     EXPECT_OK(s);
 
     db_ = nullptr;
@@ -123,7 +123,7 @@ class CorruptionTest : public testing::Test {
     db_ = nullptr;
   }
 
-  Status TryReopen(Options* options = nullptr) {
+  rocksdb_rs::status::Status TryReopen(Options* options = nullptr) {
     delete db_;
     db_ = nullptr;
     Options opt = (options ? *options : options_);
@@ -408,7 +408,7 @@ TEST_F(CorruptionTest, PostPITRCorruptionWALsRetained) {
 
 TEST_F(CorruptionTest, RecoverWriteError) {
   fs_->writable_file_error_ = true;
-  Status s = TryReopen();
+  rocksdb_rs::status::Status s = TryReopen();
   ASSERT_TRUE(!s.ok());
 }
 
@@ -418,7 +418,7 @@ TEST_F(CorruptionTest, NewFileErrorDuringWrite) {
   const int num =
       static_cast<int>(3 + (Options().write_buffer_size / kValueSize));
   std::string value_storage;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool failed = false;
   for (int i = 0; i < num; i++) {
     WriteBatch batch;
@@ -533,7 +533,7 @@ TEST_F(CorruptionTest, TableFileFooterMagic) {
   Check(100, 100);
   // Corrupt the whole footer
   Corrupt(rocksdb_rs::types::FileType::kTableFile, -100, 100);
-  Status s = TryReopen();
+  rocksdb_rs::status::Status s = TryReopen();
   ASSERT_TRUE(s.IsCorruption());
   // Contains useful message, and magic number should be the first thing
   // reported as corrupt.
@@ -549,7 +549,7 @@ TEST_F(CorruptionTest, TableFileFooterNotMagic) {
   Check(100, 100);
   // Corrupt footer except magic number
   Corrupt(rocksdb_rs::types::FileType::kTableFile, -100, 92);
-  Status s = TryReopen();
+  rocksdb_rs::status::Status s = TryReopen();
   ASSERT_TRUE(s.IsCorruption());
   // The next thing checked after magic number is format_version
   ASSERT_TRUE(s.ToString()->find("format_version") != std::string::npos);
@@ -586,7 +586,7 @@ TEST_F(CorruptionTest, TableFileWrongSize) {
 
   // But reports the issue with paranoid checks
   options_.paranoid_checks = true;
-  Status s = TryReopen();
+  rocksdb_rs::status::Status s = TryReopen();
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(s.ToString()->find("file size mismatch") != std::string::npos);
 
@@ -648,7 +648,7 @@ TEST_F(CorruptionTest, CorruptedDescriptor) {
       dbi->CompactRange(cro, dbi->DefaultColumnFamily(), nullptr, nullptr));
 
   Corrupt(rocksdb_rs::types::FileType::kDescriptorFile, 0, 1000);
-  Status s = TryReopen();
+  rocksdb_rs::status::Status s = TryReopen();
   ASSERT_TRUE(!s.ok());
 
   RepairDB();
@@ -714,7 +714,7 @@ TEST_F(CorruptionTest, CompactionInputErrorParanoid) {
   ASSERT_NOK(dbi->VerifyChecksum());
 
   // Write must eventually fail because of corrupted table
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string tmp1, tmp2;
   bool failed = false;
   for (int i = 0; i < 10000; i++) {
@@ -801,11 +801,11 @@ TEST_F(CorruptionTest, FileSystemStateCorrupted) {
       ASSERT_OK(env_->NewWritableFile(filename, &file, EnvOptions()));
       ASSERT_OK(file->Append(Slice("corrupted sst")));
       file.reset();
-      Status x = TryReopen(&options);
+      rocksdb_rs::status::Status x = TryReopen(&options);
       ASSERT_TRUE(x.IsCorruption());
     } else {  // delete the file
       ASSERT_OK(env_->DeleteFile(filename));
-      Status x = TryReopen(&options);
+      rocksdb_rs::status::Status x = TryReopen(&options);
       ASSERT_TRUE(x.IsCorruption());
     }
 
@@ -825,7 +825,7 @@ TEST_F(CorruptionTest, ParanoidFileChecksOnFlush) {
   options.check_flush_compaction_key_order = false;
   options.paranoid_file_checks = true;
   options.create_if_missing = true;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (const auto& mode : corruption_modes) {
     delete db_;
     db_ = nullptr;
@@ -854,7 +854,7 @@ TEST_F(CorruptionTest, ParanoidFileChecksOnCompact) {
   options.paranoid_file_checks = true;
   options.create_if_missing = true;
   options.check_flush_compaction_key_order = false;
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (const auto& mode : corruption_modes) {
     delete db_;
     db_ = nullptr;
@@ -1019,7 +1019,7 @@ TEST_F(CorruptionTest, LogCorruptionErrorsInCompactionIterator) {
   ASSERT_OK(dbi->TEST_FlushMemTable());
   CompactRangeOptions cro;
   cro.bottommost_level_compaction = BottommostLevelCompaction::kForce;
-  Status s =
+  rocksdb_rs::status::Status s =
       dbi->CompactRange(cro, dbi->DefaultColumnFamily(), nullptr, nullptr);
   ASSERT_NOK(s);
   ASSERT_TRUE(s.IsCorruption());
@@ -1078,7 +1078,7 @@ TEST_F(CorruptionTest, FlushKeyOrderCheck) {
         }
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
-  Status s = static_cast_with_check<DBImpl>(db_)->TEST_FlushMemTable();
+  rocksdb_rs::status::Status s = static_cast_with_check<DBImpl>(db_)->TEST_FlushMemTable();
   ASSERT_NOK(s);
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
@@ -1132,7 +1132,7 @@ TEST_F(CorruptionTest, VerifyWholeTableChecksum) {
   int count{0};
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::VerifyFullFileChecksum:mismatch", [&](void* arg) {
-        auto* s = reinterpret_cast<Status*>(arg);
+        auto* s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_NE(s, nullptr);
         ++count;
         ASSERT_NOK(*s);
@@ -1206,7 +1206,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
   options.max_write_buffer_number = 8;
 
   Reopen(&options);
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   const std::string test_cf_name = "test_cf";
   ColumnFamilyHandle* cfh = nullptr;
   s = db_->CreateColumnFamily(options, test_cf_name, &cfh);
@@ -1277,9 +1277,9 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
     SyncPoint::GetInstance()->ClearAllCallBacks();
     SyncPoint::GetInstance()->SetCallBack(
         "DBImpl::GetLogSizeAndMaybeTruncate:0", [&](void* arg) {
-          auto* tmp_s = reinterpret_cast<Status*>(arg);
+          auto* tmp_s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
           assert(tmp_s);
-          *tmp_s = Status_IOError("Injected");
+          *tmp_s = rocksdb_rs::status::Status_IOError("Injected");
         });
     SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1331,7 +1331,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
       // Since  it's corrupting second last wal, below key is not found.
       v.clear();
       ASSERT_TRUE(db_->Get(ReadOptions(), "key" + std::to_string(1), &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {
@@ -1382,7 +1382,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
   // Create cf test_cf_name.
   ColumnFamilyHandle* cfh = nullptr;
   const std::string test_cf_name = "test_cf";
-  Status s = db_->CreateColumnFamily(options, test_cf_name, &cfh);
+  rocksdb_rs::status::Status s = db_->CreateColumnFamily(options, test_cf_name, &cfh);
   ASSERT_OK(s);
   delete cfh;
   CloseDb();
@@ -1459,9 +1459,9 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
     SyncPoint::GetInstance()->ClearAllCallBacks();
     SyncPoint::GetInstance()->SetCallBack(
         "DBImpl::Open::BeforeSyncWAL", [&](void* arg) {
-          auto* tmp_s = reinterpret_cast<Status*>(arg);
+          auto* tmp_s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
           assert(tmp_s);
-          *tmp_s = Status_IOError("Injected");
+          *tmp_s = rocksdb_rs::status::Status_IOError("Injected");
         });
     SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1506,7 +1506,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
       std::string v;
       // Key not visible since it's not committed.
       ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo", &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
 
       v.clear();
       ASSERT_OK(txn_db->Get(ReadOptions(), "key" + std::to_string(0), &v));
@@ -1515,10 +1515,10 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
       // Last WAL is corrupted which contains two keys below.
       v.clear();
       ASSERT_TRUE(txn_db->Get(ReadOptions(), "key" + std::to_string(1), &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
       v.clear();
       ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo1", &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {
@@ -1577,7 +1577,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
 
   ColumnFamilyHandle* cfh = nullptr;
   const std::string test_cf_name = "test_cf";
-  Status s = db_->CreateColumnFamily(options, test_cf_name, &cfh);
+  rocksdb_rs::status::Status s = db_->CreateColumnFamily(options, test_cf_name, &cfh);
   ASSERT_OK(s);
   delete cfh;
 
@@ -1627,9 +1627,9 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
     SyncPoint::GetInstance()->ClearAllCallBacks();
     SyncPoint::GetInstance()->SetCallBack(
         "DBImpl::GetLogSizeAndMaybeTruncate:0", [&](void* arg) {
-          auto* tmp_s = reinterpret_cast<Status*>(arg);
+          auto* tmp_s = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
           assert(tmp_s);
-          *tmp_s = Status_IOError("Injected");
+          *tmp_s = rocksdb_rs::status::Status_IOError("Injected");
         });
     SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1667,7 +1667,7 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
       // Since it's corrupting last wal after Flush, below key is not found.
       v.clear();
       ASSERT_TRUE(db_->Get(ReadOptions(), handles[1], "dontcare", &v).eq(
-                Status_NotFound()));
+                rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {

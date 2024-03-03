@@ -833,7 +833,7 @@ TEST_F(DBTestCompactionFilter, SkipUntil) {
       snprintf(key, sizeof(key), "%010d", table * 100 + i);
       auto expected = std::to_string(table * 1000 + i);
       std::string val;
-      Status s = db_->Get(ReadOptions(), key, &val);
+      rocksdb_rs::status::Status s = db_->Get(ReadOptions(), key, &val);
       if (k / 10 % 2 == 0) {
         ASSERT_TRUE(s.IsNotFound());
       } else {
@@ -866,7 +866,7 @@ TEST_F(DBTestCompactionFilter, SkipUntilWithBloomFilter) {
   EXPECT_OK(db_->CompactRange(CompactRangeOptions(), nullptr, nullptr));
   EXPECT_EQ(1, cfilter_skips);
 
-  Status s = Status_new();
+  rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string val;
 
   s = db_->Get(ReadOptions(), "0000000010", &val);
