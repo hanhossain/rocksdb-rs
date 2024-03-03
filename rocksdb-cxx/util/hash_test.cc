@@ -302,7 +302,7 @@ TEST(HashTest, Hash128Misc) {
       EXPECT_EQ(here, GetSliceHash128(Slice(str.data(), size)));
       {
         uint64_t hi, lo;
-        rocksdb::hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(str.data()), size), hi, lo);
+        rocksdb_rs::hash::hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(str.data()), size), hi, lo);
         EXPECT_EQ(Lower64of128(here), lo);
         EXPECT_EQ(Upper64of128(here), hi);
       }
@@ -310,11 +310,11 @@ TEST(HashTest, Hash128Misc) {
         const uint64_t in_hi = DecodeFixed64(str.data() + 8);
         const uint64_t in_lo = DecodeFixed64(str.data());
         uint64_t hi, lo;
-        rocksdb::bijective_hash2x64(in_hi, in_lo, hi, lo);
+        rocksdb_rs::hash::bijective_hash2x64(in_hi, in_lo, hi, lo);
         EXPECT_EQ(Lower64of128(here), lo);
         EXPECT_EQ(Upper64of128(here), hi);
         uint64_t un_hi, un_lo;
-        rocksdb::bijective_unhash2x64(hi, lo, un_hi, un_lo);
+        rocksdb_rs::hash::bijective_unhash2x64(hi, lo, un_hi, un_lo);
         EXPECT_EQ(in_lo, un_lo);
         EXPECT_EQ(in_hi, un_hi);
       }
@@ -333,7 +333,7 @@ TEST(HashTest, Hash128Misc) {
         {
           uint64_t hi, lo;
           auto slice = rust::Slice(reinterpret_cast<const uint8_t*>(str.data()), size);
-          rocksdb::hash2x64_with_seed(slice, var_seed, hi, lo);
+          rocksdb_rs::hash::hash2x64_with_seed(slice, var_seed, hi, lo);
           EXPECT_EQ(Lower64of128(seeded), lo);
           EXPECT_EQ(Upper64of128(seeded), hi);
         }
@@ -341,11 +341,11 @@ TEST(HashTest, Hash128Misc) {
           const uint64_t in_hi = DecodeFixed64(str.data() + 8);
           const uint64_t in_lo = DecodeFixed64(str.data());
           uint64_t hi, lo;
-          rocksdb::bijective_hash2x64_with_seed(in_hi, in_lo, var_seed, hi, lo);
+          rocksdb_rs::hash::bijective_hash2x64_with_seed(in_hi, in_lo, var_seed, hi, lo);
           EXPECT_EQ(Lower64of128(seeded), lo);
           EXPECT_EQ(Upper64of128(seeded), hi);
           uint64_t un_hi, un_lo;
-          rocksdb::bijective_unhash2x64_with_seed(hi, lo, var_seed, un_hi, un_lo);
+          rocksdb_rs::hash::bijective_unhash2x64_with_seed(hi, lo, var_seed, un_hi, un_lo);
           EXPECT_EQ(in_lo, un_lo);
           EXPECT_EQ(in_hi, un_hi);
         }

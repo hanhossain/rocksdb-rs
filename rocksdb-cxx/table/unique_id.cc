@@ -23,8 +23,8 @@ constexpr uint64_t kLoOffsetForZero = 6417269962128484497U;
 
 void InternalUniqueIdToExternal(UniqueIdPtr in_out) {
   uint64_t hi, lo;
-  bijective_hash2x64(in_out.ptr[1] + kHiOffsetForZero,
-                    in_out.ptr[0] + kLoOffsetForZero, hi, lo);
+  rocksdb_rs::hash::bijective_hash2x64(in_out.ptr[1] + kHiOffsetForZero,
+                                       in_out.ptr[0] + kLoOffsetForZero, hi, lo);
   in_out.ptr[0] = lo;
   in_out.ptr[1] = hi;
   if (in_out.extended) {
@@ -38,7 +38,7 @@ void ExternalUniqueIdToInternal(UniqueIdPtr in_out) {
   if (in_out.extended) {
     in_out.ptr[2] -= lo + hi;
   }
-  bijective_unhash2x64(hi, lo, hi, lo);
+  rocksdb_rs::hash::bijective_unhash2x64(hi, lo, hi, lo);
   in_out.ptr[0] = lo - kLoOffsetForZero;
   in_out.ptr[1] = hi - kHiOffsetForZero;
 }
