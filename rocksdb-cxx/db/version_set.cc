@@ -2489,7 +2489,7 @@ void Version::Get(const ReadOptions& read_options, const LookupKey& k,
             "rocksdb::blob_db::BlobDB instead.");
         return;
       case GetContext::kMergeOperatorFailed:
-        *status = Status_Corruption(SubCode::kMergeOperatorFailed);
+        *status = Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
         return;
     }
     f = fp.GetNextFile();

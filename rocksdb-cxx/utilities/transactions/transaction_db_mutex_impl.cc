@@ -85,7 +85,7 @@ Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
 
   if (!locked) {
     // timeout acquiring mutex
-    return Status_TimedOut(SubCode::kMutexTimeout);
+    return Status_TimedOut(rocksdb_rs::status::SubCode::kMutexTimeout);
   }
 
   return Status_OK();
@@ -120,7 +120,7 @@ Status TransactionDBCondVarImpl::WaitFor(
 
     // Check if the wait stopped due to timing out.
     if (cv_status == std::cv_status::timeout) {
-      s = Status_TimedOut(SubCode::kMutexTimeout);
+      s = Status_TimedOut(rocksdb_rs::status::SubCode::kMutexTimeout);
     }
   }
 

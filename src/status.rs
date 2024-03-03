@@ -24,6 +24,7 @@ pub(crate) mod ffi {
         kMaxCode,
     }
 
+    #[namespace = "rocksdb_rs::status"]
     #[derive(Debug)]
     enum SubCode {
         kNone = 0,

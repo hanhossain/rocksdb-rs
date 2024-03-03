@@ -66,7 +66,7 @@ IOStatus IOError(const std::string& context, const std::string& file_name,
       return s;
     }
     case ESTALE:
-      return IOStatus::IOError(SubCode::kStaleFile);
+      return IOStatus::IOError(rocksdb_rs::status::SubCode::kStaleFile);
     case ENOENT:
       return IOStatus::PathNotFound(IOErrorMsg(context, file_name),
                                     errnoStr(err_number).c_str());

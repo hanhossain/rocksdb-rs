@@ -159,7 +159,7 @@ DEFINE_SYNC_AND_ASYNC(Status, Version::MultiGetFromSST)
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kMergeOperatorFailed:
-        *status = Status_Corruption(SubCode::kMergeOperatorFailed);
+        *status = Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
         file_range.MarkKeyDone(iter);
         continue;
     }

@@ -1358,7 +1358,7 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
   }
   if ((status.ok() || status.IsColumnFamilyDropped()) &&
       (manual_compaction_canceled_.load(std::memory_order_relaxed))) {
-    status = Status_Incomplete(SubCode::kManualCompactionPaused);
+    status = Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
   if (status.ok()) {
     status = input->status();

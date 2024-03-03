@@ -184,7 +184,7 @@ class FaultInjectionTestEnv : public EnvWrapper {
   virtual Status GetFreeSpace(const std::string& path,
                               uint64_t* disk_free) override {
     if (!IsFilesystemActive() &&
-        error_.subcode() == SubCode::kNoSpace) {
+        error_.subcode() == rocksdb_rs::status::SubCode::kNoSpace) {
       *disk_free = 0;
       return Status_OK();
     } else {

@@ -48,7 +48,7 @@ TEST_F(DBBasicTest, OpenWhenOpen) {
     return "db2 open: ok";
   }();
   ASSERT_EQ(rocksdb_rs::status::Code::kIOError, s.code());
-  ASSERT_EQ(SubCode::kNone, s.subcode());
+  ASSERT_EQ(rocksdb_rs::status::SubCode::kNone, s.subcode());
   ASSERT_TRUE(strstr(s.getState()->c_str(), "lock ") != nullptr);
 
   delete db2;
