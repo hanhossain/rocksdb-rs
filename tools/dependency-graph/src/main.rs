@@ -17,6 +17,7 @@ fn main() -> anyhow::Result<()> {
     let repo_root = std::fs::canonicalize(format!("{manifest_dir}/../.."))?;
     let cxx_root = repo_root.join("rocksdb-cxx");
 
+    // get all c++ files from rocksdb-cxx
     let mut paths = WalkDir::new(&cxx_root)
         .into_iter()
         .filter_map(|e| e.ok())
@@ -28,6 +29,7 @@ fn main() -> anyhow::Result<()> {
         .map(|e| e.into_path())
         .collect::<HashSet<_>>();
 
+    // get all header files generated from rocksdb-rs
     for path in WalkDir::new(GENERATED_INCLUDE_DIR) {
         let path = path?;
         if path.path().extension().map_or(false, |e| e == "h") {
@@ -35,35 +37,36 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    let re = RegexBuilder::new("^#include \"(\\S+)\"")
+    let re = RegexBuilder::new(r#"^#include "(\S+)""#)
         .multi_line(true)
         .build()?;
 
     let mut path_mappings = HashMap::new();
 
+    // map every file's include statements
     for path in &paths {
         let content = std::fs::read_to_string(path)?;
         let mut include_mappings = HashMap::new();
-        for (_, [include]) in re.captures_iter(&content).map(|c| c.extract()) {
-            if !include_mappings.contains_key(include) {
-                let path = find_path(&cxx_root, include, path);
+        for include in re.captures_iter(&content).map(|c| c[1].to_string()) {
+            if !include_mappings.contains_key(&include) {
+                // map the include statement to a filepath
+                let path = find_path(&cxx_root, &include, path);
                 let include_mapping = IncludeMapping {
                     include: include.to_string(),
                     path,
                 };
-                include_mappings.insert(include.to_string(), include_mapping);
+                include_mappings.insert(include, include_mapping);
             }
         }
         path_mappings.insert(path.clone(), include_mappings);
     }
 
     let mut counter = 0;
+    println!("Files with missing include paths:");
     for (path, mappings) in path_mappings {
         if mappings.values().any(|m| m.path.is_none()) {
             counter += 1;
             println!("{counter} - {:?}", path);
-            // println!("{}: {:#?}", path.display(), mappings);
-            // break;
         }
     }
 
