@@ -1,3 +1,4 @@
+use clap::{Parser, Subcommand};
 use regex::RegexBuilder;
 use rocksdb_rs as _;
 use std::collections::{HashMap, HashSet};
@@ -6,7 +7,23 @@ use walkdir::WalkDir;
 
 const GENERATED_INCLUDE_DIR: &str = env!("ROCKSDB_GENERATED_INCLUDE");
 
+/// This tool is used to interact with the dependency graph of the C++ files.
+#[derive(Debug, Parser)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[command(subcommand)]
+    subcommand: Option<Commands>,
+}
+
+#[derive(Debug, Subcommand)]
+enum Commands {
+    /// Check for missing include paths
+    MissingIncludePaths,
+}
+
 fn main() -> anyhow::Result<()> {
+    let args = Args::parse();
+
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let repo_root = std::fs::canonicalize(format!("{manifest_dir}/../.."))?;
     let cxx_root = repo_root.join("rocksdb-cxx");
@@ -30,6 +47,19 @@ fn main() -> anyhow::Result<()> {
         path_mappings.insert(path.clone(), include_mappings);
     }
 
+    match args.subcommand {
+        Some(Commands::MissingIncludePaths) => {
+            show_missing_include_paths(&path_mappings);
+        }
+        None => {
+            println!("No subcommand provided");
+        }
+    }
+
+    Ok(())
+}
+
+fn show_missing_include_paths(path_mappings: &HashMap<PathBuf, HashSet<IncludeMapping>>) {
     let mut counter = 0;
     println!("Files with missing include paths:");
     for (path, mappings) in path_mappings {
@@ -44,8 +74,6 @@ fn main() -> anyhow::Result<()> {
             println!("    {:?}", include_mapping.include);
         }
     }
-
-    Ok(())
 }
 
 /// Get paths for C++ files from rocksdb-cxx and all header files generated from rocksdb-rs
