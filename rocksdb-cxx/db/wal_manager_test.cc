@@ -137,7 +137,7 @@ TEST_F(WalManagerTest, ReadFirstRecordCache) {
   ASSERT_EQ(s, 0U);
 
   ASSERT_OK(
-      wal_manager_->TEST_ReadFirstRecord(WalFileType::kAliveLogFile, 1 /* number */, &s));
+      wal_manager_->TEST_ReadFirstRecord(rocksdb_rs::transaction_log::WalFileType::kAliveLogFile, 1 /* number */, &s));
   ASSERT_EQ(s, 0U);
 
   std::unique_ptr<WritableFileWriter> file_writer(
@@ -155,13 +155,13 @@ TEST_F(WalManagerTest, ReadFirstRecordCache) {
   // sequential_read_counter_ sanity test
   // ASSERT_EQ(env_->sequential_read_counter_.Read(), 0);
 
-  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(WalFileType::kAliveLogFile, 1, &s));
+  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(rocksdb_rs::transaction_log::WalFileType::kAliveLogFile, 1, &s));
   ASSERT_EQ(s, 10U);
   // did a read
   // TODO(icanadi) move SpecialEnv outside of db_test, so we can reuse it here
   // ASSERT_EQ(env_->sequential_read_counter_.Read(), 1);
 
-  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(WalFileType::kAliveLogFile, 1, &s));
+  ASSERT_OK(wal_manager_->TEST_ReadFirstRecord(rocksdb_rs::transaction_log::WalFileType::kAliveLogFile, 1, &s));
   ASSERT_EQ(s, 10U);
   // no new reads since the value is cached
   // TODO(icanadi) move SpecialEnv outside of db_test, so we can reuse it here

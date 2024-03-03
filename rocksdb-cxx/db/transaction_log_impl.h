@@ -21,7 +21,7 @@ namespace rocksdb {
 
 class LogFileImpl : public LogFile {
  public:
-  LogFileImpl(uint64_t logNum, WalFileType logType, SequenceNumber startSeq,
+  LogFileImpl(uint64_t logNum, rocksdb_rs::transaction_log::WalFileType logType, SequenceNumber startSeq,
               uint64_t sizeBytes)
       : logNumber_(logNum),
         type_(logType),
@@ -29,7 +29,7 @@ class LogFileImpl : public LogFile {
         sizeFileBytes_(sizeBytes) {}
 
   std::string PathName() const override {
-    if (type_ == WalFileType::kArchivedLogFile) {
+    if (type_ == rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
       return static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName("", logNumber_));
     }
     return static_cast<std::string>(rocksdb_rs::filename::LogFileName("", logNumber_));
@@ -37,7 +37,7 @@ class LogFileImpl : public LogFile {
 
   uint64_t LogNumber() const override { return logNumber_; }
 
-  WalFileType Type() const override { return type_; }
+  rocksdb_rs::transaction_log::WalFileType Type() const override { return type_; }
 
   SequenceNumber StartSequence() const override { return startSequence_; }
 
@@ -49,7 +49,7 @@ class LogFileImpl : public LogFile {
 
  private:
   uint64_t logNumber_;
-  WalFileType type_;
+  rocksdb_rs::transaction_log::WalFileType type_;
   SequenceNumber startSequence_;
   uint64_t sizeFileBytes_;
 };

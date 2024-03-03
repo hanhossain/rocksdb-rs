@@ -66,7 +66,7 @@ class WalManager {
 
   Status GetLiveWalFile(uint64_t number, std::unique_ptr<LogFile>* log_file);
 
-  Status TEST_ReadFirstRecord(const WalFileType type, const uint64_t number,
+  Status TEST_ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
                               SequenceNumber* sequence) {
     return ReadFirstRecord(type, number, sequence);
   }
@@ -78,7 +78,7 @@ class WalManager {
 
  private:
   Status GetSortedWalsOfType(const std::string& path, VectorLogPtr& log_files,
-                             WalFileType type);
+                             rocksdb_rs::transaction_log::WalFileType type);
   // Requires: all_logs should be sorted with earliest log file first
   // Retains all log files in all_logs which contain updates with seq no.
   // Greater Than or Equal to the requested SequenceNumber.
@@ -93,7 +93,7 @@ class WalManager {
   // order to include that WAL and is inserted in read_first_record_cache_.
   // Therefore, sequence_number is used as boolean if WAL should be included or
   // not and that sequence_number shouldn't be use for any other purpose.
-  Status ReadFirstRecord(const WalFileType type, const uint64_t number,
+  Status ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
                          SequenceNumber* sequence);
 
   // In case of no wal_compression, ReadFirstLine returns status.ok() and

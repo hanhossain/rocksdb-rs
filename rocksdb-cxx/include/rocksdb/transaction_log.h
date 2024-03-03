@@ -34,7 +34,7 @@ class LogFile {
   virtual uint64_t LogNumber() const = 0;
 
   // Log file can be either alive or archived
-  virtual WalFileType Type() const = 0;
+  virtual rocksdb_rs::transaction_log::WalFileType Type() const = 0;
 
   // Starting sequence number of writebatch written in this log file
   virtual SequenceNumber StartSequence() const = 0;

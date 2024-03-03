@@ -176,7 +176,7 @@ TEST_F(ObsoleteFilesTest, DeleteObsoleteOptionsFile) {
     uint64_t file_num;
     Slice dummy_info_log_name_prefix;
     FileType type;
-    WalFileType log_type;
+    rocksdb_rs::transaction_log::WalFileType log_type;
     if (ParseFileName(file, &file_num, dummy_info_log_name_prefix.ToString(), &type,
                       &log_type) &&
         type == FileType::kOptionsFile) {

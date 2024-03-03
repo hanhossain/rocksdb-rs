@@ -706,7 +706,7 @@ TEST_F(CheckpointTest, CurrentFileModifiedWhileCheckpointing2PC) {
   for (auto& file : files) {
     uint64_t num;
     FileType type;
-    WalFileType log_type;
+    rocksdb_rs::transaction_log::WalFileType log_type;
     if (ParseFileName(file, &num, &type, &log_type) && type == FileType::kWalFile) {
       num_log_files++;
     }

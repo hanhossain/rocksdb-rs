@@ -160,6 +160,8 @@ mod ffi {
 
         type DbPath = crate::options::ffi::DbPath;
         type FileType = crate::types::ffi::FileType;
+
+        #[namespace = "rocksdb_rs::transaction_log"]
         type WalFileType = crate::transaction_log::ffi::WalFileType;
     }
 }

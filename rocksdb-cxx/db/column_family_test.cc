@@ -419,7 +419,7 @@ class ColumnFamilyTestBase : public testing::Test {
     }
     EXPECT_OK(s);
     for (const auto& wal : wal_files) {
-      if (wal->Type() == WalFileType::kAliveLogFile) {
+      if (wal->Type() == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
         ++ret;
       }
     }

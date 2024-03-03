@@ -4278,7 +4278,7 @@ Status DBImpl::DeleteFile(std::string name) {
   const ReadOptions read_options;
   uint64_t number;
   FileType type;
-  WalFileType log_type;
+  rocksdb_rs::transaction_log::WalFileType log_type;
   if (!ParseFileName(name, &number, &type, &log_type) ||
       (type != FileType::kTableFile && type != FileType::kWalFile)) {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log, "DeleteFile %s failed.\n",
@@ -4288,7 +4288,7 @@ Status DBImpl::DeleteFile(std::string name) {
 
   if (type == FileType::kWalFile) {
     // Only allow deleting archived log files
-    if (log_type != WalFileType::kArchivedLogFile) {
+    if (log_type != rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log,
                       "DeleteFile %s failed - not archived log.\n",
                       name.c_str());
