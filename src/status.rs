@@ -113,7 +113,6 @@ pub(crate) mod ffi {
         #[cxx_name = "Status_OK"]
         fn status_ok() -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_OkOverwritten"]
         fn status_ok_overwritten() -> Status;
 

@@ -610,7 +610,7 @@ rocksdb_rs::status::Status BaseClockTable::Insert(const ClockHandleBasicData& pr
   // insertions, but we instead are probably interested in how many insertions
   // didn't go into the table (instead "standalone"), which could be redundant
   // Insert or some other reason (use_standalone_insert reasons above).
-  return Status_OkOverwritten();
+  return rocksdb_rs::status::Status_OkOverwritten();
 }
 
 void BaseClockTable::Ref(ClockHandle& h) {

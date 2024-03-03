@@ -398,7 +398,7 @@ rocksdb_rs::status::Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** h
       LRUHandle* old = table_.Insert(e);
       usage_ += e->total_charge;
       if (old != nullptr) {
-        s = Status_OkOverwritten();
+        s = rocksdb_rs::status::Status_OkOverwritten();
         assert(old->InCache());
         old->SetInCache(false);
         if (!old->HasRefs()) {
