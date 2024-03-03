@@ -408,7 +408,7 @@ rocksdb_rs::status::Status ReadFooterFromFile(const IOOptions& opts, RandomAcces
 
   s = footer->DecodeFrom(footer_input, read_offset, enforce_table_magic_number);
   if (!s.ok()) {
-    s = Status_CopyAppendMessage(s, " in ", file->file_name());
+    s = rocksdb_rs::status::Status_CopyAppendMessage(s, " in ", file->file_name());
     return s;
   }
   return Status_OK();

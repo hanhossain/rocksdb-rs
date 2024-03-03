@@ -383,11 +383,9 @@ pub(crate) mod ffi {
         #[cxx_name = "Status_CopyState"]
         fn status_copy_state(s: &CxxString) -> UniquePtr<CxxString>;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_CopyAppendMessage"]
         fn status_copy_append_message(status: &Status, delim: &Slice, msg: &Slice) -> Status;
 
-        #[namespace = "rocksdb"]
         #[cxx_name = "Status_Move"]
         fn status_move(status: Status) -> Status;
 
