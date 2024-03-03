@@ -29,3 +29,12 @@ extern "C++" {
     type WalFileType = crate::transaction_log::ffi::WalFileType;
 }
 ```
+
+Referencing a c++ type defined in a different bridge:
+```rust
+unsafe extern "C++" {
+    include!("rocksdb/slice.h");
+
+    type Slice = crate::slice::ffi::Slice;
+}
+```
