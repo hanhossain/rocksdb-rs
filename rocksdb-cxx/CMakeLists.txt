@@ -1110,7 +1110,7 @@ set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
-# corrosion_set_env_vars(rocksdb-rs SKIP_BUILD_SCRIPT=1)
+corrosion_set_env_vars(rocksdb-rs SKIP_CXX_COMPILE=1)
 set(CARGO_TARGET_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED})
 message(STATUS "CARGO_TARGET_OUT_DIR: ${CARGO_TARGET_OUT_DIR}")
 set(CXXBRIDGE_OUT_DIR ${CARGO_TARGET_OUT_DIR}/cxxbridge)
