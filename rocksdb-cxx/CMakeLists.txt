@@ -50,8 +50,6 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
 )
 FetchContent_MakeAvailable(Corrosion)
-# TODO: remove custom corrosion
-# include(CustomCorrosion)
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
