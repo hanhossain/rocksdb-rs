@@ -41,7 +41,7 @@ jobs:
       run: ${{ matrix.deps }}
 
     - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.3
+      uses: mozilla-actions/sccache-action@v0.0.4
 
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
