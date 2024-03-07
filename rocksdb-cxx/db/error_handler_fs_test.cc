@@ -327,7 +327,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
   IOStatus error_msg = IOStatus::IOError("File Scope Data Loss Error");
   error_msg.SetDataLoss(true);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFile);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
   error_msg.SetRetryable(false);
 
   ASSERT_OK(Put(Key(1), "val1"));
@@ -375,7 +375,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
   // not file scope, but retyrable set
   error_msg.SetDataLoss(false);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFileSystem);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem);
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(3), "val3"));
@@ -731,7 +731,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteFileScopeError) {
   IOStatus error_msg = IOStatus::IOError("File Scope Data Loss Error");
   error_msg.SetDataLoss(true);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFile);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
   error_msg.SetRetryable(false);
 
   ASSERT_OK(Put(Key(0), "val"));
@@ -1101,7 +1101,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   IOStatus error_msg = IOStatus::IOError("File Scope Data Loss Error");
   error_msg.SetDataLoss(true);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFile);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
   error_msg.SetRetryable(false);
 
   ASSERT_OK(Put(Key(0), "va;"));
@@ -2487,7 +2487,7 @@ TEST_F(DBErrorHandlingFSTest, FlushReadError) {
       "BuildTable:BeforeOutputValidation", [&](void*) {
         IOStatus st = IOStatus::IOError();
         st.SetRetryable(true);
-        st.SetScope(IOStatus::IOErrorScope::kIOErrorScopeFile);
+        st.SetScope(rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
         fault_fs_->SetFilesystemActive(false, st);
       });
   SyncPoint::GetInstance()->SetCallBack(
@@ -2536,7 +2536,7 @@ TEST_F(DBErrorHandlingFSTest, AtomicFlushReadError) {
       "BuildTable:BeforeOutputValidation", [&](void*) {
         IOStatus st = IOStatus::IOError();
         st.SetRetryable(true);
-        st.SetScope(IOStatus::IOErrorScope::kIOErrorScopeFile);
+        st.SetScope(rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
         fault_fs_->SetFilesystemActive(false, st);
       });
   SyncPoint::GetInstance()->SetCallBack(
