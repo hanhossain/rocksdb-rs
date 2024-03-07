@@ -50,6 +50,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
 )
 FetchContent_MakeAvailable(Corrosion)
+include(CustomCorrosion)
 
 if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
@@ -1108,21 +1109,21 @@ set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
-corrosion_set_env_vars(rocksdb-rs SKIP_CXX_COMPILE=1)
-set(CARGO_TARGET_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED})
-message(STATUS "CARGO_TARGET_OUT_DIR: ${CARGO_TARGET_OUT_DIR}")
-set(CXXBRIDGE_OUT_DIR ${CARGO_TARGET_OUT_DIR}/cxxbridge)
-target_include_directories(rocksdb-rs INTERFACE ${CXXBRIDGE_OUT_DIR})
+corrosion_set_env_vars(rocksdb-rs SKIP_BUILD_SCRIPT=1)
+corrosion_add_cxxbridge_custom(rocksdb-rs-cxx CRATE rocksdb-rs
+        FILES cache.rs compression_type.rs env.rs filename.rs hash.rs lib.rs options.rs port_defs.rs slice.rs status.rs
+        transaction_log.rs types.rs unique_id.rs)
+target_include_directories(rocksdb-rs-cxx PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})
 target_link_libraries(${ROCKSDB_STATIC_LIB}
-  PUBLIC rocksdb-rs
+  PUBLIC rocksdb-rs-cxx
   PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
 if(ROCKSDB_BUILD_SHARED)
   add_library(${ROCKSDB_SHARED_LIB} SHARED ${SOURCES} ${BUILD_VERSION_CC})
   target_link_libraries(${ROCKSDB_SHARED_LIB}
-    PUBLIC rocksdb-rs
+    PUBLIC rocksdb-rs-cxx
     PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
   if(WIN32)
@@ -1169,7 +1170,7 @@ if(WITH_TESTS OR WITH_BENCHMARK_TOOLS)
   test_util/mock_time_env.cc
   test_util/secondary_cache_test_util.cc
   test_util/testharness.cc)
-  target_link_libraries(testharness gtest rocksdb-rs)
+  target_link_libraries(testharness gtest rocksdb-rs-cxx)
 endif()
 
 if(WITH_TESTS)
