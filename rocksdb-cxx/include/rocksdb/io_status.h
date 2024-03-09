@@ -30,9 +30,8 @@
 namespace rocksdb {
     class IOStatus {
     public:
-        // TODO: move to rust
         // Create a success status.
-        IOStatus() : IOStatus(rocksdb_rs::status::Code::kOk, rocksdb_rs::status::SubCode::kNone) {
+        IOStatus() : oxidize_(rocksdb_rs::io_status::IOStatus_new()) {
         }
 
         // TODO: move to rust
@@ -54,26 +53,20 @@ namespace rocksdb {
         // TODO: move to rust
         bool operator!=(const IOStatus &rhs) const;
 
-        // TODO: move to rust
-        void SetRetryable(bool retryable) { oxidize_.status_.retryable = retryable; }
+        void SetRetryable(bool retryable) { oxidize_.SetRetryable(retryable); }
 
-        // TODO: move to rust
-        void SetDataLoss(bool data_loss) { oxidize_.status_.data_loss = data_loss; }
+        void SetDataLoss(bool data_loss) { oxidize_.SetDataLoss(data_loss); }
 
-        // TODO: move to rust
         void SetScope(rocksdb_rs::io_status::IOErrorScope scope) {
-            oxidize_.status_.scope = static_cast<unsigned char>(scope);
+            oxidize_.SetScope(scope);
         }
 
-        // TODO: move to rust
-        bool GetRetryable() const { return oxidize_.status_.retryable; }
+        bool GetRetryable() const { return oxidize_.GetRetryable(); }
 
-        // TODO: move to rust
-        bool GetDataLoss() const { return oxidize_.status_.data_loss; }
+        bool GetDataLoss() const { return oxidize_.GetDataLoss(); }
 
-        // TODO: move to rust
         rocksdb_rs::io_status::IOErrorScope GetScope() const {
-            return static_cast<rocksdb_rs::io_status::IOErrorScope>(oxidize_.status_.scope);
+            return oxidize_.GetScope();
         }
 
         // TODO: move to rust
