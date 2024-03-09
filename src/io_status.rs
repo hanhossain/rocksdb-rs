@@ -38,6 +38,33 @@ mod ffi {
         fn get_data_loss(self: &IOStatus) -> bool;
         #[cxx_name = "GetScope"]
         fn get_scope(self: &IOStatus) -> IOErrorScope;
+        fn ok(self: &IOStatus) -> bool;
+        #[cxx_name = "IsNotFound"]
+        fn is_not_found(self: &IOStatus) -> bool;
+        #[cxx_name = "IsNotSupported"]
+        fn is_not_supported(self: &IOStatus) -> bool;
+        #[cxx_name = "IsIncomplete"]
+        fn is_incomplete(self: &IOStatus) -> bool;
+        #[cxx_name = "IsCorruption"]
+        fn is_corruption(self: &IOStatus) -> bool;
+        #[cxx_name = "IsBusy"]
+        fn is_busy(self: &IOStatus) -> bool;
+        #[cxx_name = "IsIOFenced"]
+        fn is_io_fenced(self: &IOStatus) -> bool;
+        #[cxx_name = "IsIOError"]
+        fn is_io_error(self: &IOStatus) -> bool;
+        #[cxx_name = "IsShutdownInProgress"]
+        fn is_shutdown_in_progress(self: &IOStatus) -> bool;
+        #[cxx_name = "IsColumnFamilyDropped"]
+        fn is_column_family_dropped(self: &IOStatus) -> bool;
+        #[cxx_name = "IsTryAgain"]
+        fn is_try_again(self: &IOStatus) -> bool;
+        #[cxx_name = "IsAborted"]
+        fn is_aborted(self: &IOStatus) -> bool;
+        #[cxx_name = "IsPathNotFound"]
+        fn is_path_not_found(self: &IOStatus) -> bool;
+        #[cxx_name = "IsInvalidArgument"]
+        fn is_invalid_argument(self: &IOStatus) -> bool;
     }
 
     #[namespace = "rocksdb_rs::status"]
@@ -79,6 +106,62 @@ impl ffi::IOStatus {
             3 => ffi::IOErrorScope::kIOErrorScopeMax,
             _ => panic!("Invalid scope"),
         }
+    }
+
+    fn ok(&self) -> bool {
+        self.status.ok()
+    }
+
+    fn is_not_found(&self) -> bool {
+        self.status.is_not_found()
+    }
+
+    fn is_not_supported(&self) -> bool {
+        self.status.is_not_supported()
+    }
+
+    fn is_incomplete(&self) -> bool {
+        self.status.is_incomplete()
+    }
+
+    fn is_corruption(&self) -> bool {
+        self.status.is_corruption()
+    }
+
+    fn is_busy(&self) -> bool {
+        self.status.is_busy()
+    }
+
+    fn is_io_fenced(&self) -> bool {
+        self.status.is_io_fenced()
+    }
+
+    fn is_io_error(&self) -> bool {
+        self.status.is_io_error()
+    }
+
+    fn is_shutdown_in_progress(&self) -> bool {
+        self.status.is_shutdown_in_progress()
+    }
+
+    fn is_column_family_dropped(&self) -> bool {
+        self.status.is_column_family_dropped()
+    }
+
+    fn is_try_again(&self) -> bool {
+        self.status.is_try_again()
+    }
+
+    fn is_aborted(&self) -> bool {
+        self.status.is_aborted()
+    }
+
+    fn is_path_not_found(&self) -> bool {
+        self.status.is_path_not_found()
+    }
+
+    fn is_invalid_argument(&self) -> bool {
+        self.status.is_invalid_argument()
     }
 }
 

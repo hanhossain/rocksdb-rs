@@ -69,47 +69,33 @@ namespace rocksdb {
             return oxidize_.GetScope();
         }
 
-        // TODO: move to rust
-        bool ok() const { return oxidize_.status_.ok(); }
+        bool ok() const { return oxidize_.ok(); }
 
-        // TODO: move to rust
-        bool IsNotFound() const { return oxidize_.status_.IsNotFound(); }
+        bool IsNotFound() const { return oxidize_.IsNotFound(); }
 
-        // TODO: move to rust
-        bool IsNotSupported() const { return oxidize_.status_.IsNotSupported(); }
+        bool IsNotSupported() const { return oxidize_.IsNotSupported(); }
 
-        // TODO: move to rust
-        bool IsIncomplete() const { return oxidize_.status_.IsIncomplete(); }
+        bool IsIncomplete() const { return oxidize_.IsIncomplete(); }
 
-        // TODO: move to rust
-        bool IsCorruption() const { return oxidize_.status_.IsCorruption(); }
+        bool IsCorruption() const { return oxidize_.IsCorruption(); }
 
-        // TODO: move to rust
-        bool IsBusy() const { return oxidize_.status_.IsBusy(); }
+        bool IsBusy() const { return oxidize_.IsBusy(); }
 
-        // TODO: move to rust
-        bool IsIOFenced() const { return oxidize_.status_.IsIOFenced(); }
+        bool IsIOFenced() const { return oxidize_.IsIOFenced(); }
 
-        // TODO: move to rust
-        bool IsIOError() const { return oxidize_.status_.IsIOError(); }
+        bool IsIOError() const { return oxidize_.IsIOError(); }
 
-        // TODO: move to rust
-        bool IsShutdownInProgress() const { return oxidize_.status_.IsShutdownInProgress(); }
+        bool IsShutdownInProgress() const { return oxidize_.IsShutdownInProgress(); }
 
-        // TODO: move to rust
-        bool IsColumnFamilyDropped() const { return oxidize_.status_.IsColumnFamilyDropped(); }
+        bool IsColumnFamilyDropped() const { return oxidize_.IsColumnFamilyDropped(); }
 
-        // TODO: move to rust
-        bool IsTryAgain() const { return oxidize_.status_.IsTryAgain(); }
+        bool IsTryAgain() const { return oxidize_.IsTryAgain(); }
 
-        // TODO: move to rust
-        bool IsAborted() const { return oxidize_.status_.IsAborted(); }
+        bool IsAborted() const { return oxidize_.IsAborted(); }
 
-        // TODO: move to rust
-        bool IsPathNotFound() const { return oxidize_.status_.IsPathNotFound(); }
+        bool IsPathNotFound() const { return oxidize_.IsPathNotFound(); }
 
-        // TODO: move to rust
-        bool IsInvalidArgument() const { return oxidize_.status_.IsInvalidArgument(); }
+        bool IsInvalidArgument() const { return oxidize_.IsInvalidArgument(); }
 
         // TODO: move to rust
         operator rocksdb_rs::status::Status() const { return oxidize_.status_.Clone(); }

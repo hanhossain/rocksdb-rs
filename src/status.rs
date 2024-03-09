@@ -439,27 +439,27 @@ impl ffi::Status {
     }
 
     /// Returns true iff the status indicates a NotFound error.
-    fn is_not_found(&self) -> bool {
+    pub(crate) fn is_not_found(&self) -> bool {
         self.code == ffi::Code::kNotFound
     }
 
     /// Returns true iff the status indicates a Corruption error.
-    fn is_corruption(&self) -> bool {
+    pub(crate) fn is_corruption(&self) -> bool {
         self.code == ffi::Code::kCorruption
     }
 
     /// Returns true iff the status indicates a NotSupported error.
-    fn is_not_supported(&self) -> bool {
+    pub(crate) fn is_not_supported(&self) -> bool {
         self.code == ffi::Code::kNotSupported
     }
 
     /// Returns true iff the status indicates an InvalidArgument error.
-    fn is_invalid_argument(&self) -> bool {
+    pub(crate) fn is_invalid_argument(&self) -> bool {
         self.code == ffi::Code::kInvalidArgument
     }
 
     /// Returns true iff the status indicates an IOError.
-    fn is_io_error(&self) -> bool {
+    pub(crate) fn is_io_error(&self) -> bool {
         self.code == ffi::Code::kIOError
     }
 
@@ -469,12 +469,12 @@ impl ffi::Status {
     }
 
     /// Returns true iff the status indicates Incomplete
-    fn is_incomplete(&self) -> bool {
+    pub(crate) fn is_incomplete(&self) -> bool {
         self.code == ffi::Code::kIncomplete
     }
 
     /// Returns true iff the status indicates Shutdown In progress
-    fn is_shutdown_in_progress(&self) -> bool {
+    pub(crate) fn is_shutdown_in_progress(&self) -> bool {
         self.code == ffi::Code::kShutdownInProgress
     }
 
@@ -482,7 +482,7 @@ impl ffi::Status {
         self.code == ffi::Code::kTimedOut
     }
 
-    fn is_aborted(&self) -> bool {
+    pub(crate) fn is_aborted(&self) -> bool {
         self.code == ffi::Code::kAborted
     }
 
@@ -492,7 +492,7 @@ impl ffi::Status {
 
     /// Returns true iff the status indicates that a resource is Busy and temporarily could not be
     /// acquired.
-    fn is_busy(&self) -> bool {
+    pub(crate) fn is_busy(&self) -> bool {
         self.code == ffi::Code::kBusy
     }
 
@@ -507,7 +507,7 @@ impl ffi::Status {
 
     /// Returns true iff the status indicates a TryAgain error. This usually means that the
     /// operation failed, but may succeed if re-attempted.
-    fn is_try_again(&self) -> bool {
+    pub(crate) fn is_try_again(&self) -> bool {
         self.code == ffi::Code::kTryAgain
     }
 
@@ -517,7 +517,7 @@ impl ffi::Status {
     }
 
     /// Returns true iff the status indicates Column Family Dropped
-    fn is_column_family_dropped(&self) -> bool {
+    pub(crate) fn is_column_family_dropped(&self) -> bool {
         self.code == ffi::Code::kColumnFamilyDropped
     }
 
@@ -538,7 +538,7 @@ impl ffi::Status {
     /// Returns true iff the status indicates a PathNotFound error. This is caused by an I/O error
     /// returning the specific "no such file or directory" error condition. A PathNotFound error is
     /// an I/O error with a specific subcode, enabling users to take appropriate action if necessary
-    fn is_path_not_found(&self) -> bool {
+    pub(crate) fn is_path_not_found(&self) -> bool {
         (self.code == ffi::Code::kIOError || self.code == ffi::Code::kNotFound)
             && self.subcode == ffi::SubCode::kPathNotFound
     }
@@ -555,7 +555,7 @@ impl ffi::Status {
     }
 
     /// Returns true iff the status indicates a IOFenced error.
-    fn is_io_fenced(&self) -> bool {
+    pub(crate) fn is_io_fenced(&self) -> bool {
         self.code == ffi::Code::kIOError && self.subcode == ffi::SubCode::kIOFenced
     }
 
