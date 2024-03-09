@@ -774,7 +774,7 @@ fn status_new5(
     ffi::Status::new_with_slices(code, subcode, msg, msg2, sev)
 }
 
-fn status_new6(code: ffi::Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
+pub(crate) fn status_new6(code: ffi::Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Status {
     ffi::Status::new_with_slices(
         code,
         ffi::SubCode::kNone,
@@ -784,7 +784,7 @@ fn status_new6(code: ffi::Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::Sta
     )
 }
 
-fn status_new7(
+pub(crate) fn status_new7(
     code: ffi::Code,
     subcode: ffi::SubCode,
     msg: &ffi::Slice,

@@ -254,39 +254,18 @@ class IOStatus {
   explicit IOStatus(rocksdb_rs::status::Code _code)
       : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code)) {}
 
-  // TODO: move to rust
   IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode,
            const Slice &msg, const Slice &msg2);
 
-  // TODO: move to rust
   IOStatus(rocksdb_rs::status::Code _code, const Slice &msg, const Slice &msg2)
-      : IOStatus(_code, rocksdb_rs::status::SubCode::kNone, msg, msg2) {}
+      : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code, msg, msg2)) {}
 };
 
-// TODO: move to rust
 inline IOStatus::IOStatus(rocksdb_rs::status::Code _code,
                           rocksdb_rs::status::SubCode _subcode,
                           const Slice &msg, const Slice &msg2)
     : oxidize_(
-          rocksdb_rs::io_status::IOStatus_new(rocksdb_rs::status::Status_new(
-              _code, _subcode, false, false,
-              static_cast<uint8_t>(rocksdb_rs::io_status::IOErrorScope::
-                                       kIOErrorScopeFileSystem)))) {
-  assert(oxidize_.status_.code_ != rocksdb_rs::status::Code::kOk);
-  assert(oxidize_.status_.subcode_ != rocksdb_rs::status::SubCode::kMaxSubCode);
-  const size_t len1 = msg.size();
-  const size_t len2 = msg2.size();
-  const size_t size = len1 + (len2 ? (2 + len2) : 0);
-  char *const result = new char[size + 1];  // +1 for null terminator
-  memcpy(result, msg.data(), len1);
-  if (len2) {
-    result[len1] = ':';
-    result[len1 + 1] = ' ';
-    memcpy(result + len1 + 2, msg2.data(), len2);
-  }
-  result[size] = '\0';  // null terminator for C style string
-  oxidize_.status_.state = std::make_unique<std::string>(result);
-}
+          rocksdb_rs::io_status::IOStatus_new(_code, _subcode, msg, msg2)) {}
 
 // TODO: move to rust
 inline IOStatus::IOStatus(const IOStatus &s)

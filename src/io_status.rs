@@ -1,4 +1,5 @@
 use crate::io_status::ffi::{Code, SubCode};
+use crate::status;
 use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb_rs::io_status")]
@@ -26,6 +27,10 @@ mod ffi {
         fn io_status_new2(code: Code) -> IOStatus;
         #[cxx_name = "IOStatus_new"]
         fn io_status_new3() -> IOStatus;
+        #[cxx_name = "IOStatus_new"]
+        fn io_status_new4(code: Code, subcode: SubCode, msg: &Slice, msg2: &Slice) -> IOStatus;
+        #[cxx_name = "IOStatus_new"]
+        fn io_status_new5(code: Code, msg: &Slice, msg2: &Slice) -> IOStatus;
 
         #[cxx_name = "SetRetryable"]
         fn set_retryable(self: &mut IOStatus, retryable: bool);
@@ -81,6 +86,13 @@ mod ffi {
         type Status = crate::status::ffi::Status;
         type Code = crate::status::ffi::Code;
         type SubCode = crate::status::ffi::SubCode;
+    }
+
+    #[namespace = "rocksdb"]
+    unsafe extern "C++" {
+        include!("rocksdb/slice.h");
+
+        type Slice = crate::slice::ffi::Slice;
     }
 }
 
@@ -214,5 +226,22 @@ fn io_status_new2(code: Code) -> ffi::IOStatus {
 fn io_status_new3() -> ffi::IOStatus {
     ffi::IOStatus {
         status: ffi::Status::default(),
+    }
+}
+
+fn io_status_new4(
+    code: Code,
+    subcode: SubCode,
+    msg: &ffi::Slice,
+    msg2: &ffi::Slice,
+) -> ffi::IOStatus {
+    ffi::IOStatus {
+        status: status::status_new7(code, subcode, msg, msg2),
+    }
+}
+
+fn io_status_new5(code: Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
+    ffi::IOStatus {
+        status: status::status_new6(code, msg, msg2),
     }
 }
