@@ -1,4 +1,5 @@
-use crate::status::ffi::{Code, SubCode};
+use crate::io_status::ffi::{Code, SubCode};
+use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb_rs::io_status")]
 mod ffi {
@@ -65,6 +66,12 @@ mod ffi {
         fn is_path_not_found(self: &IOStatus) -> bool;
         #[cxx_name = "IsInvalidArgument"]
         fn is_invalid_argument(self: &IOStatus) -> bool;
+        fn status(self: &IOStatus) -> Status;
+        fn subcode(self: &IOStatus) -> SubCode;
+        #[cxx_name = "ToString"]
+        fn to_string(self: &IOStatus) -> UniquePtr<CxxString>;
+        #[cxx_name = "getState"]
+        fn get_state(self: &IOStatus) -> &UniquePtr<CxxString>;
     }
 
     #[namespace = "rocksdb_rs::status"]
@@ -162,6 +169,22 @@ impl ffi::IOStatus {
 
     fn is_invalid_argument(&self) -> bool {
         self.status.is_invalid_argument()
+    }
+
+    fn status(&self) -> ffi::Status {
+        self.status.clone()
+    }
+
+    fn subcode(&self) -> SubCode {
+        self.status.subcode
+    }
+
+    fn to_string(&self) -> UniquePtr<CxxString> {
+        self.status.to_string()
+    }
+
+    fn get_state(&self) -> &UniquePtr<CxxString> {
+        self.status.get_state()
     }
 }
 

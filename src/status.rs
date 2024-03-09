@@ -424,7 +424,7 @@ impl ffi::Status {
         self.severity
     }
 
-    fn get_state(&self) -> &UniquePtr<CxxString> {
+    pub(crate) fn get_state(&self) -> &UniquePtr<CxxString> {
         &self.state
     }
 
@@ -559,7 +559,7 @@ impl ffi::Status {
         self.code == ffi::Code::kIOError && self.subcode == ffi::SubCode::kIOFenced
     }
 
-    fn to_string(&self) -> UniquePtr<CxxString> {
+    pub(crate) fn to_string(&self) -> UniquePtr<CxxString> {
         let msg = match self.code {
             ffi::Code::kOk => {
                 let mut s = crate::ffi::make_string();

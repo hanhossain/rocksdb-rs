@@ -97,17 +97,13 @@ namespace rocksdb {
 
         bool IsInvalidArgument() const { return oxidize_.IsInvalidArgument(); }
 
-        // TODO: move to rust
-        operator rocksdb_rs::status::Status() const { return oxidize_.status_.Clone(); }
+        operator rocksdb_rs::status::Status() const { return oxidize_.status(); }
 
-        // TODO: move to rust
-        rocksdb_rs::status::SubCode subcode() const { return oxidize_.status_.subcode(); }
+        rocksdb_rs::status::SubCode subcode() const { return oxidize_.subcode(); }
 
-        // TODO: move to rust
-        std::string ToString() const { return *oxidize_.status_.ToString(); }
+        std::string ToString() const { return *oxidize_.ToString(); }
 
-        // TODO: move to rust
-        const char *getState() const { return oxidize_.status_.getState()->c_str(); }
+        const char *getState() const { return oxidize_.getState()->c_str(); }
 
         // TODO: move to rust
         // Return a success status.
