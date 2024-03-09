@@ -739,7 +739,7 @@ fn status_new2(code: ffi::Code) -> ffi::Status {
     }
 }
 
-fn status_new3(code: ffi::Code, subcode: ffi::SubCode) -> ffi::Status {
+pub(crate) fn status_new3(code: ffi::Code, subcode: ffi::SubCode) -> ffi::Status {
     ffi::Status {
         code,
         subcode,

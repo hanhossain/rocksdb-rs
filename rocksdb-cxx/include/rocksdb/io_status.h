@@ -55,80 +55,80 @@ namespace rocksdb {
         bool operator!=(const IOStatus &rhs) const;
 
         // TODO: move to rust
-        void SetRetryable(bool retryable) { status_.retryable = retryable; }
+        void SetRetryable(bool retryable) { oxidize_.status_.retryable = retryable; }
 
         // TODO: move to rust
-        void SetDataLoss(bool data_loss) { status_.data_loss = data_loss; }
+        void SetDataLoss(bool data_loss) { oxidize_.status_.data_loss = data_loss; }
 
         // TODO: move to rust
         void SetScope(rocksdb_rs::io_status::IOErrorScope scope) {
-            status_.scope = static_cast<unsigned char>(scope);
+            oxidize_.status_.scope = static_cast<unsigned char>(scope);
         }
 
         // TODO: move to rust
-        bool GetRetryable() const { return status_.retryable; }
+        bool GetRetryable() const { return oxidize_.status_.retryable; }
 
         // TODO: move to rust
-        bool GetDataLoss() const { return status_.data_loss; }
+        bool GetDataLoss() const { return oxidize_.status_.data_loss; }
 
         // TODO: move to rust
         rocksdb_rs::io_status::IOErrorScope GetScope() const {
-            return static_cast<rocksdb_rs::io_status::IOErrorScope>(status_.scope);
+            return static_cast<rocksdb_rs::io_status::IOErrorScope>(oxidize_.status_.scope);
         }
 
         // TODO: move to rust
-        bool ok() const { return status_.ok(); }
+        bool ok() const { return oxidize_.status_.ok(); }
 
         // TODO: move to rust
-        bool IsNotFound() const { return status_.IsNotFound(); }
+        bool IsNotFound() const { return oxidize_.status_.IsNotFound(); }
 
         // TODO: move to rust
-        bool IsNotSupported() const { return status_.IsNotSupported(); }
+        bool IsNotSupported() const { return oxidize_.status_.IsNotSupported(); }
 
         // TODO: move to rust
-        bool IsIncomplete() const { return status_.IsIncomplete(); }
+        bool IsIncomplete() const { return oxidize_.status_.IsIncomplete(); }
 
         // TODO: move to rust
-        bool IsCorruption() const { return status_.IsCorruption(); }
+        bool IsCorruption() const { return oxidize_.status_.IsCorruption(); }
 
         // TODO: move to rust
-        bool IsBusy() const { return status_.IsBusy(); }
+        bool IsBusy() const { return oxidize_.status_.IsBusy(); }
 
         // TODO: move to rust
-        bool IsIOFenced() const { return status_.IsIOFenced(); }
+        bool IsIOFenced() const { return oxidize_.status_.IsIOFenced(); }
 
         // TODO: move to rust
-        bool IsIOError() const { return status_.IsIOError(); }
+        bool IsIOError() const { return oxidize_.status_.IsIOError(); }
 
         // TODO: move to rust
-        bool IsShutdownInProgress() const { return status_.IsShutdownInProgress(); }
+        bool IsShutdownInProgress() const { return oxidize_.status_.IsShutdownInProgress(); }
 
         // TODO: move to rust
-        bool IsColumnFamilyDropped() const { return status_.IsColumnFamilyDropped(); }
+        bool IsColumnFamilyDropped() const { return oxidize_.status_.IsColumnFamilyDropped(); }
 
         // TODO: move to rust
-        bool IsTryAgain() const { return status_.IsTryAgain(); }
+        bool IsTryAgain() const { return oxidize_.status_.IsTryAgain(); }
 
         // TODO: move to rust
-        bool IsAborted() const { return status_.IsAborted(); }
+        bool IsAborted() const { return oxidize_.status_.IsAborted(); }
 
         // TODO: move to rust
-        bool IsPathNotFound() const { return status_.IsPathNotFound(); }
+        bool IsPathNotFound() const { return oxidize_.status_.IsPathNotFound(); }
 
         // TODO: move to rust
-        bool IsInvalidArgument() const { return status_.IsInvalidArgument(); }
+        bool IsInvalidArgument() const { return oxidize_.status_.IsInvalidArgument(); }
 
         // TODO: move to rust
-        operator rocksdb_rs::status::Status() const { return status_.Clone(); }
+        operator rocksdb_rs::status::Status() const { return oxidize_.status_.Clone(); }
 
         // TODO: move to rust
-        rocksdb_rs::status::SubCode subcode() const { return status_.subcode(); }
+        rocksdb_rs::status::SubCode subcode() const { return oxidize_.status_.subcode(); }
 
         // TODO: move to rust
-        std::string ToString() const { return *status_.ToString(); }
+        std::string ToString() const { return *oxidize_.status_.ToString(); }
 
         // TODO: move to rust
-        const char *getState() const { return status_.getState()->c_str(); }
+        const char *getState() const { return oxidize_.status_.getState()->c_str(); }
 
         // TODO: move to rust
         // Return a success status.
@@ -252,17 +252,18 @@ namespace rocksdb {
         // std::string ToString() const;
 
     private:
-        rocksdb_rs::status::Status status_;
+        rocksdb_rs::io_status::IOStatus oxidize_;
 
         // TODO: move to rust
         friend IOStatus status_to_io_status(rocksdb_rs::status::Status &&);
 
-        // TODO: move to rust
         explicit IOStatus(rocksdb_rs::status::Code _code,
-                          rocksdb_rs::status::SubCode _subcode = rocksdb_rs::status::SubCode::kNone)
-            : status_(rocksdb_rs::status::Status_new(_code, _subcode, false, false,
-                                                     static_cast<uint8_t>(
-                                                         rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem))) {
+                          rocksdb_rs::status::SubCode _subcode)
+            : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code, _subcode)) {
+        }
+
+        explicit IOStatus(rocksdb_rs::status::Code _code)
+            : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code)) {
         }
 
         // TODO: move to rust
@@ -278,11 +279,11 @@ namespace rocksdb {
     // TODO: move to rust
     inline IOStatus::IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode, const Slice &msg,
                               const Slice &msg2)
-        : status_(rocksdb_rs::status::Status_new(_code, _subcode, false, false,
-                                                 static_cast<uint8_t>(
-                                                     rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem))) {
-        assert(status_.code_ != rocksdb_rs::status::Code::kOk);
-        assert(status_.subcode_ != rocksdb_rs::status::SubCode::kMaxSubCode);
+        : oxidize_(rocksdb_rs::io_status::IOStatus_new(rocksdb_rs::status::Status_new(_code, _subcode, false, false,
+            static_cast<uint8_t>(
+                rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem)))) {
+        assert(oxidize_.status_.code_ != rocksdb_rs::status::Code::kOk);
+        assert(oxidize_.status_.subcode_ != rocksdb_rs::status::SubCode::kMaxSubCode);
         const size_t len1 = msg.size();
         const size_t len2 = msg2.size();
         const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -294,18 +295,20 @@ namespace rocksdb {
             memcpy(result + len1 + 2, msg2.data(), len2);
         }
         result[size] = '\0'; // null terminator for C style string
-        status_.state = std::make_unique<std::string>(result);
+        oxidize_.status_.state = std::make_unique<std::string>(result);
     }
 
     // TODO: move to rust
     inline IOStatus::IOStatus(const IOStatus &s)
-        : status_(rocksdb_rs::status::Status_new(
-            s.status_.code_,
-            s.status_.subcode_,
-            s.status_.retryable,
-            s.status_.data_loss,
-            s.status_.scope)) {
-        status_.state = s.status_.state == nullptr ? nullptr : rocksdb_rs::status::Status_CopyState(*s.status_.state);
+        : oxidize_(rocksdb_rs::io_status::IOStatus_new(rocksdb_rs::status::Status_new(
+            s.oxidize_.status_.code_,
+            s.oxidize_.status_.subcode_,
+            s.oxidize_.status_.retryable,
+            s.oxidize_.status_.data_loss,
+            s.oxidize_.status_.scope))) {
+        oxidize_.status_.state = s.oxidize_.status_.state == nullptr
+                                     ? nullptr
+                                     : rocksdb_rs::status::Status_CopyState(*s.oxidize_.status_.state);
     }
 
     // TODO: move to rust
@@ -313,13 +316,15 @@ namespace rocksdb {
         // The following condition catches both aliasing (when this == &s),
         // and the common case where both s and *this are ok.
         if (this != &s) {
-            status_.code_ = s.status_.code_;
-            status_.subcode_ = s.status_.subcode_;
-            status_.retryable = s.status_.retryable;
-            status_.data_loss = s.status_.data_loss;
-            status_.scope = s.status_.scope;
-            status_.state =
-                    s.status_.state == nullptr ? nullptr : rocksdb_rs::status::Status_CopyState(*s.status_.state);
+            oxidize_.status_.code_ = s.oxidize_.status_.code_;
+            oxidize_.status_.subcode_ = s.oxidize_.status_.subcode_;
+            oxidize_.status_.retryable = s.oxidize_.status_.retryable;
+            oxidize_.status_.data_loss = s.oxidize_.status_.data_loss;
+            oxidize_.status_.scope = s.oxidize_.status_.scope;
+            oxidize_.status_.state =
+                    s.oxidize_.status_.state == nullptr
+                        ? nullptr
+                        : rocksdb_rs::status::Status_CopyState(*s.oxidize_.status_.state);
         }
         return *this;
     }
@@ -332,22 +337,23 @@ namespace rocksdb {
     // TODO: move to rust
     inline IOStatus &IOStatus::operator=(IOStatus &&s) noexcept {
         if (this != &s) {
-            status_.code_ = s.status_.code_;
-            s.status_.code_ = rocksdb_rs::status::Code::kOk;
-            status_.subcode_ = s.status_.subcode_;
-            s.status_.subcode_ = rocksdb_rs::status::SubCode::kNone;
-            status_.retryable = s.status_.retryable;
-            status_.data_loss = s.status_.data_loss;
-            status_.scope = s.status_.scope;
-            s.status_.scope = static_cast<uint8_t>(rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem);
-            status_.state = std::move(s.status_.state);
+            oxidize_.status_.code_ = s.oxidize_.status_.code_;
+            s.oxidize_.status_.code_ = rocksdb_rs::status::Code::kOk;
+            oxidize_.status_.subcode_ = s.oxidize_.status_.subcode_;
+            s.oxidize_.status_.subcode_ = rocksdb_rs::status::SubCode::kNone;
+            oxidize_.status_.retryable = s.oxidize_.status_.retryable;
+            oxidize_.status_.data_loss = s.oxidize_.status_.data_loss;
+            oxidize_.status_.scope = s.oxidize_.status_.scope;
+            s.oxidize_.status_.scope = static_cast<uint8_t>(
+                rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem);
+            oxidize_.status_.state = std::move(s.oxidize_.status_.state);
         }
         return *this;
     }
 
     // TODO: move to rust
     inline bool IOStatus::operator==(const IOStatus &rhs) const {
-        return (status_.code_ == rhs.status_.code_);
+        return (oxidize_.status_.code_ == rhs.oxidize_.status_.code_);
     }
 
     // TODO: move to rust
@@ -358,7 +364,7 @@ namespace rocksdb {
     // TODO: move to rust
     inline IOStatus status_to_io_status(rocksdb_rs::status::Status &&status) {
         IOStatus io_s;
-        rocksdb_rs::status::Status &s = io_s.status_;
+        rocksdb_rs::status::Status &s = io_s.oxidize_.status_;
         s = std::move(status);
         return io_s;
     }
