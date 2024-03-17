@@ -98,10 +98,10 @@ class EnvLogger : public Logger {
     if (close_status.ok()) {
       return close_status;
     }
-    return rocksdb_rs::status::Status_IOError("Close of log file failed with error:" +
-                           (close_status.getState()
-                                ? std::string(close_status.getState())
-                                : std::string()));
+    return rocksdb_rs::status::Status_IOError(
+        "Close of log file failed with error:" +
+        (close_status.getState() ? std::string(*close_status.getState())
+                                 : std::string()));
   }
 
   using Logger::Logv;

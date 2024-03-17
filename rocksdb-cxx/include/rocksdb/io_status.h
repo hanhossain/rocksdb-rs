@@ -104,7 +104,9 @@ class IOStatus {
 
   std::string ToString() const { return *oxidize_.ToString(); }
 
-  const char *getState() const { return oxidize_.getState()->c_str(); }
+  const std::unique_ptr<std::string> &getState() const {
+    return oxidize_.getState();
+  }
 
   // TODO: move to rust
   // Return a success status.
