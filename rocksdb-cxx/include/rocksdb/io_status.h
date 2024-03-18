@@ -54,7 +54,6 @@ class IOStatus {
   // TODO: move to rust
   IOStatus &operator=(const IOStatus &s);
 
-  // TODO: move to rust
   IOStatus(IOStatus &&s) noexcept;
 
   // TODO: move to rust
@@ -157,7 +156,6 @@ inline IOStatus &IOStatus::operator=(const IOStatus &s) {
   return *this;
 }
 
-// TODO: move to rust
 inline IOStatus::IOStatus(IOStatus &&s) noexcept : IOStatus() {
   *this = std::move(s);
 }
