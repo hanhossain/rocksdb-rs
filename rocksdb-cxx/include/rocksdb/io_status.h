@@ -46,6 +46,8 @@ class IOStatus {
   IOStatus(rocksdb_rs::status::Code _code, const Slice &msg, const Slice &msg2)
       : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code, msg, msg2)) {}
 
+  IOStatus(rocksdb_rs::io_status::IOStatus &&s) : oxidize_(std::move(s)) {}
+
   // TODO: move to rust
   // Copy the specified status.
   IOStatus(const IOStatus &s);
@@ -209,233 +211,176 @@ inline IOStatus status_to_io_status(rocksdb_rs::status::Status &&status) {
   return io_s;
 }
 
-// TODO: move to rust
 // Return a success status.
-static IOStatus IOStatus_OK() { return IOStatus(); }
+static IOStatus IOStatus_OK() {
+  return IOStatus(rocksdb_rs::io_status::IOStatus_OK());
+}
 
-// TODO: move to rust
 static IOStatus IOStatus_NotSupported(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kNotSupported, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotSupported(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_NotSupported(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kNotSupported, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotSupported(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_NotSupported(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kNotSupported, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotSupported(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_NotSupported() {
-  return IOStatus(rocksdb_rs::status::Code::kNotSupported,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotSupported());
 }
 
-// TODO: move to rust
 // Return error status of an appropriate type.
 static IOStatus IOStatus_NotFound(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kNotFound, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotFound(msg, msg2));
 }
 
-// TODO: move to rust
 // Return error status of an appropriate type.
 static IOStatus IOStatus_NotFound(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kNotFound, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotFound(msg));
 }
 
-// TODO: move to rust
 // Fast path for not found without malloc;
 static IOStatus IOStatus_NotFound(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kNotFound, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotFound(msg));
 }
 
-// TODO: move to rust
 // Fast path for not found without malloc;
 static IOStatus IOStatus_NotFound() {
-  return IOStatus(rocksdb_rs::status::Code::kNotFound,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NotFound());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Corruption(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kCorruption, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Corruption(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Corruption(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kCorruption, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Corruption(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Corruption(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kCorruption, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Corruption(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Corruption() {
-  return IOStatus(rocksdb_rs::status::Code::kCorruption,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Corruption());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_InvalidArgument(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kInvalidArgument, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_InvalidArgument(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_InvalidArgument(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kInvalidArgument, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_InvalidArgument(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_InvalidArgument(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kInvalidArgument, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_InvalidArgument(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_InvalidArgument() {
-  return IOStatus(rocksdb_rs::status::Code::kInvalidArgument,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_InvalidArgument());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_IOError(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_IOError(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_IOError(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_IOError(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_IOError(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_IOError(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_IOError() {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_IOError());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Busy(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kBusy, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Busy(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Busy() {
-  return IOStatus(rocksdb_rs::status::Code::kBusy,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Busy());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Busy(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kBusy, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Busy(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Busy(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kBusy, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Busy(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_TimedOut(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kTimedOut, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_TimedOut(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_TimedOut() {
-  return IOStatus(rocksdb_rs::status::Code::kTimedOut,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_TimedOut());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_TimedOut(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kTimedOut, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_TimedOut(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_TimedOut(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kTimedOut, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_TimedOut(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_NoSpace() {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kNoSpace);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NoSpace());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_NoSpace(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kNoSpace, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NoSpace(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_NoSpace(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kNoSpace, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_NoSpace(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_PathNotFound() {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kPathNotFound);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_PathNotFound());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_PathNotFound(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kPathNotFound, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_PathNotFound(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_PathNotFound(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kPathNotFound, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_PathNotFound(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_IOFenced() {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kIOFenced);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_IOFenced());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_IOFenced(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kIOFenced, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_IOFenced(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_IOFenced(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kIOError,
-                  rocksdb_rs::status::SubCode::kIOFenced, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_IOFenced(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Aborted(rocksdb_rs::status::SubCode msg) {
-  return IOStatus(rocksdb_rs::status::Code::kAborted, msg);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Aborted(msg));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Aborted() {
-  return IOStatus(rocksdb_rs::status::Code::kAborted,
-                  rocksdb_rs::status::SubCode::kNone);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Aborted());
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Aborted(const Slice &msg, const Slice &msg2) {
-  return IOStatus(rocksdb_rs::status::Code::kAborted, msg, msg2);
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Aborted(msg, msg2));
 }
 
-// TODO: move to rust
 static IOStatus IOStatus_Aborted(const Slice &msg) {
-  return IOStatus(rocksdb_rs::status::Code::kAborted, msg, Slice());
+  return IOStatus(rocksdb_rs::io_status::IOStatus_Aborted(msg));
 }
 }  // namespace rocksdb
