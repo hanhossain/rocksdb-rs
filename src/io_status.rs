@@ -12,7 +12,7 @@ mod ffi {
         kIOErrorScopeMax,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     struct IOStatus {
         #[cxx_name = "status_"]
         status: Status,
@@ -173,6 +173,7 @@ mod ffi {
         fn to_string(self: &IOStatus) -> UniquePtr<CxxString>;
         #[cxx_name = "getState"]
         fn get_state(self: &IOStatus) -> &UniquePtr<CxxString>;
+        fn eq(self: &IOStatus, other: &IOStatus) -> bool;
     }
 
     #[namespace = "rocksdb_rs::status"]

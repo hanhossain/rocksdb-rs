@@ -61,10 +61,8 @@ class IOStatus {
   // TODO: move to rust
   IOStatus &operator=(IOStatus &&s) noexcept;
 
-  // TODO: move to rust
   bool operator==(const IOStatus &rhs) const;
 
-  // TODO: move to rust
   bool operator!=(const IOStatus &rhs) const;
 
   void SetRetryable(bool retryable) { oxidize_.SetRetryable(retryable); }
@@ -193,14 +191,12 @@ inline IOStatus &IOStatus::operator=(IOStatus &&s) noexcept {
   return *this;
 }
 
-// TODO: move to rust
 inline bool IOStatus::operator==(const IOStatus &rhs) const {
-  return (oxidize_.status_.code_ == rhs.oxidize_.status_.code_);
+  return (oxidize_ == rhs.oxidize_);
 }
 
-// TODO: move to rust
 inline bool IOStatus::operator!=(const IOStatus &rhs) const {
-  return !(*this == rhs);
+  return oxidize_ != rhs.oxidize_;
 }
 
 // TODO: move to rust
