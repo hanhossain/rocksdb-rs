@@ -97,6 +97,39 @@ mod ffi {
 }
 
 impl ffi::IOStatus {
+    fn new(code: Code, subcode: SubCode, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
+        ffi::IOStatus {
+            status: status::status_new7(code, subcode, msg, msg2),
+        }
+    }
+
+    fn new2(code: Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
+        ffi::IOStatus {
+            status: status::status_new6(code, msg, msg2),
+        }
+    }
+
+    fn new3(code: Code, subcode: SubCode) -> ffi::IOStatus {
+        ffi::IOStatus {
+            status: status::status_new3(code, subcode),
+        }
+    }
+
+    fn new4(code: Code) -> ffi::IOStatus {
+        let status = ffi::Status {
+            code,
+            scope: ffi::IOErrorScope::kIOErrorScopeFileSystem.repr,
+            ..ffi::Status::default()
+        };
+        ffi::IOStatus { status }
+    }
+
+    fn new5() -> ffi::IOStatus {
+        ffi::IOStatus {
+            status: ffi::Status::default(),
+        }
+    }
+
     fn set_retryable(&mut self, retryable: bool) {
         self.status.retryable = retryable;
     }
@@ -205,28 +238,15 @@ fn io_status_new(status: ffi::Status) -> ffi::IOStatus {
 }
 
 fn io_status_new1(code: Code, subcode: SubCode) -> ffi::IOStatus {
-    let status = ffi::Status {
-        code,
-        subcode,
-        scope: ffi::IOErrorScope::kIOErrorScopeFileSystem.repr,
-        ..ffi::Status::default()
-    };
-    ffi::IOStatus { status }
+    ffi::IOStatus::new3(code, subcode)
 }
 
 fn io_status_new2(code: Code) -> ffi::IOStatus {
-    let status = ffi::Status {
-        code,
-        scope: ffi::IOErrorScope::kIOErrorScopeFileSystem.repr,
-        ..ffi::Status::default()
-    };
-    ffi::IOStatus { status }
+    ffi::IOStatus::new4(code)
 }
 
 fn io_status_new3() -> ffi::IOStatus {
-    ffi::IOStatus {
-        status: ffi::Status::default(),
-    }
+    ffi::IOStatus::new5()
 }
 
 fn io_status_new4(
@@ -235,13 +255,9 @@ fn io_status_new4(
     msg: &ffi::Slice,
     msg2: &ffi::Slice,
 ) -> ffi::IOStatus {
-    ffi::IOStatus {
-        status: status::status_new7(code, subcode, msg, msg2),
-    }
+    ffi::IOStatus::new(code, subcode, msg, msg2)
 }
 
 fn io_status_new5(code: Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus {
-        status: status::status_new6(code, msg, msg2),
-    }
+    ffi::IOStatus::new2(code, msg, msg2)
 }

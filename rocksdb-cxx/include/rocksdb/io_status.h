@@ -33,6 +33,19 @@ class IOStatus {
   // Create a success status.
   IOStatus() : oxidize_(rocksdb_rs::io_status::IOStatus_new()) {}
 
+  explicit IOStatus(rocksdb_rs::status::Code _code,
+                    rocksdb_rs::status::SubCode _subcode)
+      : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code, _subcode)) {}
+
+  explicit IOStatus(rocksdb_rs::status::Code _code)
+      : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code)) {}
+
+  IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode,
+           const Slice &msg, const Slice &msg2);
+
+  IOStatus(rocksdb_rs::status::Code _code, const Slice &msg, const Slice &msg2)
+      : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code, msg, msg2)) {}
+
   // TODO: move to rust
   // Copy the specified status.
   IOStatus(const IOStatus &s);
@@ -111,19 +124,6 @@ class IOStatus {
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
   // std::string ToString() const;
-
-  explicit IOStatus(rocksdb_rs::status::Code _code,
-                    rocksdb_rs::status::SubCode _subcode)
-      : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code, _subcode)) {}
-
-  explicit IOStatus(rocksdb_rs::status::Code _code)
-      : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code)) {}
-
-  IOStatus(rocksdb_rs::status::Code _code, rocksdb_rs::status::SubCode _subcode,
-           const Slice &msg, const Slice &msg2);
-
-  IOStatus(rocksdb_rs::status::Code _code, const Slice &msg, const Slice &msg2)
-      : oxidize_(rocksdb_rs::io_status::IOStatus_new(_code, msg, msg2)) {}
 
  private:
   rocksdb_rs::io_status::IOStatus oxidize_;
