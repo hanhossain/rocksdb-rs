@@ -228,7 +228,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
     if (log_io_s.ok() && synced_wals.IsWalAddition()) {
       const ReadOptions read_options(Env::IOActivity::kFlush);
       log_io_s =
-          status_to_io_status(ApplyWALToManifest(read_options, &synced_wals));
+          IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
       TEST_SYNC_POINT_CALLBACK("DBImpl::FlushMemTableToOutputFile:CommitWal:1",
                                nullptr);
     }
@@ -493,7 +493,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
     if (log_io_s.ok() && synced_wals.IsWalAddition()) {
       const ReadOptions read_options(Env::IOActivity::kFlush);
       log_io_s =
-          status_to_io_status(ApplyWALToManifest(read_options, &synced_wals));
+          IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
     }
 
     if (!log_io_s.ok() && !log_io_s.IsShutdownInProgress() &&

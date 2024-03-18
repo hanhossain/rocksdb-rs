@@ -40,7 +40,7 @@ IOStatus EncryptedSequentialFile::Read(size_t n, const IOOptions& options,
   }
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    io_s = status_to_io_status(
+    io_s = IOStatus_new(
         stream_->Decrypt(offset_, (char*)result->data(), result->size()));
   }
   if (io_s.ok()) {
@@ -85,7 +85,7 @@ IOStatus EncryptedSequentialFile::PositionedRead(uint64_t offset, size_t n,
   offset_ = offset + result->size();
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    io_s = status_to_io_status(
+    io_s = IOStatus_new(
         stream_->Decrypt(offset, (char*)result->data(), result->size()));
   }
   return io_s;
@@ -103,7 +103,7 @@ IOStatus EncryptedRandomAccessFile::Read(uint64_t offset, size_t n,
   }
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    io_s = status_to_io_status(
+    io_s = IOStatus_new(
         stream_->Decrypt(offset, (char*)result->data(), result->size()));
   }
   return io_s;
@@ -153,7 +153,7 @@ IOStatus EncryptedWritableFile::Append(const Slice& data,
     IOStatus io_s;
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
-      io_s = status_to_io_status(
+      io_s = IOStatus_new(
           stream_->Encrypt(offset, buf.BufferStart(), buf.CurrentSize()));
     }
     if (!io_s.ok()) {
@@ -180,7 +180,7 @@ IOStatus EncryptedWritableFile::PositionedAppend(const Slice& data,
     IOStatus io_s;
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
-      io_s = status_to_io_status(
+      io_s = IOStatus_new(
           stream_->Encrypt(offset, buf.BufferStart(), buf.CurrentSize()));
     }
     if (!io_s.ok()) {
@@ -285,7 +285,7 @@ IOStatus EncryptedRandomRWFile::Write(uint64_t offset, const Slice& data,
     IOStatus io_s;
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
-      io_s = status_to_io_status(
+      io_s = IOStatus_new(
           stream_->Encrypt(offset, buf.BufferStart(), buf.CurrentSize()));
     }
     if (!io_s.ok()) {
@@ -307,7 +307,7 @@ IOStatus EncryptedRandomRWFile::Read(uint64_t offset, size_t n,
   }
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    status = status_to_io_status(
+    status = IOStatus_new(
         stream_->Decrypt(offset, (char*)result->data(), result->size()));
   }
   return status;
@@ -404,7 +404,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         // Initialize prefix
         buffer.Alignment(underlying->GetRequiredBufferAlignment());
         buffer.AllocateNewBuffer(*prefix_length);
-        status = status_to_io_status(provider->CreateNewPrefix(
+        status = IOStatus_new(provider->CreateNewPrefix(
             fname, buffer.BufferStart(), *prefix_length));
         if (status.ok()) {
           buffer.Size(*prefix_length);
@@ -417,7 +417,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         }
       }
       // Create cipher stream
-      status = status_to_io_status(
+      status = IOStatus_new(
           provider->CreateCipherStream(fname, options, prefix, stream));
     }
     return status;
@@ -475,7 +475,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         // Initialize prefix
         buffer.Alignment(underlying->GetRequiredBufferAlignment());
         buffer.AllocateNewBuffer(*prefix_length);
-        io_s = status_to_io_status(provider->CreateNewPrefix(
+        io_s = IOStatus_new(provider->CreateNewPrefix(
             fname, buffer.BufferStart(), *prefix_length));
         if (io_s.ok()) {
           buffer.Size(*prefix_length);
@@ -488,7 +488,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         }
       }
       // Create cipher stream
-      io_s = status_to_io_status(
+      io_s = IOStatus_new(
           provider->CreateCipherStream(fname, options, prefix, stream));
     }
     return io_s;
@@ -525,7 +525,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
       }
       buffer.Size(*prefix_length);
     }
-    return status_to_io_status(
+    return IOStatus_new(
         provider_->CreateCipherStream(fname, options, prefix, stream));
   }
 
@@ -560,7 +560,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
       }
       buffer.Size(*prefix_length);
     }
-    return status_to_io_status(
+    return IOStatus_new(
         provider_->CreateCipherStream(fname, options, prefix, stream));
   }
 

@@ -34,7 +34,7 @@ inline void BlockFetcher::ProcessTrailerIfPresent() {
   if (footer_.GetBlockTrailerSize() > 0) {
     assert(footer_.GetBlockTrailerSize() == BlockBasedTable::kBlockTrailerSize);
     if (read_options_.verify_checksums) {
-      io_status_ = status_to_io_status(VerifyBlockChecksum(
+      io_status_ = IOStatus_new(VerifyBlockChecksum(
           footer_.checksum_type(), slice_.data(), block_size_,
           file_->file_name(), handle_.offset()));
       RecordTick(ioptions_.stats, BLOCK_CHECKSUM_COMPUTE_COUNT);
@@ -108,7 +108,7 @@ inline bool BlockFetcher::TryGetSerializedBlockFromPersistentCache() {
   if (cache_options_.persistent_cache &&
       cache_options_.persistent_cache->IsCompressed()) {
     std::unique_ptr<char[]> buf;
-    io_status_ = status_to_io_status(PersistentCacheHelper::LookupSerialized(
+    io_status_ = IOStatus_new(PersistentCacheHelper::LookupSerialized(
         cache_options_, handle_, &buf, block_size_with_trailer_));
     if (io_status_.ok()) {
       heap_buf_ = CacheAllocationPtr(buf.release());
@@ -331,7 +331,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
     // compressed page, uncompress, update cache
     UncompressionContext context(compression_type_);
     UncompressionInfo info(context, uncompression_dict_, compression_type_);
-    io_status_ = status_to_io_status(UncompressSerializedBlock(
+    io_status_ = IOStatus_new(UncompressSerializedBlock(
         info, slice_.data(), block_size_, contents_, footer_.format_version(),
         ioptions_, memory_allocator_));
 #ifndef NDEBUG
@@ -362,7 +362,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
       if (!io_s.ok()) {
         return io_s;
       }
-      io_s = status_to_io_status(prefetch_buffer_->PrefetchAsync(
+      io_s = IOStatus_new(prefetch_buffer_->PrefetchAsync(
           opts, file_, handle_.offset(), block_size_with_trailer_, &slice_));
       if (io_s.IsTryAgain()) {
         return io_s;
@@ -382,7 +382,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
           UncompressionContext context(compression_type_);
           UncompressionInfo info(context, uncompression_dict_,
                                  compression_type_);
-          io_status_ = status_to_io_status(UncompressSerializedBlock(
+          io_status_ = IOStatus_new(UncompressSerializedBlock(
               info, slice_.data(), block_size_, contents_,
               footer_.format_version(), ioptions_, memory_allocator_));
 #ifndef NDEBUG

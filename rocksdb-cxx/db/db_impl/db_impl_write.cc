@@ -1312,7 +1312,7 @@ IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batch,
   TEST_SYNC_POINT_CALLBACK("DBImpl::WriteToWAL:log_entry", &log_entry);
   auto s = merged_batch.VerifyChecksum();
   if (!s.ok()) {
-    return status_to_io_status(std::move(s));
+    return IOStatus_new(std::move(s));
   }
   *log_size = log_entry.size();
   // When two_write_queues_ WriteToWAL has to be protected from concurretn calls
@@ -1358,7 +1358,7 @@ IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup& write_group,
   size_t write_with_wal = 0;
   WriteBatch* to_be_cached_state = nullptr;
   WriteBatch* merged_batch;
-  io_s = status_to_io_status(MergeBatch(write_group, &tmp_batch_, &merged_batch,
+  io_s = IOStatus_new(MergeBatch(write_group, &tmp_batch_, &merged_batch,
                                         &write_with_wal, &to_be_cached_state));
   if (UNLIKELY(!io_s.ok())) {
     return io_s;
@@ -1454,7 +1454,7 @@ IOStatus DBImpl::ConcurrentWriteToWAL(
   size_t write_with_wal = 0;
   WriteBatch* to_be_cached_state = nullptr;
   WriteBatch* merged_batch;
-  io_s = status_to_io_status(MergeBatch(write_group, &tmp_batch, &merged_batch,
+  io_s = IOStatus_new(MergeBatch(write_group, &tmp_batch, &merged_batch,
                                         &write_with_wal, &to_be_cached_state));
   if (UNLIKELY(!io_s.ok())) {
     return io_s;

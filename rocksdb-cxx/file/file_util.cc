@@ -50,7 +50,7 @@ IOStatus CopyFile(FileSystem* fs, const std::string& source,
   while (size > 0) {
     size_t bytes_to_read = std::min(sizeof(buffer), static_cast<size_t>(size));
     // TODO: rate limit copy file
-    io_s = status_to_io_status(
+    io_s = IOStatus_new(
         src_reader->Read(bytes_to_read, &slice, buffer,
                          Env::IO_TOTAL /* rate_limiter_priority */));
     if (!io_s.ok()) {

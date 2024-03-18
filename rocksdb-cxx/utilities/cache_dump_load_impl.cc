@@ -276,7 +276,7 @@ IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
         Slice(static_cast<char*>(dump_unit.value), dump_unit.value_len);
     rocksdb_rs::status::Status s = secondary_cache_->InsertSaved(dump_unit.key, content);
     if (!s.ok()) {
-      io_s = status_to_io_status(std::move(s));
+      io_s = IOStatus_new(std::move(s));
     }
   }
   if (dump_unit.type == CacheDumpUnitType::kFooter) {
@@ -297,7 +297,7 @@ IOStatus CacheDumpedLoaderImpl::ReadDumpUnitMeta(std::string* data,
   if (!io_s.ok()) {
     return io_s;
   }
-  return status_to_io_status(
+  return IOStatus_new(
       CacheDumperHelper::DecodeDumpUnitMeta(*data, unit_meta));
 }
 
@@ -317,7 +317,7 @@ IOStatus CacheDumpedLoaderImpl::ReadDumpUnit(size_t len, std::string* data,
         "The data being read out does not match the size stored in metadata!");
   }
   Slice block;
-  return status_to_io_status(CacheDumperHelper::DecodeDumpUnit(*data, unit));
+  return IOStatus_new(CacheDumperHelper::DecodeDumpUnit(*data, unit));
 }
 
 // Read the header

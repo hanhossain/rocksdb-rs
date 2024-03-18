@@ -495,7 +495,7 @@ namespace rocksdb {
                                                              BackgroundErrorReason reason) {
     db_mutex_->AssertHeld();
     rocksdb_rs::status::Status tmp_status = bg_status.Clone();
-    IOStatus bg_io_err = status_to_io_status(std::move(tmp_status));
+    IOStatus bg_io_err = IOStatus_new(std::move(tmp_status));
 
     if (bg_io_err.ok()) {
       return kOkStatus;

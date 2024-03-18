@@ -124,8 +124,7 @@ class IOStatus {
  private:
   rocksdb_rs::io_status::IOStatus oxidize_;
 
-  // TODO: move to rust
-  friend IOStatus status_to_io_status(rocksdb_rs::status::Status &&);
+  friend IOStatus IOStatus_new(rocksdb_rs::status::Status &&);
 };
 
 inline IOStatus::IOStatus(rocksdb_rs::status::Code _code,
@@ -164,12 +163,8 @@ inline bool IOStatus::operator!=(const IOStatus &rhs) const {
   return oxidize_ != rhs.oxidize_;
 }
 
-// TODO: move to rust
-inline IOStatus status_to_io_status(rocksdb_rs::status::Status &&status) {
-  IOStatus io_s;
-  rocksdb_rs::status::Status &s = io_s.oxidize_.status_;
-  s = std::move(status);
-  return io_s;
+inline IOStatus IOStatus_new(rocksdb_rs::status::Status &&status) {
+  return IOStatus(rocksdb_rs::io_status::IOStatus_new(std::move(status)));
 }
 
 // Return a success status.
