@@ -217,7 +217,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool need_cancel = false;
-  IOStatus log_io_s = IOStatus::OK();
+  IOStatus log_io_s = IOStatus_OK();
   if (needs_to_sync_closed_wals) {
     // SyncClosedLogs() may unlock and re-lock the log_write_mutex multiple
     // times.
@@ -472,7 +472,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   // is specific and doesn't allow &v[i].
   std::deque<bool> switched_to_mempurge(num_cfs, false);
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  IOStatus log_io_s = IOStatus::OK();
+  IOStatus log_io_s = IOStatus_OK();
   assert(num_cfs == static_cast<int>(jobs.size()));
 
   for (int i = 0; i != num_cfs; ++i) {

@@ -246,7 +246,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
 #ifndef NDEBUG
     contents_->has_trailer = footer_.GetBlockTrailerSize() > 0;
 #endif  // NDEBUG
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
   if (TryGetFromPrefetchBuffer()) {
     if (!io_status_.ok()) {
@@ -311,7 +311,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
     }
 
     if (slice_.size() != block_size_with_trailer_) {
-      return IOStatus::Corruption(
+      return IOStatus_Corruption(
           "truncated block read from " + file_->file_name() + " offset " +
           std::to_string(handle_.offset()) + ", expected " +
           std::to_string(block_size_with_trailer_) + " bytes, got " +
@@ -353,7 +353,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
 #ifndef NDEBUG
     contents_->has_trailer = footer_.GetBlockTrailerSize() > 0;
 #endif  // NDEBUG
-    return IOStatus::OK();
+    return IOStatus_OK();
   } else if (!TryGetSerializedBlockFromPersistentCache()) {
     assert(prefetch_buffer_ != nullptr);
     if (!for_compaction_) {

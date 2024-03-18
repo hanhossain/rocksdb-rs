@@ -117,7 +117,7 @@ inline void UpdateResult(struct io_uring_cqe* cqe, const std::string& file_name,
     TEST_SYNC_POINT_CALLBACK("UpdateResults::io_uring_result", &bytes_read);
     if (bytes_read == iov_len) {
       req->result = Slice(req->scratch, req->len);
-      req->status = IOStatus::OK();
+      req->status = IOStatus_OK();
     } else if (bytes_read == 0) {
       /// cqe->res == 0 can means EOF, or can mean partial results. See
       // comment
@@ -127,13 +127,13 @@ inline void UpdateResult(struct io_uring_cqe* cqe, const std::string& file_name,
         // Bytes reads don't fill sectors. Should only happen at the end
         // of the file.
         req->result = Slice(req->scratch, finished_len);
-        req->status = IOStatus::OK();
+        req->status = IOStatus_OK();
       } else {
         if (async_read) {
           // No  bytes read. It can means EOF. In case of partial results, it's
           // caller responsibility to call read/readasync again.
           req->result = Slice(req->scratch, 0);
-          req->status = IOStatus::OK();
+          req->status = IOStatus_OK();
         } else {
           read_again = true;
         }
@@ -142,7 +142,7 @@ inline void UpdateResult(struct io_uring_cqe* cqe, const std::string& file_name,
       assert(bytes_read > 0);
       if (async_read) {
         req->result = Slice(req->scratch, bytes_read);
-        req->status = IOStatus::OK();
+        req->status = IOStatus_OK();
       } else {
         assert(bytes_read + finished_len < len);
         finished_len += bytes_read;
@@ -450,7 +450,7 @@ class PosixMmapFile : public FSWritableFile {
   // and it does not need any additional information
   virtual IOStatus Truncate(uint64_t /*size*/, const IOOptions& /*opts*/,
                             IODebugContext* /*dbg*/) override {
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
   virtual IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
   virtual IOStatus Append(const Slice& data, const IOOptions& opts,

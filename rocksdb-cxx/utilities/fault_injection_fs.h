@@ -326,14 +326,14 @@ class FaultInjectionTestFS : public FileSystemWrapper {
            skip_direct_writable_types_.end();
   }
   void SetFilesystemActiveNoLock(
-      bool active, IOStatus error = IOStatus::Corruption("Not active")) {
+      bool active, IOStatus error = IOStatus_Corruption("Not active")) {
     filesystem_active_ = active;
     if (!active) {
       error_ = error;
     }
   }
   void SetFilesystemActive(
-      bool active, IOStatus error = IOStatus::Corruption("Not active")) {
+      bool active, IOStatus error = IOStatus_Corruption("Not active")) {
     MutexLock l(&mutex_);
     SetFilesystemActiveNoLock(active, error);
   }

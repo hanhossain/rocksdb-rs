@@ -3486,11 +3486,11 @@ class ReadAsyncFS : public FileSystemWrapper {
       MockIOHandle* handle = static_cast<MockIOHandle*>(io_handles[i]);
       if (handle->create_io_error) {
         FSReadRequest req;
-        req.status = IOStatus::IOError();
+        req.status = IOStatus_IOError();
         handle->cb(req, handle->cb_arg);
       }
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   std::vector<std::thread> workers;
@@ -3529,7 +3529,7 @@ IOStatus ReadAsyncRandomAccessFile::ReadAsync(
       };
 
   fs_.workers.emplace_back(submit_request, std::move(req));
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 class TestAsyncRead : public testing::Test {
@@ -3608,7 +3608,7 @@ TEST_F(TestAsyncRead, ReadAsync) {
     // Check the status of read requests.
     for (size_t i = 0; i < kNumSectors; i++) {
       if (i % 2) {
-        ASSERT_EQ(reqs[i].status, IOStatus::IOError());
+        ASSERT_EQ(reqs[i].status, IOStatus_IOError());
       } else {
         auto buf = NewAligned(kSectorSize * 8, static_cast<char>(i + 1));
         Slice expected_data(buf.get(), kSectorSize);

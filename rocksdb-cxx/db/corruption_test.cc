@@ -60,7 +60,7 @@ class ErrorFS : public FileSystemWrapper {
     result->reset();
     if (writable_file_error_) {
       ++num_writable_file_errors_;
-      return IOStatus::IOError(fname, "fake error");
+      return IOStatus_IOError(fname, "fake error");
     }
     return target()->NewWritableFile(fname, opts, result, dbg);
   }

@@ -2178,7 +2178,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
 
   // The hash does not match, write fails
   // fault_fs->SetChecksumHandoffFuncType(ChecksumType::kxxHash);
-  // Since the file system returns IOStatus::Corruption, it is an
+  // Since the file system returns IOStatus_Corruption, it is an
   // unrecoverable error.
   SyncPoint::GetInstance()->SetCallBack("FlushJob::Start", [&](void*) {
     fault_fs->SetChecksumHandoffFuncType(ChecksumType::kxxHash);
@@ -2201,7 +2201,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   ASSERT_OK(dbfull()->TEST_SwitchMemtable());
 
   // Each write will be similated as corrupted.
-  // Since the file system returns IOStatus::Corruption, it is an
+  // Since the file system returns IOStatus_Corruption, it is an
   // unrecoverable error.
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   SyncPoint::GetInstance()->SetCallBack("FlushJob::Start", [&](void*) {
@@ -2296,7 +2296,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest1) {
 
   // The hash does not match, write fails
   // fault_fs->SetChecksumHandoffFuncType(ChecksumType::kxxHash);
-  // Since the file system returns IOStatus::Corruption, it is mapped to
+  // Since the file system returns IOStatus_Corruption, it is mapped to
   // kFatalError error.
   ASSERT_OK(Put("key3", "value3"));
   SyncPoint::GetInstance()->SetCallBack(
@@ -2336,7 +2336,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest2) {
   ASSERT_OK(Flush());
 
   // Each write will be similated as corrupted.
-  // Since the file system returns IOStatus::Corruption, it is mapped to
+  // Since the file system returns IOStatus_Corruption, it is mapped to
   // kFatalError error.
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   SyncPoint::GetInstance()->SetCallBack(
@@ -3135,7 +3135,7 @@ TEST_P(DBAtomicFlushTest, BgThreadNoWaitAfterManifestError) {
       "VersionSet::ProcessManifestWrites:AfterSyncManifest", [&](void* arg) {
         auto* ptr = reinterpret_cast<IOStatus*>(arg);
         assert(ptr);
-        *ptr = IOStatus::IOError("Injected failure");
+        *ptr = IOStatus_IOError("Injected failure");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

@@ -354,10 +354,10 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                                EncryptionProvider** result) {
     if (provider_) {
       *result = provider_.get();
-      return IOStatus::OK();
+      return IOStatus_OK();
     } else {
       *result = nullptr;
-      return IOStatus::NotFound("No WriteProvider specified");
+      return IOStatus_NotFound("No WriteProvider specified");
     }
   }
 
@@ -367,10 +367,10 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                                EncryptionProvider** result) {
     if (provider_) {
       *result = provider_.get();
-      return IOStatus::OK();
+      return IOStatus_OK();
     } else {
       *result = nullptr;
-      return IOStatus::NotFound("No Provider specified");
+      return IOStatus_NotFound("No Provider specified");
     }
   }
 
@@ -583,7 +583,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                              IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_reads) {
-      return IOStatus::InvalidArgument();
+      return IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSSequentialFile> underlying;
@@ -620,7 +620,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                                IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_reads) {
-      return IOStatus::InvalidArgument();
+      return IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSRandomAccessFile> underlying;
@@ -649,7 +649,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                            IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_writes) {
-      return IOStatus::InvalidArgument();
+      return IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSWritableFile> underlying;
@@ -667,7 +667,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                               IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_writes) {
-      return IOStatus::InvalidArgument();
+      return IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSWritableFile> underlying;
@@ -686,7 +686,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                              IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_writes) {
-      return IOStatus::InvalidArgument();
+      return IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSWritableFile> underlying;
@@ -703,7 +703,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                            IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_reads || options.use_mmap_writes) {
-      return IOStatus::InvalidArgument();
+      return IOStatus_InvalidArgument();
     }
     // Check file exists
     bool isNewFile = !FileExists(fname, options.io_options, dbg).ok();
@@ -760,7 +760,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         it->size_bytes -= provider->GetPrefixLength();
       }
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus GetFileSize(const std::string& fname, const IOOptions& options,

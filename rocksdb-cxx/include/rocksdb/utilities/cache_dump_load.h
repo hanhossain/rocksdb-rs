@@ -94,7 +94,7 @@ class CacheDumper {
   // condition from block cache to a certain CacheDumpWriter in one shot. This
   // process may take some time.
   virtual IOStatus DumpCacheEntriesToWriter() {
-    return IOStatus::NotSupported("DumpCacheEntriesToWriter is not supported");
+    return IOStatus_NotSupported("DumpCacheEntriesToWriter is not supported");
   }
 };
 
@@ -106,7 +106,7 @@ class CacheDumpedLoader {
  public:
   virtual ~CacheDumpedLoader() = default;
   virtual IOStatus RestoreCacheEntriesToSecondaryCache() {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "RestoreCacheEntriesToSecondaryCache is not supported");
   }
 };

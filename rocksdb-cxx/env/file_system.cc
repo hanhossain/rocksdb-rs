@@ -123,7 +123,7 @@ IOStatus FileSystem::NewLogger(const std::string& fname,
 
   *result = std::make_shared<EnvLogger>(std::move(writable_file), fname,
                                         options, Env::Default());
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 FileOptions FileSystem::OptimizeForLogRead(

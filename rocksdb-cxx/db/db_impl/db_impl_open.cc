@@ -408,7 +408,7 @@ IOStatus Directories::SetDirectories(FileSystem* fs, const std::string& dbname,
     }
   }
   assert(data_dirs_.size() == data_paths.size());
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::Recover(

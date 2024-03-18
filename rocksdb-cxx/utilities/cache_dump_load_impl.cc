@@ -58,14 +58,14 @@ rocksdb_rs::status::Status CacheDumperImpl::SetDumpFilter(std::vector<DB*> db_li
 IOStatus CacheDumperImpl::DumpCacheEntriesToWriter() {
   // Prepare stage, check the parameters.
   if (cache_ == nullptr) {
-    return IOStatus::InvalidArgument("Cache is null");
+    return IOStatus_InvalidArgument("Cache is null");
   }
   if (writer_ == nullptr) {
-    return IOStatus::InvalidArgument("CacheDumpWriter is null");
+    return IOStatus_InvalidArgument("CacheDumpWriter is null");
   }
   // Set the system clock
   if (options_.clock == nullptr) {
-    return IOStatus::InvalidArgument("System clock is null");
+    return IOStatus_InvalidArgument("System clock is null");
   }
   clock_ = options_.clock;
 
@@ -240,10 +240,10 @@ IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
   (void)options_;
   // Step 1: we check if all the arguments are valid
   if (secondary_cache_ == nullptr) {
-    return IOStatus::InvalidArgument("Secondary Cache is null");
+    return IOStatus_InvalidArgument("Secondary Cache is null");
   }
   if (reader_ == nullptr) {
-    return IOStatus::InvalidArgument("CacheDumpReader is null");
+    return IOStatus_InvalidArgument("CacheDumpReader is null");
   }
 
   // Step 2: read the header
@@ -280,7 +280,7 @@ IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
     }
   }
   if (dump_unit.type == CacheDumpUnitType::kFooter) {
-    return IOStatus::OK();
+    return IOStatus_OK();
   } else {
     return io_s;
   }
@@ -313,7 +313,7 @@ IOStatus CacheDumpedLoaderImpl::ReadDumpUnit(size_t len, std::string* data,
     return io_s;
   }
   if (data->size() != len) {
-    return IOStatus::Corruption(
+    return IOStatus_Corruption(
         "The data being read out does not match the size stored in metadata!");
   }
   Slice block;
@@ -337,7 +337,7 @@ IOStatus CacheDumpedLoaderImpl::ReadHeader(std::string* data,
   }
   uint32_t unit_checksum = crc32c::Value(data->data(), data->size());
   if (unit_checksum != header_meta.dump_unit_checksum) {
-    return IOStatus::Corruption("Read header unit corrupted!");
+    return IOStatus_Corruption("Read header unit corrupted!");
   }
   return io_s;
 }
@@ -362,7 +362,7 @@ IOStatus CacheDumpedLoaderImpl::ReadCacheBlock(std::string* data,
   }
   uint32_t unit_checksum = crc32c::Value(data->data(), data->size());
   if (unit_checksum != unit_meta.dump_unit_checksum) {
-    return IOStatus::Corruption(
+    return IOStatus_Corruption(
         "Checksum does not match! Read dumped unit corrupted!");
   }
   return io_s;

@@ -288,7 +288,7 @@ class WritableFileWriter {
   IOStatus AssertFalseAndGetStatusForPrevError() {
     // This should only happen if SyncWithoutFlush() was called.
     assert(sync_without_flush_called_);
-    return IOStatus::IOError("Writer has previous error.");
+    return IOStatus_IOError("Writer has previous error.");
   }
 
  private:

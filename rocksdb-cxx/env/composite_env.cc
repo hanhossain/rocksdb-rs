@@ -72,7 +72,7 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
       fs_reqs[i].offset = reqs[i].offset;
       fs_reqs[i].len = reqs[i].len;
       fs_reqs[i].scratch = reqs[i].scratch;
-      fs_reqs[i].status = IOStatus::OK();
+      fs_reqs[i].status = IOStatus_OK();
     }
     status = target_->MultiRead(fs_reqs.data(), num_reqs, io_opts, &dbg);
     for (size_t i = 0; i < num_reqs; ++i) {

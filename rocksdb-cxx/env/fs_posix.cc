@@ -206,7 +206,7 @@ class PosixFileSystem : public FileSystem {
     result->reset(new PosixSequentialFile(
         fname, file, fd, GetLogicalBlockSizeForReadIfNeeded(options, fname, fd),
         options));
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus NewRandomAccessFile(const std::string& fname,
@@ -214,7 +214,7 @@ class PosixFileSystem : public FileSystem {
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* /*dbg*/) override {
     result->reset();
-    IOStatus s = IOStatus::OK();
+    IOStatus s = IOStatus_OK();
     int fd;
     int flags = cloexec_flags(O_RDONLY, &options);
 
@@ -471,7 +471,7 @@ class PosixFileSystem : public FileSystem {
 
     SetFD_CLOEXEC(fd, &options);
     result->reset(new PosixRandomRWFile(fname, fd, options));
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus NewMemoryMappedFileBuffer(
@@ -533,7 +533,7 @@ class PosixFileSystem : public FileSystem {
     } else {
       result->reset(new PosixDirectory(fd, name));
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus FileExists(const std::string& fname, const IOOptions& /*opts*/,
@@ -541,7 +541,7 @@ class PosixFileSystem : public FileSystem {
     int result = access(fname.c_str(), F_OK);
 
     if (result == 0) {
-      return IOStatus::OK();
+      return IOStatus_OK();
     }
 
     int err = errno;
@@ -551,10 +551,10 @@ class PosixFileSystem : public FileSystem {
       case ENAMETOOLONG:
       case ENOENT:
       case ENOTDIR:
-        return IOStatus::NotFound();
+        return IOStatus_NotFound();
       default:
         assert(err == EIO || err == ENOMEM);
-        return IOStatus::IOError("Unexpected error(" + std::to_string(err) +
+        return IOStatus_IOError("Unexpected error(" + std::to_string(err) +
                                  ") accessing file `" + fname + "' ");
     }
   }
@@ -570,7 +570,7 @@ class PosixFileSystem : public FileSystem {
         case EACCES:
         case ENOENT:
         case ENOTDIR:
-          return IOStatus::NotFound();
+          return IOStatus_NotFound();
         default:
           return IOError("While opendir", dir, errno);
       }
@@ -613,7 +613,7 @@ class PosixFileSystem : public FileSystem {
       return IOError("While closedir", dir, errno);
     }
 
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus DeleteFile(const std::string& fname, const IOOptions& /*opts*/,
@@ -630,7 +630,7 @@ class PosixFileSystem : public FileSystem {
     if (mkdir(name.c_str(), 0755) != 0) {
       return IOError("While mkdir", name, errno);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus CreateDirIfMissing(const std::string& name,
@@ -642,11 +642,11 @@ class PosixFileSystem : public FileSystem {
       } else if (!DirExists(name)) {  // Check that name is actually a
                                       // directory.
         // Message is taken from mkdir
-        return IOStatus::IOError("`" + name +
+        return IOStatus_IOError("`" + name +
                                  "' exists but is not a directory");
       }
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus DeleteDir(const std::string& name, const IOOptions& /*opts*/,
@@ -654,7 +654,7 @@ class PosixFileSystem : public FileSystem {
     if (rmdir(name.c_str()) != 0) {
       return IOError("file rmdir", name, errno);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus GetFileSize(const std::string& fname, const IOOptions& /*opts*/,
@@ -666,7 +666,7 @@ class PosixFileSystem : public FileSystem {
     } else {
       *size = sbuf.st_size;
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus GetFileModificationTime(const std::string& fname,
@@ -678,7 +678,7 @@ class PosixFileSystem : public FileSystem {
       return IOError("while stat a file for modification time", fname, errno);
     }
     *file_mtime = static_cast<uint64_t>(s.st_mtime);
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus RenameFile(const std::string& src, const std::string& target,
@@ -687,7 +687,7 @@ class PosixFileSystem : public FileSystem {
     if (rename(src.c_str(), target.c_str()) != 0) {
       return IOError("While renaming a file to " + target, src, errno);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus LinkFile(const std::string& src, const std::string& target,
@@ -695,13 +695,13 @@ class PosixFileSystem : public FileSystem {
                     IODebugContext* /*dbg*/) override {
     if (link(src.c_str(), target.c_str()) != 0) {
       if (errno == EXDEV || errno == ENOTSUP) {
-        return IOStatus::NotSupported(errno == EXDEV
+        return IOStatus_NotSupported(errno == EXDEV
                                           ? "No cross FS links allowed"
                                           : "Links not supported by FS");
       }
       return IOError("while link file to " + target, src, errno);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus NumFileLinks(const std::string& fname, const IOOptions& /*opts*/,
@@ -711,7 +711,7 @@ class PosixFileSystem : public FileSystem {
       return IOError("while stat a file for num file links", fname, errno);
     }
     *count = static_cast<uint64_t>(s.st_nlink);
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus AreFilesSame(const std::string& first, const std::string& second,
@@ -732,7 +732,7 @@ class PosixFileSystem : public FileSystem {
     } else {
       *res = true;
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus LockFile(const std::string& fname, const IOOptions& /*opts*/,
@@ -771,7 +771,7 @@ class PosixFileSystem : public FileSystem {
                      fname, errno);
     }
 
-    IOStatus result = IOStatus::OK();
+    IOStatus result = IOStatus_OK();
     int fd;
     int flags = cloexec_flags(O_RDWR | O_CREAT, nullptr);
 
@@ -827,17 +827,17 @@ class PosixFileSystem : public FileSystem {
                            IODebugContext* /*dbg*/) override {
     if (!db_path.empty() && db_path[0] == '/') {
       *output_path = db_path;
-      return IOStatus::OK();
+      return IOStatus_OK();
     }
 
     char the_path[4096];
     char* ret = getcwd(the_path, 4096);
     if (ret == nullptr) {
-      return IOStatus::IOError(errnoStr(errno).c_str());
+      return IOStatus_IOError(errnoStr(errno).c_str());
     }
 
     *output_path = ret;
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus GetTestDirectory(const IOOptions& /*opts*/, std::string* result,
@@ -855,7 +855,7 @@ class PosixFileSystem : public FileSystem {
       IOOptions opts;
       return CreateDirIfMissing(*result, opts, nullptr);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus GetFreeSpace(const std::string& fname, const IOOptions& /*opts*/,
@@ -878,7 +878,7 @@ class PosixFileSystem : public FileSystem {
       // root user can access all disk space
       *free_space = ((uint64_t)sbuf.f_bsize * sbuf.f_bfree);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus IsDirectory(const std::string& path, const IOOptions& /*opts*/,
@@ -1015,7 +1015,7 @@ class PosixFileSystem : public FileSystem {
 
     // Init failed, platform doesn't support io_uring.
     if (iu == nullptr) {
-      return IOStatus::NotSupported("Poll");
+      return IOStatus_NotSupported("Poll");
     }
 
     for (size_t i = 0; i < io_handles.size(); i++) {
@@ -1040,7 +1040,7 @@ class PosixFileSystem : public FileSystem {
             static_cast<Posix_IOHandle*>(io_uring_cqe_get_data(cqe));
         assert(posix_handle->iu == iu);
         if (posix_handle->iu != iu) {
-          return IOStatus::IOError("");
+          return IOStatus_IOError("");
         }
         // Reset cqe data to catch any stray reuse of it
         static_cast<struct io_uring_cqe*>(cqe)->user_data = 0xd5d5d5d5d5d5d5d5;
@@ -1070,10 +1070,10 @@ class PosixFileSystem : public FileSystem {
         }
       }
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
 #else
     (void)io_handles;
-    return IOStatus::NotSupported("Poll");
+    return IOStatus_NotSupported("Poll");
 #endif
   }
 
@@ -1089,7 +1089,7 @@ class PosixFileSystem : public FileSystem {
     // If Poll is not supported then it didn't submit any request and it should
     // return OK.
     if (iu == nullptr) {
-      return IOStatus::OK();
+      return IOStatus_OK();
     }
 
     for (size_t i = 0; i < io_handles.size(); i++) {
@@ -1100,7 +1100,7 @@ class PosixFileSystem : public FileSystem {
       }
       assert(posix_handle->iu == iu);
       if (posix_handle->iu != iu) {
-        return IOStatus::IOError("");
+        return IOStatus_IOError("");
       }
 
       // Prepare the cancel request.
@@ -1117,7 +1117,7 @@ class PosixFileSystem : public FileSystem {
       ssize_t ret = io_uring_submit(iu);
       if (ret < 0) {
         fprintf(stderr, "io_uring_submit error: %ld\n", long(ret));
-        return IOStatus::IOError("io_uring_submit() requested but returned " +
+        return IOStatus_IOError("io_uring_submit() requested but returned " +
                                  std::to_string(ret));
       }
     }
@@ -1143,7 +1143,7 @@ class PosixFileSystem : public FileSystem {
             static_cast<Posix_IOHandle*>(io_uring_cqe_get_data(cqe));
         assert(posix_handle->iu == iu);
         if (posix_handle->iu != iu) {
-          return IOStatus::IOError("");
+          return IOStatus_IOError("");
         }
         posix_handle->req_count++;
 
@@ -1166,19 +1166,19 @@ class PosixFileSystem : public FileSystem {
             static_cast<Posix_IOHandle*>(io_handles[i]) == posix_handle) {
           posix_handle->is_finished = true;
           FSReadRequest req;
-          req.status = IOStatus::Aborted();
+          req.status = IOStatus_Aborted();
           posix_handle->cb(req, posix_handle->cb_arg);
 
           break;
         }
       }
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
 #else
     // If Poll is not supported then it didn't submit any request and it should
     // return OK.
     (void)io_handles;
-    return IOStatus::OK();
+    return IOStatus_OK();
 #endif
   }
 

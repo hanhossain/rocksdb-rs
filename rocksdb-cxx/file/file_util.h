@@ -70,7 +70,7 @@ inline IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
     // Ensure there is atleast 1us available. We don't want to pass a value of
     // 0 as that means no timeout
     if (now >= ro.deadline) {
-      return IOStatus::TimedOut("Deadline exceeded");
+      return IOStatus_TimedOut("Deadline exceeded");
     }
     opts.timeout = ro.deadline - now;
   }
@@ -83,7 +83,7 @@ inline IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
   opts.rate_limiter_priority = ro.rate_limiter_priority;
   opts.io_activity = ro.io_activity;
 
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 // Test method to delete the input directory and all of its contents.

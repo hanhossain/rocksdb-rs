@@ -379,7 +379,7 @@ class FileSystem : public Customizable {
   virtual IOStatus ReopenWritableFile(
       const std::string& /*fname*/, const FileOptions& /*options*/,
       std::unique_ptr<FSWritableFile>* /*result*/, IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported("ReopenWritableFile");
+    return IOStatus_NotSupported("ReopenWritableFile");
   }
 
   // Reuse an existing file by renaming it and opening it as writable.
@@ -398,7 +398,7 @@ class FileSystem : public Customizable {
                                    const FileOptions& /*options*/,
                                    std::unique_ptr<FSRandomRWFile>* /*result*/,
                                    IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "RandomRWFile is not implemented in this FileSystem");
   }
 
@@ -408,7 +408,7 @@ class FileSystem : public Customizable {
   virtual IOStatus NewMemoryMappedFileBuffer(
       const std::string& /*fname*/,
       std::unique_ptr<MemoryMappedFileBuffer>* /*result*/) {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "MemoryMappedFileBuffer is not implemented in this FileSystem");
   }
 
@@ -480,7 +480,7 @@ class FileSystem : public Customizable {
       result_size++;
     }
     result->resize(result_size);
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
 // This seems to clash with a macro on Windows, so #undef it here
@@ -496,7 +496,7 @@ class FileSystem : public Customizable {
   virtual IOStatus Truncate(const std::string& /*fname*/, size_t /*size*/,
                             const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "Truncate is not supported for this FileSystem");
   }
 
@@ -534,14 +534,14 @@ class FileSystem : public Customizable {
                             const std::string& /*target*/,
                             const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "LinkFile is not supported for this FileSystem");
   }
 
   virtual IOStatus NumFileLinks(const std::string& /*fname*/,
                                 const IOOptions& /*options*/,
                                 uint64_t* /*count*/, IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "Getting number of file links is not supported for this FileSystem");
   }
 
@@ -549,7 +549,7 @@ class FileSystem : public Customizable {
                                 const std::string& /*second*/,
                                 const IOOptions& /*options*/, bool* /*res*/,
                                 IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "AreFilesSame is not supported for this FileSystem");
   }
 
@@ -654,7 +654,7 @@ class FileSystem : public Customizable {
                                 const IOOptions& /*options*/,
                                 uint64_t* /*diskfree*/,
                                 IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported("GetFreeSpace");
+    return IOStatus_NotSupported("GetFreeSpace");
   }
 
   virtual IOStatus IsDirectory(const std::string& /*path*/,
@@ -670,7 +670,7 @@ class FileSystem : public Customizable {
   // call Read or ReadAsync in order to get the remaining bytes.
   virtual IOStatus Poll(std::vector<void*>& /*io_handles*/,
                         size_t /*min_completions*/) {
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   // Abort the read IO requests submitted asynchronously. Underlying FS is
@@ -678,7 +678,7 @@ class FileSystem : public Customizable {
   // the all the read requests related to io_handles should be aborted and
   // it shouldn't call the callback for these io_handles.
   virtual IOStatus AbortIO(std::vector<void*>& /*io_handles*/) {
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   // Indicates to upper layers which FileSystem operations mentioned in
@@ -745,7 +745,7 @@ class FSSequentialFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   virtual IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return IOStatus::NotSupported("InvalidateCache not supported.");
+    return IOStatus_NotSupported("InvalidateCache not supported.");
   }
 
   // Positioned Read for direct I/O
@@ -754,7 +754,7 @@ class FSSequentialFile {
                                   const IOOptions& /*options*/,
                                   Slice* /*result*/, char* /*scratch*/,
                                   IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported("PositionedRead");
+    return IOStatus_NotSupported("PositionedRead");
   }
 
   // EXPERIMENTAL
@@ -868,7 +868,7 @@ class FSRandomAccessFile {
   virtual IOStatus Prefetch(uint64_t /*offset*/, size_t /*n*/,
                             const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported("Prefetch");
+    return IOStatus_NotSupported("Prefetch");
   }
 
   // Read a bunch of blocks as described by reqs. The blocks can
@@ -887,7 +887,7 @@ class FSRandomAccessFile {
       req.status =
           Read(req.offset, req.len, options, &req.result, req.scratch, dbg);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   // Tries to get an unique ID for this file that will be the same each time
@@ -926,7 +926,7 @@ class FSRandomAccessFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   virtual IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return IOStatus::NotSupported("InvalidateCache not supported.");
+    return IOStatus_NotSupported("InvalidateCache not supported.");
   }
 
   // This API reads the requested data in FSReadRequest asynchronously. This is
@@ -968,7 +968,7 @@ class FSRandomAccessFile {
     req.status =
         Read(req.offset, req.len, opts, &(req.result), req.scratch, dbg);
     cb(req, cb_arg);
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   // EXPERIMENTAL
@@ -1057,7 +1057,7 @@ class FSWritableFile {
                                     uint64_t /* offset */,
                                     const IOOptions& /*options*/,
                                     IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported("PositionedAppend");
+    return IOStatus_NotSupported("PositionedAppend");
   }
 
   // PositionedAppend data with verification information.
@@ -1073,7 +1073,7 @@ class FSWritableFile {
       const IOOptions& /*options*/,
       const DataVerificationInfo& /* verification_info */,
       IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported("PositionedAppend");
+    return IOStatus_NotSupported("PositionedAppend");
   }
 
   // Truncate is necessary to trim the file to the correct size
@@ -1082,7 +1082,7 @@ class FSWritableFile {
   // with other writes to follow.
   virtual IOStatus Truncate(uint64_t /*size*/, const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) {
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   // The caller should call Close() before destroying the FSWritableFile to
@@ -1173,7 +1173,7 @@ class FSWritableFile {
   // If the system is not caching the file contents, then this is a noop.
   // This call has no effect on dirty pages in the cache.
   virtual IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return IOStatus::NotSupported("InvalidateCache not supported.");
+    return IOStatus_NotSupported("InvalidateCache not supported.");
   }
 
   // Sync a file range with disk.
@@ -1187,7 +1187,7 @@ class FSWritableFile {
     if (strict_bytes_per_sync_) {
       return Sync(options, dbg);
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   // PrepareWrite performs any necessary preparation for a write
@@ -1219,7 +1219,7 @@ class FSWritableFile {
   virtual IOStatus Allocate(uint64_t /*offset*/, uint64_t /*len*/,
                             const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) {
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   // If you're adding methods here, remember to add them to
@@ -1353,7 +1353,7 @@ class FSDirectory {
   // The directory is considered closed regardless of return status.
   virtual IOStatus Close(const IOOptions& /*options*/,
                          IODebugContext* /*dbg*/) {
-    return IOStatus::NotSupported("Close");
+    return IOStatus_NotSupported("Close");
   }
 
   virtual size_t GetUniqueId(char* /*id*/, size_t /*max_size*/) const {

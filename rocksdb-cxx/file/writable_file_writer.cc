@@ -31,7 +31,7 @@ IOStatus WritableFileWriter::Create(const std::shared_ptr<FileSystem>& fs,
                                     IODebugContext* dbg) {
   if (file_opts.use_direct_writes &&
       0 == file_opts.writable_file_max_buffer_size) {
-    return IOStatus::InvalidArgument(
+    return IOStatus_InvalidArgument(
         "Direct write requires writable_file_max_buffer_size > 0");
   }
   std::unique_ptr<FSWritableFile> file;
@@ -106,7 +106,7 @@ IOStatus WritableFileWriter::Append(const Slice& data, uint32_t crc32c_checksum,
       if ((buf_.Capacity() - buf_.CurrentSize()) >= left) {
         size_t appended = buf_.Append(src, left);
         if (appended != left) {
-          s = IOStatus::Corruption("Write buffer append failure");
+          s = IOStatus_Corruption("Write buffer append failure");
         }
         buffered_data_crc32c_checksum_ = crc32c::Crc32cCombine(
             buffered_data_crc32c_checksum_, crc32c_checksum, appended);
@@ -211,7 +211,7 @@ IOStatus WritableFileWriter::Pad(const size_t pad_bytes,
         crc32c::Extend(buffered_data_crc32c_checksum_,
                        buf_.BufferStart() + pad_start, pad_bytes);
   }
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WritableFileWriter::Close() {
@@ -222,7 +222,7 @@ IOStatus WritableFileWriter::Close() {
       writable_file_.reset();
     }
     if (interim.ok()) {
-      return IOStatus::IOError(
+      return IOStatus_IOError(
           "File is closed but data not flushed as writer has previous error.");
     } else {
       return interim;
@@ -236,7 +236,7 @@ IOStatus WritableFileWriter::Close() {
   // Windows when pre-allocating does not fill with zeros
   // also with unbuffered access we also set the end of data.
   if (writable_file_.get() == nullptr) {
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   IOStatus s;
@@ -449,7 +449,7 @@ IOStatus WritableFileWriter::Sync(bool use_fsync) {
   }
   TEST_KILL_RANDOM("WritableFileWriter::Sync:1");
   pending_sync_ = false;
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WritableFileWriter::SyncWithoutFlush(bool use_fsync) {
@@ -457,7 +457,7 @@ IOStatus WritableFileWriter::SyncWithoutFlush(bool use_fsync) {
     return AssertFalseAndGetStatusForPrevError();
   }
   if (!writable_file_->IsSyncThreadSafe()) {
-    return IOStatus::NotSupported(
+    return IOStatus_NotSupported(
         "Can't WritableFileWriter::SyncWithoutFlush() because "
         "WritableFile::IsSyncThreadSafe() is false");
   }
@@ -760,7 +760,7 @@ IOStatus WritableFileWriter::WriteDirect(
   if (seen_error()) {
     assert(false);
 
-    return IOStatus::IOError("Writer has previous error.");
+    return IOStatus_IOError("Writer has previous error.");
   }
 
   assert(use_direct_io());

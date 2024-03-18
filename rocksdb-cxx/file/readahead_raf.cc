@@ -56,7 +56,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
         (cached_len == n || buffer_.CurrentSize() < readahead_size_)) {
       // We read exactly what we needed, or we hit end of file - return.
       *result = Slice(scratch, cached_len);
-      return IOStatus::OK();
+      return IOStatus_OK();
     }
     size_t advanced_offset = static_cast<size_t>(offset + cached_len);
     // In the case of cache hit advanced_offset is already aligned, means that
@@ -79,7 +79,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
     if (n < readahead_size_) {
       // Don't allow smaller prefetches than the configured `readahead_size_`.
       // `Read()` assumes a smaller prefetch buffer indicates EOF was reached.
-      return IOStatus::OK();
+      return IOStatus_OK();
     }
 
     std::unique_lock<std::mutex> lk(lock_);
@@ -87,7 +87,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
     size_t offset_ = static_cast<size_t>(offset);
     size_t prefetch_offset = TruncateToPageBoundary(alignment_, offset_);
     if (prefetch_offset == buffer_offset_) {
-      return IOStatus::OK();
+      return IOStatus_OK();
     }
     return ReadIntoBuffer(prefetch_offset,
                           Roundup(offset_ + n, alignment_) - prefetch_offset,

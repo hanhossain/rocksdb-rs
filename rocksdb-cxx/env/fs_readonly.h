@@ -16,7 +16,7 @@ namespace rocksdb {
 // guarantees.
 class ReadOnlyFileSystem : public FileSystemWrapper {
   static inline IOStatus FailReadOnly() {
-    IOStatus s = IOStatus::IOError("Attempted write to ReadOnlyFileSystem");
+    IOStatus s = IOStatus_IOError("Attempted write to ReadOnlyFileSystem");
     assert(s.GetRetryable() == false);
     return s;
   }

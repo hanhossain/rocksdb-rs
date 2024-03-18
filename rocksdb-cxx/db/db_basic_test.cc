@@ -4028,7 +4028,7 @@ class DeadlineRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
 
 class DeadlineFS : public FileSystemWrapper {
  public:
-  // The error_on_delay parameter specifies whether a IOStatus::TimedOut()
+  // The error_on_delay parameter specifies whether a IOStatus_TimedOut()
   // status should be returned after delaying the IO to exceed the timeout,
   // or to simply delay but return success anyway. The latter mimics the
   // behavior of PosixFileSystem, which does not enforce any timeout
@@ -4076,18 +4076,18 @@ class DeadlineFS : public FileSystemWrapper {
   // Increment the IO counter and return a delay in microseconds
   IOStatus ShouldDelay(const IOOptions& opts) {
     if (timedout_) {
-      return IOStatus::TimedOut();
+      return IOStatus_TimedOut();
     } else if (!deadline_.count() && !io_timeout_.count()) {
-      return IOStatus::OK();
+      return IOStatus_OK();
     }
     if (!ignore_deadline_ && delay_trigger_ == io_count_++) {
       env_->SleepForMicroseconds(static_cast<int>(opts.timeout.count() + 1));
       timedout_ = true;
       if (error_on_delay_) {
-        return IOStatus::TimedOut();
+        return IOStatus_TimedOut();
       }
     }
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   const std::chrono::microseconds GetDeadline() {
@@ -4137,7 +4137,7 @@ class DeadlineFS : public FileSystemWrapper {
   bool timedout_;
   // Temporarily ignore deadlines/timeouts
   bool ignore_deadline_;
-  // Return IOStatus::TimedOut() or IOStatus::OK()
+  // Return IOStatus_TimedOut() or IOStatus_OK()
   bool error_on_delay_;
 };
 

@@ -57,7 +57,7 @@ IOStatus CopyFile(FileSystem* fs, const std::string& source,
       return io_s;
     }
     if (slice.size() == 0) {
-      return IOStatus::Corruption("file too small");
+      return IOStatus_Corruption("file too small");
     }
     io_s = dest_writer->Append(slice);
     if (!io_s.ok()) {
@@ -139,7 +139,7 @@ IOStatus GenerateOneFileChecksum(
     std::shared_ptr<IOTracer>& io_tracer, RateLimiter* rate_limiter,
     Env::IOPriority rate_limiter_priority) {
   if (checksum_factory == nullptr) {
-    return IOStatus::InvalidArgument("Checksum factory is invalid");
+    return IOStatus_InvalidArgument("Checksum factory is invalid");
   }
   assert(file_checksum != nullptr);
   assert(file_checksum_func_name != nullptr);
@@ -155,7 +155,7 @@ IOStatus GenerateOneFileChecksum(
         "checksum function name: " +
         requested_checksum_func_name +
         " from checksum factory: " + checksum_factory->Name();
-    return IOStatus::InvalidArgument(msg);
+    return IOStatus_InvalidArgument(msg);
   } else {
     // For backward compatibility and use in file ingestion clients where there
     // is no stored checksum function name, `requested_checksum_func_name` can
@@ -168,7 +168,7 @@ IOStatus GenerateOneFileChecksum(
                         "', while the factory created one "
                         "named '" +
                         checksum_generator->Name() + "'";
-      return IOStatus::InvalidArgument(msg);
+      return IOStatus_InvalidArgument(msg);
     }
   }
 
@@ -212,11 +212,11 @@ IOStatus GenerateOneFileChecksum(
     io_s = reader->Read(opts, offset, bytes_to_read, &slice, buf.get(), nullptr,
                         rate_limiter_priority);
     if (!io_s.ok()) {
-      return IOStatus::Corruption("file read failed with error: " +
+      return IOStatus_Corruption("file read failed with error: " +
                                   io_s.ToString());
     }
     if (slice.size() == 0) {
-      return IOStatus::Corruption("file too small");
+      return IOStatus_Corruption("file too small");
     }
     checksum_generator->Update(slice.data(), slice.size());
     size -= slice.size();
@@ -227,7 +227,7 @@ IOStatus GenerateOneFileChecksum(
   checksum_generator->Finalize();
   *file_checksum = checksum_generator->GetChecksum();
   *file_checksum_func_name = checksum_generator->Name();
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {

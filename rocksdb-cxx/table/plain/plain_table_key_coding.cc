@@ -88,7 +88,7 @@ IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key,
   rocksdb_rs::status::Status pik_status =
       ParseInternalKey(key, &parsed_key, false /* log_err_key */);  // TODO
   if (!pik_status.ok()) {
-    return IOStatus::Corruption(*pik_status.getState());
+    return IOStatus_Corruption(*pik_status.getState());
   }
 
   Slice key_to_write = key;  // Portion of internal key to write out.
@@ -167,7 +167,7 @@ IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key,
     *offset += key_to_write.size();
   }
 
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 Slice PlainTableFileReader::GetFromBuffer(Buffer* buffer, uint32_t file_offset,

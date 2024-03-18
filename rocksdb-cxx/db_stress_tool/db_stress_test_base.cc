@@ -752,11 +752,11 @@ void StressTest::OperateDb(ThreadState* thread) {
   if (FLAGS_write_fault_one_in) {
     IOStatus error_msg;
     if (FLAGS_injest_error_severity <= 1 || FLAGS_injest_error_severity > 2) {
-      error_msg = IOStatus::IOError("Retryable IO Error");
+      error_msg = IOStatus_IOError("Retryable IO Error");
       error_msg.SetRetryable(true);
     } else if (FLAGS_injest_error_severity == 2) {
       // Ingest the fatal error
-      error_msg = IOStatus::IOError("Fatal IO Error");
+      error_msg = IOStatus_IOError("Fatal IO Error");
       error_msg.SetDataLoss(true);
     }
     std::vector<rocksdb_rs::types::FileType> types = {rocksdb_rs::types::FileType::kTableFile,
@@ -2655,7 +2655,7 @@ void StressTest::Open(SharedState* shared) {
           fault_fs_guard->EnableWriteErrorInjection();
           fault_fs_guard->SetRandomWriteError(
               static_cast<uint32_t>(FLAGS_seed), FLAGS_open_write_fault_one_in,
-              IOStatus::IOError("Injected Open Error"),
+              IOStatus_IOError("Injected Open Error"),
               /*inject_for_all_file_types=*/true, /*types=*/{});
         }
         if (ingest_read_error) {

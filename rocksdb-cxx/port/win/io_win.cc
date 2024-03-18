@@ -74,7 +74,7 @@ IOStatus pwrite(const WinFileData* file_data, const Slice& data,
   if (num_bytes > std::numeric_limits<DWORD>::max()) {
     // May happen in 64-bit builds where size_t is 64-bits but
     // long is still 32-bit, but that's the API here at the moment
-    return IOStatus::InvalidArgument(
+    return IOStatus_InvalidArgument(
         "num_bytes is too large for a single write: " + file_data->GetName());
   }
 
@@ -107,7 +107,7 @@ IOStatus pread(const WinFileData* file_data, char* src, size_t num_bytes,
   bytes_read = 0;
 
   if (num_bytes > std::numeric_limits<DWORD>::max()) {
-    return IOStatus::InvalidArgument(
+    return IOStatus_InvalidArgument(
         "num_bytes is too large for a single read: " + file_data->GetName());
   }
 
@@ -235,7 +235,7 @@ IOStatus WinMmapReadableFile::Read(uint64_t offset, size_t n,
 }
 
 IOStatus WinMmapReadableFile::InvalidateCache(size_t offset, size_t length) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 size_t WinMmapReadableFile::GetUniqueId(char* id, size_t max_size) const {
@@ -423,14 +423,14 @@ IOStatus WinMmapFile::Append(const Slice& data, const IOOptions& options,
     memset(dst_, 0, bytesToPad);
   }
 
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 // Means Close() will properly take care of truncate
 // and it does not need any additional information
 IOStatus WinMmapFile::Truncate(uint64_t size, const IOOptions& /*options*/,
                                IODebugContext* /*dbg*/) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WinMmapFile::Close(const IOOptions& options, IODebugContext* dbg) {
@@ -480,7 +480,7 @@ IOStatus WinMmapFile::Close(const IOOptions& options, IODebugContext* dbg) {
 
 IOStatus WinMmapFile::Flush(const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 // Flush only data
@@ -543,7 +543,7 @@ uint64_t WinMmapFile::GetFileSize(const IOOptions& /*options*/,
 }
 
 IOStatus WinMmapFile::InvalidateCache(size_t offset, size_t length) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WinMmapFile::Allocate(uint64_t offset, uint64_t len,
@@ -593,14 +593,14 @@ IOStatus WinSequentialFile::Read(size_t n, const IOOptions& /*opts*/,
 
   assert(result != nullptr);
   if (WinFileData::use_direct_io()) {
-    return IOStatus::NotSupported("Read() does not support direct_io");
+    return IOStatus_NotSupported("Read() does not support direct_io");
   }
 
   // Windows ReadFile API accepts a DWORD.
   // While it is possible to read in a loop if n is too big
   // it is an unlikely case.
   if (n > std::numeric_limits<DWORD>::max()) {
-    return IOStatus::InvalidArgument("n is too big for a single ReadFile: " +
+    return IOStatus_InvalidArgument("n is too big for a single ReadFile: " +
                                      filename_);
   }
 
@@ -632,7 +632,7 @@ IOStatus WinSequentialFile::PositionedRead(uint64_t offset, size_t n,
                                            Slice* result, char* scratch,
                                            IODebugContext* /*dbg*/) {
   if (!WinFileData::use_direct_io()) {
-    return IOStatus::NotSupported("This function is only used for direct_io");
+    return IOStatus_NotSupported("This function is only used for direct_io");
   }
 
   assert(IsSectorAligned(static_cast<size_t>(offset)));
@@ -649,7 +649,7 @@ IOStatus WinSequentialFile::Skip(uint64_t n) {
   // Can't handle more than signed max as SetFilePointerEx accepts a signed
   // 64-bit integer. As such it is a highly unlikley case to have n so large.
   if (n > static_cast<uint64_t>(std::numeric_limits<LONGLONG>::max())) {
-    return IOStatus::InvalidArgument(
+    return IOStatus_InvalidArgument(
         "n is too large for a single SetFilePointerEx() call" + filename_);
   }
 
@@ -662,11 +662,11 @@ IOStatus WinSequentialFile::Skip(uint64_t n) {
     return IOErrorFromWindowsError("Skip SetFilePointerEx():" + filename_,
                                    lastError);
   }
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WinSequentialFile::InvalidateCache(size_t offset, size_t length) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -696,7 +696,7 @@ inline IOStatus WinRandomAccessImpl::ReadImpl(uint64_t offset, size_t n,
 
   if (n == 0) {
     *result = Slice(scratch, 0);
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
 
   size_t bytes_read = 0;
@@ -724,7 +724,7 @@ IOStatus WinRandomAccessFile::Read(uint64_t offset, size_t n,
 }
 
 IOStatus WinRandomAccessFile::InvalidateCache(size_t offset, size_t length) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 size_t WinRandomAccessFile::GetUniqueId(char* id, size_t max_size) const {
@@ -771,7 +771,7 @@ inline IOStatus WinWritableImpl::AppendImpl(const Slice& data) {
   IOStatus s;
 
   if (data.size() > std::numeric_limits<DWORD>::max()) {
-    return IOStatus::InvalidArgument("data is too long for a single write" +
+    return IOStatus_InvalidArgument("data is too long for a single write" +
                                      file_data_->GetName());
   }
 
@@ -803,7 +803,7 @@ inline IOStatus WinWritableImpl::AppendImpl(const Slice& data) {
       // is sector aligned
       next_write_offset_ += bytes_written;
     } else {
-      s = IOStatus::IOError("Failed to write all bytes: " +
+      s = IOStatus_IOError("Failed to write all bytes: " +
                             file_data_->GetName());
     }
   }
@@ -831,7 +831,7 @@ inline IOStatus WinWritableImpl::PositionedAppendImpl(const Slice& data,
         next_write_offset_ = write_end;
       }
     } else {
-      s = IOStatus::IOError("Failed to write all of the requested data: " +
+      s = IOStatus_IOError("Failed to write all of the requested data: " +
                             file_data_->GetName());
     }
   }
@@ -959,7 +959,7 @@ IOStatus WinWritableFile::Close(const IOOptions& /*options*/,
 // This is now taken care of the WritableFileWriter
 IOStatus WinWritableFile::Flush(const IOOptions& /*options*/,
                                 IODebugContext* /*dbg*/) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WinWritableFile::Sync(const IOOptions& options, IODebugContext* dbg) {
@@ -1021,7 +1021,7 @@ IOStatus WinRandomRWFile::Read(uint64_t offset, size_t n,
 
 IOStatus WinRandomRWFile::Flush(const IOOptions& /*options*/,
                                 IODebugContext* /*dbg*/) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WinRandomRWFile::Sync(const IOOptions& options, IODebugContext* dbg) {
@@ -1064,12 +1064,12 @@ WinMemoryMappedBuffer::~WinMemoryMappedBuffer() {
 
 IOStatus WinDirectory::Fsync(const IOOptions& /*options*/,
                              IODebugContext* /*dbg*/) {
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 IOStatus WinDirectory::Close(const IOOptions& /*options*/,
                              IODebugContext* /*dbg*/) {
-  IOStatus s = IOStatus::OK();
+  IOStatus s = IOStatus_OK();
   BOOL ret __attribute__((__unused__));
   if (handle_ != INVALID_HANDLE_VALUE) {
     ret = ::CloseHandle(handle_);

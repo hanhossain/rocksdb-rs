@@ -112,7 +112,7 @@ class Directories {
 
   IOStatus Close(const IOOptions& options, IODebugContext* dbg) {
     // close all directories for all database paths
-    IOStatus s = IOStatus::OK();
+    IOStatus s = IOStatus_OK();
 
     // The default implementation for Close() in Directory/FSDirectory class
     // "NotSupported" status, the upper level interface should be able to

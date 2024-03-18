@@ -38,7 +38,7 @@ class MockRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
       prefetch_count_.fetch_add(1);
       return target()->Prefetch(offset, n, options, dbg);
     } else {
-      return IOStatus::NotSupported("Prefetch not supported");
+      return IOStatus_NotSupported("Prefetch not supported");
     }
   }
 

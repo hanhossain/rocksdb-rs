@@ -510,7 +510,7 @@ IOStatus RandomAccessFileReader::ReadAsync(
 // Suppress false positive clang analyzer warnings.
 // Memory is not released if file_->ReadAsync returns !s.ok(), because
 // ReadAsyncCallback is never called in that case. If ReadAsyncCallback is
-// called then ReadAsync should always return IOStatus::OK().
+// called then ReadAsync should always return IOStatus_OK().
 #ifndef __clang_analyzer__
   if (!s.ok()) {
     delete read_async_info;

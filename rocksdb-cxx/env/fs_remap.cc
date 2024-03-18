@@ -269,7 +269,7 @@ IOStatus RemapFileSystem::RenameFile(const std::string& src,
   if (!status_and_src_enc_path.first.ok()) {
     if (status_and_src_enc_path.first.IsNotFound()) {
       const IOStatus& s = status_and_src_enc_path.first;
-      status_and_src_enc_path.first = IOStatus::PathNotFound(s.ToString());
+      status_and_src_enc_path.first = IOStatus_PathNotFound(s.ToString());
     }
     return status_and_src_enc_path.first;
   }

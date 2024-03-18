@@ -1051,7 +1051,7 @@ IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
     // If file_checksum_gen_factory is not set, we are not able to generate
     // the checksum. if write_global_seqno is false, it means we will use
     // file checksum generated during Prepare(). This step will be skipped.
-    return IOStatus::OK();
+    return IOStatus_OK();
   }
   std::string file_checksum;
   std::string file_checksum_func_name;
@@ -1069,7 +1069,7 @@ IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
   }
   file_to_ingest->file_checksum = file_checksum;
   file_to_ingest->file_checksum_func_name = file_checksum_func_name;
-  return IOStatus::OK();
+  return IOStatus_OK();
 }
 
 bool ExternalSstFileIngestionJob::IngestedFileFitInLevel(

@@ -388,7 +388,7 @@ struct BlockBasedTableBuilder::Rep {
     // to false, and this is ensured by io_status_mutex, so no special memory
     // order for io_status_ok is required.
     if (io_status_ok.load(std::memory_order_relaxed)) {
-      return IOStatus::OK();
+      return IOStatus_OK();
     } else {
       return CopyIOStatus();
     }
