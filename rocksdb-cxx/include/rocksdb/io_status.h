@@ -48,7 +48,6 @@ class IOStatus {
 
   IOStatus(rocksdb_rs::io_status::IOStatus &&s) : oxidize_(std::move(s)) {}
 
-  // TODO: move to rust
   // Copy the specified status.
   IOStatus(const IOStatus &s);
 
@@ -138,18 +137,7 @@ inline IOStatus::IOStatus(rocksdb_rs::status::Code _code,
     : oxidize_(
           rocksdb_rs::io_status::IOStatus_new(_code, _subcode, msg, msg2)) {}
 
-// TODO: move to rust
-inline IOStatus::IOStatus(const IOStatus &s)
-    : oxidize_(
-          rocksdb_rs::io_status::IOStatus_new(rocksdb_rs::status::Status_new(
-              s.oxidize_.status_.code_, s.oxidize_.status_.subcode_,
-              s.oxidize_.status_.retryable, s.oxidize_.status_.data_loss,
-              s.oxidize_.status_.scope))) {
-  oxidize_.status_.state =
-      s.oxidize_.status_.state == nullptr
-          ? nullptr
-          : rocksdb_rs::status::Status_CopyState(*s.oxidize_.status_.state);
-}
+inline IOStatus::IOStatus(const IOStatus &s) : IOStatus(s.oxidize_.Clone()) {}
 
 // TODO: move to rust
 inline IOStatus &IOStatus::operator=(const IOStatus &s) {
