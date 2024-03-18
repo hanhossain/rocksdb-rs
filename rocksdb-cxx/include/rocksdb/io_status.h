@@ -51,12 +51,10 @@ class IOStatus {
   // Copy the specified status.
   IOStatus(const IOStatus &s);
 
-  // TODO: move to rust
   IOStatus &operator=(const IOStatus &s);
 
   IOStatus(IOStatus &&s) noexcept;
 
-  // TODO: move to rust
   IOStatus &operator=(IOStatus &&s) noexcept;
 
   bool operator==(const IOStatus &rhs) const;
@@ -138,20 +136,11 @@ inline IOStatus::IOStatus(rocksdb_rs::status::Code _code,
 
 inline IOStatus::IOStatus(const IOStatus &s) : IOStatus(s.oxidize_.Clone()) {}
 
-// TODO: move to rust
 inline IOStatus &IOStatus::operator=(const IOStatus &s) {
   // The following condition catches both aliasing (when this == &s),
   // and the common case where both s and *this are ok.
   if (this != &s) {
-    oxidize_.status_.code_ = s.oxidize_.status_.code_;
-    oxidize_.status_.subcode_ = s.oxidize_.status_.subcode_;
-    oxidize_.status_.retryable = s.oxidize_.status_.retryable;
-    oxidize_.status_.data_loss = s.oxidize_.status_.data_loss;
-    oxidize_.status_.scope = s.oxidize_.status_.scope;
-    oxidize_.status_.state =
-        s.oxidize_.status_.state == nullptr
-            ? nullptr
-            : rocksdb_rs::status::Status_CopyState(*s.oxidize_.status_.state);
+    oxidize_ = s.oxidize_.Clone();
   }
   return *this;
 }
@@ -160,19 +149,9 @@ inline IOStatus::IOStatus(IOStatus &&s) noexcept : IOStatus() {
   *this = std::move(s);
 }
 
-// TODO: move to rust
 inline IOStatus &IOStatus::operator=(IOStatus &&s) noexcept {
   if (this != &s) {
-    oxidize_.status_.code_ = s.oxidize_.status_.code_;
-    s.oxidize_.status_.code_ = rocksdb_rs::status::Code::kOk;
-    oxidize_.status_.subcode_ = s.oxidize_.status_.subcode_;
-    s.oxidize_.status_.subcode_ = rocksdb_rs::status::SubCode::kNone;
-    oxidize_.status_.retryable = s.oxidize_.status_.retryable;
-    oxidize_.status_.data_loss = s.oxidize_.status_.data_loss;
-    oxidize_.status_.scope = s.oxidize_.status_.scope;
-    s.oxidize_.status_.scope = static_cast<uint8_t>(
-        rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem);
-    oxidize_.status_.state = std::move(s.oxidize_.status_.state);
+    oxidize_ = std::move(s.oxidize_);
   }
   return *this;
 }
