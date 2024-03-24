@@ -20,27 +20,6 @@ using SequenceNumber = uint64_t;
 
 const SequenceNumber kMinUnCommittedSeq = 1;  // 0 is always committed
 
-enum class WriteStallCause {
-  // Beginning of CF-scope write stall causes
-  //
-  // Always keep `kMemtableLimit` as the first stat in this section
-  kMemtableLimit,
-  kL0FileCountLimit,
-  kPendingCompactionBytes,
-  kCFScopeWriteStallCauseEnumMax,
-  // End of CF-scope write stall causes
-
-  // Beginning of DB-scope write stall causes
-  //
-  // Always keep `kWriteBufferManagerLimit` as the first stat in this section
-  kWriteBufferManagerLimit,
-  kDBScopeWriteStallCauseEnumMax,
-  // End of DB-scope write stall causes
-
-  // Always add new WriteStallCause before `kNone`
-  kNone,
-};
-
 enum class WriteStallCondition {
   kDelayed,
   kStopped,

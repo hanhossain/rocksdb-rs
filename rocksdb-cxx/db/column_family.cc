@@ -864,42 +864,42 @@ int GetL0ThresholdSpeedupCompaction(int level0_file_num_compaction_trigger,
 }
 }  // anonymous namespace
 
-std::pair<WriteStallCondition, WriteStallCause>
+std::pair<WriteStallCondition, rocksdb_rs::types::WriteStallCause>
 ColumnFamilyData::GetWriteStallConditionAndCause(
     int num_unflushed_memtables, int num_l0_files,
     uint64_t num_compaction_needed_bytes,
     const MutableCFOptions& mutable_cf_options,
     const ImmutableCFOptions& immutable_cf_options) {
   if (num_unflushed_memtables >= mutable_cf_options.max_write_buffer_number) {
-    return {WriteStallCondition::kStopped, WriteStallCause::kMemtableLimit};
+    return {WriteStallCondition::kStopped, rocksdb_rs::types::WriteStallCause::kMemtableLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              num_l0_files >= mutable_cf_options.level0_stop_writes_trigger) {
-    return {WriteStallCondition::kStopped, WriteStallCause::kL0FileCountLimit};
+    return {WriteStallCondition::kStopped, rocksdb_rs::types::WriteStallCause::kL0FileCountLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.hard_pending_compaction_bytes_limit > 0 &&
              num_compaction_needed_bytes >=
                  mutable_cf_options.hard_pending_compaction_bytes_limit) {
     return {WriteStallCondition::kStopped,
-            WriteStallCause::kPendingCompactionBytes};
+            rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes};
   } else if (mutable_cf_options.max_write_buffer_number > 3 &&
              num_unflushed_memtables >=
                  mutable_cf_options.max_write_buffer_number - 1 &&
              num_unflushed_memtables - 1 >=
                  immutable_cf_options.min_write_buffer_number_to_merge) {
-    return {WriteStallCondition::kDelayed, WriteStallCause::kMemtableLimit};
+    return {WriteStallCondition::kDelayed, rocksdb_rs::types::WriteStallCause::kMemtableLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.level0_slowdown_writes_trigger >= 0 &&
              num_l0_files >=
                  mutable_cf_options.level0_slowdown_writes_trigger) {
-    return {WriteStallCondition::kDelayed, WriteStallCause::kL0FileCountLimit};
+    return {WriteStallCondition::kDelayed, rocksdb_rs::types::WriteStallCause::kL0FileCountLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.soft_pending_compaction_bytes_limit > 0 &&
              num_compaction_needed_bytes >=
                  mutable_cf_options.soft_pending_compaction_bytes_limit) {
     return {WriteStallCondition::kDelayed,
-            WriteStallCause::kPendingCompactionBytes};
+            rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes};
   }
-  return {WriteStallCondition::kNormal, WriteStallCause::kNone};
+  return {WriteStallCondition::kNormal, rocksdb_rs::types::WriteStallCause::kNone};
 }
 
 WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
@@ -922,7 +922,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
     bool needed_delay = write_controller->NeedsDelay();
 
     if (write_stall_condition == WriteStallCondition::kStopped &&
-        write_stall_cause == WriteStallCause::kMemtableLimit) {
+        write_stall_cause == rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
       write_controller_token_ = write_controller->GetStopToken();
       internal_stats_->AddCFStats(InternalStats::MEMTABLE_LIMIT_STOPS, 1);
       ROCKS_LOG_WARN(
@@ -932,7 +932,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
           name_.c_str(), imm()->NumNotFlushed(),
           mutable_cf_options.max_write_buffer_number);
     } else if (write_stall_condition == WriteStallCondition::kStopped &&
-               write_stall_cause == WriteStallCause::kL0FileCountLimit) {
+               write_stall_cause == rocksdb_rs::types::WriteStallCause::kL0FileCountLimit) {
       write_controller_token_ = write_controller->GetStopToken();
       internal_stats_->AddCFStats(InternalStats::L0_FILE_COUNT_LIMIT_STOPS, 1);
       if (compaction_picker_->IsLevel0CompactionInProgress()) {
@@ -944,7 +944,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
                      "[%s] Stopping writes because we have %d level-0 files",
                      name_.c_str(), vstorage->l0_delay_trigger_count());
     } else if (write_stall_condition == WriteStallCondition::kStopped &&
-               write_stall_cause == WriteStallCause::kPendingCompactionBytes) {
+               write_stall_cause == rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes) {
       write_controller_token_ = write_controller->GetStopToken();
       internal_stats_->AddCFStats(
           InternalStats::PENDING_COMPACTION_BYTES_LIMIT_STOPS, 1);
@@ -954,7 +954,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
           "bytes %" PRIu64,
           name_.c_str(), compaction_needed_bytes);
     } else if (write_stall_condition == WriteStallCondition::kDelayed &&
-               write_stall_cause == WriteStallCause::kMemtableLimit) {
+               write_stall_cause == rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
       write_controller_token_ =
           SetupDelay(write_controller, compaction_needed_bytes,
                      prev_compaction_needed_bytes_, was_stopped,
@@ -969,7 +969,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
           mutable_cf_options.max_write_buffer_number,
           write_controller->delayed_write_rate());
     } else if (write_stall_condition == WriteStallCondition::kDelayed &&
-               write_stall_cause == WriteStallCause::kL0FileCountLimit) {
+               write_stall_cause == rocksdb_rs::types::WriteStallCause::kL0FileCountLimit) {
       // L0 is the last two files from stopping.
       bool near_stop = vstorage->l0_delay_trigger_count() >=
                        mutable_cf_options.level0_stop_writes_trigger - 2;
@@ -989,7 +989,7 @@ WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
                      name_.c_str(), vstorage->l0_delay_trigger_count(),
                      write_controller->delayed_write_rate());
     } else if (write_stall_condition == WriteStallCondition::kDelayed &&
-               write_stall_cause == WriteStallCause::kPendingCompactionBytes) {
+               write_stall_cause == rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes) {
       // If the distance to hard limit is less than 1/4 of the gap between soft
       // and
       // hard bytes limit, we think it is near stop and speed up the slowdown.
