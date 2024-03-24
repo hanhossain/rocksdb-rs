@@ -578,8 +578,8 @@ rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::ReopenWritableFile(
   }
 
   bool exists;
-  rocksdb_rs::io_status::IOStatus io_s,
-      exists_s = target()->FileExists(fname, IOOptions(), nullptr /* dbg */);
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();;
+  rocksdb_rs::io_status::IOStatus exists_s = target()->FileExists(fname, IOOptions(), nullptr /* dbg */);
   if (exists_s.IsNotFound()) {
     exists = false;
   } else if (exists_s.ok()) {
