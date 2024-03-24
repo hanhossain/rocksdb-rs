@@ -1193,7 +1193,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::Initialize() {
       }
       if (io_s.IsCorruption() || io_s.IsNotSupported()) {
         ROCKS_LOG_INFO(options_.info_log, "Backup %u corrupted -- %s",
-                       backup_iter->first, io_s.ToString().c_str());
+                       backup_iter->first, io_s.ToString()->c_str());
         corrupt_backups_.insert(std::make_pair(
             backup_iter->first,
             std::make_pair(io_s, std::move(backup_iter->second))));
@@ -1632,7 +1632,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
     backup_statistics_.IncrementNumberFailBackup();
     // clean all the files we might have created
     ROCKS_LOG_INFO(options_.info_log, "Backup failed -- %s",
-                   io_s.ToString().c_str());
+                   io_s.ToString()->c_str());
     ROCKS_LOG_INFO(options_.info_log, "Backup Statistics %s\n",
                    backup_statistics_.ToString().c_str());
     // delete files that we might have already written
@@ -1737,7 +1737,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::DeleteBackupNoGC(BackupID back
       rocksdb_rs::io_status::IOStatus io_s = backup_fs_->DeleteFile(GetAbsolutePath(itr.first),
                                              io_options_, nullptr);
       ROCKS_LOG_INFO(options_.info_log, "Deleting %s -- %s", itr.first.c_str(),
-                     io_s.ToString().c_str());
+                     io_s.ToString()->c_str());
       to_delete.push_back(itr.first);
       if (!io_s.ok()) {
         // Trying again later might work
@@ -1755,7 +1755,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::DeleteBackupNoGC(BackupID back
   rocksdb_rs::io_status::IOStatus io_s =
       backup_fs_->DeleteDir(GetAbsolutePath(private_dir), io_options_, nullptr);
   ROCKS_LOG_INFO(options_.info_log, "Deleting private dir %s -- %s",
-                 private_dir.c_str(), io_s.ToString().c_str());
+                 private_dir.c_str(), io_s.ToString()->c_str());
   if (!io_s.ok()) {
     // Full gc or trying again later might work
     might_need_garbage_collect_ = true;
@@ -2055,7 +2055,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::RestoreDBFromBackup(
   }
 
   ROCKS_LOG_INFO(options_.info_log, "Restoring done -- %s\n",
-                 io_s.ToString().c_str());
+                 io_s.ToString()->c_str());
   return io_s;
 }
 
@@ -2723,7 +2723,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::GarbageCollect() {
         rocksdb_rs::io_status::IOStatus io_s = backup_fs_->DeleteFile(GetAbsolutePath(rel_fname),
                                                io_options_, nullptr);
         ROCKS_LOG_INFO(options_.info_log, "Deleting %s -- %s",
-                       rel_fname.c_str(), io_s.ToString().c_str());
+                       rel_fname.c_str(), io_s.ToString()->c_str());
         backuped_file_infos_.erase(rel_fname);
         if (!io_s.ok()) {
           // Trying again later might work
@@ -2766,7 +2766,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::GarbageCollect() {
                                                io_options_, nullptr);
         ROCKS_LOG_INFO(options_.info_log, "Deleting %s -- %s",
                        (full_private_path + subchild).c_str(),
-                       io_s.ToString().c_str());
+                       io_s.ToString()->c_str());
         if (!io_s.ok()) {
           // Trying again later might work
           might_need_garbage_collect_ = true;
@@ -2777,7 +2777,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::GarbageCollect() {
     rocksdb_rs::io_status::IOStatus io_s =
         backup_fs_->DeleteDir(full_private_path, io_options_, nullptr);
     ROCKS_LOG_INFO(options_.info_log, "Deleting dir %s -- %s",
-                   full_private_path.c_str(), io_s.ToString().c_str());
+                   full_private_path.c_str(), io_s.ToString()->c_str());
     if (!io_s.ok()) {
       // Trying again later might work
       might_need_garbage_collect_ = true;

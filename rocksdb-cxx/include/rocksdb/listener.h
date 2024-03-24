@@ -308,6 +308,12 @@ namespace rocksdb {
         start_ts(_start_ts.first),
         status(_status.Clone()) {
     }
+    FileOperationInfo(const FileOperationType _type, const std::string &_path,
+                      const StartTimePoint &_start_ts,
+                      const FinishTimePoint &_finish_ts, const rocksdb_rs::io_status::IOStatus &_status,
+                      const Temperature _temperature = Temperature::kUnknown)
+    : FileOperationInfo(_type, _path, _start_ts, _finish_ts, _status.status(), _temperature) {}
+
 
     static StartTimePoint StartNow() {
       return std::make_pair<SystemTimePoint, SteadyTimePoint>(

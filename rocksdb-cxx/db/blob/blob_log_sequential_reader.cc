@@ -31,7 +31,7 @@ rocksdb_rs::status::Status BlobLogSequentialReader::ReadSlice(uint64_t size, Sli
   // TODO: rate limit `BlobLogSequentialReader` reads (it appears unused?)
   rocksdb_rs::status::Status s =
       file_->Read(IOOptions(), next_byte_, static_cast<size_t>(size), slice,
-                  buf, nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+                  buf, nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
   next_byte_ += size;
   if (!s.ok()) {
     return s;
