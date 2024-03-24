@@ -32,7 +32,7 @@ class BlobFileCompletionCallback {
   void OnBlobFileCreationStarted(const std::string& file_name,
                                  const std::string& column_family_name,
                                  int job_id,
-                                 BlobFileCreationReason creation_reason) {
+                                 rocksdb_rs::types::BlobFileCreationReason creation_reason) {
     // Notify the listeners.
     EventHelpers::NotifyBlobFileCreationStarted(listeners_, dbname_,
                                                 column_family_name, file_name,
@@ -42,7 +42,7 @@ class BlobFileCompletionCallback {
   rocksdb_rs::status::Status OnBlobFileCompleted(const std::string& file_name,
                              const std::string& column_family_name, int job_id,
                              uint64_t file_number,
-                             BlobFileCreationReason creation_reason,
+                             rocksdb_rs::types::BlobFileCreationReason creation_reason,
                              const rocksdb_rs::status::Status& report_status,
                              const std::string& checksum_value,
                              const std::string& checksum_method,

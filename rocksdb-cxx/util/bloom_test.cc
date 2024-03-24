@@ -1099,10 +1099,10 @@ static void SetTestingLevel(int levelish, FilterBuildingContext* ctx) {
   if (levelish == -1) {
     // Flush is treated as level -1 for this option but actually level 0
     ctx->level_at_creation = 0;
-    ctx->reason = TableFileCreationReason::kFlush;
+    ctx->reason = rocksdb_rs::types::TableFileCreationReason::kFlush;
   } else {
     ctx->level_at_creation = levelish;
-    ctx->reason = TableFileCreationReason::kCompaction;
+    ctx->reason = rocksdb_rs::types::TableFileCreationReason::kCompaction;
   }
 }
 
@@ -1151,7 +1151,7 @@ TEST(RibbonTest, RibbonTestLevelThreshold) {
 
         // Like SST file writer
         ctx.level_at_creation = -1;
-        ctx.reason = TableFileCreationReason::kMisc;
+        ctx.reason = rocksdb_rs::types::TableFileCreationReason::kMisc;
 
         builder.reset(policy->GetBuilderWithContext(ctx));
 

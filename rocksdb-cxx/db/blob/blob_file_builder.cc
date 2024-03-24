@@ -40,7 +40,7 @@ BlobFileBuilder::BlobFileBuilder(
     Env::IOPriority io_priority, Env::WriteLifeTimeHint write_hint,
     const std::shared_ptr<IOTracer>& io_tracer,
     BlobFileCompletionCallback* blob_callback,
-    BlobFileCreationReason creation_reason,
+    rocksdb_rs::types::BlobFileCreationReason creation_reason,
     std::vector<std::string>* blob_file_paths,
     std::vector<BlobFileAddition>* blob_file_additions)
     : BlobFileBuilder([versions]() { return versions->NewFileNumber(); }, fs,
@@ -59,7 +59,7 @@ BlobFileBuilder::BlobFileBuilder(
     Env::IOPriority io_priority, Env::WriteLifeTimeHint write_hint,
     const std::shared_ptr<IOTracer>& io_tracer,
     BlobFileCompletionCallback* blob_callback,
-    BlobFileCreationReason creation_reason,
+    rocksdb_rs::types::BlobFileCreationReason creation_reason,
     std::vector<std::string>* blob_file_paths,
     std::vector<BlobFileAddition>* blob_file_additions)
     : file_number_generator_(std::move(file_number_generator)),
@@ -399,7 +399,7 @@ rocksdb_rs::status::Status BlobFileBuilder::PutBlobIntoCacheIfNeeded(const Slice
   auto statistics = immutable_options_->statistics.get();
   bool warm_cache =
       prepopulate_blob_cache_ == PrepopulateBlobCache::kFlushOnly &&
-      creation_reason_ == BlobFileCreationReason::kFlush;
+      creation_reason_ == rocksdb_rs::types::BlobFileCreationReason::kFlush;
 
   if (blob_cache && warm_cache) {
     const OffsetableCacheKey base_cache_key(db_id_, db_session_id_,

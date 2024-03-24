@@ -1958,7 +1958,7 @@ struct WriteStallStatsMapKeys {
   //
   // REQUIRES:
   // `condition` isn't any of these: `WriteStallCondition::kNormal`
-  static std::string CauseConditionCount(WriteStallCause cause,
+  static std::string CauseConditionCount(rocksdb_rs::types::WriteStallCause cause,
                                          WriteStallCondition condition);
 };
 

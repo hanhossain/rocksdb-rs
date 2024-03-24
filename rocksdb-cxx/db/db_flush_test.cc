@@ -1457,10 +1457,10 @@ class ConditionalUpdateFilterFactory : public CompactionFilterFactory {
   const char* Name() const override { return "ConditionalUpdateFilterFactory"; }
 
   bool ShouldFilterTableFileCreation(
-      TableFileCreationReason reason) const override {
+      rocksdb_rs::types::TableFileCreationReason reason) const override {
     // This compaction filter will be invoked
     // at flush time (and therefore at MemPurge time).
-    return (reason == TableFileCreationReason::kFlush);
+    return (reason == rocksdb_rs::types::TableFileCreationReason::kFlush);
   }
 
  private:

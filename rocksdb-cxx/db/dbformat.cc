@@ -30,26 +30,26 @@ const ValueType kValueTypeForSeek = kTypeWideColumnEntity;
 const ValueType kValueTypeForSeekForPrev = kTypeDeletion;
 const std::string kDisableUserTimestamp("");
 
-EntryType GetEntryType(ValueType value_type) {
+rocksdb_rs::types::EntryType GetEntryType(ValueType value_type) {
   switch (value_type) {
     case kTypeValue:
-      return kEntryPut;
+      return rocksdb_rs::types::EntryType::kEntryPut;
     case kTypeDeletion:
-      return kEntryDelete;
+      return rocksdb_rs::types::EntryType::kEntryDelete;
     case kTypeDeletionWithTimestamp:
-      return kEntryDeleteWithTimestamp;
+      return rocksdb_rs::types::EntryType::kEntryDeleteWithTimestamp;
     case kTypeSingleDeletion:
-      return kEntrySingleDelete;
+      return rocksdb_rs::types::EntryType::kEntrySingleDelete;
     case kTypeMerge:
-      return kEntryMerge;
+      return rocksdb_rs::types::EntryType::kEntryMerge;
     case kTypeRangeDeletion:
-      return kEntryRangeDeletion;
+      return rocksdb_rs::types::EntryType::kEntryRangeDeletion;
     case kTypeBlobIndex:
-      return kEntryBlobIndex;
+      return rocksdb_rs::types::EntryType::kEntryBlobIndex;
     case kTypeWideColumnEntity:
-      return kEntryWideColumnEntity;
+      return rocksdb_rs::types::EntryType::kEntryWideColumnEntity;
     default:
-      return kEntryOther;
+      return rocksdb_rs::types::EntryType::kEntryOther;
   }
 }
 

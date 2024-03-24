@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "rocksdb/slice.h"
+#include "rocksdb-rs/src/types.rs.h"
 
 namespace rocksdb {
 
@@ -19,54 +19,6 @@ using ColumnFamilyId = uint32_t;
 using SequenceNumber = uint64_t;
 
 const SequenceNumber kMinUnCommittedSeq = 1;  // 0 is always committed
-
-enum class TableFileCreationReason {
-  kFlush,
-  kCompaction,
-  kRecovery,
-  kMisc,
-};
-
-enum class BlobFileCreationReason {
-  kFlush,
-  kCompaction,
-  kRecovery,
-};
-
-// User-oriented representation of internal key types.
-// Ordering of this enum entries should not change.
-enum EntryType {
-  kEntryPut,
-  kEntryDelete,
-  kEntrySingleDelete,
-  kEntryMerge,
-  kEntryRangeDeletion,
-  kEntryBlobIndex,
-  kEntryDeleteWithTimestamp,
-  kEntryWideColumnEntity,
-  kEntryOther,
-};
-
-enum class WriteStallCause {
-  // Beginning of CF-scope write stall causes
-  //
-  // Always keep `kMemtableLimit` as the first stat in this section
-  kMemtableLimit,
-  kL0FileCountLimit,
-  kPendingCompactionBytes,
-  kCFScopeWriteStallCauseEnumMax,
-  // End of CF-scope write stall causes
-
-  // Beginning of DB-scope write stall causes
-  //
-  // Always keep `kWriteBufferManagerLimit` as the first stat in this section
-  kWriteBufferManagerLimit,
-  kDBScopeWriteStallCauseEnumMax,
-  // End of DB-scope write stall causes
-
-  // Always add new WriteStallCause before `kNone`
-  kNone,
-};
 
 enum class WriteStallCondition {
   kDelayed,

@@ -1634,12 +1634,12 @@ class LevelAndStyleCustomFilterPolicy : public FilterPolicy {
   const std::unique_ptr<const FilterPolicy> policy_otherwise_;
 };
 
-static std::map<TableFileCreationReason, std::string>
+static std::map<rocksdb_rs::types::TableFileCreationReason, std::string>
     table_file_creation_reason_to_string{
-        {TableFileCreationReason::kCompaction, "kCompaction"},
-        {TableFileCreationReason::kFlush, "kFlush"},
-        {TableFileCreationReason::kMisc, "kMisc"},
-        {TableFileCreationReason::kRecovery, "kRecovery"},
+        {rocksdb_rs::types::TableFileCreationReason::kCompaction, "kCompaction"},
+        {rocksdb_rs::types::TableFileCreationReason::kFlush, "kFlush"},
+        {rocksdb_rs::types::TableFileCreationReason::kMisc, "kMisc"},
+        {rocksdb_rs::types::TableFileCreationReason::kRecovery, "kRecovery"},
     };
 
 class TestingContextCustomFilterPolicy
