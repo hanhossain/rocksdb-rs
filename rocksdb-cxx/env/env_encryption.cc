@@ -15,7 +15,7 @@
 #include "env/env_encryption_ctr.h"
 #include "monitoring/perf_context_imp.h"
 #include "rocksdb/convenience.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/system_clock.h"
 #include "rocksdb/utilities/customizable_util.h"
 #include "rocksdb/utilities/options_type.h"

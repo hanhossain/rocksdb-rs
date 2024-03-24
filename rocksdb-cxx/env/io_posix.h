@@ -22,7 +22,7 @@
 #include "port/port.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "test_util/sync_point.h"
 #include "util/mutexlock.h"
 #include "util/thread_local.h"

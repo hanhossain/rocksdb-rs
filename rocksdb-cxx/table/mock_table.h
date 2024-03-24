@@ -15,7 +15,7 @@
 #include "db/version_edit.h"
 #include "port/port.h"
 #include "rocksdb/comparator.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/table.h"
 #include "table/internal_iterator.h"
 #include "table/table_builder.h"

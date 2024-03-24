@@ -16,7 +16,7 @@
 #include "port/port.h"
 #include "rocksdb/file_checksum.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/listener.h"
 #include "rocksdb/rate_limiter.h"
 #include "test_util/sync_point.h"

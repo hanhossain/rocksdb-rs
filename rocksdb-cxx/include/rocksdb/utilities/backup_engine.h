@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "rocksdb/env.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/metadata.h"
 #include "rocksdb/options.h"
 

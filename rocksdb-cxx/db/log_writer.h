@@ -15,7 +15,7 @@
 
 #include "db/log_format.h"
 #include "rocksdb/env.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/slice.h"
 #include "util/compression.h"
 #include "util/hash_containers.h"

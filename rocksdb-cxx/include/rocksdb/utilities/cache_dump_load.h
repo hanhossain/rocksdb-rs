@@ -10,7 +10,7 @@
 #include "rocksdb/cache.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/secondary_cache.h"
 #include "rocksdb/table.h"
 

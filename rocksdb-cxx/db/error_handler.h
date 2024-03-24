@@ -6,7 +6,7 @@
 
 #include "monitoring/instrumented_mutex.h"
 #include "options/db_options.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/listener.h"
 
 #include "rocksdb-rs/src/env.rs.h"

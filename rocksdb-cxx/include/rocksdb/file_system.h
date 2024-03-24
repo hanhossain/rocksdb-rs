@@ -30,7 +30,7 @@
 
 #include "rocksdb/customizable.h"
 #include "rocksdb/env.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/options.h"
 #include "rocksdb/table.h"
 #include "rocksdb/thread_status.h"

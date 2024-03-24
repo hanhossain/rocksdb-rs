@@ -13,7 +13,7 @@
 
 #include "file/writable_file_writer.h"
 #include "rocksdb/env.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "util/coding.h"
 #include "util/crc32c.h"
 #include "util/udt_util.h"

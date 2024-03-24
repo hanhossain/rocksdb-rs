@@ -15,7 +15,7 @@
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/compaction_job_stats.h"
 #include "rocksdb/customizable.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/table_properties.h"
 #include "rocksdb/types.h"
 

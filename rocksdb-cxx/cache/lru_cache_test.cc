@@ -17,7 +17,7 @@
 #include "port/port.h"
 #include "port/stack_trace.h"
 #include "rocksdb/cache.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/sst_file_manager.h"
 #include "rocksdb/utilities/cache_dump_load.h"
 #include "test_util/secondary_cache_test_util.h"

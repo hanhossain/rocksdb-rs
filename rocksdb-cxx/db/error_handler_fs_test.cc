@@ -10,7 +10,7 @@
 #include "db/db_test_util.h"
 #include "file/sst_file_manager_impl.h"
 #include "port/stack_trace.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/sst_file_manager.h"
 #include "test_util/sync_point.h"
 #include "util/random.h"

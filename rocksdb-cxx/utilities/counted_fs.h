@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 
 namespace rocksdb {
 class Logger;
