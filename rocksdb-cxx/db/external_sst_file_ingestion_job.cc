@@ -217,7 +217,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
         std::string requested_checksum_func_name;
         // TODO: rate limit file reads for checksum calculation during file
         // ingestion.
-        IOStatus io_s = GenerateOneFileChecksum(
+        rocksdb_rs::io_status::IOStatus io_s = GenerateOneFileChecksum(
             fs_.get(), files_to_ingest_[i].internal_file_path,
             db_options_.file_checksum_gen_factory.get(),
             requested_checksum_func_name, &generated_checksum,
@@ -1043,7 +1043,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForInge
   return rocksdb_rs::status::Status_OK();
 }
 
-IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
+rocksdb_rs::io_status::IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
     IngestedFileInfo* file_to_ingest) {
   if (db_options_.file_checksum_gen_factory == nullptr ||
       need_generate_file_checksum_ == false ||
@@ -1057,7 +1057,7 @@ IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
   std::string file_checksum_func_name;
   std::string requested_checksum_func_name;
   // TODO: rate limit file reads for checksum calculation during file ingestion.
-  IOStatus io_s = GenerateOneFileChecksum(
+  rocksdb_rs::io_status::IOStatus io_s = GenerateOneFileChecksum(
       fs_.get(), file_to_ingest->internal_file_path,
       db_options_.file_checksum_gen_factory.get(), requested_checksum_func_name,
       &file_checksum, &file_checksum_func_name,

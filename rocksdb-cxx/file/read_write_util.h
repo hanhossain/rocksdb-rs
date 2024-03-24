@@ -21,7 +21,7 @@ namespace rocksdb {
 // fname   : the file name.
 // result  : output arg. A WritableFile based on `fname` returned.
 // options : the Env Options.
-extern IOStatus NewWritableFile(FileSystem* fs, const std::string& fname,
+extern rocksdb_rs::io_status::IOStatus NewWritableFile(FileSystem* fs, const std::string& fname,
                                 std::unique_ptr<FSWritableFile>* result,
                                 const FileOptions& options);
 

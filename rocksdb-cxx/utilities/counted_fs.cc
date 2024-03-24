@@ -23,17 +23,17 @@ class CountedSequentialFile : public FSSequentialFileOwnerWrapper {
 
   ~CountedSequentialFile() override { fs_->counters()->closes++; }
 
-  IOStatus Read(size_t n, const IOOptions& options, Slice* result,
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
                 char* scratch, IODebugContext* dbg) override {
-    IOStatus rv = target()->Read(n, options, result, scratch, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->Read(n, options, result, scratch, dbg);
     fs_->counters()->reads.RecordOp(rv, result->size());
     return rv;
   }
 
-  IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
                           Slice* result, char* scratch,
                           IODebugContext* dbg) override {
-    IOStatus rv =
+    rocksdb_rs::io_status::IOStatus rv =
         target()->PositionedRead(offset, n, options, result, scratch, dbg);
     fs_->counters()->reads.RecordOp(rv, result->size());
     return rv;
@@ -51,17 +51,17 @@ class CountedRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
 
   ~CountedRandomAccessFile() override { fs_->counters()->closes++; }
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override {
-    IOStatus rv = target()->Read(offset, n, options, result, scratch, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->Read(offset, n, options, result, scratch, dbg);
     fs_->counters()->reads.RecordOp(rv, result->size());
     return rv;
   }
 
-  IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
                      const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->MultiRead(reqs, num_reqs, options, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->MultiRead(reqs, num_reqs, options, dbg);
     for (size_t r = 0; r < num_reqs; r++) {
       fs_->counters()->reads.RecordOp(reqs[r].status, reqs[r].result.size());
     }
@@ -78,73 +78,73 @@ class CountedWritableFile : public FSWritableFileOwnerWrapper {
                       CountedFileSystem* fs)
       : FSWritableFileOwnerWrapper(std::move(f)), fs_(fs) {}
 
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   IODebugContext* dbg) override {
-    IOStatus rv = target()->Append(data, options, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->Append(data, options, dbg);
     fs_->counters()->writes.RecordOp(rv, data.size());
     return rv;
   }
 
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   const DataVerificationInfo& info,
                   IODebugContext* dbg) override {
-    IOStatus rv = target()->Append(data, options, info, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->Append(data, options, info, dbg);
     fs_->counters()->writes.RecordOp(rv, data.size());
     return rv;
   }
 
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override {
-    IOStatus rv = target()->PositionedAppend(data, offset, options, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->PositionedAppend(data, offset, options, dbg);
     fs_->counters()->writes.RecordOp(rv, data.size());
     return rv;
   }
 
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             const DataVerificationInfo& info,
                             IODebugContext* dbg) override {
-    IOStatus rv = target()->PositionedAppend(data, offset, options, info, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->PositionedAppend(data, offset, options, info, dbg);
     fs_->counters()->writes.RecordOp(rv, data.size());
     return rv;
   }
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Close(options, dbg);
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Close(options, dbg);
     if (rv.ok()) {
       fs_->counters()->closes++;
     }
     return rv;
   }
 
-  IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Flush(options, dbg);
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Flush(options, dbg);
     if (rv.ok()) {
       fs_->counters()->flushes++;
     }
     return rv;
   }
 
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Sync(options, dbg);
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Sync(options, dbg);
     if (rv.ok()) {
       fs_->counters()->syncs++;
     }
     return rv;
   }
 
-  IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Fsync(options, dbg);
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Fsync(options, dbg);
     if (rv.ok()) {
       fs_->counters()->fsyncs++;
     }
     return rv;
   }
 
-  IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
                      IODebugContext* dbg) override {
-    IOStatus rv = target()->RangeSync(offset, nbytes, options, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->RangeSync(offset, nbytes, options, dbg);
     if (rv.ok()) {
       fs_->counters()->syncs++;
     }
@@ -160,47 +160,47 @@ class CountedRandomRWFile : public FSRandomRWFileOwnerWrapper {
   CountedRandomRWFile(std::unique_ptr<FSRandomRWFile>&& f,
                       CountedFileSystem* fs)
       : FSRandomRWFileOwnerWrapper(std::move(f)), fs_(fs) {}
-  IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
                  IODebugContext* dbg) override {
-    IOStatus rv = target()->Write(offset, data, options, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->Write(offset, data, options, dbg);
     fs_->counters()->writes.RecordOp(rv, data.size());
     return rv;
   }
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override {
-    IOStatus rv = target()->Read(offset, n, options, result, scratch, dbg);
+    rocksdb_rs::io_status::IOStatus rv = target()->Read(offset, n, options, result, scratch, dbg);
     fs_->counters()->reads.RecordOp(rv, result->size());
     return rv;
   }
 
-  IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Flush(options, dbg);
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Flush(options, dbg);
     if (rv.ok()) {
       fs_->counters()->flushes++;
     }
     return rv;
   }
 
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Sync(options, dbg);
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Sync(options, dbg);
     if (rv.ok()) {
       fs_->counters()->syncs++;
     }
     return rv;
   }
 
-  IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Fsync(options, dbg);
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Fsync(options, dbg);
     if (rv.ok()) {
       fs_->counters()->fsyncs++;
     }
     return rv;
   }
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = target()->Close(options, dbg);
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = target()->Close(options, dbg);
     if (rv.ok()) {
       fs_->counters()->closes++;
     }
@@ -217,16 +217,16 @@ class CountedDirectory : public FSDirectoryWrapper {
   CountedDirectory(std::unique_ptr<FSDirectory>&& f, CountedFileSystem* fs)
       : FSDirectoryWrapper(std::move(f)), fs_(fs) {}
 
-  IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = FSDirectoryWrapper::Fsync(options, dbg);
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = FSDirectoryWrapper::Fsync(options, dbg);
     if (rv.ok()) {
       fs_->counters()->dsyncs++;
     }
     return rv;
   }
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus rv = FSDirectoryWrapper::Close(options, dbg);
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus rv = FSDirectoryWrapper::Close(options, dbg);
     if (rv.ok()) {
       fs_->counters()->closes++;
       fs_->counters()->dir_closes++;
@@ -235,9 +235,9 @@ class CountedDirectory : public FSDirectoryWrapper {
     return rv;
   }
 
-  IOStatus FsyncWithDirOptions(const IOOptions& options, IODebugContext* dbg,
+  rocksdb_rs::io_status::IOStatus FsyncWithDirOptions(const IOOptions& options, IODebugContext* dbg,
                                const DirFsyncOptions& dir_options) override {
-    IOStatus rv =
+    rocksdb_rs::io_status::IOStatus rv =
         FSDirectoryWrapper::FsyncWithDirOptions(options, dbg, dir_options);
     if (rv.ok()) {
       fs_->counters()->dsyncs++;
@@ -287,11 +287,11 @@ std::string FileOpCounters::PrintCounters() const {
 CountedFileSystem::CountedFileSystem(const std::shared_ptr<FileSystem>& base)
     : FileSystemWrapper(base) {}
 
-IOStatus CountedFileSystem::NewSequentialFile(
+rocksdb_rs::io_status::IOStatus CountedFileSystem::NewSequentialFile(
     const std::string& f, const FileOptions& options,
     std::unique_ptr<FSSequentialFile>* r, IODebugContext* dbg) {
   std::unique_ptr<FSSequentialFile> base;
-  IOStatus s = target()->NewSequentialFile(f, options, &base, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewSequentialFile(f, options, &base, dbg);
   if (s.ok()) {
     counters_.opens++;
     r->reset(new CountedSequentialFile(std::move(base), this));
@@ -299,11 +299,11 @@ IOStatus CountedFileSystem::NewSequentialFile(
   return s;
 }
 
-IOStatus CountedFileSystem::NewRandomAccessFile(
+rocksdb_rs::io_status::IOStatus CountedFileSystem::NewRandomAccessFile(
     const std::string& f, const FileOptions& options,
     std::unique_ptr<FSRandomAccessFile>* r, IODebugContext* dbg) {
   std::unique_ptr<FSRandomAccessFile> base;
-  IOStatus s = target()->NewRandomAccessFile(f, options, &base, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(f, options, &base, dbg);
   if (s.ok()) {
     counters_.opens++;
     r->reset(new CountedRandomAccessFile(std::move(base), this));
@@ -311,12 +311,12 @@ IOStatus CountedFileSystem::NewRandomAccessFile(
   return s;
 }
 
-IOStatus CountedFileSystem::NewWritableFile(const std::string& f,
+rocksdb_rs::io_status::IOStatus CountedFileSystem::NewWritableFile(const std::string& f,
                                             const FileOptions& options,
                                             std::unique_ptr<FSWritableFile>* r,
                                             IODebugContext* dbg) {
   std::unique_ptr<FSWritableFile> base;
-  IOStatus s = target()->NewWritableFile(f, options, &base, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewWritableFile(f, options, &base, dbg);
   if (s.ok()) {
     counters_.opens++;
     r->reset(new CountedWritableFile(std::move(base), this));
@@ -324,11 +324,11 @@ IOStatus CountedFileSystem::NewWritableFile(const std::string& f,
   return s;
 }
 
-IOStatus CountedFileSystem::ReopenWritableFile(
+rocksdb_rs::io_status::IOStatus CountedFileSystem::ReopenWritableFile(
     const std::string& fname, const FileOptions& options,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) {
   std::unique_ptr<FSWritableFile> base;
-  IOStatus s = target()->ReopenWritableFile(fname, options, &base, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->ReopenWritableFile(fname, options, &base, dbg);
   if (s.ok()) {
     counters_.opens++;
     result->reset(new CountedWritableFile(std::move(base), this));
@@ -336,12 +336,12 @@ IOStatus CountedFileSystem::ReopenWritableFile(
   return s;
 }
 
-IOStatus CountedFileSystem::ReuseWritableFile(
+rocksdb_rs::io_status::IOStatus CountedFileSystem::ReuseWritableFile(
     const std::string& fname, const std::string& old_fname,
     const FileOptions& options, std::unique_ptr<FSWritableFile>* result,
     IODebugContext* dbg) {
   std::unique_ptr<FSWritableFile> base;
-  IOStatus s =
+  rocksdb_rs::io_status::IOStatus s =
       target()->ReuseWritableFile(fname, old_fname, options, &base, dbg);
   if (s.ok()) {
     counters_.opens++;
@@ -350,11 +350,11 @@ IOStatus CountedFileSystem::ReuseWritableFile(
   return s;
 }
 
-IOStatus CountedFileSystem::NewRandomRWFile(
+rocksdb_rs::io_status::IOStatus CountedFileSystem::NewRandomRWFile(
     const std::string& name, const FileOptions& options,
     std::unique_ptr<FSRandomRWFile>* result, IODebugContext* dbg) {
   std::unique_ptr<FSRandomRWFile> base;
-  IOStatus s = target()->NewRandomRWFile(name, options, &base, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewRandomRWFile(name, options, &base, dbg);
   if (s.ok()) {
     counters_.opens++;
     result->reset(new CountedRandomRWFile(std::move(base), this));
@@ -362,12 +362,12 @@ IOStatus CountedFileSystem::NewRandomRWFile(
   return s;
 }
 
-IOStatus CountedFileSystem::NewDirectory(const std::string& name,
+rocksdb_rs::io_status::IOStatus CountedFileSystem::NewDirectory(const std::string& name,
                                          const IOOptions& options,
                                          std::unique_ptr<FSDirectory>* result,
                                          IODebugContext* dbg) {
   std::unique_ptr<FSDirectory> base;
-  IOStatus s = target()->NewDirectory(name, options, &base, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewDirectory(name, options, &base, dbg);
   if (s.ok()) {
     counters_.opens++;
     counters_.dir_opens++;

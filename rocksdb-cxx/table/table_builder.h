@@ -181,7 +181,7 @@ class TableBuilder {
   virtual rocksdb_rs::status::Status status() const = 0;
 
   // Return non-ok iff some error happens during IO.
-  virtual IOStatus io_status() const = 0;
+  virtual rocksdb_rs::io_status::IOStatus io_status() const = 0;
 
   // Finish building the table.
   // REQUIRES: Finish(), Abandon() have not been called

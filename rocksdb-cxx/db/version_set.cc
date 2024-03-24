@@ -5332,8 +5332,8 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
 
   uint64_t new_manifest_file_size = 0;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  IOStatus io_s;
-  IOStatus manifest_io_status;
+  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus manifest_io_status;
   {
     FileOptions opt_file_opts = fs_->OptimizeForManifestWrite(file_options_);
     mu->Unlock();
@@ -6375,7 +6375,7 @@ void VersionSet::MarkMinLogNumberToKeep(uint64_t number) {
 
 rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
     const std::unordered_map<uint32_t, MutableCFState>& curr_state,
-    const VersionEdit& wal_additions, log::Writer* log, IOStatus& io_s) {
+    const VersionEdit& wal_additions, log::Writer* log, rocksdb_rs::io_status::IOStatus& io_s) {
   // TODO: Break up into multiple records to reduce memory usage on recovery?
 
   // WARNING: This method doesn't hold a mutex!!

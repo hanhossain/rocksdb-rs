@@ -138,7 +138,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
   AlignedBuf direct_io_buf;
   {
     IOOptions opts;
-    IOStatus s = file->PrepareIOOptions(options, opts);
+    rocksdb_rs::io_status::IOStatus s = file->PrepareIOOptions(options, opts);
     if (s.ok()) {
 #if defined(WITH_COROUTINES)
       if (file->use_direct_io()) {

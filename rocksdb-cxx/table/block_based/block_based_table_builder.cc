@@ -383,7 +383,7 @@ struct BlockBasedTableBuilder::Rep {
     return status.Clone();
   }
 
-  IOStatus GetIOStatus() {
+  rocksdb_rs::io_status::IOStatus GetIOStatus() {
     // We need to make modifications of io_status visible when status_ok is set
     // to false, and this is ensured by io_status_mutex, so no special memory
     // order for io_status_ok is required.
@@ -394,7 +394,7 @@ struct BlockBasedTableBuilder::Rep {
     }
   }
 
-  IOStatus CopyIOStatus() {
+  rocksdb_rs::io_status::IOStatus CopyIOStatus() {
     std::lock_guard<std::mutex> lock(io_status_mutex);
     return io_status;
   }
@@ -413,7 +413,7 @@ struct BlockBasedTableBuilder::Rep {
 
   // Never erase an existing I/O status that is not OK.
   // Calling this will also SetStatus(ios)
-  void SetIOStatus(IOStatus ios) {
+  void SetIOStatus(rocksdb_rs::io_status::IOStatus ios) {
     if (!ios.ok() && io_status_ok.load(std::memory_order_relaxed)) {
       // Locking is an overkill for non compression_opts.parallel_threads
       // case but since it's unlikely that s is not OK, we take this cost
@@ -610,7 +610,7 @@ struct BlockBasedTableBuilder::Rep {
   rocksdb_rs::status::Status status;
   std::mutex io_status_mutex;
   std::atomic<bool> io_status_ok;
-  IOStatus io_status;
+  rocksdb_rs::io_status::IOStatus io_status;
 };
 
 struct BlockBasedTableBuilder::ParallelCompressionRep {
@@ -1296,7 +1296,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
   }
 
   {
-    IOStatus io_s = r->file->Append(block_contents);
+    rocksdb_rs::io_status::IOStatus io_s = r->file->Append(block_contents);
     if (!io_s.ok()) {
       r->SetIOStatus(io_s);
       return;
@@ -1322,7 +1322,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
       "BlockBasedTableBuilder::WriteMaybeCompressedBlock:TamperWithChecksum",
       trailer.data());
   {
-    IOStatus io_s = r->file->Append(Slice(trailer.data(), trailer.size()));
+    rocksdb_rs::io_status::IOStatus io_s = r->file->Append(Slice(trailer.data(), trailer.size()));
     if (!io_s.ok()) {
       r->SetIOStatus(io_s);
       return;
@@ -1359,7 +1359,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
         (r->alignment -
          ((block_contents.size() + kBlockTrailerSize) & (r->alignment - 1))) &
         (r->alignment - 1);
-    IOStatus io_s = r->file->Pad(pad_bytes);
+    rocksdb_rs::io_status::IOStatus io_s = r->file->Pad(pad_bytes);
     if (io_s.ok()) {
       r->set_offset(r->get_offset() + pad_bytes);
     } else {
@@ -1456,7 +1456,7 @@ void BlockBasedTableBuilder::StopParallelCompression() {
 
 rocksdb_rs::status::Status BlockBasedTableBuilder::status() const { return rep_->GetStatus(); }
 
-IOStatus BlockBasedTableBuilder::io_status() const {
+rocksdb_rs::io_status::IOStatus BlockBasedTableBuilder::io_status() const {
   return rep_->GetIOStatus();
 }
 
@@ -1757,7 +1757,7 @@ void BlockBasedTableBuilder::WriteFooter(BlockHandle& metaindex_block_handle,
   footer.Build(kBlockBasedTableMagicNumber, r->table_options.format_version,
                r->get_offset(), r->table_options.checksum,
                metaindex_block_handle, index_block_handle);
-  IOStatus ios = r->file->Append(footer.GetSlice());
+  rocksdb_rs::io_status::IOStatus ios = r->file->Append(footer.GetSlice());
   if (ios.ok()) {
     r->set_offset(r->get_offset() + footer.GetSlice().size());
   } else {

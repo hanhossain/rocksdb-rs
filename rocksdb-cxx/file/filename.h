@@ -48,7 +48,7 @@ extern const std::string kTempFileNameSuffix;     // = "dbtmp"
 // specified number. On its success and when dir_contains_current_file is not
 // nullptr, the function will fsync the directory containing the CURRENT file
 // when
-extern IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
+extern rocksdb_rs::io_status::IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
                                uint64_t descriptor_number,
                                FSDirectory* dir_contains_current_file);
 
@@ -57,7 +57,7 @@ extern rocksdb_rs::status::Status SetIdentityFile(Env* env, const std::string& d
                               const std::string& db_id = {});
 
 // Sync manifest file `file`.
-extern IOStatus SyncManifest(const ImmutableDBOptions* db_options,
+extern rocksdb_rs::io_status::IOStatus SyncManifest(const ImmutableDBOptions* db_options,
                              WritableFileWriter* file);
 
 // Return list of file names of info logs in `file_names`.

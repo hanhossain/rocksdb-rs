@@ -86,7 +86,7 @@ rocksdb_rs::status::Status UpdateManifestForFilesState(
         // file.
         fopts.temperature = Temperature::kUnknown;
 
-        IOStatus file_ios =
+        rocksdb_rs::io_status::IOStatus file_ios =
             fs->NewSequentialFile(fname, fopts, &f, /*dbg*/ nullptr);
         if (file_ios.ok()) {
           if (opts.update_temperatures) {

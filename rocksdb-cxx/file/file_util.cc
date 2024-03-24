@@ -17,13 +17,13 @@
 namespace rocksdb {
 
 // Utility function to copy a file up to a specified length
-IOStatus CopyFile(FileSystem* fs, const std::string& source,
+rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
                   std::unique_ptr<WritableFileWriter>& dest_writer,
                   uint64_t size, bool use_fsync,
                   const std::shared_ptr<IOTracer>& io_tracer,
                   const Temperature temperature) {
   FileOptions soptions;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   std::unique_ptr<SequentialFileReader> src_reader;
 
   {
@@ -68,12 +68,12 @@ IOStatus CopyFile(FileSystem* fs, const std::string& source,
   return dest_writer->Sync(use_fsync);
 }
 
-IOStatus CopyFile(FileSystem* fs, const std::string& source,
+rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
                   const std::string& destination, uint64_t size, bool use_fsync,
                   const std::shared_ptr<IOTracer>& io_tracer,
                   const Temperature temperature) {
   FileOptions options;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   std::unique_ptr<WritableFileWriter> dest_writer;
 
   {
@@ -93,10 +93,10 @@ IOStatus CopyFile(FileSystem* fs, const std::string& source,
 }
 
 // Utility function to create a file with the provided contents
-IOStatus CreateFile(FileSystem* fs, const std::string& destination,
+rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs, const std::string& destination,
                     const std::string& contents, bool use_fsync) {
   const EnvOptions soptions;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   std::unique_ptr<WritableFileWriter> dest_writer;
 
   std::unique_ptr<FSWritableFile> destfile;
@@ -130,7 +130,7 @@ rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_options,
 // name of the generator created by the factory is unchecked. When
 // `requested_checksum_func_name` is non-empty, however, the created generator's
 // name must match it, otherwise an `InvalidArgument` error is returned.
-IOStatus GenerateOneFileChecksum(
+rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     FileSystem* fs, const std::string& file_path,
     FileChecksumGenFactory* checksum_factory,
     const std::string& requested_checksum_func_name, std::string* file_checksum,
@@ -173,7 +173,7 @@ IOStatus GenerateOneFileChecksum(
   }
 
   uint64_t size;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   std::unique_ptr<RandomAccessFileReader> reader;
   {
     std::unique_ptr<FSRandomAccessFile> r_file;

@@ -53,7 +53,7 @@ rocksdb_rs::status::Status ChrootFileSystem::PrepareOptions(const ConfigOptions&
   return s;
 }
 
-IOStatus ChrootFileSystem::GetTestDirectory(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus ChrootFileSystem::GetTestDirectory(const IOOptions& options,
                                             std::string* path,
                                             IODebugContext* dbg) {
   // Adapted from PosixEnv's implementation since it doesn't provide a way to
@@ -69,12 +69,12 @@ IOStatus ChrootFileSystem::GetTestDirectory(const IOOptions& options,
 // Returns status and expanded absolute path including the chroot directory.
 // Checks whether the provided path breaks out of the chroot. If it returns
 // non-OK status, the returned path should not be used.
-std::pair<IOStatus, std::string> ChrootFileSystem::EncodePath(
+std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::EncodePath(
     const std::string& path) {
   if (path.empty() || path[0] != '/') {
     return {IOStatus_InvalidArgument(path, "Not an absolute path"), ""};
   }
-  std::pair<IOStatus, std::string> res;
+  std::pair<rocksdb_rs::io_status::IOStatus, std::string> res;
   res.second = chroot_dir_ + path;
 #if defined(OS_AIX)
   char resolvedName[PATH_MAX];
@@ -100,7 +100,7 @@ std::pair<IOStatus, std::string> ChrootFileSystem::EncodePath(
 
 // Similar to EncodePath() except assumes the basename in the path hasn't been
 // created yet.
-std::pair<IOStatus, std::string> ChrootFileSystem::EncodePathWithNewBasename(
+std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::EncodePathWithNewBasename(
     const std::string& path) {
   if (path.empty() || path[0] != '/') {
     return {IOStatus_InvalidArgument(path, "Not an absolute path"), ""};

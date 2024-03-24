@@ -657,7 +657,7 @@ rocksdb_rs::status::Status CompactionJob::Run() {
 
   // Check if any thread encountered an error during execution
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   bool wrote_new_blob_files = false;
 
   for (const auto& state : compact_->sub_compact_states) {
@@ -1521,7 +1521,7 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
   }
 
   // Finish and check for file errors
-  IOStatus io_s = outputs.WriterSyncClose(s, db_options_.clock, stats_,
+  rocksdb_rs::io_status::IOStatus io_s = outputs.WriterSyncClose(s, db_options_.clock, stats_,
                                           db_options_.use_fsync);
 
   if (s.ok() && io_s.ok()) {
@@ -1766,7 +1766,7 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
   fo_copy.temperature = temperature;
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  IOStatus io_s = NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
+  rocksdb_rs::io_status::IOStatus io_s = NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
   s = io_s;
   if (sub_compact->io_status.ok()) {
     sub_compact->io_status = io_s;

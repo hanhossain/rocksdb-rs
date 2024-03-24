@@ -99,13 +99,13 @@ class CacheDumperImpl : public CacheDumper {
       : options_(dump_options), cache_(cache), writer_(std::move(writer)) {}
   ~CacheDumperImpl() { writer_.reset(); }
   rocksdb_rs::status::Status SetDumpFilter(std::vector<DB*> db_list) override;
-  IOStatus DumpCacheEntriesToWriter() override;
+  rocksdb_rs::io_status::IOStatus DumpCacheEntriesToWriter() override;
 
  private:
-  IOStatus WriteBlock(CacheDumpUnitType type, const Slice& key,
+  rocksdb_rs::io_status::IOStatus WriteBlock(CacheDumpUnitType type, const Slice& key,
                       const Slice& value);
-  IOStatus WriteHeader();
-  IOStatus WriteFooter();
+  rocksdb_rs::io_status::IOStatus WriteHeader();
+  rocksdb_rs::io_status::IOStatus WriteFooter();
   bool ShouldFilterOut(const Slice& key);
   std::function<void(const Slice&, Cache::ObjectPtr, size_t,
                      const Cache::CacheItemHelper*)>
@@ -134,13 +134,13 @@ class CacheDumpedLoaderImpl : public CacheDumpedLoader {
         secondary_cache_(secondary_cache),
         reader_(std::move(reader)) {}
   ~CacheDumpedLoaderImpl() {}
-  IOStatus RestoreCacheEntriesToSecondaryCache() override;
+  rocksdb_rs::io_status::IOStatus RestoreCacheEntriesToSecondaryCache() override;
 
  private:
-  IOStatus ReadDumpUnitMeta(std::string* data, DumpUnitMeta* unit_meta);
-  IOStatus ReadDumpUnit(size_t len, std::string* data, DumpUnit* unit);
-  IOStatus ReadHeader(std::string* data, DumpUnit* dump_unit);
-  IOStatus ReadCacheBlock(std::string* data, DumpUnit* dump_unit);
+  rocksdb_rs::io_status::IOStatus ReadDumpUnitMeta(std::string* data, DumpUnitMeta* unit_meta);
+  rocksdb_rs::io_status::IOStatus ReadDumpUnit(size_t len, std::string* data, DumpUnit* unit);
+  rocksdb_rs::io_status::IOStatus ReadHeader(std::string* data, DumpUnit* dump_unit);
+  rocksdb_rs::io_status::IOStatus ReadCacheBlock(std::string* data, DumpUnit* dump_unit);
 
   CacheDumpOptions options_;
   std::shared_ptr<SecondaryCache> secondary_cache_;
@@ -158,11 +158,11 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   ~ToFileCacheDumpWriter() { Close(); }
 
   // Write the serialized metadata to the file
-  virtual IOStatus WriteMetadata(const Slice& metadata) override {
+  virtual rocksdb_rs::io_status::IOStatus WriteMetadata(const Slice& metadata) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
     PutFixed32(&prefix, static_cast<uint32_t>(metadata.size()));
-    IOStatus io_s = file_writer_->Append(Slice(prefix));
+    rocksdb_rs::io_status::IOStatus io_s = file_writer_->Append(Slice(prefix));
     if (!io_s.ok()) {
       return io_s;
     }
@@ -171,11 +171,11 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   }
 
   // Write the serialized data to the file
-  virtual IOStatus WritePacket(const Slice& data) override {
+  virtual rocksdb_rs::io_status::IOStatus WritePacket(const Slice& data) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
     PutFixed32(&prefix, static_cast<uint32_t>(data.size()));
-    IOStatus io_s = file_writer_->Append(Slice(prefix));
+    rocksdb_rs::io_status::IOStatus io_s = file_writer_->Append(Slice(prefix));
     if (!io_s.ok()) {
       return io_s;
     }
@@ -184,7 +184,7 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   }
 
   // Reset the writer
-  virtual IOStatus Close() override {
+  virtual rocksdb_rs::io_status::IOStatus Close() override {
     file_writer_.reset();
     return IOStatus_OK();
   }
@@ -206,18 +206,18 @@ class FromFileCacheDumpReader : public CacheDumpReader {
 
   ~FromFileCacheDumpReader() { delete[] buffer_; }
 
-  virtual IOStatus ReadMetadata(std::string* metadata) override {
+  virtual rocksdb_rs::io_status::IOStatus ReadMetadata(std::string* metadata) override {
     uint32_t metadata_len = 0;
-    IOStatus io_s = ReadSizePrefix(&metadata_len);
+    rocksdb_rs::io_status::IOStatus io_s = ReadSizePrefix(&metadata_len);
     if (!io_s.ok()) {
       return io_s;
     }
     return Read(metadata_len, metadata);
   }
 
-  virtual IOStatus ReadPacket(std::string* data) override {
+  virtual rocksdb_rs::io_status::IOStatus ReadPacket(std::string* data) override {
     uint32_t data_len = 0;
-    IOStatus io_s = ReadSizePrefix(&data_len);
+    rocksdb_rs::io_status::IOStatus io_s = ReadSizePrefix(&data_len);
     if (!io_s.ok()) {
       return io_s;
     }
@@ -225,9 +225,9 @@ class FromFileCacheDumpReader : public CacheDumpReader {
   }
 
  private:
-  IOStatus ReadSizePrefix(uint32_t* len) {
+  rocksdb_rs::io_status::IOStatus ReadSizePrefix(uint32_t* len) {
     std::string prefix;
-    IOStatus io_s = Read(kSizePrefixLen, &prefix);
+    rocksdb_rs::io_status::IOStatus io_s = Read(kSizePrefixLen, &prefix);
     if (!io_s.ok()) {
       return io_s;
     }
@@ -238,9 +238,9 @@ class FromFileCacheDumpReader : public CacheDumpReader {
     return IOStatus_OK();
   }
 
-  IOStatus Read(size_t len, std::string* data) {
+  rocksdb_rs::io_status::IOStatus Read(size_t len, std::string* data) {
     assert(file_reader_ != nullptr);
-    IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s;
 
     unsigned int bytes_to_read = static_cast<unsigned int>(len);
     unsigned int to_read = bytes_to_read > kDumpReaderBufferSize

@@ -3445,7 +3445,7 @@ class ReadAsyncRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
                             std::unique_ptr<FSRandomAccessFile>& file)
       : FSRandomAccessFileOwnerWrapper(std::move(file)), fs_(fs) {}
 
-  IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
                      std::function<void(const FSReadRequest&, void*)> cb,
                      void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
                      IODebugContext* dbg) override;
@@ -3464,18 +3464,18 @@ class ReadAsyncFS : public FileSystemWrapper {
   static const char* kClassName() { return "ReadAsyncFS"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
     EXPECT_OK(s);
     result->reset(new ReadAsyncRandomAccessFile(*this, file));
     return s;
   }
 
-  IOStatus Poll(std::vector<void*>& io_handles,
+  rocksdb_rs::io_status::IOStatus Poll(std::vector<void*>& io_handles,
                 size_t /*min_completions*/) override {
     // Wait for the threads completion.
     for (auto& t : workers) {
@@ -3496,7 +3496,7 @@ class ReadAsyncFS : public FileSystemWrapper {
   std::vector<std::thread> workers;
 };
 
-IOStatus ReadAsyncRandomAccessFile::ReadAsync(
+rocksdb_rs::io_status::IOStatus ReadAsyncRandomAccessFile::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) {

@@ -458,7 +458,7 @@ class Repairer {
         range_del_iters.emplace_back(range_del_iter);
       }
 
-      IOStatus io_s;
+      rocksdb_rs::io_status::IOStatus io_s;
       CompressionOptions default_compression;
       TableBuilderOptions tboptions(
           *cfd->ioptions(), *cfd->GetLatestMutableCFOptions(),

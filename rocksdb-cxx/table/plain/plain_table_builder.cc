@@ -36,11 +36,11 @@ namespace {
 // a utility that helps writing block content to the file
 //   @offset will advance if @block_contents was successfully written.
 //   @block_handle the block handle this particular block.
-IOStatus WriteBlock(const Slice& block_contents, WritableFileWriter* file,
+rocksdb_rs::io_status::IOStatus WriteBlock(const Slice& block_contents, WritableFileWriter* file,
                     uint64_t* offset, BlockHandle* block_handle) {
   block_handle->set_offset(*offset);
   block_handle->set_size(block_contents.size());
-  IOStatus io_s = file->Append(block_contents);
+  rocksdb_rs::io_status::IOStatus io_s = file->Append(block_contents);
 
   if (io_s.ok()) {
     *offset += block_contents.size();
@@ -271,7 +271,7 @@ rocksdb_rs::status::Status PlainTableBuilder::Finish() {
 
   // -- Write property block
   BlockHandle property_block_handle;
-  IOStatus s = WriteBlock(property_block_builder.Finish(), file_, &offset_,
+  rocksdb_rs::io_status::IOStatus s = WriteBlock(property_block_builder.Finish(), file_, &offset_,
                           &property_block_handle);
   if (!s.ok()) {
     return static_cast<rocksdb_rs::status::Status>(s);

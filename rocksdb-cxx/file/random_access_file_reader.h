@@ -61,7 +61,7 @@ class RandomAccessFileReader {
     }
   }
 
-  void NotifyOnIOError(const IOStatus& io_status, FileOperationType operation,
+  void NotifyOnIOError(const rocksdb_rs::io_status::IOStatus& io_status, FileOperationType operation,
                        const std::string& file_path, size_t length,
                        uint64_t offset) const {
     if (listeners_.empty()) {
@@ -145,7 +145,7 @@ class RandomAccessFileReader {
                   });
   }
 
-  static IOStatus Create(const std::shared_ptr<FileSystem>& fs,
+  static rocksdb_rs::io_status::IOStatus Create(const std::shared_ptr<FileSystem>& fs,
                          const std::string& fname, const FileOptions& file_opts,
                          std::unique_ptr<RandomAccessFileReader>* reader,
                          IODebugContext* dbg);
@@ -166,7 +166,7 @@ class RandomAccessFileReader {
   // `rate_limiter_priority` is used to charge the internal rate limiter when
   // enabled. The special value `Env::IO_TOTAL` makes this operation bypass the
   // rate limiter.
-  IOStatus Read(const IOOptions& opts, uint64_t offset, size_t n, Slice* result,
+  rocksdb_rs::io_status::IOStatus Read(const IOOptions& opts, uint64_t offset, size_t n, Slice* result,
                 char* scratch, AlignedBuf* aligned_buf,
                 Env::IOPriority rate_limiter_priority) const;
 
@@ -179,11 +179,11 @@ class RandomAccessFileReader {
   // `rate_limiter_priority` will be used to charge the internal rate limiter.
   // It is not yet supported so the client must provide the special value
   // `Env::IO_TOTAL` to bypass the rate limiter.
-  IOStatus MultiRead(const IOOptions& opts, FSReadRequest* reqs,
+  rocksdb_rs::io_status::IOStatus MultiRead(const IOOptions& opts, FSReadRequest* reqs,
                      size_t num_reqs, AlignedBuf* aligned_buf,
                      Env::IOPriority rate_limiter_priority) const;
 
-  IOStatus Prefetch(uint64_t offset, size_t n,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n,
                     const Env::IOPriority rate_limiter_priority) const {
     IOOptions opts;
     opts.rate_limiter_priority = rate_limiter_priority;
@@ -196,9 +196,9 @@ class RandomAccessFileReader {
 
   bool use_direct_io() const { return file_->use_direct_io(); }
 
-  IOStatus PrepareIOOptions(const ReadOptions& ro, IOOptions& opts) const;
+  rocksdb_rs::io_status::IOStatus PrepareIOOptions(const ReadOptions& ro, IOOptions& opts) const;
 
-  IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
                      std::function<void(const FSReadRequest&, void*)> cb,
                      void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
                      AlignedBuf* aligned_buf);

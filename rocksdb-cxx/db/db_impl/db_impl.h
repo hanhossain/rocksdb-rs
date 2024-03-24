@@ -87,7 +87,7 @@ struct MemTableInfo;
 // Class to maintain directories for all database paths other than main one.
 class Directories {
  public:
-  IOStatus SetDirectories(FileSystem* fs, const std::string& dbname,
+  rocksdb_rs::io_status::IOStatus SetDirectories(FileSystem* fs, const std::string& dbname,
                           const std::string& wal_dir,
                           const std::vector<DbPath>& data_paths);
 
@@ -110,9 +110,9 @@ class Directories {
 
   FSDirectory* GetDbDir() { return db_dir_.get(); }
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) {
     // close all directories for all database paths
-    IOStatus s = IOStatus_OK();
+    rocksdb_rs::io_status::IOStatus s = IOStatus_OK();
 
     // The default implementation for Close() in Directory/FSDirectory class
     // "NotSupported" status, the upper level interface should be able to
@@ -121,14 +121,14 @@ class Directories {
     // `FSDirectory::Close()` yet
 
     if (db_dir_) {
-      IOStatus temp_s = db_dir_->Close(options, dbg);
+      rocksdb_rs::io_status::IOStatus temp_s = db_dir_->Close(options, dbg);
       if (!temp_s.ok() && !temp_s.IsNotSupported() && s.ok()) {
         s = std::move(temp_s);
       }
     }
 
     if (wal_dir_) {
-      IOStatus temp_s = wal_dir_->Close(options, dbg);
+      rocksdb_rs::io_status::IOStatus temp_s = wal_dir_->Close(options, dbg);
       if (!temp_s.ok() && !temp_s.IsNotSupported() && s.ok()) {
         s = std::move(temp_s);
       }
@@ -136,7 +136,7 @@ class Directories {
 
     for (auto& data_dir_ptr : data_dirs_) {
       if (data_dir_ptr) {
-        IOStatus temp_s = data_dir_ptr->Close(options, dbg);
+        rocksdb_rs::io_status::IOStatus temp_s = data_dir_ptr->Close(options, dbg);
         if (!temp_s.ok() && !temp_s.IsNotSupported() && s.ok()) {
           s = std::move(temp_s);
         }
@@ -1036,7 +1036,7 @@ class DBImpl : public DB {
                      std::vector<ColumnFamilyHandle*>* handles, DB** dbptr,
                      const bool seq_per_batch, const bool batch_per_txn);
 
-  static IOStatus CreateAndNewDirectory(
+  static rocksdb_rs::io_status::IOStatus CreateAndNewDirectory(
       FileSystem* fs, const std::string& dirname,
       std::unique_ptr<FSDirectory>* directory);
 
@@ -1822,7 +1822,7 @@ class DBImpl : public DB {
   void ReleaseFileNumberFromPendingOutputs(
       std::unique_ptr<std::list<uint64_t>::iterator>& v);
 
-  IOStatus SyncClosedLogs(JobContext* job_context, VersionEdit* synced_wals);
+  rocksdb_rs::io_status::IOStatus SyncClosedLogs(JobContext* job_context, VersionEdit* synced_wals);
 
   // Flush the in-memory write buffer to storage.  Switches to a new
   // log-file/memtable and writes a new descriptor iff successful. Then
@@ -2008,18 +2008,18 @@ class DBImpl : public DB {
   // rate_limiter_priority is used to charge `DBOptions::rate_limiter`
   // for automatic WAL flush (`Options::manual_wal_flush` == false)
   // associated with this WriteToWAL
-  IOStatus WriteToWAL(const WriteBatch& merged_batch, log::Writer* log_writer,
+  rocksdb_rs::io_status::IOStatus WriteToWAL(const WriteBatch& merged_batch, log::Writer* log_writer,
                       uint64_t* log_used, uint64_t* log_size,
                       Env::IOPriority rate_limiter_priority,
                       LogFileNumberSize& log_file_number_size);
 
-  IOStatus WriteToWAL(const WriteThread::WriteGroup& write_group,
+  rocksdb_rs::io_status::IOStatus WriteToWAL(const WriteThread::WriteGroup& write_group,
                       log::Writer* log_writer, uint64_t* log_used,
                       bool need_log_sync, bool need_log_dir_sync,
                       SequenceNumber sequence,
                       LogFileNumberSize& log_file_number_size);
 
-  IOStatus ConcurrentWriteToWAL(const WriteThread::WriteGroup& write_group,
+  rocksdb_rs::io_status::IOStatus ConcurrentWriteToWAL(const WriteThread::WriteGroup& write_group,
                                 uint64_t* log_used,
                                 SequenceNumber* last_sequence, size_t seq_inc);
 
@@ -2032,7 +2032,7 @@ class DBImpl : public DB {
 
   // Used by WriteImpl to update bg_error_ when IO error happens, e.g., write
   // WAL, sync WAL fails, if paranoid check is enabled.
-  void IOStatusCheck(const IOStatus& status);
+  void IOStatusCheck(const rocksdb_rs::io_status::IOStatus& status);
 
   // Used by WriteImpl to update bg_error_ in case of memtable insert error.
   void MemTableInsertStatusCheck(const rocksdb_rs::status::Status& memtable_insert_status);
@@ -2201,7 +2201,7 @@ class DBImpl : public DB {
   size_t GetWalPreallocateBlockSize(uint64_t write_buffer_size) const;
   Env::WriteLifeTimeHint CalculateWALWriteHint() { return Env::WLTH_SHORT; }
 
-  IOStatus CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
+  rocksdb_rs::io_status::IOStatus CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
                      size_t preallocate_block_size, log::Writer** new_log);
 
   // Validate self-consistency of DB options

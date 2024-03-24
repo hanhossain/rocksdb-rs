@@ -165,7 +165,7 @@ class MockTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
   // Return non-ok iff some error happens during IO.
-  IOStatus io_status() const override { return IOStatus_OK(); }
+  rocksdb_rs::io_status::IOStatus io_status() const override { return IOStatus_OK(); }
 
   rocksdb_rs::status::Status Finish() override {
     MutexLock lock_guard(&file_system_->mutex);

@@ -189,7 +189,7 @@ class CompactionJob {
   rocksdb_rs::status::Status Install(const MutableCFOptions& mutable_cf_options);
 
   // Return the IO status
-  IOStatus io_status() const { return io_status_; }
+  rocksdb_rs::io_status::IOStatus io_status() const { return io_status_; }
 
  protected:
   void UpdateCompactionStats();
@@ -213,7 +213,7 @@ class CompactionJob {
 
   Env::WriteLifeTimeHint write_hint_;
 
-  IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_;
 
   CompactionJobStats* compaction_job_stats_;
 
@@ -485,7 +485,7 @@ class CompactionServiceCompactionJob : private CompactionJob {
 
   void CleanupCompaction();
 
-  IOStatus io_status() const { return CompactionJob::io_status(); }
+  rocksdb_rs::io_status::IOStatus io_status() const { return CompactionJob::io_status(); }
 
  protected:
   void RecordCompactionIOStats() override;

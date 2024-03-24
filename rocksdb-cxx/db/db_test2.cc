@@ -6923,7 +6923,7 @@ TEST_F(DBTest2, CheckpointFileTemperature) {
   class NoLinkTestFS : public FileTemperatureTestFS {
     using FileTemperatureTestFS::FileTemperatureTestFS;
 
-    IOStatus LinkFile(const std::string&, const std::string&, const IOOptions&,
+    rocksdb_rs::io_status::IOStatus LinkFile(const std::string&, const std::string&, const IOOptions&,
                       IODebugContext*) override {
       // return not supported to force checkpoint copy the file instead of just
       // link

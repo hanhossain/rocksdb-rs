@@ -9,6 +9,8 @@
 
 #include "test_util/testharness.h"
 
+#include <rocksdb-rs/src/io_status.rs.h>
+
 #include <regex>
 #include <string>
 #include <thread>
@@ -24,11 +26,23 @@ std::string GetPidStr() { return std::to_string(GetCurrentProcessId()); }
 std::string GetPidStr() { return std::to_string(getpid()); }
 #endif
 
-::testing::AssertionResult AssertStatus(const char* s_expr, const rocksdb_rs::status::Status& s) {
+::testing::AssertionResult AssertStatus(const char* s_expr,
+                                        const rocksdb_rs::status::Status& s) {
   if (s.ok()) {
     return ::testing::AssertionSuccess();
   } else {
-    return ::testing::AssertionFailure() << s_expr << std::endl << *s.ToString();
+    return ::testing::AssertionFailure() << s_expr << std::endl
+                                         << *s.ToString();
+  }
+}
+
+::testing::AssertionResult AssertStatus(
+    const char* s_expr, const rocksdb_rs::io_status::rocksdb_rs::io_status::IOStatus& s) {
+  if (s.ok()) {
+    return ::testing::AssertionSuccess();
+  } else {
+    return ::testing::AssertionFailure() << s_expr << std::endl
+                                         << *s.ToString();
   }
 }
 

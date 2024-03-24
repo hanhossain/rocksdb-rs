@@ -478,25 +478,25 @@ class BackupEngineReadOnlyBase {
       std::vector<BackupID>* corrupt_backup_ids) const = 0;
 
   // Restore to specified db_dir and wal_dir from backup_id.
-  virtual IOStatus RestoreDBFromBackup(const RestoreOptions& options,
+  virtual rocksdb_rs::io_status::IOStatus RestoreDBFromBackup(const RestoreOptions& options,
                                        BackupID backup_id,
                                        const std::string& db_dir,
                                        const std::string& wal_dir) const = 0;
 
   // keep for backward compatibility.
-  virtual IOStatus RestoreDBFromBackup(
+  virtual rocksdb_rs::io_status::IOStatus RestoreDBFromBackup(
       BackupID backup_id, const std::string& db_dir, const std::string& wal_dir,
       const RestoreOptions& options = RestoreOptions()) const {
     return RestoreDBFromBackup(options, backup_id, db_dir, wal_dir);
   }
 
   // Like RestoreDBFromBackup but restores from latest non-corrupt backup_id
-  virtual IOStatus RestoreDBFromLatestBackup(
+  virtual rocksdb_rs::io_status::IOStatus RestoreDBFromLatestBackup(
       const RestoreOptions& options, const std::string& db_dir,
       const std::string& wal_dir) const = 0;
 
   // keep for backward compatibility.
-  virtual IOStatus RestoreDBFromLatestBackup(
+  virtual rocksdb_rs::io_status::IOStatus RestoreDBFromLatestBackup(
       const std::string& db_dir, const std::string& wal_dir,
       const RestoreOptions& options = RestoreOptions()) const {
     return RestoreDBFromLatestBackup(options, db_dir, wal_dir);
@@ -517,7 +517,7 @@ class BackupEngineReadOnlyBase {
   // their sizes (and checksums) when the BackupEngine was opened.
   //
   // Returns Status_OK() if all checks are good
-  virtual IOStatus VerifyBackup(BackupID backup_id,
+  virtual rocksdb_rs::io_status::IOStatus VerifyBackup(BackupID backup_id,
                                 bool verify_with_checksum = false) const = 0;
 
   // Internal use only
@@ -532,12 +532,12 @@ class BackupEngineAppendOnlyBase {
   virtual ~BackupEngineAppendOnlyBase() {}
 
   // same as CreateNewBackup, but stores extra application metadata.
-  virtual IOStatus CreateNewBackupWithMetadata(
+  virtual rocksdb_rs::io_status::IOStatus CreateNewBackupWithMetadata(
       const CreateBackupOptions& options, DB* db,
       const std::string& app_metadata, BackupID* new_backup_id = nullptr) = 0;
 
   // keep here for backward compatibility.
-  virtual IOStatus CreateNewBackupWithMetadata(
+  virtual rocksdb_rs::io_status::IOStatus CreateNewBackupWithMetadata(
       DB* db, const std::string& app_metadata, bool flush_before_backup = false,
       std::function<void()> progress_callback = []() {}) {
     CreateBackupOptions options;
@@ -552,13 +552,13 @@ class BackupEngineAppendOnlyBase {
   // NOTE: db_paths and cf_paths are not supported for creating backups,
   // and NotSupported will be returned when the DB (without WALs) uses more
   // than one directory.
-  virtual IOStatus CreateNewBackup(const CreateBackupOptions& options, DB* db,
+  virtual rocksdb_rs::io_status::IOStatus CreateNewBackup(const CreateBackupOptions& options, DB* db,
                                    BackupID* new_backup_id = nullptr) {
     return CreateNewBackupWithMetadata(options, db, "", new_backup_id);
   }
 
   // keep here for backward compatibility.
-  virtual IOStatus CreateNewBackup(
+  virtual rocksdb_rs::io_status::IOStatus CreateNewBackup(
       DB* db, bool flush_before_backup = false,
       std::function<void()> progress_callback = []() {}) {
     CreateBackupOptions options;
@@ -592,7 +592,7 @@ class BackupEngineAppendOnlyBase {
   // with Append or Write operations in another BackupEngine on the same
   // backup_dir, because temporary files will be treated as obsolete and
   // deleted.
-  virtual IOStatus GarbageCollect() = 0;
+  virtual rocksdb_rs::io_status::IOStatus GarbageCollect() = 0;
 };
 
 // A backup engine for organizing and managing backups.
@@ -652,24 +652,24 @@ class BackupEngine : public BackupEngineReadOnlyBase,
 
   // BackupEngineOptions have to be the same as the ones used in previous
   // BackupEngines for the same backup directory.
-  static IOStatus Open(const BackupEngineOptions& options, Env* db_env,
+  static rocksdb_rs::io_status::IOStatus Open(const BackupEngineOptions& options, Env* db_env,
                        BackupEngine** backup_engine_ptr);
 
   // keep for backward compatibility.
-  static IOStatus Open(Env* db_env, const BackupEngineOptions& options,
+  static rocksdb_rs::io_status::IOStatus Open(Env* db_env, const BackupEngineOptions& options,
                        BackupEngine** backup_engine_ptr) {
     return BackupEngine::Open(options, db_env, backup_engine_ptr);
   }
 
   // Deletes old backups, keeping latest num_backups_to_keep alive.
   // See also DeleteBackup.
-  virtual IOStatus PurgeOldBackups(uint32_t num_backups_to_keep) = 0;
+  virtual rocksdb_rs::io_status::IOStatus PurgeOldBackups(uint32_t num_backups_to_keep) = 0;
 
   // Deletes a specific backup. If this operation (or PurgeOldBackups)
   // is not completed due to crash, power failure, etc. the state
   // will be cleaned up the next time you call DeleteBackup,
   // PurgeOldBackups, or GarbageCollect.
-  virtual IOStatus DeleteBackup(BackupID backup_id) = 0;
+  virtual rocksdb_rs::io_status::IOStatus DeleteBackup(BackupID backup_id) = 0;
 };
 
 // A variant of BackupEngine that only allows "Read" operations. See
@@ -678,10 +678,10 @@ class BackupEngineReadOnly : public BackupEngineReadOnlyBase {
  public:
   virtual ~BackupEngineReadOnly() {}
 
-  static IOStatus Open(const BackupEngineOptions& options, Env* db_env,
+  static rocksdb_rs::io_status::IOStatus Open(const BackupEngineOptions& options, Env* db_env,
                        BackupEngineReadOnly** backup_engine_ptr);
   // keep for backward compatibility.
-  static IOStatus Open(Env* db_env, const BackupEngineOptions& options,
+  static rocksdb_rs::io_status::IOStatus Open(Env* db_env, const BackupEngineOptions& options,
                        BackupEngineReadOnly** backup_engine_ptr) {
     return BackupEngineReadOnly::Open(options, db_env, backup_engine_ptr);
   }

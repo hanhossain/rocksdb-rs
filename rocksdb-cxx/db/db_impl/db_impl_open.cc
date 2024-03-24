@@ -362,7 +362,7 @@ rocksdb_rs::status::Status DBImpl::NewDB(std::vector<std::string>* new_filenames
   return s;
 }
 
-IOStatus DBImpl::CreateAndNewDirectory(
+rocksdb_rs::io_status::IOStatus DBImpl::CreateAndNewDirectory(
     FileSystem* fs, const std::string& dirname,
     std::unique_ptr<FSDirectory>* directory) {
   // We call CreateDirIfMissing() as the directory may already exist (if we
@@ -372,17 +372,17 @@ IOStatus DBImpl::CreateAndNewDirectory(
   // file not existing. One real-world example of this occurring is if
   // env->CreateDirIfMissing() doesn't create intermediate directories, e.g.
   // when dbname_ is "dir/db" but when "dir" doesn't exist.
-  IOStatus io_s = fs->CreateDirIfMissing(dirname, IOOptions(), nullptr);
+  rocksdb_rs::io_status::IOStatus io_s = fs->CreateDirIfMissing(dirname, IOOptions(), nullptr);
   if (!io_s.ok()) {
     return io_s;
   }
   return fs->NewDirectory(dirname, IOOptions(), directory, nullptr);
 }
 
-IOStatus Directories::SetDirectories(FileSystem* fs, const std::string& dbname,
+rocksdb_rs::io_status::IOStatus Directories::SetDirectories(FileSystem* fs, const std::string& dbname,
                                      const std::string& wal_dir,
                                      const std::vector<DbPath>& data_paths) {
-  IOStatus io_s = DBImpl::CreateAndNewDirectory(fs, dbname, &db_dir_);
+  rocksdb_rs::io_status::IOStatus io_s = DBImpl::CreateAndNewDirectory(fs, dbname, &db_dir_);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -1646,7 +1646,7 @@ rocksdb_rs::status::Status DBImpl::WriteLevel0TableForRecovery(int job_id, Colum
         range_del_iters.emplace_back(range_del_iter);
       }
 
-      IOStatus io_s;
+      rocksdb_rs::io_status::IOStatus io_s;
       TableBuilderOptions tboptions(
           *cfd->ioptions(), mutable_cf_options, cfd->internal_comparator(),
           cfd->int_tbl_prop_collector_factories(),
@@ -1854,10 +1854,10 @@ rocksdb_rs::status::Status DB::OpenAndTrimHistory(
   return s;
 }
 
-IOStatus DBImpl::CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
+rocksdb_rs::io_status::IOStatus DBImpl::CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
                            size_t preallocate_block_size,
                            log::Writer** new_log) {
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   std::unique_ptr<FSWritableFile> lfile;
 
   DBOptions db_options =

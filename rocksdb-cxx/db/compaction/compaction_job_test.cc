@@ -78,30 +78,30 @@ class MockTestWritableFile : public FSWritableFileOwnerWrapper {
                        Env::IOPriority io_priority)
       : FSWritableFileOwnerWrapper(std::move(file)),
         write_io_priority_(io_priority) {}
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Append(data, options, dbg);
   }
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   const DataVerificationInfo& verification_info,
                   IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Append(data, options, verification_info, dbg);
   }
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Close(options, dbg);
   }
-  IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Flush(options, dbg);
   }
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Sync(options, dbg);
   }
-  IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Fsync(options, dbg);
   }
@@ -109,7 +109,7 @@ class MockTestWritableFile : public FSWritableFileOwnerWrapper {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->GetFileSize(options, dbg);
   }
-  IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
                      IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->RangeSync(offset, nbytes, options, dbg);
@@ -121,7 +121,7 @@ class MockTestWritableFile : public FSWritableFileOwnerWrapper {
     target()->PrepareWrite(offset, len, options, dbg);
   }
 
-  IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
                     IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Allocate(offset, len, options, dbg);
@@ -140,13 +140,13 @@ class MockTestRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
       : FSRandomAccessFileOwnerWrapper(std::move(file)),
         read_io_priority_(io_priority) {}
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override {
     EXPECT_EQ(options.rate_limiter_priority, read_io_priority_);
     return target()->Read(offset, n, options, result, scratch, dbg);
   }
-  IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
                     IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, read_io_priority_);
     return target()->Prefetch(offset, n, options, dbg);
@@ -169,21 +169,21 @@ class MockTestFileSystem : public FileSystemWrapper {
   static const char* kClassName() { return "MockTestFileSystem"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& file_opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override {
-    IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
     EXPECT_OK(s);
     result->reset(
         new MockTestRandomAccessFile(std::move(*result), read_io_priority_));
     return s;
   }
-  IOStatus NewWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
                            const FileOptions& file_opts,
                            std::unique_ptr<FSWritableFile>* result,
                            IODebugContext* dbg) override {
-    IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
     EXPECT_OK(s);
     result->reset(
         new MockTestWritableFile(std::move(*result), write_io_priority_));
@@ -446,7 +446,7 @@ class CompactionJobTestBase : public testing::Test {
       std::string file_name = GenerateFileName(output_file->fd.GetNumber());
       const auto& fs = env_->GetFileSystem();
       std::unique_ptr<RandomAccessFileReader> freader;
-      IOStatus ios = RandomAccessFileReader::Create(
+      rocksdb_rs::io_status::IOStatus ios = RandomAccessFileReader::Create(
           fs, file_name, FileOptions(), &freader, nullptr);
       ASSERT_OK(ios);
       std::unique_ptr<TableReader> table_reader;

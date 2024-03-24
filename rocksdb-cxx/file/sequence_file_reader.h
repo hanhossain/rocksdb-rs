@@ -84,7 +84,7 @@ class SequentialFileReader {
         rate_limiter_(rate_limiter) {
     AddFileIOListeners(listeners);
   }
-  static IOStatus Create(const std::shared_ptr<FileSystem>& fs,
+  static rocksdb_rs::io_status::IOStatus Create(const std::shared_ptr<FileSystem>& fs,
                          const std::string& fname, const FileOptions& file_opts,
                          std::unique_ptr<SequentialFileReader>* reader,
                          IODebugContext* dbg, RateLimiter* rate_limiter);
@@ -98,10 +98,10 @@ class SequentialFileReader {
   // when less than n bytes are actually read (e.g. at end of file). To avoid
   // overcharging the rate limiter, the caller can use file size to cap n to
   // read until end of file.
-  IOStatus Read(size_t n, Slice* result, char* scratch,
+  rocksdb_rs::io_status::IOStatus Read(size_t n, Slice* result, char* scratch,
                 Env::IOPriority rate_limiter_priority);
 
-  IOStatus Skip(uint64_t n);
+  rocksdb_rs::io_status::IOStatus Skip(uint64_t n);
 
   FSSequentialFile* file() { return file_.get(); }
 

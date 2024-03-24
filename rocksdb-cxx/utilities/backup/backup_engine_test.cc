@@ -156,7 +156,7 @@ class TestFs : public FileSystemWrapper {
    public:
     explicit DummySequentialFile(bool fail_reads)
         : FSSequentialFile(), rnd_(5), fail_reads_(fail_reads) {}
-    IOStatus Read(size_t n, const IOOptions&, Slice* result, char* scratch,
+    rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions&, Slice* result, char* scratch,
                   IODebugContext*) override {
       if (fail_reads_) {
         return IOStatus_IOError();
@@ -170,7 +170,7 @@ class TestFs : public FileSystemWrapper {
       return IOStatus_OK();
     }
 
-    IOStatus Skip(uint64_t n) override {
+    rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
       size_left = (n > size_left) ? size_left - n : 0;
       return IOStatus_OK();
     }
@@ -181,7 +181,7 @@ class TestFs : public FileSystemWrapper {
     bool fail_reads_;
   };
 
-  IOStatus NewSequentialFile(const std::string& f, const FileOptions& file_opts,
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& f, const FileOptions& file_opts,
                              std::unique_ptr<FSSequentialFile>* r,
                              IODebugContext* dbg) override {
     MutexLock l(&mutex_);
@@ -190,7 +190,7 @@ class TestFs : public FileSystemWrapper {
           new TestFs::DummySequentialFile(dummy_sequential_file_fail_reads_));
       return IOStatus_OK();
     } else {
-      IOStatus s = FileSystemWrapper::NewSequentialFile(f, file_opts, r, dbg);
+      rocksdb_rs::io_status::IOStatus s = FileSystemWrapper::NewSequentialFile(f, file_opts, r, dbg);
       if (s.ok()) {
         if ((*r)->use_direct_io()) {
           ++num_direct_seq_readers_;
@@ -201,7 +201,7 @@ class TestFs : public FileSystemWrapper {
     }
   }
 
-  IOStatus NewWritableFile(const std::string& f, const FileOptions& file_opts,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& f, const FileOptions& file_opts,
                            std::unique_ptr<FSWritableFile>* r,
                            IODebugContext* dbg) override {
     MutexLock l(&mutex_);
@@ -210,7 +210,7 @@ class TestFs : public FileSystemWrapper {
       return IOStatus_NotSupported("Limit on written files reached");
     }
     limit_written_files_--;
-    IOStatus s = FileSystemWrapper::NewWritableFile(f, file_opts, r, dbg);
+    rocksdb_rs::io_status::IOStatus s = FileSystemWrapper::NewWritableFile(f, file_opts, r, dbg);
     if (s.ok()) {
       if ((*r)->use_direct_io()) {
         ++num_direct_writers_;
@@ -220,12 +220,12 @@ class TestFs : public FileSystemWrapper {
     return s;
   }
 
-  IOStatus NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& f,
                                const FileOptions& file_opts,
                                std::unique_ptr<FSRandomAccessFile>* r,
                                IODebugContext* dbg) override {
     MutexLock l(&mutex_);
-    IOStatus s = FileSystemWrapper::NewRandomAccessFile(f, file_opts, r, dbg);
+    rocksdb_rs::io_status::IOStatus s = FileSystemWrapper::NewRandomAccessFile(f, file_opts, r, dbg);
     if (s.ok()) {
       if ((*r)->use_direct_io()) {
         ++num_direct_rand_readers_;
@@ -235,7 +235,7 @@ class TestFs : public FileSystemWrapper {
     return s;
   }
 
-  IOStatus DeleteFile(const std::string& f, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& f, const IOOptions& options,
                       IODebugContext* dbg) override {
     MutexLock l(&mutex_);
     if (fail_delete_files_) {
@@ -246,7 +246,7 @@ class TestFs : public FileSystemWrapper {
     return FileSystemWrapper::DeleteFile(f, options, dbg);
   }
 
-  IOStatus DeleteDir(const std::string& d, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& d, const IOOptions& options,
                      IODebugContext* dbg) override {
     MutexLock l(&mutex_);
     if (fail_delete_files_) {
@@ -293,7 +293,7 @@ class TestFs : public FileSystemWrapper {
   }
 
   void SetGetChildrenFailure(bool fail) { get_children_failure_ = fail; }
-  IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
+  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
                        std::vector<std::string>* r,
                        IODebugContext* dbg) override {
     if (get_children_failure_) {
@@ -308,7 +308,7 @@ class TestFs : public FileSystemWrapper {
   void SetFilenamesForMockedAttrs(const std::vector<std::string>& filenames) {
     filenames_for_mocked_attrs_ = filenames;
   }
-  IOStatus GetChildrenFileAttributes(const std::string& dir,
+  rocksdb_rs::io_status::IOStatus GetChildrenFileAttributes(const std::string& dir,
                                      const IOOptions& options,
                                      std::vector<FileAttributes>* result,
                                      IODebugContext* dbg) override {
@@ -326,7 +326,7 @@ class TestFs : public FileSystemWrapper {
                                                         dbg);
   }
 
-  IOStatus GetFileSize(const std::string& f, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& f, const IOOptions& options,
                        uint64_t* s, IODebugContext* dbg) override {
     if (filenames_for_mocked_attrs_.size() > 0) {
       auto fname = f.substr(f.find_last_of('/') + 1);
@@ -347,7 +347,7 @@ class TestFs : public FileSystemWrapper {
   void SetCreateDirIfMissingFailure(bool fail) {
     create_dir_if_missing_failure_ = fail;
   }
-  IOStatus CreateDirIfMissing(const std::string& d, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& d, const IOOptions& options,
                               IODebugContext* dbg) override {
     if (create_dir_if_missing_failure_) {
       return IOStatus_IOError("SimulatedFailure");
@@ -356,7 +356,7 @@ class TestFs : public FileSystemWrapper {
   }
 
   void SetNewDirectoryFailure(bool fail) { new_directory_failure_ = fail; }
-  IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
+  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
                         std::unique_ptr<FSDirectory>* result,
                         IODebugContext* dbg) override {
     if (new_directory_failure_) {

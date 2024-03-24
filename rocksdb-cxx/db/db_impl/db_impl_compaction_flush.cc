@@ -73,7 +73,7 @@ bool DBImpl::RequestCompactionToken(ColumnFamilyData* cfd, bool force,
   return false;
 }
 
-IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
+rocksdb_rs::io_status::IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
                                 VersionEdit* synced_wals) {
   TEST_SYNC_POINT("DBImpl::SyncClosedLogs:Start");
   InstrumentedMutexLock l(&log_write_mutex_);
@@ -90,7 +90,7 @@ IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
     logs_to_sync.push_back(log.writer);
   }
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   if (!logs_to_sync.empty()) {
     log_write_mutex_.Unlock();
 
@@ -217,7 +217,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool need_cancel = false;
-  IOStatus log_io_s = IOStatus_OK();
+  rocksdb_rs::io_status::IOStatus log_io_s = IOStatus_OK();
   if (needs_to_sync_closed_wals) {
     // SyncClosedLogs() may unlock and re-lock the log_write_mutex multiple
     // times.
@@ -472,7 +472,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   // is specific and doesn't allow &v[i].
   std::deque<bool> switched_to_mempurge(num_cfs, false);
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  IOStatus log_io_s = IOStatus_OK();
+  rocksdb_rs::io_status::IOStatus log_io_s = IOStatus_OK();
   assert(num_cfs == static_cast<int>(jobs.size()));
 
   for (int i = 0; i != num_cfs; ++i) {
@@ -1522,7 +1522,7 @@ rocksdb_rs::status::Status DBImpl::CompactFilesImpl(
                    "[%s] [JOB %d] Compaction error: %s",
                    c->column_family_data()->GetName().c_str(),
                    job_context->job_id, status.ToString()->c_str());
-    IOStatus io_s = compaction_job.io_status();
+    rocksdb_rs::io_status::IOStatus io_s = compaction_job.io_status();
     if (!io_s.ok()) {
       error_handler_.SetBGError(io_s, BackgroundErrorReason::kCompaction);
     } else {
@@ -3436,7 +3436,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
     }
   }
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   if (!c) {
     // Nothing to do
     ROCKS_LOG_BUFFER(log_buffer, "Compaction nothing to do");

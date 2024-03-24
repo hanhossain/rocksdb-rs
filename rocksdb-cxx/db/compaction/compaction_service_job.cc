@@ -292,7 +292,7 @@ rocksdb_rs::status::Status CompactionServiceCompactionJob::Run() {
                         compaction_stats_.stats.cpu_micros);
 
   rocksdb_rs::status::Status status = sub_compact->status.Clone();
-  IOStatus io_s = sub_compact->io_status;
+  rocksdb_rs::io_status::IOStatus io_s = sub_compact->io_status;
 
   if (io_status_.ok()) {
     io_status_ = io_s;

@@ -38,15 +38,15 @@ class SimulatedHybridFileSystem : public FileSystemWrapper {
   ~SimulatedHybridFileSystem() override;
 
  public:
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& file_opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override;
-  IOStatus NewWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
                            const FileOptions& file_opts,
                            std::unique_ptr<FSWritableFile>* result,
                            IODebugContext* dbg) override;
-  IOStatus DeleteFile(const std::string& fname, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname, const IOOptions& options,
                       IODebugContext* dbg) override;
 
   const char* Name() const override { return name_.c_str(); }
@@ -75,14 +75,14 @@ class SimulatedHybridRaf : public FSRandomAccessFileOwnerWrapper {
 
   ~SimulatedHybridRaf() override {}
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override;
 
-  IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
                      const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
                     IODebugContext* dbg) override;
 
  private:
@@ -99,16 +99,16 @@ class SimulatedWritableFile : public FSWritableFileWrapper {
       : FSWritableFileWrapper(t.get()),
         file_guard_(std::move(t)),
         rate_limiter_(rate_limiter) {}
-  IOStatus Append(const Slice& data, const IOOptions&,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions&,
                   IODebugContext*) override;
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   const DataVerificationInfo& verification_info,
                   IODebugContext* dbg) override;
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             const DataVerificationInfo& verification_info,
                             IODebugContext* dbg) override;

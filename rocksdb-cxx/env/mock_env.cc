@@ -161,10 +161,10 @@ class MemFile {
     }
   }
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*options*/,
                 Slice* result, char* scratch, IODebugContext* /*dbg*/) const {
     {
-      IOStatus s;
+      rocksdb_rs::io_status::IOStatus s;
       TEST_SYNC_POINT_CALLBACK("MemFile::Read:IOStatus", &s);
       if (!s.ok()) {
         // with sync point only
@@ -191,7 +191,7 @@ class MemFile {
     return IOStatus_OK();
   }
 
-  IOStatus Write(uint64_t offset, const Slice& data,
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
                  const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
     MutexLock lock(&mutex_);
     size_t offset_ = static_cast<size_t>(offset);
@@ -204,7 +204,7 @@ class MemFile {
     return IOStatus_OK();
   }
 
-  IOStatus Append(const Slice& data, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& /*options*/,
                   IODebugContext* /*dbg*/) {
     MutexLock lock(&mutex_);
     data_.append(data.data(), data.size());
@@ -213,7 +213,7 @@ class MemFile {
     return IOStatus_OK();
   }
 
-  IOStatus Fsync(const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
     fsynced_bytes_ = size_.load();
     return IOStatus_OK();
   }
@@ -262,9 +262,9 @@ class MockSequentialFile : public FSSequentialFile {
 
   ~MockSequentialFile() override { file_->Unref(); }
 
-  IOStatus Read(size_t n, const IOOptions& options, Slice* result,
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
                 char* scratch, IODebugContext* dbg) override {
-    IOStatus s = file_->Read(pos_, n, options, result,
+    rocksdb_rs::io_status::IOStatus s = file_->Read(pos_, n, options, result,
                              (use_mmap_read_) ? nullptr : scratch, dbg);
     if (s.ok()) {
       pos_ += result->size();
@@ -273,7 +273,7 @@ class MockSequentialFile : public FSSequentialFile {
   }
 
   bool use_direct_io() const override { return use_direct_io_; }
-  IOStatus Skip(uint64_t n) override {
+  rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
     if (pos_ > file_->Size()) {
       return IOStatus_IOError("pos_ > file_->Size()");
     }
@@ -305,13 +305,13 @@ class MockRandomAccessFile : public FSRandomAccessFile {
 
   bool use_direct_io() const override { return use_direct_io_; }
 
-  IOStatus Prefetch(uint64_t /*offset*/, size_t /*n*/,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t /*offset*/, size_t /*n*/,
                     const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
     return IOStatus_OK();
   }
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override {
     if (use_mmap_read_) {
@@ -333,27 +333,27 @@ class MockRandomRWFile : public FSRandomRWFile {
 
   ~MockRandomRWFile() override { file_->Unref(); }
 
-  IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
                  IODebugContext* dbg) override {
     return file_->Write(offset, data, options, dbg);
   }
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override {
     return file_->Read(offset, n, options, result, scratch, dbg);
   }
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
     return file_->Fsync(options, dbg);
   }
 
-  IOStatus Flush(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_OK();
   }
 
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
     return file_->Fsync(options, dbg);
   }
 
@@ -375,12 +375,12 @@ class MockWritableFile : public FSWritableFile {
   bool use_direct_io() const override { return false && use_direct_io_; }
 
   using FSWritableFile::Append;
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   IODebugContext* dbg) override {
     size_t bytes_written = 0;
     while (bytes_written < data.size()) {
       auto bytes = RequestToken(data.size() - bytes_written);
-      IOStatus s = file_->Append(Slice(data.data() + bytes_written, bytes),
+      rocksdb_rs::io_status::IOStatus s = file_->Append(Slice(data.data() + bytes_written, bytes),
                                  options, dbg);
       if (!s.ok()) {
         return s;
@@ -391,28 +391,28 @@ class MockWritableFile : public FSWritableFile {
   }
 
   using FSWritableFile::PositionedAppend;
-  IOStatus PositionedAppend(const Slice& data, uint64_t /*offset*/,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t /*offset*/,
                             const IOOptions& options,
                             IODebugContext* dbg) override {
     assert(use_direct_io_);
     return Append(data, options, dbg);
   }
 
-  IOStatus Truncate(uint64_t size, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& options,
                     IODebugContext* dbg) override {
     file_->Truncate(static_cast<size_t>(size), options, dbg);
     return IOStatus_OK();
   }
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
     return file_->Fsync(options, dbg);
   }
 
-  IOStatus Flush(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_OK();
   }
 
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
     return file_->Fsync(options, dbg);
   }
 
@@ -438,12 +438,12 @@ class MockWritableFile : public FSWritableFile {
 
 class MockEnvDirectory : public FSDirectory {
  public:
-  IOStatus Fsync(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_OK();
   }
 
-  IOStatus Close(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_OK();
   }
@@ -595,7 +595,7 @@ rocksdb_rs::status::Status MockFileSystem::PrepareOptions(const ConfigOptions& o
   return s;
 }
 
-IOStatus MockFileSystem::GetAbsolutePath(const std::string& db_path,
+rocksdb_rs::io_status::IOStatus MockFileSystem::GetAbsolutePath(const std::string& db_path,
                                          const IOOptions& /*options*/,
                                          std::string* output_path,
                                          IODebugContext* /*dbg*/) {
@@ -616,7 +616,7 @@ std::string MockFileSystem::NormalizeMockPath(const std::string& path) {
 }
 
 // Partial implementation of the FileSystem interface.
-IOStatus MockFileSystem::NewSequentialFile(
+rocksdb_rs::io_status::IOStatus MockFileSystem::NewSequentialFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSSequentialFile>* result, IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -637,7 +637,7 @@ IOStatus MockFileSystem::NewSequentialFile(
   }
 }
 
-IOStatus MockFileSystem::NewRandomAccessFile(
+rocksdb_rs::io_status::IOStatus MockFileSystem::NewRandomAccessFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSRandomAccessFile>* result, IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -657,7 +657,7 @@ IOStatus MockFileSystem::NewRandomAccessFile(
   }
 }
 
-IOStatus MockFileSystem::NewRandomRWFile(
+rocksdb_rs::io_status::IOStatus MockFileSystem::NewRandomRWFile(
     const std::string& fname, const FileOptions& /*file_opts*/,
     std::unique_ptr<FSRandomRWFile>* result, IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -674,7 +674,7 @@ IOStatus MockFileSystem::NewRandomRWFile(
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::ReuseWritableFile(
+rocksdb_rs::io_status::IOStatus MockFileSystem::ReuseWritableFile(
     const std::string& fname, const std::string& old_fname,
     const FileOptions& options, std::unique_ptr<FSWritableFile>* result,
     IODebugContext* dbg) {
@@ -687,7 +687,7 @@ IOStatus MockFileSystem::ReuseWritableFile(
   }
 }
 
-IOStatus MockFileSystem::NewWritableFile(
+rocksdb_rs::io_status::IOStatus MockFileSystem::NewWritableFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -706,7 +706,7 @@ IOStatus MockFileSystem::NewWritableFile(
   }
 }
 
-IOStatus MockFileSystem::ReopenWritableFile(
+rocksdb_rs::io_status::IOStatus MockFileSystem::ReopenWritableFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -728,7 +728,7 @@ IOStatus MockFileSystem::ReopenWritableFile(
   }
 }
 
-IOStatus MockFileSystem::NewDirectory(const std::string& /*name*/,
+rocksdb_rs::io_status::IOStatus MockFileSystem::NewDirectory(const std::string& /*name*/,
                                       const IOOptions& /*io_opts*/,
                                       std::unique_ptr<FSDirectory>* result,
                                       IODebugContext* /*dbg*/) {
@@ -736,7 +736,7 @@ IOStatus MockFileSystem::NewDirectory(const std::string& /*name*/,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::FileExists(const std::string& fname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::FileExists(const std::string& fname,
                                     const IOOptions& /*io_opts*/,
                                     IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -782,7 +782,7 @@ bool MockFileSystem::GetChildrenInternal(const std::string& dir,
   return found_dir;
 }
 
-IOStatus MockFileSystem::GetChildren(const std::string& dir,
+rocksdb_rs::io_status::IOStatus MockFileSystem::GetChildren(const std::string& dir,
                                      const IOOptions& /*options*/,
                                      std::vector<std::string>* result,
                                      IODebugContext* /*dbg*/) {
@@ -804,7 +804,7 @@ void MockFileSystem::DeleteFileInternal(const std::string& fname) {
   }
 }
 
-IOStatus MockFileSystem::DeleteFile(const std::string& fname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::DeleteFile(const std::string& fname,
                                     const IOOptions& /*options*/,
                                     IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -817,7 +817,7 @@ IOStatus MockFileSystem::DeleteFile(const std::string& fname,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::Truncate(const std::string& fname, size_t size,
+rocksdb_rs::io_status::IOStatus MockFileSystem::Truncate(const std::string& fname, size_t size,
                                   const IOOptions& options,
                                   IODebugContext* dbg) {
   auto fn = NormalizeMockPath(fname);
@@ -830,7 +830,7 @@ IOStatus MockFileSystem::Truncate(const std::string& fname, size_t size,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::CreateDir(const std::string& dirname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::CreateDir(const std::string& dirname,
                                    const IOOptions& /*options*/,
                                    IODebugContext* /*dbg*/) {
   auto dn = NormalizeMockPath(dirname);
@@ -845,14 +845,14 @@ IOStatus MockFileSystem::CreateDir(const std::string& dirname,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::CreateDirIfMissing(const std::string& dirname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::CreateDirIfMissing(const std::string& dirname,
                                             const IOOptions& options,
                                             IODebugContext* dbg) {
   CreateDir(dirname, options, dbg);
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::DeleteDir(const std::string& dirname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::DeleteDir(const std::string& dirname,
                                    const IOOptions& /*options*/,
                                    IODebugContext* /*dbg*/) {
   auto dir = NormalizeMockPath(dirname);
@@ -871,7 +871,7 @@ IOStatus MockFileSystem::DeleteDir(const std::string& dirname,
   }
 }
 
-IOStatus MockFileSystem::GetFileSize(const std::string& fname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::GetFileSize(const std::string& fname,
                                      const IOOptions& /*options*/,
                                      uint64_t* file_size,
                                      IODebugContext* /*dbg*/) {
@@ -887,7 +887,7 @@ IOStatus MockFileSystem::GetFileSize(const std::string& fname,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::GetFileModificationTime(const std::string& fname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::GetFileModificationTime(const std::string& fname,
                                                  const IOOptions& /*options*/,
                                                  uint64_t* time,
                                                  IODebugContext* /*dbg*/) {
@@ -919,7 +919,7 @@ bool MockFileSystem::RenameFileInternal(const std::string& src,
   }
 }
 
-IOStatus MockFileSystem::RenameFile(const std::string& src,
+rocksdb_rs::io_status::IOStatus MockFileSystem::RenameFile(const std::string& src,
                                     const std::string& dest,
                                     const IOOptions& /*options*/,
                                     IODebugContext* /*dbg*/) {
@@ -934,7 +934,7 @@ IOStatus MockFileSystem::RenameFile(const std::string& src,
   }
 }
 
-IOStatus MockFileSystem::LinkFile(const std::string& src,
+rocksdb_rs::io_status::IOStatus MockFileSystem::LinkFile(const std::string& src,
                                   const std::string& dest,
                                   const IOOptions& /*options*/,
                                   IODebugContext* /*dbg*/) {
@@ -951,7 +951,7 @@ IOStatus MockFileSystem::LinkFile(const std::string& src,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::NewLogger(const std::string& fname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::NewLogger(const std::string& fname,
                                    const IOOptions& io_opts,
                                    std::shared_ptr<Logger>* result,
                                    IODebugContext* dbg) {
@@ -971,7 +971,7 @@ IOStatus MockFileSystem::NewLogger(const std::string& fname,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::LockFile(const std::string& fname,
+rocksdb_rs::io_status::IOStatus MockFileSystem::LockFile(const std::string& fname,
                                   const IOOptions& /*options*/,
                                   FileLock** flock, IODebugContext* /*dbg*/) {
   auto fn = NormalizeMockPath(fname);
@@ -995,7 +995,7 @@ IOStatus MockFileSystem::LockFile(const std::string& fname,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::UnlockFile(FileLock* flock,
+rocksdb_rs::io_status::IOStatus MockFileSystem::UnlockFile(FileLock* flock,
                                     const IOOptions& /*options*/,
                                     IODebugContext* /*dbg*/) {
   std::string fn = static_cast_with_check<MockEnvFileLock>(flock)->FileName();
@@ -1012,7 +1012,7 @@ IOStatus MockFileSystem::UnlockFile(FileLock* flock,
   return IOStatus_OK();
 }
 
-IOStatus MockFileSystem::GetTestDirectory(const IOOptions& /*options*/,
+rocksdb_rs::io_status::IOStatus MockFileSystem::GetTestDirectory(const IOOptions& /*options*/,
                                           std::string* path,
                                           IODebugContext* /*dbg*/) {
   *path = "/test";

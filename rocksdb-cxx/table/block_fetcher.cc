@@ -75,7 +75,7 @@ inline bool BlockFetcher::TryGetUncompressBlockFromPersistentCache() {
 inline bool BlockFetcher::TryGetFromPrefetchBuffer() {
   if (prefetch_buffer_ != nullptr) {
     IOOptions opts;
-    IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
+    rocksdb_rs::io_status::IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
     if (io_s.ok()) {
       bool read_from_prefetch_buffer = false;
       if (read_options_.async_io && !for_compaction_) {
@@ -240,7 +240,7 @@ inline void BlockFetcher::GetBlockContents() {
 #endif
 }
 
-IOStatus BlockFetcher::ReadBlockContents() {
+rocksdb_rs::io_status::IOStatus BlockFetcher::ReadBlockContents() {
   if (TryGetUncompressBlockFromPersistentCache()) {
     compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifndef NDEBUG
@@ -347,7 +347,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
   return io_status_;
 }
 
-IOStatus BlockFetcher::ReadAsyncBlockContents() {
+rocksdb_rs::io_status::IOStatus BlockFetcher::ReadAsyncBlockContents() {
   if (TryGetUncompressBlockFromPersistentCache()) {
     compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifndef NDEBUG
@@ -358,7 +358,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
     assert(prefetch_buffer_ != nullptr);
     if (!for_compaction_) {
       IOOptions opts;
-      IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
+      rocksdb_rs::io_status::IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
       if (!io_s.ok()) {
         return io_s;
       }

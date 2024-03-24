@@ -46,15 +46,15 @@ Writer::~Writer() {
   }
 }
 
-IOStatus Writer::WriteBuffer() {
+rocksdb_rs::io_status::IOStatus Writer::WriteBuffer() {
   if (dest_->seen_error()) {
     return IOStatus_IOError("Seen error. Skip writing buffer.");
   }
   return dest_->Flush();
 }
 
-IOStatus Writer::Close() {
-  IOStatus s;
+rocksdb_rs::io_status::IOStatus Writer::Close() {
+  rocksdb_rs::io_status::IOStatus s;
   if (dest_) {
     s = dest_->Close();
     dest_.reset();
@@ -62,7 +62,7 @@ IOStatus Writer::Close() {
   return s;
 }
 
-IOStatus Writer::AddRecord(const Slice& slice,
+rocksdb_rs::io_status::IOStatus Writer::AddRecord(const Slice& slice,
                            Env::IOPriority rate_limiter_priority) {
   const char* ptr = slice.data();
   size_t left = slice.size();
@@ -82,7 +82,7 @@ IOStatus Writer::AddRecord(const Slice& slice,
     compress_start = true;
   }
 
-  IOStatus s;
+  rocksdb_rs::io_status::IOStatus s;
   do {
     const int64_t leftover = kBlockSize - block_offset_;
     assert(leftover >= 0);
@@ -159,7 +159,7 @@ IOStatus Writer::AddRecord(const Slice& slice,
   return s;
 }
 
-IOStatus Writer::AddCompressionTypeRecord() {
+rocksdb_rs::io_status::IOStatus Writer::AddCompressionTypeRecord() {
   // Should be the first record
   assert(block_offset_ == 0);
 
@@ -171,7 +171,7 @@ IOStatus Writer::AddCompressionTypeRecord() {
   CompressionTypeRecord record(compression_type_);
   std::string encode;
   record.EncodeTo(&encode);
-  IOStatus s =
+  rocksdb_rs::io_status::IOStatus s =
       EmitPhysicalRecord(kSetCompressionType, encode.data(), encode.size());
   if (s.ok()) {
     if (!manual_flush_) {
@@ -196,7 +196,7 @@ IOStatus Writer::AddCompressionTypeRecord() {
   return s;
 }
 
-IOStatus Writer::MaybeAddUserDefinedTimestampSizeRecord(
+rocksdb_rs::io_status::IOStatus Writer::MaybeAddUserDefinedTimestampSizeRecord(
     const UnorderedMap<uint32_t, size_t>& cf_to_ts_sz,
     Env::IOPriority rate_limiter_priority) {
   std::vector<std::pair<uint32_t, size_t>> ts_sz_to_record;
@@ -225,7 +225,7 @@ IOStatus Writer::MaybeAddUserDefinedTimestampSizeRecord(
 
 bool Writer::BufferIsEmpty() { return dest_->BufferIsEmpty(); }
 
-IOStatus Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n,
+rocksdb_rs::io_status::IOStatus Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n,
                                     Env::IOPriority rate_limiter_priority) {
   assert(n <= 0xffff);  // Must fit in two bytes
 
@@ -266,7 +266,7 @@ IOStatus Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n,
   EncodeFixed32(buf, crc);
 
   // Write the header and the payload
-  IOStatus s = dest_->Append(Slice(buf, header_size), 0 /* crc32c_checksum */,
+  rocksdb_rs::io_status::IOStatus s = dest_->Append(Slice(buf, header_size), 0 /* crc32c_checksum */,
                              rate_limiter_priority);
   if (s.ok()) {
     s = dest_->Append(Slice(ptr, n), payload_crc, rate_limiter_priority);

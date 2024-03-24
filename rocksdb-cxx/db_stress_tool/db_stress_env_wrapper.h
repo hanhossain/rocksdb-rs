@@ -19,7 +19,7 @@ class DbStressRandomAccessFileWrapper : public FSRandomAccessFileOwnerWrapper {
       std::unique_ptr<FSRandomAccessFile>&& target)
       : FSRandomAccessFileOwnerWrapper(std::move(target)) {}
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override {
 #ifndef NDEBUG
@@ -41,19 +41,19 @@ class DbStressFSWrapper : public FileSystemWrapper {
   static const char* kClassName() { return "DbStressFS"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& f,
                                const FileOptions& file_opts,
                                std::unique_ptr<FSRandomAccessFile>* r,
                                IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    IOStatus s = target()->NewRandomAccessFile(f, file_opts, &file, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(f, file_opts, &file, dbg);
     if (s.ok()) {
       r->reset(new DbStressRandomAccessFileWrapper(std::move(file)));
     }
     return s;
   }
 
-  IOStatus DeleteFile(const std::string& f, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& f, const IOOptions& opts,
                       IODebugContext* dbg) override {
     // We determine whether it is a manifest file by searching a strong,
     // so that there will be false positive if the directory path contains the

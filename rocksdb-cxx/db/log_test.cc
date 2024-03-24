@@ -70,7 +70,7 @@ class LogTest
           returned_partial_(false),
           fail_after_read_partial_(fail_after_read_partial) {}
 
-    IOStatus Read(size_t n, const IOOptions& /*opts*/, Slice* result,
+    rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& /*opts*/, Slice* result,
                   char* scratch, IODebugContext* /*dbg*/) override {
       if (fail_after_read_partial_) {
         EXPECT_TRUE(!returned_partial_) << "must not Read() after eof/error";
@@ -112,7 +112,7 @@ class LogTest
       return IOStatus_OK();
     }
 
-    IOStatus Skip(uint64_t n) override {
+    rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
       if (n > contents_.size()) {
         contents_.clear();
         return IOStatus_NotFound("in-memory file skipepd past end");

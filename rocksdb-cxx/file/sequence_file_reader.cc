@@ -22,12 +22,12 @@
 #include "util/rate_limiter_impl.h"
 
 namespace rocksdb {
-IOStatus SequentialFileReader::Create(
+rocksdb_rs::io_status::IOStatus SequentialFileReader::Create(
     const std::shared_ptr<FileSystem>& fs, const std::string& fname,
     const FileOptions& file_opts, std::unique_ptr<SequentialFileReader>* reader,
     IODebugContext* dbg, RateLimiter* rate_limiter) {
   std::unique_ptr<FSSequentialFile> file;
-  IOStatus io_s = fs->NewSequentialFile(fname, file_opts, &file, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = fs->NewSequentialFile(fname, file_opts, &file, dbg);
   if (io_s.ok()) {
     reader->reset(new SequentialFileReader(std::move(file), fname, nullptr, {},
                                            rate_limiter));
@@ -35,9 +35,9 @@ IOStatus SequentialFileReader::Create(
   return io_s;
 }
 
-IOStatus SequentialFileReader::Read(size_t n, Slice* result, char* scratch,
+rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(size_t n, Slice* result, char* scratch,
                                     Env::IOPriority rate_limiter_priority) {
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   if (use_direct_io()) {
     //
     //    |-offset_advance-|---bytes returned--|
@@ -137,7 +137,7 @@ IOStatus SequentialFileReader::Read(size_t n, Slice* result, char* scratch,
   return io_s;
 }
 
-IOStatus SequentialFileReader::Skip(uint64_t n) {
+rocksdb_rs::io_status::IOStatus SequentialFileReader::Skip(uint64_t n) {
   if (use_direct_io()) {
     offset_ += static_cast<size_t>(n);
     return IOStatus_OK();
@@ -168,7 +168,7 @@ class ReadaheadSequentialFile : public FSSequentialFile {
 
   ReadaheadSequentialFile& operator=(const ReadaheadSequentialFile&) = delete;
 
-  IOStatus Read(size_t n, const IOOptions& opts, Slice* result, char* scratch,
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& opts, Slice* result, char* scratch,
                 IODebugContext* dbg) override {
     std::unique_lock<std::mutex> lk(lock_);
 
@@ -185,7 +185,7 @@ class ReadaheadSequentialFile : public FSSequentialFile {
     }
     n -= cached_len;
 
-    IOStatus s;
+    rocksdb_rs::io_status::IOStatus s;
     // Read-ahead only make sense if we have some slack left after reading
     if (n + alignment_ >= readahead_size_) {
       s = file_->Read(n, opts, result, scratch + cached_len, dbg);
@@ -207,9 +207,9 @@ class ReadaheadSequentialFile : public FSSequentialFile {
     return s;
   }
 
-  IOStatus Skip(uint64_t n) override {
+  rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
     std::unique_lock<std::mutex> lk(lock_);
-    IOStatus s = IOStatus_OK();
+    rocksdb_rs::io_status::IOStatus s = IOStatus_OK();
     // First check if we need to skip already cached data
     if (buffer_.CurrentSize() > 0) {
       // Do we need to skip beyond cached data?
@@ -234,13 +234,13 @@ class ReadaheadSequentialFile : public FSSequentialFile {
     return s;
   }
 
-  IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& opts,
                           Slice* result, char* scratch,
                           IODebugContext* dbg) override {
     return file_->PositionedRead(offset, n, opts, result, scratch, dbg);
   }
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
     std::unique_lock<std::mutex> lk(lock_);
     buffer_.Clear();
     return file_->InvalidateCache(offset, length);
@@ -270,14 +270,14 @@ class ReadaheadSequentialFile : public FSSequentialFile {
   // Reads into buffer_ the next n bytes from file_.
   // Can actually read less if EOF was reached.
   // Returns the status of the read operastion on the file.
-  IOStatus ReadIntoBuffer(size_t n, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus ReadIntoBuffer(size_t n, const IOOptions& opts,
                           IODebugContext* dbg) {
     if (n > buffer_.Capacity()) {
       n = buffer_.Capacity();
     }
     assert(IsFileSectorAligned(n, alignment_));
     Slice result;
-    IOStatus s = file_->Read(n, opts, &result, buffer_.BufferStart(), dbg);
+    rocksdb_rs::io_status::IOStatus s = file_->Read(n, opts, &result, buffer_.BufferStart(), dbg);
     if (s.ok()) {
       buffer_offset_ = read_offset_;
       buffer_.Size(result.size());

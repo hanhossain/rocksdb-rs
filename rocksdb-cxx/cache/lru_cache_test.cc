@@ -2282,7 +2282,7 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadWithFilter) {
 
   // After load, we do the Get again. To validate the cache, we do not allow any
   // I/O, so we set the file system to false.
-  IOStatus error_msg = IOStatus_IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = IOStatus_IOError("Retryable IO Error");
   fault_fs_->SetFilesystemActive(false, error_msg);
   start_insert = secondary_cache->num_inserts();
   start_lookup = secondary_cache->num_lookups();

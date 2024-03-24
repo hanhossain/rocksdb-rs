@@ -111,21 +111,21 @@ class LegacySequentialFileWrapper : public FSSequentialFile {
       std::unique_ptr<SequentialFile>&& _target)
       : target_(std::move(_target)) {}
 
-  IOStatus Read(size_t n, const IOOptions& /*options*/, Slice* result,
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& /*options*/, Slice* result,
                 char* scratch, IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Read(n, result, scratch));
   }
-  IOStatus Skip(uint64_t n) override {
+  rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
     return IOStatus_new(target_->Skip(n));
   }
   bool use_direct_io() const override { return target_->use_direct_io(); }
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
     return IOStatus_new(target_->InvalidateCache(offset, length));
   }
-  IOStatus PositionedRead(uint64_t offset, size_t n,
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n,
                           const IOOptions& /*options*/, Slice* result,
                           char* scratch, IODebugContext* /*dbg*/) override {
     return IOStatus_new(
@@ -142,13 +142,13 @@ class LegacyRandomAccessFileWrapper : public FSRandomAccessFile {
       std::unique_ptr<RandomAccessFile>&& target)
       : target_(std::move(target)) {}
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*options*/,
                 Slice* result, char* scratch,
                 IODebugContext* /*dbg*/) const override {
     return IOStatus_new(target_->Read(offset, n, result, scratch));
   }
 
-  IOStatus MultiRead(FSReadRequest* fs_reqs, size_t num_reqs,
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* fs_reqs, size_t num_reqs,
                      const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
     std::vector<ReadRequest> reqs;
@@ -172,7 +172,7 @@ class LegacyRandomAccessFileWrapper : public FSRandomAccessFile {
     return IOStatus_new(std::move(status));
   }
 
-  IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Prefetch(offset, n));
   }
@@ -186,7 +186,7 @@ class LegacyRandomAccessFileWrapper : public FSRandomAccessFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
     return IOStatus_new(target_->InvalidateCache(offset, length));
   }
 
@@ -203,29 +203,29 @@ class LegacyRandomRWFileWrapper : public FSRandomRWFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  IOStatus Write(uint64_t offset, const Slice& data,
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
                  const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Write(offset, data));
   }
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*options*/,
                 Slice* result, char* scratch,
                 IODebugContext* /*dbg*/) const override {
     return IOStatus_new(target_->Read(offset, n, result, scratch));
   }
-  IOStatus Flush(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Flush());
   }
-  IOStatus Sync(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*options*/,
                 IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Sync());
   }
-  IOStatus Fsync(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Fsync());
   }
-  IOStatus Close(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Close());
   }
@@ -239,43 +239,43 @@ class LegacyWritableFileWrapper : public FSWritableFile {
   explicit LegacyWritableFileWrapper(std::unique_ptr<WritableFile>&& _target)
       : target_(std::move(_target)) {}
 
-  IOStatus Append(const Slice& data, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& /*options*/,
                   IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Append(data));
   }
-  IOStatus Append(const Slice& data, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& /*options*/,
                   const DataVerificationInfo& /*verification_info*/,
                   IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Append(data));
   }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->PositionedAppend(data, offset));
   }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& /*options*/,
                             const DataVerificationInfo& /*verification_info*/,
                             IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->PositionedAppend(data, offset));
   }
-  IOStatus Truncate(uint64_t size, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Truncate(size));
   }
-  IOStatus Close(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Close());
   }
-  IOStatus Flush(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Flush());
   }
-  IOStatus Sync(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*options*/,
                 IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Sync());
   }
-  IOStatus Fsync(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Fsync());
   }
@@ -313,11 +313,11 @@ class LegacyWritableFileWrapper : public FSWritableFile {
     return target_->GetUniqueId(id, max_size);
   }
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
     return IOStatus_new(target_->InvalidateCache(offset, length));
   }
 
-  IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
                      const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->RangeSync(offset, nbytes));
@@ -328,7 +328,7 @@ class LegacyWritableFileWrapper : public FSWritableFile {
     target_->PrepareWrite(offset, len);
   }
 
-  IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Allocate(offset, len));
   }
@@ -342,11 +342,11 @@ class LegacyDirectoryWrapper : public FSDirectory {
   explicit LegacyDirectoryWrapper(std::unique_ptr<Directory>&& target)
       : target_(std::move(target)) {}
 
-  IOStatus Fsync(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Fsync());
   }
-  IOStatus Close(const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Close());
   }
@@ -371,7 +371,7 @@ class LegacyFileSystemWrapper : public FileSystem {
   Env* target() const { return target_; }
 
   // The following text is boilerplate that forwards all methods to target()
-  IOStatus NewSequentialFile(const std::string& f, const FileOptions& file_opts,
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& f, const FileOptions& file_opts,
                              std::unique_ptr<FSSequentialFile>* r,
                              IODebugContext* /*dbg*/) override {
     std::unique_ptr<SequentialFile> file;
@@ -381,7 +381,7 @@ class LegacyFileSystemWrapper : public FileSystem {
     }
     return IOStatus_new(std::move(s));
   }
-  IOStatus NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& f,
                                const FileOptions& file_opts,
                                std::unique_ptr<FSRandomAccessFile>* r,
                                IODebugContext* /*dbg*/) override {
@@ -392,7 +392,7 @@ class LegacyFileSystemWrapper : public FileSystem {
     }
     return IOStatus_new(std::move(s));
   }
-  IOStatus NewWritableFile(const std::string& f, const FileOptions& file_opts,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& f, const FileOptions& file_opts,
                            std::unique_ptr<FSWritableFile>* r,
                            IODebugContext* /*dbg*/) override {
     std::unique_ptr<WritableFile> file;
@@ -402,7 +402,7 @@ class LegacyFileSystemWrapper : public FileSystem {
     }
     return IOStatus_new(std::move(s));
   }
-  IOStatus ReopenWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReopenWritableFile(const std::string& fname,
                               const FileOptions& file_opts,
                               std::unique_ptr<FSWritableFile>* result,
                               IODebugContext* /*dbg*/) override {
@@ -413,7 +413,7 @@ class LegacyFileSystemWrapper : public FileSystem {
     }
     return IOStatus_new(std::move(s));
   }
-  IOStatus ReuseWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReuseWritableFile(const std::string& fname,
                              const std::string& old_fname,
                              const FileOptions& file_opts,
                              std::unique_ptr<FSWritableFile>* r,
@@ -425,7 +425,7 @@ class LegacyFileSystemWrapper : public FileSystem {
     }
     return IOStatus_new(std::move(s));
   }
-  IOStatus NewRandomRWFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& fname,
                            const FileOptions& file_opts,
                            std::unique_ptr<FSRandomRWFile>* result,
                            IODebugContext* /*dbg*/) override {
@@ -436,13 +436,13 @@ class LegacyFileSystemWrapper : public FileSystem {
     }
     return IOStatus_new(std::move(s));
   }
-  IOStatus NewMemoryMappedFileBuffer(
+  rocksdb_rs::io_status::IOStatus NewMemoryMappedFileBuffer(
       const std::string& fname,
       std::unique_ptr<MemoryMappedFileBuffer>* result) override {
     return IOStatus_new(
         target_->NewMemoryMappedFileBuffer(fname, result));
   }
-  IOStatus NewDirectory(const std::string& name, const IOOptions& /*io_opts*/,
+  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& /*io_opts*/,
                         std::unique_ptr<FSDirectory>* result,
                         IODebugContext* /*dbg*/) override {
     std::unique_ptr<Directory> dir;
@@ -452,49 +452,49 @@ class LegacyFileSystemWrapper : public FileSystem {
     }
     return IOStatus_new(std::move(s));
   }
-  IOStatus FileExists(const std::string& f, const IOOptions& /*io_opts*/,
+  rocksdb_rs::io_status::IOStatus FileExists(const std::string& f, const IOOptions& /*io_opts*/,
                       IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->FileExists(f));
   }
-  IOStatus GetChildren(const std::string& dir, const IOOptions& /*io_opts*/,
+  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& /*io_opts*/,
                        std::vector<std::string>* r,
                        IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->GetChildren(dir, r));
   }
-  IOStatus GetChildrenFileAttributes(const std::string& dir,
+  rocksdb_rs::io_status::IOStatus GetChildrenFileAttributes(const std::string& dir,
                                      const IOOptions& /*options*/,
                                      std::vector<FileAttributes>* result,
                                      IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->GetChildrenFileAttributes(dir, result));
   }
-  IOStatus DeleteFile(const std::string& f, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& f, const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->DeleteFile(f));
   }
-  IOStatus Truncate(const std::string& fname, size_t size,
+  rocksdb_rs::io_status::IOStatus Truncate(const std::string& fname, size_t size,
                     const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->Truncate(fname, size));
   }
-  IOStatus CreateDir(const std::string& d, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus CreateDir(const std::string& d, const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->CreateDir(d));
   }
-  IOStatus CreateDirIfMissing(const std::string& d,
+  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& d,
                               const IOOptions& /*options*/,
                               IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->CreateDirIfMissing(d));
   }
-  IOStatus DeleteDir(const std::string& d, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& d, const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->DeleteDir(d));
   }
-  IOStatus GetFileSize(const std::string& f, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& f, const IOOptions& /*options*/,
                        uint64_t* s, IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->GetFileSize(f, s));
   }
 
-  IOStatus GetFileModificationTime(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus GetFileModificationTime(const std::string& fname,
                                    const IOOptions& /*options*/,
                                    uint64_t* file_mtime,
                                    IODebugContext* /*dbg*/) override {
@@ -502,51 +502,51 @@ class LegacyFileSystemWrapper : public FileSystem {
         target_->GetFileModificationTime(fname, file_mtime));
   }
 
-  IOStatus GetAbsolutePath(const std::string& db_path,
+  rocksdb_rs::io_status::IOStatus GetAbsolutePath(const std::string& db_path,
                            const IOOptions& /*options*/,
                            std::string* output_path,
                            IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->GetAbsolutePath(db_path, output_path));
   }
 
-  IOStatus RenameFile(const std::string& s, const std::string& t,
+  rocksdb_rs::io_status::IOStatus RenameFile(const std::string& s, const std::string& t,
                       const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->RenameFile(s, t));
   }
 
-  IOStatus LinkFile(const std::string& s, const std::string& t,
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& s, const std::string& t,
                     const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->LinkFile(s, t));
   }
 
-  IOStatus NumFileLinks(const std::string& fname, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus NumFileLinks(const std::string& fname, const IOOptions& /*options*/,
                         uint64_t* count, IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->NumFileLinks(fname, count));
   }
 
-  IOStatus AreFilesSame(const std::string& first, const std::string& second,
+  rocksdb_rs::io_status::IOStatus AreFilesSame(const std::string& first, const std::string& second,
                         const IOOptions& /*options*/, bool* res,
                         IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->AreFilesSame(first, second, res));
   }
 
-  IOStatus LockFile(const std::string& f, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus LockFile(const std::string& f, const IOOptions& /*options*/,
                     FileLock** l, IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->LockFile(f, l));
   }
 
-  IOStatus UnlockFile(FileLock* l, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* l, const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->UnlockFile(l));
   }
 
-  IOStatus GetTestDirectory(const IOOptions& /*options*/, std::string* path,
+  rocksdb_rs::io_status::IOStatus GetTestDirectory(const IOOptions& /*options*/, std::string* path,
                             IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->GetTestDirectory(path));
   }
-  IOStatus NewLogger(const std::string& fname, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus NewLogger(const std::string& fname, const IOOptions& /*options*/,
                      std::shared_ptr<Logger>* result,
                      IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->NewLogger(fname, result));
@@ -592,11 +592,11 @@ class LegacyFileSystemWrapper : public FileSystem {
 #ifdef GetFreeSpace
 #undef GetFreeSpace
 #endif
-  IOStatus GetFreeSpace(const std::string& path, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& path, const IOOptions& /*options*/,
                         uint64_t* diskfree, IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->GetFreeSpace(path, diskfree));
   }
-  IOStatus IsDirectory(const std::string& path, const IOOptions& /*options*/,
+  rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& path, const IOOptions& /*options*/,
                        bool* is_dir, IODebugContext* /*dbg*/) override {
     return IOStatus_new(target_->IsDirectory(path, is_dir));
   }

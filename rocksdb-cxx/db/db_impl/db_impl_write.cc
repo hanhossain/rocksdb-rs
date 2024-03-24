@@ -400,7 +400,7 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
   last_batch_group_size_ =
       write_thread_.EnterAsBatchGroupLeader(&w, &write_group);
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   rocksdb_rs::status::Status pre_release_cb_status = rocksdb_rs::status::Status_new();
   if (status.ok()) {
     // TODO: this use of operator bool on `tracer_` can avoid unnecessary lock
@@ -729,7 +729,7 @@ rocksdb_rs::status::Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_
 
     PERF_TIMER_STOP(write_pre_and_post_process_time);
 
-    IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s;
 
     if (w.status.ok() && !write_options.disableWAL) {
       PERF_TIMER_GUARD(write_wal_time);
@@ -1005,7 +1005,7 @@ rocksdb_rs::status::Status DBImpl::WriteImplWALOnly(
   }
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   if (!write_options.disableWAL) {
-    IOStatus io_s =
+    rocksdb_rs::io_status::IOStatus io_s =
         ConcurrentWriteToWAL(write_group, log_used, &last_sequence, seq_inc);
     status = io_s;
     // last_sequence may not be set if there is an error
@@ -1110,7 +1110,7 @@ void DBImpl::WriteStatusCheck(const rocksdb_rs::status::Status& status) {
   }
 }
 
-void DBImpl::IOStatusCheck(const IOStatus& io_status) {
+void DBImpl::IOStatusCheck(const rocksdb_rs::io_status::IOStatus& io_status) {
   // Is setting bg_error_ enough here?  This will at least stop
   // compaction and fail any further writes.
   if ((immutable_db_options_.paranoid_checks && !io_status.ok() &&
@@ -1301,7 +1301,7 @@ rocksdb_rs::status::Status DBImpl::MergeBatch(const WriteThread::WriteGroup& wri
 
 // When two_write_queues_ is disabled, this function is called from the only
 // write thread. Otherwise this must be called holding log_write_mutex_.
-IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batch,
+rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batch,
                             log::Writer* log_writer, uint64_t* log_used,
                             uint64_t* log_size,
                             Env::IOPriority rate_limiter_priority,
@@ -1326,7 +1326,7 @@ IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batch,
   if (UNLIKELY(needs_locking)) {
     log_write_mutex_.Lock();
   }
-  IOStatus io_s = log_writer->MaybeAddUserDefinedTimestampSizeRecord(
+  rocksdb_rs::io_status::IOStatus io_s = log_writer->MaybeAddUserDefinedTimestampSizeRecord(
       versions_->GetColumnFamiliesTimestampSizeForRecord(),
       rate_limiter_priority);
   if (!io_s.ok()) {
@@ -1346,12 +1346,12 @@ IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batch,
   return io_s;
 }
 
-IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup& write_group,
+rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup& write_group,
                             log::Writer* log_writer, uint64_t* log_used,
                             bool need_log_sync, bool need_log_dir_sync,
                             SequenceNumber sequence,
                             LogFileNumberSize& log_file_number_size) {
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   assert(!two_write_queues_);
   assert(!write_group.leader->disable_wal);
   // Same holds for all in the batch group
@@ -1442,10 +1442,10 @@ IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup& write_group,
   return io_s;
 }
 
-IOStatus DBImpl::ConcurrentWriteToWAL(
+rocksdb_rs::io_status::IOStatus DBImpl::ConcurrentWriteToWAL(
     const WriteThread::WriteGroup& write_group, uint64_t* log_used,
     SequenceNumber* last_sequence, size_t seq_inc) {
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
 
   assert(two_write_queues_ || immutable_db_options_.unordered_write);
   assert(!write_group.leader->disable_wal);
@@ -2098,7 +2098,7 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
   const ReadOptions read_options;
   log::Writer* new_log = nullptr;
   MemTable* new_mem = nullptr;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
 
   // Recoverable state is persisted in WAL. After memtable switch, WAL might
   // be deleted, so we write the state to memtable to be persisted as well.

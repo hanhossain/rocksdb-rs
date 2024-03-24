@@ -29,7 +29,7 @@ class ExternalSSTTestFS : public FileSystemWrapper {
   static const char* kClassName() { return "ExternalSSTTestFS"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus LinkFile(const std::string& s, const std::string& t,
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& s, const std::string& t,
                     const IOOptions& options, IODebugContext* dbg) override {
     if (fail_link_) {
       return IOStatus_NotSupported("Link failed");

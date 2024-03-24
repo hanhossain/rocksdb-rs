@@ -100,7 +100,7 @@ rocksdb_rs::status::Status DeleteScheduler::DeleteFile(const std::string& file_p
 
   // Update the total trash size
   uint64_t trash_file_size = 0;
-  IOStatus io_s =
+  rocksdb_rs::io_status::IOStatus io_s =
       fs_->GetFileSize(trash_file, IOOptions(), &trash_file_size, nullptr);
   if (io_s.ok()) {
     total_trash_size_.fetch_add(trash_file_size);

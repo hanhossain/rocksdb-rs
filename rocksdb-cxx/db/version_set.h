@@ -1501,7 +1501,7 @@ class VersionSet {
   static uint64_t GetTotalBlobFileSize(Version* dummy_versions);
 
   // Get the IO Status returned by written Manifest.
-  const IOStatus& io_status() const { return io_status_; }
+  const rocksdb_rs::io_status::IOStatus& io_status() const { return io_status_; }
 
   // The returned WalSet needs to be accessed with DB mutex held.
   const WalSet& GetWalSet() const { return wals_; }
@@ -1566,7 +1566,7 @@ class VersionSet {
   // Save current contents to *log
   rocksdb_rs::status::Status WriteCurrentStateToManifest(
       const std::unordered_map<uint32_t, MutableCFState>& curr_state,
-      const VersionEdit& wal_additions, log::Writer* log, IOStatus& io_s);
+      const VersionEdit& wal_additions, log::Writer* log, rocksdb_rs::io_status::IOStatus& io_s);
 
   void AppendVersion(ColumnFamilyData* column_family_data, Version* v);
 
@@ -1639,7 +1639,7 @@ class VersionSet {
   BlockCacheTracer* const block_cache_tracer_;
 
   // Store the IO status when Manifest is written
-  IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_;
 
   std::shared_ptr<IOTracer> io_tracer_;
 

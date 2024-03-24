@@ -713,9 +713,9 @@ class TableFileCreationListener : public EventListener {
     static const char* kClassName() { return "TestEnv"; }
     const char* Name() const override { return kClassName(); }
 
-    void SetStatus(IOStatus s) { status_ = s; }
+    void SetStatus(rocksdb_rs::io_status::IOStatus s) { status_ = s; }
 
-    IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
+    rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
                              std::unique_ptr<FSWritableFile>* result,
                              IODebugContext* dbg) override {
       if (fname.size() > 4 && fname.substr(fname.size() - 4) == ".sst") {
@@ -727,7 +727,7 @@ class TableFileCreationListener : public EventListener {
     }
 
    private:
-    IOStatus status_;
+    rocksdb_rs::io_status::IOStatus status_;
   };
 
   TableFileCreationListener() : last_failure_(rocksdb_rs::status::Status_new()) {

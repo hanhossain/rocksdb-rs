@@ -37,7 +37,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
   ReadaheadRandomAccessFile& operator=(const ReadaheadRandomAccessFile&) =
       delete;
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override {
     // Read-ahead only make sense if we have some slack left after reading
@@ -63,7 +63,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
     // chunk_offset equals to advanced_offset
     size_t chunk_offset = TruncateToPageBoundary(alignment_, advanced_offset);
 
-    IOStatus s = ReadIntoBuffer(chunk_offset, readahead_size_, options, dbg);
+    rocksdb_rs::io_status::IOStatus s = ReadIntoBuffer(chunk_offset, readahead_size_, options, dbg);
     if (s.ok()) {
       // The data we need is now in cache, so we can safely read it
       size_t remaining_len;
@@ -74,7 +74,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
     return s;
   }
 
-  IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
                     IODebugContext* dbg) override {
     if (n < readahead_size_) {
       // Don't allow smaller prefetches than the configured `readahead_size_`.
@@ -100,7 +100,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
 
   void Hint(AccessPattern pattern) override { file_->Hint(pattern); }
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
     std::unique_lock<std::mutex> lk(lock_);
     buffer_.Clear();
     return file_->InvalidateCache(offset, length);
@@ -130,7 +130,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
   // Reads into buffer_ the next n bytes from file_ starting at offset.
   // Can actually read less if EOF was reached.
   // Returns the status of the read operastion on the file.
-  IOStatus ReadIntoBuffer(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus ReadIntoBuffer(uint64_t offset, size_t n, const IOOptions& options,
                           IODebugContext* dbg) const {
     if (n > buffer_.Capacity()) {
       n = buffer_.Capacity();
@@ -138,7 +138,7 @@ class ReadaheadRandomAccessFile : public FSRandomAccessFile {
     assert(IsFileSectorAligned(offset, alignment_));
     assert(IsFileSectorAligned(n, alignment_));
     Slice result;
-    IOStatus s =
+    rocksdb_rs::io_status::IOStatus s =
         file_->Read(offset, n, options, &result, buffer_.BufferStart(), dbg);
     if (s.ok()) {
       buffer_offset_ = offset;

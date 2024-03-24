@@ -750,7 +750,7 @@ void StressTest::OperateDb(ThreadState* thread) {
   }
 #endif  // NDEBUG
   if (FLAGS_write_fault_one_in) {
-    IOStatus error_msg;
+    rocksdb_rs::io_status::IOStatus error_msg;
     if (FLAGS_injest_error_severity <= 1 || FLAGS_injest_error_severity > 2) {
       error_msg = IOStatus_IOError("Retryable IO Error");
       error_msg.SetRetryable(true);

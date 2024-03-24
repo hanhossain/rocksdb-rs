@@ -716,10 +716,10 @@ class FileTemperatureTestFS : public FileSystemWrapper {
   static const char* kClassName() { return "FileTemperatureTestFS"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewSequentialFile(const std::string& fname, const FileOptions& opts,
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& fname, const FileOptions& opts,
                              std::unique_ptr<FSSequentialFile>* result,
                              IODebugContext* dbg) override {
-    IOStatus s = target()->NewSequentialFile(fname, opts, result, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewSequentialFile(fname, opts, result, dbg);
     uint64_t number;
     rocksdb_rs::types::FileType type;
     if (ParseFileName(GetFileName(fname), &number, &type) &&
@@ -744,11 +744,11 @@ class FileTemperatureTestFS : public FileSystemWrapper {
     return s;
   }
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override {
-    IOStatus s = target()->NewRandomAccessFile(fname, opts, result, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, opts, result, dbg);
     uint64_t number;
     rocksdb_rs::types::FileType type;
     if (ParseFileName(GetFileName(fname), &number, &type) &&
@@ -784,7 +784,7 @@ class FileTemperatureTestFS : public FileSystemWrapper {
     }
   }
 
-  IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
                            std::unique_ptr<FSWritableFile>* result,
                            IODebugContext* dbg) override {
     uint64_t number;

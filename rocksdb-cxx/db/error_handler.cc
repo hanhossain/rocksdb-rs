@@ -495,7 +495,7 @@ namespace rocksdb {
                                                              BackgroundErrorReason reason) {
     db_mutex_->AssertHeld();
     rocksdb_rs::status::Status tmp_status = bg_status.Clone();
-    IOStatus bg_io_err = IOStatus_new(std::move(tmp_status));
+    rocksdb_rs::io_status::IOStatus bg_io_err = IOStatus_new(std::move(tmp_status));
 
     if (bg_io_err.ok()) {
       return kOkStatus;
@@ -726,7 +726,7 @@ namespace rocksdb {
   }
 
   const rocksdb_rs::status::Status &ErrorHandler::StartRecoverFromRetryableBGIOError(
-    const IOStatus &io_error) {
+    const rocksdb_rs::io_status::IOStatus &io_error) {
     db_mutex_->AssertHeld();
     if (bg_error_.ok()) {
       return bg_error_;

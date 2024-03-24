@@ -115,7 +115,7 @@ class CompactionOutputs {
         std::make_shared<TableProperties>(GetTableProperties());
   }
 
-  IOStatus WriterSyncClose(const rocksdb_rs::status::Status& intput_status, SystemClock* clock,
+  rocksdb_rs::io_status::IOStatus WriterSyncClose(const rocksdb_rs::status::Status& intput_status, SystemClock* clock,
                            Statistics* statistics, bool use_fsync);
 
   TableProperties GetTableProperties() {

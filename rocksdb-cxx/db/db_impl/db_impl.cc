@@ -359,7 +359,7 @@ rocksdb_rs::status::Status DBImpl::ResumeImpl(DBRecoverContext context) {
   // Make sure the IO Status stored in version set is set to OK.
   bool file_deletion_disabled = !IsFileDeletionsEnabled();
   if (s.ok()) {
-    IOStatus io_s = versions_->io_status();
+    rocksdb_rs::io_status::IOStatus io_s = versions_->io_status();
     if (io_s.IsIOError()) {
       // If resuming from IOError resulted from MANIFEST write, then assert
       // that we must have already set the MANIFEST writer to nullptr during
@@ -720,7 +720,7 @@ rocksdb_rs::status::Status DBImpl::CloseHelper() {
     write_buffer_manager_->RemoveDBFromQueue(wbm_stall_.get());
   }
 
-  IOStatus io_s = directories_.Close(IOOptions(), nullptr /* dbg */);
+  rocksdb_rs::io_status::IOStatus io_s = directories_.Close(IOOptions(), nullptr /* dbg */);
   if (!io_s.ok()) {
     ret = io_s;
   }
@@ -1398,7 +1398,7 @@ int DBImpl::FindMinimumEmptyLevelFitting(
 
 rocksdb_rs::status::Status DBImpl::FlushWAL(bool sync) {
   if (manual_wal_flush_) {
-    IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s;
     {
       // We need to lock log_write_mutex_ since logs_ might change concurrently
       InstrumentedMutexLock wl(&log_write_mutex_);
@@ -1475,7 +1475,7 @@ rocksdb_rs::status::Status DBImpl::SyncWAL() {
   TEST_SYNC_POINT("DBWALTest::SyncWALNotWaitWrite:1");
   RecordTick(stats_, WAL_FILE_SYNCED);
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   for (log::Writer* log : logs_to_sync) {
     io_s = log->file()->SyncWithoutFlush(immutable_db_options_.use_fsync);
     if (!io_s.ok()) {
@@ -5516,7 +5516,7 @@ rocksdb_rs::status::Status DBImpl::IngestExternalFiles(
       // CURRENT file. With current code, it's just difficult to tell. So just
       // be pessimistic and try write to a new MANIFEST.
       // TODO: distinguish between MANIFEST write and CURRENT renaming
-      const IOStatus& io_s = versions_->io_status();
+      const rocksdb_rs::io_status::IOStatus& io_s = versions_->io_status();
       // Should handle return error?
       error_handler_.SetBGError(io_s, BackgroundErrorReason::kManifestWrite);
     }

@@ -64,7 +64,7 @@ class BlockBasedTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status status() const override;
 
   // Return non-ok iff some error happens during IO.
-  IOStatus io_status() const override;
+  rocksdb_rs::io_status::IOStatus io_status() const override;
 
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.

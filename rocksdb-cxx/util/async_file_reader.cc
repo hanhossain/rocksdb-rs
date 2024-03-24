@@ -20,7 +20,7 @@ bool AsyncFileReader::MultiReadAsyncImpl(ReadAwaiter* awaiter) {
   awaiter->io_handle_.resize(awaiter->num_reqs_);
   awaiter->del_fn_.resize(awaiter->num_reqs_);
   for (size_t i = 0; i < awaiter->num_reqs_; ++i) {
-    IOStatus s = awaiter->file_->ReadAsync(
+    rocksdb_rs::io_status::IOStatus s = awaiter->file_->ReadAsync(
         awaiter->read_reqs_[i], awaiter->opts_,
         [](const FSReadRequest& req, void* cb_arg) {
           FSReadRequest* read_req = static_cast<FSReadRequest*>(cb_arg);
@@ -49,7 +49,7 @@ void AsyncFileReader::Wait() {
   }
   ReadAwaiter* waiter;
   std::vector<void*> io_handles;
-  IOStatus s;
+  rocksdb_rs::io_status::IOStatus s;
   io_handles.reserve(num_reqs_);
   waiter = head_;
   do {

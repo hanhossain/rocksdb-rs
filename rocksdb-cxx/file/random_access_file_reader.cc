@@ -67,19 +67,19 @@ inline void RecordIOStats(Statistics* stats, Temperature file_temperature,
   }
 }
 
-IOStatus RandomAccessFileReader::Create(
+rocksdb_rs::io_status::IOStatus RandomAccessFileReader::Create(
     const std::shared_ptr<FileSystem>& fs, const std::string& fname,
     const FileOptions& file_opts,
     std::unique_ptr<RandomAccessFileReader>* reader, IODebugContext* dbg) {
   std::unique_ptr<FSRandomAccessFile> file;
-  IOStatus io_s = fs->NewRandomAccessFile(fname, file_opts, &file, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = fs->NewRandomAccessFile(fname, file_opts, &file, dbg);
   if (io_s.ok()) {
     reader->reset(new RandomAccessFileReader(std::move(file), fname));
   }
   return io_s;
 }
 
-IOStatus RandomAccessFileReader::Read(
+rocksdb_rs::io_status::IOStatus RandomAccessFileReader::Read(
     const IOOptions& opts, uint64_t offset, size_t n, Slice* result,
     char* scratch, AlignedBuf* aligned_buf,
     Env::IOPriority rate_limiter_priority) const {
@@ -95,7 +95,7 @@ IOStatus RandomAccessFileReader::Read(
     scratch[0]++;
   }
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   uint64_t elapsed = 0;
   size_t alignment = file_->GetRequiredBufferAlignment();
   bool is_aligned = false;
@@ -277,7 +277,7 @@ bool TryMerge(FSReadRequest* dest, const FSReadRequest& src) {
   return true;
 }
 
-IOStatus RandomAccessFileReader::MultiRead(
+rocksdb_rs::io_status::IOStatus RandomAccessFileReader::MultiRead(
     const IOOptions& opts, FSReadRequest* read_reqs, size_t num_reqs,
     AlignedBuf* aligned_buf, Env::IOPriority rate_limiter_priority) const {
   (void)aligned_buf;  // suppress warning of unused variable in LITE mode
@@ -300,7 +300,7 @@ IOStatus RandomAccessFileReader::MultiRead(
     }
   }
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s;
   uint64_t elapsed = 0;
   {
     StopWatch sw(clock_, stats_, hist_type_,
@@ -440,7 +440,7 @@ IOStatus RandomAccessFileReader::MultiRead(
   return io_s;
 }
 
-IOStatus RandomAccessFileReader::PrepareIOOptions(const ReadOptions& ro,
+rocksdb_rs::io_status::IOStatus RandomAccessFileReader::PrepareIOOptions(const ReadOptions& ro,
                                                   IOOptions& opts) const {
   if (clock_ != nullptr) {
     return PrepareIOFromReadOptions(ro, clock_, opts);
@@ -449,11 +449,11 @@ IOStatus RandomAccessFileReader::PrepareIOOptions(const ReadOptions& ro,
   }
 }
 
-IOStatus RandomAccessFileReader::ReadAsync(
+rocksdb_rs::io_status::IOStatus RandomAccessFileReader::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, AlignedBuf* aligned_buf) {
-  IOStatus s;
+  rocksdb_rs::io_status::IOStatus s;
   // Create a callback and populate info.
   auto read_async_callback =
       std::bind(&RandomAccessFileReader::ReadAsyncCallback, this,
