@@ -441,12 +441,12 @@ rocksdb_rs::status::Status FlushJob::MemPurge() {
     std::unique_ptr<CompactionFilter> compaction_filter;
     if (ioptions->compaction_filter_factory != nullptr &&
         ioptions->compaction_filter_factory->ShouldFilterTableFileCreation(
-            TableFileCreationReason::kFlush)) {
+            rocksdb_rs::types::TableFileCreationReason::kFlush)) {
       CompactionFilter::Context ctx;
       ctx.is_full_compaction = false;
       ctx.is_manual_compaction = false;
       ctx.column_family_id = cfd_->GetID();
-      ctx.reason = TableFileCreationReason::kFlush;
+      ctx.reason = rocksdb_rs::types::TableFileCreationReason::kFlush;
       compaction_filter =
           ioptions->compaction_filter_factory->CreateCompactionFilter(ctx);
       if (compaction_filter != nullptr &&
@@ -932,7 +932,7 @@ rocksdb_rs::status::Status FlushJob::WriteLevel0Table() {
           cfd_->int_tbl_prop_collector_factories(), output_compression_,
           mutable_cf_options_.compression_opts, cfd_->GetID(), cfd_->GetName(),
           0 /* level */, false /* is_bottommost */,
-          TableFileCreationReason::kFlush, oldest_key_time, current_time,
+          rocksdb_rs::types::TableFileCreationReason::kFlush, oldest_key_time, current_time,
           db_id_, db_session_id_, 0 /* target_file_size */,
           meta_.fd.GetNumber());
       const SequenceNumber job_snapshot_seq =
@@ -963,7 +963,7 @@ rocksdb_rs::status::Status FlushJob::WriteLevel0Table() {
           s = rocksdb_rs::status::Status_Corruption(msg);
         }
       }
-      if (tboptions.reason == TableFileCreationReason::kFlush) {
+      if (tboptions.reason == rocksdb_rs::types::TableFileCreationReason::kFlush) {
         TEST_SYNC_POINT("DBImpl::FlushJob:Flush");
         RecordTick(stats_, MEMTABLE_PAYLOAD_BYTES_AT_FLUSH,
                    memtable_payload_bytes);

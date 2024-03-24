@@ -1740,7 +1740,7 @@ FilterBitsBuilder* RibbonFilterPolicy::GetBuilderWithContext(
   switch (context.compaction_style) {
     case kCompactionStyleLevel:
     case kCompactionStyleUniversal: {
-      if (context.reason == TableFileCreationReason::kFlush) {
+      if (context.reason == rocksdb_rs::types::TableFileCreationReason::kFlush) {
         // Treat flush as level -1
         assert(context.level_at_creation == 0);
         levelish = -1;

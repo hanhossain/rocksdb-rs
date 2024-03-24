@@ -78,7 +78,7 @@ struct FilterBuildingContext {
   bool is_bottommost = false;
 
   // Reason for creating the file with the filter
-  TableFileCreationReason reason = TableFileCreationReason::kMisc;
+  rocksdb_rs::types::TableFileCreationReason reason = rocksdb_rs::types::TableFileCreationReason::kMisc;
 };
 
 // Determines what kind of filter (if any) to generate in SST files, and under

@@ -59,7 +59,7 @@ namespace rocksdb {
 
   struct TableFileCreationBriefInfo : public FileCreationBriefInfo {
     // reason of creating the table.
-    TableFileCreationReason reason;
+    rocksdb_rs::types::TableFileCreationReason reason;
   };
 
   struct TableFileCreationInfo : public TableFileCreationBriefInfo {

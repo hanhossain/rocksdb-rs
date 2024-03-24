@@ -111,7 +111,7 @@ struct TableBuilderOptions {
       const CompressionOptions& _compression_opts, uint32_t _column_family_id,
       const std::string& _column_family_name, int _level,
       bool _is_bottommost = false,
-      TableFileCreationReason _reason = TableFileCreationReason::kMisc,
+      rocksdb_rs::types::TableFileCreationReason _reason = rocksdb_rs::types::TableFileCreationReason::kMisc,
       const int64_t _oldest_key_time = 0,
       const uint64_t _file_creation_time = 0, const std::string& _db_id = "",
       const std::string& _db_session_id = "",
@@ -150,7 +150,7 @@ struct TableBuilderOptions {
   // BEGIN for FilterBuildingContext
   const int level_at_creation;
   const bool is_bottommost;
-  const TableFileCreationReason reason;
+  const rocksdb_rs::types::TableFileCreationReason reason;
   // END for FilterBuildingContext
 
   // XXX: only used by BlockBasedTableBuilder for SstFileWriter. If you

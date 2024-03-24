@@ -1653,7 +1653,7 @@ rocksdb_rs::status::Status DBImpl::WriteLevel0TableForRecovery(int job_id, Colum
           GetCompressionFlush(*cfd->ioptions(), mutable_cf_options),
           mutable_cf_options.compression_opts, cfd->GetID(), cfd->GetName(),
           0 /* level */, false /* is_bottommost */,
-          TableFileCreationReason::kRecovery, 0 /* oldest_key_time */,
+          rocksdb_rs::types::TableFileCreationReason::kRecovery, 0 /* oldest_key_time */,
           0 /* file_creation_time */, db_id_, db_session_id_,
           0 /* target_file_size */, meta.fd.GetNumber());
       SeqnoToTimeMapping empty_seqno_time_mapping;

@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "rocksdb/slice.h"
+#include "rocksdb-rs/src/types.rs.h"
 
 namespace rocksdb {
 
@@ -19,13 +19,6 @@ using ColumnFamilyId = uint32_t;
 using SequenceNumber = uint64_t;
 
 const SequenceNumber kMinUnCommittedSeq = 1;  // 0 is always committed
-
-enum class TableFileCreationReason {
-  kFlush,
-  kCompaction,
-  kRecovery,
-  kMisc,
-};
 
 enum class BlobFileCreationReason {
   kFlush,

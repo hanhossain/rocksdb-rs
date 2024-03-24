@@ -15,4 +15,11 @@ pub mod ffi {
         kOptionsFile,
         kBlobFile,
     }
+
+    enum TableFileCreationReason {
+        kFlush,
+        kCompaction,
+        kRecovery,
+        kMisc,
+    }
 }

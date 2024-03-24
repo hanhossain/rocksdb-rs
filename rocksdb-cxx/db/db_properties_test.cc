@@ -1750,7 +1750,7 @@ TEST_F(DBPropertiesTest, MinObsoleteSstNumberToKeep) {
   class TestListener : public EventListener {
    public:
     void OnTableFileCreated(const TableFileCreationInfo& info) override {
-      if (info.reason == TableFileCreationReason::kCompaction) {
+      if (info.reason == rocksdb_rs::types::TableFileCreationReason::kCompaction) {
         // Verify the property indicates that SSTs created by a running
         // compaction cannot be deleted.
         uint64_t created_file_num;

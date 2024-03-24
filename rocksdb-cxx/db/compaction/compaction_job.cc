@@ -1595,7 +1595,7 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
   EventHelpers::LogAndNotifyTableFileCreationFinished(
       event_logger_, cfd->ioptions()->listeners, dbname_, cfd->GetName(), fname,
       job_id_, output_fd, oldest_blob_file_number, tp,
-      TableFileCreationReason::kCompaction, status_for_listener, file_checksum,
+      rocksdb_rs::types::TableFileCreationReason::kCompaction, status_for_listener, file_checksum,
       file_checksum_func_name);
 
   // Report new file to SstFileManagerImpl
@@ -1743,7 +1743,7 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
   ColumnFamilyData* cfd = sub_compact->compaction->column_family_data();
   EventHelpers::NotifyTableFileCreationStarted(
       cfd->ioptions()->listeners, dbname_, cfd->GetName(), fname, job_id_,
-      TableFileCreationReason::kCompaction);
+      rocksdb_rs::types::TableFileCreationReason::kCompaction);
   // Make the output file
   std::unique_ptr<FSWritableFile> writable_file;
 #ifndef NDEBUG
@@ -1782,7 +1782,7 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
     EventHelpers::LogAndNotifyTableFileCreationFinished(
         event_logger_, cfd->ioptions()->listeners, dbname_, cfd->GetName(),
         fname, job_id_, FileDescriptor(), kInvalidBlobFileNumber,
-        TableProperties(), TableFileCreationReason::kCompaction, s,
+        TableProperties(), rocksdb_rs::types::TableFileCreationReason::kCompaction, s,
         kUnknownFileChecksum, kUnknownFileChecksumFuncName);
     return s;
   }
@@ -1858,7 +1858,7 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
       sub_compact->compaction->output_compression(),
       sub_compact->compaction->output_compression_opts(), cfd->GetID(),
       cfd->GetName(), sub_compact->compaction->output_level(),
-      bottommost_level_, TableFileCreationReason::kCompaction,
+      bottommost_level_, rocksdb_rs::types::TableFileCreationReason::kCompaction,
       0 /* oldest_key_time */, current_time, db_id_, db_session_id_,
       sub_compact->compaction->max_output_file_size(), file_number);
 
