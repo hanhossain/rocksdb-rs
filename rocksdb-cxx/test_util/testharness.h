@@ -81,7 +81,7 @@ int RandomSeed();
 ::testing::AssertionResult AssertStatus(const char* s_expr,
                                         const rocksdb_rs::status::Status& s);
 ::testing::AssertionResult AssertStatus(
-    const char* s_expr, const rocksdb_rs::io_status::rocksdb_rs::io_status::IOStatus& s);
+    const char* s_expr, const rocksdb_rs::io_status::IOStatus& s);
 
 #define ASSERT_OK(s) ASSERT_PRED_FORMAT1(rocksdb::test::AssertStatus, s)
 #define ASSERT_NOK(s) ASSERT_FALSE((s).ok())

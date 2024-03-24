@@ -37,7 +37,7 @@ std::string GetPidStr() { return std::to_string(getpid()); }
 }
 
 ::testing::AssertionResult AssertStatus(
-    const char* s_expr, const rocksdb_rs::io_status::rocksdb_rs::io_status::IOStatus& s) {
+    const char* s_expr, const rocksdb_rs::io_status::IOStatus& s) {
   if (s.ok()) {
     return ::testing::AssertionSuccess();
   } else {

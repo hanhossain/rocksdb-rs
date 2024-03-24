@@ -275,7 +275,7 @@ rocksdb_rs::status::Status MockTableFactory::CreateMockTable(Env* env, const std
                                          KVVector file_contents) {
   std::unique_ptr<WritableFileWriter> file_writer;
   rocksdb_rs::status::Status s = WritableFileWriter::Create(env->GetFileSystem(), fname,
-                                        FileOptions(), &file_writer, nullptr);
+                                        FileOptions(), &file_writer, nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -292,7 +292,7 @@ rocksdb_rs::status::Status MockTableFactory::GetAndWriteNextID(WritableFileWrite
   *next_id = next_id_.fetch_add(1);
   char buf[4];
   EncodeFixed32(buf, *next_id);
-  return file->Append(Slice(buf, 4));
+  return file->Append(Slice(buf, 4)).status();
 }
 
 rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(RandomAccessFileReader* file,
@@ -300,7 +300,7 @@ rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(RandomAccessFileReade
   char buf[4];
   Slice result;
   rocksdb_rs::status::Status s = file->Read(IOOptions(), 0, 4, &result, buf, nullptr,
-                        Env::IO_TOTAL /* rate_limiter_priority */);
+                        Env::IO_TOTAL /* rate_limiter_priority */).status();
   assert(result.size() == 4);
   *id = DecodeFixed32(buf);
   return s;
