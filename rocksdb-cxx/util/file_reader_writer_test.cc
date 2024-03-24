@@ -37,11 +37,11 @@ TEST_F(WritableFileWriterTest, RangeSync) {
     rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
       size_ += data.size();
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Truncate(uint64_t /*size*/, const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
@@ -49,19 +49,19 @@ TEST_F(WritableFileWriterTest, RangeSync) {
       EXPECT_LT(size_, last_synced_ + 2 * kMb);
       // Make sure random writes generated enough writes.
       EXPECT_GT(size_, 10 * kMb);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*options*/,
                   IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     void SetIOPriority(Env::IOPriority /*pri*/) override {}
     uint64_t GetFileSize(const IOOptions& /*options*/,
@@ -74,14 +74,14 @@ TEST_F(WritableFileWriterTest, RangeSync) {
       return 0;
     }
     rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
    protected:
     rocksdb_rs::io_status::IOStatus Allocate(uint64_t /*offset*/, uint64_t /*len*/,
                       const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
                        const IOOptions& /*options*/,
@@ -95,7 +95,7 @@ TEST_F(WritableFileWriterTest, RangeSync) {
       if (size_ > 2 * kMb) {
         EXPECT_LT(size_, last_synced_ + 2 * kMb);
       }
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     uint64_t size_;
@@ -141,7 +141,7 @@ TEST_F(WritableFileWriterTest, IncrementalBuffer) {
                     IODebugContext* /*dbg*/) override {
       file_data_->append(data.data(), data.size());
       size_ += data.size();
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     using FSWritableFile::PositionedAppend;
     rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t pos,
@@ -152,29 +152,29 @@ TEST_F(WritableFileWriterTest, IncrementalBuffer) {
       file_data_->resize(pos);
       file_data_->append(data.data(), data.size());
       size_ += data.size();
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
       file_data_->resize(size);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*options*/,
                   IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     void SetIOPriority(Env::IOPriority /*pri*/) override {}
     uint64_t GetFileSize(const IOOptions& /*options*/,
@@ -187,7 +187,7 @@ TEST_F(WritableFileWriterTest, IncrementalBuffer) {
       return 0;
     }
     rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     bool use_direct_io() const override { return use_direct_io_; }
 
@@ -428,30 +428,30 @@ TEST_F(WritableFileWriterTest, AppendStatusReturn) {
     rocksdb_rs::io_status::IOStatus Append(const Slice& /*data*/, const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
       if (io_error_) {
-        return IOStatus_IOError("Fake IO error");
+        return rocksdb_rs::io_status::IOStatus_IOError("Fake IO error");
       }
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     using FSWritableFile::PositionedAppend;
     rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& /*data*/, uint64_t,
                               const IOOptions& /*options*/,
                               IODebugContext* /*dbg*/) override {
       if (io_error_) {
-        return IOStatus_IOError("Fake IO error");
+        return rocksdb_rs::io_status::IOStatus_IOError("Fake IO error");
       }
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*options*/,
                   IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     void Setuse_direct_io(bool val) { use_direct_io_ = val; }
     void SetIOError(bool val) { io_error_ = val; }
@@ -761,7 +761,7 @@ TEST(LineFileReaderTest, LineFileReaderTest) {
     SyncPoint::GetInstance()->SetCallBack(
         "MemFile::Read:IOStatus", [&](void* arg) {
           rocksdb_rs::io_status::IOStatus* status = static_cast<rocksdb_rs::io_status::IOStatus*>(arg);
-          *status = IOStatus_Corruption("test");
+          *status = rocksdb_rs::io_status::IOStatus_Corruption("test");
           ++callback_count;
         });
     SyncPoint::GetInstance()->EnableProcessing();
@@ -817,9 +817,9 @@ TEST_F(DBWritableFileWriterTest, IOErrorNotification) {
                     IODebugContext* /*dbg*/) override {
       if (io_error_) {
         file_append_errors_++;
-        return IOStatus_IOError("Fake IO error");
+        return rocksdb_rs::io_status::IOStatus_IOError("Fake IO error");
       }
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     using FSWritableFile::PositionedAppend;
@@ -827,25 +827,25 @@ TEST_F(DBWritableFileWriterTest, IOErrorNotification) {
                               const IOOptions& /*options*/,
                               IODebugContext* /*dbg*/) override {
       if (io_error_) {
-        return IOStatus_IOError("Fake IO error");
+        return rocksdb_rs::io_status::IOStatus_IOError("Fake IO error");
       }
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                    IODebugContext* /*dbg*/) override {
       if (io_error_) {
         file_flush_errors_++;
-        return IOStatus_IOError("Fake IO error");
+        return rocksdb_rs::io_status::IOStatus_IOError("Fake IO error");
       }
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*options*/,
                   IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     void SetIOError(bool val) { io_error_ = val; }
@@ -924,7 +924,7 @@ class WritableFileWriterIOPriorityTest : public testing::Test {
     rocksdb_rs::io_status::IOStatus Append(const Slice& /*data*/, const IOOptions& options,
                     IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                     const DataVerificationInfo& /* verification_info */,
@@ -935,7 +935,7 @@ class WritableFileWriterIOPriorityTest : public testing::Test {
                               const IOOptions& options,
                               IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus PositionedAppend(
         const Slice& /* data */, uint64_t /* offset */,
@@ -943,28 +943,28 @@ class WritableFileWriterIOPriorityTest : public testing::Test {
         const DataVerificationInfo& /* verification_info */,
         IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Truncate(uint64_t /*size*/, const IOOptions& options,
                       IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     uint64_t GetFileSize(const IOOptions& options,
                          IODebugContext* /*dbg*/) override {
@@ -977,20 +977,20 @@ class WritableFileWriterIOPriorityTest : public testing::Test {
       return 0;
     }
     rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     rocksdb_rs::io_status::IOStatus Allocate(uint64_t /*offset*/, uint64_t /*len*/,
                       const IOOptions& options,
                       IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/,
                        const IOOptions& options,
                        IODebugContext* /*dbg*/) override {
       EXPECT_EQ(options.rate_limiter_priority, io_priority_);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     void PrepareWrite(size_t /*offset*/, size_t /*len*/,

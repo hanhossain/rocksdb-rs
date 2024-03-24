@@ -40,7 +40,7 @@ rocksdb_rs::io_status::IOStatus EncryptedSequentialFile::Read(size_t n, const IO
   }
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    io_s = IOStatus_new(
+    io_s = rocksdb_rs::io_status::IOStatus_new(
         stream_->Decrypt(offset_, (char*)result->data(), result->size()));
   }
   if (io_s.ok()) {
@@ -85,7 +85,7 @@ rocksdb_rs::io_status::IOStatus EncryptedSequentialFile::PositionedRead(uint64_t
   offset_ = offset + result->size();
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    io_s = IOStatus_new(
+    io_s = rocksdb_rs::io_status::IOStatus_new(
         stream_->Decrypt(offset, (char*)result->data(), result->size()));
   }
   return io_s;
@@ -103,7 +103,7 @@ rocksdb_rs::io_status::IOStatus EncryptedRandomAccessFile::Read(uint64_t offset,
   }
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    io_s = IOStatus_new(
+    io_s = rocksdb_rs::io_status::IOStatus_new(
         stream_->Decrypt(offset, (char*)result->data(), result->size()));
   }
   return io_s;
@@ -153,7 +153,7 @@ rocksdb_rs::io_status::IOStatus EncryptedWritableFile::Append(const Slice& data,
     rocksdb_rs::io_status::IOStatus io_s;
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
-      io_s = IOStatus_new(
+      io_s = rocksdb_rs::io_status::IOStatus_new(
           stream_->Encrypt(offset, buf.BufferStart(), buf.CurrentSize()));
     }
     if (!io_s.ok()) {
@@ -180,7 +180,7 @@ rocksdb_rs::io_status::IOStatus EncryptedWritableFile::PositionedAppend(const Sl
     rocksdb_rs::io_status::IOStatus io_s;
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
-      io_s = IOStatus_new(
+      io_s = rocksdb_rs::io_status::IOStatus_new(
           stream_->Encrypt(offset, buf.BufferStart(), buf.CurrentSize()));
     }
     if (!io_s.ok()) {
@@ -285,7 +285,7 @@ rocksdb_rs::io_status::IOStatus EncryptedRandomRWFile::Write(uint64_t offset, co
     rocksdb_rs::io_status::IOStatus io_s;
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
-      io_s = IOStatus_new(
+      io_s = rocksdb_rs::io_status::IOStatus_new(
           stream_->Encrypt(offset, buf.BufferStart(), buf.CurrentSize()));
     }
     if (!io_s.ok()) {
@@ -307,7 +307,7 @@ rocksdb_rs::io_status::IOStatus EncryptedRandomRWFile::Read(uint64_t offset, siz
   }
   {
     PERF_TIMER_GUARD(decrypt_data_nanos);
-    status = IOStatus_new(
+    status = rocksdb_rs::io_status::IOStatus_new(
         stream_->Decrypt(offset, (char*)result->data(), result->size()));
   }
   return status;
@@ -354,10 +354,10 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                                EncryptionProvider** result) {
     if (provider_) {
       *result = provider_.get();
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     } else {
       *result = nullptr;
-      return IOStatus_NotFound("No WriteProvider specified");
+      return rocksdb_rs::io_status::IOStatus_NotFound("No WriteProvider specified");
     }
   }
 
@@ -367,10 +367,10 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                                EncryptionProvider** result) {
     if (provider_) {
       *result = provider_.get();
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     } else {
       *result = nullptr;
-      return IOStatus_NotFound("No Provider specified");
+      return rocksdb_rs::io_status::IOStatus_NotFound("No Provider specified");
     }
   }
 
@@ -404,7 +404,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         // Initialize prefix
         buffer.Alignment(underlying->GetRequiredBufferAlignment());
         buffer.AllocateNewBuffer(*prefix_length);
-        status = IOStatus_new(provider->CreateNewPrefix(
+        status = rocksdb_rs::io_status::IOStatus_new(provider->CreateNewPrefix(
             fname, buffer.BufferStart(), *prefix_length));
         if (status.ok()) {
           buffer.Size(*prefix_length);
@@ -417,7 +417,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         }
       }
       // Create cipher stream
-      status = IOStatus_new(
+      status = rocksdb_rs::io_status::IOStatus_new(
           provider->CreateCipherStream(fname, options, prefix, stream));
     }
     return status;
@@ -475,7 +475,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         // Initialize prefix
         buffer.Alignment(underlying->GetRequiredBufferAlignment());
         buffer.AllocateNewBuffer(*prefix_length);
-        io_s = IOStatus_new(provider->CreateNewPrefix(
+        io_s = rocksdb_rs::io_status::IOStatus_new(provider->CreateNewPrefix(
             fname, buffer.BufferStart(), *prefix_length));
         if (io_s.ok()) {
           buffer.Size(*prefix_length);
@@ -488,7 +488,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         }
       }
       // Create cipher stream
-      io_s = IOStatus_new(
+      io_s = rocksdb_rs::io_status::IOStatus_new(
           provider->CreateCipherStream(fname, options, prefix, stream));
     }
     return io_s;
@@ -525,7 +525,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
       }
       buffer.Size(*prefix_length);
     }
-    return IOStatus_new(
+    return rocksdb_rs::io_status::IOStatus_new(
         provider_->CreateCipherStream(fname, options, prefix, stream));
   }
 
@@ -560,7 +560,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
       }
       buffer.Size(*prefix_length);
     }
-    return IOStatus_new(
+    return rocksdb_rs::io_status::IOStatus_new(
         provider_->CreateCipherStream(fname, options, prefix, stream));
   }
 
@@ -583,7 +583,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                              IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_reads) {
-      return IOStatus_InvalidArgument();
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSSequentialFile> underlying;
@@ -620,7 +620,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                                IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_reads) {
-      return IOStatus_InvalidArgument();
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSRandomAccessFile> underlying;
@@ -649,7 +649,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                            IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_writes) {
-      return IOStatus_InvalidArgument();
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSWritableFile> underlying;
@@ -667,7 +667,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                               IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_writes) {
-      return IOStatus_InvalidArgument();
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSWritableFile> underlying;
@@ -686,7 +686,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                              IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_writes) {
-      return IOStatus_InvalidArgument();
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument();
     }
     // Open file using underlying Env implementation
     std::unique_ptr<FSWritableFile> underlying;
@@ -703,7 +703,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
                            IODebugContext* dbg) override {
     result->reset();
     if (options.use_mmap_reads || options.use_mmap_writes) {
-      return IOStatus_InvalidArgument();
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument();
     }
     // Check file exists
     bool isNewFile = !FileExists(fname, options.io_options, dbg).ok();
@@ -760,7 +760,7 @@ class EncryptedFileSystemImpl : public EncryptedFileSystem {
         it->size_bytes -= provider->GetPrefixLength();
       }
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& fname, const IOOptions& options,

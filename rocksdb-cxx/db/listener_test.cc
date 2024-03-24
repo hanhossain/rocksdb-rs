@@ -829,11 +829,11 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   listener->CheckAndResetCounters(1, 1, 0, 0, 0, 0);
   ASSERT_OK(Put("foo", "aaa1"));
   ASSERT_OK(Put("bar", "bbb1"));
-  test_fs->SetStatus(IOStatus_NotSupported("not supported"));
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
   ASSERT_NOK(Flush());
   listener->CheckAndResetCounters(1, 1, 1, 0, 0, 0);
   ASSERT_TRUE(listener->last_failure_.IsNotSupported());
-  test_fs->SetStatus(IOStatus_OK());
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_OK());
 
   Reopen(options);
   ASSERT_OK(Put("foo", "aaa2"));
@@ -852,7 +852,7 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   ASSERT_OK(Put("foo", "aaa3"));
   ASSERT_OK(Put("bar", "bbb3"));
   ASSERT_OK(Flush());
-  test_fs->SetStatus(IOStatus_NotSupported("not supported"));
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
   ASSERT_NOK(
       dbfull()->CompactRange(CompactRangeOptions(), &kRangeStart, &kRangeEnd));
   ASSERT_NOK(dbfull()->TEST_WaitForCompact());
@@ -860,7 +860,7 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   ASSERT_TRUE(listener->last_failure_.IsNotSupported());
 
   // Reset
-  test_fs->SetStatus(IOStatus_OK());
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_OK());
   DestroyAndReopen(options);
 
   // Verify that an empty table file that is immediately deleted gives Aborted

@@ -72,7 +72,7 @@ rocksdb_rs::io_status::IOStatus ChrootFileSystem::GetTestDirectory(const IOOptio
 std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::EncodePath(
     const std::string& path) {
   if (path.empty() || path[0] != '/') {
-    return {IOStatus_InvalidArgument(path, "Not an absolute path"), ""};
+    return {rocksdb_rs::io_status::IOStatus_InvalidArgument(path, "Not an absolute path"), ""};
   }
   std::pair<rocksdb_rs::io_status::IOStatus, std::string> res;
   res.second = chroot_dir_ + path;
@@ -83,14 +83,14 @@ std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::Encode
   char* normalized_path = realpath(res.second.c_str(), nullptr);
 #endif
   if (normalized_path == nullptr) {
-    res.first = IOStatus_NotFound(res.second, errnoStr(errno).c_str());
+    res.first = rocksdb_rs::io_status::IOStatus_NotFound(res.second, errnoStr(errno).c_str());
   } else if (strlen(normalized_path) < chroot_dir_.size() ||
              strncmp(normalized_path, chroot_dir_.c_str(),
                      chroot_dir_.size()) != 0) {
-    res.first = IOStatus_IOError(res.second,
+    res.first = rocksdb_rs::io_status::IOStatus_IOError(res.second,
                                   "Attempted to access path outside chroot");
   } else {
-    res.first = IOStatus_OK();
+    res.first = rocksdb_rs::io_status::IOStatus_OK();
   }
 #if !defined(OS_AIX)
   free(normalized_path);
@@ -103,7 +103,7 @@ std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::Encode
 std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::EncodePathWithNewBasename(
     const std::string& path) {
   if (path.empty() || path[0] != '/') {
-    return {IOStatus_InvalidArgument(path, "Not an absolute path"), ""};
+    return {rocksdb_rs::io_status::IOStatus_InvalidArgument(path, "Not an absolute path"), ""};
   }
   // Basename may be followed by trailing slashes
   size_t final_idx = path.find_last_not_of('/');

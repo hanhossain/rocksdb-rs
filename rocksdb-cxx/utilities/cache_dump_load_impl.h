@@ -186,7 +186,7 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   // Reset the writer
   virtual rocksdb_rs::io_status::IOStatus Close() override {
     file_writer_.reset();
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
  private:
@@ -233,9 +233,9 @@ class FromFileCacheDumpReader : public CacheDumpReader {
     }
     Slice encoded_slice(prefix);
     if (!GetFixed32(&encoded_slice, len)) {
-      return IOStatus_Corruption("Decode size prefix string failed");
+      return rocksdb_rs::io_status::IOStatus_Corruption("Decode size prefix string failed");
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Read(size_t len, std::string* data) {
@@ -255,7 +255,7 @@ class FromFileCacheDumpReader : public CacheDumpReader {
         return io_s;
       }
       if (result_.size() < to_read) {
-        return IOStatus_Corruption("Corrupted cache dump file.");
+        return rocksdb_rs::io_status::IOStatus_Corruption("Corrupted cache dump file.");
       }
       data->append(result_.data(), result_.size());
 

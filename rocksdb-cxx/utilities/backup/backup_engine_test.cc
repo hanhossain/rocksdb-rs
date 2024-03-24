@@ -159,7 +159,7 @@ class TestFs : public FileSystemWrapper {
     rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions&, Slice* result, char* scratch,
                   IODebugContext*) override {
       if (fail_reads_) {
-        return IOStatus_IOError();
+        return rocksdb_rs::io_status::IOStatus_IOError();
       }
       size_t read_size = (n > size_left) ? size_left : n;
       for (size_t i = 0; i < read_size; ++i) {
@@ -167,12 +167,12 @@ class TestFs : public FileSystemWrapper {
       }
       *result = Slice(scratch, read_size);
       size_left -= read_size;
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
       size_left = (n > size_left) ? size_left - n : 0;
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
    private:
@@ -188,7 +188,7 @@ class TestFs : public FileSystemWrapper {
     if (dummy_sequential_file_) {
       r->reset(
           new TestFs::DummySequentialFile(dummy_sequential_file_fail_reads_));
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     } else {
       rocksdb_rs::io_status::IOStatus s = FileSystemWrapper::NewSequentialFile(f, file_opts, r, dbg);
       if (s.ok()) {
@@ -207,7 +207,7 @@ class TestFs : public FileSystemWrapper {
     MutexLock l(&mutex_);
     written_files_.push_back(f);
     if (limit_written_files_ == 0) {
-      return IOStatus_NotSupported("Limit on written files reached");
+      return rocksdb_rs::io_status::IOStatus_NotSupported("Limit on written files reached");
     }
     limit_written_files_--;
     rocksdb_rs::io_status::IOStatus s = FileSystemWrapper::NewWritableFile(f, file_opts, r, dbg);
@@ -239,7 +239,7 @@ class TestFs : public FileSystemWrapper {
                       IODebugContext* dbg) override {
     MutexLock l(&mutex_);
     if (fail_delete_files_) {
-      return IOStatus_IOError();
+      return rocksdb_rs::io_status::IOStatus_IOError();
     }
     EXPECT_GT(limit_delete_files_, 0U);
     limit_delete_files_--;
@@ -250,7 +250,7 @@ class TestFs : public FileSystemWrapper {
                      IODebugContext* dbg) override {
     MutexLock l(&mutex_);
     if (fail_delete_files_) {
-      return IOStatus_IOError();
+      return rocksdb_rs::io_status::IOStatus_IOError();
     }
     return FileSystemWrapper::DeleteDir(d, options, dbg);
   }
@@ -297,7 +297,7 @@ class TestFs : public FileSystemWrapper {
                        std::vector<std::string>* r,
                        IODebugContext* dbg) override {
     if (get_children_failure_) {
-      return IOStatus_IOError("SimulatedFailure");
+      return rocksdb_rs::io_status::IOStatus_IOError("SimulatedFailure");
     }
     return FileSystemWrapper::GetChildren(dir, io_opts, r, dbg);
   }
@@ -320,7 +320,7 @@ class TestFs : public FileSystemWrapper {
         }
         result->push_back({dir + "/" + filename, size_bytes});
       }
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     return FileSystemWrapper::GetChildrenFileAttributes(dir, options, result,
                                                         dbg);
@@ -337,9 +337,9 @@ class TestFs : public FileSystemWrapper {
         if (fname.find("MANIFEST") == 0) {
           *s = 100;  // Match DummyDB::GetLiveFiles
         }
-        return IOStatus_OK();
+        return rocksdb_rs::io_status::IOStatus_OK();
       }
-      return IOStatus_NotFound(fname);
+      return rocksdb_rs::io_status::IOStatus_NotFound(fname);
     }
     return FileSystemWrapper::GetFileSize(f, options, s, dbg);
   }
@@ -350,7 +350,7 @@ class TestFs : public FileSystemWrapper {
   rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& d, const IOOptions& options,
                               IODebugContext* dbg) override {
     if (create_dir_if_missing_failure_) {
-      return IOStatus_IOError("SimulatedFailure");
+      return rocksdb_rs::io_status::IOStatus_IOError("SimulatedFailure");
     }
     return FileSystemWrapper::CreateDirIfMissing(d, options, dbg);
   }
@@ -360,7 +360,7 @@ class TestFs : public FileSystemWrapper {
                         std::unique_ptr<FSDirectory>* result,
                         IODebugContext* dbg) override {
     if (new_directory_failure_) {
-      return IOStatus_IOError("SimulatedFailure");
+      return rocksdb_rs::io_status::IOStatus_IOError("SimulatedFailure");
     }
     return FileSystemWrapper::NewDirectory(name, io_opts, result, dbg);
   }

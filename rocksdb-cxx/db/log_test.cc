@@ -84,7 +84,7 @@ class LogTest
           contents_.remove_prefix(force_error_position_);
           force_error_ = false;
           returned_partial_ = true;
-          return IOStatus_Corruption("read error");
+          return rocksdb_rs::io_status::IOStatus_Corruption("read error");
         }
       }
 
@@ -109,18 +109,18 @@ class LogTest
       *result = Slice(scratch, n);
 
       contents_.remove_prefix(n);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
       if (n > contents_.size()) {
         contents_.clear();
-        return IOStatus_NotFound("in-memory file skipepd past end");
+        return rocksdb_rs::io_status::IOStatus_NotFound("in-memory file skipepd past end");
       }
 
       contents_.remove_prefix(n);
 
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
   };
 

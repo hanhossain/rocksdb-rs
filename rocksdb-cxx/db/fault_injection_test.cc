@@ -566,7 +566,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   }
 
   fault_fs->SetRandomWriteError(
-      0xdeadbeef, /*one_in=*/1, IOStatus_IOError("Injected IOError"),
+      0xdeadbeef, /*one_in=*/1, rocksdb_rs::io_status::IOStatus_IOError("Injected IOError"),
       /*inject_for_all_file_types=*/true, /*types=*/{});
 
   {

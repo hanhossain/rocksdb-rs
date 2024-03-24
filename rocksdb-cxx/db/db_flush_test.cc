@@ -3135,7 +3135,7 @@ TEST_P(DBAtomicFlushTest, BgThreadNoWaitAfterManifestError) {
       "VersionSet::ProcessManifestWrites:AfterSyncManifest", [&](void* arg) {
         auto* ptr = reinterpret_cast<rocksdb_rs::io_status::IOStatus*>(arg);
         assert(ptr);
-        *ptr = IOStatus_IOError("Injected failure");
+        *ptr = rocksdb_rs::io_status::IOStatus_IOError("Injected failure");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 

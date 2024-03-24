@@ -4076,18 +4076,18 @@ class DeadlineFS : public FileSystemWrapper {
   // Increment the IO counter and return a delay in microseconds
   rocksdb_rs::io_status::IOStatus ShouldDelay(const IOOptions& opts) {
     if (timedout_) {
-      return IOStatus_TimedOut();
+      return rocksdb_rs::io_status::IOStatus_TimedOut();
     } else if (!deadline_.count() && !io_timeout_.count()) {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     if (!ignore_deadline_ && delay_trigger_ == io_count_++) {
       env_->SleepForMicroseconds(static_cast<int>(opts.timeout.count() + 1));
       timedout_ = true;
       if (error_on_delay_) {
-        return IOStatus_TimedOut();
+        return rocksdb_rs::io_status::IOStatus_TimedOut();
       }
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   const std::chrono::microseconds GetDeadline() {

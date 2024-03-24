@@ -32,7 +32,7 @@ class ExternalSSTTestFS : public FileSystemWrapper {
   rocksdb_rs::io_status::IOStatus LinkFile(const std::string& s, const std::string& t,
                     const IOOptions& options, IODebugContext* dbg) override {
     if (fail_link_) {
-      return IOStatus_NotSupported("Link failed");
+      return rocksdb_rs::io_status::IOStatus_NotSupported("Link failed");
     }
     return target()->LinkFile(s, t, options, dbg);
   }

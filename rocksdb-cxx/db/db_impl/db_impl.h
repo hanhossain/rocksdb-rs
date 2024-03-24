@@ -112,7 +112,7 @@ class Directories {
 
   rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) {
     // close all directories for all database paths
-    rocksdb_rs::io_status::IOStatus s = IOStatus_OK();
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_OK();
 
     // The default implementation for Close() in Directory/FSDirectory class
     // "NotSupported" status, the upper level interface should be able to

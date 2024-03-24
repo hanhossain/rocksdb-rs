@@ -48,7 +48,7 @@ Writer::~Writer() {
 
 rocksdb_rs::io_status::IOStatus Writer::WriteBuffer() {
   if (dest_->seen_error()) {
-    return IOStatus_IOError("Seen error. Skip writing buffer.");
+    return rocksdb_rs::io_status::IOStatus_IOError("Seen error. Skip writing buffer.");
   }
   return dest_->Flush();
 }
@@ -117,7 +117,7 @@ rocksdb_rs::io_status::IOStatus Writer::AddRecord(const Slice& slice,
 
       if (compress_remaining < 0) {
         // Set failure status
-        s = IOStatus_IOError("Unexpected WAL compression error");
+        s = rocksdb_rs::io_status::IOStatus_IOError("Unexpected WAL compression error");
         s.SetDataLoss(true);
         break;
       } else if (left == 0) {
@@ -165,7 +165,7 @@ rocksdb_rs::io_status::IOStatus Writer::AddCompressionTypeRecord() {
 
   if (compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     // No need to add a record
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   CompressionTypeRecord record(compression_type_);
@@ -211,7 +211,7 @@ rocksdb_rs::io_status::IOStatus Writer::MaybeAddUserDefinedTimestampSizeRecord(
     }
   }
   if (ts_sz_to_record.empty()) {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   UserDefinedTimestampSizeRecord record(std::move(ts_sz_to_record));

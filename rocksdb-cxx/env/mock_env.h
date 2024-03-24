@@ -104,7 +104,7 @@ class MockFileSystem : public FileSystem {
   rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& /*path*/,
                        const IOOptions& /*options*/, bool* /*is_dir*/,
                        IODebugContext* /*dgb*/) override {
-    return IOStatus_NotSupported("IsDirectory");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("IsDirectory");
   }
 
   rocksdb_rs::status::Status CorruptBuffer(const std::string& fname);

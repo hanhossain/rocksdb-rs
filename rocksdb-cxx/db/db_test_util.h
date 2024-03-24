@@ -734,7 +734,7 @@ class FileTemperatureTestFS : public FileSystemWrapper {
           if (e != current_sst_file_temperatures_.end() &&
               e->second != opts.temperature) {
             result->reset();
-            return IOStatus_PathNotFound("Temperature mismatch on " + fname);
+            return rocksdb_rs::io_status::IOStatus_PathNotFound("Temperature mismatch on " + fname);
           }
         }
         *result = WrapWithTemperature<FSSequentialFileOwnerWrapper>(
@@ -763,7 +763,7 @@ class FileTemperatureTestFS : public FileSystemWrapper {
           if (e != current_sst_file_temperatures_.end() &&
               e->second != opts.temperature) {
             result->reset();
-            return IOStatus_PathNotFound("Temperature mismatch on " + fname);
+            return rocksdb_rs::io_status::IOStatus_PathNotFound("Temperature mismatch on " + fname);
           }
         }
         *result = WrapWithTemperature<FSRandomAccessFileOwnerWrapper>(

@@ -27,10 +27,10 @@ std::string GetWindowsErrSz(DWORD err);
 
 inline rocksdb_rs::io_status::IOStatus IOErrorFromWindowsError(const std::string& context, DWORD err) {
   return ((err == ERROR_HANDLE_DISK_FULL) || (err == ERROR_DISK_FULL))
-             ? IOStatus_NoSpace(context, GetWindowsErrSz(err))
+             ? rocksdb_rs::io_status::IOStatus_NoSpace(context, GetWindowsErrSz(err))
          : ((err == ERROR_FILE_NOT_FOUND) || (err == ERROR_PATH_NOT_FOUND))
-             ? IOStatus_PathNotFound(context, GetWindowsErrSz(err))
-             : IOStatus_IOError(context, GetWindowsErrSz(err));
+             ? rocksdb_rs::io_status::IOStatus_PathNotFound(context, GetWindowsErrSz(err))
+             : rocksdb_rs::io_status::IOStatus_IOError(context, GetWindowsErrSz(err));
 }
 
 inline rocksdb_rs::io_status::IOStatus IOErrorFromLastWindowsError(const std::string& context) {
@@ -39,10 +39,10 @@ inline rocksdb_rs::io_status::IOStatus IOErrorFromLastWindowsError(const std::st
 
 inline rocksdb_rs::io_status::IOStatus IOError(const std::string& context, int err_number) {
   return (err_number == ENOSPC)
-             ? IOStatus_NoSpace(context, errnoStr(err_number).c_str())
+             ? rocksdb_rs::io_status::IOStatus_NoSpace(context, errnoStr(err_number).c_str())
          : (err_number == ENOENT)
-             ? IOStatus_PathNotFound(context, errnoStr(err_number).c_str())
-             : IOStatus_IOError(context, errnoStr(err_number).c_str());
+             ? rocksdb_rs::io_status::IOStatus_PathNotFound(context, errnoStr(err_number).c_str())
+             : rocksdb_rs::io_status::IOStatus_IOError(context, errnoStr(err_number).c_str());
 }
 
 class WinFileData;

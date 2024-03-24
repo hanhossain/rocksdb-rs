@@ -6927,7 +6927,7 @@ TEST_F(DBTest2, CheckpointFileTemperature) {
                       IODebugContext*) override {
       // return not supported to force checkpoint copy the file instead of just
       // link
-      return IOStatus_NotSupported();
+      return rocksdb_rs::io_status::IOStatus_NotSupported();
     }
   };
   auto test_fs = std::make_shared<NoLinkTestFS>(env_->GetFileSystem());

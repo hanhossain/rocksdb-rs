@@ -408,7 +408,7 @@ rocksdb_rs::io_status::IOStatus Directories::SetDirectories(FileSystem* fs, cons
     }
   }
   assert(data_dirs_.size() == data_paths.size());
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::Recover(

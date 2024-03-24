@@ -94,7 +94,7 @@ class CacheDumper {
   // condition from block cache to a certain CacheDumpWriter in one shot. This
   // process may take some time.
   virtual rocksdb_rs::io_status::IOStatus DumpCacheEntriesToWriter() {
-    return IOStatus_NotSupported("DumpCacheEntriesToWriter is not supported");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("DumpCacheEntriesToWriter is not supported");
   }
 };
 
@@ -106,7 +106,7 @@ class CacheDumpedLoader {
  public:
   virtual ~CacheDumpedLoader() = default;
   virtual rocksdb_rs::io_status::IOStatus RestoreCacheEntriesToSecondaryCache() {
-    return IOStatus_NotSupported(
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
         "RestoreCacheEntriesToSecondaryCache is not supported");
   }
 };

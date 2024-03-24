@@ -495,7 +495,7 @@ namespace rocksdb {
                                                              BackgroundErrorReason reason) {
     db_mutex_->AssertHeld();
     rocksdb_rs::status::Status tmp_status = bg_status.Clone();
-    rocksdb_rs::io_status::IOStatus bg_io_err = IOStatus_new(std::move(tmp_status));
+    rocksdb_rs::io_status::IOStatus bg_io_err = rocksdb_rs::io_status::IOStatus_new(std::move(tmp_status));
 
     if (bg_io_err.ok()) {
       return kOkStatus;
@@ -662,7 +662,7 @@ namespace rocksdb {
       rocksdb_rs::status::Status old_bg_error = bg_error_.Clone();
       // Clear and check the recovery IO and BG error
       bg_error_ = rocksdb_rs::status::Status_OK();
-      recovery_io_error_ = IOStatus_OK();
+      recovery_io_error_ = rocksdb_rs::io_status::IOStatus_OK();
       recovery_in_prog_ = false;
       soft_error_no_bg_work_ = false;
       EventHelpers::NotifyOnErrorRecoveryEnd(db_options_.listeners, old_bg_error,
@@ -787,7 +787,7 @@ namespace rocksdb {
       }
       TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume0");
       TEST_SYNC_POINT("RecoverFromRetryableBGIOError:BeforeResume1");
-      recovery_io_error_ = IOStatus_OK();
+      recovery_io_error_ = rocksdb_rs::io_status::IOStatus_OK();
       recovery_error_ = rocksdb_rs::status::Status_OK();
       retry_count++;
       rocksdb_rs::status::Status s = db_->ResumeImpl(context);

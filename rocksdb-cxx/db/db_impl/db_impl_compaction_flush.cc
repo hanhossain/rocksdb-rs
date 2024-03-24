@@ -217,7 +217,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool need_cancel = false;
-  rocksdb_rs::io_status::IOStatus log_io_s = IOStatus_OK();
+  rocksdb_rs::io_status::IOStatus log_io_s = rocksdb_rs::io_status::IOStatus_OK();
   if (needs_to_sync_closed_wals) {
     // SyncClosedLogs() may unlock and re-lock the log_write_mutex multiple
     // times.
@@ -228,7 +228,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
     if (log_io_s.ok() && synced_wals.IsWalAddition()) {
       const ReadOptions read_options(Env::IOActivity::kFlush);
       log_io_s =
-          IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
+          rocksdb_rs::io_status::IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
       TEST_SYNC_POINT_CALLBACK("DBImpl::FlushMemTableToOutputFile:CommitWal:1",
                                nullptr);
     }
@@ -472,7 +472,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   // is specific and doesn't allow &v[i].
   std::deque<bool> switched_to_mempurge(num_cfs, false);
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  rocksdb_rs::io_status::IOStatus log_io_s = IOStatus_OK();
+  rocksdb_rs::io_status::IOStatus log_io_s = rocksdb_rs::io_status::IOStatus_OK();
   assert(num_cfs == static_cast<int>(jobs.size()));
 
   for (int i = 0; i != num_cfs; ++i) {
@@ -493,7 +493,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
     if (log_io_s.ok() && synced_wals.IsWalAddition()) {
       const ReadOptions read_options(Env::IOActivity::kFlush);
       log_io_s =
-          IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
+          rocksdb_rs::io_status::IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
     }
 
     if (!log_io_s.ok() && !log_io_s.IsShutdownInProgress() &&

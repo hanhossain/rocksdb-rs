@@ -70,7 +70,7 @@ inline rocksdb_rs::io_status::IOStatus PrepareIOFromReadOptions(const ReadOption
     // Ensure there is atleast 1us available. We don't want to pass a value of
     // 0 as that means no timeout
     if (now >= ro.deadline) {
-      return IOStatus_TimedOut("Deadline exceeded");
+      return rocksdb_rs::io_status::IOStatus_TimedOut("Deadline exceeded");
     }
     opts.timeout = ro.deadline - now;
   }
@@ -83,7 +83,7 @@ inline rocksdb_rs::io_status::IOStatus PrepareIOFromReadOptions(const ReadOption
   opts.rate_limiter_priority = ro.rate_limiter_priority;
   opts.io_activity = ro.io_activity;
 
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 // Test method to delete the input directory and all of its contents.

@@ -503,7 +503,7 @@ void BlobFileReader::MultiGetBlob(
     const auto& record_slice = read_req.result;
     if (read_req.status.ok() && record_slice.size() != read_req.len) {
       read_req.status =
-          IOStatus_Corruption("Failed to read data from blob file");
+          rocksdb_rs::io_status::IOStatus_Corruption("Failed to read data from blob file");
     }
 
     *req->status = read_req.status.status();

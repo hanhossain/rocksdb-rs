@@ -50,14 +50,14 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
   while (size > 0) {
     size_t bytes_to_read = std::min(sizeof(buffer), static_cast<size_t>(size));
     // TODO: rate limit copy file
-    io_s = IOStatus_new(
+    io_s = rocksdb_rs::io_status::IOStatus_new(
         src_reader->Read(bytes_to_read, &slice, buffer,
                          Env::IO_TOTAL /* rate_limiter_priority */));
     if (!io_s.ok()) {
       return io_s;
     }
     if (slice.size() == 0) {
-      return IOStatus_Corruption("file too small");
+      return rocksdb_rs::io_status::IOStatus_Corruption("file too small");
     }
     io_s = dest_writer->Append(slice);
     if (!io_s.ok()) {
@@ -139,7 +139,7 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     std::shared_ptr<IOTracer>& io_tracer, RateLimiter* rate_limiter,
     Env::IOPriority rate_limiter_priority) {
   if (checksum_factory == nullptr) {
-    return IOStatus_InvalidArgument("Checksum factory is invalid");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument("Checksum factory is invalid");
   }
   assert(file_checksum != nullptr);
   assert(file_checksum_func_name != nullptr);
@@ -155,7 +155,7 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
         "checksum function name: " +
         requested_checksum_func_name +
         " from checksum factory: " + checksum_factory->Name();
-    return IOStatus_InvalidArgument(msg);
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(msg);
   } else {
     // For backward compatibility and use in file ingestion clients where there
     // is no stored checksum function name, `requested_checksum_func_name` can
@@ -168,7 +168,7 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
                         "', while the factory created one "
                         "named '" +
                         checksum_generator->Name() + "'";
-      return IOStatus_InvalidArgument(msg);
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument(msg);
     }
   }
 
@@ -212,11 +212,11 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     io_s = reader->Read(opts, offset, bytes_to_read, &slice, buf.get(), nullptr,
                         rate_limiter_priority);
     if (!io_s.ok()) {
-      return IOStatus_Corruption("file read failed with error: " +
+      return rocksdb_rs::io_status::IOStatus_Corruption("file read failed with error: " +
                                   io_s.ToString());
     }
     if (slice.size() == 0) {
-      return IOStatus_Corruption("file too small");
+      return rocksdb_rs::io_status::IOStatus_Corruption("file too small");
     }
     checksum_generator->Update(slice.data(), slice.size());
     size -= slice.size();
@@ -227,7 +227,7 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
   checksum_generator->Finalize();
   *file_checksum = checksum_generator->GetChecksum();
   *file_checksum_func_name = checksum_generator->Name();
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {

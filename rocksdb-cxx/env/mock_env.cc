@@ -180,7 +180,7 @@ class MemFile {
     }
     if (n == 0) {
       *result = Slice();
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     if (scratch) {
       memcpy(scratch, &(data_[offset_]), n);
@@ -188,7 +188,7 @@ class MemFile {
     } else {
       *result = Slice(&(data_[offset_]), n);
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
@@ -201,7 +201,7 @@ class MemFile {
     data_.replace(offset_, data.size(), data.data(), data.size());
     size_ = data_.size();
     modified_time_ = Now();
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& /*options*/,
@@ -210,12 +210,12 @@ class MemFile {
     data_.append(data.data(), data.size());
     size_ = data_.size();
     modified_time_ = Now();
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
     fsynced_bytes_ = size_.load();
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   uint64_t ModifiedTime() const { return modified_time_; }
@@ -275,14 +275,14 @@ class MockSequentialFile : public FSSequentialFile {
   bool use_direct_io() const override { return use_direct_io_; }
   rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
     if (pos_ > file_->Size()) {
-      return IOStatus_IOError("pos_ > file_->Size()");
+      return rocksdb_rs::io_status::IOStatus_IOError("pos_ > file_->Size()");
     }
     const uint64_t available = file_->Size() - pos_;
     if (n > available) {
       n = available;
     }
     pos_ += static_cast<size_t>(n);
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
  private:
@@ -308,7 +308,7 @@ class MockRandomAccessFile : public FSRandomAccessFile {
   rocksdb_rs::io_status::IOStatus Prefetch(uint64_t /*offset*/, size_t /*n*/,
                     const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
@@ -350,7 +350,7 @@ class MockRandomRWFile : public FSRandomRWFile {
 
   rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
@@ -387,7 +387,7 @@ class MockWritableFile : public FSWritableFile {
       }
       bytes_written += bytes;
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   using FSWritableFile::PositionedAppend;
@@ -401,7 +401,7 @@ class MockWritableFile : public FSWritableFile {
   rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& options,
                     IODebugContext* dbg) override {
     file_->Truncate(static_cast<size_t>(size), options, dbg);
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
     return file_->Fsync(options, dbg);
@@ -409,7 +409,7 @@ class MockWritableFile : public FSWritableFile {
 
   rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
@@ -440,12 +440,12 @@ class MockEnvDirectory : public FSDirectory {
  public:
   rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
                  IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 };
 
@@ -601,9 +601,9 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::GetAbsolutePath(const std::strin
                                          IODebugContext* /*dbg*/) {
   *output_path = NormalizeMockPath(db_path);
   if (output_path->at(0) != '/') {
-    return IOStatus_NotSupported("GetAbsolutePath");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("GetAbsolutePath");
   } else {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 }
 
@@ -624,16 +624,16 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::NewSequentialFile(
   MutexLock lock(&mutex_);
   if (file_map_.find(fn) == file_map_.end()) {
     *result = nullptr;
-    return IOStatus_PathNotFound(fn);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(fn);
   }
   auto* f = file_map_[fn];
   if (f->is_lock_file()) {
-    return IOStatus_InvalidArgument(fn, "Cannot open a lock file.");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(fn, "Cannot open a lock file.");
   } else if (file_opts.use_direct_reads && !supports_direct_io_) {
-    return IOStatus_NotSupported("Direct I/O Not Supported");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("Direct I/O Not Supported");
   } else {
     result->reset(new MockSequentialFile(f, file_opts));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 }
 
@@ -644,16 +644,16 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::NewRandomAccessFile(
   MutexLock lock(&mutex_);
   if (file_map_.find(fn) == file_map_.end()) {
     *result = nullptr;
-    return IOStatus_PathNotFound(fn);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(fn);
   }
   auto* f = file_map_[fn];
   if (f->is_lock_file()) {
-    return IOStatus_InvalidArgument(fn, "Cannot open a lock file.");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(fn, "Cannot open a lock file.");
   } else if (file_opts.use_direct_reads && !supports_direct_io_) {
-    return IOStatus_NotSupported("Direct I/O Not Supported");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("Direct I/O Not Supported");
   } else {
     result->reset(new MockRandomAccessFile(f, file_opts));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 }
 
@@ -664,14 +664,14 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::NewRandomRWFile(
   MutexLock lock(&mutex_);
   if (file_map_.find(fn) == file_map_.end()) {
     *result = nullptr;
-    return IOStatus_PathNotFound(fn);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(fn);
   }
   auto* f = file_map_[fn];
   if (f->is_lock_file()) {
-    return IOStatus_InvalidArgument(fn, "Cannot open a lock file.");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(fn, "Cannot open a lock file.");
   }
   result->reset(new MockRandomRWFile(f));
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::ReuseWritableFile(
@@ -699,10 +699,10 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::NewWritableFile(
   file->Ref();
   file_map_[fn] = file;
   if (file_opts.use_direct_writes && !supports_direct_io_) {
-    return IOStatus_NotSupported("Direct I/O Not Supported");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("Direct I/O Not Supported");
   } else {
     result->reset(new MockWritableFile(file, file_opts));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 }
 
@@ -721,10 +721,10 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::ReopenWritableFile(
     file = file_map_[fn];
   }
   if (file_opts.use_direct_writes && !supports_direct_io_) {
-    return IOStatus_NotSupported("Direct I/O Not Supported");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("Direct I/O Not Supported");
   } else {
     result->reset(new MockWritableFile(file, file_opts));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 }
 
@@ -733,7 +733,7 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::NewDirectory(const std::string& 
                                       std::unique_ptr<FSDirectory>* result,
                                       IODebugContext* /*dbg*/) {
   result->reset(new MockEnvDirectory());
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::FileExists(const std::string& fname,
@@ -743,17 +743,17 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::FileExists(const std::string& fn
   MutexLock lock(&mutex_);
   if (file_map_.find(fn) != file_map_.end()) {
     // File exists
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   // Now also check if fn exists as a dir
   for (const auto& iter : file_map_) {
     const std::string& filename = iter.first;
     if (filename.size() >= fn.size() + 1 && filename[fn.size()] == '/' &&
         Slice(filename).starts_with(Slice(fn))) {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
   }
-  return IOStatus_NotFound();
+  return rocksdb_rs::io_status::IOStatus_NotFound();
 }
 
 bool MockFileSystem::GetChildrenInternal(const std::string& dir,
@@ -789,9 +789,9 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::GetChildren(const std::string& d
   MutexLock lock(&mutex_);
   bool found_dir = GetChildrenInternal(dir, result);
 #ifndef __clang_analyzer__
-  return found_dir ? IOStatus_OK() : IOStatus_NotFound(dir);
+  return found_dir ? rocksdb_rs::io_status::IOStatus_OK() : rocksdb_rs::io_status::IOStatus_NotFound(dir);
 #else
-  return found_dir ? IOStatus_OK() : IOStatus_NotFound();
+  return found_dir ? rocksdb_rs::io_status::IOStatus_OK() : rocksdb_rs::io_status::IOStatus_NotFound();
 #endif
 }
 
@@ -810,11 +810,11 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::DeleteFile(const std::string& fn
   auto fn = NormalizeMockPath(fname);
   MutexLock lock(&mutex_);
   if (file_map_.find(fn) == file_map_.end()) {
-    return IOStatus_PathNotFound(fn);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(fn);
   }
 
   DeleteFileInternal(fn);
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::Truncate(const std::string& fname, size_t size,
@@ -824,10 +824,10 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::Truncate(const std::string& fnam
   MutexLock lock(&mutex_);
   auto iter = file_map_.find(fn);
   if (iter == file_map_.end()) {
-    return IOStatus_PathNotFound(fn);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(fn);
   }
   iter->second->Truncate(size, options, dbg);
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::CreateDir(const std::string& dirname,
@@ -840,16 +840,16 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::CreateDir(const std::string& dir
     file->Ref();
     file_map_[dn] = file;
   } else {
-    return IOStatus_IOError();
+    return rocksdb_rs::io_status::IOStatus_IOError();
   }
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::CreateDirIfMissing(const std::string& dirname,
                                             const IOOptions& options,
                                             IODebugContext* dbg) {
   CreateDir(dirname, options, dbg);
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::DeleteDir(const std::string& dirname,
@@ -858,7 +858,7 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::DeleteDir(const std::string& dir
   auto dir = NormalizeMockPath(dirname);
   MutexLock lock(&mutex_);
   if (file_map_.find(dir) == file_map_.end()) {
-    return IOStatus_PathNotFound(dir);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(dir);
   } else {
     std::vector<std::string> children;
     if (GetChildrenInternal(dir, &children)) {
@@ -867,7 +867,7 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::DeleteDir(const std::string& dir
       }
     }
     DeleteFileInternal(dir);
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 }
 
@@ -880,11 +880,11 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::GetFileSize(const std::string& f
   MutexLock lock(&mutex_);
   auto iter = file_map_.find(fn);
   if (iter == file_map_.end()) {
-    return IOStatus_PathNotFound(fn);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(fn);
   }
 
   *file_size = iter->second->Size();
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::GetFileModificationTime(const std::string& fname,
@@ -895,10 +895,10 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::GetFileModificationTime(const st
   MutexLock lock(&mutex_);
   auto iter = file_map_.find(fn);
   if (iter == file_map_.end()) {
-    return IOStatus_PathNotFound(fn);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(fn);
   }
   *time = iter->second->ModifiedTime();
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 bool MockFileSystem::RenameFileInternal(const std::string& src,
@@ -928,9 +928,9 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::RenameFile(const std::string& sr
   MutexLock lock(&mutex_);
   bool found = RenameFileInternal(s, t);
   if (!found) {
-    return IOStatus_PathNotFound(s);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(s);
   } else {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 }
 
@@ -942,13 +942,13 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::LinkFile(const std::string& src,
   auto t = NormalizeMockPath(dest);
   MutexLock lock(&mutex_);
   if (file_map_.find(s) == file_map_.end()) {
-    return IOStatus_PathNotFound(s);
+    return rocksdb_rs::io_status::IOStatus_PathNotFound(s);
   }
 
   DeleteFileInternal(t);
   file_map_[t] = file_map_[s];
   file_map_[t]->Ref();  // Otherwise it might get deleted when noone uses s
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::NewLogger(const std::string& fname,
@@ -968,7 +968,7 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::NewLogger(const std::string& fna
   }
   std::unique_ptr<FSWritableFile> f(new MockWritableFile(file, FileOptions()));
   result->reset(new TestMemLogger(std::move(f), clock_, io_opts, dbg));
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::LockFile(const std::string& fname,
@@ -979,10 +979,10 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::LockFile(const std::string& fnam
     MutexLock lock(&mutex_);
     if (file_map_.find(fn) != file_map_.end()) {
       if (!file_map_[fn]->is_lock_file()) {
-        return IOStatus_InvalidArgument(fname, "Not a lock file.");
+        return rocksdb_rs::io_status::IOStatus_InvalidArgument(fname, "Not a lock file.");
       }
       if (!file_map_[fn]->Lock()) {
-        return IOStatus_IOError(fn, "lock is already held.");
+        return rocksdb_rs::io_status::IOStatus_IOError(fn, "lock is already held.");
       }
     } else {
       auto* file = new MemFile(clock_, fn, true);
@@ -992,7 +992,7 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::LockFile(const std::string& fnam
     }
   }
   *flock = new MockEnvFileLock(fn);
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::UnlockFile(FileLock* flock,
@@ -1003,20 +1003,20 @@ rocksdb_rs::io_status::IOStatus MockFileSystem::UnlockFile(FileLock* flock,
     MutexLock lock(&mutex_);
     if (file_map_.find(fn) != file_map_.end()) {
       if (!file_map_[fn]->is_lock_file()) {
-        return IOStatus_InvalidArgument(fn, "Not a lock file.");
+        return rocksdb_rs::io_status::IOStatus_InvalidArgument(fn, "Not a lock file.");
       }
       file_map_[fn]->Unlock();
     }
   }
   delete flock;
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus MockFileSystem::GetTestDirectory(const IOOptions& /*options*/,
                                           std::string* path,
                                           IODebugContext* /*dbg*/) {
   *path = "/test";
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::status::Status MockFileSystem::CorruptBuffer(const std::string& fname) {

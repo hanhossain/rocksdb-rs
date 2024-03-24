@@ -151,10 +151,10 @@ class StringSink : public FSWritableFile {
   rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& /*opts*/,
                     IODebugContext* /*dbg*/) override {
     contents_.resize(static_cast<size_t>(size));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
     if (reader_contents_ != nullptr) {
@@ -165,17 +165,17 @@ class StringSink : public FSWritableFile {
       last_flush_ = contents_.size();
     }
 
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   using FSWritableFile::Append;
   rocksdb_rs::io_status::IOStatus Append(const Slice& slice, const IOOptions& /*opts*/,
                   IODebugContext* /*dbg*/) override {
     contents_.append(slice.data(), slice.size());
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   void Drop(size_t bytes) {
     if (reader_contents_ != nullptr) {
@@ -204,7 +204,7 @@ class RandomRWStringSink : public FSRandomRWFile {
 
     char* pos = const_cast<char*>(ss_->contents_.data() + offset);
     memcpy(pos, data.data(), data.size());
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*opts*/,
@@ -216,19 +216,19 @@ class RandomRWStringSink : public FSRandomRWFile {
           std::min(static_cast<size_t>(ss_->contents_.size() - offset), n);
       *result = Slice(ss_->contents_.data() + offset, str_res_sz);
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   const std::string& contents() const { return ss_->contents(); }
@@ -253,10 +253,10 @@ class OverwritingStringSink : public FSWritableFile {
   rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& /*opts*/,
                     IODebugContext* /*dbg*/) override {
     contents_.resize(static_cast<size_t>(size));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
     if (last_flush_ < contents_.size()) {
@@ -265,17 +265,17 @@ class OverwritingStringSink : public FSWritableFile {
              contents_.data() + last_flush_, contents_.size() - last_flush_);
       last_flush_ = contents_.size();
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   using FSWritableFile::Append;
   rocksdb_rs::io_status::IOStatus Append(const Slice& slice, const IOOptions& /*opts*/,
                   IODebugContext* /*dbg*/) override {
     contents_.append(slice.data(), slice.size());
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   void Drop(size_t bytes) {
     contents_.resize(contents_.size() - bytes);
@@ -306,9 +306,9 @@ class StringSource : public FSRandomAccessFile {
                     IODebugContext* /*dbg*/) override {
     // If we are using mmap_, it is equivalent to performing a prefetch
     if (mmap_) {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     } else {
-      return IOStatus_NotSupported("Prefetch not supported");
+      return rocksdb_rs::io_status::IOStatus_NotSupported("Prefetch not supported");
     }
   }
 
@@ -317,7 +317,7 @@ class StringSource : public FSRandomAccessFile {
                 IODebugContext* /*dbg*/) const override {
     total_reads_++;
     if (offset > contents_.size()) {
-      return IOStatus_InvalidArgument("invalid Read offset");
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument("invalid Read offset");
     }
     if (offset + n > contents_.size()) {
       n = contents_.size() - static_cast<size_t>(offset);
@@ -328,7 +328,7 @@ class StringSource : public FSRandomAccessFile {
     } else {
       *result = Slice(&contents_[static_cast<size_t>(offset)], n);
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   size_t GetUniqueId(char* id, size_t max_size) const override {
@@ -507,21 +507,21 @@ class SeqStringSource : public FSSequentialFile {
       offset_ += n;
       *result = Slice(scratch, n);
     } else {
-      return IOStatus_InvalidArgument(
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument(
           "Attempt to read when it already reached eof.");
     }
     (*read_count_)++;
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
     if (offset_ >= data_.size()) {
-      return IOStatus_InvalidArgument(
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument(
           "Attempt to read when it already reached eof.");
     }
     // TODO(yhchiang): Currently doesn't handle the overflow case.
     offset_ += static_cast<size_t>(n);
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
  private:
@@ -539,25 +539,25 @@ class StringFS : public FileSystemWrapper {
     rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& /*opts*/,
                       IODebugContext* /*dbg*/) override {
       contents_->resize(static_cast<size_t>(size));
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*opts*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Flush(const IOOptions& /*opts*/,
                    IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     rocksdb_rs::io_status::IOStatus Sync(const IOOptions& /*opts*/, IODebugContext* /*dbg*/) override {
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     using FSWritableFile::Append;
     rocksdb_rs::io_status::IOStatus Append(const Slice& slice, const IOOptions& /*opts*/,
                     IODebugContext* /*dbg*/) override {
       contents_->append(slice.data(), slice.size());
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
    private:
@@ -600,17 +600,17 @@ class StringFS : public FileSystemWrapper {
                              IODebugContext* /*dbg*/) override {
     auto iter = files_.find(f);
     if (iter == files_.end()) {
-      return IOStatus_NotFound("The specified file does not exist", f);
+      return rocksdb_rs::io_status::IOStatus_NotFound("The specified file does not exist", f);
     }
     r->reset(new SeqStringSource(iter->second, &num_seq_file_read_));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& /*f*/,
                                const FileOptions& /*options*/,
                                std::unique_ptr<FSRandomAccessFile>* /*r*/,
                                IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& f, const FileOptions& /*options*/,
@@ -618,91 +618,91 @@ class StringFS : public FileSystemWrapper {
                            IODebugContext* /*dbg*/) override {
     auto iter = files_.find(f);
     if (iter != files_.end()) {
-      return IOStatus_IOError("The specified file already exists", f);
+      return rocksdb_rs::io_status::IOStatus_IOError("The specified file already exists", f);
     }
     r->reset(new StringSink(&files_[f]));
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& /*name*/,
                         const IOOptions& /*options*/,
                         std::unique_ptr<FSDirectory>* /*result*/,
                         IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus FileExists(const std::string& f, const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
     if (files_.find(f) == files_.end()) {
-      return IOStatus_NotFound();
+      return rocksdb_rs::io_status::IOStatus_NotFound();
     }
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus GetChildren(const std::string& /*dir*/, const IOOptions& /*options*/,
                        std::vector<std::string>* /*r*/,
                        IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& f, const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
     files_.erase(f);
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus CreateDir(const std::string& /*d*/, const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& /*d*/,
                               const IOOptions& /*options*/,
                               IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& /*d*/, const IOOptions& /*options*/,
                      IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& f, const IOOptions& /*options*/,
                        uint64_t* s, IODebugContext* /*dbg*/) override {
     auto iter = files_.find(f);
     if (iter == files_.end()) {
-      return IOStatus_NotFound("The specified file does not exist:", f);
+      return rocksdb_rs::io_status::IOStatus_NotFound("The specified file does not exist:", f);
     }
     *s = iter->second.size();
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus GetFileModificationTime(const std::string& /*fname*/,
                                    const IOOptions& /*options*/,
                                    uint64_t* /*file_mtime*/,
                                    IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus RenameFile(const std::string& /*s*/, const std::string& /*t*/,
                       const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus LinkFile(const std::string& /*s*/, const std::string& /*t*/,
                     const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus LockFile(const std::string& /*f*/, const IOOptions& /*options*/,
                     FileLock** /*l*/, IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* /*l*/, const IOOptions& /*options*/,
                       IODebugContext* /*dbg*/) override {
-    return IOStatus_NotSupported();
+    return rocksdb_rs::io_status::IOStatus_NotSupported();
   }
 
   std::atomic<int> num_seq_file_read_;

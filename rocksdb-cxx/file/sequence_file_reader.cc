@@ -140,7 +140,7 @@ rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(size_t n, Slice* resu
 rocksdb_rs::io_status::IOStatus SequentialFileReader::Skip(uint64_t n) {
   if (use_direct_io()) {
     offset_ += static_cast<size_t>(n);
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   return file_->Skip(n);
 }
@@ -181,7 +181,7 @@ class ReadaheadSequentialFile : public FSSequentialFile {
         (cached_len == n || buffer_.CurrentSize() < readahead_size_)) {
       // We read exactly what we needed, or we hit end of file - return.
       *result = Slice(scratch, cached_len);
-      return IOStatus_OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     n -= cached_len;
 
@@ -209,7 +209,7 @@ class ReadaheadSequentialFile : public FSSequentialFile {
 
   rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
     std::unique_lock<std::mutex> lk(lock_);
-    rocksdb_rs::io_status::IOStatus s = IOStatus_OK();
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_OK();
     // First check if we need to skip already cached data
     if (buffer_.CurrentSize() > 0) {
       // Do we need to skip beyond cached data?

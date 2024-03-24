@@ -269,7 +269,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::RenameFile(const std::string& s
   if (!status_and_src_enc_path.first.ok()) {
     if (status_and_src_enc_path.first.IsNotFound()) {
       const rocksdb_rs::io_status::IOStatus& s = status_and_src_enc_path.first;
-      status_and_src_enc_path.first = IOStatus_PathNotFound(s.ToString());
+      status_and_src_enc_path.first = rocksdb_rs::io_status::IOStatus_PathNotFound(s.ToString());
     }
     return status_and_src_enc_path.first;
   }

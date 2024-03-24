@@ -525,13 +525,13 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::NewMemoryMappedFileBuffer(
   }
   // Will not map empty files
   if (fileSize == 0) {
-    return IOStatus_NotSupported(
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
         "NewMemoryMappedFileBuffer can not map zero length files: " + fname);
   }
 
   // size_t is 32-bit with 32-bit builds
   if (fileSize > std::numeric_limits<size_t>::max()) {
-    return IOStatus_NotSupported(
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
         "The specified file size does not fit into 32-bit memory addressing: " +
         fname);
   }
@@ -622,7 +622,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::FileExists(const std::string& fna
       case ERROR_NOT_FOUND:
       case ERROR_FILE_NOT_FOUND:
       case ERROR_PATH_NOT_FOUND:
-        s = IOStatus_NotFound();
+        s = rocksdb_rs::io_status::IOStatus_NotFound();
         break;
       default:
         s = IOErrorFromWindowsError("Unexpected error for: " + fname,
@@ -659,7 +659,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetChildren(const std::string& di
       case ERROR_ACCESS_DENIED:
       case ERROR_FILE_NOT_FOUND:
       case ERROR_PATH_NOT_FOUND:
-        status = IOStatus_NotFound();
+        status = rocksdb_rs::io_status::IOStatus_NotFound();
         break;
       default:
         status = IOErrorFromWindowsError("Failed to GetChhildren for: " + dir,
@@ -727,7 +727,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::CreateDirIfMissing(const std::str
       result = IOErrorFromWindowsError("Failed to create a directory: " + name,
                                        lastError);
     } else {
-      result = IOStatus_IOError(name + ": exists but is not a directory");
+      result = rocksdb_rs::io_status::IOStatus_IOError(name + ": exists but is not a directory");
     }
   }
   return result;
@@ -833,7 +833,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::LinkFile(const std::string& src,
   if (!RX_CreateHardLink(RX_FN(target).c_str(), RX_FN(src).c_str(), NULL)) {
     DWORD lastError = GetLastError();
     if (lastError == ERROR_NOT_SAME_DEVICE) {
-      return IOStatus_NotSupported("No cross FS links allowed");
+      return rocksdb_rs::io_status::IOStatus_NotSupported("No cross FS links allowed");
     }
 
     std::string text("Failed to link: ");
@@ -879,12 +879,12 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::AreFilesSame(const std::string& f
                                      IODebugContext* /*dbg*/) {
 // For MinGW builds
 #if (_WIN32_WINNT == _WIN32_WINNT_VISTA)
-  rocksdb_rs::io_status::IOStatus s = IOStatus_NotSupported();
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_NotSupported();
 #else
   assert(res != nullptr);
   rocksdb_rs::io_status::IOStatus s;
   if (res == nullptr) {
-    s = IOStatus_InvalidArgument("res");
+    s = rocksdb_rs::io_status::IOStatus_InvalidArgument("res");
     return s;
   }
 
@@ -1018,7 +1018,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetTestDirectory(const IOOptions&
 
   output.swap(*result);
 
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus WinFileSystem::NewLogger(const std::string& fname,
@@ -1070,7 +1070,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::IsDirectory(const std::string& pa
   if (is_dir) {
     *is_dir = ret ? true : false;
   }
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::status::Status WinEnvIO::GetHostName(char* name, uint64_t len) {
@@ -1098,7 +1098,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetAbsolutePath(const std::string
   if ((!db_path.empty() && (db_path[0] == '\\' || db_path[0] == '/')) ||
       !RX_PathIsRelative(RX_FN(db_path).c_str())) {
     *output_path = db_path;
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   RX_FILESTRING result;
@@ -1117,7 +1117,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetAbsolutePath(const std::string
   std::string res = FN_TO_RX(result);
 
   res.swap(*output_path);
-  return IOStatus_OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus WinFileSystem::GetFreeSpace(const std::string& path,
@@ -1129,7 +1129,7 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetFreeSpace(const std::string& p
   BOOL f = RX_GetDiskFreeSpaceEx(RX_FN(path).c_str(), &freeBytes, NULL, NULL);
   if (f) {
     *diskfree = freeBytes.QuadPart;
-    return IOStatus_OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   } else {
     DWORD lastError = GetLastError();
     return IOErrorFromWindowsError("Failed to get free space: " + path,
