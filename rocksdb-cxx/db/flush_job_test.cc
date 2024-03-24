@@ -83,26 +83,26 @@ class FlushJobTestBase : public testing::Test {
     std::unique_ptr<WritableFileWriter> file_writer;
     rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
-        nullptr);
+        nullptr).status();
     ASSERT_OK(s);
 
     {
       log::Writer log(std::move(file_writer), 0, false);
       std::string record;
       new_db.EncodeTo(&record);
-      s = log.AddRecord(record);
+      s = log.AddRecord(record).status();
       ASSERT_OK(s);
 
       for (const auto& e : new_cfs) {
         record.clear();
         e.EncodeTo(&record);
-        s = log.AddRecord(record);
+        s = log.AddRecord(record).status();
         ASSERT_OK(s);
       }
     }
     ASSERT_OK(s);
     // Make "CURRENT" file that points to the new manifest file.
-    s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+    s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
     ASSERT_OK(s);
   }
 

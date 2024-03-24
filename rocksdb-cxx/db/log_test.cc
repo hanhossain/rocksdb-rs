@@ -825,10 +825,10 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     FileOptions fopts;
     auto fs = env_->GetFileSystem();
-    s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr);
+    s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr).status();
     std::unique_ptr<FSWritableFile> writable_file;
     if (s.ok()) {
-      s = fs->NewWritableFile(log_file_, fopts, &writable_file, nullptr);
+      s = fs->NewWritableFile(log_file_, fopts, &writable_file, nullptr).status();
     }
     if (s.ok()) {
       writer_.reset(
@@ -837,7 +837,7 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     }
     std::unique_ptr<FSSequentialFile> seq_file;
     if (s.ok()) {
-      s = fs->NewSequentialFile(log_file_, fopts, &seq_file, nullptr);
+      s = fs->NewSequentialFile(log_file_, fopts, &seq_file, nullptr).status();
     }
     if (s.ok()) {
       reader_.reset(new SequentialFileReader(std::move(seq_file), log_file_));
@@ -991,7 +991,7 @@ INSTANTIATE_TEST_CASE_P(bool, RetriableLogTest, ::testing::Values(0, 2));
 
 class CompressionLogTest : public LogTest {
  public:
-  rocksdb_rs::status::Status SetupTestEnv() { return writer_->AddCompressionTypeRecord(); }
+  rocksdb_rs::status::Status SetupTestEnv() { return writer_->AddCompressionTypeRecord().status(); }
 };
 
 TEST_P(CompressionLogTest, Empty) {

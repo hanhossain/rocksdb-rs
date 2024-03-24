@@ -60,7 +60,7 @@ SimulatedHybridFileSystem::SimulatedHybridFileSystem(
   s = ReadFileToString(base.get(), metadata_file_name, &metadata);
   if (!s.ok()) {
     fprintf(stderr, "Error reading from file %s: %s",
-            metadata_file_name.c_str(), s.ToString().c_str());
+            metadata_file_name.c_str(), s.ToString()->c_str());
     // Exit rather than assert as this file system is built to run with
     // benchmarks, which usually run on release mode.
     std::exit(1);
@@ -89,7 +89,7 @@ SimulatedHybridFileSystem::~SimulatedHybridFileSystem() {
   rocksdb_rs::io_status::IOStatus s = WriteStringToFile(target(), metadata, metadata_file_name_, true);
   if (!s.ok()) {
     fprintf(stderr, "Error writing to file %s: %s", metadata_file_name_.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
   }
 }
 

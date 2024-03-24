@@ -103,7 +103,7 @@ TEST_F(RandomAccessFileReaderTest, MultiReadDirectIO) {
           aligned_reqs[i].offset = req.offset;
           aligned_reqs[i].len = req.len;
           aligned_reqs[i].result = req.result;
-          aligned_reqs[i].status = req.status;
+          aligned_reqs[i].status = req.status.Clone();
           aligned_reqs[i].scratch = req.scratch;
           i++;
         }

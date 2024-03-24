@@ -62,7 +62,7 @@ class IOTracerTest : public testing::Test {
       record.io_op_data |= (1 << IOTraceOp::kIOLen);
       record.io_op_data |= (1 << IOTraceOp::kIOOffset);
       record.file_operation = GetFileOperation(i);
-      record.io_status = rocksdb_rs::io_status::IOStatus_OK().ToString();
+      record.io_status = *rocksdb_rs::io_status::IOStatus_OK().ToString();
       record.file_name = kDummyFile + std::to_string(i);
       record.len = i;
       record.offset = i + 20;
@@ -76,7 +76,7 @@ class IOTracerTest : public testing::Test {
       IOTraceRecord record;
       ASSERT_OK(reader->ReadIOOp(&record));
       ASSERT_EQ(record.file_operation, GetFileOperation(i));
-      ASSERT_EQ(record.io_status, rocksdb_rs::io_status::IOStatus_OK().ToString());
+      ASSERT_EQ(record.io_status, *rocksdb_rs::io_status::IOStatus_OK().ToString());
       ASSERT_EQ(record.len, i);
       ASSERT_EQ(record.offset, i + 20);
     }
@@ -241,7 +241,7 @@ TEST_F(IOTracerTest, AtomicWrite) {
     IOTraceRecord access_record;
     ASSERT_OK(reader.ReadIOOp(&access_record));
     ASSERT_EQ(access_record.file_operation, GetFileOperation(0));
-    ASSERT_EQ(access_record.io_status, rocksdb_rs::io_status::IOStatus_OK().ToString());
+    ASSERT_EQ(access_record.io_status, *rocksdb_rs::io_status::IOStatus_OK().ToString());
     ASSERT_EQ(access_record.file_name, file_name);
     ASSERT_NOK(reader.ReadIOOp(&access_record));
   }
@@ -308,7 +308,7 @@ TEST_F(IOTracerTest, AtomicNoWriteAfterEndTrace) {
     IOTraceRecord access_record;
     ASSERT_OK(reader.ReadIOOp(&access_record));
     ASSERT_EQ(access_record.file_operation, GetFileOperation(2));
-    ASSERT_EQ(access_record.io_status, rocksdb_rs::io_status::IOStatus_OK().ToString());
+    ASSERT_EQ(access_record.io_status, *rocksdb_rs::io_status::IOStatus_OK().ToString());
     ASSERT_EQ(access_record.file_size, 10);
     // No more record.
     ASSERT_NOK(reader.ReadIOOp(&access_record));

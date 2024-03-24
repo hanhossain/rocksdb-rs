@@ -308,10 +308,10 @@ rocksdb_rs::status::Status FileExpectedStateManager::SaveAtAndAfter(DB* db) {
   // with contents from "LATEST.state"
   rocksdb_rs::status::Status s = CopyFile(FileSystem::Default(), latest_file_path,
                       state_file_temp_path, 0 /* size */, false /* use_fsync */,
-                      nullptr /* io_tracer */, Temperature::kUnknown);
+                      nullptr /* io_tracer */, Temperature::kUnknown).status();
   if (s.ok()) {
     s = FileSystem::Default()->RenameFile(state_file_temp_path, state_file_path,
-                                          IOOptions(), nullptr /* dbg */);
+                                          IOOptions(), nullptr /* dbg */).status();
   }
   SequenceNumber old_saved_seqno = 0;
   if (s.ok()) {
@@ -636,7 +636,7 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
     // new "LATEST.state" appear atomically using `RenameFile()`.
     s = CopyFile(FileSystem::Default(), state_file_path, latest_file_temp_path,
                  0 /* size */, false /* use_fsync */, nullptr /* io_tracer */,
-                 Temperature::kUnknown);
+                 Temperature::kUnknown).status();
   }
 
   {
@@ -687,7 +687,7 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
   if (s.ok()) {
     s = FileSystem::Default()->RenameFile(latest_file_temp_path,
                                           latest_file_path, IOOptions(),
-                                          nullptr /* dbg */);
+                                          nullptr /* dbg */).status();
   }
   if (s.ok()) {
     latest_.reset(new FileExpectedState(latest_file_path, max_key_,

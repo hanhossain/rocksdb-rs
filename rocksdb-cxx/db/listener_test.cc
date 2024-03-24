@@ -713,14 +713,14 @@ class TableFileCreationListener : public EventListener {
     static const char* kClassName() { return "TestEnv"; }
     const char* Name() const override { return kClassName(); }
 
-    void SetStatus(rocksdb_rs::io_status::IOStatus s) { status_ = s; }
+    void SetStatus(rocksdb_rs::io_status::IOStatus s) { status_ = s.Clone(); }
 
     rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
                              std::unique_ptr<FSWritableFile>* result,
                              IODebugContext* dbg) override {
       if (fname.size() > 4 && fname.substr(fname.size() - 4) == ".sst") {
         if (!status_.ok()) {
-          return status_;
+          return status_.Clone();
         }
       }
       return target()->NewWritableFile(fname, opts, result, dbg);

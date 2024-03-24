@@ -557,7 +557,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   {
     std::unique_ptr<FSWritableFile> file;
     const rocksdb_rs::status::Status s =
-        fault_fs->NewWritableFile(file_name, FileOptions(), &file, nullptr);
+        fault_fs->NewWritableFile(file_name, FileOptions(), &file, nullptr).status();
     ASSERT_OK(s);
     std::unique_ptr<WritableFileWriter> fwriter(
         new WritableFileWriter(std::move(file), file_name, FileOptions()));
@@ -574,7 +574,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
     edit.SetColumnFamily(0);
     std::string buf;
     assert(edit.EncodeTo(&buf));
-    const rocksdb_rs::status::Status s = log_writer->AddRecord(buf);
+    const rocksdb_rs::status::Status s = log_writer->AddRecord(buf).status();
     ASSERT_NOK(s);
   }
 
@@ -587,7 +587,7 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   {
     std::unique_ptr<FSSequentialFile> file;
     rocksdb_rs::status::Status s =
-        fault_fs->NewSequentialFile(file_name, FileOptions(), &file, nullptr);
+        fault_fs->NewSequentialFile(file_name, FileOptions(), &file, nullptr).status();
     ASSERT_OK(s);
     std::unique_ptr<SequentialFileReader> freader(
         new SequentialFileReader(std::move(file), file_name));

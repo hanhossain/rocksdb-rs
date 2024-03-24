@@ -1196,7 +1196,7 @@ TEST_P(BackupEngineTestWithParam, OnlineIntegrationTest) {
   for (int i = 1; i <= 5; ++i) {
     if (i == 2) {
       // we deleted backup 2
-      rocksdb_rs::status::Status s = backup_engine_->RestoreDBFromBackup(2, dbname_, dbname_);
+      rocksdb_rs::status::Status s = backup_engine_->RestoreDBFromBackup(2, dbname_, dbname_).status();
       ASSERT_TRUE(!s.ok());
     } else {
       int fill_up_to = std::min(keys_iteration * i, max_key);
@@ -1351,7 +1351,7 @@ TEST_F(BackupEngineTest, CorruptionsTest) {
   FillDB(db_.get(), keys_iteration * 5, keys_iteration * 6);
   test_backup_fs_->SetLimitWrittenFiles(2);
   // should fail
-  s = backup_engine_->CreateNewBackup(db_.get(), !!(rnd.Next() % 2));
+  s = backup_engine_->CreateNewBackup(db_.get(), !!(rnd.Next() % 2)).status();
   ASSERT_NOK(s);
   test_backup_fs_->SetLimitWrittenFiles(1000000);
   // latest backup should have all the keys
@@ -1363,14 +1363,14 @@ TEST_F(BackupEngineTest, CorruptionsTest) {
   // since 5 meta is now corrupted, latest backup should be 4
   AssertBackupConsistency(0, 0, keys_iteration * 4, keys_iteration * 5);
   OpenBackupEngine();
-  s = backup_engine_->RestoreDBFromBackup(5, dbname_, dbname_);
+  s = backup_engine_->RestoreDBFromBackup(5, dbname_, dbname_).status();
   ASSERT_NOK(s);
   CloseBackupEngine();
   ASSERT_OK(file_manager_->DeleteRandomFileInDir(backupdir_ + "/private/4"));
   // 4 is corrupted, 3 is the latest backup now
   AssertBackupConsistency(0, 0, keys_iteration * 3, keys_iteration * 5);
   OpenBackupEngine();
-  s = backup_engine_->RestoreDBFromBackup(4, dbname_, dbname_);
+  s = backup_engine_->RestoreDBFromBackup(4, dbname_, dbname_).status();
   CloseBackupEngine();
   ASSERT_NOK(s);
 
@@ -1385,7 +1385,7 @@ TEST_F(BackupEngineTest, CorruptionsTest) {
   ASSERT_OK(file_manager_->FileExists(backupdir_ + "/meta/2"));
   OpenBackupEngine();
   ASSERT_OK(file_manager_->FileExists(backupdir_ + "/meta/2"));
-  s = backup_engine_->RestoreDBFromBackup(2, dbname_, dbname_);
+  s = backup_engine_->RestoreDBFromBackup(2, dbname_, dbname_).status();
   ASSERT_NOK(s);
 
   // make sure that no corrupt backups have actually been deleted!
@@ -1691,7 +1691,7 @@ TEST_F(BackupEngineTest, TableFileWithoutDbChecksumCorruptedDuringBackup) {
         }
       });
   SyncPoint::GetInstance()->EnableProcessing();
-  rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
+  rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get()).status();
   if (corrupted) {
     ASSERT_NOK(s);
   } else {
@@ -1940,7 +1940,7 @@ TEST_F(BackupEngineTest, FailOverwritingBackups) {
   OpenDBAndBackupEngine(false);
   // More data, bigger SST
   FillDB(db_.get(), 1000, 1300, FillDBFlushAction::kFlushAll);
-  rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
+  rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get()).status();
   // the new backup fails because new table files
   // clash with old table files from backups 4 and 5
   // (since write_buffer_size is huge, we can be sure that
@@ -2164,7 +2164,7 @@ TEST_F(BackupEngineTest, TableFileCorruptionBeforeIncremental) {
       ASSERT_OK(db_file_manager_->CorruptFileStart(tf0));
 
       OpenDBAndBackupEngine(false, false, share);
-      rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
+      rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get()).status();
 
       // Even though none of the naming options catch the inconsistency
       // between the first and second time backing up fname, in the case
@@ -2268,7 +2268,7 @@ TEST_F(BackupEngineTest, FileSizeForIncremental) {
     }
 
     OpenDBAndBackupEngine(false, false, share);
-    rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get());
+    rocksdb_rs::status::Status s = backup_engine_->CreateNewBackup(db_.get()).status();
     EXPECT_TRUE(s.IsCorruption());
 
     ASSERT_OK(backup_engine_->PurgeOldBackups(0));
@@ -2321,7 +2321,7 @@ TEST_F(BackupEngineTest, FileSizeForIncremental) {
     ASSERT_EQ(children.size(), 2U);  // two sst files
 
     // Try create backup 3
-    s = backup_engine_->CreateNewBackup(db_.get(), true /*flush*/);
+    s = backup_engine_->CreateNewBackup(db_.get(), true /*flush*/).status();
 
     // Re-count backup SSTs
     children.clear();
@@ -3987,18 +3987,18 @@ rocksdb_rs::status::Status GetSizeOfBackupFiles(FileSystem* backup_fs,
     std::string dir = std::move(dir_stack.back());
     dir_stack.pop_back();
     std::vector<std::string> children;
-    s = backup_fs->GetChildren(dir, IOOptions(), &children, nullptr /* dbg */);
+    s = backup_fs->GetChildren(dir, IOOptions(), &children, nullptr /* dbg */).status();
     for (size_t i = 0; s.ok() && i < children.size(); ++i) {
       std::string path = dir + "/" + children[i];
       bool is_dir;
-      s = backup_fs->IsDirectory(path, IOOptions(), &is_dir, nullptr /* dbg */);
+      s = backup_fs->IsDirectory(path, IOOptions(), &is_dir, nullptr /* dbg */).status();
       uint64_t file_size = 0;
       if (s.ok()) {
         if (is_dir) {
           dir_stack.emplace_back(std::move(path));
         } else {
           s = backup_fs->GetFileSize(path, IOOptions(), &file_size,
-                                     nullptr /* dbg */);
+                                     nullptr /* dbg */).status();
         }
       }
       if (s.ok()) {

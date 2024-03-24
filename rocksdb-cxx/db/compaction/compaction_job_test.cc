@@ -291,7 +291,7 @@ class CompactionJobTestBase : public testing::Test {
                    const mock::KVVector& contents, uint64_t& file_size) {
     std::unique_ptr<WritableFileWriter> file_writer;
     rocksdb_rs::status::Status s = WritableFileWriter::Create(fs_, table_name, FileOptions(),
-                                          &file_writer, nullptr);
+                                          &file_writer, nullptr).status();
     ASSERT_OK(s);
     std::unique_ptr<TableBuilder> table_builder(
         cf_options_.table_factory->NewTableBuilder(
@@ -558,18 +558,18 @@ class CompactionJobTestBase : public testing::Test {
     const auto& fs = env_->GetFileSystem();
     s = WritableFileWriter::Create(fs, manifest,
                                    fs->OptimizeForManifestWrite(env_options_),
-                                   &file_writer, nullptr);
+                                   &file_writer, nullptr).status();
 
     ASSERT_OK(s);
     {
       log::Writer log(std::move(file_writer), 0, false);
       std::string record;
       new_db.EncodeTo(&record);
-      s = log.AddRecord(record);
+      s = log.AddRecord(record).status();
     }
     ASSERT_OK(s);
     // Make "CURRENT" file that points to the new manifest file.
-    s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+    s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
 
     ASSERT_OK(s);
 

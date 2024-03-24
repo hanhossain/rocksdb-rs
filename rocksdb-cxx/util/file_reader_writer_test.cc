@@ -113,16 +113,16 @@ TEST_F(WritableFileWriterTest, RangeSync) {
   for (int i = 0; i < 1000; i++) {
     int skew_limit = (i < 700) ? 10 : 15;
     uint32_t num = r.Skewed(skew_limit) * 100 + r.Uniform(100);
-    s = writer->Append(Slice(large_buf.get(), num));
+    s = writer->Append(Slice(large_buf.get(), num)).status();
     ASSERT_OK(s);
 
     // Flush in a chance of 1/10.
     if (r.Uniform(10) == 0) {
-      s = writer->Flush();
+      s = writer->Flush().status();
       ASSERT_OK(s);
     }
   }
-  s = writer->Close();
+  s = writer->Close().status();
   ASSERT_OK(s);
 }
 
@@ -239,7 +239,7 @@ TEST_F(WritableFileWriterTest, BufferWithZeroCapacityDirectIO) {
     const rocksdb_rs::status::Status s =
         WritableFileWriter::Create(FileSystem::Default(), /*fname=*/"dont_care",
                                    FileOptions(env_opts), &writer,
-                                   /*dbg=*/nullptr);
+                                   /*dbg=*/nullptr).status();
     ASSERT_TRUE(s.IsInvalidArgument());
   }
 }
@@ -489,7 +489,7 @@ class ReadaheadRandomAccessFileTest
   std::string Read(uint64_t offset, size_t n) {
     Slice result;
     rocksdb_rs::status::Status s = test_read_holder_->Read(offset, n, IOOptions(), &result,
-                                       scratch_.get(), nullptr);
+                                       scratch_.get(), nullptr).status();
     EXPECT_TRUE(s.ok() || s.IsInvalidArgument());
     return std::string(result.data(), result.size());
   }
@@ -498,9 +498,9 @@ class ReadaheadRandomAccessFileTest
         new test::StringSink(&control_contents_));
     std::unique_ptr<WritableFileWriter> write_holder(new WritableFileWriter(
         std::move(sink), "" /* don't care */, FileOptions()));
-    rocksdb_rs::status::Status s = write_holder->Append(Slice(str));
+    rocksdb_rs::status::Status s = write_holder->Append(Slice(str)).status();
     EXPECT_OK(s);
-    s = write_holder->Flush();
+    s = write_holder->Flush().status();
     EXPECT_OK(s);
     std::unique_ptr<FSRandomAccessFile> read_holder(
         new test::StringSource(control_contents_));
@@ -592,7 +592,7 @@ class ReadaheadSequentialFileTest : public testing::Test,
   std::string Read(size_t n) {
     Slice result;
     rocksdb_rs::status::Status s = test_read_holder_->Read(
-        n, &result, scratch_.get(), Env::IO_TOTAL /* rate_limiter_priority*/);
+        n, &result, scratch_.get(), Env::IO_TOTAL /* rate_limiter_priority*/).status();
     EXPECT_TRUE(s.ok() || s.IsInvalidArgument());
     return std::string(result.data(), result.size());
   }
@@ -1037,16 +1037,16 @@ TEST_F(WritableFileWriterIOPriorityTest, BasicOp) {
   for (int i = 0; i < 1000; i++) {
     int skew_limit = (i < 700) ? 10 : 15;
     uint32_t num = r.Skewed(skew_limit) * 100 + r.Uniform(100);
-    s = writer->Append(Slice(large_buf.get(), num));
+    s = writer->Append(Slice(large_buf.get(), num)).status();
     ASSERT_OK(s);
 
     // Flush in a chance of 1/10.
     if (r.Uniform(10) == 0) {
-      s = writer->Flush();
+      s = writer->Flush().status();
       ASSERT_OK(s);
     }
   }
-  s = writer->Close();
+  s = writer->Close().status();
   ASSERT_OK(s);
 }
 }  // namespace rocksdb

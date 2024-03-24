@@ -2592,14 +2592,14 @@ TEST_F(EnvTest, IsDirectory) {
   {
     std::unique_ptr<FSWritableFile> wfile;
     s = Env::Default()->GetFileSystem()->NewWritableFile(
-        test_file_path, FileOptions(), &wfile, /*dbg=*/nullptr);
+        test_file_path, FileOptions(), &wfile, /*dbg=*/nullptr).status();
     ASSERT_OK(s);
     std::unique_ptr<WritableFileWriter> fwriter;
     fwriter.reset(new WritableFileWriter(std::move(wfile), test_file_path,
                                          FileOptions(),
                                          SystemClock::Default().get()));
     constexpr char buf[] = "test";
-    s = fwriter->Append(buf);
+    s = fwriter->Append(buf).status();
     ASSERT_OK(s);
   }
   ASSERT_OK(Env::Default()->IsDirectory(test_file_path, &is_dir));
@@ -3592,7 +3592,7 @@ TEST_F(TestAsyncRead, ReadAsync) {
           size_t i = *(reinterpret_cast<size_t*>(cb_arg));
           reqs[i].offset = req.offset;
           reqs[i].result = req.result;
-          reqs[i].status = req.status;
+          reqs[i].status = req.status.Clone();
         };
 
     // Submit asynchronous read requests.

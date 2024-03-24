@@ -763,7 +763,7 @@ void StressTest::OperateDb(ThreadState* thread) {
                                    rocksdb_rs::types::FileType::kDescriptorFile,
                                    rocksdb_rs::types::FileType::kCurrentFile};
     fault_fs_guard->SetRandomWriteError(
-        thread->shared->GetSeed(), FLAGS_write_fault_one_in, error_msg,
+        thread->shared->GetSeed(), FLAGS_write_fault_one_in, error_msg.Clone(),
         /*inject_for_all_file_types=*/false, types);
   }
   thread->stats.Start();
@@ -1572,7 +1572,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
   }
   BackupEngine* backup_engine = nullptr;
   std::string from = "a backup/restore operation";
-  rocksdb_rs::status::Status s = BackupEngine::Open(db_stress_env, backup_opts, &backup_engine);
+  rocksdb_rs::status::Status s = BackupEngine::Open(db_stress_env, backup_opts, &backup_engine).status();
   if (!s.ok()) {
     from = "BackupEngine::Open";
   }
@@ -1596,7 +1596,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
       // lock and wait on a background operation (flush).
       create_opts.flush_before_backup = true;
     }
-    s = backup_engine->CreateNewBackup(create_opts, db_);
+    s = backup_engine->CreateNewBackup(create_opts, db_).status();
     if (!s.ok()) {
       from = "BackupEngine::CreateNewBackup";
     }
@@ -1604,7 +1604,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
   if (s.ok()) {
     delete backup_engine;
     backup_engine = nullptr;
-    s = BackupEngine::Open(db_stress_env, backup_opts, &backup_engine);
+    s = BackupEngine::Open(db_stress_env, backup_opts, &backup_engine).status();
     if (!s.ok()) {
       from = "BackupEngine::Open (again)";
     }
@@ -1625,7 +1625,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
   if (s.ok() && thread->rand.OneIn(2)) {
     s = backup_engine->VerifyBackup(
         backup_info.front().backup_id,
-        thread->rand.OneIn(2) /* verify_with_checksum */);
+        thread->rand.OneIn(2) /* verify_with_checksum */).status();
     if (!s.ok()) {
       from = "BackupEngine::VerifyBackup";
     }
@@ -1637,7 +1637,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
     if (count > 1) {
       s = backup_engine->RestoreDBFromBackup(
           RestoreOptions(), backup_info[thread->rand.Uniform(count)].backup_id,
-          restore_dir /* db_dir */, restore_dir /* wal_dir */);
+          restore_dir /* db_dir */, restore_dir /* wal_dir */).status();
       if (!s.ok()) {
         from = "BackupEngine::RestoreDBFromBackup";
       }
@@ -1645,7 +1645,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
       from_latest = true;
       s = backup_engine->RestoreDBFromLatestBackup(RestoreOptions(),
                                                    restore_dir /* db_dir */,
-                                                   restore_dir /* wal_dir */);
+                                                   restore_dir /* wal_dir */).status();
       if (!s.ok()) {
         from = "BackupEngine::RestoreDBFromLatestBackup";
       }
@@ -1659,7 +1659,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
       // allow one thread to keep up to 2 backups
       to_keep = thread->rand.Uniform(3);
     }
-    s = backup_engine->PurgeOldBackups(to_keep);
+    s = backup_engine->PurgeOldBackups(to_keep).status();
     if (!s.ok()) {
       from = "BackupEngine::PurgeOldBackups";
     }
@@ -1759,7 +1759,7 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
       // allow one thread to keep up to 2 backups
       to_keep = thread->rand.Uniform(3);
     }
-    s = backup_engine->PurgeOldBackups(to_keep);
+    s = backup_engine->PurgeOldBackups(to_keep).status();
     if (!s.ok()) {
       from = "BackupEngine::PurgeOldBackups";
     }
