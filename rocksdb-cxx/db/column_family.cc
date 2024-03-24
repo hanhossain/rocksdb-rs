@@ -1490,7 +1490,7 @@ rocksdb_rs::status::Status ColumnFamilyData::AddDirectories(
     if (existing_dir == created_dirs->end()) {
       std::unique_ptr<FSDirectory> path_directory;
       s = DBImpl::CreateAndNewDirectory(ioptions_.fs.get(), p.path,
-                                        &path_directory);
+                                        &path_directory).status();
       if (!s.ok()) {
         return s;
       }

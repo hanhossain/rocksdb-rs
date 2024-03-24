@@ -32,13 +32,13 @@ class MockRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
         prefetch_count_(prefetch_count),
         small_buffer_alignment_(small_buffer_alignment) {}
 
-  IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
                     IODebugContext* dbg) override {
     if (support_prefetch_) {
       prefetch_count_.fetch_add(1);
       return target()->Prefetch(offset, n, options, dbg);
     } else {
-      return IOStatus::NotSupported("Prefetch not supported");
+      return rocksdb_rs::io_status::IOStatus_NotSupported("Prefetch not supported");
     }
   }
 
@@ -65,12 +65,12 @@ class MockFS : public FileSystemWrapper {
   static const char* kClassName() { return "MockFS"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    IOStatus s;
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
     result->reset(new MockRandomAccessFile(
         file, support_prefetch_, prefetch_count_, small_buffer_alignment_));

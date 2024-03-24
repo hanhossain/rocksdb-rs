@@ -126,7 +126,7 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
                            fname.c_str());
             return db_->GetFileSystem()->LinkFile(
                 src_dirname + "/" + fname, full_private_path + "/" + fname,
-                IOOptions(), nullptr);
+                IOOptions(), nullptr).status();
           } /* link_file_cb */,
           [&](const std::string& src_dirname, const std::string& fname,
               uint64_t size_limit_bytes, rocksdb_rs::types::FileType,
@@ -136,13 +136,13 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
             ROCKS_LOG_INFO(db_options.info_log, "Copying %s", fname.c_str());
             return CopyFile(db_->GetFileSystem(), src_dirname + "/" + fname,
                             full_private_path + "/" + fname, size_limit_bytes,
-                            db_options.use_fsync, nullptr, temperature);
+                            db_options.use_fsync, nullptr, temperature).status();
           } /* copy_file_cb */,
           [&](const std::string& fname, const std::string& contents, rocksdb_rs::types::FileType) {
             ROCKS_LOG_INFO(db_options.info_log, "Creating %s", fname.c_str());
             return CreateFile(db_->GetFileSystem(),
                               full_private_path + "/" + fname, contents,
-                              db_options.use_fsync);
+                              db_options.use_fsync).status();
           } /* create_file_cb */,
           &sequence_number, log_size_for_flush);
 
@@ -161,11 +161,11 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
   if (s.ok()) {
     std::unique_ptr<FSDirectory> checkpoint_directory;
     s = db_->GetFileSystem()->NewDirectory(checkpoint_dir, IOOptions(),
-                                           &checkpoint_directory, nullptr);
+                                           &checkpoint_directory, nullptr).status();
     if (s.ok() && checkpoint_directory != nullptr) {
       s = checkpoint_directory->FsyncWithDirOptions(
           IOOptions(), nullptr,
-          DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed));
+          DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed)).status();
     }
   }
 
@@ -332,7 +332,7 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
                            cf_name.c_str(), fname.c_str());
             return CopyFile(db_->GetFileSystem(), src_dirname + fname,
                             tmp_export_dir + fname, 0, db_options.use_fsync,
-                            nullptr, Temperature::kUnknown);
+                            nullptr, Temperature::kUnknown).status();
           } /*copy_file_cb*/);
 
       const auto enable_status = db_->EnableFileDeletions(false /*force*/);
@@ -353,12 +353,12 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
     moved_to_user_specified_dir = true;
     std::unique_ptr<FSDirectory> dir_ptr;
     s = db_->GetFileSystem()->NewDirectory(export_dir, IOOptions(), &dir_ptr,
-                                           nullptr);
+                                           nullptr).status();
     if (s.ok()) {
       assert(dir_ptr != nullptr);
       s = dir_ptr->FsyncWithDirOptions(
           IOOptions(), nullptr,
-          DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed));
+          DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed)).status();
     }
   }
 

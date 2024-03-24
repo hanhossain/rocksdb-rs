@@ -86,7 +86,7 @@ rocksdb_rs::status::Status UpdateManifestForFilesState(
         // file.
         fopts.temperature = Temperature::kUnknown;
 
-        IOStatus file_ios =
+        rocksdb_rs::io_status::IOStatus file_ios =
             fs->NewSequentialFile(fname, fopts, &f, /*dbg*/ nullptr);
         if (file_ios.ok()) {
           if (opts.update_temperatures) {
@@ -107,7 +107,7 @@ rocksdb_rs::status::Status UpdateManifestForFilesState(
             }
           }
         } else {
-          s = file_ios;
+          s = file_ios.status();
           break;
         }
       }
@@ -115,7 +115,7 @@ rocksdb_rs::status::Status UpdateManifestForFilesState(
 
     if (s.ok() && edit.NumEntries() > 0) {
       std::unique_ptr<FSDirectory> db_dir;
-      s = fs->NewDirectory(db_name, IOOptions(), &db_dir, nullptr);
+      s = fs->NewDirectory(db_name, IOOptions(), &db_dir, nullptr).status();
       if (s.ok()) {
         s = w.LogAndApply(read_options, cfd, &edit, db_dir.get());
       }

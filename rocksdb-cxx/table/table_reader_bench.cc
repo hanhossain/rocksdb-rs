@@ -133,7 +133,7 @@ void TableReaderBenchmark(Options& opts, EnvOptions& env_options,
     FileOptions fopts(env_options);
 
     std::unique_ptr<FSRandomAccessFile> raf;
-    s = fs->NewRandomAccessFile(file_name, fopts, &raf, nullptr);
+    s = fs->NewRandomAccessFile(file_name, fopts, &raf, nullptr).status();
     if (!s.ok()) {
       fprintf(stderr, "Create File Error: %s\n", s.ToString()->c_str());
       exit(1);

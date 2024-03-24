@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 
 namespace rocksdb {
 class Logger;
@@ -24,7 +24,7 @@ struct OpCounter {
     ops = 0;
     bytes = 0;
   }
-  void RecordOp(const IOStatus& io_s, size_t added_bytes) {
+  void RecordOp(const rocksdb_rs::io_status::IOStatus& io_s, size_t added_bytes) {
     if (!io_s.IsNotSupported()) {
       ops.fetch_add(1, std::memory_order_relaxed);
     }
@@ -90,48 +90,48 @@ class CountedFileSystem : public FileSystemWrapper {
   static const char* kClassName() { return "CountedFileSystem"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewSequentialFile(const std::string& f, const FileOptions& options,
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& f, const FileOptions& options,
                              std::unique_ptr<FSSequentialFile>* r,
                              IODebugContext* dbg) override;
 
-  IOStatus NewRandomAccessFile(const std::string& f,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& f,
                                const FileOptions& file_opts,
                                std::unique_ptr<FSRandomAccessFile>* r,
                                IODebugContext* dbg) override;
 
-  IOStatus NewWritableFile(const std::string& f, const FileOptions& options,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& f, const FileOptions& options,
                            std::unique_ptr<FSWritableFile>* r,
                            IODebugContext* dbg) override;
-  IOStatus ReopenWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReopenWritableFile(const std::string& fname,
                               const FileOptions& options,
                               std::unique_ptr<FSWritableFile>* result,
                               IODebugContext* dbg) override;
 
-  IOStatus ReuseWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReuseWritableFile(const std::string& fname,
                              const std::string& old_fname,
                              const FileOptions& file_opts,
                              std::unique_ptr<FSWritableFile>* result,
                              IODebugContext* dbg) override;
-  IOStatus NewRandomRWFile(const std::string& name, const FileOptions& options,
+  rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& name, const FileOptions& options,
                            std::unique_ptr<FSRandomRWFile>* result,
                            IODebugContext* dbg) override;
 
-  IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
+  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
                         std::unique_ptr<FSDirectory>* result,
                         IODebugContext* dbg) override;
 
-  IOStatus DeleteFile(const std::string& fname, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname, const IOOptions& options,
                       IODebugContext* dbg) override {
-    IOStatus s = target()->DeleteFile(fname, options, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->DeleteFile(fname, options, dbg);
     if (s.ok()) {
       counters_.deletes++;
     }
     return s;
   }
 
-  IOStatus RenameFile(const std::string& s, const std::string& t,
+  rocksdb_rs::io_status::IOStatus RenameFile(const std::string& s, const std::string& t,
                       const IOOptions& options, IODebugContext* dbg) override {
-    IOStatus st = target()->RenameFile(s, t, options, dbg);
+    rocksdb_rs::io_status::IOStatus st = target()->RenameFile(s, t, options, dbg);
     if (st.ok()) {
       counters_.renames++;
     }

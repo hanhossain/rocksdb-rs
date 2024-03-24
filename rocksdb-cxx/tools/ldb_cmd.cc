@@ -2614,7 +2614,7 @@ void DumpWalFile(Options options, std::string wal_file, bool print_header,
   std::unique_ptr<SequentialFileReader> wal_file_reader;
   rocksdb_rs::status::Status status = SequentialFileReader::Create(
       fs, wal_file, soptions, &wal_file_reader, nullptr /* dbg */,
-      nullptr /* rate_limiter */);
+      nullptr /* rate_limiter */).status();
   if (!status.ok()) {
     if (exec_state) {
       *exec_state = LDBCommandExecuteResult::Failed("Failed to open WAL file " +
@@ -3530,14 +3530,14 @@ void BackupCommand::DoCommand() {
       BackupEngineOptions(backup_dir_, custom_env);
   backup_options.info_log = logger_.get();
   backup_options.max_background_operations = num_threads_;
-  status = BackupEngine::Open(options_.env, backup_options, &backup_engine);
+  status = BackupEngine::Open(options_.env, backup_options, &backup_engine).status();
   if (status.ok()) {
     fprintf(stdout, "open backup engine OK\n");
   } else {
     exec_state_ = LDBCommandExecuteResult::Failed(*status.ToString());
     return;
   }
-  status = backup_engine->CreateNewBackup(db_);
+  status = backup_engine->CreateNewBackup(db_).status();
   if (status.ok()) {
     fprintf(stdout, "create new backup OK\n");
   } else {
@@ -3579,14 +3579,14 @@ void RestoreCommand::DoCommand() {
     opts.max_background_operations = num_threads_;
     BackupEngineReadOnly* raw_restore_engine_ptr;
     status =
-        BackupEngineReadOnly::Open(options_.env, opts, &raw_restore_engine_ptr);
+        BackupEngineReadOnly::Open(options_.env, opts, &raw_restore_engine_ptr).status();
     if (status.ok()) {
       restore_engine.reset(raw_restore_engine_ptr);
     }
   }
   if (status.ok()) {
     fprintf(stdout, "open restore engine OK\n");
-    status = restore_engine->RestoreDBFromLatestBackup(db_path_, db_path_);
+    status = restore_engine->RestoreDBFromLatestBackup(db_path_, db_path_).status();
   }
   if (status.ok()) {
     fprintf(stdout, "restore from backup OK\n");
@@ -4198,7 +4198,7 @@ void UnsafeRemoveSstFileCommand::DoCommand() {
     edit.DeleteFile(level, sst_file_number_);
     std::unique_ptr<FSDirectory> db_dir;
     s = options_.env->GetFileSystem()->NewDirectory(db_path_, IOOptions(),
-                                                    &db_dir, nullptr);
+                                                    &db_dir, nullptr).status();
     if (s.ok()) {
       s = w.LogAndApply(read_options, cfd, &edit, db_dir.get());
     }

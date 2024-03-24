@@ -34,7 +34,7 @@ inline void BlockFetcher::ProcessTrailerIfPresent() {
   if (footer_.GetBlockTrailerSize() > 0) {
     assert(footer_.GetBlockTrailerSize() == BlockBasedTable::kBlockTrailerSize);
     if (read_options_.verify_checksums) {
-      io_status_ = status_to_io_status(VerifyBlockChecksum(
+      io_status_ = rocksdb_rs::io_status::IOStatus_new(VerifyBlockChecksum(
           footer_.checksum_type(), slice_.data(), block_size_,
           file_->file_name(), handle_.offset()));
       RecordTick(ioptions_.stats, BLOCK_CHECKSUM_COMPUTE_COUNT);
@@ -75,7 +75,7 @@ inline bool BlockFetcher::TryGetUncompressBlockFromPersistentCache() {
 inline bool BlockFetcher::TryGetFromPrefetchBuffer() {
   if (prefetch_buffer_ != nullptr) {
     IOOptions opts;
-    IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
+    rocksdb_rs::io_status::IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
     if (io_s.ok()) {
       bool read_from_prefetch_buffer = false;
       if (read_options_.async_io && !for_compaction_) {
@@ -97,7 +97,7 @@ inline bool BlockFetcher::TryGetFromPrefetchBuffer() {
       }
     }
     if (!io_s.ok()) {
-      io_status_ = io_s;
+      io_status_ = io_s.Clone();
       return true;
     }
   }
@@ -108,7 +108,7 @@ inline bool BlockFetcher::TryGetSerializedBlockFromPersistentCache() {
   if (cache_options_.persistent_cache &&
       cache_options_.persistent_cache->IsCompressed()) {
     std::unique_ptr<char[]> buf;
-    io_status_ = status_to_io_status(PersistentCacheHelper::LookupSerialized(
+    io_status_ = rocksdb_rs::io_status::IOStatus_new(PersistentCacheHelper::LookupSerialized(
         cache_options_, handle_, &buf, block_size_with_trailer_));
     if (io_status_.ok()) {
       heap_buf_ = CacheAllocationPtr(buf.release());
@@ -120,7 +120,7 @@ inline bool BlockFetcher::TryGetSerializedBlockFromPersistentCache() {
       assert(!io_status_.ok());
       ROCKS_LOG_INFO(ioptions_.logger,
                      "Error reading from persistent cache. %s",
-                     io_status_.ToString().c_str());
+                     io_status_.ToString()->c_str());
     }
   }
   return false;
@@ -240,17 +240,17 @@ inline void BlockFetcher::GetBlockContents() {
 #endif
 }
 
-IOStatus BlockFetcher::ReadBlockContents() {
+rocksdb_rs::io_status::IOStatus BlockFetcher::ReadBlockContents() {
   if (TryGetUncompressBlockFromPersistentCache()) {
     compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifndef NDEBUG
     contents_->has_trailer = footer_.GetBlockTrailerSize() > 0;
 #endif  // NDEBUG
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   if (TryGetFromPrefetchBuffer()) {
     if (!io_status_.ok()) {
-      return io_status_;
+      return io_status_.Clone();
     }
   } else if (!TryGetSerializedBlockFromPersistentCache()) {
     IOOptions opts;
@@ -307,11 +307,11 @@ IOStatus BlockFetcher::ReadBlockContents() {
 
     PERF_COUNTER_ADD(block_read_byte, block_size_with_trailer_);
     if (!io_status_.ok()) {
-      return io_status_;
+      return io_status_.Clone();
     }
 
     if (slice_.size() != block_size_with_trailer_) {
-      return IOStatus::Corruption(
+      return rocksdb_rs::io_status::IOStatus_Corruption(
           "truncated block read from " + file_->file_name() + " offset " +
           std::to_string(handle_.offset()) + ", expected " +
           std::to_string(block_size_with_trailer_) + " bytes, got " +
@@ -322,7 +322,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
     if (io_status_.ok()) {
       InsertCompressedBlockToPersistentCacheIfNeeded();
     } else {
-      return io_status_;
+      return io_status_.Clone();
     }
   }
 
@@ -331,7 +331,7 @@ IOStatus BlockFetcher::ReadBlockContents() {
     // compressed page, uncompress, update cache
     UncompressionContext context(compression_type_);
     UncompressionInfo info(context, uncompression_dict_, compression_type_);
-    io_status_ = status_to_io_status(UncompressSerializedBlock(
+    io_status_ = rocksdb_rs::io_status::IOStatus_new(UncompressSerializedBlock(
         info, slice_.data(), block_size_, contents_, footer_.format_version(),
         ioptions_, memory_allocator_));
 #ifndef NDEBUG
@@ -344,25 +344,25 @@ IOStatus BlockFetcher::ReadBlockContents() {
 
   InsertUncompressedBlockToPersistentCacheIfNeeded();
 
-  return io_status_;
+  return io_status_.Clone();
 }
 
-IOStatus BlockFetcher::ReadAsyncBlockContents() {
+rocksdb_rs::io_status::IOStatus BlockFetcher::ReadAsyncBlockContents() {
   if (TryGetUncompressBlockFromPersistentCache()) {
     compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifndef NDEBUG
     contents_->has_trailer = footer_.GetBlockTrailerSize() > 0;
 #endif  // NDEBUG
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   } else if (!TryGetSerializedBlockFromPersistentCache()) {
     assert(prefetch_buffer_ != nullptr);
     if (!for_compaction_) {
       IOOptions opts;
-      IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
+      rocksdb_rs::io_status::IOStatus io_s = file_->PrepareIOOptions(read_options_, opts);
       if (!io_s.ok()) {
         return io_s;
       }
-      io_s = status_to_io_status(prefetch_buffer_->PrefetchAsync(
+      io_s = rocksdb_rs::io_status::IOStatus_new(prefetch_buffer_->PrefetchAsync(
           opts, file_, handle_.offset(), block_size_with_trailer_, &slice_));
       if (io_s.IsTryAgain()) {
         return io_s;
@@ -372,7 +372,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
         got_from_prefetch_buffer_ = true;
         ProcessTrailerIfPresent();
         if (!io_status_.ok()) {
-          return io_status_;
+          return io_status_.Clone();
         }
         used_buf_ = const_cast<char*>(slice_.data());
 
@@ -382,7 +382,7 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
           UncompressionContext context(compression_type_);
           UncompressionInfo info(context, uncompression_dict_,
                                  compression_type_);
-          io_status_ = status_to_io_status(UncompressSerializedBlock(
+          io_status_ = rocksdb_rs::io_status::IOStatus_new(UncompressSerializedBlock(
               info, slice_.data(), block_size_, contents_,
               footer_.format_version(), ioptions_, memory_allocator_));
 #ifndef NDEBUG
@@ -393,14 +393,14 @@ IOStatus BlockFetcher::ReadAsyncBlockContents() {
           GetBlockContents();
         }
         InsertUncompressedBlockToPersistentCacheIfNeeded();
-        return io_status_;
+        return io_status_.Clone();
       }
     }
     // Fallback to sequential reading of data blocks in case of io_s returns
     // error or for_compaction_is true.
     return ReadBlockContents();
   }
-  return io_status_;
+  return io_status_.Clone();
 }
 
 }  // namespace rocksdb

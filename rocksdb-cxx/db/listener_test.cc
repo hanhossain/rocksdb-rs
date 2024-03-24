@@ -713,21 +713,21 @@ class TableFileCreationListener : public EventListener {
     static const char* kClassName() { return "TestEnv"; }
     const char* Name() const override { return kClassName(); }
 
-    void SetStatus(IOStatus s) { status_ = s; }
+    void SetStatus(rocksdb_rs::io_status::IOStatus s) { status_ = s.Clone(); }
 
-    IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
+    rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
                              std::unique_ptr<FSWritableFile>* result,
                              IODebugContext* dbg) override {
       if (fname.size() > 4 && fname.substr(fname.size() - 4) == ".sst") {
         if (!status_.ok()) {
-          return status_;
+          return status_.Clone();
         }
       }
       return target()->NewWritableFile(fname, opts, result, dbg);
     }
 
    private:
-    IOStatus status_;
+    rocksdb_rs::io_status::IOStatus status_ = rocksdb_rs::io_status::IOStatus_new();
   };
 
   TableFileCreationListener() : last_failure_(rocksdb_rs::status::Status_new()) {
@@ -829,11 +829,11 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   listener->CheckAndResetCounters(1, 1, 0, 0, 0, 0);
   ASSERT_OK(Put("foo", "aaa1"));
   ASSERT_OK(Put("bar", "bbb1"));
-  test_fs->SetStatus(IOStatus::NotSupported("not supported"));
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
   ASSERT_NOK(Flush());
   listener->CheckAndResetCounters(1, 1, 1, 0, 0, 0);
   ASSERT_TRUE(listener->last_failure_.IsNotSupported());
-  test_fs->SetStatus(IOStatus::OK());
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_OK());
 
   Reopen(options);
   ASSERT_OK(Put("foo", "aaa2"));
@@ -852,7 +852,7 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   ASSERT_OK(Put("foo", "aaa3"));
   ASSERT_OK(Put("bar", "bbb3"));
   ASSERT_OK(Flush());
-  test_fs->SetStatus(IOStatus::NotSupported("not supported"));
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
   ASSERT_NOK(
       dbfull()->CompactRange(CompactRangeOptions(), &kRangeStart, &kRangeEnd));
   ASSERT_NOK(dbfull()->TEST_WaitForCompact());
@@ -860,7 +860,7 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   ASSERT_TRUE(listener->last_failure_.IsNotSupported());
 
   // Reset
-  test_fs->SetStatus(IOStatus::OK());
+  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_OK());
   DestroyAndReopen(options);
 
   // Verify that an empty table file that is immediately deleted gives Aborted

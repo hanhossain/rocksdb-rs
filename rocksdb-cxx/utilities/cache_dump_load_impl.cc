@@ -55,17 +55,17 @@ rocksdb_rs::status::Status CacheDumperImpl::SetDumpFilter(std::vector<DB*> db_li
 // This is the main function to dump out the cache block entries to the writer.
 // The writer may create a file or write to other systems. Currently, we will
 // iterate the whole block cache, get the blocks, and write them to the writer
-IOStatus CacheDumperImpl::DumpCacheEntriesToWriter() {
+rocksdb_rs::io_status::IOStatus CacheDumperImpl::DumpCacheEntriesToWriter() {
   // Prepare stage, check the parameters.
   if (cache_ == nullptr) {
-    return IOStatus::InvalidArgument("Cache is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument("Cache is null");
   }
   if (writer_ == nullptr) {
-    return IOStatus::InvalidArgument("CacheDumpWriter is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument("CacheDumpWriter is null");
   }
   // Set the system clock
   if (options_.clock == nullptr) {
-    return IOStatus::InvalidArgument("System clock is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument("System clock is null");
   }
   clock_ = options_.clock;
 
@@ -73,7 +73,7 @@ IOStatus CacheDumperImpl::DumpCacheEntriesToWriter() {
   sequence_num_ = 0;
 
   // Dump stage, first, we write the hader
-  IOStatus io_s = WriteHeader();
+  rocksdb_rs::io_status::IOStatus io_s = WriteHeader();
   if (!io_s.ok()) {
     return io_s;
   }
@@ -169,7 +169,7 @@ CacheDumperImpl::DumpOneBlockCallBack(std::string& buf) {
 // the dump unit metadata.
 // First, we write the metadata first, which is a fixed size string. Then, we
 // Append the dump unit string to the writer.
-IOStatus CacheDumperImpl::WriteBlock(CacheDumpUnitType type, const Slice& key,
+rocksdb_rs::io_status::IOStatus CacheDumperImpl::WriteBlock(CacheDumpUnitType type, const Slice& key,
                                      const Slice& value) {
   uint64_t timestamp = clock_->NowMicros();
   uint32_t value_checksum = crc32c::Value(value.data(), value.size());
@@ -199,7 +199,7 @@ IOStatus CacheDumperImpl::WriteBlock(CacheDumpUnitType type, const Slice& key,
 
   // We write the metadata first.
   assert(writer_ != nullptr);
-  IOStatus io_s = writer_->WriteMetadata(encoded_meta);
+  rocksdb_rs::io_status::IOStatus io_s = writer_->WriteMetadata(encoded_meta);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -209,7 +209,7 @@ IOStatus CacheDumperImpl::WriteBlock(CacheDumpUnitType type, const Slice& key,
 
 // Before we write any block, we write the header first to store the cache dump
 // format version, rocksdb version, and brief intro.
-IOStatus CacheDumperImpl::WriteHeader() {
+rocksdb_rs::io_status::IOStatus CacheDumperImpl::WriteHeader() {
   std::string header_key = "header";
   std::ostringstream s;
   s << kTraceMagic << "\t"
@@ -225,7 +225,7 @@ IOStatus CacheDumperImpl::WriteHeader() {
 }
 
 // Write the footer after all the blocks are stored to indicate the ending.
-IOStatus CacheDumperImpl::WriteFooter() {
+rocksdb_rs::io_status::IOStatus CacheDumperImpl::WriteFooter() {
   std::string footer_key = "footer";
   std::string footer_value("cache dump completed");
   CacheDumpUnitType type = CacheDumpUnitType::kFooter;
@@ -235,21 +235,21 @@ IOStatus CacheDumperImpl::WriteFooter() {
 // This is the main function to restore the cache entries to secondary cache.
 // First, we check if all the arguments are valid. Then, we read the block
 // sequentially from the reader and insert them to the secondary cache.
-IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
   // TODO: remove this line when options are used in the loader
   (void)options_;
   // Step 1: we check if all the arguments are valid
   if (secondary_cache_ == nullptr) {
-    return IOStatus::InvalidArgument("Secondary Cache is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument("Secondary Cache is null");
   }
   if (reader_ == nullptr) {
-    return IOStatus::InvalidArgument("CacheDumpReader is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument("CacheDumpReader is null");
   }
 
   // Step 2: read the header
   // TODO: we need to check the cache dump format version and RocksDB version
   // after the header is read out.
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   DumpUnit dump_unit;
   std::string data;
   io_s = ReadHeader(&data, &dump_unit);
@@ -276,11 +276,11 @@ IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
         Slice(static_cast<char*>(dump_unit.value), dump_unit.value_len);
     rocksdb_rs::status::Status s = secondary_cache_->InsertSaved(dump_unit.key, content);
     if (!s.ok()) {
-      io_s = status_to_io_status(std::move(s));
+      io_s = rocksdb_rs::io_status::IOStatus_new(std::move(s));
     }
   }
   if (dump_unit.type == CacheDumpUnitType::kFooter) {
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   } else {
     return io_s;
   }
@@ -288,45 +288,45 @@ IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
 
 // Read and copy the dump unit metadata to std::string data, decode and create
 // the unit metadata based on the string
-IOStatus CacheDumpedLoaderImpl::ReadDumpUnitMeta(std::string* data,
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnitMeta(std::string* data,
                                                  DumpUnitMeta* unit_meta) {
   assert(reader_ != nullptr);
   assert(data != nullptr);
   assert(unit_meta != nullptr);
-  IOStatus io_s = reader_->ReadMetadata(data);
+  rocksdb_rs::io_status::IOStatus io_s = reader_->ReadMetadata(data);
   if (!io_s.ok()) {
     return io_s;
   }
-  return status_to_io_status(
+  return rocksdb_rs::io_status::IOStatus_new(
       CacheDumperHelper::DecodeDumpUnitMeta(*data, unit_meta));
 }
 
 // Read and copy the dump unit to std::string data, decode and create the unit
 // based on the string
-IOStatus CacheDumpedLoaderImpl::ReadDumpUnit(size_t len, std::string* data,
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnit(size_t len, std::string* data,
                                              DumpUnit* unit) {
   assert(reader_ != nullptr);
   assert(data != nullptr);
   assert(unit != nullptr);
-  IOStatus io_s = reader_->ReadPacket(data);
+  rocksdb_rs::io_status::IOStatus io_s = reader_->ReadPacket(data);
   if (!io_s.ok()) {
     return io_s;
   }
   if (data->size() != len) {
-    return IOStatus::Corruption(
+    return rocksdb_rs::io_status::IOStatus_Corruption(
         "The data being read out does not match the size stored in metadata!");
   }
   Slice block;
-  return status_to_io_status(CacheDumperHelper::DecodeDumpUnit(*data, unit));
+  return rocksdb_rs::io_status::IOStatus_new(CacheDumperHelper::DecodeDumpUnit(*data, unit));
 }
 
 // Read the header
-IOStatus CacheDumpedLoaderImpl::ReadHeader(std::string* data,
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadHeader(std::string* data,
                                            DumpUnit* dump_unit) {
   DumpUnitMeta header_meta;
   header_meta.reset();
   std::string meta_string;
-  IOStatus io_s = ReadDumpUnitMeta(&meta_string, &header_meta);
+  rocksdb_rs::io_status::IOStatus io_s = ReadDumpUnitMeta(&meta_string, &header_meta);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -337,19 +337,19 @@ IOStatus CacheDumpedLoaderImpl::ReadHeader(std::string* data,
   }
   uint32_t unit_checksum = crc32c::Value(data->data(), data->size());
   if (unit_checksum != header_meta.dump_unit_checksum) {
-    return IOStatus::Corruption("Read header unit corrupted!");
+    return rocksdb_rs::io_status::IOStatus_Corruption("Read header unit corrupted!");
   }
   return io_s;
 }
 
 // Read the blocks after header is read out
-IOStatus CacheDumpedLoaderImpl::ReadCacheBlock(std::string* data,
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadCacheBlock(std::string* data,
                                                DumpUnit* dump_unit) {
   // According to the write process, we read the dump_unit_metadata first
   DumpUnitMeta unit_meta;
   unit_meta.reset();
   std::string unit_string;
-  IOStatus io_s = ReadDumpUnitMeta(&unit_string, &unit_meta);
+  rocksdb_rs::io_status::IOStatus io_s = ReadDumpUnitMeta(&unit_string, &unit_meta);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -362,7 +362,7 @@ IOStatus CacheDumpedLoaderImpl::ReadCacheBlock(std::string* data,
   }
   uint32_t unit_checksum = crc32c::Value(data->data(), data->size());
   if (unit_checksum != unit_meta.dump_unit_checksum) {
-    return IOStatus::Corruption(
+    return rocksdb_rs::io_status::IOStatus_Corruption(
         "Checksum does not match! Read dumped unit corrupted!");
   }
   return io_s;

@@ -158,7 +158,7 @@ class PosixFileSystem : public FileSystem {
     }
   }
 
-  IOStatus NewSequentialFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& fname,
                              const FileOptions& options,
                              std::unique_ptr<FSSequentialFile>* result,
                              IODebugContext* /*dbg*/) override {
@@ -206,15 +206,15 @@ class PosixFileSystem : public FileSystem {
     result->reset(new PosixSequentialFile(
         fname, file, fd, GetLogicalBlockSizeForReadIfNeeded(options, fname, fd),
         options));
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& options,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* /*dbg*/) override {
     result->reset();
-    IOStatus s = IOStatus::OK();
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_OK();
     int fd;
     int flags = cloexec_flags(O_RDONLY, &options);
 
@@ -275,12 +275,12 @@ class PosixFileSystem : public FileSystem {
     return s;
   }
 
-  virtual IOStatus OpenWritableFile(const std::string& fname,
+  virtual rocksdb_rs::io_status::IOStatus OpenWritableFile(const std::string& fname,
                                     const FileOptions& options, bool reopen,
                                     std::unique_ptr<FSWritableFile>* result,
                                     IODebugContext* /*dbg*/) {
     result->reset();
-    IOStatus s;
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     int fd = -1;
     int flags = (reopen) ? (O_CREAT | O_APPEND) : (O_CREAT | O_TRUNC);
     // Direct IO mode with O_DIRECT flag or F_NOCAHCE (MAC OSX)
@@ -355,26 +355,26 @@ class PosixFileSystem : public FileSystem {
     return s;
   }
 
-  IOStatus NewWritableFile(const std::string& fname, const FileOptions& options,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname, const FileOptions& options,
                            std::unique_ptr<FSWritableFile>* result,
                            IODebugContext* dbg) override {
     return OpenWritableFile(fname, options, false, result, dbg);
   }
 
-  IOStatus ReopenWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReopenWritableFile(const std::string& fname,
                               const FileOptions& options,
                               std::unique_ptr<FSWritableFile>* result,
                               IODebugContext* dbg) override {
     return OpenWritableFile(fname, options, true, result, dbg);
   }
 
-  IOStatus ReuseWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReuseWritableFile(const std::string& fname,
                              const std::string& old_fname,
                              const FileOptions& options,
                              std::unique_ptr<FSWritableFile>* result,
                              IODebugContext* /*dbg*/) override {
     result->reset();
-    IOStatus s;
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     int fd = -1;
 
     int flags = 0;
@@ -450,7 +450,7 @@ class PosixFileSystem : public FileSystem {
     return s;
   }
 
-  IOStatus NewRandomRWFile(const std::string& fname, const FileOptions& options,
+  rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& fname, const FileOptions& options,
                            std::unique_ptr<FSRandomRWFile>* result,
                            IODebugContext* /*dbg*/) override {
     int fd = -1;
@@ -471,14 +471,14 @@ class PosixFileSystem : public FileSystem {
 
     SetFD_CLOEXEC(fd, &options);
     result->reset(new PosixRandomRWFile(fname, fd, options));
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus NewMemoryMappedFileBuffer(
+  rocksdb_rs::io_status::IOStatus NewMemoryMappedFileBuffer(
       const std::string& fname,
       std::unique_ptr<MemoryMappedFileBuffer>* result) override {
     int fd = -1;
-    IOStatus status;
+    rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
     int flags = cloexec_flags(O_RDWR, nullptr);
 
     while (fd < 0) {
@@ -518,7 +518,7 @@ class PosixFileSystem : public FileSystem {
     return status;
   }
 
-  IOStatus NewDirectory(const std::string& name, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& /*opts*/,
                         std::unique_ptr<FSDirectory>* result,
                         IODebugContext* /*dbg*/) override {
     result->reset();
@@ -533,15 +533,15 @@ class PosixFileSystem : public FileSystem {
     } else {
       result->reset(new PosixDirectory(fd, name));
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus FileExists(const std::string& fname, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus FileExists(const std::string& fname, const IOOptions& /*opts*/,
                       IODebugContext* /*dbg*/) override {
     int result = access(fname.c_str(), F_OK);
 
     if (result == 0) {
-      return IOStatus::OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     int err = errno;
@@ -551,15 +551,15 @@ class PosixFileSystem : public FileSystem {
       case ENAMETOOLONG:
       case ENOENT:
       case ENOTDIR:
-        return IOStatus::NotFound();
+        return rocksdb_rs::io_status::IOStatus_NotFound();
       default:
         assert(err == EIO || err == ENOMEM);
-        return IOStatus::IOError("Unexpected error(" + std::to_string(err) +
+        return rocksdb_rs::io_status::IOStatus_IOError("Unexpected error(" + std::to_string(err) +
                                  ") accessing file `" + fname + "' ");
     }
   }
 
-  IOStatus GetChildren(const std::string& dir, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& opts,
                        std::vector<std::string>* result,
                        IODebugContext* /*dbg*/) override {
     result->clear();
@@ -570,7 +570,7 @@ class PosixFileSystem : public FileSystem {
         case EACCES:
         case ENOENT:
         case ENOTDIR:
-          return IOStatus::NotFound();
+          return rocksdb_rs::io_status::IOStatus_NotFound();
         default:
           return IOError("While opendir", dir, errno);
       }
@@ -613,27 +613,27 @@ class PosixFileSystem : public FileSystem {
       return IOError("While closedir", dir, errno);
     }
 
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus DeleteFile(const std::string& fname, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname, const IOOptions& /*opts*/,
                       IODebugContext* /*dbg*/) override {
-    IOStatus result;
+    rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
     if (unlink(fname.c_str()) != 0) {
       result = IOError("while unlink() file", fname, errno);
     }
     return result;
   }
 
-  IOStatus CreateDir(const std::string& name, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus CreateDir(const std::string& name, const IOOptions& /*opts*/,
                      IODebugContext* /*dbg*/) override {
     if (mkdir(name.c_str(), 0755) != 0) {
       return IOError("While mkdir", name, errno);
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus CreateDirIfMissing(const std::string& name,
+  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& name,
                               const IOOptions& /*opts*/,
                               IODebugContext* /*dbg*/) override {
     if (mkdir(name.c_str(), 0755) != 0) {
@@ -642,22 +642,22 @@ class PosixFileSystem : public FileSystem {
       } else if (!DirExists(name)) {  // Check that name is actually a
                                       // directory.
         // Message is taken from mkdir
-        return IOStatus::IOError("`" + name +
+        return rocksdb_rs::io_status::IOStatus_IOError("`" + name +
                                  "' exists but is not a directory");
       }
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus DeleteDir(const std::string& name, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& name, const IOOptions& /*opts*/,
                      IODebugContext* /*dbg*/) override {
     if (rmdir(name.c_str()) != 0) {
       return IOError("file rmdir", name, errno);
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus GetFileSize(const std::string& fname, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& fname, const IOOptions& /*opts*/,
                        uint64_t* size, IODebugContext* /*dbg*/) override {
     struct stat sbuf;
     if (stat(fname.c_str(), &sbuf) != 0) {
@@ -666,10 +666,10 @@ class PosixFileSystem : public FileSystem {
     } else {
       *size = sbuf.st_size;
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus GetFileModificationTime(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus GetFileModificationTime(const std::string& fname,
                                    const IOOptions& /*opts*/,
                                    uint64_t* file_mtime,
                                    IODebugContext* /*dbg*/) override {
@@ -678,43 +678,43 @@ class PosixFileSystem : public FileSystem {
       return IOError("while stat a file for modification time", fname, errno);
     }
     *file_mtime = static_cast<uint64_t>(s.st_mtime);
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus RenameFile(const std::string& src, const std::string& target,
+  rocksdb_rs::io_status::IOStatus RenameFile(const std::string& src, const std::string& target,
                       const IOOptions& /*opts*/,
                       IODebugContext* /*dbg*/) override {
     if (rename(src.c_str(), target.c_str()) != 0) {
       return IOError("While renaming a file to " + target, src, errno);
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus LinkFile(const std::string& src, const std::string& target,
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& src, const std::string& target,
                     const IOOptions& /*opts*/,
                     IODebugContext* /*dbg*/) override {
     if (link(src.c_str(), target.c_str()) != 0) {
       if (errno == EXDEV || errno == ENOTSUP) {
-        return IOStatus::NotSupported(errno == EXDEV
+        return rocksdb_rs::io_status::IOStatus_NotSupported(errno == EXDEV
                                           ? "No cross FS links allowed"
                                           : "Links not supported by FS");
       }
       return IOError("while link file to " + target, src, errno);
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus NumFileLinks(const std::string& fname, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus NumFileLinks(const std::string& fname, const IOOptions& /*opts*/,
                         uint64_t* count, IODebugContext* /*dbg*/) override {
     struct stat s;
     if (stat(fname.c_str(), &s) != 0) {
       return IOError("while stat a file for num file links", fname, errno);
     }
     *count = static_cast<uint64_t>(s.st_nlink);
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus AreFilesSame(const std::string& first, const std::string& second,
+  rocksdb_rs::io_status::IOStatus AreFilesSame(const std::string& first, const std::string& second,
                         const IOOptions& /*opts*/, bool* res,
                         IODebugContext* /*dbg*/) override {
     struct stat statbuf[2];
@@ -732,10 +732,10 @@ class PosixFileSystem : public FileSystem {
     } else {
       *res = true;
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus LockFile(const std::string& fname, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus LockFile(const std::string& fname, const IOOptions& /*opts*/,
                     FileLock** lock, IODebugContext* /*dbg*/) override {
     *lock = nullptr;
 
@@ -771,7 +771,7 @@ class PosixFileSystem : public FileSystem {
                      fname, errno);
     }
 
-    IOStatus result = IOStatus::OK();
+    rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_OK();
     int fd;
     int flags = cloexec_flags(O_RDWR | O_CREAT, nullptr);
 
@@ -802,10 +802,10 @@ class PosixFileSystem : public FileSystem {
     return result;
   }
 
-  IOStatus UnlockFile(FileLock* lock, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* lock, const IOOptions& /*opts*/,
                       IODebugContext* /*dbg*/) override {
     PosixFileLock* my_lock = reinterpret_cast<PosixFileLock*>(lock);
-    IOStatus result;
+    rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
     mutex_locked_files.Lock();
     // If we are unlocking, then verify that we had locked it earlier,
     // it should already exist in locked_files. Remove it from locked_files.
@@ -822,25 +822,25 @@ class PosixFileSystem : public FileSystem {
     return result;
   }
 
-  IOStatus GetAbsolutePath(const std::string& db_path,
+  rocksdb_rs::io_status::IOStatus GetAbsolutePath(const std::string& db_path,
                            const IOOptions& /*opts*/, std::string* output_path,
                            IODebugContext* /*dbg*/) override {
     if (!db_path.empty() && db_path[0] == '/') {
       *output_path = db_path;
-      return IOStatus::OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     char the_path[4096];
     char* ret = getcwd(the_path, 4096);
     if (ret == nullptr) {
-      return IOStatus::IOError(errnoStr(errno).c_str());
+      return rocksdb_rs::io_status::IOStatus_IOError(errnoStr(errno).c_str());
     }
 
     *output_path = ret;
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus GetTestDirectory(const IOOptions& /*opts*/, std::string* result,
+  rocksdb_rs::io_status::IOStatus GetTestDirectory(const IOOptions& /*opts*/, std::string* result,
                             IODebugContext* /*dbg*/) override {
     const char* env = getenv("TEST_TMPDIR");
     if (env && env[0] != '\0') {
@@ -855,10 +855,10 @@ class PosixFileSystem : public FileSystem {
       IOOptions opts;
       return CreateDirIfMissing(*result, opts, nullptr);
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus GetFreeSpace(const std::string& fname, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& fname, const IOOptions& /*opts*/,
                         uint64_t* free_space,
                         IODebugContext* /*dbg*/) override {
     struct statvfs sbuf;
@@ -878,10 +878,10 @@ class PosixFileSystem : public FileSystem {
       // root user can access all disk space
       *free_space = ((uint64_t)sbuf.f_bsize * sbuf.f_bfree);
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  IOStatus IsDirectory(const std::string& path, const IOOptions& /*opts*/,
+  rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& path, const IOOptions& /*opts*/,
                        bool* is_dir, IODebugContext* /*dbg*/) override {
     // First open
     int fd = -1;
@@ -893,7 +893,7 @@ class PosixFileSystem : public FileSystem {
     if (fd < 0) {
       return IOError("While open for IsDirectory()", path, errno);
     }
-    IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     struct stat sbuf;
     if (fstat(fd, &sbuf) < 0) {
       io_s = IOError("While doing stat for IsDirectory()", path, errno);
@@ -1004,7 +1004,7 @@ class PosixFileSystem : public FileSystem {
   // equal to atleast min_completions.
   // 2. Currently in case of direct_io, Read API is called because of which call
   // to Poll API fails as it expects IOHandle to be populated.
-  virtual IOStatus Poll(std::vector<void*>& io_handles,
+  virtual rocksdb_rs::io_status::IOStatus Poll(std::vector<void*>& io_handles,
                         size_t /*min_completions*/) override {
 #if defined(ROCKSDB_IOURING_PRESENT)
     // io_uring_queue_init.
@@ -1015,7 +1015,7 @@ class PosixFileSystem : public FileSystem {
 
     // Init failed, platform doesn't support io_uring.
     if (iu == nullptr) {
-      return IOStatus::NotSupported("Poll");
+      return rocksdb_rs::io_status::IOStatus_NotSupported("Poll");
     }
 
     for (size_t i = 0; i < io_handles.size(); i++) {
@@ -1040,7 +1040,7 @@ class PosixFileSystem : public FileSystem {
             static_cast<Posix_IOHandle*>(io_uring_cqe_get_data(cqe));
         assert(posix_handle->iu == iu);
         if (posix_handle->iu != iu) {
-          return IOStatus::IOError("");
+          return rocksdb_rs::io_status::IOStatus_IOError("");
         }
         // Reset cqe data to catch any stray reuse of it
         static_cast<struct io_uring_cqe*>(cqe)->user_data = 0xd5d5d5d5d5d5d5d5;
@@ -1070,14 +1070,14 @@ class PosixFileSystem : public FileSystem {
         }
       }
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
 #else
     (void)io_handles;
-    return IOStatus::NotSupported("Poll");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("Poll");
 #endif
   }
 
-  virtual IOStatus AbortIO(std::vector<void*>& io_handles) override {
+  virtual rocksdb_rs::io_status::IOStatus AbortIO(std::vector<void*>& io_handles) override {
 #if defined(ROCKSDB_IOURING_PRESENT)
     // io_uring_queue_init.
     struct io_uring* iu = nullptr;
@@ -1089,7 +1089,7 @@ class PosixFileSystem : public FileSystem {
     // If Poll is not supported then it didn't submit any request and it should
     // return OK.
     if (iu == nullptr) {
-      return IOStatus::OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
     for (size_t i = 0; i < io_handles.size(); i++) {
@@ -1100,7 +1100,7 @@ class PosixFileSystem : public FileSystem {
       }
       assert(posix_handle->iu == iu);
       if (posix_handle->iu != iu) {
-        return IOStatus::IOError("");
+        return rocksdb_rs::io_status::IOStatus_IOError("");
       }
 
       // Prepare the cancel request.
@@ -1117,7 +1117,7 @@ class PosixFileSystem : public FileSystem {
       ssize_t ret = io_uring_submit(iu);
       if (ret < 0) {
         fprintf(stderr, "io_uring_submit error: %ld\n", long(ret));
-        return IOStatus::IOError("io_uring_submit() requested but returned " +
+        return rocksdb_rs::io_status::IOStatus_IOError("io_uring_submit() requested but returned " +
                                  std::to_string(ret));
       }
     }
@@ -1143,7 +1143,7 @@ class PosixFileSystem : public FileSystem {
             static_cast<Posix_IOHandle*>(io_uring_cqe_get_data(cqe));
         assert(posix_handle->iu == iu);
         if (posix_handle->iu != iu) {
-          return IOStatus::IOError("");
+          return rocksdb_rs::io_status::IOStatus_IOError("");
         }
         posix_handle->req_count++;
 
@@ -1166,19 +1166,19 @@ class PosixFileSystem : public FileSystem {
             static_cast<Posix_IOHandle*>(io_handles[i]) == posix_handle) {
           posix_handle->is_finished = true;
           FSReadRequest req;
-          req.status = IOStatus::Aborted();
+          req.status = rocksdb_rs::io_status::IOStatus_Aborted();
           posix_handle->cb(req, posix_handle->cb_arg);
 
           break;
         }
       }
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
 #else
     // If Poll is not supported then it didn't submit any request and it should
     // return OK.
     (void)io_handles;
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
 #endif
   }
 

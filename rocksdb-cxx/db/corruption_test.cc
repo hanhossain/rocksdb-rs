@@ -53,14 +53,14 @@ class ErrorFS : public FileSystemWrapper {
         num_writable_file_errors_(0) {}
   const char* Name() const override { return "ErrorEnv"; }
 
-  virtual IOStatus NewWritableFile(const std::string& fname,
+  virtual rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
                                    const FileOptions& opts,
                                    std::unique_ptr<FSWritableFile>* result,
                                    IODebugContext* dbg) override {
     result->reset();
     if (writable_file_error_) {
       ++num_writable_file_errors_;
-      return IOStatus::IOError(fname, "fake error");
+      return rocksdb_rs::io_status::IOStatus_IOError(fname, "fake error");
     }
     return target()->NewWritableFile(fname, opts, result, dbg);
   }

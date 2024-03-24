@@ -52,7 +52,7 @@ SimulatedHybridFileSystem::SimulatedHybridFileSystem(
       metadata_file_name_(metadata_file_name),
       name_("SimulatedHybridFileSystem: " + std::string(target()->Name())),
       is_full_fs_warm_(is_full_fs_warm) {
-  IOStatus s = base->FileExists(metadata_file_name, IOOptions(), nullptr);
+  rocksdb_rs::io_status::IOStatus s = base->FileExists(metadata_file_name, IOOptions(), nullptr);
   if (s.IsNotFound()) {
     return;
   }
@@ -60,7 +60,7 @@ SimulatedHybridFileSystem::SimulatedHybridFileSystem(
   s = ReadFileToString(base.get(), metadata_file_name, &metadata);
   if (!s.ok()) {
     fprintf(stderr, "Error reading from file %s: %s",
-            metadata_file_name.c_str(), s.ToString().c_str());
+            metadata_file_name.c_str(), s.ToString()->c_str());
     // Exit rather than assert as this file system is built to run with
     // benchmarks, which usually run on release mode.
     std::exit(1);
@@ -86,14 +86,14 @@ SimulatedHybridFileSystem::~SimulatedHybridFileSystem() {
     metadata += f;
     metadata += "\n";
   }
-  IOStatus s = WriteStringToFile(target(), metadata, metadata_file_name_, true);
+  rocksdb_rs::io_status::IOStatus s = WriteStringToFile(target(), metadata, metadata_file_name_, true);
   if (!s.ok()) {
     fprintf(stderr, "Error writing to file %s: %s", metadata_file_name_.c_str(),
-            s.ToString().c_str());
+            s.ToString()->c_str());
   }
 }
 
-IOStatus SimulatedHybridFileSystem::NewRandomAccessFile(
+rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::NewRandomAccessFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSRandomAccessFile>* result, IODebugContext* dbg) {
   Temperature temperature = Temperature::kUnknown;
@@ -106,13 +106,13 @@ IOStatus SimulatedHybridFileSystem::NewRandomAccessFile(
     }
     assert(temperature == file_opts.temperature);
   }
-  IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
   result->reset(
       new SimulatedHybridRaf(std::move(*result), rate_limiter_, temperature));
   return s;
 }
 
-IOStatus SimulatedHybridFileSystem::NewWritableFile(
+rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::NewWritableFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) {
   if (file_opts.temperature == Temperature::kWarm) {
@@ -120,14 +120,14 @@ IOStatus SimulatedHybridFileSystem::NewWritableFile(
     warm_file_set_.insert(fname);
   }
 
-  IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
   if (file_opts.temperature == Temperature::kWarm || is_full_fs_warm_) {
     result->reset(new SimulatedWritableFile(std::move(*result), rate_limiter_));
   }
   return s;
 }
 
-IOStatus SimulatedHybridFileSystem::DeleteFile(const std::string& fname,
+rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::DeleteFile(const std::string& fname,
                                                const IOOptions& options,
                                                IODebugContext* dbg) {
   {
@@ -137,7 +137,7 @@ IOStatus SimulatedHybridFileSystem::DeleteFile(const std::string& fname,
   return target()->DeleteFile(fname, options, dbg);
 }
 
-IOStatus SimulatedHybridRaf::Read(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::Read(uint64_t offset, size_t n,
                                   const IOOptions& options, Slice* result,
                                   char* scratch, IODebugContext* dbg) const {
   if (temperature_ == Temperature::kWarm) {
@@ -146,7 +146,7 @@ IOStatus SimulatedHybridRaf::Read(uint64_t offset, size_t n,
   return target()->Read(offset, n, options, result, scratch, dbg);
 }
 
-IOStatus SimulatedHybridRaf::MultiRead(FSReadRequest* reqs, size_t num_reqs,
+rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::MultiRead(FSReadRequest* reqs, size_t num_reqs,
                                        const IOOptions& options,
                                        IODebugContext* dbg) {
   if (temperature_ == Temperature::kWarm) {
@@ -157,7 +157,7 @@ IOStatus SimulatedHybridRaf::MultiRead(FSReadRequest* reqs, size_t num_reqs,
   return target()->MultiRead(reqs, num_reqs, options, dbg);
 }
 
-IOStatus SimulatedHybridRaf::Prefetch(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::Prefetch(uint64_t offset, size_t n,
                                       const IOOptions& options,
                                       IODebugContext* dbg) {
   if (temperature_ == Temperature::kWarm) {
@@ -185,7 +185,7 @@ void SimulatedWritableFile::SimulateIOWait(int64_t bytes) const {
   RateLimiterRequest(rate_limiter_.get(), serve_time);
 }
 
-IOStatus SimulatedWritableFile::Append(const Slice& data, const IOOptions& ioo,
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Append(const Slice& data, const IOOptions& ioo,
                                        IODebugContext* idc) {
   if (use_direct_io()) {
     SimulateIOWait(data.size());
@@ -195,7 +195,7 @@ IOStatus SimulatedWritableFile::Append(const Slice& data, const IOOptions& ioo,
   return target()->Append(data, ioo, idc);
 }
 
-IOStatus SimulatedWritableFile::Append(
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Append(
     const Slice& data, const IOOptions& options,
     const DataVerificationInfo& verification_info, IODebugContext* dbg) {
   if (use_direct_io()) {
@@ -206,7 +206,7 @@ IOStatus SimulatedWritableFile::Append(
   return target()->Append(data, options, verification_info, dbg);
 }
 
-IOStatus SimulatedWritableFile::PositionedAppend(const Slice& data,
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::PositionedAppend(const Slice& data,
                                                  uint64_t offset,
                                                  const IOOptions& options,
                                                  IODebugContext* dbg) {
@@ -218,7 +218,7 @@ IOStatus SimulatedWritableFile::PositionedAppend(const Slice& data,
   }
   return target()->PositionedAppend(data, offset, options, dbg);
 }
-IOStatus SimulatedWritableFile::PositionedAppend(
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::PositionedAppend(
     const Slice& data, uint64_t offset, const IOOptions& options,
     const DataVerificationInfo& verification_info, IODebugContext* dbg) {
   if (use_direct_io()) {
@@ -231,7 +231,7 @@ IOStatus SimulatedWritableFile::PositionedAppend(
                                     dbg);
 }
 
-IOStatus SimulatedWritableFile::Sync(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Sync(const IOOptions& options,
                                      IODebugContext* dbg) {
   if (unsynced_bytes > 0) {
     SimulateIOWait(unsynced_bytes);

@@ -10,7 +10,7 @@
 #include "rocksdb/cache.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/secondary_cache.h"
 #include "rocksdb/table.h"
 
@@ -44,9 +44,9 @@ class CacheDumpWriter {
   virtual ~CacheDumpWriter() = default;
 
   // Called ONCE before the calls to WritePacket
-  virtual IOStatus WriteMetadata(const Slice& metadata) = 0;
-  virtual IOStatus WritePacket(const Slice& data) = 0;
-  virtual IOStatus Close() = 0;
+  virtual rocksdb_rs::io_status::IOStatus WriteMetadata(const Slice& metadata) = 0;
+  virtual rocksdb_rs::io_status::IOStatus WritePacket(const Slice& data) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Close() = 0;
 };
 
 // NOTE that: this class is EXPERIMENTAL! May be changed in the future!
@@ -57,9 +57,9 @@ class CacheDumpReader {
  public:
   virtual ~CacheDumpReader() = default;
   // Called ONCE before the calls to ReadPacket
-  virtual IOStatus ReadMetadata(std::string* metadata) = 0;
+  virtual rocksdb_rs::io_status::IOStatus ReadMetadata(std::string* metadata) = 0;
   // Sets data to empty string on EOF
-  virtual IOStatus ReadPacket(std::string* data) = 0;
+  virtual rocksdb_rs::io_status::IOStatus ReadPacket(std::string* data) = 0;
   // (Close not needed)
 };
 
@@ -93,8 +93,8 @@ class CacheDumper {
   // The main function to dump out all the blocks that satisfy the filter
   // condition from block cache to a certain CacheDumpWriter in one shot. This
   // process may take some time.
-  virtual IOStatus DumpCacheEntriesToWriter() {
-    return IOStatus::NotSupported("DumpCacheEntriesToWriter is not supported");
+  virtual rocksdb_rs::io_status::IOStatus DumpCacheEntriesToWriter() {
+    return rocksdb_rs::io_status::IOStatus_NotSupported("DumpCacheEntriesToWriter is not supported");
   }
 };
 
@@ -105,20 +105,20 @@ class CacheDumper {
 class CacheDumpedLoader {
  public:
   virtual ~CacheDumpedLoader() = default;
-  virtual IOStatus RestoreCacheEntriesToSecondaryCache() {
-    return IOStatus::NotSupported(
+  virtual rocksdb_rs::io_status::IOStatus RestoreCacheEntriesToSecondaryCache() {
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
         "RestoreCacheEntriesToSecondaryCache is not supported");
   }
 };
 
 // Get the writer which stores all the metadata and data sequentially to a file
-IOStatus NewToFileCacheDumpWriter(const std::shared_ptr<FileSystem>& fs,
+rocksdb_rs::io_status::IOStatus NewToFileCacheDumpWriter(const std::shared_ptr<FileSystem>& fs,
                                   const FileOptions& file_opts,
                                   const std::string& file_name,
                                   std::unique_ptr<CacheDumpWriter>* writer);
 
 // Get the reader which read out the metadata and data sequentially from a file
-IOStatus NewFromFileCacheDumpReader(const std::shared_ptr<FileSystem>& fs,
+rocksdb_rs::io_status::IOStatus NewFromFileCacheDumpReader(const std::shared_ptr<FileSystem>& fs,
                                     const FileOptions& file_opts,
                                     const std::string& file_name,
                                     std::unique_ptr<CacheDumpReader>* reader);

@@ -95,19 +95,19 @@ rocksdb_rs::status::Status FileSystem::CreateFromString(const ConfigOptions& con
   }
 }
 
-IOStatus FileSystem::ReuseWritableFile(const std::string& fname,
+rocksdb_rs::io_status::IOStatus FileSystem::ReuseWritableFile(const std::string& fname,
                                        const std::string& old_fname,
                                        const FileOptions& opts,
                                        std::unique_ptr<FSWritableFile>* result,
                                        IODebugContext* dbg) {
-  IOStatus s = RenameFile(old_fname, fname, opts.io_options, dbg);
+  rocksdb_rs::io_status::IOStatus s = RenameFile(old_fname, fname, opts.io_options, dbg);
   if (!s.ok()) {
     return s;
   }
   return NewWritableFile(fname, opts, result, dbg);
 }
 
-IOStatus FileSystem::NewLogger(const std::string& fname,
+rocksdb_rs::io_status::IOStatus FileSystem::NewLogger(const std::string& fname,
                                const IOOptions& io_opts,
                                std::shared_ptr<Logger>* result,
                                IODebugContext* dbg) {
@@ -116,14 +116,14 @@ IOStatus FileSystem::NewLogger(const std::string& fname,
   // TODO: Tune the buffer size.
   options.writable_file_max_buffer_size = 1024 * 1024;
   std::unique_ptr<FSWritableFile> writable_file;
-  const IOStatus status = NewWritableFile(fname, options, &writable_file, dbg);
+  const rocksdb_rs::io_status::IOStatus status = NewWritableFile(fname, options, &writable_file, dbg);
   if (!status.ok()) {
-    return status;
+    return status.Clone();
   }
 
   *result = std::make_shared<EnvLogger>(std::move(writable_file), fname,
                                         options, Env::Default());
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 FileOptions FileSystem::OptimizeForLogRead(
@@ -179,11 +179,11 @@ FileOptions FileSystem::OptimizeForBlobFileRead(
   return optimized_file_options;
 }
 
-IOStatus WriteStringToFile(FileSystem* fs, const Slice& data,
+rocksdb_rs::io_status::IOStatus WriteStringToFile(FileSystem* fs, const Slice& data,
                            const std::string& fname, bool should_sync) {
   std::unique_ptr<FSWritableFile> file;
   EnvOptions soptions;
-  IOStatus s = fs->NewWritableFile(fname, soptions, &file, nullptr);
+  rocksdb_rs::io_status::IOStatus s = fs->NewWritableFile(fname, soptions, &file, nullptr);
   if (!s.ok()) {
     return s;
   }
@@ -197,13 +197,12 @@ IOStatus WriteStringToFile(FileSystem* fs, const Slice& data,
   return s;
 }
 
-IOStatus ReadFileToString(FileSystem* fs, const std::string& fname,
+rocksdb_rs::io_status::IOStatus ReadFileToString(FileSystem* fs, const std::string& fname,
                           std::string* data) {
   FileOptions soptions;
   data->clear();
   std::unique_ptr<FSSequentialFile> file;
-  IOStatus s = status_to_io_status(
-      fs->NewSequentialFile(fname, soptions, &file, nullptr));
+  rocksdb_rs::io_status::IOStatus s = fs->NewSequentialFile(fname, soptions, &file, nullptr);
   if (!s.ok()) {
     return s;
   }

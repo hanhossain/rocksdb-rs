@@ -34,7 +34,7 @@ rocksdb_rs::status::Status CompactionOutputs::Finish(const rocksdb_rs::status::S
   } else {
     builder_->Abandon();
   }
-  rocksdb_rs::status::Status io_s = builder_->io_status();
+  rocksdb_rs::status::Status io_s = builder_->io_status().status();
   if (s.ok()) {
     s.copy_from(io_s);
   }
@@ -53,11 +53,11 @@ rocksdb_rs::status::Status CompactionOutputs::Finish(const rocksdb_rs::status::S
   return s;
 }
 
-IOStatus CompactionOutputs::WriterSyncClose(const rocksdb_rs::status::Status& input_status,
+rocksdb_rs::io_status::IOStatus CompactionOutputs::WriterSyncClose(const rocksdb_rs::status::Status& input_status,
                                             SystemClock* clock,
                                             Statistics* statistics,
                                             bool use_fsync) {
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (input_status.ok()) {
     StopWatch sw(clock, statistics, COMPACTION_OUTFILE_SYNC_MICROS);
     io_s = file_writer_->Sync(use_fsync);

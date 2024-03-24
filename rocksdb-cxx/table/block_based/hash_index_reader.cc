@@ -78,7 +78,7 @@ rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
       ioptions, true /*decompress*/, true /*maybe_compressed*/,
       BlockType::kHashIndexPrefixes, UncompressionDict::GetEmptyDict(),
       cache_options, memory_allocator);
-  s = prefixes_block_fetcher.ReadBlockContents();
+  s = prefixes_block_fetcher.ReadBlockContents().status();
   if (!s.ok()) {
     return s;
   }
@@ -88,7 +88,7 @@ rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
       &prefixes_meta_contents, ioptions, true /*decompress*/,
       true /*maybe_compressed*/, BlockType::kHashIndexMetadata,
       UncompressionDict::GetEmptyDict(), cache_options, memory_allocator);
-  s = prefixes_meta_block_fetcher.ReadBlockContents();
+  s = prefixes_meta_block_fetcher.ReadBlockContents().status();
   if (!s.ok()) {
     // TODO: log error
     return rocksdb_rs::status::Status_OK();

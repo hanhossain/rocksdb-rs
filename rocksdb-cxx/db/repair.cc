@@ -166,7 +166,7 @@ class Repairer {
     mutex_.Lock();
     std::unique_ptr<FSDirectory> db_dir;
     rocksdb_rs::status::Status status = env_->GetFileSystem()->NewDirectory(dbname_, IOOptions(),
-                                                        &db_dir, nullptr);
+                                                        &db_dir, nullptr).status();
     if (status.ok()) {
       status = vset_.LogAndApply(cfd, mut_cf_opts, read_options, &edit, &mutex_,
                                  db_dir.get(), false /* new_descriptor_log */,
@@ -369,7 +369,7 @@ class Repairer {
     std::unique_ptr<SequentialFileReader> lfile_reader;
     rocksdb_rs::status::Status status = SequentialFileReader::Create(
         fs, logname, fs->OptimizeForLogRead(file_options_), &lfile_reader,
-        nullptr /* dbg */, nullptr /* rate limiter */);
+        nullptr /* dbg */, nullptr /* rate limiter */).status();
     if (!status.ok()) {
       return status;
     }
@@ -458,7 +458,7 @@ class Repairer {
         range_del_iters.emplace_back(range_del_iter);
       }
 
-      IOStatus io_s;
+      rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
       CompressionOptions default_compression;
       TableBuilderOptions tboptions(
           *cfd->ioptions(), *cfd->GetLatestMutableCFOptions(),
@@ -742,7 +742,7 @@ class Repairer {
         mutex_.Lock();
         std::unique_ptr<FSDirectory> db_dir;
         s = env_->GetFileSystem()->NewDirectory(dbname_, IOOptions(), &db_dir,
-                                                nullptr);
+                                                nullptr).status();
         if (s.ok()) {
           s = vset_.LogAndApply(cfd, *cfd->GetLatestMutableCFOptions(),
                                 read_options, &edit, &mutex_, db_dir.get(),

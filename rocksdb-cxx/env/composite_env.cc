@@ -28,21 +28,21 @@ class CompositeSequentialFileWrapper : public SequentialFile {
   rocksdb_rs::status::Status Read(size_t n, Slice* result, char* scratch) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Read(n, io_opts, result, scratch, &dbg);
+    return target_->Read(n, io_opts, result, scratch, &dbg).status();
   }
-  rocksdb_rs::status::Status Skip(uint64_t n) override { return target_->Skip(n); }
+  rocksdb_rs::status::Status Skip(uint64_t n) override { return target_->Skip(n).status(); }
   bool use_direct_io() const override { return target_->use_direct_io(); }
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
   rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
-    return target_->InvalidateCache(offset, length);
+    return target_->InvalidateCache(offset, length).status();
   }
   rocksdb_rs::status::Status PositionedRead(uint64_t offset, size_t n, Slice* result,
                         char* scratch) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->PositionedRead(offset, n, io_opts, result, scratch, &dbg);
+    return target_->PositionedRead(offset, n, io_opts, result, scratch, &dbg).status();
   }
 
  private:
@@ -59,7 +59,7 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
               char* scratch) const override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Read(offset, n, io_opts, result, scratch, &dbg);
+    return target_->Read(offset, n, io_opts, result, scratch, &dbg).status();
   }
   rocksdb_rs::status::Status MultiRead(ReadRequest* reqs, size_t num_reqs) override {
     IOOptions io_opts;
@@ -72,19 +72,19 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
       fs_reqs[i].offset = reqs[i].offset;
       fs_reqs[i].len = reqs[i].len;
       fs_reqs[i].scratch = reqs[i].scratch;
-      fs_reqs[i].status = IOStatus::OK();
+      fs_reqs[i].status = rocksdb_rs::io_status::IOStatus_OK();
     }
-    status = target_->MultiRead(fs_reqs.data(), num_reqs, io_opts, &dbg);
+    status = target_->MultiRead(fs_reqs.data(), num_reqs, io_opts, &dbg).status();
     for (size_t i = 0; i < num_reqs; ++i) {
       reqs[i].result = fs_reqs[i].result;
-      reqs[i].status = fs_reqs[i].status;
+      reqs[i].status = fs_reqs[i].status.status();
     }
     return status;
   }
   rocksdb_rs::status::Status Prefetch(uint64_t offset, size_t n) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Prefetch(offset, n, io_opts, &dbg);
+    return target_->Prefetch(offset, n, io_opts, &dbg).status();
   }
   size_t GetUniqueId(char* id, size_t max_size) const override {
     return target_->GetUniqueId(id, max_size);
@@ -97,7 +97,7 @@ class CompositeRandomAccessFileWrapper : public RandomAccessFile {
     return target_->GetRequiredBufferAlignment();
   }
   rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
-    return target_->InvalidateCache(offset, length);
+    return target_->InvalidateCache(offset, length).status();
   }
 
  private:
@@ -112,18 +112,18 @@ class CompositeWritableFileWrapper : public WritableFile {
   rocksdb_rs::status::Status Append(const Slice& data) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Append(data, io_opts, &dbg);
+    return target_->Append(data, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Append(const Slice& data,
                 const DataVerificationInfo& verification_info) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Append(data, io_opts, verification_info, &dbg);
+    return target_->Append(data, io_opts, verification_info, &dbg).status();
   }
   rocksdb_rs::status::Status PositionedAppend(const Slice& data, uint64_t offset) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->PositionedAppend(data, offset, io_opts, &dbg);
+    return target_->PositionedAppend(data, offset, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status PositionedAppend(
       const Slice& data, uint64_t offset,
@@ -131,32 +131,32 @@ class CompositeWritableFileWrapper : public WritableFile {
     IOOptions io_opts;
     IODebugContext dbg;
     return target_->PositionedAppend(data, offset, io_opts, verification_info,
-                                     &dbg);
+                                     &dbg).status();
   }
   rocksdb_rs::status::Status Truncate(uint64_t size) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Truncate(size, io_opts, &dbg);
+    return target_->Truncate(size, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Close() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Close(io_opts, &dbg);
+    return target_->Close(io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Flush() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Flush(io_opts, &dbg);
+    return target_->Flush(io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Sync() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Sync(io_opts, &dbg);
+    return target_->Sync(io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Fsync() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Fsync(io_opts, &dbg);
+    return target_->Fsync(io_opts, &dbg).status();
   }
   bool IsSyncThreadSafe() const override { return target_->IsSyncThreadSafe(); }
 
@@ -194,13 +194,13 @@ class CompositeWritableFileWrapper : public WritableFile {
   }
 
   rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
-    return target_->InvalidateCache(offset, length);
+    return target_->InvalidateCache(offset, length).status();
   }
 
   rocksdb_rs::status::Status RangeSync(uint64_t offset, uint64_t nbytes) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->RangeSync(offset, nbytes, io_opts, &dbg);
+    return target_->RangeSync(offset, nbytes, io_opts, &dbg).status();
   }
 
   void PrepareWrite(size_t offset, size_t len) override {
@@ -212,7 +212,7 @@ class CompositeWritableFileWrapper : public WritableFile {
   rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t len) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Allocate(offset, len, io_opts, &dbg);
+    return target_->Allocate(offset, len, io_opts, &dbg).status();
   }
 
   std::unique_ptr<FSWritableFile>* target() { return &target_; }
@@ -233,33 +233,33 @@ class CompositeRandomRWFileWrapper : public RandomRWFile {
   rocksdb_rs::status::Status Write(uint64_t offset, const Slice& data) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Write(offset, data, io_opts, &dbg);
+    return target_->Write(offset, data, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
               char* scratch) const override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Read(offset, n, io_opts, result, scratch, &dbg);
+    return target_->Read(offset, n, io_opts, result, scratch, &dbg).status();
   }
   rocksdb_rs::status::Status Flush() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Flush(io_opts, &dbg);
+    return target_->Flush(io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Sync() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Sync(io_opts, &dbg);
+    return target_->Sync(io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Fsync() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Fsync(io_opts, &dbg);
+    return target_->Fsync(io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Close() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Close(io_opts, &dbg);
+    return target_->Close(io_opts, &dbg).status();
   }
 
  private:
@@ -274,13 +274,13 @@ class CompositeDirectoryWrapper : public Directory {
   rocksdb_rs::status::Status Fsync() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->FsyncWithDirOptions(io_opts, &dbg, DirFsyncOptions());
+    return target_->FsyncWithDirOptions(io_opts, &dbg, DirFsyncOptions()).status();
   }
 
   rocksdb_rs::status::Status Close() override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->Close(io_opts, &dbg);
+    return target_->Close(io_opts, &dbg).status();
   }
 
   size_t GetUniqueId(char* id, size_t max_size) const override {
@@ -299,7 +299,7 @@ rocksdb_rs::status::Status CompositeEnv::NewSequentialFile(const std::string& f,
   std::unique_ptr<FSSequentialFile> file;
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status =
-      file_system_->NewSequentialFile(f, FileOptions(options), &file, &dbg);
+      file_system_->NewSequentialFile(f, FileOptions(options), &file, &dbg).status();
   if (status.ok()) {
     r->reset(new CompositeSequentialFileWrapper(file));
   }
@@ -313,7 +313,7 @@ rocksdb_rs::status::Status CompositeEnv::NewRandomAccessFile(const std::string& 
   std::unique_ptr<FSRandomAccessFile> file;
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status =
-      file_system_->NewRandomAccessFile(f, FileOptions(options), &file, &dbg);
+      file_system_->NewRandomAccessFile(f, FileOptions(options), &file, &dbg).status();
   if (status.ok()) {
     r->reset(new CompositeRandomAccessFileWrapper(file));
   }
@@ -326,7 +326,7 @@ rocksdb_rs::status::Status CompositeEnv::NewWritableFile(const std::string& f,
   IODebugContext dbg;
   std::unique_ptr<FSWritableFile> file;
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
-  status = file_system_->NewWritableFile(f, FileOptions(options), &file, &dbg);
+  status = file_system_->NewWritableFile(f, FileOptions(options), &file, &dbg).status();
   if (status.ok()) {
     r->reset(new CompositeWritableFileWrapper(file));
   }
@@ -340,7 +340,7 @@ rocksdb_rs::status::Status CompositeEnv::ReopenWritableFile(const std::string& f
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::unique_ptr<FSWritableFile> file;
   status = file_system_->ReopenWritableFile(fname, FileOptions(options), &file,
-                                            &dbg);
+                                            &dbg).status();
   if (status.ok()) {
     result->reset(new CompositeWritableFileWrapper(file));
   }
@@ -355,7 +355,7 @@ rocksdb_rs::status::Status CompositeEnv::ReuseWritableFile(const std::string& fn
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::unique_ptr<FSWritableFile> file;
   status = file_system_->ReuseWritableFile(fname, old_fname,
-                                           FileOptions(options), &file, &dbg);
+                                           FileOptions(options), &file, &dbg).status();
   if (status.ok()) {
     r->reset(new CompositeWritableFileWrapper(file));
   }
@@ -369,7 +369,7 @@ rocksdb_rs::status::Status CompositeEnv::NewRandomRWFile(const std::string& fnam
   std::unique_ptr<FSRandomRWFile> file;
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   status =
-      file_system_->NewRandomRWFile(fname, FileOptions(options), &file, &dbg);
+      file_system_->NewRandomRWFile(fname, FileOptions(options), &file, &dbg).status();
   if (status.ok()) {
     result->reset(new CompositeRandomRWFileWrapper(file));
   }
@@ -382,7 +382,7 @@ rocksdb_rs::status::Status CompositeEnv::NewDirectory(const std::string& name,
   IODebugContext dbg;
   std::unique_ptr<FSDirectory> dir;
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
-  status = file_system_->NewDirectory(name, io_opts, &dir, &dbg);
+  status = file_system_->NewDirectory(name, io_opts, &dir, &dbg).status();
   if (status.ok()) {
     result->reset(new CompositeDirectoryWrapper(dir));
   }

@@ -15,7 +15,7 @@
 
 #include "db/log_format.h"
 #include "rocksdb/env.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/slice.h"
 #include "util/compression.h"
 #include "util/hash_containers.h"
@@ -86,16 +86,16 @@ class Writer {
 
   ~Writer();
 
-  IOStatus AddRecord(const Slice& slice,
+  rocksdb_rs::io_status::IOStatus AddRecord(const Slice& slice,
                      Env::IOPriority rate_limiter_priority = Env::IO_TOTAL);
-  IOStatus AddCompressionTypeRecord();
+  rocksdb_rs::io_status::IOStatus AddCompressionTypeRecord();
 
   // If there are column families in `cf_to_ts_sz` not included in
   // `recorded_cf_to_ts_sz_` and its user-defined timestamp size is non-zero,
   // adds a record of type kUserDefinedTimestampSizeType or
   // kRecyclableUserDefinedTimestampSizeType for these column families.
   // This timestamp size record applies to all subsequent records.
-  IOStatus MaybeAddUserDefinedTimestampSizeRecord(
+  rocksdb_rs::io_status::IOStatus MaybeAddUserDefinedTimestampSizeRecord(
       const UnorderedMap<uint32_t, size_t>& cf_to_ts_sz,
       Env::IOPriority rate_limiter_priority = Env::IO_TOTAL);
 
@@ -104,9 +104,9 @@ class Writer {
 
   uint64_t get_log_number() const { return log_number_; }
 
-  IOStatus WriteBuffer();
+  rocksdb_rs::io_status::IOStatus WriteBuffer();
 
-  IOStatus Close();
+  rocksdb_rs::io_status::IOStatus Close();
 
   bool BufferIsEmpty();
 
@@ -121,7 +121,7 @@ class Writer {
   // record type stored in the header.
   uint32_t type_crc_[kMaxRecordType + 1];
 
-  IOStatus EmitPhysicalRecord(
+  rocksdb_rs::io_status::IOStatus EmitPhysicalRecord(
       RecordType type, const char* ptr, size_t length,
       Env::IOPriority rate_limiter_priority = Env::IO_TOTAL);
 

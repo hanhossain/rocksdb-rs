@@ -3934,7 +3934,7 @@ class OptionsSanityCheckTest : public OptionsParserTest,
 
   rocksdb_rs::status::Status PersistOptions(const DBOptions& db_opts,
                         const ColumnFamilyOptions& cf_opts) {
-    rocksdb_rs::status::Status s = fs_->DeleteFile(kOptionsFileName, IOOptions(), nullptr);
+    rocksdb_rs::status::Status s = fs_->DeleteFile(kOptionsFileName, IOOptions(), nullptr).status();
     if (!s.ok()) {
       return s;
     }

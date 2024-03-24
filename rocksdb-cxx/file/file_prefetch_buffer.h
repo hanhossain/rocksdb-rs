@@ -130,7 +130,7 @@ class FilePrefetchBuffer {
       }
       if (!handles.empty()) {
         StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-        rocksdb_rs::status::Status s = fs_->AbortIO(handles);
+        rocksdb_rs::status::Status s = fs_->AbortIO(handles).status();
         assert(s.ok());
       }
     }

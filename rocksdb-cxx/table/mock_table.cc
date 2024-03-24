@@ -165,7 +165,7 @@ class MockTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
 
   // Return non-ok iff some error happens during IO.
-  IOStatus io_status() const override { return IOStatus::OK(); }
+  rocksdb_rs::io_status::IOStatus io_status() const override { return rocksdb_rs::io_status::IOStatus_OK(); }
 
   rocksdb_rs::status::Status Finish() override {
     MutexLock lock_guard(&file_system_->mutex);
@@ -275,7 +275,7 @@ rocksdb_rs::status::Status MockTableFactory::CreateMockTable(Env* env, const std
                                          KVVector file_contents) {
   std::unique_ptr<WritableFileWriter> file_writer;
   rocksdb_rs::status::Status s = WritableFileWriter::Create(env->GetFileSystem(), fname,
-                                        FileOptions(), &file_writer, nullptr);
+                                        FileOptions(), &file_writer, nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -292,7 +292,7 @@ rocksdb_rs::status::Status MockTableFactory::GetAndWriteNextID(WritableFileWrite
   *next_id = next_id_.fetch_add(1);
   char buf[4];
   EncodeFixed32(buf, *next_id);
-  return file->Append(Slice(buf, 4));
+  return file->Append(Slice(buf, 4)).status();
 }
 
 rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(RandomAccessFileReader* file,
@@ -300,7 +300,7 @@ rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(RandomAccessFileReade
   char buf[4];
   Slice result;
   rocksdb_rs::status::Status s = file->Read(IOOptions(), 0, 4, &result, buf, nullptr,
-                        Env::IO_TOTAL /* rate_limiter_priority */);
+                        Env::IO_TOTAL /* rate_limiter_priority */).status();
   assert(result.size() == 4);
   *id = DecodeFixed32(buf);
   return s;

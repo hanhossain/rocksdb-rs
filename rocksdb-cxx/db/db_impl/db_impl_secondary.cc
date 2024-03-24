@@ -101,7 +101,7 @@ rocksdb_rs::status::Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64
   io_opts.do_not_recurse = true;
   s = immutable_db_options_.fs->GetChildren(immutable_db_options_.GetWalDir(),
                                             io_opts, &filenames,
-                                            /*IODebugContext*=*/nullptr);
+                                            /*IODebugContext*=*/nullptr).status();
   if (s.IsNotFound()) {
     return rocksdb_rs::status::Status_InvalidArgument("Failed to open wal_dir",
                                    immutable_db_options_.GetWalDir());
@@ -154,7 +154,7 @@ rocksdb_rs::status::Status DBImplSecondary::MaybeInitLogReader(
     {
       std::unique_ptr<FSSequentialFile> file;
       rocksdb_rs::status::Status status = fs_->NewSequentialFile(
-          fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr);
+          fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr).status();
       if (!status.ok()) {
         *log_reader = nullptr;
         return status;
@@ -843,7 +843,7 @@ rocksdb_rs::status::Status DBImplSecondary::CompactWithoutInstallation(
 
   // Create output directory if it's not existed yet
   std::unique_ptr<FSDirectory> output_dir;
-  s = CreateAndNewDirectory(fs_.get(), secondary_path_, &output_dir);
+  s = CreateAndNewDirectory(fs_.get(), secondary_path_, &output_dir).status();
   if (!s.ok()) {
     return s;
   }

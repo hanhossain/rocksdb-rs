@@ -10,7 +10,7 @@
 #include "db/db_test_util.h"
 #include "file/sst_file_manager_impl.h"
 #include "port/stack_trace.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/sst_file_manager.h"
 #include "test_util/sync_point.h"
 #include "util/random.h"
@@ -69,8 +69,8 @@ class ErrorHandlerFSListener : public EventListener {
     file_creation_started_ = true;
     if (file_count_ > 0) {
       if (--file_count_ == 0) {
-        fault_fs_->SetFilesystemActive(false, file_creation_error_);
-        file_creation_error_ = IOStatus::OK();
+        fault_fs_->SetFilesystemActive(false, file_creation_error_.Clone());
+        file_creation_error_ = rocksdb_rs::io_status::IOStatus_OK();
       }
     }
     cv_.SignalAll();
@@ -126,10 +126,10 @@ class ErrorHandlerFSListener : public EventListener {
   }
 
   void InjectFileCreationError(FaultInjectionTestFS* fs, int file_count,
-                               IOStatus io_s) {
+                               rocksdb_rs::io_status::IOStatus io_s) {
     fault_fs_ = fs;
     file_count_ = file_count;
-    file_creation_error_ = io_s;
+    file_creation_error_ = io_s.Clone();
   }
 
   rocksdb_rs::status::Status new_bg_error() { return new_bg_error_.Clone(); }
@@ -142,7 +142,7 @@ class ErrorHandlerFSListener : public EventListener {
   bool file_creation_started_;
   bool override_bg_error_;
   int file_count_;
-  IOStatus file_creation_error_;
+  rocksdb_rs::io_status::IOStatus file_creation_error_ = rocksdb_rs::io_status::IOStatus_new();
   rocksdb_rs::status::Status bg_error_;
   rocksdb_rs::status::Status new_bg_error_;
   FaultInjectionTestFS* fault_fs_;
@@ -163,7 +163,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteError) {
 
   ASSERT_OK(Put(Key(0), "val"));
   SyncPoint::GetInstance()->SetCallBack("FlushJob::Start", [&](void*) {
-    fault_fs_->SetFilesystemActive(false, IOStatus::NoSpace("Out of space"));
+    fault_fs_->SetFilesystemActive(false, rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -208,13 +208,13 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoSpaceError) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::NoSpace("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_NoSpace("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(1), "val1"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kHardError);
@@ -251,13 +251,13 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteRetryableError) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(1), "val1"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -283,7 +283,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteRetryableError) {
   ASSERT_OK(Put(Key(2), "val2"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeSyncTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -297,7 +297,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteRetryableError) {
   ASSERT_OK(Put(Key(3), "val3"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeCloseTableFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -324,16 +324,16 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("File Scope Data Loss Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("File Scope Data Loss Error");
   error_msg.SetDataLoss(true);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFile);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
   error_msg.SetRetryable(false);
 
   ASSERT_OK(Put(Key(1), "val1"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -347,7 +347,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
   ASSERT_OK(Put(Key(2), "val2"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeSyncTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -361,7 +361,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
   ASSERT_OK(Put(Key(3), "val3"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeCloseTableFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -375,13 +375,13 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteFileScopeError) {
   // not file scope, but retyrable set
   error_msg.SetDataLoss(false);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFileSystem);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFileSystem);
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(3), "val3"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeCloseTableFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -405,13 +405,13 @@ TEST_F(DBErrorHandlingFSTest, FLushWALWriteRetryableError) {
   options.max_bgerror_resume_count = 0;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   listener->EnableAutoRecovery(false);
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::SyncClosedLogs:Start",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
 
   CreateAndReopenWithCF({"pikachu, sdfsdfsdf"}, options);
@@ -450,13 +450,13 @@ TEST_F(DBErrorHandlingFSTest, FLushWALAtomicWriteRetryableError) {
   options.atomic_flush = true;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   listener->EnableAutoRecovery(false);
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::SyncClosedLogs:Start",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
 
   CreateAndReopenWithCF({"pikachu, sdfsdfsdf"}, options);
@@ -499,7 +499,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableError1) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   WriteOptions wo = WriteOptions();
@@ -507,7 +507,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableError1) {
   ASSERT_OK(Put(Key(1), "val1", wo));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_OK(Put(Key(2), "val2", wo));
@@ -554,7 +554,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError2) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   WriteOptions wo = WriteOptions();
@@ -563,7 +563,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError2) {
   ASSERT_OK(Put(Key(1), "val1", wo));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeSyncTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_OK(Put(Key(2), "val2", wo));
@@ -598,7 +598,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError3) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   WriteOptions wo = WriteOptions();
@@ -607,7 +607,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWriteNoWALRetryableError3) {
   ASSERT_OK(Put(Key(1), "val1", wo));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeCloseTableFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_OK(Put(Key(2), "val2", wo));
@@ -649,7 +649,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteError) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest", [&](void*) {
         fault_fs_->SetFilesystemActive(false,
-                                       IOStatus::NoSpace("Out of space"));
+                                       rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
       });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -685,7 +685,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableError) {
   DestroyAndReopen(options);
   old_manifest = GetManifestNameFromLiveFiles();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(0), "val"));
@@ -693,7 +693,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableError) {
   ASSERT_OK(Put(Key(1), "val"));
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -728,10 +728,10 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteFileScopeError) {
   DestroyAndReopen(options);
   old_manifest = GetManifestNameFromLiveFiles();
 
-  IOStatus error_msg = IOStatus::IOError("File Scope Data Loss Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("File Scope Data Loss Error");
   error_msg.SetDataLoss(true);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFile);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
   error_msg.SetRetryable(false);
 
   ASSERT_OK(Put(Key(0), "val"));
@@ -739,7 +739,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteFileScopeError) {
   ASSERT_OK(Put(Key(1), "val"));
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -774,7 +774,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableError) {
   DestroyAndReopen(options);
   old_manifest = GetManifestNameFromLiveFiles();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   WriteOptions wo = WriteOptions();
@@ -784,7 +784,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableError) {
   ASSERT_OK(Put(Key(1), "val", wo));
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -824,7 +824,7 @@ TEST_F(DBErrorHandlingFSTest, DoubleManifestWriteError) {
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest", [&](void*) {
         fault_fs_->SetFilesystemActive(false,
-                                       IOStatus::NoSpace("Out of space"));
+                                       rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
       });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -894,7 +894,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteError) {
       "VersionSet::LogAndApply:WriteManifest", [&](void*) {
         if (fail_manifest.load()) {
           fault_fs_->SetFilesystemActive(false,
-                                         IOStatus::NoSpace("Out of space"));
+                                         rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
         }
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -941,7 +941,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   DestroyAndReopen(options);
   old_manifest = GetManifestNameFromLiveFiles();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(0), "val"));
@@ -949,7 +949,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg.status(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -966,7 +966,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionManifestWriteRetryableError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest", [&](void*) {
         if (fail_manifest.load()) {
-          fault_fs_->SetFilesystemActive(false, error_msg);
+          fault_fs_->SetFilesystemActive(false, error_msg.Clone());
         }
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -1022,7 +1022,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "BackgroundCallCompaction:0", [&](void*) {
         fault_fs_->SetFilesystemActive(false,
-                                       IOStatus::NoSpace("Out of space"));
+                                       rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1051,7 +1051,7 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteRetryableError) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(0), "va;"));
@@ -1059,14 +1059,14 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteRetryableError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg.status(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "CompactionJob::OpenCompactionOutputFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::BackgroundCompaction:Finish",
       [&](void*) { CancelAllBackgroundWork(dbfull()); });
@@ -1098,10 +1098,10 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("File Scope Data Loss Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("File Scope Data Loss Error");
   error_msg.SetDataLoss(true);
   error_msg.SetScope(
-      rocksdb::IOStatus::IOErrorScope::kIOErrorScopeFile);
+      rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
   error_msg.SetRetryable(false);
 
   ASSERT_OK(Put(Key(0), "va;"));
@@ -1109,14 +1109,14 @@ TEST_F(DBErrorHandlingFSTest, DISABLED_CompactionWriteFileScopeError) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg.status(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
         "BackgroundCallCompaction:0"}});
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "CompactionJob::OpenCompactionOutputFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::BackgroundCompaction:Finish",
       [&](void*) { CancelAllBackgroundWork(dbfull()); });
@@ -1156,7 +1156,7 @@ TEST_F(DBErrorHandlingFSTest, CorruptionError) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "BackgroundCallCompaction:0", [&](void*) {
         fault_fs_->SetFilesystemActive(false,
-                                       IOStatus::Corruption("Corruption"));
+                                       rocksdb_rs::io_status::IOStatus_Corruption("Corruption"));
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
@@ -1193,7 +1193,7 @@ TEST_F(DBErrorHandlingFSTest, AutoRecoverFlushError) {
 
   ASSERT_OK(Put(Key(0), "val"));
   SyncPoint::GetInstance()->SetCallBack("FlushJob::Start", [&](void*) {
-    fault_fs_->SetFilesystemActive(false, IOStatus::NoSpace("Out of space"));
+    fault_fs_->SetFilesystemActive(false, rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -1237,7 +1237,7 @@ TEST_F(DBErrorHandlingFSTest, FailRecoverFlushError) {
 
   ASSERT_OK(Put(Key(0), "val"));
   SyncPoint::GetInstance()->SetCallBack("FlushJob::Start", [&](void*) {
-    fault_fs_->SetFilesystemActive(false, IOStatus::NoSpace("Out of space"));
+    fault_fs_->SetFilesystemActive(false, rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -1291,7 +1291,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteError) {
           write_error++;
           if (write_error > 2) {
             fault_fs_->SetFilesystemActive(false,
-                                           IOStatus::NoSpace("Out of space"));
+                                           rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
           }
         });
     SyncPoint::GetInstance()->EnableProcessing();
@@ -1339,7 +1339,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableError) {
 
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   // For the first batch, write is successful, require sync
@@ -1369,7 +1369,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableError) {
         "WritableFileWriter::Append:BeforePrepareWrite", [&](void*) {
           write_error++;
           if (write_error > 2) {
-            fault_fs_->SetFilesystemActive(false, error_msg);
+            fault_fs_->SetFilesystemActive(false, error_msg.Clone());
           }
         });
     SyncPoint::GetInstance()->EnableProcessing();
@@ -1461,7 +1461,7 @@ TEST_F(DBErrorHandlingFSTest, MultiCFWALWriteError) {
           write_error++;
           if (write_error > 2) {
             fault_fs_->SetFilesystemActive(false,
-                                           IOStatus::NoSpace("Out of space"));
+                                           rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
           }
         });
     SyncPoint::GetInstance()->EnableProcessing();
@@ -1538,7 +1538,7 @@ TEST_F(DBErrorHandlingFSTest, MultiDBCompactionError) {
     listener[i]->EnableAutoRecovery();
     // Setup for returning error for the 3rd SST, which would be level 1
     listener[i]->InjectFileCreationError(fault_fs[i], 3,
-                                         IOStatus::NoSpace("Out of space"));
+                                         rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
     snprintf(buf, sizeof(buf), "_%d", i);
     ASSERT_OK(DestroyDB(dbname_ + std::string(buf), options[i]));
     ASSERT_OK(DB::Open(options[i], dbname_ + std::string(buf), &dbptr));
@@ -1647,13 +1647,13 @@ TEST_F(DBErrorHandlingFSTest, MultiDBVariousErrors) {
       case 0:
         // Setup for returning error for the 3rd SST, which would be level 1
         listener[i]->InjectFileCreationError(fault_fs[i], 3,
-                                             IOStatus::NoSpace("Out of space"));
+                                             rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
         break;
       case 1:
         // Setup for returning error after the 1st SST, which would result
         // in a hard error
         listener[i]->InjectFileCreationError(fault_fs[i], 2,
-                                             IOStatus::NoSpace("Out of space"));
+                                             rocksdb_rs::io_status::IOStatus_NoSpace("Out of space"));
         break;
       default:
         break;
@@ -1769,7 +1769,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover1) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   WriteOptions wo = WriteOptions();
@@ -1780,7 +1780,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover1) {
         "FLushWritNoWALRetryableeErrorAutoRecover1:1"}});
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
 
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -1839,7 +1839,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover2) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   WriteOptions wo = WriteOptions();
@@ -1847,7 +1847,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritNoWALRetryableErrorAutoRecover2) {
   ASSERT_OK(Put(Key(1), "val1", wo));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
 
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -1899,13 +1899,13 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAutoRecover1) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(1), "val1"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
 
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -1941,7 +1941,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAutoRecover2) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(1), "val1"));
@@ -1952,7 +1952,7 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAutoRecover2) {
         "FLushWritRetryableeErrorAutoRecover2:1"}});
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -1995,7 +1995,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableErrorAutoRecover) {
   DestroyAndReopen(options);
   old_manifest = GetManifestNameFromLiveFiles();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(0), "val"));
@@ -2010,7 +2010,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteRetryableErrorAutoRecover) {
         "ManifestWriteRetryableErrorAutoRecover:2"}});
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -2048,7 +2048,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableErrorAutoRecover) {
   DestroyAndReopen(options);
   old_manifest = GetManifestNameFromLiveFiles();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   WriteOptions wo = WriteOptions();
@@ -2065,7 +2065,7 @@ TEST_F(DBErrorHandlingFSTest, ManifestWriteNoWALRetryableErrorAutoRecover) {
         "ManifestWriteNoWALRetryableErrorAutoRecover:2"}});
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -2103,14 +2103,14 @@ TEST_F(DBErrorHandlingFSTest,
   DestroyAndReopen(options);
   old_manifest = GetManifestNameFromLiveFiles();
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(0), "val"));
   ASSERT_OK(Put(Key(2), "val"));
   ASSERT_OK(Flush());
 
-  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg.status(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       // Wait for flush of 2nd L0 file before starting compaction
@@ -2138,7 +2138,7 @@ TEST_F(DBErrorHandlingFSTest,
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest", [&](void*) {
         if (fail_manifest.load()) {
-          fault_fs_->SetFilesystemActive(false, error_msg);
+          fault_fs_->SetFilesystemActive(false, error_msg.Clone());
         }
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -2189,7 +2189,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   std::atomic<bool> fail_second(true);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(0), "va;"));
@@ -2197,7 +2197,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg.status(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2212,7 +2212,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionWriteRetryableErrorAutoRecover) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "CompactionJob::OpenCompactionOutputFile", [&](void*) {
         if (fail_first.load() && fail_second.load()) {
-          fault_fs_->SetFilesystemActive(false, error_msg);
+          fault_fs_->SetFilesystemActive(false, error_msg.Clone());
           fail_second.store(false);
         }
       });
@@ -2246,7 +2246,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableErrorAutoRecover1) {
 
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   // For the first batch, write is successful, require sync
@@ -2281,7 +2281,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableErrorAutoRecover1) {
         "WritableFileWriter::Append:BeforePrepareWrite", [&](void*) {
           write_error++;
           if (write_error > 2) {
-            fault_fs_->SetFilesystemActive(false, error_msg);
+            fault_fs_->SetFilesystemActive(false, error_msg.Clone());
           }
         });
     SyncPoint::GetInstance()->EnableProcessing();
@@ -2349,7 +2349,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableErrorAutoRecover2) {
 
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   // For the first batch, write is successful, require sync
@@ -2383,7 +2383,7 @@ TEST_F(DBErrorHandlingFSTest, WALWriteRetryableErrorAutoRecover2) {
         "WritableFileWriter::Append:BeforePrepareWrite", [&](void*) {
           write_error++;
           if (write_error > 2) {
-            fault_fs_->SetFilesystemActive(false, error_msg);
+            fault_fs_->SetFilesystemActive(false, error_msg.Clone());
           }
         });
     SyncPoint::GetInstance()->EnableProcessing();
@@ -2450,13 +2450,13 @@ TEST_F(DBErrorHandlingFSTest, FLushWritRetryableErrorAbortRecovery) {
   listener->EnableAutoRecovery(false);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   ASSERT_OK(Put(Key(1), "val1"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeFinishBuildTable",
-      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg); });
+      [&](void*) { fault_fs_->SetFilesystemActive(false, error_msg.Clone()); });
 
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -2485,14 +2485,14 @@ TEST_F(DBErrorHandlingFSTest, FlushReadError) {
   ASSERT_OK(Put(Key(0), "val"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeOutputValidation", [&](void*) {
-        IOStatus st = IOStatus::IOError();
+        rocksdb_rs::io_status::IOStatus st = rocksdb_rs::io_status::IOStatus_IOError();
         st.SetRetryable(true);
-        st.SetScope(IOStatus::IOErrorScope::kIOErrorScopeFile);
-        fault_fs_->SetFilesystemActive(false, st);
+        st.SetScope(rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
+        fault_fs_->SetFilesystemActive(false, st.Clone());
       });
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeDeleteFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(true, IOStatus::OK()); });
+      [&](void*) { fault_fs_->SetFilesystemActive(true, rocksdb_rs::io_status::IOStatus_OK()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -2534,14 +2534,14 @@ TEST_F(DBErrorHandlingFSTest, AtomicFlushReadError) {
   ASSERT_OK(Put(1, Key(0), "val"));
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeOutputValidation", [&](void*) {
-        IOStatus st = IOStatus::IOError();
+        rocksdb_rs::io_status::IOStatus st = rocksdb_rs::io_status::IOStatus_IOError();
         st.SetRetryable(true);
-        st.SetScope(IOStatus::IOErrorScope::kIOErrorScopeFile);
-        fault_fs_->SetFilesystemActive(false, st);
+        st.SetScope(rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile);
+        fault_fs_->SetFilesystemActive(false, st.Clone());
       });
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeDeleteFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(true, IOStatus::OK()); });
+      [&](void*) { fault_fs_->SetFilesystemActive(true, rocksdb_rs::io_status::IOStatus_OK()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush({0, 1});
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kSoftError);
@@ -2583,12 +2583,12 @@ TEST_F(DBErrorHandlingFSTest, AtomicFlushNoSpaceError) {
   ASSERT_OK(Put(0, Key(0), "val"));
   ASSERT_OK(Put(1, Key(0), "val"));
   SyncPoint::GetInstance()->SetCallBack("BuildTable:create_file", [&](void*) {
-    IOStatus st = IOStatus::NoSpace();
-    fault_fs_->SetFilesystemActive(false, st);
+    rocksdb_rs::io_status::IOStatus st = rocksdb_rs::io_status::IOStatus_NoSpace();
+    fault_fs_->SetFilesystemActive(false, st.Clone());
   });
   SyncPoint::GetInstance()->SetCallBack(
       "BuildTable:BeforeDeleteFile",
-      [&](void*) { fault_fs_->SetFilesystemActive(true, IOStatus::OK()); });
+      [&](void*) { fault_fs_->SetFilesystemActive(true, rocksdb_rs::io_status::IOStatus_OK()); });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush({0, 1});
   ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kHardError);
@@ -2630,7 +2630,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   Random rnd(301);
   DestroyAndReopen(options);
 
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
   error_msg.SetRetryable(true);
 
   for (int i = 0; i < 100; ++i) {
@@ -2639,7 +2639,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   s = Flush();
   ASSERT_OK(s);
 
-  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg, rocksdb_rs::status::Severity::kHardError));
+  listener->OverrideBGError(rocksdb_rs::status::Status_new(error_msg.status(), rocksdb_rs::status::Severity::kHardError));
   listener->EnableAutoRecovery(false);
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"DBImpl::FlushMemTable:FlushMemTableFinished",
@@ -2654,7 +2654,7 @@ TEST_F(DBErrorHandlingFSTest, CompactionReadRetryableErrorAutoRecover) {
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "CompactionJob::Run():PausingManualCompaction:2", [&](void*) {
         if (fail_first.load() && fail_second.load()) {
-          fault_fs_->SetFilesystemActive(false, error_msg);
+          fault_fs_->SetFilesystemActive(false, error_msg.Clone());
           fail_second.store(false);
         }
       });
@@ -2691,7 +2691,7 @@ TEST_P(DBErrorHandlingFencingTest, FLushWriteFenced) {
 
   ASSERT_OK(Put(Key(0), "val"));
   SyncPoint::GetInstance()->SetCallBack("FlushJob::Start", [&](void*) {
-    fault_fs_->SetFilesystemActive(false, IOStatus::IOFenced("IO fenced"));
+    fault_fs_->SetFilesystemActive(false, rocksdb_rs::io_status::IOStatus_IOFenced("IO fenced"));
   });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -2725,7 +2725,7 @@ TEST_P(DBErrorHandlingFencingTest, ManifestWriteFenced) {
   ASSERT_OK(Put(Key(1), "val"));
   SyncPoint::GetInstance()->SetCallBack(
       "VersionSet::LogAndApply:WriteManifest", [&](void*) {
-        fault_fs_->SetFilesystemActive(false, IOStatus::IOFenced("IO fenced"));
+        fault_fs_->SetFilesystemActive(false, rocksdb_rs::io_status::IOStatus_IOFenced("IO fenced"));
       });
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
@@ -2762,7 +2762,7 @@ TEST_P(DBErrorHandlingFencingTest, CompactionWriteFenced) {
         "BackgroundCallCompaction:0"}});
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "BackgroundCallCompaction:0", [&](void*) {
-        fault_fs_->SetFilesystemActive(false, IOStatus::IOFenced("IO fenced"));
+        fault_fs_->SetFilesystemActive(false, rocksdb_rs::io_status::IOStatus_IOFenced("IO fenced"));
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
@@ -2820,7 +2820,7 @@ TEST_P(DBErrorHandlingFencingTest, WALWriteFenced) {
           write_error++;
           if (write_error > 2) {
             fault_fs_->SetFilesystemActive(false,
-                                           IOStatus::IOFenced("IO fenced"));
+                                           rocksdb_rs::io_status::IOStatus_IOFenced("IO fenced"));
           }
         });
     SyncPoint::GetInstance()->EnableProcessing();

@@ -11,12 +11,12 @@
 
 namespace rocksdb {
 
-IOStatus FileSystemTracingWrapper::NewSequentialFile(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::NewSequentialFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSSequentialFile>* result, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->NewSequentialFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewSequentialFile(fname, file_opts, result, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -25,12 +25,12 @@ IOStatus FileSystemTracingWrapper::NewSequentialFile(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::NewRandomAccessFile(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::NewRandomAccessFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSRandomAccessFile>* result, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -39,12 +39,12 @@ IOStatus FileSystemTracingWrapper::NewRandomAccessFile(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::NewWritableFile(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::NewWritableFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -53,12 +53,12 @@ IOStatus FileSystemTracingWrapper::NewWritableFile(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::ReopenWritableFile(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::ReopenWritableFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->ReopenWritableFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->ReopenWritableFile(fname, file_opts, result, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -67,13 +67,13 @@ IOStatus FileSystemTracingWrapper::ReopenWritableFile(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::ReuseWritableFile(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::ReuseWritableFile(
     const std::string& fname, const std::string& old_fname,
     const FileOptions& file_opts, std::unique_ptr<FSWritableFile>* result,
     IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s =
+  rocksdb_rs::io_status::IOStatus s =
       target()->ReuseWritableFile(fname, old_fname, file_opts, result, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
@@ -83,12 +83,12 @@ IOStatus FileSystemTracingWrapper::ReuseWritableFile(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::NewRandomRWFile(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::NewRandomRWFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSRandomRWFile>* result, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->NewRandomRWFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewRandomRWFile(fname, file_opts, result, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -97,12 +97,12 @@ IOStatus FileSystemTracingWrapper::NewRandomRWFile(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::NewDirectory(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::NewDirectory(
     const std::string& name, const IOOptions& io_opts,
     std::unique_ptr<FSDirectory>* result, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->NewDirectory(name, io_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->NewDirectory(name, io_opts, result, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -111,13 +111,13 @@ IOStatus FileSystemTracingWrapper::NewDirectory(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::GetChildren(const std::string& dir,
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::GetChildren(const std::string& dir,
                                                const IOOptions& io_opts,
                                                std::vector<std::string>* r,
                                                IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->GetChildren(dir, io_opts, r, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->GetChildren(dir, io_opts, r, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -126,12 +126,12 @@ IOStatus FileSystemTracingWrapper::GetChildren(const std::string& dir,
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::DeleteFile(const std::string& fname,
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::DeleteFile(const std::string& fname,
                                               const IOOptions& options,
                                               IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->DeleteFile(fname, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->DeleteFile(fname, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -140,12 +140,12 @@ IOStatus FileSystemTracingWrapper::DeleteFile(const std::string& fname,
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::CreateDir(const std::string& dirname,
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::CreateDir(const std::string& dirname,
                                              const IOOptions& options,
                                              IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->CreateDir(dirname, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->CreateDir(dirname, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -154,11 +154,11 @@ IOStatus FileSystemTracingWrapper::CreateDir(const std::string& dirname,
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::CreateDirIfMissing(
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::CreateDirIfMissing(
     const std::string& dirname, const IOOptions& options, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->CreateDirIfMissing(dirname, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->CreateDirIfMissing(dirname, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -167,12 +167,12 @@ IOStatus FileSystemTracingWrapper::CreateDirIfMissing(
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::DeleteDir(const std::string& dirname,
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::DeleteDir(const std::string& dirname,
                                              const IOOptions& options,
                                              IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->DeleteDir(dirname, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->DeleteDir(dirname, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -181,13 +181,13 @@ IOStatus FileSystemTracingWrapper::DeleteDir(const std::string& dirname,
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::GetFileSize(const std::string& fname,
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::GetFileSize(const std::string& fname,
                                                const IOOptions& options,
                                                uint64_t* file_size,
                                                IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->GetFileSize(fname, options, file_size, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->GetFileSize(fname, options, file_size, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOFileSize);
@@ -198,13 +198,13 @@ IOStatus FileSystemTracingWrapper::GetFileSize(const std::string& fname,
   return s;
 }
 
-IOStatus FileSystemTracingWrapper::Truncate(const std::string& fname,
+rocksdb_rs::io_status::IOStatus FileSystemTracingWrapper::Truncate(const std::string& fname,
                                             size_t size,
                                             const IOOptions& options,
                                             IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Truncate(fname, size, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Truncate(fname, size, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOFileSize);
@@ -215,13 +215,13 @@ IOStatus FileSystemTracingWrapper::Truncate(const std::string& fname,
   return s;
 }
 
-IOStatus FSSequentialFileTracingWrapper::Read(size_t n,
+rocksdb_rs::io_status::IOStatus FSSequentialFileTracingWrapper::Read(size_t n,
                                               const IOOptions& options,
                                               Slice* result, char* scratch,
                                               IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Read(n, options, result, scratch, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Read(n, options, result, scratch, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -232,11 +232,11 @@ IOStatus FSSequentialFileTracingWrapper::Read(size_t n,
   return s;
 }
 
-IOStatus FSSequentialFileTracingWrapper::InvalidateCache(size_t offset,
+rocksdb_rs::io_status::IOStatus FSSequentialFileTracingWrapper::InvalidateCache(size_t offset,
                                                          size_t length) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->InvalidateCache(offset, length);
+  rocksdb_rs::io_status::IOStatus s = target()->InvalidateCache(offset, length);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -248,12 +248,12 @@ IOStatus FSSequentialFileTracingWrapper::InvalidateCache(size_t offset,
   return s;
 }
 
-IOStatus FSSequentialFileTracingWrapper::PositionedRead(
+rocksdb_rs::io_status::IOStatus FSSequentialFileTracingWrapper::PositionedRead(
     uint64_t offset, size_t n, const IOOptions& options, Slice* result,
     char* scratch, IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s =
+  rocksdb_rs::io_status::IOStatus s =
       target()->PositionedRead(offset, n, options, result, scratch, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
@@ -266,13 +266,13 @@ IOStatus FSSequentialFileTracingWrapper::PositionedRead(
   return s;
 }
 
-IOStatus FSRandomAccessFileTracingWrapper::Read(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus FSRandomAccessFileTracingWrapper::Read(uint64_t offset, size_t n,
                                                 const IOOptions& options,
                                                 Slice* result, char* scratch,
                                                 IODebugContext* dbg) const {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Read(offset, n, options, result, scratch, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Read(offset, n, options, result, scratch, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -284,13 +284,13 @@ IOStatus FSRandomAccessFileTracingWrapper::Read(uint64_t offset, size_t n,
   return s;
 }
 
-IOStatus FSRandomAccessFileTracingWrapper::MultiRead(FSReadRequest* reqs,
+rocksdb_rs::io_status::IOStatus FSRandomAccessFileTracingWrapper::MultiRead(FSReadRequest* reqs,
                                                      size_t num_reqs,
                                                      const IOOptions& options,
                                                      IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->MultiRead(reqs, num_reqs, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->MultiRead(reqs, num_reqs, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t latency = elapsed;
   uint64_t io_op_data = 0;
@@ -305,12 +305,12 @@ IOStatus FSRandomAccessFileTracingWrapper::MultiRead(FSReadRequest* reqs,
   return s;
 }
 
-IOStatus FSRandomAccessFileTracingWrapper::Prefetch(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus FSRandomAccessFileTracingWrapper::Prefetch(uint64_t offset, size_t n,
                                                     const IOOptions& options,
                                                     IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Prefetch(offset, n, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Prefetch(offset, n, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -322,11 +322,11 @@ IOStatus FSRandomAccessFileTracingWrapper::Prefetch(uint64_t offset, size_t n,
   return s;
 }
 
-IOStatus FSRandomAccessFileTracingWrapper::InvalidateCache(size_t offset,
+rocksdb_rs::io_status::IOStatus FSRandomAccessFileTracingWrapper::InvalidateCache(size_t offset,
                                                            size_t length) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->InvalidateCache(offset, length);
+  rocksdb_rs::io_status::IOStatus s = target()->InvalidateCache(offset, length);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -338,7 +338,7 @@ IOStatus FSRandomAccessFileTracingWrapper::InvalidateCache(size_t offset,
   return s;
 }
 
-IOStatus FSRandomAccessFileTracingWrapper::ReadAsync(
+rocksdb_rs::io_status::IOStatus FSRandomAccessFileTracingWrapper::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) {
@@ -352,7 +352,7 @@ IOStatus FSRandomAccessFileTracingWrapper::ReadAsync(
   read_async_cb_info->start_time_ = clock_->NowNanos();
   read_async_cb_info->file_op_ = __func__;
 
-  IOStatus s = target()->ReadAsync(req, opts, read_async_callback,
+  rocksdb_rs::io_status::IOStatus s = target()->ReadAsync(req, opts, read_async_callback,
                                    read_async_cb_info, io_handle, del_fn, dbg);
 
   if (!s.ok()) {
@@ -383,12 +383,12 @@ void FSRandomAccessFileTracingWrapper::ReadAsyncCallback(
   delete read_async_cb_info;
 }
 
-IOStatus FSWritableFileTracingWrapper::Append(const Slice& data,
+rocksdb_rs::io_status::IOStatus FSWritableFileTracingWrapper::Append(const Slice& data,
                                               const IOOptions& options,
                                               IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Append(data, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Append(data, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -399,12 +399,12 @@ IOStatus FSWritableFileTracingWrapper::Append(const Slice& data,
   return s;
 }
 
-IOStatus FSWritableFileTracingWrapper::PositionedAppend(
+rocksdb_rs::io_status::IOStatus FSWritableFileTracingWrapper::PositionedAppend(
     const Slice& data, uint64_t offset, const IOOptions& options,
     IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->PositionedAppend(data, offset, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->PositionedAppend(data, offset, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -416,12 +416,12 @@ IOStatus FSWritableFileTracingWrapper::PositionedAppend(
   return s;
 }
 
-IOStatus FSWritableFileTracingWrapper::Truncate(uint64_t size,
+rocksdb_rs::io_status::IOStatus FSWritableFileTracingWrapper::Truncate(uint64_t size,
                                                 const IOOptions& options,
                                                 IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Truncate(size, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Truncate(size, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -432,11 +432,11 @@ IOStatus FSWritableFileTracingWrapper::Truncate(uint64_t size,
   return s;
 }
 
-IOStatus FSWritableFileTracingWrapper::Close(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus FSWritableFileTracingWrapper::Close(const IOOptions& options,
                                              IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Close(options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Close(options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -459,11 +459,11 @@ uint64_t FSWritableFileTracingWrapper::GetFileSize(const IOOptions& options,
   return file_size;
 }
 
-IOStatus FSWritableFileTracingWrapper::InvalidateCache(size_t offset,
+rocksdb_rs::io_status::IOStatus FSWritableFileTracingWrapper::InvalidateCache(size_t offset,
                                                        size_t length) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->InvalidateCache(offset, length);
+  rocksdb_rs::io_status::IOStatus s = target()->InvalidateCache(offset, length);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -475,12 +475,12 @@ IOStatus FSWritableFileTracingWrapper::InvalidateCache(size_t offset,
   return s;
 }
 
-IOStatus FSRandomRWFileTracingWrapper::Write(uint64_t offset, const Slice& data,
+rocksdb_rs::io_status::IOStatus FSRandomRWFileTracingWrapper::Write(uint64_t offset, const Slice& data,
                                              const IOOptions& options,
                                              IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Write(offset, data, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Write(offset, data, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -492,13 +492,13 @@ IOStatus FSRandomRWFileTracingWrapper::Write(uint64_t offset, const Slice& data,
   return s;
 }
 
-IOStatus FSRandomRWFileTracingWrapper::Read(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus FSRandomRWFileTracingWrapper::Read(uint64_t offset, size_t n,
                                             const IOOptions& options,
                                             Slice* result, char* scratch,
                                             IODebugContext* dbg) const {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Read(offset, n, options, result, scratch, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Read(offset, n, options, result, scratch, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
@@ -510,11 +510,11 @@ IOStatus FSRandomRWFileTracingWrapper::Read(uint64_t offset, size_t n,
   return s;
 }
 
-IOStatus FSRandomRWFileTracingWrapper::Flush(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus FSRandomRWFileTracingWrapper::Flush(const IOOptions& options,
                                              IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Flush(options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Flush(options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -523,11 +523,11 @@ IOStatus FSRandomRWFileTracingWrapper::Flush(const IOOptions& options,
   return s;
 }
 
-IOStatus FSRandomRWFileTracingWrapper::Close(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus FSRandomRWFileTracingWrapper::Close(const IOOptions& options,
                                              IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Close(options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Close(options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -536,11 +536,11 @@ IOStatus FSRandomRWFileTracingWrapper::Close(const IOOptions& options,
   return s;
 }
 
-IOStatus FSRandomRWFileTracingWrapper::Sync(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus FSRandomRWFileTracingWrapper::Sync(const IOOptions& options,
                                             IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Sync(options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Sync(options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),
@@ -549,11 +549,11 @@ IOStatus FSRandomRWFileTracingWrapper::Sync(const IOOptions& options,
   return s;
 }
 
-IOStatus FSRandomRWFileTracingWrapper::Fsync(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus FSRandomRWFileTracingWrapper::Fsync(const IOOptions& options,
                                              IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->Fsync(options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Fsync(options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   IOTraceRecord io_record(clock_->NowNanos(), TraceType::kIOTracer,
                           0 /*io_op_data*/, __func__, elapsed, s.ToString(),

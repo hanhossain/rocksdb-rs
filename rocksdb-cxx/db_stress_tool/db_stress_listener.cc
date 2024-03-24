@@ -30,7 +30,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   const std::shared_ptr<FileSystem> fs = env->GetFileSystem();
   IOOptions opts;
 
-  rocksdb_rs::status::Status st = fs->CreateDirIfMissing(db_name, opts, nullptr);
+  rocksdb_rs::status::Status st = fs->CreateDirIfMissing(db_name, opts, nullptr).status();
   if (!st.ok()) {
     fprintf(stderr, "Failed to create directory %s: %s\n", db_name.c_str(),
             st.ToString()->c_str());
@@ -40,9 +40,9 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   // Avoid relying on ReopenWritableFile which is not supported by all
   // file systems. Create a new file and copy the old file contents to it.
   std::string tmp_path = path_ + ".tmp";
-  st = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr);
+  st = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr).status();
   if (st.IsNotFound()) {
-    st = fs->RenameFile(path_, tmp_path, opts, /*dbg*/ nullptr);
+    st = fs->RenameFile(path_, tmp_path, opts, /*dbg*/ nullptr).status();
     // Either it should succeed or fail because src path doesn't exist
     assert(st.ok() || st.IsPathNotFound());
   } else {
@@ -53,7 +53,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
     // 3. Create path_
     // 4. Copy tmp_path contents to path_
     // 5. Delete tmp_path
-    st = fs->DeleteFile(path_, opts, /*dbg*/ nullptr);
+    st = fs->DeleteFile(path_, opts, /*dbg*/ nullptr).status();
     assert(st.ok() || st.IsPathNotFound());
   }
 
@@ -61,13 +61,13 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   {
     std::unique_ptr<FSSequentialFile> reader;
     rocksdb_rs::status::Status s = fs->NewSequentialFile(tmp_path, FileOptions(), &reader,
-                                     /*dbg*/ nullptr);
+                                     /*dbg*/ nullptr).status();
     if (s.ok()) {
       // Load from file
       std::string id(24U, '\0');
       Slice result;
       for (;;) {
-        s = reader->Read(id.size(), opts, &result, &id[0], /*dbg*/ nullptr);
+        s = reader->Read(id.size(), opts, &result, &id[0], /*dbg*/ nullptr).status();
         if (!s.ok()) {
           fprintf(stderr, "Error reading unique id file: %s\n",
                   s.ToString()->c_str());
@@ -81,7 +81,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
             fprintf(stdout, "Warning: clearing corrupt unique id file\n");
             id_set_.clear();
             reader.reset();
-            s = fs->DeleteFile(tmp_path, opts, /*dbg*/ nullptr);
+            s = fs->DeleteFile(tmp_path, opts, /*dbg*/ nullptr).status();
             assert(s.ok());
             size = 0;
           }
@@ -94,7 +94,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
       // Newly created is ok.
       // But FileSystem doesn't tell us whether non-existence was the cause of
       // the failure. (Issue #9021)
-      rocksdb_rs::status::Status s2 = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr);
+      rocksdb_rs::status::Status s2 = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr).status();
       if (!s2.IsNotFound()) {
         fprintf(stderr, "Error opening unique id file: %s\n",
                 s.ToString()->c_str());
@@ -106,7 +106,7 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   fprintf(stdout, "(Re-)verified %zu unique IDs\n", id_set_.size());
 
   std::unique_ptr<FSWritableFile> file_writer;
-  st = fs->NewWritableFile(path_, FileOptions(), &file_writer, /*dbg*/ nullptr);
+  st = fs->NewWritableFile(path_, FileOptions(), &file_writer, /*dbg*/ nullptr).status();
   if (!st.ok()) {
     fprintf(stderr, "Error creating the unique ids file: %s\n",
             st.ToString()->c_str());
@@ -118,19 +118,19 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   if (size > 0) {
     st = CopyFile(fs.get(), tmp_path, data_file_writer_, size,
                   /*use_fsync*/ true, /*io_tracer*/ nullptr,
-                  /*temparature*/ Temperature::kHot);
+                  /*temparature*/ Temperature::kHot).status();
     if (!st.ok()) {
       fprintf(stderr, "Error copying contents of old unique id file: %s\n",
               st.ToString()->c_str());
       assert(false);
     }
   }
-  st = fs->DeleteFile(tmp_path, opts, /*dbg*/ nullptr);
+  st = fs->DeleteFile(tmp_path, opts, /*dbg*/ nullptr).status();
   assert(st.ok() || st.IsPathNotFound());
 }
 
 UniqueIdVerifier::~UniqueIdVerifier() {
-  IOStatus s = data_file_writer_->Close();
+  rocksdb_rs::io_status::IOStatus s = data_file_writer_->Close();
   assert(s.ok());
 }
 
@@ -153,16 +153,16 @@ void UniqueIdVerifier::Verify(const std::string& id) {
   if (id_set_.size() >= 4294967) {
     return;
   }
-  IOStatus s = data_file_writer_->Append(Slice(id));
+  rocksdb_rs::io_status::IOStatus s = data_file_writer_->Append(Slice(id));
   if (!s.ok()) {
     fprintf(stderr, "Error writing to unique id file: %s\n",
-            s.ToString().c_str());
+            s.ToString()->c_str());
     assert(false);
   }
   s = data_file_writer_->Flush();
   if (!s.ok()) {
     fprintf(stderr, "Error flushing unique id file: %s\n",
-            s.ToString().c_str());
+            s.ToString()->c_str());
     assert(false);
   }
   VerifyNoWrite(id);

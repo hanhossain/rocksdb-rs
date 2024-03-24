@@ -4,6 +4,7 @@ pub mod compression_type;
 pub mod env;
 mod filename;
 mod hash;
+mod io_status;
 mod options;
 pub mod port_defs;
 pub mod slice;

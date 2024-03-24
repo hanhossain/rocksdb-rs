@@ -1365,9 +1365,9 @@ class StableCacheKeyTestFS : public FaultInjectionTestFS {
 
   virtual ~StableCacheKeyTestFS() override {}
 
-  IOStatus LinkFile(const std::string&, const std::string&, const IOOptions&,
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string&, const std::string&, const IOOptions&,
                     IODebugContext*) override {
-    return IOStatus::NotSupported("Disabled");
+    return rocksdb_rs::io_status::IOStatus_NotSupported("Disabled");
   }
 };
 

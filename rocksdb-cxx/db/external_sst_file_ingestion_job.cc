@@ -109,14 +109,14 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
         cfd_->ioptions()->cf_paths, f.fd.GetNumber(), f.fd.GetPathId()));
     if (ingestion_options_.move_files) {
       status =
-          fs_->LinkFile(path_outside_db, path_inside_db, IOOptions(), nullptr);
+          fs_->LinkFile(path_outside_db, path_inside_db, IOOptions(), nullptr).status();
       if (status.ok()) {
         // It is unsafe to assume application had sync the file and file
         // directory before ingest the file. For integrity of RocksDB we need
         // to sync the file.
         std::unique_ptr<FSWritableFile> file_to_sync;
         rocksdb_rs::status::Status s = fs_->ReopenWritableFile(path_inside_db, env_options_,
-                                           &file_to_sync, nullptr);
+                                           &file_to_sync, nullptr).status();
         TEST_SYNC_POINT_CALLBACK("ExternalSstFileIngestionJob::Prepare:Reopen",
                                  &s);
         // Some file systems (especially remote/distributed) don't support
@@ -155,7 +155,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
       // CopyFile also sync the new file.
       status =
           CopyFile(fs_.get(), path_outside_db, path_inside_db, 0,
-                   db_options_.use_fsync, io_tracer_, Temperature::kUnknown);
+                   db_options_.use_fsync, io_tracer_, Temperature::kUnknown).status();
     }
     TEST_SYNC_POINT("ExternalSstFileIngestionJob::Prepare:FileAdded");
     if (!status.ok()) {
@@ -173,7 +173,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
     for (auto path_id : ingestion_path_ids) {
       status = directories_->GetDataDir(path_id)->FsyncWithDirOptions(
           IOOptions(), nullptr,
-          DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced));
+          DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced)).status();
       if (!status.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
                        "Failed to sync directory %" ROCKSDB_PRIszt
@@ -217,7 +217,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
         std::string requested_checksum_func_name;
         // TODO: rate limit file reads for checksum calculation during file
         // ingestion.
-        IOStatus io_s = GenerateOneFileChecksum(
+        rocksdb_rs::io_status::IOStatus io_s = GenerateOneFileChecksum(
             fs_.get(), files_to_ingest_[i].internal_file_path,
             db_options_.file_checksum_gen_factory.get(),
             requested_checksum_func_name, &generated_checksum,
@@ -227,7 +227,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
             db_options_.rate_limiter.get(),
             Env::IO_TOTAL /* rate_limiter_priority */);
         if (!io_s.ok()) {
-          status = io_s;
+          status = io_s.status();
           ROCKS_LOG_WARN(db_options_.info_log,
                          "Sst file checksum generation of file: %s failed: %s",
                          files_to_ingest_[i].internal_file_path.c_str(),
@@ -322,7 +322,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Prepare(
       if (f.internal_file_path.empty()) {
         continue;
       }
-      rocksdb_rs::status::Status s = fs_->DeleteFile(f.internal_file_path, io_opts, nullptr);
+      rocksdb_rs::status::Status s = fs_->DeleteFile(f.internal_file_path, io_opts, nullptr).status();
       if (!s.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
                        "AddFile() clean up for file %s failed : %s",
@@ -450,7 +450,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::Run() {
       return status;
     }
 
-    status = GenerateChecksumForIngestedFile(&f);
+    status = GenerateChecksumForIngestedFile(&f).status();
     if (!status.ok()) {
       return status;
     }
@@ -633,7 +633,7 @@ void ExternalSstFileIngestionJob::Cleanup(const rocksdb_rs::status::Status& stat
       if (f.internal_file_path.empty()) {
         continue;
       }
-      rocksdb_rs::status::Status s = fs_->DeleteFile(f.internal_file_path, io_opts, nullptr);
+      rocksdb_rs::status::Status s = fs_->DeleteFile(f.internal_file_path, io_opts, nullptr).status();
       if (!s.ok()) {
         ROCKS_LOG_WARN(db_options_.info_log,
                        "AddFile() clean up for file %s failed : %s",
@@ -645,7 +645,7 @@ void ExternalSstFileIngestionJob::Cleanup(const rocksdb_rs::status::Status& stat
   } else if (status.ok() && ingestion_options_.move_files) {
     // The files were moved and added successfully, remove original file links
     for (IngestedFileInfo& f : files_to_ingest_) {
-      rocksdb_rs::status::Status s = fs_->DeleteFile(f.external_file_path, io_opts, nullptr);
+      rocksdb_rs::status::Status s = fs_->DeleteFile(f.external_file_path, io_opts, nullptr).status();
       if (!s.ok()) {
         ROCKS_LOG_WARN(
             db_options_.info_log,
@@ -664,7 +664,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
 
   // Get external file size
   rocksdb_rs::status::Status status = fs_->GetFileSize(external_file, IOOptions(),
-                                   &file_to_ingest->file_size, nullptr);
+                                   &file_to_ingest->file_size, nullptr).status();
   if (!status.ok()) {
     return status;
   }
@@ -679,7 +679,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
   std::unique_ptr<RandomAccessFileReader> sst_file_reader;
 
   status =
-      fs_->NewRandomAccessFile(external_file, env_options_, &sst_file, nullptr);
+      fs_->NewRandomAccessFile(external_file, env_options_, &sst_file, nullptr).status();
   if (!status.ok()) {
     return status;
   }
@@ -1009,7 +1009,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForInge
     // Otherwise we should.
     std::unique_ptr<FSRandomRWFile> rwfile;
     rocksdb_rs::status::Status status = fs_->NewRandomRWFile(file_to_ingest->internal_file_path,
-                                         env_options_, &rwfile, nullptr);
+                                         env_options_, &rwfile, nullptr).status();
     TEST_SYNC_POINT_CALLBACK("ExternalSstFileIngestionJob::NewRandomRWFile",
                              &status);
     if (status.ok()) {
@@ -1018,7 +1018,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForInge
       std::string seqno_val;
       PutFixed64(&seqno_val, seqno);
       status = fsptr->Write(file_to_ingest->global_seqno_offset, seqno_val,
-                            IOOptions(), nullptr);
+                            IOOptions(), nullptr).status();
       if (status.ok()) {
         TEST_SYNC_POINT("ExternalSstFileIngestionJob::BeforeSyncGlobalSeqno");
         status = SyncIngestedFile(fsptr.get());
@@ -1043,7 +1043,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForInge
   return rocksdb_rs::status::Status_OK();
 }
 
-IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
+rocksdb_rs::io_status::IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
     IngestedFileInfo* file_to_ingest) {
   if (db_options_.file_checksum_gen_factory == nullptr ||
       need_generate_file_checksum_ == false ||
@@ -1051,13 +1051,13 @@ IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
     // If file_checksum_gen_factory is not set, we are not able to generate
     // the checksum. if write_global_seqno is false, it means we will use
     // file checksum generated during Prepare(). This step will be skipped.
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   std::string file_checksum;
   std::string file_checksum_func_name;
   std::string requested_checksum_func_name;
   // TODO: rate limit file reads for checksum calculation during file ingestion.
-  IOStatus io_s = GenerateOneFileChecksum(
+  rocksdb_rs::io_status::IOStatus io_s = GenerateOneFileChecksum(
       fs_.get(), file_to_ingest->internal_file_path,
       db_options_.file_checksum_gen_factory.get(), requested_checksum_func_name,
       &file_checksum, &file_checksum_func_name,
@@ -1069,7 +1069,7 @@ IOStatus ExternalSstFileIngestionJob::GenerateChecksumForIngestedFile(
   }
   file_to_ingest->file_checksum = file_checksum;
   file_to_ingest->file_checksum_func_name = file_checksum_func_name;
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 bool ExternalSstFileIngestionJob::IngestedFileFitInLevel(
@@ -1099,9 +1099,9 @@ template <typename TWritableFile>
 rocksdb_rs::status::Status ExternalSstFileIngestionJob::SyncIngestedFile(TWritableFile* file) {
   assert(file != nullptr);
   if (db_options_.use_fsync) {
-    return file->Fsync(IOOptions(), nullptr);
+    return file->Fsync(IOOptions(), nullptr).status();
   } else {
-    return file->Sync(IOOptions(), nullptr);
+    return file->Sync(IOOptions(), nullptr).status();
   }
 }
 

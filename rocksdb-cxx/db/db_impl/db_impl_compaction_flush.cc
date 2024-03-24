@@ -73,7 +73,7 @@ bool DBImpl::RequestCompactionToken(ColumnFamilyData* cfd, bool force,
   return false;
 }
 
-IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
+rocksdb_rs::io_status::IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
                                 VersionEdit* synced_wals) {
   TEST_SYNC_POINT("DBImpl::SyncClosedLogs:Start");
   InstrumentedMutexLock l(&log_write_mutex_);
@@ -90,7 +90,7 @@ IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
     logs_to_sync.push_back(log.writer);
   }
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (!logs_to_sync.empty()) {
     log_write_mutex_.Unlock();
 
@@ -217,7 +217,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   bool need_cancel = false;
-  IOStatus log_io_s = IOStatus::OK();
+  rocksdb_rs::io_status::IOStatus log_io_s = rocksdb_rs::io_status::IOStatus_OK();
   if (needs_to_sync_closed_wals) {
     // SyncClosedLogs() may unlock and re-lock the log_write_mutex multiple
     // times.
@@ -228,19 +228,19 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
     if (log_io_s.ok() && synced_wals.IsWalAddition()) {
       const ReadOptions read_options(Env::IOActivity::kFlush);
       log_io_s =
-          status_to_io_status(ApplyWALToManifest(read_options, &synced_wals));
+          rocksdb_rs::io_status::IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
       TEST_SYNC_POINT_CALLBACK("DBImpl::FlushMemTableToOutputFile:CommitWal:1",
                                nullptr);
     }
 
     if (!log_io_s.ok() && !log_io_s.IsShutdownInProgress() &&
         !log_io_s.IsColumnFamilyDropped()) {
-      error_handler_.SetBGError(log_io_s, BackgroundErrorReason::kFlush);
+      error_handler_.SetBGError(log_io_s.status(), BackgroundErrorReason::kFlush);
     }
   } else {
     TEST_SYNC_POINT("DBImpl::SyncClosedLogs:Skip");
   }
-  s = log_io_s;
+  s = log_io_s.status();
 
   // If the log sync failed, we do not need to pick memtable. Otherwise,
   // num_flush_not_started_ needs to be rollback.
@@ -327,7 +327,7 @@ rocksdb_rs::status::Status DBImpl::FlushMemTableToOutputFile(
         error_handler_.SetBGError(s, BackgroundErrorReason::kFlushNoWAL);
       }
     } else {
-      assert(s.eq(log_io_s));
+      assert(s.eq(log_io_s.status()));
       rocksdb_rs::status::Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
@@ -472,7 +472,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
   // is specific and doesn't allow &v[i].
   std::deque<bool> switched_to_mempurge(num_cfs, false);
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  IOStatus log_io_s = IOStatus::OK();
+  rocksdb_rs::io_status::IOStatus log_io_s = rocksdb_rs::io_status::IOStatus_OK();
   assert(num_cfs == static_cast<int>(jobs.size()));
 
   for (int i = 0; i != num_cfs; ++i) {
@@ -493,20 +493,20 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
     if (log_io_s.ok() && synced_wals.IsWalAddition()) {
       const ReadOptions read_options(Env::IOActivity::kFlush);
       log_io_s =
-          status_to_io_status(ApplyWALToManifest(read_options, &synced_wals));
+          rocksdb_rs::io_status::IOStatus_new(ApplyWALToManifest(read_options, &synced_wals));
     }
 
     if (!log_io_s.ok() && !log_io_s.IsShutdownInProgress() &&
         !log_io_s.IsColumnFamilyDropped()) {
       if (total_log_size_ > 0) {
-        error_handler_.SetBGError(log_io_s, BackgroundErrorReason::kFlush);
+        error_handler_.SetBGError(log_io_s.status(), BackgroundErrorReason::kFlush);
       } else {
         // If the WAL is empty, we use different error reason
-        error_handler_.SetBGError(log_io_s, BackgroundErrorReason::kFlushNoWAL);
+        error_handler_.SetBGError(log_io_s.status(), BackgroundErrorReason::kFlushNoWAL);
       }
     }
   }
-  s = log_io_s;
+  s = log_io_s.status();
 
   // exec_status stores the execution status of flush_jobs as
   // <bool /* executed */, Status /* status code */>
@@ -575,7 +575,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
       if (dir != nullptr) {
         rocksdb_rs::status::Status error_status = dir->FsyncWithDirOptions(
             IOOptions(), nullptr,
-            DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced));
+            DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced)).status();
         if (!error_status.ok()) {
           s.copy_from(error_status);
           break;
@@ -607,7 +607,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
       if (!versions_->io_status().ok()) {
         // Something went wrong elsewhere, we cannot count on waiting for our
         // turn to write/sync to MANIFEST or CURRENT. Just return.
-        return std::make_pair(versions_->io_status(), false);
+        return std::make_pair(versions_->io_status().status(), false);
       } else if (shutting_down_.load(std::memory_order_acquire)) {
         return std::make_pair(rocksdb_rs::status::Status_ShutdownInProgress(), false);
       }
@@ -800,7 +800,7 @@ rocksdb_rs::status::Status DBImpl::AtomicFlushMemTablesToOutputFiles(
         error_handler_.SetBGError(s, BackgroundErrorReason::kFlushNoWAL);
       }
     } else {
-      assert(s.eq(log_io_s));
+      assert(s.eq(log_io_s.status()));
       rocksdb_rs::status::Status new_bg_error = s.Clone();
       error_handler_.SetBGError(new_bg_error, BackgroundErrorReason::kFlush);
     }
@@ -1522,9 +1522,9 @@ rocksdb_rs::status::Status DBImpl::CompactFilesImpl(
                    "[%s] [JOB %d] Compaction error: %s",
                    c->column_family_data()->GetName().c_str(),
                    job_context->job_id, status.ToString()->c_str());
-    IOStatus io_s = compaction_job.io_status();
+    rocksdb_rs::io_status::IOStatus io_s = compaction_job.io_status();
     if (!io_s.ok()) {
-      error_handler_.SetBGError(io_s, BackgroundErrorReason::kCompaction);
+      error_handler_.SetBGError(io_s.status(), BackgroundErrorReason::kCompaction);
     } else {
       error_handler_.SetBGError(status, BackgroundErrorReason::kCompaction);
     }
@@ -3436,7 +3436,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
     }
   }
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (!c) {
     // Nothing to do
     ROCKS_LOG_BUFFER(log_buffer, "Compaction nothing to do");
@@ -3460,7 +3460,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
     status = versions_->LogAndApply(
         c->column_family_data(), *c->mutable_cf_options(), read_options,
         c->edit(), &mutex_, directories_.GetDbDir());
-    io_s = versions_->io_status();
+    io_s = versions_->io_status().Clone();
     InstallSuperVersionAndScheduleWork(c->column_family_data(),
                                        &job_context->superversion_contexts[0],
                                        *c->mutable_cf_options());
@@ -3526,7 +3526,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
     status = versions_->LogAndApply(
         c->column_family_data(), *c->mutable_cf_options(), read_options,
         c->edit(), &mutex_, directories_.GetDbDir());
-    io_s = versions_->io_status();
+    io_s = versions_->io_status().Clone();
     // Use latest MutableCFOptions
     InstallSuperVersionAndScheduleWork(c->column_family_data(),
                                        &job_context->superversion_contexts[0],
@@ -3632,7 +3632,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
   }
 
   if (status.ok() && !io_s.ok()) {
-    status = io_s;
+    status = io_s.status();
   }
 
   if (c != nullptr) {
@@ -3667,7 +3667,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
       auto err_reason = versions_->io_status().ok()
                             ? BackgroundErrorReason::kCompaction
                             : BackgroundErrorReason::kManifestWrite;
-      error_handler_.SetBGError(io_s, err_reason);
+      error_handler_.SetBGError(io_s.status(), err_reason);
     } else {
       error_handler_.SetBGError(status, BackgroundErrorReason::kCompaction);
     }

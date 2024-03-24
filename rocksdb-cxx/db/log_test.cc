@@ -70,7 +70,7 @@ class LogTest
           returned_partial_(false),
           fail_after_read_partial_(fail_after_read_partial) {}
 
-    IOStatus Read(size_t n, const IOOptions& /*opts*/, Slice* result,
+    rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& /*opts*/, Slice* result,
                   char* scratch, IODebugContext* /*dbg*/) override {
       if (fail_after_read_partial_) {
         EXPECT_TRUE(!returned_partial_) << "must not Read() after eof/error";
@@ -84,7 +84,7 @@ class LogTest
           contents_.remove_prefix(force_error_position_);
           force_error_ = false;
           returned_partial_ = true;
-          return IOStatus::Corruption("read error");
+          return rocksdb_rs::io_status::IOStatus_Corruption("read error");
         }
       }
 
@@ -109,18 +109,18 @@ class LogTest
       *result = Slice(scratch, n);
 
       contents_.remove_prefix(n);
-      return IOStatus::OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
 
-    IOStatus Skip(uint64_t n) override {
+    rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
       if (n > contents_.size()) {
         contents_.clear();
-        return IOStatus::NotFound("in-memory file skipepd past end");
+        return rocksdb_rs::io_status::IOStatus_NotFound("in-memory file skipepd past end");
       }
 
       contents_.remove_prefix(n);
 
-      return IOStatus::OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
   };
 
@@ -825,10 +825,10 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     FileOptions fopts;
     auto fs = env_->GetFileSystem();
-    s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr);
+    s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr).status();
     std::unique_ptr<FSWritableFile> writable_file;
     if (s.ok()) {
-      s = fs->NewWritableFile(log_file_, fopts, &writable_file, nullptr);
+      s = fs->NewWritableFile(log_file_, fopts, &writable_file, nullptr).status();
     }
     if (s.ok()) {
       writer_.reset(
@@ -837,7 +837,7 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     }
     std::unique_ptr<FSSequentialFile> seq_file;
     if (s.ok()) {
-      s = fs->NewSequentialFile(log_file_, fopts, &seq_file, nullptr);
+      s = fs->NewSequentialFile(log_file_, fopts, &seq_file, nullptr).status();
     }
     if (s.ok()) {
       reader_.reset(new SequentialFileReader(std::move(seq_file), log_file_));
@@ -991,7 +991,7 @@ INSTANTIATE_TEST_CASE_P(bool, RetriableLogTest, ::testing::Values(0, 2));
 
 class CompressionLogTest : public LogTest {
  public:
-  rocksdb_rs::status::Status SetupTestEnv() { return writer_->AddCompressionTypeRecord(); }
+  rocksdb_rs::status::Status SetupTestEnv() { return writer_->AddCompressionTypeRecord().status(); }
 };
 
 TEST_P(CompressionLogTest, Empty) {

@@ -340,6 +340,7 @@ fn main() {
         "src/env.rs",
         "src/filename.rs",
         "src/hash.rs",
+        "src/io_status.rs",
         "src/lib.rs",
         "src/options.rs",
         "src/port_defs.rs",

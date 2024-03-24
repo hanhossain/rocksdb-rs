@@ -4009,14 +4009,14 @@ class DeadlineRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
                            std::unique_ptr<FSRandomAccessFile>& file)
       : FSRandomAccessFileOwnerWrapper(std::move(file)), fs_(fs) {}
 
-  IOStatus Read(uint64_t offset, size_t len, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t len, const IOOptions& opts,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override;
 
-  IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
                      const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
                      std::function<void(const FSReadRequest&, void*)> cb,
                      void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
                      IODebugContext* dbg) override;
@@ -4028,7 +4028,7 @@ class DeadlineRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
 
 class DeadlineFS : public FileSystemWrapper {
  public:
-  // The error_on_delay parameter specifies whether a IOStatus::TimedOut()
+  // The error_on_delay parameter specifies whether a IOStatus_TimedOut()
   // status should be returned after delaying the IO to exceed the timeout,
   // or to simply delay but return success anyway. The latter mimics the
   // behavior of PosixFileSystem, which does not enforce any timeout
@@ -4044,12 +4044,12 @@ class DeadlineFS : public FileSystemWrapper {
   static const char* kClassName() { return "DeadlineFileSystem"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
     EXPECT_OK(s);
     result->reset(new DeadlineRandomAccessFile(*this, file));
 
@@ -4074,20 +4074,20 @@ class DeadlineFS : public FileSystemWrapper {
   }
 
   // Increment the IO counter and return a delay in microseconds
-  IOStatus ShouldDelay(const IOOptions& opts) {
+  rocksdb_rs::io_status::IOStatus ShouldDelay(const IOOptions& opts) {
     if (timedout_) {
-      return IOStatus::TimedOut();
+      return rocksdb_rs::io_status::IOStatus_TimedOut();
     } else if (!deadline_.count() && !io_timeout_.count()) {
-      return IOStatus::OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
     if (!ignore_deadline_ && delay_trigger_ == io_count_++) {
       env_->SleepForMicroseconds(static_cast<int>(opts.timeout.count() + 1));
       timedout_ = true;
       if (error_on_delay_) {
-        return IOStatus::TimedOut();
+        return rocksdb_rs::io_status::IOStatus_TimedOut();
       }
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   const std::chrono::microseconds GetDeadline() {
@@ -4137,17 +4137,17 @@ class DeadlineFS : public FileSystemWrapper {
   bool timedout_;
   // Temporarily ignore deadlines/timeouts
   bool ignore_deadline_;
-  // Return IOStatus::TimedOut() or IOStatus::OK()
+  // Return IOStatus_TimedOut() or IOStatus_OK()
   bool error_on_delay_;
 };
 
-IOStatus DeadlineRandomAccessFile::Read(uint64_t offset, size_t len,
+rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::Read(uint64_t offset, size_t len,
                                         const IOOptions& opts, Slice* result,
                                         char* scratch,
                                         IODebugContext* dbg) const {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
-  IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (deadline.count() || io_timeout.count()) {
     fs_.AssertDeadline(deadline, io_timeout, opts);
   }
@@ -4161,13 +4161,13 @@ IOStatus DeadlineRandomAccessFile::Read(uint64_t offset, size_t len,
   return s;
 }
 
-IOStatus DeadlineRandomAccessFile::ReadAsync(
+rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
-  IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (deadline.count() || io_timeout.count()) {
     fs_.AssertDeadline(deadline, io_timeout, opts);
   }
@@ -4181,13 +4181,13 @@ IOStatus DeadlineRandomAccessFile::ReadAsync(
   return s;
 }
 
-IOStatus DeadlineRandomAccessFile::MultiRead(FSReadRequest* reqs,
+rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::MultiRead(FSReadRequest* reqs,
                                              size_t num_reqs,
                                              const IOOptions& options,
                                              IODebugContext* dbg) {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
-  IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (deadline.count() || io_timeout.count()) {
     fs_.AssertDeadline(deadline, io_timeout, options);
   }

@@ -77,32 +77,32 @@ void CalculateTypedChecksum(const ChecksumType& checksum_type, const char* data,
   return;
 }
 
-IOStatus FSFileState::DropUnsyncedData() {
+rocksdb_rs::io_status::IOStatus FSFileState::DropUnsyncedData() {
   buffer_.resize(0);
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-IOStatus FSFileState::DropRandomUnsyncedData(Random* rand) {
+rocksdb_rs::io_status::IOStatus FSFileState::DropRandomUnsyncedData(Random* rand) {
   int range = static_cast<int>(buffer_.size());
   size_t truncated_size = static_cast<size_t>(rand->Uniform(range));
   buffer_.resize(truncated_size);
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-IOStatus TestFSDirectory::Fsync(const IOOptions& options, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TestFSDirectory::Fsync(const IOOptions& options, IODebugContext* dbg) {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
   }
   {
-    IOStatus in_s = fs_->InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = fs_->InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
   }
   fs_->SyncDir(dirname_);
-  IOStatus s = dir_->Fsync(options, dbg);
+  rocksdb_rs::io_status::IOStatus s = dir_->Fsync(options, dbg);
   {
-    IOStatus in_s = fs_->InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = fs_->InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -110,30 +110,30 @@ IOStatus TestFSDirectory::Fsync(const IOOptions& options, IODebugContext* dbg) {
   return s;
 }
 
-IOStatus TestFSDirectory::Close(const IOOptions& options, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TestFSDirectory::Close(const IOOptions& options, IODebugContext* dbg) {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
   }
-  IOStatus s = dir_->Close(options, dbg);
+  rocksdb_rs::io_status::IOStatus s = dir_->Close(options, dbg);
   return s;
 }
 
-IOStatus TestFSDirectory::FsyncWithDirOptions(
+rocksdb_rs::io_status::IOStatus TestFSDirectory::FsyncWithDirOptions(
     const IOOptions& options, IODebugContext* dbg,
     const DirFsyncOptions& dir_fsync_options) {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
   }
   {
-    IOStatus in_s = fs_->InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = fs_->InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
   }
   fs_->SyncDir(dirname_);
-  IOStatus s = dir_->FsyncWithDirOptions(options, dbg, dir_fsync_options);
+  rocksdb_rs::io_status::IOStatus s = dir_->FsyncWithDirOptions(options, dbg, dir_fsync_options);
   {
-    IOStatus in_s = fs_->InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = fs_->InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -160,7 +160,7 @@ TestFSWritableFile::~TestFSWritableFile() {
   }
 }
 
-IOStatus TestFSWritableFile::Append(const Slice& data, const IOOptions& options,
+rocksdb_rs::io_status::IOStatus TestFSWritableFile::Append(const Slice& data, const IOOptions& options,
                                     IODebugContext* dbg) {
   MutexLock l(&mutex_);
   if (!fs_->IsFilesystemActive()) {
@@ -173,13 +173,13 @@ IOStatus TestFSWritableFile::Append(const Slice& data, const IOOptions& options,
     state_.pos_ += data.size();
     fs_->WritableFileAppended(state_);
   }
-  IOStatus io_s = fs_->InjectWriteError(state_.filename_);
+  rocksdb_rs::io_status::IOStatus io_s = fs_->InjectWriteError(state_.filename_);
   return io_s;
 }
 
 // By setting the IngestDataCorruptionBeforeWrite(), the data corruption is
 // simulated.
-IOStatus TestFSWritableFile::Append(
+rocksdb_rs::io_status::IOStatus TestFSWritableFile::Append(
     const Slice& data, const IOOptions& options,
     const DataVerificationInfo& verification_info, IODebugContext* dbg) {
   MutexLock l(&mutex_);
@@ -187,7 +187,7 @@ IOStatus TestFSWritableFile::Append(
     return fs_->GetError();
   }
   if (fs_->ShouldDataCorruptionBeforeWrite()) {
-    return IOStatus::Corruption("Data is corrupted!");
+    return rocksdb_rs::io_status::IOStatus_Corruption("Data is corrupted!");
   }
 
   // Calculate the checksum
@@ -199,7 +199,7 @@ IOStatus TestFSWritableFile::Append(
     std::string msg = "Data is corrupted! Origin data checksum: " +
                       verification_info.checksum.ToString() +
                       "current data checksum: " + checksum;
-    return IOStatus::Corruption(msg);
+    return rocksdb_rs::io_status::IOStatus_Corruption(msg);
   }
   if (target_->use_direct_io()) {
     target_->Append(data, options, dbg);
@@ -208,11 +208,11 @@ IOStatus TestFSWritableFile::Append(
     state_.pos_ += data.size();
     fs_->WritableFileAppended(state_);
   }
-  IOStatus io_s = fs_->InjectWriteError(state_.filename_);
+  rocksdb_rs::io_status::IOStatus io_s = fs_->InjectWriteError(state_.filename_);
   return io_s;
 }
 
-IOStatus TestFSWritableFile::PositionedAppend(
+rocksdb_rs::io_status::IOStatus TestFSWritableFile::PositionedAppend(
     const Slice& data, uint64_t offset, const IOOptions& options,
     const DataVerificationInfo& verification_info, IODebugContext* dbg) {
   MutexLock l(&mutex_);
@@ -220,7 +220,7 @@ IOStatus TestFSWritableFile::PositionedAppend(
     return fs_->GetError();
   }
   if (fs_->ShouldDataCorruptionBeforeWrite()) {
-    return IOStatus::Corruption("Data is corrupted!");
+    return rocksdb_rs::io_status::IOStatus_Corruption("Data is corrupted!");
   }
 
   // Calculate the checksum
@@ -232,14 +232,14 @@ IOStatus TestFSWritableFile::PositionedAppend(
     std::string msg = "Data is corrupted! Origin data checksum: " +
                       verification_info.checksum.ToString() +
                       "current data checksum: " + checksum;
-    return IOStatus::Corruption(msg);
+    return rocksdb_rs::io_status::IOStatus_Corruption(msg);
   }
   target_->PositionedAppend(data, offset, options, dbg);
-  IOStatus io_s = fs_->InjectWriteError(state_.filename_);
+  rocksdb_rs::io_status::IOStatus io_s = fs_->InjectWriteError(state_.filename_);
   return io_s;
 }
 
-IOStatus TestFSWritableFile::Close(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus TestFSWritableFile::Close(const IOOptions& options,
                                    IODebugContext* dbg) {
   MutexLock l(&mutex_);
   fs_->WritableFileClosed(state_);
@@ -247,13 +247,13 @@ IOStatus TestFSWritableFile::Close(const IOOptions& options,
     return fs_->GetError();
   }
   {
-    IOStatus in_s = fs_->InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = fs_->InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
   }
   writable_file_opened_ = false;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (!target_->use_direct_io()) {
     io_s = target_->Append(state_.buffer_, options, dbg);
   }
@@ -264,7 +264,7 @@ IOStatus TestFSWritableFile::Close(const IOOptions& options,
     io_s = target_->Close(options, dbg);
   }
   if (io_s.ok()) {
-    IOStatus in_s = fs_->InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = fs_->InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -272,7 +272,7 @@ IOStatus TestFSWritableFile::Close(const IOOptions& options,
   return io_s;
 }
 
-IOStatus TestFSWritableFile::Flush(const IOOptions&, IODebugContext*) {
+rocksdb_rs::io_status::IOStatus TestFSWritableFile::Flush(const IOOptions&, IODebugContext*) {
   MutexLock l(&mutex_);
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
@@ -280,10 +280,10 @@ IOStatus TestFSWritableFile::Flush(const IOOptions&, IODebugContext*) {
   if (fs_->IsFilesystemActive()) {
     state_.pos_at_last_flush_ = state_.pos_;
   }
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-IOStatus TestFSWritableFile::Sync(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus TestFSWritableFile::Sync(const IOOptions& options,
                                   IODebugContext* dbg) {
   MutexLock l(&mutex_);
   if (!fs_->IsFilesystemActive()) {
@@ -292,9 +292,9 @@ IOStatus TestFSWritableFile::Sync(const IOOptions& options,
   if (target_->use_direct_io()) {
     // For Direct IO mode, we don't buffer anything in TestFSWritableFile.
     // So just return
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
-  IOStatus io_s = target_->Append(state_.buffer_, options, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = target_->Append(state_.buffer_, options, dbg);
   state_.buffer_.resize(0);
   // Ignore sync errors
   target_->Sync(options, dbg);
@@ -303,7 +303,7 @@ IOStatus TestFSWritableFile::Sync(const IOOptions& options,
   return io_s;
 }
 
-IOStatus TestFSWritableFile::RangeSync(uint64_t offset, uint64_t nbytes,
+rocksdb_rs::io_status::IOStatus TestFSWritableFile::RangeSync(uint64_t offset, uint64_t nbytes,
                                        const IOOptions& options,
                                        IODebugContext* dbg) {
   MutexLock l(&mutex_);
@@ -315,7 +315,7 @@ IOStatus TestFSWritableFile::RangeSync(uint64_t offset, uint64_t nbytes,
   uint64_t buf_begin =
       state_.pos_at_last_sync_ < 0 ? 0 : state_.pos_at_last_sync_;
 
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (sync_limit < buf_begin) {
     return io_s;
   }
@@ -344,7 +344,7 @@ TestFSRandomRWFile::~TestFSRandomRWFile() {
   }
 }
 
-IOStatus TestFSRandomRWFile::Write(uint64_t offset, const Slice& data,
+rocksdb_rs::io_status::IOStatus TestFSRandomRWFile::Write(uint64_t offset, const Slice& data,
                                    const IOOptions& options,
                                    IODebugContext* dbg) {
   if (!fs_->IsFilesystemActive()) {
@@ -353,7 +353,7 @@ IOStatus TestFSRandomRWFile::Write(uint64_t offset, const Slice& data,
   return target_->Write(offset, data, options, dbg);
 }
 
-IOStatus TestFSRandomRWFile::Read(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus TestFSRandomRWFile::Read(uint64_t offset, size_t n,
                                   const IOOptions& options, Slice* result,
                                   char* scratch, IODebugContext* dbg) const {
   if (!fs_->IsFilesystemActive()) {
@@ -362,7 +362,7 @@ IOStatus TestFSRandomRWFile::Read(uint64_t offset, size_t n,
   return target_->Read(offset, n, options, result, scratch, dbg);
 }
 
-IOStatus TestFSRandomRWFile::Close(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus TestFSRandomRWFile::Close(const IOOptions& options,
                                    IODebugContext* dbg) {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
@@ -371,7 +371,7 @@ IOStatus TestFSRandomRWFile::Close(const IOOptions& options,
   return target_->Close(options, dbg);
 }
 
-IOStatus TestFSRandomRWFile::Flush(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus TestFSRandomRWFile::Flush(const IOOptions& options,
                                    IODebugContext* dbg) {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
@@ -379,7 +379,7 @@ IOStatus TestFSRandomRWFile::Flush(const IOOptions& options,
   return target_->Flush(options, dbg);
 }
 
-IOStatus TestFSRandomRWFile::Sync(const IOOptions& options,
+rocksdb_rs::io_status::IOStatus TestFSRandomRWFile::Sync(const IOOptions& options,
                                   IODebugContext* dbg) {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
@@ -394,31 +394,31 @@ TestFSRandomAccessFile::TestFSRandomAccessFile(
   assert(target_ != nullptr);
 }
 
-IOStatus TestFSRandomAccessFile::Read(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus TestFSRandomAccessFile::Read(uint64_t offset, size_t n,
                                       const IOOptions& options, Slice* result,
                                       char* scratch,
                                       IODebugContext* dbg) const {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
   }
-  IOStatus s = target_->Read(offset, n, options, result, scratch, dbg);
+  rocksdb_rs::io_status::IOStatus s = target_->Read(offset, n, options, result, scratch, dbg);
   if (s.ok()) {
     s = fs_->InjectThreadSpecificReadError(
         FaultInjectionTestFS::ErrorOperation::kRead, result, use_direct_io(),
         scratch, /*need_count_increase=*/true, /*fault_injected=*/nullptr);
   }
   if (s.ok() && fs_->ShouldInjectRandomReadError()) {
-    return IOStatus::IOError("Injected read error");
+    return rocksdb_rs::io_status::IOStatus_IOError("Injected read error");
   }
   return s;
 }
 
-IOStatus TestFSRandomAccessFile::ReadAsync(
+rocksdb_rs::io_status::IOStatus TestFSRandomAccessFile::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, IODebugContext* /*dbg*/) {
-  IOStatus ret;
-  IOStatus s;
+  rocksdb_rs::io_status::IOStatus ret = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   FSReadRequest res;
   if (!fs_->IsFilesystemActive()) {
     ret = fs_->GetError();
@@ -430,25 +430,25 @@ IOStatus TestFSRandomAccessFile::ReadAsync(
   }
   if (ret.ok()) {
     if (fs_->ShouldInjectRandomReadError()) {
-      ret = IOStatus::IOError("Injected read error");
+      ret = rocksdb_rs::io_status::IOStatus_IOError("Injected read error");
     } else {
       s = target_->ReadAsync(req, opts, cb, cb_arg, io_handle, del_fn, nullptr);
     }
   }
   if (!ret.ok()) {
-    res.status = ret;
+    res.status = ret.Clone();
     cb(res, cb_arg);
   }
   return s;
 }
 
-IOStatus TestFSRandomAccessFile::MultiRead(FSReadRequest* reqs, size_t num_reqs,
+rocksdb_rs::io_status::IOStatus TestFSRandomAccessFile::MultiRead(FSReadRequest* reqs, size_t num_reqs,
                                            const IOOptions& options,
                                            IODebugContext* dbg) {
   if (!fs_->IsFilesystemActive()) {
     return fs_->GetError();
   }
-  IOStatus s = target_->MultiRead(reqs, num_reqs, options, dbg);
+  rocksdb_rs::io_status::IOStatus s = target_->MultiRead(reqs, num_reqs, options, dbg);
   bool injected_error = false;
   for (size_t i = 0; i < num_reqs; i++) {
     if (!reqs[i].status.ok()) {
@@ -470,7 +470,7 @@ IOStatus TestFSRandomAccessFile::MultiRead(FSReadRequest* reqs, size_t num_reqs,
         /*fault_injected=*/nullptr);
   }
   if (s.ok() && fs_->ShouldInjectRandomReadError()) {
-    return IOStatus::IOError("Injected read error");
+    return rocksdb_rs::io_status::IOStatus_IOError("Injected read error");
   }
   return s;
 }
@@ -482,49 +482,49 @@ size_t TestFSRandomAccessFile::GetUniqueId(char* id, size_t max_size) const {
     return target_->GetUniqueId(id, max_size);
   }
 }
-IOStatus TestFSSequentialFile::Read(size_t n, const IOOptions& options,
+rocksdb_rs::io_status::IOStatus TestFSSequentialFile::Read(size_t n, const IOOptions& options,
                                     Slice* result, char* scratch,
                                     IODebugContext* dbg) {
-  IOStatus s = target()->Read(n, options, result, scratch, dbg);
+  rocksdb_rs::io_status::IOStatus s = target()->Read(n, options, result, scratch, dbg);
   if (s.ok() && fs_->ShouldInjectRandomReadError()) {
-    return IOStatus::IOError("Injected seq read error");
+    return rocksdb_rs::io_status::IOStatus_IOError("Injected seq read error");
   }
   return s;
 }
 
-IOStatus TestFSSequentialFile::PositionedRead(uint64_t offset, size_t n,
+rocksdb_rs::io_status::IOStatus TestFSSequentialFile::PositionedRead(uint64_t offset, size_t n,
                                               const IOOptions& options,
                                               Slice* result, char* scratch,
                                               IODebugContext* dbg) {
-  IOStatus s =
+  rocksdb_rs::io_status::IOStatus s =
       target()->PositionedRead(offset, n, options, result, scratch, dbg);
   if (s.ok() && fs_->ShouldInjectRandomReadError()) {
-    return IOStatus::IOError("Injected seq positioned read error");
+    return rocksdb_rs::io_status::IOStatus_IOError("Injected seq positioned read error");
   }
   return s;
 }
 
-IOStatus FaultInjectionTestFS::NewDirectory(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::NewDirectory(
     const std::string& name, const IOOptions& options,
     std::unique_ptr<FSDirectory>* result, IODebugContext* dbg) {
   std::unique_ptr<FSDirectory> r;
-  IOStatus io_s = target()->NewDirectory(name, options, &r, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = target()->NewDirectory(name, options, &r, dbg);
   if (!io_s.ok()) {
     return io_s;
   }
   result->reset(
       new TestFSDirectory(this, TestFSTrimDirname(name), r.release()));
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-IOStatus FaultInjectionTestFS::NewWritableFile(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::NewWritableFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
   {
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -534,7 +534,7 @@ IOStatus FaultInjectionTestFS::NewWritableFile(
     return target()->NewWritableFile(fname, file_opts, result, dbg);
   }
 
-  IOStatus io_s = target()->NewWritableFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = target()->NewWritableFile(fname, file_opts, result, dbg);
   if (io_s.ok()) {
     result->reset(
         new TestFSWritableFile(fname, file_opts, std::move(*result), this));
@@ -552,7 +552,7 @@ IOStatus FaultInjectionTestFS::NewWritableFile(
       list[dir_and_name.second] = kNewFileNoOverwrite;
     }
     {
-      IOStatus in_s = InjectMetadataWriteError();
+      rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
       if (!in_s.ok()) {
         return in_s;
       }
@@ -561,7 +561,7 @@ IOStatus FaultInjectionTestFS::NewWritableFile(
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::ReopenWritableFile(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::ReopenWritableFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) {
   if (!IsFilesystemActive()) {
@@ -571,21 +571,21 @@ IOStatus FaultInjectionTestFS::ReopenWritableFile(
     return target()->ReopenWritableFile(fname, file_opts, result, dbg);
   }
   {
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
   }
 
   bool exists;
-  IOStatus io_s,
-      exists_s = target()->FileExists(fname, IOOptions(), nullptr /* dbg */);
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();;
+  rocksdb_rs::io_status::IOStatus exists_s = target()->FileExists(fname, IOOptions(), nullptr /* dbg */);
   if (exists_s.IsNotFound()) {
     exists = false;
   } else if (exists_s.ok()) {
     exists = true;
   } else {
-    io_s = exists_s;
+    io_s = exists_s.Clone();
     exists = false;
   }
 
@@ -622,7 +622,7 @@ IOStatus FaultInjectionTestFS::ReopenWritableFile(
           new TestFSWritableFile(fname, file_opts, std::move(*result), this));
     }
     {
-      IOStatus in_s = InjectMetadataWriteError();
+      rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
       if (!in_s.ok()) {
         return in_s;
       }
@@ -631,7 +631,7 @@ IOStatus FaultInjectionTestFS::ReopenWritableFile(
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::NewRandomRWFile(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::NewRandomRWFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSRandomRWFile>* result, IODebugContext* dbg) {
   if (!IsFilesystemActive()) {
@@ -641,12 +641,12 @@ IOStatus FaultInjectionTestFS::NewRandomRWFile(
     return target()->NewRandomRWFile(fname, file_opts, result, dbg);
   }
   {
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
   }
-  IOStatus io_s = target()->NewRandomRWFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = target()->NewRandomRWFile(fname, file_opts, result, dbg);
   if (io_s.ok()) {
     result->reset(new TestFSRandomRWFile(fname, std::move(*result), this));
     // WritableFileWriter* file is opened
@@ -662,7 +662,7 @@ IOStatus FaultInjectionTestFS::NewRandomRWFile(
       list[dir_and_name.second] = kNewFileNoOverwrite;
     }
     {
-      IOStatus in_s = InjectMetadataWriteError();
+      rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
       if (!in_s.ok()) {
         return in_s;
       }
@@ -671,16 +671,16 @@ IOStatus FaultInjectionTestFS::NewRandomRWFile(
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::NewRandomAccessFile(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::NewRandomAccessFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSRandomAccessFile>* result, IODebugContext* dbg) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
   if (ShouldInjectRandomReadError()) {
-    return IOStatus::IOError("Injected error when open random access file");
+    return rocksdb_rs::io_status::IOStatus_IOError("Injected error when open random access file");
   }
-  IOStatus io_s = InjectThreadSpecificReadError(ErrorOperation::kOpen, nullptr,
+  rocksdb_rs::io_status::IOStatus io_s = InjectThreadSpecificReadError(ErrorOperation::kOpen, nullptr,
                                                 false, nullptr,
                                                 /*need_count_increase=*/true,
                                                 /*fault_injected=*/nullptr);
@@ -693,7 +693,7 @@ IOStatus FaultInjectionTestFS::NewRandomAccessFile(
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::NewSequentialFile(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::NewSequentialFile(
     const std::string& fname, const FileOptions& file_opts,
     std::unique_ptr<FSSequentialFile>* result, IODebugContext* dbg) {
   if (!IsFilesystemActive()) {
@@ -701,32 +701,32 @@ IOStatus FaultInjectionTestFS::NewSequentialFile(
   }
 
   if (ShouldInjectRandomReadError()) {
-    return IOStatus::IOError("Injected read error when creating seq file");
+    return rocksdb_rs::io_status::IOStatus_IOError("Injected read error when creating seq file");
   }
-  IOStatus io_s = target()->NewSequentialFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = target()->NewSequentialFile(fname, file_opts, result, dbg);
   if (io_s.ok()) {
     result->reset(new TestFSSequentialFile(std::move(*result), this));
   }
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::DeleteFile(const std::string& f,
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::DeleteFile(const std::string& f,
                                           const IOOptions& options,
                                           IODebugContext* dbg) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
   {
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
   }
-  IOStatus io_s = FileSystemWrapper::DeleteFile(f, options, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = FileSystemWrapper::DeleteFile(f, options, dbg);
   if (io_s.ok()) {
     UntrackFile(f);
     {
-      IOStatus in_s = InjectMetadataWriteError();
+      rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
       if (!in_s.ok()) {
         return in_s;
       }
@@ -735,7 +735,7 @@ IOStatus FaultInjectionTestFS::DeleteFile(const std::string& f,
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::RenameFile(const std::string& s,
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::RenameFile(const std::string& s,
                                           const std::string& t,
                                           const IOOptions& options,
                                           IODebugContext* dbg) {
@@ -743,7 +743,7 @@ IOStatus FaultInjectionTestFS::RenameFile(const std::string& s,
     return GetError();
   }
   {
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -761,7 +761,7 @@ IOStatus FaultInjectionTestFS::RenameFile(const std::string& s,
       ReadFileToString(target(), t, &previous_contents);
     }
   }
-  IOStatus io_s = FileSystemWrapper::RenameFile(s, t, options, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = FileSystemWrapper::RenameFile(s, t, options, dbg);
 
   if (io_s.ok()) {
     {
@@ -779,7 +779,7 @@ IOStatus FaultInjectionTestFS::RenameFile(const std::string& s,
         tlist[tdn.second] = previous_contents;
       }
     }
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -788,7 +788,7 @@ IOStatus FaultInjectionTestFS::RenameFile(const std::string& s,
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::LinkFile(const std::string& s,
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::LinkFile(const std::string& s,
                                         const std::string& t,
                                         const IOOptions& options,
                                         IODebugContext* dbg) {
@@ -796,7 +796,7 @@ IOStatus FaultInjectionTestFS::LinkFile(const std::string& s,
     return GetError();
   }
   {
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -806,7 +806,7 @@ IOStatus FaultInjectionTestFS::LinkFile(const std::string& s,
   // may be a more reasonable choice.
   std::string previous_contents = kNewFileNoOverwrite;
 
-  IOStatus io_s = FileSystemWrapper::LinkFile(s, t, options, dbg);
+  rocksdb_rs::io_status::IOStatus io_s = FileSystemWrapper::LinkFile(s, t, options, dbg);
 
   if (io_s.ok()) {
     {
@@ -824,7 +824,7 @@ IOStatus FaultInjectionTestFS::LinkFile(const std::string& s,
         tlist[tdn.second] = previous_contents;
       }
     }
-    IOStatus in_s = InjectMetadataWriteError();
+    rocksdb_rs::io_status::IOStatus in_s = InjectMetadataWriteError();
     if (!in_s.ok()) {
       return in_s;
     }
@@ -833,12 +833,12 @@ IOStatus FaultInjectionTestFS::LinkFile(const std::string& s,
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::Poll(std::vector<void*>& io_handles,
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::Poll(std::vector<void*>& io_handles,
                                     size_t min_completions) {
   return target()->Poll(io_handles, min_completions);
 }
 
-IOStatus FaultInjectionTestFS::AbortIO(std::vector<void*>& io_handles) {
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::AbortIO(std::vector<void*>& io_handles) {
   return target()->AbortIO(io_handles);
 }
 
@@ -872,8 +872,8 @@ void FaultInjectionTestFS::WritableFileAppended(const FSFileState& state) {
   }
 }
 
-IOStatus FaultInjectionTestFS::DropUnsyncedFileData() {
-  IOStatus io_s;
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::DropUnsyncedFileData() {
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FSFileState>::iterator it = db_file_state_.begin();
        io_s.ok() && it != db_file_state_.end(); ++it) {
@@ -885,8 +885,8 @@ IOStatus FaultInjectionTestFS::DropUnsyncedFileData() {
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::DropRandomUnsyncedFileData(Random* rnd) {
-  IOStatus io_s;
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::DropRandomUnsyncedFileData(Random* rnd) {
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FSFileState>::iterator it = db_file_state_.begin();
        io_s.ok() && it != db_file_state_.end(); ++it) {
@@ -898,7 +898,7 @@ IOStatus FaultInjectionTestFS::DropRandomUnsyncedFileData(Random* rnd) {
   return io_s;
 }
 
-IOStatus FaultInjectionTestFS::DeleteFilesCreatedAfterLastDirSync(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::DeleteFilesCreatedAfterLastDirSync(
     const IOOptions& options, IODebugContext* dbg) {
   // Because DeleteFile access this container make a copy to avoid deadlock
   std::map<std::string, std::map<std::string, std::string>> map_copy;
@@ -911,13 +911,13 @@ IOStatus FaultInjectionTestFS::DeleteFilesCreatedAfterLastDirSync(
   for (auto& pair : map_copy) {
     for (auto& file_pair : pair.second) {
       if (file_pair.second == kNewFileNoOverwrite) {
-        IOStatus io_s =
+        rocksdb_rs::io_status::IOStatus io_s =
             DeleteFile(pair.first + "/" + file_pair.first, options, dbg);
         if (!io_s.ok()) {
           return io_s;
         }
       } else {
-        IOStatus io_s =
+        rocksdb_rs::io_status::IOStatus io_s =
             WriteStringToFile(target(), file_pair.second,
                               pair.first + "/" + file_pair.first, true);
         if (!io_s.ok()) {
@@ -926,7 +926,7 @@ IOStatus FaultInjectionTestFS::DeleteFilesCreatedAfterLastDirSync(
       }
     }
   }
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 void FaultInjectionTestFS::ResetState() {
@@ -945,7 +945,7 @@ void FaultInjectionTestFS::UntrackFile(const std::string& f) {
   open_managed_files_.erase(f);
 }
 
-IOStatus FaultInjectionTestFS::InjectThreadSpecificReadError(
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::InjectThreadSpecificReadError(
     ErrorOperation op, Slice* result, bool direct_io, char* scratch,
     bool need_count_increase, bool* fault_injected) {
   bool dummy_bool;
@@ -953,7 +953,7 @@ IOStatus FaultInjectionTestFS::InjectThreadSpecificReadError(
   ret_fault_injected = false;
   ErrorContext* ctx = static_cast<ErrorContext*>(thread_local_error_->Get());
   if (ctx == nullptr || !ctx->enable_error_injection || !ctx->one_in) {
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   if (ctx->rand.OneIn(ctx->one_in)) {
@@ -972,7 +972,7 @@ IOStatus FaultInjectionTestFS::InjectThreadSpecificReadError(
       // Likely non-per read status code for MultiRead
       ctx->message += "error; ";
       ret_fault_injected = true;
-      return IOStatus::IOError();
+      return rocksdb_rs::io_status::IOStatus_IOError();
     } else if (Random::GetTLSInstance()->OneIn(8)) {
       assert(result);
       // For a small chance, set the failure to status but turn the
@@ -1000,10 +1000,10 @@ IOStatus FaultInjectionTestFS::InjectThreadSpecificReadError(
     } else {
       ctx->message += "error result multiget single; ";
       ret_fault_injected = true;
-      return IOStatus::IOError();
+      return rocksdb_rs::io_status::IOStatus_IOError();
     }
   }
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 bool FaultInjectionTestFS::TryParseFileName(const std::string& file_name,
@@ -1013,10 +1013,10 @@ bool FaultInjectionTestFS::TryParseFileName(const std::string& file_name,
   return rocksdb_rs::filename::ParseFileName(file, number, type);
 }
 
-IOStatus FaultInjectionTestFS::InjectWriteError(const std::string& file_name) {
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::InjectWriteError(const std::string& file_name) {
   MutexLock l(&mutex_);
   if (!enable_write_error_injection_ || !write_error_one_in_) {
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
   bool allowed_type = false;
 
@@ -1039,20 +1039,20 @@ IOStatus FaultInjectionTestFS::InjectWriteError(const std::string& file_name) {
       return GetError();
     }
   }
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-IOStatus FaultInjectionTestFS::InjectMetadataWriteError() {
+rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::InjectMetadataWriteError() {
   {
     MutexLock l(&mutex_);
     if (!enable_metadata_write_error_injection_ ||
         !metadata_write_error_one_in_ ||
         !write_error_rand_.OneIn(metadata_write_error_one_in_)) {
-      return IOStatus::OK();
+      return rocksdb_rs::io_status::IOStatus_OK();
     }
   }
   TEST_SYNC_POINT("FaultInjectionTestFS::InjectMetadataWriteError:Injected");
-  return IOStatus::IOError();
+  return rocksdb_rs::io_status::IOStatus_IOError();
 }
 
 void FaultInjectionTestFS::PrintFaultBacktrace() {

@@ -100,7 +100,7 @@ rocksdb_rs::status::Status BlobFileReader::OpenFile(
     TEST_SYNC_POINT("BlobFileReader::OpenFile:GetFileSize");
 
     const rocksdb_rs::status::Status s =
-        fs->GetFileSize(blob_file_path, IOOptions(), file_size, dbg);
+        fs->GetFileSize(blob_file_path, IOOptions(), file_size, dbg).status();
     if (!s.ok()) {
       return s.Clone();
     }
@@ -116,7 +116,7 @@ rocksdb_rs::status::Status BlobFileReader::OpenFile(
     TEST_SYNC_POINT("BlobFileReader::OpenFile:NewRandomAccessFile");
 
     const rocksdb_rs::status::Status s =
-        fs->NewRandomAccessFile(blob_file_path, file_opts, &file, dbg);
+        fs->NewRandomAccessFile(blob_file_path, file_opts, &file, dbg).status();
     if (!s.ok()) {
       return s.Clone();
     }
@@ -256,7 +256,7 @@ rocksdb_rs::status::Status BlobFileReader::ReadFromFile(const RandomAccessFileRe
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
   IOOptions io_options;
-  s = file_reader->PrepareIOOptions(read_options, io_options);
+  s = file_reader->PrepareIOOptions(read_options, io_options).status();
   if (!s.ok()) {
     return s;
   }
@@ -265,13 +265,13 @@ rocksdb_rs::status::Status BlobFileReader::ReadFromFile(const RandomAccessFileRe
     constexpr char* scratch = nullptr;
 
     s = file_reader->Read(io_options, read_offset, read_size, slice, scratch,
-                          aligned_buf, rate_limiter_priority);
+                          aligned_buf, rate_limiter_priority).status();
   } else {
     buf->reset(new char[read_size]);
     constexpr AlignedBuf* aligned_scratch = nullptr;
 
     s = file_reader->Read(io_options, read_offset, read_size, slice, buf->get(),
-                          aligned_scratch, rate_limiter_priority);
+                          aligned_scratch, rate_limiter_priority).status();
   }
 
   if (!s.ok()) {
@@ -339,7 +339,7 @@ rocksdb_rs::status::Status BlobFileReader::GetBlob(
     constexpr bool for_compaction = true;
 
     IOOptions io_options;
-    rocksdb_rs::status::Status s = file_reader_->PrepareIOOptions(read_options, io_options);
+    rocksdb_rs::status::Status s = file_reader_->PrepareIOOptions(read_options, io_options).status();
     if (!s.ok()) {
       return s;
     }
@@ -470,7 +470,7 @@ void BlobFileReader::MultiGetBlob(
   PERF_COUNTER_ADD(blob_read_byte, total_len);
   s = file_reader_->MultiRead(IOOptions(), read_reqs.data(), read_reqs.size(),
                               direct_io ? &aligned_buf : nullptr,
-                              read_options.rate_limiter_priority);
+                              read_options.rate_limiter_priority).status();
   if (!s.ok()) {
     for (auto& blob_req : blob_reqs) {
       BlobReadRequest* const req = blob_req.first;
@@ -503,10 +503,10 @@ void BlobFileReader::MultiGetBlob(
     const auto& record_slice = read_req.result;
     if (read_req.status.ok() && record_slice.size() != read_req.len) {
       read_req.status =
-          IOStatus::Corruption("Failed to read data from blob file");
+          rocksdb_rs::io_status::IOStatus_Corruption("Failed to read data from blob file");
     }
 
-    *req->status = read_req.status;
+    *req->status = read_req.status.status();
     if (!req->status->ok()) {
       continue;
     }

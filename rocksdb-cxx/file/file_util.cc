@@ -17,13 +17,13 @@
 namespace rocksdb {
 
 // Utility function to copy a file up to a specified length
-IOStatus CopyFile(FileSystem* fs, const std::string& source,
+rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
                   std::unique_ptr<WritableFileWriter>& dest_writer,
                   uint64_t size, bool use_fsync,
                   const std::shared_ptr<IOTracer>& io_tracer,
                   const Temperature temperature) {
   FileOptions soptions;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<SequentialFileReader> src_reader;
 
   {
@@ -50,14 +50,13 @@ IOStatus CopyFile(FileSystem* fs, const std::string& source,
   while (size > 0) {
     size_t bytes_to_read = std::min(sizeof(buffer), static_cast<size_t>(size));
     // TODO: rate limit copy file
-    io_s = status_to_io_status(
-        src_reader->Read(bytes_to_read, &slice, buffer,
-                         Env::IO_TOTAL /* rate_limiter_priority */));
+    io_s = src_reader->Read(bytes_to_read, &slice, buffer,
+                         Env::IO_TOTAL /* rate_limiter_priority */);
     if (!io_s.ok()) {
       return io_s;
     }
     if (slice.size() == 0) {
-      return IOStatus::Corruption("file too small");
+      return rocksdb_rs::io_status::IOStatus_Corruption("file too small");
     }
     io_s = dest_writer->Append(slice);
     if (!io_s.ok()) {
@@ -68,12 +67,12 @@ IOStatus CopyFile(FileSystem* fs, const std::string& source,
   return dest_writer->Sync(use_fsync);
 }
 
-IOStatus CopyFile(FileSystem* fs, const std::string& source,
+rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
                   const std::string& destination, uint64_t size, bool use_fsync,
                   const std::shared_ptr<IOTracer>& io_tracer,
                   const Temperature temperature) {
   FileOptions options;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<WritableFileWriter> dest_writer;
 
   {
@@ -93,10 +92,10 @@ IOStatus CopyFile(FileSystem* fs, const std::string& source,
 }
 
 // Utility function to create a file with the provided contents
-IOStatus CreateFile(FileSystem* fs, const std::string& destination,
+rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs, const std::string& destination,
                     const std::string& contents, bool use_fsync) {
   const EnvOptions soptions;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<WritableFileWriter> dest_writer;
 
   std::unique_ptr<FSWritableFile> destfile;
@@ -130,7 +129,7 @@ rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_options,
 // name of the generator created by the factory is unchecked. When
 // `requested_checksum_func_name` is non-empty, however, the created generator's
 // name must match it, otherwise an `InvalidArgument` error is returned.
-IOStatus GenerateOneFileChecksum(
+rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     FileSystem* fs, const std::string& file_path,
     FileChecksumGenFactory* checksum_factory,
     const std::string& requested_checksum_func_name, std::string* file_checksum,
@@ -139,7 +138,7 @@ IOStatus GenerateOneFileChecksum(
     std::shared_ptr<IOTracer>& io_tracer, RateLimiter* rate_limiter,
     Env::IOPriority rate_limiter_priority) {
   if (checksum_factory == nullptr) {
-    return IOStatus::InvalidArgument("Checksum factory is invalid");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument("Checksum factory is invalid");
   }
   assert(file_checksum != nullptr);
   assert(file_checksum_func_name != nullptr);
@@ -155,7 +154,7 @@ IOStatus GenerateOneFileChecksum(
         "checksum function name: " +
         requested_checksum_func_name +
         " from checksum factory: " + checksum_factory->Name();
-    return IOStatus::InvalidArgument(msg);
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(msg);
   } else {
     // For backward compatibility and use in file ingestion clients where there
     // is no stored checksum function name, `requested_checksum_func_name` can
@@ -168,12 +167,12 @@ IOStatus GenerateOneFileChecksum(
                         "', while the factory created one "
                         "named '" +
                         checksum_generator->Name() + "'";
-      return IOStatus::InvalidArgument(msg);
+      return rocksdb_rs::io_status::IOStatus_InvalidArgument(msg);
     }
   }
 
   uint64_t size;
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<RandomAccessFileReader> reader;
   {
     std::unique_ptr<FSRandomAccessFile> r_file;
@@ -212,11 +211,11 @@ IOStatus GenerateOneFileChecksum(
     io_s = reader->Read(opts, offset, bytes_to_read, &slice, buf.get(), nullptr,
                         rate_limiter_priority);
     if (!io_s.ok()) {
-      return IOStatus::Corruption("file read failed with error: " +
-                                  io_s.ToString());
+      return rocksdb_rs::io_status::IOStatus_Corruption("file read failed with error: " +
+                                  *io_s.ToString());
     }
     if (slice.size() == 0) {
-      return IOStatus::Corruption("file too small");
+      return rocksdb_rs::io_status::IOStatus_Corruption("file too small");
     }
     checksum_generator->Update(slice.data(), slice.size());
     size -= slice.size();
@@ -227,7 +226,7 @@ IOStatus GenerateOneFileChecksum(
   checksum_generator->Finalize();
   *file_checksum = checksum_generator->GetChecksum();
   *file_checksum_func_name = checksum_generator->Name();
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::status::Status DestroyDir(Env* env, const std::string& dir) {

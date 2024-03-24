@@ -177,7 +177,7 @@ DBOptions SanitizeOptions(const std::string& dbname, const DBOptions& src,
     io_opts.do_not_recurse = true;
     auto wal_dir = immutable_db_options.GetWalDir();
     rocksdb_rs::status::Status s = immutable_db_options.fs->GetChildren(
-        wal_dir, io_opts, &filenames, /*IODebugContext*=*/nullptr);
+        wal_dir, io_opts, &filenames, /*IODebugContext*=*/nullptr).status();
     for (std::string& filename : filenames) {
       if (filename.find(".log.trash", filename.length() -
                                           std::string(".log.trash").length()) !=
@@ -329,7 +329,7 @@ rocksdb_rs::status::Status DBImpl::NewDB(std::vector<std::string>* new_filenames
     }
     std::unique_ptr<FSWritableFile> file;
     FileOptions file_options = fs_->OptimizeForManifestWrite(file_options_);
-    s = NewWritableFile(fs_.get(), manifest, &file, file_options);
+    s = NewWritableFile(fs_.get(), manifest, &file, file_options).status();
     if (!s.ok()) {
       return s;
     }
@@ -344,14 +344,14 @@ rocksdb_rs::status::Status DBImpl::NewDB(std::vector<std::string>* new_filenames
     log::Writer log(std::move(file_writer), 0, false);
     std::string record;
     new_db.EncodeTo(&record);
-    s = log.AddRecord(record);
+    s = log.AddRecord(record).status();
     if (s.ok()) {
-      s = SyncManifest(&immutable_db_options_, log.file());
+      s = SyncManifest(&immutable_db_options_, log.file()).status();
     }
   }
   if (s.ok()) {
     // Make "CURRENT" file that points to the new manifest file.
-    s = SetCurrentFile(fs_.get(), dbname_, 1, directories_.GetDbDir());
+    s = SetCurrentFile(fs_.get(), dbname_, 1, directories_.GetDbDir()).status();
     if (new_filenames) {
       new_filenames->emplace_back(
           manifest.substr(manifest.find_last_of("/\\") + 1));
@@ -362,7 +362,7 @@ rocksdb_rs::status::Status DBImpl::NewDB(std::vector<std::string>* new_filenames
   return s;
 }
 
-IOStatus DBImpl::CreateAndNewDirectory(
+rocksdb_rs::io_status::IOStatus DBImpl::CreateAndNewDirectory(
     FileSystem* fs, const std::string& dirname,
     std::unique_ptr<FSDirectory>* directory) {
   // We call CreateDirIfMissing() as the directory may already exist (if we
@@ -372,17 +372,17 @@ IOStatus DBImpl::CreateAndNewDirectory(
   // file not existing. One real-world example of this occurring is if
   // env->CreateDirIfMissing() doesn't create intermediate directories, e.g.
   // when dbname_ is "dir/db" but when "dir" doesn't exist.
-  IOStatus io_s = fs->CreateDirIfMissing(dirname, IOOptions(), nullptr);
+  rocksdb_rs::io_status::IOStatus io_s = fs->CreateDirIfMissing(dirname, IOOptions(), nullptr);
   if (!io_s.ok()) {
     return io_s;
   }
   return fs->NewDirectory(dirname, IOOptions(), directory, nullptr);
 }
 
-IOStatus Directories::SetDirectories(FileSystem* fs, const std::string& dbname,
+rocksdb_rs::io_status::IOStatus Directories::SetDirectories(FileSystem* fs, const std::string& dbname,
                                      const std::string& wal_dir,
                                      const std::vector<DbPath>& data_paths) {
-  IOStatus io_s = DBImpl::CreateAndNewDirectory(fs, dbname, &db_dir_);
+  rocksdb_rs::io_status::IOStatus io_s = DBImpl::CreateAndNewDirectory(fs, dbname, &db_dir_);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -408,7 +408,7 @@ IOStatus Directories::SetDirectories(FileSystem* fs, const std::string& dbname,
     }
   }
   assert(data_dirs_.size() == data_paths.size());
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::status::Status DBImpl::Recover(
@@ -423,7 +423,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
   if (!read_only) {
     rocksdb_rs::status::Status s = directories_.SetDirectories(fs_.get(), dbname_,
                                            immutable_db_options_.wal_dir,
-                                           immutable_db_options_.db_paths);
+                                           immutable_db_options_.db_paths).status();
     if (!s.ok()) {
       return s;
     }
@@ -446,7 +446,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
       IOOptions io_opts;
       io_opts.do_not_recurse = true;
       rocksdb_rs::status::Status io_s = immutable_db_options_.fs->GetChildren(
-          dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr);
+          dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr).status();
       if (!io_s.ok()) {
         s.copy_from(io_s);
         files_in_dbname.clear();
@@ -495,12 +495,12 @@ rocksdb_rs::status::Status DBImpl::Recover(
           immutable_db_options_.use_direct_io_for_flush_and_compaction;
       const std::string& fname =
           manifest_path.empty() ? current_fname : manifest_path;
-      s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
+      s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr).status();
       if (!s.ok()) {
         std::string error_str = *s.ToString();
         // Check if unsupported Direct I/O is the root cause
         customized_fs.use_direct_reads = false;
-        s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr);
+        s = fs_->NewRandomAccessFile(fname, customized_fs, &idfile, nullptr).status();
         if (s.ok()) {
           return rocksdb_rs::status::Status_InvalidArgument(
               "Direct I/O is not supported by the specified DB.");
@@ -515,7 +515,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
     IOOptions io_opts;
     io_opts.do_not_recurse = true;
     rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
-        dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr);
+        dbname_, io_opts, &files_in_dbname, /*IODebugContext*=*/nullptr).status();
     if (s.IsNotFound()) {
       return rocksdb_rs::status::Status_InvalidArgument(dbname_,
                                      "does not exist (open for read only)");
@@ -688,7 +688,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
       IOOptions io_opts;
       io_opts.do_not_recurse = true;
       s = immutable_db_options_.fs->GetChildren(
-          wal_dir, io_opts, &files_in_wal_dir, /*IODebugContext*=*/nullptr);
+          wal_dir, io_opts, &files_in_wal_dir, /*IODebugContext*=*/nullptr).status();
     }
     if (s.IsNotFound()) {
       return rocksdb_rs::status::Status_InvalidArgument("wal_dir not found", wal_dir);
@@ -799,7 +799,7 @@ rocksdb_rs::status::Status DBImpl::Recover(
         IOOptions io_opts;
         io_opts.do_not_recurse = true;
         s = immutable_db_options_.fs->GetChildren(
-            GetName(), io_opts, &filenames, /*IODebugContext*=*/nullptr);
+            GetName(), io_opts, &filenames, /*IODebugContext*=*/nullptr).status();
       }
     }
     if (s.ok()) {
@@ -1154,7 +1154,7 @@ rocksdb_rs::status::Status DBImpl::RecoverLogFiles(const std::vector<uint64_t>& 
     {
       std::unique_ptr<FSSequentialFile> file;
       status = fs_->NewSequentialFile(
-          fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr);
+          fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr).status();
       if (!status.ok()) {
         MaybeIgnoreError(&status);
         if (!status.ok()) {
@@ -1527,12 +1527,12 @@ rocksdb_rs::status::Status DBImpl::GetLogSizeAndMaybeTruncate(uint64_t wal_numbe
         fs_->OptimizeForLogWrite(
             file_options_,
             BuildDBOptions(immutable_db_options_, mutable_db_options_)),
-        &last_log, nullptr);
+        &last_log, nullptr).status();
     if (truncate_status.ok()) {
-      truncate_status = last_log->Truncate(log.size, IOOptions(), nullptr);
+      truncate_status = last_log->Truncate(log.size, IOOptions(), nullptr).status();
     }
     if (truncate_status.ok()) {
-      truncate_status = last_log->Close(IOOptions(), nullptr);
+      truncate_status = last_log->Close(IOOptions(), nullptr).status();
     }
     // Not a critical error if fail to truncate.
     if (!truncate_status.ok() && !truncate_status.IsNotSupported()) {
@@ -1646,7 +1646,7 @@ rocksdb_rs::status::Status DBImpl::WriteLevel0TableForRecovery(int job_id, Colum
         range_del_iters.emplace_back(range_del_iter);
       }
 
-      IOStatus io_s;
+      rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
       TableBuilderOptions tboptions(
           *cfd->ioptions(), mutable_cf_options, cfd->internal_comparator(),
           cfd->int_tbl_prop_collector_factories(),
@@ -1683,7 +1683,7 @@ rocksdb_rs::status::Status DBImpl::WriteLevel0TableForRecovery(int job_id, Colum
 
       // TODO(AR) is this ok?
       if (!io_s.ok() && s.ok()) {
-        s = io_s;
+        s = io_s.status();
       }
 
       uint64_t total_num_entries = mem->num_entries();
@@ -1854,10 +1854,10 @@ rocksdb_rs::status::Status DB::OpenAndTrimHistory(
   return s;
 }
 
-IOStatus DBImpl::CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
+rocksdb_rs::io_status::IOStatus DBImpl::CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
                            size_t preallocate_block_size,
                            log::Writer** new_log) {
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<FSWritableFile> lfile;
 
   DBOptions db_options =
@@ -1980,7 +1980,7 @@ rocksdb_rs::status::Status DBImpl::Open(const DBOptions& db_options, const std::
     const size_t preallocate_block_size =
         impl->GetWalPreallocateBlockSize(max_write_buffer_size);
     s = impl->CreateWAL(new_log_number, 0 /*recycle_log_number*/,
-                        preallocate_block_size, &new_log);
+                        preallocate_block_size, &new_log).status();
     if (s.ok()) {
       InstrumentedMutexLock wl(&impl->log_write_mutex_);
       impl->logfile_number_ = new_log_number;
@@ -2012,13 +2012,13 @@ rocksdb_rs::status::Status DBImpl::Open(const DBOptions& db_options, const std::
         assert(log_writer->get_log_number() == log_file_number_size.number);
         impl->mutex_.AssertHeld();
         s = impl->WriteToWAL(empty_batch, log_writer, &log_used, &log_size,
-                             Env::IO_TOTAL, log_file_number_size);
+                             Env::IO_TOTAL, log_file_number_size).status();
         if (s.ok()) {
           // Need to fsync, otherwise it might get lost after a power reset.
           s = impl->FlushWAL(false);
           TEST_SYNC_POINT_CALLBACK("DBImpl::Open::BeforeSyncWAL", /*arg=*/&s);
           if (s.ok()) {
-            s = log_writer->file()->Sync(impl->immutable_db_options_.use_fsync);
+            s = log_writer->file()->Sync(impl->immutable_db_options_.use_fsync).status();
           }
         }
       }
@@ -2201,7 +2201,7 @@ rocksdb_rs::status::Status DBImpl::Open(const DBOptions& db_options, const std::
         // Sync is needed otherwise WAL buffered data might get lost after a
         // power reset.
         log::Writer* log_writer = impl->logs_.back().writer;
-        s = log_writer->file()->Sync(impl->immutable_db_options_.use_fsync);
+        s = log_writer->file()->Sync(impl->immutable_db_options_.use_fsync).status();
       }
     }
     if (s.ok() && !persist_options_status.ok()) {

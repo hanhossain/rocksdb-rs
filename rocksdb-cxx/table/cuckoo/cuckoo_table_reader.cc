@@ -147,7 +147,7 @@ CuckooTableReader::CuckooTableReader(
   // TODO: rate limit reads of whole cuckoo tables.
   status_ =
       file_->Read(IOOptions(), 0, static_cast<size_t>(file_size), &file_data_,
-                  nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+                  nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
 }
 
 rocksdb_rs::status::Status CuckooTableReader::Get(const ReadOptions& /*readOptions*/,

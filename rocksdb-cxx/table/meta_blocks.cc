@@ -255,7 +255,7 @@ rocksdb_rs::status::Status ReadTablePropertiesHelper(
                              false /*maybe_compressed*/, BlockType::kProperties,
                              UncompressionDict::GetEmptyDict(),
                              PersistentCacheOptions::kEmpty, memory_allocator);
-  rocksdb_rs::status::Status s = block_fetcher.ReadBlockContents();
+  rocksdb_rs::status::Status s = block_fetcher.ReadBlockContents().status();
   if (!s.ok()) {
     return s;
   }
@@ -492,7 +492,7 @@ rocksdb_rs::status::Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file
   Footer footer;
   IOOptions opts;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  s = file->PrepareIOOptions(read_options, opts);
+  s = file->PrepareIOOptions(read_options, opts).status();
   if (!s.ok()) {
     return s;
   }
@@ -511,7 +511,7 @@ rocksdb_rs::status::Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file
                       false /* do decompression */, false /*maybe_compressed*/,
                       BlockType::kMetaIndex, UncompressionDict::GetEmptyDict(),
                       PersistentCacheOptions::kEmpty, memory_allocator)
-      .ReadBlockContents();
+      .ReadBlockContents().status();
 }
 
 rocksdb_rs::status::Status FindMetaBlockInFile(
@@ -564,7 +564,7 @@ rocksdb_rs::status::Status ReadMetaBlock(RandomAccessFileReader* file,
                       false /*maybe_compressed*/, block_type,
                       UncompressionDict::GetEmptyDict(),
                       PersistentCacheOptions::kEmpty, memory_allocator)
-      .ReadBlockContents();
+      .ReadBlockContents().status();
 }
 
 }  // namespace rocksdb

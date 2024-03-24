@@ -225,7 +225,7 @@ struct SstFileWriter::Rep {
       TEST_SYNC_POINT_CALLBACK("SstFileWriter::Rep::InvalidatePageCache",
                                &(bytes_since_last_fadvise));
       // Tell the OS that we don't need this file in page cache
-      s = file_writer->InvalidateCache(0, 0);
+      s = file_writer->InvalidateCache(0, 0).status();
       if (s.IsNotSupported()) {
         // NotSupported is fine as it could be a file type that doesn't use page
         // cache.
@@ -268,7 +268,7 @@ rocksdb_rs::status::Status SstFileWriter::Open(const std::string& file_path) {
   std::unique_ptr<FSWritableFile> sst_file;
   FileOptions cur_file_opts(r->env_options);
   rocksdb_rs::status::Status s = r->ioptions.env->GetFileSystem()->NewWritableFile(
-      file_path, cur_file_opts, &sst_file, nullptr);
+      file_path, cur_file_opts, &sst_file, nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -407,10 +407,10 @@ rocksdb_rs::status::Status SstFileWriter::Finish(ExternalSstFileInfo* file_info)
   r->file_info.file_size = r->builder->FileSize();
 
   if (s.ok()) {
-    s = r->file_writer->Sync(r->ioptions.use_fsync);
+    s = r->file_writer->Sync(r->ioptions.use_fsync).status();
     r->InvalidatePageCache(true /* closing */);
     if (s.ok()) {
-      s = r->file_writer->Close();
+      s = r->file_writer->Close().status();
     }
   }
   if (s.ok()) {

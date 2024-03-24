@@ -87,7 +87,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::Read(const IOOptions& opts,
   Slice result;
   rocksdb_rs::status::Status s = reader->Read(opts, rounddown_start + chunk_len, read_len, &result,
                           bufs_[index].buffer_.BufferStart() + chunk_len,
-                          /*aligned_buf=*/nullptr, rate_limiter_priority);
+                          /*aligned_buf=*/nullptr, rate_limiter_priority).status();
 #ifndef NDEBUG
   if (result.size() < read_len) {
     // Fake an IO error to force db_stress fault injection to ignore
@@ -124,7 +124,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
   rocksdb_rs::status::Status s =
       reader->ReadAsync(req, opts, fp, &(bufs_[index].pos_),
                         &(bufs_[index].io_handle_), &(bufs_[index].del_fn_),
-                        /*aligned_buf=*/nullptr);
+                        /*aligned_buf=*/nullptr).status();
   if (s.ok()) {
     bufs_[index].async_read_in_progress_ = true;
   }
@@ -215,7 +215,7 @@ void FilePrefetchBuffer::AbortIOIfNeeded(uint64_t offset) {
   }
   if (!handles.empty()) {
     StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-    rocksdb_rs::status::Status s = fs_->AbortIO(handles);
+    rocksdb_rs::status::Status s = fs_->AbortIO(handles).status();
     assert(s.ok());
   }
 
@@ -243,7 +243,7 @@ void FilePrefetchBuffer::AbortAllIOs() {
   }
   if (!handles.empty()) {
     StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-    rocksdb_rs::status::Status s = fs_->AbortIO(handles);
+    rocksdb_rs::status::Status s = fs_->AbortIO(handles).status();
     assert(s.ok());
   }
 
@@ -500,7 +500,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsyncInternal(
       handles.emplace_back(bufs_[second].io_handle_);
       {
         StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-        rocksdb_rs::status::Status status = fs_->AbortIO(handles);
+        rocksdb_rs::status::Status status = fs_->AbortIO(handles).status();
         assert(status.ok());
       }
     }
@@ -588,7 +588,7 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsyncInternal(
         handles.emplace_back(bufs_[second].io_handle_);
         {
           StopWatch sw(clock_, stats_, ASYNC_PREFETCH_ABORT_MICROS);
-          rocksdb_rs::status::Status status = fs_->AbortIO(handles);
+          rocksdb_rs::status::Status status = fs_->AbortIO(handles).status();
           assert(status.ok());
         }
       }

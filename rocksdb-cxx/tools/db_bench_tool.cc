@@ -8422,9 +8422,9 @@ class Benchmark {
     }
     // Build new backup of the entire DB
     engine_options->destroy_old_data = true;
-    s = BackupEngine::Open(FLAGS_env, *engine_options, &backup_engine);
+    s = BackupEngine::Open(FLAGS_env, *engine_options, &backup_engine).status();
     assert(s.ok());
-    s = backup_engine->CreateNewBackup(db);
+    s = backup_engine->CreateNewBackup(db).status();
     assert(s.ok());
     std::vector<BackupInfo> backup_info;
     backup_engine->GetBackupInfo(&backup_info);
@@ -8442,10 +8442,10 @@ class Benchmark {
     }
     BackupEngineReadOnly* backup_engine;
     rocksdb_rs::status::Status s =
-        BackupEngineReadOnly::Open(FLAGS_env, *engine_options, &backup_engine);
+        BackupEngineReadOnly::Open(FLAGS_env, *engine_options, &backup_engine).status();
     assert(s.ok());
     s = backup_engine->RestoreDBFromLatestBackup(FLAGS_restore_dir,
-                                                 FLAGS_restore_dir);
+                                                 FLAGS_restore_dir).status();
     assert(s.ok());
     delete backup_engine;
   }

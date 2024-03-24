@@ -48,9 +48,9 @@ rocksdb_rs::status::Status VerifySstFileChecksum(const Options& options,
   ImmutableOptions ioptions(options);
 
   rocksdb_rs::status::Status s = ioptions.fs->NewRandomAccessFile(
-      file_path, FileOptions(env_options), &file, nullptr);
+      file_path, FileOptions(env_options), &file, nullptr).status();
   if (s.ok()) {
-    s = ioptions.fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr);
+    s = ioptions.fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr).status();
   } else {
     return s;
   }

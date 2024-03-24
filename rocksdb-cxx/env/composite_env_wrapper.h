@@ -61,7 +61,7 @@ class CompositeEnv : public Env {
   rocksdb_rs::status::Status NewMemoryMappedFileBuffer(
       const std::string& fname,
       std::unique_ptr<MemoryMappedFileBuffer>* result) override {
-    return file_system_->NewMemoryMappedFileBuffer(fname, result);
+    return file_system_->NewMemoryMappedFileBuffer(fname, result).status();
   }
 
   rocksdb_rs::status::Status NewDirectory(const std::string& name,
@@ -70,49 +70,49 @@ class CompositeEnv : public Env {
   rocksdb_rs::status::Status FileExists(const std::string& f) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->FileExists(f, io_opts, &dbg);
+    return file_system_->FileExists(f, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status GetChildren(const std::string& dir,
                      std::vector<std::string>* r) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->GetChildren(dir, io_opts, r, &dbg);
+    return file_system_->GetChildren(dir, io_opts, r, &dbg).status();
   }
   rocksdb_rs::status::Status GetChildrenFileAttributes(
       const std::string& dir, std::vector<FileAttributes>* result) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->GetChildrenFileAttributes(dir, io_opts, result, &dbg);
+    return file_system_->GetChildrenFileAttributes(dir, io_opts, result, &dbg).status();
   }
   rocksdb_rs::status::Status DeleteFile(const std::string& f) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->DeleteFile(f, io_opts, &dbg);
+    return file_system_->DeleteFile(f, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status Truncate(const std::string& fname, size_t size) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->Truncate(fname, size, io_opts, &dbg);
+    return file_system_->Truncate(fname, size, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status CreateDir(const std::string& d) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->CreateDir(d, io_opts, &dbg);
+    return file_system_->CreateDir(d, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status CreateDirIfMissing(const std::string& d) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->CreateDirIfMissing(d, io_opts, &dbg);
+    return file_system_->CreateDirIfMissing(d, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status DeleteDir(const std::string& d) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->DeleteDir(d, io_opts, &dbg);
+    return file_system_->DeleteDir(d, io_opts, &dbg).status();
   }
   rocksdb_rs::status::Status GetFileSize(const std::string& f, uint64_t* s) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->GetFileSize(f, io_opts, s, &dbg);
+    return file_system_->GetFileSize(f, io_opts, s, &dbg).status();
   }
 
   rocksdb_rs::status::Status GetFileModificationTime(const std::string& fname,
@@ -120,70 +120,70 @@ class CompositeEnv : public Env {
     IOOptions io_opts;
     IODebugContext dbg;
     return file_system_->GetFileModificationTime(fname, io_opts, file_mtime,
-                                                 &dbg);
+                                                 &dbg).status();
   }
 
   rocksdb_rs::status::Status RenameFile(const std::string& s, const std::string& t) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->RenameFile(s, t, io_opts, &dbg);
+    return file_system_->RenameFile(s, t, io_opts, &dbg).status();
   }
 
   rocksdb_rs::status::Status LinkFile(const std::string& s, const std::string& t) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->LinkFile(s, t, io_opts, &dbg);
+    return file_system_->LinkFile(s, t, io_opts, &dbg).status();
   }
 
   rocksdb_rs::status::Status NumFileLinks(const std::string& fname, uint64_t* count) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->NumFileLinks(fname, io_opts, count, &dbg);
+    return file_system_->NumFileLinks(fname, io_opts, count, &dbg).status();
   }
 
   rocksdb_rs::status::Status AreFilesSame(const std::string& first, const std::string& second,
                       bool* res) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->AreFilesSame(first, second, io_opts, res, &dbg);
+    return file_system_->AreFilesSame(first, second, io_opts, res, &dbg).status();
   }
 
   rocksdb_rs::status::Status LockFile(const std::string& f, FileLock** l) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->LockFile(f, io_opts, l, &dbg);
+    return file_system_->LockFile(f, io_opts, l, &dbg).status();
   }
 
   rocksdb_rs::status::Status UnlockFile(FileLock* l) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->UnlockFile(l, io_opts, &dbg);
+    return file_system_->UnlockFile(l, io_opts, &dbg).status();
   }
 
   rocksdb_rs::status::Status GetAbsolutePath(const std::string& db_path,
                          std::string* output_path) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->GetAbsolutePath(db_path, io_opts, output_path, &dbg);
+    return file_system_->GetAbsolutePath(db_path, io_opts, output_path, &dbg).status();
   }
 
   rocksdb_rs::status::Status NewLogger(const std::string& fname,
                    std::shared_ptr<Logger>* result) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->NewLogger(fname, io_opts, result, &dbg);
+    return file_system_->NewLogger(fname, io_opts, result, &dbg).status();
   }
 
   rocksdb_rs::status::Status IsDirectory(const std::string& path, bool* is_dir) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->IsDirectory(path, io_opts, is_dir, &dbg);
+    return file_system_->IsDirectory(path, io_opts, is_dir, &dbg).status();
   }
 
   rocksdb_rs::status::Status GetTestDirectory(std::string* path) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->GetTestDirectory(io_opts, path, &dbg);
+    return file_system_->GetTestDirectory(io_opts, path, &dbg).status();
   }
 
   EnvOptions OptimizeForLogRead(const EnvOptions& env_options) const override {
@@ -231,7 +231,7 @@ class CompositeEnv : public Env {
   rocksdb_rs::status::Status GetFreeSpace(const std::string& path, uint64_t* diskfree) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return file_system_->GetFreeSpace(path, io_opts, diskfree, &dbg);
+    return file_system_->GetFreeSpace(path, io_opts, diskfree, &dbg).status();
   }
   uint64_t NowMicros() override { return system_clock_->NowMicros(); }
   uint64_t NowNanos() override { return system_clock_->NowNanos(); }

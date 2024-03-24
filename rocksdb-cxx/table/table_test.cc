@@ -1331,7 +1331,7 @@ class FileChecksumTestHelper {
     uint64_t offset = 0;
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     s = file_reader_->Read(IOOptions(), offset, 2048, &result, scratch.get(),
-                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
     if (!s.ok()) {
       return s;
     }
@@ -1340,7 +1340,7 @@ class FileChecksumTestHelper {
       offset += static_cast<uint64_t>(result.size());
       s = file_reader_->Read(IOOptions(), offset, 2048, &result, scratch.get(),
                              nullptr,
-                             Env::IO_TOTAL /* rate_limiter_priority */);
+                             Env::IO_TOTAL /* rate_limiter_priority */).status();
       if (!s.ok()) {
         return s;
       }

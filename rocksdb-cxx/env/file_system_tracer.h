@@ -30,61 +30,61 @@ class FileSystemTracingWrapper : public FileSystemWrapper {
   static const char* kClassName() { return "FileSystemTracing"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewSequentialFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& fname,
                              const FileOptions& file_opts,
                              std::unique_ptr<FSSequentialFile>* result,
                              IODebugContext* dbg) override;
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& file_opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override;
 
-  IOStatus NewWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
                            const FileOptions& file_opts,
                            std::unique_ptr<FSWritableFile>* result,
                            IODebugContext* dbg) override;
 
-  IOStatus ReopenWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReopenWritableFile(const std::string& fname,
                               const FileOptions& file_opts,
                               std::unique_ptr<FSWritableFile>* result,
                               IODebugContext* dbg) override;
 
-  IOStatus ReuseWritableFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus ReuseWritableFile(const std::string& fname,
                              const std::string& old_fname,
                              const FileOptions& file_opts,
                              std::unique_ptr<FSWritableFile>* result,
                              IODebugContext* dbg) override;
 
-  IOStatus NewRandomRWFile(const std::string& fname, const FileOptions& options,
+  rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& fname, const FileOptions& options,
                            std::unique_ptr<FSRandomRWFile>* result,
                            IODebugContext* dbg) override;
 
-  IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
+  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
                         std::unique_ptr<FSDirectory>* result,
                         IODebugContext* dbg) override;
 
-  IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
+  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
                        std::vector<std::string>* r,
                        IODebugContext* dbg) override;
 
-  IOStatus DeleteFile(const std::string& fname, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname, const IOOptions& options,
                       IODebugContext* dbg) override;
 
-  IOStatus CreateDir(const std::string& dirname, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus CreateDir(const std::string& dirname, const IOOptions& options,
                      IODebugContext* dbg) override;
 
-  IOStatus CreateDirIfMissing(const std::string& dirname,
+  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& dirname,
                               const IOOptions& options,
                               IODebugContext* dbg) override;
 
-  IOStatus DeleteDir(const std::string& dirname, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& dirname, const IOOptions& options,
                      IODebugContext* dbg) override;
 
-  IOStatus GetFileSize(const std::string& fname, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& fname, const IOOptions& options,
                        uint64_t* file_size, IODebugContext* dbg) override;
 
-  IOStatus Truncate(const std::string& fname, size_t size,
+  rocksdb_rs::io_status::IOStatus Truncate(const std::string& fname, size_t size,
                     const IOOptions& options, IODebugContext* dbg) override;
 
  private:
@@ -146,12 +146,12 @@ class FSSequentialFileTracingWrapper : public FSSequentialFileOwnerWrapper {
 
   ~FSSequentialFileTracingWrapper() override {}
 
-  IOStatus Read(size_t n, const IOOptions& options, Slice* result,
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
                 char* scratch, IODebugContext* dbg) override;
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 
-  IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
                           Slice* result, char* scratch,
                           IODebugContext* dbg) override;
 
@@ -216,19 +216,19 @@ class FSRandomAccessFileTracingWrapper : public FSRandomAccessFileOwnerWrapper {
 
   ~FSRandomAccessFileTracingWrapper() override {}
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override;
 
-  IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
                      const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
                     IODebugContext* dbg) override;
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 
-  IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
                      std::function<void(const FSReadRequest&, void*)> cb,
                      void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
                      IODebugContext* dbg) override;
@@ -303,32 +303,32 @@ class FSWritableFileTracingWrapper : public FSWritableFileOwnerWrapper {
 
   ~FSWritableFileTracingWrapper() override {}
 
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   IODebugContext* dbg) override;
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   const DataVerificationInfo& /*verification_info*/,
                   IODebugContext* dbg) override {
     return Append(data, options, dbg);
   }
 
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             const DataVerificationInfo& /*verification_info*/,
                             IODebugContext* dbg) override {
     return PositionedAppend(data, offset, options, dbg);
   }
 
-  IOStatus Truncate(uint64_t size, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& options,
                     IODebugContext* dbg) override;
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
 
   uint64_t GetFileSize(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 
  private:
   std::shared_ptr<IOTracer> io_tracer_;
@@ -400,20 +400,20 @@ class FSRandomRWFileTracingWrapper : public FSRandomRWFileOwnerWrapper {
 
   ~FSRandomRWFileTracingWrapper() override {}
 
-  IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
                  IODebugContext* dbg) override;
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override;
 
-  IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override;
 
  private:
   std::shared_ptr<IOTracer> io_tracer_;

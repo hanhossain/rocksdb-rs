@@ -17,7 +17,7 @@
 #include "port/port.h"
 #include "port/stack_trace.h"
 #include "rocksdb/cache.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/sst_file_manager.h"
 #include "rocksdb/utilities/cache_dump_load.h"
 #include "test_util/secondary_cache_test_util.h"
@@ -2072,7 +2072,7 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadBasic) {
   std::string dump_path = db_->GetName() + "/cache_dump";
   std::unique_ptr<CacheDumpWriter> dump_writer;
   rocksdb_rs::status::Status s = NewToFileCacheDumpWriter(fault_fs_, FileOptions(), dump_path,
-                                      &dump_writer);
+                                      &dump_writer).status();
   ASSERT_OK(s);
   std::unique_ptr<CacheDumper> cache_dumper;
   s = NewDefaultCacheDumper(cd_options, cache, std::move(dump_writer),
@@ -2082,7 +2082,7 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadBasic) {
   db_list.push_back(db_);
   s = cache_dumper->SetDumpFilter(db_list);
   ASSERT_OK(s);
-  s = cache_dumper->DumpCacheEntriesToWriter();
+  s = cache_dumper->DumpCacheEntriesToWriter().status();
   ASSERT_OK(s);
   cache_dumper.reset();
 
@@ -2105,13 +2105,13 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadBasic) {
   start_lookup = secondary_cache->num_lookups();
   std::unique_ptr<CacheDumpReader> dump_reader;
   s = NewFromFileCacheDumpReader(fault_fs_, FileOptions(), dump_path,
-                                 &dump_reader);
+                                 &dump_reader).status();
   ASSERT_OK(s);
   std::unique_ptr<CacheDumpedLoader> cache_loader;
   s = NewDefaultCacheDumpedLoader(cd_options, table_options, secondary_cache,
                                   std::move(dump_reader), &cache_loader);
   ASSERT_OK(s);
-  s = cache_loader->RestoreCacheEntriesToSecondaryCache();
+  s = cache_loader->RestoreCacheEntriesToSecondaryCache().status();
   ASSERT_OK(s);
   uint32_t load_insert = secondary_cache->num_inserts() - start_insert;
   uint32_t load_lookup = secondary_cache->num_lookups() - start_lookup;
@@ -2228,7 +2228,7 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadWithFilter) {
   std::string dump_path = db1->GetName() + "/cache_dump";
   std::unique_ptr<CacheDumpWriter> dump_writer;
   rocksdb_rs::status::Status s = NewToFileCacheDumpWriter(fault_fs_, FileOptions(), dump_path,
-                                      &dump_writer);
+                                      &dump_writer).status();
   ASSERT_OK(s);
   std::unique_ptr<CacheDumper> cache_dumper;
   s = NewDefaultCacheDumper(cd_options, cache, std::move(dump_writer),
@@ -2238,7 +2238,7 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadWithFilter) {
   db_list.push_back(db1);
   s = cache_dumper->SetDumpFilter(db_list);
   ASSERT_OK(s);
-  s = cache_dumper->DumpCacheEntriesToWriter();
+  s = cache_dumper->DumpCacheEntriesToWriter().status();
   ASSERT_OK(s);
   cache_dumper.reset();
 
@@ -2261,13 +2261,13 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadWithFilter) {
   start_lookup = secondary_cache->num_lookups();
   std::unique_ptr<CacheDumpReader> dump_reader;
   s = NewFromFileCacheDumpReader(fault_fs_, FileOptions(), dump_path,
-                                 &dump_reader);
+                                 &dump_reader).status();
   ASSERT_OK(s);
   std::unique_ptr<CacheDumpedLoader> cache_loader;
   s = NewDefaultCacheDumpedLoader(cd_options, table_options, secondary_cache,
                                   std::move(dump_reader), &cache_loader);
   ASSERT_OK(s);
-  s = cache_loader->RestoreCacheEntriesToSecondaryCache();
+  s = cache_loader->RestoreCacheEntriesToSecondaryCache().status();
   ASSERT_OK(s);
   uint32_t load_insert = secondary_cache->num_inserts() - start_insert;
   uint32_t load_lookup = secondary_cache->num_lookups() - start_lookup;
@@ -2282,8 +2282,8 @@ TEST_P(DBSecondaryCacheTest, LRUCacheDumpLoadWithFilter) {
 
   // After load, we do the Get again. To validate the cache, we do not allow any
   // I/O, so we set the file system to false.
-  IOStatus error_msg = IOStatus::IOError("Retryable IO Error");
-  fault_fs_->SetFilesystemActive(false, error_msg);
+  rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
+  fault_fs_->SetFilesystemActive(false, error_msg.Clone());
   start_insert = secondary_cache->num_inserts();
   start_lookup = secondary_cache->num_lookups();
   uint32_t cache_insert = cache->GetInsertCount();

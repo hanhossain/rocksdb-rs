@@ -187,7 +187,7 @@ class ExternalSstFileIngestionJob {
   rocksdb_rs::status::Status AssignGlobalSeqnoForIngestedFile(IngestedFileInfo* file_to_ingest,
                                           SequenceNumber seqno);
   // Generate the file checksum and store in the IngestedFileInfo
-  IOStatus GenerateChecksumForIngestedFile(IngestedFileInfo* file_to_ingest);
+  rocksdb_rs::io_status::IOStatus GenerateChecksumForIngestedFile(IngestedFileInfo* file_to_ingest);
 
   // Check if `file_to_ingest` can fit in level `level`
   // REQUIRES: Mutex held

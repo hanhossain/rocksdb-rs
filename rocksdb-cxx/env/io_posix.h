@@ -22,7 +22,7 @@
 #include "port/port.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "test_util/sync_point.h"
 #include "util/mutexlock.h"
 #include "util/thread_local.h"
@@ -47,7 +47,7 @@ namespace rocksdb {
 std::string IOErrorMsg(const std::string& context,
                        const std::string& file_name);
 // file_name can be left empty if it is not unkown.
-IOStatus IOError(const std::string& context, const std::string& file_name,
+rocksdb_rs::io_status::IOStatus IOError(const std::string& context, const std::string& file_name,
                  int err_number);
 
 class PosixHelper {
@@ -117,7 +117,7 @@ inline void UpdateResult(struct io_uring_cqe* cqe, const std::string& file_name,
     TEST_SYNC_POINT_CALLBACK("UpdateResults::io_uring_result", &bytes_read);
     if (bytes_read == iov_len) {
       req->result = Slice(req->scratch, req->len);
-      req->status = IOStatus::OK();
+      req->status = rocksdb_rs::io_status::IOStatus_OK();
     } else if (bytes_read == 0) {
       /// cqe->res == 0 can means EOF, or can mean partial results. See
       // comment
@@ -127,13 +127,13 @@ inline void UpdateResult(struct io_uring_cqe* cqe, const std::string& file_name,
         // Bytes reads don't fill sectors. Should only happen at the end
         // of the file.
         req->result = Slice(req->scratch, finished_len);
-        req->status = IOStatus::OK();
+        req->status = rocksdb_rs::io_status::IOStatus_OK();
       } else {
         if (async_read) {
           // No  bytes read. It can means EOF. In case of partial results, it's
           // caller responsibility to call read/readasync again.
           req->result = Slice(req->scratch, 0);
-          req->status = IOStatus::OK();
+          req->status = rocksdb_rs::io_status::IOStatus_OK();
         } else {
           read_again = true;
         }
@@ -142,7 +142,7 @@ inline void UpdateResult(struct io_uring_cqe* cqe, const std::string& file_name,
       assert(bytes_read > 0);
       if (async_read) {
         req->result = Slice(req->scratch, bytes_read);
-        req->status = IOStatus::OK();
+        req->status = rocksdb_rs::io_status::IOStatus_OK();
       } else {
         assert(bytes_read + finished_len < len);
         finished_len += bytes_read;
@@ -245,13 +245,13 @@ class PosixSequentialFile : public FSSequentialFile {
                       size_t logical_block_size, const EnvOptions& options);
   virtual ~PosixSequentialFile();
 
-  virtual IOStatus Read(size_t n, const IOOptions& opts, Slice* result,
+  virtual rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& opts, Slice* result,
                         char* scratch, IODebugContext* dbg) override;
-  virtual IOStatus PositionedRead(uint64_t offset, size_t n,
+  virtual rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n,
                                   const IOOptions& opts, Slice* result,
                                   char* scratch, IODebugContext* dbg) override;
-  virtual IOStatus Skip(uint64_t n) override;
-  virtual IOStatus InvalidateCache(size_t offset, size_t length) override;
+  virtual rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override;
+  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
   virtual bool use_direct_io() const override { return use_direct_io_; }
   virtual size_t GetRequiredBufferAlignment() const override {
     return logical_sector_size_;
@@ -298,28 +298,28 @@ class PosixRandomAccessFile : public FSRandomAccessFile {
   );
   virtual ~PosixRandomAccessFile();
 
-  virtual IOStatus Read(uint64_t offset, size_t n, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& opts,
                         Slice* result, char* scratch,
                         IODebugContext* dbg) const override;
 
-  virtual IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
+  virtual rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
                              const IOOptions& options,
                              IODebugContext* dbg) override;
 
-  virtual IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& opts,
                             IODebugContext* dbg) override;
 
 #if defined(OS_LINUX) || defined(OS_MACOSX) || defined(OS_AIX)
   virtual size_t GetUniqueId(char* id, size_t max_size) const override;
 #endif
   virtual void Hint(AccessPattern pattern) override;
-  virtual IOStatus InvalidateCache(size_t offset, size_t length) override;
+  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
   virtual bool use_direct_io() const override { return use_direct_io_; }
   virtual size_t GetRequiredBufferAlignment() const override {
     return logical_sector_size_;
   }
   // EXPERIMENTAL
-  virtual IOStatus ReadAsync(
+  virtual rocksdb_rs::io_status::IOStatus ReadAsync(
       FSReadRequest& req, const IOOptions& opts,
       std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
       void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) override;
@@ -350,43 +350,43 @@ class PosixWritableFile : public FSWritableFile {
 
   // Need to implement this so the file is truncated correctly
   // with direct I/O
-  virtual IOStatus Truncate(uint64_t size, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& opts,
                             IODebugContext* dbg) override;
-  virtual IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Append(const Slice& data, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& opts,
                           IODebugContext* dbg) override;
-  virtual IOStatus Append(const Slice& data, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& opts,
                           const DataVerificationInfo& /* verification_info */,
                           IODebugContext* dbg) override {
     return Append(data, opts, dbg);
   }
-  virtual IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  virtual rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                                     const IOOptions& opts,
                                     IODebugContext* dbg) override;
-  virtual IOStatus PositionedAppend(
+  virtual rocksdb_rs::io_status::IOStatus PositionedAppend(
       const Slice& data, uint64_t offset, const IOOptions& opts,
       const DataVerificationInfo& /* verification_info */,
       IODebugContext* dbg) override {
     return PositionedAppend(data, offset, opts, dbg);
   }
-  virtual IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
   virtual bool IsSyncThreadSafe() const override;
   virtual bool use_direct_io() const override { return use_direct_io_; }
   virtual void SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) override;
   virtual uint64_t GetFileSize(const IOOptions& opts,
                                IODebugContext* dbg) override;
-  virtual IOStatus InvalidateCache(size_t offset, size_t length) override;
+  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
   virtual size_t GetRequiredBufferAlignment() const override {
     return logical_sector_size_;
   }
 #ifdef ROCKSDB_FALLOCATE_PRESENT
-  virtual IOStatus Allocate(uint64_t offset, uint64_t len,
+  virtual rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len,
                             const IOOptions& opts,
                             IODebugContext* dbg) override;
 #endif
-  virtual IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
+  virtual rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
                              const IOOptions& opts,
                              IODebugContext* dbg) override;
 #ifdef OS_LINUX
@@ -406,10 +406,10 @@ class PosixMmapReadableFile : public FSRandomAccessFile {
   PosixMmapReadableFile(const int fd, const std::string& fname, void* base,
                         size_t length, const EnvOptions& options);
   virtual ~PosixMmapReadableFile();
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& opts, Slice* result,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& opts, Slice* result,
                 char* scratch, IODebugContext* dbg) const override;
   void Hint(AccessPattern pattern) override;
-  IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 };
 
 class PosixMmapFile : public FSWritableFile {
@@ -437,9 +437,9 @@ class PosixMmapFile : public FSWritableFile {
     return s;
   }
 
-  IOStatus MapNewRegion();
-  IOStatus UnmapCurrentRegion();
-  IOStatus Msync();
+  rocksdb_rs::io_status::IOStatus MapNewRegion();
+  rocksdb_rs::io_status::IOStatus UnmapCurrentRegion();
+  rocksdb_rs::io_status::IOStatus Msync();
 
  public:
   PosixMmapFile(const std::string& fname, int fd, size_t page_size,
@@ -448,26 +448,26 @@ class PosixMmapFile : public FSWritableFile {
 
   // Means Close() will properly take care of truncate
   // and it does not need any additional information
-  virtual IOStatus Truncate(uint64_t /*size*/, const IOOptions& /*opts*/,
+  virtual rocksdb_rs::io_status::IOStatus Truncate(uint64_t /*size*/, const IOOptions& /*opts*/,
                             IODebugContext* /*dbg*/) override {
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
-  virtual IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Append(const Slice& data, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& opts,
                           IODebugContext* dbg) override;
-  virtual IOStatus Append(const Slice& data, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& opts,
                           const DataVerificationInfo& /* verification_info */,
                           IODebugContext* dbg) override {
     return Append(data, opts, dbg);
   }
-  virtual IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
   virtual uint64_t GetFileSize(const IOOptions& opts,
                                IODebugContext* dbg) override;
-  virtual IOStatus InvalidateCache(size_t offset, size_t length) override;
+  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 #ifdef ROCKSDB_FALLOCATE_PRESENT
-  virtual IOStatus Allocate(uint64_t offset, uint64_t len,
+  virtual rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len,
                             const IOOptions& opts,
                             IODebugContext* dbg) override;
 #endif
@@ -479,17 +479,17 @@ class PosixRandomRWFile : public FSRandomRWFile {
                              const EnvOptions& options);
   virtual ~PosixRandomRWFile();
 
-  virtual IOStatus Write(uint64_t offset, const Slice& data,
+  virtual rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
                          const IOOptions& opts, IODebugContext* dbg) override;
 
-  virtual IOStatus Read(uint64_t offset, size_t n, const IOOptions& opts,
+  virtual rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& opts,
                         Slice* result, char* scratch,
                         IODebugContext* dbg) const override;
 
-  virtual IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
-  virtual IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
 
  private:
   const std::string filename_;
@@ -506,11 +506,11 @@ class PosixDirectory : public FSDirectory {
  public:
   explicit PosixDirectory(int fd, const std::string& directory_name);
   ~PosixDirectory();
-  virtual IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& opts, IODebugContext* dbg) override;
 
-  virtual IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& opts, IODebugContext* dbg) override;
 
-  virtual IOStatus FsyncWithDirOptions(
+  virtual rocksdb_rs::io_status::IOStatus FsyncWithDirOptions(
       const IOOptions&, IODebugContext*,
       const DirFsyncOptions& dir_fsync_options) override;
 

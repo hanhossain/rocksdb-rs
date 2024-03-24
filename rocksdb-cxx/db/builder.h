@@ -63,7 +63,7 @@ extern rocksdb_rs::status::Status BuildTable(
     SequenceNumber earliest_write_conflict_snapshot,
     SequenceNumber job_snapshot, SnapshotChecker* snapshot_checker,
     bool paranoid_file_checks, InternalStats* internal_stats,
-    IOStatus* io_status, const std::shared_ptr<IOTracer>& io_tracer,
+    rocksdb_rs::io_status::IOStatus* io_status, const std::shared_ptr<IOTracer>& io_tracer,
     BlobFileCreationReason blob_creation_reason,
     const SeqnoToTimeMapping& seqno_to_time_mapping,
     EventLogger* event_logger = nullptr, int job_id = 0,

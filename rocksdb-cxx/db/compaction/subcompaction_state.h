@@ -60,7 +60,7 @@ class SubcompactionState {
   rocksdb_rs::status::Status status;
 
   // The return IO Status of this sub-compaction
-  IOStatus io_status;
+  rocksdb_rs::io_status::IOStatus io_status = rocksdb_rs::io_status::IOStatus_new();
 
   // Notify on sub-compaction completion only if listener was notified on
   // sub-compaction begin.

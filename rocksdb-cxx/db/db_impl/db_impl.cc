@@ -359,7 +359,7 @@ rocksdb_rs::status::Status DBImpl::ResumeImpl(DBRecoverContext context) {
   // Make sure the IO Status stored in version set is set to OK.
   bool file_deletion_disabled = !IsFileDeletionsEnabled();
   if (s.ok()) {
-    IOStatus io_s = versions_->io_status();
+    rocksdb_rs::io_status::IOStatus io_s = versions_->io_status().Clone();
     if (io_s.IsIOError()) {
       // If resuming from IOError resulted from MANIFEST write, then assert
       // that we must have already set the MANIFEST writer to nullptr during
@@ -381,9 +381,9 @@ rocksdb_rs::status::Status DBImpl::ResumeImpl(DBRecoverContext context) {
       s = versions_->LogAndApply(cfd, cf_opts, read_options, &edit, &mutex_,
                                  directories_.GetDbDir());
       if (!s.ok()) {
-        io_s = versions_->io_status();
+        io_s = versions_->io_status().Clone();
         if (!io_s.ok()) {
-          s.copy_from(error_handler_.SetBGError(io_s,
+          s.copy_from(error_handler_.SetBGError(io_s.status(),
                                         BackgroundErrorReason::kManifestWrite));
         }
       }
@@ -720,9 +720,9 @@ rocksdb_rs::status::Status DBImpl::CloseHelper() {
     write_buffer_manager_->RemoveDBFromQueue(wbm_stall_.get());
   }
 
-  IOStatus io_s = directories_.Close(IOOptions(), nullptr /* dbg */);
+  rocksdb_rs::io_status::IOStatus io_s = directories_.Close(IOOptions(), nullptr /* dbg */);
   if (!io_s.ok()) {
-    ret = io_s;
+    ret = io_s.status();
   }
   if (ret.IsAborted()) {
     // Reserve IsAborted() error for those where users didn't release
@@ -1398,7 +1398,7 @@ int DBImpl::FindMinimumEmptyLevelFitting(
 
 rocksdb_rs::status::Status DBImpl::FlushWAL(bool sync) {
   if (manual_wal_flush_) {
-    IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     {
       // We need to lock log_write_mutex_ since logs_ might change concurrently
       InstrumentedMutexLock wl(&log_write_mutex_);
@@ -1407,16 +1407,16 @@ rocksdb_rs::status::Status DBImpl::FlushWAL(bool sync) {
     }
     if (!io_s.ok()) {
       ROCKS_LOG_ERROR(immutable_db_options_.info_log, "WAL flush error %s",
-                      io_s.ToString().c_str());
+                      io_s.ToString()->c_str());
       // In case there is a fs error we should set it globally to prevent the
       // future writes
       IOStatusCheck(io_s);
       // whether sync or not, we should abort the rest of function upon error
-      return static_cast<rocksdb_rs::status::Status>(io_s);
+      return io_s.status();
     }
     if (!sync) {
       ROCKS_LOG_DEBUG(immutable_db_options_.info_log, "FlushWAL sync=false");
-      return static_cast<rocksdb_rs::status::Status>(io_s);
+      return io_s.status();
     }
   }
   if (!sync) {
@@ -1475,17 +1475,17 @@ rocksdb_rs::status::Status DBImpl::SyncWAL() {
   TEST_SYNC_POINT("DBWALTest::SyncWALNotWaitWrite:1");
   RecordTick(stats_, WAL_FILE_SYNCED);
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
-  IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   for (log::Writer* log : logs_to_sync) {
     io_s = log->file()->SyncWithoutFlush(immutable_db_options_.use_fsync);
     if (!io_s.ok()) {
-      status = io_s;
+      status = io_s.status();
       break;
     }
   }
   if (!io_s.ok()) {
     ROCKS_LOG_ERROR(immutable_db_options_.info_log, "WAL Sync error %s",
-                    io_s.ToString().c_str());
+                    io_s.ToString()->c_str());
     // In case there is a fs error we should set it globally to prevent the
     // future writes
     IOStatusCheck(io_s);
@@ -1493,7 +1493,7 @@ rocksdb_rs::status::Status DBImpl::SyncWAL() {
   if (status.ok() && need_log_dir_sync) {
     status = directories_.GetWalDir()->FsyncWithDirOptions(
         IOOptions(), nullptr,
-        DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced));
+        DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced)).status();
   }
   TEST_SYNC_POINT("DBWALTest::SyncWALNotWaitWrite:2");
 
@@ -1527,7 +1527,7 @@ rocksdb_rs::status::Status DBImpl::ApplyWALToManifest(const ReadOptions& read_op
   rocksdb_rs::status::Status status = versions_->LogAndApplyToDefaultColumnFamily(
       read_options, synced_wals, &mutex_, directories_.GetDbDir());
   if (!status.ok() && versions_->io_status().IsIOError()) {
-    status.copy_from(error_handler_.SetBGError(versions_->io_status(),
+    status.copy_from(error_handler_.SetBGError(versions_->io_status().status(),
                                        BackgroundErrorReason::kManifestWrite));
   }
   return status;
@@ -4542,7 +4542,7 @@ rocksdb_rs::status::Status DBImpl::CheckConsistency() {
       std::string directory = dir_files.first;
       std::vector<std::string> existing_files;
       rocksdb_rs::status::Status s = fs_->GetChildren(directory, io_opts, &existing_files,
-                                  /*IODebugContext*=*/nullptr);
+                                  /*IODebugContext*=*/nullptr).status();
       if (!s.ok()) {
         corruption_messages +=
             "Can't list files in " + directory + ": " + *s.ToString() + "\n";
@@ -4600,7 +4600,7 @@ rocksdb_rs::status::Status DBImpl::GetDbIdentityFromIdentityFile(std::string* id
   std::string idfilename = static_cast<std::string>(IdentityFileName(dbname_));
   const FileOptions soptions;
 
-  rocksdb_rs::status::Status s = ReadFileToString(fs_.get(), idfilename, identity);
+  rocksdb_rs::status::Status s = ReadFileToString(fs_.get(), idfilename, identity).status();
   if (!s.ok()) {
     return s;
   }
@@ -4956,7 +4956,7 @@ rocksdb_rs::status::Status DBImpl::DeleteObsoleteOptionsFiles() {
   IOOptions io_opts;
   io_opts.do_not_recurse = true;
   s = fs_->GetChildren(GetName(), io_opts, &filenames,
-                       /*IODebugContext*=*/nullptr);
+                       /*IODebugContext*=*/nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -4990,14 +4990,14 @@ rocksdb_rs::status::Status DBImpl::RenameTempFileToOptionsFile(const std::string
     s = GetEnv()->RenameFile(file_name, options_file_name);
     std::unique_ptr<FSDirectory> dir_obj;
     if (s.ok()) {
-      s = fs_->NewDirectory(GetName(), IOOptions(), &dir_obj, nullptr);
+      s = fs_->NewDirectory(GetName(), IOOptions(), &dir_obj, nullptr).status();
     }
     if (s.ok()) {
       s = dir_obj->FsyncWithDirOptions(IOOptions(), nullptr,
-                                       DirFsyncOptions(options_file_name));
+                                       DirFsyncOptions(options_file_name)).status();
     }
     if (s.ok()) {
-      rocksdb_rs::status::Status temp_s = dir_obj->Close(IOOptions(), nullptr);
+      rocksdb_rs::status::Status temp_s = dir_obj->Close(IOOptions(), nullptr).status();
       // The default Close() could return "NotSupproted" and we bypass it
       // if it is not impelmented. Detailed explanations can be found in
       // db/db_impl/db_impl.h
@@ -5516,9 +5516,9 @@ rocksdb_rs::status::Status DBImpl::IngestExternalFiles(
       // CURRENT file. With current code, it's just difficult to tell. So just
       // be pessimistic and try write to a new MANIFEST.
       // TODO: distinguish between MANIFEST write and CURRENT renaming
-      const IOStatus& io_s = versions_->io_status();
+      const rocksdb_rs::io_status::IOStatus& io_s = versions_->io_status();
       // Should handle return error?
-      error_handler_.SetBGError(io_s, BackgroundErrorReason::kManifestWrite);
+      error_handler_.SetBGError(io_s.status(), BackgroundErrorReason::kManifestWrite);
     }
 
     // Resume writes to the DB
@@ -5930,7 +5930,7 @@ rocksdb_rs::status::Status DBImpl::VerifyFullFileChecksum(const std::string& fil
       func_name_expected, &file_checksum, &func_name,
       read_options.readahead_size, immutable_db_options_.allow_mmap_reads,
       io_tracer_, immutable_db_options_.rate_limiter.get(),
-      read_options.rate_limiter_priority);
+      read_options.rate_limiter_priority).status();
   if (s.ok()) {
     assert(func_name_expected == func_name);
     if (file_checksum != file_checksum_expected) {

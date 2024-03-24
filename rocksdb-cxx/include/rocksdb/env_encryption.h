@@ -194,18 +194,18 @@ class EncryptedSequentialFile : public FSSequentialFile {
         offset_(prefixLength),
         prefixLength_(prefixLength) {}
 
-  IOStatus Read(size_t n, const IOOptions& options, Slice* result,
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
                 char* scratch, IODebugContext* dbg) override;
 
-  IOStatus Skip(uint64_t n) override;
+  rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override;
 
   bool use_direct_io() const override;
 
   size_t GetRequiredBufferAlignment() const override;
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 
-  IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
                           Slice* result, char* scratch,
                           IODebugContext* dbg) override;
 };
@@ -224,11 +224,11 @@ class EncryptedRandomAccessFile : public FSRandomAccessFile {
         stream_(std::move(s)),
         prefixLength_(prefixLength) {}
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override;
 
-  IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
                     IODebugContext* dbg) override;
 
   size_t GetUniqueId(char* id, size_t max_size) const override;
@@ -239,7 +239,7 @@ class EncryptedRandomAccessFile : public FSRandomAccessFile {
 
   size_t GetRequiredBufferAlignment() const override;
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 };
 
 class EncryptedWritableFile : public FSWritableFile {
@@ -258,11 +258,11 @@ class EncryptedWritableFile : public FSWritableFile {
         prefixLength_(prefixLength) {}
 
   using FSWritableFile::Append;
-  IOStatus Append(const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
                   IODebugContext* dbg) override;
 
   using FSWritableFile::PositionedAppend;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override;
 
@@ -274,12 +274,12 @@ class EncryptedWritableFile : public FSWritableFile {
 
   uint64_t GetFileSize(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Truncate(uint64_t size, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& options,
                     IODebugContext* dbg) override;
 
-  IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
 
-  IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
                      IODebugContext* dbg) override;
 
   void PrepareWrite(size_t offset, size_t len, const IOOptions& options,
@@ -290,14 +290,14 @@ class EncryptedWritableFile : public FSWritableFile {
   void GetPreallocationStatus(size_t* block_size,
                               size_t* last_allocated_block) override;
 
-  IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
                     IODebugContext* dbg) override;
 
-  IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
 };
 
 class EncryptedRandomRWFile : public FSRandomRWFile {
@@ -318,20 +318,20 @@ class EncryptedRandomRWFile : public FSRandomRWFile {
 
   size_t GetRequiredBufferAlignment() const override;
 
-  IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
                  IODebugContext* dbg) override;
 
-  IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
                 Slice* result, char* scratch,
                 IODebugContext* dbg) const override;
 
-  IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override;
 
-  IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
 };
 
 class EncryptedFileSystem : public FileSystemWrapper {

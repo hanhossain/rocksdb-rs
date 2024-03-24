@@ -1251,17 +1251,17 @@ class VersionSetTestBase {
     const auto& fs = env_->GetFileSystem();
     rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
-        nullptr);
+        nullptr).status();
     ASSERT_OK(s);
     {
       log_writer->reset(new log::Writer(std::move(file_writer), 0, false));
       std::string record;
       new_db.EncodeTo(&record);
-      s = (*log_writer)->AddRecord(record);
+      s = (*log_writer)->AddRecord(record).status();
       for (const auto& e : new_cfs) {
         record.clear();
         e.EncodeTo(&record);
-        s = (*log_writer)->AddRecord(record);
+        s = (*log_writer)->AddRecord(record).status();
         ASSERT_OK(s);
       }
     }
@@ -1281,7 +1281,7 @@ class VersionSetTestBase {
     PrepareManifest(&column_families_, &last_seqno, &log_writer);
     log_writer.reset();
     // Make "CURRENT" file point to the new manifest file.
-    rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+    rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
     ASSERT_OK(s);
 
     EXPECT_OK(versions_->Recover(column_families_, false));
@@ -2695,7 +2695,7 @@ TEST_P(VersionSetTestDropOneCF, HandleDroppedColumnFamilyInAtomicGroup) {
   SequenceNumber last_seqno;
   std::unique_ptr<log::Writer> log_writer;
   PrepareManifest(&column_families, &last_seqno, &log_writer);
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
 
   EXPECT_OK(versions_->Recover(column_families, false /* read_only */));
@@ -2799,12 +2799,12 @@ class EmptyDefaultCfNewManifest : public VersionSetTestBase,
     std::unique_ptr<WritableFileWriter> file_writer;
     rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest_path, fs->OptimizeForManifestWrite(env_options_),
-        &file_writer, nullptr);
+        &file_writer, nullptr).status();
     ASSERT_OK(s);
     log_writer->reset(new log::Writer(std::move(file_writer), 0, true));
     std::string record;
     ASSERT_TRUE(new_db.EncodeTo(&record));
-    s = (*log_writer)->AddRecord(record);
+    s = (*log_writer)->AddRecord(record).status();
     ASSERT_OK(s);
     // Create new column family
     VersionEdit new_cf;
@@ -2814,7 +2814,7 @@ class EmptyDefaultCfNewManifest : public VersionSetTestBase,
     new_cf.SetNextFile(2);
     record.clear();
     ASSERT_TRUE(new_cf.EncodeTo(&record));
-    s = (*log_writer)->AddRecord(record);
+    s = (*log_writer)->AddRecord(record).status();
     ASSERT_OK(s);
   }
 
@@ -2829,7 +2829,7 @@ TEST_F(EmptyDefaultCfNewManifest, Recover) {
   PrepareManifest(nullptr, nullptr, &log_writer_);
   log_writer_.reset();
   rocksdb_rs::status::Status s =
-      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
+      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -2872,13 +2872,13 @@ class VersionSetTestEmptyDb
     std::unique_ptr<WritableFileWriter> file_writer;
     rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest_path, fs->OptimizeForManifestWrite(env_options_),
-        &file_writer, nullptr);
+        &file_writer, nullptr).status();
     ASSERT_OK(s);
     {
       log_writer->reset(new log::Writer(std::move(file_writer), 0, false));
       std::string record;
       new_db.EncodeTo(&record);
-      s = (*log_writer)->AddRecord(record);
+      s = (*log_writer)->AddRecord(record).status();
       ASSERT_OK(s);
     }
   }
@@ -2893,7 +2893,7 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest0) {
   PrepareManifest(nullptr, nullptr, &log_writer_);
   log_writer_.reset();
   rocksdb_rs::status::Status s =
-      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
+      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -2933,11 +2933,11 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest1) {
   {
     std::string record;
     new_cf1.EncodeTo(&record);
-    s = log_writer_->AddRecord(record);
+    s = log_writer_->AddRecord(record).status();
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -2980,11 +2980,11 @@ TEST_P(VersionSetTestEmptyDb, OpenFromInCompleteManifest2) {
     new_cf.SetColumnFamily(cf_id++);
     std::string record;
     ASSERT_TRUE(new_cf.EncodeTo(&record));
-    s = log_writer_->AddRecord(record);
+    s = log_writer_->AddRecord(record).status();
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -3027,7 +3027,7 @@ TEST_P(VersionSetTestEmptyDb, OpenManifestWithUnknownCF) {
     new_cf.SetColumnFamily(cf_id++);
     std::string record;
     ASSERT_TRUE(new_cf.EncodeTo(&record));
-    s = log_writer_->AddRecord(record);
+    s = log_writer_->AddRecord(record).status();
     ASSERT_OK(s);
   }
   {
@@ -3038,11 +3038,11 @@ TEST_P(VersionSetTestEmptyDb, OpenManifestWithUnknownCF) {
     tmp_edit.SetLastSequence(0);
     std::string record;
     ASSERT_TRUE(tmp_edit.EncodeTo(&record));
-    s = log_writer_->AddRecord(record);
+    s = log_writer_->AddRecord(record).status();
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -3085,7 +3085,7 @@ TEST_P(VersionSetTestEmptyDb, OpenCompleteManifest) {
     new_cf.SetColumnFamily(cf_id++);
     std::string record;
     ASSERT_TRUE(new_cf.EncodeTo(&record));
-    s = log_writer_->AddRecord(record);
+    s = log_writer_->AddRecord(record).status();
     ASSERT_OK(s);
   }
   {
@@ -3095,11 +3095,11 @@ TEST_P(VersionSetTestEmptyDb, OpenCompleteManifest) {
     tmp_edit.SetLastSequence(0);
     std::string record;
     ASSERT_TRUE(tmp_edit.EncodeTo(&record));
-    s = log_writer_->AddRecord(record);
+    s = log_writer_->AddRecord(record).status();
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr);
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -3185,7 +3185,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     std::unique_ptr<WritableFileWriter> file_writer;
     rocksdb_rs::status::Status s = WritableFileWriter::Create(
         fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
-        nullptr);
+        nullptr).status();
     ASSERT_OK(s);
     log_writer->reset(new log::Writer(std::move(file_writer), 0, false));
     VersionEdit new_db;
@@ -3200,7 +3200,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     {
       std::string record;
       ASSERT_TRUE(new_db.EncodeTo(&record));
-      s = (*log_writer)->AddRecord(record);
+      s = (*log_writer)->AddRecord(record).status();
       ASSERT_OK(s);
     }
     const std::vector<std::string> cf_names = {
@@ -3218,7 +3218,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       new_cf.SetColumnFamily(cf_id);
       std::string record;
       ASSERT_TRUE(new_cf.EncodeTo(&record));
-      s = (*log_writer)->AddRecord(record);
+      s = (*log_writer)->AddRecord(record).status();
       ASSERT_OK(s);
 
       VersionEdit cf_files;
@@ -3226,7 +3226,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       cf_files.SetLogNumber(0);
       record.clear();
       ASSERT_TRUE(cf_files.EncodeTo(&record));
-      s = (*log_writer)->AddRecord(record);
+      s = (*log_writer)->AddRecord(record).status();
       ASSERT_OK(s);
       ++cf_id;
     }
@@ -3237,7 +3237,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       edit.SetLastSequence(seq);
       std::string record;
       ASSERT_TRUE(edit.EncodeTo(&record));
-      s = (*log_writer)->AddRecord(record);
+      s = (*log_writer)->AddRecord(record).status();
       ASSERT_OK(s);
     }
     *last_seqno = seq + 1;
@@ -3272,7 +3272,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       uint64_t file_num = info.file_number;
       std::string fname = static_cast<std::string>(MakeTableFileName(dbname_, file_num));
       std::unique_ptr<FSWritableFile> file;
-      rocksdb_rs::status::Status s = fs_->NewWritableFile(fname, FileOptions(), &file, nullptr);
+      rocksdb_rs::status::Status s = fs_->NewWritableFile(fname, FileOptions(), &file, nullptr).status();
       ASSERT_OK(s);
       std::unique_ptr<WritableFileWriter> fwriter(new WritableFileWriter(
           std::move(file), fname, FileOptions(), env_->GetSystemClock().get()));
@@ -3291,7 +3291,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       ASSERT_OK(builder->Finish());
       ASSERT_OK(fwriter->Flush());
       uint64_t file_size = 0;
-      s = fs_->GetFileSize(fname, IOOptions(), &file_size, nullptr);
+      s = fs_->GetFileSize(fname, IOOptions(), &file_size, nullptr).status();
       ASSERT_OK(s);
       ASSERT_NE(0, file_size);
       file_metas->emplace_back(
@@ -3321,7 +3321,7 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     assert(log_writer_.get() != nullptr);
     std::string record;
     ASSERT_TRUE(edit.EncodeTo(&record, 0 /* ts_sz */));
-    rocksdb_rs::status::Status s = log_writer_->AddRecord(record);
+    rocksdb_rs::status::Status s = log_writer_->AddRecord(record).status();
     ASSERT_OK(s);
   }
 
@@ -3366,7 +3366,7 @@ TEST_F(VersionSetTestMissingFiles, ManifestFarBehindSst) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, std::vector<std::pair<int, FileMetaData>>(), deleted_files);
   log_writer_.reset();
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3424,7 +3424,7 @@ TEST_F(VersionSetTestMissingFiles, ManifestAheadofSst) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, added_files, std::vector<std::pair<int, uint64_t>>());
   log_writer_.reset();
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3478,7 +3478,7 @@ TEST_F(VersionSetTestMissingFiles, NoFileMissing) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, std::vector<std::pair<int, FileMetaData>>(), deleted_files);
   log_writer_.reset();
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr);
+  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);

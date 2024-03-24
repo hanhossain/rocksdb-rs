@@ -69,8 +69,8 @@ class BlockFetcher {
         for_compaction_(for_compaction) {
   }
 
-  IOStatus ReadBlockContents();
-  IOStatus ReadAsyncBlockContents();
+  rocksdb_rs::io_status::IOStatus ReadBlockContents();
+  rocksdb_rs::io_status::IOStatus ReadAsyncBlockContents();
 
   inline rocksdb_rs::compression_type::CompressionType get_compression_type() const {
     return compression_type_;
@@ -112,7 +112,7 @@ class BlockFetcher {
   const PersistentCacheOptions& cache_options_;
   MemoryAllocator* memory_allocator_;
   MemoryAllocator* memory_allocator_compressed_;
-  IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
   Slice slice_;
   char* used_buf_ = nullptr;
   AlignedBuf direct_io_buf_;

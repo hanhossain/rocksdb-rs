@@ -2505,10 +2505,10 @@ TEST_F(DBWALTest, WalInManifestButNotInSortedWals) {
                  bool* _wals_go_missing_flag)
         : FileSystemWrapper(t), wals_go_missing_flag(_wals_go_missing_flag) {}
     bool* wals_go_missing_flag;
-    IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
+    rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
                          std::vector<std::string>* r,
                          IODebugContext* dbg) override {
-      IOStatus s = target_->GetChildren(dir, io_opts, r, dbg);
+      rocksdb_rs::io_status::IOStatus s = target_->GetChildren(dir, io_opts, r, dbg);
       if (s.ok() && *wals_go_missing_flag) {
         for (size_t i = 0; i < r->size();) {
           if (EndsWith(r->at(i), ".log")) {

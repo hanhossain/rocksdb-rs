@@ -2592,14 +2592,14 @@ TEST_F(EnvTest, IsDirectory) {
   {
     std::unique_ptr<FSWritableFile> wfile;
     s = Env::Default()->GetFileSystem()->NewWritableFile(
-        test_file_path, FileOptions(), &wfile, /*dbg=*/nullptr);
+        test_file_path, FileOptions(), &wfile, /*dbg=*/nullptr).status();
     ASSERT_OK(s);
     std::unique_ptr<WritableFileWriter> fwriter;
     fwriter.reset(new WritableFileWriter(std::move(wfile), test_file_path,
                                          FileOptions(),
                                          SystemClock::Default().get()));
     constexpr char buf[] = "test";
-    s = fwriter->Append(buf);
+    s = fwriter->Append(buf).status();
     ASSERT_OK(s);
   }
   ASSERT_OK(Env::Default()->IsDirectory(test_file_path, &is_dir));
@@ -3445,7 +3445,7 @@ class ReadAsyncRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
                             std::unique_ptr<FSRandomAccessFile>& file)
       : FSRandomAccessFileOwnerWrapper(std::move(file)), fs_(fs) {}
 
-  IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
+  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
                      std::function<void(const FSReadRequest&, void*)> cb,
                      void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
                      IODebugContext* dbg) override;
@@ -3464,18 +3464,18 @@ class ReadAsyncFS : public FileSystemWrapper {
   static const char* kClassName() { return "ReadAsyncFS"; }
   const char* Name() const override { return kClassName(); }
 
-  IOStatus NewRandomAccessFile(const std::string& fname,
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
                                const FileOptions& opts,
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
+    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
     EXPECT_OK(s);
     result->reset(new ReadAsyncRandomAccessFile(*this, file));
     return s;
   }
 
-  IOStatus Poll(std::vector<void*>& io_handles,
+  rocksdb_rs::io_status::IOStatus Poll(std::vector<void*>& io_handles,
                 size_t /*min_completions*/) override {
     // Wait for the threads completion.
     for (auto& t : workers) {
@@ -3486,17 +3486,17 @@ class ReadAsyncFS : public FileSystemWrapper {
       MockIOHandle* handle = static_cast<MockIOHandle*>(io_handles[i]);
       if (handle->create_io_error) {
         FSReadRequest req;
-        req.status = IOStatus::IOError();
+        req.status = rocksdb_rs::io_status::IOStatus_IOError();
         handle->cb(req, handle->cb_arg);
       }
     }
-    return IOStatus::OK();
+    return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   std::vector<std::thread> workers;
 };
 
-IOStatus ReadAsyncRandomAccessFile::ReadAsync(
+rocksdb_rs::io_status::IOStatus ReadAsyncRandomAccessFile::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) {
@@ -3529,7 +3529,7 @@ IOStatus ReadAsyncRandomAccessFile::ReadAsync(
       };
 
   fs_.workers.emplace_back(submit_request, std::move(req));
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 class TestAsyncRead : public testing::Test {
@@ -3592,7 +3592,7 @@ TEST_F(TestAsyncRead, ReadAsync) {
           size_t i = *(reinterpret_cast<size_t*>(cb_arg));
           reqs[i].offset = req.offset;
           reqs[i].result = req.result;
-          reqs[i].status = req.status;
+          reqs[i].status = req.status.Clone();
         };
 
     // Submit asynchronous read requests.
@@ -3608,7 +3608,7 @@ TEST_F(TestAsyncRead, ReadAsync) {
     // Check the status of read requests.
     for (size_t i = 0; i < kNumSectors; i++) {
       if (i % 2) {
-        ASSERT_EQ(reqs[i].status, IOStatus::IOError());
+        ASSERT_EQ(reqs[i].status, rocksdb_rs::io_status::IOStatus_IOError());
       } else {
         auto buf = NewAligned(kSectorSize * 8, static_cast<char>(i + 1));
         Slice expected_data(buf.get(), kSectorSize);

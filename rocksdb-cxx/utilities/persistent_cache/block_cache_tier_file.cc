@@ -40,7 +40,7 @@ rocksdb_rs::status::Status NewRandomAccessCacheFile(const std::shared_ptr<FileSy
 
   FileOptions opt;
   opt.use_direct_reads = use_direct_reads;
-  return fs->NewRandomAccessFile(filepath, opt, file, nullptr);
+  return fs->NewRandomAccessFile(filepath, opt, file, nullptr).status();
 }
 
 //
@@ -236,7 +236,7 @@ bool RandomAccessCacheFile::Read(const LBA& lba, Slice* key, Slice* val,
 
   Slice result;
   rocksdb_rs::status::Status s = freader_->Read(IOOptions(), lba.off_, lba.size_, &result, scratch,
-                            nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+                            nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
   if (!s.ok()) {
     Error(log_, "Error reading from file %s. %s", Path().c_str(),
           s.ToString()->c_str());

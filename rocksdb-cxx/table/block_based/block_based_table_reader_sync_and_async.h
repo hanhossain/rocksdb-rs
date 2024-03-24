@@ -138,7 +138,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
   AlignedBuf direct_io_buf;
   {
     IOOptions opts;
-    IOStatus s = file->PrepareIOOptions(options, opts);
+    rocksdb_rs::io_status::IOStatus s = file->PrepareIOOptions(options, opts);
     if (s.ok()) {
 #if defined(WITH_COROUTINES)
       if (file->use_direct_io()) {
@@ -156,7 +156,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
       // Discard all the results in this batch if there is any time out
       // or overall MultiRead error
       for (FSReadRequest& req : read_reqs) {
-        req.status = s;
+        req.status = s.Clone();
       }
     }
   }
@@ -178,7 +178,7 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
     size_t& req_offset = req_offset_for_block[valid_batch_idx];
     valid_batch_idx++;
     FSReadRequest& req = read_reqs[req_idx];
-    rocksdb_rs::status::Status s = req.status;
+    rocksdb_rs::status::Status s = req.status.status();
     if (s.ok()) {
       if ((req.result.size() != req.len) ||
           (req_offset + BlockSizeWithTrailer(handle) > req.result.size())) {

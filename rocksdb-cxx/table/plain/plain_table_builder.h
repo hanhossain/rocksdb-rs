@@ -65,7 +65,7 @@ class PlainTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   // Return non-ok iff some error happens during IO.
-  IOStatus io_status() const override { return io_status_; }
+  rocksdb_rs::io_status::IOStatus io_status() const override { return io_status_.Clone(); }
 
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.
@@ -123,7 +123,7 @@ class PlainTableBuilder : public TableBuilder {
   uint32_t bloom_bits_per_key_;
   size_t huge_page_tlb_size_;
   rocksdb_rs::status::Status status_;
-  IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
   TableProperties properties_;
   PlainTableKeyEncoder encoder_;
 

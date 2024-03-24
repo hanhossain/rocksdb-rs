@@ -39,7 +39,7 @@ static const std::string kLevelDbTFileExt = "ldb";
 static const std::string kRocksDBBlobFileExt = "blob";
 static const std::string kArchivalDirName = "archive";
 
-IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
+rocksdb_rs::io_status::IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
                         uint64_t descriptor_number,
                         FSDirectory* dir_contains_current_file) {
   // Remove leading "dbname/" and add newline to manifest file name
@@ -48,7 +48,7 @@ IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
   assert(contents.starts_with(dbname + "/"));
   contents.remove_prefix(dbname.size() + 1);
   std::string tmp = static_cast<std::string>(TempFileName(dbname, descriptor_number));
-  IOStatus s = WriteStringToFile(fs, contents.ToString() + "\n", tmp, true);
+  rocksdb_rs::io_status::IOStatus s = WriteStringToFile(fs, contents.ToString() + "\n", tmp, true);
   TEST_SYNC_POINT_CALLBACK("SetCurrentFile:BeforeRename", &s);
   if (s.ok()) {
     TEST_KILL_RANDOM_WITH_WEIGHT("SetCurrentFile:0", REDUCE_ODDS2);
@@ -86,18 +86,18 @@ rocksdb_rs::status::Status SetIdentityFile(Env* env, const std::string& dbname,
   std::unique_ptr<FSDirectory> dir_obj;
   if (s.ok()) {
     s = env->GetFileSystem()->NewDirectory(dbname, IOOptions(), &dir_obj,
-                                           nullptr);
+                                           nullptr).status();
   }
   if (s.ok()) {
     s = dir_obj->FsyncWithDirOptions(IOOptions(), nullptr,
-                                     DirFsyncOptions(identify_file_name));
+                                     DirFsyncOptions(identify_file_name)).status();
   }
 
   // The default Close() could return "NotSupported" and we bypass it
   // if it is not impelmented. Detailed explanations can be found in
   // db/db_impl/db_impl.h
   if (s.ok()) {
-    rocksdb_rs::status::Status temp_s = dir_obj->Close(IOOptions(), nullptr);
+    rocksdb_rs::status::Status temp_s = dir_obj->Close(IOOptions(), nullptr).status();
     if (!temp_s.ok()) {
       if (!temp_s.IsNotSupported()) {
         s.copy_from(temp_s);
@@ -110,7 +110,7 @@ rocksdb_rs::status::Status SetIdentityFile(Env* env, const std::string& dbname,
   return s;
 }
 
-IOStatus SyncManifest(const ImmutableDBOptions* db_options,
+rocksdb_rs::io_status::IOStatus SyncManifest(const ImmutableDBOptions* db_options,
                       WritableFileWriter* file) {
   TEST_KILL_RANDOM_WITH_WEIGHT("SyncManifest:0", REDUCE_ODDS2);
   StopWatch sw(db_options->clock, db_options->stats, MANIFEST_FILE_SYNC_MICROS);
@@ -135,7 +135,7 @@ rocksdb_rs::status::Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs
   InfoLogPrefix info_log_prefix = InfoLogPrefix_new(!db_log_dir.empty(), dbname);
 
   std::vector<std::string> file_names;
-  rocksdb_rs::status::Status s = fs->GetChildren(*parent_dir, IOOptions(), &file_names, nullptr);
+  rocksdb_rs::status::Status s = fs->GetChildren(*parent_dir, IOOptions(), &file_names, nullptr).status();
 
   if (!s.ok()) {
     return s;

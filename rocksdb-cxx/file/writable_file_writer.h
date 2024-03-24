@@ -16,7 +16,7 @@
 #include "port/port.h"
 #include "rocksdb/file_checksum.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb/io_status.h"
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/listener.h"
 #include "rocksdb/rate_limiter.h"
 #include "test_util/sync_point.h"
@@ -39,7 +39,7 @@ class WritableFileWriter {
       uint64_t offset, size_t length,
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
-      const IOStatus& io_status) {
+      const rocksdb_rs::io_status::IOStatus& io_status) {
     FileOperationInfo info(FileOperationType::kWrite, file_name_, start_ts,
                            finish_ts, io_status, temperature_);
     info.offset = offset;
@@ -52,7 +52,7 @@ class WritableFileWriter {
   void NotifyOnFileFlushFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
-      const IOStatus& io_status) {
+      const rocksdb_rs::io_status::IOStatus& io_status) {
     FileOperationInfo info(FileOperationType::kFlush, file_name_, start_ts,
                            finish_ts, io_status, temperature_);
 
@@ -63,7 +63,7 @@ class WritableFileWriter {
   void NotifyOnFileSyncFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
-      const IOStatus& io_status,
+      const rocksdb_rs::io_status::IOStatus& io_status,
       FileOperationType type = FileOperationType::kSync) {
     FileOperationInfo info(type, file_name_, start_ts, finish_ts, io_status,
                            temperature_);
@@ -76,7 +76,7 @@ class WritableFileWriter {
       uint64_t offset, size_t length,
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
-      const IOStatus& io_status) {
+      const rocksdb_rs::io_status::IOStatus& io_status) {
     FileOperationInfo info(FileOperationType::kRangeSync, file_name_, start_ts,
                            finish_ts, io_status, temperature_);
     info.offset = offset;
@@ -89,7 +89,7 @@ class WritableFileWriter {
   void NotifyOnFileTruncateFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
-      const IOStatus& io_status) {
+      const rocksdb_rs::io_status::IOStatus& io_status) {
     FileOperationInfo info(FileOperationType::kTruncate, file_name_, start_ts,
                            finish_ts, io_status, temperature_);
 
@@ -100,7 +100,7 @@ class WritableFileWriter {
   void NotifyOnFileCloseFinish(
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
-      const IOStatus& io_status) {
+      const rocksdb_rs::io_status::IOStatus& io_status) {
     FileOperationInfo info(FileOperationType::kClose, file_name_, start_ts,
                            finish_ts, io_status, temperature_);
 
@@ -109,7 +109,7 @@ class WritableFileWriter {
     }
   }
 
-  void NotifyOnIOError(const IOStatus& io_status, FileOperationType operation,
+  void NotifyOnIOError(const rocksdb_rs::io_status::IOStatus& io_status, FileOperationType operation,
                        const std::string& file_path, size_t length = 0,
                        uint64_t offset = 0) {
     if (listeners_.empty()) {
@@ -211,7 +211,7 @@ class WritableFileWriter {
     }
   }
 
-  static IOStatus Create(const std::shared_ptr<FileSystem>& fs,
+  static rocksdb_rs::io_status::IOStatus Create(const std::shared_ptr<FileSystem>& fs,
                          const std::string& fname, const FileOptions& file_opts,
                          std::unique_ptr<WritableFileWriter>* writer,
                          IODebugContext* dbg);
@@ -227,22 +227,22 @@ class WritableFileWriter {
 
   // When this Append API is called, if the crc32c_checksum is not provided, we
   // will calculate the checksum internally.
-  IOStatus Append(const Slice& data, uint32_t crc32c_checksum = 0,
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data, uint32_t crc32c_checksum = 0,
                   Env::IOPriority op_rate_limiter_priority = Env::IO_TOTAL);
 
-  IOStatus Pad(const size_t pad_bytes,
+  rocksdb_rs::io_status::IOStatus Pad(const size_t pad_bytes,
                Env::IOPriority op_rate_limiter_priority = Env::IO_TOTAL);
 
-  IOStatus Flush(Env::IOPriority op_rate_limiter_priority = Env::IO_TOTAL);
+  rocksdb_rs::io_status::IOStatus Flush(Env::IOPriority op_rate_limiter_priority = Env::IO_TOTAL);
 
-  IOStatus Close();
+  rocksdb_rs::io_status::IOStatus Close();
 
-  IOStatus Sync(bool use_fsync);
+  rocksdb_rs::io_status::IOStatus Sync(bool use_fsync);
 
   // Sync only the data that was already Flush()ed. Safe to call concurrently
   // with Append() and Flush(). If !writable_file_->IsSyncThreadSafe(),
   // returns NotSupported status.
-  IOStatus SyncWithoutFlush(bool use_fsync);
+  rocksdb_rs::io_status::IOStatus SyncWithoutFlush(bool use_fsync);
 
   uint64_t GetFileSize() const {
     return filesize_.load(std::memory_order_acquire);
@@ -256,7 +256,7 @@ class WritableFileWriter {
     return flushed_size_.load(std::memory_order_acquire);
   }
 
-  IOStatus InvalidateCache(size_t offset, size_t length) {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) {
     return writable_file_->InvalidateCache(offset, length);
   }
 
@@ -285,10 +285,10 @@ class WritableFileWriter {
   }
   void set_seen_error() { seen_error_.store(true, std::memory_order_relaxed); }
 
-  IOStatus AssertFalseAndGetStatusForPrevError() {
+  rocksdb_rs::io_status::IOStatus AssertFalseAndGetStatusForPrevError() {
     // This should only happen if SyncWithoutFlush() was called.
     assert(sync_without_flush_called_);
-    return IOStatus::IOError("Writer has previous error.");
+    return rocksdb_rs::io_status::IOStatus_IOError("Writer has previous error.");
   }
 
  private:
@@ -299,14 +299,14 @@ class WritableFileWriter {
 
   // Used when os buffering is OFF and we are writing
   // DMA such as in Direct I/O mode
-  IOStatus WriteDirect(Env::IOPriority op_rate_limiter_priority);
-  IOStatus WriteDirectWithChecksum(Env::IOPriority op_rate_limiter_priority);
+  rocksdb_rs::io_status::IOStatus WriteDirect(Env::IOPriority op_rate_limiter_priority);
+  rocksdb_rs::io_status::IOStatus WriteDirectWithChecksum(Env::IOPriority op_rate_limiter_priority);
   // Normal write.
-  IOStatus WriteBuffered(const char* data, size_t size,
+  rocksdb_rs::io_status::IOStatus WriteBuffered(const char* data, size_t size,
                          Env::IOPriority op_rate_limiter_priority);
-  IOStatus WriteBufferedWithChecksum(const char* data, size_t size,
+  rocksdb_rs::io_status::IOStatus WriteBufferedWithChecksum(const char* data, size_t size,
                                      Env::IOPriority op_rate_limiter_priority);
-  IOStatus RangeSync(uint64_t offset, uint64_t nbytes);
-  IOStatus SyncInternal(bool use_fsync);
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes);
+  rocksdb_rs::io_status::IOStatus SyncInternal(bool use_fsync);
 };
 }  // namespace rocksdb

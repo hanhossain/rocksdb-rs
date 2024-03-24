@@ -20,17 +20,17 @@
 namespace rocksdb {
 // use_fsync maps to options.use_fsync, which determines the way that
 // the file is synced after copying.
-extern IOStatus CopyFile(FileSystem* fs, const std::string& source,
+extern rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
                          std::unique_ptr<WritableFileWriter>& dest_writer,
                          uint64_t size, bool use_fsync,
                          const std::shared_ptr<IOTracer>& io_tracer,
                          const Temperature temperature);
-extern IOStatus CopyFile(FileSystem* fs, const std::string& source,
+extern rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
                          const std::string& destination, uint64_t size,
                          bool use_fsync,
                          const std::shared_ptr<IOTracer>& io_tracer,
                          const Temperature temperature);
-inline IOStatus CopyFile(const std::shared_ptr<FileSystem>& fs,
+inline rocksdb_rs::io_status::IOStatus CopyFile(const std::shared_ptr<FileSystem>& fs,
                          const std::string& source,
                          const std::string& destination, uint64_t size,
                          bool use_fsync,
@@ -39,10 +39,10 @@ inline IOStatus CopyFile(const std::shared_ptr<FileSystem>& fs,
   return CopyFile(fs.get(), source, destination, size, use_fsync, io_tracer,
                   temperature);
 }
-extern IOStatus CreateFile(FileSystem* fs, const std::string& destination,
+extern rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs, const std::string& destination,
                            const std::string& contents, bool use_fsync);
 
-inline IOStatus CreateFile(const std::shared_ptr<FileSystem>& fs,
+inline rocksdb_rs::io_status::IOStatus CreateFile(const std::shared_ptr<FileSystem>& fs,
                            const std::string& destination,
                            const std::string& contents, bool use_fsync) {
   return CreateFile(fs.get(), destination, contents, use_fsync);
@@ -53,7 +53,7 @@ extern rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_opti
                            const std::string& path_to_sync, const bool force_bg,
                            const bool force_fg);
 
-extern IOStatus GenerateOneFileChecksum(
+extern rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     FileSystem* fs, const std::string& file_path,
     FileChecksumGenFactory* checksum_factory,
     const std::string& requested_checksum_func_name, std::string* file_checksum,
@@ -62,7 +62,7 @@ extern IOStatus GenerateOneFileChecksum(
     std::shared_ptr<IOTracer>& io_tracer, RateLimiter* rate_limiter,
     Env::IOPriority rate_limiter_priority);
 
-inline IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
+inline rocksdb_rs::io_status::IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
                                          SystemClock* clock, IOOptions& opts) {
   if (ro.deadline.count()) {
     std::chrono::microseconds now =
@@ -70,7 +70,7 @@ inline IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
     // Ensure there is atleast 1us available. We don't want to pass a value of
     // 0 as that means no timeout
     if (now >= ro.deadline) {
-      return IOStatus::TimedOut("Deadline exceeded");
+      return rocksdb_rs::io_status::IOStatus_TimedOut("Deadline exceeded");
     }
     opts.timeout = ro.deadline - now;
   }
@@ -83,7 +83,7 @@ inline IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
   opts.rate_limiter_priority = ro.rate_limiter_priority;
   opts.io_activity = ro.io_activity;
 
-  return IOStatus::OK();
+  return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 // Test method to delete the input directory and all of its contents.

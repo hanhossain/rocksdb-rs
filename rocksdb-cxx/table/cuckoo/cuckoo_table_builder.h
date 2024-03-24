@@ -49,7 +49,7 @@ class CuckooTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   // Return non-ok iff some error happens during IO.
-  IOStatus io_status() const override { return io_status_; }
+  rocksdb_rs::io_status::IOStatus io_status() const override { return io_status_.Clone(); }
 
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.
@@ -120,7 +120,7 @@ class CuckooTableBuilder : public TableBuilder {
   // Number of keys that contain value (non-deletion op)
   uint64_t num_values_;
   rocksdb_rs::status::Status status_;
-  IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
   TableProperties properties_;
   const Comparator* ucomp_;
   bool use_module_hash_;

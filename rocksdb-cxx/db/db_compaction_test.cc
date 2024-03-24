@@ -8541,7 +8541,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
 
   // The hash does not match, compaction write fails
   // fault_fs->SetChecksumHandoffFuncType(ChecksumType::kxxHash);
-  // Since the file system returns IOStatus::Corruption, it is an
+  // Since the file system returns IOStatus_Corruption, it is an
   // unrecoverable error.
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
@@ -8579,7 +8579,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoff1) {
   ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // Each write will be similated as corrupted.
-  // Since the file system returns IOStatus::Corruption, it is an
+  // Since the file system returns IOStatus_Corruption, it is an
   // unrecoverable error.
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
@@ -8722,7 +8722,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest1) {
 
   // The hash does not match, compaction write fails
   // fault_fs->SetChecksumHandoffFuncType(ChecksumType::kxxHash);
-  // Since the file system returns IOStatus::Corruption, it is mapped to
+  // Since the file system returns IOStatus_Corruption, it is mapped to
   // kFatalError error.
   ASSERT_OK(Put(Key(0), "value1"));
   ASSERT_OK(Put(Key(2), "value2"));
@@ -8776,7 +8776,7 @@ TEST_F(DBCompactionTest, CompactionWithChecksumHandoffManifest2) {
   ASSERT_TRUE(s.eq(rocksdb_rs::status::Status_OK()));
 
   // Each write will be similated as corrupted.
-  // Since the file system returns IOStatus::Corruption, it is mapped to
+  // Since the file system returns IOStatus_Corruption, it is mapped to
   // kFatalError error.
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   ASSERT_OK(Put(Key(0), "value1"));
