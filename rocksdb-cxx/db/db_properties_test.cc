@@ -1094,7 +1094,7 @@ class CountingUserTblPropCollector : public TablePropertiesCollector {
   }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                    EntryType /*type*/, SequenceNumber /*seq*/,
+                    rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     ++count_;
     return rocksdb_rs::status::Status_OK();
@@ -1137,9 +1137,9 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
   const char* Name() const override { return "CountingDeleteTabPropCollector"; }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                    EntryType type, SequenceNumber /*seq*/,
+                    rocksdb_rs::types::EntryType type, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
-    if (type == EntryType::kEntryDelete) {
+    if (type == rocksdb_rs::types::EntryType::kEntryDelete) {
       num_deletes_++;
     }
     return rocksdb_rs::status::Status_OK();
@@ -1188,7 +1188,7 @@ class BlockCountingTablePropertiesCollector : public TablePropertiesCollector {
   }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                    EntryType /*type*/, SequenceNumber /*seq*/,
+                    rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
     return rocksdb_rs::status::Status_OK();
   }

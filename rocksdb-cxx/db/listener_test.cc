@@ -56,7 +56,7 @@ struct TestPropertiesCollector
   rocksdb_rs::status::Status AddUserKey(
       const rocksdb::Slice& /*key*/,
       const rocksdb::Slice& /*value*/,
-      rocksdb::EntryType /*type*/,
+      rocksdb_rs::types::EntryType /*type*/,
       rocksdb::SequenceNumber /*seq*/,
       uint64_t /*file_size*/) override {
     return rocksdb_rs::status::Status_OK();

@@ -88,17 +88,17 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
   }
 
   rocksdb_rs::status::Status AddUserKey(const Slice& user_key, const Slice& /*value*/,
-                    EntryType type, SequenceNumber /*seq*/,
+                    rocksdb_rs::types::EntryType type, SequenceNumber /*seq*/,
                     uint64_t file_size) override {
     // simply asssume all user keys are not empty.
     if (user_key.data()[0] == 'A') {
       ++count_;
     }
-    if (type == EntryType::kEntryPut) {
+    if (type == rocksdb_rs::types::EntryType::kEntryPut) {
       num_puts_++;
-    } else if (type == EntryType::kEntryDelete) {
+    } else if (type == rocksdb_rs::types::EntryType::kEntryDelete) {
       num_deletes_++;
-    } else if (type == EntryType::kEntrySingleDelete) {
+    } else if (type == rocksdb_rs::types::EntryType::kEntrySingleDelete) {
       num_single_deletes_++;
     }
     if (file_size < file_size_) {

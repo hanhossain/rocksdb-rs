@@ -28,4 +28,18 @@ pub mod ffi {
         kCompaction,
         kRecovery,
     }
+
+    /// User-oriented representation of internal key types.
+    /// Ordering of this enum entries should not change.
+    enum EntryType {
+        kEntryPut,
+        kEntryDelete,
+        kEntrySingleDelete,
+        kEntryMerge,
+        kEntryRangeDeletion,
+        kEntryBlobIndex,
+        kEntryDeleteWithTimestamp,
+        kEntryWideColumnEntity,
+        kEntryOther,
+    }
 }

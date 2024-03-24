@@ -20,20 +20,6 @@ using SequenceNumber = uint64_t;
 
 const SequenceNumber kMinUnCommittedSeq = 1;  // 0 is always committed
 
-// User-oriented representation of internal key types.
-// Ordering of this enum entries should not change.
-enum class EntryType {
-  kEntryPut,
-  kEntryDelete,
-  kEntrySingleDelete,
-  kEntryMerge,
-  kEntryRangeDeletion,
-  kEntryBlobIndex,
-  kEntryDeleteWithTimestamp,
-  kEntryWideColumnEntity,
-  kEntryOther,
-};
-
 enum class WriteStallCause {
   // Beginning of CF-scope write stall causes
   //
