@@ -70,7 +70,7 @@ class MockFS : public FileSystemWrapper {
                                std::unique_ptr<FSRandomAccessFile>* result,
                                IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    rocksdb_rs::io_status::IOStatus s;
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
     result->reset(new MockRandomAccessFile(
         file, support_prefetch_, prefetch_count_, small_buffer_alignment_));

@@ -120,7 +120,7 @@ class CuckooTableBuilder : public TableBuilder {
   // Number of keys that contain value (non-deletion op)
   uint64_t num_values_;
   rocksdb_rs::status::Status status_;
-  rocksdb_rs::io_status::IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
   TableProperties properties_;
   const Comparator* ucomp_;
   bool use_module_hash_;

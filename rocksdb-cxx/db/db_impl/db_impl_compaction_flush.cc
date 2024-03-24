@@ -90,7 +90,7 @@ rocksdb_rs::io_status::IOStatus DBImpl::SyncClosedLogs(JobContext* job_context,
     logs_to_sync.push_back(log.writer);
   }
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (!logs_to_sync.empty()) {
     log_write_mutex_.Unlock();
 
@@ -3436,7 +3436,7 @@ rocksdb_rs::status::Status DBImpl::BackgroundCompaction(bool* made_progress,
     }
   }
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (!c) {
     // Nothing to do
     ROCKS_LOG_BUFFER(log_buffer, "Compaction nothing to do");

@@ -253,7 +253,7 @@ rocksdb_rs::io_status::IOStatus TestFSWritableFile::Close(const IOOptions& optio
     }
   }
   writable_file_opened_ = false;
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (!target_->use_direct_io()) {
     io_s = target_->Append(state_.buffer_, options, dbg);
   }
@@ -315,7 +315,7 @@ rocksdb_rs::io_status::IOStatus TestFSWritableFile::RangeSync(uint64_t offset, u
   uint64_t buf_begin =
       state_.pos_at_last_sync_ < 0 ? 0 : state_.pos_at_last_sync_;
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (sync_limit < buf_begin) {
     return io_s;
   }
@@ -417,8 +417,8 @@ rocksdb_rs::io_status::IOStatus TestFSRandomAccessFile::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus ret;
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus ret = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   FSReadRequest res;
   if (!fs_->IsFilesystemActive()) {
     ret = fs_->GetError();
@@ -873,7 +873,7 @@ void FaultInjectionTestFS::WritableFileAppended(const FSFileState& state) {
 }
 
 rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::DropUnsyncedFileData() {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FSFileState>::iterator it = db_file_state_.begin();
        io_s.ok() && it != db_file_state_.end(); ++it) {
@@ -886,7 +886,7 @@ rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::DropUnsyncedFileData() {
 }
 
 rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::DropRandomUnsyncedFileData(Random* rnd) {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   MutexLock l(&mutex_);
   for (std::map<std::string, FSFileState>::iterator it = db_file_state_.begin();
        io_s.ok() && it != db_file_state_.end(); ++it) {

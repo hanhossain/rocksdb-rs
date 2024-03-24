@@ -5332,8 +5332,8 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
 
   uint64_t new_manifest_file_size = 0;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  rocksdb_rs::io_status::IOStatus io_s;
-  rocksdb_rs::io_status::IOStatus manifest_io_status;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus manifest_io_status = rocksdb_rs::io_status::IOStatus_new();
   {
     FileOptions opt_file_opts = fs_->OptimizeForManifestWrite(file_options_);
     mu->Unlock();

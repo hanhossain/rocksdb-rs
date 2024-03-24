@@ -1646,7 +1646,7 @@ rocksdb_rs::status::Status DBImpl::WriteLevel0TableForRecovery(int job_id, Colum
         range_del_iters.emplace_back(range_del_iter);
       }
 
-      rocksdb_rs::io_status::IOStatus io_s;
+      rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
       TableBuilderOptions tboptions(
           *cfd->ioptions(), mutable_cf_options, cfd->internal_comparator(),
           cfd->int_tbl_prop_collector_factories(),
@@ -1857,7 +1857,7 @@ rocksdb_rs::status::Status DB::OpenAndTrimHistory(
 rocksdb_rs::io_status::IOStatus DBImpl::CreateWAL(uint64_t log_file_num, uint64_t recycle_log_number,
                            size_t preallocate_block_size,
                            log::Writer** new_log) {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<FSWritableFile> lfile;
 
   DBOptions db_options =

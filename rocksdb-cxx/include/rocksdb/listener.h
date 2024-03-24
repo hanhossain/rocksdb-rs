@@ -588,7 +588,7 @@ namespace rocksdb {
         offset(_offset) {
     }
 
-    rocksdb_rs::io_status::IOStatus io_status;
+    rocksdb_rs::io_status::IOStatus io_status = rocksdb_rs::io_status::IOStatus_new();
     FileOperationType operation;
     std::string file_path;
     size_t length;

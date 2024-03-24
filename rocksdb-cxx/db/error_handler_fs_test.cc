@@ -142,7 +142,7 @@ class ErrorHandlerFSListener : public EventListener {
   bool file_creation_started_;
   bool override_bg_error_;
   int file_count_;
-  rocksdb_rs::io_status::IOStatus file_creation_error_;
+  rocksdb_rs::io_status::IOStatus file_creation_error_ = rocksdb_rs::io_status::IOStatus_new();
   rocksdb_rs::status::Status bg_error_;
   rocksdb_rs::status::Status new_bg_error_;
   FaultInjectionTestFS* fault_fs_;

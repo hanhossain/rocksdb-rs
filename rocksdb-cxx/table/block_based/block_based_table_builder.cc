@@ -610,7 +610,7 @@ struct BlockBasedTableBuilder::Rep {
   rocksdb_rs::status::Status status;
   std::mutex io_status_mutex;
   std::atomic<bool> io_status_ok;
-  rocksdb_rs::io_status::IOStatus io_status;
+  rocksdb_rs::io_status::IOStatus io_status = rocksdb_rs::io_status::IOStatus_new();
 };
 
 struct BlockBasedTableBuilder::ParallelCompressionRep {

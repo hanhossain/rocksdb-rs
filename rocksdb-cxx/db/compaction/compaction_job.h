@@ -213,7 +213,7 @@ class CompactionJob {
 
   Env::WriteLifeTimeHint write_hint_;
 
-  rocksdb_rs::io_status::IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
 
   CompactionJobStats* compaction_job_stats_;
 

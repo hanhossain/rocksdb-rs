@@ -1398,7 +1398,7 @@ int DBImpl::FindMinimumEmptyLevelFitting(
 
 rocksdb_rs::status::Status DBImpl::FlushWAL(bool sync) {
   if (manual_wal_flush_) {
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     {
       // We need to lock log_write_mutex_ since logs_ might change concurrently
       InstrumentedMutexLock wl(&log_write_mutex_);
@@ -1475,7 +1475,7 @@ rocksdb_rs::status::Status DBImpl::SyncWAL() {
   TEST_SYNC_POINT("DBWALTest::SyncWALNotWaitWrite:1");
   RecordTick(stats_, WAL_FILE_SYNCED);
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   for (log::Writer* log : logs_to_sync) {
     io_s = log->file()->SyncWithoutFlush(immutable_db_options_.use_fsync);
     if (!io_s.ok()) {

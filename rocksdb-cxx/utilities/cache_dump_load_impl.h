@@ -240,7 +240,7 @@ class FromFileCacheDumpReader : public CacheDumpReader {
 
   rocksdb_rs::io_status::IOStatus Read(size_t len, std::string* data) {
     assert(file_reader_ != nullptr);
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
 
     unsigned int bytes_to_read = static_cast<unsigned int>(len);
     unsigned int to_read = bytes_to_read > kDumpReaderBufferSize

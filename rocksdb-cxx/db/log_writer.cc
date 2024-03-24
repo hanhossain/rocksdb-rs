@@ -54,7 +54,7 @@ rocksdb_rs::io_status::IOStatus Writer::WriteBuffer() {
 }
 
 rocksdb_rs::io_status::IOStatus Writer::Close() {
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (dest_) {
     s = dest_->Close();
     dest_.reset();
@@ -82,7 +82,7 @@ rocksdb_rs::io_status::IOStatus Writer::AddRecord(const Slice& slice,
     compress_start = true;
   }
 
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   do {
     const int64_t leftover = kBlockSize - block_offset_;
     assert(leftover >= 0);

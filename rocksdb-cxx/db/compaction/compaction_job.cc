@@ -657,7 +657,7 @@ rocksdb_rs::status::Status CompactionJob::Run() {
 
   // Check if any thread encountered an error during execution
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   bool wrote_new_blob_files = false;
 
   for (const auto& state : compact_->sub_compact_states) {

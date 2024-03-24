@@ -1639,7 +1639,7 @@ class VersionSet {
   BlockCacheTracer* const block_cache_tracer_;
 
   // Store the IO status when Manifest is written
-  rocksdb_rs::io_status::IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
 
   std::shared_ptr<IOTracer> io_tracer_;
 

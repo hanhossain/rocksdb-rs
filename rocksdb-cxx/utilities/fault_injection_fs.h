@@ -259,7 +259,7 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   virtual rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& path,
                                 const IOOptions& options, uint64_t* disk_free,
                                 IODebugContext* dbg) override {
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     if (!IsFilesystemActive() &&
         error_.subcode() == rocksdb_rs::status::SubCode::kNoSpace) {
       *disk_free = 0;
@@ -533,7 +533,7 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   bool filesystem_active_;    // Record flushes, syncs, writes
   bool filesystem_writable_;  // Bypass FaultInjectionTestFS and go directly
                               // to underlying FS for writable files
-  rocksdb_rs::io_status::IOStatus error_;
+  rocksdb_rs::io_status::IOStatus error_ = rocksdb_rs::io_status::IOStatus_new();
 
   enum ErrorType : int {
     kErrorTypeStatus = 0,

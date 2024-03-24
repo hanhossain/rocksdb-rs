@@ -280,7 +280,7 @@ class PosixFileSystem : public FileSystem {
                                     std::unique_ptr<FSWritableFile>* result,
                                     IODebugContext* /*dbg*/) {
     result->reset();
-    rocksdb_rs::io_status::IOStatus s;
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     int fd = -1;
     int flags = (reopen) ? (O_CREAT | O_APPEND) : (O_CREAT | O_TRUNC);
     // Direct IO mode with O_DIRECT flag or F_NOCAHCE (MAC OSX)
@@ -374,7 +374,7 @@ class PosixFileSystem : public FileSystem {
                              std::unique_ptr<FSWritableFile>* result,
                              IODebugContext* /*dbg*/) override {
     result->reset();
-    rocksdb_rs::io_status::IOStatus s;
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     int fd = -1;
 
     int flags = 0;
@@ -478,7 +478,7 @@ class PosixFileSystem : public FileSystem {
       const std::string& fname,
       std::unique_ptr<MemoryMappedFileBuffer>* result) override {
     int fd = -1;
-    rocksdb_rs::io_status::IOStatus status;
+    rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
     int flags = cloexec_flags(O_RDWR, nullptr);
 
     while (fd < 0) {
@@ -618,7 +618,7 @@ class PosixFileSystem : public FileSystem {
 
   rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname, const IOOptions& /*opts*/,
                       IODebugContext* /*dbg*/) override {
-    rocksdb_rs::io_status::IOStatus result;
+    rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
     if (unlink(fname.c_str()) != 0) {
       result = IOError("while unlink() file", fname, errno);
     }
@@ -805,7 +805,7 @@ class PosixFileSystem : public FileSystem {
   rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* lock, const IOOptions& /*opts*/,
                       IODebugContext* /*dbg*/) override {
     PosixFileLock* my_lock = reinterpret_cast<PosixFileLock*>(lock);
-    rocksdb_rs::io_status::IOStatus result;
+    rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
     mutex_locked_files.Lock();
     // If we are unlocking, then verify that we had locked it earlier,
     // it should already exist in locked_files. Remove it from locked_files.
@@ -893,7 +893,7 @@ class PosixFileSystem : public FileSystem {
     if (fd < 0) {
       return IOError("While open for IsDirectory()", path, errno);
     }
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     struct stat sbuf;
     if (fstat(fd, &sbuf) < 0) {
       io_s = IOError("While doing stat for IsDirectory()", path, errno);

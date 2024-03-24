@@ -17,7 +17,7 @@ class LineFileReader {
  private:
   std::array<char, 8192> buf_;
   SequentialFileReader sfr_;
-  rocksdb_rs::io_status::IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
   const char* buf_begin_ = buf_.data();
   const char* buf_end_ = buf_.data();
   size_t line_number_ = 0;

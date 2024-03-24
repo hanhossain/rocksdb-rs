@@ -727,7 +727,7 @@ class TableFileCreationListener : public EventListener {
     }
 
    private:
-    rocksdb_rs::io_status::IOStatus status_;
+    rocksdb_rs::io_status::IOStatus status_ = rocksdb_rs::io_status::IOStatus_new();
   };
 
   TableFileCreationListener() : last_failure_(rocksdb_rs::status::Status_new()) {

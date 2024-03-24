@@ -23,7 +23,7 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
                   const std::shared_ptr<IOTracer>& io_tracer,
                   const Temperature temperature) {
   FileOptions soptions;
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<SequentialFileReader> src_reader;
 
   {
@@ -72,7 +72,7 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
                   const std::shared_ptr<IOTracer>& io_tracer,
                   const Temperature temperature) {
   FileOptions options;
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<WritableFileWriter> dest_writer;
 
   {
@@ -95,7 +95,7 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
 rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs, const std::string& destination,
                     const std::string& contents, bool use_fsync) {
   const EnvOptions soptions;
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<WritableFileWriter> dest_writer;
 
   std::unique_ptr<FSWritableFile> destfile;
@@ -172,7 +172,7 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
   }
 
   uint64_t size;
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<RandomAccessFileReader> reader;
   {
     std::unique_ptr<FSRandomAccessFile> r_file;

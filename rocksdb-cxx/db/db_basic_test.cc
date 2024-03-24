@@ -4147,7 +4147,7 @@ rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::Read(uint64_t offset, 
                                         IODebugContext* dbg) const {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (deadline.count() || io_timeout.count()) {
     fs_.AssertDeadline(deadline, io_timeout, opts);
   }
@@ -4167,7 +4167,7 @@ rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::ReadAsync(
     void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (deadline.count() || io_timeout.count()) {
     fs_.AssertDeadline(deadline, io_timeout, opts);
   }
@@ -4187,7 +4187,7 @@ rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::MultiRead(FSReadReques
                                              IODebugContext* dbg) {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (deadline.count() || io_timeout.count()) {
     fs_.AssertDeadline(deadline, io_timeout, options);
   }

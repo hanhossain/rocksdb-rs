@@ -798,7 +798,7 @@ struct FSReadRequest {
 
   // Output parameter set by underlying FileSystem that represents status of
   // read request.
-  rocksdb_rs::io_status::IOStatus status;
+  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
 
   // fs_scratch is a data buffer allocated and provided by underlying FileSystem
   // to RocksDB during reads, when FS wants to provide its own buffer with data

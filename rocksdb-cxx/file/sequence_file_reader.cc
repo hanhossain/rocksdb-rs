@@ -37,7 +37,7 @@ rocksdb_rs::io_status::IOStatus SequentialFileReader::Create(
 
 rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(size_t n, Slice* result, char* scratch,
                                     Env::IOPriority rate_limiter_priority) {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (use_direct_io()) {
     //
     //    |-offset_advance-|---bytes returned--|
@@ -185,7 +185,7 @@ class ReadaheadSequentialFile : public FSSequentialFile {
     }
     n -= cached_len;
 
-    rocksdb_rs::io_status::IOStatus s;
+    rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     // Read-ahead only make sense if we have some slack left after reading
     if (n + alignment_ >= readahead_size_) {
       s = file_->Read(n, opts, result, scratch + cached_len, dbg);

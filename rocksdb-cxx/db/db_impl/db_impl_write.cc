@@ -400,7 +400,7 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
   last_batch_group_size_ =
       write_thread_.EnterAsBatchGroupLeader(&w, &write_group);
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   rocksdb_rs::status::Status pre_release_cb_status = rocksdb_rs::status::Status_new();
   if (status.ok()) {
     // TODO: this use of operator bool on `tracer_` can avoid unnecessary lock
@@ -729,7 +729,7 @@ rocksdb_rs::status::Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_
 
     PERF_TIMER_STOP(write_pre_and_post_process_time);
 
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
 
     if (w.status.ok() && !write_options.disableWAL) {
       PERF_TIMER_GUARD(write_wal_time);
@@ -1351,7 +1351,7 @@ rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup
                             bool need_log_sync, bool need_log_dir_sync,
                             SequenceNumber sequence,
                             LogFileNumberSize& log_file_number_size) {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   assert(!two_write_queues_);
   assert(!write_group.leader->disable_wal);
   // Same holds for all in the batch group
@@ -1445,7 +1445,7 @@ rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup
 rocksdb_rs::io_status::IOStatus DBImpl::ConcurrentWriteToWAL(
     const WriteThread::WriteGroup& write_group, uint64_t* log_used,
     SequenceNumber* last_sequence, size_t seq_inc) {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
 
   assert(two_write_queues_ || immutable_db_options_.unordered_write);
   assert(!write_group.leader->disable_wal);
@@ -2098,7 +2098,7 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
   const ReadOptions read_options;
   log::Writer* new_log = nullptr;
   MemTable* new_mem = nullptr;
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
 
   // Recoverable state is persisted in WAL. After memtable switch, WAL might
   // be deleted, so we write the state to memtable to be persisted as well.

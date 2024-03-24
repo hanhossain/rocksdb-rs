@@ -87,7 +87,7 @@ class ErrorHandler {
   rocksdb_rs::status::Status recovery_error_;
   // A separate IO Status variable used to record any IO errors during
   // the recovery process. At the same time, recovery_error_ is also set.
-  rocksdb_rs::io_status::IOStatus recovery_io_error_;
+  rocksdb_rs::io_status::IOStatus recovery_io_error_ = rocksdb_rs::io_status::IOStatus_new();
   // The condition variable used with db_mutex during auto resume for time
   // wait.
   InstrumentedCondVar cv_;

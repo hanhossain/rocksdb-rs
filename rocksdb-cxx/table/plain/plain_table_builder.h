@@ -123,7 +123,7 @@ class PlainTableBuilder : public TableBuilder {
   uint32_t bloom_bits_per_key_;
   size_t huge_page_tlb_size_;
   rocksdb_rs::status::Status status_;
-  rocksdb_rs::io_status::IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
   TableProperties properties_;
   PlainTableKeyEncoder encoder_;
 

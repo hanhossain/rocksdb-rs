@@ -600,7 +600,7 @@ class BackupEngineImpl {
     std::string checksum_hex;
     std::string db_id;
     std::string db_session_id;
-    rocksdb_rs::io_status::IOStatus io_status;
+    rocksdb_rs::io_status::IOStatus io_status = rocksdb_rs::io_status::IOStatus_new();
     Temperature expected_src_temperature = Temperature::kUnknown;
     Temperature current_src_temperature = Temperature::kUnknown;
   };
@@ -1437,7 +1437,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
           }
           Log(options_.info_log, "add file for backup %s", fname.c_str());
           uint64_t size_bytes = 0;
-          rocksdb_rs::io_status::IOStatus io_st;
+          rocksdb_rs::io_status::IOStatus io_st = rocksdb_rs::io_status::IOStatus_new();
           if (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile) {
             io_st = db_fs_->GetFileSize(src_dirname + "/" + fname, io_options_,
                                         &size_bytes, nullptr);
@@ -1543,7 +1543,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
   }
   ROCKS_LOG_INFO(options_.info_log,
                  "dispatch files for backup done, wait for finish.");
-  rocksdb_rs::io_status::IOStatus item_io_status;
+  rocksdb_rs::io_status::IOStatus item_io_status = rocksdb_rs::io_status::IOStatus_new();
   for (auto& item : backup_items_to_finish) {
     item.result.wait();
     auto result = item.result.get();
@@ -1936,7 +1936,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::RestoreDBFromBackup(
     restore_file_infos.emplace_back(this, &*file_info_shared);
   }
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::vector<RestoreAfterCopyOrCreateWorkItem> restore_items_to_finish;
   std::string temporary_current_file;
   std::string final_current_file;
@@ -2005,7 +2005,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::RestoreDBFromBackup(
     restore_items_to_finish.push_back(
         std::move(after_copy_or_create_work_item));
   }
-  rocksdb_rs::io_status::IOStatus item_io_status;
+  rocksdb_rs::io_status::IOStatus item_io_status = rocksdb_rs::io_status::IOStatus_new();
   for (auto& item : restore_items_to_finish) {
     item.result.wait();
     auto result = item.result.get();
@@ -2136,7 +2136,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CopyOrCreateFile(
     Temperature dst_temperature, uint64_t* bytes_toward_next_callback,
     uint64_t* size, std::string* checksum_hex) {
   assert(src.empty() != contents.empty());
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<FSWritableFile> dst_file;
   std::unique_ptr<FSSequentialFile> src_file;
   FileOptions dst_file_options;
@@ -2847,7 +2847,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::BackupMeta::AddFile(
 }
 
 rocksdb_rs::io_status::IOStatus BackupEngineImpl::BackupMeta::Delete(bool delete_meta) {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   for (const auto& file : files_) {
     --file->refs;  // decrease refcount
   }
@@ -3207,7 +3207,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::BackupMeta::StoreToFile(
   // Need schema_version >= 2 for TEST_BackupMetaSchemaOptions
   assert(schema_version >= 2 || schema_test_options == nullptr);
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<FSWritableFile> backup_meta_file;
   FileOptions file_options;
   file_options.use_mmap_writes = false;

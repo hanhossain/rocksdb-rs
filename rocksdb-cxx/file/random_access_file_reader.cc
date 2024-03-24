@@ -95,7 +95,7 @@ rocksdb_rs::io_status::IOStatus RandomAccessFileReader::Read(
     scratch[0]++;
   }
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   uint64_t elapsed = 0;
   size_t alignment = file_->GetRequiredBufferAlignment();
   bool is_aligned = false;
@@ -300,7 +300,7 @@ rocksdb_rs::io_status::IOStatus RandomAccessFileReader::MultiRead(
     }
   }
 
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   uint64_t elapsed = 0;
   {
     StopWatch sw(clock_, stats_, hist_type_,
@@ -453,7 +453,7 @@ rocksdb_rs::io_status::IOStatus RandomAccessFileReader::ReadAsync(
     FSReadRequest& req, const IOOptions& opts,
     std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
     void** io_handle, IOHandleDeleter* del_fn, AlignedBuf* aligned_buf) {
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   // Create a callback and populate info.
   auto read_async_callback =
       std::bind(&RandomAccessFileReader::ReadAsyncCallback, this,

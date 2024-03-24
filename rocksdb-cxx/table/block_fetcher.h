@@ -112,7 +112,7 @@ class BlockFetcher {
   const PersistentCacheOptions& cache_options_;
   MemoryAllocator* memory_allocator_;
   MemoryAllocator* memory_allocator_compressed_;
-  rocksdb_rs::io_status::IOStatus io_status_;
+  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
   Slice slice_;
   char* used_buf_ = nullptr;
   AlignedBuf direct_io_buf_;

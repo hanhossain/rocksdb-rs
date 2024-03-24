@@ -150,7 +150,7 @@ rocksdb_rs::io_status::IOStatus EncryptedWritableFile::Append(const Slice& data,
     // so that the next two lines can be replaced with buf.Append().
     memmove(buf.BufferStart(), data.data(), data.size());
     buf.Size(data.size());
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
       io_s = rocksdb_rs::io_status::IOStatus_new(
@@ -177,7 +177,7 @@ rocksdb_rs::io_status::IOStatus EncryptedWritableFile::PositionedAppend(const Sl
     buf.AllocateNewBuffer(data.size());
     memmove(buf.BufferStart(), data.data(), data.size());
     buf.Size(data.size());
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
       io_s = rocksdb_rs::io_status::IOStatus_new(
@@ -282,7 +282,7 @@ rocksdb_rs::io_status::IOStatus EncryptedRandomRWFile::Write(uint64_t offset, co
     buf.AllocateNewBuffer(data.size());
     memmove(buf.BufferStart(), data.data(), data.size());
     buf.Size(data.size());
-    rocksdb_rs::io_status::IOStatus io_s;
+    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
     {
       PERF_TIMER_GUARD(encrypt_data_nanos);
       io_s = rocksdb_rs::io_status::IOStatus_new(

@@ -164,7 +164,7 @@ class MemFile {
   rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& /*options*/,
                 Slice* result, char* scratch, IODebugContext* /*dbg*/) const {
     {
-      rocksdb_rs::io_status::IOStatus s;
+      rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
       TEST_SYNC_POINT_CALLBACK("MemFile::Read:IOStatus", &s);
       if (!s.ok()) {
         // with sync point only

@@ -229,7 +229,7 @@ rocksdb_rs::io_status::IOStatus PosixSequentialFile::Read(size_t n, const IOOpti
                                    Slice* result, char* scratch,
                                    IODebugContext* /*dbg*/) {
   assert(result != nullptr && !use_direct_io());
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   size_t r = 0;
   do {
     clearerr(file_);
@@ -259,7 +259,7 @@ rocksdb_rs::io_status::IOStatus PosixSequentialFile::PositionedRead(uint64_t off
   assert(IsSectorAligned(n, GetRequiredBufferAlignment()));
   assert(IsSectorAligned(scratch, GetRequiredBufferAlignment()));
 
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   ssize_t r = -1;
   size_t left = n;
   char* ptr = scratch;
@@ -571,7 +571,7 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::Read(uint64_t offset, siz
     assert(IsSectorAligned(n, GetRequiredBufferAlignment()));
     assert(IsSectorAligned(scratch, GetRequiredBufferAlignment()));
   }
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   ssize_t r = -1;
   size_t left = n;
   char* ptr = scratch;
@@ -779,7 +779,7 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::MultiRead(FSReadRequest* 
 rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::Prefetch(uint64_t offset, size_t n,
                                          const IOOptions& /*opts*/,
                                          IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (!use_direct_io()) {
     ssize_t r = 0;
 #ifdef OS_LINUX
@@ -956,7 +956,7 @@ rocksdb_rs::io_status::IOStatus PosixMmapReadableFile::Read(uint64_t offset, siz
                                      const IOOptions& /*opts*/, Slice* result,
                                      char* /*scratch*/,
                                      IODebugContext* /*dbg*/) const {
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (offset > length_) {
     *result = Slice();
     return IOError("While mmap read offset " + std::to_string(offset) +
@@ -1150,7 +1150,7 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::Append(const Slice& data, const I
 
 rocksdb_rs::io_status::IOStatus PosixMmapFile::Close(const IOOptions& /*opts*/,
                               IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   size_t unused = limit_ - dst_;
 
   s = UnmapCurrentRegion();
@@ -1330,7 +1330,7 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::PositionedAppend(const Slice&
 
 rocksdb_rs::io_status::IOStatus PosixWritableFile::Truncate(uint64_t size, const IOOptions& /*opts*/,
                                      IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   int r = ftruncate(fd_, size);
   if (r < 0) {
     s = IOError("While ftruncate file to size " + std::to_string(size),
@@ -1343,7 +1343,7 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::Truncate(uint64_t size, const
 
 rocksdb_rs::io_status::IOStatus PosixWritableFile::Close(const IOOptions& /*opts*/,
                                   IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   size_t block_size;
   size_t last_allocated_block;

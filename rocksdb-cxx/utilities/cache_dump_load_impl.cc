@@ -249,7 +249,7 @@ rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSeco
   // Step 2: read the header
   // TODO: we need to check the cache dump format version and RocksDB version
   // after the header is read out.
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   DumpUnit dump_unit;
   std::string data;
   io_s = ReadHeader(&data, &dump_unit);

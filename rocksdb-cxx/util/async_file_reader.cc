@@ -49,7 +49,7 @@ void AsyncFileReader::Wait() {
   }
   ReadAwaiter* waiter;
   std::vector<void*> io_handles;
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   io_handles.reserve(num_reqs_);
   waiter = head_;
   do {

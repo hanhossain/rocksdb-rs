@@ -57,7 +57,7 @@ rocksdb_rs::io_status::IOStatus CompactionOutputs::WriterSyncClose(const rocksdb
                                             SystemClock* clock,
                                             Statistics* statistics,
                                             bool use_fsync) {
-  rocksdb_rs::io_status::IOStatus io_s;
+  rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (input_status.ok()) {
     StopWatch sw(clock, statistics, COMPACTION_OUTFILE_SYNC_MICROS);
     io_s = file_writer_->Sync(use_fsync);

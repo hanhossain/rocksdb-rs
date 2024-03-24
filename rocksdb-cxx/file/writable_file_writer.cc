@@ -50,7 +50,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Append(const Slice& data, ui
 
   const char* src = data.data();
   size_t left = data.size();
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   pending_sync_ = true;
 
   TEST_KILL_RANDOM_WITH_WEIGHT("WritableFileWriter::Append:0", REDUCE_ODDS2);
@@ -216,7 +216,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Pad(const size_t pad_bytes,
 
 rocksdb_rs::io_status::IOStatus WritableFileWriter::Close() {
   if (seen_error()) {
-    rocksdb_rs::io_status::IOStatus interim;
+    rocksdb_rs::io_status::IOStatus interim = rocksdb_rs::io_status::IOStatus_new();
     if (writable_file_.get() != nullptr) {
       interim = writable_file_->Close(IOOptions(), nullptr);
       writable_file_.reset();
@@ -239,10 +239,10 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Close() {
     return rocksdb_rs::io_status::IOStatus_OK();
   }
 
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   s = Flush();  // flush cache to OS
 
-  rocksdb_rs::io_status::IOStatus interim;
+  rocksdb_rs::io_status::IOStatus interim = rocksdb_rs::io_status::IOStatus_new();
   IOOptions io_options;
   io_options.rate_limiter_priority = writable_file_->GetIOPriority();
   // In direct I/O mode we write whole pages so
@@ -327,7 +327,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Flush(Env::IOPriority op_rat
     return AssertFalseAndGetStatusForPrevError();
   }
 
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   TEST_KILL_RANDOM_WITH_WEIGHT("WritableFileWriter::Flush:0", REDUCE_ODDS2);
 
   if (buf_.CurrentSize() > 0) {
@@ -475,7 +475,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncWithoutFlush(bool use_fs
 
 rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncInternal(bool use_fsync) {
   // Caller is supposed to check seen_error_
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   IOSTATS_TIMER_GUARD(fsync_nanos);
   TEST_SYNC_POINT("WritableFileWriter::SyncInternal:0");
   auto prev_perf_level = GetPerfLevel();
@@ -547,7 +547,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteBuffered(
     return AssertFalseAndGetStatusForPrevError();
   }
 
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   assert(!use_direct_io());
   const char* src = data;
   size_t left = size;
@@ -641,7 +641,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteBufferedWithChecksum(
     return AssertFalseAndGetStatusForPrevError();
   }
 
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   assert(!use_direct_io());
   assert(perform_data_verification_ && buffered_data_with_checksum_);
   const char* src = data;
@@ -764,7 +764,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteDirect(
   }
 
   assert(use_direct_io());
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   const size_t alignment = buf_.Alignment();
   assert((next_write_offset_ % alignment) == 0);
 
@@ -867,7 +867,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteDirectWithChecksum(
 
   assert(use_direct_io());
   assert(perform_data_verification_ && buffered_data_with_checksum_);
-  rocksdb_rs::io_status::IOStatus s;
+  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   const size_t alignment = buf_.Alignment();
   assert((next_write_offset_ % alignment) == 0);
 
