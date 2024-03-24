@@ -20,12 +20,6 @@ using SequenceNumber = uint64_t;
 
 const SequenceNumber kMinUnCommittedSeq = 1;  // 0 is always committed
 
-enum class BlobFileCreationReason {
-  kFlush,
-  kCompaction,
-  kRecovery,
-};
-
 // User-oriented representation of internal key types.
 // Ordering of this enum entries should not change.
 enum class EntryType {

@@ -22,4 +22,10 @@ pub mod ffi {
         kRecovery,
         kMisc,
     }
+
+    enum BlobFileCreationReason {
+        kFlush,
+        kCompaction,
+        kRecovery,
+    }
 }
