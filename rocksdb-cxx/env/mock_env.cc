@@ -546,7 +546,7 @@ class TestMemLogger : public Logger {
       assert(p <= limit);
       const size_t write_size = p - base;
 
-      rocksdb_rs::status::Status s = file_->Append(Slice(base, write_size), options_, dbg_);
+      rocksdb_rs::status::Status s = file_->Append(Slice(base, write_size), options_, dbg_).status();
       if (s.ok()) {
         flush_pending_ = true;
         log_size_ += write_size;

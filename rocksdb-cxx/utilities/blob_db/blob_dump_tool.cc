@@ -35,17 +35,17 @@ rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, Displa
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   const auto fs = FileSystem::Default();
   IOOptions io_opts;
-  s = fs->FileExists(filename, io_opts, nullptr);
+  s = fs->FileExists(filename, io_opts, nullptr).status();
   if (!s.ok()) {
     return s;
   }
   uint64_t file_size = 0;
-  s = fs->GetFileSize(filename, io_opts, &file_size, nullptr);
+  s = fs->GetFileSize(filename, io_opts, &file_size, nullptr).status();
   if (!s.ok()) {
     return s;
   }
   std::unique_ptr<FSRandomAccessFile> file;
-  s = fs->NewRandomAccessFile(filename, FileOptions(), &file, nullptr);
+  s = fs->NewRandomAccessFile(filename, FileOptions(), &file, nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -103,7 +103,7 @@ rocksdb_rs::status::Status BlobDumpTool::Read(uint64_t offset, size_t size, Slic
     buffer_.reset(new char[buffer_size_]);
   }
   rocksdb_rs::status::Status s = reader_->Read(IOOptions(), offset, size, result, buffer_.get(),
-                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
   if (!s.ok()) {
     return s;
   }

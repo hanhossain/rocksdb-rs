@@ -43,7 +43,7 @@ rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
   assert(file_reader_ != nullptr);
   rocksdb_rs::status::Status s = file_reader_->Read(IOOptions(), offset_, kTraceMetadataSize,
                                 &result_, buffer_, nullptr,
-                                Env::IO_TOTAL /* rate_limiter_priority */);
+                                Env::IO_TOTAL /* rate_limiter_priority */).status();
   if (!s.ok()) {
     return s;
   }
@@ -68,7 +68,7 @@ rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
       bytes_to_read > kBufferSize ? kBufferSize : bytes_to_read;
   while (to_read > 0) {
     s = file_reader_->Read(IOOptions(), offset_, to_read, &result_, buffer_,
-                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
     if (!s.ok()) {
       return s;
     }
@@ -97,7 +97,7 @@ rocksdb_rs::status::Status FileTraceWriter::Close() {
 }
 
 rocksdb_rs::status::Status FileTraceWriter::Write(const Slice& data) {
-  return file_writer_->Append(data);
+  return file_writer_->Append(data).status();
 }
 
 uint64_t FileTraceWriter::GetFileSize() { return file_writer_->GetFileSize(); }
@@ -108,7 +108,7 @@ rocksdb_rs::status::Status NewFileTraceReader(Env* env, const EnvOptions& env_op
   std::unique_ptr<RandomAccessFileReader> file_reader;
   rocksdb_rs::status::Status s = RandomAccessFileReader::Create(
       env->GetFileSystem(), trace_filename, FileOptions(env_options),
-      &file_reader, nullptr);
+      &file_reader, nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -122,7 +122,7 @@ rocksdb_rs::status::Status NewFileTraceWriter(Env* env, const EnvOptions& env_op
   std::unique_ptr<WritableFileWriter> file_writer;
   rocksdb_rs::status::Status s = WritableFileWriter::Create(env->GetFileSystem(), trace_filename,
                                         FileOptions(env_options), &file_writer,
-                                        nullptr);
+                                        nullptr).status();
   if (!s.ok()) {
     return s;
   }

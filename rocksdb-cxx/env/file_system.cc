@@ -118,7 +118,7 @@ rocksdb_rs::io_status::IOStatus FileSystem::NewLogger(const std::string& fname,
   std::unique_ptr<FSWritableFile> writable_file;
   const rocksdb_rs::io_status::IOStatus status = NewWritableFile(fname, options, &writable_file, dbg);
   if (!status.ok()) {
-    return status;
+    return status.Clone();
   }
 
   *result = std::make_shared<EnvLogger>(std::move(writable_file), fname,
@@ -202,8 +202,7 @@ rocksdb_rs::io_status::IOStatus ReadFileToString(FileSystem* fs, const std::stri
   FileOptions soptions;
   data->clear();
   std::unique_ptr<FSSequentialFile> file;
-  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new(
-      fs->NewSequentialFile(fname, soptions, &file, nullptr));
+  rocksdb_rs::io_status::IOStatus s = fs->NewSequentialFile(fname, soptions, &file, nullptr);
   if (!s.ok()) {
     return s;
   }

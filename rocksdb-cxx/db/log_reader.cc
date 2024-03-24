@@ -365,7 +365,7 @@ void Reader::UnmarkEOFInternal() {
   // content left until EOF to read.
   rocksdb_rs::status::Status status =
       file_->Read(remaining, &read_buffer, backing_store_ + eof_offset_,
-                  Env::IO_TOTAL /* rate_limiter_priority */);
+                  Env::IO_TOTAL /* rate_limiter_priority */).status();
 
   size_t added = read_buffer.size();
   end_of_buffer_offset_ += added;
@@ -416,7 +416,7 @@ bool Reader::ReadMore(size_t* drop_size, int* error) {
     // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
     // content left until EOF to read.
     rocksdb_rs::status::Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
-                                Env::IO_TOTAL /* rate_limiter_priority */);
+                                Env::IO_TOTAL /* rate_limiter_priority */).status();
     TEST_SYNC_POINT_CALLBACK("LogReader::ReadMore:AfterReadFile", &status);
     end_of_buffer_offset_ += buffer_.size();
     if (!status.ok()) {
@@ -792,7 +792,7 @@ bool FragmentBufferedReader::TryReadMore(size_t* drop_size, int* error) {
     // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
     // content left until EOF to read.
     rocksdb_rs::status::Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
-                                Env::IO_TOTAL /* rate_limiter_priority */);
+                                Env::IO_TOTAL /* rate_limiter_priority */).status();
     end_of_buffer_offset_ += buffer_.size();
     if (!status.ok()) {
       buffer_.clear();

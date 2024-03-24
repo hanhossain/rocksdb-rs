@@ -396,7 +396,7 @@ struct BlockBasedTableBuilder::Rep {
 
   rocksdb_rs::io_status::IOStatus CopyIOStatus() {
     std::lock_guard<std::mutex> lock(io_status_mutex);
-    return io_status;
+    return io_status.Clone();
   }
 
   // Never erase an existing status that is not OK.
@@ -419,10 +419,10 @@ struct BlockBasedTableBuilder::Rep {
       // case but since it's unlikely that s is not OK, we take this cost
       // to be simplicity.
       std::lock_guard<std::mutex> lock(io_status_mutex);
-      io_status = ios;
+      io_status = ios.Clone();
       io_status_ok.store(false, std::memory_order_relaxed);
     }
-    SetStatus(ios);
+    SetStatus(ios.status());
   }
 
   Rep(const BlockBasedTableOptions& table_opt, const TableBuilderOptions& tbo,
@@ -1298,7 +1298,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
   {
     rocksdb_rs::io_status::IOStatus io_s = r->file->Append(block_contents);
     if (!io_s.ok()) {
-      r->SetIOStatus(io_s);
+      r->SetIOStatus(io_s.Clone());
       return;
     }
   }
@@ -1324,7 +1324,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
   {
     rocksdb_rs::io_status::IOStatus io_s = r->file->Append(Slice(trailer.data(), trailer.size()));
     if (!io_s.ok()) {
-      r->SetIOStatus(io_s);
+      r->SetIOStatus(io_s.Clone());
       return;
     }
   }
@@ -1363,7 +1363,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
     if (io_s.ok()) {
       r->set_offset(r->get_offset() + pad_bytes);
     } else {
-      r->SetIOStatus(io_s);
+      r->SetIOStatus(io_s.Clone());
       return;
     }
   }
@@ -1761,7 +1761,7 @@ void BlockBasedTableBuilder::WriteFooter(BlockHandle& metaindex_block_handle,
   if (ios.ok()) {
     r->set_offset(r->get_offset() + footer.GetSlice().size());
   } else {
-    r->SetIOStatus(ios);
+    r->SetIOStatus(ios.Clone());
   }
 }
 
@@ -1970,7 +1970,7 @@ rocksdb_rs::status::Status BlockBasedTableBuilder::Finish() {
     WriteFooter(metaindex_block_handle, index_block_handle);
   }
   r->state = Rep::State::kClosed;
-  r->SetStatus(r->CopyIOStatus());
+  r->SetStatus(r->CopyIOStatus().status());
   rocksdb_rs::status::Status ret_status = r->CopyStatus();
   assert(!ret_status.ok() || io_status().ok());
   r->tail_size = r->offset - r->props.tail_start_offset;

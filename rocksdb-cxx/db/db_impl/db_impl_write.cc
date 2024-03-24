@@ -506,7 +506,7 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
         last_sequence = versions_->FetchAddLastAllocatedSequence(seq_inc);
       }
     }
-    status = io_s;
+    status = io_s.status();
     assert(last_sequence != kMaxSequenceNumber);
     const SequenceNumber current_sequence = last_sequence + 1;
     last_sequence += seq_inc;
@@ -747,7 +747,7 @@ rocksdb_rs::status::Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_
           WriteToWAL(wal_write_group, log_context.writer, log_used,
                      log_context.need_log_sync, log_context.need_log_dir_sync,
                      current_sequence, log_file_number_size);
-      w.status = io_s;
+      w.status = io_s.status();
     }
 
     if (!io_s.ok()) {
@@ -1007,7 +1007,7 @@ rocksdb_rs::status::Status DBImpl::WriteImplWALOnly(
   if (!write_options.disableWAL) {
     rocksdb_rs::io_status::IOStatus io_s =
         ConcurrentWriteToWAL(write_group, log_used, &last_sequence, seq_inc);
-    status = io_s;
+    status = io_s.status();
     // last_sequence may not be set if there is an error
     // This error checking and return is moved up to avoid using uninitialized
     // last_sequence.
@@ -1118,7 +1118,7 @@ void DBImpl::IOStatusCheck(const rocksdb_rs::io_status::IOStatus& io_status) {
       io_status.IsIOFenced()) {
     mutex_.Lock();
     // Maybe change the return status to void?
-    error_handler_.SetBGError(io_status, BackgroundErrorReason::kWriteCallback);
+    error_handler_.SetBGError(io_status.status(), BackgroundErrorReason::kWriteCallback);
     mutex_.Unlock();
   } else {
     // Force writable file to be continue writable.
@@ -2145,7 +2145,7 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
     io_s = CreateWAL(new_log_number, recycle_log_number, preallocate_block_size,
                      &new_log);
     if (s.ok()) {
-      s = io_s;
+      s = io_s.status();
     }
   }
   if (s.ok()) {
@@ -2182,7 +2182,7 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
       }
       io_s = cur_log_writer->WriteBuffer();
       if (s.ok()) {
-        s = io_s;
+        s = io_s.status();
       }
       if (!s.ok()) {
         ROCKS_LOG_WARN(immutable_db_options_.info_log,
@@ -2210,7 +2210,7 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
     // We may have lost data from the WritableFileBuffer in-memory buffer for
     // the current log, so treat it as a fatal error and set bg_error
     if (!io_s.ok()) {
-      error_handler_.SetBGError(io_s, BackgroundErrorReason::kMemTable);
+      error_handler_.SetBGError(io_s.status(), BackgroundErrorReason::kMemTable);
     } else {
       error_handler_.SetBGError(s, BackgroundErrorReason::kMemTable);
     }
@@ -2250,7 +2250,7 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
       s = versions_->LogAndApplyToDefaultColumnFamily(
           read_options, &wal_deletion, &mutex_, directories_.GetDbDir());
       if (!s.ok() && versions_->io_status().IsIOError()) {
-        s.copy_from(error_handler_.SetBGError(versions_->io_status(),
+        s.copy_from(error_handler_.SetBGError(versions_->io_status().status(),
                                       BackgroundErrorReason::kManifestWrite));
       }
       if (!s.ok()) {

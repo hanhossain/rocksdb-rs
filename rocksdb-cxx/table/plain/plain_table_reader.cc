@@ -282,7 +282,7 @@ rocksdb_rs::status::Status PlainTableReader::MmapDataIfNeeded() {
     // Get mmapped memory.
     return file_info_.file->Read(
         IOOptions(), 0, static_cast<size_t>(file_size_), &file_info_.file_data,
-        nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+        nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
   }
   return rocksdb_rs::status::Status_OK();
 }

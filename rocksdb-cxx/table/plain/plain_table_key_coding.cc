@@ -216,7 +216,7 @@ bool PlainTableFileReader::ReadNonMmap(uint32_t file_offset, uint32_t len,
   rocksdb_rs::status::Status s =
       file_info_->file->Read(IOOptions(), file_offset, size_to_read,
                              &read_result, new_buffer->buf.get(), nullptr,
-                             Env::IO_TOTAL /* rate_limiter_priority */);
+                             Env::IO_TOTAL /* rate_limiter_priority */).status();
   if (!s.ok()) {
     status_.copy_from(s);
     return false;

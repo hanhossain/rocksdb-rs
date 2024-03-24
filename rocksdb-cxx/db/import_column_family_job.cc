@@ -114,7 +114,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
 
       if (hardlink_files) {
         status = fs_->LinkFile(path_outside_db, static_cast<std::string>(path_inside_db), IOOptions(),
-                               nullptr);
+                               nullptr).status();
         if (status.IsNotSupported()) {
           // Original file is on a different FS, use copy instead of hard
           // linking
@@ -128,7 +128,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
       if (!hardlink_files) {
         status =
             CopyFile(fs_.get(), path_outside_db, static_cast<std::string>(path_inside_db), 0,
-                     db_options_.use_fsync, io_tracer_, Temperature::kUnknown);
+                     db_options_.use_fsync, io_tracer_, Temperature::kUnknown).status();
       }
       if (!status.ok()) {
         break;
@@ -153,7 +153,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
         if (!s.ok()) {
           ROCKS_LOG_WARN(db_options_.info_log,
                          "AddFile() clean up for file %s failed : %s",
-                         f.internal_file_path.c_str(), s.ToString().c_str());
+                         f.internal_file_path.c_str(), s.ToString()->c_str());
         }
       }
     }
@@ -265,7 +265,7 @@ void ImportColumnFamilyJob::Cleanup(const rocksdb_rs::status::Status& status) {
         if (!s.ok()) {
           ROCKS_LOG_WARN(db_options_.info_log,
                          "AddFile() clean up for file %s failed : %s",
-                         f.internal_file_path.c_str(), s.ToString().c_str());
+                         f.internal_file_path.c_str(), s.ToString()->c_str());
         }
       }
     }
@@ -280,7 +280,7 @@ void ImportColumnFamilyJob::Cleanup(const rocksdb_rs::status::Status& status) {
               db_options_.info_log,
               "%s was added to DB successfully but failed to remove original "
               "file link : %s",
-              f.external_file_path.c_str(), s.ToString().c_str());
+              f.external_file_path.c_str(), s.ToString()->c_str());
         }
       }
     }
@@ -298,7 +298,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
   } else {
     // Get external file size
     status = fs_->GetFileSize(external_file, IOOptions(),
-                              &file_to_import->file_size, nullptr);
+                              &file_to_import->file_size, nullptr).status();
     if (!status.ok()) {
       return status;
     }
@@ -313,7 +313,7 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
   std::unique_ptr<RandomAccessFileReader> sst_file_reader;
 
   status =
-      fs_->NewRandomAccessFile(external_file, env_options_, &sst_file, nullptr);
+      fs_->NewRandomAccessFile(external_file, env_options_, &sst_file, nullptr).status();
   if (!status.ok()) {
     return status;
   }

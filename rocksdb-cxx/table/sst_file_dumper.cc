@@ -87,9 +87,9 @@ rocksdb_rs::status::Status SstFileDumper::GetTableReader(const std::string& file
   uint64_t file_size = 0;
   FileOptions fopts = soptions_;
   fopts.temperature = file_temp_;
-  rocksdb_rs::status::Status s = fs->NewRandomAccessFile(file_path, fopts, &file, nullptr);
+  rocksdb_rs::status::Status s = fs->NewRandomAccessFile(file_path, fopts, &file, nullptr).status();
   if (s.ok()) {
-    s = fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr);
+    s = fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr).status();
   }
 
   // check empty file
@@ -226,7 +226,7 @@ rocksdb_rs::status::Status SstFileDumper::CalculateCompressedTableSize(
   std::unique_ptr<WritableFileWriter> dest_writer;
   rocksdb_rs::status::Status s =
       WritableFileWriter::Create(env->GetFileSystem(), testFileName,
-                                 FileOptions(soptions_), &dest_writer, nullptr);
+                                 FileOptions(soptions_), &dest_writer, nullptr).status();
   if (!s.ok()) {
     return s;
   }

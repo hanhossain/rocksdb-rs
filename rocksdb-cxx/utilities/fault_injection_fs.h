@@ -329,13 +329,13 @@ class FaultInjectionTestFS : public FileSystemWrapper {
       bool active, rocksdb_rs::io_status::IOStatus error = rocksdb_rs::io_status::IOStatus_Corruption("Not active")) {
     filesystem_active_ = active;
     if (!active) {
-      error_ = error;
+      error_ = error.Clone();
     }
   }
   void SetFilesystemActive(
       bool active, rocksdb_rs::io_status::IOStatus error = rocksdb_rs::io_status::IOStatus_Corruption("Not active")) {
     MutexLock l(&mutex_);
-    SetFilesystemActiveNoLock(active, error);
+    SetFilesystemActiveNoLock(active, error.Clone());
   }
   void SetFilesystemDirectWritable(bool writable) {
     MutexLock l(&mutex_);
@@ -343,11 +343,11 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   }
   void AssertNoOpenFile() { assert(open_managed_files_.empty()); }
 
-  rocksdb_rs::io_status::IOStatus GetError() { return error_; }
+  rocksdb_rs::io_status::IOStatus GetError() { return error_.Clone(); }
 
   void SetFileSystemIOError(rocksdb_rs::io_status::IOStatus io_error) {
     MutexLock l(&mutex_);
-    error_ = io_error;
+    error_ = io_error.Clone();
   }
 
   // To simulate the data corruption before data is written in FS
@@ -425,7 +425,7 @@ class FaultInjectionTestFS : public FileSystemWrapper {
                            const std::vector<rocksdb_rs::types::FileType>& types) {
     MutexLock l(&mutex_);
     Random tmp_rand(seed);
-    error_ = error;
+    error_ = error.Clone();
     write_error_rand_ = tmp_rand;
     write_error_one_in_ = one_in;
     inject_for_all_file_types_ = inject_for_all_file_types;

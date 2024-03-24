@@ -436,7 +436,7 @@ rocksdb_rs::io_status::IOStatus TestFSRandomAccessFile::ReadAsync(
     }
   }
   if (!ret.ok()) {
-    res.status = ret;
+    res.status = ret.Clone();
     cb(res, cb_arg);
   }
   return s;
@@ -585,7 +585,7 @@ rocksdb_rs::io_status::IOStatus FaultInjectionTestFS::ReopenWritableFile(
   } else if (exists_s.ok()) {
     exists = true;
   } else {
-    io_s = exists_s;
+    io_s = exists_s.Clone();
     exists = false;
   }
 

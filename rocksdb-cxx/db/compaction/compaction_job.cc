@@ -663,7 +663,7 @@ rocksdb_rs::status::Status CompactionJob::Run() {
   for (const auto& state : compact_->sub_compact_states) {
     if (!state.status.ok()) {
       status.copy_from(state.status);
-      io_s = state.io_status;
+      io_s = state.io_status.Clone();
       break;
     }
 
@@ -673,7 +673,7 @@ rocksdb_rs::status::Status CompactionJob::Run() {
   }
 
   if (io_status_.ok()) {
-    io_status_ = io_s;
+    io_status_ = io_s.Clone();
   }
   if (status.ok()) {
     constexpr IODebugContext* dbg = nullptr;
@@ -692,10 +692,10 @@ rocksdb_rs::status::Status CompactionJob::Run() {
     }
   }
   if (io_status_.ok()) {
-    io_status_ = io_s;
+    io_status_ = io_s.Clone();
   }
   if (status.ok()) {
-    status = io_s;
+    status = io_s.status();
   }
   if (status.ok()) {
     thread_pool.clear();
@@ -832,7 +832,7 @@ rocksdb_rs::status::Status CompactionJob::Install(const MutableCFOptions& mutabl
     status = InstallCompactionResults(mutable_cf_options);
   }
   if (!versions_->io_status().ok()) {
-    io_status_ = versions_->io_status();
+    io_status_ = versions_->io_status().Clone();
   }
 
   VersionStorageInfo::LevelSummaryStorage tmp;
@@ -1530,10 +1530,10 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
   }
 
   if (s.ok()) {
-    s = io_s;
+    s = io_s.status();
   }
   if (sub_compact->io_status.ok()) {
-    sub_compact->io_status = io_s;
+    sub_compact->io_status = io_s.Clone();
   }
 
   TableProperties tp;
@@ -1767,9 +1767,9 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   rocksdb_rs::io_status::IOStatus io_s = NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
-  s = io_s;
+  s = io_s.status();
   if (sub_compact->io_status.ok()) {
-    sub_compact->io_status = io_s;
+    sub_compact->io_status = io_s.Clone();
   }
   if (!s.ok()) {
     ROCKS_LOG_ERROR(

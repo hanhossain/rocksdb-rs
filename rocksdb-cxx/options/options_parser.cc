@@ -68,7 +68,7 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_opt
   std::unique_ptr<FSWritableFile> wf;
 
   rocksdb_rs::status::Status s =
-      fs->NewWritableFile(file_name, FileOptions(), &wf, nullptr);
+      fs->NewWritableFile(file_name, FileOptions(), &wf, nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -84,34 +84,34 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_opt
       "]\n"
       "  rocksdb_version=" +
       std::to_string(ROCKSDB_MAJOR) + "." + std::to_string(ROCKSDB_MINOR) +
-      "." + std::to_string(ROCKSDB_PATCH) + "\n");
+      "." + std::to_string(ROCKSDB_PATCH) + "\n").status();
   if (s.ok()) {
     s = writable->Append(
         "  options_file_version=" + std::to_string(ROCKSDB_OPTION_FILE_MAJOR) +
-        "." + std::to_string(ROCKSDB_OPTION_FILE_MINOR) + "\n");
+        "." + std::to_string(ROCKSDB_OPTION_FILE_MINOR) + "\n").status();
   }
   if (s.ok()) {
     s = writable->Append("\n[" + opt_section_titles[kOptionSectionDBOptions] +
-                         "]\n  ");
+                         "]\n  ").status();
   }
 
   if (s.ok()) {
     s = GetStringFromDBOptions(config_options, db_opt, &options_file_content);
   }
   if (s.ok()) {
-    s = writable->Append(options_file_content + "\n");
+    s = writable->Append(options_file_content + "\n").status();
   }
 
   for (size_t i = 0; s.ok() && i < cf_opts.size(); ++i) {
     // CFOptions section
     s = writable->Append("\n[" + opt_section_titles[kOptionSectionCFOptions] +
-                         " \"" + EscapeOptionString(cf_names[i]) + "\"]\n  ");
+                         " \"" + EscapeOptionString(cf_names[i]) + "\"]\n  ").status();
     if (s.ok()) {
       s = GetStringFromColumnFamilyOptions(config_options, cf_opts[i],
                                            &options_file_content);
     }
     if (s.ok()) {
-      s = writable->Append(options_file_content + "\n");
+      s = writable->Append(options_file_content + "\n").status();
     }
     // TableOptions section
     auto* tf = cf_opts[i].table_factory.get();
@@ -119,22 +119,22 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_opt
       if (s.ok()) {
         s = writable->Append(
             "[" + opt_section_titles[kOptionSectionTableOptions] + tf->Name() +
-            " \"" + EscapeOptionString(cf_names[i]) + "\"]\n  ");
+            " \"" + EscapeOptionString(cf_names[i]) + "\"]\n  ").status();
       }
       if (s.ok()) {
         options_file_content.clear();
         s = tf->GetOptionString(config_options, &options_file_content);
       }
       if (s.ok()) {
-        s = writable->Append(options_file_content + "\n");
+        s = writable->Append(options_file_content + "\n").status();
       }
     }
   }
   if (s.ok()) {
-    s = writable->Sync(true /* use_fsync */);
+    s = writable->Sync(true /* use_fsync */).status();
   }
   if (s.ok()) {
-    s = writable->Close();
+    s = writable->Close().status();
   }
   TEST_SYNC_POINT("PersistRocksDBOptions:written");
   if (s.ok()) {
@@ -259,7 +259,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const ConfigOptions& conf
 
   std::unique_ptr<FSSequentialFile> seq_file;
   rocksdb_rs::status::Status s = fs->NewSequentialFile(file_name, FileOptions(), &seq_file,
-                                   nullptr);
+                                   nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -309,7 +309,7 @@ rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const ConfigOptions& conf
       opt_map.insert({name, value});
     }
   }
-  s = lf_reader.GetStatus();
+  s = lf_reader.GetStatus().status();
   if (!s.ok()) {
     return s;
   }

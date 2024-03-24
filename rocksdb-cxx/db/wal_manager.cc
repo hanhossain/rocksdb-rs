@@ -468,7 +468,7 @@ rocksdb_rs::status::Status WalManager::ReadFirstLine(const std::string& fname,
 
   std::unique_ptr<FSSequentialFile> file;
   rocksdb_rs::status::Status status = fs_->NewSequentialFile(
-      fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr);
+      fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr).status();
   std::unique_ptr<SequentialFileReader> file_reader(
       new SequentialFileReader(std::move(file), fname, io_tracer_));
 

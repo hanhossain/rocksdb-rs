@@ -64,7 +64,7 @@ rocksdb_rs::status::Status DeleteScheduler::DeleteFile(const std::string& file_p
     // Rate limiting is disabled or trash size makes up more than
     // max_trash_db_ratio_ (default 25%) of the total DB size
     TEST_SYNC_POINT("DeleteScheduler::DeleteFile");
-    rocksdb_rs::status::Status s = fs_->DeleteFile(file_path, IOOptions(), nullptr);
+    rocksdb_rs::status::Status s = fs_->DeleteFile(file_path, IOOptions(), nullptr).status();
     if (s.ok()) {
       s = sst_file_manager_->OnDeleteFile(file_path);
       ROCKS_LOG_INFO(info_log_,
@@ -87,7 +87,7 @@ rocksdb_rs::status::Status DeleteScheduler::DeleteFile(const std::string& file_p
   if (!s.ok()) {
     ROCKS_LOG_ERROR(info_log_, "Failed to mark %s as trash -- %s",
                     file_path.c_str(), s.ToString()->c_str());
-    s = fs_->DeleteFile(file_path, IOOptions(), nullptr);
+    s = fs_->DeleteFile(file_path, IOOptions(), nullptr).status();
     if (s.ok()) {
       s = sst_file_manager_->OnDeleteFile(file_path);
       ROCKS_LOG_INFO(info_log_, "Deleted file %s immediately",
@@ -146,7 +146,7 @@ rocksdb_rs::status::Status DeleteScheduler::CleanupDirectory(Env* env, SstFileMa
   IOOptions io_opts;
   io_opts.do_not_recurse = true;
   s = fs->GetChildren(path, io_opts, &files_in_path,
-                      /*IODebugContext*=*/nullptr);
+                      /*IODebugContext*=*/nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -196,10 +196,10 @@ rocksdb_rs::status::Status DeleteScheduler::MarkAsTrash(const std::string& file_
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   InstrumentedMutexLock l(&file_move_mu_);
   while (true) {
-    s = fs_->FileExists(*trash_file, IOOptions(), nullptr);
+    s = fs_->FileExists(*trash_file, IOOptions(), nullptr).status();
     if (s.IsNotFound()) {
       // We found a path for our file in trash
-      s = fs_->RenameFile(file_path, *trash_file, IOOptions(), nullptr);
+      s = fs_->RenameFile(file_path, *trash_file, IOOptions(), nullptr).status();
       break;
     } else if (s.ok()) {
       // Name conflict, generate new random suffix
@@ -304,7 +304,7 @@ rocksdb_rs::status::Status DeleteScheduler::DeleteTrashFile(const std::string& p
                                         uint64_t* deleted_bytes,
                                         bool* is_complete) {
   uint64_t file_size;
-  rocksdb_rs::status::Status s = fs_->GetFileSize(path_in_trash, IOOptions(), &file_size, nullptr);
+  rocksdb_rs::status::Status s = fs_->GetFileSize(path_in_trash, IOOptions(), &file_size, nullptr).status();
   *is_complete = true;
   TEST_SYNC_POINT("DeleteScheduler::DeleteTrashFile:DeleteFile");
   if (s.ok()) {
@@ -316,18 +316,18 @@ rocksdb_rs::status::Status DeleteScheduler::DeleteTrashFile(const std::string& p
       // the file is now in trash and no hardlink is supposed to create
       // to trash files by RocksDB.
       rocksdb_rs::status::Status my_status = fs_->NumFileLinks(path_in_trash, IOOptions(),
-                                           &num_hard_links, nullptr);
+                                           &num_hard_links, nullptr).status();
       if (my_status.ok()) {
         if (num_hard_links == 1) {
           std::unique_ptr<FSWritableFile> wf;
           my_status = fs_->ReopenWritableFile(path_in_trash, FileOptions(), &wf,
-                                              nullptr);
+                                              nullptr).status();
           if (my_status.ok()) {
             my_status = wf->Truncate(file_size - bytes_max_delete_chunk_,
-                                     IOOptions(), nullptr);
+                                     IOOptions(), nullptr).status();
             if (my_status.ok()) {
               TEST_SYNC_POINT("DeleteScheduler::DeleteTrashFile:Fsync");
-              my_status = wf->Fsync(IOOptions(), nullptr);
+              my_status = wf->Fsync(IOOptions(), nullptr).status();
             }
           }
           if (my_status.ok()) {
@@ -356,16 +356,16 @@ rocksdb_rs::status::Status DeleteScheduler::DeleteTrashFile(const std::string& p
     }
 
     if (need_full_delete) {
-      s = fs_->DeleteFile(path_in_trash, IOOptions(), nullptr);
+      s = fs_->DeleteFile(path_in_trash, IOOptions(), nullptr).status();
       if (!dir_to_sync.empty()) {
         std::unique_ptr<FSDirectory> dir_obj;
         if (s.ok()) {
-          s = fs_->NewDirectory(dir_to_sync, IOOptions(), &dir_obj, nullptr);
+          s = fs_->NewDirectory(dir_to_sync, IOOptions(), &dir_obj, nullptr).status();
         }
         if (s.ok()) {
           s = dir_obj->FsyncWithDirOptions(
               IOOptions(), nullptr,
-              DirFsyncOptions(DirFsyncOptions::FsyncReason::kFileDeleted));
+              DirFsyncOptions(DirFsyncOptions::FsyncReason::kFileDeleted)).status();
           TEST_SYNC_POINT_CALLBACK(
               "DeleteScheduler::DeleteTrashFile::AfterSyncDir",
               reinterpret_cast<void*>(const_cast<std::string*>(&dir_to_sync)));

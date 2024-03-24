@@ -81,7 +81,7 @@ rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(size_t n, Slice* resu
       if (ShouldNotifyListeners()) {
         auto finish_ts = FileOperationInfo::FinishNow();
         NotifyOnFileReadFinish(orig_offset, tmp.size(), start_ts, finish_ts,
-                               io_s);
+                               io_s.status());
       }
       buf.Size(buf.CurrentSize() + tmp.size());
       if (!io_s.ok() || tmp.size() < allowed) {
@@ -124,7 +124,7 @@ rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(size_t n, Slice* resu
       if (ShouldNotifyListeners()) {
         auto finish_ts = FileOperationInfo::FinishNow();
         size_t offset = offset_.fetch_add(tmp.size());
-        NotifyOnFileReadFinish(offset, tmp.size(), start_ts, finish_ts, io_s);
+        NotifyOnFileReadFinish(offset, tmp.size(), start_ts, finish_ts, io_s.status());
       }
       read += tmp.size();
       if (!io_s.ok() || tmp.size() < allowed) {

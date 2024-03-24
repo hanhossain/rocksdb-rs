@@ -97,7 +97,7 @@ inline bool BlockFetcher::TryGetFromPrefetchBuffer() {
       }
     }
     if (!io_s.ok()) {
-      io_status_ = io_s;
+      io_status_ = io_s.Clone();
       return true;
     }
   }
@@ -120,7 +120,7 @@ inline bool BlockFetcher::TryGetSerializedBlockFromPersistentCache() {
       assert(!io_status_.ok());
       ROCKS_LOG_INFO(ioptions_.logger,
                      "Error reading from persistent cache. %s",
-                     io_status_.ToString().c_str());
+                     io_status_.ToString()->c_str());
     }
   }
   return false;
@@ -250,7 +250,7 @@ rocksdb_rs::io_status::IOStatus BlockFetcher::ReadBlockContents() {
   }
   if (TryGetFromPrefetchBuffer()) {
     if (!io_status_.ok()) {
-      return io_status_;
+      return io_status_.Clone();
     }
   } else if (!TryGetSerializedBlockFromPersistentCache()) {
     IOOptions opts;
@@ -307,7 +307,7 @@ rocksdb_rs::io_status::IOStatus BlockFetcher::ReadBlockContents() {
 
     PERF_COUNTER_ADD(block_read_byte, block_size_with_trailer_);
     if (!io_status_.ok()) {
-      return io_status_;
+      return io_status_.Clone();
     }
 
     if (slice_.size() != block_size_with_trailer_) {
@@ -322,7 +322,7 @@ rocksdb_rs::io_status::IOStatus BlockFetcher::ReadBlockContents() {
     if (io_status_.ok()) {
       InsertCompressedBlockToPersistentCacheIfNeeded();
     } else {
-      return io_status_;
+      return io_status_.Clone();
     }
   }
 
@@ -344,7 +344,7 @@ rocksdb_rs::io_status::IOStatus BlockFetcher::ReadBlockContents() {
 
   InsertUncompressedBlockToPersistentCacheIfNeeded();
 
-  return io_status_;
+  return io_status_.Clone();
 }
 
 rocksdb_rs::io_status::IOStatus BlockFetcher::ReadAsyncBlockContents() {
@@ -372,7 +372,7 @@ rocksdb_rs::io_status::IOStatus BlockFetcher::ReadAsyncBlockContents() {
         got_from_prefetch_buffer_ = true;
         ProcessTrailerIfPresent();
         if (!io_status_.ok()) {
-          return io_status_;
+          return io_status_.Clone();
         }
         used_buf_ = const_cast<char*>(slice_.data());
 
@@ -393,14 +393,14 @@ rocksdb_rs::io_status::IOStatus BlockFetcher::ReadAsyncBlockContents() {
           GetBlockContents();
         }
         InsertUncompressedBlockToPersistentCacheIfNeeded();
-        return io_status_;
+        return io_status_.Clone();
       }
     }
     // Fallback to sequential reading of data blocks in case of io_s returns
     // error or for_compaction_is true.
     return ReadBlockContents();
   }
-  return io_status_;
+  return io_status_.Clone();
 }
 
 }  // namespace rocksdb

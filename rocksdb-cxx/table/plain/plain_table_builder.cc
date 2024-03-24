@@ -197,7 +197,7 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
   // notify property collectors
   NotifyCollectTableCollectorsOnAdd(
       key, value, offset_, table_properties_collectors_, ioptions_.logger);
-  status_ = io_status_;
+  status_ = io_status_.status();
 }
 
 rocksdb_rs::status::Status PlainTableBuilder::Finish() {
@@ -237,7 +237,7 @@ rocksdb_rs::status::Status PlainTableBuilder::Finish() {
           WriteBlock(bloom_finish_result, file_, &offset_, &bloom_block_handle);
 
       if (!io_status_.ok()) {
-        status_ = io_status_;
+        status_ = io_status_.status();
         return status_.Clone();
       }
       meta_index_builer.Add(BloomBlockBuilder::kBloomBlock, bloom_block_handle);
@@ -250,7 +250,7 @@ rocksdb_rs::status::Status PlainTableBuilder::Finish() {
         WriteBlock(index_finish_result, file_, &offset_, &index_block_handle);
 
     if (!io_status_.ok()) {
-      status_ = io_status_;
+      status_ = io_status_.status();
       return status_.Clone();
     }
 
@@ -274,7 +274,7 @@ rocksdb_rs::status::Status PlainTableBuilder::Finish() {
   rocksdb_rs::io_status::IOStatus s = WriteBlock(property_block_builder.Finish(), file_, &offset_,
                           &property_block_handle);
   if (!s.ok()) {
-    return static_cast<rocksdb_rs::status::Status>(s);
+    return s.status();
   }
   meta_index_builer.Add(kPropertiesBlockName, property_block_handle);
 
@@ -283,7 +283,7 @@ rocksdb_rs::status::Status PlainTableBuilder::Finish() {
   io_status_ = WriteBlock(meta_index_builer.Finish(), file_, &offset_,
                           &metaindex_block_handle);
   if (!io_status_.ok()) {
-    status_ = io_status_;
+    status_ = io_status_.status();
     return status_.Clone();
   }
 
@@ -296,7 +296,7 @@ rocksdb_rs::status::Status PlainTableBuilder::Finish() {
   if (io_status_.ok()) {
     offset_ += footer.GetSlice().size();
   }
-  status_ = io_status_;
+  status_ = io_status_.status();
   return status_.Clone();
 }
 

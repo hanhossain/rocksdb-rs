@@ -148,9 +148,9 @@ rocksdb_rs::status::Status BuildTable(
 #endif  // !NDEBUG
       rocksdb_rs::io_status::IOStatus io_s = NewWritableFile(fs, fname, &file, file_options);
       assert(s.ok());
-      s = io_s;
+      s = io_s.status();
       if (io_status->ok()) {
-        *io_status = io_s;
+        *io_status = io_s.Clone();
       }
       if (!s.ok()) {
         EventHelpers::LogAndNotifyTableFileCreationFinished(
@@ -366,7 +366,7 @@ rocksdb_rs::status::Status BuildTable(
     }
 
     if (s.ok()) {
-      s = *io_status;
+      s = io_status->status();
     }
 
     // TODO(yuzhangyu): handle the key copy in the blob when ts should be
@@ -430,7 +430,7 @@ rocksdb_rs::status::Status BuildTable(
     constexpr IODebugContext* dbg = nullptr;
 
     if (table_file_created) {
-      rocksdb_rs::status::Status ignored = fs->DeleteFile(fname, IOOptions(), dbg);
+      rocksdb_rs::status::Status ignored = fs->DeleteFile(fname, IOOptions(), dbg).status();
     }
 
     assert(blob_file_additions || blob_file_paths.empty());

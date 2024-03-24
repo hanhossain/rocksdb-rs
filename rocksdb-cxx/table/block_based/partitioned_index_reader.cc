@@ -172,7 +172,7 @@ rocksdb_rs::status::Status PartitionIndexReader::CacheDependencies(
         0 /*num_reads_*/, 0 /*num_file_reads_for_auto_readahead*/);
     IOOptions opts;
     {
-      rocksdb_rs::status::Status s = rep->file->PrepareIOOptions(ro, opts);
+      rocksdb_rs::status::Status s = rep->file->PrepareIOOptions(ro, opts).status();
       if (s.ok()) {
         s = prefetch_buffer->Prefetch(opts, rep->file.get(), prefetch_off,
                                       static_cast<size_t>(prefetch_len),

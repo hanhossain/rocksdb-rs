@@ -61,6 +61,14 @@ class RandomAccessFileReader {
     }
   }
 
+  void NotifyOnFileReadFinish(
+      uint64_t offset, size_t length,
+      const FileOperationInfo::StartTimePoint& start_ts,
+      const FileOperationInfo::FinishTimePoint& finish_ts,
+      const rocksdb_rs::io_status::IOStatus& status) const {
+    NotifyOnFileReadFinish(offset, length, start_ts, finish_ts, status.status());
+  }
+
   void NotifyOnIOError(const rocksdb_rs::io_status::IOStatus& io_status, FileOperationType operation,
                        const std::string& file_path, size_t length,
                        uint64_t offset) const {

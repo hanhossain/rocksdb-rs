@@ -186,7 +186,7 @@ class PosixClock : public SystemClock {
   rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
     time_t ret = time(nullptr);
     if (ret == (time_t)-1) {
-      return IOError("GetCurrentTime", "", errno);
+      return IOError("GetCurrentTime", "", errno).status();
     }
     *unix_time = (int64_t)ret;
     return rocksdb_rs::status::Status_OK();
@@ -337,9 +337,9 @@ class PosixEnv : public CompositeEnv {
         return rocksdb_rs::status::Status_InvalidArgument(errnoStr(errno).c_str());
       } else if (errno == ENAMETOOLONG) {
         return IOError("GetHostName", std::string(name, strnlen(name, max_len)),
-                       errno);
+                       errno).status();
       } else {
-        return IOError("GetHostName", "", errno);
+        return IOError("GetHostName", "", errno).status();
       }
     }
     return rocksdb_rs::status::Status_OK();

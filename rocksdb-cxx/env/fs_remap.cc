@@ -23,7 +23,7 @@ rocksdb_rs::status::Status RemapFileSystem::RegisterDbPaths(const std::vector<st
   for (auto& path : paths) {
     auto status_and_enc_path = EncodePathWithNewBasename(path);
     if (!status_and_enc_path.first.ok()) {
-      return status_and_enc_path.first;
+      return status_and_enc_path.first.status();
     }
     encoded_paths.emplace_back(status_and_enc_path.second);
   }
@@ -37,7 +37,7 @@ rocksdb_rs::status::Status RemapFileSystem::UnregisterDbPaths(
   for (auto& path : paths) {
     auto status_and_enc_path = EncodePathWithNewBasename(path);
     if (!status_and_enc_path.first.ok()) {
-      return status_and_enc_path.first;
+      return status_and_enc_path.first.status();
     }
     encoded_paths.emplace_back(status_and_enc_path.second);
   }
@@ -49,7 +49,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::NewSequentialFile(
     std::unique_ptr<FSSequentialFile>* result, IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::NewSequentialFile(status_and_enc_path.second,
                                               options, result, dbg);
@@ -60,7 +60,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::NewRandomAccessFile(
     std::unique_ptr<FSRandomAccessFile>* result, IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::NewRandomAccessFile(status_and_enc_path.second,
                                                 options, result, dbg);
@@ -71,7 +71,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::NewWritableFile(
     std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::NewWritableFile(status_and_enc_path.second, options,
                                             result, dbg);
@@ -83,11 +83,11 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::ReuseWritableFile(
     IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   auto status_and_old_enc_path = EncodePath(old_fname);
   if (!status_and_old_enc_path.first.ok()) {
-    return status_and_old_enc_path.first;
+    return status_and_old_enc_path.first.Clone();
   }
   return FileSystemWrapper::ReuseWritableFile(status_and_old_enc_path.second,
                                               status_and_old_enc_path.second,
@@ -99,7 +99,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::NewRandomRWFile(
     std::unique_ptr<FSRandomRWFile>* result, IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::NewRandomRWFile(status_and_enc_path.second, options,
                                             result, dbg);
@@ -129,7 +129,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::NewDirectory(const std::string&
           return FSDirectoryWrapper::FsyncWithDirOptions(options, dbg,
                                                          mapped_options);
         } else {
-          return status_and_enc_path.first;
+          return status_and_enc_path.first.Clone();
         }
       }
     }
@@ -140,7 +140,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::NewDirectory(const std::string&
 
   auto status_and_enc_path = EncodePathWithNewBasename(dir);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   rocksdb_rs::io_status::IOStatus ios = FileSystemWrapper::NewDirectory(status_and_enc_path.second,
                                                  options, result, dbg);
@@ -155,7 +155,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::FileExists(const std::string& f
                                      IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::FileExists(status_and_enc_path.second, options,
                                        dbg);
@@ -167,7 +167,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::GetChildren(const std::string& 
                                       IODebugContext* dbg) {
   auto status_and_enc_path = EncodePath(dir);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::GetChildren(status_and_enc_path.second, options,
                                         result, dbg);
@@ -178,7 +178,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::GetChildrenFileAttributes(
     std::vector<FileAttributes>* result, IODebugContext* dbg) {
   auto status_and_enc_path = EncodePath(dir);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::GetChildrenFileAttributes(
       status_and_enc_path.second, options, result, dbg);
@@ -189,7 +189,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::DeleteFile(const std::string& f
                                      IODebugContext* dbg) {
   auto status_and_enc_path = EncodePath(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::DeleteFile(status_and_enc_path.second, options,
                                        dbg);
@@ -200,7 +200,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::CreateDir(const std::string& di
                                     IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(dirname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::CreateDir(status_and_enc_path.second, options, dbg);
 }
@@ -210,7 +210,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::CreateDirIfMissing(const std::s
                                              IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(dirname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::CreateDirIfMissing(status_and_enc_path.second,
                                                options, dbg);
@@ -221,7 +221,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::DeleteDir(const std::string& di
                                     IODebugContext* dbg) {
   auto status_and_enc_path = EncodePath(dirname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::DeleteDir(status_and_enc_path.second, options, dbg);
 }
@@ -232,7 +232,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::GetFileSize(const std::string& 
                                       IODebugContext* dbg) {
   auto status_and_enc_path = EncodePath(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::GetFileSize(status_and_enc_path.second, options,
                                         file_size, dbg);
@@ -244,7 +244,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::GetFileModificationTime(const s
                                                   IODebugContext* dbg) {
   auto status_and_enc_path = EncodePath(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::GetFileModificationTime(status_and_enc_path.second,
                                                     options, file_mtime, dbg);
@@ -255,7 +255,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::IsDirectory(const std::string& 
                                       IODebugContext* dbg) {
   auto status_and_enc_path = EncodePath(path);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::IsDirectory(status_and_enc_path.second, options,
                                         is_dir, dbg);
@@ -271,11 +271,11 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::RenameFile(const std::string& s
       const rocksdb_rs::io_status::IOStatus& s = status_and_src_enc_path.first;
       status_and_src_enc_path.first = rocksdb_rs::io_status::IOStatus_PathNotFound(s.ToString());
     }
-    return status_and_src_enc_path.first;
+    return status_and_src_enc_path.first.Clone();
   }
   auto status_and_dest_enc_path = EncodePathWithNewBasename(dest);
   if (!status_and_dest_enc_path.first.ok()) {
-    return status_and_dest_enc_path.first;
+    return status_and_dest_enc_path.first.Clone();
   }
   return FileSystemWrapper::RenameFile(status_and_src_enc_path.second,
                                        status_and_dest_enc_path.second, options,
@@ -288,11 +288,11 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::LinkFile(const std::string& src
                                    IODebugContext* dbg) {
   auto status_and_src_enc_path = EncodePath(src);
   if (!status_and_src_enc_path.first.ok()) {
-    return status_and_src_enc_path.first;
+    return status_and_src_enc_path.first.Clone();
   }
   auto status_and_dest_enc_path = EncodePathWithNewBasename(dest);
   if (!status_and_dest_enc_path.first.ok()) {
-    return status_and_dest_enc_path.first;
+    return status_and_dest_enc_path.first.Clone();
   }
   return FileSystemWrapper::LinkFile(status_and_src_enc_path.second,
                                      status_and_dest_enc_path.second, options,
@@ -304,7 +304,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::LockFile(const std::string& fna
                                    IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   // FileLock subclasses may store path (e.g., PosixFileLock stores it). We
   // can skip stripping the chroot directory from this path because callers
@@ -319,7 +319,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::NewLogger(const std::string& fn
                                     IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(fname);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::NewLogger(status_and_enc_path.second, options,
                                       result, dbg);
@@ -331,7 +331,7 @@ rocksdb_rs::io_status::IOStatus RemapFileSystem::GetAbsolutePath(const std::stri
                                           IODebugContext* dbg) {
   auto status_and_enc_path = EncodePathWithNewBasename(db_path);
   if (!status_and_enc_path.first.ok()) {
-    return status_and_enc_path.first;
+    return status_and_enc_path.first.Clone();
   }
   return FileSystemWrapper::GetAbsolutePath(status_and_enc_path.second, options,
                                             output_path, dbg);

@@ -215,7 +215,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       // alive in the subsequent processings.
       std::vector<std::string> files;
       rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
-          path, io_opts, &files, /*IODebugContext*=*/nullptr);
+          path, io_opts, &files, /*IODebugContext*=*/nullptr).status();
       for (const std::string& file : files) {
         uint64_t number;
         rocksdb_rs::types::FileType type;
@@ -242,7 +242,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       std::vector<std::string> log_files;
       rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.wal_dir, io_opts, &log_files,
-          /*IODebugContext*=*/nullptr);
+          /*IODebugContext*=*/nullptr).status();
       for (const std::string& log_file : log_files) {
         job_context->full_scan_candidate_files.emplace_back(
             log_file, immutable_db_options_.wal_dir);
@@ -255,7 +255,7 @@ void DBImpl::FindObsoleteFiles(JobContext* job_context, bool force,
       std::vector<std::string> info_log_files;
       rocksdb_rs::status::Status s = immutable_db_options_.fs->GetChildren(
           immutable_db_options_.db_log_dir, io_opts, &info_log_files,
-          /*IODebugContext*=*/nullptr);
+          /*IODebugContext*=*/nullptr).status();
       for (std::string& log_file : info_log_files) {
         job_context->full_scan_candidate_files.emplace_back(
             log_file, immutable_db_options_.db_log_dir);
@@ -929,7 +929,7 @@ rocksdb_rs::status::Status DBImpl::SetupDBId(bool read_only, RecoveryContext* re
   // Check for the IDENTITY file and create it if not there or
   // broken or not matching manifest
   std::string db_id_in_file;
-  s = fs_->FileExists(static_cast<std::string>(IdentityFileName(dbname_)), IOOptions(), nullptr);
+  s = fs_->FileExists(static_cast<std::string>(IdentityFileName(dbname_)), IOOptions(), nullptr).status();
   if (s.ok()) {
     s = GetDbIdentityFromIdentityFile(&db_id_in_file);
     if (s.ok() && !db_id_in_file.empty()) {

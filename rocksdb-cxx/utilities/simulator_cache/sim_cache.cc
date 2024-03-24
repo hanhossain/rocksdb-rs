@@ -45,7 +45,7 @@ class CacheActivityLogger {
 
     // Open log file
     status = WritableFileWriter::Create(env->GetFileSystem(), activity_log_file,
-                                        file_opts, &file_writer_, nullptr);
+                                        file_opts, &file_writer_, nullptr).status();
     if (!status.ok()) {
       return status;
     }
@@ -72,7 +72,7 @@ class CacheActivityLogger {
     oss << "LOOKUP - " << key.ToString(true) << std::endl;
 
     MutexLock l(&mutex_);
-    rocksdb_rs::status::Status s = file_writer_->Append(oss.str());
+    rocksdb_rs::status::Status s = file_writer_->Append(oss.str()).status();
     if (!s.ok() && bg_status_.ok()) {
       bg_status_.copy_from(s);
     }
@@ -92,7 +92,7 @@ class CacheActivityLogger {
     // line format: "ADD - <KEY> - <KEY-SIZE>"
     oss << "ADD - " << key.ToString(true) << " - " << size << std::endl;
     MutexLock l(&mutex_);
-    rocksdb_rs::status::Status s = file_writer_->Append(oss.str());
+    rocksdb_rs::status::Status s = file_writer_->Append(oss.str()).status();
     if (!s.ok() && bg_status_.ok()) {
       bg_status_.copy_from(s);
     }
@@ -125,7 +125,7 @@ class CacheActivityLogger {
     }
 
     activity_logging_enabled_.store(false);
-    rocksdb_rs::status::Status s = file_writer_->Close();
+    rocksdb_rs::status::Status s = file_writer_->Close().status();
     if (!s.ok() && bg_status_.ok()) {
       bg_status_.copy_from(s);
     }

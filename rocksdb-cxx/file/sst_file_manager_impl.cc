@@ -61,7 +61,7 @@ void SstFileManagerImpl::Close() {
 
 rocksdb_rs::status::Status SstFileManagerImpl::OnAddFile(const std::string& file_path) {
   uint64_t file_size;
-  rocksdb_rs::status::Status s = fs_->GetFileSize(file_path, IOOptions(), &file_size, nullptr);
+  rocksdb_rs::status::Status s = fs_->GetFileSize(file_path, IOOptions(), &file_size, nullptr).status();
   if (s.ok()) {
     MutexLock l(&mu_);
     OnAddFileImpl(file_path, file_size);
@@ -176,7 +176,7 @@ bool SstFileManagerImpl::EnoughRoomForCompaction(
         rocksdb_rs::filename::TableFileName(cfd->ioptions()->cf_paths, inputs[0][0]->fd.GetNumber(),
                                             inputs[0][0]->fd.GetPathId());
     uint64_t free_space = 0;
-    rocksdb_rs::status::Status s = fs_->GetFreeSpace(static_cast<std::string>(fn), IOOptions(), &free_space, nullptr);
+    rocksdb_rs::status::Status s = fs_->GetFreeSpace(static_cast<std::string>(fn), IOOptions(), &free_space, nullptr).status();
     // needed_headroom is based on current size reserved by compactions,
     // minus any files created by running compactions as they would count
     // against the reserved size. If user didn't specify any compaction
@@ -258,7 +258,7 @@ void SstFileManagerImpl::ClearError() {
     }
 
     uint64_t free_space = 0;
-    rocksdb_rs::status::Status s = fs_->GetFreeSpace(path_, IOOptions(), &free_space, nullptr);
+    rocksdb_rs::status::Status s = fs_->GetFreeSpace(path_, IOOptions(), &free_space, nullptr).status();
     free_space = max_allowed_space_ > 0
                      ? std::min(max_allowed_space_, free_space)
                      : free_space;
@@ -478,7 +478,7 @@ SstFileManager* NewSstFileManager(Env* env, std::shared_ptr<FileSystem> fs,
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (delete_existing_trash && trash_dir != "") {
     std::vector<std::string> files_in_trash;
-    s = fs->GetChildren(trash_dir, IOOptions(), &files_in_trash, nullptr);
+    s = fs->GetChildren(trash_dir, IOOptions(), &files_in_trash, nullptr).status();
     if (s.ok()) {
       for (const std::string& trash_file : files_in_trash) {
         std::string path_in_trash = trash_dir + "/" + trash_file;

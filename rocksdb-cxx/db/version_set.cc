@@ -1566,7 +1566,7 @@ rocksdb_rs::status::Status Version::GetTableProperties(const ReadOptions& read_o
                               file_meta->fd.GetPathId()));
   }
   s = ioptions->fs->NewRandomAccessFile(file_name, file_options_, &file,
-                                        nullptr);
+                                        nullptr).status();
   if (!s.ok()) {
     return s;
   }
@@ -5387,8 +5387,8 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
         s = WriteCurrentStateToManifest(curr_state, wal_additions,
                                         descriptor_log_.get(), io_s);
       } else {
-        manifest_io_status = io_s;
-        s = io_s;
+        manifest_io_status = io_s.Clone();
+        s = io_s.status();
       }
     }
 
@@ -5429,20 +5429,20 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
 #endif /* !NDEBUG */
         io_s = descriptor_log_->AddRecord(record);
         if (!io_s.ok()) {
-          s = io_s;
-          manifest_io_status = io_s;
+          s = io_s.status();
+          manifest_io_status = io_s.Clone();
           break;
         }
       }
 
       if (s.ok()) {
         io_s = SyncManifest(db_options_, descriptor_log_->file());
-        manifest_io_status = io_s;
+        manifest_io_status = io_s.Clone();
         TEST_SYNC_POINT_CALLBACK(
             "VersionSet::ProcessManifestWrites:AfterSyncManifest", &io_s);
       }
       if (!io_s.ok()) {
-        s = io_s;
+        s = io_s.status();
         ROCKS_LOG_ERROR(db_options_->info_log, "MANIFEST write %s\n",
                         s.ToString()->c_str());
       }
@@ -5457,7 +5457,7 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
       io_s = SetCurrentFile(fs_.get(), dbname_, pending_manifest_file_number_,
                             dir_contains_current_file);
       if (!io_s.ok()) {
-        s = io_s;
+        s = io_s.status();
       }
     }
 
@@ -5493,10 +5493,10 @@ rocksdb_rs::status::Status VersionSet::ProcessManifestWrites(
 
   if (!io_s.ok()) {
     if (io_status_.ok()) {
-      io_status_ = io_s;
+      io_status_ = io_s.Clone();
     }
   } else if (!io_status_.ok()) {
-    io_status_ = io_s;
+    io_status_ = io_s.Clone();
   }
 
   // Append the old manifest file to the obsolete_manifest_ list to be deleted
@@ -5820,7 +5820,7 @@ rocksdb_rs::status::Status VersionSet::GetCurrentManifestPath(const std::string&
   assert(manifest_file_number != nullptr);
 
   std::string fname;
-  rocksdb_rs::status::Status s = ReadFileToString(fs, static_cast<std::string>(CurrentFileName(dbname)), &fname);
+  rocksdb_rs::status::Status s = ReadFileToString(fs, static_cast<std::string>(CurrentFileName(dbname)), &fname).status();
   if (!s.ok()) {
     return s;
   }
@@ -5863,7 +5863,7 @@ rocksdb_rs::status::Status VersionSet::Recover(
     std::unique_ptr<FSSequentialFile> manifest_file;
     s = fs_->NewSequentialFile(manifest_path,
                                fs_->OptimizeForManifestRead(file_options_),
-                               &manifest_file, nullptr);
+                               &manifest_file, nullptr).status();
     if (!s.ok()) {
       return s;
     }
@@ -6039,7 +6039,7 @@ rocksdb_rs::status::Status VersionSet::TryRecoverFromOneManifest(
     std::unique_ptr<FSSequentialFile> manifest_file;
     s = fs_->NewSequentialFile(manifest_path,
                                fs_->OptimizeForManifestRead(file_options_),
-                               &manifest_file, nullptr);
+                               &manifest_file, nullptr).status();
     if (!s.ok()) {
       return s;
     }
@@ -6106,7 +6106,7 @@ rocksdb_rs::status::Status VersionSet::ListColumnFamiliesFromManifest(
     std::unique_ptr<FSSequentialFile> file;
     // these are just for performance reasons, not correctness,
     // so we're fine using the defaults
-    s = fs->NewSequentialFile(manifest_path, FileOptions(), &file, nullptr);
+    s = fs->NewSequentialFile(manifest_path, FileOptions(), &file, nullptr).status();
     if (!s.ok()) {
       return s;
     }
@@ -6323,7 +6323,7 @@ rocksdb_rs::status::Status VersionSet::DumpManifest(
     std::unique_ptr<FSSequentialFile> file;
     const std::shared_ptr<FileSystem>& fs = options.env->GetFileSystem();
     s = fs->NewSequentialFile(
-        dscname, fs->OptimizeForManifestRead(file_options_), &file, nullptr);
+        dscname, fs->OptimizeForManifestRead(file_options_), &file, nullptr).status();
     if (!s.ok()) {
       return s;
     }
@@ -6396,7 +6396,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
     }
     io_s = log->AddRecord(db_id_record);
     if (!io_s.ok()) {
-      return io_s;
+      return io_s.status();
     }
   }
 
@@ -6411,7 +6411,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
     }
     io_s = log->AddRecord(record);
     if (!io_s.ok()) {
-      return io_s;
+      return io_s.status();
     }
   }
 
@@ -6428,7 +6428,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
   }
   io_s = log->AddRecord(wal_deletions_record);
   if (!io_s.ok()) {
-    return io_s;
+    return io_s.status();
   }
 
   for (auto cfd : *column_family_set_) {
@@ -6456,7 +6456,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
       }
       io_s = log->AddRecord(record);
       if (!io_s.ok()) {
-        return io_s;
+        return io_s.status();
       }
     }
 
@@ -6538,7 +6538,7 @@ rocksdb_rs::status::Status VersionSet::WriteCurrentStateToManifest(
       }
       io_s = log->AddRecord(record);
       if (!io_s.ok()) {
-        return io_s;
+        return io_s.status();
       }
     }
   }
@@ -7143,7 +7143,7 @@ rocksdb_rs::status::Status VersionSet::VerifyFileMetadata(const ReadOptions& rea
                                       const std::string& fpath, int level,
                                       const FileMetaData& meta) {
   uint64_t fsize = 0;
-  rocksdb_rs::status::Status status = fs_->GetFileSize(fpath, IOOptions(), &fsize, nullptr);
+  rocksdb_rs::status::Status status = fs_->GetFileSize(fpath, IOOptions(), &fsize, nullptr).status();
   if (status.ok()) {
     if (fsize != meta.fd.GetFileSize()) {
       status = rocksdb_rs::status::Status_Corruption("File size mismatch: " + fpath);
@@ -7274,7 +7274,7 @@ rocksdb_rs::status::Status ReactiveVersionSet::MaybeSwitchManifest(
   }
   assert(nullptr == manifest_reader->get() ||
          manifest_reader->get()->file()->file_name() != manifest_path);
-  s = fs_->FileExists(manifest_path, IOOptions(), nullptr);
+  s = fs_->FileExists(manifest_path, IOOptions(), nullptr).status();
   if (s.IsNotFound()) {
     return rocksdb_rs::status::Status_TryAgain(
         "The primary may have switched to a new MANIFEST and deleted the old "
@@ -7293,7 +7293,7 @@ rocksdb_rs::status::Status ReactiveVersionSet::MaybeSwitchManifest(
   // to MANIFEST. The hard link should be cleaned up later by the secondary.
   s = fs_->NewSequentialFile(manifest_path,
                              fs_->OptimizeForManifestRead(file_options_),
-                             &manifest_file, nullptr);
+                             &manifest_file, nullptr).status();
   std::unique_ptr<SequentialFileReader> manifest_file_reader;
   if (s.ok()) {
     manifest_file_reader.reset(new SequentialFileReader(

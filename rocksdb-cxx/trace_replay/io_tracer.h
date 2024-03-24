@@ -77,6 +77,13 @@ struct IOTraceRecord {
 
   IOTraceRecord(const uint64_t& _access_timestamp, const TraceType& _trace_type,
                 const uint64_t& _io_op_data, const std::string& _file_operation,
+                const uint64_t& _latency, const std::unique_ptr<std::string>& _io_status,
+                const std::string& _file_name, const uint64_t& _file_size = 0)
+                  : IOTraceRecord(_access_timestamp, _trace_type, _io_op_data, _file_operation,
+                                  _latency, *_io_status, _file_name, _file_size) {}
+
+  IOTraceRecord(const uint64_t& _access_timestamp, const TraceType& _trace_type,
+                const uint64_t& _io_op_data, const std::string& _file_operation,
                 const uint64_t& _latency, const std::string& _io_status,
                 const std::string& _file_name, const uint64_t& _len,
                 const uint64_t& _offset)
@@ -89,6 +96,14 @@ struct IOTraceRecord {
         file_name(_file_name),
         len(_len),
         offset(_offset) {}
+
+  IOTraceRecord(const uint64_t& _access_timestamp, const TraceType& _trace_type,
+                const uint64_t& _io_op_data, const std::string& _file_operation,
+                const uint64_t& _latency, const std::unique_ptr<std::string>& _io_status,
+                const std::string& _file_name, const uint64_t& _len,
+                const uint64_t& _offset)
+                  : IOTraceRecord(_access_timestamp, _trace_type, _io_op_data, _file_operation,
+                                  _latency, *_io_status, _file_name, _len, _offset) {}
 };
 
 struct IOTraceHeader {

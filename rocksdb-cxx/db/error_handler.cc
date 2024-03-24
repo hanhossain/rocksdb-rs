@@ -501,10 +501,10 @@ namespace rocksdb {
       return kOkStatus;
     }
     ROCKS_LOG_WARN(db_options_.info_log, "Background IO error %s",
-                   bg_io_err.ToString().c_str());
+                   bg_io_err.ToString()->c_str());
 
     if (recovery_in_prog_ && recovery_io_error_.ok()) {
-      recovery_io_error_ = bg_io_err;
+      recovery_io_error_ = bg_io_err.Clone();
     }
     if (BackgroundErrorReason::kManifestWrite == reason ||
         BackgroundErrorReason::kManifestWriteNoWAL == reason) {
@@ -513,7 +513,7 @@ namespace rocksdb {
       db_->DisableFileDeletionsWithLock();
     }
 
-    rocksdb_rs::status::Status new_bg_io_err = bg_io_err;
+    rocksdb_rs::status::Status new_bg_io_err = bg_io_err.status();
     DBRecoverContext context;
     if (bg_io_err.GetScope() != rocksdb_rs::io_status::IOErrorScope::kIOErrorScopeFile &&
         bg_io_err.GetDataLoss()) {
@@ -853,7 +853,7 @@ namespace rocksdb {
           EventHelpers::NotifyOnErrorRecoveryEnd(
             db_options_.listeners, bg_error_,
             !recovery_io_error_.ok()
-              ? recovery_io_error_
+              ? recovery_io_error_.status()
               : (!recovery_error_.ok() ? recovery_error_ : s).Clone(),
             db_mutex_);
           return;

@@ -1042,7 +1042,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
       std::unique_ptr<FSSequentialFile> file;
 
       s = env_->GetFileSystem()->NewSequentialFile(
-          whole_key_path, FileOptions(env_options_), &file, nullptr);
+          whole_key_path, FileOptions(env_options_), &file, nullptr).status();
       if (!s.ok()) {
         fprintf(stderr, "Cannot open the whole key space file of CF: %u\n",
                 cf_id);
@@ -1113,7 +1113,7 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
             }
           }
         }
-        s = lf_reader.GetStatus();
+        s = lf_reader.GetStatus().status();
         if (!s.ok()) {
           fprintf(stderr, "Read whole key space file failed\n");
           return s;

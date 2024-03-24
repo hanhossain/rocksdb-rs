@@ -449,7 +449,7 @@ bool IsPrefetchSupported(const std::shared_ptr<FileSystem>& fs,
   Random rnd(301);
   std::string test_string = rnd.RandomString(4096);
   Slice data(test_string);
-  rocksdb_rs::status::Status s = WriteStringToFile(fs.get(), data, tmp, true);
+  rocksdb_rs::status::Status s = WriteStringToFile(fs.get(), data, tmp, true).status();
   if (s.ok()) {
     std::unique_ptr<FSRandomAccessFile> file;
     auto io_s = fs->NewRandomAccessFile(tmp, FileOptions(), &file, nullptr);
@@ -457,7 +457,7 @@ bool IsPrefetchSupported(const std::shared_ptr<FileSystem>& fs,
       supported = !(file->Prefetch(0, data.size(), IOOptions(), nullptr)
                         .IsNotSupported());
     }
-    s = fs->DeleteFile(tmp, IOOptions(), nullptr);
+    s = fs->DeleteFile(tmp, IOOptions(), nullptr).status();
   }
   return s.ok() && supported;
 }

@@ -96,7 +96,7 @@ class EnvLogger : public Logger {
     const auto close_status = file_.Close();
 
     if (close_status.ok()) {
-      return close_status;
+      return close_status.status();
     }
     return rocksdb_rs::status::Status_IOError(
         "Close of log file failed with error:" +

@@ -171,7 +171,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
     auto src_file = compaction_result.output_path + "/" + file.file_name;
     auto tgt_file = TableFileName(compaction->immutable_options()->cf_paths,
                                   file_num, compaction->output_path_id());
-    s = fs_->RenameFile(src_file, static_cast<std::string>(tgt_file), IOOptions(), nullptr);
+    s = fs_->RenameFile(src_file, static_cast<std::string>(tgt_file), IOOptions(), nullptr).status();
     if (!s.ok()) {
       sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;
@@ -179,7 +179,7 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
 
     FileMetaData meta;
     uint64_t file_size;
-    s = fs_->GetFileSize(static_cast<std::string>(tgt_file), IOOptions(), &file_size, nullptr);
+    s = fs_->GetFileSize(static_cast<std::string>(tgt_file), IOOptions(), &file_size, nullptr).status();
     if (!s.ok()) {
       sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;
@@ -292,10 +292,10 @@ rocksdb_rs::status::Status CompactionServiceCompactionJob::Run() {
                         compaction_stats_.stats.cpu_micros);
 
   rocksdb_rs::status::Status status = sub_compact->status.Clone();
-  rocksdb_rs::io_status::IOStatus io_s = sub_compact->io_status;
+  rocksdb_rs::io_status::IOStatus io_s = sub_compact->io_status.Clone();
 
   if (io_status_.ok()) {
-    io_status_ = io_s;
+    io_status_ = io_s.Clone();
   }
 
   if (status.ok()) {
@@ -307,10 +307,10 @@ rocksdb_rs::status::Status CompactionServiceCompactionJob::Run() {
     }
   }
   if (io_status_.ok()) {
-    io_status_ = io_s;
+    io_status_ = io_s.Clone();
   }
   if (status.ok()) {
-    status = io_s;
+    status = io_s.status();
   }
   if (status.ok()) {
     // TODO: Add verify_table()

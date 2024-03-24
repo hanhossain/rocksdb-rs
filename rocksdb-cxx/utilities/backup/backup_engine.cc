@@ -1196,7 +1196,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::Initialize() {
                        backup_iter->first, io_s.ToString()->c_str());
         corrupt_backups_.insert(std::make_pair(
             backup_iter->first,
-            std::make_pair(io_s, std::move(backup_iter->second))));
+            std::make_pair(std::move(io_s), std::move(backup_iter->second))));
       } else if (!io_s.ok()) {
         // Distinguish corruption errors from errors in the backup Env.
         // Errors in the backup Env (i.e., this code path) will cause Open() to
@@ -1425,7 +1425,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
             rocksdb_rs::types::FileType) {
           // custom checkpoint will switch to calling copy_file_cb after it sees
           // NotSupported returned from link_file_cb.
-          return rocksdb_rs::io_status::IOStatus_NotSupported();
+          return rocksdb_rs::io_status::IOStatus_NotSupported().status();
         } /* link_file_cb */,
         [&](const std::string& src_dirname, const std::string& fname,
             uint64_t size_limit_bytes, rocksdb_rs::types::FileType type,
@@ -1433,7 +1433,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
             const std::string& checksum_val,
             const Temperature src_temperature) {
           if (type == rocksdb_rs::types::FileType::kWalFile && !options_.backup_log_files) {
-            return rocksdb_rs::io_status::IOStatus_OK();
+            return rocksdb_rs::io_status::IOStatus_OK().status();
           }
           Log(options_.info_log, "add file for backup %s", fname.c_str());
           uint64_t size_bytes = 0;
@@ -1443,8 +1443,8 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
                                         &size_bytes, nullptr);
             if (!io_st.ok()) {
               Log(options_.info_log, "GetFileSize is failed: %s",
-                  io_st.ToString().c_str());
-              return io_st;
+                  io_st.ToString()->c_str());
+              return io_st.status();
             }
           }
           EnvOptions src_env_options;
@@ -1483,7 +1483,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
                   (type == rocksdb_rs::types::FileType::kTableFile || type == rocksdb_rs::types::FileType::kBlobFile),
               options.progress_callback, "" /* contents */, checksum_func_name,
               checksum_val, src_temperature);
-          return io_st;
+          return io_st.status();
         } /* copy_file_cb */,
         [&](const std::string& fname, const std::string& contents,
             rocksdb_rs::types::FileType type) {
@@ -1494,7 +1494,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
               false /* shared */, "" /* src_dir */, fname,
               EnvOptions() /* src_env_options */, rate_limiter, type,
               contents.size(), db_options.statistics.get(), 0 /* size_limit */,
-              false /* shared_checksum */, options.progress_callback, contents);
+              false /* shared_checksum */, options.progress_callback, contents).status();
         } /* create_file_cb */,
         &sequence_number,
         options.flush_before_backup ? 0 : std::numeric_limits<uint64_t>::max(),
@@ -1547,7 +1547,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
   for (auto& item : backup_items_to_finish) {
     item.result.wait();
     auto result = item.result.get();
-    item_io_status = result.io_status;
+    item_io_status = result.io_status.Clone();
     Temperature temp = result.expected_src_temperature;
     if (result.current_src_temperature != Temperature::kUnknown &&
         (temp == Temperature::kUnknown ||
@@ -1564,7 +1564,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::CreateNewBackupWithMetadata(
           result.db_session_id, temp));
     }
     if (!item_io_status.ok()) {
-      io_s = item_io_status;
+      io_s = item_io_status.Clone();
     }
   }
 
@@ -1665,7 +1665,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::PurgeOldBackups(uint32_t num_b
     // Do not GC until end
     rocksdb_rs::io_status::IOStatus io_s = DeleteBackupNoGC(backup_id);
     if (!io_s.ok()) {
-      overall_status = io_s;
+      overall_status = io_s.Clone();
     }
   }
   // Clean up after any incomplete backup deletion, potentially from
@@ -1673,7 +1673,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::PurgeOldBackups(uint32_t num_b
   if (might_need_garbage_collect_) {
     rocksdb_rs::io_status::IOStatus io_s = GarbageCollect();
     if (!io_s.ok() && overall_status.ok()) {
-      overall_status = io_s;
+      overall_status = io_s.Clone();
     }
   }
   return overall_status;
@@ -1856,7 +1856,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::RestoreDBFromBackup(
   }
   auto corrupt_itr = corrupt_backups_.find(backup_id);
   if (corrupt_itr != corrupt_backups_.end()) {
-    return corrupt_itr->second.first;
+    return corrupt_itr->second.first.Clone();
   }
   auto backup_itr = backups_.find(backup_id);
   if (backup_itr == backups_.end()) {
@@ -2009,11 +2009,11 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::RestoreDBFromBackup(
   for (auto& item : restore_items_to_finish) {
     item.result.wait();
     auto result = item.result.get();
-    item_io_status = result.io_status;
+    item_io_status = result.io_status.Clone();
     // Note: It is possible that both of the following bad-status cases occur
     // during copying. But, we only return one status.
     if (!item_io_status.ok()) {
-      io_s = item_io_status;
+      io_s = item_io_status.Clone();
       break;
     } else if (!item.checksum_hex.empty() &&
                item.checksum_hex != result.checksum_hex) {
@@ -2065,7 +2065,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::VerifyBackup(BackupID backup_i
   // Check if backup_id is corrupted, or valid and registered
   auto corrupt_itr = corrupt_backups_.find(backup_id);
   if (corrupt_itr != corrupt_backups_.end()) {
-    return corrupt_itr->second.first;
+    return corrupt_itr->second.first.Clone();
   }
 
   auto backup_itr = backups_.find(backup_id);
@@ -2702,7 +2702,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::GarbageCollect() {
         io_s = rocksdb_rs::io_status::IOStatus_OK();
       }
       if (!io_s.ok()) {
-        overall_status = io_s;
+        overall_status = io_s.Clone();
         // Trying again later might work
         might_need_garbage_collect_ = true;
       }
@@ -2740,7 +2740,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::GarbageCollect() {
         backup_fs_->GetChildren(GetAbsolutePath(kPrivateDirName), io_options_,
                                 &private_children, nullptr);
     if (!io_s.ok()) {
-      overall_status = io_s;
+      overall_status = io_s.Clone();
       // Trying again later might work
       might_need_garbage_collect_ = true;
     }
@@ -3161,7 +3161,7 @@ rocksdb_rs::io_status::IOStatus BackupEngineImpl::BackupMeta::LoadFromFile(
   }
 
   {
-    rocksdb_rs::io_status::IOStatus io_s = backup_meta_reader->GetStatus();
+    rocksdb_rs::io_status::IOStatus io_s = backup_meta_reader->GetStatus().Clone();
     if (!io_s.ok()) {
       return io_s;
     }

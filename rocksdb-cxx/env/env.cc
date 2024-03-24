@@ -1057,12 +1057,12 @@ void Log(const std::shared_ptr<Logger>& info_log, const char* format, ...) {
 rocksdb_rs::status::Status WriteStringToFile(Env* env, const Slice& data, const std::string& fname,
                          bool should_sync) {
   const auto& fs = env->GetFileSystem();
-  return WriteStringToFile(fs.get(), data, fname, should_sync);
+  return WriteStringToFile(fs.get(), data, fname, should_sync).status();
 }
 
 rocksdb_rs::status::Status ReadFileToString(Env* env, const std::string& fname, std::string* data) {
   const auto& fs = env->GetFileSystem();
-  return ReadFileToString(fs.get(), fname, data);
+  return ReadFileToString(fs.get(), fname, data).status();
 }
 
 namespace {  // anonymous namespace
@@ -1150,7 +1150,7 @@ rocksdb_rs::status::Status NewEnvLogger(const std::string& fname, Env* env,
   const auto status = env->GetFileSystem()->NewWritableFile(
       fname, options, &writable_file, nullptr);
   if (!status.ok()) {
-    return status;
+    return status.status();
   }
 
   *result = std::make_shared<EnvLogger>(std::move(writable_file), fname,

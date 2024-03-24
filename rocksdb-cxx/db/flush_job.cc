@@ -984,7 +984,7 @@ rocksdb_rs::status::Status FlushJob::WriteLevel0Table() {
     if (s.ok() && output_file_directory_ != nullptr && sync_output_directory_) {
       s = output_file_directory_->FsyncWithDirOptions(
           IOOptions(), nullptr,
-          DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced));
+          DirFsyncOptions(DirFsyncOptions::FsyncReason::kNewFileSynced)).status();
     }
     TEST_SYNC_POINT_CALLBACK("FlushJob::WriteLevel0Table", &mems_);
     db_mutex_->Lock();

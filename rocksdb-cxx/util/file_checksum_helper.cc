@@ -109,7 +109,7 @@ rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std:
     const std::shared_ptr<FileSystem>& fs = src_env->GetFileSystem();
     s = fs->NewSequentialFile(abs_path,
                               fs->OptimizeForManifestRead(FileOptions()), &file,
-                              nullptr /* dbg */);
+                              nullptr /* dbg */).status();
     if (!s.ok()) {
       return s;
     }

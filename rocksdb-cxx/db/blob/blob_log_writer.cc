@@ -35,7 +35,7 @@ rocksdb_rs::status::Status BlobLogWriter::Sync() {
   TEST_SYNC_POINT("BlobLogWriter::Sync");
 
   StopWatch sync_sw(clock_, statistics_, BLOB_DB_BLOB_FILE_SYNC_MICROS);
-  rocksdb_rs::status::Status s = dest_->Sync(use_fsync_);
+  rocksdb_rs::status::Status s = dest_->Sync(use_fsync_).status();
   RecordTick(statistics_, BLOB_DB_BLOB_FILE_SYNCED);
   return s;
 }
@@ -46,11 +46,11 @@ rocksdb_rs::status::Status BlobLogWriter::WriteHeader(BlobLogHeader& header) {
   std::string str;
   header.EncodeTo(&str);
 
-  rocksdb_rs::status::Status s = dest_->Append(Slice(str));
+  rocksdb_rs::status::Status s = dest_->Append(Slice(str)).status();
   if (s.ok()) {
     block_offset_ += str.size();
     if (do_flush_) {
-      s = dest_->Flush();
+      s = dest_->Flush().status();
     }
   }
   last_elem_type_ = ElemType::kEtFileHdr;
@@ -72,14 +72,14 @@ rocksdb_rs::status::Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
   if (dest_->seen_error()) {
     return rocksdb_rs::status::Status_IOError("Seen Error. Skip closing.");
   } else {
-    s = dest_->Append(Slice(str));
+    s = dest_->Append(Slice(str)).status();
     if (s.ok()) {
       block_offset_ += str.size();
 
       s = Sync();
 
       if (s.ok()) {
-        s = dest_->Close();
+        s = dest_->Close().status();
 
         if (s.ok()) {
           assert(!!checksum_method == !!checksum_value);
@@ -152,15 +152,15 @@ rocksdb_rs::status::Status BlobLogWriter::EmitPhysicalRecord(const std::string& 
                                          uint64_t* key_offset,
                                          uint64_t* blob_offset) {
   StopWatch write_sw(clock_, statistics_, BLOB_DB_BLOB_FILE_WRITE_MICROS);
-  rocksdb_rs::status::Status s = dest_->Append(Slice(headerbuf));
+  rocksdb_rs::status::Status s = dest_->Append(Slice(headerbuf)).status();
   if (s.ok()) {
-    s = dest_->Append(key);
+    s = dest_->Append(key).status();
   }
   if (s.ok()) {
-    s = dest_->Append(val);
+    s = dest_->Append(val).status();
   }
   if (do_flush_ && s.ok()) {
-    s = dest_->Flush();
+    s = dest_->Flush().status();
   }
 
   *key_offset = block_offset_ + BlobLogRecord::kHeaderSize;

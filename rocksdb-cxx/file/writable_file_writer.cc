@@ -282,7 +282,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Close() {
       }
     }
     if (!interim.ok() && s.ok()) {
-      s = interim;
+      s = interim.Clone();
     }
   }
 
@@ -302,7 +302,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Close() {
     }
   }
   if (!interim.ok() && s.ok()) {
-    s = interim;
+    s = interim.Clone();
   }
 
   writable_file_.reset();

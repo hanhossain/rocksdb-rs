@@ -154,12 +154,12 @@ rocksdb_rs::status::Status ReadAndParseBlockFromFile(
   // If prefetch_buffer is not allocated, it will fallback to synchronous
   // reading of block contents.
   if (async_read && prefetch_buffer != nullptr) {
-    s = block_fetcher.ReadAsyncBlockContents();
+    s = block_fetcher.ReadAsyncBlockContents().status();
     if (!s.ok()) {
       return s;
     }
   } else {
-    s = block_fetcher.ReadBlockContents();
+    s = block_fetcher.ReadBlockContents().status();
   }
   if (s.ok()) {
     create_context.Create(result, std::move(contents));
@@ -615,7 +615,7 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
   //    6. [meta block: index]
   //    7. [meta block: filter]
   IOOptions opts;
-  s = file->PrepareIOOptions(ro, opts);
+  s = file->PrepareIOOptions(ro, opts).status();
   if (s.ok()) {
     s = ReadFooterFromFile(opts, file.get(), *ioptions.fs,
                            prefetch_buffer.get(), file_size, &footer,
@@ -875,7 +875,7 @@ rocksdb_rs::status::Status BlockBasedTable::PrefetchTail(
       FilePrefetchBufferUsage::kTableOpenPrefetchTail));
 
   IOOptions opts;
-  rocksdb_rs::status::Status s = file->PrepareIOOptions(ro, opts);
+  rocksdb_rs::status::Status s = file->PrepareIOOptions(ro, opts).status();
   if (s.ok()) {
     s = (*prefetch_buffer)
             ->Prefetch(opts, file, prefetch_off, prefetch_len,
@@ -1550,12 +1550,12 @@ BlockBasedTable::MaybeReadBlockAndLoadToCache(
         // If prefetch_buffer is not allocated, it will fallback to synchronous
         // reading of block contents.
         if (async_read && prefetch_buffer != nullptr) {
-          s = block_fetcher.ReadAsyncBlockContents();
+          s = block_fetcher.ReadAsyncBlockContents().status();
           if (!s.ok()) {
             return s;
           }
         } else {
-          s = block_fetcher.ReadBlockContents();
+          s = block_fetcher.ReadBlockContents().status();
         }
 
         contents_comp_type = block_fetcher.get_compression_type();
@@ -2403,7 +2403,7 @@ rocksdb_rs::status::Status BlockBasedTable::VerifyChecksumInBlocks(
         &contents, rep_->ioptions, false /* decompress */,
         false /*maybe_compressed*/, BlockType::kData,
         UncompressionDict::GetEmptyDict(), rep_->persistent_cache_options);
-    s = block_fetcher.ReadBlockContents();
+    s = block_fetcher.ReadBlockContents().status();
     if (!s.ok()) {
       break;
     }
@@ -2484,7 +2484,7 @@ rocksdb_rs::status::Status BlockBasedTable::VerifyChecksumInMetaBlocks(
               false /* decompress */, false /*maybe_compressed*/,
               GetBlockTypeForMetaBlockByName(meta_block_name),
               UncompressionDict::GetEmptyDict(), rep_->persistent_cache_options)
-              .ReadBlockContents();
+              .ReadBlockContents().status();
     }
     if (!s.ok()) {
       break;

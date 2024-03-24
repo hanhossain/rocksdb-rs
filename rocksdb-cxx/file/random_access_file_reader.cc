@@ -399,7 +399,7 @@ rocksdb_rs::io_status::IOStatus RandomAccessFileReader::MultiRead(
           aligned_i++;
         }
         const auto& fs_r = fs_reqs[aligned_i];
-        r.status = fs_r.status;
+        r.status = fs_r.status.Clone();
         if (r.status.ok()) {
           uint64_t offset = r.offset - fs_r.offset;
           if (fs_r.result.size() <= offset) {
@@ -535,7 +535,7 @@ void RandomAccessFileReader::ReadAsyncCallback(const FSReadRequest& req,
 
     // Update results in user_req.
     user_req.result = req.result;
-    user_req.status = req.status;
+    user_req.status = req.status.Clone();
 
     read_async_info->buf_.Size(read_async_info->buf_.CurrentSize() +
                                req.result.size());

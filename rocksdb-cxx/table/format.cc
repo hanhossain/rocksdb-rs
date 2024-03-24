@@ -377,12 +377,12 @@ rocksdb_rs::status::Status ReadFooterFromFile(const IOOptions& opts, RandomAcces
     if (file->use_direct_io()) {
       s = file->Read(opts, read_offset, Footer::kMaxEncodedLength,
                      &footer_input, nullptr, &internal_buf,
-                     opts.rate_limiter_priority);
+                     opts.rate_limiter_priority).status();
     } else {
       footer_buf.reserve(Footer::kMaxEncodedLength);
       s = file->Read(opts, read_offset, Footer::kMaxEncodedLength,
                      &footer_input, &footer_buf[0], nullptr,
-                     opts.rate_limiter_priority);
+                     opts.rate_limiter_priority).status();
     }
     if (!s.ok()) return s;
   }

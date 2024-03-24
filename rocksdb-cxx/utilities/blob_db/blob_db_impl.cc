@@ -174,7 +174,7 @@ rocksdb_rs::status::Status BlobDBImpl::Open(std::vector<ColumnFamilyHandle*>* ha
                     blob_dir_.c_str(), s.ToString()->c_str());
   }
   s = env_->GetFileSystem()->NewDirectory(blob_dir_, IOOptions(), &dir_ent_,
-                                          nullptr);
+                                          nullptr).status();
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to open blob_dir %s, status: %s", blob_dir_.c_str(),
@@ -720,7 +720,7 @@ rocksdb_rs::status::Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<
   std::unique_ptr<FSWritableFile> wfile;
   const auto& fs = env_->GetFileSystem();
 
-  rocksdb_rs::status::Status s = fs->ReopenWritableFile(fpath, file_options_, &wfile, nullptr);
+  rocksdb_rs::status::Status s = fs->ReopenWritableFile(fpath, file_options_, &wfile, nullptr).status();
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to open blob file for write: %s status: '%s'"
@@ -728,7 +728,7 @@ rocksdb_rs::status::Status BlobDBImpl::CreateWriterLocked(const std::shared_ptr<
                     fpath.c_str(), s.ToString()->c_str(),
                     fs->FileExists(fpath, file_options_.io_options, nullptr)
                         .ToString()
-                        .c_str());
+                        ->c_str());
     return s;
   }
 
@@ -1540,12 +1540,12 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
     if (reader->use_direct_io()) {
       s = reader->Read(IOOptions(), record_offset,
                        static_cast<size_t>(record_size), &blob_record, nullptr,
-                       &aligned_buf, Env::IO_TOTAL /* rate_limiter_priority */);
+                       &aligned_buf, Env::IO_TOTAL /* rate_limiter_priority */).status();
     } else {
       buf.reserve(static_cast<size_t>(record_size));
       s = reader->Read(IOOptions(), record_offset,
                        static_cast<size_t>(record_size), &blob_record, &buf[0],
-                       nullptr, Env::IO_TOTAL /* rate_limiter_priority */);
+                       nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
     }
     RecordTick(statistics_, BLOB_DB_BLOB_FILE_BYTES_READ, blob_record.size());
   }
@@ -1915,7 +1915,7 @@ rocksdb_rs::status::Status BlobDBImpl::SyncBlobFiles() {
     }
   }
 
-  s = dir_ent_->FsyncWithDirOptions(IOOptions(), nullptr, DirFsyncOptions());
+  s = dir_ent_->FsyncWithDirOptions(IOOptions(), nullptr, DirFsyncOptions()).status();
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log,
                     "Failed to sync blob directory, status: %s",
@@ -2009,7 +2009,7 @@ std::pair<bool, int64_t> BlobDBImpl::DeleteObsoleteFiles(bool aborted) {
   if (file_deleted) {
     rocksdb_rs::status::Status s = dir_ent_->FsyncWithDirOptions(
         IOOptions(), nullptr,
-        DirFsyncOptions(DirFsyncOptions::FsyncReason::kFileDeleted));
+        DirFsyncOptions(DirFsyncOptions::FsyncReason::kFileDeleted)).status();
     if (!s.ok()) {
       ROCKS_LOG_ERROR(db_options_.info_log, "Failed to sync dir %s: %s",
                       blob_dir_.c_str(), s.ToString()->c_str());

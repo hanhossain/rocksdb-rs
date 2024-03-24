@@ -47,9 +47,9 @@ rocksdb_rs::status::Status SstFileReader::Open(const std::string& file_path) {
   FileOptions fopts(r->soptions);
   const auto& fs = r->options.env->GetFileSystem();
 
-  s = fs->GetFileSize(file_path, fopts.io_options, &file_size, nullptr);
+  s = fs->GetFileSize(file_path, fopts.io_options, &file_size, nullptr).status();
   if (s.ok()) {
-    s = fs->NewRandomAccessFile(file_path, fopts, &file, nullptr);
+    s = fs->NewRandomAccessFile(file_path, fopts, &file, nullptr).status();
   }
   if (s.ok()) {
     file_reader.reset(new RandomAccessFileReader(std::move(file), file_path));

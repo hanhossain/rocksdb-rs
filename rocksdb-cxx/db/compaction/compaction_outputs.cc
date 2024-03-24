@@ -34,7 +34,7 @@ rocksdb_rs::status::Status CompactionOutputs::Finish(const rocksdb_rs::status::S
   } else {
     builder_->Abandon();
   }
-  rocksdb_rs::status::Status io_s = builder_->io_status();
+  rocksdb_rs::status::Status io_s = builder_->io_status().status();
   if (s.ok()) {
     s.copy_from(io_s);
   }

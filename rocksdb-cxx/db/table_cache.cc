@@ -101,11 +101,11 @@ rocksdb_rs::status::Status TableCache::GetTableReader(
   std::unique_ptr<FSRandomAccessFile> file;
   FileOptions fopts = file_options;
   fopts.temperature = file_temperature;
-  rocksdb_rs::status::Status s = PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options);
+  rocksdb_rs::status::Status s = PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options).status();
   TEST_SYNC_POINT_CALLBACK("TableCache::GetTableReader:BeforeOpenFile",
                            const_cast<rocksdb_rs::status::Status*>(&s));
   if (s.ok()) {
-    s = ioptions_.fs->NewRandomAccessFile(fname, fopts, &file, nullptr);
+    s = ioptions_.fs->NewRandomAccessFile(fname, fopts, &file, nullptr).status();
   }
   if (s.ok()) {
     RecordTick(ioptions_.stats, NO_FILE_OPENS);
@@ -114,10 +114,10 @@ rocksdb_rs::status::Status TableCache::GetTableReader(
     // If this file is also not found, we want to use the error message
     // that contains the table file name which is less confusing.
     rocksdb_rs::status::Status temp_s =
-        PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options);
+        PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options).status();
     if (temp_s.ok()) {
       temp_s = ioptions_.fs->NewRandomAccessFile(fname, file_options, &file,
-                                                 nullptr);
+                                                 nullptr).status();
     }
     if (temp_s.ok()) {
       RecordTick(ioptions_.stats, NO_FILE_OPENS);

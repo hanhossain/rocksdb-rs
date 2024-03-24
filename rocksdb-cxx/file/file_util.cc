@@ -50,9 +50,8 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
   while (size > 0) {
     size_t bytes_to_read = std::min(sizeof(buffer), static_cast<size_t>(size));
     // TODO: rate limit copy file
-    io_s = rocksdb_rs::io_status::IOStatus_new(
-        src_reader->Read(bytes_to_read, &slice, buffer,
-                         Env::IO_TOTAL /* rate_limiter_priority */));
+    io_s = src_reader->Read(bytes_to_read, &slice, buffer,
+                         Env::IO_TOTAL /* rate_limiter_priority */);
     if (!io_s.ok()) {
       return io_s;
     }
@@ -213,7 +212,7 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
                         rate_limiter_priority);
     if (!io_s.ok()) {
       return rocksdb_rs::io_status::IOStatus_Corruption("file read failed with error: " +
-                                  io_s.ToString());
+                                  *io_s.ToString());
     }
     if (slice.size() == 0) {
       return rocksdb_rs::io_status::IOStatus_Corruption("file too small");

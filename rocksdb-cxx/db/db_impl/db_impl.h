@@ -1613,7 +1613,7 @@ class DBImpl : public DB {
       return w;
     }
     rocksdb_rs::status::Status ClearWriter() {
-      rocksdb_rs::status::Status s = writer->WriteBuffer();
+      rocksdb_rs::status::Status s = writer->WriteBuffer().status();
       delete writer;
       writer = nullptr;
       return s;

@@ -189,7 +189,7 @@ class CompactionJob {
   rocksdb_rs::status::Status Install(const MutableCFOptions& mutable_cf_options);
 
   // Return the IO status
-  rocksdb_rs::io_status::IOStatus io_status() const { return io_status_; }
+  rocksdb_rs::io_status::IOStatus io_status() const { return io_status_.Clone(); }
 
  protected:
   void UpdateCompactionStats();

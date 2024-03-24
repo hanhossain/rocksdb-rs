@@ -34,7 +34,7 @@ rocksdb_rs::status::Status ChrootFileSystem::PrepareOptions(const ConfigOptions&
   } else if (chroot_dir_.empty()) {
     s = rocksdb_rs::status::Status_InvalidArgument("ChRootFileSystem requires a chroot dir");
   } else {
-    s = target_->FileExists(chroot_dir_, IOOptions(), nullptr);
+    s = target_->FileExists(chroot_dir_, IOOptions(), nullptr).status();
   }
   if (s.ok()) {
 #if defined(OS_AIX)

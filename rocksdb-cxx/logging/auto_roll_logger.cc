@@ -44,7 +44,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
       call_NowMicros_every_N_records_(100),
       mutex_() {
   rocksdb_rs::status::Status s = fs->GetAbsolutePath(dbname, io_options_, &db_absolute_path_,
-                                 &io_context_);
+                                 &io_context_).status();
   if (s.IsNotSupported()) {
     db_absolute_path_ = dbname;
   } else {
@@ -63,7 +63,7 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
 
 rocksdb_rs::status::Status AutoRollLogger::ResetLogger() {
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:BeforeNewLogger");
-  status_ = fs_->NewLogger(log_fname_, io_options_, &logger_, &io_context_);
+  status_ = fs_->NewLogger(log_fname_, io_options_, &logger_, &io_context_).status();
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:AfterNewLogger");
 
   if (!status_.ok()) {
@@ -108,7 +108,7 @@ void AutoRollLogger::RollLogFile() {
   if (logger_) {
     logger_->Close();
   }
-  rocksdb_rs::status::Status s = fs_->RenameFile(log_fname_, old_fname, io_options_, &io_context_);
+  rocksdb_rs::status::Status s = fs_->RenameFile(log_fname_, old_fname, io_options_, &io_context_).status();
   if (!s.ok()) {
     // What should we do on error?
   }
@@ -153,7 +153,7 @@ rocksdb_rs::status::Status AutoRollLogger::TrimOldLogFiles() {
   // the queue feels safer.
   while (!old_log_files_.empty() && old_log_files_.size() >= kKeepLogFileNum) {
     rocksdb_rs::status::Status s =
-        fs_->DeleteFile(old_log_files_.front(), io_options_, &io_context_);
+        fs_->DeleteFile(old_log_files_.front(), io_options_, &io_context_).status();
     // Remove the file from the tracking anyway. It's possible that
     // DB cleaned up the old log file, or people cleaned it up manually.
     old_log_files_.pop();

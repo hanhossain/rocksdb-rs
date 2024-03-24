@@ -331,7 +331,7 @@ rocksdb_rs::status::Status CuckooTableBuilder::Finish() {
       }
     }
     if (!io_status_.ok()) {
-      status_ = io_status_;
+      status_ = io_status_.status();
       return status_.Clone();
     }
   }
@@ -385,7 +385,7 @@ rocksdb_rs::status::Status CuckooTableBuilder::Finish() {
   io_status_ = file_->Append(property_block);
   offset += property_block.size();
   if (!io_status_.ok()) {
-    status_ = io_status_;
+    status_ = io_status_.status();
     return status_.Clone();
   }
 
@@ -397,7 +397,7 @@ rocksdb_rs::status::Status CuckooTableBuilder::Finish() {
   meta_index_block_handle.set_size(meta_index_block.size());
   io_status_ = file_->Append(meta_index_block);
   if (!io_status_.ok()) {
-    status_ = io_status_;
+    status_ = io_status_.status();
     return status_.Clone();
   }
 
@@ -405,7 +405,7 @@ rocksdb_rs::status::Status CuckooTableBuilder::Finish() {
   footer.Build(kCuckooTableMagicNumber, /* format_version */ 1, offset,
                kNoChecksum, meta_index_block_handle);
   io_status_ = file_->Append(footer.GetSlice());
-  status_ = io_status_;
+  status_ = io_status_.status();
   return status_.Clone();
 }
 

@@ -191,7 +191,7 @@ rocksdb_rs::status::Status BlobFileBuilder::OpenBlobFileIfNeeded() {
 
   {
     assert(file_options_);
-    rocksdb_rs::status::Status s = NewWritableFile(fs_, blob_file_path, &file, *file_options_);
+    rocksdb_rs::status::Status s = NewWritableFile(fs_, blob_file_path, &file, *file_options_).status();
 
     TEST_SYNC_POINT_CALLBACK(
         "BlobFileBuilder::OpenBlobFileIfNeeded:NewWritableFile", &s);
