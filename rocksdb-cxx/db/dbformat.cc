@@ -33,23 +33,23 @@ const std::string kDisableUserTimestamp("");
 EntryType GetEntryType(ValueType value_type) {
   switch (value_type) {
     case kTypeValue:
-      return kEntryPut;
+      return EntryType::kEntryPut;
     case kTypeDeletion:
-      return kEntryDelete;
+      return EntryType::kEntryDelete;
     case kTypeDeletionWithTimestamp:
-      return kEntryDeleteWithTimestamp;
+      return EntryType::kEntryDeleteWithTimestamp;
     case kTypeSingleDeletion:
-      return kEntrySingleDelete;
+      return EntryType::kEntrySingleDelete;
     case kTypeMerge:
-      return kEntryMerge;
+      return EntryType::kEntryMerge;
     case kTypeRangeDeletion:
-      return kEntryRangeDeletion;
+      return EntryType::kEntryRangeDeletion;
     case kTypeBlobIndex:
-      return kEntryBlobIndex;
+      return EntryType::kEntryBlobIndex;
     case kTypeWideColumnEntity:
-      return kEntryWideColumnEntity;
+      return EntryType::kEntryWideColumnEntity;
     default:
-      return kEntryOther;
+      return EntryType::kEntryOther;
   }
 }
 

@@ -53,7 +53,7 @@ rocksdb_rs::status::Status CompactOnDeletionCollector::AddUserKey(const Slice& /
 
   if (deletion_ratio_enabled_) {
     total_entries_++;
-    if (type == kEntryDelete) {
+    if (type == EntryType::kEntryDelete) {
       deletion_entries_++;
     }
   }
@@ -76,7 +76,7 @@ rocksdb_rs::status::Status CompactOnDeletionCollector::AddUserKey(const Slice& /
     }
 
     num_keys_in_current_bucket_++;
-    if (type == kEntryDelete) {
+    if (type == EntryType::kEntryDelete) {
       num_deletions_in_observation_window_++;
       num_deletions_in_buckets_[current_bucket_]++;
       if (num_deletions_in_observation_window_ >= deletion_trigger_) {

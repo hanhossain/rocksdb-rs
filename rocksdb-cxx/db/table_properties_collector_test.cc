@@ -94,11 +94,11 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
     if (user_key.data()[0] == 'A') {
       ++count_;
     }
-    if (type == kEntryPut) {
+    if (type == EntryType::kEntryPut) {
       num_puts_++;
-    } else if (type == kEntryDelete) {
+    } else if (type == EntryType::kEntryDelete) {
       num_deletes_++;
-    } else if (type == kEntrySingleDelete) {
+    } else if (type == EntryType::kEntrySingleDelete) {
       num_single_deletes_++;
     }
     if (file_size < file_size_) {

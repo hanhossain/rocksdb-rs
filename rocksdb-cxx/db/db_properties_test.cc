@@ -1139,7 +1139,7 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
   rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
                     EntryType type, SequenceNumber /*seq*/,
                     uint64_t /*file_size*/) override {
-    if (type == kEntryDelete) {
+    if (type == EntryType::kEntryDelete) {
       num_deletes_++;
     }
     return rocksdb_rs::status::Status_OK();

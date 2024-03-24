@@ -35,7 +35,7 @@ enum class BlobFileCreationReason {
 
 // User-oriented representation of internal key types.
 // Ordering of this enum entries should not change.
-enum EntryType {
+enum class EntryType {
   kEntryPut,
   kEntryDelete,
   kEntrySingleDelete,
