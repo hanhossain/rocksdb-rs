@@ -16,7 +16,7 @@ extern const std::string& InvalidWriteStallHyphenString();
 extern const std::string& WriteStallCauseToHyphenString(rocksdb_rs::types::WriteStallCause cause);
 
 extern const std::string& WriteStallConditionToHyphenString(
-    WriteStallCondition condition);
+    rocksdb_rs::types::WriteStallCondition condition);
 
 // REQUIRES:
 // cause` is CF-scope `WriteStallCause`, see `WriteStallCause` for more
@@ -24,7 +24,7 @@ extern const std::string& WriteStallConditionToHyphenString(
 // REQUIRES:
 // `condition` != `WriteStallCondition::kNormal`
 extern InternalStats::InternalCFStatsType InternalCFStat(
-    rocksdb_rs::types::WriteStallCause cause, WriteStallCondition condition);
+    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition);
 
 // REQUIRES:
 // cause` is DB-scope `WriteStallCause`, see `WriteStallCause` for more
@@ -32,7 +32,7 @@ extern InternalStats::InternalCFStatsType InternalCFStat(
 // REQUIRES:
 // `condition` != `WriteStallCondition::kNormal`
 extern InternalStats::InternalDBStatsType InternalDBStat(
-    rocksdb_rs::types::WriteStallCause cause, WriteStallCondition condition);
+    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition);
 
 extern bool isCFScopeWriteStallCause(rocksdb_rs::types::WriteStallCause cause);
 extern bool isDBScopeWriteStallCause(rocksdb_rs::types::WriteStallCause cause);

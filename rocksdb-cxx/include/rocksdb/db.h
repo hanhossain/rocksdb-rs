@@ -1959,7 +1959,7 @@ struct WriteStallStatsMapKeys {
   // REQUIRES:
   // `condition` isn't any of these: `WriteStallCondition::kNormal`
   static std::string CauseConditionCount(rocksdb_rs::types::WriteStallCause cause,
-                                         WriteStallCondition condition);
+                                         rocksdb_rs::types::WriteStallCondition condition);
 };
 
 // Overloaded operators for enum class SizeApproximationFlags.

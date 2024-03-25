@@ -223,8 +223,8 @@ namespace rocksdb {
 
     // state of the write controller
     struct {
-      WriteStallCondition cur;
-      WriteStallCondition prev;
+      rocksdb_rs::types::WriteStallCondition cur;
+      rocksdb_rs::types::WriteStallCondition prev;
     } condition;
   };
 
