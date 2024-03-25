@@ -28,7 +28,7 @@ namespace rocksdb {
 
 rocksdb_rs::status::Status BlobFileReader::Create(
     const ImmutableOptions& immutable_options, const ReadOptions& read_options,
-    const FileOptions& file_options, uint32_t column_family_id,
+    const FileOptions& file_options, rocksdb_rs::types::ColumnFamilyId column_family_id,
     HistogramImpl* blob_file_read_hist, uint64_t blob_file_number,
     const std::shared_ptr<IOTracer>& io_tracer,
     std::unique_ptr<BlobFileReader>* blob_file_reader) {
@@ -139,7 +139,7 @@ rocksdb_rs::status::Status BlobFileReader::OpenFile(
 
 rocksdb_rs::status::Status BlobFileReader::ReadHeader(const RandomAccessFileReader* file_reader,
                                   const ReadOptions& read_options,
-                                  uint32_t column_family_id,
+                                  rocksdb_rs::types::ColumnFamilyId column_family_id,
                                   Statistics* statistics,
                                   rocksdb_rs::compression_type::CompressionType* compression_type) {
   assert(file_reader);

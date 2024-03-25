@@ -48,7 +48,7 @@ class BlobFileBuilderTest : public testing::Test {
 
   void VerifyBlobFile(uint64_t blob_file_number,
                       const std::string& blob_file_path,
-                      uint32_t column_family_id,
+                      rocksdb_rs::types::ColumnFamilyId column_family_id,
                       rocksdb_rs::compression_type::CompressionType blob_compression_type,
                       const std::vector<std::pair<std::string, std::string>>&
                           expected_key_value_pairs,

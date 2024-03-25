@@ -888,7 +888,7 @@ rocksdb_rs::status::Status PessimisticTransaction::LockBatch(WriteBatch* batch,
 
     Handler() {}
 
-    void RecordKey(uint32_t column_family_id, const Slice& key) {
+    void RecordKey(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) {
       std::string key_str = key.ToString();
 
       auto& cfh_keys = keys_[column_family_id];
@@ -899,17 +899,17 @@ rocksdb_rs::status::Status PessimisticTransaction::LockBatch(WriteBatch* batch,
       }
     }
 
-    rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                  const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
       return rocksdb_rs::status::Status_OK();
     }
-    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                    const Slice& /* unused */) override {
       RecordKey(column_family_id, key);
       return rocksdb_rs::status::Status_OK();
     }
-    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
       RecordKey(column_family_id, key);
       return rocksdb_rs::status::Status_OK();
     }

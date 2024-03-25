@@ -60,7 +60,7 @@ void deserialize_endpoint(const DBT* dbt, EndpointStruct* endp) {
 
 // Get a range lock on [start_key; end_key] range
 rocksdb_rs::status::Status RangeTreeLockManager::TryLock(PessimisticTransaction* txn,
-                                     uint32_t column_family_id,
+                                     rocksdb_rs::types::ColumnFamilyId column_family_id,
                                      const Endpoint& start_endp,
                                      const Endpoint& end_endp, Env*,
                                      bool exclusive) {
@@ -367,7 +367,7 @@ std::shared_ptr<toku::locktree> RangeTreeLockManager::MakeLockTreePtr(
 }
 
 void RangeTreeLockManager::AddColumnFamily(const ColumnFamilyHandle* cfh) {
-  uint32_t column_family_id = cfh->GetID();
+  rocksdb_rs::types::ColumnFamilyId column_family_id = cfh->GetID();
 
   InstrumentedMutexLock l(&ltree_map_mutex_);
   if (ltree_map_.find(column_family_id) == ltree_map_.end()) {
@@ -385,7 +385,7 @@ void RangeTreeLockManager::AddColumnFamily(const ColumnFamilyHandle* cfh) {
 }
 
 void RangeTreeLockManager::RemoveColumnFamily(const ColumnFamilyHandle* cfh) {
-  uint32_t column_family_id = cfh->GetID();
+  rocksdb_rs::types::ColumnFamilyId column_family_id = cfh->GetID();
   // Remove lock_map for this column family.  Since the lock map is stored
   // as a shared ptr, concurrent transactions can still keep using it
   // until they release their references to it.

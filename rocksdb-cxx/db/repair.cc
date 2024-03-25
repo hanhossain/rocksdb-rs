@@ -245,7 +245,7 @@ class Repairer {
  private:
   struct TableInfo {
     FileMetaData meta;
-    uint32_t column_family_id;
+    rocksdb_rs::types::ColumnFamilyId column_family_id;
     std::string column_family_name;
   };
 

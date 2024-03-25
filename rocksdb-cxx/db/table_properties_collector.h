@@ -44,7 +44,7 @@ class IntTblPropCollectorFactory {
   virtual ~IntTblPropCollectorFactory() {}
   // has to be thread-safe
   virtual IntTblPropCollector* CreateIntTblPropCollector(
-      uint32_t column_family_id, int level_at_creation) = 0;
+      rocksdb_rs::types::ColumnFamilyId column_family_id, int level_at_creation) = 0;
 
   // The name of the properties collector can be used for debugging purpose.
   virtual const char* Name() const = 0;
@@ -94,7 +94,7 @@ class UserKeyTablePropertiesCollectorFactory
       std::shared_ptr<TablePropertiesCollectorFactory> user_collector_factory)
       : user_collector_factory_(user_collector_factory) {}
   virtual IntTblPropCollector* CreateIntTblPropCollector(
-      uint32_t column_family_id, int level_at_creation) override {
+      rocksdb_rs::types::ColumnFamilyId column_family_id, int level_at_creation) override {
     TablePropertiesCollectorFactory::Context context;
     context.column_family_id = column_family_id;
     context.level_at_creation = level_at_creation;

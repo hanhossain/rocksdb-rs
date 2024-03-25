@@ -41,7 +41,7 @@ class BlobFileBuilder {
                   const MutableCFOptions* mutable_cf_options,
                   const FileOptions* file_options, std::string db_id,
                   std::string db_session_id, int job_id,
-                  uint32_t column_family_id,
+                  rocksdb_rs::types::ColumnFamilyId column_family_id,
                   const std::string& column_family_name,
                   Env::IOPriority io_priority,
                   Env::WriteLifeTimeHint write_hint,
@@ -56,7 +56,7 @@ class BlobFileBuilder {
                   const MutableCFOptions* mutable_cf_options,
                   const FileOptions* file_options, std::string db_id,
                   std::string db_session_id, int job_id,
-                  uint32_t column_family_id,
+                  rocksdb_rs::types::ColumnFamilyId column_family_id,
                   const std::string& column_family_name,
                   Env::IOPriority io_priority,
                   Env::WriteLifeTimeHint write_hint,
@@ -98,7 +98,7 @@ class BlobFileBuilder {
   const std::string db_id_;
   const std::string db_session_id_;
   int job_id_;
-  uint32_t column_family_id_;
+  rocksdb_rs::types::ColumnFamilyId column_family_id_;
   std::string column_family_name_;
   Env::IOPriority io_priority_;
   Env::WriteLifeTimeHint write_hint_;

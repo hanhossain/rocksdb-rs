@@ -19,7 +19,7 @@ namespace rocksdb {
 class ColumnFamilyCollector : public WriteBatch::Handler {
   std::unordered_set<uint32_t> column_family_ids_;
 
-  rocksdb_rs::status::Status AddColumnFamilyId(uint32_t column_family_id) {
+  rocksdb_rs::status::Status AddColumnFamilyId(rocksdb_rs::types::ColumnFamilyId column_family_id) {
     column_family_ids_.insert(column_family_id);
     return rocksdb_rs::status::Status_OK();
   }
@@ -29,29 +29,29 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
 
   ~ColumnFamilyCollector() override {}
 
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice&, const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice&) override {
+  rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice&) override {
+  rocksdb_rs::status::Status SingleDeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice&,
+  rocksdb_rs::status::Status DeleteRangeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice&,
                        const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice&,
+  rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice&,
                  const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t column_family_id, const Slice&,
+  rocksdb_rs::status::Status PutBlobIndexCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice&,
                         const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }

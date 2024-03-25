@@ -56,7 +56,7 @@ struct WriteBatchWithIndex::Rep {
   // Return true if the key is found and updated.
   bool UpdateExistingEntry(ColumnFamilyHandle* column_family, const Slice& key,
                            WriteType type);
-  bool UpdateExistingEntryWithCfId(uint32_t column_family_id, const Slice& key,
+  bool UpdateExistingEntryWithCfId(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                                    WriteType type);
 
   // Add the recent entry to the update.
@@ -67,7 +67,7 @@ struct WriteBatchWithIndex::Rep {
 
   // Allocate an index entry pointing to the last entry in the write batch and
   // put it to skip list.
-  void AddNewEntry(uint32_t column_family_id);
+  void AddNewEntry(rocksdb_rs::types::ColumnFamilyId column_family_id);
 
   // Clear all updates buffered in this batch.
   void Clear();
@@ -85,7 +85,7 @@ bool WriteBatchWithIndex::Rep::UpdateExistingEntry(
 }
 
 bool WriteBatchWithIndex::Rep::UpdateExistingEntryWithCfId(
-    uint32_t column_family_id, const Slice& key, WriteType type) {
+    rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key, WriteType type) {
   if (!overwrite_key) {
     return false;
   }
@@ -139,7 +139,7 @@ void WriteBatchWithIndex::Rep::AddOrUpdateIndex(const Slice& key,
   }
 }
 
-void WriteBatchWithIndex::Rep::AddNewEntry(uint32_t column_family_id) {
+void WriteBatchWithIndex::Rep::AddNewEntry(rocksdb_rs::types::ColumnFamilyId column_family_id) {
   const std::string& wb_data = write_batch.Data();
   Slice entry_ptr = Slice(wb_data.data() + last_entry_offset,
                           wb_data.size() - last_entry_offset);
@@ -200,7 +200,7 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Rep::ReBuildIndex() {
   uint32_t found = 0;
   while (s.ok() && !input.empty()) {
     Slice key, value, blob, xid;
-    uint32_t column_family_id = 0;  // default
+    rocksdb_rs::types::ColumnFamilyId column_family_id = 0;  // default
     char tag = 0;
 
     // set offset of current entry for call to AddNewEntry()

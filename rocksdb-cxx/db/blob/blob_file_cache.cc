@@ -21,7 +21,7 @@ namespace rocksdb {
 BlobFileCache::BlobFileCache(Cache* cache,
                              const ImmutableOptions* immutable_options,
                              const FileOptions* file_options,
-                             uint32_t column_family_id,
+                             rocksdb_rs::types::ColumnFamilyId column_family_id,
                              HistogramImpl* blob_file_read_hist,
                              const std::shared_ptr<IOTracer>& io_tracer)
     : cache_(cache),

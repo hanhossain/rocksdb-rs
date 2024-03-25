@@ -835,7 +835,7 @@ class ColumnFamilyMemTablesImpl : public ColumnFamilyMemTables {
   // returns false if column family doesn't exist
   // REQUIRES: use this function of DBImpl::column_family_memtables_ should be
   //           under a DB mutex OR from a write thread
-  bool Seek(uint32_t column_family_id) override;
+  bool Seek(rocksdb_rs::types::ColumnFamilyId column_family_id) override;
 
   // Returns log number of the selected column family
   // REQUIRES: under a DB mutex OR from a write thread

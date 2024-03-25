@@ -140,7 +140,7 @@ struct TableBuilderOptions {
   const IntTblPropCollectorFactories* int_tbl_prop_collector_factories;
   const rocksdb_rs::compression_type::CompressionType compression_type;
   const CompressionOptions& compression_opts;
-  const uint32_t column_family_id;
+  const rocksdb_rs::types::ColumnFamilyId column_family_id;
   const std::string& column_family_name;
   const int64_t oldest_key_time;
   const uint64_t target_file_size;

@@ -414,7 +414,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   // object, but it's convenient and works to share state with the
   // `TraceRecord::Handler`.
 
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key_with_ts,
+  rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key_with_ts,
                const Slice& value) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
@@ -435,7 +435,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id, const Slice& key_with_ts,
+  rocksdb_rs::status::Status PutEntityCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key_with_ts,
                      const Slice& entity) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
@@ -474,7 +474,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+  rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id,
                   const Slice& key_with_ts) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
@@ -494,7 +494,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
+  rocksdb_rs::status::Status SingleDeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id,
                         const Slice& key_with_ts) override {
     bool should_buffer_write = !(buffered_writes_ == nullptr);
     if (should_buffer_write) {
@@ -511,7 +511,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return DeleteCF(column_family_id, key_with_ts);
   }
 
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id,
+  rocksdb_rs::status::Status DeleteRangeCF(rocksdb_rs::types::ColumnFamilyId column_family_id,
                        const Slice& begin_key_with_ts,
                        const Slice& end_key_with_ts) override {
     Slice begin_key =
@@ -540,7 +540,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key_with_ts,
+  rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key_with_ts,
                  const Slice& value) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);

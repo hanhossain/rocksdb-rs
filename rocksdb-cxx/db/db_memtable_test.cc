@@ -82,7 +82,7 @@ class MockMemTableRepFactory : public MemTableRepFactory {
                                  Allocator* allocator,
                                  const SliceTransform* transform,
                                  Logger* logger,
-                                 uint32_t column_family_id) override {
+                                 rocksdb_rs::types::ColumnFamilyId column_family_id) override {
     last_column_family_id_ = column_family_id;
     return CreateMemTableRep(cmp, allocator, transform, logger);
   }

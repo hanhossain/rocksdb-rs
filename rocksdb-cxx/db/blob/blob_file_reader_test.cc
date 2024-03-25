@@ -31,7 +31,7 @@ namespace {
 
 // Creates a test blob file with `num` blobs in it.
 void WriteBlobFile(const ImmutableOptions& immutable_options,
-                   uint32_t column_family_id, bool has_ttl,
+                   rocksdb_rs::types::ColumnFamilyId column_family_id, bool has_ttl,
                    const ExpirationRange& expiration_range_header,
                    const ExpirationRange& expiration_range_footer,
                    uint64_t blob_file_number, const std::vector<Slice>& keys,
@@ -110,7 +110,7 @@ void WriteBlobFile(const ImmutableOptions& immutable_options,
 // makes it possible to test various corner cases by allowing the caller
 // to specify the contents of various blob file header/footer fields.
 void WriteBlobFile(const ImmutableOptions& immutable_options,
-                   uint32_t column_family_id, bool has_ttl,
+                   rocksdb_rs::types::ColumnFamilyId column_family_id, bool has_ttl,
                    const ExpirationRange& expiration_range_header,
                    const ExpirationRange& expiration_range_footer,
                    uint64_t blob_file_number, const Slice& key,

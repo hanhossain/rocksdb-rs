@@ -266,7 +266,7 @@ TEST_F(WriteBatchTest, OwnershipTransfer) {
 namespace {
 struct TestHandler : public WriteBatch::Handler {
   std::string seen;
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                const Slice& value) override {
     if (column_family_id == 0) {
       seen += "Put(" + key.ToString() + ", " + value.ToString() + ")";
@@ -276,7 +276,7 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
     if (column_family_id == 0) {
       seen += "Delete(" + key.ToString() + ")";
     } else {
@@ -285,7 +285,7 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
     if (column_family_id == 0) {
       seen += "SingleDelete(" + key.ToString() + ")";
     } else {
@@ -294,7 +294,7 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
+  rocksdb_rs::status::Status DeleteRangeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& begin_key,
                        const Slice& end_key) override {
     if (column_family_id == 0) {
       seen += "DeleteRange(" + begin_key.ToString() + ", " +
@@ -305,7 +305,7 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                  const Slice& value) override {
     if (column_family_id == 0) {
       seen += "Merge(" + key.ToString() + ", " + value.ToString() + ")";
@@ -575,21 +575,21 @@ TEST_F(WriteBatchTest, Continue) {
 
   struct Handler : public TestHandler {
     int num_seen = 0;
-    rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                  const Slice& value) override {
       ++num_seen;
       return TestHandler::PutCF(column_family_id, key, value);
     }
-    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
       ++num_seen;
       return TestHandler::DeleteCF(column_family_id, key);
     }
-    rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
+    rocksdb_rs::status::Status SingleDeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id,
                           const Slice& key) override {
       ++num_seen;
       return TestHandler::SingleDeleteCF(column_family_id, key);
     }
-    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                    const Slice& value) override {
       ++num_seen;
       return TestHandler::MergeCF(column_family_id, key, value);

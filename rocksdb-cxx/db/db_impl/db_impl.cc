@@ -4088,7 +4088,7 @@ SuperVersion* DBImpl::GetAndRefSuperVersion(ColumnFamilyData* cfd) {
 
 // REQUIRED: this function should only be called on the write thread or if the
 // mutex is held.
-SuperVersion* DBImpl::GetAndRefSuperVersion(uint32_t column_family_id) {
+SuperVersion* DBImpl::GetAndRefSuperVersion(rocksdb_rs::types::ColumnFamilyId column_family_id) {
   auto column_family_set = versions_->GetColumnFamilySet();
   auto cfd = column_family_set->GetColumnFamily(column_family_id);
   if (!cfd) {
@@ -4126,7 +4126,7 @@ void DBImpl::ReturnAndCleanupSuperVersion(ColumnFamilyData* cfd,
 }
 
 // REQUIRED: this function should only be called on the write thread.
-void DBImpl::ReturnAndCleanupSuperVersion(uint32_t column_family_id,
+void DBImpl::ReturnAndCleanupSuperVersion(rocksdb_rs::types::ColumnFamilyId column_family_id,
                                           SuperVersion* sv) {
   auto column_family_set = versions_->GetColumnFamilySet();
   auto cfd = column_family_set->GetColumnFamily(column_family_id);
@@ -4139,7 +4139,7 @@ void DBImpl::ReturnAndCleanupSuperVersion(uint32_t column_family_id,
 
 // REQUIRED: this function should only be called on the write thread or if the
 // mutex is held.
-ColumnFamilyHandle* DBImpl::GetColumnFamilyHandle(uint32_t column_family_id) {
+ColumnFamilyHandle* DBImpl::GetColumnFamilyHandle(rocksdb_rs::types::ColumnFamilyId column_family_id) {
   ColumnFamilyMemTables* cf_memtables = column_family_memtables_.get();
 
   if (!cf_memtables->Seek(column_family_id)) {
@@ -4151,7 +4151,7 @@ ColumnFamilyHandle* DBImpl::GetColumnFamilyHandle(uint32_t column_family_id) {
 
 // REQUIRED: mutex is NOT held.
 std::unique_ptr<ColumnFamilyHandle> DBImpl::GetColumnFamilyHandleUnlocked(
-    uint32_t column_family_id) {
+    rocksdb_rs::types::ColumnFamilyId column_family_id) {
   InstrumentedMutexLock l(&mutex_);
 
   auto* cfd =

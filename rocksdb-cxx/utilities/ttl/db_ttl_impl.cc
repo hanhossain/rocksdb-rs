@@ -552,7 +552,7 @@ rocksdb_rs::status::Status DBWithTTLImpl::Write(const WriteOptions& opts, WriteB
    public:
     explicit Handler(SystemClock* clock) : clock_(clock) {}
     WriteBatch updates_ttl;
-    rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                  const Slice& value) override {
       std::string value_with_ts;
       rocksdb_rs::status::Status st = AppendTS(value, &value_with_ts, clock_);
@@ -562,7 +562,7 @@ rocksdb_rs::status::Status DBWithTTLImpl::Write(const WriteOptions& opts, WriteB
       return WriteBatchInternal::Put(&updates_ttl, column_family_id, key,
                                      value_with_ts);
     }
-    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
+    rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                    const Slice& value) override {
       std::string value_with_ts;
       rocksdb_rs::status::Status st = AppendTS(value, &value_with_ts, clock_);
@@ -572,10 +572,10 @@ rocksdb_rs::status::Status DBWithTTLImpl::Write(const WriteOptions& opts, WriteB
       return WriteBatchInternal::Merge(&updates_ttl, column_family_id, key,
                                        value_with_ts);
     }
-    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
       return WriteBatchInternal::Delete(&updates_ttl, column_family_id, key);
     }
-    rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
+    rocksdb_rs::status::Status DeleteRangeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& begin_key,
                          const Slice& end_key) override {
       return WriteBatchInternal::DeleteRange(&updates_ttl, column_family_id,
                                              begin_key, end_key);

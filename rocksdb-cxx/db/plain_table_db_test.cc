@@ -264,7 +264,7 @@ class TestPlainTableReader : public PlainTableReader {
       std::unique_ptr<RandomAccessFileReader>&& file,
       const ImmutableOptions& ioptions, const SliceTransform* prefix_extractor,
       bool* expect_bloom_not_match, bool store_index_in_file,
-      uint32_t column_family_id, const std::string& column_family_name)
+      rocksdb_rs::types::ColumnFamilyId column_family_id, const std::string& column_family_name)
       : PlainTableReader(ioptions, std::move(file), env_options, icomparator,
                          encoding_type, file_size, props.get(),
                          prefix_extractor),
@@ -312,7 +312,7 @@ class TestPlainTableFactory : public PlainTableFactory {
  public:
   explicit TestPlainTableFactory(bool* expect_bloom_not_match,
                                  const PlainTableOptions& options,
-                                 uint32_t column_family_id,
+                                 rocksdb_rs::types::ColumnFamilyId column_family_id,
                                  std::string column_family_name)
       : PlainTableFactory(options),
         bloom_bits_per_key_(options.bloom_bits_per_key),
@@ -377,7 +377,7 @@ class TestPlainTableFactory : public PlainTableFactory {
   size_t index_sparseness_;
   bool store_index_in_file_;
   bool* expect_bloom_not_match_;
-  const uint32_t column_family_id_;
+  const rocksdb_rs::types::ColumnFamilyId column_family_id_;
   const std::string column_family_name_;
 };
 

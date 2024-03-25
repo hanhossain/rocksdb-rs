@@ -17,7 +17,7 @@ namespace rocksdb {
 // Request for locking a single key.
 struct PointLockRequest {
   // The id of the key's column family.
-  rocksdb_rs::types::ColumnFamilyId column_family_id = 0;
+  rocksdb_rs::types::ColumnFamilyId column_family_id = rocksdb_rs::types::ColumnFamilyId_new();
   // The key to lock.
   std::string key;
   // The sequence number from which there is no concurrent update to key.

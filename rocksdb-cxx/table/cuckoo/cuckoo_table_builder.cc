@@ -53,7 +53,7 @@ CuckooTableBuilder::CuckooTableBuilder(
     const Comparator* user_comparator, uint32_t cuckoo_block_size,
     bool use_module_hash, bool identity_as_first_hash,
     uint64_t (*get_slice_hash)(const Slice&, uint32_t, uint64_t),
-    uint32_t column_family_id, const std::string& column_family_name,
+    rocksdb_rs::types::ColumnFamilyId column_family_id, const std::string& column_family_name,
     const std::string& db_id, const std::string& db_session_id,
     uint64_t file_number)
     : num_hash_func_(2),

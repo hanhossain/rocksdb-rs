@@ -121,7 +121,7 @@ class WriteQueryTraceRecord : public QueryTraceRecord {
 // Trace record for DB::Get() operation
 class GetQueryTraceRecord : public QueryTraceRecord {
  public:
-  GetQueryTraceRecord(uint32_t column_family_id, PinnableSlice&& key,
+  GetQueryTraceRecord(rocksdb_rs::types::ColumnFamilyId column_family_id, PinnableSlice&& key,
                       uint64_t timestamp);
 
   GetQueryTraceRecord(uint32_t column_family_id, const std::string& key,

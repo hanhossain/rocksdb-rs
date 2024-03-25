@@ -48,7 +48,7 @@ struct Entry {
 
 struct TestHandler : public WriteBatch::Handler {
   std::map<uint32_t, std::vector<Entry>> seen;
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                const Slice& value) override {
     Entry e;
     e.key = key.ToString();
@@ -57,7 +57,7 @@ struct TestHandler : public WriteBatch::Handler {
     seen[column_family_id].push_back(e);
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                  const Slice& value) override {
     Entry e;
     e.key = key.ToString();
@@ -67,7 +67,7 @@ struct TestHandler : public WriteBatch::Handler {
     return rocksdb_rs::status::Status_OK();
   }
   void LogData(const Slice& /*blob*/) override {}
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
     Entry e;
     e.key = key.ToString();
     e.value = "";

@@ -785,7 +785,7 @@ rocksdb_rs::status::Status CheckColumnFamilyTimestampSize(ColumnFamilyHandle* co
 }
 }  // anonymous namespace
 
-rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
     return rocksdb_rs::status::Status_InvalidArgument("key is too large");
@@ -881,7 +881,7 @@ rocksdb_rs::status::Status WriteBatchInternal::CheckSlicePartsLength(const Slice
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Put(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                const SliceParts& key, const SliceParts& value) {
   rocksdb_rs::status::Status s = CheckSlicePartsLength(key, value);
   if (!s.ok()) {
@@ -933,7 +933,7 @@ rocksdb_rs::status::Status WriteBatch::Put(ColumnFamilyHandle* column_family, co
       "Cannot call this method on column family enabling timestamp");
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::PutEntity(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::PutEntity(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                      const Slice& key,
                                      const WideColumns& columns) {
   assert(b);
@@ -1081,7 +1081,7 @@ rocksdb_rs::status::Status WriteBatchInternal::MarkRollback(WriteBatch* b, const
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                   const Slice& key) {
   LocalSavePoint save(b);
   WriteBatchInternal::SetCount(b, WriteBatchInternal::Count(b) + 1);
@@ -1145,7 +1145,7 @@ rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
                                     SliceParts(key_with_ts.data(), 2));
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Delete(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                   const SliceParts& key) {
   LocalSavePoint save(b);
   WriteBatchInternal::SetCount(b, WriteBatchInternal::Count(b) + 1);
@@ -1195,7 +1195,7 @@ rocksdb_rs::status::Status WriteBatch::Delete(ColumnFamilyHandle* column_family,
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::SingleDelete(WriteBatch* b,
-                                        uint32_t column_family_id,
+                                        rocksdb_rs::types::ColumnFamilyId column_family_id,
                                         const Slice& key) {
   LocalSavePoint save(b);
   WriteBatchInternal::SetCount(b, WriteBatchInternal::Count(b) + 1);
@@ -1261,7 +1261,7 @@ rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_f
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::SingleDelete(WriteBatch* b,
-                                        uint32_t column_family_id,
+                                        rocksdb_rs::types::ColumnFamilyId column_family_id,
                                         const SliceParts& key) {
   LocalSavePoint save(b);
   WriteBatchInternal::SetCount(b, WriteBatchInternal::Count(b) + 1);
@@ -1311,7 +1311,7 @@ rocksdb_rs::status::Status WriteBatch::SingleDelete(ColumnFamilyHandle* column_f
       "Cannot call this method on column family enabling timestamp");
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::DeleteRange(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                        const Slice& begin_key,
                                        const Slice& end_key) {
   LocalSavePoint save(b);
@@ -1384,7 +1384,7 @@ rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_fa
                                          SliceParts(end_key_with_ts.data(), 2));
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::DeleteRange(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::DeleteRange(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                        const SliceParts& begin_key,
                                        const SliceParts& end_key) {
   LocalSavePoint save(b);
@@ -1435,7 +1435,7 @@ rocksdb_rs::status::Status WriteBatch::DeleteRange(ColumnFamilyHandle* column_fa
       "Cannot call this method on column family enabling timestamp");
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Merge(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                  const Slice& key, const Slice& value) {
   if (key.size() > size_t{std::numeric_limits<uint32_t>::max()}) {
     return rocksdb_rs::status::Status_InvalidArgument("key is too large");
@@ -1508,7 +1508,7 @@ rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family, 
       this, cf_id, SliceParts(key_with_ts.data(), 2), SliceParts(&value, 1));
 }
 
-rocksdb_rs::status::Status WriteBatchInternal::Merge(WriteBatch* b, uint32_t column_family_id,
+rocksdb_rs::status::Status WriteBatchInternal::Merge(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                                  const SliceParts& key,
                                  const SliceParts& value) {
   rocksdb_rs::status::Status s = CheckSlicePartsLength(key, value);
@@ -1562,7 +1562,7 @@ rocksdb_rs::status::Status WriteBatch::Merge(ColumnFamilyHandle* column_family,
 }
 
 rocksdb_rs::status::Status WriteBatchInternal::PutBlobIndex(WriteBatch* b,
-                                        uint32_t column_family_id,
+                                        rocksdb_rs::types::ColumnFamilyId column_family_id,
                                         const Slice& key, const Slice& value) {
   LocalSavePoint save(b);
   WriteBatchInternal::SetCount(b, WriteBatchInternal::Count(b) + 1);
@@ -1814,7 +1814,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return *reinterpret_cast<MemPostInfoMap*>(&mem_post_info_map_);
   }
 
-  bool IsDuplicateKeySeq(uint32_t column_family_id, const Slice& key) {
+  bool IsDuplicateKeySeq(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) {
     assert(!write_after_commit_);
     assert(rebuilding_trx_ != nullptr);
     if (!dup_dectector_on_) {
@@ -1951,7 +1951,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
   }
 
-  bool SeekToColumnFamily(uint32_t column_family_id, rocksdb_rs::status::Status* s) {
+  bool SeekToColumnFamily(rocksdb_rs::types::ColumnFamilyId column_family_id, rocksdb_rs::status::Status* s) {
     // If we are in a concurrent mode, it is the caller's responsibility
     // to clone the original ColumnFamilyMemTables so that each thread
     // has its own instance.  Otherwise, it must be guaranteed that there
@@ -1990,7 +1990,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return true;
   }
 
-  rocksdb_rs::status::Status PutCFImpl(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCFImpl(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                    const Slice& value, ValueType value_type,
                    const ProtectionInfoKVOS64* kv_prot_info) {
     // optimize for non-recovery mode
@@ -2139,7 +2139,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
     rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();
@@ -2163,7 +2163,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutEntityCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                      const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
 
@@ -2206,7 +2206,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
     if (UNLIKELY(write_after_commit_ && rebuilding_trx_ != nullptr)) {
@@ -2270,7 +2270,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
     if (UNLIKELY(write_after_commit_ && rebuilding_trx_ != nullptr)) {
@@ -2328,7 +2328,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
+  rocksdb_rs::status::Status DeleteRangeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& begin_key,
                        const Slice& end_key) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
@@ -2415,7 +2415,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                  const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
     // optimize for non-recovery mode
@@ -2576,7 +2576,7 @@ class MemTableInserter : public WriteBatch::Handler {
     return ret_status;
   }
 
-  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutBlobIndexCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                         const Slice& value) override {
     const auto* kv_prot_info = NextProtectionInfo();
     rocksdb_rs::status::Status ret_status = rocksdb_rs::status::Status_new();

@@ -34,7 +34,7 @@ class BlobFileReader {
   static rocksdb_rs::status::Status Create(const ImmutableOptions& immutable_options,
                        const ReadOptions& read_options,
                        const FileOptions& file_options,
-                       uint32_t column_family_id,
+                       rocksdb_rs::types::ColumnFamilyId column_family_id,
                        HistogramImpl* blob_file_read_hist,
                        uint64_t blob_file_number,
                        const std::shared_ptr<IOTracer>& io_tracer,
@@ -79,7 +79,7 @@ class BlobFileReader {
 
   static rocksdb_rs::status::Status ReadHeader(const RandomAccessFileReader* file_reader,
                            const ReadOptions& read_options,
-                           uint32_t column_family_id, Statistics* statistics,
+                           rocksdb_rs::types::ColumnFamilyId column_family_id, Statistics* statistics,
                            rocksdb_rs::compression_type::CompressionType* compression_type);
 
   static rocksdb_rs::status::Status ReadFooter(const RandomAccessFileReader* file_reader,

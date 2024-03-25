@@ -53,14 +53,14 @@ rocksdb_rs::status::Status WriteQueryTraceRecord::Accept(
 }
 
 // GetQueryTraceRecord
-GetQueryTraceRecord::GetQueryTraceRecord(uint32_t column_family_id,
+GetQueryTraceRecord::GetQueryTraceRecord(rocksdb_rs::types::ColumnFamilyId column_family_id,
                                          PinnableSlice&& key,
                                          uint64_t timestamp)
     : QueryTraceRecord(timestamp),
       cf_id_(column_family_id),
       key_(std::move(key)) {}
 
-GetQueryTraceRecord::GetQueryTraceRecord(uint32_t column_family_id,
+GetQueryTraceRecord::GetQueryTraceRecord(rocksdb_rs::types::ColumnFamilyId column_family_id,
                                          const std::string& key,
                                          uint64_t timestamp)
     : QueryTraceRecord(timestamp), cf_id_(column_family_id) {
@@ -106,7 +106,7 @@ Slice IteratorQueryTraceRecord::GetUpperBound() const { return Slice(upper_); }
 
 // IteratorSeekQueryTraceRecord
 IteratorSeekQueryTraceRecord::IteratorSeekQueryTraceRecord(
-    SeekType seek_type, uint32_t column_family_id, PinnableSlice&& key,
+    SeekType seek_type, rocksdb_rs::types::ColumnFamilyId column_family_id, PinnableSlice&& key,
     uint64_t timestamp)
     : IteratorQueryTraceRecord(timestamp),
       type_(seek_type),
@@ -114,7 +114,7 @@ IteratorSeekQueryTraceRecord::IteratorSeekQueryTraceRecord(
       key_(std::move(key)) {}
 
 IteratorSeekQueryTraceRecord::IteratorSeekQueryTraceRecord(
-    SeekType seek_type, uint32_t column_family_id, const std::string& key,
+    SeekType seek_type, rocksdb_rs::types::ColumnFamilyId column_family_id, const std::string& key,
     uint64_t timestamp)
     : IteratorQueryTraceRecord(timestamp),
       type_(seek_type),
@@ -123,7 +123,7 @@ IteratorSeekQueryTraceRecord::IteratorSeekQueryTraceRecord(
 }
 
 IteratorSeekQueryTraceRecord::IteratorSeekQueryTraceRecord(
-    SeekType seek_type, uint32_t column_family_id, PinnableSlice&& key,
+    SeekType seek_type, rocksdb_rs::types::ColumnFamilyId column_family_id, PinnableSlice&& key,
     PinnableSlice&& lower_bound, PinnableSlice&& upper_bound,
     uint64_t timestamp)
     : IteratorQueryTraceRecord(std::move(lower_bound), std::move(upper_bound),
@@ -133,7 +133,7 @@ IteratorSeekQueryTraceRecord::IteratorSeekQueryTraceRecord(
       key_(std::move(key)) {}
 
 IteratorSeekQueryTraceRecord::IteratorSeekQueryTraceRecord(
-    SeekType seek_type, uint32_t column_family_id, const std::string& key,
+    SeekType seek_type, rocksdb_rs::types::ColumnFamilyId column_family_id, const std::string& key,
     const std::string& lower_bound, const std::string& upper_bound,
     uint64_t timestamp)
     : IteratorQueryTraceRecord(lower_bound, upper_bound, timestamp),

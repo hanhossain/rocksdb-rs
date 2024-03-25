@@ -29,7 +29,7 @@ namespace rocksdb {
 namespace {
 
 // Creates a test blob file with a single blob in it.
-void WriteBlobFile(uint32_t column_family_id,
+void WriteBlobFile(rocksdb_rs::types::ColumnFamilyId column_family_id,
                    const ImmutableOptions& immutable_options,
                    uint64_t blob_file_number) {
   assert(!immutable_options.cf_paths.empty());

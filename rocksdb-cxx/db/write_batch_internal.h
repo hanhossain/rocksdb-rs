@@ -31,7 +31,7 @@ class ColumnFamilyData;
 class ColumnFamilyMemTables {
  public:
   virtual ~ColumnFamilyMemTables() {}
-  virtual bool Seek(uint32_t column_family_id) = 0;
+  virtual bool Seek(rocksdb_rs::types::ColumnFamilyId column_family_id) = 0;
   // returns true if the update to memtable should be ignored
   // (useful when recovering from log whose updates have already
   // been processed)
@@ -46,8 +46,8 @@ class ColumnFamilyMemTablesDefault : public ColumnFamilyMemTables {
   explicit ColumnFamilyMemTablesDefault(MemTable* mem)
       : ok_(false), mem_(mem) {}
 
-  bool Seek(uint32_t column_family_id) override {
-    ok_ = (column_family_id == 0);
+  bool Seek(rocksdb_rs::types::ColumnFamilyId column_family_id) override {
+    ok_ = (column_family_id.id == 0);
     return ok_;
   }
 
@@ -81,41 +81,41 @@ class WriteBatchInternal {
   static constexpr size_t kHeader = 12;
 
   // WriteBatch methods with column_family_id instead of ColumnFamilyHandle*
-  static rocksdb_rs::status::Status Put(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Put(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                     const Slice& key, const Slice& value);
 
-  static rocksdb_rs::status::Status Put(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Put(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                     const SliceParts& key, const SliceParts& value);
 
-  static rocksdb_rs::status::Status PutEntity(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status PutEntity(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                           const Slice& key, const WideColumns& columns);
 
-  static rocksdb_rs::status::Status Delete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Delete(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                        const SliceParts& key);
 
-  static rocksdb_rs::status::Status Delete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Delete(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                        const Slice& key);
 
-  static rocksdb_rs::status::Status SingleDelete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status SingleDelete(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                              const SliceParts& key);
 
-  static rocksdb_rs::status::Status SingleDelete(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status SingleDelete(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                              const Slice& key);
 
-  static rocksdb_rs::status::Status DeleteRange(WriteBatch* b, uint32_t column_family_id,
+  static rocksdb_rs::status::Status DeleteRange(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                             const Slice& begin_key, const Slice& end_key);
 
-  static rocksdb_rs::status::Status DeleteRange(WriteBatch* b, uint32_t column_family_id,
+  static rocksdb_rs::status::Status DeleteRange(WriteBatch* b, rocksdb_rs::types::ColumnFamilyId column_family_id,
                             const SliceParts& begin_key,
                             const SliceParts& end_key);
 
-  static rocksdb_rs::status::Status Merge(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Merge(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                       const Slice& key, const Slice& value);
 
-  static rocksdb_rs::status::Status Merge(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status Merge(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                       const SliceParts& key, const SliceParts& value);
 
-  static rocksdb_rs::status::Status PutBlobIndex(WriteBatch* batch, uint32_t column_family_id,
+  static rocksdb_rs::status::Status PutBlobIndex(WriteBatch* batch, rocksdb_rs::types::ColumnFamilyId column_family_id,
                              const Slice& key, const Slice& value);
 
   static rocksdb_rs::status::Status MarkEndPrepare(WriteBatch* batch, const Slice& xid,

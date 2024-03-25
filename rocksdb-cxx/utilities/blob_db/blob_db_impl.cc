@@ -691,7 +691,7 @@ std::shared_ptr<BlobFile> BlobDBImpl::NewBlobFile(
 
   uint64_t file_num = next_file_number_++;
 
-  const uint32_t column_family_id =
+  const rocksdb_rs::types::ColumnFamilyId column_family_id =
       static_cast<ColumnFamilyHandleImpl*>(DefaultColumnFamily())->GetID();
   auto blob_file = std::make_shared<BlobFile>(
       this, blob_dir_, file_num, db_options_.info_log.get(), column_family_id,
@@ -949,7 +949,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
 
   WriteBatch* batch() { return &batch_; }
 
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+  rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                const Slice& value) override {
     if (column_family_id != default_cf_id_) {
       return rocksdb_rs::status::Status_NotSupported(
@@ -960,7 +960,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
     return s;
   }
 
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) override {
     if (column_family_id != default_cf_id_) {
       return rocksdb_rs::status::Status_NotSupported(
           "Blob DB doesn't support non-default column family.");
@@ -969,7 +969,7 @@ class BlobDBImpl::BlobInserter : public WriteBatch::Handler {
     return s;
   }
 
-  virtual rocksdb_rs::status::Status DeleteRange(uint32_t column_family_id, const Slice& begin_key,
+  virtual rocksdb_rs::status::Status DeleteRange(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& begin_key,
                              const Slice& end_key) {
     if (column_family_id != default_cf_id_) {
       return rocksdb_rs::status::Status_NotSupported(
@@ -1051,7 +1051,7 @@ rocksdb_rs::status::Status BlobDBImpl::PutBlobValue(const WriteOptions& /*option
   write_mutex_.AssertHeld();
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string index_entry;
-  uint32_t column_family_id =
+  rocksdb_rs::types::ColumnFamilyId column_family_id =
       static_cast_with_check<ColumnFamilyHandleImpl>(DefaultColumnFamily())
           ->GetID();
   if (value.size() < bdb_options_.min_blob_size) {

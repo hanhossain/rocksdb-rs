@@ -594,7 +594,7 @@ class VersionEdit {
            wal_additions_.size() + !wal_deletion_.IsEmpty();
   }
 
-  void SetColumnFamily(uint32_t column_family_id) {
+  void SetColumnFamily(rocksdb_rs::types::ColumnFamilyId column_family_id) {
     column_family_ = column_family_id;
   }
   uint32_t GetColumnFamily() const { return column_family_; }

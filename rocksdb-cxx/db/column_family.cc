@@ -1648,7 +1648,7 @@ void ColumnFamilySet::RemoveColumnFamily(ColumnFamilyData* cfd) {
 }
 
 // under a DB mutex OR from a write thread
-bool ColumnFamilyMemTablesImpl::Seek(uint32_t column_family_id) {
+bool ColumnFamilyMemTablesImpl::Seek(rocksdb_rs::types::ColumnFamilyId column_family_id) {
   if (column_family_id == 0) {
     // optimization for common case
     current_ = column_family_set_->GetDefault();
@@ -1675,7 +1675,7 @@ ColumnFamilyHandle* ColumnFamilyMemTablesImpl::GetColumnFamilyHandle() {
 }
 
 uint32_t GetColumnFamilyID(ColumnFamilyHandle* column_family) {
-  uint32_t column_family_id = 0;
+  rocksdb_rs::types::ColumnFamilyId column_family_id = 0;
   if (column_family != nullptr) {
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
     column_family_id = cfh->GetID();

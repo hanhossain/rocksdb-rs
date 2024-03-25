@@ -1576,33 +1576,33 @@ rocksdb_rs::status::Status TraceAnalyzer::Handle(const MultiGetQueryTraceRecord&
 }
 
 // Handle the Put request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::PutCF(uint32_t column_family_id, const Slice& key,
+rocksdb_rs::status::Status TraceAnalyzer::PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                             const Slice& value) {
   return OutputAnalysisResult(TraceOperationType::kPut, write_batch_ts_,
                               column_family_id, key, value.size());
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::PutEntityCF(uint32_t column_family_id, const Slice& key,
+rocksdb_rs::status::Status TraceAnalyzer::PutEntityCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                                   const Slice& value) {
   return OutputAnalysisResult(TraceOperationType::kPutEntity, write_batch_ts_,
                               column_family_id, key, value.size());
 }
 
 // Handle the Delete request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::DeleteCF(uint32_t column_family_id, const Slice& key) {
+rocksdb_rs::status::Status TraceAnalyzer::DeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key) {
   return OutputAnalysisResult(TraceOperationType::kDelete, write_batch_ts_,
                               column_family_id, key, 0);
 }
 
 // Handle the SingleDelete request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::SingleDeleteCF(uint32_t column_family_id,
+rocksdb_rs::status::Status TraceAnalyzer::SingleDeleteCF(rocksdb_rs::types::ColumnFamilyId column_family_id,
                                      const Slice& key) {
   return OutputAnalysisResult(TraceOperationType::kSingleDelete,
                               write_batch_ts_, column_family_id, key, 0);
 }
 
 // Handle the DeleteRange request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::DeleteRangeCF(uint32_t column_family_id,
+rocksdb_rs::status::Status TraceAnalyzer::DeleteRangeCF(rocksdb_rs::types::ColumnFamilyId column_family_id,
                                     const Slice& begin_key,
                                     const Slice& end_key) {
   return OutputAnalysisResult(TraceOperationType::kRangeDelete, write_batch_ts_,
@@ -1611,7 +1611,7 @@ rocksdb_rs::status::Status TraceAnalyzer::DeleteRangeCF(uint32_t column_family_i
 }
 
 // Handle the Merge request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::MergeCF(uint32_t column_family_id, const Slice& key,
+rocksdb_rs::status::Status TraceAnalyzer::MergeCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                               const Slice& value) {
   return OutputAnalysisResult(TraceOperationType::kMerge, write_batch_ts_,
                               column_family_id, key, value.size());

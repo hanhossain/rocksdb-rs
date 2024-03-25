@@ -41,7 +41,7 @@ class PlainTableBuilder : public TableBuilder {
   PlainTableBuilder(
       const ImmutableOptions& ioptions, const MutableCFOptions& moptions,
       const IntTblPropCollectorFactories* int_tbl_prop_collector_factories,
-      uint32_t column_family_id, int level_at_creation,
+      rocksdb_rs::types::ColumnFamilyId column_family_id, int level_at_creation,
       WritableFileWriter* file, uint32_t user_key_size,
       EncodingType encoding_type, size_t index_sparseness,
       uint32_t bloom_bits_per_key, const std::string& column_family_name,

@@ -1060,7 +1060,7 @@ TEST_F(DBTest2, WalFilterTestWithColumnFamilies) {
               cf_wal_keys_(cf_wal_keys),
               log_number_(current_log_number) {}
 
-        rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
+        rocksdb_rs::status::Status PutCF(rocksdb_rs::types::ColumnFamilyId column_family_id, const Slice& key,
                      const Slice& /*value*/) override {
           auto it = cf_log_number_map_.find(column_family_id);
           assert(it != cf_log_number_map_.end());

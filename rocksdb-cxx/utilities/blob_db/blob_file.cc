@@ -28,7 +28,7 @@ BlobFile::BlobFile(const BlobDBImpl* p, const std::string& bdir, uint64_t fn,
     : parent_(p), path_to_dir_(bdir), file_number_(fn), info_log_(info_log) {}
 
 BlobFile::BlobFile(const BlobDBImpl* p, const std::string& bdir, uint64_t fn,
-                   Logger* info_log, uint32_t column_family_id,
+                   Logger* info_log, rocksdb_rs::types::ColumnFamilyId column_family_id,
                    rocksdb_rs::compression_type::CompressionType compression, bool has_ttl,
                    const ExpirationRange& expiration_range)
     : parent_(p),

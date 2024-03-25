@@ -27,7 +27,7 @@ class IOTracer;
 class BlobFileCache {
  public:
   BlobFileCache(Cache* cache, const ImmutableOptions* immutable_options,
-                const FileOptions* file_options, uint32_t column_family_id,
+                const FileOptions* file_options, rocksdb_rs::types::ColumnFamilyId column_family_id,
                 HistogramImpl* blob_file_read_hist,
                 const std::shared_ptr<IOTracer>& io_tracer);
 
@@ -48,7 +48,7 @@ class BlobFileCache {
   Striped<CacheAlignedWrapper<port::Mutex>> mutex_;
   const ImmutableOptions* immutable_options_;
   const FileOptions* file_options_;
-  uint32_t column_family_id_;
+  rocksdb_rs::types::ColumnFamilyId column_family_id_;
   HistogramImpl* blob_file_read_hist_;
   std::shared_ptr<IOTracer> io_tracer_;
 

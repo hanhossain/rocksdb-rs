@@ -53,7 +53,7 @@ struct BlobLogHeader {
         expiration_range(_expiration_range) {}
 
   uint32_t version = kVersion1;
-  uint32_t column_family_id = 0;
+  rocksdb_rs::types::ColumnFamilyId column_family_id = 0;
   rocksdb_rs::compression_type::CompressionType compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
   bool has_ttl = false;
   ExpirationRange expiration_range;
