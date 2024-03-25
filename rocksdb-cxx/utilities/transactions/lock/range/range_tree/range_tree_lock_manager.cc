@@ -153,7 +153,7 @@ void wait_callback_for_locktree(void*, toku::lock_wait_infos* infos) {
     // As long as we hold the lock on the locktree's pending request queue
     // this should be safe.
     auto txn = (PessimisticTransaction*)wait_info.waiter;
-    auto cf_id = (ColumnFamilyId)wait_info.ltree->get_dict_id().dictid;
+    auto cf_id = (rocksdb_rs::types::ColumnFamilyId)wait_info.ltree->get_dict_id().dictid;
 
     autovector<TransactionID> waitee_ids;
     for (auto waitee : wait_info.waitees) {
@@ -167,7 +167,7 @@ void wait_callback_for_locktree(void*, toku::lock_wait_infos* infos) {
 }
 
 void RangeTreeLockManager::UnLock(PessimisticTransaction* txn,
-                                  ColumnFamilyId column_family_id,
+                                  rocksdb_rs::types::ColumnFamilyId column_family_id,
                                   const std::string& key, Env*) {
   auto locktree = GetLockTreeForCF(column_family_id);
   std::string endp_image;
@@ -251,7 +251,7 @@ namespace {
 void UnrefLockTreeMapsCache(void* ptr) {
   // Called when a thread exits or a ThreadLocalPtr gets destroyed.
   auto lock_tree_map_cache = static_cast<
-      std::unordered_map<ColumnFamilyId, std::shared_ptr<toku::locktree>>*>(
+      std::unordered_map<rocksdb_rs::types::ColumnFamilyId, std::shared_ptr<toku::locktree>>*>(
       ptr);
   delete lock_tree_map_cache;
 }
@@ -420,7 +420,7 @@ void RangeTreeLockManager::RemoveColumnFamily(const ColumnFamilyHandle* cfh) {
 }
 
 std::shared_ptr<toku::locktree> RangeTreeLockManager::GetLockTreeForCF(
-    ColumnFamilyId column_family_id) {
+    rocksdb_rs::types::ColumnFamilyId column_family_id) {
   // First check thread-local cache
   if (ltree_lookup_cache_->Get() == nullptr) {
     ltree_lookup_cache_->Reset(new LockTreeMap());

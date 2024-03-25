@@ -104,7 +104,7 @@ rocksdb_rs::status::Status OptimisticTransaction::CommitWithParallelValidate() {
       tracked_locks_->GetColumnFamilyIterator());
   assert(cf_it != nullptr);
   while (cf_it->HasNext()) {
-    ColumnFamilyId cf = cf_it->Next();
+    rocksdb_rs::types::ColumnFamilyId cf = cf_it->Next();
 
     // To avoid the same key(s) contending across CFs or DBs, seed the
     // hash independently.

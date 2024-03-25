@@ -43,7 +43,7 @@ void RangeTreeLockTracker::Track(const RangeLockRequest &lock_req) {
 }
 
 PointLockStatus RangeTreeLockTracker::GetPointLockStatus(
-    ColumnFamilyId /*cf_id*/, const std::string & /*key*/) const {
+    rocksdb_rs::types::ColumnFamilyId /*cf_id*/, const std::string & /*key*/) const {
   // This function is not expected to be called as RangeTreeLockTracker::
   // IsPointLockSupported() returns false. Return the status which indicates
   // the point is not locked.
@@ -56,7 +56,7 @@ PointLockStatus RangeTreeLockTracker::GetPointLockStatus(
 
 void RangeTreeLockTracker::Clear() { range_list_.reset(); }
 
-void RangeLockList::Append(ColumnFamilyId cf_id, const DBT *left_key,
+void RangeLockList::Append(rocksdb_rs::types::ColumnFamilyId cf_id, const DBT *left_key,
                            const DBT *right_key) {
   MutexLock l(&mutex_);
   // Only the transaction owner thread calls this function.
@@ -136,7 +136,7 @@ void RangeLockList::ReplaceLocks(const toku::locktree *lt,
     return;
   }
 
-  ColumnFamilyId cf_id = (ColumnFamilyId)lt->get_dict_id().dictid;
+  rocksdb_rs::types::ColumnFamilyId cf_id = (rocksdb_rs::types::ColumnFamilyId)lt->get_dict_id().dictid;
 
   auto it = buffers_.find(cf_id);
   it->second->destroy();

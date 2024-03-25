@@ -159,7 +159,7 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_imp
       tracker.GetColumnFamilyIterator());
   assert(cf_it != nullptr);
   while (cf_it->HasNext()) {
-    ColumnFamilyId cf = cf_it->Next();
+    rocksdb_rs::types::ColumnFamilyId cf = cf_it->Next();
 
     SuperVersion* sv = db_impl->GetAndRefSuperVersion(cf);
     if (sv == nullptr) {

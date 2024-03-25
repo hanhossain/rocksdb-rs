@@ -158,7 +158,7 @@ void PointLockManager::RemoveColumnFamily(const ColumnFamilyHandle* cf) {
 // Note:  The LockMap is only valid as long as the caller is still holding on
 //   to the returned std::shared_ptr.
 std::shared_ptr<LockMap> PointLockManager::GetLockMap(
-    ColumnFamilyId column_family_id) {
+    rocksdb_rs::types::ColumnFamilyId column_family_id) {
   // First check thread-local cache
   if (lock_maps_cache_->Get() == nullptr) {
     lock_maps_cache_->Reset(new LockMaps());
@@ -223,7 +223,7 @@ bool PointLockManager::IsLockExpired(TransactionID txn_id,
 }
 
 rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* txn,
-                                 ColumnFamilyId column_family_id,
+                                 rocksdb_rs::types::ColumnFamilyId column_family_id,
                                  const std::string& key, Env* env,
                                  bool exclusive) {
   // Lookup lock map for this column family id
@@ -252,7 +252,7 @@ rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* txn
 // Helper function for TryLock().
 rocksdb_rs::status::Status PointLockManager::AcquireWithTimeout(
     PessimisticTransaction* txn, LockMap* lock_map, LockMapStripe* stripe,
-    ColumnFamilyId column_family_id, const std::string& key, Env* env,
+    rocksdb_rs::types::ColumnFamilyId column_family_id, const std::string& key, Env* env,
     int64_t timeout, const LockInfo& lock_info) {
   rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
   uint64_t end_time = 0;
@@ -577,7 +577,7 @@ void PointLockManager::UnLockKey(PessimisticTransaction* txn,
 }
 
 void PointLockManager::UnLock(PessimisticTransaction* txn,
-                              ColumnFamilyId column_family_id,
+                              rocksdb_rs::types::ColumnFamilyId column_family_id,
                               const std::string& key, Env* env) {
   std::shared_ptr<LockMap> lock_map_ptr = GetLockMap(column_family_id);
   LockMap* lock_map = lock_map_ptr.get();
@@ -605,7 +605,7 @@ void PointLockManager::UnLock(PessimisticTransaction* txn,
       tracker.GetColumnFamilyIterator());
   assert(cf_it != nullptr);
   while (cf_it->HasNext()) {
-    ColumnFamilyId cf = cf_it->Next();
+    rocksdb_rs::types::ColumnFamilyId cf = cf_it->Next();
     std::shared_ptr<LockMap> lock_map_ptr = GetLockMap(cf);
     LockMap* lock_map = lock_map_ptr.get();
     if (!lock_map) {
@@ -701,7 +701,7 @@ PointLockManager::RangeLockStatus PointLockManager::GetRangeLockStatus() {
 }
 
 rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* /* txn */,
-                                 ColumnFamilyId /* cf_id */,
+                                 rocksdb_rs::types::ColumnFamilyId /* cf_id */,
                                  const Endpoint& /* start */,
                                  const Endpoint& /* end */, Env* /* env */,
                                  bool /* exclusive */) {
@@ -710,7 +710,7 @@ rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* /* 
 }
 
 void PointLockManager::UnLock(PessimisticTransaction* /* txn */,
-                              ColumnFamilyId /* cf_id */,
+                              rocksdb_rs::types::ColumnFamilyId /* cf_id */,
                               const Endpoint& /* start */,
                               const Endpoint& /* end */, Env* /* env */) {
   // no-op

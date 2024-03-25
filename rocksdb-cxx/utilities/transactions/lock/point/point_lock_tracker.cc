@@ -18,7 +18,7 @@ class TrackedKeysColumnFamilyIterator
 
   bool HasNext() const override { return it_ != tracked_keys_.end(); }
 
-  ColumnFamilyId Next() override { return (it_++)->first; }
+  rocksdb_rs::types::ColumnFamilyId Next() override { return (it_++)->first; }
 
  private:
   const TrackedKeys& tracked_keys_;
@@ -27,7 +27,7 @@ class TrackedKeysColumnFamilyIterator
 
 class TrackedKeysIterator : public LockTracker::KeyIterator {
  public:
-  TrackedKeysIterator(const TrackedKeys& keys, ColumnFamilyId id)
+  TrackedKeysIterator(const TrackedKeys& keys, rocksdb_rs::types::ColumnFamilyId id)
       : key_infos_(keys.at(id)), it_(key_infos_.begin()) {}
 
   bool HasNext() const override { return it_ != key_infos_.end(); }
@@ -110,7 +110,7 @@ UntrackStatus PointLockTracker::Untrack(const PointLockRequest& r) {
 void PointLockTracker::Merge(const LockTracker& tracker) {
   const PointLockTracker& t = static_cast<const PointLockTracker&>(tracker);
   for (const auto& cf_keys : t.tracked_keys_) {
-    ColumnFamilyId cf = cf_keys.first;
+    rocksdb_rs::types::ColumnFamilyId cf = cf_keys.first;
     const auto& keys = cf_keys.second;
 
     auto current_cf_keys = tracked_keys_.find(cf);
@@ -137,7 +137,7 @@ void PointLockTracker::Merge(const LockTracker& tracker) {
 void PointLockTracker::Subtract(const LockTracker& tracker) {
   const PointLockTracker& t = static_cast<const PointLockTracker&>(tracker);
   for (const auto& cf_keys : t.tracked_keys_) {
-    ColumnFamilyId cf = cf_keys.first;
+    rocksdb_rs::types::ColumnFamilyId cf = cf_keys.first;
     const auto& keys = cf_keys.second;
 
     auto& current_keys = tracked_keys_.at(cf);
@@ -177,7 +177,7 @@ LockTracker* PointLockTracker::GetTrackedLocksSinceSavePoint(
   const PointLockTracker& save_point_t =
       static_cast<const PointLockTracker&>(save_point_tracker);
   for (const auto& cf_keys : save_point_t.tracked_keys_) {
-    ColumnFamilyId cf = cf_keys.first;
+    rocksdb_rs::types::ColumnFamilyId cf = cf_keys.first;
     const auto& keys = cf_keys.second;
 
     auto& current_keys = tracked_keys_.at(cf);
@@ -209,7 +209,7 @@ LockTracker* PointLockTracker::GetTrackedLocksSinceSavePoint(
 }
 
 PointLockStatus PointLockTracker::GetPointLockStatus(
-    ColumnFamilyId column_family_id, const std::string& key) const {
+    rocksdb_rs::types::ColumnFamilyId column_family_id, const std::string& key) const {
   assert(IsPointLockSupported());
   PointLockStatus status;
   auto it = tracked_keys_.find(column_family_id);
@@ -244,7 +244,7 @@ LockTracker::ColumnFamilyIterator* PointLockTracker::GetColumnFamilyIterator()
 }
 
 LockTracker::KeyIterator* PointLockTracker::GetKeyIterator(
-    ColumnFamilyId column_family_id) const {
+    rocksdb_rs::types::ColumnFamilyId column_family_id) const {
   assert(tracked_keys_.find(column_family_id) != tracked_keys_.end());
   return new TrackedKeysIterator(tracked_keys_, column_family_id);
 }

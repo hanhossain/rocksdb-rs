@@ -691,7 +691,7 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::WriteRollbackKeys(
       lock_tracker.GetColumnFamilyIterator());
   assert(cf_it != nullptr);
   while (cf_it->HasNext()) {
-    ColumnFamilyId cf = cf_it->Next();
+    rocksdb_rs::types::ColumnFamilyId cf = cf_it->Next();
     std::unique_ptr<LockTracker::KeyIterator> key_it(
         lock_tracker.GetKeyIterator(cf));
     assert(key_it != nullptr);
