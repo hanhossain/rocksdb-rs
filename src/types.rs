@@ -70,4 +70,24 @@ pub mod ffi {
         // Always add new WriteStallCondition before `kNormal`
         kNormal,
     }
+
+    #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+    struct ColumnFamilyId {
+        id: u32,
+    }
+
+    extern "Rust" {
+        #[cxx_name = "ColumnFamilyId_new"]
+        fn column_family_id_new() -> ColumnFamilyId;
+        #[cxx_name = "ColumnFamilyId_new"]
+        fn column_family_id_new1(id: u32) -> ColumnFamilyId;
+    }
+}
+
+fn column_family_id_new() -> ffi::ColumnFamilyId {
+    ffi::ColumnFamilyId::default()
+}
+
+fn column_family_id_new1(id: u32) -> ffi::ColumnFamilyId {
+    ffi::ColumnFamilyId { id }
 }

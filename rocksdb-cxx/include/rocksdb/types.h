@@ -13,8 +13,6 @@ namespace rocksdb {
 
 // Define all public custom types here.
 
-using ColumnFamilyId = uint32_t;
-
 // Represents a sequence number in a WAL file.
 using SequenceNumber = uint64_t;
 
