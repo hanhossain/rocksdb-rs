@@ -94,7 +94,7 @@ class RangeLockManagerHandle : public LockManagerHandle {
   virtual size_t GetMaxLockMemory() = 0;
 
   using RangeLockStatus =
-      std::unordered_multimap<ColumnFamilyId, RangeLockInfo>;
+      std::unordered_multimap<rocksdb_rs::types::ColumnFamilyId, RangeLockInfo>;
 
   // Lock Escalation barrier check function.
   // It is called for a couple of endpoints A and B, such that A < B.

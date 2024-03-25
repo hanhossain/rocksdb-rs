@@ -39,15 +39,15 @@ class RangeTreeLockManager : public RangeLockManagerBase,
   //  @note only exclusive locks are currently supported (requesting a
   //  non-exclusive lock will get an exclusive one)
   using LockManager::TryLock;
-  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, rocksdb_rs::types::ColumnFamilyId column_family_id,
                  const Endpoint& start_endp, const Endpoint& end_endp, Env* env,
                  bool exclusive) override;
 
   void UnLock(PessimisticTransaction* txn, const LockTracker& tracker,
               Env* env) override;
-  void UnLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+  void UnLock(PessimisticTransaction* txn, rocksdb_rs::types::ColumnFamilyId column_family_id,
               const std::string& key, Env* env) override;
-  void UnLock(PessimisticTransaction*, ColumnFamilyId, const Endpoint&,
+  void UnLock(PessimisticTransaction*, rocksdb_rs::types::ColumnFamilyId, const Endpoint&,
               const Endpoint&, Env*) override {
     // TODO: range unlock does nothing...
   }
@@ -88,7 +88,7 @@ class RangeTreeLockManager : public RangeLockManagerBase,
   }
 
   // Get the locktree which stores locks for the Column Family with given cf_id
-  std::shared_ptr<toku::locktree> GetLockTreeForCF(ColumnFamilyId cf_id);
+  std::shared_ptr<toku::locktree> GetLockTreeForCF(rocksdb_rs::types::ColumnFamilyId cf_id);
 
   void SetEscalationBarrierFunc(EscalationBarrierFunc func) override {
     barrier_func_ = func;
@@ -105,7 +105,7 @@ class RangeTreeLockManager : public RangeLockManagerBase,
   // Map from cf_id to locktree*. Can only be accessed while holding the
   // ltree_map_mutex_. Must use a custom deleter that calls ltm_.release_lt
   using LockTreeMap =
-      std::unordered_map<ColumnFamilyId, std::shared_ptr<toku::locktree>>;
+      std::unordered_map<rocksdb_rs::types::ColumnFamilyId, std::shared_ptr<toku::locktree>>;
   LockTreeMap ltree_map_;
 
   InstrumentedMutex ltree_map_mutex_;

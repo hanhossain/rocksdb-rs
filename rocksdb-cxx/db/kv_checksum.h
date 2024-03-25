@@ -145,7 +145,7 @@ class ProtectionInfoKVO {
   ProtectionInfo<T> StripKVO(const SliceParts& key, const SliceParts& value,
                              ValueType op_type) const;
 
-  ProtectionInfoKVOC<T> ProtectC(ColumnFamilyId column_family_id) const;
+  ProtectionInfoKVOC<T> ProtectC(rocksdb_rs::types::ColumnFamilyId column_family_id) const;
   ProtectionInfoKVOS<T> ProtectS(SequenceNumber sequence_number) const;
 
   void UpdateK(const Slice& old_key, const Slice& new_key);
@@ -183,7 +183,7 @@ class ProtectionInfoKVOC {
  public:
   ProtectionInfoKVOC() = default;
 
-  ProtectionInfoKVO<T> StripC(ColumnFamilyId column_family_id) const;
+  ProtectionInfoKVO<T> StripC(rocksdb_rs::types::ColumnFamilyId column_family_id) const;
 
   void UpdateK(const Slice& old_key, const Slice& new_key) {
     kvo_.UpdateK(old_key, new_key);
@@ -200,8 +200,8 @@ class ProtectionInfoKVOC {
   void UpdateO(ValueType old_op_type, ValueType new_op_type) {
     kvo_.UpdateO(old_op_type, new_op_type);
   }
-  void UpdateC(ColumnFamilyId old_column_family_id,
-               ColumnFamilyId new_column_family_id);
+  void UpdateC(rocksdb_rs::types::ColumnFamilyId old_column_family_id,
+               rocksdb_rs::types::ColumnFamilyId new_column_family_id);
 
   void Encode(uint8_t len, char* dst) const { kvo_.Encode(len, dst); }
   bool Verify(uint8_t len, const char* checksum_ptr) const {
@@ -418,7 +418,7 @@ ProtectionInfo<T> ProtectionInfoKVO<T>::StripKVO(const SliceParts& key,
 
 template <typename T>
 ProtectionInfoKVOC<T> ProtectionInfoKVO<T>::ProtectC(
-    ColumnFamilyId column_family_id) const {
+    rocksdb_rs::types::ColumnFamilyId column_family_id) const {
   T val = GetVal();
   val = val ^ static_cast<T>(NPHash64(
                   reinterpret_cast<char*>(&column_family_id),
@@ -428,7 +428,7 @@ ProtectionInfoKVOC<T> ProtectionInfoKVO<T>::ProtectC(
 
 template <typename T>
 ProtectionInfoKVO<T> ProtectionInfoKVOC<T>::StripC(
-    ColumnFamilyId column_family_id) const {
+    rocksdb_rs::types::ColumnFamilyId column_family_id) const {
   T val = GetVal();
   val = val ^ static_cast<T>(NPHash64(
                   reinterpret_cast<char*>(&column_family_id),
@@ -437,8 +437,8 @@ ProtectionInfoKVO<T> ProtectionInfoKVOC<T>::StripC(
 }
 
 template <typename T>
-void ProtectionInfoKVOC<T>::UpdateC(ColumnFamilyId old_column_family_id,
-                                    ColumnFamilyId new_column_family_id) {
+void ProtectionInfoKVOC<T>::UpdateC(rocksdb_rs::types::ColumnFamilyId old_column_family_id,
+                                    rocksdb_rs::types::ColumnFamilyId new_column_family_id) {
   T val = GetVal();
   val = val ^ static_cast<T>(NPHash64(
                   reinterpret_cast<char*>(&old_column_family_id),

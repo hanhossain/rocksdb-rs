@@ -17,7 +17,7 @@ namespace rocksdb {
 // Request for locking a single key.
 struct PointLockRequest {
   // The id of the key's column family.
-  ColumnFamilyId column_family_id = 0;
+  rocksdb_rs::types::ColumnFamilyId column_family_id = 0;
   // The key to lock.
   std::string key;
   // The sequence number from which there is no concurrent update to key.
@@ -31,7 +31,7 @@ struct PointLockRequest {
 // Request for locking a range of keys.
 struct RangeLockRequest {
   // The id of the key's column family.
-  ColumnFamilyId column_family_id;
+  rocksdb_rs::types::ColumnFamilyId column_family_id;
 
   // The range to be locked
   Endpoint start_endp;
@@ -144,7 +144,7 @@ class LockTracker {
   // If point lock is not supported, always returns LockStatus with
   // locked=false.
   virtual PointLockStatus GetPointLockStatus(
-      ColumnFamilyId /*column_family_id*/,
+      rocksdb_rs::types::ColumnFamilyId /*column_family_id*/,
       const std::string& /*key*/) const = 0;
 
   // Gets number of tracked point locks.
@@ -162,7 +162,7 @@ class LockTracker {
     // Gets next column family id.
     //
     // If HasNext is false, calling this method has undefined behavior.
-    virtual ColumnFamilyId Next() = 0;
+    virtual rocksdb_rs::types::ColumnFamilyId Next() = 0;
   };
 
   // Gets an iterator for column families.
@@ -192,7 +192,7 @@ class LockTracker {
   // Returned iterator must not be nullptr.
   // Caller owns the returned pointer.
   virtual KeyIterator* GetKeyIterator(
-      ColumnFamilyId /*column_family_id*/) const = 0;
+      rocksdb_rs::types::ColumnFamilyId /*column_family_id*/) const = 0;
 };
 
 // LockTracker should always be constructed through this factory.

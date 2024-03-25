@@ -40,7 +40,7 @@ class RangeLockList {
 
   RangeLockList() : releasing_locks_(false) {}
 
-  void Append(ColumnFamilyId cf_id, const DBT* left_key, const DBT* right_key);
+  void Append(rocksdb_rs::types::ColumnFamilyId cf_id, const DBT* left_key, const DBT* right_key);
   void ReleaseLocks(RangeTreeLockManager* mgr, PessimisticTransaction* txn,
                     bool all_trx_locks);
   void ReplaceLocks(const toku::locktree* lt, const toku::range_buffer& buffer);
@@ -53,7 +53,7 @@ class RangeLockList {
     buffers_.clear();
   }
 
-  std::unordered_map<ColumnFamilyId, std::shared_ptr<toku::range_buffer>>
+  std::unordered_map<rocksdb_rs::types::ColumnFamilyId, std::shared_ptr<toku::range_buffer>>
       buffers_;
   port::Mutex mutex_;
   std::atomic<bool> releasing_locks_;
@@ -99,7 +99,7 @@ class RangeTreeLockTracker : public LockTracker {
     return nullptr;
   }
 
-  PointLockStatus GetPointLockStatus(ColumnFamilyId column_family_id,
+  PointLockStatus GetPointLockStatus(rocksdb_rs::types::ColumnFamilyId column_family_id,
                                      const std::string& key) const override;
 
   // The return value is only used for tests
@@ -110,7 +110,7 @@ class RangeTreeLockTracker : public LockTracker {
   }
 
   KeyIterator* GetKeyIterator(
-      ColumnFamilyId /*column_family_id*/) const override {
+      rocksdb_rs::types::ColumnFamilyId /*column_family_id*/) const override {
     return nullptr;
   }
 

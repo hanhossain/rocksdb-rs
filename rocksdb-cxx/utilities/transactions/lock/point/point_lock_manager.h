@@ -132,17 +132,17 @@ class PointLockManager : public LockManager {
   // this column family is no longer in use.
   void RemoveColumnFamily(const ColumnFamilyHandle* cf) override;
 
-  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, rocksdb_rs::types::ColumnFamilyId column_family_id,
                  const std::string& key, Env* env, bool exclusive) override;
-  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, rocksdb_rs::types::ColumnFamilyId column_family_id,
                  const Endpoint& start, const Endpoint& end, Env* env,
                  bool exclusive) override;
 
   void UnLock(PessimisticTransaction* txn, const LockTracker& tracker,
               Env* env) override;
-  void UnLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+  void UnLock(PessimisticTransaction* txn, rocksdb_rs::types::ColumnFamilyId column_family_id,
               const std::string& key, Env* env) override;
-  void UnLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+  void UnLock(PessimisticTransaction* txn, rocksdb_rs::types::ColumnFamilyId column_family_id,
               const Endpoint& start, const Endpoint& end, Env* env) override;
 
   PointLockStatus GetPointLockStatus() override;

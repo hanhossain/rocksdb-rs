@@ -18,13 +18,13 @@ namespace rocksdb {
 
 class MockColumnFamilyHandle : public ColumnFamilyHandle {
  public:
-  explicit MockColumnFamilyHandle(ColumnFamilyId cf_id) : cf_id_(cf_id) {}
+  explicit MockColumnFamilyHandle(rocksdb_rs::types::ColumnFamilyId cf_id) : cf_id_(cf_id) {}
 
   ~MockColumnFamilyHandle() override {}
 
   const std::string& GetName() const override { return name_; }
 
-  ColumnFamilyId GetID() const override { return cf_id_; }
+  rocksdb_rs::types::ColumnFamilyId GetID() const override { return cf_id_; }
 
   rocksdb_rs::status::Status GetDescriptor(ColumnFamilyDescriptor*) override {
     return rocksdb_rs::status::Status_OK();
@@ -35,7 +35,7 @@ class MockColumnFamilyHandle : public ColumnFamilyHandle {
   }
 
  private:
-  ColumnFamilyId cf_id_;
+  rocksdb_rs::types::ColumnFamilyId cf_id_;
   std::string name_ = "MockCF";
 };
 

@@ -35,7 +35,7 @@ struct TrackedKeyInfo {
 
 using TrackedKeyInfos = std::unordered_map<std::string, TrackedKeyInfo>;
 
-using TrackedKeys = std::unordered_map<ColumnFamilyId, TrackedKeyInfos>;
+using TrackedKeys = std::unordered_map<rocksdb_rs::types::ColumnFamilyId, TrackedKeyInfos>;
 
 // Tracks point locks on single keys.
 class PointLockTracker : public LockTracker {
@@ -68,14 +68,14 @@ class PointLockTracker : public LockTracker {
   virtual LockTracker* GetTrackedLocksSinceSavePoint(
       const LockTracker& save_point_tracker) const override;
 
-  PointLockStatus GetPointLockStatus(ColumnFamilyId column_family_id,
+  PointLockStatus GetPointLockStatus(rocksdb_rs::types::ColumnFamilyId column_family_id,
                                      const std::string& key) const override;
 
   uint64_t GetNumPointLocks() const override;
 
   ColumnFamilyIterator* GetColumnFamilyIterator() const override;
 
-  KeyIterator* GetKeyIterator(ColumnFamilyId column_family_id) const override;
+  KeyIterator* GetKeyIterator(rocksdb_rs::types::ColumnFamilyId column_family_id) const override;
 
  private:
   TrackedKeys tracked_keys_;
