@@ -107,7 +107,7 @@ class TablePropertiesCollector {
   // @params key    the user key that is inserted into the table.
   // @params value  the value that is inserted into the table.
   virtual rocksdb_rs::status::Status AddUserKey(const Slice& key, const Slice& value,
-                            EntryType /*type*/, SequenceNumber /*seq*/,
+                            rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
                             uint64_t /*file_size*/) {
     // For backwards-compatibility.
     return Add(key, value);

@@ -465,7 +465,7 @@ class Repairer {
           cfd->internal_comparator(), cfd->int_tbl_prop_collector_factories(),
           rocksdb_rs::compression_type::CompressionType::kNoCompression, default_compression, cfd->GetID(), cfd->GetName(),
           -1 /* level */, false /* is_bottommost */,
-          TableFileCreationReason::kRecovery, 0 /* oldest_key_time */,
+          rocksdb_rs::types::TableFileCreationReason::kRecovery, 0 /* oldest_key_time */,
           0 /* file_creation_time */, "DB Repairer" /* db_id */, db_session_id_,
           0 /*target_file_size*/, meta.fd.GetNumber());
 
@@ -476,7 +476,7 @@ class Repairer {
           std::move(range_del_iters), &meta, nullptr /* blob_file_additions */,
           {}, kMaxSequenceNumber, kMaxSequenceNumber, snapshot_checker,
           false /* paranoid_file_checks*/, nullptr /* internal_stats */, &io_s,
-          nullptr /*IOTracer*/, BlobFileCreationReason::kRecovery,
+          nullptr /*IOTracer*/, rocksdb_rs::types::BlobFileCreationReason::kRecovery,
           empty_seqno_time_mapping, nullptr /* event_logger */, 0 /* job_id */,
           Env::IO_HIGH, nullptr /* table_properties */, write_hint);
       ROCKS_LOG_INFO(db_options_.info_log,

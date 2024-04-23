@@ -24,7 +24,7 @@ class DbStressTablePropertiesCollector : public TablePropertiesCollector {
             FLAGS_mark_for_compaction_one_file_in)) {}
 
   virtual rocksdb_rs::status::Status AddUserKey(const Slice& /* key */, const Slice& /* value */,
-                            EntryType /*type*/, SequenceNumber /*seq*/,
+                            rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
                             uint64_t /*file_size*/) override {
     return rocksdb_rs::status::Status_OK();
   }

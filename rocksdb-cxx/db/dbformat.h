@@ -165,7 +165,7 @@ inline void UnPackSequenceAndType(uint64_t packed, uint64_t* seq,
   // assert(IsExtendedValueType(*t));
 }
 
-EntryType GetEntryType(ValueType value_type);
+rocksdb_rs::types::EntryType GetEntryType(ValueType value_type);
 
 // Append the serialization of "key" to *result.
 void AppendInternalKey(std::string* result, const ParsedInternalKey& key);
