@@ -20,11 +20,4 @@ using SequenceNumber = uint64_t;
 
 const SequenceNumber kMinUnCommittedSeq = 1;  // 0 is always committed
 
-enum class WriteStallCondition {
-  kDelayed,
-  kStopped,
-  // Always add new WriteStallCondition before `kNormal`
-  kNormal,
-};
-
 }  // namespace rocksdb

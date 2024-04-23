@@ -33,13 +33,13 @@ const std::string& WriteStallCauseToHyphenString(rocksdb_rs::types::WriteStallCa
 }
 
 const std::string& WriteStallConditionToHyphenString(
-    WriteStallCondition condition) {
+    rocksdb_rs::types::WriteStallCondition condition) {
   static const std::string kDelayed = "delays";
   static const std::string kStopped = "stops";
   switch (condition) {
-    case WriteStallCondition::kDelayed:
+    case rocksdb_rs::types::WriteStallCondition::kDelayed:
       return kDelayed;
-    case WriteStallCondition::kStopped:
+    case rocksdb_rs::types::WriteStallCondition::kStopped:
       return kStopped;
     default:
       break;
@@ -48,37 +48,37 @@ const std::string& WriteStallConditionToHyphenString(
 }
 
 InternalStats::InternalCFStatsType InternalCFStat(
-    rocksdb_rs::types::WriteStallCause cause, WriteStallCondition condition) {
+    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition) {
   switch (cause) {
     case rocksdb_rs::types::WriteStallCause::kMemtableLimit: {
       switch (condition) {
-        case WriteStallCondition::kDelayed:
+        case rocksdb_rs::types::WriteStallCondition::kDelayed:
           return InternalStats::MEMTABLE_LIMIT_DELAYS;
-        case WriteStallCondition::kStopped:
+        case rocksdb_rs::types::WriteStallCondition::kStopped:
           return InternalStats::MEMTABLE_LIMIT_STOPS;
-        case WriteStallCondition::kNormal:
+        case rocksdb_rs::types::WriteStallCondition::kNormal:
           break;
       }
       break;
     }
     case rocksdb_rs::types::WriteStallCause::kL0FileCountLimit: {
       switch (condition) {
-        case WriteStallCondition::kDelayed:
+        case rocksdb_rs::types::WriteStallCondition::kDelayed:
           return InternalStats::L0_FILE_COUNT_LIMIT_DELAYS;
-        case WriteStallCondition::kStopped:
+        case rocksdb_rs::types::WriteStallCondition::kStopped:
           return InternalStats::L0_FILE_COUNT_LIMIT_STOPS;
-        case WriteStallCondition::kNormal:
+        case rocksdb_rs::types::WriteStallCondition::kNormal:
           break;
       }
       break;
     }
     case rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes: {
       switch (condition) {
-        case WriteStallCondition::kDelayed:
+        case rocksdb_rs::types::WriteStallCondition::kDelayed:
           return InternalStats::PENDING_COMPACTION_BYTES_LIMIT_DELAYS;
-        case WriteStallCondition::kStopped:
+        case rocksdb_rs::types::WriteStallCondition::kStopped:
           return InternalStats::PENDING_COMPACTION_BYTES_LIMIT_STOPS;
-        case WriteStallCondition::kNormal:
+        case rocksdb_rs::types::WriteStallCondition::kNormal:
           break;
       }
       break;
@@ -90,11 +90,11 @@ InternalStats::InternalCFStatsType InternalCFStat(
 }
 
 InternalStats::InternalDBStatsType InternalDBStat(
-    rocksdb_rs::types::WriteStallCause cause, WriteStallCondition condition) {
+    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition) {
   switch (cause) {
     case rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit: {
       switch (condition) {
-        case WriteStallCondition::kStopped:
+        case rocksdb_rs::types::WriteStallCondition::kStopped:
           return InternalStats::kIntStatsWriteBufferManagerLimitStopsCounts;
         default:
           break;
@@ -154,7 +154,7 @@ WriteStallStatsMapKeys::CFL0FileCountLimitStopsWithOngoingCompaction() {
 }
 
 std::string WriteStallStatsMapKeys::CauseConditionCount(
-    rocksdb_rs::types::WriteStallCause cause, WriteStallCondition condition) {
+    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition) {
   std::string cause_condition_count_name;
 
   std::string cause_name;

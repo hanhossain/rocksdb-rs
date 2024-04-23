@@ -2447,9 +2447,9 @@ rocksdb_rs::status::Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamil
     *flush_needed = true;
     InstrumentedMutexLock l(&mutex_);
     uint64_t orig_active_memtable_id = cfd->mem()->GetID();
-    WriteStallCondition write_stall_condition = WriteStallCondition::kNormal;
+    rocksdb_rs::types::WriteStallCondition write_stall_condition = rocksdb_rs::types::WriteStallCondition::kNormal;
     do {
-      if (write_stall_condition != WriteStallCondition::kNormal) {
+      if (write_stall_condition != rocksdb_rs::types::WriteStallCondition::kNormal) {
         // Same error handling as user writes: Don't wait if there's a
         // background error, even if it's a soft error. We might wait here
         // indefinitely as the pending flushes/compactions may never finish
@@ -2504,7 +2504,7 @@ rocksdb_rs::status::Status DBImpl::WaitUntilFlushWouldNotStallWrites(ColumnFamil
                                   vstorage->estimated_compaction_needed_bytes(),
                                   mutable_cf_options, *cfd->ioptions())
                                   .first;
-    } while (write_stall_condition != WriteStallCondition::kNormal);
+    } while (write_stall_condition != rocksdb_rs::types::WriteStallCondition::kNormal);
   }
   return rocksdb_rs::status::Status_OK();
 }

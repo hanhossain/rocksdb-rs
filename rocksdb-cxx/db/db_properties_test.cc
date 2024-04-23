@@ -2109,9 +2109,9 @@ TEST_F(DBPropertiesTest, WriteStallStatsSanityCheck) {
     }
   }
 
-  for (uint32_t i = 0; i < static_cast<uint32_t>(WriteStallCondition::kNormal);
+  for (uint32_t i = 0; i < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal);
        ++i) {
-    WriteStallCondition condition = static_cast<WriteStallCondition>(i);
+    rocksdb_rs::types::WriteStallCondition condition = static_cast<rocksdb_rs::types::WriteStallCondition>(i);
     const std::string& str = WriteStallConditionToHyphenString(condition);
     ASSERT_TRUE(!str.empty())
         << "Please ensure mapping from `WriteStallCondition` to "
@@ -2120,9 +2120,9 @@ TEST_F(DBPropertiesTest, WriteStallStatsSanityCheck) {
 
   for (uint32_t i = 0; i < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kNone); ++i) {
     for (uint32_t j = 0;
-         j < static_cast<uint32_t>(WriteStallCondition::kNormal); ++j) {
+         j < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal); ++j) {
       rocksdb_rs::types::WriteStallCause cause = static_cast<rocksdb_rs::types::WriteStallCause>(i);
-      WriteStallCondition condition = static_cast<WriteStallCondition>(j);
+      rocksdb_rs::types::WriteStallCondition condition = static_cast<rocksdb_rs::types::WriteStallCondition>(j);
 
       if (isCFScopeWriteStallCause(cause)) {
         ASSERT_TRUE(InternalCFStat(cause, condition) !=
@@ -2138,7 +2138,7 @@ TEST_F(DBPropertiesTest, WriteStallStatsSanityCheck) {
             InternalDBStat(cause, condition);
         if (internal_db_stat == InternalStats::kIntStatsNumMax) {
           ASSERT_TRUE(cause == rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit &&
-                      condition == WriteStallCondition::kDelayed)
+                      condition == rocksdb_rs::types::WriteStallCondition::kDelayed)
               << "Please ensure the combination of WriteStallCause(" +
                      std::to_string(static_cast<uint32_t>(cause)) +
                      ") + WriteStallCondition(" +
@@ -2177,7 +2177,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
                                          &db_values));
     ASSERT_EQ(std::stoi(db_values[WriteStallStatsMapKeys::CauseConditionCount(
                   rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit,
-                  WriteStallCondition::kStopped)]),
+                  rocksdb_rs::types::WriteStallCondition::kStopped)]),
               0);
 
     for (int cf = 0; cf <= 1; ++cf) {
@@ -2229,7 +2229,7 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
                                            &db_values));
       EXPECT_EQ(std::stoi(db_values[WriteStallStatsMapKeys::CauseConditionCount(
                     rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit,
-                    WriteStallCondition::kStopped)]),
+                    rocksdb_rs::types::WriteStallCondition::kStopped)]),
                 1);
       // `WriteStallCause::kWriteBufferManagerLimit` should not result in any
       // CF-scope write stall stats changes
@@ -2252,14 +2252,14 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
         EXPECT_EQ(
             std::stoi(cf_values[WriteStallStatsMapKeys::CauseConditionCount(
                 rocksdb_rs::types::WriteStallCause::kMemtableLimit,
-                WriteStallCondition::kStopped)]),
+                rocksdb_rs::types::WriteStallCondition::kStopped)]),
             cf == 1 ? 1 : 0);
         EXPECT_EQ(std::stoi(cf_values[WriteStallStatsMapKeys::TotalDelays()]),
                   0);
         EXPECT_EQ(
             std::stoi(cf_values[WriteStallStatsMapKeys::CauseConditionCount(
                 rocksdb_rs::types::WriteStallCause::kMemtableLimit,
-                WriteStallCondition::kDelayed)]),
+                rocksdb_rs::types::WriteStallCondition::kDelayed)]),
             0);
       }
     }

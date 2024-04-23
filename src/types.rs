@@ -63,4 +63,11 @@ pub mod ffi {
         // Always add new WriteStallCause before `kNone`
         kNone,
     }
+
+    enum WriteStallCondition {
+        kDelayed,
+        kStopped,
+        // Always add new WriteStallCondition before `kNormal`
+        kNormal,
+    }
 }
