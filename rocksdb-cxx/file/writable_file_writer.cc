@@ -683,7 +683,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteBufferedWithChecksum(
 
       IOSTATS_CPU_TIMER_GUARD(cpu_write_nanos, clock_);
 
-      EncodeFixed32(checksum_buf, buffered_data_crc32c_checksum_);
+      rocksdb_rs::coding_lean::EncodeFixed32(checksum_buf, buffered_data_crc32c_checksum_);
       v_info.checksum = Slice(checksum_buf, sizeof(uint32_t));
       s = writable_file_->Append(Slice(src, left), io_options, v_info, nullptr);
       SetPerfLevel(prev_perf_level);
@@ -744,7 +744,7 @@ void WritableFileWriter::Crc32cHandoffChecksumCalculation(const char* data,
                                                           size_t size,
                                                           char* buf) {
   uint32_t v_crc32c = crc32c::Extend(0, data, size);
-  EncodeFixed32(buf, v_crc32c);
+  rocksdb_rs::coding_lean::EncodeFixed32(buf, v_crc32c);
 }
 
 // This flushes the accumulated data in the buffer. We pad data with zeros if
@@ -923,7 +923,7 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteDirectWithChecksum(
       start_ts = FileOperationInfo::StartNow();
     }
     // direct writes must be positional
-    EncodeFixed32(checksum_buf, buffered_data_crc32c_checksum_);
+    rocksdb_rs::coding_lean::EncodeFixed32(checksum_buf, buffered_data_crc32c_checksum_);
     v_info.checksum = Slice(checksum_buf, sizeof(uint32_t));
     s = writable_file_->PositionedAppend(Slice(src, left), write_offset,
                                          io_options, v_info, nullptr);

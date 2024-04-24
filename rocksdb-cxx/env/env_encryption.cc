@@ -965,7 +965,7 @@ rocksdb_rs::status::Status CTRCipherStream::EncryptBlock(uint64_t blockIndex, ch
   // Create nonce + counter
   auto blockSize = cipher_->BlockSize();
   memmove(scratch, iv_.data(), blockSize);
-  EncodeFixed64(scratch, blockIndex + initialCounter_);
+  rocksdb_rs::coding_lean::EncodeFixed64(scratch, blockIndex + initialCounter_);
 
   // Encrypt nonce + counter
   auto status = cipher_->Encrypt(scratch);
@@ -1024,7 +1024,7 @@ rocksdb_rs::status::Status CTREncryptionProvider::AddCipher(const std::string& /
 static void decodeCTRParameters(const char* prefix, size_t blockSize,
                                 uint64_t& initialCounter, Slice& iv) {
   // First block contains 64-bit initial counter
-  initialCounter = DecodeFixed64(prefix);
+  initialCounter = rocksdb_rs::coding_lean::DecodeFixed64(prefix);
   // Second block contains IV
   iv = Slice(prefix + blockSize, blockSize);
 }

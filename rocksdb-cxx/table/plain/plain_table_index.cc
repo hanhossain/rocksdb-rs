@@ -189,7 +189,7 @@ Slice PlainTableIndexBuilder::FillIndexes(
         int j;
         for (j = num_keys_for_bucket - 1; j >= 0 && record;
              j--, record = record->next) {
-          EncodeFixed32(sub_index_pos + j * sizeof(uint32_t), record->offset);
+          rocksdb_rs::coding_lean::EncodeFixed32(sub_index_pos + j * sizeof(uint32_t), record->offset);
         }
         assert(j == -1 && record == nullptr);
         sub_index_offset += PlainTableIndex::kOffsetLen * num_keys_for_bucket;

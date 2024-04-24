@@ -1111,7 +1111,7 @@ Slice LegacyBloomBitsBuilder::Finish(std::unique_ptr<const char[]>* buf) {
   }
   // See BloomFilterPolicy::GetFilterBitsReader for metadata
   data[total_bits / 8] = static_cast<char>(num_probes_);
-  EncodeFixed32(data + total_bits / 8 + 1, static_cast<uint32_t>(num_lines));
+  rocksdb_rs::coding_lean::EncodeFixed32(data + total_bits / 8 + 1, static_cast<uint32_t>(num_lines));
 
   const char* const_data = data;
   buf->reset(const_data);
@@ -1599,7 +1599,7 @@ BuiltinFilterBitsReader* BuiltinFilterPolicy::GetBuiltinFilterBitsReader(
   uint32_t len = len_with_meta - kMetadataLen;
   assert(len > 0);
 
-  uint32_t num_lines = DecodeFixed32(contents.data() + len_with_meta - 4);
+  uint32_t num_lines = rocksdb_rs::coding_lean::DecodeFixed32(contents.data() + len_with_meta - 4);
   uint32_t log2_cache_line_size;
 
   if (num_lines * CACHE_LINE_SIZE == len) {
@@ -1699,7 +1699,7 @@ BuiltinFilterBitsReader* BuiltinFilterPolicy::GetBloomBitsReader(
     return new AlwaysTrueFilter();
   }
 
-  uint16_t rest = DecodeFixed16(contents.data() + len_with_meta - 2);
+  uint16_t rest = rocksdb_rs::coding_lean::DecodeFixed16(contents.data() + len_with_meta - 2);
   if (rest != 0) {
     // Reserved, possibly for hash seed
     // Future safe

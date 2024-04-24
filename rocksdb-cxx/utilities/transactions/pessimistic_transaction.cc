@@ -202,7 +202,7 @@ inline rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdateImpl(
   if (!read_options.timestamp) {
     ReadOptions read_opts_copy = read_options;
     char ts_buf[sizeof(kMaxTxnTimestamp)];
-    EncodeFixed64(ts_buf, read_timestamp_);
+    rocksdb_rs::coding_lean::EncodeFixed64(ts_buf, read_timestamp_);
     Slice ts(ts_buf, sizeof(ts_buf));
     read_opts_copy.timestamp = &ts;
     return TransactionBaseImpl::GetForUpdate(read_opts_copy, column_family, key,
@@ -211,7 +211,7 @@ inline rocksdb_rs::status::Status WriteCommittedTxn::GetForUpdateImpl(
   assert(read_options.timestamp);
   const char* const ts_buf = read_options.timestamp->data();
   assert(read_options.timestamp->size() == sizeof(kMaxTxnTimestamp));
-  TxnTimestamp ts = DecodeFixed64(ts_buf);
+  TxnTimestamp ts = rocksdb_rs::coding_lean::DecodeFixed64(ts_buf);
   if (ts != read_timestamp_) {
     return rocksdb_rs::status::Status_InvalidArgument("Must read from the same read_timestamp");
   }
@@ -677,7 +677,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitWithoutPrepareInternal() {
   if (needs_ts) {
     assert(commit_timestamp_ != kMaxTxnTimestamp);
     char commit_ts_buf[sizeof(kMaxTxnTimestamp)];
-    EncodeFixed64(commit_ts_buf, commit_timestamp_);
+    rocksdb_rs::coding_lean::EncodeFixed64(commit_ts_buf, commit_timestamp_);
     Slice commit_ts(commit_ts_buf, sizeof(commit_ts_buf));
 
     rocksdb_rs::status::Status s =
@@ -751,7 +751,7 @@ rocksdb_rs::status::Status WriteCommittedTxn::CommitInternal() {
   } else {
     assert(commit_timestamp_ != kMaxTxnTimestamp);
     char commit_ts_buf[sizeof(kMaxTxnTimestamp)];
-    EncodeFixed64(commit_ts_buf, commit_timestamp_);
+    rocksdb_rs::coding_lean::EncodeFixed64(commit_ts_buf, commit_timestamp_);
     Slice commit_ts(commit_ts_buf, sizeof(commit_ts_buf));
     s = WriteBatchInternal::MarkCommitWithTimestamp(working_batch, name_,
                                                     commit_ts);

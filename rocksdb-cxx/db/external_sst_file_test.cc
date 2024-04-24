@@ -2349,7 +2349,7 @@ TEST_P(ExternalSSTBlockChecksumTest, DISABLED_HugeBlockChecksum) {
       Random64 r(123);
       std::string huge(huge_size, 0);
       for (size_t j = 0; j + 7 < huge_size; j += 8) {
-        EncodeFixed64(&huge[j], r.Next());
+        rocksdb_rs::coding_lean::EncodeFixed64(&huge[j], r.Next());
       }
       ASSERT_OK(sst_file_writer.Put("Huge", huge));
     }

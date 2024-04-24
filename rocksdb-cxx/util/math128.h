@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "util/coding_lean.h"
 #include "util/math.h"
+#include "rocksdb-rs/src/coding_lean.rs.h"
 
 #ifdef TEST_UINT128_COMPAT
 #undef HAVE_UINT128_EXTENSION
@@ -242,13 +242,13 @@ struct IsUnsignedUpTo128
                                        std::is_same<T, Unsigned128>::value> {};
 
 inline void EncodeFixed128(char* dst, Unsigned128 value) {
-  EncodeFixed64(dst, Lower64of128(value));
-  EncodeFixed64(dst + 8, Upper64of128(value));
+  rocksdb_rs::coding_lean::EncodeFixed64(dst, Lower64of128(value));
+  rocksdb_rs::coding_lean::EncodeFixed64(dst + 8, Upper64of128(value));
 }
 
 inline Unsigned128 DecodeFixed128(const char* ptr) {
-  Unsigned128 rv = DecodeFixed64(ptr + 8);
-  return (rv << 64) | DecodeFixed64(ptr);
+  Unsigned128 rv = rocksdb_rs::coding_lean::DecodeFixed64(ptr + 8);
+  return (rv << 64) | rocksdb_rs::coding_lean::DecodeFixed64(ptr);
 }
 
 // A version of EncodeFixed* for generic algorithms. Likely to be used
@@ -275,15 +275,15 @@ inline void EncodeFixedGeneric(char* /*dst*/, T /*value*/) {
 
 template <>
 inline void EncodeFixedGeneric(char* dst, uint16_t value) {
-  return EncodeFixed16(dst, value);
+  return rocksdb_rs::coding_lean::EncodeFixed16(dst, value);
 }
 template <>
 inline void EncodeFixedGeneric(char* dst, uint32_t value) {
-  return EncodeFixed32(dst, value);
+  return rocksdb_rs::coding_lean::EncodeFixed32(dst, value);
 }
 template <>
 inline void EncodeFixedGeneric(char* dst, uint64_t value) {
-  return EncodeFixed64(dst, value);
+  return rocksdb_rs::coding_lean::EncodeFixed64(dst, value);
 }
 template <>
 inline void EncodeFixedGeneric(char* dst, Unsigned128 value) {
@@ -298,15 +298,15 @@ inline T DecodeFixedGeneric(const char* /*dst*/) {
 
 template <>
 inline uint16_t DecodeFixedGeneric(const char* dst) {
-  return DecodeFixed16(dst);
+  return rocksdb_rs::coding_lean::DecodeFixed16(dst);
 }
 template <>
 inline uint32_t DecodeFixedGeneric(const char* dst) {
-  return DecodeFixed32(dst);
+  return rocksdb_rs::coding_lean::DecodeFixed32(dst);
 }
 template <>
 inline uint64_t DecodeFixedGeneric(const char* dst) {
-  return DecodeFixed64(dst);
+  return rocksdb_rs::coding_lean::DecodeFixed64(dst);
 }
 template <>
 inline Unsigned128 DecodeFixedGeneric(const char* dst) {

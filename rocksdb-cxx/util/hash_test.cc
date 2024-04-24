@@ -12,17 +12,18 @@
 #include <cstring>
 #include <type_traits>
 #include <vector>
-#include <rocksdb-rs/src/hash.rs.h>
+
+#include "rocksdb-rs/src/hash.rs.h"
+#include "rocksdb-rs/src/coding_lean.rs.h"
 
 #include "test_util/testharness.h"
 #include "util/coding.h"
-#include "util/coding_lean.h"
 #include "util/hash128.h"
 #include "util/math.h"
 #include "util/math128.h"
 
-using rocksdb::DecodeFixed64;
-using rocksdb::EncodeFixed32;
+using rocksdb_rs::coding_lean::DecodeFixed64;
+using rocksdb_rs::coding_lean::EncodeFixed32;
 using rocksdb::EndianSwapValue;
 using rocksdb::GetSliceHash64;
 using rocksdb::Hash;
@@ -147,7 +148,7 @@ TEST(HashTest, Hash64Trivial) {
   constexpr int max_len = thorough ? 3 : 2;
   for (int len = 1; len <= max_len; ++len) {
     for (uint32_t i = 0; (i >> (len * 8)) == 0; ++i) {
-      EncodeFixed32(input, i);
+      rocksdb_rs::coding_lean::EncodeFixed32(input, i);
       uint64_t here = Hash64(input, len, kSeed);
       EXPECT_NE(Lower32of64(here), 0u);
       EXPECT_NE(Upper32of64(here), 0u);
@@ -307,8 +308,8 @@ TEST(HashTest, Hash128Misc) {
         EXPECT_EQ(Upper64of128(here), hi);
       }
       if (size == 16) {
-        const uint64_t in_hi = DecodeFixed64(str.data() + 8);
-        const uint64_t in_lo = DecodeFixed64(str.data());
+        const uint64_t in_hi = rocksdb_rs::coding_lean::DecodeFixed64(str.data() + 8);
+        const uint64_t in_lo = rocksdb_rs::coding_lean::DecodeFixed64(str.data());
         uint64_t hi, lo;
         rocksdb_rs::hash::bijective_hash2x64(in_hi, in_lo, hi, lo);
         EXPECT_EQ(Lower64of128(here), lo);
@@ -338,8 +339,8 @@ TEST(HashTest, Hash128Misc) {
           EXPECT_EQ(Upper64of128(seeded), hi);
         }
         if (size == 16) {
-          const uint64_t in_hi = DecodeFixed64(str.data() + 8);
-          const uint64_t in_lo = DecodeFixed64(str.data());
+          const uint64_t in_hi = rocksdb_rs::coding_lean::DecodeFixed64(str.data() + 8);
+          const uint64_t in_lo = rocksdb_rs::coding_lean::DecodeFixed64(str.data());
           uint64_t hi, lo;
           rocksdb_rs::hash::bijective_hash2x64_with_seed(in_hi, in_lo, var_seed, hi, lo);
           EXPECT_EQ(Lower64of128(seeded), lo);
@@ -379,7 +380,7 @@ TEST(HashTest, Hash128Trivial) {
   constexpr int max_len = thorough ? 3 : 2;
   for (int len = 1; len <= max_len; ++len) {
     for (uint32_t i = 0; (i >> (len * 8)) == 0; ++i) {
-      EncodeFixed32(input, i);
+      rocksdb_rs::coding_lean::EncodeFixed32(input, i);
       Unsigned128 here = Hash128(input, len, kSeed);
       EXPECT_NE(Lower64of128(here), 0u);
       EXPECT_NE(Upper64of128(here), 0u);

@@ -990,7 +990,7 @@ bool IndexBlockIter::PrefixSeek(const Slice& target, uint32_t* index,
 
 uint32_t Block::NumRestarts() const {
   assert(size_ >= 2 * sizeof(uint32_t));
-  uint32_t block_footer = DecodeFixed32(data_ + size_ - sizeof(uint32_t));
+  uint32_t block_footer = rocksdb_rs::coding_lean::DecodeFixed32(data_ + size_ - sizeof(uint32_t));
   uint32_t num_restarts = block_footer;
   if (size_ > kMaxBlockSizeSupportedByHashIndex) {
     // In BlockBuilder, we have ensured a block with HashIndex is less than
@@ -1016,7 +1016,7 @@ BlockBasedTableOptions::DataBlockIndexType Block::IndexType() const {
     // The check is for the same reason as that in NumRestarts()
     return BlockBasedTableOptions::kDataBlockBinarySearch;
   }
-  uint32_t block_footer = DecodeFixed32(data_ + size_ - sizeof(uint32_t));
+  uint32_t block_footer = rocksdb_rs::coding_lean::DecodeFixed32(data_ + size_ - sizeof(uint32_t));
   uint32_t num_restarts = block_footer;
   BlockBasedTableOptions::DataBlockIndexType index_type;
   UnPackIndexTypeAndNumRestarts(block_footer, &index_type, &num_restarts);

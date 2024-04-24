@@ -218,11 +218,11 @@ struct KeyGen {
     // Variable size and alignment
     size_t off = key % 8;
     key_data[0] = char{42};
-    EncodeFixed64(key_data + 1, key);
+    rocksdb_rs::coding_lean::EncodeFixed64(key_data + 1, key);
     key_data[9] = char{11};
-    EncodeFixed64(key_data + 10, key);
+    rocksdb_rs::coding_lean::EncodeFixed64(key_data + 10, key);
     key_data[18] = char{4};
-    EncodeFixed64(key_data + 19, key);
+    rocksdb_rs::coding_lean::EncodeFixed64(key_data + 19, key);
     assert(27 >= kCacheKeySize);
     return Slice(&key_data[off], kCacheKeySize);
   }
@@ -232,7 +232,7 @@ Cache::ObjectPtr createValue(Random64& rnd) {
   char* rv = new char[FLAGS_value_bytes];
   // Fill with some filler data, and take some CPU time
   for (uint32_t i = 0; i < FLAGS_value_bytes; i += 8) {
-    EncodeFixed64(rv + i, rnd.Next());
+    rocksdb_rs::coding_lean::EncodeFixed64(rv + i, rnd.Next());
   }
   return rv;
 }
@@ -849,11 +849,11 @@ class StressCacheKey {
         reduced_key = GetSliceHash64(ck.AsSlice()) >> shift_away;
       } else if (FLAGS_sck_footer_unique_id) {
         // Special case: keep only file number, not session counter
-        reduced_key = DecodeFixed64(ck.AsSlice().data()) >> shift_away;
+        reduced_key = rocksdb_rs::coding_lean::DecodeFixed64(ck.AsSlice().data()) >> shift_away;
       } else {
         // Try to keep file number and session counter (shift away other bits)
-        uint32_t a = DecodeFixed32(ck.AsSlice().data()) << shift_away_a;
-        uint32_t b = DecodeFixed32(ck.AsSlice().data() + 4) >> shift_away_b;
+        uint32_t a = rocksdb_rs::coding_lean::DecodeFixed32(ck.AsSlice().data()) << shift_away_a;
+        uint32_t b = rocksdb_rs::coding_lean::DecodeFixed32(ck.AsSlice().data() + 4) >> shift_away_b;
         reduced_key = (uint64_t{a} << 32) + b;
       }
       if (reduced_key == 0) {

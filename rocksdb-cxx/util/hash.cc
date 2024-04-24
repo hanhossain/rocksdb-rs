@@ -34,7 +34,7 @@ uint32_t Hash(const char* data, size_t n, uint32_t seed) {
 
   // Pick up four bytes at a time
   while (data + 4 <= limit) {
-    uint32_t w = DecodeFixed32(data);
+    uint32_t w = rocksdb_rs::coding_lean::DecodeFixed32(data);
     data += 4;
     h += w;
     h *= m;

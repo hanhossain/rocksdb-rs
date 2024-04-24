@@ -188,7 +188,7 @@ int InternalKeyComparator::Compare(const Slice& a,
   int r = user_comparator_.Compare(ExtractUserKey(a), b.user_key);
   if (r == 0) {
     const uint64_t anum =
-        DecodeFixed64(a.data() + a.size() - kNumInternalBytes);
+        rocksdb_rs::coding_lean::DecodeFixed64(a.data() + a.size() - kNumInternalBytes);
     const uint64_t bnum = (b.sequence << 8) | b.type;
     if (anum > bnum) {
       r = -1;
@@ -225,7 +225,7 @@ LookupKey::LookupKey(const Slice& _user_key, SequenceNumber s,
     memcpy(dst, ts->data(), ts_sz);
     dst += ts_sz;
   }
-  EncodeFixed64(dst, PackSequenceAndType(s, kValueTypeForSeek));
+  rocksdb_rs::coding_lean::EncodeFixed64(dst, PackSequenceAndType(s, kValueTypeForSeek));
   dst += 8;
   end_ = dst;
 }

@@ -445,7 +445,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
     return rocksdb_rs::status::Status_OK();
   }
 
-  uint32_t version = DecodeFixed32(version_pos->second.c_str());
+  uint32_t version = rocksdb_rs::coding_lean::DecodeFixed32(version_pos->second.c_str());
   if (version < 2) {
     if (seqno_pos != props.end() || version != 1) {
       std::array<char, 200> msg_buf;
@@ -464,7 +464,7 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
   // SST is external.
   SequenceNumber global_seqno(0);
   if (seqno_pos != props.end()) {
-    global_seqno = DecodeFixed64(seqno_pos->second.c_str());
+    global_seqno = rocksdb_rs::coding_lean::DecodeFixed64(seqno_pos->second.c_str());
   }
   // SstTableReader open table reader with kMaxSequenceNumber as largest_seqno
   // to denote it is unknown.
@@ -943,7 +943,7 @@ rocksdb_rs::status::Status BlockBasedTable::ReadPropertiesBlock(
     auto index_type_pos = props.find(BlockBasedTablePropertyNames::kIndexType);
     if (index_type_pos != props.end()) {
       rep_->index_type = static_cast<BlockBasedTableOptions::IndexType>(
-          DecodeFixed32(index_type_pos->second.c_str()));
+          rocksdb_rs::coding_lean::DecodeFixed32(index_type_pos->second.c_str()));
     }
     auto min_ts_pos = props.find("rocksdb.timestamp_min");
     if (min_ts_pos != props.end()) {

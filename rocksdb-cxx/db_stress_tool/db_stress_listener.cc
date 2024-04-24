@@ -9,7 +9,7 @@
 
 #include "file/file_util.h"
 #include "rocksdb/file_system.h"
-#include "util/coding_lean.h"
+#include "rocksdb-rs/src/coding_lean.rs.h"
 
 namespace rocksdb {
 
@@ -136,7 +136,7 @@ UniqueIdVerifier::~UniqueIdVerifier() {
 
 void UniqueIdVerifier::VerifyNoWrite(const std::string& id) {
   assert(id.size() == 24);
-  bool is_new = id_set_.insert(DecodeFixed64(&id[offset_])).second;
+  bool is_new = id_set_.insert(rocksdb_rs::coding_lean::DecodeFixed64(&id[offset_])).second;
   if (!is_new) {
     fprintf(stderr,
             "Duplicate partial unique ID found (offset=%zu, count=%zu)\n",

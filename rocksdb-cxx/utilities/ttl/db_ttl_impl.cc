@@ -90,7 +90,7 @@ bool TtlMergeOperator::FullMergeV2(const MergeOperationInput& merge_in,
     return false;
   } else {
     char ts_string[ts_len];
-    EncodeFixed32(ts_string, (int32_t)curtime);
+    rocksdb_rs::coding_lean::EncodeFixed32(ts_string, (int32_t)curtime);
     merge_out->new_value.append(ts_string, ts_len);
     return true;
   }
@@ -130,7 +130,7 @@ bool TtlMergeOperator::PartialMergeMulti(const Slice& key,
     return false;
   } else {
     char ts_string[ts_len];
-    EncodeFixed32(ts_string, (int32_t)curtime);
+    rocksdb_rs::coding_lean::EncodeFixed32(ts_string, (int32_t)curtime);
     new_value->append(ts_string, ts_len);
     return true;
   }
@@ -420,7 +420,7 @@ rocksdb_rs::status::Status DBWithTTLImpl::AppendTS(const Slice& val, std::string
   if (!st.ok()) {
     return st;
   }
-  EncodeFixed32(ts_string, (int32_t)curtime);
+  rocksdb_rs::coding_lean::EncodeFixed32(ts_string, (int32_t)curtime);
   val_with_ts->append(val.data(), val.size());
   val_with_ts->append(ts_string, kTSLength);
   return st;
@@ -434,7 +434,7 @@ rocksdb_rs::status::Status DBWithTTLImpl::SanityCheckTimestamp(const Slice& str)
   }
   // Checks that TS is not lesser than kMinTimestamp
   // Gaurds against corruption & normal database opened incorrectly in ttl mode
-  int32_t timestamp_value = DecodeFixed32(str.data() + str.size() - kTSLength);
+  int32_t timestamp_value = rocksdb_rs::coding_lean::DecodeFixed32(str.data() + str.size() - kTSLength);
   if (timestamp_value < kMinTimestamp) {
     return rocksdb_rs::status::Status_Corruption("Error: Timestamp < ttl feature release time!\n");
   }
@@ -456,7 +456,7 @@ bool DBWithTTLImpl::IsStale(const Slice& value, int32_t ttl,
    * convert timestamp_value to int64_t
    */
   int64_t timestamp_value =
-      DecodeFixed32(value.data() + value.size() - kTSLength);
+      rocksdb_rs::coding_lean::DecodeFixed32(value.data() + value.size() - kTSLength);
   return (timestamp_value + ttl) < curtime;
 }
 

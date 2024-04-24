@@ -1317,7 +1317,7 @@ void BlockBasedTableBuilder::WriteMaybeCompressedBlock(
     }
   }
 
-  EncodeFixed32(trailer.data() + 1, checksum);
+  rocksdb_rs::coding_lean::EncodeFixed32(trailer.data() + 1, checksum);
   TEST_SYNC_POINT_CALLBACK(
       "BlockBasedTableBuilder::WriteMaybeCompressedBlock:TamperWithChecksum",
       trailer.data());

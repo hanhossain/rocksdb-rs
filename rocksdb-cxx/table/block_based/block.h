@@ -658,7 +658,7 @@ class BlockIter : public InternalIteratorBase<TValue> {
 
   uint32_t GetRestartPoint(uint32_t index) const {
     assert(index < num_restarts_);
-    return DecodeFixed32(data_ + restarts_ + index * sizeof(uint32_t));
+    return rocksdb_rs::coding_lean::DecodeFixed32(data_ + restarts_ + index * sizeof(uint32_t));
   }
 
   void SeekToRestartPoint(uint32_t index) {

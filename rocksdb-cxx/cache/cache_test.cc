@@ -44,7 +44,7 @@ std::string EncodeKey16Bytes(int k) {
 
 int DecodeKey16Bytes(const Slice& k) {
   assert(k.size() == 16);
-  return DecodeFixed32(k.data());  // Decodes only the first 4 bytes of k.
+  return rocksdb_rs::coding_lean::DecodeFixed32(k.data());  // Decodes only the first 4 bytes of k.
 }
 
 std::string EncodeKey32Bits(int k) {
@@ -55,7 +55,7 @@ std::string EncodeKey32Bits(int k) {
 
 int DecodeKey32Bits(const Slice& k) {
   assert(k.size() == 4);
-  return DecodeFixed32(k.data());
+  return rocksdb_rs::coding_lean::DecodeFixed32(k.data());
 }
 
 Cache::ObjectPtr EncodeValue(uintptr_t v) {

@@ -37,7 +37,7 @@ uint64_t UInt64AddOperator::DecodeInteger(const Slice& value,
   uint64_t result = 0;
 
   if (value.size() == sizeof(uint64_t)) {
-    result = DecodeFixed64(value.data());
+    result = rocksdb_rs::coding_lean::DecodeFixed64(value.data());
   } else if (logger != nullptr) {
     // If value is corrupted, treat it as 0
     ROCKS_LOG_ERROR(logger,

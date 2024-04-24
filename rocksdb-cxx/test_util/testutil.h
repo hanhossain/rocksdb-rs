@@ -465,7 +465,7 @@ class FilterNumber : public CompactionFilter {
               const rocksdb::Slice& value, std::string* /*new_value*/,
               bool* /*value_changed*/) const override {
     if (value.size() == sizeof(uint64_t)) {
-      return num_ == DecodeFixed64(value.data());
+      return num_ == rocksdb_rs::coding_lean::DecodeFixed64(value.data());
     }
     return true;
   }
@@ -475,7 +475,7 @@ class FilterNumber : public CompactionFilter {
       const rocksdb::Slice& value) const override {
     last_merge_operand_key_ = key.ToString();
     if (value.size() == sizeof(uint64_t)) {
-      return num_ == DecodeFixed64(value.data());
+      return num_ == rocksdb_rs::coding_lean::DecodeFixed64(value.data());
     }
     return true;
   }

@@ -727,7 +727,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
   if (version_iter == uprops.end()) {
     return rocksdb_rs::status::Status_Corruption("External file version not found");
   }
-  file_to_ingest->version = DecodeFixed32(version_iter->second.c_str());
+  file_to_ingest->version = rocksdb_rs::coding_lean::DecodeFixed32(version_iter->second.c_str());
 
   auto seqno_iter = uprops.find(ExternalSstFilePropertyNames::kGlobalSeqno);
   if (file_to_ingest->version == 2) {
@@ -738,7 +738,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::GetIngestedFileInfo(
     }
 
     // Set the global sequence number
-    file_to_ingest->original_seqno = DecodeFixed64(seqno_iter->second.c_str());
+    file_to_ingest->original_seqno = rocksdb_rs::coding_lean::DecodeFixed64(seqno_iter->second.c_str());
     if (props->external_sst_file_global_seqno_offset == 0) {
       file_to_ingest->global_seqno_offset = 0;
       return rocksdb_rs::status::Status_Corruption("Was not able to find file global seqno field");

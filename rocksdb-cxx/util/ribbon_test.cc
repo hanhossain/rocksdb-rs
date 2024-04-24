@@ -99,7 +99,7 @@ struct StandardKeyGen {
 
   const std::string& operator*() {
     // Use multiplication to mix things up a little in the key
-    rocksdb::EncodeFixed64(&str_[str_.size() - 8],
+    rocksdb_rs::coding_lean::EncodeFixed64(&str_[str_.size() - 8],
                                      id_ * uint64_t{0x1500000001});
     return str_;
   }
@@ -140,7 +140,7 @@ struct SmallKeyGen {
   }
 
   const std::string& operator*() {
-    rocksdb::EncodeFixed64(&str_[str_.size() - 8], id_);
+    rocksdb_rs::coding_lean::EncodeFixed64(&str_[str_.size() - 8], id_);
     return str_;
   }
 
@@ -1060,7 +1060,7 @@ struct PhsfInputGen {
 
   const std::pair<std::string, uint8_t>& operator*() {
     // Use multiplication to mix things up a little in the key
-    rocksdb::EncodeFixed64(&val_.first[val_.first.size() - 8],
+    rocksdb_rs::coding_lean::EncodeFixed64(&val_.first[val_.first.size() - 8],
                                      id_ * uint64_t{0x1500000001});
     // Occasionally repeat values etc.
     val_.second = static_cast<uint8_t>(id_ * 7 / 8);

@@ -76,7 +76,7 @@ inline Slice TestKeyToSlice(std::string& s, const TestKey& test_key) {
 }
 
 inline const TestKey SliceToTestKey(const Slice& slice) {
-  return TestKey(DecodeFixed64(slice.data()), DecodeFixed64(slice.data() + 8));
+  return TestKey(rocksdb_rs::coding_lean::DecodeFixed64(slice.data()), rocksdb_rs::coding_lean::DecodeFixed64(slice.data() + 8));
 }
 
 class TestKeyComparator : public Comparator {

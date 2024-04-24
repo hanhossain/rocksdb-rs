@@ -985,7 +985,7 @@ class TestSecondaryCache : public SecondaryCache {
     num_inserts_++;
     size = (*helper->size_cb)(value);
     buf = new char[size + sizeof(uint64_t)];
-    EncodeFixed64(buf, size);
+    rocksdb_rs::coding_lean::EncodeFixed64(buf, size);
     s = (*helper->saveto_cb)(value, 0, size, buf + sizeof(uint64_t));
     if (!s.ok()) {
       delete[] buf;
@@ -1020,7 +1020,7 @@ class TestSecondaryCache : public SecondaryCache {
       rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
       if (type != ResultType::DEFER_AND_FAIL) {
         char* ptr = cache_.Value(handle);
-        size_t size = DecodeFixed64(ptr);
+        size_t size = rocksdb_rs::coding_lean::DecodeFixed64(ptr);
         ptr += sizeof(uint64_t);
         s = helper->create_cb(Slice(ptr, size), create_context,
                               /*alloc*/ nullptr, &value, &charge);

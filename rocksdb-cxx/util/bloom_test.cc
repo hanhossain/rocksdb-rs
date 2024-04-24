@@ -815,7 +815,7 @@ struct RawFilterTester {
   Slice ResetNoFill(uint32_t len_without_metadata, uint32_t num_lines,
                     uint32_t num_probes) {
     metadata_ptr_[0] = static_cast<char>(num_probes);
-    EncodeFixed32(metadata_ptr_ + 1, num_lines);
+    rocksdb_rs::coding_lean::EncodeFixed32(metadata_ptr_ + 1, num_lines);
     uint32_t len = len_without_metadata + /*metadata*/ 5;
     assert(len <= data_.size());
     return Slice(metadata_ptr_ - len_without_metadata, len);

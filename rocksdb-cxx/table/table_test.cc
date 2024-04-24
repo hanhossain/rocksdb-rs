@@ -67,7 +67,6 @@
 #include "test_util/sync_point.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
-#include "util/coding_lean.h"
 #include "util/compression.h"
 #include "util/file_checksum_helper.h"
 #include "util/random.h"
@@ -76,6 +75,7 @@
 #include "utilities/merge_operators.h"
 
 #include "rocksdb-rs/src/compression_type.rs.h"
+#include "rocksdb-rs/src/coding_lean.rs.h"
 
 namespace rocksdb {
 
@@ -1439,16 +1439,16 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
     std::string euid;
     EXPECT_OK(GetExtendedUniqueIdFromTableProperties(*tp, euid));
     EXPECT_EQ(euid.size(), 24U);
-    t.external_id.data[0] = DecodeFixed64(&euid[0]);
-    t.external_id.data[1] = DecodeFixed64(&euid[8]);
-    t.external_id.data[2] = DecodeFixed64(&euid[16]);
+    t.external_id.data[0] = rocksdb_rs::coding_lean::DecodeFixed64(&euid[0]);
+    t.external_id.data[1] = rocksdb_rs::coding_lean::DecodeFixed64(&euid[8]);
+    t.external_id.data[2] = rocksdb_rs::coding_lean::DecodeFixed64(&euid[16]);
 
     std::string uid;
     EXPECT_OK(GetUniqueIdFromTableProperties(*tp, uid));
     EXPECT_EQ(uid.size(), 16U);
     EXPECT_EQ(uid, euid.substr(0, 16));
-    EXPECT_EQ(t.external_id.data[0], DecodeFixed64(&uid[0]));
-    EXPECT_EQ(t.external_id.data[1], DecodeFixed64(&uid[8]));
+    EXPECT_EQ(t.external_id.data[0], rocksdb_rs::coding_lean::DecodeFixed64(&uid[0]));
+    EXPECT_EQ(t.external_id.data[1], rocksdb_rs::coding_lean::DecodeFixed64(&uid[8]));
   }
   // All these should be effectively random
   EXPECT_TRUE(seen->insert(t.external_id.data[0]).second);
@@ -2287,7 +2287,7 @@ std::string ChecksumAsString(const std::string& data,
   }
   // Little endian as in file
   std::array<char, 4> raw_bytes;
-  EncodeFixed32(raw_bytes.data(), v);
+  rocksdb_rs::coding_lean::EncodeFixed32(raw_bytes.data(), v);
   return Slice(raw_bytes.data(), raw_bytes.size()).ToString(/*hex*/ true);
 }
 
@@ -4489,7 +4489,7 @@ TEST(TableTest, FooterTests) {
     ASSERT_EQ(decoded_footer.GetBlockTrailerSize(), 5U);
     // Ensure serialized with legacy magic
     ASSERT_EQ(
-        DecodeFixed64(footer.GetSlice().data() + footer.GetSlice().size() - 8),
+        rocksdb_rs::coding_lean::DecodeFixed64(footer.GetSlice().data() + footer.GetSlice().size() - 8),
         kLegacyBlockBasedTableMagicNumber);
   }
   // block based, various checksums, various versions
@@ -4530,7 +4530,7 @@ TEST(TableTest, FooterTests) {
     ASSERT_EQ(decoded_footer.GetBlockTrailerSize(), 0U);
     // Ensure serialized with legacy magic
     ASSERT_EQ(
-        DecodeFixed64(footer.GetSlice().data() + footer.GetSlice().size() - 8),
+        rocksdb_rs::coding_lean::DecodeFixed64(footer.GetSlice().data() + footer.GetSlice().size() - 8),
         kLegacyPlainTableMagicNumber);
   }
   {
@@ -4770,9 +4770,9 @@ TEST_P(BlockBasedTableTest, DISABLED_TableWithGlobalSeqno) {
                                   read_options, &props));
 
     UserCollectedProperties user_props = props->user_collected_properties;
-    version = DecodeFixed32(
+    version = rocksdb_rs::coding_lean::DecodeFixed32(
         user_props[ExternalSstFilePropertyNames::kVersion].c_str());
-    global_seqno = DecodeFixed64(
+    global_seqno = rocksdb_rs::coding_lean::DecodeFixed64(
         user_props[ExternalSstFilePropertyNames::kGlobalSeqno].c_str());
     global_seqno_offset = props->external_sst_file_global_seqno_offset;
   };
