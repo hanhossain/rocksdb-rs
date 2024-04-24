@@ -1129,11 +1129,11 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
       uint32_t a = record.a_value();
       uint32_t c = record.c_value();
       char sk_buf[12];
-      EncodeFixed32(sk_buf, Record::kSecondaryIndexId);
+      rocksdb_rs::coding_lean::EncodeFixed32(sk_buf, Record::kSecondaryIndexId);
       std::reverse(sk_buf, sk_buf + sizeof(uint32_t));
-      EncodeFixed32(sk_buf + sizeof(uint32_t), c);
+      rocksdb_rs::coding_lean::EncodeFixed32(sk_buf + sizeof(uint32_t), c);
       std::reverse(sk_buf + sizeof(uint32_t), sk_buf + 2 * sizeof(uint32_t));
-      EncodeFixed32(sk_buf + 2 * sizeof(uint32_t), a);
+      rocksdb_rs::coding_lean::EncodeFixed32(sk_buf + 2 * sizeof(uint32_t), a);
       std::reverse(sk_buf + 2 * sizeof(uint32_t), sk_buf + sizeof(sk_buf));
       Slice sk(sk_buf, sizeof(sk_buf));
       std::string value;
@@ -1348,7 +1348,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(T
 
   uint64_t counter_val = counter_.Next();
   char val_buf[sizeof(counter_val)];
-  EncodeFixed64(val_buf, counter_val);
+  rocksdb_rs::coding_lean::EncodeFixed64(val_buf, counter_val);
   return ctwb->Put(Slice(key_buf, sizeof(key_buf)),
                    Slice(val_buf, sizeof(val_buf)));
 }

@@ -404,7 +404,7 @@ rocksdb_rs::status::Status ReadTablePropertiesHelper(
         uint64_t global_seqno_offset =
             new_table_properties->external_sst_file_global_seqno_offset -
             handle.offset();
-        EncodeFixed64(&tmp_buf[static_cast<size_t>(global_seqno_offset)], 0);
+        rocksdb_rs::coding_lean::EncodeFixed64(&tmp_buf[static_cast<size_t>(global_seqno_offset)], 0);
         s = VerifyBlockChecksum(footer.checksum_type(), tmp_buf.data(),
                                 block_size, file->file_name(), handle.offset());
       }

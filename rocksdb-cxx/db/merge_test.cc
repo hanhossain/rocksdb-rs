@@ -154,7 +154,7 @@ class Counters {
   bool set(const std::string& key, uint64_t value) {
     // just treat the internal rep of int64 as the string
     char buf[sizeof(value)];
-    EncodeFixed64(buf, value);
+    rocksdb_rs::coding_lean::EncodeFixed64(buf, value);
     Slice slice(buf, sizeof(value));
     auto s = db_->Put(put_option_, key, slice);
 
@@ -193,7 +193,7 @@ class Counters {
         std::cerr << "value corruption\n";
         return false;
       }
-      *value = DecodeFixed64(&str[0]);
+      *value = rocksdb_rs::coding_lean::DecodeFixed64(&str[0]);
       return true;
     } else {
       std::cerr << *s.ToString() << std::endl;
@@ -242,7 +242,7 @@ class MergeBasedCounters : public Counters {
   // mapped to a rocksdb Merge operation
   bool add(const std::string& key, uint64_t value) override {
     char encoded[sizeof(uint64_t)];
-    EncodeFixed64(encoded, value);
+    rocksdb_rs::coding_lean::EncodeFixed64(encoded, value);
     Slice slice(encoded, sizeof(uint64_t));
     auto s = db_->Merge(merge_option_, key, slice);
 
@@ -258,7 +258,7 @@ class MergeBasedCounters : public Counters {
 void dumpDb(DB* db) {
   auto it = std::unique_ptr<Iterator>(db->NewIterator(ReadOptions()));
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    // uint64_t value = DecodeFixed64(it->value().data());
+    // uint64_t value = rocksdb_rs::coding_lean::DecodeFixed64(it->value().data());
     // std::cout << it->key().ToString() << ": " << value << std::endl;
   }
   assert(it->status().ok());  // Check for any errors found during the scan
@@ -474,7 +474,7 @@ void testSingleBatchSuccessiveMerge(DB* db, size_t max_num_merges,
   Slice key("BatchSuccessiveMerge");
   uint64_t merge_value = 1;
   char buf[sizeof(merge_value)];
-  EncodeFixed64(buf, merge_value);
+  rocksdb_rs::coding_lean::EncodeFixed64(buf, merge_value);
   Slice merge_value_slice(buf, sizeof(merge_value));
 
   // Create the batch
@@ -495,7 +495,7 @@ void testSingleBatchSuccessiveMerge(DB* db, size_t max_num_merges,
   std::string get_value_str;
   ASSERT_OK(db->Get(ReadOptions(), key, &get_value_str));
   assert(get_value_str.size() == sizeof(uint64_t));
-  uint64_t get_value = DecodeFixed64(&get_value_str[0]);
+  uint64_t get_value = rocksdb_rs::coding_lean::DecodeFixed64(&get_value_str[0]);
   ASSERT_EQ(get_value, num_merges * merge_value);
   ASSERT_EQ(num_merge_operator_calls,
             static_cast<size_t>((num_merges % (max_num_merges + 1))));

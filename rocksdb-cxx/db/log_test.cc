@@ -234,7 +234,7 @@ class LogTest
     uint32_t crc = crc32c::Value(&dest_contents()[header_offset + 6],
                                  header_size - 6 + len);
     crc = crc32c::Mask(crc);
-    EncodeFixed32(&dest_contents()[header_offset], crc);
+    rocksdb_rs::coding_lean::EncodeFixed32(&dest_contents()[header_offset], crc);
   }
 
   void ForceError(size_t position = 0) {

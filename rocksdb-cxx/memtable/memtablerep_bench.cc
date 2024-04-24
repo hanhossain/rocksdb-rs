@@ -243,9 +243,9 @@ class FillBenchmarkThread : public BenchmarkThread {
     assert(buf != nullptr);
     char* p = EncodeVarint32(buf, internal_key_size);
     auto key = key_gen_->Next();
-    EncodeFixed64(p, key);
+    rocksdb_rs::coding_lean::EncodeFixed64(p, key);
     p += 8;
-    EncodeFixed64(p, ++(*sequence_));
+    rocksdb_rs::coding_lean::EncodeFixed64(p, ++(*sequence_));
     p += 8;
     Slice bytes = generator_.Generate(FLAGS_item_size);
     memcpy(p, bytes.data(), FLAGS_item_size);

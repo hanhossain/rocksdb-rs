@@ -483,7 +483,7 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result, size_t* drop_size,
         }
         continue;
       }
-      const uint32_t log_num = DecodeFixed32(header + 7);
+      const uint32_t log_num = rocksdb_rs::coding_lean::DecodeFixed32(header + 7);
       if (log_num != log_number_) {
         return kOldRecord;
       }
@@ -511,7 +511,7 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result, size_t* drop_size,
 
     // Check crc
     if (checksum_) {
-      uint32_t expected_crc = crc32c::Unmask(DecodeFixed32(header));
+      uint32_t expected_crc = crc32c::Unmask(rocksdb_rs::coding_lean::DecodeFixed32(header));
       uint32_t actual_crc = crc32c::Value(header + 6, length + header_size - 6);
       if (actual_crc != expected_crc) {
         // Drop the rest of the buffer since "length" itself may have
@@ -861,7 +861,7 @@ bool FragmentBufferedReader::TryReadFragment(
         return false;
       }
     }
-    const uint32_t log_num = DecodeFixed32(header + 7);
+    const uint32_t log_num = rocksdb_rs::coding_lean::DecodeFixed32(header + 7);
     if (log_num != log_number_) {
       *fragment_type_or_err = kOldRecord;
       return true;
@@ -886,7 +886,7 @@ bool FragmentBufferedReader::TryReadFragment(
   }
 
   if (checksum_) {
-    uint32_t expected_crc = crc32c::Unmask(DecodeFixed32(header));
+    uint32_t expected_crc = crc32c::Unmask(rocksdb_rs::coding_lean::DecodeFixed32(header));
     uint32_t actual_crc = crc32c::Value(header + 6, length + header_size - 6);
     if (actual_crc != expected_crc) {
       *drop_size = buffer_.size();

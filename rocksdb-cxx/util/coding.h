@@ -21,7 +21,7 @@
 
 #include "port/port.h"
 #include "rocksdb/slice.h"
-#include "util/coding_lean.h"
+#include "rocksdb-rs/src/coding_lean.rs.h"
 
 // Some processors does not allow unaligned access to memory
 #if defined(__sparc)
@@ -125,7 +125,7 @@ inline void PutFixed16(std::string* dst, uint16_t value) {
                 sizeof(value));
   } else {
     char buf[sizeof(value)];
-    EncodeFixed16(buf, value);
+    rocksdb_rs::coding_lean::EncodeFixed16(buf, value);
     dst->append(buf, sizeof(buf));
   }
 }
@@ -136,7 +136,7 @@ inline void PutFixed32(std::string* dst, uint32_t value) {
                 sizeof(value));
   } else {
     char buf[sizeof(value)];
-    EncodeFixed32(buf, value);
+    rocksdb_rs::coding_lean::EncodeFixed32(buf, value);
     dst->append(buf, sizeof(buf));
   }
 }
@@ -147,7 +147,7 @@ inline void PutFixed64(std::string* dst, uint64_t value) {
                 sizeof(value));
   } else {
     char buf[sizeof(value)];
-    EncodeFixed64(buf, value);
+    rocksdb_rs::coding_lean::EncodeFixed64(buf, value);
     dst->append(buf, sizeof(buf));
   }
 }
@@ -261,7 +261,7 @@ inline bool GetFixed64(Slice* input, uint64_t* value) {
   if (input->size() < sizeof(uint64_t)) {
     return false;
   }
-  *value = DecodeFixed64(input->data());
+  *value = rocksdb_rs::coding_lean::DecodeFixed64(input->data());
   input->remove_prefix(sizeof(uint64_t));
   return true;
 }
@@ -270,7 +270,7 @@ inline bool GetFixed32(Slice* input, uint32_t* value) {
   if (input->size() < sizeof(uint32_t)) {
     return false;
   }
-  *value = DecodeFixed32(input->data());
+  *value = rocksdb_rs::coding_lean::DecodeFixed32(input->data());
   input->remove_prefix(sizeof(uint32_t));
   return true;
 }
@@ -279,7 +279,7 @@ inline bool GetFixed16(Slice* input, uint16_t* value) {
   if (input->size() < sizeof(uint16_t)) {
     return false;
   }
-  *value = DecodeFixed16(input->data());
+  *value = rocksdb_rs::coding_lean::DecodeFixed16(input->data());
   input->remove_prefix(sizeof(uint16_t));
   return true;
 }

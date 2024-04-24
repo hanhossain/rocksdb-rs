@@ -60,7 +60,7 @@ rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
   offset_ += kTraceMetadataSize;
 
   uint32_t payload_len =
-      DecodeFixed32(&buffer_[kTraceTimestampSize + kTraceTypeSize]);
+      rocksdb_rs::coding_lean::DecodeFixed32(&buffer_[kTraceTimestampSize + kTraceTypeSize]);
 
   // Read Payload
   unsigned int bytes_to_read = payload_len;

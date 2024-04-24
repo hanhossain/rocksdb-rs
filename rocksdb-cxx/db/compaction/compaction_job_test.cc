@@ -1627,12 +1627,12 @@ TEST_F(CompactionJobTest, InputSerialization) {
   output.clear();
   ASSERT_OK(input.Write(&output));
 
-  uint32_t data_version = DecodeFixed32(output.data());
+  uint32_t data_version = rocksdb_rs::coding_lean::DecodeFixed32(output.data());
   const size_t kDataVersionSize = sizeof(data_version);
   ASSERT_EQ(data_version,
             1U);  // Update once the default data version is changed
   char buf[kDataVersionSize];
-  EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
+  rocksdb_rs::coding_lean::EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
   output.replace(0, kDataVersionSize, buf, kDataVersionSize);
   rocksdb_rs::status::Status s = CompactionServiceInput::Read(output, &deserialized3);
   ASSERT_TRUE(s.IsNotSupported());
@@ -1724,12 +1724,12 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   output.clear();
   ASSERT_OK(result.Write(&output));
 
-  uint32_t data_version = DecodeFixed32(output.data());
+  uint32_t data_version = rocksdb_rs::coding_lean::DecodeFixed32(output.data());
   const size_t kDataVersionSize = sizeof(data_version);
   ASSERT_EQ(data_version,
             1U);  // Update once the default data version is changed
   char buf[kDataVersionSize];
-  EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
+  rocksdb_rs::coding_lean::EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
   output.replace(0, kDataVersionSize, buf, kDataVersionSize);
   rocksdb_rs::status::Status s = CompactionServiceResult::Read(output, &deserialized3);
   ASSERT_TRUE(s.IsNotSupported());

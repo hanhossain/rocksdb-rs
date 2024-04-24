@@ -231,9 +231,9 @@ void FooterBuilder::Build(uint64_t magic_number, uint32_t format_version,
     cur += kFooterPart2Size;
     // Part 3
     part3 = cur;
-    EncodeFixed32(cur, format_version);
+    rocksdb_rs::coding_lean::EncodeFixed32(cur, format_version);
     cur += 4;
-    EncodeFixed64(cur, magic_number);
+    rocksdb_rs::coding_lean::EncodeFixed64(cur, magic_number);
     assert(cur + 8 == slice_.data() + slice_.size());
   } else {
     slice_ = Slice(data_.data(), Footer::kVersion0EncodedLength);
@@ -245,7 +245,7 @@ void FooterBuilder::Build(uint64_t magic_number, uint32_t format_version,
     char* cur = part3;
     // Use legacy magic numbers to indicate format_version=0, for
     // compatibility. No other cases should use format_version=0.
-    EncodeFixed64(cur, DownconvertToLegacyFooterFormat(magic_number));
+    rocksdb_rs::coding_lean::EncodeFixed64(cur, DownconvertToLegacyFooterFormat(magic_number));
     assert(cur + 8 == slice_.data() + slice_.size());
   }
 
@@ -268,7 +268,7 @@ rocksdb_rs::status::Status Footer::DecodeFrom(Slice input, uint64_t input_offset
   assert(input.size() >= kMinEncodedLength);
 
   const char* magic_ptr = input.data() + input.size() - kMagicNumberLengthByte;
-  uint64_t magic = DecodeFixed64(magic_ptr);
+  uint64_t magic = rocksdb_rs::coding_lean::DecodeFixed64(magic_ptr);
 
   // We check for legacy formats here and silently upconvert them
   bool legacy = IsLegacyFooterFormat(magic);
@@ -292,7 +292,7 @@ rocksdb_rs::status::Status Footer::DecodeFrom(Slice input, uint64_t input_offset
     checksum_type_ = kCRC32c;
   } else {
     const char* part3_ptr = magic_ptr - 4;
-    format_version_ = DecodeFixed32(part3_ptr);
+    format_version_ = rocksdb_rs::coding_lean::DecodeFixed32(part3_ptr);
     if (!IsSupportedFormatVersion(format_version_)) {
       return rocksdb_rs::status::Status_Corruption("Corrupt or unsupported format_version: " +
                                 std::to_string(format_version_));

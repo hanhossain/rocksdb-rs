@@ -267,7 +267,7 @@ TEST_F(DBMemTableTest, ConcurrentMergeWrite) {
                       roptions, false /* immutable_memtable */);
   ASSERT_OK(status);
   ASSERT_TRUE(res);
-  uint64_t ivalue = DecodeFixed64(Slice(value).data());
+  uint64_t ivalue = rocksdb_rs::coding_lean::DecodeFixed64(Slice(value).data());
   uint64_t sum = 0;
   for (int seq = 0; seq < num_ops; seq++) {
     sum += seq;

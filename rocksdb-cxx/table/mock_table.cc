@@ -291,7 +291,7 @@ rocksdb_rs::status::Status MockTableFactory::GetAndWriteNextID(WritableFileWrite
                                            uint32_t* next_id) const {
   *next_id = next_id_.fetch_add(1);
   char buf[4];
-  EncodeFixed32(buf, *next_id);
+  rocksdb_rs::coding_lean::EncodeFixed32(buf, *next_id);
   return file->Append(Slice(buf, 4)).status();
 }
 
@@ -302,7 +302,7 @@ rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(RandomAccessFileReade
   rocksdb_rs::status::Status s = file->Read(IOOptions(), 0, 4, &result, buf, nullptr,
                         Env::IO_TOTAL /* rate_limiter_priority */).status();
   assert(result.size() == 4);
-  *id = DecodeFixed32(buf);
+  *id = rocksdb_rs::coding_lean::DecodeFixed32(buf);
   return s;
 }
 

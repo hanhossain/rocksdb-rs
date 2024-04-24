@@ -38,7 +38,7 @@ class TestFilterBitsBuilder : public FilterBitsBuilder {
     uint32_t len = static_cast<uint32_t>(hash_entries_.size()) * 4;
     char* data = new char[len];
     for (size_t i = 0; i < hash_entries_.size(); i++) {
-      EncodeFixed32(data + i * 4, hash_entries_[i]);
+      rocksdb_rs::coding_lean::EncodeFixed32(data + i * 4, hash_entries_[i]);
     }
     const char* const_data = data;
     buf->reset(const_data);
@@ -69,7 +69,7 @@ class TestFilterBitsReader : public FilterBitsReader {
   bool MayMatch(const Slice& entry) override {
     uint32_t h = Hash(entry.data(), entry.size(), 1);
     for (size_t i = 0; i + 4 <= len_; i += 4) {
-      if (h == DecodeFixed32(data_ + i)) {
+      if (h == rocksdb_rs::coding_lean::DecodeFixed32(data_ + i)) {
         return true;
       }
     }

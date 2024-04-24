@@ -76,7 +76,7 @@ void DataBlockHashIndexBuilder::Reset() {
 void DataBlockHashIndex::Initialize(const char* data, uint16_t size,
                                     uint16_t* map_offset) {
   assert(size >= sizeof(uint16_t));  // NUM_BUCKETS
-  num_buckets_ = DecodeFixed16(data + size - sizeof(uint16_t));
+  num_buckets_ = rocksdb_rs::coding_lean::DecodeFixed16(data + size - sizeof(uint16_t));
   assert(num_buckets_ > 0);
   assert(size > num_buckets_ * sizeof(uint8_t));
   *map_offset = static_cast<uint16_t>(size - sizeof(uint16_t) -

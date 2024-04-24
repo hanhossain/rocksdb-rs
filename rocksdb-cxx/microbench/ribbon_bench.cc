@@ -38,10 +38,10 @@ struct KeyMaker {
     // variance confined to a contiguous 32 bits, because then a 32 bit
     // hash function can "cheat" the false positive rate by
     // approximating a perfect hash.
-    EncodeFixed32(data, val_num);
-    EncodeFixed32(data + 4, filter_num + val_num);
+    rocksdb_rs::coding_lean::EncodeFixed32(data, val_num);
+    rocksdb_rs::coding_lean::EncodeFixed32(data + 4, filter_num + val_num);
     // ensure clearing leftovers from different alignment
-    EncodeFixed32(data + 8, 0);
+    rocksdb_rs::coding_lean::EncodeFixed32(data + 8, 0);
     return {data, len};
   }
 };

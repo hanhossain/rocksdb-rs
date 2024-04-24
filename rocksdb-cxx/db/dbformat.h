@@ -254,7 +254,7 @@ inline Slice ExtractTimestampFromKey(const Slice& internal_key, size_t ts_sz) {
 inline uint64_t ExtractInternalKeyFooter(const Slice& internal_key) {
   assert(internal_key.size() >= kNumInternalBytes);
   const size_t n = internal_key.size();
-  return DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
+  return rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
 }
 
 inline ValueType ExtractValueType(const Slice& internal_key) {
@@ -408,7 +408,7 @@ inline rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
                               std::to_string(n) + ". ");
   }
 
-  uint64_t num = DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
+  uint64_t num = rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
   unsigned char c = num & 0xff;
   result->sequence = num >> 8;
   result->type = static_cast<ValueType>(c);
@@ -432,14 +432,14 @@ inline void UpdateInternalKey(std::string* ikey, uint64_t seq, ValueType t) {
 
   // Note: Since C++11, strings are guaranteed to be stored contiguously and
   // string::operator[]() is guaranteed not to change ikey.data().
-  EncodeFixed64(&(*ikey)[ikey_sz - kNumInternalBytes], newval);
+  rocksdb_rs::coding_lean::EncodeFixed64(&(*ikey)[ikey_sz - kNumInternalBytes], newval);
 }
 
 // Get the sequence number from the internal key
 inline uint64_t GetInternalKeySeqno(const Slice& internal_key) {
   const size_t n = internal_key.size();
   assert(n >= kNumInternalBytes);
-  uint64_t num = DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
+  uint64_t num = rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
   return num >> 8;
 }
 
@@ -626,7 +626,7 @@ class IterKey {
              ts->size());
     }
     uint64_t newval = (seq << 8) | t;
-    EncodeFixed64(&buf_[key_size_ - kNumInternalBytes], newval);
+    rocksdb_rs::coding_lean::EncodeFixed64(&buf_[key_size_ - kNumInternalBytes], newval);
   }
 
   bool IsKeyPinned() const { return (key_ != buf_); }
@@ -649,7 +649,7 @@ class IterKey {
     if (ts) {
       memcpy(buf_ + psize + usize, ts->data(), ts_sz);
     }
-    EncodeFixed64(buf_ + usize + psize + ts_sz,
+    rocksdb_rs::coding_lean::EncodeFixed64(buf_ + usize + psize + ts_sz,
                   PackSequenceAndType(s, value_type));
 
     key_ = buf_;
@@ -884,9 +884,9 @@ inline int InternalKeyComparator::Compare(const Slice& akey,
   int r = user_comparator_.Compare(ExtractUserKey(akey), ExtractUserKey(bkey));
   if (r == 0) {
     const uint64_t anum =
-        DecodeFixed64(akey.data() + akey.size() - kNumInternalBytes);
+        rocksdb_rs::coding_lean::DecodeFixed64(akey.data() + akey.size() - kNumInternalBytes);
     const uint64_t bnum =
-        DecodeFixed64(bkey.data() + bkey.size() - kNumInternalBytes);
+        rocksdb_rs::coding_lean::DecodeFixed64(bkey.data() + bkey.size() - kNumInternalBytes);
     if (anum > bnum) {
       r = -1;
     } else if (anum < bnum) {
@@ -905,9 +905,9 @@ inline int InternalKeyComparator::CompareKeySeq(const Slice& akey,
   if (r == 0) {
     // Shift the number to exclude the last byte which contains the value type
     const uint64_t anum =
-        DecodeFixed64(akey.data() + akey.size() - kNumInternalBytes) >> 8;
+        rocksdb_rs::coding_lean::DecodeFixed64(akey.data() + akey.size() - kNumInternalBytes) >> 8;
     const uint64_t bnum =
-        DecodeFixed64(bkey.data() + bkey.size() - kNumInternalBytes) >> 8;
+        rocksdb_rs::coding_lean::DecodeFixed64(bkey.data() + bkey.size() - kNumInternalBytes) >> 8;
     if (anum > bnum) {
       r = -1;
     } else if (anum < bnum) {

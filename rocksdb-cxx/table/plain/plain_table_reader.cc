@@ -42,7 +42,7 @@ namespace {
 // Safely getting a uint32_t element from a char array, where, starting from
 // `base`, every 4 bytes are considered as an fixed 32 bit integer.
 inline uint32_t GetFixed32Element(const char* base, size_t offset) {
-  return DecodeFixed32(base + offset * sizeof(uint32_t));
+  return rocksdb_rs::coding_lean::DecodeFixed32(base + offset * sizeof(uint32_t));
 }
 }  // namespace
 
@@ -153,7 +153,7 @@ rocksdb_rs::status::Status PlainTableReader::Open(
       user_props.find(PlainTablePropertyNames::kEncodingType);
   if (encoding_type_prop != user_props.end()) {
     encoding_type = static_cast<EncodingType>(
-        DecodeFixed32(encoding_type_prop->second.c_str()));
+        rocksdb_rs::coding_lean::DecodeFixed32(encoding_type_prop->second.c_str()));
   }
 
   std::unique_ptr<PlainTableReader> new_reader(new PlainTableReader(

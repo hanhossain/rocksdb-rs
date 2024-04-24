@@ -277,8 +277,8 @@ class ComparatorWithU64TsImpl : public Comparator {
   int CompareTimestamp(const Slice& ts1, const Slice& ts2) const override {
     assert(ts1.size() == sizeof(uint64_t));
     assert(ts2.size() == sizeof(uint64_t));
-    uint64_t lhs = DecodeFixed64(ts1.data());
-    uint64_t rhs = DecodeFixed64(ts2.data());
+    uint64_t lhs = rocksdb_rs::coding_lean::DecodeFixed64(ts1.data());
+    uint64_t rhs = rocksdb_rs::coding_lean::DecodeFixed64(ts2.data());
     if (lhs < rhs) {
       return -1;
     } else if (lhs > rhs) {

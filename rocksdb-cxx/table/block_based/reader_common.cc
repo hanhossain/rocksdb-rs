@@ -31,7 +31,7 @@ rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type, const char* da
   // the checksummed section.
   size_t len = block_size + 1;
   // And then the stored checksum value (4 bytes).
-  uint32_t stored = DecodeFixed32(data + len);
+  uint32_t stored = rocksdb_rs::coding_lean::DecodeFixed32(data + len);
 
   uint32_t computed = ComputeBuiltinChecksum(type, data, len);
   if (stored == computed) {

@@ -750,7 +750,7 @@ rocksdb_rs::status::Status CompactionServiceInput::Read(const std::string& data_
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
     return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceInput string");
   }
-  auto format_version = DecodeFixed32(data_str.data());
+  auto format_version = rocksdb_rs::coding_lean::DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
     ConfigOptions cf;
     cf.invoke_prepare_options = false;
@@ -767,7 +767,7 @@ rocksdb_rs::status::Status CompactionServiceInput::Read(const std::string& data_
 
 rocksdb_rs::status::Status CompactionServiceInput::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
-  EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
+  rocksdb_rs::coding_lean::EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));
   ConfigOptions cf;
   cf.invoke_prepare_options = false;
@@ -779,7 +779,7 @@ rocksdb_rs::status::Status CompactionServiceResult::Read(const std::string& data
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
     return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceResult string");
   }
-  auto format_version = DecodeFixed32(data_str.data());
+  auto format_version = rocksdb_rs::coding_lean::DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
     ConfigOptions cf;
     cf.invoke_prepare_options = false;
@@ -796,7 +796,7 @@ rocksdb_rs::status::Status CompactionServiceResult::Read(const std::string& data
 
 rocksdb_rs::status::Status CompactionServiceResult::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
-  EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
+  rocksdb_rs::coding_lean::EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));
   ConfigOptions cf;
   cf.invoke_prepare_options = false;

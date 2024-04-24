@@ -396,7 +396,7 @@ TEST_F(DBTestDynamicLevel, DynamicLevelMaxBytesBaseInc) {
 
   for (int i = 0; i < total_keys; i++) {
     std::string value = Get(Key(i));
-    ASSERT_EQ(DecodeFixed32(value.c_str() + random_part_size),
+    ASSERT_EQ(rocksdb_rs::coding_lean::DecodeFixed32(value.c_str() + random_part_size),
               static_cast<uint32_t>(i));
   }
 

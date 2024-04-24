@@ -253,7 +253,7 @@ rocksdb_rs::io_status::IOStatus Writer::EmitPhysicalRecord(RecordType t, const c
     // ~4 billion logs ago, but that is effectively impossible, and
     // even if it were we'dbe far more likely to see a false positive
     // on the 32-bit CRC.
-    EncodeFixed32(buf + 7, static_cast<uint32_t>(log_number_));
+    rocksdb_rs::coding_lean::EncodeFixed32(buf + 7, static_cast<uint32_t>(log_number_));
     crc = crc32c::Extend(crc, buf + 7, 4);
   }
 
@@ -263,7 +263,7 @@ rocksdb_rs::io_status::IOStatus Writer::EmitPhysicalRecord(RecordType t, const c
   crc = crc32c::Mask(crc);  // Adjust for storage
   TEST_SYNC_POINT_CALLBACK("LogWriter::EmitPhysicalRecord:BeforeEncodeChecksum",
                            &crc);
-  EncodeFixed32(buf, crc);
+  rocksdb_rs::coding_lean::EncodeFixed32(buf, crc);
 
   // Write the header and the payload
   rocksdb_rs::io_status::IOStatus s = dest_->Append(Slice(buf, header_size), 0 /* crc32c_checksum */,

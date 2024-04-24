@@ -357,7 +357,7 @@ class TestPlainTableFactory : public PlainTableFactory {
         user_props.find(PlainTablePropertyNames::kEncodingType);
     assert(encoding_type_prop != user_props.end());
     EncodingType encoding_type = static_cast<EncodingType>(
-        DecodeFixed32(encoding_type_prop->second.c_str()));
+        rocksdb_rs::coding_lean::DecodeFixed32(encoding_type_prop->second.c_str()));
 
     std::unique_ptr<PlainTableReader> new_reader(new TestPlainTableReader(
         table_reader_options.env_options,

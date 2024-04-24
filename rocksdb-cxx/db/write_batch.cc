@@ -727,19 +727,19 @@ void WriteBatchInternal::SetAsLatestPersistentState(WriteBatch* b) {
 }
 
 uint32_t WriteBatchInternal::Count(const WriteBatch* b) {
-  return DecodeFixed32(b->rep_.data() + 8);
+  return rocksdb_rs::coding_lean::DecodeFixed32(b->rep_.data() + 8);
 }
 
 void WriteBatchInternal::SetCount(WriteBatch* b, uint32_t n) {
-  EncodeFixed32(&b->rep_[8], n);
+  rocksdb_rs::coding_lean::EncodeFixed32(&b->rep_[8], n);
 }
 
 SequenceNumber WriteBatchInternal::Sequence(const WriteBatch* b) {
-  return SequenceNumber(DecodeFixed64(b->rep_.data()));
+  return SequenceNumber(rocksdb_rs::coding_lean::DecodeFixed64(b->rep_.data()));
 }
 
 void WriteBatchInternal::SetSequence(WriteBatch* b, SequenceNumber seq) {
-  EncodeFixed64(&b->rep_[0], seq);
+  rocksdb_rs::coding_lean::EncodeFixed64(&b->rep_[0], seq);
 }
 
 size_t WriteBatchInternal::GetFirstOffset(WriteBatch* /*b*/) {

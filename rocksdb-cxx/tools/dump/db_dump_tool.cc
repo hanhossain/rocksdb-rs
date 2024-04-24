@@ -78,7 +78,7 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
 
   rocksdb::Slice infoslice(json, strlen(json));
   char infosize[4];
-  rocksdb::EncodeFixed32(infosize, (uint32_t)infoslice.size());
+  rocksdb_rs::coding_lean::EncodeFixed32(infosize, (uint32_t)infoslice.size());
   rocksdb::Slice infosizeslice(infosize, 4);
   status = dumpfile->Append(infosizeslice);
   if (!status.ok()) {
@@ -95,7 +95,7 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
       db->NewIterator(rocksdb::ReadOptions()));
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
     char keysize[4];
-    rocksdb::EncodeFixed32(keysize, (uint32_t)it->key().size());
+    rocksdb_rs::coding_lean::EncodeFixed32(keysize, (uint32_t)it->key().size());
     rocksdb::Slice keysizeslice(keysize, 4);
     status = dumpfile->Append(keysizeslice);
     if (!status.ok()) {
@@ -109,7 +109,7 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
     }
 
     char valsize[4];
-    rocksdb::EncodeFixed32(valsize, (uint32_t)it->value().size());
+    rocksdb_rs::coding_lean::EncodeFixed32(valsize, (uint32_t)it->value().size());
     rocksdb::Slice valsizeslice(valsize, 4);
     status = dumpfile->Append(valsizeslice);
     if (!status.ok()) {
@@ -173,7 +173,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
     std::cerr << "Unable to read info blob size." << std::endl;
     return false;
   }
-  uint32_t infosize = rocksdb::DecodeFixed32(slice.data());
+  uint32_t infosize = rocksdb_rs::coding_lean::DecodeFixed32(slice.data());
   status = dumpfile->Skip(infosize);
   if (!status.ok()) {
     std::cerr << "Unable to skip info blob: " << *status.ToString() << std::endl;
@@ -202,7 +202,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
 
     status = dumpfile->Read(4, &slice, scratch8);
     if (!status.ok() || slice.size() != 4) break;
-    keysize = rocksdb::DecodeFixed32(slice.data());
+    keysize = rocksdb_rs::coding_lean::DecodeFixed32(slice.data());
     if (keysize > last_keysize) {
       while (keysize > last_keysize) last_keysize *= 2;
       keyscratch = std::unique_ptr<char[]>(new char[last_keysize]);
@@ -223,7 +223,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
                 << std::endl;
       return false;
     }
-    valsize = rocksdb::DecodeFixed32(slice.data());
+    valsize = rocksdb_rs::coding_lean::DecodeFixed32(slice.data());
     if (valsize > last_valsize) {
       while (valsize > last_valsize) last_valsize *= 2;
       valscratch = std::unique_ptr<char[]>(new char[last_valsize]);

@@ -2567,7 +2567,7 @@ class TimestampEmulator {
     assert(FLAGS_user_timestamp_size == 8);
     assert(scratch);
     uint64_t ts = timestamp_.fetch_add(1);
-    EncodeFixed64(scratch, ts);
+    rocksdb_rs::coding_lean::EncodeFixed64(scratch, ts);
     return Slice(scratch, FLAGS_user_timestamp_size);
   }
   Slice GetTimestampForRead(Random64& rand, char* scratch) {
@@ -2578,7 +2578,7 @@ class TimestampEmulator {
     }
     // Choose a random timestamp from the past.
     uint64_t ts = rand.Next() % Get();
-    EncodeFixed64(scratch, ts);
+    rocksdb_rs::coding_lean::EncodeFixed64(scratch, ts);
     return Slice(scratch, FLAGS_user_timestamp_size);
   }
 };

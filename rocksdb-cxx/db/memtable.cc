@@ -271,7 +271,7 @@ rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
   }
   Slice user_key = Slice(key_ptr, key_length - 8);
 
-  const uint64_t tag = DecodeFixed64(key_ptr + key_length - 8);
+  const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
   ValueType type;
   SequenceNumber seq;
   UnPackSequenceAndType(tag, &seq, &type);
@@ -636,7 +636,7 @@ rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(Slice encoded,
   Slice key(encoded.data(), user_key_len);
   encoded.remove_prefix(user_key_len);
 
-  uint64_t packed = DecodeFixed64(encoded.data());
+  uint64_t packed = rocksdb_rs::coding_lean::DecodeFixed64(encoded.data());
   ValueType value_type = kMaxValue;
   SequenceNumber sequence_number = kMaxSequenceNumber;
   UnPackSequenceAndType(packed, &sequence_number, &value_type);
@@ -706,7 +706,7 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
   Slice key_slice(p, key_size);
   p += key_size;
   uint64_t packed = PackSequenceAndType(s, type);
-  EncodeFixed64(p, packed);
+  rocksdb_rs::coding_lean::EncodeFixed64(p, packed);
   p += 8;
   p = EncodeVarint32(p, val_size);
   memcpy(p, value.data(), val_size);
@@ -919,7 +919,7 @@ static bool SaveValue(void* arg, const char* entry) {
   if (user_comparator->EqualWithoutTimestamp(user_key_slice,
                                              s->key->user_key())) {
     // Correct user key
-    const uint64_t tag = DecodeFixed64(key_ptr + key_length - 8);
+    const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
     ValueType type;
     SequenceNumber seq;
     UnPackSequenceAndType(tag, &seq, &type);
@@ -1479,7 +1479,7 @@ rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_
     if (comparator_.comparator.user_comparator()->Equal(
             Slice(key_ptr, key_length - 8), lkey.user_key())) {
       // Correct user key
-      const uint64_t tag = DecodeFixed64(key_ptr + key_length - 8);
+      const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
       ValueType type;
       SequenceNumber existing_seq;
       UnPackSequenceAndType(tag, &existing_seq, &type);
@@ -1542,7 +1542,7 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
     if (comparator_.comparator.user_comparator()->Equal(
             Slice(key_ptr, key_length - 8), lkey.user_key())) {
       // Correct user key
-      const uint64_t tag = DecodeFixed64(key_ptr + key_length - 8);
+      const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
       ValueType type;
       uint64_t existing_seq;
       UnPackSequenceAndType(tag, &existing_seq, &type);
@@ -1635,7 +1635,7 @@ size_t MemTable::CountSuccessiveMergeEntries(const LookupKey& key) {
       break;
     }
 
-    const uint64_t tag = DecodeFixed64(iter_key_ptr + key_length - 8);
+    const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(iter_key_ptr + key_length - 8);
     ValueType type;
     uint64_t unused;
     UnPackSequenceAndType(tag, &unused, &type);

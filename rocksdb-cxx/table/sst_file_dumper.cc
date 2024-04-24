@@ -403,7 +403,7 @@ rocksdb_rs::status::Status SstFileDumper::SetTableOptionsByMagicNumber(
     auto pos = props.find(BlockBasedTablePropertyNames::kIndexType);
     if (pos != props.end()) {
       auto index_type_on_file = static_cast<BlockBasedTableOptions::IndexType>(
-          DecodeFixed32(pos->second.c_str()));
+          rocksdb_rs::coding_lean::DecodeFixed32(pos->second.c_str()));
       if (index_type_on_file ==
           BlockBasedTableOptions::IndexType::kHashSearch) {
         options_.prefix_extractor.reset(NewNoopTransform());
