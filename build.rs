@@ -336,6 +336,7 @@ fn main() {
 
     let bridges = vec![
         "src/cache.rs",
+        "src/coding.rs",
         "src/coding_lean.rs",
         "src/compression_type.rs",
         "src/env.rs",
