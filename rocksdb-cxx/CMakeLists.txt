@@ -45,11 +45,13 @@ project(rocksdb
         HOMEPAGE_URL https://rocksdb.org/
         LANGUAGES CXX C ASM)
 
-FetchContent_Declare(
-        Corrosion
-        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-)
-FetchContent_MakeAvailable(Corrosion)
+#FetchContent_Declare(
+#        Corrosion
+#        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+#        FETCHCONTENT_FULLY_DISCONNECTED ON
+#)
+#FetchContent_MakeAvailable(Corrosion)
+include(Corrosion)
 include(CustomCorrosion)
 
 if (POLICY CMP0042)
