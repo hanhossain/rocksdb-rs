@@ -588,10 +588,10 @@ TEST_P(DBTestCompactionFilterWithCompactParam,
 
 TEST_F(DBTestCompactionFilter, CompactionFilterWithMergeOperator) {
   std::string one, two, three, four;
-  PutFixed64(&one, 1);
-  PutFixed64(&two, 2);
-  PutFixed64(&three, 3);
-  PutFixed64(&four, 4);
+  rocksdb_rs::coding::PutFixed64(one, 1);
+  rocksdb_rs::coding::PutFixed64(two, 2);
+  rocksdb_rs::coding::PutFixed64(three, 3);
+  rocksdb_rs::coding::PutFixed64(four, 4);
 
   Options options = CurrentOptions();
   options.create_if_missing = true;

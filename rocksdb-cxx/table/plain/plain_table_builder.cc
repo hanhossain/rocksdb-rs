@@ -112,7 +112,7 @@ PlainTableBuilder::PlainTableBuilder(
           : "nullptr";
 
   std::string val;
-  PutFixed32(&val, static_cast<uint32_t>(encoder_.GetEncodingType()));
+  rocksdb_rs::coding::PutFixed32(val, static_cast<uint32_t>(encoder_.GetEncodingType()));
   properties_
       .user_collected_properties[PlainTablePropertyNames::kEncodingType] = val;
 

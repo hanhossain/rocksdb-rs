@@ -36,7 +36,7 @@ namespace {
 // Conversions between numeric keys/values and the types expected by Cache.
 std::string EncodeKey16Bytes(int k) {
   std::string result;
-  PutFixed32(&result, k);
+  rocksdb_rs::coding::PutFixed32(result, k);
   result.append(std::string(12, 'a'));  // Because we need a 16B output, we
                                         // add a 12-byte padding.
   return result;
@@ -49,7 +49,7 @@ int DecodeKey16Bytes(const Slice& k) {
 
 std::string EncodeKey32Bits(int k) {
   std::string result;
-  PutFixed32(&result, k);
+  rocksdb_rs::coding::PutFixed32(result, k);
   return result;
 }
 

@@ -489,7 +489,7 @@ class FilterNumber : public CompactionFilter {
 
 inline std::string EncodeInt(uint64_t x) {
   std::string result;
-  PutFixed64(&result, x);
+  rocksdb_rs::coding::PutFixed64(result, x);
   return result;
 }
 

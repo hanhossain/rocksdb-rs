@@ -27,7 +27,7 @@ std::string EncodeAsString(uint64_t v) {
 
 std::string EncodeAsUint64(uint64_t v) {
   std::string dst;
-  PutFixed64(&dst, v);
+  rocksdb_rs::coding::PutFixed64(dst, v);
   return dst;
 }
 

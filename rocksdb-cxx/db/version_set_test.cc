@@ -916,13 +916,13 @@ class VersionStorageInfoTimestampTest : public VersionStorageInfoTestBase {
   ~VersionStorageInfoTimestampTest() override {}
   std::string Timestamp(uint64_t ts) const {
     std::string ret;
-    PutFixed64(&ret, ts);
+    rocksdb_rs::coding::PutFixed64(ret, ts);
     return ret;
   }
   std::string PackUserKeyAndTimestamp(const Slice& ukey, uint64_t ts) const {
     std::string ret;
     ret.assign(ukey.data(), ukey.size());
-    PutFixed64(&ret, ts);
+    rocksdb_rs::coding::PutFixed64(ret, ts);
     return ret;
   }
 };

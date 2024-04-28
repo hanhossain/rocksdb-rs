@@ -850,9 +850,9 @@ TEST_P(ColumnFamilyTest, IgnoreRecoveredLog) {
 
   // fill up the DB
   std::string one, two, three;
-  PutFixed64(&one, 1);
-  PutFixed64(&two, 2);
-  PutFixed64(&three, 3);
+  rocksdb_rs::coding::PutFixed64(one, 1);
+  rocksdb_rs::coding::PutFixed64(two, 2);
+  rocksdb_rs::coding::PutFixed64(three, 3);
   ASSERT_OK(Merge(0, "foo", one));
   ASSERT_OK(Merge(1, "mirko", one));
   ASSERT_OK(Merge(0, "foo", one));
@@ -1228,9 +1228,9 @@ TEST_P(ColumnFamilyTest, DifferentMergeOperators) {
   Reopen({default_cf, first, second});
 
   std::string one, two, three;
-  PutFixed64(&one, 1);
-  PutFixed64(&two, 2);
-  PutFixed64(&three, 3);
+  rocksdb_rs::coding::PutFixed64(one, 1);
+  rocksdb_rs::coding::PutFixed64(two, 2);
+  rocksdb_rs::coding::PutFixed64(three, 3);
 
   ASSERT_OK(Put(0, "foo", two));
   ASSERT_OK(Put(0, "foo", one));

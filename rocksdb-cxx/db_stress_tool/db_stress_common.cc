@@ -312,7 +312,7 @@ bool VerifyWideColumns(const WideColumns& columns) {
 std::string GetNowNanos() {
   uint64_t t = db_stress_env->NowNanos();
   std::string ret;
-  PutFixed64(&ret, t);
+  rocksdb_rs::coding::PutFixed64(ret, t);
   return ret;
 }
 
@@ -335,15 +335,15 @@ class MyXXH64Checksum : public FileChecksumGenerator {
     assert(str_.empty());
     uint64_t digest = XXH64_digest(state_);
     // Store as little endian raw bytes
-    PutFixed64(&str_, digest);
+    rocksdb_rs::coding::PutFixed64(str_, digest);
     if (big_) {
       // Throw in some more data for stress testing (448 bits total)
-      PutFixed64(&str_, GetSliceHash64(str_));
-      PutFixed64(&str_, GetSliceHash64(str_));
-      PutFixed64(&str_, GetSliceHash64(str_));
-      PutFixed64(&str_, GetSliceHash64(str_));
-      PutFixed64(&str_, GetSliceHash64(str_));
-      PutFixed64(&str_, GetSliceHash64(str_));
+      rocksdb_rs::coding::PutFixed64(str_, GetSliceHash64(str_));
+      rocksdb_rs::coding::PutFixed64(str_, GetSliceHash64(str_));
+      rocksdb_rs::coding::PutFixed64(str_, GetSliceHash64(str_));
+      rocksdb_rs::coding::PutFixed64(str_, GetSliceHash64(str_));
+      rocksdb_rs::coding::PutFixed64(str_, GetSliceHash64(str_));
+      rocksdb_rs::coding::PutFixed64(str_, GetSliceHash64(str_));
     }
   }
 

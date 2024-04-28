@@ -124,23 +124,23 @@ rocksdb_rs::status::Status BlockCacheTraceWriterImpl::WriteBlockAccess(
   trace.ts = record.access_timestamp;
   trace.type = record.block_type;
   PutLengthPrefixedSlice(&trace.payload, block_key);
-  PutFixed64(&trace.payload, record.block_size);
-  PutFixed64(&trace.payload, record.cf_id);
+  rocksdb_rs::coding::PutFixed64(trace.payload, record.block_size);
+  rocksdb_rs::coding::PutFixed64(trace.payload, record.cf_id);
   PutLengthPrefixedSlice(&trace.payload, cf_name);
-  PutFixed32(&trace.payload, record.level);
-  PutFixed64(&trace.payload, record.sst_fd_number);
+  rocksdb_rs::coding::PutFixed32(trace.payload, record.level);
+  rocksdb_rs::coding::PutFixed64(trace.payload, record.sst_fd_number);
   trace.payload.push_back(record.caller);
   trace.payload.push_back(record.is_cache_hit);
   trace.payload.push_back(record.no_insert);
   if (BlockCacheTraceHelper::IsGetOrMultiGet(record.caller)) {
-    PutFixed64(&trace.payload, record.get_id);
+    rocksdb_rs::coding::PutFixed64(trace.payload, record.get_id);
     trace.payload.push_back(record.get_from_user_specified_snapshot);
     PutLengthPrefixedSlice(&trace.payload, referenced_key);
   }
   if (BlockCacheTraceHelper::IsGetOrMultiGetOnDataBlock(record.block_type,
                                                         record.caller)) {
-    PutFixed64(&trace.payload, record.referenced_data_size);
-    PutFixed64(&trace.payload, record.num_keys_in_block);
+    rocksdb_rs::coding::PutFixed64(trace.payload, record.referenced_data_size);
+    rocksdb_rs::coding::PutFixed64(trace.payload, record.num_keys_in_block);
     trace.payload.push_back(record.referenced_key_exist_in_block);
   }
   std::string encoded_trace;
@@ -153,8 +153,8 @@ rocksdb_rs::status::Status BlockCacheTraceWriterImpl::WriteHeader() {
   trace.ts = clock_->NowMicros();
   trace.type = TraceType::kTraceBegin;
   PutLengthPrefixedSlice(&trace.payload, kTraceMagic);
-  PutFixed32(&trace.payload, kMajorVersion);
-  PutFixed32(&trace.payload, kMinorVersion);
+  rocksdb_rs::coding::PutFixed32(trace.payload, kMajorVersion);
+  rocksdb_rs::coding::PutFixed32(trace.payload, kMinorVersion);
   std::string encoded_trace;
   TracerHelper::EncodeTrace(trace, &encoded_trace);
   return trace_writer_->Write(encoded_trace);
@@ -434,9 +434,9 @@ rocksdb_rs::status::Status BlockCacheHumanReadableTraceReader::ReadAccess(
 
   if (get_key_id != 0) {
     std::string tmp_get_key;
-    PutFixed64(&tmp_get_key, get_key_id);
-    PutFixed64(&tmp_get_key, get_sequence_number << 8);
-    PutFixed32(&record->referenced_key, static_cast<uint32_t>(table_id));
+    rocksdb_rs::coding::PutFixed64(tmp_get_key, get_key_id);
+    rocksdb_rs::coding::PutFixed64(tmp_get_key, get_sequence_number << 8);
+    rocksdb_rs::coding::PutFixed32(record->referenced_key, static_cast<uint32_t>(table_id));
     // Append 1 until the size is the same as traced key size.
     while (record->referenced_key.size() < get_key_size - tmp_get_key.size()) {
       record->referenced_key += "1";

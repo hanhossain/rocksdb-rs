@@ -520,7 +520,7 @@ TYPED_TEST(RibbonTypeParamTest, CompactnessAndBacktrackAndFpRate) {
       total_added += num_to_add;
 
       std::string prefix;
-      rocksdb::PutFixed32(&prefix, rnd.Next());
+      rocksdb_rs::coding::PutFixed32(prefix, rnd.Next());
 
       // Batch that must be added
       std::string added_str = prefix + "added";

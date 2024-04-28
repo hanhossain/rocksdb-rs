@@ -17,7 +17,7 @@ class Coding {};
 // Test that encoding routines generate little-endian encodings
 TEST(Coding, EncodingOutput) {
   std::string dst;
-  PutFixed32(&dst, 0x04030201);
+  rocksdb_rs::coding::PutFixed32(dst, 0x04030201);
   ASSERT_EQ(4U, dst.size());
   ASSERT_EQ(0x01, static_cast<int>(dst[0]));
   ASSERT_EQ(0x02, static_cast<int>(dst[1]));
@@ -25,7 +25,7 @@ TEST(Coding, EncodingOutput) {
   ASSERT_EQ(0x04, static_cast<int>(dst[3]));
 
   dst.clear();
-  PutFixed64(&dst, 0x0807060504030201ull);
+  rocksdb_rs::coding::PutFixed64(dst, 0x0807060504030201ull);
   ASSERT_EQ(8U, dst.size());
   ASSERT_EQ(0x01, static_cast<int>(dst[0]));
   ASSERT_EQ(0x02, static_cast<int>(dst[1]));

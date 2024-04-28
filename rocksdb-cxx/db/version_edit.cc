@@ -216,7 +216,7 @@ bool VersionEdit::EncodeTo(std::string* dst,
     if (has_min_log_number_to_keep_ && !min_log_num_written) {
       PutVarint32(dst, NewFileCustomTag::kMinLogNumberToKeepHack);
       std::string varint_log_number;
-      PutFixed64(&varint_log_number, min_log_number_to_keep_);
+      rocksdb_rs::coding::PutFixed64(varint_log_number, min_log_number_to_keep_);
       PutLengthPrefixedSlice(dst, Slice(varint_log_number));
       min_log_num_written = true;
     }

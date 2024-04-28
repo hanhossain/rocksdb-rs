@@ -35,7 +35,6 @@ namespace rocksdb {
 const uint32_t kMaxVarint64Length = 10;
 
 // Standard Put... routines append to a string
-extern void PutFixed16(std::string* dst, uint16_t value);
 extern void PutFixed32(std::string* dst, uint32_t value);
 extern void PutFixed64(std::string* dst, uint64_t value);
 extern void PutVarint32(std::string* dst, uint32_t value);
@@ -117,11 +116,6 @@ inline const char* GetVarint32Ptr(const char* p, const char* limit,
     }
   }
   return GetVarint32PtrFallback(p, limit, value);
-}
-
-// Pull the last 8 bits and cast it to a character
-inline void PutFixed16(std::string* dst, uint16_t value) {
-  rocksdb_rs::coding::PutFixed16(*dst, value);
 }
 
 inline void PutFixed32(std::string* dst, uint32_t value) {

@@ -131,7 +131,7 @@ TEST_P(WriteCommittedTxnWithTsTest, ReOpenWithTimestamp) {
   ASSERT_OK(txn1->Put(handles_[1], "foo", "value1"));
   {
     std::string buf;
-    PutFixed64(&buf, 23);
+    rocksdb_rs::coding::PutFixed64(buf, 23);
     ASSERT_OK(txn1->Put("id", buf));
     ASSERT_OK(txn1->Merge("id", buf));
   }
@@ -259,7 +259,7 @@ TEST_P(WriteCommittedTxnWithTsTest, TransactionDbLevelApi) {
   std::string key_str = "tes_key";
   std::string ts_str;
   std::string value_str = "test_value";
-  PutFixed64(&ts_str, 100);
+  rocksdb_rs::coding::PutFixed64(ts_str, 100);
   Slice value = value_str;
 
   assert(db);

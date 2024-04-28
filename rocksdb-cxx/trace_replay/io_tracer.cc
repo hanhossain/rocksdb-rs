@@ -35,10 +35,10 @@ rocksdb_rs::status::Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
   Trace trace;
   trace.ts = record.access_timestamp;
   trace.type = record.trace_type;
-  PutFixed64(&trace.payload, record.io_op_data);
+  rocksdb_rs::coding::PutFixed64(trace.payload, record.io_op_data);
   Slice file_operation(record.file_operation);
   PutLengthPrefixedSlice(&trace.payload, file_operation);
-  PutFixed64(&trace.payload, record.latency);
+  rocksdb_rs::coding::PutFixed64(trace.payload, record.latency);
   Slice io_status(record.io_status);
   PutLengthPrefixedSlice(&trace.payload, io_status);
   Slice file_name(record.file_name);
@@ -57,13 +57,13 @@ rocksdb_rs::status::Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
     uint32_t set_pos = static_cast<uint32_t>(log2(io_op_data & -io_op_data));
     switch (set_pos) {
       case IOTraceOp::kIOFileSize:
-        PutFixed64(&trace.payload, record.file_size);
+        rocksdb_rs::coding::PutFixed64(trace.payload, record.file_size);
         break;
       case IOTraceOp::kIOLen:
-        PutFixed64(&trace.payload, record.len);
+        rocksdb_rs::coding::PutFixed64(trace.payload, record.len);
         break;
       case IOTraceOp::kIOOffset:
-        PutFixed64(&trace.payload, record.offset);
+        rocksdb_rs::coding::PutFixed64(trace.payload, record.offset);
         break;
       default:
         assert(false);
@@ -76,7 +76,7 @@ rocksdb_rs::status::Status IOTraceWriter::WriteIOOp(const IOTraceRecord& record,
   if (dbg) {
     trace_data = static_cast<int64_t>(dbg->trace_data);
   }
-  PutFixed64(&trace.payload, trace_data);
+  rocksdb_rs::coding::PutFixed64(trace.payload, trace_data);
   while (trace_data) {
     // Find the rightmost set bit.
     uint32_t set_pos = static_cast<uint32_t>(log2(trace_data & -trace_data));
@@ -102,8 +102,8 @@ rocksdb_rs::status::Status IOTraceWriter::WriteHeader() {
   trace.ts = clock_->NowMicros();
   trace.type = TraceType::kTraceBegin;
   PutLengthPrefixedSlice(&trace.payload, kTraceMagic);
-  PutFixed32(&trace.payload, kMajorVersion);
-  PutFixed32(&trace.payload, kMinorVersion);
+  rocksdb_rs::coding::PutFixed32(trace.payload, kMajorVersion);
+  rocksdb_rs::coding::PutFixed32(trace.payload, kMinorVersion);
   std::string encoded_trace;
   TracerHelper::EncodeTrace(trace, &encoded_trace);
   return trace_writer_->Write(encoded_trace);

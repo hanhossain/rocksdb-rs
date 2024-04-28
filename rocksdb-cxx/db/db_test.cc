@@ -5931,9 +5931,9 @@ class DelayedMergeOperator : public MergeOperator {
 
 TEST_F(DBTest, MergeTestTime) {
   std::string one, two, three;
-  PutFixed64(&one, 1);
-  PutFixed64(&two, 2);
-  PutFixed64(&three, 3);
+  rocksdb_rs::coding::PutFixed64(one, 1);
+  rocksdb_rs::coding::PutFixed64(two, 2);
+  rocksdb_rs::coding::PutFixed64(three, 3);
 
   // Enable time profiling
   SetPerfLevel(kEnableTime);

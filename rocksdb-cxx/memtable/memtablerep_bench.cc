@@ -311,7 +311,7 @@ class ReadBenchmarkThread : public BenchmarkThread {
   void ReadOne() {
     std::string user_key;
     auto key = key_gen_->Next();
-    PutFixed64(&user_key, key);
+    rocksdb_rs::coding::PutFixed64(user_key, key);
     LookupKey lookup_key(user_key, *sequence_);
     InternalKeyComparator internal_key_comp(BytewiseComparator());
     CallbackVerifyArgs verify_args;

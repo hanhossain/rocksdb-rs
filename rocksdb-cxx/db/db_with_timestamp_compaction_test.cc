@@ -17,14 +17,14 @@ namespace rocksdb {
 namespace {
 std::string Key1(uint64_t key) {
   std::string ret;
-  PutFixed64(&ret, key);
+  rocksdb_rs::coding::PutFixed64(ret, key);
   std::reverse(ret.begin(), ret.end());
   return ret;
 }
 
 std::string Timestamp(uint64_t ts) {
   std::string ret;
-  PutFixed64(&ret, ts);
+  rocksdb_rs::coding::PutFixed64(ret, ts);
   return ret;
 }
 }  // anonymous namespace

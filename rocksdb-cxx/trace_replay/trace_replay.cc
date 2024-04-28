@@ -361,7 +361,7 @@ rocksdb_rs::status::Status Tracer::Write(WriteBatch* write_batch) {
   trace.type = trace_type;
   TracerHelper::SetPayloadMap(trace.payload_map,
                               TracePayloadType::kWriteBatchData);
-  PutFixed64(&trace.payload, trace.payload_map);
+  rocksdb_rs::coding::PutFixed64(trace.payload, trace.payload_map);
   PutLengthPrefixedSlice(&trace.payload, Slice(write_batch->Data()));
   return WriteTrace(trace);
 }
@@ -379,8 +379,8 @@ rocksdb_rs::status::Status Tracer::Get(ColumnFamilyHandle* column_family, const 
   TracerHelper::SetPayloadMap(trace.payload_map, TracePayloadType::kGetCFID);
   TracerHelper::SetPayloadMap(trace.payload_map, TracePayloadType::kGetKey);
   // Encode the Get struct members into payload. Make sure add them in order.
-  PutFixed64(&trace.payload, trace.payload_map);
-  PutFixed32(&trace.payload, column_family->GetID());
+  rocksdb_rs::coding::PutFixed64(trace.payload, trace.payload_map);
+  rocksdb_rs::coding::PutFixed32(trace.payload, column_family->GetID());
   PutLengthPrefixedSlice(&trace.payload, key);
   return WriteTrace(trace);
 }
@@ -408,8 +408,8 @@ rocksdb_rs::status::Status Tracer::IteratorSeek(const uint32_t& cf_id, const Sli
   }
   // Encode the Iterator struct members into payload. Make sure add them in
   // order.
-  PutFixed64(&trace.payload, trace.payload_map);
-  PutFixed32(&trace.payload, cf_id);
+  rocksdb_rs::coding::PutFixed64(trace.payload, trace.payload_map);
+  rocksdb_rs::coding::PutFixed32(trace.payload, cf_id);
   PutLengthPrefixedSlice(&trace.payload, key);
   if (lower_bound.size() > 0) {
     PutLengthPrefixedSlice(&trace.payload, lower_bound);
@@ -444,8 +444,8 @@ rocksdb_rs::status::Status Tracer::IteratorSeekForPrev(const uint32_t& cf_id, co
   }
   // Encode the Iterator struct members into payload. Make sure add them in
   // order.
-  PutFixed64(&trace.payload, trace.payload_map);
-  PutFixed32(&trace.payload, cf_id);
+  rocksdb_rs::coding::PutFixed64(trace.payload, trace.payload_map);
+  rocksdb_rs::coding::PutFixed32(trace.payload, cf_id);
   PutLengthPrefixedSlice(&trace.payload, key);
   if (lower_bound.size() > 0) {
     PutLengthPrefixedSlice(&trace.payload, lower_bound);
@@ -516,12 +516,12 @@ rocksdb_rs::status::Status Tracer::MultiGet(const std::vector<ColumnFamilyHandle
   for (uint32_t i = 0; i < multiget_size; i++) {
     assert(i < column_families.size());
     assert(i < keys.size());
-    PutFixed32(&cfids_payload, column_families[i]->GetID());
+    rocksdb_rs::coding::PutFixed32(cfids_payload, column_families[i]->GetID());
     PutLengthPrefixedSlice(&keys_payload, keys[i]);
   }
   // Encode the Get struct members into payload. Make sure add them in order.
-  PutFixed64(&trace.payload, trace.payload_map);
-  PutFixed32(&trace.payload, multiget_size);
+  rocksdb_rs::coding::PutFixed64(trace.payload, trace.payload_map);
+  rocksdb_rs::coding::PutFixed32(trace.payload, multiget_size);
   PutLengthPrefixedSlice(&trace.payload, cfids_payload);
   PutLengthPrefixedSlice(&trace.payload, keys_payload);
   return WriteTrace(trace);

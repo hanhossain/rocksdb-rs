@@ -147,8 +147,8 @@ void MultiOpsTxnsStressTest::KeyGenerator::UndoAllocation(uint32_t new_val) {
 
 std::string MultiOpsTxnsStressTest::Record::EncodePrimaryKey(uint32_t a) {
   std::string ret;
-  PutFixed32(&ret, kPrimaryIndexId);
-  PutFixed32(&ret, a);
+  rocksdb_rs::coding::PutFixed32(ret, kPrimaryIndexId);
+  rocksdb_rs::coding::PutFixed32(ret, a);
 
   char* const buf = &ret[0];
   std::reverse(buf, buf + sizeof(kPrimaryIndexId));
@@ -159,8 +159,8 @@ std::string MultiOpsTxnsStressTest::Record::EncodePrimaryKey(uint32_t a) {
 
 std::string MultiOpsTxnsStressTest::Record::EncodeSecondaryKey(uint32_t c) {
   std::string ret;
-  PutFixed32(&ret, kSecondaryIndexId);
-  PutFixed32(&ret, c);
+  rocksdb_rs::coding::PutFixed32(ret, kSecondaryIndexId);
+  rocksdb_rs::coding::PutFixed32(ret, c);
 
   char* const buf = &ret[0];
   std::reverse(buf, buf + sizeof(kSecondaryIndexId));
@@ -172,9 +172,9 @@ std::string MultiOpsTxnsStressTest::Record::EncodeSecondaryKey(uint32_t c) {
 std::string MultiOpsTxnsStressTest::Record::EncodeSecondaryKey(uint32_t c,
                                                                uint32_t a) {
   std::string ret;
-  PutFixed32(&ret, kSecondaryIndexId);
-  PutFixed32(&ret, c);
-  PutFixed32(&ret, a);
+  rocksdb_rs::coding::PutFixed32(ret, kSecondaryIndexId);
+  rocksdb_rs::coding::PutFixed32(ret, c);
+  rocksdb_rs::coding::PutFixed32(ret, a);
 
   char* const buf = &ret[0];
   std::reverse(buf, buf + sizeof(kSecondaryIndexId));
@@ -227,8 +227,8 @@ std::string MultiOpsTxnsStressTest::Record::EncodePrimaryKey() const {
 
 std::string MultiOpsTxnsStressTest::Record::EncodePrimaryIndexValue() const {
   std::string ret;
-  PutFixed32(&ret, b_);
-  PutFixed32(&ret, c_);
+  rocksdb_rs::coding::PutFixed32(ret, b_);
+  rocksdb_rs::coding::PutFixed32(ret, c_);
   return ret;
 }
 
@@ -240,7 +240,7 @@ MultiOpsTxnsStressTest::Record::EncodeSecondaryIndexEntry() const {
   std::string secondary_index_value;
   uint32_t crc =
       crc32c::Value(secondary_index_key.data(), secondary_index_key.size());
-  PutFixed32(&secondary_index_value, crc);
+  rocksdb_rs::coding::PutFixed32(secondary_index_value, crc);
   return std::make_pair(std::move(secondary_index_key), secondary_index_value);
 }
 
@@ -1097,12 +1097,12 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
   size_t primary_index_entries_count = 0;
   {
     std::string iter_ub_str;
-    PutFixed32(&iter_ub_str, Record::kPrimaryIndexId + 1);
+    rocksdb_rs::coding::PutFixed32(iter_ub_str, Record::kPrimaryIndexId + 1);
     std::reverse(iter_ub_str.begin(), iter_ub_str.end());
     Slice iter_ub = iter_ub_str;
 
     std::string start_key;
-    PutFixed32(&start_key, Record::kPrimaryIndexId);
+    rocksdb_rs::coding::PutFixed32(start_key, Record::kPrimaryIndexId);
     std::reverse(start_key.begin(), start_key.end());
 
     // This `ReadOptions` is for validation purposes. Ignore
@@ -1151,7 +1151,7 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
   size_t secondary_index_entries_count = 0;
   {
     std::string start_key;
-    PutFixed32(&start_key, Record::kSecondaryIndexId);
+    rocksdb_rs::coding::PutFixed32(start_key, Record::kSecondaryIndexId);
     std::reverse(start_key.begin(), start_key.end());
 
     // This `ReadOptions` is for validation purposes. Ignore
@@ -1244,7 +1244,7 @@ void MultiOpsTxnsStressTest::VerifyPkSkFast(const ReadOptions& read_options,
       << dbimpl->GetLastPublishedSequence() << "] ";
 
   std::string start_key;
-  PutFixed32(&start_key, Record::kSecondaryIndexId);
+  rocksdb_rs::coding::PutFixed32(start_key, Record::kSecondaryIndexId);
   std::reverse(start_key.begin(), start_key.end());
 
   // This `ReadOptions` is for validation purposes. Ignore
@@ -1391,10 +1391,10 @@ void MultiOpsTxnsStressTest::SetupSnapshot(
 
 std::string MultiOpsTxnsStressTest::KeySpaces::EncodeTo() const {
   std::string result;
-  PutFixed32(&result, lb_a);
-  PutFixed32(&result, ub_a);
-  PutFixed32(&result, lb_c);
-  PutFixed32(&result, ub_c);
+  rocksdb_rs::coding::PutFixed32(result, lb_a);
+  rocksdb_rs::coding::PutFixed32(result, ub_a);
+  rocksdb_rs::coding::PutFixed32(result, lb_c);
+  rocksdb_rs::coding::PutFixed32(result, ub_c);
   return result;
 }
 

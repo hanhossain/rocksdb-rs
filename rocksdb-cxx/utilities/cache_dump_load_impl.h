@@ -161,7 +161,7 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   virtual rocksdb_rs::io_status::IOStatus WriteMetadata(const Slice& metadata) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
-    PutFixed32(&prefix, static_cast<uint32_t>(metadata.size()));
+    rocksdb_rs::coding::PutFixed32(prefix, static_cast<uint32_t>(metadata.size()));
     rocksdb_rs::io_status::IOStatus io_s = file_writer_->Append(Slice(prefix));
     if (!io_s.ok()) {
       return io_s;
@@ -174,7 +174,7 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   virtual rocksdb_rs::io_status::IOStatus WritePacket(const Slice& data) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
-    PutFixed32(&prefix, static_cast<uint32_t>(data.size()));
+    rocksdb_rs::coding::PutFixed32(prefix, static_cast<uint32_t>(data.size()));
     rocksdb_rs::io_status::IOStatus io_s = file_writer_->Append(Slice(prefix));
     if (!io_s.ok()) {
       return io_s;
