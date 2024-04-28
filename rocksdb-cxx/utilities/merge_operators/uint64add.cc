@@ -27,7 +27,7 @@ bool UInt64AddOperator::Merge(const Slice& /*key*/, const Slice* existing_value,
 
   assert(new_value);
   new_value->clear();
-  PutFixed64(new_value, orig_value + operand);
+  rocksdb_rs::coding::PutFixed64(*new_value, orig_value + operand);
 
   return true;  // Return true always since corruption will be treated as 0
 }

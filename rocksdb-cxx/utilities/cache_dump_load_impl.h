@@ -278,19 +278,19 @@ class CacheDumperHelper {
   // serialize the dump_unit_meta to a string, it is fixed 16 bytes size.
   static void EncodeDumpUnitMeta(const DumpUnitMeta& meta, std::string* data) {
     assert(data);
-    PutFixed32(data, static_cast<uint32_t>(meta.sequence_num));
-    PutFixed32(data, static_cast<uint32_t>(meta.dump_unit_checksum));
-    PutFixed64(data, meta.dump_unit_size);
+    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(meta.sequence_num));
+    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(meta.dump_unit_checksum));
+    rocksdb_rs::coding::PutFixed64(*data, meta.dump_unit_size);
   }
 
   // Serialize the dump_unit to a string.
   static void EncodeDumpUnit(const DumpUnit& dump_unit, std::string* data) {
     assert(data);
-    PutFixed64(data, dump_unit.timestamp);
+    rocksdb_rs::coding::PutFixed64(*data, dump_unit.timestamp);
     data->push_back(dump_unit.type);
     PutLengthPrefixedSlice(data, dump_unit.key);
-    PutFixed32(data, static_cast<uint32_t>(dump_unit.value_len));
-    PutFixed32(data, dump_unit.value_checksum);
+    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(dump_unit.value_len));
+    rocksdb_rs::coding::PutFixed32(*data, dump_unit.value_checksum);
     PutLengthPrefixedSlice(data,
                            Slice((char*)dump_unit.value, dump_unit.value_len));
   }

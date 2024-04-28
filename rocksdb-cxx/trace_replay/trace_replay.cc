@@ -81,9 +81,9 @@ rocksdb_rs::status::Status TracerHelper::ParseTraceHeader(const Trace& header, i
 
 void TracerHelper::EncodeTrace(const Trace& trace, std::string* encoded_trace) {
   assert(encoded_trace);
-  PutFixed64(encoded_trace, trace.ts);
+  rocksdb_rs::coding::PutFixed64(*encoded_trace, trace.ts);
   encoded_trace->push_back(trace.type);
-  PutFixed32(encoded_trace, static_cast<uint32_t>(trace.payload.size()));
+  rocksdb_rs::coding::PutFixed32(*encoded_trace, static_cast<uint32_t>(trace.payload.size()));
   encoded_trace->append(trace.payload);
 }
 

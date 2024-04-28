@@ -83,7 +83,7 @@ namespace {
 struct StandardKeyGen {
   StandardKeyGen(const std::string& prefix, uint64_t id)
       : id_(id), str_(prefix) {
-    rocksdb::PutFixed64(&str_, /*placeholder*/ 0);
+    rocksdb_rs::coding::PutFixed64(str_, /*placeholder*/ 0);
   }
 
   // Prefix (only one required)
@@ -125,7 +125,7 @@ struct SmallKeyGen {
   SmallKeyGen(const std::string& prefix, uint64_t id) : id_(id) {
     // Hash the prefix for a heuristically unique offset
     id_ += rocksdb::GetSliceHash64(prefix);
-    rocksdb::PutFixed64(&str_, id_);
+    rocksdb_rs::coding::PutFixed64(str_, id_);
   }
 
   // Prefix (only one required)
@@ -1049,7 +1049,7 @@ namespace {
 struct PhsfInputGen {
   PhsfInputGen(const std::string& prefix, uint64_t id) : id_(id) {
     val_.first = prefix;
-    rocksdb::PutFixed64(&val_.first, /*placeholder*/ 0);
+    rocksdb_rs::coding::PutFixed64(val_.first, /*placeholder*/ 0);
   }
 
   // Prefix (only one required)

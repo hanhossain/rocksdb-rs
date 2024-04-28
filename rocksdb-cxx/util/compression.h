@@ -1626,7 +1626,7 @@ class CompressionTypeRecord {
 
   inline void EncodeTo(std::string* dst) const {
     assert(dst != nullptr);
-    PutFixed32(dst, static_cast<uint32_t>(compression_type_));
+    rocksdb_rs::coding::PutFixed32(*dst, static_cast<uint32_t>(compression_type_));
   }
 
   inline rocksdb_rs::status::Status DecodeFrom(Slice* src) {

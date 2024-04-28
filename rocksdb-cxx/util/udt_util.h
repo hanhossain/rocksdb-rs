@@ -39,7 +39,7 @@ class UserDefinedTimestampSizeRecord {
     assert(dst != nullptr);
     for (const auto& [cf_id, ts_sz] : cf_to_ts_sz_) {
       assert(ts_sz != 0);
-      PutFixed32(dst, cf_id);
+      rocksdb_rs::coding::PutFixed32(*dst, cf_id);
       rocksdb_rs::coding::PutFixed16(*dst, static_cast<uint16_t>(ts_sz));
     }
   }

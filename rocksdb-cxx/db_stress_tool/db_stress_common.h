@@ -475,7 +475,7 @@ inline bool GetNextPrefix(const rocksdb::Slice& src, std::string* v) {
 // Append `val` to `*key` in fixed-width big-endian format
 extern inline void AppendIntToString(uint64_t val, std::string* key) {
   // PutFixed64 uses little endian
-  PutFixed64(key, val);
+  rocksdb_rs::coding::PutFixed64(*key, val);
   // Reverse to get big endian
   char* int_data = &((*key)[key->size() - sizeof(uint64_t)]);
   for (size_t i = 0; i < sizeof(uint64_t) / 2; ++i) {

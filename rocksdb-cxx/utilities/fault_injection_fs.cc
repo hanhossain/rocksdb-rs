@@ -68,11 +68,11 @@ void CalculateTypedChecksum(const ChecksumType& checksum_type, const char* data,
                             size_t size, std::string* checksum) {
   if (checksum_type == ChecksumType::kCRC32c) {
     uint32_t v_crc32c = crc32c::Extend(0, data, size);
-    PutFixed32(checksum, v_crc32c);
+    rocksdb_rs::coding::PutFixed32(*checksum, v_crc32c);
     return;
   } else if (checksum_type == ChecksumType::kxxHash) {
     uint32_t v = XXH32(data, size, 0);
-    PutFixed32(checksum, v);
+    rocksdb_rs::coding::PutFixed32(*checksum, v);
   }
   return;
 }

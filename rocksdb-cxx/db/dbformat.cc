@@ -55,7 +55,7 @@ rocksdb_rs::types::EntryType GetEntryType(ValueType value_type) {
 
 void AppendInternalKey(std::string* result, const ParsedInternalKey& key) {
   result->append(key.user_key.data(), key.user_key.size());
-  PutFixed64(result, PackSequenceAndType(key.sequence, key.type));
+  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(key.sequence, key.type));
 }
 
 void AppendInternalKeyWithDifferentTimestamp(std::string* result,
@@ -64,12 +64,12 @@ void AppendInternalKeyWithDifferentTimestamp(std::string* result,
   assert(key.user_key.size() >= ts.size());
   result->append(key.user_key.data(), key.user_key.size() - ts.size());
   result->append(ts.data(), ts.size());
-  PutFixed64(result, PackSequenceAndType(key.sequence, key.type));
+  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(key.sequence, key.type));
 }
 
 void AppendInternalKeyFooter(std::string* result, SequenceNumber s,
                              ValueType t) {
-  PutFixed64(result, PackSequenceAndType(s, t));
+  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(s, t));
 }
 
 void AppendKeyWithMinTimestamp(std::string* result, const Slice& key,
