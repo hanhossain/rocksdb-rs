@@ -1,5 +1,9 @@
-use crate::coding_lean::{encode_fixed_16, encode_fixed_32, encode_fixed_64};
+use crate::coding_lean::{
+    decode_fixed_16_ptr, decode_fixed_32_ptr, decode_fixed_64_ptr, encode_fixed_16,
+    encode_fixed_32, encode_fixed_64,
+};
 use cxx::CxxString;
+use std::mem::size_of;
 use std::pin::Pin;
 
 #[cxx::bridge(namespace = "rocksdb_rs::coding")]
@@ -14,6 +18,22 @@ mod ffi {
 
         #[cxx_name = "PutFixed64"]
         fn put_fixed_64(dst: Pin<&mut CxxString>, value: u64);
+
+        #[cxx_name = "GetFixed16"]
+        fn get_fixed_16(input: Pin<&mut Slice>, value: &mut u16) -> bool;
+
+        #[cxx_name = "GetFixed32"]
+        fn get_fixed_32(input: Pin<&mut Slice>, value: &mut u32) -> bool;
+
+        #[cxx_name = "GetFixed64"]
+        fn get_fixed_64(input: Pin<&mut Slice>, value: &mut u64) -> bool;
+    }
+
+    #[namespace = "rocksdb"]
+    unsafe extern "C++" {
+        include!("rocksdb/slice.h");
+
+        type Slice = crate::slice::ffi::Slice;
     }
 }
 
@@ -28,4 +48,34 @@ fn put_fixed_32(dst: Pin<&mut CxxString>, value: u32) {
 
 fn put_fixed_64(dst: Pin<&mut CxxString>, value: u64) {
     dst.push_bytes(&encode_fixed_64(value));
+}
+
+fn get_fixed_16(input: Pin<&mut ffi::Slice>, value: &mut u16) -> bool {
+    if input.size() < size_of::<u16>() {
+        return false;
+    }
+
+    *value = unsafe { decode_fixed_16_ptr(input.data()) };
+    input.remove_prefix(size_of::<u16>());
+    true
+}
+
+fn get_fixed_32(input: Pin<&mut ffi::Slice>, value: &mut u32) -> bool {
+    if input.size() < size_of::<u32>() {
+        return false;
+    }
+
+    *value = unsafe { decode_fixed_32_ptr(input.data()) };
+    input.remove_prefix(size_of::<u32>());
+    true
+}
+
+fn get_fixed_64(input: Pin<&mut ffi::Slice>, value: &mut u64) -> bool {
+    if input.size() < size_of::<u64>() {
+        return false;
+    }
+
+    *value = unsafe { decode_fixed_64_ptr(input.data()) };
+    input.remove_prefix(size_of::<u64>());
+    true
 }

@@ -238,30 +238,15 @@ inline int VarintLength(uint64_t v) {
 }
 
 inline bool GetFixed64(Slice* input, uint64_t* value) {
-  if (input->size() < sizeof(uint64_t)) {
-    return false;
-  }
-  *value = rocksdb_rs::coding_lean::DecodeFixed64(input->data());
-  input->remove_prefix(sizeof(uint64_t));
-  return true;
+  return rocksdb_rs::coding::GetFixed64(*input, *value);
 }
 
 inline bool GetFixed32(Slice* input, uint32_t* value) {
-  if (input->size() < sizeof(uint32_t)) {
-    return false;
-  }
-  *value = rocksdb_rs::coding_lean::DecodeFixed32(input->data());
-  input->remove_prefix(sizeof(uint32_t));
-  return true;
+  return rocksdb_rs::coding::GetFixed32(*input, *value);
 }
 
 inline bool GetFixed16(Slice* input, uint16_t* value) {
-  if (input->size() < sizeof(uint16_t)) {
-    return false;
-  }
-  *value = rocksdb_rs::coding_lean::DecodeFixed16(input->data());
-  input->remove_prefix(sizeof(uint16_t));
-  return true;
+  return rocksdb_rs::coding::GetFixed16(*input, *value);
 }
 
 inline bool GetVarint32(Slice* input, uint32_t* value) {

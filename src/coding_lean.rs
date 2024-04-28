@@ -69,14 +69,14 @@ pub(crate) fn decode_fixed_64(bytes: &[u8]) -> u64 {
 
 // Lower-level versions of Get... that read directly from a character buffer
 // without any bounds checking.
-unsafe fn decode_fixed_16_ptr(bytes: *const c_char) -> u16 {
+pub(crate) unsafe fn decode_fixed_16_ptr(bytes: *const c_char) -> u16 {
     decode_fixed_16(std::slice::from_raw_parts(bytes as *const _, 2))
 }
 
-unsafe fn decode_fixed_32_ptr(bytes: *const c_char) -> u32 {
+pub(crate) unsafe fn decode_fixed_32_ptr(bytes: *const c_char) -> u32 {
     decode_fixed_32(std::slice::from_raw_parts(bytes as *const _, 4))
 }
 
-unsafe fn decode_fixed_64_ptr(bytes: *const c_char) -> u64 {
+pub(crate) unsafe fn decode_fixed_64_ptr(bytes: *const c_char) -> u64 {
     decode_fixed_64(std::slice::from_raw_parts(bytes as *const _, 8))
 }
