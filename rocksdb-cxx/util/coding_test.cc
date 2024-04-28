@@ -14,61 +14,6 @@
 namespace rocksdb {
 
 class Coding {};
-TEST(Coding, Fixed16) {
-  std::string s;
-  for (uint16_t v = 0; v < 0xFFFF; v++) {
-    PutFixed16(&s, v);
-  }
-
-  const char* p = s.data();
-  for (uint16_t v = 0; v < 0xFFFF; v++) {
-    uint16_t actual = rocksdb_rs::coding_lean::DecodeFixed16(p);
-    ASSERT_EQ(v, actual);
-    p += sizeof(uint16_t);
-  }
-}
-
-TEST(Coding, Fixed32) {
-  std::string s;
-  for (uint32_t v = 0; v < 100000; v++) {
-    PutFixed32(&s, v);
-  }
-
-  const char* p = s.data();
-  for (uint32_t v = 0; v < 100000; v++) {
-    uint32_t actual = rocksdb_rs::coding_lean::DecodeFixed32(p);
-    ASSERT_EQ(v, actual);
-    p += sizeof(uint32_t);
-  }
-}
-
-TEST(Coding, Fixed64) {
-  std::string s;
-  for (int power = 0; power <= 63; power++) {
-    uint64_t v = static_cast<uint64_t>(1) << power;
-    PutFixed64(&s, v - 1);
-    PutFixed64(&s, v + 0);
-    PutFixed64(&s, v + 1);
-  }
-
-  const char* p = s.data();
-  for (int power = 0; power <= 63; power++) {
-    uint64_t v = static_cast<uint64_t>(1) << power;
-    uint64_t actual = 0;
-    actual = rocksdb_rs::coding_lean::DecodeFixed64(p);
-    ASSERT_EQ(v - 1, actual);
-    p += sizeof(uint64_t);
-
-    actual = rocksdb_rs::coding_lean::DecodeFixed64(p);
-    ASSERT_EQ(v + 0, actual);
-    p += sizeof(uint64_t);
-
-    actual = rocksdb_rs::coding_lean::DecodeFixed64(p);
-    ASSERT_EQ(v + 1, actual);
-    p += sizeof(uint64_t);
-  }
-}
-
 // Test that encoding routines generate little-endian encodings
 TEST(Coding, EncodingOutput) {
   std::string dst;

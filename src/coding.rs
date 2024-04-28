@@ -79,3 +79,68 @@ fn get_fixed_64(input: Pin<&mut ffi::Slice>, value: &mut u64) -> bool {
     input.remove_prefix(size_of::<u64>());
     true
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cxx::let_cxx_string;
+
+    #[test]
+    fn fixed16() {
+        let_cxx_string!(s = "");
+        for v in 0..0xFFFF {
+            put_fixed_16(s.as_mut(), v);
+        }
+
+        let mut p = s.as_ptr();
+        for v in 0..0xFFFF {
+            let actual = unsafe { decode_fixed_16_ptr(p as *const _) };
+            assert_eq!(v, actual);
+            p = unsafe { p.add(size_of::<u16>()) };
+        }
+    }
+
+    #[test]
+    fn fixed32() {
+        let_cxx_string!(s = "");
+        for v in 0..100_000 {
+            put_fixed_32(s.as_mut(), v);
+        }
+
+        let mut p = s.as_ptr();
+        for v in 0..100_000 {
+            let actual = unsafe { decode_fixed_32_ptr(p as *const _) };
+            assert_eq!(v, actual);
+            p = unsafe { p.add(size_of::<u32>()) };
+        }
+    }
+
+    #[test]
+    fn fixed64() {
+        let_cxx_string!(s = "");
+        for power in 0..=63 {
+            let v = 1u64 << power;
+            put_fixed_64(s.as_mut(), v - 1);
+            put_fixed_64(s.as_mut(), v);
+            put_fixed_64(s.as_mut(), v + 1);
+        }
+
+        let mut p = s.as_ptr();
+        for power in 0..63 {
+            let v = 1u64 << power;
+            unsafe {
+                let actual = decode_fixed_64_ptr(p as *const _);
+                assert_eq!(v - 1, actual);
+                p = p.add(size_of::<u64>());
+
+                let actual = decode_fixed_64_ptr(p as *const _);
+                assert_eq!(v, actual);
+                p = p.add(size_of::<u64>());
+
+                let actual = decode_fixed_64_ptr(p as *const _);
+                assert_eq!(v + 1, actual);
+                p = p.add(size_of::<u64>());
+            }
+        }
+    }
+}
