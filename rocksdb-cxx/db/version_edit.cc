@@ -401,7 +401,7 @@ const char* VersionEdit::DecodeNewFile4From(Slice* input) {
         case kMinLogNumberToKeepHack:
           // This is a hack to encode kMinLogNumberToKeep in a
           // forward-compatible fashion.
-          if (!GetFixed64(&field, &min_log_number_to_keep_)) {
+          if (!rocksdb_rs::coding::GetFixed64(field, min_log_number_to_keep_)) {
             return "deleted log number malformatted";
           }
           has_min_log_number_to_keep_ = true;

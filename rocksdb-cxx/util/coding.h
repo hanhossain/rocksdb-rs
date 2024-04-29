@@ -53,11 +53,6 @@ extern void PutLengthPrefixedSliceParts(std::string* dst,
 extern void PutLengthPrefixedSlicePartsWithPadding(
     std::string* dst, const SliceParts& slice_parts, size_t pad_sz);
 
-// Standard Get... routines parse a value from the beginning of a Slice
-// and advance the slice past the parsed value.
-extern bool GetFixed64(Slice* input, uint64_t* value);
-extern bool GetFixed32(Slice* input, uint32_t* value);
-extern bool GetFixed16(Slice* input, uint16_t* value);
 extern bool GetVarint32(Slice* input, uint32_t* value);
 extern bool GetVarint64(Slice* input, uint64_t* value);
 extern bool GetVarsignedint64(Slice* input, int64_t* value);
@@ -219,18 +214,6 @@ inline int VarintLength(uint64_t v) {
     len++;
   }
   return len;
-}
-
-inline bool GetFixed64(Slice* input, uint64_t* value) {
-  return rocksdb_rs::coding::GetFixed64(*input, *value);
-}
-
-inline bool GetFixed32(Slice* input, uint32_t* value) {
-  return rocksdb_rs::coding::GetFixed32(*input, *value);
-}
-
-inline bool GetFixed16(Slice* input, uint16_t* value) {
-  return rocksdb_rs::coding::GetFixed16(*input, *value);
 }
 
 inline bool GetVarint32(Slice* input, uint32_t* value) {

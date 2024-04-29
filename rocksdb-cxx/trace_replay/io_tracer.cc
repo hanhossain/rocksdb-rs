@@ -135,12 +135,12 @@ rocksdb_rs::status::Status IOTraceReader::ReadHeader(IOTraceHeader* header) {
     return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Magic number does not match.");
   }
-  if (!GetFixed32(&enc_slice, &header->rocksdb_major_version)) {
+  if (!rocksdb_rs::coding::GetFixed32(enc_slice, header->rocksdb_major_version)) {
     return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb major "
         "version number.");
   }
-  if (!GetFixed32(&enc_slice, &header->rocksdb_minor_version)) {
+  if (!rocksdb_rs::coding::GetFixed32(enc_slice, header->rocksdb_minor_version)) {
     return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb minor "
         "version number.");
@@ -170,7 +170,7 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
   record->trace_type = trace.type;
   Slice enc_slice = Slice(trace.payload);
 
-  if (!GetFixed64(&enc_slice, &record->io_op_data)) {
+  if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->io_op_data)) {
     return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read trace data.");
   }
@@ -180,7 +180,7 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
         "Incomplete access record: Failed to read file operation.");
   }
   record->file_operation = file_operation.ToString();
-  if (!GetFixed64(&enc_slice, &record->latency)) {
+  if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->latency)) {
     return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read latency.");
   }
@@ -211,19 +211,19 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
     uint32_t set_pos = static_cast<uint32_t>(log2(io_op_data & -io_op_data));
     switch (set_pos) {
       case IOTraceOp::kIOFileSize:
-        if (!GetFixed64(&enc_slice, &record->file_size)) {
+        if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->file_size)) {
           return rocksdb_rs::status::Status_Incomplete(
               "Incomplete access record: Failed to read file size.");
         }
         break;
       case IOTraceOp::kIOLen:
-        if (!GetFixed64(&enc_slice, &record->len)) {
+        if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->len)) {
           return rocksdb_rs::status::Status_Incomplete(
               "Incomplete access record: Failed to read length.");
         }
         break;
       case IOTraceOp::kIOOffset:
-        if (!GetFixed64(&enc_slice, &record->offset)) {
+        if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->offset)) {
           return rocksdb_rs::status::Status_Incomplete(
               "Incomplete access record: Failed to read offset.");
         }
@@ -235,7 +235,7 @@ rocksdb_rs::status::Status IOTraceReader::ReadIOOp(IOTraceRecord* record) {
     io_op_data &= (io_op_data - 1);
   }
 
-  if (!GetFixed64(&enc_slice, &record->trace_data)) {
+  if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->trace_data)) {
     return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read trace op.");
   }

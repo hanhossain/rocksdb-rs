@@ -557,7 +557,7 @@ extern inline bool GetIntVal(std::string big_endian_key, uint64_t* key_p) {
     Slice little_endian_slice =
         Slice(&little_endian_key[start], sizeof(uint64_t));
     uint64_t pfx;
-    if (!GetFixed64(&little_endian_slice, &pfx)) {
+    if (!rocksdb_rs::coding::GetFixed64(little_endian_slice, pfx)) {
       return false;
     }
     prefixes.emplace_back(pfx);

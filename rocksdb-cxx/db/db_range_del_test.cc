@@ -553,7 +553,7 @@ TEST_F(DBRangeDelTest, CompactionRemovesCoveredMergeOperands) {
   ASSERT_OK(db_->Get(read_opts, "key", &actual));
   uint64_t tmp;
   Slice tmp2(actual);
-  GetFixed64(&tmp2, &tmp);
+  rocksdb_rs::coding::GetFixed64(tmp2, tmp);
   rocksdb_rs::coding::PutFixed64(expected, 30);  // 6+7+8+9 (earlier operands covered by tombstone)
   ASSERT_EQ(expected, actual);
 }

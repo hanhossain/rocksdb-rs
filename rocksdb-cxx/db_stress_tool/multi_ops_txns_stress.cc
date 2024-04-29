@@ -193,8 +193,8 @@ MultiOpsTxnsStressTest::Record::DecodePrimaryIndexValue(
   }
   uint32_t b = 0;
   uint32_t c = 0;
-  if (!GetFixed32(&primary_index_value, &b) ||
-      !GetFixed32(&primary_index_value, &c)) {
+  if (!rocksdb_rs::coding::GetFixed32(primary_index_value, b) ||
+      !rocksdb_rs::coding::GetFixed32(primary_index_value, c)) {
     assert(false);
     return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_Corruption(""), 0, 0};
   }
@@ -209,7 +209,7 @@ MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexValue(
   }
   uint32_t crc = 0;
   bool result __attribute__((unused)) =
-      GetFixed32(&secondary_index_value, &crc);
+      rocksdb_rs::coding::GetFixed32(secondary_index_value, crc);
   assert(result);
   return std::make_pair(rocksdb_rs::status::Status_OK(), crc);
 }
@@ -257,7 +257,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
 
   uint32_t index_id = 0;
 
-  [[maybe_unused]] bool res = GetFixed32(&primary_index_key, &index_id);
+  [[maybe_unused]] bool res = rocksdb_rs::coding::GetFixed32(primary_index_key, index_id);
   assert(res);
   index_id = EndianSwapValue(index_id);
 
@@ -267,7 +267,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
     return rocksdb_rs::status::Status_Corruption(oss.str());
   }
 
-  res = GetFixed32(&primary_index_key, &a_);
+  res = rocksdb_rs::coding::GetFixed32(primary_index_key, a_);
   assert(res);
   a_ = EndianSwapValue(a_);
   assert(primary_index_key.empty());
@@ -275,8 +275,8 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
   if (primary_index_value.size() != 8) {
     return rocksdb_rs::status::Status_Corruption("Primary index value length is not 8");
   }
-  GetFixed32(&primary_index_value, &b_);
-  GetFixed32(&primary_index_value, &c_);
+  rocksdb_rs::coding::GetFixed32(primary_index_value, b_);
+  rocksdb_rs::coding::GetFixed32(primary_index_value, c_);
   return rocksdb_rs::status::Status_OK();
 }
 
@@ -290,7 +290,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
 
   uint32_t index_id = 0;
 
-  [[maybe_unused]] bool res = GetFixed32(&secondary_index_key, &index_id);
+  [[maybe_unused]] bool res = rocksdb_rs::coding::GetFixed32(secondary_index_key, index_id);
   assert(res);
   index_id = EndianSwapValue(index_id);
 
@@ -301,12 +301,12 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
   }
 
   assert(secondary_index_key.size() == 8);
-  res = GetFixed32(&secondary_index_key, &c_);
+  res = rocksdb_rs::coding::GetFixed32(secondary_index_key, c_);
   assert(res);
   c_ = EndianSwapValue(c_);
 
   assert(secondary_index_key.size() == 4);
-  res = GetFixed32(&secondary_index_key, &a_);
+  res = rocksdb_rs::coding::GetFixed32(secondary_index_key, a_);
   assert(res);
   a_ = EndianSwapValue(a_);
   assert(secondary_index_key.empty());
@@ -315,7 +315,7 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
     return rocksdb_rs::status::Status_Corruption("Secondary index value length is not 4");
   }
   uint32_t val = 0;
-  GetFixed32(&secondary_index_value, &val);
+  rocksdb_rs::coding::GetFixed32(secondary_index_value, val);
   if (val != crc) {
     std::ostringstream oss;
     oss << "Secondary index key checksum mismatch, stored: " << val
@@ -548,7 +548,7 @@ void MultiOpsTxnsStressTest::PrepareTxnDbOptions(
          const Slice& key) {
         Slice ks = key;
         uint32_t index_id = 0;
-        [[maybe_unused]] bool res = GetFixed32(&ks, &index_id);
+        [[maybe_unused]] bool res = rocksdb_rs::coding::GetFixed32(ks, index_id);
         assert(res);
         index_id = EndianSwapValue(index_id);
         assert(index_id <= Record::kSecondaryIndexId);
@@ -1399,8 +1399,8 @@ std::string MultiOpsTxnsStressTest::KeySpaces::EncodeTo() const {
 }
 
 bool MultiOpsTxnsStressTest::KeySpaces::DecodeFrom(Slice data) {
-  if (!GetFixed32(&data, &lb_a) || !GetFixed32(&data, &ub_a) ||
-      !GetFixed32(&data, &lb_c) || !GetFixed32(&data, &ub_c)) {
+  if (!rocksdb_rs::coding::GetFixed32(data, lb_a) || !rocksdb_rs::coding::GetFixed32(data, ub_a) ||
+      !rocksdb_rs::coding::GetFixed32(data, lb_c) || !rocksdb_rs::coding::GetFixed32(data, ub_c)) {
     return false;
   }
   return true;

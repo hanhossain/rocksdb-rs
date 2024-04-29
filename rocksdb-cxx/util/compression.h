@@ -1633,7 +1633,7 @@ class CompressionTypeRecord {
     constexpr char class_name[] = "CompressionTypeRecord";
 
     uint32_t val;
-    if (!GetFixed32(src, &val)) {
+    if (!rocksdb_rs::coding::GetFixed32(*src, val)) {
       return rocksdb_rs::status::Status_Corruption(class_name,
                                 "Error decoding WAL compression type");
     }

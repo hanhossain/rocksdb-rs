@@ -27,7 +27,7 @@ const std::string kTraceMagic = "feedcafedeadbeef";
 namespace {
 void DecodeCFAndKey(std::string& buffer, uint32_t* cf_id, Slice* key) {
   Slice buf(buffer);
-  GetFixed32(&buf, cf_id);
+  rocksdb_rs::coding::GetFixed32(buf, *cf_id);
   GetLengthPrefixedSlice(&buf, key);
 }
 }  // namespace
@@ -91,7 +91,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTrace(const std::string& encoded_
                                  Trace* trace) {
   assert(trace != nullptr);
   Slice enc_slice = Slice(encoded_trace);
-  if (!GetFixed64(&enc_slice, &trace->ts)) {
+  if (!rocksdb_rs::coding::GetFixed64(enc_slice, trace->ts)) {
     return rocksdb_rs::status::Status_Incomplete("Decode trace string failed");
   }
   if (enc_slice.size() < kTraceTypeSize + kTracePayloadLengthSize) {
@@ -141,7 +141,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
         rep.PinSelf(trace->payload);
       } else {
         Slice buf(trace->payload);
-        GetFixed64(&buf, &trace->payload_map);
+        rocksdb_rs::coding::GetFixed64(buf, trace->payload_map);
         int64_t payload_map = static_cast<int64_t>(trace->payload_map);
         Slice write_batch_data;
         while (payload_map) {
@@ -178,7 +178,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
         DecodeCFAndKey(trace->payload, &cf_id, &get_key);
       } else {
         Slice buf(trace->payload);
-        GetFixed64(&buf, &trace->payload_map);
+        rocksdb_rs::coding::GetFixed64(buf, trace->payload_map);
         int64_t payload_map = static_cast<int64_t>(trace->payload_map);
         while (payload_map) {
           // Find the rightmost set bit.
@@ -186,7 +186,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
               static_cast<uint32_t>(log2(payload_map & -payload_map));
           switch (set_pos) {
             case TracePayloadType::kGetCFID: {
-              GetFixed32(&buf, &cf_id);
+              rocksdb_rs::coding::GetFixed32(buf, cf_id);
               break;
             }
             case TracePayloadType::kGetKey: {
@@ -222,7 +222,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
         DecodeCFAndKey(trace->payload, &cf_id, &iter_key);
       } else {
         Slice buf(trace->payload);
-        GetFixed64(&buf, &trace->payload_map);
+        rocksdb_rs::coding::GetFixed64(buf, trace->payload_map);
         int64_t payload_map = static_cast<int64_t>(trace->payload_map);
         while (payload_map) {
           // Find the rightmost set bit.
@@ -230,7 +230,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
               static_cast<uint32_t>(log2(payload_map & -payload_map));
           switch (set_pos) {
             case TracePayloadType::kIterCFID: {
-              GetFixed32(&buf, &cf_id);
+              rocksdb_rs::coding::GetFixed32(buf, cf_id);
               break;
             }
             case TracePayloadType::kIterKey: {
@@ -282,7 +282,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
       Slice cfids_payload;
       Slice keys_payload;
       Slice buf(trace->payload);
-      GetFixed64(&buf, &trace->payload_map);
+      rocksdb_rs::coding::GetFixed64(buf, trace->payload_map);
       int64_t payload_map = static_cast<int64_t>(trace->payload_map);
       while (payload_map) {
         // Find the rightmost set bit.
@@ -290,7 +290,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
             static_cast<uint32_t>(log2(payload_map & -payload_map));
         switch (set_pos) {
           case TracePayloadType::kMultiGetSize: {
-            GetFixed32(&buf, &multiget_size);
+            rocksdb_rs::coding::GetFixed32(buf, multiget_size);
             break;
           }
           case TracePayloadType::kMultiGetCFIDs: {
@@ -318,7 +318,7 @@ rocksdb_rs::status::Status TracerHelper::DecodeTraceRecord(Trace* trace, int tra
       for (uint32_t i = 0; i < multiget_size; i++) {
         uint32_t tmp_cfid = 0;
         Slice tmp_key;
-        GetFixed32(&cfids_payload, &tmp_cfid);
+        rocksdb_rs::coding::GetFixed32(cfids_payload, tmp_cfid);
         GetLengthPrefixedSlice(&keys_payload, &tmp_key);
         cf_ids.push_back(tmp_cfid);
         Slice s(tmp_key);

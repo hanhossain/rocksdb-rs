@@ -155,7 +155,7 @@ TEST_P(WriteCommittedTxnWithTsTest, ReOpenWithTimestamp) {
     ASSERT_OK(s);
     uint64_t ival = 0;
     Slice value_slc = value;
-    bool result = GetFixed64(&value_slc, &ival);
+    bool result = rocksdb_rs::coding::GetFixed64(value_slc, ival);
     assert(result);
     ASSERT_EQ(46, ival);
   }
@@ -552,7 +552,7 @@ TEST_P(WriteCommittedTxnWithTsTest, CheckKeysForConflicts) {
         assert(ts_ptr);
         Slice ts_slc = *ts_ptr;
         uint64_t last_ts = 0;
-        ASSERT_TRUE(GetFixed64(&ts_slc, &last_ts));
+        ASSERT_TRUE(rocksdb_rs::coding::GetFixed64(ts_slc, last_ts));
         ASSERT_EQ(30, last_ts);
         called = true;
       });

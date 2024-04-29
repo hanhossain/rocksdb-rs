@@ -1575,7 +1575,7 @@ rocksdb_rs::status::Status BlobDBImpl::GetRawBlobFromFile(const Slice& key, uint
                    static_cast<size_t>(size));
 
   uint32_t crc_exp = 0;
-  if (!GetFixed32(&crc_slice, &crc_exp)) {
+  if (!rocksdb_rs::coding::GetFixed32(crc_slice, crc_exp)) {
     ROCKS_LOG_DEBUG(
         db_options_.info_log,
         "Unable to decode CRC from blob file %" PRIu64 ", blob_offset: %" PRIu64

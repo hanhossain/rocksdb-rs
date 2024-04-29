@@ -187,12 +187,12 @@ rocksdb_rs::status::Status BlockCacheTraceReader::ReadHeader(BlockCacheTraceHead
     return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Magic number does not match.");
   }
-  if (!GetFixed32(&enc_slice, &header->rocksdb_major_version)) {
+  if (!rocksdb_rs::coding::GetFixed32(enc_slice, header->rocksdb_major_version)) {
     return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb major "
         "version number.");
   }
-  if (!GetFixed32(&enc_slice, &header->rocksdb_minor_version)) {
+  if (!rocksdb_rs::coding::GetFixed32(enc_slice, header->rocksdb_minor_version)) {
     return rocksdb_rs::status::Status_Corruption(
         "Corrupted header in the trace file: Failed to read rocksdb minor "
         "version number.");
@@ -230,11 +230,11 @@ rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceReco
         "Incomplete access record: Failed to read block key.");
   }
   record->block_key = block_key.ToString();
-  if (!GetFixed64(&enc_slice, &record->block_size)) {
+  if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->block_size)) {
     return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read block size.");
   }
-  if (!GetFixed64(&enc_slice, &record->cf_id)) {
+  if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->cf_id)) {
     return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read column family ID.");
   }
@@ -244,11 +244,11 @@ rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceReco
         "Incomplete access record: Failed to read column family name.");
   }
   record->cf_name = cf_name.ToString();
-  if (!GetFixed32(&enc_slice, &record->level)) {
+  if (!rocksdb_rs::coding::GetFixed32(enc_slice, record->level)) {
     return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read level.");
   }
-  if (!GetFixed64(&enc_slice, &record->sst_fd_number)) {
+  if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->sst_fd_number)) {
     return rocksdb_rs::status::Status_Incomplete(
         "Incomplete access record: Failed to read SST file number.");
   }
@@ -271,7 +271,7 @@ rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceReco
   record->no_insert = static_cast<char>(enc_slice[0]);
   enc_slice.remove_prefix(kCharSize);
   if (BlockCacheTraceHelper::IsGetOrMultiGet(record->caller)) {
-    if (!GetFixed64(&enc_slice, &record->get_id)) {
+    if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->get_id)) {
       return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read the get id.");
     }
@@ -291,11 +291,11 @@ rocksdb_rs::status::Status BlockCacheTraceReader::ReadAccess(BlockCacheTraceReco
   }
   if (BlockCacheTraceHelper::IsGetOrMultiGetOnDataBlock(record->block_type,
                                                         record->caller)) {
-    if (!GetFixed64(&enc_slice, &record->referenced_data_size)) {
+    if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->referenced_data_size)) {
       return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read the referenced data size.");
     }
-    if (!GetFixed64(&enc_slice, &record->num_keys_in_block)) {
+    if (!rocksdb_rs::coding::GetFixed64(enc_slice, record->num_keys_in_block)) {
       return rocksdb_rs::status::Status_Incomplete(
           "Incomplete access record: Failed to read the number of keys in the "
           "block.");
