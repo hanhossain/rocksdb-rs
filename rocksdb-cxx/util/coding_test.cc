@@ -53,7 +53,7 @@ TEST(Coding, Varint32) {
     p = GetVarint32Ptr(p, limit, &actual);
     ASSERT_TRUE(p != nullptr);
     ASSERT_EQ(expected, actual);
-    ASSERT_EQ(VarintLength(actual), p - start);
+    ASSERT_EQ(rocksdb_rs::coding::VarintLength(actual), p - start);
   }
   ASSERT_EQ(p, s.data() + s.size());
 }
@@ -88,7 +88,7 @@ TEST(Coding, Varint64) {
     p = GetVarint64Ptr(p, limit, &actual);
     ASSERT_TRUE(p != nullptr);
     ASSERT_EQ(values[i], actual);
-    ASSERT_EQ(VarintLength(actual), p - start);
+    ASSERT_EQ(rocksdb_rs::coding::VarintLength(actual), p - start);
   }
   ASSERT_EQ(p, limit);
 }

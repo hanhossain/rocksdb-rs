@@ -144,7 +144,7 @@ void PlainTableIndexBuilder::BucketizeIndexes(
       continue;
     }
     // Only buckets with more than 1 entry will have subindex.
-    sub_index_size_ += VarintLength(entry_count);
+    sub_index_size_ += rocksdb_rs::coding::VarintLength(entry_count);
     // total bytes needed to store these entries' in-file offsets.
     sub_index_size_ += entry_count * PlainTableIndex::kOffsetLen;
   }

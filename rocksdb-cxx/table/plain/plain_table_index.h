@@ -153,7 +153,7 @@ class PlainTableIndexBuilder {
   Slice Finish();
 
   uint32_t GetTotalSize() const {
-    return VarintLength(index_size_) + VarintLength(num_prefixes_) +
+    return rocksdb_rs::coding::VarintLength(index_size_) + rocksdb_rs::coding::VarintLength(num_prefixes_) +
            PlainTableIndex::kOffsetLen * index_size_ + sub_index_size_;
   }
 

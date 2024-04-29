@@ -116,9 +116,9 @@ size_t BlockBuilder::EstimateSizeAfterKV(const Slice& key,
   estimate += sizeof(int32_t);  // varint for shared prefix length.
   // Note: this is an imprecise estimate as we will have to encoded size, one
   // for shared key and one for non-shared key.
-  estimate += VarintLength(key.size());  // varint for key length.
+  estimate += rocksdb_rs::coding::VarintLength(key.size());  // varint for key length.
   if (!use_value_delta_encoding_ || (counter_ >= block_restart_interval_)) {
-    estimate += VarintLength(value.size());  // varint for value length.
+    estimate += rocksdb_rs::coding::VarintLength(value.size());  // varint for value length.
   }
 
   return estimate;

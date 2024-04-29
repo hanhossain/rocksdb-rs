@@ -238,7 +238,7 @@ class FillBenchmarkThread : public BenchmarkThread {
     char* buf = nullptr;
     auto internal_key_size = 16;
     auto encoded_len =
-        FLAGS_item_size + VarintLength(internal_key_size) + internal_key_size;
+        FLAGS_item_size + rocksdb_rs::coding::VarintLength(internal_key_size) + internal_key_size;
     KeyHandle handle = table_->Allocate(encoded_len, &buf);
     assert(buf != nullptr);
     char* p = EncodeVarint32(buf, internal_key_size);
@@ -321,7 +321,7 @@ class ReadBenchmarkThread : public BenchmarkThread {
     verify_args.comparator = &internal_key_comp;
     table_->Get(lookup_key, &verify_args, callback);
     if (verify_args.found) {
-      *bytes_read_ += VarintLength(16) + 16 + FLAGS_item_size;
+      *bytes_read_ += rocksdb_rs::coding::VarintLength(16) + 16 + FLAGS_item_size;
       ++*read_hits_;
     }
   }
@@ -345,7 +345,7 @@ class SeqReadBenchmarkThread : public BenchmarkThread {
     std::unique_ptr<MemTableRep::Iterator> iter(table_->GetIterator());
     for (iter->SeekToFirst(); iter->Valid(); iter->Next()) {
       // pretend to read the value
-      *bytes_read_ += VarintLength(16) + 16 + FLAGS_item_size;
+      *bytes_read_ += rocksdb_rs::coding::VarintLength(16) + 16 + FLAGS_item_size;
     }
     ++*read_hits_;
   }

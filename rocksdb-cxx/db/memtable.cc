@@ -693,8 +693,8 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
   uint32_t key_size = static_cast<uint32_t>(key.size());
   uint32_t val_size = static_cast<uint32_t>(value.size());
   uint32_t internal_key_size = key_size + 8;
-  const uint32_t encoded_len = VarintLength(internal_key_size) +
-                               internal_key_size + VarintLength(val_size) +
+  const uint32_t encoded_len = rocksdb_rs::coding::VarintLength(internal_key_size) +
+                               internal_key_size + rocksdb_rs::coding::VarintLength(val_size) +
                                val_size + moptions_.protection_bytes_per_key;
   char* buf = nullptr;
   std::unique_ptr<MemTableRep>& table =
@@ -1496,8 +1496,8 @@ rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_
           WriteLock wl(GetLock(lkey.user_key()));
           memcpy(p, value.data(), value.size());
           assert((unsigned)((p + value.size()) - entry) ==
-                 (unsigned)(VarintLength(key_length) + key_length +
-                            VarintLength(value.size()) + value.size()));
+                 (unsigned)(rocksdb_rs::coding::VarintLength(key_length) + key_length +
+                            rocksdb_rs::coding::VarintLength(value.size()) + value.size()));
           RecordTick(moptions_.statistics, NUMBER_KEYS_UPDATED);
           if (kv_prot_info != nullptr) {
             ProtectionInfoKVOS64 updated_kv_prot_info(*kv_prot_info);
@@ -1564,7 +1564,7 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
             // overwrite the new prev_size
             char* p = EncodeVarint32(const_cast<char*>(key_ptr) + key_length,
                                      new_prev_size);
-            if (VarintLength(new_prev_size) < VarintLength(prev_size)) {
+            if (rocksdb_rs::coding::VarintLength(new_prev_size) < rocksdb_rs::coding::VarintLength(prev_size)) {
               // shift the value buffer as well.
               memcpy(p, prev_buffer, new_prev_size);
               prev_buffer = p;

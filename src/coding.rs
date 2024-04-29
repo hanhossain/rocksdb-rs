@@ -31,6 +31,10 @@ mod ffi {
 
         #[cxx_name = "GetSliceUntil"]
         fn get_slice_until(mut slice: Pin<&mut Slice>, delimeter: c_char) -> Pin<&mut Slice>;
+
+        /// Returns the length of the varint32 or varint64 encoding of "v"
+        #[cxx_name = "VarintLength"]
+        fn varint_length(mut v: u64) -> i32;
     }
 
     #[namespace = "rocksdb"]
@@ -98,6 +102,16 @@ fn get_slice_until(mut slice: Pin<&mut ffi::Slice>, delimeter: c_char) -> Pin<&m
     let size = slice.size() - n;
     slice.as_mut().remove_prefix(size);
     slice
+}
+
+/// Returns the length of the varint32 or varint64 encoding of "v"
+fn varint_length(mut v: u64) -> i32 {
+    let mut len = 1;
+    while v >= 128 {
+        v >>= 7;
+        len += 1;
+    }
+    len
 }
 
 #[cfg(test)]
