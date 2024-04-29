@@ -3,6 +3,7 @@ use crate::coding_lean::{
     encode_fixed_32, encode_fixed_64,
 };
 use cxx::CxxString;
+use std::ffi::c_char;
 use std::mem::size_of;
 use std::pin::Pin;
 
@@ -27,6 +28,9 @@ mod ffi {
 
         #[cxx_name = "GetFixed64"]
         fn get_fixed_64(input: Pin<&mut Slice>, value: &mut u64) -> bool;
+
+        #[cxx_name = "GetSliceUntil"]
+        fn get_slice_until(mut slice: Pin<&mut Slice>, delimeter: c_char) -> Pin<&mut Slice>;
     }
 
     #[namespace = "rocksdb"]
@@ -78,6 +82,22 @@ fn get_fixed_64(input: Pin<&mut ffi::Slice>, value: &mut u64) -> bool {
     *value = unsafe { decode_fixed_64_ptr(input.data()) };
     input.remove_prefix(size_of::<u64>());
     true
+}
+
+fn get_slice_until(mut slice: Pin<&mut ffi::Slice>, delimeter: c_char) -> Pin<&mut ffi::Slice> {
+    let mut p = slice.data();
+    let mut n = slice.size();
+    while n > 0 {
+        if unsafe { *p } == delimeter {
+            break;
+        }
+        p = unsafe { p.add(1) };
+        n -= 1;
+    }
+
+    let size = slice.size() - n;
+    slice.as_mut().remove_prefix(size);
+    slice
 }
 
 #[cfg(test)]

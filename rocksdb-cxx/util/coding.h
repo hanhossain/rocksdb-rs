@@ -60,8 +60,6 @@ extern bool GetLengthPrefixedSlice(Slice* input, Slice* result);
 // This function assumes data is well-formed.
 extern Slice GetLengthPrefixedSlice(const char* data);
 
-extern Slice GetSliceUntil(Slice* slice, char delimiter);
-
 // Borrowed from
 // https://github.com/facebook/fbthrift/blob/449a5f77f9f9bae72c9eb5e78093247eef185c04/thrift/lib/cpp/util/VarintUtils-inl.h#L202-L208
 constexpr inline uint64_t i64ToZigzag(const int64_t l) {
@@ -269,17 +267,6 @@ inline Slice GetLengthPrefixedSlice(const char* data) {
   // unsigned char is 7 bits, uint32_t is 32 bits, need 5 unsigned char
   auto p = GetVarint32Ptr(data, data + 5 /* limit */, &len);
   return Slice(p, len);
-}
-
-inline Slice GetSliceUntil(Slice* slice, char delimiter) {
-  uint32_t len = 0;
-  for (len = 0; len < slice->size() && slice->data()[len] != delimiter; ++len) {
-    // nothing
-  }
-
-  Slice ret(slice->data(), len);
-  slice->remove_prefix(len + ((len < slice->size()) ? 1 : 0));
-  return ret;
 }
 
 template <class T>
