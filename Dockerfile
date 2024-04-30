@@ -5,8 +5,10 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     libgflags-dev \
     libclang-dev \
-    clang
+    clang \
+    lld
 
+ENV LDFLAGS="-fuse-ld=lld"
 ENV CC=/usr/bin/clang
 ENV CXX=/usr/bin/clang++
 

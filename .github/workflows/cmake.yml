@@ -104,7 +104,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         include:
         - os: ubuntu-latest
-          deps: sudo apt-get install -y ninja-build libgflags-dev
+          deps: sudo apt-get install -y ninja-build libgflags-dev lld && export LDFLAGS="-fuse-ld=lld"
         - os: macos-latest
           deps: brew install ninja gflags
     steps:
