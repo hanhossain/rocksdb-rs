@@ -727,7 +727,7 @@ inline bool GetDecompressedSizeInfo(const char** input_data,
                                     size_t* input_length,
                                     uint32_t* output_len) {
   auto new_input_data =
-      GetVarint32Ptr(*input_data, *input_data + *input_length, output_len);
+      rocksdb_rs::coding::GetVarint32Ptr(*input_data, *input_data + *input_length, output_len);
   if (new_input_data == nullptr) {
     return false;
   }

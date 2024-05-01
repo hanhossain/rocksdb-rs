@@ -233,7 +233,7 @@ inline bool PlainTableFileReader::ReadVarint32(uint32_t offset, uint32_t* out,
     const char* start = file_info_->file_data.data() + offset;
     const char* limit =
         file_info_->file_data.data() + file_info_->data_end_offset;
-    const char* key_ptr = GetVarint32Ptr(start, limit, out);
+    const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(start, limit, out);
     assert(key_ptr != nullptr);
     *bytes_read = static_cast<uint32_t>(key_ptr - start);
     return true;
@@ -256,7 +256,7 @@ bool PlainTableFileReader::ReadVarint32NonMmap(uint32_t offset, uint32_t* out,
   start = bytes.data();
   limit = bytes.data() + bytes.size();
 
-  const char* key_ptr = GetVarint32Ptr(start, limit, out);
+  const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(start, limit, out);
   *bytes_read =
       (key_ptr != nullptr) ? static_cast<uint32_t>(key_ptr - start) : 0;
   return true;

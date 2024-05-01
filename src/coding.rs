@@ -56,6 +56,13 @@ mod ffi {
             limit: *const c_char,
             value: *mut u32,
         ) -> *const c_char;
+
+        #[cxx_name = "GetVarint32Ptr"]
+        unsafe fn get_varint32_ptr(
+            p: *const c_char,
+            limit: *const c_char,
+            value: *mut u32,
+        ) -> *const c_char;
     }
 
     #[namespace = "rocksdb"]
@@ -192,6 +199,25 @@ unsafe fn get_varint32_ptr_fallback(
     }
 
     std::ptr::null()
+}
+
+/// Pointer-based variants of GetVarint...  These either store a value
+/// in *v and return a pointer just past the parsed value, or return
+/// nullptr on error.  These routines only look at bytes in the range
+/// [p..limit-1]
+unsafe fn get_varint32_ptr(
+    p: *const c_char,
+    limit: *const c_char,
+    value: *mut u32,
+) -> *const c_char {
+    if p < limit {
+        let result = *p as u32;
+        if result & 0x80 == 0 {
+            *value = result;
+            return p.add(1);
+        }
+    }
+    get_varint32_ptr_fallback(p, limit, value)
 }
 
 #[cfg(test)]

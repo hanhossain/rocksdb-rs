@@ -298,7 +298,7 @@ class ReadBenchmarkThread : public BenchmarkThread {
     CallbackVerifyArgs* callback_args = static_cast<CallbackVerifyArgs*>(arg);
     assert(callback_args != nullptr);
     uint32_t key_length;
-    const char* key_ptr = GetVarint32Ptr(entry, entry + 5, &key_length);
+    const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
     if ((callback_args->comparator)
             ->user_comparator()
             ->Equal(Slice(key_ptr, key_length - 8),
