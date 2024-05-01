@@ -41,6 +41,13 @@ mod ffi {
 
         #[cxx_name = "zigzagToI64"]
         fn zigzag_to_i64(n: u64) -> i64;
+
+        #[cxx_name = "GetVarint64Ptr"]
+        unsafe fn get_varint64_ptr(
+            p: *const c_char,
+            limit: *const c_char,
+            value: *mut u64,
+        ) -> *const c_char;
     }
 
     #[namespace = "rocksdb"]
@@ -128,6 +135,30 @@ fn i64_to_zigzag(v: i64) -> u64 {
 
 fn zigzag_to_i64(n: u64) -> i64 {
     ((n >> 1) as i64) ^ (-((n & 1) as i64))
+}
+
+unsafe fn get_varint64_ptr(
+    mut p: *const c_char,
+    limit: *const c_char,
+    value: *mut u64,
+) -> *const c_char {
+    let mut result = 0;
+    let mut shift = 0;
+
+    while shift <= 63 && p < limit {
+        let byte = *p as u64;
+        p = p.add(1);
+
+        if byte & 0x80 == 0 {
+            *value = result | (byte << shift);
+            return p;
+        }
+
+        result |= (byte & 0x7f) << shift;
+        shift += 7;
+    }
+
+    std::ptr::null()
 }
 
 #[cfg(test)]

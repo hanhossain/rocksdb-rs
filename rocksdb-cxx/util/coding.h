@@ -66,12 +66,10 @@ extern Slice GetLengthPrefixedSlice(const char* data);
 // [p..limit-1]
 extern const char* GetVarint32Ptr(const char* p, const char* limit,
                                   uint32_t* v);
-extern const char* GetVarint64Ptr(const char* p, const char* limit,
-                                  uint64_t* v);
 inline const char* GetVarsignedint64Ptr(const char* p, const char* limit,
                                         int64_t* value) {
   uint64_t u = 0;
-  const char* ret = GetVarint64Ptr(p, limit, &u);
+  const char* ret = rocksdb_rs::coding::GetVarint64Ptr(p, limit, &u);
   *value = rocksdb_rs::coding::zigzagToI64(u);
   return ret;
 }
@@ -209,7 +207,7 @@ inline bool GetVarint32(Slice* input, uint32_t* value) {
 inline bool GetVarint64(Slice* input, uint64_t* value) {
   const char* p = input->data();
   const char* limit = p + input->size();
-  const char* q = GetVarint64Ptr(p, limit, value);
+  const char* q = rocksdb_rs::coding::GetVarint64Ptr(p, limit, value);
   if (q == nullptr) {
     return false;
   } else {

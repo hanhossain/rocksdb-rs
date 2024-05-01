@@ -85,7 +85,7 @@ TEST(Coding, Varint64) {
     ASSERT_TRUE(p < limit);
     uint64_t actual = 0;
     const char* start = p;
-    p = GetVarint64Ptr(p, limit, &actual);
+    p = rocksdb_rs::coding::GetVarint64Ptr(p, limit, &actual);
     ASSERT_TRUE(p != nullptr);
     ASSERT_EQ(values[i], actual);
     ASSERT_EQ(rocksdb_rs::coding::VarintLength(actual), p - start);
@@ -116,7 +116,7 @@ TEST(Coding, Varint32Truncation) {
 TEST(Coding, Varint64Overflow) {
   uint64_t result;
   std::string input("\x81\x82\x83\x84\x85\x81\x82\x83\x84\x85\x11");
-  ASSERT_TRUE(GetVarint64Ptr(input.data(), input.data() + input.size(),
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(input.data(), input.data() + input.size(),
                              &result) == nullptr);
 }
 
@@ -126,9 +126,9 @@ TEST(Coding, Varint64Truncation) {
   PutVarint64(&s, large_value);
   uint64_t result;
   for (unsigned int len = 0; len + 1 < s.size(); len++) {
-    ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + len, &result) == nullptr);
+    ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + len, &result) == nullptr);
   }
-  ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + s.size(), &result) !=
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + s.size(), &result) !=
               nullptr);
   ASSERT_EQ(large_value, result);
 }

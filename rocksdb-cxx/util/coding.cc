@@ -70,21 +70,4 @@ const char* GetVarint32PtrFallback(const char* p, const char* limit,
   return nullptr;
 }
 
-const char* GetVarint64Ptr(const char* p, const char* limit, uint64_t* value) {
-  uint64_t result = 0;
-  for (uint32_t shift = 0; shift <= 63 && p < limit; shift += 7) {
-    uint64_t byte = *(reinterpret_cast<const unsigned char*>(p));
-    p++;
-    if (byte & 128) {
-      // More bytes are present
-      result |= ((byte & 127) << shift);
-    } else {
-      result |= (byte << shift);
-      *value = result;
-      return reinterpret_cast<const char*>(p);
-    }
-  }
-  return nullptr;
-}
-
 }  // namespace rocksdb
