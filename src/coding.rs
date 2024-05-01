@@ -35,6 +35,12 @@ mod ffi {
         /// Returns the length of the varint32 or varint64 encoding of "v"
         #[cxx_name = "VarintLength"]
         fn varint_length(mut v: u64) -> i32;
+
+        #[cxx_name = "i64ToZigzag"]
+        fn i64_to_zigzag(v: i64) -> u64;
+
+        #[cxx_name = "zigzagToI64"]
+        fn zigzag_to_i64(n: u64) -> i64;
     }
 
     #[namespace = "rocksdb"]
@@ -112,6 +118,16 @@ fn varint_length(mut v: u64) -> i32 {
         len += 1;
     }
     len
+}
+
+// Borrowed from
+// https://github.com/facebook/fbthrift/blob/449a5f77f9f9bae72c9eb5e78093247eef185c04/thrift/lib/cpp/util/VarintUtils-inl.h#L202-L208
+fn i64_to_zigzag(v: i64) -> u64 {
+    ((v as u64) << 1) ^ ((v >> 63) as u64)
+}
+
+fn zigzag_to_i64(n: u64) -> i64 {
+    ((n >> 1) as i64) ^ (-((n & 1) as i64))
 }
 
 #[cfg(test)]
