@@ -41,7 +41,7 @@ size_t EncodeSize(PlainTableEntryType type, uint32_t key_size,
     return 1;
   } else {
     out_buffer[0] |= kSizeInlineLimit;
-    char* ptr = EncodeVarint32(out_buffer + 1, key_size - kSizeInlineLimit);
+    char* ptr = rocksdb_rs::coding::EncodeVarint32(out_buffer + 1, key_size - kSizeInlineLimit);
     return ptr - out_buffer;
   }
 }
@@ -98,7 +98,7 @@ rocksdb_rs::io_status::IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key
     if (fixed_user_key_len_ == kPlainTableVariableLength) {
       // Write key length
       char key_size_buf[5];  // tmp buffer for key size as varint32
-      char* ptr = EncodeVarint32(key_size_buf, user_key_size);
+      char* ptr = rocksdb_rs::coding::EncodeVarint32(key_size_buf, user_key_size);
       assert(ptr <= key_size_buf + sizeof(key_size_buf));
       auto len = ptr - key_size_buf;
       rocksdb_rs::io_status::IOStatus io_s = file->Append(Slice(key_size_buf, len));
@@ -233,7 +233,7 @@ inline bool PlainTableFileReader::ReadVarint32(uint32_t offset, uint32_t* out,
     const char* start = file_info_->file_data.data() + offset;
     const char* limit =
         file_info_->file_data.data() + file_info_->data_end_offset;
-    const char* key_ptr = GetVarint32Ptr(start, limit, out);
+    const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(start, limit, out);
     assert(key_ptr != nullptr);
     *bytes_read = static_cast<uint32_t>(key_ptr - start);
     return true;
@@ -256,7 +256,7 @@ bool PlainTableFileReader::ReadVarint32NonMmap(uint32_t offset, uint32_t* out,
   start = bytes.data();
   limit = bytes.data() + bytes.size();
 
-  const char* key_ptr = GetVarint32Ptr(start, limit, out);
+  const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(start, limit, out);
   *bytes_read =
       (key_ptr != nullptr) ? static_cast<uint32_t>(key_ptr - start) : 0;
   return true;

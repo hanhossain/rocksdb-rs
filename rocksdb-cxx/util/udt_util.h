@@ -39,8 +39,8 @@ class UserDefinedTimestampSizeRecord {
     assert(dst != nullptr);
     for (const auto& [cf_id, ts_sz] : cf_to_ts_sz_) {
       assert(ts_sz != 0);
-      PutFixed32(dst, cf_id);
-      PutFixed16(dst, static_cast<uint16_t>(ts_sz));
+      rocksdb_rs::coding::PutFixed32(*dst, cf_id);
+      rocksdb_rs::coding::PutFixed16(*dst, static_cast<uint16_t>(ts_sz));
     }
   }
 
@@ -56,7 +56,7 @@ class UserDefinedTimestampSizeRecord {
     for (int i = 0; i < num_of_entries; i++) {
       uint32_t cf_id = 0;
       uint16_t ts_sz = 0;
-      if (!GetFixed32(src, &cf_id) || !GetFixed16(src, &ts_sz)) {
+      if (!rocksdb_rs::coding::GetFixed32(*src, cf_id) || !rocksdb_rs::coding::GetFixed16(*src, ts_sz)) {
         return rocksdb_rs::status::Status_Corruption(
             "Error decoding user-defined timestamp size record entry");
       }

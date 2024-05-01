@@ -230,7 +230,7 @@ TEST_F(DBMemTableTest, ConcurrentMergeWrite) {
                                kMaxSequenceNumber, 0 /* column_family_id */);
 
   // Put 0 as the base
-  PutFixed64(&value, static_cast<uint64_t>(0));
+  rocksdb_rs::coding::PutFixed64(value, static_cast<uint64_t>(0));
   ASSERT_OK(mem->Add(0, kTypeValue, "key", value, nullptr /* kv_prot_info */));
   value.clear();
 
@@ -239,7 +239,7 @@ TEST_F(DBMemTableTest, ConcurrentMergeWrite) {
     MemTablePostProcessInfo post_process_info1;
     std::string v1;
     for (int seq = 1; seq < num_ops / 2; seq++) {
-      PutFixed64(&v1, seq);
+      rocksdb_rs::coding::PutFixed64(v1, seq);
       ASSERT_OK(mem->Add(seq, kTypeMerge, "key", v1, nullptr /* kv_prot_info */,
                          true, &post_process_info1));
       v1.clear();
@@ -249,7 +249,7 @@ TEST_F(DBMemTableTest, ConcurrentMergeWrite) {
     MemTablePostProcessInfo post_process_info2;
     std::string v2;
     for (int seq = num_ops / 2; seq < num_ops; seq++) {
-      PutFixed64(&v2, seq);
+      rocksdb_rs::coding::PutFixed64(v2, seq);
       ASSERT_OK(mem->Add(seq, kTypeMerge, "key", v2, nullptr /* kv_prot_info */,
                          true, &post_process_info2));
       v2.clear();

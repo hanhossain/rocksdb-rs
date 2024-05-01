@@ -1016,7 +1016,7 @@ rocksdb_rs::status::Status ExternalSstFileIngestionJob::AssignGlobalSeqnoForInge
       FSRandomRWFilePtr fsptr(std::move(rwfile), io_tracer_,
                               file_to_ingest->internal_file_path);
       std::string seqno_val;
-      PutFixed64(&seqno_val, seqno);
+      rocksdb_rs::coding::PutFixed64(seqno_val, seqno);
       status = fsptr->Write(file_to_ingest->global_seqno_offset, seqno_val,
                             IOOptions(), nullptr).status();
       if (status.ok()) {

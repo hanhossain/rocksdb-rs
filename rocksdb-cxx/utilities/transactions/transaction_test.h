@@ -534,7 +534,7 @@ class WriteCommittedTxnWithTsTest
   rocksdb_rs::status::Status GetFromDb(ReadOptions read_opts, ColumnFamilyHandle* column_family,
                    const Slice& key, TxnTimestamp ts, std::string* value) {
     std::string ts_buf;
-    PutFixed64(&ts_buf, ts);
+    rocksdb_rs::coding::PutFixed64(ts_buf, ts);
     Slice ts_slc = ts_buf;
     read_opts.timestamp = &ts_slc;
     assert(db);

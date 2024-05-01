@@ -144,7 +144,7 @@ void PlainTableIndexBuilder::BucketizeIndexes(
       continue;
     }
     // Only buckets with more than 1 entry will have subindex.
-    sub_index_size_ += VarintLength(entry_count);
+    sub_index_size_ += rocksdb_rs::coding::VarintLength(entry_count);
     // total bytes needed to store these entries' in-file offsets.
     sub_index_size_ += entry_count * PlainTableIndex::kOffsetLen;
   }
@@ -160,9 +160,9 @@ Slice PlainTableIndexBuilder::FillIndexes(
   char* allocated = arena_->AllocateAligned(
       total_allocate_size, huge_page_tlb_size_, ioptions_.logger);
 
-  auto temp_ptr = EncodeVarint32(allocated, index_size_);
+  auto temp_ptr = rocksdb_rs::coding::EncodeVarint32(allocated, index_size_);
   uint32_t* index =
-      reinterpret_cast<uint32_t*>(EncodeVarint32(temp_ptr, num_prefixes_));
+      reinterpret_cast<uint32_t*>(rocksdb_rs::coding::EncodeVarint32(temp_ptr, num_prefixes_));
   char* sub_index = reinterpret_cast<char*>(index + index_size_);
 
   uint32_t sub_index_offset = 0;
@@ -182,7 +182,7 @@ Slice PlainTableIndexBuilder::FillIndexes(
         PutUnaligned(index + i,
                      sub_index_offset | PlainTableIndex::kSubIndexMask);
         char* prev_ptr = &sub_index[sub_index_offset];
-        char* cur_ptr = EncodeVarint32(prev_ptr, num_keys_for_bucket);
+        char* cur_ptr = rocksdb_rs::coding::EncodeVarint32(prev_ptr, num_keys_for_bucket);
         sub_index_offset += static_cast<uint32_t>(cur_ptr - prev_ptr);
         char* sub_index_pos = &sub_index[sub_index_offset];
         IndexRecord* record = hash_to_offsets[i];

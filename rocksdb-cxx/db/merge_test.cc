@@ -392,7 +392,7 @@ void testCountersWithFlushAndCompaction(Counters& counters, DB* db) {
 
   TEST_SYNC_POINT("testCountersWithFlushAndCompaction:BeforeVerification");
   std::string expected;
-  PutFixed64(&expected, 1);
+  rocksdb_rs::coding::PutFixed64(expected, 1);
   std::string actual;
   rocksdb_rs::status::Status s = db->Get(ReadOptions(), "test-key", &actual);
   TEST_SYNC_POINT("testCountersWithFlushAndCompaction:AfterGet");

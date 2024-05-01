@@ -116,9 +116,9 @@ size_t BlockBuilder::EstimateSizeAfterKV(const Slice& key,
   estimate += sizeof(int32_t);  // varint for shared prefix length.
   // Note: this is an imprecise estimate as we will have to encoded size, one
   // for shared key and one for non-shared key.
-  estimate += VarintLength(key.size());  // varint for key length.
+  estimate += rocksdb_rs::coding::VarintLength(key.size());  // varint for key length.
   if (!use_value_delta_encoding_ || (counter_ >= block_restart_interval_)) {
-    estimate += VarintLength(value.size());  // varint for value length.
+    estimate += rocksdb_rs::coding::VarintLength(value.size());  // varint for value length.
   }
 
   return estimate;
@@ -127,7 +127,7 @@ size_t BlockBuilder::EstimateSizeAfterKV(const Slice& key,
 Slice BlockBuilder::Finish() {
   // Append restart array
   for (size_t i = 0; i < restarts_.size(); i++) {
-    PutFixed32(&buffer_, restarts_[i]);
+    rocksdb_rs::coding::PutFixed32(buffer_, restarts_[i]);
   }
 
   uint32_t num_restarts = static_cast<uint32_t>(restarts_.size());
@@ -142,7 +142,7 @@ Slice BlockBuilder::Finish() {
   // footer is a packed format of data_block_index_type and num_restarts
   uint32_t block_footer = PackIndexTypeAndNumRestarts(index_type, num_restarts);
 
-  PutFixed32(&buffer_, block_footer);
+  rocksdb_rs::coding::PutFixed32(buffer_, block_footer);
   finished_ = true;
   return Slice(buffer_);
 }

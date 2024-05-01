@@ -169,7 +169,7 @@ std::string KeyStr(uint64_t ts, const std::string& user_key,
                    bool corrupt) {
   std::string user_key_with_ts(user_key);
   std::string ts_str;
-  PutFixed64(&ts_str, ts);
+  rocksdb_rs::coding::PutFixed64(ts_str, ts);
   user_key_with_ts.append(ts_str);
   return KeyStr(user_key_with_ts, seq, t, corrupt);
 }

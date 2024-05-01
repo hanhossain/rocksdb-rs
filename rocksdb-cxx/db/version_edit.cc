@@ -216,7 +216,7 @@ bool VersionEdit::EncodeTo(std::string* dst,
     if (has_min_log_number_to_keep_ && !min_log_num_written) {
       PutVarint32(dst, NewFileCustomTag::kMinLogNumberToKeepHack);
       std::string varint_log_number;
-      PutFixed64(&varint_log_number, min_log_number_to_keep_);
+      rocksdb_rs::coding::PutFixed64(varint_log_number, min_log_number_to_keep_);
       PutLengthPrefixedSlice(dst, Slice(varint_log_number));
       min_log_num_written = true;
     }
@@ -401,7 +401,7 @@ const char* VersionEdit::DecodeNewFile4From(Slice* input) {
         case kMinLogNumberToKeepHack:
           // This is a hack to encode kMinLogNumberToKeep in a
           // forward-compatible fashion.
-          if (!GetFixed64(&field, &min_log_number_to_keep_)) {
+          if (!rocksdb_rs::coding::GetFixed64(field, min_log_number_to_keep_)) {
             return "deleted log number malformatted";
           }
           has_min_log_number_to_keep_ = true;

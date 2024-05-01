@@ -7623,10 +7623,10 @@ TEST_F(DBTest2, GetLatestSeqAndTsForKey) {
 
   for (uint64_t key = 0; key < 100; ++key) {
     std::string ts;
-    PutFixed64(&ts, kTsU64Value);
+    rocksdb_rs::coding::PutFixed64(ts, kTsU64Value);
 
     std::string key_str;
-    PutFixed64(&key_str, key);
+    rocksdb_rs::coding::PutFixed64(key_str, key);
     std::reverse(key_str.begin(), key_str.end());
     ASSERT_OK(db_->Put(WriteOptions(), key_str, ts, "value"));
   }
@@ -7642,7 +7642,7 @@ TEST_F(DBTest2, GetLatestSeqAndTsForKey) {
   SuperVersion* sv = cfhi->cfd()->GetSuperVersion();
   for (uint64_t key = 0; key < 100; ++key) {
     std::string key_str;
-    PutFixed64(&key_str, key);
+    rocksdb_rs::coding::PutFixed64(key_str, key);
     std::reverse(key_str.begin(), key_str.end());
     std::string ts;
     SequenceNumber seq = kMaxSequenceNumber;
@@ -7654,7 +7654,7 @@ TEST_F(DBTest2, GetLatestSeqAndTsForKey) {
         &found_record_for_key, &is_blob_index);
     ASSERT_OK(s);
     std::string expected_ts;
-    PutFixed64(&expected_ts, kTsU64Value);
+    rocksdb_rs::coding::PutFixed64(expected_ts, kTsU64Value);
     ASSERT_EQ(expected_ts, ts);
     ASSERT_TRUE(found_record_for_key);
     ASSERT_FALSE(is_blob_index);

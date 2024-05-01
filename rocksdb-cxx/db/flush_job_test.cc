@@ -623,7 +623,7 @@ class FlushJobTimestampTest
                              SequenceNumber seq, ValueType value_type,
                              Slice value) {
     std::string key_str(std::move(key));
-    PutFixed64(&key_str, ts);
+    rocksdb_rs::coding::PutFixed64(key_str, ts);
     ASSERT_OK(memtable->Add(seq, value_type, key_str, value,
                             nullptr /* kv_prot_info */));
   }
@@ -685,7 +685,7 @@ TEST_P(FlushJobTimestampTest, AllKeysExpired) {
   JobContext job_context(0);
   EventLogger event_logger(db_options_.info_log.get());
   std::string full_history_ts_low;
-  PutFixed64(&full_history_ts_low, std::numeric_limits<uint64_t>::max());
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low, std::numeric_limits<uint64_t>::max());
   FlushJob flush_job(
       dbname_, cfd, db_options_, *cfd->GetLatestMutableCFOptions(),
       std::numeric_limits<uint64_t>::max() /* memtable_id */, env_options_,
@@ -745,7 +745,7 @@ TEST_P(FlushJobTimestampTest, NoKeyExpired) {
   JobContext job_context(0);
   EventLogger event_logger(db_options_.info_log.get());
   std::string full_history_ts_low;
-  PutFixed64(&full_history_ts_low, 0);
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low, 0);
   FlushJob flush_job(
       dbname_, cfd, db_options_, *cfd->GetLatestMutableCFOptions(),
       std::numeric_limits<uint64_t>::max() /* memtable_id */, env_options_,

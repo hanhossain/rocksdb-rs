@@ -62,7 +62,7 @@ void DataBlockHashIndexBuilder::Finish(std::string& buffer) {
   }
 
   // write NUM_BUCK
-  PutFixed16(&buffer, num_buckets);
+  rocksdb_rs::coding::PutFixed16(buffer, num_buckets);
 
   assert(buffer.size() <= kMaxBlockSizeSupportedByHashIndex);
 }

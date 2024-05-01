@@ -2798,7 +2798,7 @@ TEST_P(ExternalSSTFileTest, DeltaEncodingWhileGlobalSeqnoPresent) {
   // key is composed as (seqno << 8 | value_type), and here `1` represents
   // ValueType::kTypeValue
 
-  PutFixed64(&key2, PackSequenceAndType(0, kTypeValue));
+  rocksdb_rs::coding::PutFixed64(key2, PackSequenceAndType(0, kTypeValue));
   key2 += "cdefghijkl";
 
   ASSERT_OK(writer.Put(key1, value));
@@ -2831,7 +2831,7 @@ TEST_P(ExternalSSTFileTest,
   // key is composed as (seqno << 8 | value_type), and here `1` represents
   // ValueType::kTypeValue
   std::string key2 = "ab";
-  PutFixed64(&key2, PackSequenceAndType(0, kTypeValue));
+  rocksdb_rs::coding::PutFixed64(key2, PackSequenceAndType(0, kTypeValue));
   key2 += "cdefghijkl";
   std::string key3 = key2 + "_";
 

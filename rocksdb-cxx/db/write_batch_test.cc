@@ -1110,7 +1110,7 @@ TEST_F(WriteBatchTest, CommitWithTimestamp) {
   const std::string txn_name = "xid1";
   std::string ts;
   constexpr uint64_t commit_ts = 23;
-  PutFixed64(&ts, commit_ts);
+  rocksdb_rs::coding::PutFixed64(ts, commit_ts);
   ASSERT_OK(WriteBatchInternal::MarkCommitWithTimestamp(&wb, txn_name, ts));
   TestHandler handler;
   ASSERT_OK(wb.Iterate(&handler));

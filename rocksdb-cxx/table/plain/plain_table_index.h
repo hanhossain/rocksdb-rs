@@ -97,7 +97,7 @@ class PlainTableIndex {
   const char* GetSubIndexBasePtrAndUpperBound(uint32_t offset,
                                               uint32_t* upper_bound) const {
     const char* index_ptr = &sub_index_[offset];
-    return GetVarint32Ptr(index_ptr, index_ptr + 4, upper_bound);
+    return rocksdb_rs::coding::GetVarint32Ptr(index_ptr, index_ptr + 4, upper_bound);
   }
 
   uint32_t GetIndexSize() const { return index_size_; }
@@ -153,7 +153,7 @@ class PlainTableIndexBuilder {
   Slice Finish();
 
   uint32_t GetTotalSize() const {
-    return VarintLength(index_size_) + VarintLength(num_prefixes_) +
+    return rocksdb_rs::coding::VarintLength(index_size_) + rocksdb_rs::coding::VarintLength(num_prefixes_) +
            PlainTableIndex::kOffsetLen * index_size_ + sub_index_size_;
   }
 

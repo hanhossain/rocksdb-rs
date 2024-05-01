@@ -221,7 +221,6 @@ const SOURCES: &[&str] = &[
     "trace_replay/trace_replay.cc",
     "util/async_file_reader.cc",
     "util/cleanable.cc",
-    "util/coding.cc",
     "util/common_ffi.cc",
     "util/compaction_job_stats_impl.cc",
     "util/comparator.cc",
@@ -336,6 +335,7 @@ fn main() {
 
     let bridges = vec![
         "src/cache.rs",
+        "src/coding.rs",
         "src/coding_lean.rs",
         "src/compression_type.rs",
         "src/env.rs",

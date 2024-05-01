@@ -47,12 +47,12 @@ class SstFileWriterPropertiesCollector : public IntTblPropCollector {
   virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     // File version
     std::string version_val;
-    PutFixed32(&version_val, static_cast<uint32_t>(version_));
+    rocksdb_rs::coding::PutFixed32(version_val, static_cast<uint32_t>(version_));
     properties->insert({ExternalSstFilePropertyNames::kVersion, version_val});
 
     // Global Sequence number
     std::string seqno_val;
-    PutFixed64(&seqno_val, static_cast<uint64_t>(global_seqno_));
+    rocksdb_rs::coding::PutFixed64(seqno_val, static_cast<uint64_t>(global_seqno_));
     properties->insert({ExternalSstFilePropertyNames::kGlobalSeqno, seqno_val});
 
     return rocksdb_rs::status::Status_OK();

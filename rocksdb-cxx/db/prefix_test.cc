@@ -70,8 +70,8 @@ struct TestKey {
 // return a slice backed by test_key
 inline Slice TestKeyToSlice(std::string& s, const TestKey& test_key) {
   s.clear();
-  PutFixed64(&s, test_key.prefix);
-  PutFixed64(&s, test_key.sorted);
+  rocksdb_rs::coding::PutFixed64(s, test_key.prefix);
+  rocksdb_rs::coding::PutFixed64(s, test_key.sorted);
   return Slice(s.c_str(), s.size());
 }
 

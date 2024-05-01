@@ -1316,7 +1316,7 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorAndGetReadTimestampSizeMismatch) {
 
   ReadOptions read_opts;
   std::string different_size_read_timestamp;
-  PutFixed32(&different_size_read_timestamp, 2);
+  rocksdb_rs::coding::PutFixed32(different_size_read_timestamp, 2);
   Slice different_size_read_ts = different_size_read_timestamp;
   read_opts.timestamp = &different_size_read_ts;
   {
@@ -1548,7 +1548,7 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorsReadTimestampSizeMismatch) {
 
   ReadOptions read_opts;
   std::string different_size_read_timestamp;
-  PutFixed32(&different_size_read_timestamp, 2);
+  rocksdb_rs::coding::PutFixed32(different_size_read_timestamp, 2);
   Slice different_size_read_ts = different_size_read_timestamp;
   read_opts.timestamp = &different_size_read_ts;
   {

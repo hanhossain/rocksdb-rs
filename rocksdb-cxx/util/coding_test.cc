@@ -14,65 +14,10 @@
 namespace rocksdb {
 
 class Coding {};
-TEST(Coding, Fixed16) {
-  std::string s;
-  for (uint16_t v = 0; v < 0xFFFF; v++) {
-    PutFixed16(&s, v);
-  }
-
-  const char* p = s.data();
-  for (uint16_t v = 0; v < 0xFFFF; v++) {
-    uint16_t actual = rocksdb_rs::coding_lean::DecodeFixed16(p);
-    ASSERT_EQ(v, actual);
-    p += sizeof(uint16_t);
-  }
-}
-
-TEST(Coding, Fixed32) {
-  std::string s;
-  for (uint32_t v = 0; v < 100000; v++) {
-    PutFixed32(&s, v);
-  }
-
-  const char* p = s.data();
-  for (uint32_t v = 0; v < 100000; v++) {
-    uint32_t actual = rocksdb_rs::coding_lean::DecodeFixed32(p);
-    ASSERT_EQ(v, actual);
-    p += sizeof(uint32_t);
-  }
-}
-
-TEST(Coding, Fixed64) {
-  std::string s;
-  for (int power = 0; power <= 63; power++) {
-    uint64_t v = static_cast<uint64_t>(1) << power;
-    PutFixed64(&s, v - 1);
-    PutFixed64(&s, v + 0);
-    PutFixed64(&s, v + 1);
-  }
-
-  const char* p = s.data();
-  for (int power = 0; power <= 63; power++) {
-    uint64_t v = static_cast<uint64_t>(1) << power;
-    uint64_t actual = 0;
-    actual = rocksdb_rs::coding_lean::DecodeFixed64(p);
-    ASSERT_EQ(v - 1, actual);
-    p += sizeof(uint64_t);
-
-    actual = rocksdb_rs::coding_lean::DecodeFixed64(p);
-    ASSERT_EQ(v + 0, actual);
-    p += sizeof(uint64_t);
-
-    actual = rocksdb_rs::coding_lean::DecodeFixed64(p);
-    ASSERT_EQ(v + 1, actual);
-    p += sizeof(uint64_t);
-  }
-}
-
 // Test that encoding routines generate little-endian encodings
 TEST(Coding, EncodingOutput) {
   std::string dst;
-  PutFixed32(&dst, 0x04030201);
+  rocksdb_rs::coding::PutFixed32(dst, 0x04030201);
   ASSERT_EQ(4U, dst.size());
   ASSERT_EQ(0x01, static_cast<int>(dst[0]));
   ASSERT_EQ(0x02, static_cast<int>(dst[1]));
@@ -80,7 +25,7 @@ TEST(Coding, EncodingOutput) {
   ASSERT_EQ(0x04, static_cast<int>(dst[3]));
 
   dst.clear();
-  PutFixed64(&dst, 0x0807060504030201ull);
+  rocksdb_rs::coding::PutFixed64(dst, 0x0807060504030201ull);
   ASSERT_EQ(8U, dst.size());
   ASSERT_EQ(0x01, static_cast<int>(dst[0]));
   ASSERT_EQ(0x02, static_cast<int>(dst[1]));
@@ -105,10 +50,10 @@ TEST(Coding, Varint32) {
     uint32_t expected = (i / 32) << (i % 32);
     uint32_t actual = 0;
     const char* start = p;
-    p = GetVarint32Ptr(p, limit, &actual);
+    p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, &actual);
     ASSERT_TRUE(p != nullptr);
     ASSERT_EQ(expected, actual);
-    ASSERT_EQ(VarintLength(actual), p - start);
+    ASSERT_EQ(rocksdb_rs::coding::VarintLength(actual), p - start);
   }
   ASSERT_EQ(p, s.data() + s.size());
 }
@@ -140,10 +85,10 @@ TEST(Coding, Varint64) {
     ASSERT_TRUE(p < limit);
     uint64_t actual = 0;
     const char* start = p;
-    p = GetVarint64Ptr(p, limit, &actual);
+    p = rocksdb_rs::coding::GetVarint64Ptr(p, limit, &actual);
     ASSERT_TRUE(p != nullptr);
     ASSERT_EQ(values[i], actual);
-    ASSERT_EQ(VarintLength(actual), p - start);
+    ASSERT_EQ(rocksdb_rs::coding::VarintLength(actual), p - start);
   }
   ASSERT_EQ(p, limit);
 }
@@ -151,7 +96,7 @@ TEST(Coding, Varint64) {
 TEST(Coding, Varint32Overflow) {
   uint32_t result;
   std::string input("\x81\x82\x83\x84\x85\x11");
-  ASSERT_TRUE(GetVarint32Ptr(input.data(), input.data() + input.size(),
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(input.data(), input.data() + input.size(),
                              &result) == nullptr);
 }
 
@@ -161,9 +106,9 @@ TEST(Coding, Varint32Truncation) {
   PutVarint32(&s, large_value);
   uint32_t result;
   for (unsigned int len = 0; len + 1 < s.size(); len++) {
-    ASSERT_TRUE(GetVarint32Ptr(s.data(), s.data() + len, &result) == nullptr);
+    ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(s.data(), s.data() + len, &result) == nullptr);
   }
-  ASSERT_TRUE(GetVarint32Ptr(s.data(), s.data() + s.size(), &result) !=
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(s.data(), s.data() + s.size(), &result) !=
               nullptr);
   ASSERT_EQ(large_value, result);
 }
@@ -171,7 +116,7 @@ TEST(Coding, Varint32Truncation) {
 TEST(Coding, Varint64Overflow) {
   uint64_t result;
   std::string input("\x81\x82\x83\x84\x85\x81\x82\x83\x84\x85\x11");
-  ASSERT_TRUE(GetVarint64Ptr(input.data(), input.data() + input.size(),
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(input.data(), input.data() + input.size(),
                              &result) == nullptr);
 }
 
@@ -181,9 +126,9 @@ TEST(Coding, Varint64Truncation) {
   PutVarint64(&s, large_value);
   uint64_t result;
   for (unsigned int len = 0; len + 1 < s.size(); len++) {
-    ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + len, &result) == nullptr);
+    ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + len, &result) == nullptr);
   }
-  ASSERT_TRUE(GetVarint64Ptr(s.data(), s.data() + s.size(), &result) !=
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + s.size(), &result) !=
               nullptr);
   ASSERT_EQ(large_value, result);
 }

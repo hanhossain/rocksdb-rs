@@ -385,7 +385,7 @@ TEST_F(DBTestDynamicLevel, DynamicLevelMaxBytesBaseInc) {
   const int random_part_size = 100;
   for (int i = 0; i < total_keys; i++) {
     std::string value = rnd.RandomString(random_part_size);
-    PutFixed32(&value, static_cast<uint32_t>(i));
+    rocksdb_rs::coding::PutFixed32(value, static_cast<uint32_t>(i));
     ASSERT_OK(Put(Key(i), value));
   }
   ASSERT_OK(Flush());

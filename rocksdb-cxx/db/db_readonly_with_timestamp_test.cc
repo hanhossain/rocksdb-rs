@@ -89,7 +89,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, IteratorAndGetReadTimestampSizeMismatch) {
   ASSERT_OK(ReadOnlyReopen(options));
   ReadOptions read_opts;
   std::string different_size_read_timestamp;
-  PutFixed32(&different_size_read_timestamp, 2);
+  rocksdb_rs::coding::PutFixed32(different_size_read_timestamp, 2);
   Slice different_size_read_ts = different_size_read_timestamp;
   read_opts.timestamp = &different_size_read_ts;
   {
@@ -361,7 +361,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, IteratorsReadTimestampSizeMismatch) {
   ASSERT_OK(ReadOnlyReopen(options));
   ReadOptions read_opts;
   std::string different_size_read_timestamp;
-  PutFixed32(&different_size_read_timestamp, 2);
+  rocksdb_rs::coding::PutFixed32(different_size_read_timestamp, 2);
   Slice different_size_read_ts = different_size_read_timestamp;
   read_opts.timestamp = &different_size_read_ts;
   {
@@ -473,7 +473,7 @@ TEST_F(DBReadOnlyTestWithTimestamp, CompactedDBGetReadTimestampSizeMismatch) {
 
   ReadOptions read_opts;
   std::string different_size_read_timestamp;
-  PutFixed32(&different_size_read_timestamp, 2);
+  rocksdb_rs::coding::PutFixed32(different_size_read_timestamp, 2);
   Slice different_size_read_ts = different_size_read_timestamp;
   read_opts.timestamp = &different_size_read_ts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
@@ -702,7 +702,7 @@ TEST_F(DBReadOnlyTestWithTimestamp,
 
   ReadOptions read_opts;
   std::string different_size_read_timestamp;
-  PutFixed32(&different_size_read_timestamp, 2);
+  rocksdb_rs::coding::PutFixed32(different_size_read_timestamp, 2);
   Slice different_size_read_ts = different_size_read_timestamp;
   read_opts.timestamp = &different_size_read_ts;
   std::vector<std::string> key_strs;

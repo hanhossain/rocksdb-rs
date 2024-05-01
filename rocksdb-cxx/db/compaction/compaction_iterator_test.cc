@@ -1238,7 +1238,7 @@ TEST_P(CompactionIteratorTsGcTest, NoKeyEligibleForGC) {
   std::string full_history_ts_low;
   // All keys' timestamps are newer than or equal to 102, thus none of them
   // will be eligible for GC.
-  PutFixed64(&full_history_ts_low, 102);
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low, 102);
   const std::vector<std::string>& expected_keys = input_keys;
   const std::vector<std::string>& expected_values = input_values;
   const std::vector<std::pair<bool, bool>> params = {
@@ -1290,7 +1290,7 @@ TEST_P(CompactionIteratorTsGcTest, AllKeysOlderThanThreshold) {
       test::KeyStr(/*ts=*/104, user_key[1], /*seq=*/5, kTypeValue)};
   const std::vector<std::string> input_values = {"", "a2", "a1", "b5"};
   std::string full_history_ts_low;
-  PutFixed64(&full_history_ts_low, std::numeric_limits<uint64_t>::max());
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low, std::numeric_limits<uint64_t>::max());
   {
     // With a snapshot at seq 3, both the deletion marker and the key at 3 must
     // be preserved.
@@ -1349,7 +1349,7 @@ TEST_P(CompactionIteratorTsGcTest, SomeMergesOlderThanThreshold) {
   std::shared_ptr<MergeOperator> merge_op =
       MergeOperators::CreateStringAppendTESTOperator();
   std::string full_history_ts_low;
-  PutFixed64(&full_history_ts_low, 20000);
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low, 20000);
 
   const std::vector<std::pair<bool, bool>> params = {
       {false, false}, {false, true}, {true, true}};
@@ -1429,7 +1429,7 @@ TEST_P(CompactionIteratorTsGcTest, NewHidesOldSameSnapshot) {
   {
     std::string full_history_ts_low;
     // Keys whose timestamps larger than or equal to 102 will be preserved.
-    PutFixed64(&full_history_ts_low, 102);
+    rocksdb_rs::coding::PutFixed64(full_history_ts_low, 102);
     const std::vector<std::string> expected_keys = {
         input_keys[0], input_keys[1], input_keys[2]};
     const std::vector<std::string> expected_values = {"", input_values[1],
@@ -1460,7 +1460,7 @@ TEST_P(CompactionIteratorTsGcTest, DropTombstones) {
   {
     // Non-bottommost level, but key does not exist beyond output level.
     std::string full_history_ts_low;
-    PutFixed64(&full_history_ts_low, 102);
+    rocksdb_rs::coding::PutFixed64(full_history_ts_low, 102);
     RunTest(input_keys, input_values, expected_keys, expected_values,
             /*last_committed_sequence=*/kMaxSequenceNumber,
             /*merge_op=*/nullptr, /*compaction_filter=*/nullptr,
@@ -1471,7 +1471,7 @@ TEST_P(CompactionIteratorTsGcTest, DropTombstones) {
   {
     // Bottommost level
     std::string full_history_ts_low;
-    PutFixed64(&full_history_ts_low, 102);
+    rocksdb_rs::coding::PutFixed64(full_history_ts_low, 102);
     RunTest(input_keys, input_values, expected_keys, expected_values,
             /*last_committed_seq=*/kMaxSequenceNumber,
             /*merge_operator=*/nullptr, /*compaction_filter=*/nullptr,
@@ -1500,7 +1500,7 @@ TEST_P(CompactionIteratorTsGcTest, RewriteTs) {
   {
     // Bottommost level and need to rewrite both ts and seq.
     std::string full_history_ts_low;
-    PutFixed64(&full_history_ts_low, 102);
+    rocksdb_rs::coding::PutFixed64(full_history_ts_low, 102);
     RunTest(input_keys, input_values, expected_keys, expected_values,
             /*last_committed_seq=*/kMaxSequenceNumber,
             /*merge_operator=*/nullptr, /*compaction_filter=*/nullptr,
@@ -1520,7 +1520,7 @@ TEST_P(CompactionIteratorTsGcTest, SingleDeleteNoKeyEligibleForGC) {
   std::string full_history_ts_low;
   // All keys' timestamps are newer than or equal to 102, thus none of them
   // will be eligible for GC.
-  PutFixed64(&full_history_ts_low, 102);
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low, 102);
   const std::vector<std::string>& expected_keys = input_keys;
   const std::vector<std::string>& expected_values = input_values;
   const std::vector<std::pair<bool, bool>> params = {
@@ -1557,7 +1557,7 @@ TEST_P(CompactionIteratorTsGcTest, SingleDeleteDropTombstones) {
       const bool bottommost_level = param.first;
       const bool key_not_exists_beyond_output_level = param.second;
       std::string full_history_ts_low;
-      PutFixed64(&full_history_ts_low, 102);
+      rocksdb_rs::coding::PutFixed64(full_history_ts_low, 102);
       RunTest(input_keys, input_values, expected_keys, expected_values,
               /*last_committed_seq=*/kMaxSequenceNumber,
               /*merge_operator=*/nullptr, /*compaction_filter=*/nullptr,
@@ -1576,7 +1576,7 @@ TEST_P(CompactionIteratorTsGcTest, SingleDeleteAllKeysOlderThanThreshold) {
       test::KeyStr(/*ts=*/104, user_key[1], /*seq=*/5, kTypeValue)};
   const std::vector<std::string> input_values = {"", "a2", "b5"};
   std::string full_history_ts_low;
-  PutFixed64(&full_history_ts_low, std::numeric_limits<uint64_t>::max());
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low, std::numeric_limits<uint64_t>::max());
   {
     // With a snapshot at seq 3, both the deletion marker and the key at 3 must
     // be preserved.

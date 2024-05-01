@@ -346,7 +346,7 @@ TEST_F(DBFlushTest, StatisticsGarbageBasic) {
   // Put multiple times the same key-values.
   // The encoded length of a db entry in the memtable is
   // defined in db/memtable.cc (MemTable::Add) as the variable:
-  // encoded_len=  VarintLength(internal_key_size)  --> =
+  // encoded_len=  rocksdb_rs::coding::VarintLength(internal_key_size)  --> =
   // log_256(internal_key).
   // Min # of bytes
   //                                                       necessary to
@@ -359,7 +359,7 @@ TEST_F(DBFlushTest, StatisticsGarbageBasic) {
   //                                                      number
   // +
   //                                                      insertion type"
-  //             + VarintLength(val_size)           --> = min # of bytes to
+  //             + rocksdb_rs::coding::VarintLength(val_size)           --> = min # of bytes to
   //             store val_size
   //             + val_size                         --> = actual value
   //             string

@@ -55,7 +55,7 @@ rocksdb_rs::types::EntryType GetEntryType(ValueType value_type) {
 
 void AppendInternalKey(std::string* result, const ParsedInternalKey& key) {
   result->append(key.user_key.data(), key.user_key.size());
-  PutFixed64(result, PackSequenceAndType(key.sequence, key.type));
+  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(key.sequence, key.type));
 }
 
 void AppendInternalKeyWithDifferentTimestamp(std::string* result,
@@ -64,12 +64,12 @@ void AppendInternalKeyWithDifferentTimestamp(std::string* result,
   assert(key.user_key.size() >= ts.size());
   result->append(key.user_key.data(), key.user_key.size() - ts.size());
   result->append(ts.data(), ts.size());
-  PutFixed64(result, PackSequenceAndType(key.sequence, key.type));
+  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(key.sequence, key.type));
 }
 
 void AppendInternalKeyFooter(std::string* result, SequenceNumber s,
                              ValueType t) {
-  PutFixed64(result, PackSequenceAndType(s, t));
+  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(s, t));
 }
 
 void AppendKeyWithMinTimestamp(std::string* result, const Slice& key,
@@ -217,7 +217,7 @@ LookupKey::LookupKey(const Slice& _user_key, SequenceNumber s,
   }
   start_ = dst;
   // NOTE: We don't support users keys of more than 2GB :)
-  dst = EncodeVarint32(dst, static_cast<uint32_t>(usize + ts_sz + 8));
+  dst = rocksdb_rs::coding::EncodeVarint32(dst, static_cast<uint32_t>(usize + ts_sz + 8));
   kstart_ = dst;
   memcpy(dst, _user_key.data(), usize);
   dst += usize;

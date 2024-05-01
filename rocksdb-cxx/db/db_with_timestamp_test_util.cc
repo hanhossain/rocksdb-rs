@@ -12,7 +12,7 @@
 namespace rocksdb {
 std::string DBBasicTestWithTimestampBase::Key1(uint64_t k) {
   std::string ret;
-  PutFixed64(&ret, k);
+  rocksdb_rs::coding::PutFixed64(ret, k);
   std::reverse(ret.begin(), ret.end());
   return ret;
 }
@@ -20,7 +20,7 @@ std::string DBBasicTestWithTimestampBase::Key1(uint64_t k) {
 std::string DBBasicTestWithTimestampBase::KeyWithPrefix(std::string prefix,
                                                         uint64_t k) {
   std::string ret;
-  PutFixed64(&ret, k);
+  rocksdb_rs::coding::PutFixed64(ret, k);
   std::reverse(ret.begin(), ret.end());
   return prefix + ret;
 }
@@ -37,8 +37,8 @@ std::vector<Slice> DBBasicTestWithTimestampBase::ConvertStrToSlice(
 std::string DBBasicTestWithTimestampBase::Timestamp(uint64_t low,
                                                     uint64_t high) {
   std::string ts;
-  PutFixed64(&ts, low);
-  PutFixed64(&ts, high);
+  rocksdb_rs::coding::PutFixed64(ts, low);
+  rocksdb_rs::coding::PutFixed64(ts, high);
   return ts;
 }
 

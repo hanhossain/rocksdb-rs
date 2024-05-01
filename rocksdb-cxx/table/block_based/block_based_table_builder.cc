@@ -235,7 +235,7 @@ class BlockBasedTableBuilder::BlockBasedTablePropertiesCollector
 
   rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
     std::string val;
-    PutFixed32(&val, static_cast<uint32_t>(index_type_));
+    rocksdb_rs::coding::PutFixed32(val, static_cast<uint32_t>(index_type_));
     properties->insert({BlockBasedTablePropertyNames::kIndexType, val});
     properties->insert({BlockBasedTablePropertyNames::kWholeKeyFiltering,
                         whole_key_filtering_ ? kPropTrue : kPropFalse});

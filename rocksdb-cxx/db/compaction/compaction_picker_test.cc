@@ -3522,9 +3522,9 @@ TEST_F(CompactionPickerU64TsTest, Overlap) {
 
   {
     std::string ts1;
-    PutFixed64(&ts1, ts_of_smallest);
+    rocksdb_rs::coding::PutFixed64(ts1, ts_of_smallest);
     std::string ts2;
-    PutFixed64(&ts2, ts_of_largest);
+    rocksdb_rs::coding::PutFixed64(ts2, ts_of_largest);
     Add(level, file_number, smallest, largest,
         /*file_size=*/1U, /*path_id=*/0,
         /*smallest_seq=*/100, /*largest_seq=*/100, /*compensated_file_size=*/0,
@@ -3549,9 +3549,9 @@ TEST_F(CompactionPickerU64TsTest, Overlap) {
     //                               c->GetLargestUserKey()) == 0.
     // Should still be considered overlapping.
     std::string user_key_with_ts1(largest);
-    PutFixed64(&user_key_with_ts1, ts_of_largest - 1);
+    rocksdb_rs::coding::PutFixed64(user_key_with_ts1, ts_of_largest - 1);
     std::string user_key_with_ts2(largest);
-    PutFixed64(&user_key_with_ts2, ts_of_largest - 1);
+    rocksdb_rs::coding::PutFixed64(user_key_with_ts2, ts_of_largest - 1);
     ASSERT_TRUE(level_compaction_picker.RangeOverlapWithCompaction(
         user_key_with_ts1, user_key_with_ts2, level));
   }
@@ -3562,9 +3562,9 @@ TEST_F(CompactionPickerU64TsTest, Overlap) {
     //                               c->GetSmallestUserKey()) == 0.
     // Should still be considered overlapping.
     std::string user_key_with_ts1(smallest);
-    PutFixed64(&user_key_with_ts1, ts_of_smallest + 1);
+    rocksdb_rs::coding::PutFixed64(user_key_with_ts1, ts_of_smallest + 1);
     std::string user_key_with_ts2(smallest);
-    PutFixed64(&user_key_with_ts2, ts_of_smallest + 1);
+    rocksdb_rs::coding::PutFixed64(user_key_with_ts2, ts_of_smallest + 1);
     ASSERT_TRUE(level_compaction_picker.RangeOverlapWithCompaction(
         user_key_with_ts1, user_key_with_ts2, level));
   }
@@ -3582,13 +3582,13 @@ TEST_F(CompactionPickerU64TsTest, CannotTrivialMoveUniversal) {
   ASSERT_FALSE(universal_compaction_picker.NeedsCompaction(vstorage_.get()));
 
   std::string ts1;
-  PutFixed64(&ts1, 9000);
+  rocksdb_rs::coding::PutFixed64(ts1, 9000);
   std::string ts2;
-  PutFixed64(&ts2, 8000);
+  rocksdb_rs::coding::PutFixed64(ts2, 8000);
   std::string ts3;
-  PutFixed64(&ts3, 7000);
+  rocksdb_rs::coding::PutFixed64(ts3, 7000);
   std::string ts4;
-  PutFixed64(&ts4, 6000);
+  rocksdb_rs::coding::PutFixed64(ts4, 6000);
 
   NewVersionStorage(3, kCompactionStyleUniversal);
   // A compaction should be triggered and pick file 2

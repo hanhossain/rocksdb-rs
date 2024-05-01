@@ -164,7 +164,7 @@ std::unique_ptr<InternalIterator> MakeRangeDelIterator(
 static std::string Key(int64_t val) {
   std::string little_endian_key;
   std::string big_endian_key;
-  PutFixed64(&little_endian_key, val);
+  rocksdb_rs::coding::PutFixed64(little_endian_key, val);
   assert(little_endian_key.size() == sizeof(val));
   big_endian_key.resize(sizeof(val));
   for (size_t i = 0; i < sizeof(val); ++i) {

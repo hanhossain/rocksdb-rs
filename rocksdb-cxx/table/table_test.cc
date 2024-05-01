@@ -4780,7 +4780,7 @@ TEST_P(BlockBasedTableTest, DISABLED_TableWithGlobalSeqno) {
   // Helper function to update the value of the global seqno in the file
   std::function<void(uint64_t)> SetGlobalSeqno = [&](uint64_t val) {
     std::string new_global_seqno;
-    PutFixed64(&new_global_seqno, val);
+    rocksdb_rs::coding::PutFixed64(new_global_seqno, val);
 
     ASSERT_OK(ss_rw.Write(global_seqno_offset, new_global_seqno, IOOptions(),
                           nullptr));

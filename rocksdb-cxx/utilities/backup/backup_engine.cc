@@ -71,7 +71,7 @@ inline std::string ChecksumStrToHex(const std::string& checksum_str) {
 }
 inline std::string ChecksumInt32ToHex(const uint32_t& checksum_value) {
   std::string checksum_str;
-  PutFixed32(&checksum_str, EndianSwapValue(checksum_value));
+  rocksdb_rs::coding::PutFixed32(checksum_str, EndianSwapValue(checksum_value));
   return ChecksumStrToHex(checksum_str);
 }
 

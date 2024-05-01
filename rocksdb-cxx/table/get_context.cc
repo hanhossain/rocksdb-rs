@@ -26,7 +26,7 @@ void appendToReplayLog(std::string* replay_log, ValueType type, Slice value) {
     if (replay_log->empty()) {
       // Optimization: in the common case of only one operation in the
       // log, we allocate the exact amount of space needed.
-      replay_log->reserve(1 + VarintLength(value.size()) + value.size());
+      replay_log->reserve(1 + rocksdb_rs::coding::VarintLength(value.size()) + value.size());
     }
     replay_log->push_back(type);
     PutLengthPrefixedSlice(replay_log, value);

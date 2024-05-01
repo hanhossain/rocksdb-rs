@@ -923,8 +923,8 @@ TEST_F(DBWALTest, IgnoreRecoveredLog) {
 
     // fill up the DB
     std::string one, two;
-    PutFixed64(&one, 1);
-    PutFixed64(&two, 2);
+    rocksdb_rs::coding::PutFixed64(one, 1);
+    rocksdb_rs::coding::PutFixed64(two, 2);
     ASSERT_OK(db_->Merge(WriteOptions(), Slice("foo"), Slice(one)));
     ASSERT_OK(db_->Merge(WriteOptions(), Slice("foo"), Slice(one)));
     ASSERT_OK(db_->Merge(WriteOptions(), Slice("bar"), Slice(one)));

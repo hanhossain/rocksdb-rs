@@ -2622,7 +2622,7 @@ TEST_F(EnvTest, EnvWriteVerificationTest) {
   std::string test_data = "test";
   std::string checksum;
   uint32_t v_crc32c = crc32c::Extend(0, test_data.c_str(), test_data.size());
-  PutFixed32(&checksum, v_crc32c);
+  rocksdb_rs::coding::PutFixed32(checksum, v_crc32c);
   v_info.checksum = Slice(checksum);
   s = file->Append(Slice(test_data), v_info);
   ASSERT_OK(s);

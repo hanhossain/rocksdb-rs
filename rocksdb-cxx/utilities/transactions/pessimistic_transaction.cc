@@ -1135,7 +1135,7 @@ rocksdb_rs::status::Status PessimisticTransaction::ValidateSnapshot(
   std::string ts_buf;
   if (ts_sz > 0 && read_timestamp_ < kMaxTxnTimestamp) {
     assert(ts_sz == sizeof(read_timestamp_));
-    PutFixed64(&ts_buf, read_timestamp_);
+    rocksdb_rs::coding::PutFixed64(ts_buf, read_timestamp_);
   }
 
   return TransactionUtil::CheckKeyForConflicts(

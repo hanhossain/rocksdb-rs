@@ -727,7 +727,7 @@ inline bool GetDecompressedSizeInfo(const char** input_data,
                                     size_t* input_length,
                                     uint32_t* output_len) {
   auto new_input_data =
-      GetVarint32Ptr(*input_data, *input_data + *input_length, output_len);
+      rocksdb_rs::coding::GetVarint32Ptr(*input_data, *input_data + *input_length, output_len);
   if (new_input_data == nullptr) {
     return false;
   }
@@ -1626,14 +1626,14 @@ class CompressionTypeRecord {
 
   inline void EncodeTo(std::string* dst) const {
     assert(dst != nullptr);
-    PutFixed32(dst, static_cast<uint32_t>(compression_type_));
+    rocksdb_rs::coding::PutFixed32(*dst, static_cast<uint32_t>(compression_type_));
   }
 
   inline rocksdb_rs::status::Status DecodeFrom(Slice* src) {
     constexpr char class_name[] = "CompressionTypeRecord";
 
     uint32_t val;
-    if (!GetFixed32(src, &val)) {
+    if (!rocksdb_rs::coding::GetFixed32(*src, val)) {
       return rocksdb_rs::status::Status_Corruption(class_name,
                                 "Error decoding WAL compression type");
     }

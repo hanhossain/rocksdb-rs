@@ -2296,7 +2296,7 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
   // Put keys
   for (uint32_t i = 0; i < kMaxKey; ++i) {
     std::string key;
-    PutFixed32(&key, i);
+    rocksdb_rs::coding::PutFixed32(key, i);
     rocksdb_rs::status::Status s = batch_->Put(&cf2, key, "value" + std::to_string(i));
     ASSERT_OK(s);
   }
@@ -2310,7 +2310,7 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
   for (uint32_t i = 0; i < kMaxKey; ++i) {
     std::string value;
     std::string key;
-    PutFixed32(&key, i);
+    rocksdb_rs::coding::PutFixed32(key, i);
     rocksdb_rs::status::Status s = batch_->GetFromBatch(&cf2, Options(), key, &value);
     ASSERT_OK(s);
     ASSERT_EQ("value" + std::to_string(i), value);
@@ -2322,7 +2322,7 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
     uint32_t start = 0;
     for (it->SeekToFirst(); it->Valid(); it->Next(), ++start) {
       std::string key;
-      PutFixed32(&key, start);
+      rocksdb_rs::coding::PutFixed32(key, start);
       ASSERT_OK(it->status());
       ASSERT_EQ(key, it->Entry().key);
       ASSERT_EQ("value" + std::to_string(start), it->Entry().value);
@@ -2334,7 +2334,7 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
   // Delete the keys with Delete() or SingleDelete()
   for (uint32_t i = 0; i < kMaxKey; ++i) {
     std::string key;
-    PutFixed32(&key, i);
+    rocksdb_rs::coding::PutFixed32(key, i);
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (0 == (i % 2)) {
       s = batch_->Delete(&cf2, key);
@@ -2350,7 +2350,7 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
   for (uint32_t i = 0; i < kMaxKey; ++i) {
     std::string value;
     std::string key;
-    PutFixed32(&key, i);
+    rocksdb_rs::coding::PutFixed32(key, i);
     rocksdb_rs::status::Status s = batch_->GetFromBatch(&cf2, Options(), key, &value);
     ASSERT_TRUE(s.IsNotFound());
   }
@@ -2362,7 +2362,7 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
     uint32_t start = 0;
     for (it->SeekToFirst(); it->Valid(); it->Next(), ++start) {
       std::string key;
-      PutFixed32(&key, start);
+      rocksdb_rs::coding::PutFixed32(key, start);
       ASSERT_EQ(key, it->Entry().key);
       if (!overwrite) {
         ASSERT_EQ(WriteType::kPutRecord, it->Entry().type);
@@ -2386,7 +2386,7 @@ TEST_P(WriteBatchWithIndexTest, IndexNoTs) {
   ASSERT_OK(wbwi.Put(&cf, "a", "a1"));
   {
     std::string ts;
-    PutFixed64(&ts, 10000);
+    rocksdb_rs::coding::PutFixed64(ts, 10000);
     ASSERT_OK(wbwi.GetWriteBatch()->UpdateTimestamps(
         ts, [](uint32_t cf_id) { return cf_id == 1 ? 8 : 0; }));
   }

@@ -371,9 +371,9 @@ TEST_F(BlockCacheTracerTest, HumanReadableTrace) {
   record.caller = TableReaderCaller::kUserGet;
   record.get_from_user_specified_snapshot = true;
   record.referenced_data_size = kReferencedDataSize;
-  PutFixed32(&record.referenced_key, 111);
+  rocksdb_rs::coding::PutFixed32(record.referenced_key, 111);
   PutLengthPrefixedSlice(&record.referenced_key, "get_key");
-  PutFixed64(&record.referenced_key, 2 << 8);
+  rocksdb_rs::coding::PutFixed64(record.referenced_key, 2 << 8);
   PutLengthPrefixedSlice(&record.block_key, "block_key");
   PutVarint64(&record.block_key, 333);
   {

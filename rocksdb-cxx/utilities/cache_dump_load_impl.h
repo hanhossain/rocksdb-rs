@@ -161,7 +161,7 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   virtual rocksdb_rs::io_status::IOStatus WriteMetadata(const Slice& metadata) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
-    PutFixed32(&prefix, static_cast<uint32_t>(metadata.size()));
+    rocksdb_rs::coding::PutFixed32(prefix, static_cast<uint32_t>(metadata.size()));
     rocksdb_rs::io_status::IOStatus io_s = file_writer_->Append(Slice(prefix));
     if (!io_s.ok()) {
       return io_s;
@@ -174,7 +174,7 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   virtual rocksdb_rs::io_status::IOStatus WritePacket(const Slice& data) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
-    PutFixed32(&prefix, static_cast<uint32_t>(data.size()));
+    rocksdb_rs::coding::PutFixed32(prefix, static_cast<uint32_t>(data.size()));
     rocksdb_rs::io_status::IOStatus io_s = file_writer_->Append(Slice(prefix));
     if (!io_s.ok()) {
       return io_s;
@@ -232,7 +232,7 @@ class FromFileCacheDumpReader : public CacheDumpReader {
       return io_s;
     }
     Slice encoded_slice(prefix);
-    if (!GetFixed32(&encoded_slice, len)) {
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, *len)) {
       return rocksdb_rs::io_status::IOStatus_Corruption("Decode size prefix string failed");
     }
     return rocksdb_rs::io_status::IOStatus_OK();
@@ -278,19 +278,19 @@ class CacheDumperHelper {
   // serialize the dump_unit_meta to a string, it is fixed 16 bytes size.
   static void EncodeDumpUnitMeta(const DumpUnitMeta& meta, std::string* data) {
     assert(data);
-    PutFixed32(data, static_cast<uint32_t>(meta.sequence_num));
-    PutFixed32(data, static_cast<uint32_t>(meta.dump_unit_checksum));
-    PutFixed64(data, meta.dump_unit_size);
+    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(meta.sequence_num));
+    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(meta.dump_unit_checksum));
+    rocksdb_rs::coding::PutFixed64(*data, meta.dump_unit_size);
   }
 
   // Serialize the dump_unit to a string.
   static void EncodeDumpUnit(const DumpUnit& dump_unit, std::string* data) {
     assert(data);
-    PutFixed64(data, dump_unit.timestamp);
+    rocksdb_rs::coding::PutFixed64(*data, dump_unit.timestamp);
     data->push_back(dump_unit.type);
     PutLengthPrefixedSlice(data, dump_unit.key);
-    PutFixed32(data, static_cast<uint32_t>(dump_unit.value_len));
-    PutFixed32(data, dump_unit.value_checksum);
+    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(dump_unit.value_len));
+    rocksdb_rs::coding::PutFixed32(*data, dump_unit.value_checksum);
     PutLengthPrefixedSlice(data,
                            Slice((char*)dump_unit.value, dump_unit.value_len));
   }
@@ -300,14 +300,14 @@ class CacheDumperHelper {
                                    DumpUnitMeta* unit_meta) {
     assert(unit_meta != nullptr);
     Slice encoded_slice = Slice(encoded_data);
-    if (!GetFixed32(&encoded_slice, &(unit_meta->sequence_num))) {
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, unit_meta->sequence_num)) {
       return rocksdb_rs::status::Status_Incomplete("Decode dumped unit meta sequence_num failed");
     }
-    if (!GetFixed32(&encoded_slice, &(unit_meta->dump_unit_checksum))) {
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, unit_meta->dump_unit_checksum)) {
       return rocksdb_rs::status::Status_Incomplete(
           "Decode dumped unit meta dump_unit_checksum failed");
     }
-    if (!GetFixed64(&encoded_slice, &(unit_meta->dump_unit_size))) {
+    if (!rocksdb_rs::coding::GetFixed64(encoded_slice, unit_meta->dump_unit_size)) {
       return rocksdb_rs::status::Status_Incomplete(
           "Decode dumped unit meta dump_unit_size failed");
     }
@@ -321,7 +321,7 @@ class CacheDumperHelper {
     Slice encoded_slice = Slice(encoded_data);
 
     // Decode timestamp
-    if (!GetFixed64(&encoded_slice, &dump_unit->timestamp)) {
+    if (!rocksdb_rs::coding::GetFixed64(encoded_slice, dump_unit->timestamp)) {
       return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     // Decode the block type
@@ -333,12 +333,12 @@ class CacheDumperHelper {
     }
     // Decode the value size
     uint32_t value_len;
-    if (!GetFixed32(&encoded_slice, &value_len)) {
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, value_len)) {
       return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     dump_unit->value_len = static_cast<size_t>(value_len);
     // Decode the value checksum
-    if (!GetFixed32(&encoded_slice, &(dump_unit->value_checksum))) {
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, dump_unit->value_checksum)) {
       return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
     }
     // Decode the block content and copy to the memory space whose pointer

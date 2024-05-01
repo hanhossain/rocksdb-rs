@@ -49,9 +49,9 @@ struct DecodeEntry {
       // Fast path: all three values are encoded in one byte each
       p += 3;
     } else {
-      if ((p = GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
-      if ((p = GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
-      if ((p = GetVarint32Ptr(p, limit, value_length)) == nullptr) {
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, value_length)) == nullptr) {
         return nullptr;
       }
     }
@@ -82,9 +82,9 @@ struct CheckAndDecodeEntry {
       // Fast path: all three values are encoded in one byte each
       p += 3;
     } else {
-      if ((p = GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
-      if ((p = GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
-      if ((p = GetVarint32Ptr(p, limit, value_length)) == nullptr) {
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, value_length)) == nullptr) {
         return nullptr;
       }
     }
@@ -120,8 +120,8 @@ struct DecodeKeyV4 {
       // Fast path: all three values are encoded in one byte each
       p += 2;
     } else {
-      if ((p = GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
-      if ((p = GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
     }
     return p;
   }

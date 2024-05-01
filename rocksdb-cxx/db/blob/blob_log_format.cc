@@ -15,14 +15,14 @@ void BlobLogHeader::EncodeTo(std::string* dst) {
   assert(dst != nullptr);
   dst->clear();
   dst->reserve(BlobLogHeader::kSize);
-  PutFixed32(dst, kMagicNumber);
-  PutFixed32(dst, version);
-  PutFixed32(dst, column_family_id);
+  rocksdb_rs::coding::PutFixed32(*dst, kMagicNumber);
+  rocksdb_rs::coding::PutFixed32(*dst, version);
+  rocksdb_rs::coding::PutFixed32(*dst, column_family_id);
   unsigned char flags = (has_ttl ? 1 : 0);
   dst->push_back(flags);
   dst->push_back(static_cast<uint8_t>(compression));
-  PutFixed64(dst, expiration_range.first);
-  PutFixed64(dst, expiration_range.second);
+  rocksdb_rs::coding::PutFixed64(*dst, expiration_range.first);
+  rocksdb_rs::coding::PutFixed64(*dst, expiration_range.second);
 }
 
 rocksdb_rs::status::Status BlobLogHeader::DecodeFrom(Slice src) {
@@ -33,8 +33,8 @@ rocksdb_rs::status::Status BlobLogHeader::DecodeFrom(Slice src) {
   }
   uint32_t magic_number;
   unsigned char flags;
-  if (!GetFixed32(&src, &magic_number) || !GetFixed32(&src, &version) ||
-      !GetFixed32(&src, &column_family_id)) {
+  if (!rocksdb_rs::coding::GetFixed32(src, magic_number) || !rocksdb_rs::coding::GetFixed32(src, version) ||
+      !rocksdb_rs::coding::GetFixed32(src, column_family_id)) {
     return rocksdb_rs::status::Status_Corruption(
         kErrorMessage,
         "Error decoding magic number, version and column family id");
@@ -49,8 +49,8 @@ rocksdb_rs::status::Status BlobLogHeader::DecodeFrom(Slice src) {
   compression = static_cast<rocksdb_rs::compression_type::CompressionType>(src.data()[1]);
   has_ttl = (flags & 1) == 1;
   src.remove_prefix(2);
-  if (!GetFixed64(&src, &expiration_range.first) ||
-      !GetFixed64(&src, &expiration_range.second)) {
+  if (!rocksdb_rs::coding::GetFixed64(src, expiration_range.first) ||
+      !rocksdb_rs::coding::GetFixed64(src, expiration_range.second)) {
     return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Error decoding expiration range");
   }
   return rocksdb_rs::status::Status_OK();
@@ -60,13 +60,13 @@ void BlobLogFooter::EncodeTo(std::string* dst) {
   assert(dst != nullptr);
   dst->clear();
   dst->reserve(BlobLogFooter::kSize);
-  PutFixed32(dst, kMagicNumber);
-  PutFixed64(dst, blob_count);
-  PutFixed64(dst, expiration_range.first);
-  PutFixed64(dst, expiration_range.second);
+  rocksdb_rs::coding::PutFixed32(*dst, kMagicNumber);
+  rocksdb_rs::coding::PutFixed64(*dst, blob_count);
+  rocksdb_rs::coding::PutFixed64(*dst, expiration_range.first);
+  rocksdb_rs::coding::PutFixed64(*dst, expiration_range.second);
   crc = crc32c::Value(dst->c_str(), dst->size());
   crc = crc32c::Mask(crc);
-  PutFixed32(dst, crc);
+  rocksdb_rs::coding::PutFixed32(*dst, crc);
 }
 
 rocksdb_rs::status::Status BlobLogFooter::DecodeFrom(Slice src) {
@@ -79,9 +79,9 @@ rocksdb_rs::status::Status BlobLogFooter::DecodeFrom(Slice src) {
   src_crc = crc32c::Value(src.data(), BlobLogFooter::kSize - sizeof(uint32_t));
   src_crc = crc32c::Mask(src_crc);
   uint32_t magic_number = 0;
-  if (!GetFixed32(&src, &magic_number) || !GetFixed64(&src, &blob_count) ||
-      !GetFixed64(&src, &expiration_range.first) ||
-      !GetFixed64(&src, &expiration_range.second) || !GetFixed32(&src, &crc)) {
+  if (!rocksdb_rs::coding::GetFixed32(src, magic_number) || !rocksdb_rs::coding::GetFixed64(src, blob_count) ||
+      !rocksdb_rs::coding::GetFixed64(src, expiration_range.first) ||
+      !rocksdb_rs::coding::GetFixed64(src, expiration_range.second) || !rocksdb_rs::coding::GetFixed32(src, crc)) {
     return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Error decoding content");
   }
   if (magic_number != kMagicNumber) {
@@ -97,16 +97,16 @@ void BlobLogRecord::EncodeHeaderTo(std::string* dst) {
   assert(dst != nullptr);
   dst->clear();
   dst->reserve(BlobLogRecord::kHeaderSize + key.size() + value.size());
-  PutFixed64(dst, key.size());
-  PutFixed64(dst, value.size());
-  PutFixed64(dst, expiration);
+  rocksdb_rs::coding::PutFixed64(*dst, key.size());
+  rocksdb_rs::coding::PutFixed64(*dst, value.size());
+  rocksdb_rs::coding::PutFixed64(*dst, expiration);
   header_crc = crc32c::Value(dst->c_str(), dst->size());
   header_crc = crc32c::Mask(header_crc);
-  PutFixed32(dst, header_crc);
+  rocksdb_rs::coding::PutFixed32(*dst, header_crc);
   blob_crc = crc32c::Value(key.data(), key.size());
   blob_crc = crc32c::Extend(blob_crc, value.data(), value.size());
   blob_crc = crc32c::Mask(blob_crc);
-  PutFixed32(dst, blob_crc);
+  rocksdb_rs::coding::PutFixed32(*dst, blob_crc);
 }
 
 rocksdb_rs::status::Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
@@ -118,9 +118,9 @@ rocksdb_rs::status::Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
   uint32_t src_crc = 0;
   src_crc = crc32c::Value(src.data(), BlobLogRecord::kHeaderSize - 8);
   src_crc = crc32c::Mask(src_crc);
-  if (!GetFixed64(&src, &key_size) || !GetFixed64(&src, &value_size) ||
-      !GetFixed64(&src, &expiration) || !GetFixed32(&src, &header_crc) ||
-      !GetFixed32(&src, &blob_crc)) {
+  if (!rocksdb_rs::coding::GetFixed64(src, key_size) || !rocksdb_rs::coding::GetFixed64(src, value_size) ||
+      !rocksdb_rs::coding::GetFixed64(src, expiration) || !rocksdb_rs::coding::GetFixed32(src, header_crc) ||
+      !rocksdb_rs::coding::GetFixed32(src, blob_crc)) {
     return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Error decoding content");
   }
   if (src_crc != header_crc) {

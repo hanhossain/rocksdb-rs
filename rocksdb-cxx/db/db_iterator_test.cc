@@ -1693,7 +1693,7 @@ TEST_P(DBIteratorTest, PinnedDataIteratorMergeOperator) {
 
   std::string numbers[7];
   for (int val = 0; val <= 6; val++) {
-    PutFixed64(numbers + val, val);
+    rocksdb_rs::coding::PutFixed64(*(numbers + val), val);
   }
 
   // +1 all keys in range [ 0 => 999]

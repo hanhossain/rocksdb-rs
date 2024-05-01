@@ -45,11 +45,13 @@ project(rocksdb
         HOMEPAGE_URL https://rocksdb.org/
         LANGUAGES CXX C ASM)
 
-FetchContent_Declare(
-        Corrosion
-        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-)
-FetchContent_MakeAvailable(Corrosion)
+#FetchContent_Declare(
+#        Corrosion
+#        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+#        FETCHCONTENT_FULLY_DISCONNECTED ON
+#)
+#FetchContent_MakeAvailable(Corrosion)
+include(Corrosion)
 include(CustomCorrosion)
 
 if (POLICY CMP0042)
@@ -850,7 +852,6 @@ set(SOURCES
         trace_replay/trace_replay.cc
         util/async_file_reader.cc
         util/cleanable.cc
-        util/coding.cc
         util/compaction_job_stats_impl.cc
         util/comparator.cc
         util/compression.cc
@@ -1111,8 +1112,24 @@ configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
 corrosion_set_env_vars(rocksdb-rs SKIP_BUILD_SCRIPT=1)
 corrosion_add_cxxbridge_custom(rocksdb-rs-cxx CRATE rocksdb-rs
-        FILES cache.rs coding_lean.rs compression_type.rs env.rs filename.rs hash.rs io_status.rs lib.rs options.rs port_defs.rs slice.rs status.rs
-        transaction_log.rs types.rs unique_id.rs)
+        FILES
+        cache.rs
+        coding.rs
+        coding_lean.rs
+        compression_type.rs
+        env.rs
+        filename.rs
+        hash.rs
+        io_status.rs
+        lib.rs
+        options.rs
+        port_defs.rs
+        slice.rs
+        status.rs
+        transaction_log.rs
+        types.rs
+        unique_id.rs
+)
 target_include_directories(rocksdb-rs-cxx PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})

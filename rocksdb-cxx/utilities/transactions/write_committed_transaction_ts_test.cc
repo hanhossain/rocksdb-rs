@@ -131,7 +131,7 @@ TEST_P(WriteCommittedTxnWithTsTest, ReOpenWithTimestamp) {
   ASSERT_OK(txn1->Put(handles_[1], "foo", "value1"));
   {
     std::string buf;
-    PutFixed64(&buf, 23);
+    rocksdb_rs::coding::PutFixed64(buf, 23);
     ASSERT_OK(txn1->Put("id", buf));
     ASSERT_OK(txn1->Merge("id", buf));
   }
@@ -155,7 +155,7 @@ TEST_P(WriteCommittedTxnWithTsTest, ReOpenWithTimestamp) {
     ASSERT_OK(s);
     uint64_t ival = 0;
     Slice value_slc = value;
-    bool result = GetFixed64(&value_slc, &ival);
+    bool result = rocksdb_rs::coding::GetFixed64(value_slc, ival);
     assert(result);
     ASSERT_EQ(46, ival);
   }
@@ -259,7 +259,7 @@ TEST_P(WriteCommittedTxnWithTsTest, TransactionDbLevelApi) {
   std::string key_str = "tes_key";
   std::string ts_str;
   std::string value_str = "test_value";
-  PutFixed64(&ts_str, 100);
+  rocksdb_rs::coding::PutFixed64(ts_str, 100);
   Slice value = value_str;
 
   assert(db);
@@ -552,7 +552,7 @@ TEST_P(WriteCommittedTxnWithTsTest, CheckKeysForConflicts) {
         assert(ts_ptr);
         Slice ts_slc = *ts_ptr;
         uint64_t last_ts = 0;
-        ASSERT_TRUE(GetFixed64(&ts_slc, &last_ts));
+        ASSERT_TRUE(rocksdb_rs::coding::GetFixed64(ts_slc, last_ts));
         ASSERT_EQ(30, last_ts);
         called = true;
       });

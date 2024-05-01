@@ -530,7 +530,7 @@ TEST_F(DBRangeDelTest, CompactionRemovesCoveredMergeOperands) {
                                  "key", "key_"));
     }
     std::string val;
-    PutFixed64(&val, i);
+    rocksdb_rs::coding::PutFixed64(val, i);
     ASSERT_OK(db_->Merge(WriteOptions(), "key", val));
     // we need to prevent trivial move using Puts so compaction will actually
     // process the merge operands.
@@ -544,7 +544,7 @@ TEST_F(DBRangeDelTest, CompactionRemovesCoveredMergeOperands) {
   read_opts.ignore_range_deletions = true;
   std::string expected, actual;
   ASSERT_OK(db_->Get(read_opts, "key", &actual));
-  PutFixed64(&expected, 45);  // 1+2+...+9
+  rocksdb_rs::coding::PutFixed64(expected, 45);  // 1+2+...+9
   ASSERT_EQ(expected, actual);
 
   ASSERT_OK(db_->CompactRange(CompactRangeOptions(), nullptr, nullptr));
@@ -553,8 +553,8 @@ TEST_F(DBRangeDelTest, CompactionRemovesCoveredMergeOperands) {
   ASSERT_OK(db_->Get(read_opts, "key", &actual));
   uint64_t tmp;
   Slice tmp2(actual);
-  GetFixed64(&tmp2, &tmp);
-  PutFixed64(&expected, 30);  // 6+7+8+9 (earlier operands covered by tombstone)
+  rocksdb_rs::coding::GetFixed64(tmp2, tmp);
+  rocksdb_rs::coding::PutFixed64(expected, 30);  // 6+7+8+9 (earlier operands covered by tombstone)
   ASSERT_EQ(expected, actual);
 }
 
@@ -568,7 +568,7 @@ TEST_F(DBRangeDelTest, PutDeleteRangeMergeFlush) {
   Reopen(opts);
 
   std::string val;
-  PutFixed64(&val, 1);
+  rocksdb_rs::coding::PutFixed64(val, 1);
   ASSERT_OK(db_->Put(WriteOptions(), "key", val));
   ASSERT_OK(db_->DeleteRange(WriteOptions(), db_->DefaultColumnFamily(), "key",
                              "key_"));
@@ -578,7 +578,7 @@ TEST_F(DBRangeDelTest, PutDeleteRangeMergeFlush) {
   ReadOptions read_opts;
   std::string expected, actual;
   ASSERT_OK(db_->Get(read_opts, "key", &actual));
-  PutFixed64(&expected, 1);
+  rocksdb_rs::coding::PutFixed64(expected, 1);
   ASSERT_EQ(expected, actual);
 }
 
@@ -758,7 +758,7 @@ TEST_F(DBRangeDelTest, GetCoveredMergeOperandFromMemtable) {
 
   for (int i = 0; i < kNumMergeOps; ++i) {
     std::string val;
-    PutFixed64(&val, i);
+    rocksdb_rs::coding::PutFixed64(val, i);
     ASSERT_OK(db_->Merge(WriteOptions(), "key", val));
     if (i == kNumMergeOps / 2) {
       // deletes [0, 5]
@@ -770,13 +770,13 @@ TEST_F(DBRangeDelTest, GetCoveredMergeOperandFromMemtable) {
   ReadOptions read_opts;
   std::string expected, actual;
   ASSERT_OK(db_->Get(read_opts, "key", &actual));
-  PutFixed64(&expected, 30);  // 6+7+8+9
+  rocksdb_rs::coding::PutFixed64(expected, 30);  // 6+7+8+9
   ASSERT_EQ(expected, actual);
 
   expected.clear();
   read_opts.ignore_range_deletions = true;
   ASSERT_OK(db_->Get(read_opts, "key", &actual));
-  PutFixed64(&expected, 45);  // 0+1+2+...+9
+  rocksdb_rs::coding::PutFixed64(expected, 45);  // 0+1+2+...+9
   ASSERT_EQ(expected, actual);
 }
 
