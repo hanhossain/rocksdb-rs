@@ -681,7 +681,7 @@ class IterKey {
   void EncodeLengthPrefixedKey(const Slice& key) {
     auto size = key.size();
     EnlargeBufferIfNeeded(size + static_cast<size_t>(rocksdb_rs::coding::VarintLength(size)));
-    char* ptr = EncodeVarint32(buf_, static_cast<uint32_t>(size));
+    char* ptr = rocksdb_rs::coding::EncodeVarint32(buf_, static_cast<uint32_t>(size));
     memcpy(ptr, key.data(), size);
     key_ = buf_;
     is_user_key_ = true;

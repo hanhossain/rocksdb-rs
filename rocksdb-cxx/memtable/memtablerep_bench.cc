@@ -241,7 +241,7 @@ class FillBenchmarkThread : public BenchmarkThread {
         FLAGS_item_size + rocksdb_rs::coding::VarintLength(internal_key_size) + internal_key_size;
     KeyHandle handle = table_->Allocate(encoded_len, &buf);
     assert(buf != nullptr);
-    char* p = EncodeVarint32(buf, internal_key_size);
+    char* p = rocksdb_rs::coding::EncodeVarint32(buf, internal_key_size);
     auto key = key_gen_->Next();
     rocksdb_rs::coding_lean::EncodeFixed64(p, key);
     p += 8;

@@ -63,6 +63,12 @@ mod ffi {
             limit: *const c_char,
             value: *mut u32,
         ) -> *const c_char;
+
+        /// Lower-level versions of Put... that write directly into a character buffer
+        /// and return a pointer just past the last byte written.
+        /// REQUIRES: dst has enough space for the value being written
+        #[cxx_name = "EncodeVarint32"]
+        unsafe fn encode_varint32(dst: *mut c_char, v: u32) -> *mut c_char;
     }
 
     #[namespace = "rocksdb"]
@@ -218,6 +224,49 @@ unsafe fn get_varint32_ptr(
         }
     }
     get_varint32_ptr_fallback(p, limit, value)
+}
+
+unsafe fn encode_varint32(dst: *mut c_char, v: u32) -> *mut c_char {
+    let mut ptr = dst as *mut u8;
+    let msb = 0x80;
+
+    if v < (1 << 7) {
+        *ptr = v as u8;
+        ptr = ptr.add(1);
+    } else if v < (1 << 14) {
+        *ptr = (v | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = (v >> 7) as u8;
+        ptr = ptr.add(1);
+    } else if v < (1 << 21) {
+        *ptr = (v | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = ((v >> 7) | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = (v >> 14) as u8;
+        ptr = ptr.add(1);
+    } else if v < (1 << 28) {
+        *ptr = (v | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = ((v >> 7) | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = ((v >> 14) | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = (v >> 21) as u8;
+        ptr = ptr.add(1);
+    } else {
+        *ptr = (v | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = ((v >> 7) | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = ((v >> 14) | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = ((v >> 21) | msb) as u8;
+        ptr = ptr.add(1);
+        *ptr = (v >> 28) as u8;
+        ptr = ptr.add(1);
+    }
+    ptr as *mut _
 }
 
 #[cfg(test)]

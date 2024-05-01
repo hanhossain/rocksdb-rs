@@ -41,7 +41,7 @@ size_t EncodeSize(PlainTableEntryType type, uint32_t key_size,
     return 1;
   } else {
     out_buffer[0] |= kSizeInlineLimit;
-    char* ptr = EncodeVarint32(out_buffer + 1, key_size - kSizeInlineLimit);
+    char* ptr = rocksdb_rs::coding::EncodeVarint32(out_buffer + 1, key_size - kSizeInlineLimit);
     return ptr - out_buffer;
   }
 }
@@ -98,7 +98,7 @@ rocksdb_rs::io_status::IOStatus PlainTableKeyEncoder::AppendKey(const Slice& key
     if (fixed_user_key_len_ == kPlainTableVariableLength) {
       // Write key length
       char key_size_buf[5];  // tmp buffer for key size as varint32
-      char* ptr = EncodeVarint32(key_size_buf, user_key_size);
+      char* ptr = rocksdb_rs::coding::EncodeVarint32(key_size_buf, user_key_size);
       assert(ptr <= key_size_buf + sizeof(key_size_buf));
       auto len = ptr - key_size_buf;
       rocksdb_rs::io_status::IOStatus io_s = file->Append(Slice(key_size_buf, len));

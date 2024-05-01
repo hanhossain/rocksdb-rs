@@ -701,14 +701,14 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
       type == kTypeRangeDeletion ? range_del_table_ : table_;
   KeyHandle handle = table->Allocate(encoded_len, &buf);
 
-  char* p = EncodeVarint32(buf, internal_key_size);
+  char* p = rocksdb_rs::coding::EncodeVarint32(buf, internal_key_size);
   memcpy(p, key.data(), key_size);
   Slice key_slice(p, key_size);
   p += key_size;
   uint64_t packed = PackSequenceAndType(s, type);
   rocksdb_rs::coding_lean::EncodeFixed64(p, packed);
   p += 8;
-  p = EncodeVarint32(p, val_size);
+  p = rocksdb_rs::coding::EncodeVarint32(p, val_size);
   memcpy(p, value.data(), val_size);
   assert((unsigned)(p + val_size - buf + moptions_.protection_bytes_per_key) ==
          (unsigned)encoded_len);
@@ -1492,7 +1492,7 @@ rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_
         // Update value, if new value size  <= previous value size
         if (new_size <= prev_size) {
           char* p =
-              EncodeVarint32(const_cast<char*>(key_ptr) + key_length, new_size);
+              rocksdb_rs::coding::EncodeVarint32(const_cast<char*>(key_ptr) + key_length, new_size);
           WriteLock wl(GetLock(lkey.user_key()));
           memcpy(p, value.data(), value.size());
           assert((unsigned)((p + value.size()) - entry) ==
@@ -1562,7 +1562,7 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
           assert(new_prev_size <= prev_size);
           if (new_prev_size < prev_size) {
             // overwrite the new prev_size
-            char* p = EncodeVarint32(const_cast<char*>(key_ptr) + key_length,
+            char* p = rocksdb_rs::coding::EncodeVarint32(const_cast<char*>(key_ptr) + key_length,
                                      new_prev_size);
             if (rocksdb_rs::coding::VarintLength(new_prev_size) < rocksdb_rs::coding::VarintLength(prev_size)) {
               // shift the value buffer as well.

@@ -170,7 +170,7 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
   uint32_t value_size = static_cast<uint32_t>(value.size());
   if (io_status_.ok()) {
     char* end_ptr =
-        EncodeVarint32(meta_bytes_buf + meta_bytes_buf_size, value_size);
+        rocksdb_rs::coding::EncodeVarint32(meta_bytes_buf + meta_bytes_buf_size, value_size);
     assert(end_ptr <= meta_bytes_buf + sizeof(meta_bytes_buf));
     meta_bytes_buf_size = end_ptr - meta_bytes_buf;
     io_status_ = file_->Append(Slice(meta_bytes_buf, meta_bytes_buf_size));

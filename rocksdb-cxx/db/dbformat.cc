@@ -217,7 +217,7 @@ LookupKey::LookupKey(const Slice& _user_key, SequenceNumber s,
   }
   start_ = dst;
   // NOTE: We don't support users keys of more than 2GB :)
-  dst = EncodeVarint32(dst, static_cast<uint32_t>(usize + ts_sz + 8));
+  dst = rocksdb_rs::coding::EncodeVarint32(dst, static_cast<uint32_t>(usize + ts_sz + 8));
   kstart_ = dst;
   memcpy(dst, _user_key.data(), usize);
   dst += usize;

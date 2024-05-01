@@ -76,28 +76,27 @@ inline const char* GetVarsignedint64Ptr(const char* p, const char* limit,
 // Lower-level versions of Put... that write directly into a character buffer
 // and return a pointer just past the last byte written.
 // REQUIRES: dst has enough space for the value being written
-extern char* EncodeVarint32(char* dst, uint32_t value);
 extern char* EncodeVarint64(char* dst, uint64_t value);
 
 inline void PutVarint32(std::string* dst, uint32_t v) {
   char buf[5];
-  char* ptr = EncodeVarint32(buf, v);
+  char* ptr = rocksdb_rs::coding::EncodeVarint32(buf, v);
   dst->append(buf, static_cast<size_t>(ptr - buf));
 }
 
 inline void PutVarint32Varint32(std::string* dst, uint32_t v1, uint32_t v2) {
   char buf[10];
-  char* ptr = EncodeVarint32(buf, v1);
-  ptr = EncodeVarint32(ptr, v2);
+  char* ptr = rocksdb_rs::coding::EncodeVarint32(buf, v1);
+  ptr = rocksdb_rs::coding::EncodeVarint32(ptr, v2);
   dst->append(buf, static_cast<size_t>(ptr - buf));
 }
 
 inline void PutVarint32Varint32Varint32(std::string* dst, uint32_t v1,
                                         uint32_t v2, uint32_t v3) {
   char buf[15];
-  char* ptr = EncodeVarint32(buf, v1);
-  ptr = EncodeVarint32(ptr, v2);
-  ptr = EncodeVarint32(ptr, v3);
+  char* ptr = rocksdb_rs::coding::EncodeVarint32(buf, v1);
+  ptr = rocksdb_rs::coding::EncodeVarint32(ptr, v2);
+  ptr = rocksdb_rs::coding::EncodeVarint32(ptr, v3);
   dst->append(buf, static_cast<size_t>(ptr - buf));
 }
 
@@ -134,7 +133,7 @@ inline void PutVarint64Varint64(std::string* dst, uint64_t v1, uint64_t v2) {
 
 inline void PutVarint32Varint64(std::string* dst, uint32_t v1, uint64_t v2) {
   char buf[15];
-  char* ptr = EncodeVarint32(buf, v1);
+  char* ptr = rocksdb_rs::coding::EncodeVarint32(buf, v1);
   ptr = EncodeVarint64(ptr, v2);
   dst->append(buf, static_cast<size_t>(ptr - buf));
 }
@@ -142,8 +141,8 @@ inline void PutVarint32Varint64(std::string* dst, uint32_t v1, uint64_t v2) {
 inline void PutVarint32Varint32Varint64(std::string* dst, uint32_t v1,
                                         uint32_t v2, uint64_t v3) {
   char buf[20];
-  char* ptr = EncodeVarint32(buf, v1);
-  ptr = EncodeVarint32(ptr, v2);
+  char* ptr = rocksdb_rs::coding::EncodeVarint32(buf, v1);
+  ptr = rocksdb_rs::coding::EncodeVarint32(ptr, v2);
   ptr = EncodeVarint64(ptr, v3);
   dst->append(buf, static_cast<size_t>(ptr - buf));
 }
