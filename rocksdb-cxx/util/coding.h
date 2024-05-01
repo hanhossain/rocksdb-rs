@@ -81,9 +81,6 @@ inline const char* GetVarsignedint64Ptr(const char* p, const char* limit,
 extern char* EncodeVarint32(char* dst, uint32_t value);
 extern char* EncodeVarint64(char* dst, uint64_t value);
 
-// Internal routine for use by fallback path of GetVarint32Ptr
-extern const char* GetVarint32PtrFallback(const char* p, const char* limit,
-                                          uint32_t* value);
 inline const char* GetVarint32Ptr(const char* p, const char* limit,
                                   uint32_t* value) {
   if (p < limit) {
@@ -93,7 +90,7 @@ inline const char* GetVarint32Ptr(const char* p, const char* limit,
       return p + 1;
     }
   }
-  return GetVarint32PtrFallback(p, limit, value);
+  return rocksdb_rs::coding::GetVarint32PtrFallback(p, limit, value);
 }
 
 inline void PutVarint32(std::string* dst, uint32_t v) {

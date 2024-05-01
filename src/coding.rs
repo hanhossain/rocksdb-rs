@@ -48,6 +48,14 @@ mod ffi {
             limit: *const c_char,
             value: *mut u64,
         ) -> *const c_char;
+
+        /// Internal routine for use by fallback path of GetVarint32Ptr
+        #[cxx_name = "GetVarint32PtrFallback"]
+        unsafe fn get_varint32_ptr_fallback(
+            p: *const c_char,
+            limit: *const c_char,
+            value: *mut u32,
+        ) -> *const c_char;
     }
 
     #[namespace = "rocksdb"]
@@ -147,6 +155,31 @@ unsafe fn get_varint64_ptr(
 
     while shift <= 63 && p < limit {
         let byte = *p as u64;
+        p = p.add(1);
+
+        if byte & 0x80 == 0 {
+            *value = result | (byte << shift);
+            return p;
+        }
+
+        result |= (byte & 0x7f) << shift;
+        shift += 7;
+    }
+
+    std::ptr::null()
+}
+
+/// Internal routine for use by fallback path of GetVarint32Ptr
+unsafe fn get_varint32_ptr_fallback(
+    mut p: *const c_char,
+    limit: *const c_char,
+    value: *mut u32,
+) -> *const c_char {
+    let mut result = 0;
+    let mut shift = 0;
+
+    while shift <= 28 && p < limit {
+        let byte = *p as u32;
         p = p.add(1);
 
         if byte & 0x80 == 0 {
