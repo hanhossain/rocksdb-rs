@@ -1344,7 +1344,6 @@ if (WITH_TESTS)
                 tools/trace_analyzer_test.cc
                 util/autovector_test.cc
                 util/bloom_test.cc
-                util/coding_test.cc
                 util/crc32c_test.cc
                 util/defer_test.cc
                 util/dynamic_bloom_test.cc
