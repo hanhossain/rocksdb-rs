@@ -28,3 +28,18 @@ jobs:
       run: cargo build
     - name: Run tests
       run: cargo test
+
+  test-cxx:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+    env:
+      CXX_TESTS: "true"
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Build
+      run: cargo build
+    - name: Run tests
+      run: cargo test
