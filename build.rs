@@ -327,7 +327,6 @@ const SOURCES: &[&str] = &[
     "env/env_posix.cc",
     "env/fs_posix.cc",
     "env/io_posix.cc",
-    "third-party/gtest-1.8.1/fused-src/gtest/gtest-all.cc",
 ];
 
 fn main() {
@@ -335,7 +334,7 @@ fn main() {
     let skip_build_script = std::env::var("SKIP_BUILD_SCRIPT").map_or(false, |x| x == "1");
     let with_cxx_tests = std::env::var("CXX_TESTS").map_or(false, |x| x == "1" || x == "true");
 
-    let bridges = vec![
+    let mut bridges = vec![
         "src/cache.rs",
         "src/coding.rs",
         "src/coding_lean.rs",
@@ -352,16 +351,20 @@ fn main() {
         "src/transaction_log.rs",
         "src/types.rs",
         "src/unique_id.rs",
-        "src/cxx_tests/util/coding_test.rs",
     ];
+
+    if with_cxx_tests {
+        bridges.push("src/cxx_tests/util/coding_test.rs");
+    }
 
     if !skip_build_script {
         let target = std::env::var("TARGET").unwrap();
-        let includes = [
-            "rocksdb-cxx/include",
-            "rocksdb-cxx",
-            "rocksdb-cxx/third-party/gtest-1.8.1/fused-src",
-        ];
+        let mut includes = vec!["rocksdb-cxx/include", "rocksdb-cxx"];
+
+        if with_cxx_tests {
+            includes.push("rocksdb-cxx/third-party/gtest-1.8.1/fused-src");
+        }
+
         let mut config = cxx_build::bridges(&bridges);
 
         config.flag("-pthread");
@@ -392,6 +395,10 @@ fn main() {
         config.includes(&includes);
 
         let mut sources = SOURCES.to_vec();
+
+        if with_cxx_tests {
+            sources.push("third-party/gtest-1.8.1/fused-src/gtest/gtest-all.cc");
+        }
 
         if target.contains("aarch64") || target.contains("arm64") {
             config.flag_if_supported("-march=armv8-a+crc+crypto");
