@@ -333,12 +333,12 @@ const SOURCES: &[&str] = &[
 fn main() {
     // This will be set when building rocksdb-rs from cmake.
     let skip_build_script = std::env::var("SKIP_BUILD_SCRIPT").map_or(false, |x| x == "1");
+    let with_cxx_tests = std::env::var("CXX_TESTS").map_or(false, |x| x == "1" || x == "true");
 
     let bridges = vec![
         "src/cache.rs",
         "src/coding.rs",
         "src/coding_lean.rs",
-        "src/coding_test.rs",
         "src/compression_type.rs",
         "src/env.rs",
         "src/filename.rs",
@@ -352,6 +352,7 @@ fn main() {
         "src/transaction_log.rs",
         "src/types.rs",
         "src/unique_id.rs",
+        "src/cxx_tests/util/coding_test.rs",
     ];
 
     if !skip_build_script {
@@ -404,8 +405,13 @@ fn main() {
         config.compile("rocksdb-cxx");
     }
 
+    if with_cxx_tests {
+        println!("cargo:rustc-cfg=cxxtest");
+    }
+
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
+    println!("cargo:rerun-if-env-changed=CXX_TESTS");
 
     for bridge in bridges {
         println!("cargo:rerun-if-changed={bridge}");

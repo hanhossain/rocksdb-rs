@@ -1,8 +1,9 @@
 pub mod cache;
 mod coding;
 mod coding_lean;
-mod coding_test;
 pub mod compression_type;
+#[cfg(cxxtest)]
+mod cxx_tests;
 pub mod env;
 mod filename;
 mod hash;

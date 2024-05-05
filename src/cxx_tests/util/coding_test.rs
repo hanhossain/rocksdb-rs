@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 #[cxx::bridge(namespace = "rocksdb")]
 mod ffi {
     unsafe extern "C++" {
