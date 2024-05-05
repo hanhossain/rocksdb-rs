@@ -1,6 +1,7 @@
 pub mod cache;
 mod coding;
 mod coding_lean;
+mod coding_test;
 pub mod compression_type;
 pub mod env;
 mod filename;

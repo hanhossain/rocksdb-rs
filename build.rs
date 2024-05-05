@@ -327,6 +327,7 @@ const SOURCES: &[&str] = &[
     "env/env_posix.cc",
     "env/fs_posix.cc",
     "env/io_posix.cc",
+    "third-party/gtest-1.8.1/fused-src/gtest/gtest-all.cc",
 ];
 
 fn main() {
@@ -337,6 +338,7 @@ fn main() {
         "src/cache.rs",
         "src/coding.rs",
         "src/coding_lean.rs",
+        "src/coding_test.rs",
         "src/compression_type.rs",
         "src/env.rs",
         "src/filename.rs",
@@ -354,7 +356,11 @@ fn main() {
 
     if !skip_build_script {
         let target = std::env::var("TARGET").unwrap();
-        let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
+        let includes = [
+            "rocksdb-cxx/include",
+            "rocksdb-cxx",
+            "rocksdb-cxx/third-party/gtest-1.8.1/fused-src",
+        ];
         let mut config = cxx_build::bridges(&bridges);
 
         config.flag("-pthread");
