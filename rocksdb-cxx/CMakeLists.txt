@@ -1197,7 +1197,6 @@ if (WITH_TESTS)
     )
     if (WITH_ALL_TESTS)
         list(APPEND TESTS
-                cache/cache_reservation_manager_test.cc
                 cache/cache_test.cc
                 cache/compressed_secondary_cache_test.cc
                 cache/lru_cache_test.cc

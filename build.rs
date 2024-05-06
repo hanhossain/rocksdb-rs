@@ -355,6 +355,7 @@ fn main() {
 
     if with_cxx_tests {
         bridges.push("src/cxx_tests/util/coding_test.rs");
+        bridges.push("src/cxx_tests/cache/cache_reservation_manager_test.rs");
     }
 
     if !skip_build_script {
@@ -368,7 +369,9 @@ fn main() {
         let mut config = cxx_build::bridges(&bridges);
 
         config.flag("-pthread");
-        config.flag("-Wsign-compare");
+        if !with_cxx_tests {
+            config.flag("-Wsign-compare");
+        }
         config.flag("-Wshadow");
         config.flag("-Wno-unused-parameter");
         config.flag("-Wno-unused-variable");
@@ -393,6 +396,7 @@ fn main() {
         config.define("ROCKSDB_LIB_IO_POSIX", None);
 
         config.includes(&includes);
+        config.extra_warnings(false);
 
         let mut sources = SOURCES.to_vec();
 
