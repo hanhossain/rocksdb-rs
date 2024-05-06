@@ -356,6 +356,7 @@ fn main() {
     if with_cxx_tests {
         bridges.push("src/cxx_tests/util/coding_test.rs");
         bridges.push("src/cxx_tests/cache/cache_reservation_manager_test.rs");
+        bridges.push("src/cxx_tests/db/blob/blob_counting_iterator_test.rs");
     }
 
     if !skip_build_script {
@@ -402,6 +403,9 @@ fn main() {
 
         if with_cxx_tests {
             sources.push("third-party/gtest-1.8.1/fused-src/gtest/gtest-all.cc");
+            sources.push("test_util/mock_time_env.cc");
+            sources.push("test_util/secondary_cache_test_util.cc");
+            sources.push("test_util/testharness.cc");
         }
 
         if target.contains("aarch64") || target.contains("arm64") {

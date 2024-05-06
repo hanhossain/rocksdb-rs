@@ -35,7 +35,7 @@ void CheckInFlow(const BlobGarbageMeter& blob_garbage_meter,
   ASSERT_EQ(in.GetBytes(), bytes);
 }
 
-TEST(BlobCountingIteratorTest, CountBlobs) {
+inline void BlobCountingIteratorTest_CountBlobs_Test() {
   // Note: the input consists of three key-values: two are blob references to
   // different blob files, while the third one is a plain value.
   constexpr char user_key0[] = "key0";
@@ -301,7 +301,7 @@ TEST(BlobCountingIteratorTest, CountBlobs) {
               5 * second_expected_bytes);
 }
 
-TEST(BlobCountingIteratorTest, CorruptBlobIndex) {
+inline void BlobCountingIteratorTest_CorruptBlobIndex_Test() {
   const std::vector<std::string> keys{
       test::KeyStr("user_key", 1, kTypeBlobIndex)};
   const std::vector<std::string> values{"i_am_not_a_blob_index"};
@@ -319,9 +319,3 @@ TEST(BlobCountingIteratorTest, CorruptBlobIndex) {
 }
 
 }  // namespace rocksdb
-
-int main(int argc, char** argv) {
-  rocksdb::port::InstallStackTraceHandler();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

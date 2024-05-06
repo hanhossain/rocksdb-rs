@@ -1197,10 +1197,9 @@ if (WITH_TESTS)
     )
     if (WITH_ALL_TESTS)
         list(APPEND TESTS
-                cache/cache_test.cc
-                cache/compressed_secondary_cache_test.cc
-                cache/lru_cache_test.cc
-                db/blob/blob_counting_iterator_test.cc
+                cache/cache_test.cc # has TEST_P
+                cache/compressed_secondary_cache_test.cc # has TEST_P
+                cache/lru_cache_test.cc # has TEST_P
                 db/blob/blob_file_addition_test.cc
                 db/blob/blob_file_builder_test.cc
                 db/blob/blob_file_cache_test.cc
