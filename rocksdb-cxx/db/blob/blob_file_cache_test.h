@@ -83,14 +83,14 @@ void WriteBlobFile(uint32_t column_family_id,
 
 }  // anonymous namespace
 
-class BlobFileCacheTest : public testing::Test {
- protected:
+class BlobFileCacheTest {
+ public:
   BlobFileCacheTest() { mock_env_.reset(MockEnv::Create(Env::Default())); }
 
   std::unique_ptr<Env> mock_env_;
-};
 
-TEST_F(BlobFileCacheTest, GetBlobFileReader) {
+
+void GetBlobFileReader() {
   Options options;
   options.env = mock_env_.get();
   options.statistics = CreateDBStatistics();
@@ -138,7 +138,8 @@ TEST_F(BlobFileCacheTest, GetBlobFileReader) {
   ASSERT_EQ(first.GetValue(), second.GetValue());
 }
 
-TEST_F(BlobFileCacheTest, GetBlobFileReader_Race) {
+
+void GetBlobFileReader_Race() {
   Options options;
   options.env = mock_env_.get();
   options.statistics = CreateDBStatistics();
@@ -192,7 +193,7 @@ TEST_F(BlobFileCacheTest, GetBlobFileReader_Race) {
   SyncPoint::GetInstance()->ClearAllCallBacks();
 }
 
-TEST_F(BlobFileCacheTest, GetBlobFileReader_IOError) {
+void GetBlobFileReader_IOError() {
   Options options;
   options.env = mock_env_.get();
   options.statistics = CreateDBStatistics();
@@ -228,7 +229,7 @@ TEST_F(BlobFileCacheTest, GetBlobFileReader_IOError) {
   ASSERT_EQ(options.statistics->getTickerCount(NO_FILE_ERRORS), 1);
 }
 
-TEST_F(BlobFileCacheTest, GetBlobFileReader_CacheFull) {
+void GetBlobFileReader_CacheFull() {
   Options options;
   options.env = mock_env_.get();
   options.statistics = CreateDBStatistics();
@@ -270,10 +271,24 @@ TEST_F(BlobFileCacheTest, GetBlobFileReader_CacheFull) {
   ASSERT_EQ(options.statistics->getTickerCount(NO_FILE_ERRORS), 1);
 }
 
-}  // namespace rocksdb
+};
 
-int main(int argc, char** argv) {
-  rocksdb::port::InstallStackTraceHandler();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+inline void BlobFileCacheTest_GetBlobFileReader_Test() {
+    auto x = BlobFileCacheTest();
+    x.GetBlobFileReader();
 }
+
+inline void BlobFileCacheTest_GetBlobFileReader_Race_Test() {
+    auto x = BlobFileCacheTest();
+    x.GetBlobFileReader_Race();
+}
+inline void BlobFileCacheTest_GetBlobFileReader_IOError_Test() {
+    auto x = BlobFileCacheTest();
+    x.GetBlobFileReader_IOError();
+}
+inline void BlobFileCacheTest_GetBlobFileReader_CacheFull_Test() {
+    auto x = BlobFileCacheTest();
+    x.GetBlobFileReader_CacheFull();
+}
+
+}  // namespace rocksdb

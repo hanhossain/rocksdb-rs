@@ -358,6 +358,7 @@ fn main() {
         bridges.push("src/cxx_tests/cache/cache_reservation_manager_test.rs");
         bridges.push("src/cxx_tests/db/blob/blob_counting_iterator_test.rs");
         bridges.push("src/cxx_tests/db/blob/blob_file_addition_test.rs");
+        bridges.push("src/cxx_tests/db/blob/blob_file_cache_test.rs");
     }
 
     if !skip_build_script {
