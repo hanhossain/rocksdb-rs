@@ -332,8 +332,9 @@ const SOURCES: &[&str] = &[
 fn main() {
     // This will be set when building rocksdb-rs from cmake.
     let skip_build_script = std::env::var("SKIP_BUILD_SCRIPT").map_or(false, |x| x == "1");
+    let with_cxx_tests = std::env::var("CXX_TESTS").map_or(false, |x| x == "1" || x == "true");
 
-    let bridges = vec![
+    let mut bridges = vec![
         "src/cache.rs",
         "src/coding.rs",
         "src/coding_lean.rs",
@@ -352,13 +353,29 @@ fn main() {
         "src/unique_id.rs",
     ];
 
+    if with_cxx_tests {
+        bridges.push("src/cxx_tests/util/coding_test.rs");
+        bridges.push("src/cxx_tests/cache/cache_reservation_manager_test.rs");
+        bridges.push("src/cxx_tests/db/blob/blob_counting_iterator_test.rs");
+        bridges.push("src/cxx_tests/db/blob/blob_file_addition_test.rs");
+        bridges.push("src/cxx_tests/db/blob/blob_file_cache_test.rs");
+        bridges.push("src/cxx_tests/db/blob/blob_garbage_meter_test.rs");
+    }
+
     if !skip_build_script {
         let target = std::env::var("TARGET").unwrap();
-        let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
+        let mut includes = vec!["rocksdb-cxx/include", "rocksdb-cxx"];
+
+        if with_cxx_tests {
+            includes.push("rocksdb-cxx/third-party/gtest-1.8.1/fused-src");
+        }
+
         let mut config = cxx_build::bridges(&bridges);
 
         config.flag("-pthread");
-        config.flag("-Wsign-compare");
+        if !with_cxx_tests {
+            config.flag("-Wsign-compare");
+        }
         config.flag("-Wshadow");
         config.flag("-Wno-unused-parameter");
         config.flag("-Wno-unused-variable");
@@ -383,8 +400,16 @@ fn main() {
         config.define("ROCKSDB_LIB_IO_POSIX", None);
 
         config.includes(&includes);
+        config.extra_warnings(false);
 
         let mut sources = SOURCES.to_vec();
+
+        if with_cxx_tests {
+            sources.push("third-party/gtest-1.8.1/fused-src/gtest/gtest-all.cc");
+            sources.push("test_util/mock_time_env.cc");
+            sources.push("test_util/secondary_cache_test_util.cc");
+            sources.push("test_util/testharness.cc");
+        }
 
         if target.contains("aarch64") || target.contains("arm64") {
             config.flag_if_supported("-march=armv8-a+crc+crypto");
@@ -398,8 +423,13 @@ fn main() {
         config.compile("rocksdb-cxx");
     }
 
+    if with_cxx_tests {
+        println!("cargo:rustc-cfg=cxxtest");
+    }
+
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
+    println!("cargo:rerun-if-env-changed=CXX_TESTS");
 
     for bridge in bridges {
         println!("cargo:rerun-if-changed={bridge}");

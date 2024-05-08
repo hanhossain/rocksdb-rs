@@ -15,7 +15,7 @@
 
 namespace rocksdb {
 
-class BlobFileAdditionTest : public testing::Test {
+class BlobFileAdditionTest {
  public:
   static void TestEncodeDecode(const BlobFileAddition& blob_file_addition) {
     std::string encoded;
@@ -29,7 +29,7 @@ class BlobFileAdditionTest : public testing::Test {
   }
 };
 
-TEST_F(BlobFileAdditionTest, Empty) {
+inline void BlobFileAdditionTest_Empty_Test() {
   BlobFileAddition blob_file_addition;
 
   ASSERT_EQ(blob_file_addition.GetBlobFileNumber(), kInvalidBlobFileNumber);
@@ -38,10 +38,10 @@ TEST_F(BlobFileAdditionTest, Empty) {
   ASSERT_TRUE(blob_file_addition.GetChecksumMethod().empty());
   ASSERT_TRUE(blob_file_addition.GetChecksumValue().empty());
 
-  TestEncodeDecode(blob_file_addition);
+  BlobFileAdditionTest::TestEncodeDecode(blob_file_addition);
 }
 
-TEST_F(BlobFileAdditionTest, NonEmpty) {
+inline void BlobFileAdditionTest_NonEmpty_Test() {
   constexpr uint64_t blob_file_number = 123;
   constexpr uint64_t total_blob_count = 2;
   constexpr uint64_t total_blob_bytes = 123456;
@@ -60,10 +60,10 @@ TEST_F(BlobFileAdditionTest, NonEmpty) {
   ASSERT_EQ(blob_file_addition.GetChecksumMethod(), checksum_method);
   ASSERT_EQ(blob_file_addition.GetChecksumValue(), checksum_value);
 
-  TestEncodeDecode(blob_file_addition);
+  BlobFileAdditionTest::TestEncodeDecode(blob_file_addition);
 }
 
-TEST_F(BlobFileAdditionTest, DecodeErrors) {
+inline void BlobFileAdditionTest_DecodeErrors_Test() {
   std::string str;
   Slice slice(str);
 
@@ -138,7 +138,7 @@ TEST_F(BlobFileAdditionTest, DecodeErrors) {
   }
 }
 
-TEST_F(BlobFileAdditionTest, ForwardCompatibleCustomField) {
+inline void BlobFileAdditionTest_ForwardCompatibleCustomField_Test() {
   SyncPoint::GetInstance()->SetCallBack(
       "BlobFileAddition::EncodeTo::CustomFields", [&](void* arg) {
         std::string* output = static_cast<std::string*>(arg);
@@ -160,13 +160,13 @@ TEST_F(BlobFileAdditionTest, ForwardCompatibleCustomField) {
                                       total_blob_bytes, checksum_method,
                                       checksum_value);
 
-  TestEncodeDecode(blob_file_addition);
+  BlobFileAdditionTest::TestEncodeDecode(blob_file_addition);
 
   SyncPoint::GetInstance()->DisableProcessing();
   SyncPoint::GetInstance()->ClearAllCallBacks();
 }
 
-TEST_F(BlobFileAdditionTest, ForwardIncompatibleCustomField) {
+inline void BlobFileAdditionTest_ForwardIncompatibleCustomField_Test() {
   SyncPoint::GetInstance()->SetCallBack(
       "BlobFileAddition::EncodeTo::CustomFields", [&](void* arg) {
         std::string* output = static_cast<std::string*>(arg);
@@ -203,9 +203,3 @@ TEST_F(BlobFileAdditionTest, ForwardIncompatibleCustomField) {
 }
 
 }  // namespace rocksdb
-
-int main(int argc, char** argv) {
-  rocksdb::port::InstallStackTraceHandler();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

@@ -7,15 +7,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
+#pragma once
 #include "util/coding.h"
 
 #include "test_util/testharness.h"
 
 namespace rocksdb {
 
-class Coding {};
 // Test that encoding routines generate little-endian encodings
-TEST(Coding, EncodingOutput) {
+inline void Coding_EncodingOutput_Test() {
   std::string dst;
   rocksdb_rs::coding::PutFixed32(dst, 0x04030201);
   ASSERT_EQ(4U, dst.size());
@@ -37,7 +37,7 @@ TEST(Coding, EncodingOutput) {
   ASSERT_EQ(0x08, static_cast<int>(dst[7]));
 }
 
-TEST(Coding, Varint32) {
+inline void Coding_Varint32_Test() {
   std::string s;
   for (uint32_t i = 0; i < (32 * 32); i++) {
     uint32_t v = (i / 32) << (i % 32);
@@ -58,7 +58,7 @@ TEST(Coding, Varint32) {
   ASSERT_EQ(p, s.data() + s.size());
 }
 
-TEST(Coding, Varint64) {
+inline void Coding_Varint64_Test() {
   // Construct the list of values to check
   std::vector<uint64_t> values;
   // Some special values
@@ -93,14 +93,14 @@ TEST(Coding, Varint64) {
   ASSERT_EQ(p, limit);
 }
 
-TEST(Coding, Varint32Overflow) {
+inline void Coding_Varint32Overflow_Test() {
   uint32_t result;
   std::string input("\x81\x82\x83\x84\x85\x11");
   ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(input.data(), input.data() + input.size(),
                              &result) == nullptr);
 }
 
-TEST(Coding, Varint32Truncation) {
+inline void Coding_Varint32Truncation_Test() {
   uint32_t large_value = (1u << 31) + 100;
   std::string s;
   PutVarint32(&s, large_value);
@@ -113,14 +113,14 @@ TEST(Coding, Varint32Truncation) {
   ASSERT_EQ(large_value, result);
 }
 
-TEST(Coding, Varint64Overflow) {
+inline void Coding_Varint64Overflow_Test() {
   uint64_t result;
   std::string input("\x81\x82\x83\x84\x85\x81\x82\x83\x84\x85\x11");
   ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(input.data(), input.data() + input.size(),
                              &result) == nullptr);
 }
 
-TEST(Coding, Varint64Truncation) {
+inline void Coding_Varint64Truncation_Test() {
   uint64_t large_value = (1ull << 63) + 100ull;
   std::string s;
   PutVarint64(&s, large_value);
@@ -133,7 +133,7 @@ TEST(Coding, Varint64Truncation) {
   ASSERT_EQ(large_value, result);
 }
 
-TEST(Coding, Strings) {
+inline void Coding_Strings_Test() {
   std::string s;
   PutLengthPrefixedSlice(&s, Slice(""));
   PutLengthPrefixedSlice(&s, Slice("foo"));
@@ -154,9 +154,3 @@ TEST(Coding, Strings) {
 }
 
 }  // namespace rocksdb
-
-int main(int argc, char** argv) {
-  rocksdb::port::InstallStackTraceHandler();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

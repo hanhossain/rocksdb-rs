@@ -1197,17 +1197,12 @@ if (WITH_TESTS)
     )
     if (WITH_ALL_TESTS)
         list(APPEND TESTS
-                cache/cache_reservation_manager_test.cc
-                cache/cache_test.cc
-                cache/compressed_secondary_cache_test.cc
-                cache/lru_cache_test.cc
-                db/blob/blob_counting_iterator_test.cc
-                db/blob/blob_file_addition_test.cc
-                db/blob/blob_file_builder_test.cc
-                db/blob/blob_file_cache_test.cc
+                cache/cache_test.cc # has TEST_P
+                cache/compressed_secondary_cache_test.cc # has TEST_P
+                cache/lru_cache_test.cc # has TEST_P
+                db/blob/blob_file_builder_test.cc # has TEST_P
                 db/blob/blob_file_garbage_test.cc
                 db/blob/blob_file_reader_test.cc
-                db/blob/blob_garbage_meter_test.cc
                 db/blob/blob_source_test.cc
                 db/blob/db_blob_basic_test.cc
                 db/blob/db_blob_compaction_test.cc
@@ -1344,7 +1339,6 @@ if (WITH_TESTS)
                 tools/trace_analyzer_test.cc
                 util/autovector_test.cc
                 util/bloom_test.cc
-                util/coding_test.cc
                 util/crc32c_test.cc
                 util/defer_test.cc
                 util/dynamic_bloom_test.cc
