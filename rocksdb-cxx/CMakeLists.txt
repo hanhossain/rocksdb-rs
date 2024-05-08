@@ -1203,7 +1203,6 @@ if (WITH_TESTS)
                 db/blob/blob_file_builder_test.cc # has TEST_P
                 db/blob/blob_file_garbage_test.cc
                 db/blob/blob_file_reader_test.cc
-                db/blob/blob_garbage_meter_test.cc
                 db/blob/blob_source_test.cc
                 db/blob/db_blob_basic_test.cc
                 db/blob/db_blob_compaction_test.cc

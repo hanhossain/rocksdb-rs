@@ -15,7 +15,7 @@
 
 namespace rocksdb {
 
-TEST(BlobGarbageMeterTest, MeasureGarbage) {
+inline void BlobGarbageMeterTest_MeasureGarbage_Test() {
   BlobGarbageMeter blob_garbage_meter;
 
   struct BlobDescriptor {
@@ -121,7 +121,7 @@ TEST(BlobGarbageMeterTest, MeasureGarbage) {
   }
 }
 
-TEST(BlobGarbageMeterTest, PlainValue) {
+inline void BlobGarbageMeterTest_PlainValue_Test() {
   constexpr char user_key[] = "user_key";
   constexpr SequenceNumber seq = 123;
 
@@ -138,7 +138,7 @@ TEST(BlobGarbageMeterTest, PlainValue) {
   ASSERT_TRUE(blob_garbage_meter.flows().empty());
 }
 
-TEST(BlobGarbageMeterTest, CorruptInternalKey) {
+inline void BlobGarbageMeterTest_CorruptInternalKey_Test() {
   constexpr char corrupt_key[] = "i_am_corrupt";
   const Slice key_slice(corrupt_key);
 
@@ -151,7 +151,7 @@ TEST(BlobGarbageMeterTest, CorruptInternalKey) {
   ASSERT_NOK(blob_garbage_meter.ProcessOutFlow(key_slice, value_slice));
 }
 
-TEST(BlobGarbageMeterTest, CorruptBlobIndex) {
+inline void BlobGarbageMeterTest_CorruptBlobIndex_Test() {
   constexpr char user_key[] = "user_key";
   constexpr SequenceNumber seq = 123;
 
@@ -167,7 +167,7 @@ TEST(BlobGarbageMeterTest, CorruptBlobIndex) {
   ASSERT_NOK(blob_garbage_meter.ProcessOutFlow(key_slice, value_slice));
 }
 
-TEST(BlobGarbageMeterTest, InlinedTTLBlobIndex) {
+inline void BlobGarbageMeterTest_InlinedTTLBlobIndex_Test() {
   constexpr char user_key[] = "user_key";
   constexpr SequenceNumber seq = 123;
 
@@ -189,9 +189,3 @@ TEST(BlobGarbageMeterTest, InlinedTTLBlobIndex) {
 }
 
 }  // namespace rocksdb
-
-int main(int argc, char** argv) {
-  rocksdb::port::InstallStackTraceHandler();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
