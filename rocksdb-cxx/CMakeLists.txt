@@ -45,13 +45,11 @@ project(rocksdb
         HOMEPAGE_URL https://rocksdb.org/
         LANGUAGES CXX C ASM)
 
-#FetchContent_Declare(
-#        Corrosion
-#        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-#        FETCHCONTENT_FULLY_DISCONNECTED ON
-#)
-#FetchContent_MakeAvailable(Corrosion)
-include(Corrosion)
+FetchContent_Declare(
+        Corrosion
+        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+)
+FetchContent_MakeAvailable(Corrosion)
 include(CustomCorrosion)
 
 if (POLICY CMP0042)
@@ -1110,8 +1108,8 @@ set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
-corrosion_set_env_vars(rocksdb-rs SKIP_BUILD_SCRIPT=1)
-corrosion_add_cxxbridge_custom(rocksdb-rs-cxx CRATE rocksdb-rs
+corrosion_set_env_vars(rocksdb_rs SKIP_BUILD_SCRIPT=1)
+corrosion_add_cxxbridge_custom(rocksdb-rs-cxx CRATE rocksdb_rs
         FILES
         cache.rs
         coding.rs
