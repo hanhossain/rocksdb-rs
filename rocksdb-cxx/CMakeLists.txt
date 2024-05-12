@@ -46,8 +46,9 @@ project(rocksdb
         LANGUAGES CXX C ASM)
 
 FetchContent_Declare(
-        Corrosion
-        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+    Corrosion
+    GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+    # FETCHCONTENT_FULLY_DISCONNECTED ON # uncomment this line for offline development
 )
 FetchContent_MakeAvailable(Corrosion)
 include(CustomCorrosion)
