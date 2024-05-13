@@ -339,7 +339,6 @@ fn main() {
         "src/filename.rs",
         "src/hash.rs",
         "src/io_status.rs",
-        "src/lib.rs",
         "src/options.rs",
         "src/port_defs.rs",
         "src/slice.rs",
@@ -393,6 +392,22 @@ fn main() {
     }
 
     config.compile("rocksdb-cxx");
+
+    let out_dir = std::env::var("OUT_DIR").unwrap();
+    let mut includes = includes
+        .iter()
+        .map(|d| std::path::PathBuf::from(d))
+        .collect::<Vec<_>>();
+    includes.push(std::path::PathBuf::from(&out_dir).join("cxxbridge/include"));
+
+    autocxx_build::Builder::new("src/lib.rs", &includes)
+        .extra_clang_args(&["-std=c++17"])
+        .build()
+        .expect("Failed to generate bindings with autocxx")
+        .includes(&includes)
+        .cpp(true)
+        .std("c++17")
+        .compile("rocksdb-autocxx");
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
