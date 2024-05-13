@@ -51,7 +51,6 @@ FetchContent_Declare(
     # FETCHCONTENT_FULLY_DISCONNECTED ON # uncomment this line for offline development
 )
 FetchContent_MakeAvailable(Corrosion)
-include(CustomCorrosion)
 
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -1108,38 +1107,23 @@ string(REGEX REPLACE "[^0-9: /-]+" "" GIT_DATE "${GIT_DATE}")
 set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
+set(ROCKSDBRS_TRIPLE_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED})
+set(ROCKSDBRS_CXXBRDIGE ${ROCKSDBRS_TRIPLE_OUT_DIR}/cxxbridge)
+
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
-corrosion_set_env_vars(rocksdb_rs SKIP_BUILD_SCRIPT=1)
-corrosion_add_cxxbridge_custom(rocksdb-rs-cxx CRATE rocksdb_rs
-        FILES
-        cache.rs
-        coding.rs
-        coding_lean.rs
-        compression_type.rs
-        env.rs
-        filename.rs
-        hash.rs
-        io_status.rs
-        lib.rs
-        options.rs
-        port_defs.rs
-        slice.rs
-        status.rs
-        transaction_log.rs
-        types.rs
-        unique_id.rs
-)
-target_include_directories(rocksdb-rs-cxx PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR})
+corrosion_set_env_vars(rocksdb_rs SKIP_CPP_BUILD=1)
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})
+target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC ${ROCKSDBRS_CXXBRDIGE})
 target_link_libraries(${ROCKSDB_STATIC_LIB}
-        PUBLIC rocksdb-rs-cxx
+        PUBLIC rocksdb_rs
         PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
 if (ROCKSDB_BUILD_SHARED)
     add_library(${ROCKSDB_SHARED_LIB} SHARED ${SOURCES} ${BUILD_VERSION_CC})
+    target_include_directories(${ROCKSDB_SHARED_LIB} PUBLIC ${ROCKSDBRS_CXXBRDIGE})
     target_link_libraries(${ROCKSDB_SHARED_LIB}
-            PUBLIC rocksdb-rs-cxx
+            PUBLIC rocksdb_rs
             PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
     if (WIN32)
@@ -1186,7 +1170,8 @@ if (WITH_TESTS OR WITH_BENCHMARK_TOOLS)
             test_util/mock_time_env.cc
             test_util/secondary_cache_test_util.cc
             test_util/testharness.cc)
-    target_link_libraries(testharness gtest rocksdb-rs-cxx)
+    target_include_directories(testharness PUBLIC ${ROCKSDBRS_CXXBRDIGE})
+    target_link_libraries(testharness gtest rocksdb_rs)
 endif ()
 
 if (WITH_TESTS)
