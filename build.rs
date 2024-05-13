@@ -352,11 +352,26 @@ fn main() {
         "src/unique_id.rs",
     ];
 
-    if !skip_build_script {
-        let target = std::env::var("TARGET").unwrap();
-        let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
-        let mut config = cxx_build::bridges(&bridges);
+    let target = std::env::var("TARGET").unwrap();
+    let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
+    let mut config = cxx_build::bridges(&bridges);
 
+    if target.contains("darwin") {
+        config.define("OS_MACOSX", None);
+    } else if target.contains("linux") {
+        config.define("OS_LINUX", None);
+    } else {
+        panic!("Unsupported target: {}", target);
+    }
+
+    config.define("ROCKSDB_PLATFORM_POSIX", None);
+    config.define("ROCKSDB_LIB_IO_POSIX", None);
+    config.includes(&includes);
+    config.cpp(true);
+    config.std("c++17");
+    config.warnings(false);
+
+    if !skip_build_script {
         config.flag("-pthread");
         config.flag("-Wsign-compare");
         config.flag("-Wshadow");
@@ -368,22 +383,6 @@ fn main() {
         config.flag("-Wno-strict-aliasing");
         config.flag("-Wno-invalid-offsetof");
 
-        // Let c++ know it's being built from rust.
-        config.define("ROCKSDB_RS", None);
-
-        if target.contains("darwin") {
-            config.define("OS_MACOSX", None);
-        } else if target.contains("linux") {
-            config.define("OS_LINUX", None);
-        } else {
-            panic!("Unsupported target: {}", target);
-        }
-
-        config.define("ROCKSDB_PLATFORM_POSIX", None);
-        config.define("ROCKSDB_LIB_IO_POSIX", None);
-
-        config.includes(&includes);
-
         let mut sources = SOURCES.to_vec();
 
         if target.contains("aarch64") || target.contains("arm64") {
@@ -394,11 +393,11 @@ fn main() {
         let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
         config.files(sources);
         config.file("build_version.cc");
-        config.cpp(true);
-        config.std("c++17");
-        config.compile("rocksdb-cxx");
     }
 
+    config.compile("rocksdb-cxx");
+
+    println!("cargo:rerun-if-env-changed=SKIP_BUILD_SCRIPT");
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
 
