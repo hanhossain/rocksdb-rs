@@ -1111,7 +1111,6 @@ set(ROCKSDBRS_TRIPLE_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/cargo/build/${Rust_CARG
 set(ROCKSDBRS_CXXBRDIGE ${ROCKSDBRS_TRIPLE_OUT_DIR}/cxxbridge)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
-corrosion_set_env_vars(rocksdb_rs SKIP_CPP_BUILD=1)
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})
 target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC ${ROCKSDBRS_CXXBRDIGE})
