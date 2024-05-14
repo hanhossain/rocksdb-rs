@@ -96,7 +96,7 @@ impl UniqueId64x2 {
 
     /// Convert numerical format to byte format for public API
     fn encode_bytes(&self) -> UniquePtr<CxxString> {
-        let mut res = crate::ffix::make_string();
+        let mut res = crate::ffi::make_string("");
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
         res
@@ -156,7 +156,7 @@ impl UniqueId64x3 {
 
     /// Convert numerical format to byte format for public API
     fn encode_bytes(&self) -> UniquePtr<CxxString> {
-        let mut res = crate::ffix::make_string();
+        let mut res = crate::ffi::make_string("");
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[2]));

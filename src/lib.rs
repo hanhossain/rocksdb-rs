@@ -15,13 +15,8 @@ mod transaction_log;
 mod types;
 pub mod unique_id;
 
-#[cxx::bridge(namespace = "rocksdb")]
-pub mod ffix {
-    unsafe extern "C++" {
-        include!("rocksdb/common_ffi.h");
-
-        fn make_string() -> UniquePtr<CxxString>;
-    }
+autocxx::include_cpp! {
+    safety!(unsafe)
 }
 
 #[cfg(test)]
@@ -30,8 +25,7 @@ mod tests {
 
     #[test]
     fn create_string() {
-        let mut cxx_str = ffix::make_string();
-        cxx_str.pin_mut().push_str("hello world");
+        let cxx_str = ffi::make_string("hello world");
         assert_eq!(cxx_str.to_str().unwrap(), "hello world");
     }
 }

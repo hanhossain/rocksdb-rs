@@ -221,7 +221,6 @@ const SOURCES: &[&str] = &[
     "trace_replay/trace_replay.cc",
     "util/async_file_reader.cc",
     "util/cleanable.cc",
-    "util/common_ffi.cc",
     "util/compaction_job_stats_impl.cc",
     "util/comparator.cc",
     "util/compression.cc",
