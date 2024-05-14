@@ -8,7 +8,7 @@ use std::mem::size_of;
 use std::pin::Pin;
 
 #[cxx::bridge(namespace = "rocksdb_rs::coding")]
-mod ffi {
+mod ffix {
     extern "Rust" {
         /// Pull the last 8 bits and cast it to a character
         #[cxx_name = "PutFixed16"]
@@ -75,7 +75,7 @@ mod ffi {
     unsafe extern "C++" {
         include!("rocksdb/slice.h");
 
-        type Slice = crate::slice::ffi::Slice;
+        type Slice = crate::slice::ffix::Slice;
     }
 }
 
@@ -92,7 +92,7 @@ fn put_fixed_64(dst: Pin<&mut CxxString>, value: u64) {
     dst.push_bytes(&encode_fixed_64(value));
 }
 
-fn get_fixed_16(input: Pin<&mut ffi::Slice>, value: &mut u16) -> bool {
+fn get_fixed_16(input: Pin<&mut ffix::Slice>, value: &mut u16) -> bool {
     if input.size() < size_of::<u16>() {
         return false;
     }
@@ -102,7 +102,7 @@ fn get_fixed_16(input: Pin<&mut ffi::Slice>, value: &mut u16) -> bool {
     true
 }
 
-fn get_fixed_32(input: Pin<&mut ffi::Slice>, value: &mut u32) -> bool {
+fn get_fixed_32(input: Pin<&mut ffix::Slice>, value: &mut u32) -> bool {
     if input.size() < size_of::<u32>() {
         return false;
     }
@@ -112,7 +112,7 @@ fn get_fixed_32(input: Pin<&mut ffi::Slice>, value: &mut u32) -> bool {
     true
 }
 
-fn get_fixed_64(input: Pin<&mut ffi::Slice>, value: &mut u64) -> bool {
+fn get_fixed_64(input: Pin<&mut ffix::Slice>, value: &mut u64) -> bool {
     if input.size() < size_of::<u64>() {
         return false;
     }
@@ -122,7 +122,7 @@ fn get_fixed_64(input: Pin<&mut ffi::Slice>, value: &mut u64) -> bool {
     true
 }
 
-fn get_slice_until(mut slice: Pin<&mut ffi::Slice>, delimeter: c_char) -> Pin<&mut ffi::Slice> {
+fn get_slice_until(mut slice: Pin<&mut ffix::Slice>, delimeter: c_char) -> Pin<&mut ffix::Slice> {
     let mut p = slice.data();
     let mut n = slice.size();
     while n > 0 {

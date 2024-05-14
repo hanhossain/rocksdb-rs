@@ -1,5 +1,5 @@
 #[cxx::bridge(namespace = "rocksdb")]
-pub mod ffi {
+pub mod ffix {
     unsafe extern "C++" {
         include!("rocksdb/slice.h");
 

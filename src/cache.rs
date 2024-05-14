@@ -1,7 +1,7 @@
-use crate::cache::ffi::CacheEntryRole;
+use crate::cache::ffix::CacheEntryRole;
 
 #[cxx::bridge(namespace = "rocksdb_rs::cache")]
-pub mod ffi {
+pub mod ffix {
     /// Classifications of block cache entries.
     ///
     /// Developer notes: Adding a new enum to this class requires corresponding

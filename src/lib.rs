@@ -16,7 +16,7 @@ mod types;
 pub mod unique_id;
 
 #[cxx::bridge(namespace = "rocksdb")]
-pub mod ffi {
+pub mod ffix {
     unsafe extern "C++" {
         include!("rocksdb/common_ffi.h");
 
@@ -30,7 +30,7 @@ mod tests {
 
     #[test]
     fn create_string() {
-        let mut cxx_str = ffi::make_string();
+        let mut cxx_str = ffix::make_string();
         cxx_str.pin_mut().push_str("hello world");
         assert_eq!(cxx_str.to_str().unwrap(), "hello world");
     }

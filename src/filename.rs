@@ -1,4 +1,4 @@
-use crate::filename::ffi::{FileType, InfoLogPrefix, WalFileType};
+use crate::filename::ffix::{FileType, InfoLogPrefix, WalFileType};
 use cxx::CxxVector;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -12,7 +12,7 @@ const TEMP_FILE_NAME_SUFFIX: &str = "dbtmp";
 const OPTIONS_FILE_NAME_PREFIX: &str = "OPTIONS-";
 
 #[cxx::bridge(namespace = "rocksdb_rs::filename")]
-mod ffi {
+mod ffix {
     /// A helper structure for prefix of info log names.
     struct InfoLogPrefix {
         prefix: String,
@@ -158,13 +158,13 @@ mod ffi {
         include!("rocksdb/options.h");
         include!("rocksdb-rs/src/transaction_log.rs.h");
 
-        type DbPath = crate::options::ffi::DbPath;
+        type DbPath = crate::options::ffix::DbPath;
 
         #[namespace = "rocksdb_rs::types"]
-        type FileType = crate::types::ffi::FileType;
+        type FileType = crate::types::ffix::FileType;
 
         #[namespace = "rocksdb_rs::transaction_log"]
-        type WalFileType = crate::transaction_log::ffi::WalFileType;
+        type WalFileType = crate::transaction_log::ffix::WalFileType;
     }
 }
 
@@ -261,7 +261,7 @@ fn descriptor_file_name_full_path(dbname: &str, number: u64) -> String {
 
 /// Return the name of the sstable with the specified number in the db named by `dbname`.
 /// The result will be prefixed with `dbname`.
-fn table_file_name(db_paths: &CxxVector<ffi::DbPath>, number: u64, path_id: u32) -> String {
+fn table_file_name(db_paths: &CxxVector<ffix::DbPath>, number: u64, path_id: u32) -> String {
     assert!(number > 0);
     let mut idx = path_id as usize;
     if idx >= db_paths.len() {

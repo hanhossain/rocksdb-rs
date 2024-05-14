@@ -2,7 +2,7 @@ use std::ffi::c_char;
 use std::io::Write;
 
 #[cxx::bridge(namespace = "rocksdb_rs::coding_lean")]
-mod ffi {
+mod ffix {
 
     extern "Rust" {
         #[cxx_name = "EncodeFixed16"]

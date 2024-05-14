@@ -4,7 +4,7 @@ use crate::hash::xxph3::{xxph3_64, xxph3_64_with_seed};
 use xxhash_rust::xxh3::{xxh3_128, xxh3_128_with_seed};
 
 #[cxx::bridge(namespace = "rocksdb_rs::hash")]
-mod ffi {
+mod ffix {
     extern "Rust" {
         #[cxx_name = "hash2x64"]
         fn hash2x64_ext(key: &[u8], upper: &mut u64, lower: &mut u64);

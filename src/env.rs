@@ -1,7 +1,7 @@
-use crate::env::ffi::CommonRustData;
+use crate::env::ffix::CommonRustData;
 
 #[cxx::bridge(namespace = "rocksdb_rs::env")]
-pub mod ffi {
+pub mod ffix {
     #[namespace = "rocksdb"]
     unsafe extern "C++" {
         include!("rocksdb/env.h");
@@ -37,12 +37,12 @@ mod tests {
 
     #[test]
     fn create_rusty() {
-        let _rusty = ffi::rusty_new();
+        let _rusty = ffix::rusty_new();
     }
 
     #[test]
     fn hello_rusty() {
-        let rusty = ffi::rusty_new();
+        let rusty = ffix::rusty_new();
         let value = rusty.hello_world();
         let value = value.to_string();
         assert_eq!(value, "Hello World from C++!");
@@ -50,7 +50,7 @@ mod tests {
 
     #[test]
     fn hello_from_cpp() {
-        let value = ffi::hello_common_from_cpp();
+        let value = ffix::hello_common_from_cpp();
         assert_eq!(value, "Hello c++ from rust!");
     }
 }
