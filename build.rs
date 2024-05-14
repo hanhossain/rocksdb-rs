@@ -330,9 +330,6 @@ const SOURCES: &[&str] = &[
 ];
 
 fn main() {
-    // This will be set when building rocksdb-rs from cmake.
-    let skip_cpp_build = std::env::var("SKIP_CPP_BUILD").map_or(false, |x| x == "1");
-
     let bridges = vec![
         "src/cache.rs",
         "src/coding.rs",
@@ -371,7 +368,7 @@ fn main() {
     config.std("c++17");
     config.warnings(false);
 
-    if !skip_cpp_build {
+    if cfg!(feature = "build-cpp") {
         config.flag("-pthread");
         config.flag("-Wsign-compare");
         config.flag("-Wshadow");
@@ -397,7 +394,6 @@ fn main() {
 
     config.compile("rocksdb-cxx");
 
-    println!("cargo:rerun-if-env-changed=SKIP_CPP_BUILD");
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
 
