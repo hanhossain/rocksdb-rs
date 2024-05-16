@@ -348,46 +348,7 @@ fn main() {
 
     let target = std::env::var("TARGET").unwrap();
     let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
-    let mut config = cxx_build::bridges(&bridges);
-
-    if target.contains("darwin") {
-        config.define("OS_MACOSX", None);
-    } else if target.contains("linux") {
-        config.define("OS_LINUX", None);
-    } else {
-        panic!("Unsupported target: {}", target);
-    }
-
-    config.define("ROCKSDB_PLATFORM_POSIX", None);
-    config.define("ROCKSDB_LIB_IO_POSIX", None);
-    config.includes(&includes);
-    config.cpp(true);
-    config.std("c++17");
-    config.warnings(false);
-
-    if cfg!(feature = "build-cpp") {
-        config.flag("-pthread");
-        config.flag("-Wsign-compare");
-        config.flag("-Wshadow");
-        config.flag("-Wno-unused-parameter");
-        config.flag("-Wno-unused-variable");
-        config.flag("-Woverloaded-virtual");
-        config.flag("-Wnon-virtual-dtor");
-        config.flag("-Wno-missing-field-initializers");
-        config.flag("-Wno-strict-aliasing");
-        config.flag("-Wno-invalid-offsetof");
-
-        let mut sources = SOURCES.to_vec();
-
-        if target.contains("aarch64") || target.contains("arm64") {
-            config.flag_if_supported("-march=armv8-a+crc+crypto");
-            sources.push("util/crc32c_arm64.cc");
-        }
-
-        let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
-        config.files(sources);
-        config.file("build_version.cc");
-    }
+    let _ = cxx_build::bridges(&bridges);
 
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let mut includes = includes
@@ -401,11 +362,47 @@ fn main() {
         .build()
         .expect("Failed to generate bindings with autocxx");
 
+    if target.contains("darwin") {
+        config.define("OS_MACOSX", None);
+    } else if target.contains("linux") {
+        config.define("OS_LINUX", None);
+    } else {
+        panic!("Unsupported target: {}", target);
+    }
+
     config
+        .define("ROCKSDB_PLATFORM_POSIX", None)
+        .define("ROCKSDB_LIB_IO_POSIX", None)
         .includes(&includes)
         .cpp(true)
         .std("c++17")
-        .compile("rocksdb-autocxx");
+        .warnings(false);
+
+    if cfg!(feature = "build-cpp") {
+        config
+            .flag("-pthread")
+            .flag("-Wsign-compare")
+            .flag("-Wshadow")
+            .flag("-Wno-unused-parameter")
+            .flag("-Wno-unused-variable")
+            .flag("-Woverloaded-virtual")
+            .flag("-Wnon-virtual-dtor")
+            .flag("-Wno-missing-field-initializers")
+            .flag("-Wno-strict-aliasing")
+            .flag("-Wno-invalid-offsetof");
+
+        let mut sources = SOURCES.to_vec();
+
+        if target.contains("aarch64") || target.contains("arm64") {
+            config.flag_if_supported("-march=armv8-a+crc+crypto");
+            sources.push("util/crc32c_arm64.cc");
+        }
+
+        let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
+        config.files(sources).file("build_version.cc");
+    }
+
+    config.compile("rocksdb-autocxx");
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
