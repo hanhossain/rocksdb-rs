@@ -340,7 +340,6 @@ fn main() {
         "src/io_status.rs",
         "src/options.rs",
         "src/port_defs.rs",
-        "src/slice.rs",
         "src/status.rs",
         "src/transaction_log.rs",
         "src/types.rs",
@@ -390,8 +389,6 @@ fn main() {
         config.file("build_version.cc");
     }
 
-    config.compile("rocksdb-cxx");
-
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let mut includes = includes
         .iter()
@@ -399,10 +396,12 @@ fn main() {
         .collect::<Vec<_>>();
     includes.push(std::path::PathBuf::from(&out_dir).join("cxxbridge/include"));
 
-    autocxx_build::Builder::new("src/lib.rs", &includes)
+    let mut config = autocxx_build::Builder::new("src/lib.rs", &includes)
         .extra_clang_args(&["-std=c++17"])
         .build()
-        .expect("Failed to generate bindings with autocxx")
+        .expect("Failed to generate bindings with autocxx");
+
+    config
         .includes(&includes)
         .cpp(true)
         .std("c++17")

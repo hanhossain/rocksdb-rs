@@ -191,7 +191,7 @@ mod ffix {
     unsafe extern "C++" {
         include!("rocksdb/slice.h");
 
-        type Slice = crate::slice::ffix::Slice;
+        type Slice = crate::ffi::rocksdb::Slice;
     }
 }
 
@@ -232,7 +232,7 @@ impl ffix::IOStatus {
     fn new6(code: Code, msg: &ffix::Slice) -> ffix::IOStatus {
         let status = ffix::Status {
             code,
-            state: msg.to_unique_ptr_string(),
+            state: msg.ToUniquePtrString(),
             ..ffix::Status::default()
         };
         ffix::IOStatus { status }
@@ -510,7 +510,7 @@ fn io_status_no_space2(msg: &ffix::Slice) -> ffix::IOStatus {
     let status = ffix::Status {
         code: Code::kIOError,
         subcode: SubCode::kNoSpace,
-        state: msg.to_unique_ptr_string(),
+        state: msg.ToUniquePtrString(),
         ..ffix::Status::default()
     };
     ffix::IOStatus { status }
@@ -528,7 +528,7 @@ fn io_status_path_not_found2(msg: &ffix::Slice) -> ffix::IOStatus {
     let status = ffix::Status {
         code: Code::kIOError,
         subcode: SubCode::kPathNotFound,
-        state: msg.to_unique_ptr_string(),
+        state: msg.ToUniquePtrString(),
         ..ffix::Status::default()
     };
     ffix::IOStatus { status }
@@ -546,7 +546,7 @@ fn io_status_io_fenced2(msg: &ffix::Slice) -> ffix::IOStatus {
     let status = ffix::Status {
         code: Code::kIOError,
         subcode: SubCode::kIOFenced,
-        state: msg.to_unique_ptr_string(),
+        state: msg.ToUniquePtrString(),
         ..ffix::Status::default()
     };
     ffix::IOStatus { status }
