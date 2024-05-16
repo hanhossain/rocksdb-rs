@@ -18,6 +18,7 @@ xxhash-rust = { version = "0.8.10", features = ["xxh3"] }
 [build-dependencies]
 autocxx-build = "0.26.0"
 cxx-build = { version = "1.0.122", features = ["parallel"] }
+walkdir = "2.5.0"
 
 [features]
 build-cpp = []

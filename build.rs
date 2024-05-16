@@ -400,6 +400,15 @@ fn main() {
 
         let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
         config.files(sources).file("build_version.cc");
+
+        // maybe these should always be compiled
+        let cxx_files = walkdir::WalkDir::new(format!("{out_dir}/cxxbridge/sources"))
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file())
+            .map(|f| f.into_path());
+
+        config.files(cxx_files);
     }
 
     config.compile("rocksdb-autocxx");
