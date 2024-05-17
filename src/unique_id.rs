@@ -2,11 +2,11 @@ use crate::coding_lean::{decode_fixed_64, encode_fixed_64};
 use crate::hash::{hash2x64, hash2x64_with_seed};
 use crate::status::{NotSupported, Status};
 use crate::string_util::{parse_base_chars, put_base_chars};
-use crate::unique_id::ffi::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
+use crate::unique_id::ffix::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
 use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb_rs::unique_id")]
-pub mod ffi {
+pub mod ffix {
     /// Standard size unique ID, good enough for almost all practical purposes
     #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
     struct UniqueId64x2 {
@@ -33,7 +33,7 @@ pub mod ffi {
         include!("rocksdb-rs/src/status.rs.h");
 
         #[namespace = "rocksdb_rs::status"]
-        type Status = crate::status::ffi::Status;
+        type Status = crate::status::ffix::Status;
     }
 
     extern "Rust" {
@@ -96,14 +96,14 @@ impl UniqueId64x2 {
 
     /// Convert numerical format to byte format for public API
     fn encode_bytes(&self) -> UniquePtr<CxxString> {
-        let mut res = crate::ffi::make_string();
+        let mut res = crate::ffi::make_string("");
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
         res
     }
 
     /// Reverse of encode_bytes.
-    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffi::Status {
+    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffix::Status {
         if unique_id.len() != 16 {
             return Status::NotSupported(NotSupported {
                 msg: "Not a valid unique_id".to_owned(),
@@ -128,7 +128,7 @@ impl UniqueId64x2 {
         db_session_id: &str,
         file_number: u64,
         force: bool,
-    ) -> crate::status::ffi::Status {
+    ) -> crate::status::ffix::Status {
         let mut x3 = UniqueId64x3::default();
         let status = x3.get_sst_internal_unique_id(db_id, db_session_id, file_number, force);
 
@@ -156,7 +156,7 @@ impl UniqueId64x3 {
 
     /// Convert numerical format to byte format for public API
     fn encode_bytes(&self) -> UniquePtr<CxxString> {
-        let mut res = crate::ffi::make_string();
+        let mut res = crate::ffi::make_string("");
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[0]));
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[1]));
         res.pin_mut().push_bytes(&encode_fixed_64(self.data[2]));
@@ -164,7 +164,7 @@ impl UniqueId64x3 {
     }
 
     /// Reverse of encode_bytes.
-    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffi::Status {
+    fn decode_bytes(&mut self, unique_id: &CxxString) -> crate::status::ffix::Status {
         if unique_id.len() != 24 {
             return Status::NotSupported(NotSupported {
                 msg: "Not a valid unique_id".to_owned(),
@@ -190,7 +190,7 @@ impl UniqueId64x3 {
         db_session_id: &str,
         file_number: u64,
         force: bool,
-    ) -> crate::status::ffi::Status {
+    ) -> crate::status::ffix::Status {
         if !force {
             if db_id.is_empty() {
                 return Status::NotSupported(NotSupported {
@@ -314,7 +314,7 @@ fn decode_session_id(
     db_session_id: &str,
     upper: &mut u64,
     lower: &mut u64,
-) -> crate::status::ffi::Status {
+) -> crate::status::ffix::Status {
     let len = db_session_id.len();
     if len == 0 {
         return Status::NotSupported(NotSupported {

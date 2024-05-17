@@ -1,9 +1,9 @@
-use crate::io_status::ffi::{Code, SubCode};
+use crate::io_status::ffix::{Code, SubCode};
 use crate::status;
 use cxx::{CxxString, UniquePtr};
 
 #[cxx::bridge(namespace = "rocksdb_rs::io_status")]
-mod ffi {
+mod ffix {
     #[derive(Debug)]
     enum IOErrorScope {
         kIOErrorScopeFileSystem,
@@ -182,60 +182,60 @@ mod ffi {
     unsafe extern "C++" {
         include!("rocksdb-rs/src/status.rs.h");
 
-        type Status = crate::status::ffi::Status;
-        type Code = crate::status::ffi::Code;
-        type SubCode = crate::status::ffi::SubCode;
+        type Status = crate::status::ffix::Status;
+        type Code = crate::status::ffix::Code;
+        type SubCode = crate::status::ffix::SubCode;
     }
 
     #[namespace = "rocksdb"]
     unsafe extern "C++" {
         include!("rocksdb/slice.h");
 
-        type Slice = crate::slice::ffi::Slice;
+        type Slice = crate::ffi::rocksdb::Slice;
     }
 }
 
-impl ffi::IOStatus {
-    fn new(code: Code, subcode: SubCode, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-        ffi::IOStatus {
+impl ffix::IOStatus {
+    fn new(code: Code, subcode: SubCode, msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+        ffix::IOStatus {
             status: status::status_new7(code, subcode, msg, msg2),
         }
     }
 
-    fn new2(code: Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-        ffi::IOStatus {
+    fn new2(code: Code, msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+        ffix::IOStatus {
             status: status::status_new6(code, msg, msg2),
         }
     }
 
-    fn new3(code: Code, subcode: SubCode) -> ffi::IOStatus {
-        ffi::IOStatus {
+    fn new3(code: Code, subcode: SubCode) -> ffix::IOStatus {
+        ffix::IOStatus {
             status: status::status_new3(code, subcode),
         }
     }
 
-    fn new4(code: Code) -> ffi::IOStatus {
-        let status = ffi::Status {
+    fn new4(code: Code) -> ffix::IOStatus {
+        let status = ffix::Status {
             code,
-            scope: ffi::IOErrorScope::kIOErrorScopeFileSystem.repr,
-            ..ffi::Status::default()
+            scope: ffix::IOErrorScope::kIOErrorScopeFileSystem.repr,
+            ..ffix::Status::default()
         };
-        ffi::IOStatus { status }
+        ffix::IOStatus { status }
     }
 
-    fn new5() -> ffi::IOStatus {
-        ffi::IOStatus {
-            status: ffi::Status::default(),
+    fn new5() -> ffix::IOStatus {
+        ffix::IOStatus {
+            status: ffix::Status::default(),
         }
     }
 
-    fn new6(code: Code, msg: &ffi::Slice) -> ffi::IOStatus {
-        let status = ffi::Status {
+    fn new6(code: Code, msg: &ffix::Slice) -> ffix::IOStatus {
+        let status = ffix::Status {
             code,
-            state: msg.to_unique_ptr_string(),
-            ..ffi::Status::default()
+            state: msg.ToUniquePtrString(),
+            ..ffix::Status::default()
         };
-        ffi::IOStatus { status }
+        ffix::IOStatus { status }
     }
 
     fn set_retryable(&mut self, retryable: bool) {
@@ -246,7 +246,7 @@ impl ffi::IOStatus {
         self.status.data_loss = data_loss;
     }
 
-    fn set_scope(&mut self, scope: ffi::IOErrorScope) {
+    fn set_scope(&mut self, scope: ffix::IOErrorScope) {
         self.status.scope = scope.repr;
     }
 
@@ -258,12 +258,12 @@ impl ffi::IOStatus {
         self.status.data_loss
     }
 
-    fn get_scope(&self) -> ffi::IOErrorScope {
+    fn get_scope(&self) -> ffix::IOErrorScope {
         match self.status.scope {
-            0 => ffi::IOErrorScope::kIOErrorScopeFileSystem,
-            1 => ffi::IOErrorScope::kIOErrorScopeFile,
-            2 => ffi::IOErrorScope::kIOErrorScopeRange,
-            3 => ffi::IOErrorScope::kIOErrorScopeMax,
+            0 => ffix::IOErrorScope::kIOErrorScopeFileSystem,
+            1 => ffix::IOErrorScope::kIOErrorScopeFile,
+            2 => ffix::IOErrorScope::kIOErrorScopeRange,
+            3 => ffix::IOErrorScope::kIOErrorScopeMax,
             _ => panic!("Invalid scope"),
         }
     }
@@ -324,7 +324,7 @@ impl ffi::IOStatus {
         self.status.is_invalid_argument()
     }
 
-    fn status(&self) -> ffi::Status {
+    fn status(&self) -> ffix::Status {
         self.status.clone()
     }
 
@@ -341,217 +341,217 @@ impl ffi::IOStatus {
     }
 }
 
-fn io_status_new(status: ffi::Status) -> ffi::IOStatus {
-    ffi::IOStatus { status }
+fn io_status_new(status: ffix::Status) -> ffix::IOStatus {
+    ffix::IOStatus { status }
 }
 
-fn io_status_new1(code: Code, subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(code, subcode)
+fn io_status_new1(code: Code, subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(code, subcode)
 }
 
-fn io_status_new2(code: Code) -> ffi::IOStatus {
-    ffi::IOStatus::new4(code)
+fn io_status_new2(code: Code) -> ffix::IOStatus {
+    ffix::IOStatus::new4(code)
 }
 
-fn io_status_new3() -> ffi::IOStatus {
-    ffi::IOStatus::new5()
+fn io_status_new3() -> ffix::IOStatus {
+    ffix::IOStatus::new5()
 }
 
 fn io_status_new4(
     code: Code,
     subcode: SubCode,
-    msg: &ffi::Slice,
-    msg2: &ffi::Slice,
-) -> ffi::IOStatus {
-    ffi::IOStatus::new(code, subcode, msg, msg2)
+    msg: &ffix::Slice,
+    msg2: &ffix::Slice,
+) -> ffix::IOStatus {
+    ffix::IOStatus::new(code, subcode, msg, msg2)
 }
 
-fn io_status_new5(code: Code, msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(code, msg, msg2)
+fn io_status_new5(code: Code, msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(code, msg, msg2)
 }
 
-fn io_status_ok() -> ffi::IOStatus {
-    ffi::IOStatus::new5()
+fn io_status_ok() -> ffix::IOStatus {
+    ffix::IOStatus::new5()
 }
 
-fn io_status_not_supported(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kNotSupported, msg, msg2)
+fn io_status_not_supported(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kNotSupported, msg, msg2)
 }
 
-fn io_status_not_supported2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kNotSupported, msg)
+fn io_status_not_supported2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kNotSupported, msg)
 }
 
-fn io_status_not_supported3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kNotSupported, subcode)
+fn io_status_not_supported3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kNotSupported, subcode)
 }
 
-fn io_status_not_supported4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kNotSupported)
+fn io_status_not_supported4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kNotSupported)
 }
 
-fn io_status_not_found(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kNotFound, msg, msg2)
+fn io_status_not_found(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kNotFound, msg, msg2)
 }
 
-fn io_status_not_found2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kNotFound, msg)
+fn io_status_not_found2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kNotFound, msg)
 }
 
-fn io_status_not_found3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kNotFound, subcode)
+fn io_status_not_found3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kNotFound, subcode)
 }
 
-fn io_status_not_found4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kNotFound)
+fn io_status_not_found4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kNotFound)
 }
 
-fn io_status_corruption(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kCorruption, msg, msg2)
+fn io_status_corruption(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kCorruption, msg, msg2)
 }
 
-fn io_status_corruption2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kCorruption, msg)
+fn io_status_corruption2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kCorruption, msg)
 }
 
-fn io_status_corruption3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kCorruption, subcode)
+fn io_status_corruption3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kCorruption, subcode)
 }
 
-fn io_status_corruption4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kCorruption)
+fn io_status_corruption4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kCorruption)
 }
 
-fn io_status_invalid_argument(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kInvalidArgument, msg, msg2)
+fn io_status_invalid_argument(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kInvalidArgument, msg, msg2)
 }
 
-fn io_status_invalid_argument2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kInvalidArgument, msg)
+fn io_status_invalid_argument2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kInvalidArgument, msg)
 }
 
-fn io_status_invalid_argument3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kInvalidArgument, subcode)
+fn io_status_invalid_argument3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kInvalidArgument, subcode)
 }
 
-fn io_status_invalid_argument4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kInvalidArgument)
+fn io_status_invalid_argument4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kInvalidArgument)
 }
 
-fn io_status_io_error(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kIOError, msg, msg2)
+fn io_status_io_error(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kIOError, msg, msg2)
 }
 
-fn io_status_io_error2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kIOError, msg)
+fn io_status_io_error2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kIOError, msg)
 }
 
-fn io_status_io_error3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kIOError, subcode)
+fn io_status_io_error3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kIOError, subcode)
 }
 
-fn io_status_io_error4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kIOError)
+fn io_status_io_error4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kIOError)
 }
 
-fn io_status_busy(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kBusy, msg, msg2)
+fn io_status_busy(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kBusy, msg, msg2)
 }
 
-fn io_status_busy2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kBusy, msg)
+fn io_status_busy2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kBusy, msg)
 }
 
-fn io_status_busy3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kBusy, subcode)
+fn io_status_busy3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kBusy, subcode)
 }
 
-fn io_status_busy4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kBusy)
+fn io_status_busy4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kBusy)
 }
 
-fn io_status_timed_out(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kTimedOut, msg, msg2)
+fn io_status_timed_out(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kTimedOut, msg, msg2)
 }
 
-fn io_status_timed_out2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kTimedOut, msg)
+fn io_status_timed_out2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kTimedOut, msg)
 }
 
-fn io_status_timed_out3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kTimedOut, subcode)
+fn io_status_timed_out3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kTimedOut, subcode)
 }
 
-fn io_status_timed_out4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kTimedOut)
+fn io_status_timed_out4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kTimedOut)
 }
 
-fn io_status_aborted(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new2(Code::kAborted, msg, msg2)
+fn io_status_aborted(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new2(Code::kAborted, msg, msg2)
 }
 
-fn io_status_aborted2(msg: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new6(Code::kAborted, msg)
+fn io_status_aborted2(msg: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new6(Code::kAborted, msg)
 }
 
-fn io_status_aborted3(subcode: SubCode) -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kAborted, subcode)
+fn io_status_aborted3(subcode: SubCode) -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kAborted, subcode)
 }
 
-fn io_status_aborted4() -> ffi::IOStatus {
-    ffi::IOStatus::new4(Code::kAborted)
+fn io_status_aborted4() -> ffix::IOStatus {
+    ffix::IOStatus::new4(Code::kAborted)
 }
 
-fn io_status_no_space(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new(Code::kIOError, SubCode::kNoSpace, msg, msg2)
+fn io_status_no_space(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new(Code::kIOError, SubCode::kNoSpace, msg, msg2)
 }
 
-fn io_status_no_space2(msg: &ffi::Slice) -> ffi::IOStatus {
-    let status = ffi::Status {
+fn io_status_no_space2(msg: &ffix::Slice) -> ffix::IOStatus {
+    let status = ffix::Status {
         code: Code::kIOError,
         subcode: SubCode::kNoSpace,
-        state: msg.to_unique_ptr_string(),
-        ..ffi::Status::default()
+        state: msg.ToUniquePtrString(),
+        ..ffix::Status::default()
     };
-    ffi::IOStatus { status }
+    ffix::IOStatus { status }
 }
 
-fn io_status_no_space3() -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kIOError, SubCode::kNoSpace)
+fn io_status_no_space3() -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kIOError, SubCode::kNoSpace)
 }
 
-fn io_status_path_not_found(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new(Code::kIOError, SubCode::kPathNotFound, msg, msg2)
+fn io_status_path_not_found(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new(Code::kIOError, SubCode::kPathNotFound, msg, msg2)
 }
 
-fn io_status_path_not_found2(msg: &ffi::Slice) -> ffi::IOStatus {
-    let status = ffi::Status {
+fn io_status_path_not_found2(msg: &ffix::Slice) -> ffix::IOStatus {
+    let status = ffix::Status {
         code: Code::kIOError,
         subcode: SubCode::kPathNotFound,
-        state: msg.to_unique_ptr_string(),
-        ..ffi::Status::default()
+        state: msg.ToUniquePtrString(),
+        ..ffix::Status::default()
     };
-    ffi::IOStatus { status }
+    ffix::IOStatus { status }
 }
 
-fn io_status_path_not_found3() -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kIOError, SubCode::kPathNotFound)
+fn io_status_path_not_found3() -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kIOError, SubCode::kPathNotFound)
 }
 
-fn io_status_io_fenced(msg: &ffi::Slice, msg2: &ffi::Slice) -> ffi::IOStatus {
-    ffi::IOStatus::new(Code::kIOError, SubCode::kIOFenced, msg, msg2)
+fn io_status_io_fenced(msg: &ffix::Slice, msg2: &ffix::Slice) -> ffix::IOStatus {
+    ffix::IOStatus::new(Code::kIOError, SubCode::kIOFenced, msg, msg2)
 }
 
-fn io_status_io_fenced2(msg: &ffi::Slice) -> ffi::IOStatus {
-    let status = ffi::Status {
+fn io_status_io_fenced2(msg: &ffix::Slice) -> ffix::IOStatus {
+    let status = ffix::Status {
         code: Code::kIOError,
         subcode: SubCode::kIOFenced,
-        state: msg.to_unique_ptr_string(),
-        ..ffi::Status::default()
+        state: msg.ToUniquePtrString(),
+        ..ffix::Status::default()
     };
-    ffi::IOStatus { status }
+    ffix::IOStatus { status }
 }
 
-fn io_status_io_fenced3() -> ffi::IOStatus {
-    ffi::IOStatus::new3(Code::kIOError, SubCode::kIOFenced)
+fn io_status_io_fenced3() -> ffix::IOStatus {
+    ffix::IOStatus::new3(Code::kIOError, SubCode::kIOFenced)
 }

@@ -221,7 +221,6 @@ const SOURCES: &[&str] = &[
     "trace_replay/trace_replay.cc",
     "util/async_file_reader.cc",
     "util/cleanable.cc",
-    "util/common_ffi.cc",
     "util/compaction_job_stats_impl.cc",
     "util/comparator.cc",
     "util/compression.cc",
@@ -339,10 +338,8 @@ fn main() {
         "src/filename.rs",
         "src/hash.rs",
         "src/io_status.rs",
-        "src/lib.rs",
         "src/options.rs",
         "src/port_defs.rs",
-        "src/slice.rs",
         "src/status.rs",
         "src/transaction_log.rs",
         "src/types.rs",
@@ -351,7 +348,19 @@ fn main() {
 
     let target = std::env::var("TARGET").unwrap();
     let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
-    let mut config = cxx_build::bridges(&bridges);
+    let _ = cxx_build::bridges(&bridges);
+
+    let out_dir = std::env::var("OUT_DIR").unwrap();
+    let mut includes = includes
+        .iter()
+        .map(|d| std::path::PathBuf::from(d))
+        .collect::<Vec<_>>();
+    includes.push(std::path::PathBuf::from(&out_dir).join("cxxbridge/include"));
+
+    let mut config = autocxx_build::Builder::new("src/lib.rs", &includes)
+        .extra_clang_args(&["-std=c++17"])
+        .build()
+        .expect("Failed to generate bindings with autocxx");
 
     if target.contains("darwin") {
         config.define("OS_MACOSX", None);
@@ -361,24 +370,26 @@ fn main() {
         panic!("Unsupported target: {}", target);
     }
 
-    config.define("ROCKSDB_PLATFORM_POSIX", None);
-    config.define("ROCKSDB_LIB_IO_POSIX", None);
-    config.includes(&includes);
-    config.cpp(true);
-    config.std("c++17");
-    config.warnings(false);
+    config
+        .define("ROCKSDB_PLATFORM_POSIX", None)
+        .define("ROCKSDB_LIB_IO_POSIX", None)
+        .includes(&includes)
+        .cpp(true)
+        .std("c++17")
+        .warnings(false);
 
     if cfg!(feature = "build-cpp") {
-        config.flag("-pthread");
-        config.flag("-Wsign-compare");
-        config.flag("-Wshadow");
-        config.flag("-Wno-unused-parameter");
-        config.flag("-Wno-unused-variable");
-        config.flag("-Woverloaded-virtual");
-        config.flag("-Wnon-virtual-dtor");
-        config.flag("-Wno-missing-field-initializers");
-        config.flag("-Wno-strict-aliasing");
-        config.flag("-Wno-invalid-offsetof");
+        config
+            .flag("-pthread")
+            .flag("-Wsign-compare")
+            .flag("-Wshadow")
+            .flag("-Wno-unused-parameter")
+            .flag("-Wno-unused-variable")
+            .flag("-Woverloaded-virtual")
+            .flag("-Wnon-virtual-dtor")
+            .flag("-Wno-missing-field-initializers")
+            .flag("-Wno-strict-aliasing")
+            .flag("-Wno-invalid-offsetof");
 
         let mut sources = SOURCES.to_vec();
 
@@ -388,14 +399,22 @@ fn main() {
         }
 
         let sources = sources.iter().map(|s| format!("rocksdb-cxx/{}", s));
-        config.files(sources);
-        config.file("build_version.cc");
+        config.files(sources).file("build_version.cc");
     }
 
-    config.compile("rocksdb-cxx");
+    let cxx_files = walkdir::WalkDir::new(format!("{out_dir}/cxxbridge/sources"))
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
+        .map(|f| f.into_path());
+
+    config.files(cxx_files);
+
+    config.compile("rocksdb-autocxx");
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
+    println!("cargo:rerun-if-changed=src/lib.rs");
 
     for bridge in bridges {
         println!("cargo:rerun-if-changed={bridge}");

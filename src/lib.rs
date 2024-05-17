@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod cache;
 mod coding;
 mod coding_lean;
@@ -8,20 +10,17 @@ mod hash;
 mod io_status;
 mod options;
 pub mod port_defs;
-pub mod slice;
 pub mod status;
 mod string_util;
 mod transaction_log;
 mod types;
 pub mod unique_id;
 
-#[cxx::bridge(namespace = "rocksdb")]
-pub mod ffi {
-    unsafe extern "C++" {
-        include!("rocksdb/common_ffi.h");
+autocxx::include_cpp! {
+    #include "rocksdb/slice.h"
+    safety!(unsafe)
 
-        fn make_string() -> UniquePtr<CxxString>;
-    }
+    generate!("rocksdb::Slice")
 }
 
 #[cfg(test)]
@@ -30,8 +29,7 @@ mod tests {
 
     #[test]
     fn create_string() {
-        let mut cxx_str = ffi::make_string();
-        cxx_str.pin_mut().push_str("hello world");
+        let cxx_str = ffi::make_string("hello world");
         assert_eq!(cxx_str.to_str().unwrap(), "hello world");
     }
 }
