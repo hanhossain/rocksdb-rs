@@ -414,6 +414,7 @@ fn main() {
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
+    println!("cargo:rerun-if-changed=src/lib.rs");
 
     for bridge in bridges {
         println!("cargo:rerun-if-changed={bridge}");
