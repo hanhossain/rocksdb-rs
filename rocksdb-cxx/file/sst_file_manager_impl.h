@@ -13,7 +13,7 @@
 #include "port/port.h"
 #include "rocksdb/sst_file_manager.h"
 
-#include "rocksdb-rs/src/env.rs.h"
+#include "rocksdb/env.h"
 
 namespace rocksdb {
 class ErrorHandler;

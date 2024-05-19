@@ -4,7 +4,6 @@ pub mod cache;
 mod coding;
 mod coding_lean;
 pub mod compression_type;
-pub mod env;
 mod filename;
 mod hash;
 mod io_status;

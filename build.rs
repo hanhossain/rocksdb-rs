@@ -334,7 +334,6 @@ fn main() {
         "src/coding.rs",
         "src/coding_lean.rs",
         "src/compression_type.rs",
-        "src/env.rs",
         "src/filename.rs",
         "src/hash.rs",
         "src/io_status.rs",
