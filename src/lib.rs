@@ -7,7 +7,6 @@ pub mod compression_type;
 mod filename;
 mod hash;
 mod io_status;
-mod options;
 pub mod port_defs;
 pub mod status;
 mod string_util;
@@ -20,6 +19,13 @@ autocxx::include_cpp! {
     safety!(unsafe)
 
     generate!("rocksdb::Slice")
+}
+
+autocxx::include_cpp! {
+    #include "rocksdb/options.h"
+    safety!(unsafe)
+    name!(ffi_options)
+    generate!("rocksdb::DbPath")
 }
 
 #[cfg(test)]
