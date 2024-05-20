@@ -9,7 +9,7 @@
 #include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/listener.h"
 
-#include "rocksdb-rs/src/env.rs.h"
+#include "rocksdb/env.h"
 #include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {

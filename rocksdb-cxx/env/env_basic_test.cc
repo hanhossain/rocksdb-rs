@@ -16,8 +16,6 @@
 #include "rocksdb/env_encryption.h"
 #include "test_util/testharness.h"
 
-#include "rocksdb-rs/src/env.rs.h"
-
 namespace rocksdb {
 namespace {
 using CreateEnvFunc = Env*();
@@ -147,14 +145,6 @@ INSTANTIATE_TEST_CASE_P(CustomEnv, EnvBasicTestWithParam,
 
 INSTANTIATE_TEST_CASE_P(CustomEnv, EnvMoreTestWithParam,
                         ::testing::ValuesIn(GetCustomEnvs()));
-
-TEST_P(EnvBasicTestWithParam, RustIntegration) {
-  rocksdb_rs::env::CommonRustData common = {.value = "integration"};
-  ASSERT_EQ(common.value, "integration");
-
-  rust::String value = hello_common(common);
-  ASSERT_EQ(value, "Hello integration from rust!");
-}
 
 TEST_P(EnvBasicTestWithParam, Basics) {
   uint64_t file_size;

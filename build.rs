@@ -334,11 +334,9 @@ fn main() {
         "src/coding.rs",
         "src/coding_lean.rs",
         "src/compression_type.rs",
-        "src/env.rs",
         "src/filename.rs",
         "src/hash.rs",
         "src/io_status.rs",
-        "src/options.rs",
         "src/port_defs.rs",
         "src/status.rs",
         "src/transaction_log.rs",
@@ -357,7 +355,7 @@ fn main() {
         .collect::<Vec<_>>();
     includes.push(std::path::PathBuf::from(&out_dir).join("cxxbridge/include"));
 
-    let mut config = autocxx_build::Builder::new("src/lib.rs", &includes)
+    let mut config = autocxx_build::Builder::new("src/ffi.rs", &includes)
         .extra_clang_args(&["-std=c++17"])
         .build()
         .expect("Failed to generate bindings with autocxx");
@@ -414,7 +412,7 @@ fn main() {
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
-    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/ffi.rs");
 
     for bridge in bridges {
         println!("cargo:rerun-if-changed={bridge}");

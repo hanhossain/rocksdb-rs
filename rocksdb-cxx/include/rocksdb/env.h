@@ -1918,18 +1918,4 @@ rocksdb_rs::status::Status NewEnvLogger(const std::string& fname, Env* env,
 // FileSystem.
 std::unique_ptr<Env> NewCompositeEnv(const std::shared_ptr<FileSystem>& fs);
 
-// Simple hello world to help with rust integration.
-class Rusty {
- public:
-  std::unique_ptr<std::string> HelloWorld() const {
-    return std::make_unique<std::string>("Hello World from C++!");
-  }
-};
-
-[[maybe_unused]] static std::unique_ptr<Rusty> Rusty_new() {
-  return std::make_unique<Rusty>();
-}
-
-[[maybe_unused]] rust::String HelloCommonFromCpp();
-
 }  // namespace rocksdb

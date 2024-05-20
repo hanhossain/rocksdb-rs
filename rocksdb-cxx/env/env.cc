@@ -28,7 +28,7 @@
 #include "rust/cxx.h"
 #include "util/autovector.h"
 
-#include "rocksdb-rs/src/env.rs.h"
+#include "rocksdb/env.h"
 
 namespace rocksdb {
 namespace {
@@ -1232,11 +1232,6 @@ rocksdb_rs::status::Status SystemClock::CreateFromString(const ConfigOptions& co
     });
     return LoadSharedObject<SystemClock>(config_options, value, result);
   }
-}
-
-rust::String HelloCommonFromCpp() {
-  const rocksdb_rs::env::CommonRustData rust_data = {.value = "c++"};
-  return hello_common(rust_data);
 }
 
 }  // namespace rocksdb
