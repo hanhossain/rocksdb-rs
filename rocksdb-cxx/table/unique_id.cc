@@ -3,12 +3,11 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-#include <cstdint>
 #include <rocksdb-rs/src/hash.rs.h>
 
-#include "table/unique_id_impl.h"
-#include "util/hash.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/string_util.h"
+#include "rocksdb/table_properties.h"
 
 namespace rocksdb {
 

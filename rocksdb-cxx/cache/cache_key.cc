@@ -9,7 +9,7 @@
 #include <atomic>
 
 #include "rocksdb/advanced_cache.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/hash.h"
 #include "util/math.h"
 

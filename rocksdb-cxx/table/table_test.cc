@@ -63,7 +63,7 @@
 #include "table/plain/plain_table_factory.h"
 #include "table/scoped_arena_iterator.h"
 #include "table/sst_file_writer_collectors.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "test_util/sync_point.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"

@@ -11,7 +11,7 @@
 #include "rocksdb/env.h"
 #include "rocksdb/unique_id.h"
 #include "table/table_properties_internal.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/random.h"
 #include "util/string_util.h"
 

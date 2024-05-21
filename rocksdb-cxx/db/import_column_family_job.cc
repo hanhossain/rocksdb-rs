@@ -21,7 +21,7 @@
 #include "table/scoped_arena_iterator.h"
 #include "table/sst_file_writer_collectors.h"
 #include "table/table_builder.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/stop_watch.h"
 
 namespace rocksdb {

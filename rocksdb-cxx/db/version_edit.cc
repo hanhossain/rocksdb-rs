@@ -13,7 +13,7 @@
 #include "db/version_set.h"
 #include "logging/event_logger.h"
 #include "rocksdb/slice.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "test_util/sync_point.h"
 #include "util/coding.h"
 #include "util/string_util.h"

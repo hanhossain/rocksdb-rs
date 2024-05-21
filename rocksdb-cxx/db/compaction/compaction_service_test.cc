@@ -6,7 +6,7 @@
 
 #include "db/db_test_util.h"
 #include "port/stack_trace.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 
 namespace rocksdb {
 

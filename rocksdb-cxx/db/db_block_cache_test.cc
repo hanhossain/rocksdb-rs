@@ -25,13 +25,14 @@
 #include "rocksdb/table.h"
 #include "rocksdb/table_properties.h"
 #include "table/block_based/block_based_table_reader.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/compression.h"
 #include "util/defer.h"
 #include "util/hash.h"
 #include "util/math.h"
 #include "util/random.h"
 #include "utilities/fault_injection_fs.h"
+#include "rocksdb/unique_id.h"
 
 namespace rocksdb {
 

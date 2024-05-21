@@ -24,7 +24,7 @@
 #include "rocksdb/advanced_cache.h"
 #include "rocksdb/advanced_options.h"
 #include "table/table_reader.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/autovector.h"
 
 namespace rocksdb {

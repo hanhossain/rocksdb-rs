@@ -11,7 +11,7 @@
 
 #include "db/blob/blob_index.h"
 #include "rocksdb/advanced_options.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "test_util/sync_point.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"

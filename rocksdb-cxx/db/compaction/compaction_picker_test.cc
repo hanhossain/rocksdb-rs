@@ -13,7 +13,7 @@
 #include "db/compaction/compaction_picker_universal.h"
 #include "db/compaction/file_pri.h"
 #include "rocksdb/advanced_options.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 #include "util/string_util.h"

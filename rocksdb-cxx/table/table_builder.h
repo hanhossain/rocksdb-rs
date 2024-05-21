@@ -22,7 +22,7 @@
 #include "options/cf_options.h"
 #include "rocksdb/options.h"
 #include "rocksdb/table_properties.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "trace_replay/block_cache_tracer.h"
 
 namespace rocksdb::status {

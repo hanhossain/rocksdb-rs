@@ -91,7 +91,7 @@
 #include "table/sst_file_dumper.h"
 #include "table/table_builder.h"
 #include "table/two_level_iterator.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "test_util/sync_point.h"
 #include "trace_replay/trace_replay.h"
 #include "util/autovector.h"

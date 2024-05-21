@@ -12,7 +12,7 @@
 #include "db/version_edit.h"
 #include "db/version_set.h"
 #include "rocksdb/advanced_options.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 #include "util/string_util.h"

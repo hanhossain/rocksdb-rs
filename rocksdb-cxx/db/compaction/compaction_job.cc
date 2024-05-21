@@ -52,7 +52,7 @@
 #include "rocksdb/utilities/options_type.h"
 #include "table/merging_iterator.h"
 #include "table/table_builder.h"
-#include "table/unique_id_impl.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "test_util/sync_point.h"
 #include "util/stop_watch.h"
 
