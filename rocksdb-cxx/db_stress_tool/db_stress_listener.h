@@ -16,7 +16,7 @@
 #include "rocksdb/file_system.h"
 #include "rocksdb/listener.h"
 #include "rocksdb/table_properties.h"
-#include "rocksdb/unique_id.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/gflags_compat.h"
 #include "util/random.h"
 

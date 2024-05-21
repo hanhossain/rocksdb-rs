@@ -27,3 +27,14 @@ pub mod options {
     }
     pub use ffi_options::rocksdb::*;
 }
+
+pub mod table_properties {
+    autocxx::include_cpp! {
+        #include "rocksdb/table_properties.h"
+        safety!(unsafe)
+        name!(ffi_table_properties)
+        exclude_utilities!()
+        generate!("rocksdb::TableProperties")
+    }
+    pub use ffi_table_properties::rocksdb::*;
+}

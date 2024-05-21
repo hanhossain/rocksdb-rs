@@ -42,6 +42,6 @@ Referencing a c++ type defined in a different bridge:
 unsafe extern "C++" {
     include!("rocksdb/slice.h");
 
-    type Slice = crate::slice::ffi::Slice;
+    type Slice = crate::ffi::slice::Slice;
 }
 ```

@@ -9,7 +9,7 @@
 #include "port/malloc.h"
 #include "port/port.h"
 #include "rocksdb/env.h"
-#include "rocksdb/unique_id.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "table/table_properties_internal.h"
 #include "rocksdb-rs/src/unique_id.rs.h"
 #include "util/random.h"
@@ -162,7 +162,7 @@ std::string TableProperties::ToString(const std::string& prop_delim,
 
   // Unique ID, when available
   std::string id;
-  rocksdb_rs::status::Status s = GetUniqueIdFromTableProperties(*this, id);
+  rocksdb_rs::status::Status s = rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(*this, id);
   AppendProperty(result, "unique ID",
                  s.ok() ? rocksdb_rs::unique_id::UniqueIdToHumanString(id) : "N/A", prop_delim,
                  kv_delim);

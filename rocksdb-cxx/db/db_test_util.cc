@@ -16,7 +16,7 @@
 #include "rocksdb/cache.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/env_encryption.h"
-#include "rocksdb/unique_id.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 #include "rocksdb/utilities/object_registry.h"
 #include "table/format.h"
 #include "util/random.h"
@@ -1718,7 +1718,7 @@ void VerifySstUniqueIds(const TablePropertiesCollection& props) {
   std::unordered_set<std::string> seen;
   for (auto& pair : props) {
     std::string id;
-    ASSERT_OK(GetUniqueIdFromTableProperties(*pair.second, id));
+    ASSERT_OK(rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(*pair.second, id));
     ASSERT_TRUE(seen.insert(id).second);
   }
 }

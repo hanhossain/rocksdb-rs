@@ -175,7 +175,7 @@ void DbStressListener::VerifyTableFileUniqueId(
   // Unit tests verify that GetUniqueIdFromTableProperties returns just a
   // substring of this, and we're only going to pull out 64 bits, so using
   // GetExtendedUniqueIdFromTableProperties is arguably stronger testing here.
-  rocksdb_rs::status::Status s = GetExtendedUniqueIdFromTableProperties(new_file_properties, id);
+  rocksdb_rs::status::Status s = rocksdb_rs::unique_id::GetExtendedUniqueIdFromTableProperties(new_file_properties, id);
   if (!s.ok()) {
     fprintf(stderr, "Error getting SST unique id for %s: %s\n",
             file_path.c_str(), s.ToString()->c_str());

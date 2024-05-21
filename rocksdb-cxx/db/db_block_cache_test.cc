@@ -32,7 +32,6 @@
 #include "util/math.h"
 #include "util/random.h"
 #include "utilities/fault_injection_fs.h"
-#include "rocksdb/unique_id.h"
 
 namespace rocksdb {
 
@@ -1567,7 +1566,7 @@ class CacheKeyTest : public testing::Test {
     EXPECT_TRUE(!rv.IsEmpty());
     // BEGIN some assertions in relation to SST unique IDs
     std::string external_unique_id_str;
-    EXPECT_OK(GetUniqueIdFromTableProperties(tp_, external_unique_id_str));
+    EXPECT_OK(rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(tp_, external_unique_id_str));
     rocksdb_rs::unique_id::UniqueId64x2 sst_unique_id = {};
     EXPECT_OK(sst_unique_id.decode_bytes(external_unique_id_str));
     auto sst_unique_id_ptr = sst_unique_id.as_unique_id_ptr();

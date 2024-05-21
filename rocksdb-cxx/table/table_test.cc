@@ -46,7 +46,6 @@
 #include "rocksdb/statistics.h"
 #include "rocksdb/table_properties.h"
 #include "rocksdb/trace_record.h"
-#include "rocksdb/unique_id.h"
 #include "rocksdb/write_buffer_manager.h"
 #include "table/block_based/block.h"
 #include "table/block_based/block_based_table_builder.h"
@@ -76,6 +75,7 @@
 
 #include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/coding_lean.rs.h"
+#include "rocksdb-rs/src/unique_id.rs.h"
 
 namespace rocksdb {
 
@@ -1437,14 +1437,14 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   TestIds t;
   {
     std::string euid;
-    EXPECT_OK(GetExtendedUniqueIdFromTableProperties(*tp, euid));
+    EXPECT_OK(rocksdb_rs::unique_id::GetExtendedUniqueIdFromTableProperties(*tp, euid));
     EXPECT_EQ(euid.size(), 24U);
     t.external_id.data[0] = rocksdb_rs::coding_lean::DecodeFixed64(&euid[0]);
     t.external_id.data[1] = rocksdb_rs::coding_lean::DecodeFixed64(&euid[8]);
     t.external_id.data[2] = rocksdb_rs::coding_lean::DecodeFixed64(&euid[16]);
 
     std::string uid;
-    EXPECT_OK(GetUniqueIdFromTableProperties(*tp, uid));
+    EXPECT_OK(rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(*tp, uid));
     EXPECT_EQ(uid.size(), 16U);
     EXPECT_EQ(uid, euid.substr(0, 16));
     EXPECT_EQ(t.external_id.data[0], rocksdb_rs::coding_lean::DecodeFixed64(&uid[0]));
@@ -1624,7 +1624,7 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
   SetGoodTableProperties(&tp);
 
   std::string tmp;
-  EXPECT_OK(GetExtendedUniqueIdFromTableProperties(tp, tmp));
+  EXPECT_OK(rocksdb_rs::unique_id::GetExtendedUniqueIdFromTableProperties(tp, tmp));
   EXPECT_EQ(tmp,
             (std::string{{'\x64', '\x74', '\xdf', '\x65', '\x03', '\x23',
                           '\xbd', '\xf0', '\xb4', '\x8e', '\x64', '\xf3',
@@ -1633,7 +1633,7 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
   EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp),
             "6474DF650323BDF0-B48E64F3039308CA-17284B32E7F7444B");
 
-  EXPECT_OK(GetUniqueIdFromTableProperties(tp, tmp));
+  EXPECT_OK(rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(tp, tmp));
   EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "6474DF650323BDF0-B48E64F3039308CA");
 
   // including zero padding
@@ -1675,23 +1675,23 @@ TEST_F(TablePropertyTest, UniqueIdsFailure) {
   // Missing DB id
   SetGoodTableProperties(&tp);
   tp.db_id = "";
-  EXPECT_TRUE(GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+  EXPECT_TRUE(rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
   EXPECT_TRUE(
-      GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+      rocksdb_rs::unique_id::GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
 
   // Missing session id
   SetGoodTableProperties(&tp);
   tp.db_session_id = "";
-  EXPECT_TRUE(GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+  EXPECT_TRUE(rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
   EXPECT_TRUE(
-      GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+      rocksdb_rs::unique_id::GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
 
   // Missing file number
   SetGoodTableProperties(&tp);
   tp.orig_file_number = 0;
-  EXPECT_TRUE(GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+  EXPECT_TRUE(rocksdb_rs::unique_id::GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
   EXPECT_TRUE(
-      GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+      rocksdb_rs::unique_id::GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
 }
 
 // This test include all the basic checks except those for index size and block

@@ -322,6 +322,18 @@ struct TableProperties {
   // Return the approximated memory usage of this TableProperties object,
   // including memory used by the string properties and UserCollectedProperties
   std::size_t ApproximateMemoryUsage() const;
+
+  const std::string& get_db_id() const {
+    return db_id;
+  }
+
+  const std::string& get_db_session_id() const {
+    return db_session_id;
+  }
+
+  uint64_t get_orig_file_number() const {
+    return orig_file_number;
+  }
 };
 
 // Extra properties

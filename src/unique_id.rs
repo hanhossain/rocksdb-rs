@@ -1,9 +1,11 @@
 use crate::coding_lean::{decode_fixed_64, encode_fixed_64};
+use crate::ffi::table_properties::TableProperties;
 use crate::hash::{bijective_hash2x64, bijective_unhash2x64, hash2x64, hash2x64_with_seed};
 use crate::status::{NotSupported, Status};
 use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffix::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
 use cxx::{CxxString, UniquePtr};
+use std::pin::Pin;
 
 // For InternalUniqueIdToExternal / ExternalUniqueIdToInternal we want all
 // zeros in first 128 bits to map to itself, so that excluding zero in
@@ -41,6 +43,13 @@ pub mod ffix {
 
         #[namespace = "rocksdb_rs::status"]
         type Status = crate::status::ffix::Status;
+    }
+
+    #[namespace = "rocksdb"]
+    unsafe extern "C++" {
+        include!("rocksdb/table_properties.h");
+
+        type TableProperties = crate::ffi::table_properties::TableProperties;
     }
 
     extern "Rust" {
@@ -98,6 +107,50 @@ pub mod ffix {
         /// (demonstrably 1-to-1 on the first 128 bits and on the full 192 bits).
         #[cxx_name = "ExternalUniqueIdToInternal"]
         fn external_unique_id_to_internal(id: &mut UniqueIdPtr);
+
+        /// Computes a 192-bit (24 binary char) stable, universally unique ID
+        /// with an extra 64 bits of uniqueness compared to the standard ID. It is only
+        /// appropriate to use this ID instead of the 128-bit ID if ID collisions
+        /// between files among any hosts in a vast fleet is a problem, such as a shared
+        /// global namespace for SST file backups. Under this criteria, the extreme
+        /// example above would expect a global file ID collision every 4 days with
+        /// 128-bit IDs (using some worst-case assumptions about process lifetime).
+        /// It's 10^17 years with 192-bit IDs.
+        #[cxx_name = "GetExtendedUniqueIdFromTableProperties"]
+        fn get_extended_unique_id_from_table_properties(
+            props: &TableProperties,
+            out_id: Pin<&mut CxxString>,
+        ) -> Status;
+
+        /// Computes a stable, universally unique 128-bit (16 binary char) identifier
+        /// for an SST file from TableProperties. This is supported for table (SST)
+        /// files created with RocksDB 6.24 and later. NotSupported will be returned
+        /// for other cases. The first 16 bytes (128 bits) is of sufficient quality
+        /// for almost all applications, and shorter prefixes are usable as a
+        /// hash of the full unique id.
+        ///
+        /// Note: .c_str() is not compatible with binary char strings, so using
+        /// .c_str() on the result will often result in information loss and very
+        /// poor uniqueness probability.
+        ///
+        /// More detail: the value is *guaranteed* unique for SST files
+        /// generated in the same process (even different DBs, RocksDB >= 6.26),
+        /// and first 128 bits are guaranteed not "all zeros" (RocksDB >= 6.26)
+        /// so that the "all zeros" value can be used reliably for a null ID.
+        /// These IDs are more than sufficient for SST uniqueness within each of
+        /// many DBs or hosts. For an extreme example assuming random IDs, consider
+        /// 10^9 hosts each with 10^9 live SST files being replaced at 10^6/second.
+        /// Such a service would need to run for 10 million years to see an ID
+        /// collision among live SST files on any host.
+        ///
+        /// And assuming one generates many SST files in the lifetime of each process,
+        /// the probability of ID collisions is much "better than random"; see
+        /// https://github.com/pdillinger/unique_id
+        #[cxx_name = "GetUniqueIdFromTableProperties"]
+        fn get_unique_id_from_table_properties(
+            props: &TableProperties,
+            out_id: Pin<&mut CxxString>,
+        ) -> Status;
     }
 }
 
@@ -417,4 +470,100 @@ fn external_unique_id_to_internal(id: &mut UniqueIdPtr) {
         *id.ptr = lo - LO_OFFSET_FOR_ZERO;
         *id.ptr.offset(1) = hi - HI_OFFSET_FOR_ZERO;
     }
+}
+
+fn get_unique_id_from_table_properties_helper_unique_id_64x2(
+    props: &TableProperties,
+    mut out_id: Pin<&mut CxxString>,
+) -> ffix::Status {
+    let mut tmp = UniqueId64x2::default();
+    let s = tmp.get_sst_internal_unique_id(
+        props.get_db_id(),
+        props.get_db_session_id().to_str().unwrap(),
+        props.get_orig_file_number(),
+        false,
+    );
+
+    out_id.as_mut().clear();
+
+    if s.ok() {
+        let mut tmp_ptr = tmp.as_unique_id_ptr();
+        internal_unique_id_to_external(&mut tmp_ptr);
+        // out_id = *tmp.encode_bytes();
+        let bytes = tmp.encode_bytes();
+        out_id.push_bytes(bytes.as_bytes());
+    }
+
+    s
+}
+
+fn get_unique_id_from_table_properties_helper_unique_id_64x3(
+    props: &TableProperties,
+    mut out_id: Pin<&mut CxxString>,
+) -> ffix::Status {
+    let mut tmp = UniqueId64x3::default();
+    let s = tmp.get_sst_internal_unique_id(
+        props.get_db_id(),
+        props.get_db_session_id().to_str().unwrap(),
+        props.get_orig_file_number(),
+        false,
+    );
+
+    out_id.as_mut().clear();
+
+    if s.ok() {
+        let mut tmp_ptr = tmp.as_unique_id_ptr();
+        internal_unique_id_to_external(&mut tmp_ptr);
+        // out_id = *tmp.encode_bytes();
+        let bytes = tmp.encode_bytes();
+        out_id.push_bytes(bytes.as_bytes());
+    }
+
+    s
+}
+
+/// Computes a 192-bit (24 binary char) stable, universally unique ID
+/// with an extra 64 bits of uniqueness compared to the standard ID. It is only
+/// appropriate to use this ID instead of the 128-bit ID if ID collisions
+/// between files among any hosts in a vast fleet is a problem, such as a shared
+/// global namespace for SST file backups. Under this criteria, the extreme
+/// example above would expect a global file ID collision every 4 days with
+/// 128-bit IDs (using some worst-case assumptions about process lifetime).
+/// It's 10^17 years with 192-bit IDs.
+fn get_extended_unique_id_from_table_properties(
+    props: &TableProperties,
+    out_id: Pin<&mut CxxString>,
+) -> ffix::Status {
+    get_unique_id_from_table_properties_helper_unique_id_64x3(props, out_id)
+}
+
+/// Computes a stable, universally unique 128-bit (16 binary char) identifier
+/// for an SST file from TableProperties. This is supported for table (SST)
+/// files created with RocksDB 6.24 and later. NotSupported will be returned
+/// for other cases. The first 16 bytes (128 bits) is of sufficient quality
+/// for almost all applications, and shorter prefixes are usable as a
+/// hash of the full unique id.
+///
+/// Note: .c_str() is not compatible with binary char strings, so using
+/// .c_str() on the result will often result in information loss and very
+/// poor uniqueness probability.
+///
+/// More detail: the value is *guaranteed* unique for SST files
+/// generated in the same process (even different DBs, RocksDB >= 6.26),
+/// and first 128 bits are guaranteed not "all zeros" (RocksDB >= 6.26)
+/// so that the "all zeros" value can be used reliably for a null ID.
+/// These IDs are more than sufficient for SST uniqueness within each of
+/// many DBs or hosts. For an extreme example assuming random IDs, consider
+/// 10^9 hosts each with 10^9 live SST files being replaced at 10^6/second.
+/// Such a service would need to run for 10 million years to see an ID
+/// collision among live SST files on any host.
+///
+/// And assuming one generates many SST files in the lifetime of each process,
+/// the probability of ID collisions is much "better than random"; see
+/// https://github.com/pdillinger/unique_id
+fn get_unique_id_from_table_properties(
+    props: &TableProperties,
+    out_id: Pin<&mut CxxString>,
+) -> ffix::Status {
+    get_unique_id_from_table_properties_helper_unique_id_64x2(props, out_id)
 }
