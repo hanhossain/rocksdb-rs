@@ -1569,7 +1569,8 @@ class CacheKeyTest : public testing::Test {
     EXPECT_OK(GetUniqueIdFromTableProperties(tp_, external_unique_id_str));
     rocksdb_rs::unique_id::UniqueId64x2 sst_unique_id = {};
     EXPECT_OK(sst_unique_id.decode_bytes(external_unique_id_str));
-    ExternalUniqueIdToInternal(sst_unique_id.as_unique_id_ptr());
+    auto sst_unique_id_ptr = sst_unique_id.as_unique_id_ptr();
+    rocksdb_rs::unique_id::ExternalUniqueIdToInternal(sst_unique_id_ptr);
     OffsetableCacheKey ock =
         OffsetableCacheKey::FromInternalUniqueId(sst_unique_id.as_unique_id_ptr());
     EXPECT_EQ(rv.WithOffset(0).AsSlice(), ock.WithOffset(0).AsSlice());

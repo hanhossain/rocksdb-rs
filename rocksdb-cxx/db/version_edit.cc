@@ -892,7 +892,8 @@ std::string VersionEdit::DebugString(bool hex_key) const {
       rocksdb_rs::unique_id::UniqueId64x2 id = f.unique_id;
       r.append(std::string(id.to_internal_human_string()));
       r.append(" public_unique_id: ");
-      InternalUniqueIdToExternal(id.as_unique_id_ptr());
+      auto id_ptr = id.as_unique_id_ptr();
+      rocksdb_rs::unique_id::InternalUniqueIdToExternal(id_ptr);
       r.append(std::string(rocksdb_rs::unique_id::UniqueIdToHumanString(*id.encode_bytes())));
     }
     r.append(" tail size: ");

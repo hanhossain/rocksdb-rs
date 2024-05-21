@@ -1,9 +1,16 @@
 use crate::coding_lean::{decode_fixed_64, encode_fixed_64};
-use crate::hash::{hash2x64, hash2x64_with_seed};
+use crate::hash::{bijective_hash2x64, bijective_unhash2x64, hash2x64, hash2x64_with_seed};
 use crate::status::{NotSupported, Status};
 use crate::string_util::{parse_base_chars, put_base_chars};
 use crate::unique_id::ffix::{UniqueId64x2, UniqueId64x3, UniqueIdPtr};
 use cxx::{CxxString, UniquePtr};
+
+// For InternalUniqueIdToExternal / ExternalUniqueIdToInternal we want all
+// zeros in first 128 bits to map to itself, so that excluding zero in
+// internal IDs (session_lower != 0 above) does the same for external IDs.
+// These values are meaningless except for making that work.
+const HI_OFFSET_FOR_ZERO: u64 = 17391078804906429400;
+const LO_OFFSET_FOR_ZERO: u64 = 6417269962128484497;
 
 #[cxx::bridge(namespace = "rocksdb_rs::unique_id")]
 pub mod ffix {
@@ -77,6 +84,20 @@ pub mod ffix {
             file_number: u64,
             force: bool,
         ) -> Status;
+
+        /// Helper for GetUniqueIdFromTableProperties. External unique ids go through
+        /// this extra hashing layer so that prefixes of the unique id have predictable
+        /// "full" entropy. This hashing layer is 1-to-1 on the first 128 bits and on
+        /// the full 192 bits.
+        /// This transformation must be long term stable to ensure
+        /// GetUniqueIdFromTableProperties is long term stable.
+        #[cxx_name = "InternalUniqueIdToExternal"]
+        fn internal_unique_id_to_external(id: &mut UniqueIdPtr);
+
+        /// Reverse of InternalUniqueIdToExternal mostly for testing purposes
+        /// (demonstrably 1-to-1 on the first 128 bits and on the full 192 bits).
+        #[cxx_name = "ExternalUniqueIdToInternal"]
+        fn external_unique_id_to_internal(id: &mut UniqueIdPtr);
     }
 }
 
@@ -359,4 +380,41 @@ fn decode_session_id(
     *lower = (b & (u64::MAX >> 2)) | (a << 62);
 
     Status::Ok.into()
+}
+
+/// Helper for GetUniqueIdFromTableProperties. External unique ids go through
+/// this extra hashing layer so that prefixes of the unique id have predictable
+/// "full" entropy. This hashing layer is 1-to-1 on the first 128 bits and on
+/// the full 192 bits.
+/// This transformation must be long term stable to ensure
+/// GetUniqueIdFromTableProperties is long term stable.
+fn internal_unique_id_to_external(id: &mut UniqueIdPtr) {
+    unsafe {
+        let (hi, lo) = bijective_hash2x64(
+            *id.ptr.offset(1) + HI_OFFSET_FOR_ZERO,
+            *id.ptr + LO_OFFSET_FOR_ZERO,
+        );
+
+        *id.ptr = lo;
+        *id.ptr.offset(1) = hi;
+        if id.extended {
+            *id.ptr.offset(2) += lo + hi;
+        }
+    }
+}
+
+/// Reverse of InternalUniqueIdToExternal mostly for testing purposes
+/// (demonstrably 1-to-1 on the first 128 bits and on the full 192 bits).
+fn external_unique_id_to_internal(id: &mut UniqueIdPtr) {
+    unsafe {
+        let mut lo = *id.ptr;
+        let mut hi = *id.ptr.offset(1);
+        if id.extended {
+            *id.ptr.offset(2) -= lo + hi;
+        }
+
+        (hi, lo) = bijective_unhash2x64(hi, lo);
+        *id.ptr = lo - LO_OFFSET_FOR_ZERO;
+        *id.ptr.offset(1) = hi - HI_OFFSET_FOR_ZERO;
+    }
 }

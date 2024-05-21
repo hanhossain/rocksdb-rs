@@ -113,7 +113,7 @@ fn bijective_hash2x64_with_seed_ext(
     (*high_res, *low_res) = bijective_hash2x64_with_seed(high, low, seed);
 }
 
-fn bijective_hash2x64(high: u64, low: u64) -> (u64, u64) {
+pub(crate) fn bijective_hash2x64(high: u64, low: u64) -> (u64, u64) {
     bijective_hash2x64_with_seed(high, low, 0)
 }
 
@@ -154,7 +154,7 @@ fn bijective_unhash2x64_with_seed_ext(
     (*high_res, *low_res) = bijective_unhash2x64_with_seed(high, low, seed);
 }
 
-fn bijective_unhash2x64(high: u64, low: u64) -> (u64, u64) {
+pub(crate) fn bijective_unhash2x64(high: u64, low: u64) -> (u64, u64) {
     bijective_unhash2x64_with_seed(high, low, 0)
 }
 

@@ -12,44 +12,14 @@
 
 namespace rocksdb {
 
-namespace {
-// For InternalUniqueIdToExternal / ExternalUniqueIdToInternal we want all
-// zeros in first 128 bits to map to itself, so that excluding zero in
-// internal IDs (session_lower != 0 above) does the same for external IDs.
-// These values are meaningless except for making that work.
-constexpr uint64_t kHiOffsetForZero = 17391078804906429400U;
-constexpr uint64_t kLoOffsetForZero = 6417269962128484497U;
-}  // namespace
-
-void InternalUniqueIdToExternal(rocksdb_rs::unique_id::UniqueIdPtr in_out) {
-  uint64_t hi, lo;
-  rocksdb_rs::hash::bijective_hash2x64(in_out.ptr[1] + kHiOffsetForZero,
-                                       in_out.ptr[0] + kLoOffsetForZero, hi, lo);
-  in_out.ptr[0] = lo;
-  in_out.ptr[1] = hi;
-  if (in_out.extended) {
-    in_out.ptr[2] += lo + hi;
-  }
-}
-
-void ExternalUniqueIdToInternal(rocksdb_rs::unique_id::UniqueIdPtr in_out) {
-  uint64_t lo = in_out.ptr[0];
-  uint64_t hi = in_out.ptr[1];
-  if (in_out.extended) {
-    in_out.ptr[2] -= lo + hi;
-  }
-  rocksdb_rs::hash::bijective_unhash2x64(hi, lo, hi, lo);
-  in_out.ptr[0] = lo - kLoOffsetForZero;
-  in_out.ptr[1] = hi - kHiOffsetForZero;
-}
-
 template <typename ID>
 rocksdb_rs::status::Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
                                             std::string& out_id) {
   ID tmp{};
   rocksdb_rs::status::Status s = tmp.get_sst_internal_unique_id(props.db_id, props.db_session_id, props.orig_file_number, false);
   if (s.ok()) {
-    InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
+    auto tmp_ptr = tmp.as_unique_id_ptr();
+    rocksdb_rs::unique_id::InternalUniqueIdToExternal(tmp_ptr);
     out_id = *tmp.encode_bytes();
   } else {
     out_id.clear();

@@ -1461,9 +1461,10 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
 
   // Verify relationship
   rocksdb_rs::unique_id::UniqueId64x3 tmp = t.internal_id;
-  InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
+  auto tmp_ptr = tmp.as_unique_id_ptr();
+  rocksdb_rs::unique_id::InternalUniqueIdToExternal(tmp_ptr);
   EXPECT_EQ(tmp, t.external_id);
-  ExternalUniqueIdToInternal(tmp.as_unique_id_ptr());
+  rocksdb_rs::unique_id::ExternalUniqueIdToInternal(tmp_ptr);
   EXPECT_EQ(tmp, t.internal_id);
 
   // And 128-bit internal version
@@ -1473,10 +1474,11 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
 
   EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
   EXPECT_EQ(tmp2.data[1], t.internal_id.data[1]);
-  InternalUniqueIdToExternal(tmp2.as_unique_id_ptr());
+  auto tmp2_ptr = tmp2.as_unique_id_ptr();
+  rocksdb_rs::unique_id::InternalUniqueIdToExternal(tmp2_ptr);
   EXPECT_EQ(tmp2.data[0], t.external_id.data[0]);
   EXPECT_EQ(tmp2.data[1], t.external_id.data[1]);
-  ExternalUniqueIdToInternal(tmp2.as_unique_id_ptr());
+  rocksdb_rs::unique_id::ExternalUniqueIdToInternal(tmp2_ptr);
   EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
   EXPECT_EQ(tmp2.data[1], t.internal_id.data[1]);
 
@@ -1597,9 +1599,11 @@ TEST_F(TablePropertyTest, UniqueIdsSchemaAndQuality) {
   {
     rocksdb_rs::unique_id::UniqueId64x3 id1{{0, 0, Random::GetTLSInstance()->Next64()}};
     rocksdb_rs::unique_id::UniqueId64x3 id2 = id1;
-    InternalUniqueIdToExternal(id1.as_unique_id_ptr());
+    auto id1_ptr = id1.as_unique_id_ptr();
+    rocksdb_rs::unique_id::InternalUniqueIdToExternal(id1_ptr);
     EXPECT_EQ(id1, id2);
-    ExternalUniqueIdToInternal(id2.as_unique_id_ptr());
+    auto id2_ptr = id2.as_unique_id_ptr();
+    rocksdb_rs::unique_id::ExternalUniqueIdToInternal(id2_ptr);
     EXPECT_EQ(id1, id2);
   }
 }

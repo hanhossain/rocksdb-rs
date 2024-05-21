@@ -12,16 +12,5 @@
 #include "rocksdb-rs/src/unique_id.rs.h"
 
 namespace rocksdb {
-// Helper for GetUniqueIdFromTableProperties. External unique ids go through
-// this extra hashing layer so that prefixes of the unique id have predictable
-// "full" entropy. This hashing layer is 1-to-1 on the first 128 bits and on
-// the full 192 bits.
-// This transformation must be long term stable to ensure
-// GetUniqueIdFromTableProperties is long term stable.
-void InternalUniqueIdToExternal(rocksdb_rs::unique_id::UniqueIdPtr in_out);
-
-// Reverse of InternalUniqueIdToExternal mostly for testing purposes
-// (demonstrably 1-to-1 on the first 128 bits and on the full 192 bits).
-void ExternalUniqueIdToInternal(rocksdb_rs::unique_id::UniqueIdPtr in_out);
 
 }  // namespace rocksdb
