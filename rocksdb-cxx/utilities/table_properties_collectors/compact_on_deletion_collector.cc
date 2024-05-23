@@ -100,7 +100,7 @@ rocksdb_rs::status::Status CompactOnDeletionCollector::Finish(
 static std::unordered_map<std::string, OptionTypeInfo>
     on_deletion_collector_type_info = {
         {"window_size",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, OptionVerificationType::kNormal,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           OptionTypeFlags::kCompareNever | OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
@@ -118,7 +118,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
           },
           nullptr}},
         {"deletion_trigger",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, OptionVerificationType::kNormal,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           OptionTypeFlags::kCompareNever | OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
@@ -136,7 +136,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
           },
           nullptr}},
         {"deletion_ratio",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, OptionVerificationType::kNormal,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           OptionTypeFlags::kCompareNever | OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {

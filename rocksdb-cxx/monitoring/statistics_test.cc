@@ -44,7 +44,7 @@ TEST_F(StatisticsTest, NoNameStats) {
   static std::unordered_map<std::string, OptionTypeInfo> no_name_opt_info = {
       {"inner",
        OptionTypeInfo::AsCustomSharedPtr<Statistics>(
-           0, OptionVerificationType::kByName,
+           0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
            OptionTypeFlags::kAllowNull | OptionTypeFlags::kCompareNever)},
   };
 

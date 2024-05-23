@@ -1169,7 +1169,7 @@ namespace {
 static std::unordered_map<std::string, OptionTypeInfo> sc_wrapper_type_info = {
     {"target",
      OptionTypeInfo::AsCustomSharedPtr<SystemClock>(
-         0, OptionVerificationType::kByName, OptionTypeFlags::kDontSerialize)},
+         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, OptionTypeFlags::kDontSerialize)},
 };
 
 }  // namespace

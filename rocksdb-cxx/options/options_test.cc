@@ -2194,7 +2194,7 @@ class TestEventListener : public EventListener {
 static std::unordered_map<std::string, OptionTypeInfo>
     test_listener_option_info = {
         {"s",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kString, OptionVerificationType::kNormal,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           OptionTypeFlags::kNone}},
 
 };
@@ -4406,7 +4406,7 @@ TEST_F(OptionTypeInfoTest, TestInvalidArgs) {
 
   // Verify that if the parse function throws an exception, it is also trapped
   OptionTypeInfo func_info(0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
-                           OptionVerificationType::kNormal,
+                           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                            OptionTypeFlags::kNone,
                            [](const ConfigOptions&, const std::string&,
                               const std::string& value, void* addr) {
@@ -4420,7 +4420,7 @@ TEST_F(OptionTypeInfoTest, TestInvalidArgs) {
 
 TEST_F(OptionTypeInfoTest, TestParseFunc) {
   OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
-                          OptionVerificationType::kNormal,
+                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                           OptionTypeFlags::kNone);
   opt_info.SetParseFunc([](const ConfigOptions& /*opts*/,
                            const std::string& name, const std::string& value,
@@ -4442,7 +4442,7 @@ TEST_F(OptionTypeInfoTest, TestParseFunc) {
 
 TEST_F(OptionTypeInfoTest, TestSerializeFunc) {
   OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                          OptionVerificationType::kNormal,
+                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                           OptionTypeFlags::kNone);
   opt_info.SetSerializeFunc([](const ConfigOptions& /*opts*/,
                                const std::string& name, const void* /*addr*/,
@@ -4463,7 +4463,7 @@ TEST_F(OptionTypeInfoTest, TestSerializeFunc) {
 }
 
 TEST_F(OptionTypeInfoTest, TestEqualsFunc) {
-  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kInt, OptionVerificationType::kNormal,
+  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                           OptionTypeFlags::kNone);
   opt_info.SetEqualsFunc([](const ConfigOptions& /*opts*/,
                             const std::string& name, const void* addr1,
@@ -4497,7 +4497,7 @@ TEST_F(OptionTypeInfoTest, TestEqualsFunc) {
 }
 
 TEST_F(OptionTypeInfoTest, TestPrepareFunc) {
-  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kInt, OptionVerificationType::kNormal,
+  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                           OptionTypeFlags::kNone);
   opt_info.SetPrepareFunc(
       [](const ConfigOptions& /*opts*/, const std::string& name, void* addr) {
@@ -4522,7 +4522,7 @@ TEST_F(OptionTypeInfoTest, TestPrepareFunc) {
 }
 TEST_F(OptionTypeInfoTest, TestValidateFunc) {
   OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kSizeT,
-                          OptionVerificationType::kNormal,
+                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                           OptionTypeFlags::kNone);
   opt_info.SetValidateFunc([](const DBOptions& db_opts,
                               const ColumnFamilyOptions& cf_opts,
@@ -4556,16 +4556,16 @@ TEST_F(OptionTypeInfoTest, TestValidateFunc) {
 
 TEST_F(OptionTypeInfoTest, TestOptionFlags) {
   OptionTypeInfo opt_none(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                          OptionVerificationType::kNormal,
+                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                           OptionTypeFlags::kDontSerialize);
   OptionTypeInfo opt_never(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                           OptionVerificationType::kNormal,
+                           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
                            OptionTypeFlags::kCompareNever);
   OptionTypeInfo opt_alias(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                           OptionVerificationType::kAlias,
+                           rocksdb_rs::utilities::options_type::OptionVerificationType::kAlias,
                            OptionTypeFlags::kNone);
   OptionTypeInfo opt_deprecated(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                                OptionVerificationType::kDeprecated,
+                                rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
                                 OptionTypeFlags::kNone);
   ConfigOptions config_options;
   std::string opts_str;
@@ -4688,20 +4688,20 @@ TEST_F(OptionTypeInfoTest, TestStruct) {
       {"s", {offsetof(struct Basic, s), rocksdb_rs::utilities::options_type::OptionType::kString}},
   };
   OptionTypeInfo basic_info = OptionTypeInfo::Struct(
-      "b", &basic_type_map, 0, OptionVerificationType::kNormal,
+      "b", &basic_type_map, 0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       OptionTypeFlags::kMutable);
 
   std::unordered_map<std::string, OptionTypeInfo> extended_type_map = {
       {"j", {offsetof(struct Extended, j), rocksdb_rs::utilities::options_type::OptionType::kInt}},
       {"b", OptionTypeInfo::Struct(
                 "b", &basic_type_map, offsetof(struct Extended, b),
-                OptionVerificationType::kNormal, OptionTypeFlags::kNone)},
+                rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone)},
       {"m", OptionTypeInfo::Struct(
                 "m", &basic_type_map, offsetof(struct Extended, b),
-                OptionVerificationType::kNormal, OptionTypeFlags::kMutable)},
+                rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kMutable)},
   };
   OptionTypeInfo extended_info = OptionTypeInfo::Struct(
-      "e", &extended_type_map, 0, OptionVerificationType::kNormal,
+      "e", &extended_type_map, 0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       OptionTypeFlags::kMutable);
   Extended e1, e2;
   ConfigOptions config_options;
@@ -4758,7 +4758,7 @@ TEST_F(OptionTypeInfoTest, TestStruct) {
 
 TEST_F(OptionTypeInfoTest, TestArrayType) {
   OptionTypeInfo array_info = OptionTypeInfo::Array<std::string, 4>(
-      0, OptionVerificationType::kNormal, OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString});
   std::array<std::string, 4> array1, array2;
   std::string mismatch;
@@ -4788,7 +4788,7 @@ TEST_F(OptionTypeInfoTest, TestArrayType) {
 
   std::array<std::string, 3> array3, array4;
   OptionTypeInfo bar_info = OptionTypeInfo::Array<std::string, 3>(
-      0, OptionVerificationType::kNormal, OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString}, '|');
   TestParseAndCompareOption(config_options, bar_info, "v", "x|y|z", &array3,
                             &array4);
@@ -4820,7 +4820,7 @@ TEST_F(OptionTypeInfoTest, TestArrayType) {
 
 TEST_F(OptionTypeInfoTest, TestVectorType) {
   OptionTypeInfo vec_info = OptionTypeInfo::Vector<std::string>(
-      0, OptionVerificationType::kNormal, OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString});
   std::vector<std::string> vec1, vec2;
   std::string mismatch;
@@ -4847,7 +4847,7 @@ TEST_F(OptionTypeInfoTest, TestVectorType) {
   ASSERT_EQ(vec1[3], "d");
 
   OptionTypeInfo bar_info = OptionTypeInfo::Vector<std::string>(
-      0, OptionVerificationType::kNormal, OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString}, '|');
   TestParseAndCompareOption(config_options, vec_info, "v", "x|y|z", &vec1,
                             &vec2);

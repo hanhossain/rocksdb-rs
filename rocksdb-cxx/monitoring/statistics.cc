@@ -356,7 +356,7 @@ rocksdb_rs::status::Status Statistics::CreateFromString(const ConfigOptions& con
 
 static std::unordered_map<std::string, OptionTypeInfo> stats_type_info = {
     {"inner", OptionTypeInfo::AsCustomSharedPtr<Statistics>(
-                  0, OptionVerificationType::kByNameAllowFromNull,
+                  0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowFromNull,
                   OptionTypeFlags::kCompareNever)},
 };
 
