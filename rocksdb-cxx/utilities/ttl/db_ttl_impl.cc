@@ -173,7 +173,7 @@ void DBWithTTLImpl::SanitizeOptions(int32_t ttl, ColumnFamilyOptions* options,
 }
 
 static std::unordered_map<std::string, OptionTypeInfo> ttl_type_info = {
-    {"ttl", {0, OptionType::kInt32T}},
+    {"ttl", {0, rocksdb_rs::utilities::options_type::OptionType::kInt32T}},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> ttl_cff_type_info = {

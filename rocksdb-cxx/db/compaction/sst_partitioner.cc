@@ -16,7 +16,7 @@ namespace rocksdb {
 static std::unordered_map<std::string, OptionTypeInfo>
     sst_fixed_prefix_type_info = {
         {"length",
-         {0, OptionType::kSizeT, OptionVerificationType::kNormal,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kSizeT, OptionVerificationType::kNormal,
           OptionTypeFlags::kNone}},
 };
 

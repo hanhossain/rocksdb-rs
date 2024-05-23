@@ -113,10 +113,10 @@ struct AOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> a_option_info = {
     {"int",
-     {offsetof(struct AOptions, i), OptionType::kInt,
+     {offsetof(struct AOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
       OptionVerificationType::kNormal, OptionTypeFlags::kMutable}},
     {"bool",
-     {offsetof(struct AOptions, b), OptionType::kBoolean,
+     {offsetof(struct AOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
       OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
 };
 
@@ -141,10 +141,10 @@ struct BOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> b_option_info = {
     {"string",
-     {offsetof(struct BOptions, s), OptionType::kString,
+     {offsetof(struct BOptions, s), rocksdb_rs::utilities::options_type::OptionType::kString,
       OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
     {"bool",
-     {offsetof(struct BOptions, b), OptionType::kBoolean,
+     {offsetof(struct BOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
       OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
 };
 
@@ -196,7 +196,7 @@ struct SimpleOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> simple_option_info = {
     {"bool",
-     {offsetof(struct SimpleOptions, b), OptionType::kBoolean,
+     {offsetof(struct SimpleOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
       OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
     {"unique",
      OptionTypeInfo::AsCustomUniquePtr<TestCustomizable>(
@@ -533,7 +533,7 @@ TEST_F(CustomizableTest, IsInstanceOfTest) {
 TEST_F(CustomizableTest, PrepareOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> p_option_info = {
       {"can_prepare",
-       {0, OptionType::kBoolean, OptionVerificationType::kNormal,
+       {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, OptionVerificationType::kNormal,
         OptionTypeFlags::kNone}},
   };
 

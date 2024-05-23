@@ -228,7 +228,7 @@ class Configurable {
   // more than once.
   //
   // By default, this method will also prepare all nested (Inner and
-  // OptionType::kConfigurable) objects.
+  // rocksdb_rs::utilities::options_type::OptionType::kConfigurable) objects.
   //
   // @param config_options Controls how the object is prepared.  Also contains
   //      a Logger and Env that can be used to initialize this object.
@@ -244,7 +244,7 @@ class Configurable {
   // settings.
   //
   // By default, this method will also validate all nested (Inner and
-  // OptionType::kConfigurable) objects.
+  // rocksdb_rs::utilities::options_type::OptionType::kConfigurable) objects.
   //
   // @param db_opts The DBOptions to validate
   // @param cf_opts The ColumnFamilyOptions to validate

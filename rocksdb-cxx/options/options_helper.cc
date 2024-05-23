@@ -396,69 +396,69 @@ std::vector<ChecksumType> GetSupportedChecksums() {
                                    checksum_types.end());
 }
 
-static bool ParseOptionHelper(void* opt_address, const OptionType& opt_type,
+static bool ParseOptionHelper(void* opt_address, const rocksdb_rs::utilities::options_type::OptionType& opt_type,
                               const std::string& value) {
   switch (opt_type) {
-    case OptionType::kBoolean:
+    case rocksdb_rs::utilities::options_type::OptionType::kBoolean:
       *static_cast<bool*>(opt_address) = ParseBoolean("", value);
       break;
-    case OptionType::kInt:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt:
       *static_cast<int*>(opt_address) = ParseInt(value);
       break;
-    case OptionType::kInt32T:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt32T:
       *static_cast<int32_t*>(opt_address) = ParseInt32(value);
       break;
-    case OptionType::kInt64T:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt64T:
       PutUnaligned(static_cast<int64_t*>(opt_address), ParseInt64(value));
       break;
-    case OptionType::kUInt:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt:
       *static_cast<unsigned int*>(opt_address) = ParseUint32(value);
       break;
-    case OptionType::kUInt8T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt8T:
       *static_cast<uint8_t*>(opt_address) = ParseUint8(value);
       break;
-    case OptionType::kUInt32T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt32T:
       *static_cast<uint32_t*>(opt_address) = ParseUint32(value);
       break;
-    case OptionType::kUInt64T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt64T:
       PutUnaligned(static_cast<uint64_t*>(opt_address), ParseUint64(value));
       break;
-    case OptionType::kSizeT:
+    case rocksdb_rs::utilities::options_type::OptionType::kSizeT:
       PutUnaligned(static_cast<size_t*>(opt_address), ParseSizeT(value));
       break;
-    case OptionType::kString:
+    case rocksdb_rs::utilities::options_type::OptionType::kString:
       *static_cast<std::string*>(opt_address) = value;
       break;
-    case OptionType::kDouble:
+    case rocksdb_rs::utilities::options_type::OptionType::kDouble:
       *static_cast<double*>(opt_address) = ParseDouble(value);
       break;
-    case OptionType::kCompactionStyle:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionStyle:
       return ParseEnum<CompactionStyle>(
           compaction_style_string_map, value,
           static_cast<CompactionStyle*>(opt_address));
-    case OptionType::kCompactionPri:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionPri:
       return ParseEnum<CompactionPri>(compaction_pri_string_map, value,
                                       static_cast<CompactionPri*>(opt_address));
-    case OptionType::kCompressionType:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompressionType:
       return ParseEnum<rocksdb_rs::compression_type::CompressionType>(
           compression_type_string_map, value,
           static_cast<rocksdb_rs::compression_type::CompressionType*>(opt_address));
-    case OptionType::kChecksumType:
+    case rocksdb_rs::utilities::options_type::OptionType::kChecksumType:
       return ParseEnum<ChecksumType>(checksum_type_string_map, value,
                                      static_cast<ChecksumType*>(opt_address));
-    case OptionType::kEncodingType:
+    case rocksdb_rs::utilities::options_type::OptionType::kEncodingType:
       return ParseEnum<EncodingType>(encoding_type_string_map, value,
                                      static_cast<EncodingType*>(opt_address));
-    case OptionType::kCompactionStopStyle:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionStopStyle:
       return ParseEnum<CompactionStopStyle>(
           compaction_stop_style_string_map, value,
           static_cast<CompactionStopStyle*>(opt_address));
-    case OptionType::kEncodedString: {
+    case rocksdb_rs::utilities::options_type::OptionType::kEncodedString: {
       std::string* output_addr = static_cast<std::string*>(opt_address);
       (Slice(value)).DecodeHex(output_addr);
       break;
     }
-    case OptionType::kTemperature: {
+    case rocksdb_rs::utilities::options_type::OptionType::kTemperature: {
       return ParseEnum<Temperature>(temperature_string_map, value,
                                     static_cast<Temperature*>(opt_address));
     }
@@ -469,87 +469,87 @@ static bool ParseOptionHelper(void* opt_address, const OptionType& opt_type,
 }
 
 bool SerializeSingleOptionHelper(const void* opt_address,
-                                 const OptionType opt_type,
+                                 const rocksdb_rs::utilities::options_type::OptionType opt_type,
                                  std::string* value) {
   assert(value);
   switch (opt_type) {
-    case OptionType::kBoolean:
+    case rocksdb_rs::utilities::options_type::OptionType::kBoolean:
       *value = *(static_cast<const bool*>(opt_address)) ? "true" : "false";
       break;
-    case OptionType::kInt:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt:
       *value = std::to_string(*(static_cast<const int*>(opt_address)));
       break;
-    case OptionType::kInt32T:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt32T:
       *value = std::to_string(*(static_cast<const int32_t*>(opt_address)));
       break;
-    case OptionType::kInt64T:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt64T:
       {
         int64_t v;
         GetUnaligned(static_cast<const int64_t*>(opt_address), &v);
         *value = std::to_string(v);
       }
       break;
-    case OptionType::kUInt:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt:
       *value = std::to_string(*(static_cast<const unsigned int*>(opt_address)));
       break;
-    case OptionType::kUInt8T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt8T:
       *value = std::to_string(*(static_cast<const uint8_t*>(opt_address)));
       break;
-    case OptionType::kUInt32T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt32T:
       *value = std::to_string(*(static_cast<const uint32_t*>(opt_address)));
       break;
-    case OptionType::kUInt64T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt64T:
       {
         uint64_t v;
         GetUnaligned(static_cast<const uint64_t*>(opt_address), &v);
         *value = std::to_string(v);
       }
       break;
-    case OptionType::kSizeT:
+    case rocksdb_rs::utilities::options_type::OptionType::kSizeT:
       {
         size_t v;
         GetUnaligned(static_cast<const size_t*>(opt_address), &v);
         *value = std::to_string(v);
       }
       break;
-    case OptionType::kDouble:
+    case rocksdb_rs::utilities::options_type::OptionType::kDouble:
       *value = std::to_string(*(static_cast<const double*>(opt_address)));
       break;
-    case OptionType::kString:
+    case rocksdb_rs::utilities::options_type::OptionType::kString:
       *value =
           EscapeOptionString(*(static_cast<const std::string*>(opt_address)));
       break;
-    case OptionType::kCompactionStyle:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionStyle:
       return SerializeEnum<CompactionStyle>(
           compaction_style_string_map,
           *(static_cast<const CompactionStyle*>(opt_address)), value);
-    case OptionType::kCompactionPri:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionPri:
       return SerializeEnum<CompactionPri>(
           compaction_pri_string_map,
           *(static_cast<const CompactionPri*>(opt_address)), value);
-    case OptionType::kCompressionType:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompressionType:
       return SerializeEnum<rocksdb_rs::compression_type::CompressionType>(
           compression_type_string_map,
           *(static_cast<const rocksdb_rs::compression_type::CompressionType*>(opt_address)), value);
       break;
-    case OptionType::kChecksumType:
+    case rocksdb_rs::utilities::options_type::OptionType::kChecksumType:
       return SerializeEnum<ChecksumType>(
           checksum_type_string_map,
           *static_cast<const ChecksumType*>(opt_address), value);
-    case OptionType::kEncodingType:
+    case rocksdb_rs::utilities::options_type::OptionType::kEncodingType:
       return SerializeEnum<EncodingType>(
           encoding_type_string_map,
           *static_cast<const EncodingType*>(opt_address), value);
-    case OptionType::kCompactionStopStyle:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionStopStyle:
       return SerializeEnum<CompactionStopStyle>(
           compaction_stop_style_string_map,
           *static_cast<const CompactionStopStyle*>(opt_address), value);
-    case OptionType::kEncodedString: {
+    case rocksdb_rs::utilities::options_type::OptionType::kEncodedString: {
       const auto* ptr = static_cast<const std::string*>(opt_address);
       *value = (Slice(*ptr)).ToString(true);
       break;
     }
-    case OptionType::kTemperature: {
+    case rocksdb_rs::utilities::options_type::OptionType::kTemperature: {
       return SerializeEnum<Temperature>(
           temperature_string_map, *static_cast<const Temperature*>(opt_address),
           value);
@@ -1130,59 +1130,59 @@ static bool AreEqualDoubles(const double a, const double b) {
   return (fabs(a - b) < 0.00001);
 }
 
-static bool AreOptionsEqual(OptionType type, const void* this_offset,
+static bool AreOptionsEqual(rocksdb_rs::utilities::options_type::OptionType type, const void* this_offset,
                             const void* that_offset) {
   switch (type) {
-    case OptionType::kBoolean:
+    case rocksdb_rs::utilities::options_type::OptionType::kBoolean:
       return IsOptionEqual<bool>(this_offset, that_offset);
-    case OptionType::kInt:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt:
       return IsOptionEqual<int>(this_offset, that_offset);
-    case OptionType::kUInt:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt:
       return IsOptionEqual<unsigned int>(this_offset, that_offset);
-    case OptionType::kInt32T:
+    case rocksdb_rs::utilities::options_type::OptionType::kInt32T:
       return IsOptionEqual<int32_t>(this_offset, that_offset);
-    case OptionType::kInt64T: {
+    case rocksdb_rs::utilities::options_type::OptionType::kInt64T: {
       int64_t v1, v2;
       GetUnaligned(static_cast<const int64_t*>(this_offset), &v1);
       GetUnaligned(static_cast<const int64_t*>(that_offset), &v2);
       return (v1 == v2);
     }
-    case OptionType::kUInt8T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt8T:
       return IsOptionEqual<uint8_t>(this_offset, that_offset);
-    case OptionType::kUInt32T:
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt32T:
       return IsOptionEqual<uint32_t>(this_offset, that_offset);
-    case OptionType::kUInt64T: {
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt64T: {
       uint64_t v1, v2;
       GetUnaligned(static_cast<const uint64_t*>(this_offset), &v1);
       GetUnaligned(static_cast<const uint64_t*>(that_offset), &v2);
       return (v1 == v2);
     }
-    case OptionType::kSizeT: {
+    case rocksdb_rs::utilities::options_type::OptionType::kSizeT: {
       size_t v1, v2;
       GetUnaligned(static_cast<const size_t*>(this_offset), &v1);
       GetUnaligned(static_cast<const size_t*>(that_offset), &v2);
       return (v1 == v2);
     }
-    case OptionType::kString:
+    case rocksdb_rs::utilities::options_type::OptionType::kString:
       return IsOptionEqual<std::string>(this_offset, that_offset);
-    case OptionType::kDouble:
+    case rocksdb_rs::utilities::options_type::OptionType::kDouble:
       return AreEqualDoubles(*static_cast<const double*>(this_offset),
                              *static_cast<const double*>(that_offset));
-    case OptionType::kCompactionStyle:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionStyle:
       return IsOptionEqual<CompactionStyle>(this_offset, that_offset);
-    case OptionType::kCompactionStopStyle:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionStopStyle:
       return IsOptionEqual<CompactionStopStyle>(this_offset, that_offset);
-    case OptionType::kCompactionPri:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompactionPri:
       return IsOptionEqual<CompactionPri>(this_offset, that_offset);
-    case OptionType::kCompressionType:
+    case rocksdb_rs::utilities::options_type::OptionType::kCompressionType:
       return IsOptionEqual<rocksdb_rs::compression_type::CompressionType>(this_offset, that_offset);
-    case OptionType::kChecksumType:
+    case rocksdb_rs::utilities::options_type::OptionType::kChecksumType:
       return IsOptionEqual<ChecksumType>(this_offset, that_offset);
-    case OptionType::kEncodingType:
+    case rocksdb_rs::utilities::options_type::OptionType::kEncodingType:
       return IsOptionEqual<EncodingType>(this_offset, that_offset);
-    case OptionType::kEncodedString:
+    case rocksdb_rs::utilities::options_type::OptionType::kEncodedString:
       return IsOptionEqual<std::string>(this_offset, that_offset);
-    case OptionType::kTemperature:
+    case rocksdb_rs::utilities::options_type::OptionType::kTemperature:
       return IsOptionEqual<Temperature>(this_offset, that_offset);
     default:
       return false;

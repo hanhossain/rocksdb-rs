@@ -39,13 +39,13 @@ struct TestOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> simple_option_info = {
     {"int",
-     {offsetof(struct TestOptions, i), OptionType::kInt,
+     {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
       OptionVerificationType::kNormal, OptionTypeFlags::kMutable}},
     {"bool",
-     {offsetof(struct TestOptions, b), OptionType::kBoolean,
+     {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
       OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
     {"string",
-     {offsetof(struct TestOptions, s), OptionType::kString,
+     {offsetof(struct TestOptions, s), rocksdb_rs::utilities::options_type::OptionType::kString,
       OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
 };
 
@@ -56,18 +56,18 @@ static std::unordered_map<std::string, OptionTypeInfo> enum_option_info = {
 
 static std::unordered_map<std::string, OptionTypeInfo> unique_option_info = {
     {"unique",
-     {0, OptionType::kConfigurable, OptionVerificationType::kNormal,
+     {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, OptionVerificationType::kNormal,
       (OptionTypeFlags::kUnique | OptionTypeFlags::kMutable)}},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> shared_option_info = {
     {"shared",
-     {0, OptionType::kConfigurable, OptionVerificationType::kNormal,
+     {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, OptionVerificationType::kNormal,
       (OptionTypeFlags::kShared)}},
 };
 static std::unordered_map<std::string, OptionTypeInfo> pointer_option_info = {
     {"pointer",
-     {0, OptionType::kConfigurable, OptionVerificationType::kNormal,
+     {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, OptionVerificationType::kNormal,
       OptionTypeFlags::kRawPointer}},
 };
 

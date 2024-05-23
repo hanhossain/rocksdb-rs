@@ -915,7 +915,7 @@ namespace {
 static std::unordered_map<std::string, OptionTypeInfo>
     rot13_block_cipher_type_info = {
         {"block_size",
-         {0 /* No offset, whole struct*/, OptionType::kInt,
+         {0 /* No offset, whole struct*/, rocksdb_rs::utilities::options_type::OptionType::kInt,
           OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
 };
 
