@@ -48,9 +48,9 @@ namespace rocksdb {
     enum class OptionTypeFlags : uint32_t {
         kNone = 0x00,  // No flags
         kCompareDefault = 0x0,
-        kCompareNever = ConfigOptions::kSanityLevelNone,
-        kCompareLoose = ConfigOptions::kSanityLevelLooselyCompatible,
-        kCompareExact = ConfigOptions::kSanityLevelExactMatch,
+        kCompareNever = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelNone),
+        kCompareLoose = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible),
+        kCompareExact = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelExactMatch),
 
         kMutable = 0x0100,         // Option is mutable
         kRawPointer = 0x0200,      // The option is stored as a raw pointer

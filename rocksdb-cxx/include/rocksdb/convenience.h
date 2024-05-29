@@ -41,8 +41,9 @@ struct ConfigOptions {
   explicit ConfigOptions(const DBOptions&);
 
   // This enum defines the RocksDB options sanity level.
-  enum SanityLevel : unsigned char {
-    kSanityLevelNone = 0x01,  // Performs no sanity check at all.
+  enum class SanityLevel : unsigned char {
+    // Performs no sanity check at all.
+    kSanityLevelNone = 0x01,
     // Performs minimum check to ensure the RocksDB instance can be
     // opened without corrupting / mis-interpreting the data.
     kSanityLevelLooselyCompatible = 0x02,

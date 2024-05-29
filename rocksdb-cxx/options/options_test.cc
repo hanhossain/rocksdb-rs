@@ -183,8 +183,8 @@ TEST_F(OptionsTest, GetOptionsFromMapTest) {
   ConfigOptions exact, loose;
   exact.input_strings_escaped = false;
   exact.ignore_unknown_options = false;
-  exact.sanity_level = ConfigOptions::kSanityLevelExactMatch;
-  loose.sanity_level = ConfigOptions::kSanityLevelLooselyCompatible;
+  exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
+  loose.sanity_level = ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
 
   loose.input_strings_escaped = false;
   loose.ignore_unknown_options = true;
@@ -2494,8 +2494,8 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
   ASSERT_NOK(GetColumnFamilyOptionsFromMap(cf_config_options, base_cf_opt,
                                            cf_options_map, &new_cf_opt));
   ConfigOptions exact, loose;
-  exact.sanity_level = ConfigOptions::kSanityLevelExactMatch;
-  loose.sanity_level = ConfigOptions::kSanityLevelLooselyCompatible;
+  exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
+  loose.sanity_level = ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
 
   ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
@@ -2622,7 +2622,7 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
       config_options, base_cf_opt,
       "write_buffer_size=13;max_write_buffer_number_=14;", &new_cf_opt));
   ConfigOptions exact;
-  exact.sanity_level = ConfigOptions::kSanityLevelExactMatch;
+  exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
   ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   // Comparator from object registry
@@ -3263,7 +3263,7 @@ TEST_F(OptionsParserTest, Comment) {
 
   ConfigOptions exact;
   exact.input_strings_escaped = false;
-  exact.sanity_level = ConfigOptions::kSanityLevelExactMatch;
+  exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
   ASSERT_OK(
       RocksDBOptionsParser::VerifyDBOptions(exact, *parser.db_opt(), db_opt));
   ASSERT_EQ(parser.NumColumnFamilies(), 1U);
@@ -3903,14 +3903,14 @@ class OptionsSanityCheckTest : public OptionsParserTest,
 
   void SanityCheckCFOptions(const ColumnFamilyOptions& opts, bool exact) {
     ASSERT_OK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
     if (exact) {
       ASSERT_OK(
-          SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+          SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     } else {
       ASSERT_NOK(
-          SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+          SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     }
   }
 
@@ -3921,14 +3921,14 @@ class OptionsSanityCheckTest : public OptionsParserTest,
 
   void SanityCheckDBOptions(const DBOptions& opts, bool exact) {
     ASSERT_OK(SanityCheckDBOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckDBOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
     if (exact) {
       ASSERT_OK(
-          SanityCheckDBOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+          SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     } else {
       ASSERT_NOK(
-          SanityCheckDBOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+          SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     }
   }
 
@@ -3963,7 +3963,7 @@ TEST_P(OptionsSanityCheckTest, MergeOperatorErrorMessage) {
   // Test when going from merge operator -> nullptr
   opts.merge_operator = nullptr;
   rocksdb_rs::status::Status s =
-      SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelLooselyCompatible);
+      SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible);
   ASSERT_TRUE(s.IsInvalidArgument());
   std::string err_msg = *s.ToString();
   std::string specified = "The specified one is " + kNullptrString;
@@ -3973,7 +3973,7 @@ TEST_P(OptionsSanityCheckTest, MergeOperatorErrorMessage) {
 
   // Test when using a different merge operator
   opts.merge_operator.reset(test::RandomMergeOperator(&rnd));
-  s = SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelLooselyCompatible);
+  s = SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible);
   ASSERT_TRUE(s.IsInvalidArgument());
   err_msg = *s.ToString();
   specified =
@@ -3991,7 +3991,7 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
   {
     ASSERT_OK(PersistCFOptions(opts));
     ASSERT_OK(
-        SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
   }
 
   // prefix_extractor
@@ -4000,41 +4000,41 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     ASSERT_EQ(opts.prefix_extractor.get(), nullptr);
     opts.prefix_extractor.reset(NewCappedPrefixTransform(10));
     ASSERT_OK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
     ASSERT_OK(
-        SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // use same prefix extractor but with different parameter
     opts.prefix_extractor.reset(NewCappedPrefixTransform(15));
     // expect pass only in
-    // ConfigOptions::kSanityLevelLooselyCompatible
+    // ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible
     ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     ASSERT_OK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // repeat the test with FixedPrefixTransform
     opts.prefix_extractor.reset(NewFixedPrefixTransform(10));
     ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     ASSERT_OK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change of prefix_extractor
     ASSERT_OK(PersistCFOptions(opts));
     ASSERT_OK(
-        SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // use same prefix extractor but with different parameter
     opts.prefix_extractor.reset(NewFixedPrefixTransform(15));
     // expect pass only in
-    // ConfigOptions::kSanityLevelLooselyCompatible
+    // ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible
     SanityCheckCFOptions(opts, false);
 
     // Change prefix extractor from non-nullptr to nullptr
@@ -4042,12 +4042,12 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     // expect pass as it's safe to change prefix_extractor
     // from non-null to null
     ASSERT_OK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
   }
   // persist the change
   ASSERT_OK(PersistCFOptions(opts));
-  ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+  ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
   // table_factory
   {
@@ -4055,13 +4055,13 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
       // change the table factory
       opts.table_factory.reset(test::RandomTableFactory(&rnd, tb));
       ASSERT_NOK(SanityCheckCFOptions(
-          opts, ConfigOptions::kSanityLevelLooselyCompatible));
-      ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+          opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+      ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
       // persist the change
       ASSERT_OK(PersistCFOptions(opts));
       ASSERT_OK(
-          SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+          SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     }
   }
 
@@ -4070,8 +4070,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     // Test when going from nullptr -> merge operator
     opts.merge_operator.reset(test::RandomMergeOperator(&rnd));
     ASSERT_OK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4081,8 +4081,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
       // change the merge operator
       opts.merge_operator.reset(test::RandomMergeOperator(&rnd));
       ASSERT_NOK(SanityCheckCFOptions(
-          opts, ConfigOptions::kSanityLevelLooselyCompatible));
-      ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+          opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+      ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
       // persist the change
       ASSERT_OK(PersistCFOptions(opts));
@@ -4092,8 +4092,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     // Test when going from merge operator -> nullptr
     opts.merge_operator = nullptr;
     ASSERT_NOK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelNone));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
+    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4134,9 +4134,9 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     // Test change from true to false not allowed in loose and exact mode.
     opts.persist_user_defined_timestamps = false;
     ASSERT_NOK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
     ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4145,9 +4145,9 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     // Test change from false to true not allowed in loose and exact mode.
     opts.persist_user_defined_timestamps = true;
     ASSERT_NOK(SanityCheckCFOptions(
-        opts, ConfigOptions::kSanityLevelLooselyCompatible));
+        opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
     ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4162,7 +4162,7 @@ TEST_P(OptionsSanityCheckTest, DBOptionsSanityCheck) {
   {
     ASSERT_OK(PersistDBOptions(opts));
     ASSERT_OK(
-        SanityCheckDBOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+        SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
   }
 
   // File checksum generator
@@ -4193,7 +4193,7 @@ TEST_P(OptionsSanityCheckTest, DBOptionsSanityCheck) {
   }
   // persist the change
   ASSERT_OK(PersistDBOptions(opts));
-  ASSERT_OK(SanityCheckDBOptions(opts, ConfigOptions::kSanityLevelExactMatch));
+  ASSERT_OK(SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 }
 
 namespace {

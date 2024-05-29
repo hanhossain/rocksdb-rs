@@ -97,7 +97,7 @@ class DBBenchTest : public testing::Test {
 
     ConfigOptions exact;
     exact.input_strings_escaped = false;
-    exact.sanity_level = ConfigOptions::kSanityLevelExactMatch;
+    exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
     ASSERT_OK(RocksDBOptionsParser::VerifyDBOptions(exact, DBOptions(opt),
                                                     loaded_db_opts));
     ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(

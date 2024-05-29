@@ -72,7 +72,7 @@ std::string Customizable::SerializeOptions(const ConfigOptions& config_options,
 bool Customizable::AreEquivalent(const ConfigOptions& config_options,
                                  const Configurable* other,
                                  std::string* mismatch) const {
-  if (config_options.sanity_level > ConfigOptions::kSanityLevelNone &&
+  if (config_options.sanity_level > ConfigOptions::SanityLevel::kSanityLevelNone &&
       this != other) {
     const Customizable* custom = reinterpret_cast<const Customizable*>(other);
     if (custom == nullptr) {  // Cast failed
@@ -81,7 +81,7 @@ bool Customizable::AreEquivalent(const ConfigOptions& config_options,
       *mismatch = OptionTypeInfo::kIdPropName();
       return false;
     } else if (config_options.sanity_level >
-               ConfigOptions::kSanityLevelLooselyCompatible) {
+               ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible) {
       bool matches =
           Configurable::AreEquivalent(config_options, other, mismatch);
       return matches;
