@@ -46,20 +46,29 @@ namespace rocksdb {
 //                the string representation.
 // kDontPrepare   means do not call PrepareOptions for this pointer value.
     enum class OptionTypeFlags : uint32_t {
-        kNone = 0x00,  // No flags
+        // No flags
+        kNone = 0x00,
         kCompareDefault = 0x0,
         kCompareNever = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelNone),
         kCompareLoose = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible),
         kCompareExact = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelExactMatch),
 
-        kMutable = 0x0100,         // Option is mutable
-        kRawPointer = 0x0200,      // The option is stored as a raw pointer
-        kShared = 0x0400,          // The option is stored as a shared_ptr
-        kUnique = 0x0800,          // The option is stored as a unique_ptr
-        kAllowNull = 0x1000,       // The option can be null
-        kDontSerialize = 0x2000,   // Don't serialize the option
-        kDontPrepare = 0x4000,     // Don't prepare or sanitize this option
-        kStringNameOnly = 0x8000,  // The option serializes to a name only
+        // Option is mutable
+        kMutable = 0x0100,
+        // The option is stored as a raw pointer
+        kRawPointer = 0x0200,
+        // The option is stored as a shared_ptr
+        kShared = 0x0400,
+        // The option is stored as a unique_ptr
+        kUnique = 0x0800,
+        // The option can be null
+        kAllowNull = 0x1000,
+        // Don't serialize the option
+        kDontSerialize = 0x2000,
+        // Don't prepare or sanitize this option
+        kDontPrepare = 0x4000,
+        // The option serializes to a name only
+        kStringNameOnly = 0x8000,
     };
 
     inline OptionTypeFlags operator|(const OptionTypeFlags &a,
