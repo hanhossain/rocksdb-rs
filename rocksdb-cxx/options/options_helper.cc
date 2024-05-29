@@ -997,7 +997,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
   // we skip it in the serialization.
   if (opt_ptr == nullptr || IsDeprecated()) {
     return rocksdb_rs::status::Status_OK();
-  } else if (IsEnabled(OptionTypeFlags::kDontSerialize)) {
+  } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize)) {
     return rocksdb_rs::status::Status_NotSupported("Cannot serialize option: ", opt_name);
   } else if (serialize_func_ != nullptr) {
     const void* opt_addr = GetOffset(opt_ptr);
@@ -1016,7 +1016,7 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
       } else {
         *opt_value = "";
       }
-    } else if (IsEnabled(OptionTypeFlags::kStringNameOnly) &&
+    } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kStringNameOnly) &&
                !config_options.IsDetailed()) {
       if (!config_options.mutable_options_only || IsMutable()) {
         *opt_value = custom->GetId();

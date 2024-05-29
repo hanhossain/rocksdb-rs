@@ -292,7 +292,7 @@ MemTableRep::Iterator* VectorRep::GetIterator(Arena* arena) {
 static std::unordered_map<std::string, OptionTypeInfo> vector_rep_table_info = {
     {"count",
      {0, rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 VectorRepFactory::VectorRepFactory(size_t count) : count_(count) {

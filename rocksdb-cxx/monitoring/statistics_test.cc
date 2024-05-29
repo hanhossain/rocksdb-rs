@@ -45,7 +45,7 @@ TEST_F(StatisticsTest, NoNameStats) {
       {"inner",
        OptionTypeInfo::AsCustomSharedPtr<Statistics>(
            0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
-           OptionTypeFlags::kAllowNull | OptionTypeFlags::kCompareNever)},
+           rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull | rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever)},
   };
 
   class DefaultNameStatistics : public Statistics {

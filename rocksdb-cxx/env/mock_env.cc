@@ -34,7 +34,7 @@ int64_t MaybeCurrentTime(const std::shared_ptr<SystemClock>& clock) {
 static std::unordered_map<std::string, OptionTypeInfo> time_elapse_type_info = {
     {"time_elapse_only_sleep",
      {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-      OptionTypeFlags::kCompareNever,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever,
       [](const ConfigOptions& /*opts*/, const std::string& /*name*/,
          const std::string& value, void* addr) {
         auto clock = static_cast<EmulatedSystemClock*>(addr);
@@ -52,7 +52,7 @@ static std::unordered_map<std::string, OptionTypeInfo> time_elapse_type_info = {
 static std::unordered_map<std::string, OptionTypeInfo> mock_sleep_type_info = {
     {"mock_sleep",
      {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-      OptionTypeFlags::kCompareNever,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever,
       [](const ConfigOptions& /*opts*/, const std::string& /*name*/,
          const std::string& value, void* addr) {
         auto clock = static_cast<EmulatedSystemClock*>(addr);
@@ -569,7 +569,7 @@ class TestMemLogger : public Logger {
 static std::unordered_map<std::string, OptionTypeInfo> mock_fs_type_info = {
     {"supports_direct_io",
      {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 }  // namespace
 

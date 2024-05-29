@@ -21,7 +21,7 @@ static std::unordered_map<std::string, OptionTypeInfo>
     stringappend_merge_type_info = {
         {"delimiter",
          {0, rocksdb_rs::utilities::options_type::OptionType::kString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-          OptionTypeFlags::kNone}},
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 }  // namespace
 // Constructor: also specify the delimiter character.

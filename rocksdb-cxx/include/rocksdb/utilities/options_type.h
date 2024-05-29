@@ -29,57 +29,15 @@ namespace rocksdb {
     struct ColumnFamilyOptions;
     struct DBOptions;
 
-// A set of modifier flags used to alter how an option is evaluated or
-// processed. These flags can be combined together (e.g. kMutable | kShared).
-// The kCompare flags can be used to control if/when options are compared.
-// If kCompareNever is set, two related options would never be compared (always
-// equal) If kCompareExact is set, the options will only be compared if the
-// sanity mode
-//                  is exact
-// kMutable       means the option can be changed after it is prepared
-// kShared        means the option is contained in a std::shared_ptr
-// kUnique        means the option is contained in a std::uniqued_ptr
-// kRawPointer    means the option is a raw pointer value.
-// kAllowNull     means that an option is allowed to be null for verification
-//                purposes.
-// kDontSerialize means this option should not be serialized and included in
-//                the string representation.
-// kDontPrepare   means do not call PrepareOptions for this pointer value.
-    enum class OptionTypeFlags : uint32_t {
-        // No flags
-        kNone = 0x00,
-        kCompareDefault = 0x0,
-        kCompareNever = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelNone),
-        kCompareLoose = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible),
-        kCompareExact = static_cast<uint32_t>(ConfigOptions::SanityLevel::kSanityLevelExactMatch),
-
-        // Option is mutable
-        kMutable = 0x0100,
-        // The option is stored as a raw pointer
-        kRawPointer = 0x0200,
-        // The option is stored as a shared_ptr
-        kShared = 0x0400,
-        // The option is stored as a unique_ptr
-        kUnique = 0x0800,
-        // The option can be null
-        kAllowNull = 0x1000,
-        // Don't serialize the option
-        kDontSerialize = 0x2000,
-        // Don't prepare or sanitize this option
-        kDontPrepare = 0x4000,
-        // The option serializes to a name only
-        kStringNameOnly = 0x8000,
-    };
-
-    inline OptionTypeFlags operator|(const OptionTypeFlags &a,
-                                     const OptionTypeFlags &b) {
-        return static_cast<OptionTypeFlags>(static_cast<uint32_t>(a) |
+    inline rocksdb_rs::utilities::options_type::OptionTypeFlags operator|(const rocksdb_rs::utilities::options_type::OptionTypeFlags &a,
+                                     const rocksdb_rs::utilities::options_type::OptionTypeFlags &b) {
+        return static_cast<rocksdb_rs::utilities::options_type::OptionTypeFlags>(static_cast<uint32_t>(a) |
                                             static_cast<uint32_t>(b));
     }
 
-    inline OptionTypeFlags operator&(const OptionTypeFlags &a,
-                                     const OptionTypeFlags &b) {
-        return static_cast<OptionTypeFlags>(static_cast<uint32_t>(a) &
+    inline rocksdb_rs::utilities::options_type::OptionTypeFlags operator&(const rocksdb_rs::utilities::options_type::OptionTypeFlags &a,
+                                     const rocksdb_rs::utilities::options_type::OptionTypeFlags &b) {
+        return static_cast<rocksdb_rs::utilities::options_type::OptionTypeFlags>(static_cast<uint32_t>(a) &
                                             static_cast<uint32_t>(b));
     }
 
@@ -209,10 +167,10 @@ namespace rocksdb {
                   equals_func_(nullptr),
                   type_(type),
                   verification_(rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal),
-                  flags_(OptionTypeFlags::kNone) {}
+                  flags_(rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone) {}
 
         OptionTypeInfo(int offset, rocksdb_rs::utilities::options_type::OptionType type,
-                       rocksdb_rs::utilities::options_type::OptionVerificationType verification, OptionTypeFlags flags)
+                       rocksdb_rs::utilities::options_type::OptionVerificationType verification, rocksdb_rs::utilities::options_type::OptionTypeFlags flags)
                 : offset_(offset),
                   parse_func_(nullptr),
                   serialize_func_(nullptr),
@@ -222,7 +180,7 @@ namespace rocksdb {
                   flags_(flags) {}
 
         OptionTypeInfo(int offset, rocksdb_rs::utilities::options_type::OptionType type,
-                       rocksdb_rs::utilities::options_type::OptionVerificationType verification, OptionTypeFlags flags,
+                       rocksdb_rs::utilities::options_type::OptionVerificationType verification, rocksdb_rs::utilities::options_type::OptionTypeFlags flags,
                        const ParseFunc &parse_func)
                 : offset_(offset),
                   parse_func_(parse_func),
@@ -233,7 +191,7 @@ namespace rocksdb {
                   flags_(flags) {}
 
         OptionTypeInfo(int offset, rocksdb_rs::utilities::options_type::OptionType type,
-                       rocksdb_rs::utilities::options_type::OptionVerificationType verification, OptionTypeFlags flags,
+                       rocksdb_rs::utilities::options_type::OptionVerificationType verification, rocksdb_rs::utilities::options_type::OptionTypeFlags flags,
                        const ParseFunc &parse_func,
                        const SerializeFunc &serialize_func,
                        const EqualsFunc &equals_func)
@@ -259,7 +217,7 @@ namespace rocksdb {
         template<typename T>
         static OptionTypeInfo Enum(
                 int offset, const std::unordered_map<std::string, T> *const map,
-                OptionTypeFlags flags = OptionTypeFlags::kNone) {
+                rocksdb_rs::utilities::options_type::OptionTypeFlags flags = rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone) {
             OptionTypeInfo info(offset, rocksdb_rs::utilities::options_type::OptionType::kEnum,
                                 rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, flags);
             info.SetParseFunc(
@@ -331,7 +289,7 @@ namespace rocksdb {
         static OptionTypeInfo Struct(
                 const std::string &struct_name,
                 const std::unordered_map<std::string, OptionTypeInfo> *struct_map,
-                int offset, rocksdb_rs::utilities::options_type::OptionVerificationType verification, OptionTypeFlags flags) {
+                int offset, rocksdb_rs::utilities::options_type::OptionVerificationType verification, rocksdb_rs::utilities::options_type::OptionTypeFlags flags) {
             OptionTypeInfo info(offset, rocksdb_rs::utilities::options_type::OptionType::kStruct, verification, flags);
             info.SetParseFunc(
                     // Parses the struct and updates the fields at addr
@@ -362,7 +320,7 @@ namespace rocksdb {
         static OptionTypeInfo Struct(
                 const std::string &struct_name,
                 const std::unordered_map<std::string, OptionTypeInfo> *struct_map,
-                int offset, rocksdb_rs::utilities::options_type::OptionVerificationType verification, OptionTypeFlags flags,
+                int offset, rocksdb_rs::utilities::options_type::OptionVerificationType verification, rocksdb_rs::utilities::options_type::OptionTypeFlags flags,
                 const ParseFunc &parse_func) {
             OptionTypeInfo info(
                     Struct(struct_name, struct_map, offset, verification, flags));
@@ -371,7 +329,7 @@ namespace rocksdb {
 
         template<typename T, size_t kSize>
         static OptionTypeInfo Array(int _offset, rocksdb_rs::utilities::options_type::OptionVerificationType _verification,
-                                    OptionTypeFlags _flags,
+                                    rocksdb_rs::utilities::options_type::OptionTypeFlags _flags,
                                     const OptionTypeInfo &elem_info,
                                     char separator = ':') {
             OptionTypeInfo info(_offset, rocksdb_rs::utilities::options_type::OptionType::kArray, _verification,
@@ -405,7 +363,7 @@ namespace rocksdb {
         template<typename T>
         static OptionTypeInfo Vector(int _offset,
                                      rocksdb_rs::utilities::options_type::OptionVerificationType _verification,
-                                     OptionTypeFlags _flags,
+                                     rocksdb_rs::utilities::options_type::OptionTypeFlags _flags,
                                      const OptionTypeInfo &elem_info,
                                      char separator = ':') {
             OptionTypeInfo info(_offset, rocksdb_rs::utilities::options_type::OptionType::kVector, _verification,
@@ -445,9 +403,9 @@ namespace rocksdb {
         template<typename T>
         static OptionTypeInfo AsCustomSharedPtr(int offset,
                                                 rocksdb_rs::utilities::options_type::OptionVerificationType ovt,
-                                                OptionTypeFlags flags) {
+                                                rocksdb_rs::utilities::options_type::OptionTypeFlags flags) {
             OptionTypeInfo info(offset, rocksdb_rs::utilities::options_type::OptionType::kCustomizable, ovt,
-                                flags | OptionTypeFlags::kShared);
+                                flags | rocksdb_rs::utilities::options_type::OptionTypeFlags::kShared);
             return info.SetParseFunc([](const ConfigOptions &opts,
                                         const std::string &name,
                                         const std::string &value, void *addr) {
@@ -464,7 +422,7 @@ namespace rocksdb {
         template<typename T>
         static OptionTypeInfo AsCustomSharedPtr(int offset,
                                                 rocksdb_rs::utilities::options_type::OptionVerificationType ovt,
-                                                OptionTypeFlags flags,
+                                                rocksdb_rs::utilities::options_type::OptionTypeFlags flags,
                                                 const SerializeFunc &serialize_func,
                                                 const EqualsFunc &equals_func) {
             OptionTypeInfo info(AsCustomSharedPtr<T>(offset, ovt, flags));
@@ -485,9 +443,9 @@ namespace rocksdb {
         template<typename T>
         static OptionTypeInfo AsCustomUniquePtr(int offset,
                                                 rocksdb_rs::utilities::options_type::OptionVerificationType ovt,
-                                                OptionTypeFlags flags) {
+                                                rocksdb_rs::utilities::options_type::OptionTypeFlags flags) {
             OptionTypeInfo info(offset, rocksdb_rs::utilities::options_type::OptionType::kCustomizable, ovt,
-                                flags | OptionTypeFlags::kUnique);
+                                flags | rocksdb_rs::utilities::options_type::OptionTypeFlags::kUnique);
             return info.SetParseFunc([](const ConfigOptions &opts,
                                         const std::string &name,
                                         const std::string &value, void *addr) {
@@ -504,7 +462,7 @@ namespace rocksdb {
         template<typename T>
         static OptionTypeInfo AsCustomUniquePtr(int offset,
                                                 rocksdb_rs::utilities::options_type::OptionVerificationType ovt,
-                                                OptionTypeFlags flags,
+                                                rocksdb_rs::utilities::options_type::OptionTypeFlags flags,
                                                 const SerializeFunc &serialize_func,
                                                 const EqualsFunc &equals_func) {
             OptionTypeInfo info(AsCustomUniquePtr<T>(offset, ovt, flags));
@@ -524,9 +482,9 @@ namespace rocksdb {
         // @param _efunc Optional function for comparing this option
         template<typename T>
         static OptionTypeInfo AsCustomRawPtr(int offset, rocksdb_rs::utilities::options_type::OptionVerificationType ovt,
-                                             OptionTypeFlags flags) {
+                                             rocksdb_rs::utilities::options_type::OptionTypeFlags flags) {
             OptionTypeInfo info(offset, rocksdb_rs::utilities::options_type::OptionType::kCustomizable, ovt,
-                                flags | OptionTypeFlags::kRawPointer);
+                                flags | rocksdb_rs::utilities::options_type::OptionTypeFlags::kRawPointer);
             return info.SetParseFunc([](const ConfigOptions &opts,
                                         const std::string &name,
                                         const std::string &value, void *addr) {
@@ -542,7 +500,7 @@ namespace rocksdb {
 
         template<typename T>
         static OptionTypeInfo AsCustomRawPtr(int offset, rocksdb_rs::utilities::options_type::OptionVerificationType ovt,
-                                             OptionTypeFlags flags,
+                                             rocksdb_rs::utilities::options_type::OptionTypeFlags flags,
                                              const SerializeFunc &serialize_func,
                                              const EqualsFunc &equals_func) {
             OptionTypeInfo info(AsCustomRawPtr<T>(offset, ovt, flags));
@@ -576,7 +534,7 @@ namespace rocksdb {
             return *this;
         }
 
-        bool IsEnabled(OptionTypeFlags otf) const { return (flags_ & otf) == otf; }
+        bool IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags otf) const { return (flags_ & otf) == otf; }
 
         bool IsEditable(const ConfigOptions &opts) const {
             if (opts.mutable_options_only) {
@@ -586,7 +544,7 @@ namespace rocksdb {
             }
         }
 
-        bool IsMutable() const { return IsEnabled(OptionTypeFlags::kMutable); }
+        bool IsMutable() const { return IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable); }
 
         bool IsDeprecated() const {
             return IsEnabled(rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated);
@@ -609,8 +567,8 @@ namespace rocksdb {
             if (IsDeprecated() || IsAlias()) {
                 return ConfigOptions::SanityLevel::kSanityLevelNone;
             } else {
-                auto match = (flags_ & OptionTypeFlags::kCompareExact);
-                if (match == OptionTypeFlags::kCompareDefault) {
+                auto match = (flags_ & rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareExact);
+                if (match == rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone) {
                     return ConfigOptions::SanityLevel::kSanityLevelExactMatch;
                 } else {
                     return (ConfigOptions::SanityLevel) match;
@@ -624,7 +582,7 @@ namespace rocksdb {
         bool ShouldSerialize() const {
             if (IsDeprecated() || IsAlias()) {
                 return false;
-            } else if (IsEnabled(OptionTypeFlags::kDontSerialize)) {
+            } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize)) {
                 return false;
             } else {
                 return true;
@@ -634,7 +592,7 @@ namespace rocksdb {
         bool ShouldPrepare() const {
             if (IsDeprecated() || IsAlias()) {
                 return false;
-            } else if (IsEnabled(OptionTypeFlags::kDontPrepare)) {
+            } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontPrepare)) {
                 return false;
             } else {
                 return (prepare_func_ != nullptr || IsConfigurable());
@@ -653,16 +611,16 @@ namespace rocksdb {
         // Options can be null if the verification type is allow from null
         // or if the flags specify allow null.
         bool CanBeNull() const {
-            return (IsEnabled(OptionTypeFlags::kAllowNull) ||
+            return (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull) ||
                     IsEnabled(rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowNull) ||
                     IsEnabled(rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowFromNull));
         }
 
-        bool IsSharedPtr() const { return IsEnabled(OptionTypeFlags::kShared); }
+        bool IsSharedPtr() const { return IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kShared); }
 
-        bool IsUniquePtr() const { return IsEnabled(OptionTypeFlags::kUnique); }
+        bool IsUniquePtr() const { return IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kUnique); }
 
-        bool IsRawPtr() const { return IsEnabled(OptionTypeFlags::kRawPointer); }
+        bool IsRawPtr() const { return IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kRawPointer); }
 
         bool IsByName() const {
             return (verification_ == rocksdb_rs::utilities::options_type::OptionVerificationType::kByName ||
@@ -913,7 +871,7 @@ namespace rocksdb {
         ValidateFunc validate_func_;
         rocksdb_rs::utilities::options_type::OptionType type_;
         rocksdb_rs::utilities::options_type::OptionVerificationType verification_;
-        OptionTypeFlags flags_;
+        rocksdb_rs::utilities::options_type::OptionTypeFlags flags_;
     };
 
 // Parses the input value into elements of the result array, which has fixed

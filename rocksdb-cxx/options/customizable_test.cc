@@ -114,10 +114,10 @@ struct AOptions {
 static std::unordered_map<std::string, OptionTypeInfo> a_option_info = {
     {"int",
      {offsetof(struct AOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kMutable}},
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
     {"bool",
      {offsetof(struct AOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 class ACustomizable : public TestCustomizable {
@@ -142,10 +142,10 @@ struct BOptions {
 static std::unordered_map<std::string, OptionTypeInfo> b_option_info = {
     {"string",
      {offsetof(struct BOptions, s), rocksdb_rs::utilities::options_type::OptionType::kString,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"bool",
      {offsetof(struct BOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 class BCustomizable : public TestCustomizable {
@@ -197,19 +197,19 @@ struct SimpleOptions {
 static std::unordered_map<std::string, OptionTypeInfo> simple_option_info = {
     {"bool",
      {offsetof(struct SimpleOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"unique",
      OptionTypeInfo::AsCustomUniquePtr<TestCustomizable>(
          offsetof(struct SimpleOptions, cu), rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-         OptionTypeFlags::kAllowNull)},
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)},
     {"shared",
      OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
          offsetof(struct SimpleOptions, cs), rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-         OptionTypeFlags::kAllowNull)},
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)},
     {"pointer",
      OptionTypeInfo::AsCustomRawPtr<TestCustomizable>(
          offsetof(struct SimpleOptions, cp), rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-         OptionTypeFlags::kAllowNull)},
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)},
 };
 
 class SimpleConfigurable : public Configurable {
@@ -534,7 +534,7 @@ TEST_F(CustomizableTest, PrepareOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> p_option_info = {
       {"can_prepare",
        {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-        OptionTypeFlags::kNone}},
+        rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
   };
 
   class PrepareCustomizable : public TestCustomizable {
@@ -613,7 +613,7 @@ namespace {
 static std::unordered_map<std::string, OptionTypeInfo> inner_option_info = {
     {"inner",
      OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kStringNameOnly)}
+         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kStringNameOnly)}
 };
 
 struct InnerOptions {
@@ -896,10 +896,10 @@ static std::unordered_map<std::string, OptionTypeInfo> vector_option_info = {
      OptionTypeInfo::Vector<std::shared_ptr<TestCustomizable>>(
          0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
 
-         OptionTypeFlags::kNone,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
 
          OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-             0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kNone))},
+             0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone))},
 };
 class VectorConfigurable : public SimpleConfigurable {
  public:
@@ -1005,11 +1005,11 @@ TEST_F(CustomizableTest, MutableOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> mutable_option_info = {
       {"mutable",
        OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-           0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kMutable)}};
+           0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)}};
   static std::unordered_map<std::string, OptionTypeInfo> immutable_option_info =
       {{"immutable",
         OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-            0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, OptionTypeFlags::kAllowNull)}};
+            0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)}};
 
   class MutableCustomizable : public Customizable {
    private:
