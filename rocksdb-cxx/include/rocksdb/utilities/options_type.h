@@ -29,12 +29,14 @@ namespace rocksdb {
     struct ColumnFamilyOptions;
     struct DBOptions;
 
+    // TODO: need to not overload operator since we can't do that in cxx-rs.
     inline rocksdb_rs::utilities::options_type::OptionTypeFlags operator|(const rocksdb_rs::utilities::options_type::OptionTypeFlags &a,
                                      const rocksdb_rs::utilities::options_type::OptionTypeFlags &b) {
         return static_cast<rocksdb_rs::utilities::options_type::OptionTypeFlags>(static_cast<uint32_t>(a) |
                                             static_cast<uint32_t>(b));
     }
 
+    // TODO: need to not overload operator since we can't do that in cxx-rs.
     inline rocksdb_rs::utilities::options_type::OptionTypeFlags operator&(const rocksdb_rs::utilities::options_type::OptionTypeFlags &a,
                                      const rocksdb_rs::utilities::options_type::OptionTypeFlags &b) {
         return static_cast<rocksdb_rs::utilities::options_type::OptionTypeFlags>(static_cast<uint32_t>(a) &
