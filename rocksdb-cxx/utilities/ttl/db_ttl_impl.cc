@@ -21,7 +21,7 @@ namespace rocksdb {
 static std::unordered_map<std::string, OptionTypeInfo> ttl_merge_op_type_info =
     {{"user_operator",
       OptionTypeInfo::AsCustomSharedPtr<MergeOperator>(
-          0, OptionVerificationType::kByName, OptionTypeFlags::kNone)}};
+          0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)}};
 
 TtlMergeOperator::TtlMergeOperator(
     const std::shared_ptr<MergeOperator>& merge_op, SystemClock* clock)
@@ -173,18 +173,18 @@ void DBWithTTLImpl::SanitizeOptions(int32_t ttl, ColumnFamilyOptions* options,
 }
 
 static std::unordered_map<std::string, OptionTypeInfo> ttl_type_info = {
-    {"ttl", {0, OptionType::kInt32T}},
+    {"ttl", {0, rocksdb_rs::utilities::options_type::OptionType::kInt32T}},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> ttl_cff_type_info = {
     {"user_filter_factory",
      OptionTypeInfo::AsCustomSharedPtr<CompactionFilterFactory>(
-         0, OptionVerificationType::kByNameAllowFromNull,
-         OptionTypeFlags::kNone)}};
+         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowFromNull,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)}};
 static std::unordered_map<std::string, OptionTypeInfo> user_cf_type_info = {
     {"user_filter",
      OptionTypeInfo::AsCustomRawPtr<const CompactionFilter>(
-         0, OptionVerificationType::kByName, OptionTypeFlags::kAllowNull)}};
+         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)}};
 
 TtlCompactionFilter::TtlCompactionFilter(
     int32_t ttl, SystemClock* clock, const CompactionFilter* _user_comp_filter,

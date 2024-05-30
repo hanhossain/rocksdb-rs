@@ -392,8 +392,8 @@ rocksdb_rs::status::Status CompositeEnv::NewDirectory(const std::string& name,
 namespace {
 static std::unordered_map<std::string, OptionTypeInfo> env_wrapper_type_info = {
     {"target",
-     OptionTypeInfo(0, OptionType::kUnknown, OptionVerificationType::kByName,
-                    OptionTypeFlags::kDontSerialize)
+     OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
+                    rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize)
          .SetParseFunc([](const ConfigOptions& opts,
                           const std::string& /*name*/, const std::string& value,
                           void* addr) {
@@ -437,14 +437,14 @@ static std::unordered_map<std::string, OptionTypeInfo>
     composite_fs_wrapper_type_info = {
         {"file_system",
          OptionTypeInfo::AsCustomSharedPtr<FileSystem>(
-             0, OptionVerificationType::kByName, OptionTypeFlags::kNone)},
+             0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo>
     composite_clock_wrapper_type_info = {
         {"clock",
          OptionTypeInfo::AsCustomSharedPtr<SystemClock>(
-             0, OptionVerificationType::kByName, OptionTypeFlags::kNone)},
+             0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
 };
 
 }  // namespace

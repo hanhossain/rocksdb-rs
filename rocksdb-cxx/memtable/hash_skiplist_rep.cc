@@ -334,16 +334,16 @@ struct HashSkipListRepOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> hash_skiplist_info = {
     {"bucket_count",
-     {offsetof(struct HashSkipListRepOptions, bucket_count), OptionType::kSizeT,
-      OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+     {offsetof(struct HashSkipListRepOptions, bucket_count), rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"skiplist_height",
      {offsetof(struct HashSkipListRepOptions, skiplist_height),
-      OptionType::kInt32T, OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionType::kInt32T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"branching_factor",
      {offsetof(struct HashSkipListRepOptions, skiplist_branching_factor),
-      OptionType::kInt32T, OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionType::kInt32T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 class HashSkipListRepFactory : public MemTableRepFactory {

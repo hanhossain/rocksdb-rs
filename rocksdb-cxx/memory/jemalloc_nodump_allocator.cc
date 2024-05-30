@@ -27,19 +27,19 @@ std::atomic<extent_alloc_t*> JemallocNodumpAllocator::original_alloc_{nullptr};
 static std::unordered_map<std::string, OptionTypeInfo> jemalloc_type_info = {
     {"limit_tcache_size",
      {offsetof(struct JemallocAllocatorOptions, limit_tcache_size),
-      OptionType::kBoolean, OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"tcache_size_lower_bound",
      {offsetof(struct JemallocAllocatorOptions, tcache_size_lower_bound),
-      OptionType::kSizeT, OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"tcache_size_upper_bound",
      {offsetof(struct JemallocAllocatorOptions, tcache_size_upper_bound),
-      OptionType::kSizeT, OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"num_arenas",
-     {offsetof(struct JemallocAllocatorOptions, num_arenas), OptionType::kSizeT,
-      OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+     {offsetof(struct JemallocAllocatorOptions, num_arenas), rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 bool JemallocNodumpAllocator::IsSupported(std::string* why) {
 #ifndef ROCKSDB_JEMALLOC

@@ -39,14 +39,14 @@ struct TestOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> simple_option_info = {
     {"int",
-     {offsetof(struct TestOptions, i), OptionType::kInt,
-      OptionVerificationType::kNormal, OptionTypeFlags::kMutable}},
+     {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
     {"bool",
-     {offsetof(struct TestOptions, b), OptionType::kBoolean,
-      OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+     {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"string",
-     {offsetof(struct TestOptions, s), OptionType::kString,
-      OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+     {offsetof(struct TestOptions, s), rocksdb_rs::utilities::options_type::OptionType::kString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> enum_option_info = {
@@ -56,19 +56,19 @@ static std::unordered_map<std::string, OptionTypeInfo> enum_option_info = {
 
 static std::unordered_map<std::string, OptionTypeInfo> unique_option_info = {
     {"unique",
-     {0, OptionType::kConfigurable, OptionVerificationType::kNormal,
-      (OptionTypeFlags::kUnique | OptionTypeFlags::kMutable)}},
+     {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      (rocksdb_rs::utilities::options_type::OptionTypeFlags::kUnique | rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)}},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> shared_option_info = {
     {"shared",
-     {0, OptionType::kConfigurable, OptionVerificationType::kNormal,
-      (OptionTypeFlags::kShared)}},
+     {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      (rocksdb_rs::utilities::options_type::OptionTypeFlags::kShared)}},
 };
 static std::unordered_map<std::string, OptionTypeInfo> pointer_option_info = {
     {"pointer",
-     {0, OptionType::kConfigurable, OptionVerificationType::kNormal,
-      OptionTypeFlags::kRawPointer}},
+     {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kRawPointer}},
 };
 
 enum TestConfigMode {

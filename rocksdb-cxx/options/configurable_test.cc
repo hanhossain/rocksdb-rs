@@ -47,15 +47,15 @@ class StringLogger : public Logger {
 };
 static std::unordered_map<std::string, OptionTypeInfo> struct_option_info = {
     {"struct", OptionTypeInfo::Struct("struct", &simple_option_info, 0,
-                                      OptionVerificationType::kNormal,
-                                      OptionTypeFlags::kMutable)},
+                                      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+                                      rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> imm_struct_option_info =
     {
         {"struct", OptionTypeInfo::Struct("struct", &simple_option_info, 0,
-                                          OptionVerificationType::kNormal,
-                                          OptionTypeFlags::kNone)},
+                                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+                                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
 };
 
 class SimpleConfigurable : public TestConfigurable<Configurable> {
@@ -209,19 +209,19 @@ TEST_F(ConfigurableTest, InvalidOptionTest) {
 
 static std::unordered_map<std::string, OptionTypeInfo> validated_option_info = {
     {"validated",
-     {0, OptionType::kBoolean, OptionVerificationType::kNormal,
-      OptionTypeFlags::kNone}},
+     {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 static std::unordered_map<std::string, OptionTypeInfo> prepared_option_info = {
     {"prepared",
-     {0, OptionType::kInt, OptionVerificationType::kNormal,
-      OptionTypeFlags::kMutable}},
+     {0, rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
 };
 static std::unordered_map<std::string, OptionTypeInfo>
     dont_prepare_option_info = {
         {"unique",
-         {0, OptionType::kConfigurable, OptionVerificationType::kNormal,
-          (OptionTypeFlags::kUnique | OptionTypeFlags::kDontPrepare)}},
+         {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          (rocksdb_rs::utilities::options_type::OptionTypeFlags::kUnique | rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontPrepare)}},
 
 };
 
@@ -353,8 +353,8 @@ TEST_F(ConfigurableTest, CopyObjectTest) {
 TEST_F(ConfigurableTest, MutableOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> imm_option_info = {
       {"imm", OptionTypeInfo::Struct("imm", &simple_option_info, 0,
-                                     OptionVerificationType::kNormal,
-                                     OptionTypeFlags::kNone)},
+                                     rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+                                     rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
   };
 
   class MutableConfigurable : public SimpleConfigurable {
@@ -415,8 +415,8 @@ TEST_F(ConfigurableTest, DeprecatedOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo>
       deprecated_option_info = {
           {"deprecated",
-           {offsetof(struct TestOptions, b), OptionType::kBoolean,
-            OptionVerificationType::kDeprecated, OptionTypeFlags::kNone}}};
+           {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+            rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}}};
   std::unique_ptr<Configurable> orig;
   orig.reset(SimpleConfigurable::Create("simple", TestConfigMode::kDefaultMode,
                                         &deprecated_option_info));
@@ -432,11 +432,11 @@ TEST_F(ConfigurableTest, DeprecatedOptionsTest) {
 TEST_F(ConfigurableTest, AliasOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> alias_option_info = {
       {"bool",
-       {offsetof(struct TestOptions, b), OptionType::kBoolean,
-        OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+       {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
       {"alias",
-       {offsetof(struct TestOptions, b), OptionType::kBoolean,
-        OptionVerificationType::kAlias, OptionTypeFlags::kNone, 0}}};
+       {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kAlias, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone, 0}}};
   std::unique_ptr<Configurable> orig;
   orig.reset(SimpleConfigurable::Create("simple", TestConfigMode::kDefaultMode,
                                         &alias_option_info));
@@ -596,8 +596,8 @@ TEST_F(ConfigurableTest, ConfigurableEnumTest) {
 static std::unordered_map<std::string, OptionTypeInfo> noserialize_option_info =
     {
         {"int",
-         {offsetof(struct TestOptions, i), OptionType::kInt,
-          OptionVerificationType::kNormal, OptionTypeFlags::kDontSerialize}},
+         {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize}},
 };
 
 TEST_F(ConfigurableTest, TestNoSerialize) {
@@ -614,13 +614,13 @@ TEST_F(ConfigurableTest, TestNoSerialize) {
 TEST_F(ConfigurableTest, TestNoCompare) {
   std::unordered_map<std::string, OptionTypeInfo> nocomp_option_info = {
       {"int",
-       {offsetof(struct TestOptions, i), OptionType::kInt,
-        OptionVerificationType::kNormal, OptionTypeFlags::kCompareNever}},
+       {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever}},
   };
   std::unordered_map<std::string, OptionTypeInfo> normal_option_info = {
       {"int",
-       {offsetof(struct TestOptions, i), OptionType::kInt,
-        OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+       {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
   };
 
   std::unique_ptr<Configurable> base, copy;

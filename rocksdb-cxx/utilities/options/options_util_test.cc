@@ -69,7 +69,7 @@ TEST_F(OptionsUtilTest, SaveAndLoad) {
   ASSERT_OK(LoadOptionsFromFile(config_options, kFileName, &loaded_db_opt,
                                 &loaded_cf_descs));
   ConfigOptions exact;
-  exact.sanity_level = ConfigOptions::kSanityLevelExactMatch;
+  exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
   ASSERT_OK(
       RocksDBOptionsParser::VerifyDBOptions(exact, db_opt, loaded_db_opt));
   test::RandomInitDBOptions(&db_opt, &rnd_);
@@ -256,7 +256,7 @@ TEST_F(OptionsUtilTest, SanityCheck) {
   ConfigOptions config_options;
   config_options.ignore_unknown_options = false;
   config_options.input_strings_escaped = true;
-  config_options.sanity_level = ConfigOptions::kSanityLevelLooselyCompatible;
+  config_options.sanity_level = ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
   // perform sanity check
   ASSERT_OK(
       CheckOptionsCompatibility(config_options, dbname_, db_opt, cf_descs));

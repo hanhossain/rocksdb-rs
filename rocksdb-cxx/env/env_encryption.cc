@@ -338,8 +338,8 @@ static std::unordered_map<std::string, OptionTypeInfo> encrypted_fs_type_info =
     {
         {"provider",
          OptionTypeInfo::AsCustomSharedPtr<EncryptionProvider>(
-             0 /* No offset, whole struct*/, OptionVerificationType::kByName,
-             OptionTypeFlags::kNone)},
+             0 /* No offset, whole struct*/, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
 };
 // EncryptedFileSystemImpl implements an FileSystemWrapper that adds encryption
 // to files stored on disk.
@@ -915,8 +915,8 @@ namespace {
 static std::unordered_map<std::string, OptionTypeInfo>
     rot13_block_cipher_type_info = {
         {"block_size",
-         {0 /* No offset, whole struct*/, OptionType::kInt,
-          OptionVerificationType::kNormal, OptionTypeFlags::kNone}},
+         {0 /* No offset, whole struct*/, rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 // Implements a BlockCipher using ROT13.
@@ -950,8 +950,8 @@ static const std::unordered_map<std::string, OptionTypeInfo>
     ctr_encryption_provider_type_info = {
         {"cipher",
          OptionTypeInfo::AsCustomSharedPtr<BlockCipher>(
-             0 /* No offset, whole struct*/, OptionVerificationType::kByName,
-             OptionTypeFlags::kNone)},
+             0 /* No offset, whole struct*/, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
 };
 }  // anonymous namespace
 

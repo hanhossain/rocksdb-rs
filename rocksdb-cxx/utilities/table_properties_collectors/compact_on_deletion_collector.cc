@@ -100,8 +100,8 @@ rocksdb_rs::status::Status CompactOnDeletionCollector::Finish(
 static std::unordered_map<std::string, OptionTypeInfo>
     on_deletion_collector_type_info = {
         {"window_size",
-         {0, OptionType::kUnknown, OptionVerificationType::kNormal,
-          OptionTypeFlags::kCompareNever | OptionTypeFlags::kMutable,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever | rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
             auto* factory =
@@ -118,8 +118,8 @@ static std::unordered_map<std::string, OptionTypeInfo>
           },
           nullptr}},
         {"deletion_trigger",
-         {0, OptionType::kUnknown, OptionVerificationType::kNormal,
-          OptionTypeFlags::kCompareNever | OptionTypeFlags::kMutable,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever | rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
             auto* factory =
@@ -136,8 +136,8 @@ static std::unordered_map<std::string, OptionTypeInfo>
           },
           nullptr}},
         {"deletion_ratio",
-         {0, OptionType::kUnknown, OptionVerificationType::kNormal,
-          OptionTypeFlags::kCompareNever | OptionTypeFlags::kMutable,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever | rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
             auto* factory =
