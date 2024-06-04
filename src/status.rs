@@ -368,7 +368,7 @@ pub(crate) mod ffix {
         include!("rocksdb/slice.h");
 
         #[namespace = "rocksdb"]
-        type Slice = crate::ffi::slice::Slice;
+        type Slice = crate::ffi::rocksdb::Slice;
     }
 }
 
