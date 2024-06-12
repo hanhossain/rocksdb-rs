@@ -9,6 +9,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      cxx:
+        - cxx
+        - cxx-build
+      autocxx:
+        - autocxx
+        - autocxx-build
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
