@@ -11,11 +11,13 @@ updates:
       interval: "weekly"
     groups:
       cxx:
-        - cxx
-        - cxx-build
+        patterns:
+          - cxx
+          - cxx-build
       autocxx:
-        - autocxx
-        - autocxx-build
+        patterns:
+          - autocxx
+          - autocxx-build
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
