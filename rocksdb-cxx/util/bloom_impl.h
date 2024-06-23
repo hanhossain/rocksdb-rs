@@ -81,10 +81,10 @@ class FastLocalBloomImpl {
   // reasonable warnings / user feedback, not for making functional decisions.
   static double EstimatedFpRate(size_t keys, size_t bytes, int num_probes,
                                 int hash_bits) {
-    return rocksdb_rs::util::bloom::IndependentProbabilitySum(
-        rocksdb_rs::util::bloom::CacheLocalFpRate(8.0 * bytes / keys, num_probes,
+    return rocksdb_rs::util::bloom::BloomMath_IndependentProbabilitySum(
+        rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(8.0 * bytes / keys, num_probes,
                                     /*cache line bits*/ 512),
-        rocksdb_rs::util::bloom::FingerprintFpRate(keys, hash_bits));
+        rocksdb_rs::util::bloom::BloomMath_FingerprintFpRate(keys, hash_bits));
   }
 
   static inline int ChooseNumProbes(int millibits_per_key) {
@@ -347,7 +347,7 @@ class LegacyLocalityBloomImpl {
   // reasonable warnings / user feedback, not for making functional decisions.
   static double EstimatedFpRate(size_t keys, size_t bytes, int num_probes) {
     double bits_per_key = 8.0 * bytes / keys;
-    double filter_rate = rocksdb_rs::util::bloom::CacheLocalFpRate(bits_per_key, num_probes,
+    double filter_rate = rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(bits_per_key, num_probes,
                                                      /*cache line bits*/ 512);
     if (!ExtraRotates) {
       // Good estimate of impact of flaw in index computation.
@@ -359,8 +359,8 @@ class LegacyLocalityBloomImpl {
       assert(false);
     }
     // Always uses 32-bit hash
-    double fingerprint_rate = rocksdb_rs::util::bloom::FingerprintFpRate(keys, 32);
-    return rocksdb_rs::util::bloom::IndependentProbabilitySum(filter_rate, fingerprint_rate);
+    double fingerprint_rate = rocksdb_rs::util::bloom::BloomMath_FingerprintFpRate(keys, 32);
+    return rocksdb_rs::util::bloom::BloomMath_IndependentProbabilitySum(filter_rate, fingerprint_rate);
   }
 
   static inline void AddHash(uint32_t h, uint32_t num_lines, int num_probes,

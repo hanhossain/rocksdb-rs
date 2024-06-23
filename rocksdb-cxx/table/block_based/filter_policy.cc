@@ -1342,7 +1342,7 @@ BloomLikeFilterPolicy::BloomLikeFilterPolicy(double bits_per_key)
   // memory. (Ribbon bits per key will be ~30% less than Bloom bits per key
   // for same FP rate.)
   desired_one_in_fp_rate_ =
-      1.0 / rocksdb_rs::util::bloom::CacheLocalFpRate(
+      1.0 / rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(
                 bits_per_key,
                 FastLocalBloomImpl::ChooseNumProbes(millibits_per_key_),
                 /*cache_line_bits*/ 512);
