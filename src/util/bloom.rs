@@ -14,6 +14,13 @@ mod ffix {
         /// cache line size.
         #[cxx_name = "CacheLocalFpRate"]
         fn cache_local_fp_rate(bits_per_key: f64, num_probes: i32, cache_line_bits: i32) -> f64;
+
+        /// False positive rate of querying a new item against `num_keys` items, all
+        /// hashed to `fingerprint_bits` bits. (This assumes the fingerprint hashes
+        /// themselves are stored losslessly. See Section 4 of
+        /// http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
+        #[cxx_name = "FingerprintFpRate"]
+        fn fingerprint_fp_rate(num_keys: usize, fingerprint_bits: i32) -> f64;
     }
 }
 
@@ -51,4 +58,26 @@ fn cache_local_fp_rate(bits_per_key: f64, num_probes: i32, cache_line_bits: i32)
         num_probes,
     );
     (crowded_fp + uncrowded_fp) / 2.0
+}
+
+/// False positive rate of querying a new item against `num_keys` items, all
+/// hashed to `fingerprint_bits` bits. (This assumes the fingerprint hashes
+/// themselves are stored losslessly. See Section 4 of
+/// http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
+fn fingerprint_fp_rate(num_keys: usize, fingerprint_bits: i32) -> f64 {
+    let inv_fingerprint_space = 0.5f64.powi(fingerprint_bits);
+    // Base estimate assumes each key maps to a unique fingerprint.
+    // Could be > 1 in extreme cases.
+    let base_estimate = num_keys as f64 * inv_fingerprint_space;
+    // To account for potential overlap, we choose between two formulas
+    if base_estimate > 0.0001 {
+        // A very good formula assuming we don't construct a floating point
+        // number extremely close to 1. Always produces a probability < 1.
+        1.0 - (-base_estimate).exp()
+    } else {
+        // A very good formula when base_estimate is far below 1. (Subtract
+        // away the integral-approximated sum that some key has same hash as
+        // one coming before it in a list.)
+        base_estimate - (base_estimate * base_estimate * 0.5)
+    }
 }

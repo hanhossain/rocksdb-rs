@@ -27,28 +27,6 @@ namespace rocksdb {
 
 class BloomMath {
  public:
-  // False positive rate of querying a new item against `num_keys` items, all
-  // hashed to `fingerprint_bits` bits. (This assumes the fingerprint hashes
-  // themselves are stored losslessly. See Section 4 of
-  // http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
-  static double FingerprintFpRate(size_t num_keys, int fingerprint_bits) {
-    double inv_fingerprint_space = std::pow(0.5, fingerprint_bits);
-    // Base estimate assumes each key maps to a unique fingerprint.
-    // Could be > 1 in extreme cases.
-    double base_estimate = num_keys * inv_fingerprint_space;
-    // To account for potential overlap, we choose between two formulas
-    if (base_estimate > 0.0001) {
-      // A very good formula assuming we don't construct a floating point
-      // number extremely close to 1. Always produces a probability < 1.
-      return 1.0 - std::exp(-base_estimate);
-    } else {
-      // A very good formula when base_estimate is far below 1. (Subtract
-      // away the integral-approximated sum that some key has same hash as
-      // one coming before it in a list.)
-      return base_estimate - (base_estimate * base_estimate * 0.5);
-    }
-  }
-
   // Returns the probably of either of two independent(-ish) events
   // happening, given their probabilities. (This is useful for combining
   // results from StandardFpRate or CacheLocalFpRate with FingerprintFpRate
@@ -120,7 +98,7 @@ class FastLocalBloomImpl {
     return BloomMath::IndependentProbabilitySum(
         rocksdb_rs::util::bloom::CacheLocalFpRate(8.0 * bytes / keys, num_probes,
                                     /*cache line bits*/ 512),
-        BloomMath::FingerprintFpRate(keys, hash_bits));
+        rocksdb_rs::util::bloom::FingerprintFpRate(keys, hash_bits));
   }
 
   static inline int ChooseNumProbes(int millibits_per_key) {
@@ -395,7 +373,7 @@ class LegacyLocalityBloomImpl {
       assert(false);
     }
     // Always uses 32-bit hash
-    double fingerprint_rate = BloomMath::FingerprintFpRate(keys, 32);
+    double fingerprint_rate = rocksdb_rs::util::bloom::FingerprintFpRate(keys, 32);
     return BloomMath::IndependentProbabilitySum(filter_rate, fingerprint_rate);
   }
 
