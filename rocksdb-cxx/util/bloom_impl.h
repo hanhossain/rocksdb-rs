@@ -17,6 +17,8 @@
 #include "rocksdb/slice.h"
 #include "util/hash.h"
 
+#include "rocksdb-rs/src/utils/bloom.rs.h"
+
 #ifdef __AVX2__
 #include <immintrin.h>
 #endif
@@ -25,16 +27,6 @@ namespace rocksdb {
 
 class BloomMath {
  public:
-  // False positive rate of a standard Bloom filter, for given ratio of
-  // filter memory bits to added keys, and number of probes per operation.
-  // (The false positive rate is effectively independent of scale, assuming
-  // the implementation scales OK.)
-  static double StandardFpRate(double bits_per_key, int num_probes) {
-    // Standard very-good-estimate formula. See
-    // https://en.wikipedia.org/wiki/Bloom_filter#Probability_of_false_positives
-    return std::pow(1.0 - std::exp(-num_probes / bits_per_key), num_probes);
-  }
-
   // False positive rate of a "blocked"/"shareded"/"cache-local" Bloom filter,
   // for given ratio of filter memory bits to added keys, number of probes per
   // operation (all within the given block or cache line size), and block or
@@ -50,9 +42,9 @@ class BloomMath {
     // deviation above and below the mean bucket occupancy. See
     // https://github.com/facebook/rocksdb/wiki/RocksDB-Bloom-Filter#the-math
     double keys_stddev = std::sqrt(keys_per_cache_line);
-    double crowded_fp = StandardFpRate(
+    double crowded_fp = rocksdb_rs::util::bloom::StandardFpRate(
         cache_line_bits / (keys_per_cache_line + keys_stddev), num_probes);
-    double uncrowded_fp = StandardFpRate(
+    double uncrowded_fp = rocksdb_rs::util::bloom::StandardFpRate(
         cache_line_bits / (keys_per_cache_line - keys_stddev), num_probes);
     return (crowded_fp + uncrowded_fp) / 2;
   }

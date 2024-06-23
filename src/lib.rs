@@ -12,6 +12,7 @@ mod string_util;
 mod transaction_log;
 mod types;
 pub mod unique_id;
+mod util;
 mod utilities;
 
 #[cfg(test)]

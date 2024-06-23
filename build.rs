@@ -342,6 +342,7 @@ fn main() {
         "src/transaction_log.rs",
         "src/types.rs",
         "src/unique_id.rs",
+        "src/util/bloom.rs",
         "src/utilities/options_type.rs",
     ];
 
