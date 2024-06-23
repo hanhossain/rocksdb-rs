@@ -422,7 +422,7 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
 
   double EstimatedFpRate(size_t keys, size_t len_with_metadata) override {
     int num_probes = GetNumProbes(keys, len_with_metadata);
-    return FastLocalBloomImpl::EstimatedFpRate(
+    return rocksdb_rs::util::bloom::FastLocalBloomImpl_EstimatedFpRate(
         keys, len_with_metadata - kMetadataLen, num_probes, /*hash bits*/ 64);
   }
 

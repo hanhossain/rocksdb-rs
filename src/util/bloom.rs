@@ -33,6 +33,16 @@ mod ffix {
         /// http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
         #[cxx_name = "BloomMath_IndependentProbabilitySum"]
         fn bloom_math_independent_probability_sum(rate1: f64, rate2: f64) -> f64;
+
+        /// NOTE: this has only been validated to enough accuracy for producing
+        /// reasonable warnings / user feedback, not for making functional decisions.
+        #[cxx_name = "FastLocalBloomImpl_EstimatedFpRate"]
+        fn fast_local_bloom_impl_estimated_fp_rate(
+            keys: usize,
+            bytes: usize,
+            num_probes: i32,
+            hash_bits: i32,
+        ) -> f64;
     }
 }
 
@@ -123,4 +133,75 @@ fn bloom_math_fingerprint_fp_rate(num_keys: usize, fingerprint_bits: i32) -> f64
 
 fn bloom_math_independent_probability_sum(rate1: f64, rate2: f64) -> f64 {
     BloomMath::independent_probability_sum(rate1, rate2)
+}
+
+/// A fast, flexible, and accurate cache-local Bloom implementation with
+/// SIMD-optimized query performance (currently using AVX2 on Intel). Write
+/// performance and non-SIMD read are very good, benefiting from FastRange32
+/// used in place of % and single-cycle multiplication on recent processors.
+///
+/// Most other SIMD Bloom implementations sacrifice flexibility and/or
+/// accuracy by requiring num_probes to be a power of two and restricting
+/// where each probe can occur in a cache line. This implementation sacrifices
+/// SIMD-optimization for add (might still be possible, especially with AVX512)
+/// in favor of allowing any num_probes, not crossing cache line boundary,
+/// and accuracy close to theoretical best accuracy for a cache-local Bloom.
+/// E.g. theoretical best for 10 bits/key, num_probes=6, and 512-bit bucket
+/// (Intel cache line size) is 0.9535% FP rate. This implementation yields
+/// about 0.957%. (Compare to LegacyLocalityBloomImpl<false> at 1.138%, or
+/// about 0.951% for 1024-bit buckets, cache line size for some ARM CPUs.)
+///
+/// This implementation can use a 32-bit hash (let h2 be h1 * 0x9e3779b9) or
+/// a 64-bit hash (split into two uint32s). With many millions of keys, the
+/// false positive rate associated with using a 32-bit hash can dominate the
+/// false positive rate of the underlying filter. At 10 bits/key setting, the
+/// inflection point is about 40 million keys, so 32-bit hash is a bad idea
+/// with 10s of millions of keys or more.
+///
+/// Despite accepting a 64-bit hash, this implementation uses 32-bit fastrange
+/// to pick a cache line, which can be faster than 64-bit in some cases.
+/// This only hurts accuracy as you get into 10s of GB for a single filter,
+/// and accuracy abruptly breaks down at 256GB (2^32 cache lines). Switch to
+/// 64-bit fastrange if you need filters so big. ;)
+///
+/// Using only a 32-bit input hash within each cache line has negligible
+/// impact for any reasonable cache line / bucket size, for arbitrary filter
+/// size, and potentially saves intermediate data size in some cases vs.
+/// tracking full 64 bits. (Even in an implementation using 64-bit arithmetic
+/// to generate indices, I might do the same, as a single multiplication
+/// suffices to generate a sufficiently mixed 64 bits from 32 bits.)
+///
+/// This implementation is currently tied to Intel cache line size, 64 bytes ==
+/// 512 bits. If there's sufficient demand for other cache line sizes, this is
+/// a pretty good implementation to extend, but slight performance enhancements
+/// are possible with an alternate implementation (probably not very compatible
+/// with SIMD):
+/// (1) Use rotation in addition to multiplication for remixing
+/// (like murmur hash). (Using multiplication alone *slightly* hurts accuracy
+/// because lower bits never depend on original upper bits.)
+/// (2) Extract more than one bit index from each re-mix. (Only if rotation
+/// or similar is part of remix, because otherwise you're making the
+/// multiplication-only problem worse.)
+/// (3) Re-mix full 64 bit hash, to get maximum number of bit indices per
+/// re-mix.
+struct FastLocalBloomImpl;
+
+impl FastLocalBloomImpl {
+    /// NOTE: this has only been validated to enough accuracy for producing
+    /// reasonable warnings / user feedback, not for making functional decisions.
+    fn estimated_fp_rate(keys: usize, bytes: usize, num_probes: i32, hash_bits: i32) -> f64 {
+        BloomMath::independent_probability_sum(
+            BloomMath::cache_local_fp_rate(8.0 * bytes as f64 / keys as f64, num_probes, 512),
+            BloomMath::fingerprint_fp_rate(keys, hash_bits),
+        )
+    }
+}
+
+fn fast_local_bloom_impl_estimated_fp_rate(
+    keys: usize,
+    bytes: usize,
+    num_probes: i32,
+    hash_bits: i32,
+) -> f64 {
+    FastLocalBloomImpl::estimated_fp_rate(keys, bytes, num_probes, hash_bits)
 }

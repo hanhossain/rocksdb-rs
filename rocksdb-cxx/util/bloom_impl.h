@@ -77,16 +77,6 @@ namespace rocksdb {
 //
 class FastLocalBloomImpl {
  public:
-  // NOTE: this has only been validated to enough accuracy for producing
-  // reasonable warnings / user feedback, not for making functional decisions.
-  static double EstimatedFpRate(size_t keys, size_t bytes, int num_probes,
-                                int hash_bits) {
-    return rocksdb_rs::util::bloom::BloomMath_IndependentProbabilitySum(
-        rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(8.0 * bytes / keys, num_probes,
-                                    /*cache line bits*/ 512),
-        rocksdb_rs::util::bloom::BloomMath_FingerprintFpRate(keys, hash_bits));
-  }
-
   static inline int ChooseNumProbes(int millibits_per_key) {
     // Since this implementation can (with AVX2) make up to 8 probes
     // for the same cost, we pick the most accurate num_probes, based
