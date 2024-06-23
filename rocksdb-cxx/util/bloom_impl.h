@@ -17,7 +17,7 @@
 #include "rocksdb/slice.h"
 #include "util/hash.h"
 
-#include "rocksdb-rs/src/utils/bloom.rs.h"
+#include "rocksdb-rs/src/util/bloom.rs.h"
 
 #ifdef __AVX2__
 #include <immintrin.h>
@@ -27,28 +27,6 @@ namespace rocksdb {
 
 class BloomMath {
  public:
-  // False positive rate of a "blocked"/"shareded"/"cache-local" Bloom filter,
-  // for given ratio of filter memory bits to added keys, number of probes per
-  // operation (all within the given block or cache line size), and block or
-  // cache line size.
-  static double CacheLocalFpRate(double bits_per_key, int num_probes,
-                                 int cache_line_bits) {
-    if (bits_per_key <= 0.0) {
-      // Fix a discontinuity
-      return 1.0;
-    }
-    double keys_per_cache_line = cache_line_bits / bits_per_key;
-    // A reasonable estimate is the average of the FP rates for one standard
-    // deviation above and below the mean bucket occupancy. See
-    // https://github.com/facebook/rocksdb/wiki/RocksDB-Bloom-Filter#the-math
-    double keys_stddev = std::sqrt(keys_per_cache_line);
-    double crowded_fp = rocksdb_rs::util::bloom::StandardFpRate(
-        cache_line_bits / (keys_per_cache_line + keys_stddev), num_probes);
-    double uncrowded_fp = rocksdb_rs::util::bloom::StandardFpRate(
-        cache_line_bits / (keys_per_cache_line - keys_stddev), num_probes);
-    return (crowded_fp + uncrowded_fp) / 2;
-  }
-
   // False positive rate of querying a new item against `num_keys` items, all
   // hashed to `fingerprint_bits` bits. (This assumes the fingerprint hashes
   // themselves are stored losslessly. See Section 4 of
@@ -140,7 +118,7 @@ class FastLocalBloomImpl {
   static double EstimatedFpRate(size_t keys, size_t bytes, int num_probes,
                                 int hash_bits) {
     return BloomMath::IndependentProbabilitySum(
-        BloomMath::CacheLocalFpRate(8.0 * bytes / keys, num_probes,
+        rocksdb_rs::util::bloom::CacheLocalFpRate(8.0 * bytes / keys, num_probes,
                                     /*cache line bits*/ 512),
         BloomMath::FingerprintFpRate(keys, hash_bits));
   }
@@ -405,7 +383,7 @@ class LegacyLocalityBloomImpl {
   // reasonable warnings / user feedback, not for making functional decisions.
   static double EstimatedFpRate(size_t keys, size_t bytes, int num_probes) {
     double bits_per_key = 8.0 * bytes / keys;
-    double filter_rate = BloomMath::CacheLocalFpRate(bits_per_key, num_probes,
+    double filter_rate = rocksdb_rs::util::bloom::CacheLocalFpRate(bits_per_key, num_probes,
                                                      /*cache line bits*/ 512);
     if (!ExtraRotates) {
       // Good estimate of impact of flaw in index computation.
