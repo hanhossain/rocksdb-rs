@@ -25,20 +25,6 @@
 
 namespace rocksdb {
 
-class BloomMath {
- public:
-  // Returns the probably of either of two independent(-ish) events
-  // happening, given their probabilities. (This is useful for combining
-  // results from StandardFpRate or CacheLocalFpRate with FingerprintFpRate
-  // for a hash-efficient Bloom filter's FP rate. See Section 4 of
-  // http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
-  static double IndependentProbabilitySum(double rate1, double rate2) {
-    // Use formula that avoids floating point extremely close to 1 if
-    // rates are extremely small.
-    return rate1 + rate2 - (rate1 * rate2);
-  }
-};
-
 // A fast, flexible, and accurate cache-local Bloom implementation with
 // SIMD-optimized query performance (currently using AVX2 on Intel). Write
 // performance and non-SIMD read are very good, benefiting from FastRange32
@@ -95,7 +81,7 @@ class FastLocalBloomImpl {
   // reasonable warnings / user feedback, not for making functional decisions.
   static double EstimatedFpRate(size_t keys, size_t bytes, int num_probes,
                                 int hash_bits) {
-    return BloomMath::IndependentProbabilitySum(
+    return rocksdb_rs::util::bloom::IndependentProbabilitySum(
         rocksdb_rs::util::bloom::CacheLocalFpRate(8.0 * bytes / keys, num_probes,
                                     /*cache line bits*/ 512),
         rocksdb_rs::util::bloom::FingerprintFpRate(keys, hash_bits));
@@ -374,7 +360,7 @@ class LegacyLocalityBloomImpl {
     }
     // Always uses 32-bit hash
     double fingerprint_rate = rocksdb_rs::util::bloom::FingerprintFpRate(keys, 32);
-    return BloomMath::IndependentProbabilitySum(filter_rate, fingerprint_rate);
+    return rocksdb_rs::util::bloom::IndependentProbabilitySum(filter_rate, fingerprint_rate);
   }
 
   static inline void AddHash(uint32_t h, uint32_t num_lines, int num_probes,

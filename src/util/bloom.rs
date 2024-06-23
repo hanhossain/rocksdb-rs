@@ -21,6 +21,14 @@ mod ffix {
         /// http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
         #[cxx_name = "FingerprintFpRate"]
         fn fingerprint_fp_rate(num_keys: usize, fingerprint_bits: i32) -> f64;
+
+        /// Returns the probably of either of two independent(-ish) events
+        /// happening, given their probabilities. (This is useful for combining
+        /// results from StandardFpRate or CacheLocalFpRate with FingerprintFpRate
+        /// for a hash-efficient Bloom filter's FP rate. See Section 4 of
+        /// http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
+        #[cxx_name = "IndependentProbabilitySum"]
+        fn independent_probability_sum(rate1: f64, rate2: f64) -> f64;
     }
 }
 
@@ -80,4 +88,15 @@ fn fingerprint_fp_rate(num_keys: usize, fingerprint_bits: i32) -> f64 {
         // one coming before it in a list.)
         base_estimate - (base_estimate * base_estimate * 0.5)
     }
+}
+
+/// Returns the probably of either of two independent(-ish) events
+/// happening, given their probabilities. (This is useful for combining
+/// results from StandardFpRate or CacheLocalFpRate with FingerprintFpRate
+/// for a hash-efficient Bloom filter's FP rate. See Section 4 of
+/// http://www.ccs.neu.edu/home/pete/pub/bloom-filters-verification.pdf)
+fn independent_probability_sum(rate1: f64, rate2: f64) -> f64 {
+    // Use formula that avoids floating point extremely close to 1 if
+    // rates are extremely small.
+    rate1 + rate2 - rate1 * rate2
 }
