@@ -453,7 +453,7 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
       actual_millibits_per_key = millibits_per_key_;
     }
     // END XXX/TODO
-    return FastLocalBloomImpl::ChooseNumProbes(actual_millibits_per_key);
+    return rocksdb_rs::util::bloom::FastLocalBloomImpl_ChooseNumProbes(actual_millibits_per_key);
   }
 
   void AddAllEntries(char* data, uint32_t len, int num_probes) {
@@ -1344,7 +1344,7 @@ BloomLikeFilterPolicy::BloomLikeFilterPolicy(double bits_per_key)
   desired_one_in_fp_rate_ =
       1.0 / rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(
                 bits_per_key,
-                FastLocalBloomImpl::ChooseNumProbes(millibits_per_key_),
+                rocksdb_rs::util::bloom::FastLocalBloomImpl_ChooseNumProbes(millibits_per_key_),
                 /*cache_line_bits*/ 512);
 
   // For better or worse, this is a rounding up of a nudged rounding up,

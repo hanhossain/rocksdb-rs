@@ -43,6 +43,9 @@ mod ffix {
             num_probes: i32,
             hash_bits: i32,
         ) -> f64;
+
+        #[cxx_name = "FastLocalBloomImpl_ChooseNumProbes"]
+        fn fast_local_bloom_impl_choose_num_probes(millibits_per_key: i32) -> i32;
     }
 }
 
@@ -195,6 +198,50 @@ impl FastLocalBloomImpl {
             BloomMath::fingerprint_fp_rate(keys, hash_bits),
         )
     }
+
+    fn choose_num_probes(millibits_per_key: i32) -> i32 {
+        // Since this implementation can (with AVX2) make up to 8 probes
+        // for the same cost, we pick the most accurate num_probes, based
+        // on actual tests of the implementation. Note that for higher
+        // bits/key, the best choice for cache-local Bloom can be notably
+        // smaller than standard bloom, e.g. 9 instead of 11 @ 16 b/k.
+        return if millibits_per_key <= 2080 {
+            1
+        } else if millibits_per_key <= 3580 {
+            2
+        } else if millibits_per_key <= 5100 {
+            3
+        } else if millibits_per_key <= 6640 {
+            4
+        } else if millibits_per_key <= 8300 {
+            5
+        } else if millibits_per_key <= 10070 {
+            6
+        } else if millibits_per_key <= 11720 {
+            7
+        } else if millibits_per_key <= 14001 {
+            // Would be something like <= 13800 but sacrificing *slightly* for
+            // more settings using <= 8 probes.
+            8
+        } else if millibits_per_key <= 16050 {
+            9
+        } else if millibits_per_key <= 18300 {
+            10
+        } else if millibits_per_key <= 22001 {
+            11
+        } else if millibits_per_key <= 25501 {
+            12
+        } else if millibits_per_key > 50000 {
+            // Top out at 24 probes (three sets of 8)
+            24
+        } else {
+            // Roughly optimal choices for remaining range
+            // e.g.
+            // 28000 -> 12, 28001 -> 13
+            // 50000 -> 23, 50001 -> 24
+            (millibits_per_key - 1) / 2000 - 1
+        };
+    }
 }
 
 fn fast_local_bloom_impl_estimated_fp_rate(
@@ -204,4 +251,8 @@ fn fast_local_bloom_impl_estimated_fp_rate(
     hash_bits: i32,
 ) -> f64 {
     FastLocalBloomImpl::estimated_fp_rate(keys, bytes, num_probes, hash_bits)
+}
+
+fn fast_local_bloom_impl_choose_num_probes(millibits_per_key: i32) -> i32 {
+    FastLocalBloomImpl::choose_num_probes(millibits_per_key)
 }
