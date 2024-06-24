@@ -17,7 +17,7 @@
 #include <thread>
 
 #include "port/port.h"
-#include "rocksdb-rs/src/util/fastrange.rs.h"
+#include "util/fastrange.h"
 #include "util/hash.h"
 
 namespace rocksdb {

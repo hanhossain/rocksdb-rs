@@ -8,7 +8,7 @@
 #include <cmath>
 
 #include "port/port.h"  // for PREFETCH
-#include "rocksdb-rs/src/util/fastrange.rs.h"
+#include "util/fastrange.h"
 #include "util/ribbon_alg.h"
 
 namespace rocksdb {
