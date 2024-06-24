@@ -533,25 +533,6 @@ TEST(FastRange64Test, Values) {
 #endif
 }
 
-TEST(FastRangeGenericTest, Values) {
-  using rocksdb::FastRangeGeneric;
-  // Generic (including big and small)
-  // Note that FastRangeGeneric is also tested indirectly above via
-  // FastRange32 and FastRange64.
-  EXPECT_EQ(
-      FastRangeGeneric(uint64_t{0x8000000000000000}, uint64_t{420000000002}),
-      uint64_t{210000000001});
-  EXPECT_EQ(FastRangeGeneric(uint64_t{0x8000000000000000}, uint16_t{12468}),
-            uint16_t{6234});
-  EXPECT_EQ(FastRangeGeneric(uint32_t{0x80000000}, uint16_t{12468}),
-            uint16_t{6234});
-  // Not recommended for typical use because for example this could fail on
-  // some platforms and pass on others:
-  // EXPECT_EQ(FastRangeGeneric(static_cast<unsigned long>(0x80000000),
-  //                           uint16_t{12468}),
-  //          uint16_t{6234});
-}
-
 // for inspection of disassembly
 uint32_t FastRange32(uint32_t hash, uint32_t range) {
   return rocksdb_rs::util::fastrange::FastRange32(hash, range);

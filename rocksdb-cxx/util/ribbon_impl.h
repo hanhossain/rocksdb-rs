@@ -199,7 +199,7 @@ class StandardHasher {
       //
       constexpr Index kFrontSmash = kCoeffBits / 4;
       constexpr Index kBackSmash = kCoeffBits / 4;
-      Index start = FastRangeGeneric(h, num_starts + kFrontSmash + kBackSmash);
+      Index start = rocksdb_rs::util::fastrange::FastRange64(h, num_starts + kFrontSmash + kBackSmash);
       start = std::max(start, kFrontSmash);
       start -= kFrontSmash;
       start = std::min(start, num_starts - 1);
@@ -209,7 +209,7 @@ class StandardHasher {
       // entries to be under-utilized.
       // NOTE: This call statically enforces that Hash is equivalent to
       // either uint32_t or uint64_t.
-      return FastRangeGeneric(h, num_starts);
+      return rocksdb_rs::util::fastrange::FastRange64(h, num_starts);
     }
   }
   inline CoeffRow GetCoeffRow(Hash h) const {

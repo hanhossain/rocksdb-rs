@@ -170,7 +170,7 @@ class Striped {
 
   using Unwrapped = typename Unwrap<T>::type;
   Unwrapped &Get(const Key &key, uint64_t seed = 0) {
-    size_t index = FastRangeGeneric(hash_(key, seed), stripe_count_);
+    size_t index = rocksdb_rs::util::fastrange::FastRange64(hash_(key, seed), stripe_count_);
     return Unwrap<T>::Go(data_[index]);
   }
 

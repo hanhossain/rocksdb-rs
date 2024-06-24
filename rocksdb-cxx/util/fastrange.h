@@ -41,9 +41,5 @@ namespace rocksdb {
 // mostly zero, on 32-bit hash values. And because good hashing is not
 // generally required for correctness, this kind of mistake could go
 // unnoticed with just unit tests. Plus it could vary by platform.
-template <typename Range>
-inline Range FastRangeGeneric(uint64_t hash, Range range) {
-  return rocksdb_rs::util::fastrange::FastRange64(hash, range);
-}
 
 }  // namespace rocksdb
