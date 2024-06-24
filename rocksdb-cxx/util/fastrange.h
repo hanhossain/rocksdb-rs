@@ -30,38 +30,6 @@
 
 namespace rocksdb {
 
-namespace detail {
-
-// Using a class template to support partial specialization
-template <typename Hash, typename Range>
-struct FastRangeGenericImpl {
-  // only reach this on no supported specialization
-};
-
-template <typename Range>
-struct FastRangeGenericImpl<uint32_t, Range> {
-  static inline Range Fn(uint32_t hash, Range range) {
-    static_assert(std::is_unsigned<Range>::value, "must be unsigned");
-    static_assert(sizeof(Range) <= sizeof(uint32_t),
-                  "cannot be larger than hash (32 bits)");
-
-    return rocksdb_rs::util::fastrange::FastRange32(hash, range);
-  }
-};
-
-template <typename Range>
-struct FastRangeGenericImpl<uint64_t, Range> {
-  static inline Range Fn(uint64_t hash, Range range) {
-    static_assert(std::is_unsigned<Range>::value, "must be unsigned");
-    static_assert(sizeof(Range) <= sizeof(uint64_t),
-                  "cannot be larger than hash (64 bits)");
-
-    return rocksdb_rs::util::fastrange::FastRange64(hash, range);
-  }
-};
-
-}  // namespace detail
-
 // Now an omnibus templated function (yay parameter inference).
 //
 // NOTICE:
@@ -73,9 +41,14 @@ struct FastRangeGenericImpl<uint64_t, Range> {
 // mostly zero, on 32-bit hash values. And because good hashing is not
 // generally required for correctness, this kind of mistake could go
 // unnoticed with just unit tests. Plus it could vary by platform.
-template <typename Hash, typename Range>
-inline Range FastRangeGeneric(Hash hash, Range range) {
-  return detail::FastRangeGenericImpl<Hash, Range>::Fn(hash, range);
+template <typename Range>
+inline Range FastRangeGeneric(uint64_t hash, Range range) {
+  return rocksdb_rs::util::fastrange::FastRange64(hash, range);
+}
+
+template <typename Range>
+inline Range FastRangeGeneric(uint32_t hash, Range range) {
+  return rocksdb_rs::util::fastrange::FastRange32(hash, range);
 }
 
 }  // namespace rocksdb
