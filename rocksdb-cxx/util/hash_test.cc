@@ -439,7 +439,7 @@ TEST(HashTest, Hash128ValueSchema) {
 }
 
 TEST(FastRange32Test, Values) {
-  using rocksdb::FastRange32;
+  using rocksdb_rs::util::fastrange::FastRange32;
   // Zero range
   EXPECT_EQ(FastRange32(0, 0), 0U);
   EXPECT_EQ(FastRange32(123, 0), 0U);
@@ -477,7 +477,7 @@ TEST(FastRange32Test, Values) {
 }
 
 TEST(FastRange64Test, Values) {
-  using rocksdb::FastRange64;
+  using rocksdb_rs::util::fastrange::FastRange64;
   // Zero range
   EXPECT_EQ(FastRange64(0, 0), 0U);
   EXPECT_EQ(FastRange64(123, 0), 0U);
@@ -554,12 +554,12 @@ TEST(FastRangeGenericTest, Values) {
 
 // for inspection of disassembly
 uint32_t FastRange32(uint32_t hash, uint32_t range) {
-  return rocksdb::FastRange32(hash, range);
+  return rocksdb_rs::util::fastrange::FastRange32(hash, range);
 }
 
 // for inspection of disassembly
 size_t FastRange64(uint64_t hash, size_t range) {
-  return rocksdb::FastRange64(hash, range);
+  return rocksdb_rs::util::fastrange::FastRange64(hash, range);
 }
 
 // Tests for math.h / math128.h (not worth a separate test binary)

@@ -208,7 +208,7 @@ struct KeyGen {
       for (uint32_t i = 0; i < FLAGS_skew; ++i) {
         raw = std::min(raw, rnd.Next());
       }
-      key = FastRange64(raw, max_key);
+      key = rocksdb_rs::util::fastrange::FastRange64(raw, max_key);
     } else {
       key = rnd.Skewed(max_log);
       if (key > max_key) {

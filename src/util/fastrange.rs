@@ -1,3 +1,11 @@
+//! fastrange/FastRange: A faster alternative to % for mapping a hash value
+//! to an arbitrary range. See https://github.com/lemire/fastrange
+//!
+//! Generally recommended are FastRange32 for mapping results of 32-bit
+//! hash functions and FastRange64 for mapping results of 64-bit hash
+//! functions. FastRange is less forgiving than % if the input hashes are
+//! not well distributed over the full range of the type (32 or 64 bits).
+
 #[cxx::bridge(namespace = "rocksdb_rs::util::fastrange")]
 mod ffix {
     extern "Rust" {

@@ -116,7 +116,7 @@ PointLockManager::PointLockManager(PessimisticTransactionDB* txn_db,
 
 size_t LockMap::GetStripe(const std::string& key) const {
   assert(num_stripes_ > 0);
-  return FastRange64(GetSliceNPHash64(key), num_stripes_);
+  return rocksdb_rs::util::fastrange::FastRange64(GetSliceNPHash64(key), num_stripes_);
 }
 
 void PointLockManager::AddColumnFamily(const ColumnFamilyHandle* cf) {
