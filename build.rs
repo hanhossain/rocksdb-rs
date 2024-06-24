@@ -343,6 +343,7 @@ fn main() {
         "src/types.rs",
         "src/unique_id.rs",
         "src/util/bloom.rs",
+        "src/util/fastrange.rs",
         "src/utilities/options_type.rs",
     ];
 

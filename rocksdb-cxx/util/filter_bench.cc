@@ -152,7 +152,7 @@ using rocksdb_rs::cache::CacheEntryRole;
 using rocksdb::CacheEntryRoleOptions;
 using rocksdb_rs::coding_lean::EncodeFixed32;
 using rocksdb::Env;
-using rocksdb::FastRange32;
+using rocksdb_rs::util::fastrange::FastRange32;
 using rocksdb::FilterBitsReader;
 using rocksdb::FilterBuildingContext;
 using rocksdb::FilterPolicy;
