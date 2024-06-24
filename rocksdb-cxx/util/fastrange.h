@@ -22,6 +22,8 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "rocksdb-rs/src/util/fastrange.rs.h"
+
 #ifdef TEST_UINT128_COMPAT
 #undef HAVE_UINT128_EXTENSION
 #endif
@@ -106,7 +108,7 @@ inline size_t FastRange64(uint64_t hash, size_t range) {
 
 // Map a quality 32-bit hash value down to an arbitrary uint32_t range.
 inline uint32_t FastRange32(uint32_t hash, uint32_t range) {
-  return FastRangeGeneric(hash, range);
+  return rocksdb_rs::util::fastrange::FastRange32(hash, range);
 }
 
 }  // namespace rocksdb
