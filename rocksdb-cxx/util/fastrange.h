@@ -103,7 +103,7 @@ inline Range FastRangeGeneric(Hash hash, Range range) {
 // Map a quality 64-bit hash value down to an arbitrary size_t range.
 // (size_t is standard for mapping to things in memory.)
 inline size_t FastRange64(uint64_t hash, size_t range) {
-  return FastRangeGeneric(hash, range);
+  return rocksdb_rs::util::fastrange::FastRange64(hash, range);
 }
 
 // Map a quality 32-bit hash value down to an arbitrary uint32_t range.
