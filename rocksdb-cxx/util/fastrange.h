@@ -46,4 +46,9 @@ inline Range FastRangeGeneric(uint64_t hash, Range range) {
   return rocksdb_rs::util::fastrange::FastRange64(hash, range);
 }
 
+template <typename Range>
+inline Range FastRangeGeneric(uint32_t hash, Range range) {
+  return rocksdb_rs::util::fastrange::FastRange32(hash, range);
+}
+
 }  // namespace rocksdb
