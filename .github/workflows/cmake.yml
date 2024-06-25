@@ -41,7 +41,7 @@ jobs:
       run: ${{ matrix.deps }}
 
     - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.4
+      uses: mozilla-actions/sccache-action@v0.0.5
 
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
@@ -80,7 +80,7 @@ jobs:
       run: ${{ matrix.deps }}
 
     - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.4
+      uses: mozilla-actions/sccache-action@v0.0.5
 
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
@@ -113,7 +113,7 @@ jobs:
     - name: Install dependencies
       run: ${{ matrix.deps }}
     - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.4
+      uses: mozilla-actions/sccache-action@v0.0.5
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
     - name: Configure CMake
