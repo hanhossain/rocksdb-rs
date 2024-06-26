@@ -15,5 +15,4 @@ add_executable(db_stress${ARTIFACT_SUFFIX}
   multi_ops_txns_stress.cc
   no_batched_ops_stress.cc)
 target_link_libraries(db_stress${ARTIFACT_SUFFIX} ${ROCKSDB_LIB} ${THIRDPARTY_LIBS})
-target_link_options(db_stress${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 list(APPEND tool_deps db_stress)

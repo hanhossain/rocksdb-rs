@@ -6,7 +6,6 @@ foreach(src ${CORE_TOOLS})
   add_executable(${exename}${ARTIFACT_SUFFIX}
     ${src})
   target_link_libraries(${exename}${ARTIFACT_SUFFIX} ${ROCKSDB_LIB})
-  target_link_options(${exename}${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
   list(APPEND core_tool_deps ${exename})
 endforeach()
 
@@ -22,7 +21,6 @@ if(WITH_TOOLS)
     add_executable(${exename}${ARTIFACT_SUFFIX}
       ${src})
     target_link_libraries(${exename}${ARTIFACT_SUFFIX} ${ROCKSDB_LIB} ${THIRDPARTY_LIBS})
-    target_link_options(${exename}${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
     list(APPEND tool_deps ${exename})
   endforeach()
 
