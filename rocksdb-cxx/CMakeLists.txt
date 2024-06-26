@@ -504,6 +504,7 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 endif ()
 
 message(STATUS "LINKER_OVERRIDE: ${LINKER_OVERRIDE}")
+add_link_options(${LINKER_OVERRIDE})
 
 if (NOT WIN32)
     add_definitions(-DROCKSDB_PLATFORM_POSIX -DROCKSDB_LIB_IO_POSIX)
@@ -1128,7 +1129,6 @@ if (ROCKSDB_BUILD_SHARED)
     target_link_libraries(${ROCKSDB_SHARED_LIB}
             PUBLIC rocksdb_rs
             PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
-    target_link_options(${ROCKSDB_SHARED_LIB} PRIVATE ${LINKER_OVERRIDE})
 
     if (WIN32)
         set_target_properties(${ROCKSDB_SHARED_LIB} PROPERTIES
@@ -1419,7 +1419,6 @@ if (WITH_TESTS)
         )
         target_link_libraries(${exename}${ARTIFACT_SUFFIX}
                 PRIVATE testutillib${ARTIFACT_SUFFIX} testharness gtest ${THIRDPARTY_LIBS} ${ROCKSDB_LIB})
-        target_link_options(${exename}${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
         if (NOT "${exename}" MATCHES "db_sanity_test")
             gtest_discover_tests(${exename} DISCOVERY_TIMEOUT 120)
             add_dependencies(check ${exename}${ARTIFACT_SUFFIX})
@@ -1434,44 +1433,37 @@ if (WITH_BENCHMARK_TOOLS)
             tools/db_bench_tool.cc)
     target_link_libraries(db_bench${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${THIRDPARTY_LIBS})
-    target_link_options(db_bench${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
     add_executable(cache_bench${ARTIFACT_SUFFIX}
             cache/cache_bench.cc
             cache/cache_bench_tool.cc)
     target_link_libraries(cache_bench${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(cache_bench${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
     add_executable(memtablerep_bench${ARTIFACT_SUFFIX}
             memtable/memtablerep_bench.cc)
     target_link_libraries(memtablerep_bench${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(memtablerep_bench${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
     add_executable(range_del_aggregator_bench${ARTIFACT_SUFFIX}
             db/range_del_aggregator_bench.cc)
     target_link_libraries(range_del_aggregator_bench${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(range_del_aggregator_bench${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
     add_executable(table_reader_bench${ARTIFACT_SUFFIX}
             table/table_reader_bench.cc)
     target_link_libraries(table_reader_bench${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} testharness ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(table_reader_bench${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
     add_executable(filter_bench${ARTIFACT_SUFFIX}
             util/filter_bench.cc)
     target_link_libraries(filter_bench${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(filter_bench${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
     add_executable(hash_table_bench${ARTIFACT_SUFFIX}
             utilities/persistent_cache/hash_table_bench.cc)
     target_link_libraries(hash_table_bench${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(hash_table_bench${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 endif ()
 
 option(WITH_TRACE_TOOLS "build with trace tools" ON)
@@ -1480,13 +1472,11 @@ if (WITH_TRACE_TOOLS)
             tools/block_cache_analyzer/block_cache_trace_analyzer_tool.cc)
     target_link_libraries(block_cache_trace_analyzer${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(block_cache_trace_analyzer${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
     add_executable(trace_analyzer${ARTIFACT_SUFFIX}
             tools/trace_analyzer.cc)
     target_link_libraries(trace_analyzer${ARTIFACT_SUFFIX}
             ${ROCKSDB_LIB} ${GFLAGS_LIB} ${FOLLY_LIBS})
-    target_link_options(trace_analyzer${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
 
 endif ()
 
