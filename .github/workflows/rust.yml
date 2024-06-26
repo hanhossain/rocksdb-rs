@@ -24,6 +24,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
+    - name: Install dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt-get install -y lld
     - name: Build
       run: cargo build --features build-cpp
     - name: Run tests
