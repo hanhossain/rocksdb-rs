@@ -16,7 +16,7 @@ env:
   CC: clang
   CXX: clang++
   CTEST_OUTPUT_ON_FAILURE: ON
-  SCCACHE_GHA_ENABLED: "true"
+  # SCCACHE_GHA_ENABLED: "true"
 
 jobs:
   basic-test:
@@ -40,8 +40,8 @@ jobs:
     - name: Install dependencies
       run: ${{ matrix.deps }}
 
-    - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.5
+    # - name: Run sccache-cache
+    #   uses: mozilla-actions/sccache-action@v0.0.5
 
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
@@ -79,8 +79,8 @@ jobs:
     - name: Install dependencies
       run: ${{ matrix.deps }}
 
-    - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.5
+    # - name: Run sccache-cache
+    #   uses: mozilla-actions/sccache-action@v0.0.5
 
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
@@ -112,8 +112,8 @@ jobs:
     - uses: dtolnay/rust-toolchain@stable
     - name: Install dependencies
       run: ${{ matrix.deps }}
-    - name: Run sccache-cache
-      uses: mozilla-actions/sccache-action@v0.0.5
+    # - name: Run sccache-cache
+    #   uses: mozilla-actions/sccache-action@v0.0.5
     - name: Create build directory
       run: mkdir -p ${{ github.workspace }}/build
     - name: Configure CMake
