@@ -79,6 +79,10 @@ if (SCCACHE)
     set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded)
 endif ()
 
+# require clang
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
+
 option(WITH_JEMALLOC "build with JeMalloc" OFF)
 option(WITH_LIBURING "build with liburing" ON)
 option(WITH_SNAPPY "build with SNAPPY" OFF)

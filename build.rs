@@ -411,6 +411,11 @@ fn main() {
 
     config.files(cxx_files);
 
+    let compiler = config.get_compiler();
+    if !compiler.is_like_clang() {
+        config.compiler("clang++");
+    }
+
     config.compile("rocksdb-autocxx");
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
