@@ -7,6 +7,7 @@ foreach(ONE_BENCH_CPP ${ALL_BENCH_CPP})
   add_executable(${TARGET_NAME} ${ONE_BENCH_CPP})
   target_link_libraries(${TARGET_NAME} ${ROCKSDB_LIB} benchmark::benchmark
           ${CMAKE_THREAD_LIBS_INIT})
+  target_link_options(${exename}${ARTIFACT_SUFFIX} PRIVATE ${LINKER_OVERRIDE})
   # run benchmark like a test, if added, the benchmark tests could be run by `ctest -R Bench_`
   # add_test(Bench_${TARGET_NAME} ${TARGET_NAME})
   list(APPEND ALL_BENCH_TARGETS ${TARGET_NAME})
