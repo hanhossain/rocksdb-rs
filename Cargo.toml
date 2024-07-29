@@ -13,7 +13,7 @@ autocxx = "0.27.0"
 cxx = { version = "1.0.124", features = ["c++17"] }
 lazy_static = "1.5.0"
 regex = "1.10.5"
-xxhash-rust = { version = "0.8.11", features = ["xxh3"] }
+xxhash-rust = { version = "0.8.12", features = ["xxh3"] }
 
 [build-dependencies]
 autocxx-build = "0.27.0"
