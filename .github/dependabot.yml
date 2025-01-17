@@ -9,6 +9,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    allow:
+      - dependency-type: all
+    assignees:
+      - hanhossain
     groups:
       cxx:
         patterns:
@@ -22,3 +26,5 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    assignees:
+      - hanhossain
