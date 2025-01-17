@@ -22,6 +22,9 @@ updates:
         patterns:
           - autocxx
           - autocxx-build
+      non-cxx-deps:
+        patterns:
+          - '*'
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
