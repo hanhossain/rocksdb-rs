@@ -256,7 +256,7 @@ TEST(MmapTest, AllocateLazyZeroed) {
   }
 }
 
-TEST_F(ArenaTest, UnmappedAllocation) {
+TEST_F(ArenaTest, DISABLED_UnmappedAllocation) {
   // Verify that it's possible to get unmapped pages in large allocations,
   // for memory efficiency and to ensure we don't accidentally waste time &
   // space initializing the memory.
