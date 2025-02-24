@@ -162,7 +162,7 @@ unsafe fn get_varint64_ptr(
     mut p: *const c_char,
     limit: *const c_char,
     value: *mut u64,
-) -> *const c_char {
+) -> *const c_char { unsafe {
     let mut result = 0;
     let mut shift = 0;
 
@@ -180,14 +180,14 @@ unsafe fn get_varint64_ptr(
     }
 
     std::ptr::null()
-}
+}}
 
 /// Internal routine for use by fallback path of GetVarint32Ptr
 unsafe fn get_varint32_ptr_fallback(
     mut p: *const c_char,
     limit: *const c_char,
     value: *mut u32,
-) -> *const c_char {
+) -> *const c_char { unsafe {
     let mut result = 0;
     let mut shift = 0;
 
@@ -205,7 +205,7 @@ unsafe fn get_varint32_ptr_fallback(
     }
 
     std::ptr::null()
-}
+}}
 
 /// Pointer-based variants of GetVarint...  These either store a value
 /// in *v and return a pointer just past the parsed value, or return
@@ -215,7 +215,7 @@ unsafe fn get_varint32_ptr(
     p: *const c_char,
     limit: *const c_char,
     value: *mut u32,
-) -> *const c_char {
+) -> *const c_char { unsafe {
     if p < limit {
         let result = *p as u32;
         if result & 0x80 == 0 {
@@ -224,9 +224,9 @@ unsafe fn get_varint32_ptr(
         }
     }
     get_varint32_ptr_fallback(p, limit, value)
-}
+}}
 
-unsafe fn encode_varint32(dst: *mut c_char, v: u32) -> *mut c_char {
+unsafe fn encode_varint32(dst: *mut c_char, v: u32) -> *mut c_char { unsafe {
     let mut ptr = dst as *mut u8;
     let msb = 0x80;
 
@@ -267,7 +267,7 @@ unsafe fn encode_varint32(dst: *mut c_char, v: u32) -> *mut c_char {
         ptr = ptr.add(1);
     }
     ptr as *mut _
-}
+}}
 
 #[cfg(test)]
 mod tests {
