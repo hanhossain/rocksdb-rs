@@ -17,6 +17,7 @@ env:
   CXX: clang++
   CTEST_OUTPUT_ON_FAILURE: ON
   # SCCACHE_GHA_ENABLED: "true"
+  RUSTFLAGS: -D warnings
 
 jobs:
   basic-test:
