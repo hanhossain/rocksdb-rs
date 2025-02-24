@@ -1,2 +1,2 @@
 [build]
-rustflags = ["-W", "rust-2024-compatibility warning"]
+rustflags = ["-W", "rust-2024-compatibility"]
