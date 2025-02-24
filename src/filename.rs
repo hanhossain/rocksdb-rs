@@ -412,15 +412,17 @@ unsafe fn parse_file_name_with_info_log_prefix_and_log_type(
     file_type: *mut FileType,
     log_type: *mut WalFileType,
 ) -> bool {
-    if let Some(result) = parse_with_info_log_prefix(file_name, info_log_name_prefix) {
-        *number = result.number;
-        *file_type = result.file_type;
-        if let Some(log) = result.log_type {
-            *log_type = log;
+    unsafe {
+        if let Some(result) = parse_with_info_log_prefix(file_name, info_log_name_prefix) {
+            *number = result.number;
+            *file_type = result.file_type;
+            if let Some(log) = result.log_type {
+                *log_type = log;
+            }
+            true
+        } else {
+            false
         }
-        true
-    } else {
-        false
     }
 }
 
@@ -434,12 +436,14 @@ unsafe fn parse_file_name_with_info_log_prefix(
     info_log_name_prefix: &str,
     file_type: *mut FileType,
 ) -> bool {
-    if let Some(result) = parse_with_info_log_prefix(file_name, info_log_name_prefix) {
-        *number = result.number;
-        *file_type = result.file_type;
-        true
-    } else {
-        false
+    unsafe {
+        if let Some(result) = parse_with_info_log_prefix(file_name, info_log_name_prefix) {
+            *number = result.number;
+            *file_type = result.file_type;
+            true
+        } else {
+            false
+        }
     }
 }
 
@@ -453,15 +457,17 @@ unsafe fn parse_file_name_with_log_type(
     file_type: *mut FileType,
     log_type: *mut WalFileType,
 ) -> bool {
-    if let Some(result) = parse(file_name) {
-        *number = result.number;
-        *file_type = result.file_type;
-        if let Some(log) = result.log_type {
-            *log_type = log;
+    unsafe {
+        if let Some(result) = parse(file_name) {
+            *number = result.number;
+            *file_type = result.file_type;
+            if let Some(log) = result.log_type {
+                *log_type = log;
+            }
+            true
+        } else {
+            false
         }
-        true
-    } else {
-        false
     }
 }
 
@@ -470,12 +476,14 @@ unsafe fn parse_file_name_with_log_type(
 /// filename was successfully parsed, returns true. Else return false.
 /// Skips info log files.
 unsafe fn parse_file_name(file_name: &str, number: *mut u64, file_type: *mut FileType) -> bool {
-    if let Some(result) = parse(file_name) {
-        *number = result.number;
-        *file_type = result.file_type;
-        true
-    } else {
-        false
+    unsafe {
+        if let Some(result) = parse(file_name) {
+            *number = result.number;
+            *file_type = result.file_type;
+            true
+        } else {
+            false
+        }
     }
 }
 

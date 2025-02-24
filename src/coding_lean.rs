@@ -41,18 +41,24 @@ pub(crate) fn encode_fixed_64(value: u64) -> [u8; 8] {
 // REQUIRES: dst has enough space for the value being written
 // -- Implementation of the functions declared above
 unsafe fn encode_fixed_16_ptr(buf: *mut c_char, value: u16) {
-    let mut buf = std::slice::from_raw_parts_mut(buf as *mut u8, 2);
-    buf.write_all(&encode_fixed_16(value)).unwrap();
+    unsafe {
+        let mut buf = std::slice::from_raw_parts_mut(buf as *mut u8, 2);
+        buf.write_all(&encode_fixed_16(value)).unwrap();
+    }
 }
 
 unsafe fn encode_fixed_32_ptr(buf: *mut c_char, value: u32) {
-    let mut buf = std::slice::from_raw_parts_mut(buf as *mut u8, 4);
-    buf.write_all(&encode_fixed_32(value)).unwrap();
+    unsafe {
+        let mut buf = std::slice::from_raw_parts_mut(buf as *mut u8, 4);
+        buf.write_all(&encode_fixed_32(value)).unwrap();
+    }
 }
 
 unsafe fn encode_fixed_64_ptr(buf: *mut c_char, value: u64) {
-    let mut buf = std::slice::from_raw_parts_mut(buf as *mut u8, 8);
-    buf.write_all(&encode_fixed_64(value)).unwrap();
+    unsafe {
+        let mut buf = std::slice::from_raw_parts_mut(buf as *mut u8, 8);
+        buf.write_all(&encode_fixed_64(value)).unwrap();
+    }
 }
 
 pub(crate) fn decode_fixed_16(bytes: &[u8]) -> u16 {
@@ -70,13 +76,13 @@ pub(crate) fn decode_fixed_64(bytes: &[u8]) -> u64 {
 // Lower-level versions of Get... that read directly from a character buffer
 // without any bounds checking.
 pub(crate) unsafe fn decode_fixed_16_ptr(bytes: *const c_char) -> u16 {
-    decode_fixed_16(std::slice::from_raw_parts(bytes as *const _, 2))
+    unsafe { decode_fixed_16(std::slice::from_raw_parts(bytes as *const _, 2)) }
 }
 
 pub(crate) unsafe fn decode_fixed_32_ptr(bytes: *const c_char) -> u32 {
-    decode_fixed_32(std::slice::from_raw_parts(bytes as *const _, 4))
+    unsafe { decode_fixed_32(std::slice::from_raw_parts(bytes as *const _, 4)) }
 }
 
 pub(crate) unsafe fn decode_fixed_64_ptr(bytes: *const c_char) -> u64 {
-    decode_fixed_64(std::slice::from_raw_parts(bytes as *const _, 8))
+    unsafe { decode_fixed_64(std::slice::from_raw_parts(bytes as *const _, 8)) }
 }

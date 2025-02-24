@@ -163,23 +163,25 @@ unsafe fn get_varint64_ptr(
     limit: *const c_char,
     value: *mut u64,
 ) -> *const c_char {
-    let mut result = 0;
-    let mut shift = 0;
+    unsafe {
+        let mut result = 0;
+        let mut shift = 0;
 
-    while shift <= 63 && p < limit {
-        let byte = *p as u64;
-        p = p.add(1);
+        while shift <= 63 && p < limit {
+            let byte = *p as u64;
+            p = p.add(1);
 
-        if byte & 0x80 == 0 {
-            *value = result | (byte << shift);
-            return p;
+            if byte & 0x80 == 0 {
+                *value = result | (byte << shift);
+                return p;
+            }
+
+            result |= (byte & 0x7f) << shift;
+            shift += 7;
         }
 
-        result |= (byte & 0x7f) << shift;
-        shift += 7;
+        std::ptr::null()
     }
-
-    std::ptr::null()
 }
 
 /// Internal routine for use by fallback path of GetVarint32Ptr
@@ -188,23 +190,25 @@ unsafe fn get_varint32_ptr_fallback(
     limit: *const c_char,
     value: *mut u32,
 ) -> *const c_char {
-    let mut result = 0;
-    let mut shift = 0;
+    unsafe {
+        let mut result = 0;
+        let mut shift = 0;
 
-    while shift <= 28 && p < limit {
-        let byte = *p as u32;
-        p = p.add(1);
+        while shift <= 28 && p < limit {
+            let byte = *p as u32;
+            p = p.add(1);
 
-        if byte & 0x80 == 0 {
-            *value = result | (byte << shift);
-            return p;
+            if byte & 0x80 == 0 {
+                *value = result | (byte << shift);
+                return p;
+            }
+
+            result |= (byte & 0x7f) << shift;
+            shift += 7;
         }
 
-        result |= (byte & 0x7f) << shift;
-        shift += 7;
+        std::ptr::null()
     }
-
-    std::ptr::null()
 }
 
 /// Pointer-based variants of GetVarint...  These either store a value
@@ -216,57 +220,61 @@ unsafe fn get_varint32_ptr(
     limit: *const c_char,
     value: *mut u32,
 ) -> *const c_char {
-    if p < limit {
-        let result = *p as u32;
-        if result & 0x80 == 0 {
-            *value = result;
-            return p.add(1);
+    unsafe {
+        if p < limit {
+            let result = *p as u32;
+            if result & 0x80 == 0 {
+                *value = result;
+                return p.add(1);
+            }
         }
+        get_varint32_ptr_fallback(p, limit, value)
     }
-    get_varint32_ptr_fallback(p, limit, value)
 }
 
 unsafe fn encode_varint32(dst: *mut c_char, v: u32) -> *mut c_char {
-    let mut ptr = dst as *mut u8;
-    let msb = 0x80;
+    unsafe {
+        let mut ptr = dst as *mut u8;
+        let msb = 0x80;
 
-    if v < (1 << 7) {
-        *ptr = v as u8;
-        ptr = ptr.add(1);
-    } else if v < (1 << 14) {
-        *ptr = (v | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = (v >> 7) as u8;
-        ptr = ptr.add(1);
-    } else if v < (1 << 21) {
-        *ptr = (v | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = ((v >> 7) | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = (v >> 14) as u8;
-        ptr = ptr.add(1);
-    } else if v < (1 << 28) {
-        *ptr = (v | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = ((v >> 7) | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = ((v >> 14) | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = (v >> 21) as u8;
-        ptr = ptr.add(1);
-    } else {
-        *ptr = (v | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = ((v >> 7) | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = ((v >> 14) | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = ((v >> 21) | msb) as u8;
-        ptr = ptr.add(1);
-        *ptr = (v >> 28) as u8;
-        ptr = ptr.add(1);
+        if v < (1 << 7) {
+            *ptr = v as u8;
+            ptr = ptr.add(1);
+        } else if v < (1 << 14) {
+            *ptr = (v | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = (v >> 7) as u8;
+            ptr = ptr.add(1);
+        } else if v < (1 << 21) {
+            *ptr = (v | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = ((v >> 7) | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = (v >> 14) as u8;
+            ptr = ptr.add(1);
+        } else if v < (1 << 28) {
+            *ptr = (v | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = ((v >> 7) | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = ((v >> 14) | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = (v >> 21) as u8;
+            ptr = ptr.add(1);
+        } else {
+            *ptr = (v | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = ((v >> 7) | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = ((v >> 14) | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = ((v >> 21) | msb) as u8;
+            ptr = ptr.add(1);
+            *ptr = (v >> 28) as u8;
+            ptr = ptr.add(1);
+        }
+        ptr as *mut _
     }
-    ptr as *mut _
 }
 
 #[cfg(test)]
