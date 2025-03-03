@@ -49,9 +49,9 @@ checksum = "ace50bade8e6234aa140d9a2f552bbee1db4d353f69b8217bc503490fc1a9f26"
 
 [[package]]
 name = "autocxx"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68c55316bd7d6560588498fe43b1aee3fd36c17c7cd440d69a5b4ba7df33978f"
+checksum = "d50490ac50151441872fdefb8458fa634f35f421551712ac3dbe8fd3a4e071b4"
 dependencies = [
  "aquamarine",
  "autocxx-macro",
@@ -61,9 +61,9 @@ dependencies = [
 
 [[package]]
 name = "autocxx-bindgen"
-version = "0.72.0"
+version = "0.73.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "537ef6dffea4311d04a313f645bdd04d2c88b356a6eb7afd4258e5aee70dea8c"
+checksum = "ecaaf84d9cf1a772409c0abdac7d2477a31fd890dbdf606d8f684dc60129aa94"
 dependencies = [
  "bitflags",
  "cexpr",
@@ -80,9 +80,9 @@ dependencies = [
 
 [[package]]
 name = "autocxx-build"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fab383d79e3f1fe444c2161c3a0331d0e1478f7fb74bde75e3f5032577a3f706"
+checksum = "4af4daf225a4a74263e85c39193a82a78b646358a47d0369dbdd147a506ccee9"
 dependencies = [
  "autocxx-engine",
  "env_logger",
@@ -92,9 +92,9 @@ dependencies = [
 
 [[package]]
 name = "autocxx-engine"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c00c4e7d232a15552eba90ec47c9a22c65e62816aef2ae4301801c3e1017737b"
+checksum = "5747aff45bb3fc25709f804ee7b6fe42a32e7475b3114e75b7c826e930327627"
 dependencies = [
  "aquamarine",
  "autocxx-bindgen",
@@ -111,6 +111,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
+ "regex_static",
  "rustversion",
  "serde_json",
  "syn 2.0.98",
@@ -121,9 +122,9 @@ dependencies = [
 
 [[package]]
 name = "autocxx-macro"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14586f9015555a8d257259713ac4914184a5c8c3f0c22efb8e538f79d2b3d968"
+checksum = "d13fe69c3ca5cc9c536590b8094fb42040875d5f5ef82ededca8eae0a91f56d5"
 dependencies = [
  "autocxx-parser",
  "proc-macro-error",
@@ -134,9 +135,9 @@ dependencies = [
 
 [[package]]
 name = "autocxx-parser"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "893a36d31f4618434f78f890f3136b039bbe6a719919e03eb249835e849454b7"
+checksum = "0ced20708989dc8e53e61e224a3547df322d18f40162d4cb0aeca7b25b0e8ee2"
 dependencies = [
  "indexmap",
  "itertools 0.10.5",
@@ -603,7 +604,7 @@ dependencies = [
  "aho-corasick",
  "memchr",
  "regex-automata",
- "regex-syntax",
+ "regex-syntax 0.8.5",
 ]
 
 [[package]]
@@ -614,14 +615,54 @@ checksum = "809e8dc61f6de73b46c85f4c96486310fe304c434cfa43669d7b40f711150908"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax",
+ "regex-syntax 0.8.5",
 ]
+
+[[package]]
+name = "regex-syntax"
+version = "0.6.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 
 [[package]]
 name = "regex-syntax"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
+
+[[package]]
+name = "regex_static"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6126d61c5e4b41929098f73b42fc1d257116cc95d19739248c51591f77cc0021"
+dependencies = [
+ "once_cell",
+ "regex",
+ "regex_static_macro",
+]
+
+[[package]]
+name = "regex_static_impl"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c3755019886a70e772e6360b0b58501d75cf7dc17a53e08aa97e59ecb2c2bc5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "regex-syntax 0.6.29",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "regex_static_macro"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79b15495fd034158635bc8b762a132dfc83864d6992aeda1ffabf01b03b611a1"
+dependencies = [
+ "proc-macro2",
+ "regex_static_impl",
+ "syn 1.0.109",
+]
 
 [[package]]
 name = "rocksdb-rs"
