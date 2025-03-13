@@ -1393,7 +1393,7 @@ if (WITH_TESTS)
             utilities/cassandra/test_utils.cc
     )
     enable_testing()
-    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+    add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --parallel)
     set(TESTUTILLIB testutillib${ARTIFACT_SUFFIX})
     add_library(${TESTUTILLIB} STATIC ${TESTUTIL_SOURCE})
     target_link_libraries(${TESTUTILLIB} ${ROCKSDB_LIB} ${FOLLY_LIBS})
