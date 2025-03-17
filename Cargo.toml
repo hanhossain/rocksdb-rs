@@ -10,14 +10,14 @@ crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 autocxx = "0.30.0"
-cxx = { version = "1.0.143", features = ["c++17"] }
+cxx = { version = "1.0.148", features = ["c++17"] }
 lazy_static = "1.5.0"
 regex = "1.11.1"
 xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
 
 [build-dependencies]
 autocxx-build = "0.30.0"
-cxx-build = { version = "1.0.143", features = ["parallel"] }
+cxx-build = { version = "1.0.148", features = ["parallel"] }
 walkdir = "2.5.0"
 
 [features]
