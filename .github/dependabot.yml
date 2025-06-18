@@ -9,8 +9,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    assignees:
-      - hanhossain
     groups:
       cxx:
         patterns:
@@ -24,5 +22,3 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    assignees:
-      - hanhossain
