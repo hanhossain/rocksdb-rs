@@ -34,7 +34,7 @@ jobs:
           deps: brew install ninja gflags
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@stable
 
     - name: Install dependencies
@@ -72,7 +72,7 @@ jobs:
           deps: brew install ninja gflags
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@stable
 
     - name: Install dependencies
@@ -108,7 +108,7 @@ jobs:
         - os: macos-latest
           deps: brew install ninja gflags
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@stable
     - name: Install dependencies
       run: ${{ matrix.deps }}
