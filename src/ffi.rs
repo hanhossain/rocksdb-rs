@@ -1,7 +1,14 @@
-// autocxx hasn't migrated to edition 2024
-#![allow(unsafe_op_in_unsafe_fn)]
+#[cxx::bridge(namespace = "rocksdb")]
+mod ffi {
+    unsafe extern "C++" {
+        include!("rocksdb/common_ffi.h");
 
-autocxx::include_cpp! {
-    safety!(unsafe)
+        // Create a unique ptr of an empty string
+        fn make_empty_string() -> UniquePtr<CxxString>;
+
+        // Create a unique ptr of a string
+        fn make_string(s: &str) -> UniquePtr<CxxString>;
+    }
 }
+
 pub use ffi::*;

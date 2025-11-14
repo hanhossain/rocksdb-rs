@@ -562,11 +562,7 @@ impl ffix::Status {
 
     pub(crate) fn to_string(&self) -> UniquePtr<CxxString> {
         let msg = match self.code {
-            ffix::Code::kOk => {
-                let mut s = crate::ffi::make_string("");
-                s.pin_mut().push_str("OK");
-                return s;
-            }
+            ffix::Code::kOk => "OK",
             ffix::Code::kNotFound => "NotFound: ",
             ffix::Code::kCorruption => "Corruption: ",
             ffix::Code::kNotSupported => "Not implemented: ",
@@ -585,8 +581,7 @@ impl ffix::Status {
             x => unreachable!("{:?} is not a valid status code", x),
         };
 
-        let mut res = crate::ffi::make_string("");
-        res.pin_mut().push_str(msg);
+        let mut res = crate::ffi::make_string(msg);
 
         if self.subcode != ffix::SubCode::kNone {
             let subcode_msg = match self.subcode {
@@ -1521,7 +1516,7 @@ fn status_txn_not_prepared3() -> ffix::Status {
 }
 
 fn status_copy_state(s: &CxxString) -> UniquePtr<CxxString> {
-    let mut res = crate::ffi::make_string("");
+    let mut res = crate::ffi::make_empty_string();
     res.pin_mut().push_bytes(s.as_bytes());
     res
 }
@@ -1531,7 +1526,7 @@ fn status_copy_append_message(
     delim: &ffix::Slice,
     msg: &ffix::Slice,
 ) -> ffix::Status {
-    let mut new_msg = crate::ffi::make_string("");
+    let mut new_msg = crate::ffi::make_empty_string();
     new_msg.pin_mut().push_bytes(status.state.as_bytes());
     new_msg
         .pin_mut()
@@ -1577,8 +1572,7 @@ impl From<Status> for ffix::Status {
         match value {
             Status::Ok => Self::default(),
             Status::NotSupported(s) => {
-                let mut msg = crate::ffi::make_string("");
-                msg.pin_mut().push_str(&s.msg);
+                let msg = crate::ffi::make_string(&s.msg);
                 Self::new_with_messages(
                     ffix::Code::kNotSupported,
                     ffix::SubCode::kNone,
