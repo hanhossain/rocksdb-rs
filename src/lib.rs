@@ -8,6 +8,7 @@ mod hash;
 mod io_status;
 mod options;
 pub mod port_defs;
+mod slice;
 pub mod status;
 mod string_util;
 mod transaction_log;

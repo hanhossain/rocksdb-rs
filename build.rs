@@ -339,6 +339,7 @@ fn main() {
         "src/io_status.rs",
         "src/options.rs",
         "src/port_defs.rs",
+        "src/slice.rs",
         "src/status.rs",
         "src/transaction_log.rs",
         "src/types.rs",

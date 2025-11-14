@@ -2,10 +2,6 @@
 #![allow(unsafe_op_in_unsafe_fn)]
 
 autocxx::include_cpp! {
-    #include "rocksdb/slice.h"
-
     safety!(unsafe)
-
-    generate!("rocksdb::Slice")
 }
 pub use ffi::*;
