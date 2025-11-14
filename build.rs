@@ -221,6 +221,7 @@ const SOURCES: &[&str] = &[
     "trace_replay/trace_replay.cc",
     "util/async_file_reader.cc",
     "util/cleanable.cc",
+    "util/common_ffi.cc",
     "util/compaction_job_stats_impl.cc",
     "util/comparator.cc",
     "util/compression.cc",
@@ -334,10 +335,13 @@ fn main() {
         "src/coding.rs",
         "src/coding_lean.rs",
         "src/compression_type.rs",
+        "src/ffi.rs",
         "src/filename.rs",
         "src/hash.rs",
         "src/io_status.rs",
+        "src/options.rs",
         "src/port_defs.rs",
+        "src/slice.rs",
         "src/status.rs",
         "src/transaction_log.rs",
         "src/types.rs",
@@ -349,19 +353,7 @@ fn main() {
 
     let target = std::env::var("TARGET").unwrap();
     let includes = ["rocksdb-cxx/include", "rocksdb-cxx"];
-    let _ = cxx_build::bridges(&bridges);
-
-    let out_dir = std::env::var("OUT_DIR").unwrap();
-    let mut includes = includes
-        .iter()
-        .map(|d| std::path::PathBuf::from(d))
-        .collect::<Vec<_>>();
-    includes.push(std::path::PathBuf::from(&out_dir).join("cxxbridge/include"));
-
-    let mut config = autocxx_build::Builder::new("src/ffi.rs", &includes)
-        .extra_clang_args(&["-std=c++17"])
-        .build()
-        .expect("Failed to generate bindings with autocxx");
+    let mut config = cxx_build::bridges(&bridges);
 
     if target.contains("darwin") {
         config.define("OS_MACOSX", None);
@@ -403,22 +395,13 @@ fn main() {
         config.files(sources).file("build_version.cc");
     }
 
-    let cxx_files = walkdir::WalkDir::new(format!("{out_dir}/cxxbridge/sources"))
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-        .map(|f| f.into_path());
-
-    config.files(cxx_files);
-
     let compiler = config.get_compiler();
     if !compiler.is_like_clang() {
         config.compiler("clang++");
     }
 
-    config.compile("rocksdb-autocxx");
+    config.compile("rocksdb-cxx");
 
     println!("cargo:rerun-if-changed=rocksdb-cxx");
     println!("cargo:rerun-if-changed=build_version.cc");
-    println!("cargo:rerun-if-changed=src/ffi.rs");
 }

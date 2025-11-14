@@ -158,7 +158,7 @@ mod ffix {
         include!("rocksdb/options.h");
         include!("rocksdb-rs/src/transaction_log.rs.h");
 
-        type DbPath = crate::ffi::rocksdb::DbPath;
+        type DbPath = crate::options::ffix::DbPath;
 
         #[namespace = "rocksdb_rs::types"]
         type FileType = crate::types::ffix::FileType;
@@ -267,7 +267,7 @@ fn table_file_name(db_paths: &CxxVector<ffix::DbPath>, number: u64, path_id: u32
     if idx >= db_paths.len() {
         idx = db_paths.len() - 1;
     }
-    let path = db_paths.get(idx).unwrap().Path();
+    let path = db_paths.get(idx).unwrap().path();
     make_table_file_name_full_path(path.to_str().unwrap(), number)
 }
 

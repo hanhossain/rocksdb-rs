@@ -368,7 +368,7 @@ pub(crate) mod ffix {
         include!("rocksdb/slice.h");
 
         #[namespace = "rocksdb"]
-        type Slice = crate::ffi::rocksdb::Slice;
+        type Slice = crate::slice::ffix::Slice;
     }
 }
 
@@ -381,8 +381,8 @@ impl ffix::Status {
         sev: ffix::Severity,
     ) -> ffix::Status {
         assert_ne!(subcode, ffix::SubCode::kMaxSubCode);
-        let msg = msg.ToUniquePtrString();
-        let msg2 = msg2.ToUniquePtrString();
+        let msg = msg.to_unique_ptr_string();
+        let msg2 = msg2.to_unique_ptr_string();
 
         ffix::Status::new_with_messages(code, subcode, msg, msg2, sev)
     }
@@ -562,11 +562,7 @@ impl ffix::Status {
 
     pub(crate) fn to_string(&self) -> UniquePtr<CxxString> {
         let msg = match self.code {
-            ffix::Code::kOk => {
-                let mut s = crate::ffi::make_string("");
-                s.pin_mut().push_str("OK");
-                return s;
-            }
+            ffix::Code::kOk => "OK",
             ffix::Code::kNotFound => "NotFound: ",
             ffix::Code::kCorruption => "Corruption: ",
             ffix::Code::kNotSupported => "Not implemented: ",
@@ -585,8 +581,7 @@ impl ffix::Status {
             x => unreachable!("{:?} is not a valid status code", x),
         };
 
-        let mut res = crate::ffi::make_string("");
-        res.pin_mut().push_str(msg);
+        let mut res = crate::ffi::make_string(msg);
 
         if self.subcode != ffix::SubCode::kNone {
             let subcode_msg = match self.subcode {
@@ -803,7 +798,7 @@ fn status_new8(
     ffix::Status::new_with_messages(
         code,
         subcode,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         sev,
     )
@@ -863,7 +858,7 @@ fn status_not_found3(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kNotFound,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -887,7 +882,7 @@ fn status_not_found5(subcode: ffix::SubCode, msg: &ffix::Slice) -> ffix::Status 
     ffix::Status::new_with_messages(
         ffix::Code::kNotFound,
         subcode,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -922,7 +917,7 @@ fn status_corruption4(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kCorruption,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -942,7 +937,7 @@ fn status_not_supported2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kNotSupported,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -977,7 +972,7 @@ fn status_invalid_argument2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kInvalidArgument,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1011,7 +1006,7 @@ fn status_io_error2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kIOError,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1044,7 +1039,7 @@ fn status_merge_in_progress2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kMergeInProgress,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1079,7 +1074,7 @@ fn status_incomplete2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kIncomplete,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1114,7 +1109,7 @@ fn status_shutdown_in_progress2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kShutdownInProgress,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1149,7 +1144,7 @@ fn status_aborted2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kAborted,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1184,7 +1179,7 @@ fn status_busy2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kBusy,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1219,7 +1214,7 @@ fn status_timed_out2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kTimedOut,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1254,7 +1249,7 @@ fn status_expired2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kExpired,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1289,7 +1284,7 @@ fn status_try_again2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kTryAgain,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1324,7 +1319,7 @@ fn status_compaction_too_large2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kCompactionTooLarge,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1359,7 +1354,7 @@ fn status_column_family_dropped2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kColumnFamilyDropped,
         ffix::SubCode::kNone,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1394,7 +1389,7 @@ fn status_no_space2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kIOError,
         ffix::SubCode::kNoSpace,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1422,7 +1417,7 @@ fn status_memory_limit2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kAborted,
         ffix::SubCode::kMemoryLimit,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1450,7 +1445,7 @@ fn status_space_limit2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kIOError,
         ffix::SubCode::kSpaceLimit,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1478,7 +1473,7 @@ fn status_path_not_found2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kIOError,
         ffix::SubCode::kPathNotFound,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1506,7 +1501,7 @@ fn status_txn_not_prepared2(msg: &ffix::Slice) -> ffix::Status {
     ffix::Status::new_with_messages(
         ffix::Code::kInvalidArgument,
         ffix::SubCode::kTxnNotPrepared,
-        msg.ToUniquePtrString(),
+        msg.to_unique_ptr_string(),
         UniquePtr::null(),
         ffix::Severity::kNoError,
     )
@@ -1521,7 +1516,7 @@ fn status_txn_not_prepared3() -> ffix::Status {
 }
 
 fn status_copy_state(s: &CxxString) -> UniquePtr<CxxString> {
-    let mut res = crate::ffi::make_string("");
+    let mut res = crate::ffi::make_empty_string();
     res.pin_mut().push_bytes(s.as_bytes());
     res
 }
@@ -1531,14 +1526,14 @@ fn status_copy_append_message(
     delim: &ffix::Slice,
     msg: &ffix::Slice,
 ) -> ffix::Status {
-    let mut new_msg = crate::ffi::make_string("");
+    let mut new_msg = crate::ffi::make_empty_string();
     new_msg.pin_mut().push_bytes(status.state.as_bytes());
     new_msg
         .pin_mut()
-        .push_bytes(delim.ToUniquePtrString().as_bytes());
+        .push_bytes(delim.to_unique_ptr_string().as_bytes());
     new_msg
         .pin_mut()
-        .push_bytes(msg.ToUniquePtrString().as_bytes());
+        .push_bytes(msg.to_unique_ptr_string().as_bytes());
 
     ffix::Status {
         code: status.code,
@@ -1577,8 +1572,7 @@ impl From<Status> for ffix::Status {
         match value {
             Status::Ok => Self::default(),
             Status::NotSupported(s) => {
-                let mut msg = crate::ffi::make_string("");
-                msg.pin_mut().push_str(&s.msg);
+                let msg = crate::ffi::make_string(&s.msg);
                 Self::new_with_messages(
                     ffix::Code::kNotSupported,
                     ffix::SubCode::kNone,

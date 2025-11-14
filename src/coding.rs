@@ -75,7 +75,7 @@ mod ffix {
     unsafe extern "C++" {
         include!("rocksdb/slice.h");
 
-        type Slice = crate::ffi::rocksdb::Slice;
+        type Slice = crate::slice::ffix::Slice;
     }
 }
 

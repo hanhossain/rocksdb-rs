@@ -1,2 +1,3 @@
 [alias]
 b = "build --features build-cpp"
+t = "test --features build-cpp"
