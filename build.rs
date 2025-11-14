@@ -337,6 +337,7 @@ fn main() {
         "src/filename.rs",
         "src/hash.rs",
         "src/io_status.rs",
+        "src/options.rs",
         "src/port_defs.rs",
         "src/status.rs",
         "src/transaction_log.rs",

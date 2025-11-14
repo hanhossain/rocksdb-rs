@@ -6,6 +6,7 @@ mod ffi;
 mod filename;
 mod hash;
 mod io_status;
+mod options;
 pub mod port_defs;
 pub mod status;
 mod string_util;

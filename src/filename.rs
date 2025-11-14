@@ -158,9 +158,7 @@ mod ffix {
         include!("rocksdb/options.h");
         include!("rocksdb-rs/src/transaction_log.rs.h");
 
-        type DbPath;
-        #[cxx_name = "Path"]
-        fn path(self: &DbPath) -> &CxxString;
+        type DbPath = crate::options::ffix::DbPath;
 
         #[namespace = "rocksdb_rs::types"]
         type FileType = crate::types::ffix::FileType;
