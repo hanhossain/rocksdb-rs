@@ -48,7 +48,7 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{ github.workspace }}/build
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=OFF ..
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
@@ -86,7 +86,7 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{ github.workspace }}/build
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=ON ../rocksdb-cxx
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=ON ..
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
@@ -118,7 +118,7 @@ jobs:
         run: mkdir -p ${{ github.workspace }}/build
       - name: Configure CMake
         working-directory: ${{ github.workspace }}/build
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_TESTS=OFF -DWITH_EXAMPLES=ON ../rocksdb-cxx
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_TESTS=OFF -DWITH_EXAMPLES=ON ..
       - name: Build
         working-directory: ${{ github.workspace }}/build
         run: ninja
