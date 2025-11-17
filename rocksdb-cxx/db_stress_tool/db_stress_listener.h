@@ -181,7 +181,8 @@ class DbStressListener : public EventListener {
     RandomSleep();
   }
 
-  void OnErrorRecoveryCompleted(rocksdb_rs::status::Status /* old_bg_error */) override {
+  void OnErrorRecoveryCompleted(
+      rocksdb_rs::status::Status /* old_bg_error */) override {
     RandomSleep();
   }
 

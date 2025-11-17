@@ -133,11 +133,11 @@ class MultiOpsTxnsStressTest : public StressTest {
     // Used for generating search key to probe secondary index.
     static std::string EncodeSecondaryKey(uint32_t c, uint32_t a);
 
-    static std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t> DecodePrimaryIndexValue(
-        Slice primary_index_value);
+    static std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>
+    DecodePrimaryIndexValue(Slice primary_index_value);
 
-    static std::pair<rocksdb_rs::status::Status, uint32_t> DecodeSecondaryIndexValue(
-        Slice secondary_index_value);
+    static std::pair<rocksdb_rs::status::Status, uint32_t>
+    DecodeSecondaryIndexValue(Slice secondary_index_value);
 
     Record() = default;
     Record(uint32_t _a, uint32_t _b, uint32_t _c) : a_(_a), b_(_b), c_(_c) {}
@@ -158,11 +158,11 @@ class MultiOpsTxnsStressTest : public StressTest {
 
     std::string EncodeSecondaryKey() const;
 
-    rocksdb_rs::status::Status DecodePrimaryIndexEntry(Slice primary_index_key,
-                                   Slice primary_index_value);
+    rocksdb_rs::status::Status DecodePrimaryIndexEntry(
+        Slice primary_index_key, Slice primary_index_value);
 
-    rocksdb_rs::status::Status DecodeSecondaryIndexEntry(Slice secondary_index_key,
-                                     Slice secondary_index_value);
+    rocksdb_rs::status::Status DecodeSecondaryIndexEntry(
+        Slice secondary_index_key, Slice secondary_index_value);
 
     uint32_t a_value() const { return a_; }
     uint32_t b_value() const { return b_; }
@@ -201,9 +201,10 @@ class MultiOpsTxnsStressTest : public StressTest {
 
   bool IsStateTracked() const override { return false; }
 
-  rocksdb_rs::status::Status TestGet(ThreadState* thread, const ReadOptions& read_opts,
-                 const std::vector<int>& rand_column_families,
-                 const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestGet(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
   rust::Vec<rocksdb_rs::status::Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& read_opts,
@@ -218,27 +219,34 @@ class MultiOpsTxnsStressTest : public StressTest {
                           const std::vector<int>& rand_column_families,
                           const std::vector<int64_t>& rand_keys) override;
 
-  rocksdb_rs::status::Status TestPrefixScan(ThreadState* thread, const ReadOptions& read_opts,
-                        const std::vector<int>& rand_column_families,
-                        const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestPrefixScan(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
   // Given a key K, this creates an iterator which scans to K and then
   // does a random sequence of Next/Prev operations.
-  rocksdb_rs::status::Status TestIterate(ThreadState* thread, const ReadOptions& read_opts,
-                     const std::vector<int>& rand_column_families,
-                     const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestIterate(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
-  rocksdb_rs::status::Status TestPut(ThreadState* thread, WriteOptions& write_opts,
-                 const ReadOptions& read_opts, const std::vector<int>& cf_ids,
-                 const std::vector<int64_t>& keys, char (&value)[100]) override;
+  rocksdb_rs::status::Status TestPut(ThreadState* thread,
+                                     WriteOptions& write_opts,
+                                     const ReadOptions& read_opts,
+                                     const std::vector<int>& cf_ids,
+                                     const std::vector<int64_t>& keys,
+                                     char (&value)[100]) override;
 
-  rocksdb_rs::status::Status TestDelete(ThreadState* thread, WriteOptions& write_opts,
-                    const std::vector<int>& rand_column_families,
-                    const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestDelete(
+      ThreadState* thread, WriteOptions& write_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
-  rocksdb_rs::status::Status TestDeleteRange(ThreadState* thread, WriteOptions& write_opts,
-                         const std::vector<int>& rand_column_families,
-                         const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestDeleteRange(
+      ThreadState* thread, WriteOptions& write_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
   void TestIngestExternalFile(ThreadState* thread,
                               const std::vector<int>& rand_column_families,
@@ -248,17 +256,18 @@ class MultiOpsTxnsStressTest : public StressTest {
                         const Slice& start_key,
                         ColumnFamilyHandle* column_family) override;
 
-  rocksdb_rs::status::Status TestBackupRestore(ThreadState* thread,
-                           const std::vector<int>& rand_column_families,
-                           const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestBackupRestore(
+      ThreadState* thread, const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
-  rocksdb_rs::status::Status TestCheckpoint(ThreadState* thread,
-                        const std::vector<int>& rand_column_families,
-                        const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestCheckpoint(
+      ThreadState* thread, const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
-  rocksdb_rs::status::Status TestApproximateSize(ThreadState* thread, uint64_t iteration,
-                             const std::vector<int>& rand_column_families,
-                             const std::vector<int64_t>& rand_keys) override;
+  rocksdb_rs::status::Status TestApproximateSize(
+      ThreadState* thread, uint64_t iteration,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override;
 
   rocksdb_rs::status::Status TestCustomOperations(
       ThreadState* thread,
@@ -269,18 +278,25 @@ class MultiOpsTxnsStressTest : public StressTest {
   void PrepareTxnDbOptions(SharedState* /*shared*/,
                            TransactionDBOptions& txn_db_opts) override;
 
-  rocksdb_rs::status::Status PrimaryKeyUpdateTxn(ThreadState* thread, uint32_t old_a,
-                             uint32_t old_a_pos, uint32_t new_a);
+  rocksdb_rs::status::Status PrimaryKeyUpdateTxn(ThreadState* thread,
+                                                 uint32_t old_a,
+                                                 uint32_t old_a_pos,
+                                                 uint32_t new_a);
 
-  rocksdb_rs::status::Status SecondaryKeyUpdateTxn(ThreadState* thread, uint32_t old_c,
-                               uint32_t old_c_pos, uint32_t new_c);
+  rocksdb_rs::status::Status SecondaryKeyUpdateTxn(ThreadState* thread,
+                                                   uint32_t old_c,
+                                                   uint32_t old_c_pos,
+                                                   uint32_t new_c);
 
-  rocksdb_rs::status::Status UpdatePrimaryIndexValueTxn(ThreadState* thread, uint32_t a,
-                                    uint32_t b_delta);
+  rocksdb_rs::status::Status UpdatePrimaryIndexValueTxn(ThreadState* thread,
+                                                        uint32_t a,
+                                                        uint32_t b_delta);
 
-  rocksdb_rs::status::Status PointLookupTxn(ThreadState* thread, ReadOptions ropts, uint32_t a);
+  rocksdb_rs::status::Status PointLookupTxn(ThreadState* thread,
+                                            ReadOptions ropts, uint32_t a);
 
-  rocksdb_rs::status::Status RangeScanTxn(ThreadState* thread, ReadOptions ropts, uint32_t c);
+  rocksdb_rs::status::Status RangeScanTxn(ThreadState* thread,
+                                          ReadOptions ropts, uint32_t c);
 
   void VerifyDb(ThreadState* thread) const override;
 
@@ -360,8 +376,8 @@ class MultiOpsTxnsStressTest : public StressTest {
   // emulates this scenario.
   rocksdb_rs::status::Status WriteToCommitTimeWriteBatch(Transaction& txn);
 
-  rocksdb_rs::status::Status CommitAndCreateTimestampedSnapshotIfNeeded(ThreadState* thread,
-                                                    Transaction& txn);
+  rocksdb_rs::status::Status CommitAndCreateTimestampedSnapshotIfNeeded(
+      ThreadState* thread, Transaction& txn);
 
   void SetupSnapshot(ThreadState* thread, ReadOptions& read_opts,
                      Transaction& txn,

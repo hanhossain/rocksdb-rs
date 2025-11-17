@@ -189,16 +189,19 @@ std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>
 MultiOpsTxnsStressTest::Record::DecodePrimaryIndexValue(
     Slice primary_index_value) {
   if (primary_index_value.size() != 8) {
-    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_Corruption(""), 0, 0};
+    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{
+        rocksdb_rs::status::Status_Corruption(""), 0, 0};
   }
   uint32_t b = 0;
   uint32_t c = 0;
   if (!rocksdb_rs::coding::GetFixed32(primary_index_value, b) ||
       !rocksdb_rs::coding::GetFixed32(primary_index_value, c)) {
     assert(false);
-    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_Corruption(""), 0, 0};
+    return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{
+        rocksdb_rs::status::Status_Corruption(""), 0, 0};
   }
-  return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{rocksdb_rs::status::Status_OK(), b, c};
+  return std::tuple<rocksdb_rs::status::Status, uint32_t, uint32_t>{
+      rocksdb_rs::status::Status_OK(), b, c};
 }
 
 std::pair<rocksdb_rs::status::Status, uint32_t>
@@ -248,16 +251,19 @@ std::string MultiOpsTxnsStressTest::Record::EncodeSecondaryKey() const {
   return EncodeSecondaryKey(c_, a_);
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
+rocksdb_rs::status::Status
+MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEntry(
     Slice primary_index_key, Slice primary_index_value) {
   if (primary_index_key.size() != 8) {
     assert(false);
-    return rocksdb_rs::status::Status_Corruption("Primary index key length is not 8");
+    return rocksdb_rs::status::Status_Corruption(
+        "Primary index key length is not 8");
   }
 
   uint32_t index_id = 0;
 
-  [[maybe_unused]] bool res = rocksdb_rs::coding::GetFixed32(primary_index_key, index_id);
+  [[maybe_unused]] bool res =
+      rocksdb_rs::coding::GetFixed32(primary_index_key, index_id);
   assert(res);
   index_id = EndianSwapValue(index_id);
 
@@ -273,24 +279,28 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodePrimaryIndexEnt
   assert(primary_index_key.empty());
 
   if (primary_index_value.size() != 8) {
-    return rocksdb_rs::status::Status_Corruption("Primary index value length is not 8");
+    return rocksdb_rs::status::Status_Corruption(
+        "Primary index value length is not 8");
   }
   rocksdb_rs::coding::GetFixed32(primary_index_value, b_);
   rocksdb_rs::coding::GetFixed32(primary_index_value, c_);
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
+rocksdb_rs::status::Status
+MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexEntry(
     Slice secondary_index_key, Slice secondary_index_value) {
   if (secondary_index_key.size() != 12) {
-    return rocksdb_rs::status::Status_Corruption("Secondary index key length is not 12");
+    return rocksdb_rs::status::Status_Corruption(
+        "Secondary index key length is not 12");
   }
   uint32_t crc =
       crc32c::Value(secondary_index_key.data(), secondary_index_key.size());
 
   uint32_t index_id = 0;
 
-  [[maybe_unused]] bool res = rocksdb_rs::coding::GetFixed32(secondary_index_key, index_id);
+  [[maybe_unused]] bool res =
+      rocksdb_rs::coding::GetFixed32(secondary_index_key, index_id);
   assert(res);
   index_id = EndianSwapValue(index_id);
 
@@ -312,7 +322,8 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::Record::DecodeSecondaryIndexE
   assert(secondary_index_key.empty());
 
   if (secondary_index_value.size() != 4) {
-    return rocksdb_rs::status::Status_Corruption("Secondary index value length is not 4");
+    return rocksdb_rs::status::Status_Corruption(
+        "Secondary index value length is not 4");
   }
   uint32_t val = 0;
   rocksdb_rs::coding::GetFixed32(secondary_index_value, val);
@@ -425,12 +436,10 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestIterate(
 }
 
 // Not intended for use.
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestPut(ThreadState* /*thread*/,
-                                       WriteOptions& /*write_opts*/,
-                                       const ReadOptions& /*read_opts*/,
-                                       const std::vector<int>& /*cf_ids*/,
-                                       const std::vector<int64_t>& /*keys*/,
-                                       char (&value)[100]) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::TestPut(
+    ThreadState* /*thread*/, WriteOptions& /*write_opts*/,
+    const ReadOptions& /*read_opts*/, const std::vector<int>& /*cf_ids*/,
+    const std::vector<int64_t>& /*keys*/, char (&value)[100]) {
   (void)value;
   return rocksdb_rs::status::Status_NotSupported();
 }
@@ -548,7 +557,8 @@ void MultiOpsTxnsStressTest::PrepareTxnDbOptions(
          const Slice& key) {
         Slice ks = key;
         uint32_t index_id = 0;
-        [[maybe_unused]] bool res = rocksdb_rs::coding::GetFixed32(ks, index_id);
+        [[maybe_unused]] bool res =
+            rocksdb_rs::coding::GetFixed32(ks, index_id);
         assert(res);
         index_id = EndianSwapValue(index_id);
         assert(index_id <= Record::kSecondaryIndexId);
@@ -556,10 +566,8 @@ void MultiOpsTxnsStressTest::PrepareTxnDbOptions(
       };
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadState* thread,
-                                                   uint32_t old_a,
-                                                   uint32_t old_a_pos,
-                                                   uint32_t new_a) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(
+    ThreadState* thread, uint32_t old_a, uint32_t old_a_pos, uint32_t new_a) {
   std::string old_pk = Record::EncodePrimaryKey(old_a);
   std::string new_pk = Record::EncodePrimaryKey(new_a);
   Transaction* txn = nullptr;
@@ -679,10 +687,8 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::PrimaryKeyUpdateTxn(ThreadSta
   return s;
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadState* thread,
-                                                     uint32_t old_c,
-                                                     uint32_t old_c_pos,
-                                                     uint32_t new_c) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(
+    ThreadState* thread, uint32_t old_c, uint32_t old_c_pos, uint32_t new_c) {
   Transaction* txn = nullptr;
   WriteOptions wopts;
   rocksdb_rs::status::Status s = NewTxn(wopts, &txn);
@@ -878,9 +884,8 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::SecondaryKeyUpdateTxn(ThreadS
   return s;
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(ThreadState* thread,
-                                                          uint32_t a,
-                                                          uint32_t b_delta) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(
+    ThreadState* thread, uint32_t a, uint32_t b_delta) {
   std::string pk_str = Record::EncodePrimaryKey(a);
   Transaction* txn = nullptr;
   WriteOptions wopts;
@@ -960,8 +965,8 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::UpdatePrimaryIndexValueTxn(Th
   return s;
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::PointLookupTxn(ThreadState* thread,
-                                              ReadOptions ropts, uint32_t a) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::PointLookupTxn(
+    ThreadState* thread, ReadOptions ropts, uint32_t a) {
   std::string pk_str = Record::EncodePrimaryKey(a);
   // pk may or may not exist
   PinnableSlice value;
@@ -1009,8 +1014,8 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::PointLookupTxn(ThreadState* t
   return s;
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::RangeScanTxn(ThreadState* thread,
-                                            ReadOptions ropts, uint32_t c) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::RangeScanTxn(
+    ThreadState* thread, ReadOptions ropts, uint32_t c) {
   std::string sk = Record::EncodeSecondaryKey(c);
 
   Transaction* txn = nullptr;
@@ -1115,7 +1120,8 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
     std::unique_ptr<Iterator> it(db_->NewIterator(ropts));
     for (it->Seek(start_key); it->Valid(); it->Next()) {
       Record record;
-      rocksdb_rs::status::Status s = record.DecodePrimaryIndexEntry(it->key(), it->value());
+      rocksdb_rs::status::Status s =
+          record.DecodePrimaryIndexEntry(it->key(), it->value());
       if (!s.ok()) {
         oss << "Cannot decode primary index entry " << it->key().ToString(true)
             << "=>" << it->value().ToString(true);
@@ -1164,7 +1170,8 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
     for (it->Seek(start_key); it->Valid(); it->Next()) {
       ++secondary_index_entries_count;
       Record record;
-      rocksdb_rs::status::Status s = record.DecodeSecondaryIndexEntry(it->key(), it->value());
+      rocksdb_rs::status::Status s =
+          record.DecodeSecondaryIndexEntry(it->key(), it->value());
       if (!s.ok()) {
         oss << "Cannot decode secondary index entry "
             << it->key().ToString(true) << "=>" << it->value().ToString(true);
@@ -1212,7 +1219,8 @@ void MultiOpsTxnsStressTest::VerifyDb(ThreadState* thread) const {
     oss << "Pk/sk mismatch: primary index has " << primary_index_entries_count
         << " entries. Secondary index has " << secondary_index_entries_count
         << " entries.";
-    VerificationAbort(thread->shared, oss.str(), rocksdb_rs::status::Status_OK());
+    VerificationAbort(thread->shared, oss.str(),
+                      rocksdb_rs::status::Status_OK());
     assert(false);
     return;
   }
@@ -1257,7 +1265,8 @@ void MultiOpsTxnsStressTest::VerifyPkSkFast(const ReadOptions& read_options,
   std::unique_ptr<Iterator> it(db_->NewIterator(ropts));
   for (it->Seek(start_key); it->Valid(); it->Next()) {
     Record record;
-    rocksdb_rs::status::Status s = record.DecodeSecondaryIndexEntry(it->key(), it->value());
+    rocksdb_rs::status::Status s =
+        record.DecodeSecondaryIndexEntry(it->key(), it->value());
     if (!s.ok()) {
       oss << "Cannot decode secondary index entry " << it->key().ToString(true)
           << "=>" << it->value().ToString(true);
@@ -1339,7 +1348,8 @@ void MultiOpsTxnsStressTest::ProcessRecoveredPreparedTxnsHelper(
   }
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(Transaction& txn) {
+rocksdb_rs::status::Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(
+    Transaction& txn) {
   WriteBatch* ctwb = txn.GetCommitTimeWriteBatch();
   assert(ctwb);
   // Do not change the content in key_buf.
@@ -1353,7 +1363,8 @@ rocksdb_rs::status::Status MultiOpsTxnsStressTest::WriteToCommitTimeWriteBatch(T
                    Slice(val_buf, sizeof(val_buf)));
 }
 
-rocksdb_rs::status::Status MultiOpsTxnsStressTest::CommitAndCreateTimestampedSnapshotIfNeeded(
+rocksdb_rs::status::Status
+MultiOpsTxnsStressTest::CommitAndCreateTimestampedSnapshotIfNeeded(
     ThreadState* thread, Transaction& txn) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (FLAGS_create_timestamped_snapshot_one_in > 0 &&
@@ -1399,8 +1410,10 @@ std::string MultiOpsTxnsStressTest::KeySpaces::EncodeTo() const {
 }
 
 bool MultiOpsTxnsStressTest::KeySpaces::DecodeFrom(Slice data) {
-  if (!rocksdb_rs::coding::GetFixed32(data, lb_a) || !rocksdb_rs::coding::GetFixed32(data, ub_a) ||
-      !rocksdb_rs::coding::GetFixed32(data, lb_c) || !rocksdb_rs::coding::GetFixed32(data, ub_c)) {
+  if (!rocksdb_rs::coding::GetFixed32(data, lb_a) ||
+      !rocksdb_rs::coding::GetFixed32(data, ub_a) ||
+      !rocksdb_rs::coding::GetFixed32(data, lb_c) ||
+      !rocksdb_rs::coding::GetFixed32(data, ub_c)) {
     return false;
   }
   return true;
@@ -1513,7 +1526,8 @@ void MultiOpsTxnsStressTest::PreloadDb(SharedState* shared, int threads,
     Record record(a, b, c);
     WriteBatch wb;
     const auto primary_index_entry = record.EncodePrimaryIndexEntry();
-    rocksdb_rs::status::Status s = wb.Put(primary_index_entry.first, primary_index_entry.second);
+    rocksdb_rs::status::Status s =
+        wb.Put(primary_index_entry.first, primary_index_entry.second);
     assert(s.ok());
 
     const auto secondary_index_entry = record.EncodeSecondaryIndexEntry();
@@ -1613,7 +1627,8 @@ void MultiOpsTxnsStressTest::ScanExistingDb(SharedState* shared, int threads) {
 
     for (it->SeekToFirst(); it->Valid(); it->Next()) {
       Record record;
-      rocksdb_rs::status::Status s = record.DecodePrimaryIndexEntry(it->key(), it->value());
+      rocksdb_rs::status::Status s =
+          record.DecodePrimaryIndexEntry(it->key(), it->value());
       if (!s.ok()) {
         fprintf(stderr, "Cannot decode primary index entry (%s => %s): %s\n",
                 it->key().ToString(true).c_str(),

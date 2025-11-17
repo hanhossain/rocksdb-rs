@@ -6,7 +6,6 @@
 #include <atomic>
 #ifdef GFLAGS
 
-
 #include "db/wide/wide_column_serialization.h"
 #include "db_stress_tool/db_stress_common.h"
 #include "db_stress_tool/db_stress_shared_state.h"
@@ -205,8 +204,8 @@ rocksdb_rs::status::Status FileExpectedStateManager::Open() {
   // Before doing anything, sync directory state with ours. That is, determine
   // `saved_seqno_`, and create any necessary missing files.
   std::vector<std::string> expected_state_dir_children;
-  rocksdb_rs::status::Status s = Env::Default()->GetChildren(expected_state_dir_path_,
-                                         &expected_state_dir_children);
+  rocksdb_rs::status::Status s = Env::Default()->GetChildren(
+      expected_state_dir_path_, &expected_state_dir_children);
   bool found_trace = false;
   if (s.ok()) {
     for (size_t i = 0; i < expected_state_dir_children.size(); ++i) {
@@ -227,7 +226,8 @@ rocksdb_rs::status::Status FileExpectedStateManager::Open() {
     if (saved_seqno_ != kMaxSequenceNumber) {
       std::string saved_seqno_trace_path = GetPathForFilename(
           std::to_string(saved_seqno_) + kTraceFilenameSuffix);
-      rocksdb_rs::status::Status exists_status = Env::Default()->FileExists(saved_seqno_trace_path);
+      rocksdb_rs::status::Status exists_status =
+          Env::Default()->FileExists(saved_seqno_trace_path);
       if (exists_status.ok()) {
         found_trace = true;
       } else if (exists_status.IsNotFound()) {
@@ -256,7 +256,8 @@ rocksdb_rs::status::Status FileExpectedStateManager::Open() {
       GetPathForFilename(kLatestBasename + kStateFilenameSuffix);
   bool found = false;
   if (s.ok()) {
-    rocksdb_rs::status::Status exists_status = Env::Default()->FileExists(expected_state_file_path);
+    rocksdb_rs::status::Status exists_status =
+        Env::Default()->FileExists(expected_state_file_path);
     if (exists_status.ok()) {
       found = true;
     } else if (exists_status.IsNotFound()) {
@@ -306,12 +307,16 @@ rocksdb_rs::status::Status FileExpectedStateManager::SaveAtAndAfter(DB* db) {
 
   // Populate a tempfile and then rename it to atomically create "<seqno>.state"
   // with contents from "LATEST.state"
-  rocksdb_rs::status::Status s = CopyFile(FileSystem::Default(), latest_file_path,
-                      state_file_temp_path, 0 /* size */, false /* use_fsync */,
-                      nullptr /* io_tracer */, Temperature::kUnknown).status();
+  rocksdb_rs::status::Status s =
+      CopyFile(FileSystem::Default(), latest_file_path, state_file_temp_path,
+               0 /* size */, false /* use_fsync */, nullptr /* io_tracer */,
+               Temperature::kUnknown)
+          .status();
   if (s.ok()) {
-    s = FileSystem::Default()->RenameFile(state_file_temp_path, state_file_path,
-                                          IOOptions(), nullptr /* dbg */).status();
+    s = FileSystem::Default()
+            ->RenameFile(state_file_temp_path, state_file_path, IOOptions(),
+                         nullptr /* dbg */)
+            .status();
   }
   SequenceNumber old_saved_seqno = 0;
   if (s.ok()) {
@@ -363,7 +368,6 @@ bool FileExpectedStateManager::HasHistory() {
   return saved_seqno_ != kMaxSequenceNumber;
 }
 
-
 namespace {
 
 // An `ExpectedStateTraceRecordHandler` applies a configurable number of
@@ -383,8 +387,9 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   // True if we have already reached the limit on write operations to apply.
   bool IsDone() { return num_write_ops_ == max_write_ops_; }
 
-  rocksdb_rs::status::Status Handle(const WriteQueryTraceRecord& record,
-                std::unique_ptr<TraceRecordResult>* /* result */) override {
+  rocksdb_rs::status::Status Handle(
+      const WriteQueryTraceRecord& record,
+      std::unique_ptr<TraceRecordResult>* /* result */) override {
     if (IsDone()) {
       return rocksdb_rs::status::Status_OK();
     }
@@ -393,20 +398,23 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   }
 
   // Ignore reads.
-  rocksdb_rs::status::Status Handle(const GetQueryTraceRecord& /* record */,
-                std::unique_ptr<TraceRecordResult>* /* result */) override {
+  rocksdb_rs::status::Status Handle(
+      const GetQueryTraceRecord& /* record */,
+      std::unique_ptr<TraceRecordResult>* /* result */) override {
     return rocksdb_rs::status::Status_OK();
   }
 
   // Ignore reads.
-  rocksdb_rs::status::Status Handle(const IteratorSeekQueryTraceRecord& /* record */,
-                std::unique_ptr<TraceRecordResult>* /* result */) override {
+  rocksdb_rs::status::Status Handle(
+      const IteratorSeekQueryTraceRecord& /* record */,
+      std::unique_ptr<TraceRecordResult>* /* result */) override {
     return rocksdb_rs::status::Status_OK();
   }
 
   // Ignore reads.
-  rocksdb_rs::status::Status Handle(const MultiGetQueryTraceRecord& /* record */,
-                std::unique_ptr<TraceRecordResult>* /* result */) override {
+  rocksdb_rs::status::Status Handle(
+      const MultiGetQueryTraceRecord& /* record */,
+      std::unique_ptr<TraceRecordResult>* /* result */) override {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -414,13 +422,15 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   // object, but it's convenient and works to share state with the
   // `TraceRecord::Handler`.
 
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key_with_ts,
-               const Slice& value) override {
+  rocksdb_rs::status::Status PutCF(uint32_t column_family_id,
+                                   const Slice& key_with_ts,
+                                   const Slice& value) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
     uint64_t key_id;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return rocksdb_rs::status::Status_Corruption("unable to parse key", key.ToString());
+      return rocksdb_rs::status::Status_Corruption("unable to parse key",
+                                                   key.ToString());
     }
     uint32_t value_base = GetValueBase(value);
 
@@ -435,26 +445,29 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id, const Slice& key_with_ts,
-                     const Slice& entity) override {
+  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id,
+                                         const Slice& key_with_ts,
+                                         const Slice& entity) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
 
     uint64_t key_id = 0;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return rocksdb_rs::status::Status_Corruption("Unable to parse key", key.ToString());
+      return rocksdb_rs::status::Status_Corruption("Unable to parse key",
+                                                   key.ToString());
     }
 
     Slice entity_copy = entity;
     WideColumns columns;
     if (!WideColumnSerialization::Deserialize(entity_copy, columns).ok()) {
-      return rocksdb_rs::status::Status_Corruption("Unable to deserialize entity",
-                                entity.ToString(/* hex */ true));
+      return rocksdb_rs::status::Status_Corruption(
+          "Unable to deserialize entity", entity.ToString(/* hex */ true));
     }
 
     if (!VerifyWideColumns(columns)) {
-      return rocksdb_rs::status::Status_Corruption("Wide columns in entity inconsistent",
-                                entity.ToString(/* hex */ true));
+      return rocksdb_rs::status::Status_Corruption(
+          "Wide columns in entity inconsistent",
+          entity.ToString(/* hex */ true));
     }
 
     if (buffered_writes_) {
@@ -475,12 +488,13 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   }
 
   rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
-                  const Slice& key_with_ts) override {
+                                      const Slice& key_with_ts) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
     uint64_t key_id;
     if (!GetIntVal(key.ToString(), &key_id)) {
-      return rocksdb_rs::status::Status_Corruption("unable to parse key", key.ToString());
+      return rocksdb_rs::status::Status_Corruption("unable to parse key",
+                                                   key.ToString());
     }
 
     bool should_buffer_write = !(buffered_writes_ == nullptr);
@@ -495,7 +509,7 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
   }
 
   rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
-                        const Slice& key_with_ts) override {
+                                            const Slice& key_with_ts) override {
     bool should_buffer_write = !(buffered_writes_ == nullptr);
     if (should_buffer_write) {
       Slice key =
@@ -511,9 +525,9 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return DeleteCF(column_family_id, key_with_ts);
   }
 
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id,
-                       const Slice& begin_key_with_ts,
-                       const Slice& end_key_with_ts) override {
+  rocksdb_rs::status::Status DeleteRangeCF(
+      uint32_t column_family_id, const Slice& begin_key_with_ts,
+      const Slice& end_key_with_ts) override {
     Slice begin_key =
         StripTimestampFromUserKey(begin_key_with_ts, FLAGS_user_timestamp_size);
     Slice end_key =
@@ -521,10 +535,11 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     uint64_t begin_key_id, end_key_id;
     if (!GetIntVal(begin_key.ToString(), &begin_key_id)) {
       return rocksdb_rs::status::Status_Corruption("unable to parse begin key",
-                                begin_key.ToString());
+                                                   begin_key.ToString());
     }
     if (!GetIntVal(end_key.ToString(), &end_key_id)) {
-      return rocksdb_rs::status::Status_Corruption("unable to parse end key", end_key.ToString());
+      return rocksdb_rs::status::Status_Corruption("unable to parse end key",
+                                                   end_key.ToString());
     }
 
     bool should_buffer_write = !(buffered_writes_ == nullptr);
@@ -540,8 +555,9 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key_with_ts,
-                 const Slice& value) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id,
+                                     const Slice& key_with_ts,
+                                     const Slice& value) override {
     Slice key =
         StripTimestampFromUserKey(key_with_ts, FLAGS_user_timestamp_size);
 
@@ -579,7 +595,8 @@ class ExpectedStateTraceRecordHandler : public TraceRecord::Handler,
            xid_to_buffered_writes_.end());
     assert(xid_to_buffered_writes_.at(xid_str));
 
-    rocksdb_rs::status::Status s = xid_to_buffered_writes_.at(xid_str)->Iterate(this);
+    rocksdb_rs::status::Status s =
+        xid_to_buffered_writes_.at(xid_str)->Iterate(this);
     xid_to_buffered_writes_.erase(xid_str);
 
     return s;
@@ -610,7 +627,8 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
   assert(HasHistory());
   SequenceNumber seqno = db->GetLatestSequenceNumber();
   if (seqno < saved_seqno_) {
-    return rocksdb_rs::status::Status_Corruption("DB is older than any restorable expected state");
+    return rocksdb_rs::status::Status_Corruption(
+        "DB is older than any restorable expected state");
   }
 
   std::string state_filename =
@@ -627,8 +645,8 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
   std::string trace_file_path = GetPathForFilename(trace_filename);
 
   std::unique_ptr<TraceReader> trace_reader;
-  rocksdb_rs::status::Status s = NewFileTraceReader(Env::Default(), EnvOptions(), trace_file_path,
-                                &trace_reader);
+  rocksdb_rs::status::Status s = NewFileTraceReader(
+      Env::Default(), EnvOptions(), trace_file_path, &trace_reader);
 
   if (s.ok()) {
     // We are going to replay on top of "`seqno`.state" to create a new
@@ -636,7 +654,8 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
     // new "LATEST.state" appear atomically using `RenameFile()`.
     s = CopyFile(FileSystem::Default(), state_file_path, latest_file_temp_path,
                  0 /* size */, false /* use_fsync */, nullptr /* io_tracer */,
-                 Temperature::kUnknown).status();
+                 Temperature::kUnknown)
+            .status();
   }
 
   {
@@ -685,9 +704,10 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
   }
 
   if (s.ok()) {
-    s = FileSystem::Default()->RenameFile(latest_file_temp_path,
-                                          latest_file_path, IOOptions(),
-                                          nullptr /* dbg */).status();
+    s = FileSystem::Default()
+            ->RenameFile(latest_file_temp_path, latest_file_path, IOOptions(),
+                         nullptr /* dbg */)
+            .status();
   }
   if (s.ok()) {
     latest_.reset(new FileExpectedState(latest_file_path, max_key_,
@@ -710,8 +730,8 @@ rocksdb_rs::status::Status FileExpectedStateManager::Restore(DB* db) {
 
 rocksdb_rs::status::Status FileExpectedStateManager::Clean() {
   std::vector<std::string> expected_state_dir_children;
-  rocksdb_rs::status::Status s = Env::Default()->GetChildren(expected_state_dir_path_,
-                                         &expected_state_dir_children);
+  rocksdb_rs::status::Status s = Env::Default()->GetChildren(
+      expected_state_dir_path_, &expected_state_dir_children);
   // An incomplete `Open()` or incomplete `SaveAtAndAfter()` could have left
   // behind invalid temporary files. An incomplete `SaveAtAndAfter()` could have
   // also left behind stale state/trace files. An incomplete `Restore()` could

@@ -76,13 +76,14 @@ StressTest::StressTest()
     Options options;
     options.env = db_stress_env;
     // Remove files without preserving manfiest files
-    const rocksdb_rs::status::Status s = !FLAGS_use_blob_db
-                         ? DestroyDB(FLAGS_db, options)
-                         : blob_db::DestroyBlobDB(FLAGS_db, options,
-                                                  blob_db::BlobDBOptions());
+    const rocksdb_rs::status::Status s =
+        !FLAGS_use_blob_db ? DestroyDB(FLAGS_db, options)
+                           : blob_db::DestroyBlobDB(FLAGS_db, options,
+                                                    blob_db::BlobDBOptions());
 
     if (!s.ok()) {
-      fprintf(stderr, "Cannot destroy original db: %s\n", s.ToString()->c_str());
+      fprintf(stderr, "Cannot destroy original db: %s\n",
+              s.ToString()->c_str());
       exit(1);
     }
   }
@@ -341,8 +342,8 @@ void StressTest::TrackExpectedState(SharedState* shared) {
   }
 }
 
-rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf,
-                              ThreadState::SnapshotState& snap_state) {
+rocksdb_rs::status::Status StressTest::AssertSame(
+    DB* db, ColumnFamilyHandle* cf, ThreadState::SnapshotState& snap_state) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (cf->GetName() != snap_state.cf_at_name) {
     return s;
@@ -372,9 +373,9 @@ rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf
   }
   if (s.ok()) {
     if (exp_v.as_slice() != v.as_slice()) {
-      return rocksdb_rs::status::Status_Corruption("The snapshot gave inconsistent values: (" +
-                                exp_v.ToString() + ") vs. (" + v.ToString() +
-                                ")");
+      return rocksdb_rs::status::Status_Corruption(
+          "The snapshot gave inconsistent values: (" + exp_v.ToString() +
+          ") vs. (" + v.ToString() + ")");
     }
   }
   if (snap_state.key_vec != nullptr) {
@@ -392,7 +393,8 @@ rocksdb_rs::status::Status StressTest::AssertSame(DB* db, ColumnFamilyHandle* cf
     }
     if (!std::equal(snap_state.key_vec->begin(), snap_state.key_vec->end(),
                     tmp_bitvec.get()->begin())) {
-      return rocksdb_rs::status::Status_Corruption("Found inconsistent keys at this snapshot");
+      return rocksdb_rs::status::Status_Corruption(
+          "Found inconsistent keys at this snapshot");
     }
   }
   return rocksdb_rs::status::Status_OK();
@@ -489,7 +491,6 @@ void StressTest::PreloadDbAndReopenAsReadOnly(int64_t number_of_keys,
       const size_t sz = GenerateValue(value_base, value, sizeof(value));
 
       const Slice v(value, sz);
-
 
       std::string ts;
       if (FLAGS_user_timestamp_size > 0) {
@@ -629,9 +630,11 @@ void StressTest::ProcessRecoveredPreparedTxnsHelper(Transaction* txn,
   }
 }
 
-rocksdb_rs::status::Status StressTest::NewTxn(WriteOptions& write_opts, Transaction** txn) {
+rocksdb_rs::status::Status StressTest::NewTxn(WriteOptions& write_opts,
+                                              Transaction** txn) {
   if (!FLAGS_use_txn) {
-    return rocksdb_rs::status::Status_InvalidArgument("NewTxn when FLAGS_use_txn is not set");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "NewTxn when FLAGS_use_txn is not set");
   }
   write_opts.disableWAL = FLAGS_disable_wal;
   static std::atomic<uint64_t> txn_id = {0};
@@ -651,9 +654,11 @@ rocksdb_rs::status::Status StressTest::NewTxn(WriteOptions& write_opts, Transact
   }
 }
 
-rocksdb_rs::status::Status StressTest::CommitTxn(Transaction* txn, ThreadState* thread) {
+rocksdb_rs::status::Status StressTest::CommitTxn(Transaction* txn,
+                                                 ThreadState* thread) {
   if (!FLAGS_use_txn) {
-    return rocksdb_rs::status::Status_InvalidArgument("CommitTxn when FLAGS_use_txn is not set");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "CommitTxn when FLAGS_use_txn is not set");
   }
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   if (FLAGS_use_optimistic_txn) {
@@ -672,7 +677,8 @@ rocksdb_rs::status::Status StressTest::CommitTxn(Transaction* txn, ThreadState* 
 
         rocksdb_rs::status::Status a = rocksdb_rs::status::Status_new();
         std::shared_ptr<const Snapshot> b;
-        std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>> res(a.Clone(),b);
+        std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>>
+            res(a.Clone(), b);
         if (thread->tid == 0) {
           uint64_t now = db_stress_env->NowNanos();
           res = txn_db_->CreateTimestampedSnapshot(now);
@@ -750,7 +756,8 @@ void StressTest::OperateDb(ThreadState* thread) {
   }
 #endif  // NDEBUG
   if (FLAGS_write_fault_one_in) {
-    rocksdb_rs::io_status::IOStatus error_msg = rocksdb_rs::io_status::IOStatus_new();
+    rocksdb_rs::io_status::IOStatus error_msg =
+        rocksdb_rs::io_status::IOStatus_new();
     if (FLAGS_injest_error_severity <= 1 || FLAGS_injest_error_severity > 2) {
       error_msg = rocksdb_rs::io_status::IOStatus_IOError("Retryable IO Error");
       error_msg.SetRetryable(true);
@@ -759,9 +766,10 @@ void StressTest::OperateDb(ThreadState* thread) {
       error_msg = rocksdb_rs::io_status::IOStatus_IOError("Fatal IO Error");
       error_msg.SetDataLoss(true);
     }
-    std::vector<rocksdb_rs::types::FileType> types = {rocksdb_rs::types::FileType::kTableFile,
-                                   rocksdb_rs::types::FileType::kDescriptorFile,
-                                   rocksdb_rs::types::FileType::kCurrentFile};
+    std::vector<rocksdb_rs::types::FileType> types = {
+        rocksdb_rs::types::FileType::kTableFile,
+        rocksdb_rs::types::FileType::kDescriptorFile,
+        rocksdb_rs::types::FileType::kCurrentFile};
     fault_fs_guard->SetRandomWriteError(
         thread->shared->GetSeed(), FLAGS_write_fault_one_in, error_msg.Clone(),
         /*inject_for_all_file_types=*/false, types);
@@ -950,7 +958,8 @@ void StressTest::OperateDb(ThreadState* thread) {
         }
 
         if (total_size <= FLAGS_backup_max_size) {
-          rocksdb_rs::status::Status s = TestBackupRestore(thread, rand_column_families, rand_keys);
+          rocksdb_rs::status::Status s =
+              TestBackupRestore(thread, rand_column_families, rand_keys);
           if (!s.ok()) {
             VerificationAbort(shared, "Backup/restore gave inconsistent state",
                               s);
@@ -959,7 +968,8 @@ void StressTest::OperateDb(ThreadState* thread) {
       }
 
       if (thread->rand.OneInOpt(FLAGS_checkpoint_one_in)) {
-        rocksdb_rs::status::Status s = TestCheckpoint(thread, rand_column_families, rand_keys);
+        rocksdb_rs::status::Status s =
+            TestCheckpoint(thread, rand_column_families, rand_keys);
         if (!s.ok()) {
           VerificationAbort(shared, "Checkpoint gave inconsistent state", s);
         }
@@ -1147,10 +1157,10 @@ std::vector<std::string> StressTest::GetWhiteBoxKeys(ThreadState* thread,
 
 // Given a key K, this creates an iterator which scans to K and then
 // does a random sequence of Next/Prev operations.
-rocksdb_rs::status::Status StressTest::TestIterate(ThreadState* thread,
-                               const ReadOptions& read_opts,
-                               const std::vector<int>& rand_column_families,
-                               const std::vector<int64_t>& rand_keys) {
+rocksdb_rs::status::Status StressTest::TestIterate(
+    ThreadState* thread, const ReadOptions& read_opts,
+    const std::vector<int>& rand_column_families,
+    const std::vector<int64_t>& rand_keys) {
   assert(!rand_column_families.empty());
   assert(!rand_keys.empty());
 
@@ -1572,7 +1582,8 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
   }
   BackupEngine* backup_engine = nullptr;
   std::string from = "a backup/restore operation";
-  rocksdb_rs::status::Status s = BackupEngine::Open(db_stress_env, backup_opts, &backup_engine).status();
+  rocksdb_rs::status::Status s =
+      BackupEngine::Open(db_stress_env, backup_opts, &backup_engine).status();
   if (!s.ok()) {
     from = "BackupEngine::Open";
   }
@@ -1623,9 +1634,10 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
     }
   }
   if (s.ok() && thread->rand.OneIn(2)) {
-    s = backup_engine->VerifyBackup(
-        backup_info.front().backup_id,
-        thread->rand.OneIn(2) /* verify_with_checksum */).status();
+    s = backup_engine
+            ->VerifyBackup(backup_info.front().backup_id,
+                           thread->rand.OneIn(2) /* verify_with_checksum */)
+            .status();
     if (!s.ok()) {
       from = "BackupEngine::VerifyBackup";
     }
@@ -1635,17 +1647,22 @@ rocksdb_rs::status::Status StressTest::TestBackupRestore(
   int count = static_cast<int>(backup_info.size());
   if (s.ok() && !inplace_not_restore) {
     if (count > 1) {
-      s = backup_engine->RestoreDBFromBackup(
-          RestoreOptions(), backup_info[thread->rand.Uniform(count)].backup_id,
-          restore_dir /* db_dir */, restore_dir /* wal_dir */).status();
+      s = backup_engine
+              ->RestoreDBFromBackup(
+                  RestoreOptions(),
+                  backup_info[thread->rand.Uniform(count)].backup_id,
+                  restore_dir /* db_dir */, restore_dir /* wal_dir */)
+              .status();
       if (!s.ok()) {
         from = "BackupEngine::RestoreDBFromBackup";
       }
     } else {
       from_latest = true;
-      s = backup_engine->RestoreDBFromLatestBackup(RestoreOptions(),
-                                                   restore_dir /* db_dir */,
-                                                   restore_dir /* wal_dir */).status();
+      s = backup_engine
+              ->RestoreDBFromLatestBackup(RestoreOptions(),
+                                          restore_dir /* db_dir */,
+                                          restore_dir /* wal_dir */)
+              .status();
       if (!s.ok()) {
         from = "BackupEngine::RestoreDBFromLatestBackup";
       }
@@ -1832,9 +1849,9 @@ rocksdb_rs::status::Status StressTest::TestApproximateSize(
       sao, column_families_[rand_column_families[0]], &range, 1, &result);
 }
 
-rocksdb_rs::status::Status StressTest::TestCheckpoint(ThreadState* thread,
-                                  const std::vector<int>& rand_column_families,
-                                  const std::vector<int64_t>& rand_keys) {
+rocksdb_rs::status::Status StressTest::TestCheckpoint(
+    ThreadState* thread, const std::vector<int>& rand_column_families,
+    const std::vector<int64_t>& rand_keys) {
   std::vector<std::unique_ptr<MutexLock>> locks;
   if (ShouldAcquireMutexOnKey()) {
     for (int rand_column_family : rand_column_families) {
@@ -1862,7 +1879,8 @@ rocksdb_rs::status::Status StressTest::TestCheckpoint(ThreadState* thread,
       fprintf(stderr, "Fail to create checkpoint to %s\n",
               checkpoint_dir.c_str());
       std::vector<std::string> files;
-      rocksdb_rs::status::Status my_s = db_stress_env->GetChildren(checkpoint_dir, &files);
+      rocksdb_rs::status::Status my_s =
+          db_stress_env->GetChildren(checkpoint_dir, &files);
       if (my_s.ok()) {
         for (const auto& f : files) {
           fprintf(stderr, " %s\n", f.c_str());
@@ -2082,7 +2100,8 @@ void StressTest::TestCompactFiles(ThreadState* thread,
   }
 }
 
-rocksdb_rs::status::Status StressTest::TestFlush(const std::vector<int>& rand_column_families) {
+rocksdb_rs::status::Status StressTest::TestFlush(
+    const std::vector<int>& rand_column_families) {
   FlushOptions flush_opts;
   if (FLAGS_atomic_flush) {
     return db_->Flush(flush_opts, column_families_);
@@ -2093,7 +2112,8 @@ rocksdb_rs::status::Status StressTest::TestFlush(const std::vector<int>& rand_co
   return db_->Flush(flush_opts, cfhs);
 }
 
-rocksdb_rs::status::Status StressTest::TestPauseBackground(ThreadState* thread) {
+rocksdb_rs::status::Status StressTest::TestPauseBackground(
+    ThreadState* thread) {
   rocksdb_rs::status::Status status = db_->PauseBackgroundWork();
   if (!status.ok()) {
     return status;
@@ -2181,7 +2201,8 @@ void StressTest::TestAcquireSnapshot(ThreadState* thread,
   thread->snapshot_queue.emplace(release_at, snap_state);
 }
 
-rocksdb_rs::status::Status StressTest::MaybeReleaseSnapshots(ThreadState* thread, uint64_t i) {
+rocksdb_rs::status::Status StressTest::MaybeReleaseSnapshots(
+    ThreadState* thread, uint64_t i) {
   while (!thread->snapshot_queue.empty() &&
          i >= thread->snapshot_queue.front().first) {
     auto& snap_state = thread->snapshot_queue.front().second;
@@ -2189,7 +2210,8 @@ rocksdb_rs::status::Status StressTest::MaybeReleaseSnapshots(ThreadState* thread
     // Note: this is unsafe as the cf might be dropped concurrently. But
     // it is ok since unclean cf drop is cunnrently not supported by write
     // prepared transactions.
-    rocksdb_rs::status::Status s = AssertSame(db_, column_families_[snap_state.cf_at], snap_state);
+    rocksdb_rs::status::Status s =
+        AssertSame(db_, column_families_[snap_state.cf_at], snap_state);
     db_->ReleaseSnapshot(snap_state.snapshot);
     delete snap_state.key_vec;
     thread->snapshot_queue.pop();
@@ -2246,7 +2268,8 @@ void StressTest::TestCompactRange(ThreadState* thread, int64_t rand_key,
         GetRangeHash(thread, pre_snapshot, column_family, start_key, end_key);
   }
 
-  rocksdb_rs::status::Status status = db_->CompactRange(cro, column_family, &start_key, &end_key);
+  rocksdb_rs::status::Status status =
+      db_->CompactRange(cro, column_family, &start_key, &end_key);
 
   if (!status.ok()) {
     fprintf(stdout, "Unable to perform CompactRange(): %s\n",
@@ -2640,7 +2663,8 @@ void StressTest::Open(SharedState* shared) {
           // WAL is durable. Buffering unsynced writes will cause false
           // positive in crash tests. Before we figure out a way to
           // solve it, skip WAL from failure injection.
-          fault_fs_guard->SetSkipDirectWritableTypes({rocksdb_rs::types::FileType::kWalFile});
+          fault_fs_guard->SetSkipDirectWritableTypes(
+              {rocksdb_rs::types::FileType::kWalFile});
         }
         ingest_meta_error = FLAGS_open_metadata_write_fault_one_in;
         ingest_write_error = FLAGS_open_write_fault_one_in;
@@ -2679,8 +2703,7 @@ void StressTest::Open(SharedState* shared) {
           if (s.ok()) {
             db_ = blob_db;
           }
-        } else
-        {
+        } else {
           if (db_preload_finished_.load() && FLAGS_read_only) {
             s = DB::OpenForReadOnly(DBOptions(options_), FLAGS_db,
                                     cf_descriptors, &column_families_, &db_);
@@ -3001,8 +3024,8 @@ bool InitializeOptionsFromFile(Options& options) {
   config_options.env = db_stress_env;
   std::vector<ColumnFamilyDescriptor> cf_descriptors;
   if (!FLAGS_options_file.empty()) {
-    rocksdb_rs::status::Status s = LoadOptionsFromFile(config_options, FLAGS_options_file,
-                                   &db_options, &cf_descriptors);
+    rocksdb_rs::status::Status s = LoadOptionsFromFile(
+        config_options, FLAGS_options_file, &db_options, &cf_descriptors);
     if (!s.ok()) {
       fprintf(stderr, "Unable to load options file %s --- %s\n",
               FLAGS_options_file.c_str(), s.ToString()->c_str());

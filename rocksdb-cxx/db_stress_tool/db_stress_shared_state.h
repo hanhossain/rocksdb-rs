@@ -241,7 +241,9 @@ class SharedState {
 
   bool HasHistory() { return expected_state_manager_->HasHistory(); }
 
-  rocksdb_rs::status::Status Restore(DB* db) { return expected_state_manager_->Restore(db); }
+  rocksdb_rs::status::Status Restore(DB* db) {
+    return expected_state_manager_->Restore(db);
+  }
 
   // Requires external locking covering all keys in `cf`.
   void ClearColumnFamily(int cf) {
@@ -413,8 +415,9 @@ struct ThreadState {
   Stats stats;
   struct SnapshotState {
     SnapshotState(const Snapshot* snapshot, int cf_at, std::string cf_at_name,
-                  std::string key, const rocksdb_rs::status::Status& status, std::string value,
-                  std::vector<bool>* key_vec, std::string timestamp)
+                  std::string key, const rocksdb_rs::status::Status& status,
+                  std::string value, std::vector<bool>* key_vec,
+                  std::string timestamp)
         : snapshot(snapshot),
           cf_at(cf_at),
           cf_at_name(cf_at_name),

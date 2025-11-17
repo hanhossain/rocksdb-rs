@@ -8,8 +8,8 @@
 #include <cstdint>
 
 #include "file/file_util.h"
-#include "rocksdb/file_system.h"
 #include "rocksdb-rs/src/coding_lean.rs.h"
+#include "rocksdb/file_system.h"
 
 namespace rocksdb {
 
@@ -30,7 +30,8 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   const std::shared_ptr<FileSystem> fs = env->GetFileSystem();
   IOOptions opts;
 
-  rocksdb_rs::status::Status st = fs->CreateDirIfMissing(db_name, opts, nullptr).status();
+  rocksdb_rs::status::Status st =
+      fs->CreateDirIfMissing(db_name, opts, nullptr).status();
   if (!st.ok()) {
     fprintf(stderr, "Failed to create directory %s: %s\n", db_name.c_str(),
             st.ToString()->c_str());
@@ -60,14 +61,17 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   uint64_t size = 0;
   {
     std::unique_ptr<FSSequentialFile> reader;
-    rocksdb_rs::status::Status s = fs->NewSequentialFile(tmp_path, FileOptions(), &reader,
-                                     /*dbg*/ nullptr).status();
+    rocksdb_rs::status::Status s =
+        fs->NewSequentialFile(tmp_path, FileOptions(), &reader,
+                              /*dbg*/ nullptr)
+            .status();
     if (s.ok()) {
       // Load from file
       std::string id(24U, '\0');
       Slice result;
       for (;;) {
-        s = reader->Read(id.size(), opts, &result, &id[0], /*dbg*/ nullptr).status();
+        s = reader->Read(id.size(), opts, &result, &id[0], /*dbg*/ nullptr)
+                .status();
         if (!s.ok()) {
           fprintf(stderr, "Error reading unique id file: %s\n",
                   s.ToString()->c_str());
@@ -94,7 +98,8 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
       // Newly created is ok.
       // But FileSystem doesn't tell us whether non-existence was the cause of
       // the failure. (Issue #9021)
-      rocksdb_rs::status::Status s2 = fs->FileExists(tmp_path, opts, /*dbg*/ nullptr).status();
+      rocksdb_rs::status::Status s2 =
+          fs->FileExists(tmp_path, opts, /*dbg*/ nullptr).status();
       if (!s2.IsNotFound()) {
         fprintf(stderr, "Error opening unique id file: %s\n",
                 s.ToString()->c_str());
@@ -106,7 +111,8 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   fprintf(stdout, "(Re-)verified %zu unique IDs\n", id_set_.size());
 
   std::unique_ptr<FSWritableFile> file_writer;
-  st = fs->NewWritableFile(path_, FileOptions(), &file_writer, /*dbg*/ nullptr).status();
+  st = fs->NewWritableFile(path_, FileOptions(), &file_writer, /*dbg*/ nullptr)
+           .status();
   if (!st.ok()) {
     fprintf(stderr, "Error creating the unique ids file: %s\n",
             st.ToString()->c_str());
@@ -118,7 +124,8 @@ UniqueIdVerifier::UniqueIdVerifier(const std::string& db_name, Env* env)
   if (size > 0) {
     st = CopyFile(fs.get(), tmp_path, data_file_writer_, size,
                   /*use_fsync*/ true, /*io_tracer*/ nullptr,
-                  /*temparature*/ Temperature::kHot).status();
+                  /*temparature*/ Temperature::kHot)
+             .status();
     if (!st.ok()) {
       fprintf(stderr, "Error copying contents of old unique id file: %s\n",
               st.ToString()->c_str());
@@ -136,7 +143,9 @@ UniqueIdVerifier::~UniqueIdVerifier() {
 
 void UniqueIdVerifier::VerifyNoWrite(const std::string& id) {
   assert(id.size() == 24);
-  bool is_new = id_set_.insert(rocksdb_rs::coding_lean::DecodeFixed64(&id[offset_])).second;
+  bool is_new =
+      id_set_.insert(rocksdb_rs::coding_lean::DecodeFixed64(&id[offset_]))
+          .second;
   if (!is_new) {
     fprintf(stderr,
             "Duplicate partial unique ID found (offset=%zu, count=%zu)\n",
@@ -175,7 +184,8 @@ void DbStressListener::VerifyTableFileUniqueId(
   // Unit tests verify that GetUniqueIdFromTableProperties returns just a
   // substring of this, and we're only going to pull out 64 bits, so using
   // GetExtendedUniqueIdFromTableProperties is arguably stronger testing here.
-  rocksdb_rs::status::Status s = GetExtendedUniqueIdFromTableProperties(new_file_properties, id);
+  rocksdb_rs::status::Status s =
+      GetExtendedUniqueIdFromTableProperties(new_file_properties, id);
   if (!s.ok()) {
     fprintf(stderr, "Error getting SST unique id for %s: %s\n",
             file_path.c_str(), s.ToString()->c_str());

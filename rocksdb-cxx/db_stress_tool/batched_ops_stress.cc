@@ -21,11 +21,11 @@ class BatchedOpsStressTest : public StressTest {
   // Given a key K and value V, this puts ("0"+K, V+"0"), ("1"+K, V+"1"), ...,
   // ("9"+K, V+"9") in DB atomically i.e in a single batch.
   // Also refer BatchedOpsStressTest::TestGet
-  rocksdb_rs::status::Status TestPut(ThreadState* thread, WriteOptions& write_opts,
-                 const ReadOptions& /* read_opts */,
-                 const std::vector<int>& rand_column_families,
-                 const std::vector<int64_t>& rand_keys,
-                 char (&value)[100]) override {
+  rocksdb_rs::status::Status TestPut(
+      ThreadState* thread, WriteOptions& write_opts,
+      const ReadOptions& /* read_opts */,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys, char (&value)[100]) override {
     assert(!rand_column_families.empty());
     assert(!rand_keys.empty());
 
@@ -77,9 +77,10 @@ class BatchedOpsStressTest : public StressTest {
 
   // Given a key K, this deletes ("0"+K), ("1"+K), ..., ("9"+K)
   // in DB atomically i.e in a single batch. Also refer MultiGet.
-  rocksdb_rs::status::Status TestDelete(ThreadState* thread, WriteOptions& writeoptions,
-                    const std::vector<int>& rand_column_families,
-                    const std::vector<int64_t>& rand_keys) override {
+  rocksdb_rs::status::Status TestDelete(
+      ThreadState* thread, WriteOptions& writeoptions,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override {
     std::string keys[10] = {"9", "7", "5", "3", "1", "8", "6", "4", "2", "0"};
 
     WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
@@ -104,10 +105,10 @@ class BatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  rocksdb_rs::status::Status TestDeleteRange(ThreadState* /* thread */,
-                         WriteOptions& /* write_opts */,
-                         const std::vector<int>& /* rand_column_families */,
-                         const std::vector<int64_t>& /* rand_keys */) override {
+  rocksdb_rs::status::Status TestDeleteRange(
+      ThreadState* /* thread */, WriteOptions& /* write_opts */,
+      const std::vector<int>& /* rand_column_families */,
+      const std::vector<int64_t>& /* rand_keys */) override {
     assert(false);
     return rocksdb_rs::status::Status_NotSupported(
         "BatchedOpsStressTest does not support "
@@ -130,9 +131,10 @@ class BatchedOpsStressTest : public StressTest {
   // V+"0", V+"1", ..., V+"9".
   // ASSUMES that BatchedOpsStressTest::TestPut was used to put (K, V) into
   // the DB.
-  rocksdb_rs::status::Status TestGet(ThreadState* thread, const ReadOptions& readoptions,
-                 const std::vector<int>& rand_column_families,
-                 const std::vector<int64_t>& rand_keys) override {
+  rocksdb_rs::status::Status TestGet(
+      ThreadState* thread, const ReadOptions& readoptions,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override {
     std::string keys[10] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
     Slice key_slices[10];
     std::string values[10];
@@ -196,14 +198,16 @@ class BatchedOpsStressTest : public StressTest {
       const std::vector<int>& rand_column_families,
       const std::vector<int64_t>& rand_keys) override {
     size_t num_keys = rand_keys.size();
-    rust::Vec<rocksdb_rs::status::Status> ret_status = rocksdb_rs::status::Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> ret_status =
+        rocksdb_rs::status::Status_new().create_vec(num_keys);
     std::array<std::string, 10> keys = {
         {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}};
     size_t num_prefixes = keys.size();
     for (size_t rand_key = 0; rand_key < num_keys; ++rand_key) {
       std::vector<Slice> key_slices;
       std::vector<PinnableSlice> values(num_prefixes);
-      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_prefixes);
+      rust::Vec<rocksdb_rs::status::Status> statuses =
+          rocksdb_rs::status::Status_new().create_vec(num_prefixes);
       ReadOptions readoptionscopy = readoptions;
       readoptionscopy.snapshot = db_->GetSnapshot();
       readoptionscopy.rate_limiter_priority =
@@ -236,7 +240,8 @@ class BatchedOpsStressTest : public StressTest {
           assert(!values[i].empty());
 
           const char expected = keys[i][0];
-          const char actual = static_cast<const Slice&>(values[i])[values[i].size() - 1];
+          const char actual =
+              static_cast<const Slice&>(values[i])[values[i].size() - 1];
 
           if (expected != actual) {
             fprintf(stderr, "multiget error expected = %c actual = %c\n",
@@ -295,7 +300,8 @@ class BatchedOpsStressTest : public StressTest {
     for (size_t i = 0; i < num_keys; ++i) {
       const std::string key = std::to_string(i) + key_suffix;
 
-      const rocksdb_rs::status::Status s = db_->GetEntity(read_opts_copy, cfh, key, &results[i]);
+      const rocksdb_rs::status::Status s =
+          db_->GetEntity(read_opts_copy, cfh, key, &results[i]);
 
       if (!s.ok() && !s.IsNotFound()) {
         fprintf(stderr, "GetEntity error: %s\n", s.ToString()->c_str());
@@ -376,7 +382,8 @@ class BatchedOpsStressTest : public StressTest {
       std::array<std::string, num_prefixes> keys;
       std::array<Slice, num_prefixes> key_slices;
       std::array<PinnableWideColumns, num_prefixes> results;
-      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_prefixes);
+      rust::Vec<rocksdb_rs::status::Status> statuses =
+          rocksdb_rs::status::Status_new().create_vec(num_prefixes);
 
       for (size_t j = 0; j < num_prefixes; ++j) {
         keys[j] = std::to_string(j) + key_suffix;
@@ -446,9 +453,10 @@ class BatchedOpsStressTest : public StressTest {
   // each series should be the same length, and it is verified for each
   // index i that all the i'th values are of the form V+"0", V+"1", ..., V+"9".
   // ASSUMES that MultiPut was used to put (K, V)
-  rocksdb_rs::status::Status TestPrefixScan(ThreadState* thread, const ReadOptions& readoptions,
-                        const std::vector<int>& rand_column_families,
-                        const std::vector<int64_t>& rand_keys) override {
+  rocksdb_rs::status::Status TestPrefixScan(
+      ThreadState* thread, const ReadOptions& readoptions,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override {
     assert(!rand_column_families.empty());
     assert(!rand_keys.empty());
 

@@ -32,8 +32,7 @@ namespace {
 static std::shared_ptr<rocksdb::Env> env_guard;
 static std::shared_ptr<rocksdb::Env> env_wrapper_guard;
 static std::shared_ptr<rocksdb::Env> legacy_env_wrapper_guard;
-static std::shared_ptr<rocksdb::CompositeEnvWrapper>
-    dbsl_env_wrapper_guard;
+static std::shared_ptr<rocksdb::CompositeEnvWrapper> dbsl_env_wrapper_guard;
 static std::shared_ptr<CompositeEnvWrapper> fault_env_guard;
 }  // namespace
 
@@ -72,8 +71,8 @@ int db_stress_tool(int argc, char** argv) {
     exit(1);
   }
 
-  rocksdb_rs::status::Status s = Env::CreateFromUri(ConfigOptions(), FLAGS_env_uri, FLAGS_fs_uri,
-                                &raw_env, &env_guard);
+  rocksdb_rs::status::Status s = Env::CreateFromUri(
+      ConfigOptions(), FLAGS_env_uri, FLAGS_fs_uri, &raw_env, &env_guard);
   if (!s.ok()) {
     fprintf(stderr, "Error Creating Env URI: %s: %s\n", FLAGS_env_uri.c_str(),
             s.ToString()->c_str());

@@ -23,10 +23,10 @@ rocksdb::Env* db_stress_env = nullptr;
 std::shared_ptr<rocksdb::FaultInjectionTestFS> fault_fs_guard;
 enum rocksdb_rs::compression_type::CompressionType compression_type_e =
     rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
-enum rocksdb_rs::compression_type::CompressionType bottommost_compression_type_e =
-    rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
-enum rocksdb::ChecksumType checksum_type_e =
-    rocksdb::kCRC32c;
+enum rocksdb_rs::compression_type::CompressionType
+    bottommost_compression_type_e =
+        rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+enum rocksdb::ChecksumType checksum_type_e = rocksdb::kCRC32c;
 enum RepFactory FLAGS_rep_factory = kSkipList;
 std::vector<double> sum_probs(100001);
 constexpr int64_t zipf_sum_size = 100000;
@@ -418,17 +418,19 @@ std::shared_ptr<FileChecksumGenFactory> GetFileChecksumImpl(
 
 rocksdb_rs::status::Status DeleteFilesInDirectory(const std::string& dirname) {
   std::vector<std::string> filenames;
-  rocksdb_rs::status::Status s = Env::Default()->GetChildren(dirname, &filenames);
+  rocksdb_rs::status::Status s =
+      Env::Default()->GetChildren(dirname, &filenames);
   for (size_t i = 0; s.ok() && i < filenames.size(); ++i) {
     s = Env::Default()->DeleteFile(dirname + "/" + filenames[i]);
   }
   return s;
 }
 
-rocksdb_rs::status::Status SaveFilesInDirectory(const std::string& src_dirname,
-                            const std::string& dst_dirname) {
+rocksdb_rs::status::Status SaveFilesInDirectory(
+    const std::string& src_dirname, const std::string& dst_dirname) {
   std::vector<std::string> filenames;
-  rocksdb_rs::status::Status s = Env::Default()->GetChildren(src_dirname, &filenames);
+  rocksdb_rs::status::Status s =
+      Env::Default()->GetChildren(src_dirname, &filenames);
   for (size_t i = 0; s.ok() && i < filenames.size(); ++i) {
     bool is_dir = false;
     s = Env::Default()->IsDirectory(src_dirname + "/" + filenames[i], &is_dir);

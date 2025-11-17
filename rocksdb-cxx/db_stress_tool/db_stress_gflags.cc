@@ -132,14 +132,12 @@ DEFINE_bool(verbose, false, "Verbose");
 DEFINE_bool(progress_reports, true,
             "If true, db_stress will report number of finished operations");
 
-DEFINE_uint64(db_write_buffer_size,
-              rocksdb::Options().db_write_buffer_size,
+DEFINE_uint64(db_write_buffer_size, rocksdb::Options().db_write_buffer_size,
               "Number of bytes to buffer in all memtables before compacting");
 
-DEFINE_int32(
-    write_buffer_size,
-    static_cast<int32_t>(rocksdb::Options().write_buffer_size),
-    "Number of bytes to buffer in memtable before compacting");
+DEFINE_int32(write_buffer_size,
+             static_cast<int32_t>(rocksdb::Options().write_buffer_size),
+             "Number of bytes to buffer in memtable before compacting");
 
 DEFINE_int32(max_write_buffer_number,
              rocksdb::Options().max_write_buffer_number,
@@ -208,8 +206,7 @@ DEFINE_int32(
     "compressed_cache_numshardbits. Negative value means default settings. "
     "This is applied only if compressed_cache_size is greater than 0.");
 
-DEFINE_int32(compaction_style, rocksdb::Options().compaction_style,
-             "");
+DEFINE_int32(compaction_style, rocksdb::Options().compaction_style, "");
 
 DEFINE_int32(compaction_pri, rocksdb::Options().compaction_pri,
              "Which file from a level should be picked to merge to the next "
@@ -231,20 +228,18 @@ DEFINE_int32(level0_stop_writes_trigger,
              "Number of files in level-0 that will trigger put stop.");
 
 DEFINE_int32(block_size,
-             static_cast<int32_t>(
-                 rocksdb::BlockBasedTableOptions().block_size),
+             static_cast<int32_t>(rocksdb::BlockBasedTableOptions().block_size),
              "Number of bytes in a block.");
 
-DEFINE_int32(format_version,
-             static_cast<int32_t>(
-                 rocksdb::BlockBasedTableOptions().format_version),
-             "Format version of SST files.");
-
 DEFINE_int32(
-    index_block_restart_interval,
-    rocksdb::BlockBasedTableOptions().index_block_restart_interval,
-    "Number of keys between restart points "
-    "for delta encoding of keys in index block.");
+    format_version,
+    static_cast<int32_t>(rocksdb::BlockBasedTableOptions().format_version),
+    "Format version of SST files.");
+
+DEFINE_int32(index_block_restart_interval,
+             rocksdb::BlockBasedTableOptions().index_block_restart_interval,
+             "Number of keys between restart points "
+             "for delta encoding of keys in index block.");
 
 DEFINE_bool(disable_auto_compactions,
             rocksdb::Options().disable_auto_compactions,
@@ -267,8 +262,7 @@ DEFINE_int32(compaction_thread_pool_variations, 2,
              "Range of background thread pool size variations when adjusted "
              "periodically.");
 
-DEFINE_int32(max_background_flushes,
-             rocksdb::Options().max_background_flushes,
+DEFINE_int32(max_background_flushes, rocksdb::Options().max_background_flushes,
              "The maximum number of concurrent background flushes "
              "that can occur in parallel.");
 
@@ -325,10 +319,11 @@ DEFINE_int32(cache_numshardbits, 6,
 DEFINE_bool(cache_index_and_filter_blocks, false,
             "True if indexes/filters should be cached in block cache.");
 
-DEFINE_bool(charge_compression_dictionary_building_buffer, false,
-            "Setting for "
-            "CacheEntryRoleOptions::charged of "
-            "rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer");
+DEFINE_bool(
+    charge_compression_dictionary_building_buffer, false,
+    "Setting for "
+    "CacheEntryRoleOptions::charged of "
+    "rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer");
 
 DEFINE_bool(charge_filter_construction, false,
             "Setting for "
@@ -357,8 +352,7 @@ DEFINE_int32(
     "`enum PinningTier` in table.h)");
 
 DEFINE_int32(
-    partition_pinning,
-    static_cast<int32_t>(rocksdb::PinningTier::kFallback),
+    partition_pinning, static_cast<int32_t>(rocksdb::PinningTier::kFallback),
     "Type of pinning for metadata partitions (see `enum PinningTier` in "
     "table.h)");
 
@@ -398,37 +392,32 @@ DEFINE_bool(enable_write_thread_adaptive_yield, true,
 DEFINE_bool(use_blob_db, false, "[Stacked BlobDB] Use BlobDB.");
 
 DEFINE_uint64(
-    blob_db_min_blob_size,
-    rocksdb::blob_db::BlobDBOptions().min_blob_size,
+    blob_db_min_blob_size, rocksdb::blob_db::BlobDBOptions().min_blob_size,
     "[Stacked BlobDB] Smallest blob to store in a file. Blobs "
     "smaller than this will be inlined with the key in the LSM tree.");
 
 DEFINE_uint64(
-    blob_db_bytes_per_sync,
-    rocksdb::blob_db::BlobDBOptions().bytes_per_sync,
+    blob_db_bytes_per_sync, rocksdb::blob_db::BlobDBOptions().bytes_per_sync,
     "[Stacked BlobDB] Sync blob files once per every N bytes written.");
 
 DEFINE_uint64(blob_db_file_size,
               rocksdb::blob_db::BlobDBOptions().blob_file_size,
               "[Stacked BlobDB] Target size of each blob file.");
 
-DEFINE_bool(
-    blob_db_enable_gc,
-    rocksdb::blob_db::BlobDBOptions().enable_garbage_collection,
-    "[Stacked BlobDB] Enable BlobDB garbage collection.");
+DEFINE_bool(blob_db_enable_gc,
+            rocksdb::blob_db::BlobDBOptions().enable_garbage_collection,
+            "[Stacked BlobDB] Enable BlobDB garbage collection.");
 
-DEFINE_double(
-    blob_db_gc_cutoff,
-    rocksdb::blob_db::BlobDBOptions().garbage_collection_cutoff,
-    "[Stacked BlobDB] Cutoff ratio for BlobDB garbage collection.");
+DEFINE_double(blob_db_gc_cutoff,
+              rocksdb::blob_db::BlobDBOptions().garbage_collection_cutoff,
+              "[Stacked BlobDB] Cutoff ratio for BlobDB garbage collection.");
 
 // Options for integrated BlobDB
 DEFINE_bool(allow_setting_blob_options_dynamically, false,
             "[Integrated BlobDB] Allow setting blob options dynamically.");
 
 DEFINE_bool(
-    enable_blob_files,
-    rocksdb::AdvancedColumnFamilyOptions().enable_blob_files,
+    enable_blob_files, rocksdb::AdvancedColumnFamilyOptions().enable_blob_files,
     "[Integrated BlobDB] Enable writing large values to separate blob files.");
 
 DEFINE_uint64(min_blob_size,
@@ -444,16 +433,16 @@ DEFINE_string(blob_compression_type, "none",
               "[Integrated BlobDB] The compression algorithm to use for large "
               "values stored in blob files.");
 
-DEFINE_bool(enable_blob_garbage_collection,
-            rocksdb::AdvancedColumnFamilyOptions()
-                .enable_blob_garbage_collection,
-            "[Integrated BlobDB] Enable blob garbage collection.");
+DEFINE_bool(
+    enable_blob_garbage_collection,
+    rocksdb::AdvancedColumnFamilyOptions().enable_blob_garbage_collection,
+    "[Integrated BlobDB] Enable blob garbage collection.");
 
-DEFINE_double(blob_garbage_collection_age_cutoff,
-              rocksdb::AdvancedColumnFamilyOptions()
-                  .blob_garbage_collection_age_cutoff,
-              "[Integrated BlobDB] The cutoff in terms of blob file age for "
-              "garbage collection.");
+DEFINE_double(
+    blob_garbage_collection_age_cutoff,
+    rocksdb::AdvancedColumnFamilyOptions().blob_garbage_collection_age_cutoff,
+    "[Integrated BlobDB] The cutoff in terms of blob file age for "
+    "garbage collection.");
 
 DEFINE_double(blob_garbage_collection_force_threshold,
               rocksdb::AdvancedColumnFamilyOptions()
@@ -461,16 +450,15 @@ DEFINE_double(blob_garbage_collection_force_threshold,
               "[Integrated BlobDB] The threshold for the ratio of garbage in "
               "the oldest blob files for forcing garbage collection.");
 
-DEFINE_uint64(blob_compaction_readahead_size,
-              rocksdb::AdvancedColumnFamilyOptions()
-                  .blob_compaction_readahead_size,
-              "[Integrated BlobDB] Compaction readahead for blob files.");
+DEFINE_uint64(
+    blob_compaction_readahead_size,
+    rocksdb::AdvancedColumnFamilyOptions().blob_compaction_readahead_size,
+    "[Integrated BlobDB] Compaction readahead for blob files.");
 
-DEFINE_int32(
-    blob_file_starting_level,
-    rocksdb::AdvancedColumnFamilyOptions().blob_file_starting_level,
-    "[Integrated BlobDB] Enable writing blob files during flushes and "
-    "compactions starting from the specified level.");
+DEFINE_int32(blob_file_starting_level,
+             rocksdb::AdvancedColumnFamilyOptions().blob_file_starting_level,
+             "[Integrated BlobDB] Enable writing blob files during flushes and "
+             "compactions starting from the specified level.");
 
 DEFINE_bool(use_blob_cache, false, "[Integrated BlobDB] Enable blob cache.");
 
@@ -535,21 +523,18 @@ DEFINE_bool(partition_filters, false,
             "use partitioned filters "
             "for block-based table");
 
-DEFINE_bool(
-    optimize_filters_for_memory,
-    rocksdb::BlockBasedTableOptions().optimize_filters_for_memory,
-    "Minimize memory footprint of filters");
+DEFINE_bool(optimize_filters_for_memory,
+            rocksdb::BlockBasedTableOptions().optimize_filters_for_memory,
+            "Minimize memory footprint of filters");
 
 DEFINE_bool(
     detect_filter_construct_corruption,
-    rocksdb::BlockBasedTableOptions()
-        .detect_filter_construct_corruption,
+    rocksdb::BlockBasedTableOptions().detect_filter_construct_corruption,
     "Detect corruption during new Bloom Filter and Ribbon Filter construction");
 
 DEFINE_int32(
     index_type,
-    static_cast<int32_t>(
-        rocksdb::BlockBasedTableOptions().index_type),
+    static_cast<int32_t>(rocksdb::BlockBasedTableOptions().index_type),
     "Type of block-based table index (see `enum IndexType` in table.h)");
 
 DEFINE_int32(
@@ -606,8 +591,7 @@ DEFINE_uint64(bytes_per_sync, rocksdb::Options().bytes_per_sync,
               "If nonzero, sync SST file data incrementally after every "
               "`bytes_per_sync` bytes are written");
 
-DEFINE_uint64(wal_bytes_per_sync,
-              rocksdb::Options().wal_bytes_per_sync,
+DEFINE_uint64(wal_bytes_per_sync, rocksdb::Options().wal_bytes_per_sync,
               "If nonzero, sync WAL file data incrementally after every "
               "`bytes_per_sync` bytes are written");
 
@@ -624,12 +608,10 @@ extern std::vector<std::string> rocksdb_kill_exclude_prefixes;
 
 DEFINE_bool(disable_wal, false, "If true, do not write WAL for write.");
 
-DEFINE_uint64(recycle_log_file_num,
-              rocksdb::Options().recycle_log_file_num,
+DEFINE_uint64(recycle_log_file_num, rocksdb::Options().recycle_log_file_num,
               "Number of old WAL files to keep around for later recycling");
 
-DEFINE_int64(target_file_size_base,
-             rocksdb::Options().target_file_size_base,
+DEFINE_int64(target_file_size_base, rocksdb::Options().target_file_size_base,
              "Target level-1 file size for compaction");
 
 DEFINE_int32(target_file_size_multiplier, 1,
@@ -908,8 +890,7 @@ DEFINE_bool(avoid_unnecessary_blocking_io,
             "If true, some expensive cleaning up operations will be moved from "
             "user reads to high-pri background threads.");
 
-DEFINE_bool(write_dbid_to_manifest,
-            rocksdb::Options().write_dbid_to_manifest,
+DEFINE_bool(write_dbid_to_manifest, rocksdb::Options().write_dbid_to_manifest,
             "Write DB_ID to manifest");
 
 DEFINE_bool(avoid_flush_during_recovery,
@@ -1021,11 +1002,12 @@ DEFINE_int32(injest_error_severity, 1,
              "The severity of the injested IO Error. 1 is soft error (e.g. "
              "retryable error), 2 is fatal error, and the default is "
              "retryable error.");
-DEFINE_int32(prepopulate_block_cache,
-             static_cast<int32_t>(rocksdb::BlockBasedTableOptions::
-                                      PrepopulateBlockCache::kDisable),
-             "Options related to cache warming (see `enum "
-             "PrepopulateBlockCache` in table.h)");
+DEFINE_int32(
+    prepopulate_block_cache,
+    static_cast<int32_t>(
+        rocksdb::BlockBasedTableOptions::PrepopulateBlockCache::kDisable),
+    "Options related to cache warming (see `enum "
+    "PrepopulateBlockCache` in table.h)");
 
 DEFINE_bool(two_write_queues, false,
             "Set to true to enable two write queues. Default: false");
@@ -1063,12 +1045,10 @@ DEFINE_int32(
     create_timestamped_snapshot_one_in, 0,
     "On non-zero, create timestamped snapshots upon transaction commits.");
 
-DEFINE_bool(allow_data_in_errors,
-            rocksdb::Options().allow_data_in_errors,
+DEFINE_bool(allow_data_in_errors, rocksdb::Options().allow_data_in_errors,
             "If true, allow logging data, e.g. key, value in LOG files.");
 
-DEFINE_bool(enable_thread_tracking,
-            rocksdb::Options().enable_thread_tracking,
+DEFINE_bool(enable_thread_tracking, rocksdb::Options().enable_thread_tracking,
             "If true, the status of the threads involved in this DB will be "
             "tracked and available via GetThreadList() API.");
 
@@ -1095,8 +1075,7 @@ DEFINE_bool(
     "be preserved similarly under `FLAGS_expected_values_dir/unverified` when "
     "`--expected_values_dir` is nonempty.");
 
-DEFINE_uint64(stats_dump_period_sec,
-              rocksdb::Options().stats_dump_period_sec,
+DEFINE_uint64(stats_dump_period_sec, rocksdb::Options().stats_dump_period_sec,
               "Gap between printing stats to log in seconds");
 
 DEFINE_bool(use_io_uring, false, "Enable the use of IO uring on Posix");

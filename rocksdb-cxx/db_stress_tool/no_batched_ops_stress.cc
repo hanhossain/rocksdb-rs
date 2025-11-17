@@ -138,7 +138,8 @@ class NonBatchedOpsStressTest : public StressTest {
           const std::string key = Key(i);
           std::string from_db;
 
-          rocksdb_rs::status::Status s = db_->Get(options, column_families_[cf], key, &from_db);
+          rocksdb_rs::status::Status s =
+              db_->Get(options, column_families_[cf], key, &from_db);
 
           VerifyOrSyncValue(static_cast<int>(cf), i, options, shared, from_db,
                             /* msg_prefix */ "Get verification", s);
@@ -197,7 +198,8 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableSlice> values(batch_size);
-          rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+          rust::Vec<rocksdb_rs::status::Status> statuses =
+              rocksdb_rs::status::Status_new().create_vec(batch_size);
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -235,7 +237,8 @@ class NonBatchedOpsStressTest : public StressTest {
           std::vector<std::string> key_strs(batch_size);
           std::vector<Slice> keys(batch_size);
           std::vector<PinnableWideColumns> results(batch_size);
-          rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+          rust::Vec<rocksdb_rs::status::Status> statuses =
+              rocksdb_rs::status::Status_new().create_vec(batch_size);
 
           for (size_t j = 0; j < batch_size; ++j) {
             key_strs[j] = Key(i + j);
@@ -294,9 +297,9 @@ class NonBatchedOpsStressTest : public StressTest {
           std::string from_db;
           int number_of_operands = 0;
 
-          rocksdb_rs::status::Status s = db_->GetMergeOperands(options, column_families_[cf], k,
-                                           values.data(), &merge_operands_info,
-                                           &number_of_operands);
+          rocksdb_rs::status::Status s = db_->GetMergeOperands(
+              options, column_families_[cf], k, values.data(),
+              &merge_operands_info, &number_of_operands);
 
           if (s.IsIncomplete()) {
             // Need to resize values as there are more than values.size() merge
@@ -340,8 +343,8 @@ class NonBatchedOpsStressTest : public StressTest {
       exit(1);
     }
 
-    const auto checksum_column_family = [](Iterator* iter,
-                                           uint32_t* checksum) -> rocksdb_rs::status::Status {
+    const auto checksum_column_family =
+        [](Iterator* iter, uint32_t* checksum) -> rocksdb_rs::status::Status {
       assert(nullptr != checksum);
       uint32_t ret = 0;
       for (iter->SeekToFirst(); iter->Valid(); iter->Next()) {
@@ -436,7 +439,8 @@ class NonBatchedOpsStressTest : public StressTest {
               cf, new_name.c_str());
         }
         thread->shared->LockColumnFamily(cf);
-        rocksdb_rs::status::Status s = db_->DropColumnFamily(column_families_[cf]);
+        rocksdb_rs::status::Status s =
+            db_->DropColumnFamily(column_families_[cf]);
         delete column_families_[cf];
         if (!s.ok()) {
           fprintf(stderr, "dropping column family error: %s\n",
@@ -461,9 +465,10 @@ class NonBatchedOpsStressTest : public StressTest {
 
   bool IsStateTracked() const override { return true; }
 
-  rocksdb_rs::status::Status TestGet(ThreadState* thread, const ReadOptions& read_opts,
-                 const std::vector<int>& rand_column_families,
-                 const std::vector<int64_t>& rand_keys) override {
+  rocksdb_rs::status::Status TestGet(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override {
     auto cfh = column_families_[rand_column_families[0]];
     std::string key_str = Key(rand_keys[0]);
     Slice key = key_str;
@@ -569,7 +574,8 @@ class NonBatchedOpsStressTest : public StressTest {
     key_str.reserve(num_keys);
     keys.reserve(num_keys);
     std::vector<PinnableSlice> values(num_keys);
-    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> statuses =
+        rocksdb_rs::status::Status_new().create_vec(num_keys);
     // When Flags_use_txn is enabled, we also do a read your write check.
     std::vector<std::optional<ExpectedValue>> ryw_expected_values;
     ryw_expected_values.reserve(num_keys);
@@ -710,7 +716,8 @@ class NonBatchedOpsStressTest : public StressTest {
     }
 
     auto ryw_check =
-        [](const Slice& key, const PinnableSlice& value, const rocksdb_rs::status::Status& s,
+        [](const Slice& key, const PinnableSlice& value,
+           const rocksdb_rs::status::Status& s,
            const std::optional<ExpectedValue>& ryw_expected_value) -> bool {
       if (!ryw_expected_value.has_value()) {
         return true;
@@ -899,7 +906,8 @@ class NonBatchedOpsStressTest : public StressTest {
 
     PinnableWideColumns from_db;
 
-    const rocksdb_rs::status::Status s = db_->GetEntity(read_opts, cfh, key, &from_db);
+    const rocksdb_rs::status::Status s =
+        db_->GetEntity(read_opts, cfh, key, &from_db);
 
     int error_count = 0;
 
@@ -999,7 +1007,8 @@ class NonBatchedOpsStressTest : public StressTest {
     }
 
     std::vector<PinnableWideColumns> results(num_keys);
-    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+    rust::Vec<rocksdb_rs::status::Status> statuses =
+        rocksdb_rs::status::Status_new().create_vec(num_keys);
 
     if (fault_fs_guard) {
       fault_fs_guard->EnableErrorInjection();
@@ -1120,9 +1129,10 @@ class NonBatchedOpsStressTest : public StressTest {
     }
   }
 
-  rocksdb_rs::status::Status TestPrefixScan(ThreadState* thread, const ReadOptions& read_opts,
-                        const std::vector<int>& rand_column_families,
-                        const std::vector<int64_t>& rand_keys) override {
+  rocksdb_rs::status::Status TestPrefixScan(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override {
     assert(!rand_column_families.empty());
     assert(!rand_keys.empty());
 
@@ -1175,8 +1185,9 @@ class NonBatchedOpsStressTest : public StressTest {
       }
 
       if (!VerifyWideColumns(iter->value(), iter->columns())) {
-        s = rocksdb_rs::status::Status_Corruption("Value and columns inconsistent",
-                               DebugString(iter->value(), iter->columns()));
+        s = rocksdb_rs::status::Status_Corruption(
+            "Value and columns inconsistent",
+            DebugString(iter->value(), iter->columns()));
         break;
       }
     }
@@ -1208,11 +1219,11 @@ class NonBatchedOpsStressTest : public StressTest {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status TestPut(ThreadState* thread, WriteOptions& write_opts,
-                 const ReadOptions& read_opts,
-                 const std::vector<int>& rand_column_families,
-                 const std::vector<int64_t>& rand_keys,
-                 char (&value)[100]) override {
+  rocksdb_rs::status::Status TestPut(
+      ThreadState* thread, WriteOptions& write_opts,
+      const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys, char (&value)[100]) override {
     assert(!rand_column_families.empty());
     assert(!rand_keys.empty());
 
@@ -1266,7 +1277,6 @@ class NonBatchedOpsStressTest : public StressTest {
     const size_t sz = GenerateValue(value_base, value, sizeof(value));
     const Slice v(value, sz);
 
-
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     if (FLAGS_use_merge) {
@@ -1313,7 +1323,8 @@ class NonBatchedOpsStressTest : public StressTest {
 
     if (!s.ok()) {
       if (FLAGS_injest_error_severity >= 2) {
-        if (!is_db_stopped_ && s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
+        if (!is_db_stopped_ &&
+            s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
                    s.severity() < rocksdb_rs::status::Severity::kFatalError) {
@@ -1332,9 +1343,10 @@ class NonBatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  rocksdb_rs::status::Status TestDelete(ThreadState* thread, WriteOptions& write_opts,
-                    const std::vector<int>& rand_column_families,
-                    const std::vector<int64_t>& rand_keys) override {
+  rocksdb_rs::status::Status TestDelete(
+      ThreadState* thread, WriteOptions& write_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override {
     int64_t rand_key = rand_keys[0];
     int rand_column_family = rand_column_families[0];
     auto shared = thread->shared;
@@ -1430,9 +1442,10 @@ class NonBatchedOpsStressTest : public StressTest {
     return s;
   }
 
-  rocksdb_rs::status::Status TestDeleteRange(ThreadState* thread, WriteOptions& write_opts,
-                         const std::vector<int>& rand_column_families,
-                         const std::vector<int64_t>& rand_keys) override {
+  rocksdb_rs::status::Status TestDeleteRange(
+      ThreadState* thread, WriteOptions& write_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) override {
     // OPERATION delete range
     std::vector<std::unique_ptr<MutexLock>> range_locks;
     // delete range does not respect disallowed overwrites. the keys for
@@ -1475,7 +1488,8 @@ class NonBatchedOpsStressTest : public StressTest {
     }
     if (!s.ok()) {
       if (FLAGS_injest_error_severity >= 2) {
-        if (!is_db_stopped_ && s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
+        if (!is_db_stopped_ &&
+            s.severity() >= rocksdb_rs::status::Severity::kFatalError) {
           is_db_stopped_ = true;
         } else if (!is_db_stopped_ ||
                    s.severity() < rocksdb_rs::status::Severity::kFatalError) {
@@ -1928,7 +1942,8 @@ class NonBatchedOpsStressTest : public StressTest {
 
   bool VerifyOrSyncValue(int cf, int64_t key, const ReadOptions& /*opts*/,
                          SharedState* shared, const std::string& value_from_db,
-                         std::string msg_prefix, const rocksdb_rs::status::Status& s) const {
+                         std::string msg_prefix,
+                         const rocksdb_rs::status::Status& s) const {
     if (shared->HasVerificationFailedYet()) {
       return false;
     }

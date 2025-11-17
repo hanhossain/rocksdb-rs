@@ -44,7 +44,7 @@ class StressTest {
 
  protected:
   rocksdb_rs::status::Status AssertSame(DB* db, ColumnFamilyHandle* cf,
-                    ThreadState::SnapshotState& snap_state);
+                                        ThreadState::SnapshotState& snap_state);
 
   // Currently PreloadDb has to be single-threaded.
   void PreloadDbAndReopenAsReadOnly(int64_t number_of_keys,
@@ -64,9 +64,11 @@ class StressTest {
   virtual void ProcessRecoveredPreparedTxnsHelper(Transaction* txn,
                                                   SharedState* shared);
 
-  rocksdb_rs::status::Status NewTxn(WriteOptions& write_opts, Transaction** txn);
+  rocksdb_rs::status::Status NewTxn(WriteOptions& write_opts,
+                                    Transaction** txn);
 
-  rocksdb_rs::status::Status CommitTxn(Transaction* txn, ThreadState* thread = nullptr);
+  rocksdb_rs::status::Status CommitTxn(Transaction* txn,
+                                       ThreadState* thread = nullptr);
 
   rocksdb_rs::status::Status RollbackTxn(Transaction* txn);
 
@@ -86,9 +88,10 @@ class StressTest {
     return {rand_key};
   }
 
-  virtual rocksdb_rs::status::Status TestGet(ThreadState* thread, const ReadOptions& read_opts,
-                         const std::vector<int>& rand_column_families,
-                         const std::vector<int64_t>& rand_keys) = 0;
+  virtual rocksdb_rs::status::Status TestGet(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) = 0;
 
   virtual rust::Vec<rocksdb_rs::status::Status> TestMultiGet(
       ThreadState* thread, const ReadOptions& read_opts,
@@ -104,24 +107,27 @@ class StressTest {
                                   const std::vector<int>& rand_column_families,
                                   const std::vector<int64_t>& rand_keys) = 0;
 
-  virtual rocksdb_rs::status::Status TestPrefixScan(ThreadState* thread,
-                                const ReadOptions& read_opts,
-                                const std::vector<int>& rand_column_families,
-                                const std::vector<int64_t>& rand_keys) = 0;
+  virtual rocksdb_rs::status::Status TestPrefixScan(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) = 0;
 
-  virtual rocksdb_rs::status::Status TestPut(ThreadState* thread, WriteOptions& write_opts,
-                         const ReadOptions& read_opts,
-                         const std::vector<int>& cf_ids,
-                         const std::vector<int64_t>& keys,
-                         char (&value)[100]) = 0;
+  virtual rocksdb_rs::status::Status TestPut(ThreadState* thread,
+                                             WriteOptions& write_opts,
+                                             const ReadOptions& read_opts,
+                                             const std::vector<int>& cf_ids,
+                                             const std::vector<int64_t>& keys,
+                                             char (&value)[100]) = 0;
 
-  virtual rocksdb_rs::status::Status TestDelete(ThreadState* thread, WriteOptions& write_opts,
-                            const std::vector<int>& rand_column_families,
-                            const std::vector<int64_t>& rand_keys) = 0;
+  virtual rocksdb_rs::status::Status TestDelete(
+      ThreadState* thread, WriteOptions& write_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) = 0;
 
-  virtual rocksdb_rs::status::Status TestDeleteRange(ThreadState* thread, WriteOptions& write_opts,
-                                 const std::vector<int>& rand_column_families,
-                                 const std::vector<int64_t>& rand_keys) = 0;
+  virtual rocksdb_rs::status::Status TestDeleteRange(
+      ThreadState* thread, WriteOptions& write_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys) = 0;
 
   virtual void TestIngestExternalFile(
       ThreadState* thread, const std::vector<int>& rand_column_families,
@@ -155,9 +161,10 @@ class StressTest {
 
   // Given a key K, this creates an iterator which scans to K and then
   // does a random sequence of Next/Prev operations.
-  virtual rocksdb_rs::status::Status TestIterate(ThreadState* thread, const ReadOptions& read_opts,
-                             const std::vector<int>& rand_column_families,
-                             const std::vector<int64_t>& rand_keys);
+  virtual rocksdb_rs::status::Status TestIterate(
+      ThreadState* thread, const ReadOptions& read_opts,
+      const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys);
 
   virtual rocksdb_rs::status::Status TestIterateAgainstExpected(
       ThreadState* /* thread */, const ReadOptions& /* read_opts */,
@@ -187,24 +194,26 @@ class StressTest {
                       LastIterateOp op, const Slice& seek_key,
                       const std::string& op_logs, bool* diverged);
 
-  virtual rocksdb_rs::status::Status TestBackupRestore(ThreadState* thread,
-                                   const std::vector<int>& rand_column_families,
-                                   const std::vector<int64_t>& rand_keys);
+  virtual rocksdb_rs::status::Status TestBackupRestore(
+      ThreadState* thread, const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys);
 
-  virtual rocksdb_rs::status::Status TestCheckpoint(ThreadState* thread,
-                                const std::vector<int>& rand_column_families,
-                                const std::vector<int64_t>& rand_keys);
+  virtual rocksdb_rs::status::Status TestCheckpoint(
+      ThreadState* thread, const std::vector<int>& rand_column_families,
+      const std::vector<int64_t>& rand_keys);
 
   void TestCompactFiles(ThreadState* thread, ColumnFamilyHandle* column_family);
 
-  rocksdb_rs::status::Status TestFlush(const std::vector<int>& rand_column_families);
+  rocksdb_rs::status::Status TestFlush(
+      const std::vector<int>& rand_column_families);
 
   rocksdb_rs::status::Status TestPauseBackground(ThreadState* thread);
 
   void TestAcquireSnapshot(ThreadState* thread, int rand_column_family,
                            const std::string& keystr, uint64_t i);
 
-  rocksdb_rs::status::Status MaybeReleaseSnapshots(ThreadState* thread, uint64_t i);
+  rocksdb_rs::status::Status MaybeReleaseSnapshots(ThreadState* thread,
+                                                   uint64_t i);
   rocksdb_rs::status::Status VerifyGetLiveFiles() const;
   rocksdb_rs::status::Status VerifyGetSortedWalFiles() const;
   rocksdb_rs::status::Status VerifyGetCurrentWalFile() const;
@@ -218,10 +227,12 @@ class StressTest {
   virtual rocksdb_rs::status::Status TestCustomOperations(
       ThreadState* /*thread*/,
       const std::vector<int>& /*rand_column_families*/) {
-    return rocksdb_rs::status::Status_NotSupported("TestCustomOperations() must be overridden");
+    return rocksdb_rs::status::Status_NotSupported(
+        "TestCustomOperations() must be overridden");
   }
 
-  void VerificationAbort(SharedState* shared, std::string msg, const rocksdb_rs::status::Status& s) const;
+  void VerificationAbort(SharedState* shared, std::string msg,
+                         const rocksdb_rs::status::Status& s) const;
 
   void VerificationAbort(SharedState* shared, std::string msg, int cf,
                          int64_t key) const;
